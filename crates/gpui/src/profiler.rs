@@ -1560,9 +1560,6 @@ impl WindowProfiler {
     /// `window_active` says whether the window is active, and `next_frame_scheduled`
     /// says whether another frame is already requested. Together they decide whether
     /// the gap until the next newly drawn frame counts as an animation interval.
-
-    /// `next_frame_scheduled` marks the animation state for the interval
-    /// ending at the next newly drawn frame's presentation.
     pub fn record_present(
         &mut self,
         present_start: Instant,

@@ -1,6 +1,3 @@
-#[cfg(test)]
-use super::missing_glyph::{MissingGlyph, MissingGlyphSink};
-use super::missing_glyph::{MissingGlyphReceiver, MissingGlyphReporter, missing_glyph_channel};
 use crate::{
     Bounds, Font, FontId, FontMetrics, ForegroundDependency, GlyphId, GlyphRenderMode, Pixels,
     PlatformTextSystem, PreparedRasterStyle, RasterStyleRequest, RenderGlyphParams, Result, Size,
@@ -9,88 +6,88 @@ use crate::{
 use anyhow::{Context as _, anyhow};
 use collections::FxHashMap;
 use palette::Hsla;
-use parking_lot::Mutex;
 use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use smallvec::SmallVec;
-use std::{
-    borrow::Cow,
-    sync::{
-        Arc,
-        atomic::{AtomicUsize, Ordering},
-    },
-};
+use std::{borrow::Cow, sync::Arc};
 
-/// The GPUI text rendering sub system.
+/// The platform-independent font database and metrics cache, shared by all windows.
+///
+/// Get it from [`App::text_system`](crate::App::text_system) and use it to register fonts with
+/// [`TextSystem::add_fonts`], to measure glyphs and to resolve [`Font`]s to
+/// [`FontId`]s. To shape text for painting, use the [`WindowTextSystem`](crate::WindowTextSystem) of the
+/// window, which also caches the layouts.
 pub struct TextSystem {
     pub(super) platform_text_system: Arc<dyn PlatformTextSystem>,
     font_ids_by_font: RwLock<FxHashMap<Font, Result<FontId>>>,
     font_metrics: RwLock<FxHashMap<FontId, FontMetrics>>,
-    pub(super) font_generation: Arc<AtomicUsize>,
-    missing_glyph_reporter: Arc<MissingGlyphReporter>,
-    missing_glyph_receiver: Mutex<Option<MissingGlyphReceiver>>,
 }
 
 impl TextSystem {
-    /// Create a new TextSystem with the given platform text system.
+    /// Creates a text system that delegates font work to `platform_text_system`.
+    ///
+    /// GPUI creates the text system for each application. You don't need to call this
+    /// yourself, except in tests that supply their own platform text system.
     pub fn new(platform_text_system: Arc<dyn PlatformTextSystem>) -> Self {
-        let (missing_glyph_reporter, missing_glyph_receiver) = missing_glyph_channel();
         TextSystem {
             platform_text_system,
             font_metrics: RwLock::default(),
             font_ids_by_font: RwLock::default(),
-            font_generation: Arc::default(),
-            missing_glyph_reporter: Arc::new(missing_glyph_reporter),
-            missing_glyph_receiver: Mutex::new(Some(missing_glyph_receiver)),
         }
     }
 
-    /// Get sorted, unique font family names available to the platform text system.
+    /// Returns the font family names that this text system can resolve.
     ///
-    /// Includes fonts registered with [Self::add_fonts].
+    /// Use these names as [`Font::family`] values. On the web, the list contains
+    /// only the families registered with [`TextSystem::add_fonts`] and the
+    /// `.SystemUIFont` alias, because the web has no system fonts.
     pub fn all_font_names(&self) -> Vec<String> {
-        let mut names = self.platform_text_system.all_font_names();
-        names.sort_unstable();
-        names.dedup();
-        names
+        self.platform_text_system.all_font_names()
     }
 
-    /// Adds font data to the text system.
+    /// Registers font files so that [`Font`]s can resolve to them.
     ///
-    /// Font family names come from each font's embedded name table.
+    /// Each entry is the bytes of one font file, such as a `.ttf` or `.otf`.
+    /// Use `Cow::Borrowed` for bytes compiled into the binary with
+    /// `include_bytes!`, and `Cow::Owned` for bytes loaded at runtime. The
+    /// family names come from each font's name table, so pass those names to
+    /// [`font`](crate::font) or set [`Font::family`] to use them.
+    ///
+    /// The web starts with an empty font database, so add the fonts your
+    /// application uses before you open a window.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if an entry contains no font face that the platform
+    /// supports. The parley backend, used on macOS, Windows, Linux, and the web, checks
+    /// every entry before it registers any, so a failed call leaves the set of
+    /// fonts unchanged.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use gpui::TestApp;
+    /// # use std::borrow::Cow;
+    /// # let mut app = TestApp::new();
+    /// let bytes = include_bytes!(concat!(
+    ///     env!("CARGO_MANIFEST_DIR"),
+    ///     "/../../assets/fonts/lilex/Lilex-Regular.ttf"
+    /// ));
+    /// app.text_system()
+    ///     .add_fonts(vec![Cow::Borrowed(bytes.as_slice())])
+    ///     .expect("Lilex is a valid font");
+    /// ```
+    ///
+    /// See [text](crate::_documentation::guides::text) for how fonts are chosen.
     pub fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
         // Serialize registration with cache misses so an in-flight lookup cannot
         // repopulate a stale miss after the newly registered fonts become available.
         let mut font_ids = self.font_ids_by_font.write();
-        self.platform_text_system.add_fonts(fonts)?;
+        let result = self.platform_text_system.add_fonts(fonts);
         font_ids.clear();
-        self.missing_glyph_reporter.reset();
-        self.font_generation.fetch_add(1, Ordering::Release);
-        Ok(())
+        result
     }
 
-    /// Takes the receiver for missing-glyph reports, if it has not already been taken.
-    pub(crate) fn take_missing_glyph_receiver(&self) -> Option<MissingGlyphReceiver> {
-        self.missing_glyph_receiver
-            .try_lock()
-            .and_then(|mut receiver| receiver.take())
-    }
-
-    pub(crate) fn enable_missing_glyph_reporting(&self) {
-        self.platform_text_system
-            .set_missing_glyph_sink(Some(self.missing_glyph_reporter.clone()));
-    }
-
-    pub(crate) fn disable_missing_glyph_reporting(&self) {
-        self.platform_text_system.set_missing_glyph_sink(None);
-        self.missing_glyph_reporter.reset();
-    }
-
-    #[cfg(test)]
-    pub(crate) fn report_missing_glyphs_in_test(&self, missing_glyphs: Vec<MissingGlyph>) {
-        self.missing_glyph_reporter.report(missing_glyphs);
-    }
-
-    /// Get the FontId for the configure font family and style.
+    /// Resolves a font family and style to a cached [`FontId`].
     fn font_id(&self, font: &Font) -> Result<FontId> {
         fn clone_font_id_result(font_id: &Result<FontId>) -> Result<FontId> {
             match font_id {
@@ -117,21 +114,31 @@ impl TextSystem {
         }
     }
 
-    /// Resolves the specified font using backend-owned aliases and fallbacks.
+    /// Resolves a [`Font`] to the [`FontId`] of the face that will be used to draw it.
+    ///
+    /// Resolution applies the family, weight, style, width, and fallbacks, and
+    /// the result is cached. Use the returned id with the metric methods on this
+    /// type, such as [`TextSystem::ascent`].
     ///
     /// # Panics
     ///
-    /// Panics if the backend cannot resolve the font.
+    /// Panics if the platform cannot resolve the font. Pass the family name of
+    /// a font from [`TextSystem::all_font_names`] or one added with
+    /// [`TextSystem::add_fonts`] to avoid this.
     pub fn resolve_font(&self, font: &Font) -> FontId {
         self.font_id(font)
             .unwrap_or_else(|error| panic!("failed to resolve font '{}': {error}", font.family))
     }
 
-    /// Prewarm any system font caches needed to shape text.
+    /// Resolves each font and loads its platform caches ahead of time.
     ///
-    /// This may be expensive, so callers should generally invoke it on a
-    /// background executor. Missing entries are still populated on demand by
-    /// the normal shaping path.
+    /// Loading system fonts can be slow, so call this from a background
+    /// executor before the first frame that uses the fonts. Fonts that are not
+    /// prewarmed are loaded when they are first used.
+    ///
+    /// # Panics
+    ///
+    /// Panics if any font cannot be resolved, as [`TextSystem::resolve_font`] does.
     pub fn prewarm_fonts(&self, fonts: &[Font]) {
         let mut font_ids = SmallVec::<[FontId; 8]>::new();
         for font in fonts {
@@ -143,14 +150,20 @@ impl TextSystem {
         self.platform_text_system.prewarm_fonts(&font_ids);
     }
 
-    /// Get the bounding box for the given font and font size.
-    /// A font's bounding box is the smallest rectangle that could enclose all glyphs
-    /// in the font. superimposed over one another.
+    /// Returns the font's bounding box at `font_size` in logical pixels.
+    ///
+    /// The bounding box is the smallest rectangle that encloses every glyph in
+    /// the font when they are all drawn at the same origin.
     pub fn bounding_box(&self, font_id: FontId, font_size: Pixels) -> Bounds<Pixels> {
         self.read_metrics(font_id, |metrics| metrics.bounding_box(font_size))
     }
 
-    /// Get the typographic bounds for the given character, in the given font and size.
+    /// Returns the bounding rectangle of the glyph for `character` at `font_size` in logical pixels.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the font has no glyph for `character` or the platform
+    /// cannot read its bounds.
     pub fn typographic_bounds(
         &self,
         font_id: FontId,
@@ -169,7 +182,14 @@ impl TextSystem {
         }))
     }
 
-    /// Get the advance width for the given character, in the given font and size.
+    /// Returns the advance of `ch` at `font_size`: how far the pen moves after drawing it.
+    ///
+    /// The `width` of the result is the advance, which is the glyph's horizontal
+    /// width in the font, not its ink width. Layout uses it to place the next character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the font has no glyph for `ch`.
     pub fn advance(&self, font_id: FontId, font_size: Pixels, ch: char) -> Result<Size<Pixels>> {
         let glyph_id = self
             .platform_text_system
@@ -181,30 +201,37 @@ impl TextSystem {
         Ok(result * font_size)
     }
 
-    /// Get the number of font size units per 'em square',
-    /// Per MDN: "an abstract square whose height is the intended distance between
-    /// lines of type in the same type size"
+    /// Returns the number of font units in the font's em square.
+    ///
+    /// The em square is the grid that font sizes are measured on. Divide a
+    /// font-unit measurement by this value to get a fraction of the font size.
     pub fn units_per_em(&self, font_id: FontId) -> u32 {
         self.read_metrics(font_id, |metrics| metrics.units_per_em)
     }
 
-    /// Get the recommended distance from the baseline for the given font
+    /// Returns the distance from the baseline up to the top of the font's tallest glyphs, at `font_size`.
     pub fn ascent(&self, font_id: FontId, font_size: Pixels) -> Pixels {
         self.read_metrics(font_id, |metrics| metrics.ascent(font_size))
     }
 
-    /// Get the recommended distance below the baseline for the given font,
-    /// in single spaced text.
+    /// Returns the distance from the baseline down to the bottom of the font's lowest glyphs, at `font_size`.
+    ///
+    /// The value is positive. It is the distance below the baseline, not a
+    /// signed coordinate.
     pub fn descent(&self, font_id: FontId, font_size: Pixels) -> Pixels {
         self.read_metrics(font_id, |metrics| metrics.descent(font_size))
     }
 
-    /// Get the x-height for the given font and font size.
+    /// Returns the height of lowercase `x` at `font_size`.
     pub fn x_height(&self, font_id: FontId, font_size: Pixels) -> Pixels {
         self.read_metrics(font_id, |metrics| metrics.x_height(font_size))
     }
 
-    /// Get the recommended baseline offset for the given font and line height.
+    /// Returns the distance from the top of a line box of `line_height` to the baseline.
+    ///
+    /// The ascent and descent are centered in the line box, so extra
+    /// `line_height` is split evenly above and below the glyphs. Use this to
+    /// place text inside a box with a fixed height.
     pub fn baseline_offset(
         &self,
         font_id: FontId,
@@ -231,7 +258,16 @@ impl TextSystem {
         }
     }
 
-    /// Rasterizes a glyph and validates its placement and pixel buffer.
+    /// Rasterizes one glyph to pixels, and checks that the result is well formed.
+    ///
+    /// GPUI calls this when it draws a glyph that is not in the glyph atlas yet.
+    /// Application code rarely needs it.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the platform cannot rasterize the glyph, or if the
+    /// pixel buffer does not match the size and format it reports. See
+    /// [`RasterizedGlyph::validate`](crate::RasterizedGlyph::validate).
     pub fn rasterize_glyph(&self, params: &RenderGlyphParams) -> Result<ValidatedRasterizedGlyph> {
         let glyph = self.platform_text_system.rasterize_glyph(params)?;
 

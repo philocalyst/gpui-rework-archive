@@ -396,8 +396,6 @@ impl ThreadedDispatcher {
         }
     }
 
-    /// Cancels all pending timers so timers armed by one workload can't fire
-    /// during a later workload sharing this process-lifetime dispatcher.
     /// Cancels every armed timer, and returns how many were canceled.
     ///
     /// Use it between workloads that share one dispatcher, so a timer from the earlier workload

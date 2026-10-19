@@ -355,7 +355,7 @@ pub fn test(args: TokenStream, function: TokenStream) -> TokenStream {
 /// The benchmark crate needs `criterion` and `gpui_platform` as dev-dependencies,
 /// because the generated code calls both. Enable the `bench-support` feature on
 /// `gpui`, which provides `BenchAppContext`.
-
+///
 /// A benchmark that takes a `StdRng` parameter (by value, in any position) is run
 /// once per seed, with the RNG seeded from it. Seeds are chosen exactly as for
 /// `#[gpui::test]`: `seed = N`, `seeds(...)`, and `iterations = N` take the same

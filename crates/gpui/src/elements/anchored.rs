@@ -21,21 +21,26 @@ pub struct AnchoredState {
 #[setters(generate = false)]
 pub struct Anchored {
     children: SmallVec<[AnyElement; 2]>,
-    /// Sets which corner of the anchored element should be anchored to the current position.
+    /// Sets which corner of the element sits at the anchor position. The default is the top left.
     #[setters(generate)]
     anchor: Anchor,
     fit_mode: AnchoredFitMode,
-    /// Sets the position in window coordinates.
-    /// Otherwise, the location where the anchored element is rendered is used.
+    /// Sets the anchor position. Its meaning depends on [`Anchored::position_mode`]: window
+    /// coordinates by default, or an offset from the parent's origin for [`AnchoredPositionMode::Local`].
+    ///
+    /// Without this, the anchor is the element's own position.
     #[setters(generate, rename = "position", strip_option)]
     anchor_position: Option<Point<Pixels>>,
-    /// Sets the position mode for this anchored element. Local will have this
-    /// interpret its [`Anchored::position`] as relative to the parent element.
-    /// While Window will have it interpret the position as relative to the window.
+    /// Sets how [`Anchored::position`] is interpreted. The default is [`AnchoredPositionMode::Window`].
+    ///
+    /// [`AnchoredPositionMode::Window`] treats the position as window coordinates.
+    /// [`AnchoredPositionMode::Local`] treats it as relative to the element's parent.
     #[setters(generate)]
     position_mode: AnchoredPositionMode,
-    /// Offset the final position by this amount.
-    /// Useful when you want to anchor to an element but offset from it, such as in PopoverMenu.
+    /// Moves the placed element by `offset`, after the anchor position is applied.
+    ///
+    /// Use it to sit beside an anchor rather than on it, such as a popover that's offset from the
+    /// button that opens it.
     #[setters(generate, strip_option)]
     offset: Option<Point<Pixels>>,
 }

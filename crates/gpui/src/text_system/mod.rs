@@ -9,16 +9,12 @@ mod glyph;
 mod inline;
 mod line;
 mod line_layout;
-mod line_wrapper;
-mod missing_glyph;
 mod raster;
 mod text_color;
 mod text_layout;
 mod text_run;
 mod text_system;
 mod window_text_system;
-
-use crate::Pixels;
 
 pub use font::*;
 pub use font_fallbacks::*;
@@ -31,8 +27,6 @@ pub use glyph::*;
 pub use inline::*;
 pub use line::*;
 pub use line_layout::*;
-pub use line_wrapper::{Boundary, IndentAdjustment, LineFragment, LineWrapper};
-pub use missing_glyph::*;
 pub use raster::*;
 pub use text_color::*;
 pub use text_layout::*;
@@ -40,19 +34,15 @@ pub use text_run::*;
 pub use text_system::*;
 pub use window_text_system::*;
 
-// Leave room below the underline for its stroke while keeping it below the baseline.
-const UNDERLINE_DESCENT_OFFSET_FACTOR: f32 = 0.618;
-
-/// Returns the vertical offset used to paint an underline within a line.
-pub fn underline_y_offset(line_height: Pixels, ascent: Pixels, descent: Pixels) -> Pixels {
-    let padding_top = (line_height - ascent - descent) / 2.;
-    padding_top + ascent + descent * UNDERLINE_DESCENT_OFFSET_FACTOR
-}
-
-/// Number of subpixel glyph variants along the X axis.
+/// The number of horizontal subpixel positions each glyph is rasterized at.
+///
+/// Glyphs are rasterized at quarter-pixel offsets along the X axis so that
+/// positions which fall between device pixels stay sharp.
 pub const SUBPIXEL_VARIANTS_X: u8 = 4;
 
-/// Number of subpixel glyph variants along the Y axis.
+/// The number of vertical subpixel positions each glyph is rasterized at.
+///
+/// Glyphs are not offset vertically, so there is one variant along the Y axis.
 pub const SUBPIXEL_VARIANTS_Y: u8 = 1;
 
 #[cfg(test)]

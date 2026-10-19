@@ -1,17 +1,25 @@
-use crate::InlineParagraphMemo;
 use crate::{
     AbsoluteLength, App, Bounds, DefiniteLength, Display, Edges, GridTemplate, InlineContent,
     LayoutDirection, Length, Pixels, Point, Position, ResolvedDirection, SharedString, Size, Style,
-    UnicodeBidi, VerticalAlign, Window, WindowTextSystem, size,
+    UnicodeBidi, VerticalAlign, Window, size,
     util::{
         ceil_to_device_pixel, round_half_toward_zero, round_stroke_to_device_pixel,
         round_to_device_pixel,
     },
 };
-use collections::{FxHashMap, FxHashSet};
-use std::{cell::Cell, fmt::Debug, ops::Range, rc::Rc, sync::Arc};
+use std::{
+    any::Any,
+    cell::{Cell, OnceCell, RefCell},
+    fmt::Debug,
+    ops::Range,
+    rc::Rc,
+    sync::Arc,
+};
 use taffy::{
-    TaffyTree, TraversePartialTree as _,
+    BlockContext, Cache, CacheTree, Layout, LayoutBlockContainer, LayoutFlexboxContainer,
+    LayoutGridContainer, LayoutInput, LayoutOutput, LayoutPartialTree, RunMode,
+    TraversePartialTree, compute_block_layout, compute_cached_layout, compute_flexbox_layout,
+    compute_grid_layout, compute_hidden_layout, compute_leaf_layout, compute_root_layout,
     geometry::{Point as TaffyPoint, Rect as TaffyRect, Size as TaffySize},
     prelude::{max_content, min_content},
     style::AvailableSpace as TaffyAvailableSpace,
@@ -23,49 +31,32 @@ type StackSafe<T> = stacksafe::StackSafe<T>;
 #[cfg(not(feature = "stacker"))]
 type StackSafe<T> = T;
 
-type FrameBoundMeasureFn =
+type MeasureFn =
     dyn FnMut(Size<Option<Pixels>>, Size<AvailableSpace>, &mut Window, &mut App) -> Size<Pixels>;
-type RetainedMeasureFn = dyn for<'a> FnMut(
-    Size<Option<Pixels>>,
-    Size<AvailableSpace>,
-    ResolvedDirection,
-    &'a WindowTextSystem,
-) -> Size<Pixels>;
+type NodeMeasureFn = StackSafe<Box<MeasureFn>>;
 
-enum NodeContext {
-    FrameBound {
-        measure: StackSafe<Box<FrameBoundMeasureFn>>,
-        unicode_bidi: UnicodeBidi,
-    },
-    Retained {
-        measure: StackSafe<Box<RetainedMeasureFn>>,
-        unicode_bidi: UnicodeBidi,
-    },
-    RetainedInlineTextSpan {
-        measure: StackSafe<Box<RetainedMeasureFn>>,
-        unicode_bidi: UnicodeBidi,
-    },
-    RetainedInlineParagraph {
-        measure: StackSafe<Box<RetainedMeasureFn>>,
-        unicode_bidi: UnicodeBidi,
-        memo: Option<Box<InlineParagraphMemo>>,
-    },
+/// What a measured node's size depends on, besides the space it's measured in. When a view
+/// renders again, a measured node whose key matches the one its predecessor had keeps that node's
+/// layout, so it isn't measured again.
+pub(crate) trait MeasureKey: Any {
+    /// Whether a node with this key measures the same as the node that had `previous`.
+    fn same(&self, previous: &dyn MeasureKey) -> bool;
+
+    /// Takes over what the element of the node with `previous` measured, since this node won't be
+    /// measured. Without it, the element's measure function runs once, with the last sizes.
+    fn inherit(&self, _previous: &dyn MeasureKey) -> bool {
+        false
+    }
+
+    fn as_any(&self) -> &dyn Any;
 }
 
 #[derive(Clone)]
 pub(crate) struct LayoutDirectionHandle(Rc<Cell<ResolvedDirection>>);
 
 impl LayoutDirectionHandle {
-    fn new() -> Self {
-        Self(Rc::new(Cell::new(ResolvedDirection::LeftToRight)))
-    }
-
     pub(crate) fn get(&self) -> ResolvedDirection {
         self.0.get()
-    }
-
-    fn set(&self, direction: ResolvedDirection) {
-        self.0.set(direction);
     }
 }
 
@@ -75,391 +66,325 @@ struct DirectionMetadata {
     source_direction: Option<ResolvedDirection>,
     auto_direction_hint: Option<ResolvedDirection>,
     logical_children: Option<Vec<LayoutId>>,
-    resolved: LayoutDirectionHandle,
+    resolved: ResolvedDirection,
+    /// Shared with [`LayoutDirectionHandle`]s, made when the first one is requested.
+    handle: OnceCell<Rc<Cell<ResolvedDirection>>>,
 }
 
-/// Request-order IDs owned by one retained ViewElement. Nested views keep separate logs.
-#[derive(Clone, Default)]
-pub(crate) struct LayoutClaimLog {
-    nodes: Vec<LayoutId>,
-    replayable: bool,
+enum NodeKind {
+    Plain,
+    Measured(NodeMeasureFn),
+    /// Stands in for another view's island. Layout delegates to the island's root, and the
+    /// island hangs off this node when positions are read.
+    Proxy {
+        island: IslandId,
+        style: Option<Box<taffy::Style>>,
+    },
 }
 
-pub(crate) struct LayoutClaimOutcome {
-    pub(crate) log: LayoutClaimLog,
-    pub(crate) fully_replayed: bool,
+struct Node {
+    style: taffy::Style,
+    children: Vec<NodeId>,
+    parent: Option<LayoutId>,
+    cache: Cache,
+    layout: Layout,
+    kind: NodeKind,
+    vertical_align: VerticalAlign,
+    display: Display,
+    position: Position,
+    direction: DirectionMetadata,
+    inline_content: Option<Arc<InlineContent>>,
+    inline_fragments: Option<Arc<[Bounds<Pixels>]>>,
+    /// An absolute position assigned by an inline formatting context instead of by Taffy.
+    placed: Option<(Point<f32>, Bounds<Pixels>)>,
+    /// Absolute outer origin in device pixels and snapped bounds, valid for `bounds_epoch`.
+    bounds: Option<(u64, Point<f32>, Bounds<Pixels>)>,
+    /// Whether the node kept the layout of the node at its place in the view's previous render,
+    /// because nothing that affects its layout changed.
+    inherited: bool,
+    /// The key of a measured node. Measured nodes without one are always measured again.
+    measure_key: Option<Box<dyn MeasureKey>>,
+    /// The known and available sizes of the last measurement.
+    last_measure: Option<(Size<Option<Pixels>>, Size<AvailableSpace>)>,
+    /// Whether the node's measure function ran since the node was created.
+    measured: bool,
 }
 
-struct LayoutClaimScope {
-    had_previous: bool,
-    previous_len: usize,
-    cursor: usize,
-    nodes: Vec<LayoutId>,
-    replaying: bool,
-    replayable: bool,
+/// The id of a layout island: the nodes one view (or the window itself) requested.
+pub(crate) type IslandId = u32;
+
+/// The window's own island, for nodes requested outside any view. Cleared every frame.
+const WINDOW_ISLAND: IslandId = 0;
+
+#[derive(Default)]
+struct Island {
+    nodes: Vec<Node>,
+    /// The nodes of the render before the one in progress, which new nodes inherit layout from.
+    previous: Vec<Node>,
+    /// Whether the island rendered this frame into a layout different from the last one.
+    changed: bool,
+    root: Option<LayoutId>,
+    /// The node in the parent island whose position this island's root takes.
+    anchor: Option<LayoutId>,
+    /// The inherited direction this island was last resolved with.
+    resolved_with: Option<ResolvedDirection>,
+}
+
+/// Keeps a view's island alive. Dropping it (with the view's element state) frees the island
+/// at the end of the frame.
+pub(crate) struct LayoutIsland {
+    id: IslandId,
+    released: Rc<RefCell<Vec<IslandId>>>,
+}
+
+impl LayoutIsland {
+    pub(crate) fn id(&self) -> IslandId {
+        self.id
+    }
+}
+
+impl Drop for LayoutIsland {
+    fn drop(&mut self) {
+        self.released.borrow_mut().push(self.id);
+    }
 }
 
 /// Computes element layout with Taffy, a flexbox and grid engine.
 ///
-/// Window code creates nodes with [`Self::request_layout`] or
-/// [`Self::request_measured_layout`], computes the root with [`Self::compute_layout`], and reads
-/// node positions with [`Self::layout_bounds`]. Nodes claimed by a retained subtree can remain in
-/// the tree across frames, preserving their layout cache and [`LayoutId`]. At
-/// [`Self::finish_frame`], nodes not claimed for the current frame are removed.
-///
-/// Measurement callbacks have separate lifetimes: [`Self::request_measured_layout`] callbacks
-/// receive mutable access to the Window and App and are released at the end of the frame.
-/// [`Self::request_retained_measured_layout`] callbacks receive a [`WindowTextSystem`] and can
-/// remain attached to a retained node.
+/// Nodes live in islands. Each view keeps its own island across frames, so a view that didn't
+/// change keeps its laid-out nodes, and its parent reaches it through a single proxy node. Nodes
+/// requested outside any view live in the window's island, which is cleared every frame. Window
+/// code creates nodes with [`Self::request_layout`] or [`Self::request_measured_layout`], calls
+/// [`Self::compute_layout`] on a root and reads positions with [`Self::layout_bounds`].
 pub struct TaffyLayoutEngine {
-    taffy: TaffyTree<NodeContext>,
-    absolute_layout_bounds: FxHashMap<LayoutId, Bounds<Pixels>>,
-    /// Unrounded absolute border-box top-left per-node coordinate in device pixels.
-    absolute_outer_origins: FxHashMap<LayoutId, Point<f32>>,
-    computed_available_spaces: FxHashMap<LayoutId, Size<AvailableSpace>>,
-    computed_layouts: FxHashSet<LayoutId>,
-    vertical_alignments: FxHashMap<LayoutId, VerticalAlign>,
-    pub(crate) inline_content: FxHashMap<LayoutId, Arc<InlineContent>>,
-    pub(crate) inline_fragments: FxHashMap<LayoutId, Arc<[Bounds<Pixels>]>>,
-    display_and_position: FxHashMap<LayoutId, (Display, Position)>,
-    directions: FxHashMap<LayoutId, DirectionMetadata>,
-    layout_bounds_scratch_space: Vec<LayoutId>,
-    live_layout_nodes: Vec<LayoutId>,
-    frame_layout_nodes: Vec<LayoutId>,
-    frame_layout_node_set: FxHashSet<LayoutId>,
-    frame_bound_measured_nodes: FxHashSet<LayoutId>,
-    layout_claim_scopes: Vec<LayoutClaimScope>,
-    #[cfg(test)]
-    inline_text_span_replay_hits: usize,
-    #[cfg(test)]
-    inline_paragraph_replay_hits: usize,
-    #[cfg(test)]
-    inline_paragraph_measure_calls: Rc<Cell<usize>>,
-    // Direction resolution can be skipped while the engine is provably LTR-only. This is
-    // monotone because a previously resolved RTL/Auto node can remain retained across frames.
-    direction_resolution_needed: bool,
+    islands: Vec<Island>,
+    free_islands: Vec<IslandId>,
+    released: Rc<RefCell<Vec<IslandId>>>,
+    current: Vec<IslandId>,
+    computed_available_spaces: Vec<(LayoutId, Size<AvailableSpace>)>,
+    bounds_epoch: u64,
+    /// Islands rendered this frame.
+    rendered: Vec<IslandId>,
+    /// Measured nodes that inherited a layout, which must give their elements the measurement
+    /// they would have made.
+    replays: Vec<LayoutId>,
 }
-
-const EXPECT_MESSAGE: &str = "we should avoid taffy layout errors by construction if possible";
 
 impl TaffyLayoutEngine {
     /// Creates an engine with no nodes.
     pub fn new() -> Self {
-        let mut taffy = TaffyTree::new();
-        taffy.disable_rounding();
         TaffyLayoutEngine {
-            taffy,
-            absolute_layout_bounds: FxHashMap::default(),
-            absolute_outer_origins: FxHashMap::default(),
-            computed_available_spaces: FxHashMap::default(),
-            computed_layouts: FxHashSet::default(),
-            vertical_alignments: FxHashMap::default(),
-            inline_content: FxHashMap::default(),
-            inline_fragments: FxHashMap::default(),
-            display_and_position: FxHashMap::default(),
-            directions: FxHashMap::default(),
-            layout_bounds_scratch_space: Vec::new(),
-            live_layout_nodes: Vec::new(),
-            frame_layout_nodes: Vec::new(),
-            frame_layout_node_set: FxHashSet::default(),
-            frame_bound_measured_nodes: FxHashSet::default(),
-            layout_claim_scopes: Vec::new(),
-            #[cfg(test)]
-            inline_text_span_replay_hits: 0,
-            #[cfg(test)]
-            inline_paragraph_replay_hits: 0,
-            #[cfg(test)]
-            inline_paragraph_measure_calls: Rc::new(Cell::new(0)),
-            direction_resolution_needed: false,
+            islands: vec![Island::default()],
+            free_islands: Vec::new(),
+            released: Rc::default(),
+            current: vec![WINDOW_ISLAND],
+            computed_available_spaces: Vec::new(),
+            bounds_epoch: 0,
+            rendered: Vec::new(),
+            replays: Vec::new(),
         }
     }
 
-    /// Removes nodes from the previous frame that were not claimed by retained subtrees.
+    /// Ends a frame: clears the window's island and frees the islands of views that were dropped.
     ///
-    /// Retained nodes keep their Taffy layout cache; unclaimed nodes and frame-bound measurement
-    /// closures are released before the next frame starts.
-    pub fn finish_frame(&mut self) {
-        // Every claim is a live Taffy node, and every node allocated this frame is claimed
-        // immediately. Unclaimed prior-frame nodes remain in the tree until this cleanup, so an
-        // equal count proves there is nothing to prune without scanning all retained nodes.
-        if self.frame_layout_node_set.len() != self.taffy.total_node_count() {
-            // Detach stale direct children from retained parents in one operation. Taffy's remove
-            // searches the parent's child vector, so removing a wide sibling set one child at a time
-            // would repeatedly scan and shift that vector.
-            for &parent in &self.frame_layout_nodes {
-                let child_count = self.taffy.child_count(parent.0);
-                let has_unclaimed_child = (0..child_count).any(|index| {
-                    let child = LayoutId::from(self.taffy.get_child_id(parent.0, index));
-                    !self.frame_layout_node_set.contains(&child)
-                });
-                if !has_unclaimed_child {
-                    continue;
-                }
-
-                self.layout_bounds_scratch_space.clear();
-                for index in 0..child_count {
-                    let child = LayoutId::from(self.taffy.get_child_id(parent.0, index));
-                    if self.frame_layout_node_set.contains(&child) {
-                        self.layout_bounds_scratch_space.push(child);
-                    }
-                }
-                self.taffy
-                    .set_children(
-                        parent.0,
-                        LayoutId::to_taffy_slice(&self.layout_bounds_scratch_space),
-                    )
-                    .expect(EXPECT_MESSAGE);
-            }
-
-            // Start at doomed roots, then remove each before its descendants. Taffy::remove detaches
-            // a node's children, so descendants can be removed without rescanning sibling lists.
-            self.layout_bounds_scratch_space.clear();
-            for node in &self.live_layout_nodes {
-                if self.frame_layout_node_set.contains(node) {
-                    continue;
-                }
-                let parent_is_retained = self.taffy.parent(node.0).is_some_and(|parent| {
-                    self.frame_layout_node_set.contains(&LayoutId::from(parent))
-                });
-                if self.taffy.parent(node.0).is_none() || parent_is_retained {
-                    self.layout_bounds_scratch_space.push(*node);
-                }
-            }
-
-            while let Some(node) = self.layout_bounds_scratch_space.pop() {
-                if self.frame_layout_node_set.contains(&node) {
-                    continue;
-                }
-
-                // Save children before remove; removal detaches them from this parent.
-                let child_count = self.taffy.child_count(node.0);
-                for index in 0..child_count {
-                    let child = LayoutId::from(self.taffy.get_child_id(node.0, index));
-                    if !self.frame_layout_node_set.contains(&child) {
-                        self.layout_bounds_scratch_space.push(child);
-                    }
-                }
-
-                // Taffy::remove leaves context data in its side map, so remove it explicitly. Skip
-                // ordinary nodes because changing context also marks a node dirty.
-                if self.taffy.get_node_context(node.0).is_some() {
-                    self.taffy
-                        .set_node_context(node.0, None)
-                        .expect(EXPECT_MESSAGE);
-                }
-                self.taffy.remove(node.0).expect(EXPECT_MESSAGE);
-                self.vertical_alignments.remove(&node);
-                self.display_and_position.remove(&node);
-                self.inline_content.remove(&node);
-                self.inline_fragments.remove(&node);
-                self.directions.remove(&node);
-                self.computed_available_spaces.remove(&node);
-                self.frame_bound_measured_nodes.remove(&node);
-            }
+    /// Ids of nodes in the window's island are invalid afterwards. View islands persist.
+    pub fn clear(&mut self) {
+        self.islands[WINDOW_ISLAND as usize] = Island::default();
+        for id in self.released.borrow_mut().drain(..) {
+            self.islands[id as usize] = Island::default();
+            self.free_islands.push(id);
         }
-        self.live_layout_nodes.clear();
-        self.release_frame_bound_measured_contexts();
-        std::mem::swap(&mut self.live_layout_nodes, &mut self.frame_layout_nodes);
-        self.frame_layout_nodes.clear();
-        self.frame_layout_node_set.clear();
-        #[cfg(test)]
-        debug_assert_eq!(
-            self.taffy.total_node_count(),
-            self.live_layout_nodes.len(),
-            "Taffy tree nodes must match the layout engine's retained live-node inventory after pruning",
-        );
-        self.absolute_layout_bounds.clear();
-        self.absolute_outer_origins.clear();
-        self.computed_layouts.clear();
-    }
-
-    pub(crate) fn release_frame_bound_measured_contexts(&mut self) {
-        for node in self.frame_bound_measured_nodes.drain() {
-            self.taffy
-                .set_node_context(node.0, None)
-                .expect(EXPECT_MESSAGE);
+        debug_assert_eq!(self.current, [WINDOW_ISLAND]);
+        for island in self.rendered.drain(..) {
+            self.islands[island as usize].changed = false;
         }
+        self.replays.clear();
+        self.computed_available_spaces.clear();
+        self.bounds_epoch += 1;
     }
 
-    #[cfg(test)]
-    pub(crate) fn live_layout_node_count(&self) -> usize {
-        self.live_layout_nodes.len()
-    }
-
-    #[cfg(test)]
-    pub(crate) fn live_measured_node_count(&self) -> usize {
-        self.live_layout_nodes
-            .iter()
-            .filter(|node| self.taffy.get_node_context(node.0).is_some())
-            .count()
-    }
-
-    pub fn retain_subtree(&mut self, root: LayoutId) {
-        self.layout_bounds_scratch_space.clear();
-        self.layout_bounds_scratch_space.push(root);
-        while let Some(node) = self.layout_bounds_scratch_space.pop() {
-            if !self.frame_layout_node_set.insert(node) {
-                continue;
-            }
-            self.frame_layout_nodes.push(node);
-            self.layout_bounds_scratch_space.extend(
-                (0..self.taffy.child_count(node.0))
-                    .map(|index| LayoutId::from(self.taffy.get_child_id(node.0, index))),
-            );
-            if let Some(logical_children) = self
-                .directions
-                .get(&node)
-                .and_then(|metadata| metadata.logical_children.as_ref())
-            {
-                self.layout_bounds_scratch_space
-                    .extend(logical_children.iter().copied());
-            }
-        }
-    }
-
-    fn claim_node(&mut self, node: LayoutId) {
-        if self.frame_layout_node_set.insert(node) {
-            self.frame_layout_nodes.push(node);
-        }
-    }
-
-    pub(crate) fn begin_layout_claim_scope(&mut self, previous: Option<LayoutClaimLog>) {
-        let (nodes, previous_len, had_previous, replaying) = match previous {
-            Some(previous) => {
-                let replaying = previous.replayable;
-                let previous_len = previous.nodes.len();
-                (previous.nodes, previous_len, true, replaying)
-            }
-            None => (Vec::new(), 0, false, false),
-        };
-        self.layout_claim_scopes.push(LayoutClaimScope {
-            had_previous,
-            previous_len,
-            cursor: 0,
-            nodes,
-            replaying,
-            replayable: true,
+    /// Creates an empty island for a view.
+    pub(crate) fn create_island(&mut self) -> LayoutIsland {
+        let id = self.free_islands.pop().unwrap_or_else(|| {
+            self.islands.push(Island::default());
+            (self.islands.len() - 1) as IslandId
         });
+        LayoutIsland {
+            id,
+            released: self.released.clone(),
+        }
     }
 
-    pub(crate) fn finish_layout_claim_scope(&mut self) -> LayoutClaimOutcome {
-        let mut scope = self
-            .layout_claim_scopes
-            .pop()
-            .expect("layout claim scopes must be balanced");
-        let fully_replayed = scope.had_previous
-            && scope.replaying
-            && scope.replayable
-            && scope.cursor == scope.previous_len;
-        let invalidate_parent = !scope.replayable || (scope.had_previous && !fully_replayed);
-        if invalidate_parent {
-            self.mark_layout_claim_scope_non_replayable();
+    /// Clears `island` and sends node requests into it until [`Self::end_island`]. Nodes that
+    /// match the island's previous nodes keep their layout.
+    pub(crate) fn begin_island(&mut self, island: IslandId) {
+        let island_state = &mut self.islands[island as usize];
+        // Swap the buffers so both keep their capacity across renders.
+        std::mem::swap(&mut island_state.previous, &mut island_state.nodes);
+        island_state.nodes.clear();
+        island_state.root = None;
+        island_state.resolved_with = None;
+        island_state.changed = true;
+        self.rendered.push(island);
+        self.current.push(island);
+    }
+
+    pub(crate) fn end_island(&mut self) {
+        if let Some(island) = self.current.pop() {
+            self.islands[island as usize].previous.clear();
         }
-        scope.nodes.truncate(scope.cursor);
-        LayoutClaimOutcome {
-            log: LayoutClaimLog {
-                nodes: scope.nodes,
-                replayable: scope.replayable,
+    }
+
+    pub(crate) fn set_island_root(&mut self, island: IslandId, root: LayoutId) {
+        debug_assert_eq!(root.island(), island);
+        let inherited = self.node(root).inherited;
+        let island = &mut self.islands[island as usize];
+        island.root = Some(root);
+        island.changed = !inherited;
+    }
+
+    /// Adds a node to the current island that lays out `island`'s root in its place.
+    pub(crate) fn request_island(&mut self, island: IslandId) -> LayoutId {
+        let id = self.push_node(
+            taffy::Style::default(),
+            &[],
+            NodeKind::Proxy {
+                island,
+                style: None,
             },
-            fully_replayed,
-        }
+            None,
+            &Style::default(),
+        );
+        self.islands[island as usize].anchor = Some(id);
+        id
     }
 
-    pub(crate) fn mark_layout_claim_scope_non_replayable(&mut self) {
-        if let Some(scope) = self.layout_claim_scopes.last_mut() {
-            scope.replayable = false;
-            scope.replaying = false;
-        }
+    /// Hangs `island` off `anchor`, a node laid out at the island root's position and size.
+    pub(crate) fn anchor_island(&mut self, island: IslandId, anchor: LayoutId) {
+        self.islands[island as usize].anchor = Some(anchor);
     }
 
-    fn static_layout_style(style: &Style) -> bool {
-        style.direction != LayoutDirection::Auto
-            && style.effective_unicode_bidi() == UnicodeBidi::Normal
+    fn root_style(&self, island: IslandId) -> Option<&taffy::Style> {
+        let root = self.islands[island as usize].root?;
+        Some(&self.node(root).style)
     }
 
-    fn try_replay_layout(
+    fn current_island(&self) -> IslandId {
+        *self.current.last().unwrap()
+    }
+
+    fn node(&self, id: LayoutId) -> &Node {
+        &self.islands[id.island() as usize].nodes[id.index()]
+    }
+
+    fn node_mut(&mut self, id: LayoutId) -> &mut Node {
+        &mut self.islands[id.island() as usize].nodes[id.index()]
+    }
+
+    fn push_node(
         &mut self,
-        style: &Style,
-        taffy_style: &taffy::Style,
+        style: taffy::Style,
         children: &[LayoutId],
-        logical_children: Option<&[LayoutId]>,
-    ) -> Option<LayoutId> {
-        if !Self::static_layout_style(style) {
-            self.mark_layout_claim_scope_non_replayable();
-            return None;
+        kind: NodeKind,
+        measure_key: Option<Box<dyn MeasureKey>>,
+        source: &Style,
+    ) -> LayoutId {
+        let island = self.current_island();
+        let index = self.islands[island as usize].nodes.len();
+        let id = LayoutId::new(island, index);
+        for child in children {
+            self.node_mut(*child).parent = Some(id);
         }
-        let old = match self.layout_claim_scopes.last() {
-            Some(scope) if scope.replaying => scope.nodes.get(scope.cursor).copied(),
-            _ => return None,
-        };
-        let Some(old) = old else {
-            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-            return None;
-        };
-        // A custom element can leave a detached allocation in the flat claim log. Pruning
-        // removes its direction metadata, which is our O(1) liveness sentinel; Taffy 0.13's
-        // style returns a Result but indexes its SlotMap and panics for a stale key.
-        if !self.directions.contains_key(&old) {
-            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-            return None;
+        self.islands[island as usize].nodes.push(Node {
+            style,
+            children: children.iter().map(|child| NodeId::from(child.0)).collect(),
+            parent: None,
+            cache: Cache::new(),
+            layout: Layout::new(),
+            kind,
+            vertical_align: source.vertical_align,
+            display: source.display,
+            position: source.position,
+            direction: DirectionMetadata {
+                authored: source.direction,
+                unicode_bidi: source.effective_unicode_bidi(),
+                source_direction: None,
+                auto_direction_hint: None,
+                logical_children: None,
+                resolved: ResolvedDirection::LeftToRight,
+                handle: OnceCell::new(),
+            },
+            inline_content: None,
+            inline_fragments: None,
+            placed: None,
+            bounds: None,
+            inherited: false,
+            measure_key,
+            last_measure: None,
+            measured: false,
+        });
+        if let Some(previous) = self.islands[island as usize].previous.get(index)
+            && self.can_inherit(self.node(id), previous)
+        {
+            let island = &mut self.islands[id.island() as usize];
+            let (node, previous) = (&mut island.nodes[index], &mut island.previous[index]);
+            node.inherited = true;
+            std::mem::swap(&mut node.cache, &mut previous.cache);
+            node.layout = previous.layout;
+            node.style.direction = previous.style.direction;
+            node.direction.resolved = previous.direction.resolved;
+            node.last_measure = previous.last_measure;
+            let measured = match (&node.measure_key, &previous.measure_key) {
+                (Some(key), Some(previous_key)) => key.inherit(previous_key.as_ref()),
+                _ => false,
+            };
+            if matches!(node.kind, NodeKind::Measured(_)) && !measured {
+                self.replays.push(id);
+            }
         }
-        let Ok(old_style) = self.taffy.style(old.0) else {
-            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-            return None;
-        };
-        if old_style != taffy_style {
-            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-            return None;
-        }
-        let children_match = self.taffy.child_count(old.0) == children.len()
-            && children
-                .iter()
-                .enumerate()
-                .all(|(index, child)| self.taffy.get_child_id(old.0, index) == child.0);
-        let metadata_matches = self.taffy.get_node_context(old.0).is_none()
-            && !self.frame_bound_measured_nodes.contains(&old)
-            && self
-                .vertical_alignments
-                .get(&old)
-                .copied()
-                .unwrap_or(VerticalAlign::Baseline)
-                == style.vertical_align
-            && self.display_and_position.get(&old).copied()
-                == Some((style.display, style.position))
-            && self.directions.get(&old).is_some_and(|metadata| {
-                metadata.authored == style.direction
-                    && metadata.unicode_bidi == style.effective_unicode_bidi()
-                    && metadata.source_direction.is_none()
-                    && metadata.auto_direction_hint.is_none()
-                    && metadata.logical_children.as_deref() == logical_children
-            })
-            && !self.inline_content.contains_key(&old)
-            && !self.inline_fragments.contains_key(&old);
-        if children_match && metadata_matches {
-            let scope = self.layout_claim_scopes.last_mut().unwrap();
-            scope.cursor += 1;
-            self.claim_node(old);
-            Some(old)
-        } else {
-            self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-            None
-        }
+        id
     }
 
-    fn record_layout_claim(&mut self, node: LayoutId, style: &Style) {
-        let Some(scope) = self.layout_claim_scopes.last_mut() else {
-            return;
+    /// Whether `node` can keep the layout of `previous`, the node at its place in the last render,
+    /// because nothing that affects its layout changed.
+    fn can_inherit(&self, node: &Node, previous: &Node) -> bool {
+        let same_kind = match (&node.kind, &previous.kind) {
+            (NodeKind::Plain, NodeKind::Plain) => true,
+            (NodeKind::Measured(_), NodeKind::Measured(_)) => {
+                match (&node.measure_key, &previous.measure_key) {
+                    (Some(key), Some(previous_key)) => key.same(previous_key.as_ref()),
+                    _ => false,
+                }
+            }
+            (
+                NodeKind::Proxy { island, .. },
+                NodeKind::Proxy {
+                    island: previous_island,
+                    ..
+                },
+            ) => island == previous_island && !self.islands[*island as usize].changed,
+            _ => false,
         };
-        if !Self::static_layout_style(style) {
-            scope.replayable = false;
-            scope.replaying = false;
-        }
-        if scope.cursor < scope.nodes.len() {
-            scope.nodes[scope.cursor] = node;
+        let same = same_kind
+            && node.children == previous.children
+            && node
+                .children
+                .iter()
+                .all(|child| self.node(LayoutId(u64::from(*child))).inherited)
+            && node.vertical_align == previous.vertical_align
+            && node.display == previous.display
+            && node.position == previous.position
+            && node.direction.authored == previous.direction.authored
+            && node.direction.unicode_bidi == previous.direction.unicode_bidi;
+        // Directions are resolved after nodes are created, so compare with the one resolved last.
+        same && if node.style.direction == previous.style.direction {
+            node.style == previous.style
         } else {
-            scope.nodes.push(node);
+            taffy::Style {
+                direction: previous.style.direction,
+                ..node.style.clone()
+            } == previous.style
         }
-        scope.cursor += 1;
     }
 
     /// Adds a node styled by `style`, with `children` as its child nodes, and returns its id.
@@ -473,84 +398,8 @@ impl TaffyLayoutEngine {
         scale_factor: f32,
         children: &[LayoutId],
     ) -> LayoutId {
-        self.request_layout_with_optional_logical_children(
-            style,
-            rem_size,
-            scale_factor,
-            children,
-            None,
-        )
-    }
-
-    pub(crate) fn request_layout_with_logical_children(
-        &mut self,
-        style: Style,
-        rem_size: Pixels,
-        scale_factor: f32,
-        children: &[LayoutId],
-        logical_children: &[LayoutId],
-    ) -> LayoutId {
-        self.request_layout_with_optional_logical_children(
-            style,
-            rem_size,
-            scale_factor,
-            children,
-            Some(logical_children),
-        )
-    }
-
-    fn request_layout_with_optional_logical_children(
-        &mut self,
-        style: Style,
-        rem_size: Pixels,
-        scale_factor: f32,
-        children: &[LayoutId],
-        logical_children: Option<&[LayoutId]>,
-    ) -> LayoutId {
-        let normalized_logical_children = logical_children.filter(|logical| *logical != children);
         let taffy_style = style.to_taffy(rem_size, scale_factor);
-        if let Some(node_id) =
-            self.try_replay_layout(&style, &taffy_style, children, normalized_logical_children)
-        {
-            return node_id;
-        }
-
-        let node_id = if children.is_empty() {
-            self.taffy
-                .new_leaf(taffy_style)
-                .expect(EXPECT_MESSAGE)
-                .into()
-        } else {
-            // TaffyTree::new_with_children only assigns each child's parent pointer. Unlike
-            // set_children, it does not unlink that child from its previous parent's child list.
-            // A cached subtree may supply a child still attached to the previous frame's parent.
-            // Detach it first so pruning that old parent cannot clear the new parent link or
-            // leave a dangling child key that later panics during removal.
-            for child in children {
-                if let Some(previous_parent) = self.taffy.parent(child.0) {
-                    self.taffy
-                        .remove_child(previous_parent, child.0)
-                        .expect(EXPECT_MESSAGE);
-                }
-            }
-
-            self.taffy
-                // This is safe because LayoutId is repr(transparent) to taffy::tree::NodeId.
-                .new_with_children(taffy_style, LayoutId::to_taffy_slice(children))
-                .expect(EXPECT_MESSAGE)
-                .into()
-        };
-
-        self.claim_node(node_id);
-        self.record_style(node_id, &style);
-        if let Some(logical_children) = normalized_logical_children {
-            if let Some(metadata) = self.directions.get_mut(&node_id) {
-                metadata.logical_children = Some(logical_children.to_vec());
-            }
-        }
-        self.record_layout_claim(node_id, &style);
-
-        node_id
+        self.push_node(taffy_style, children, NodeKind::Plain, None, &style)
     }
 
     /// Adds a leaf node whose size comes from `measure`, and returns its id.
@@ -572,397 +421,46 @@ impl TaffyLayoutEngine {
         ) -> Size<Pixels>
         + 'static,
     ) -> LayoutId {
-        let unicode_bidi = style.effective_unicode_bidi();
-        let measure = Box::new(measure) as Box<FrameBoundMeasureFn>;
-        #[cfg(feature = "stacker")]
-        let measure = StackSafe::new(measure);
-        let node_id = self.request_measured_layout_with_context(
-            style,
-            rem_size,
-            scale_factor,
-            NodeContext::FrameBound {
-                measure,
-                unicode_bidi,
-            },
-        );
-        self.frame_bound_measured_nodes.insert(node_id);
-        node_id
+        self.request_keyed_measured_layout(style, rem_size, scale_factor, None, measure)
     }
 
-    pub fn request_retained_measured_layout(
+    /// [`Self::request_measured_layout`] for a node whose size depends only on `key` and the
+    /// space it's measured in. See [`MeasureKey`].
+    pub(crate) fn request_keyed_measured_layout(
         &mut self,
         style: Style,
         rem_size: Pixels,
         scale_factor: f32,
+        key: Option<Box<dyn MeasureKey>>,
         measure: impl FnMut(
             Size<Option<Pixels>>,
             Size<AvailableSpace>,
-            ResolvedDirection,
-            &WindowTextSystem,
+            &mut Window,
+            &mut App,
         ) -> Size<Pixels>
         + 'static,
     ) -> LayoutId {
-        let unicode_bidi = style.effective_unicode_bidi();
-        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
+        let taffy_style = style.to_taffy(rem_size, scale_factor);
+        let measure = Box::new(measure) as Box<MeasureFn>;
         #[cfg(feature = "stacker")]
         let measure = StackSafe::new(measure);
-        self.request_measured_layout_with_context(
-            style,
-            rem_size,
-            scale_factor,
-            NodeContext::Retained {
-                measure,
-                unicode_bidi,
-            },
-        )
-    }
-
-    pub(crate) fn request_retained_inline_text_span_layout(
-        &mut self,
-        style: Style,
-        rem_size: Pixels,
-        scale_factor: f32,
-        content: &InlineContent,
-        allow_reuse: bool,
-        measure: impl FnMut(
-            Size<Option<Pixels>>,
-            Size<AvailableSpace>,
-            ResolvedDirection,
-            &WindowTextSystem,
-        ) -> Size<Pixels>
-        + 'static,
-    ) -> LayoutId {
-        let unicode_bidi = style.effective_unicode_bidi();
-        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
-        #[cfg(feature = "stacker")]
-        let measure = StackSafe::new(measure);
-        let taffy_style = style.to_taffy(rem_size, scale_factor);
-        let eligible = allow_reuse
-            && style.direction == LayoutDirection::Inherit
-            && Self::static_layout_style(&style)
-            && unicode_bidi == UnicodeBidi::Normal;
-        if !eligible {
-            self.mark_layout_claim_scope_non_replayable();
-        }
-
-        let old = match self.layout_claim_scopes.last() {
-            Some(scope) if scope.replaying && eligible => scope.nodes.get(scope.cursor).copied(),
-            _ => None,
-        };
-        let old = old.and_then(|old| {
-            if !self.directions.contains_key(&old) {
-                self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-                return None;
-            }
-            match self.taffy.style(old.0) {
-                Ok(old_style) => Some((old, old_style == &taffy_style)),
-                Err(_) => {
-                    self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-                    None
-                }
-            }
-        });
-        if let Some((old, style_matches)) = old {
-            let metadata_matches = self.directions.get(&old).is_some_and(|metadata| {
-                metadata.authored == LayoutDirection::Inherit
-                    && metadata.unicode_bidi == UnicodeBidi::Normal
-                    && metadata.source_direction == Self::text_source_direction(content)
-                    && metadata.auto_direction_hint.is_none()
-                    && metadata.logical_children.is_none()
-            });
-            let content_matches = self
-                .inline_content
-                .get(&old)
-                .is_some_and(|old_content| Self::inline_text_content_matches(old_content, content));
-            let role_matches = matches!(
-                self.taffy.get_node_context(old.0),
-                Some(NodeContext::RetainedInlineTextSpan { .. })
-            );
-            let can_replay = style_matches
-                && content_matches
-                && metadata_matches
-                && role_matches
-                && self.taffy.child_count(old.0) == 0
-                && !self.frame_bound_measured_nodes.contains(&old);
-            if can_replay {
-                if let Some(node_context) = self.taffy.get_node_context_mut(old.0) {
-                    *node_context = NodeContext::RetainedInlineTextSpan {
-                        measure,
-                        unicode_bidi,
-                    };
-                    // Span nodes are detached from paragraph flow, but custom Elements may query
-                    // or attach them independently. Force the fresh callback to run in that case.
-                    self.taffy.mark_dirty(old.0).expect(EXPECT_MESSAGE);
-                    #[cfg(test)]
-                    {
-                        self.inline_text_span_replay_hits += 1;
-                    }
-                    self.computed_layouts.remove(&old);
-                    self.computed_available_spaces.remove(&old);
-                    self.inline_fragments.remove(&old);
-                    self.absolute_layout_bounds.remove(&old);
-                    self.absolute_outer_origins.remove(&old);
-                    self.claim_node(old);
-                    self.record_layout_claim(old, &style);
-                    return old;
-                }
-            }
-            if let Some(scope) = self.layout_claim_scopes.last_mut() {
-                scope.replaying = false;
-            }
-        }
-
-        let node_id = self
-            .taffy
-            .new_leaf_with_context(
-                taffy_style,
-                NodeContext::RetainedInlineTextSpan {
-                    measure,
-                    unicode_bidi,
-                },
-            )
-            .expect(EXPECT_MESSAGE)
-            .into();
-        self.claim_node(node_id);
-        self.record_style(node_id, &style);
-        self.record_layout_claim(node_id, &style);
-        node_id
-    }
-
-    pub(crate) fn request_retained_inline_paragraph_layout(
-        &mut self,
-        style: Style,
-        rem_size: Pixels,
-        scale_factor: f32,
-        memo: Option<InlineParagraphMemo>,
-        measure: impl FnMut(
-            Size<Option<Pixels>>,
-            Size<AvailableSpace>,
-            ResolvedDirection,
-            &WindowTextSystem,
-        ) -> Size<Pixels>
-        + 'static,
-    ) -> LayoutId {
-        let unicode_bidi = style.effective_unicode_bidi();
-        let measure = Box::new(measure) as Box<RetainedMeasureFn>;
-        #[cfg(feature = "stacker")]
-        let measure = StackSafe::new(measure);
-        let taffy_style = style.to_taffy(rem_size, scale_factor);
-        let eligible = memo.is_some()
-            && Self::static_layout_style(&style)
-            && unicode_bidi == UnicodeBidi::Normal;
-        if !eligible {
-            self.mark_layout_claim_scope_non_replayable();
-        }
-
-        let old = match self.layout_claim_scopes.last() {
-            Some(scope) if scope.replaying && eligible => scope.nodes.get(scope.cursor).copied(),
-            _ => None,
-        };
-        let old = old.and_then(|old| {
-            if !self.directions.contains_key(&old) {
-                self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-                return None;
-            }
-            match self.taffy.style(old.0) {
-                Ok(old_style) => Some((old, old_style == &taffy_style)),
-                Err(_) => {
-                    self.layout_claim_scopes.last_mut().unwrap().replaying = false;
-                    None
-                }
-            }
-        });
-        if let Some((old, style_matches)) = old {
-            let metadata_matches = self.directions.get(&old).is_some_and(|metadata| {
-                metadata.authored == LayoutDirection::Inherit
-                    && metadata.unicode_bidi == UnicodeBidi::Normal
-                    && metadata.source_direction.is_none()
-                    && metadata.auto_direction_hint.is_none()
-                    && metadata.logical_children.is_none()
-            });
-            let can_replay = style_matches
-                && metadata_matches
-                && self.taffy.child_count(old.0) == 0
-                && !self.frame_bound_measured_nodes.contains(&old)
-                && !self.inline_content.contains_key(&old)
-                && !self.inline_fragments.contains_key(&old);
-            if can_replay {
-                let adopted = memo.as_ref().is_some_and(|memo| {
-                    self.taffy.get_node_context(old.0).is_some_and(|old_context| {
-                        matches!(old_context, NodeContext::RetainedInlineParagraph { memo: Some(old_memo), .. }
-                            if memo.adopt_from(old_memo))
-                    })
-                });
-                if adopted {
-                    if let Some(node_context) = self.taffy.get_node_context_mut(old.0) {
-                        *node_context = NodeContext::RetainedInlineParagraph {
-                            measure,
-                            unicode_bidi,
-                            memo: memo.map(Box::new),
-                        };
-                        #[cfg(test)]
-                        {
-                            self.inline_paragraph_replay_hits += 1;
-                        }
-                        self.claim_node(old);
-                        self.record_layout_claim(old, &style);
-                        return old;
-                    }
-                }
-            }
-            if let Some(scope) = self.layout_claim_scopes.last_mut() {
-                scope.replaying = false;
-            }
-        }
-
-        let node_id = self
-            .taffy
-            .new_leaf_with_context(
-                taffy_style,
-                NodeContext::RetainedInlineParagraph {
-                    measure,
-                    unicode_bidi,
-                    memo: memo.map(Box::new),
-                },
-            )
-            .expect(EXPECT_MESSAGE)
-            .into();
-        self.claim_node(node_id);
-        self.record_style(node_id, &style);
-        self.record_layout_claim(node_id, &style);
-        node_id
-    }
-
-    #[cfg(test)]
-    pub(crate) fn inline_text_reuse_test_stats(&self) -> (usize, usize, usize) {
-        (
-            self.inline_text_span_replay_hits,
-            self.inline_paragraph_replay_hits,
-            self.inline_paragraph_measure_calls.get(),
-        )
-    }
-
-    fn text_source_direction(content: &InlineContent) -> Option<ResolvedDirection> {
-        match content {
-            InlineContent::Text { text, .. } => ResolvedDirection::from_first_strong(text),
-            _ => None,
-        }
-    }
-
-    fn inline_text_content_matches(left: &InlineContent, right: &InlineContent) -> bool {
-        match (left, right) {
-            (
-                InlineContent::Text {
-                    text: left_text,
-                    runs: left_runs,
-                    font_size: left_font_size,
-                    line_height: left_line_height,
-                },
-                InlineContent::Text {
-                    text: right_text,
-                    runs: right_runs,
-                    font_size: right_font_size,
-                    line_height: right_line_height,
-                },
-            ) => {
-                left_text == right_text
-                    && left_runs == right_runs
-                    && left_font_size == right_font_size
-                    && left_line_height == right_line_height
-            }
-            _ => false,
-        }
-    }
-
-    fn request_measured_layout_with_context(
-        &mut self,
-        style: Style,
-        rem_size: Pixels,
-        scale_factor: f32,
-        context: NodeContext,
-    ) -> LayoutId {
-        let taffy_style = style.to_taffy(rem_size, scale_factor);
-        let node_id = self
-            .taffy
-            .new_leaf_with_context(taffy_style, context)
-            .expect(EXPECT_MESSAGE)
-            .into();
-        self.claim_node(node_id);
-        self.record_style(node_id, &style);
-        self.mark_layout_claim_scope_non_replayable();
-        self.record_layout_claim(node_id, &style);
-        node_id
-    }
-
-    fn record_style(&mut self, node_id: LayoutId, style: &Style) {
-        self.direction_resolution_needed |= matches!(
-            style.direction,
-            LayoutDirection::RightToLeft | LayoutDirection::Auto
-        );
-
-        if style.vertical_align != VerticalAlign::Baseline {
-            self.vertical_alignments
-                .insert(node_id, style.vertical_align);
-        }
-
-        self.display_and_position
-            .insert(node_id, (style.display, style.position));
-        self.directions.insert(
-            node_id,
-            DirectionMetadata {
-                authored: style.direction,
-                unicode_bidi: style.effective_unicode_bidi(),
-                source_direction: None,
-                auto_direction_hint: None,
-                logical_children: None,
-                resolved: LayoutDirectionHandle::new(),
-            },
-        );
+        self.push_node(taffy_style, &[], NodeKind::Measured(measure), key, &style)
     }
 
     pub(crate) fn set_logical_children(&mut self, node_id: LayoutId, children: &[LayoutId]) {
-        let actual_child_count = self.taffy.child_count(node_id.into());
-        let matches_physical = actual_child_count == children.len()
-            && children
+        let node = self.node_mut(node_id);
+        let same = node.children.len() == children.len()
+            && node
+                .children
                 .iter()
-                .enumerate()
-                .all(|(index, child)| self.taffy.get_child_id(node_id.into(), index) == child.0);
-        let logical_children = (!matches_physical).then_some(children);
-
-        let changed = self
-            .directions
-            .get(&node_id)
-            .is_some_and(|metadata| metadata.logical_children.as_deref() != logical_children);
-        if !changed {
-            return;
-        }
-
-        if let Some(metadata) = self.directions.get_mut(&node_id) {
-            metadata.logical_children = logical_children.map(<[LayoutId]>::to_vec);
-        }
-        self.mark_layout_claim_scope_non_replayable();
+                .zip(children)
+                .all(|(actual, logical)| u64::from(*actual) == logical.0);
+        node.direction.logical_children = (!same).then(|| children.to_vec());
     }
 
     pub(crate) fn set_direction_text(&mut self, node_id: LayoutId, text: SharedString) {
-        let has_source_direction = if let Some(metadata) = self.directions.get_mut(&node_id) {
-            metadata.source_direction = ResolvedDirection::from_first_strong(&text);
-            metadata.source_direction.is_some()
-        } else {
-            false
-        };
-        if has_source_direction {
-            self.mark_layout_claim_scope_non_replayable();
-        }
-    }
-
-    pub(crate) fn set_replayable_inline_text_direction(
-        &mut self,
-        node_id: LayoutId,
-        text: SharedString,
-    ) {
-        if let Some(metadata) = self.directions.get_mut(&node_id) {
-            metadata.source_direction = ResolvedDirection::from_first_strong(&text);
-        }
+        self.node_mut(node_id).direction.source_direction =
+            ResolvedDirection::from_first_strong(&text);
     }
 
     pub(crate) fn set_auto_direction_hint(
@@ -970,53 +468,67 @@ impl TaffyLayoutEngine {
         node_id: LayoutId,
         direction: Option<ResolvedDirection>,
     ) {
-        if let Some(metadata) = self.directions.get_mut(&node_id) {
-            metadata.auto_direction_hint = direction;
-        }
-        if direction.is_some() {
-            self.mark_layout_claim_scope_non_replayable();
-        }
+        self.node_mut(node_id).direction.auto_direction_hint = direction;
+    }
+
+    pub(crate) fn island_direction_contribution(
+        &self,
+        island: IslandId,
+    ) -> Option<ResolvedDirection> {
+        self.auto_direction_contribution(self.islands[island as usize].root?)
     }
 
     pub(crate) fn auto_direction_contribution(
         &self,
         node_id: LayoutId,
     ) -> Option<ResolvedDirection> {
-        let metadata = self.directions.get(&node_id)?;
-
-        (metadata.authored == LayoutDirection::Inherit)
+        let node_id = self.through_proxy(node_id)?;
+        (self.node(node_id).direction.authored == LayoutDirection::Inherit)
             .then(|| self.auto_direction(node_id))
             .flatten()
     }
 
     pub(crate) fn direction_handle(&self, node_id: LayoutId) -> LayoutDirectionHandle {
-        self.directions[&node_id].resolved.clone()
+        let direction = &self.node(node_id).direction;
+        LayoutDirectionHandle(
+            direction
+                .handle
+                .get_or_init(|| Rc::new(Cell::new(direction.resolved)))
+                .clone(),
+        )
     }
 
     pub(crate) fn directionality(&self, node_id: LayoutId) -> (ResolvedDirection, UnicodeBidi) {
-        let metadata = &self.directions[&node_id];
+        let direction = &self.node(node_id).direction;
+        (direction.resolved, direction.unicode_bidi)
+    }
 
-        (metadata.resolved.get(), metadata.unicode_bidi)
+    /// Resolves a proxy to the root of the island it stands for.
+    fn through_proxy(&self, node_id: LayoutId) -> Option<LayoutId> {
+        match &self.node(node_id).kind {
+            NodeKind::Proxy { island, .. } => self.islands[*island as usize].root,
+            _ => Some(node_id),
+        }
+    }
+
+    fn children_of(&self, node_id: LayoutId) -> impl Iterator<Item = LayoutId> + '_ {
+        let node = self.node(node_id);
+        let logical = node.direction.logical_children.as_deref();
+        let actual = logical
+            .is_none()
+            .then(|| node.children.iter().map(|id| LayoutId(u64::from(*id))))
+            .into_iter()
+            .flatten();
+        logical.into_iter().flatten().copied().chain(actual)
     }
 
     fn auto_direction(&self, node_id: LayoutId) -> Option<ResolvedDirection> {
-        let metadata = self.directions.get(&node_id)?;
-
-        if let Some(direction) = metadata.source_direction.or(metadata.auto_direction_hint) {
+        let direction = &self.node(node_id).direction;
+        if let Some(direction) = direction.source_direction.or(direction.auto_direction_hint) {
             return Some(direction);
         }
-
-        if let Some(children) = &metadata.logical_children {
-            return children
-                .iter()
-                .find_map(|child| self.auto_direction_contribution(*child));
-        }
-
-        self.taffy
-            .children(node_id.into())
-            .expect(EXPECT_MESSAGE)
-            .into_iter()
-            .find_map(|child| self.auto_direction_contribution(child.into()))
+        self.children_of(node_id)
+            .find_map(|child| self.auto_direction_contribution(child))
     }
 
     fn resolve_directions(
@@ -1024,16 +536,8 @@ impl TaffyLayoutEngine {
         root_id: LayoutId,
         inherited: ResolvedDirection,
     ) -> Vec<LayoutId> {
-        if inherited == ResolvedDirection::RightToLeft {
-            self.direction_resolution_needed = true;
-        }
-        if !self.direction_resolution_needed {
-            return Vec::new();
-        }
-
-        let mut visited = FxHashSet::default();
         let mut changed = Vec::new();
-        self.resolve_direction_subtree(root_id, inherited, &mut visited, &mut changed);
+        self.resolve_direction_subtree(root_id, inherited, &mut changed);
         changed
     }
 
@@ -1041,17 +545,21 @@ impl TaffyLayoutEngine {
         &mut self,
         node_id: LayoutId,
         inherited: ResolvedDirection,
-        visited: &mut FxHashSet<LayoutId>,
         changed: &mut Vec<LayoutId>,
     ) {
-        if !visited.insert(node_id) {
+        if let NodeKind::Proxy { island, .. } = self.node(node_id).kind {
+            let island = &mut self.islands[island as usize];
+            if island.resolved_with == Some(inherited) {
+                return;
+            }
+            island.resolved_with = Some(inherited);
+            if let Some(root) = island.root {
+                self.resolve_direction_subtree(root, inherited, changed);
+            }
             return;
         }
 
-        let Some(metadata) = self.directions.get(&node_id) else {
-            return;
-        };
-        let resolved = match metadata.authored {
+        let resolved = match self.node(node_id).direction.authored {
             LayoutDirection::Inherit => inherited,
             LayoutDirection::LeftToRight => ResolvedDirection::LeftToRight,
             LayoutDirection::RightToLeft => ResolvedDirection::RightToLeft,
@@ -1059,64 +567,92 @@ impl TaffyLayoutEngine {
                 .auto_direction(node_id)
                 .unwrap_or(ResolvedDirection::LeftToRight),
         };
-        let actual_children = self.taffy.children(node_id.into()).expect(EXPECT_MESSAGE);
-        let logical_children = metadata.logical_children.clone().unwrap_or_default();
-        if metadata.resolved.get() != resolved {
-            changed.push(node_id);
-        }
-        metadata.resolved.set(resolved);
-
         let taffy_direction = match resolved {
             ResolvedDirection::LeftToRight => taffy::style::Direction::Ltr,
             ResolvedDirection::RightToLeft => taffy::style::Direction::Rtl,
         };
-        if self
-            .taffy
-            .style(node_id.into())
-            .expect(EXPECT_MESSAGE)
-            .direction
-            != taffy_direction
-        {
-            let mut style = self
-                .taffy
-                .style(node_id.into())
-                .expect(EXPECT_MESSAGE)
-                .clone();
-            style.direction = taffy_direction;
-            self.taffy
-                .set_style(node_id.into(), style)
-                .expect(EXPECT_MESSAGE);
+        let node = self.node_mut(node_id);
+        if node.direction.resolved != resolved {
+            changed.push(node_id);
+            node.direction.resolved = resolved;
+            if let Some(handle) = node.direction.handle.get() {
+                handle.set(resolved);
+            }
+        }
+        if node.style.direction != taffy_direction {
+            node.style.direction = taffy_direction;
+            self.mark_dirty(node_id);
         }
 
-        for child_id in actual_children
-            .into_iter()
-            .map(LayoutId::from)
-            .chain(logical_children)
-        {
-            self.resolve_direction_subtree(child_id, resolved, visited, changed);
+        let children: smallvec::SmallVec<[LayoutId; 8]> = self.children_of(node_id).collect();
+        for child_id in children {
+            self.resolve_direction_subtree(child_id, resolved, changed);
         }
+    }
+
+    /// Clears cached layout of `node_id` and of its ancestors, including through island anchors.
+    fn mark_dirty(&mut self, mut node_id: LayoutId) {
+        loop {
+            let node = self.node_mut(node_id);
+            node.cache.clear();
+            match node.parent {
+                Some(parent) => node_id = parent,
+                None => match self.anchor_of_root(node_id) {
+                    Some(anchor) => node_id = anchor,
+                    None => return,
+                },
+            }
+        }
+    }
+
+    fn anchor_of_root(&self, node_id: LayoutId) -> Option<LayoutId> {
+        let island = &self.islands[node_id.island() as usize];
+        (island.root == Some(node_id))
+            .then_some(island.anchor)
+            .flatten()
     }
 
     pub(crate) fn vertical_align(&self, node_id: LayoutId) -> VerticalAlign {
-        self.vertical_alignments
-            .get(&node_id)
-            .copied()
-            .unwrap_or_default()
+        self.node(node_id).vertical_align
+    }
+
+    /// Whether the node kept the layout it had in the view's previous render.
+    pub(crate) fn inherited(&self, node_id: LayoutId) -> bool {
+        self.node(node_id).inherited
     }
 
     pub(crate) fn display_and_position(&self, node_id: LayoutId) -> (Display, Position) {
-        self.display_and_position[&node_id]
+        let node = self.node(node_id);
+        (node.display, node.position)
+    }
+
+    pub(crate) fn inline_content(&self, node_id: LayoutId) -> Option<Arc<InlineContent>> {
+        self.node(node_id).inline_content.clone()
+    }
+
+    pub(crate) fn set_inline_content(&mut self, node_id: LayoutId, content: InlineContent) {
+        self.node_mut(node_id).inline_content = Some(Arc::new(content));
+    }
+
+    pub(crate) fn inline_fragments(&self, node_id: LayoutId) -> Option<Arc<[Bounds<Pixels>]>> {
+        self.node(node_id).inline_fragments.clone()
+    }
+
+    pub(crate) fn set_inline_fragments(
+        &mut self,
+        node_id: LayoutId,
+        fragments: Arc<[Bounds<Pixels>]>,
+    ) {
+        self.node_mut(node_id).inline_fragments = Some(fragments);
     }
 
     /// Places a detached inline box, invalidating cached positions of its descendants.
     pub(crate) fn place_inline(&mut self, node_id: LayoutId, bounds: Bounds<Pixels>, scale: f32) {
-        self.clear_cached_bounds(node_id);
-
-        self.absolute_layout_bounds.insert(node_id, bounds);
-        self.absolute_outer_origins.insert(
-            node_id,
+        self.bounds_epoch += 1;
+        self.node_mut(node_id).placed = Some((
             bounds.origin.map(|position| f32::from(position) * scale),
-        );
+            bounds,
+        ));
     }
 
     /// Treats any `auto` dimension of the given node's style as filling `size`.
@@ -1131,7 +667,11 @@ impl TaffyLayoutEngine {
         size: Size<Pixels>,
         scale_factor: f32,
     ) {
-        let style = self.taffy.style(id.0).expect(EXPECT_MESSAGE);
+        let style = match &self.node(id).kind {
+            NodeKind::Proxy { island, .. } => self.root_style(*island),
+            _ => Some(&self.node(id).style),
+        };
+        let Some(style) = style else { return };
         let stretch_width = style.size.width.is_auto();
         let stretch_height = style.size.height.is_auto();
         if !stretch_width && !stretch_height {
@@ -1146,54 +686,14 @@ impl TaffyLayoutEngine {
             style.size.height =
                 taffy::style::Dimension::length(round_to_device_pixel(size.height.0, scale_factor));
         }
-        self.taffy.set_style(id.0, style).expect(EXPECT_MESSAGE);
-    }
-
-    // Used to understand performance
-    #[allow(dead_code)]
-    fn count_all_children(&self, parent: LayoutId) -> anyhow::Result<u32> {
-        let mut count = 0;
-
-        for child in self.taffy.children(parent.0)? {
-            // Count this child.
-            count += 1;
-
-            // Count all of this child's children.
-            count += self.count_all_children(LayoutId(child))?
+        let node = self.node_mut(id);
+        match &mut node.kind {
+            NodeKind::Proxy {
+                style: stretched, ..
+            } => *stretched = Some(Box::new(style)),
+            _ => node.style = style,
         }
-
-        Ok(count)
-    }
-
-    // Used to understand performance
-    #[allow(dead_code)]
-    fn max_depth(&self, depth: u32, parent: LayoutId) -> anyhow::Result<u32> {
-        println!(
-            "{parent:?} at depth {depth} has {} children",
-            self.taffy.child_count(parent.0)
-        );
-
-        let mut max_child_depth = 0;
-
-        for child in self.taffy.children(parent.0)? {
-            max_child_depth = std::cmp::max(max_child_depth, self.max_depth(0, LayoutId(child))?);
-        }
-
-        Ok(depth + 1 + max_child_depth)
-    }
-
-    // Used to understand performance
-    #[allow(dead_code)]
-    fn get_edges(&self, parent: LayoutId) -> anyhow::Result<Vec<(LayoutId, LayoutId)>> {
-        let mut edges = Vec::new();
-
-        for child in self.taffy.children(parent.0)? {
-            edges.push((parent, LayoutId(child)));
-
-            edges.extend(self.get_edges(LayoutId(child))?);
-        }
-
-        Ok(edges)
+        node.cache.clear();
     }
 
     /// Lays out the subtree under `id` for the given available space.
@@ -1210,185 +710,105 @@ impl TaffyLayoutEngine {
         window: &mut Window,
         cx: &mut App,
     ) {
-        // Leaving this here until we have a better instrumentation approach.
-        // println!("Laying out {} children", self.count_all_children(id)?);
-        // println!("Max layout depth: {}", self.max_depth(0, id)?);
-
-        // Output the edges (branches) of the tree in Mermaid format for visualization.
-        // println!("Edges:");
-        // for (a, b) in self.get_edges(id)? {
-        //     println!("N{} --> N{}", u64::from(a), u64::from(b));
-        // }
-        //
-
-        if !self.computed_layouts.insert(id) {
-            self.clear_cached_bounds(id);
-        }
-
         let changed_ids = self.resolve_directions(id, inherited_direction);
-
         for changed_id in changed_ids {
             if changed_id == id {
                 continue;
             }
-
-            let Some(available_space) = self.computed_available_spaces.get(&changed_id).copied()
+            let Some(&(_, available_space)) = self
+                .computed_available_spaces
+                .iter()
+                .find(|(computed, _)| *computed == changed_id)
             else {
                 continue;
             };
-
-            self.clear_cached_bounds(changed_id);
-            self.compute_resolved_layout(changed_id, available_space, window, cx);
+            self.compute_resolved_layout(changed_id, available_space, None, window, cx);
         }
 
-        let previous_space = self.computed_available_spaces.insert(id, available_space);
-
-        if previous_space.is_some() {
-            self.clear_cached_bounds(id);
+        match self
+            .computed_available_spaces
+            .iter_mut()
+            .find(|(computed, _)| *computed == id)
+        {
+            Some(entry) => entry.1 = available_space,
+            None => self.computed_available_spaces.push((id, available_space)),
         }
-
-        self.compute_resolved_layout(id, available_space, window, cx);
+        self.compute_resolved_layout(id, available_space, None, window, cx);
     }
 
-    /// Computes a detached root at an assigned size, then restores its natural root style.
-    pub fn compute_layout_at_size(
+    /// Lays out `island`'s root at exactly `size`, where its anchor already sits.
+    pub(crate) fn layout_island(
         &mut self,
-        id: LayoutId,
-        available_space: Size<AvailableSpace>,
+        island: IslandId,
         size: Size<Pixels>,
         inherited_direction: ResolvedDirection,
         window: &mut Window,
         cx: &mut App,
     ) {
-        let scale_factor = window.scale_factor();
-        let natural_style = self.taffy.style(id.0).expect(EXPECT_MESSAGE).clone();
-        let mut assigned_style = natural_style.clone();
-        assigned_style.size.width =
-            taffy::style::Dimension::length(round_to_device_pixel(size.width.0, scale_factor));
-        assigned_style.size.height =
-            taffy::style::Dimension::length(round_to_device_pixel(size.height.0, scale_factor));
-        self.taffy
-            .set_style(id.0, assigned_style)
-            .expect(EXPECT_MESSAGE);
-        self.compute_layout(id, available_space, inherited_direction, window, cx);
-        self.taffy
-            .set_style(id.0, natural_style)
-            .expect(EXPECT_MESSAGE);
-    }
-
-    fn clear_cached_bounds(&mut self, id: LayoutId) {
-        let stack = &mut self.layout_bounds_scratch_space;
-        stack.push(id);
-        while let Some(id) = stack.pop() {
-            self.absolute_layout_bounds.remove(&id);
-            self.absolute_outer_origins.remove(&id);
-            stack.extend(
-                self.taffy
-                    .children(id.into())
-                    .expect(EXPECT_MESSAGE)
-                    .into_iter()
-                    .map(LayoutId::from),
-            );
-        }
+        let Some(root) = self.islands[island as usize].root else {
+            return;
+        };
+        self.islands[island as usize].resolved_with = None;
+        self.resolve_directions(root, inherited_direction);
+        let available_space = size.map(AvailableSpace::Definite);
+        self.compute_resolved_layout(root, available_space, Some(size), window, cx);
     }
 
     fn compute_resolved_layout(
         &mut self,
         id: LayoutId,
         available_space: Size<AvailableSpace>,
+        known_size: Option<Size<Pixels>>,
         window: &mut Window,
         cx: &mut App,
     ) {
         let scale_factor = window.scale_factor();
-        #[cfg(test)]
-        let inline_paragraph_measure_calls = self.inline_paragraph_measure_calls.clone();
-
-        let transform = |v: AvailableSpace| match v {
-            AvailableSpace::Definite(pixels) => {
-                AvailableSpace::Definite(Pixels(pixels.0 * scale_factor))
-            }
-            AvailableSpace::MinContent => AvailableSpace::MinContent,
-            AvailableSpace::MaxContent => AvailableSpace::MaxContent,
+        let to_device = |space: AvailableSpace| match space {
+            AvailableSpace::Definite(pixels) => AvailableSpace::Definite(pixels * scale_factor),
+            other => other,
         };
-        let available_space = size(
-            transform(available_space.width),
-            transform(available_space.height),
-        );
+        let available_space: TaffySize<TaffyAvailableSpace> = size(
+            to_device(available_space.width),
+            to_device(available_space.height),
+        )
+        .into();
+        self.bounds_epoch += 1;
 
-        self.taffy
-            .compute_layout_with_measure(
-                id.into(),
-                available_space.into(),
-                |known_dimensions, available_space, _id, node_context, style| {
-                    let Some(node_context) = node_context else {
-                        return taffy::geometry::Size::default();
-                    };
-
-                    let known_dimensions = Size {
-                        width: known_dimensions.width.map(|e| Pixels(e / scale_factor)),
-                        height: known_dimensions.height.map(|e| Pixels(e / scale_factor)),
-                    };
-
-                    let available_space: Size<AvailableSpace> = available_space.into();
-                    let untransform = |ev: AvailableSpace| match ev {
-                        AvailableSpace::Definite(pixels) => {
-                            AvailableSpace::Definite(Pixels(pixels.0 / scale_factor))
-                        }
-                        AvailableSpace::MinContent => AvailableSpace::MinContent,
-                        AvailableSpace::MaxContent => AvailableSpace::MaxContent,
-                    };
-                    let available_space = size(
-                        untransform(available_space.width),
-                        untransform(available_space.height),
-                    );
-
-                    let resolved_direction = match style.direction {
-                        taffy::style::Direction::Ltr => ResolvedDirection::LeftToRight,
-                        taffy::style::Direction::Rtl => ResolvedDirection::RightToLeft,
-                    };
-                    let previous_direction =
-                        std::mem::replace(&mut window.measurement_direction, resolved_direction);
-                    let previous_unicode_bidi = std::mem::replace(
-                        &mut window.measurement_unicode_bidi,
-                        match node_context {
-                            NodeContext::FrameBound { unicode_bidi, .. }
-                            | NodeContext::Retained { unicode_bidi, .. }
-                            | NodeContext::RetainedInlineTextSpan { unicode_bidi, .. }
-                            | NodeContext::RetainedInlineParagraph { unicode_bidi, .. } => {
-                                *unicode_bidi
-                            }
+        let mut tree = LayoutTree {
+            islands: &mut self.islands,
+            window,
+            cx,
+            scale_factor,
+        };
+        match known_size {
+            None => compute_root_layout(&mut tree, id.into(), available_space),
+            Some(known) => {
+                let known = TaffySize {
+                    width: Some(known.width.0 * scale_factor),
+                    height: Some(known.height.0 * scale_factor),
+                };
+                let output = tree.compute_child_layout(
+                    id.into(),
+                    LayoutInput {
+                        known_dimensions: known,
+                        known_dimensions_are_definite: TaffySize {
+                            width: true,
+                            height: true,
                         },
-                    );
-                    let measured_size: Size<Pixels> = match node_context {
-                        NodeContext::FrameBound { measure, .. } => {
-                            measure(known_dimensions, available_space, window, cx)
-                        }
-                        NodeContext::Retained { measure, .. }
-                        | NodeContext::RetainedInlineTextSpan { measure, .. } => measure(
-                            known_dimensions,
-                            available_space,
-                            resolved_direction,
-                            window.text_system(),
-                        ),
-                        NodeContext::RetainedInlineParagraph { measure, .. } => {
-                            #[cfg(test)]
-                            inline_paragraph_measure_calls
-                                .set(inline_paragraph_measure_calls.get() + 1);
-                            measure(
-                                known_dimensions,
-                                available_space,
-                                resolved_direction,
-                                window.text_system(),
-                            )
-                        }
-                    };
-                    window.measurement_direction = previous_direction;
-                    window.measurement_unicode_bidi = previous_unicode_bidi;
-
-                    snap_measured_size_to_device_pixels(measured_size, scale_factor).into()
-                },
-            )
-            .expect(EXPECT_MESSAGE);
+                        parent_size: known,
+                        available_space,
+                        run_mode: RunMode::PerformLayout,
+                        sizing_mode: taffy::SizingMode::InherentSize,
+                        axis: taffy::RequestedAxis::Both,
+                        vertical_margins_are_collapsible: taffy::Line::FALSE,
+                    },
+                );
+                let node = tree.node_mut(id.into());
+                node.layout.size = output.size;
+                node.layout.location = TaffyPoint::ZERO;
+            }
+        }
+        tree.replay_measurements(&mut self.replays);
     }
 
     // Pixel snapping
@@ -1471,39 +891,35 @@ impl TaffyLayoutEngine {
     /// Call [`Self::compute_layout`] first. The result is cached until the next layout and is
     /// returned in logical pixels after device-pixel snapping, so neighboring boxes meet exactly.
     pub fn layout_bounds(&mut self, id: LayoutId, scale_factor: f32) -> Bounds<Pixels> {
-        if let Some(layout) = self.absolute_layout_bounds.get(&id).cloned() {
-            return layout;
+        self.absolute_layout(id, scale_factor).1
+    }
+
+    fn absolute_layout(&mut self, id: LayoutId, scale_factor: f32) -> (Point<f32>, Bounds<Pixels>) {
+        let node = self.node(id);
+        if let Some(placed) = node.placed {
+            return placed;
         }
-
-        let layout = self.taffy.layout(id.into()).expect(EXPECT_MESSAGE);
-        let layout_location = layout.location;
-        let layout_size = layout.size;
-        let parent = self.taffy.parent(id.0);
-
-        let absolute_outer_origin = match parent {
-            Some(parent_id) => {
-                let parent_id = LayoutId::from(parent_id);
-                self.layout_bounds(parent_id, scale_factor);
-                let parent_origin = *self
-                    .absolute_outer_origins
-                    .get(&parent_id)
-                    .expect("parent absolute outer origin should be cached");
-                parent_origin + Point::from(layout_location)
-            }
-            None => Point::from(layout_location),
+        if let Some((epoch, origin, bounds)) = node.bounds
+            && epoch == self.bounds_epoch
+        {
+            return (origin, bounds);
+        }
+        let location = Point::from(node.layout.location);
+        let layout_size = node.layout.size;
+        let parent = node.parent.or_else(|| self.anchor_of_root(id));
+        let origin = match parent {
+            Some(parent) => self.absolute_layout(parent, scale_factor).0 + location,
+            None => location,
         };
-        self.absolute_outer_origins
-            .insert(id, absolute_outer_origin);
-
-        let absolute_far = absolute_outer_origin + Point::from(Size::from(layout_size));
-        let snapped_bounds = Bounds::from_corners(
-            absolute_outer_origin.map(round_half_toward_zero),
-            absolute_far.map(round_half_toward_zero),
+        let far = origin + Point::from(Size::from(layout_size));
+        let snapped = Bounds::from_corners(
+            origin.map(round_half_toward_zero),
+            far.map(round_half_toward_zero),
         );
-
-        let bounds = (snapped_bounds / scale_factor).map(Pixels);
-        self.absolute_layout_bounds.insert(id, bounds);
-        bounds
+        let bounds = (snapped / scale_factor).map(Pixels);
+        let epoch = self.bounds_epoch;
+        self.node_mut(id).bounds = Some((epoch, origin, bounds));
+        (origin, bounds)
     }
 
     /// Returns bounds whose origin and size are snapped in the coordinate space of the parent.
@@ -1516,18 +932,16 @@ impl TaffyLayoutEngine {
         node_id: LayoutId,
         scale_factor: f32,
     ) -> Bounds<Pixels> {
-        if self.inline_fragments.contains_key(&node_id) {
+        let node = self.node(node_id);
+        if node.inline_fragments.is_some() {
             return self.layout_bounds(node_id, scale_factor);
         }
-
-        let Some(parent_id) = self.taffy.parent(node_id.0).map(LayoutId::from) else {
+        let Some(parent_id) = node.parent else {
             return self.layout_bounds(node_id, scale_factor);
         };
+        let local_origin = Point::from(node.layout.location).map(round_half_toward_zero);
+        let local_size = Size::from(node.layout.size).map(round_half_toward_zero);
         let parent_bounds = self.layout_bounds(parent_id, scale_factor);
-        let layout = self.taffy.layout(node_id.into()).expect(EXPECT_MESSAGE);
-        let local_origin = Point::from(layout.location).map(round_half_toward_zero);
-        let local_size = Size::from(layout.size).map(round_half_toward_zero);
-
         Bounds::new(
             parent_bounds.origin + (local_origin / scale_factor).map(Pixels),
             (local_size / scale_factor).map(Pixels),
@@ -1535,40 +949,344 @@ impl TaffyLayoutEngine {
     }
 }
 
-/// An id for a node in the Taffy layout tree.
+/// Taffy's view of every island while a layout computes. Measured leaves get the window and app.
+struct LayoutTree<'a> {
+    islands: &'a mut [Island],
+    window: &'a mut Window,
+    cx: &'a mut App,
+    scale_factor: f32,
+}
+
+impl LayoutTree<'_> {
+    fn node(&self, id: NodeId) -> &Node {
+        let id = LayoutId(u64::from(id));
+        &self.islands[id.island() as usize].nodes[id.index()]
+    }
+
+    fn node_mut(&mut self, id: NodeId) -> &mut Node {
+        let id = LayoutId(u64::from(id));
+        &mut self.islands[id.island() as usize].nodes[id.index()]
+    }
+
+    fn style(&self, id: NodeId) -> &taffy::Style {
+        match &self.node(id).kind {
+            NodeKind::Proxy {
+                style: Some(style), ..
+            } => style,
+            NodeKind::Proxy { island, .. } => match self.islands[*island as usize].root {
+                Some(root) => &self.node(root.into()).style,
+                None => &self.node(id).style,
+            },
+            _ => &self.node(id).style,
+        }
+    }
+
+    fn compute_node(
+        &mut self,
+        node_id: NodeId,
+        inputs: LayoutInput,
+        block_ctx: Option<&mut BlockContext<'_>>,
+    ) -> LayoutOutput {
+        if inputs.run_mode == RunMode::PerformHiddenLayout {
+            return compute_hidden_layout(self, node_id);
+        }
+        if let NodeKind::Proxy { island, style } = &self.node(node_id).kind {
+            let Some(root) = self.islands[*island as usize].root else {
+                return LayoutOutput::HIDDEN;
+            };
+            // A stretched window root carries its size on the proxy.
+            let mut inputs = inputs;
+            if let Some(style) = style {
+                let size = TaffySize {
+                    width: style.size.width.into_option(),
+                    height: style.size.height.into_option(),
+                };
+                inputs.known_dimensions = inputs.known_dimensions.or(size);
+            }
+            return self.compute_node(root.into(), inputs, block_ctx);
+        }
+        compute_cached_layout(self, node_id, inputs, |tree, node_id, inputs| {
+            let node = tree.node(node_id);
+            match (node.style.display, !node.children.is_empty()) {
+                (taffy::Display::None, _) => compute_hidden_layout(tree, node_id),
+                (taffy::Display::Block, true) => {
+                    compute_block_layout(tree, node_id, inputs, block_ctx)
+                }
+                (taffy::Display::FlowRoot, true) => {
+                    compute_block_layout(tree, node_id, inputs, None)
+                }
+                (taffy::Display::Flex, true) => compute_flexbox_layout(tree, node_id, inputs),
+                (taffy::Display::Grid, true) => compute_grid_layout(tree, node_id, inputs),
+                (_, false) => tree.compute_leaf(node_id, inputs),
+            }
+        })
+    }
+
+    fn compute_leaf(&mut self, node_id: NodeId, inputs: LayoutInput) -> LayoutOutput {
+        let scale_factor = self.scale_factor;
+        let id = LayoutId(u64::from(node_id));
+        let Node {
+            style,
+            kind,
+            direction,
+            last_measure,
+            measured,
+            ..
+        } = &mut self.islands[id.island() as usize].nodes[id.index()];
+        let NodeKind::Measured(measure) = kind else {
+            return compute_leaf_layout(inputs, style, |_, _| 0.0, |_, _| TaffySize::ZERO);
+        };
+        let unicode_bidi = direction.unicode_bidi;
+        let window = &mut *self.window;
+        let cx = &mut *self.cx;
+        compute_leaf_layout(
+            inputs,
+            style,
+            |_, _| 0.0,
+            |known, available| {
+                let known = Size {
+                    width: known.width.map(|e| Pixels(e / scale_factor)),
+                    height: known.height.map(|e| Pixels(e / scale_factor)),
+                };
+                let from_device = |space: AvailableSpace| match space {
+                    AvailableSpace::Definite(pixels) => {
+                        AvailableSpace::Definite(Pixels(pixels.0 / scale_factor))
+                    }
+                    other => other,
+                };
+                let available: Size<AvailableSpace> = available.into();
+                let available = size(from_device(available.width), from_device(available.height));
+                *last_measure = Some((known, available));
+                *measured = true;
+                let size = call_measure(
+                    measure,
+                    style.direction,
+                    unicode_bidi,
+                    known,
+                    available,
+                    window,
+                    cx,
+                );
+                snap_measured_size_to_device_pixels(size, scale_factor).into()
+            },
+        )
+    }
+}
+
+/// Calls a measure function in the direction its node lays out in.
+fn call_measure(
+    measure: &mut NodeMeasureFn,
+    direction: taffy::style::Direction,
+    unicode_bidi: UnicodeBidi,
+    known: Size<Option<Pixels>>,
+    available: Size<AvailableSpace>,
+    window: &mut Window,
+    cx: &mut App,
+) -> Size<Pixels> {
+    let direction = match direction {
+        taffy::style::Direction::Ltr => ResolvedDirection::LeftToRight,
+        taffy::style::Direction::Rtl => ResolvedDirection::RightToLeft,
+    };
+    let previous_direction = std::mem::replace(&mut window.measurement_direction, direction);
+    let previous_unicode_bidi =
+        std::mem::replace(&mut window.measurement_unicode_bidi, unicode_bidi);
+    let size = measure(known, available, window, cx);
+    window.measurement_direction = previous_direction;
+    window.measurement_unicode_bidi = previous_unicode_bidi;
+    size
+}
+
+impl LayoutTree<'_> {
+    /// Gives the elements of measured nodes that kept their layout, and weren't measured since,
+    /// the measurement they made last time.
+    fn replay_measurements(&mut self, replays: &mut Vec<LayoutId>) {
+        for id in replays.drain(..) {
+            let Some(Node {
+                style,
+                kind: NodeKind::Measured(measure),
+                direction,
+                last_measure: Some((known, available)),
+                measured,
+                inherited: true,
+                ..
+            }) = self.islands[id.island() as usize].nodes.get_mut(id.index())
+            else {
+                continue;
+            };
+            if *measured {
+                continue;
+            }
+            *measured = true;
+            call_measure(
+                measure,
+                style.direction,
+                direction.unicode_bidi,
+                *known,
+                *available,
+                self.window,
+                self.cx,
+            );
+        }
+    }
+}
+
+impl TraversePartialTree for LayoutTree<'_> {
+    type ChildIter<'a>
+        = std::iter::Copied<std::slice::Iter<'a, NodeId>>
+    where
+        Self: 'a;
+
+    fn child_ids(&self, parent: NodeId) -> Self::ChildIter<'_> {
+        self.node(parent).children.iter().copied()
+    }
+
+    fn child_count(&self, parent: NodeId) -> usize {
+        self.node(parent).children.len()
+    }
+
+    fn get_child_id(&self, parent: NodeId, index: usize) -> NodeId {
+        self.node(parent).children[index]
+    }
+}
+
+impl LayoutPartialTree for LayoutTree<'_> {
+    type CoreContainerStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+
+    type CustomIdent = String;
+
+    fn get_core_container_style(&self, node_id: NodeId) -> Self::CoreContainerStyle<'_> {
+        self.style(node_id)
+    }
+
+    fn set_unrounded_layout(&mut self, node_id: NodeId, layout: &Layout) {
+        self.node_mut(node_id).layout = *layout;
+        if let NodeKind::Proxy { island, .. } = self.node(node_id).kind
+            && let Some(root) = self.islands[island as usize].root
+        {
+            self.node_mut(root.into()).layout = Layout {
+                location: TaffyPoint::ZERO,
+                ..*layout
+            };
+        }
+    }
+
+    fn resolve_calc_value(&self, _val: *const (), _basis: f32) -> f32 {
+        0.0
+    }
+
+    fn compute_child_layout(&mut self, node_id: NodeId, inputs: LayoutInput) -> LayoutOutput {
+        self.compute_node(node_id, inputs, None)
+    }
+}
+
+impl CacheTree for LayoutTree<'_> {
+    fn cache_get(&mut self, node_id: NodeId, input: &LayoutInput) -> Option<LayoutOutput> {
+        self.node_mut(node_id).cache.get(input)
+    }
+
+    fn cache_store(&mut self, node_id: NodeId, input: &LayoutInput, output: LayoutOutput) {
+        self.node_mut(node_id).cache.store(input, output)
+    }
+
+    fn cache_clear(&mut self, node_id: NodeId) {
+        self.node_mut(node_id).cache.clear();
+    }
+}
+
+impl LayoutBlockContainer for LayoutTree<'_> {
+    type BlockContainerStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+    type BlockItemStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+
+    fn get_block_container_style(&self, node_id: NodeId) -> Self::BlockContainerStyle<'_> {
+        self.style(node_id)
+    }
+
+    fn get_block_child_style(&self, child_node_id: NodeId) -> Self::BlockItemStyle<'_> {
+        self.style(child_node_id)
+    }
+
+    fn compute_block_child_layout(
+        &mut self,
+        node_id: NodeId,
+        inputs: LayoutInput,
+        block_ctx: Option<&mut BlockContext<'_>>,
+    ) -> LayoutOutput {
+        self.compute_node(node_id, inputs, block_ctx)
+    }
+}
+
+impl LayoutFlexboxContainer for LayoutTree<'_> {
+    type FlexboxContainerStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+    type FlexboxItemStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+
+    fn get_flexbox_container_style(&self, node_id: NodeId) -> Self::FlexboxContainerStyle<'_> {
+        self.style(node_id)
+    }
+
+    fn get_flexbox_child_style(&self, child_node_id: NodeId) -> Self::FlexboxItemStyle<'_> {
+        self.style(child_node_id)
+    }
+}
+
+impl LayoutGridContainer for LayoutTree<'_> {
+    type GridContainerStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+    type GridItemStyle<'a>
+        = &'a taffy::Style
+    where
+        Self: 'a;
+
+    fn get_grid_container_style(&self, node_id: NodeId) -> Self::GridContainerStyle<'_> {
+        self.style(node_id)
+    }
+
+    fn get_grid_child_style(&self, child_node_id: NodeId) -> Self::GridItemStyle<'_> {
+        self.style(child_node_id)
+    }
+}
+
+/// An id for a node in the layout tree.
 ///
-/// [`Window::request_layout`](crate::Window::request_layout) returns ids while building an
-/// element tree. Pass an element's child ids when requesting its layout, and read node positions
-/// with the window's layout bounds methods. GPUI may preserve a node and its id across frames while
-/// the owning subtree is retained. Nodes not claimed in the current frame are removed when the
-/// frame finishes, so a [`LayoutId`] is valid only while GPUI retains its node; it is not a
-/// durable application identity.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-#[repr(transparent)]
-pub struct LayoutId(NodeId);
+/// [`Window::request_layout`](crate::Window::request_layout) returns one for each element. Pass
+/// the ids of an element's children when you request its layout, and read a node's position
+/// with the window's layout bounds methods. An id is valid only in the frame that created it.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct LayoutId(u64);
 
 impl LayoutId {
-    fn to_taffy_slice(node_ids: &[Self]) -> &[taffy::NodeId] {
-        // SAFETY: LayoutId is repr(transparent) to taffy::tree::NodeId.
-        unsafe { std::mem::transmute::<&[LayoutId], &[taffy::NodeId]>(node_ids) }
+    fn new(island: IslandId, index: usize) -> Self {
+        Self((u64::from(island) << 32) | index as u64)
     }
-}
 
-impl std::hash::Hash for LayoutId {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        u64::from(self.0).hash(state);
+    pub(crate) fn island(self) -> IslandId {
+        (self.0 >> 32) as IslandId
     }
-}
 
-impl From<NodeId> for LayoutId {
-    fn from(node_id: NodeId) -> Self {
-        Self(node_id)
+    fn index(self) -> usize {
+        self.0 as u32 as usize
     }
 }
 
 impl From<LayoutId> for NodeId {
     fn from(layout_id: LayoutId) -> NodeId {
-        layout_id.0
+        NodeId::from(layout_id.0)
     }
 }
 
@@ -2003,716 +1721,12 @@ impl From<Size<Pixels>> for Size<AvailableSpace> {
 mod tests {
     use super::*;
     use crate::px;
-    use taffy::prelude::TaffyMaxContent;
-
-    #[test]
-    fn node_context_stays_compact_with_paragraph_memo() {
-        assert!(std::mem::size_of::<NodeContext>() <= 32);
-    }
 
     fn direction_style(direction: LayoutDirection) -> Style {
         Style {
             direction,
             ..Default::default()
         }
-    }
-
-    fn static_direction_style(direction: LayoutDirection) -> Style {
-        Style {
-            direction,
-            unicode_bidi: UnicodeBidi::Normal,
-            unicode_bidi_explicit: true,
-            ..Default::default()
-        }
-    }
-
-    #[test]
-    fn exact_layout_claim_replay_reuses_ids_and_prunes_on_shape_change() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        let child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let root = engine.request_layout(Style::default(), px(16.0), 1.0, &[child]);
-        let initial = engine.finish_layout_claim_scope();
-        assert!(!initial.fully_replayed);
-        assert!(initial.log.replayable);
-        assert_eq!(engine.taffy.total_node_count(), 2);
-        engine.finish_frame();
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let reused_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let reused_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[reused_child]);
-        let replay = engine.finish_layout_claim_scope();
-        assert!(replay.fully_replayed);
-        assert_eq!(reused_child, child);
-        assert_eq!(reused_root, root);
-        assert_eq!(engine.taffy.total_node_count(), 2);
-        engine.finish_frame();
-
-        engine.begin_layout_claim_scope(Some(replay.log));
-        let changed_child = engine.request_layout(
-            static_direction_style(LayoutDirection::LeftToRight),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        let changed_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[changed_child]);
-        assert_ne!(changed_root, root);
-        let changed = engine.finish_layout_claim_scope();
-        assert!(!changed.fully_replayed);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-    }
-
-    #[test]
-    fn pruned_inline_span_claim_falls_back_without_stale_taffy_access() {
-        let mut engine = TaffyLayoutEngine::new();
-        let content = InlineContent::Text {
-            text: "span".into(),
-            runs: Arc::<[crate::TextRun]>::from([]),
-            font_size: px(12.0),
-            line_height: px(14.0),
-        };
-
-        engine.begin_layout_claim_scope(None);
-        let old = engine.request_retained_inline_text_span_layout(
-            Style::default(),
-            px(16.0),
-            1.0,
-            &content,
-            true,
-            |_, _, _, _| size(px(24.0), px(14.0)),
-        );
-        engine.set_replayable_inline_text_direction(old, "span".into());
-        engine.inline_content.insert(
-            old,
-            Arc::new(InlineContent::Text {
-                text: "span".into(),
-                runs: Arc::<[crate::TextRun]>::from([]),
-                font_size: px(12.0),
-                line_height: px(14.0),
-            }),
-        );
-        let initial = engine.finish_layout_claim_scope();
-        assert!(initial.log.replayable);
-        engine.finish_frame();
-        assert!(engine.directions.contains_key(&old));
-
-        // Simulate an ordinary detached allocation that was in the previous flat claim log but
-        // was not retained by the view subtree. The next span request must treat its ID as stale.
-        engine.finish_frame();
-        assert!(!engine.directions.contains_key(&old));
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let replacement = engine.request_retained_inline_text_span_layout(
-            Style::default(),
-            px(16.0),
-            1.0,
-            &content,
-            true,
-            |_, _, _, _| size(px(24.0), px(14.0)),
-        );
-        engine.set_replayable_inline_text_direction(replacement, "span".into());
-        engine.inline_content.insert(
-            replacement,
-            Arc::new(InlineContent::Text {
-                text: "span".into(),
-                runs: Arc::<[crate::TextRun]>::from([]),
-                font_size: px(12.0),
-                line_height: px(14.0),
-            }),
-        );
-        let fallback = engine.finish_layout_claim_scope();
-        assert!(!fallback.fully_replayed);
-        assert_ne!(replacement, old);
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 1);
-    }
-
-    #[test]
-    fn exact_claim_replay_reuses_the_owned_log_allocation() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        let first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let initial = engine.finish_layout_claim_scope();
-        let initial_ptr = initial.log.nodes.as_ptr();
-        let initial_capacity = initial.log.nodes.capacity();
-        engine.finish_frame();
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let replayed_first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let replayed_second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let replay = engine.finish_layout_claim_scope();
-        assert!(replay.fully_replayed);
-        assert_eq!(replayed_first, first);
-        assert_eq!(replayed_second, second);
-        assert_eq!(replay.log.nodes.as_ptr(), initial_ptr);
-        assert_eq!(replay.log.nodes.capacity(), initial_capacity);
-    }
-
-    #[test]
-    fn mismatch_overwrites_prefix_and_shrink_truncates_the_reused_log() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        let first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let second = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let _third = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let initial = engine.finish_layout_claim_scope();
-        let initial_ptr = initial.log.nodes.as_ptr();
-        engine.finish_frame();
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let replayed_first = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let replacement = engine.request_layout(
-            static_direction_style(LayoutDirection::LeftToRight),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        let shortened = engine.finish_layout_claim_scope();
-        assert!(!shortened.fully_replayed);
-        assert_eq!(replayed_first, first);
-        assert_eq!(shortened.log.nodes.as_ptr(), initial_ptr);
-        assert_eq!(shortened.log.nodes, vec![first, replacement]);
-        assert_ne!(replacement, second);
-        assert_eq!(shortened.log.nodes.len(), 2);
-        assert!(shortened.log.nodes.capacity() >= 3);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-    }
-
-    #[test]
-    fn extra_request_after_claim_log_is_exhausted_is_a_fallback() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        let old_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let initial = engine.finish_layout_claim_scope();
-        engine.finish_frame();
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let retained_leaf = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let expanded_root =
-            engine.request_layout(Style::default(), px(16.0), 1.0, &[retained_leaf]);
-        let expanded = engine.finish_layout_claim_scope();
-        assert_eq!(retained_leaf, old_root);
-        assert!(!expanded.fully_replayed);
-        assert_eq!(expanded.log.nodes.len(), 2);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-
-        engine.begin_layout_claim_scope(Some(expanded.log));
-        let replayed_leaf = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let replayed_root =
-            engine.request_layout(Style::default(), px(16.0), 1.0, &[replayed_leaf]);
-        let replay = engine.finish_layout_claim_scope();
-        assert!(replay.fully_replayed);
-        assert_eq!(replayed_leaf, retained_leaf);
-        assert_eq!(replayed_root, expanded_root);
-    }
-
-    #[test]
-    fn fallback_claims_old_nodes_for_one_frame_then_replays_replacement_log() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        let old_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let old_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[old_child]);
-        let initial = engine.finish_layout_claim_scope();
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-
-        // The view has already retained its prior subtree before fresh request descriptors
-        // reveal a shape mismatch. Those IDs must remain claimed through this frame.
-        engine.retain_subtree(old_root);
-        engine.begin_layout_claim_scope(Some(initial.log.clone()));
-        let new_child = engine.request_layout(
-            static_direction_style(LayoutDirection::LeftToRight),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        let new_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[new_child]);
-        let fallback = engine.finish_layout_claim_scope();
-        assert!(!fallback.fully_replayed);
-        assert_ne!(fallback.log.nodes, initial.log.nodes);
-        assert_eq!(engine.taffy.total_node_count(), 4);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 4);
-
-        // The frame-bound fallback forces a fresh request next frame. Its replacement log
-        // now exactly replays, and the unclaimed old subtree is pruned at frame end.
-        engine.retain_subtree(new_root);
-        engine.begin_layout_claim_scope(Some(fallback.log));
-        let replayed_child = engine.request_layout(
-            static_direction_style(LayoutDirection::LeftToRight),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        let replayed_root =
-            engine.request_layout(Style::default(), px(16.0), 1.0, &[replayed_child]);
-        let replay = engine.finish_layout_claim_scope();
-        assert!(replay.fully_replayed);
-        assert_eq!(replayed_child, new_child);
-        assert_eq!(replayed_root, new_root);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-    }
-
-    #[test]
-    fn non_replayable_nested_scope_disables_parent_replay() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        engine.begin_layout_claim_scope(None);
-        engine.request_retained_measured_layout(Style::default(), px(16.0), 1.0, |_, _, _, _| {
-            size(px(12.0), px(8.0))
-        });
-        let nested = engine.finish_layout_claim_scope();
-        assert!(!nested.log.replayable);
-
-        let parent = engine.request_layout(Style::default(), px(16.0), 1.0, &nested.log.nodes);
-        let outer = engine.finish_layout_claim_scope();
-        assert!(!outer.log.replayable);
-        assert_eq!(engine.taffy.child_count(parent.0), 1);
-    }
-
-    #[test]
-    fn changed_nested_child_disables_parent_replay_and_prunes_old_tree() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        engine.begin_layout_claim_scope(None);
-        let old_child = engine.request_layout(Style::default(), px(16.0), 1.0, &[]);
-        let nested_initial = engine.finish_layout_claim_scope();
-        let old_parent = engine.request_layout(Style::default(), px(16.0), 1.0, &[old_child]);
-        let parent_initial = engine.finish_layout_claim_scope();
-        assert!(parent_initial.log.replayable);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-
-        engine.begin_layout_claim_scope(Some(parent_initial.log));
-        engine.begin_layout_claim_scope(Some(nested_initial.log));
-        let new_child = engine.request_layout(
-            static_direction_style(LayoutDirection::LeftToRight),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        let nested_changed = engine.finish_layout_claim_scope();
-        assert!(nested_changed.log.replayable);
-        assert!(!nested_changed.fully_replayed);
-        let new_parent = engine.request_layout(Style::default(), px(16.0), 1.0, &[new_child]);
-        let parent_changed = engine.finish_layout_claim_scope();
-        assert!(!parent_changed.fully_replayed);
-        assert_ne!(new_parent, old_parent);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-    }
-
-    #[test]
-    fn measured_layout_claims_never_replay_opaque_closures() {
-        let mut engine = TaffyLayoutEngine::new();
-        engine.begin_layout_claim_scope(None);
-        let first = engine.request_retained_measured_layout(
-            Style::default(),
-            px(16.0),
-            1.0,
-            |_, _, _, _| size(px(12.0), px(8.0)),
-        );
-        let initial = engine.finish_layout_claim_scope();
-        assert!(!initial.log.replayable);
-        engine.finish_frame();
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let second = engine.request_retained_measured_layout(
-            Style::default(),
-            px(16.0),
-            1.0,
-            |_, _, _, _| size(px(12.0), px(8.0)),
-        );
-        let replay = engine.finish_layout_claim_scope();
-        assert!(!replay.fully_replayed);
-        assert_ne!(first, second);
-    }
-
-    fn resolve_directions_without_guard(
-        engine: &mut TaffyLayoutEngine,
-        root_id: LayoutId,
-        inherited: ResolvedDirection,
-    ) -> Vec<LayoutId> {
-        let mut visited = FxHashSet::default();
-        let mut changed = Vec::new();
-        engine.resolve_direction_subtree(root_id, inherited, &mut visited, &mut changed);
-        changed
-    }
-
-    #[test]
-    fn ltr_only_direction_resolution_matches_the_full_walk() {
-        fn make_engine() -> (TaffyLayoutEngine, LayoutId, LayoutId, LayoutId) {
-            let mut engine = TaffyLayoutEngine::new();
-            let logical_child = engine.request_layout(
-                direction_style(LayoutDirection::Inherit),
-                px(16.0),
-                1.0,
-                &[],
-            );
-            engine.set_direction_text(logical_child, "مرحبا".into());
-            engine.set_auto_direction_hint(logical_child, Some(ResolvedDirection::RightToLeft));
-
-            let explicit_ltr_child = engine.request_layout(
-                direction_style(LayoutDirection::LeftToRight),
-                px(16.0),
-                1.0,
-                &[],
-            );
-            let root = engine.request_layout(
-                direction_style(LayoutDirection::Inherit),
-                px(16.0),
-                1.0,
-                &[],
-            );
-            // This edge is logical-only, as in inline paragraph layouts. Without Auto it cannot
-            // affect resolved direction, even when the child has directional text and a hint.
-            engine.set_logical_children(root, &[logical_child, explicit_ltr_child]);
-            (engine, root, logical_child, explicit_ltr_child)
-        }
-
-        let (mut guarded, guarded_root, guarded_child, guarded_ltr) = make_engine();
-        let (mut reference, reference_root, reference_child, reference_ltr) = make_engine();
-        assert!(!guarded.direction_resolution_needed);
-
-        let guarded_changed =
-            guarded.resolve_directions(guarded_root, ResolvedDirection::LeftToRight);
-        let reference_changed = resolve_directions_without_guard(
-            &mut reference,
-            reference_root,
-            ResolvedDirection::LeftToRight,
-        );
-        assert_eq!(guarded_changed, reference_changed);
-        assert_eq!(
-            guarded.direction_handle(guarded_root).get(),
-            reference.direction_handle(reference_root).get()
-        );
-        assert_eq!(
-            guarded.direction_handle(guarded_child).get(),
-            reference.direction_handle(reference_child).get()
-        );
-        assert_eq!(
-            guarded.direction_handle(guarded_ltr).get(),
-            reference.direction_handle(reference_ltr).get()
-        );
-        for (guarded_id, reference_id) in [
-            (guarded_root, reference_root),
-            (guarded_child, reference_child),
-            (guarded_ltr, reference_ltr),
-        ] {
-            assert_eq!(
-                guarded.taffy.style(guarded_id.into()).unwrap().direction,
-                reference
-                    .taffy
-                    .style(reference_id.into())
-                    .unwrap()
-                    .direction
-            );
-        }
-        assert_eq!(
-            guarded.direction_handle(guarded_root).get(),
-            ResolvedDirection::LeftToRight
-        );
-        assert_eq!(
-            guarded.direction_handle(guarded_child).get(),
-            ResolvedDirection::LeftToRight
-        );
-        assert_eq!(
-            guarded.direction_handle(guarded_ltr).get(),
-            ResolvedDirection::LeftToRight
-        );
-        assert!(!guarded.direction_resolution_needed);
-    }
-
-    #[test]
-    fn rtl_inheritance_latches_direction_resolution_across_roots_and_pruning() {
-        let mut engine = TaffyLayoutEngine::new();
-        let rtl_child = engine.request_layout(
-            direction_style(LayoutDirection::Inherit),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        let rtl_root = engine.request_layout(
-            direction_style(LayoutDirection::Inherit),
-            px(16.0),
-            1.0,
-            &[rtl_child],
-        );
-        let changed = engine.resolve_directions(rtl_root, ResolvedDirection::RightToLeft);
-        assert!(engine.direction_resolution_needed);
-        assert_eq!(changed.len(), 2);
-        assert_eq!(
-            engine.direction_handle(rtl_child).get(),
-            ResolvedDirection::RightToLeft
-        );
-        assert_eq!(
-            engine.taffy.style(rtl_child.into()).unwrap().direction,
-            taffy::style::Direction::Rtl
-        );
-
-        // Keep the RTL child alive while replacing its old RTL parent with a fresh LTR root.
-        engine.retain_subtree(rtl_child);
-        let ltr_root = engine.request_layout(Style::default(), px(16.0), 1.0, &[rtl_child]);
-        let changed = engine.resolve_directions(ltr_root, ResolvedDirection::LeftToRight);
-        assert!(changed.contains(&rtl_child));
-        assert_eq!(
-            engine.direction_handle(rtl_child).get(),
-            ResolvedDirection::LeftToRight
-        );
-        assert_eq!(
-            engine.taffy.style(rtl_child.into()).unwrap().direction,
-            taffy::style::Direction::Ltr
-        );
-        assert!(engine.direction_resolution_needed);
-
-        engine.finish_frame();
-        engine.finish_frame();
-        assert!(engine.live_layout_nodes.is_empty());
-        assert!(
-            engine.direction_resolution_needed,
-            "the RTL guard remains latched after pruning"
-        );
-    }
-
-    #[test]
-    fn authored_rtl_latches_direction_resolution() {
-        let mut engine = TaffyLayoutEngine::new();
-        let root = engine.request_layout(
-            direction_style(LayoutDirection::RightToLeft),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        assert!(engine.direction_resolution_needed);
-        let changed = engine.resolve_directions(root, ResolvedDirection::LeftToRight);
-        assert_eq!(changed, vec![root]);
-        assert_eq!(
-            engine.direction_handle(root).get(),
-            ResolvedDirection::RightToLeft
-        );
-        assert_eq!(
-            engine.taffy.style(root.into()).unwrap().direction,
-            taffy::style::Direction::Rtl
-        );
-    }
-
-    #[test]
-    fn authored_auto_rtl_latches_guard_across_pruning() {
-        let mut engine = TaffyLayoutEngine::new();
-        let text = engine.request_layout(
-            direction_style(LayoutDirection::Inherit),
-            px(16.0),
-            1.0,
-            &[],
-        );
-        engine.set_direction_text(text, "مرحبا".into());
-        let root = engine.request_layout(
-            direction_style(LayoutDirection::Auto),
-            px(16.0),
-            1.0,
-            &[text],
-        );
-        assert!(engine.direction_resolution_needed);
-        let _ = engine.resolve_directions(root, ResolvedDirection::LeftToRight);
-        assert_eq!(
-            engine.direction_handle(root).get(),
-            ResolvedDirection::RightToLeft
-        );
-
-        engine.finish_frame();
-        engine.finish_frame();
-        assert!(engine.live_layout_nodes.is_empty());
-        assert!(engine.direction_resolution_needed);
-    }
-
-    #[test]
-    fn retained_layout_subtrees_keep_stable_nodes_and_prune_unclaimed_nodes() {
-        let mut engine = TaffyLayoutEngine::new();
-        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        let root = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 2);
-
-        engine.retain_subtree(root);
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 2);
-
-        let replacement = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 1);
-        assert!(engine.taffy.style(replacement.into()).is_ok());
-    }
-
-    #[test]
-    fn pruning_a_wide_tree_drops_contexts_and_invalidates_all_old_handles() {
-        let mut engine = TaffyLayoutEngine::new();
-        let drops = Rc::new(Cell::new(0));
-        let mut children = Vec::new();
-        let mut measured = None;
-        for index in 0..256 {
-            let child = if index == 128 {
-                struct DropProbe(Rc<Cell<usize>>);
-                impl Drop for DropProbe {
-                    fn drop(&mut self) {
-                        self.0.set(self.0.get() + 1);
-                    }
-                }
-
-                let probe = DropProbe(drops.clone());
-                let measure = engine.request_retained_measured_layout(
-                    Style::default(),
-                    px(16.),
-                    1.0,
-                    move |_, _, _, _| {
-                        let _ = &probe;
-                        crate::size(px(1.), px(1.))
-                    },
-                );
-                measured = Some(measure);
-                measure
-            } else {
-                engine.request_layout(Style::default(), px(16.), 1.0, &[])
-            };
-            children.push(child);
-        }
-        let root = engine.request_layout(Style::default(), px(16.), 1.0, &children);
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 257);
-        assert_eq!(drops.get(), 0);
-
-        // No nodes are claimed in the next frame. Reclamation must drop the retained callback
-        // and remove every old handle without leaving stale Taffy child references.
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 0);
-        assert_eq!(engine.taffy.total_node_count(), 0);
-        assert_eq!(drops.get(), 1);
-        assert!(!engine.live_layout_nodes.contains(&root));
-        assert!(!engine.live_layout_nodes.contains(&measured.unwrap()));
-    }
-
-    #[test]
-    fn pruning_a_parent_detaches_a_retained_descendant() {
-        let mut engine = TaffyLayoutEngine::new();
-        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        let old_parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
-        engine.finish_frame();
-
-        engine.retain_subtree(child);
-        engine.finish_frame();
-
-        assert_eq!(engine.live_layout_node_count(), 1);
-        assert!(!engine.live_layout_nodes.contains(&old_parent));
-        assert!(engine.taffy.style(child.into()).is_ok());
-        assert_eq!(engine.taffy.parent(child.0), None);
-    }
-
-    #[test]
-    fn pruning_unclaimed_children_marks_a_retained_parent_dirty() {
-        let mut engine = TaffyLayoutEngine::new();
-        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        let parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
-        engine.finish_frame();
-
-        engine
-            .taffy
-            .compute_layout(parent.0, TaffySize::MAX_CONTENT)
-            .expect(EXPECT_MESSAGE);
-        assert!(!engine.taffy.dirty(parent.0).unwrap());
-
-        // Exercise a retained parent whose stale children were not claimed this frame.
-        engine.frame_layout_nodes.push(parent);
-        engine.frame_layout_node_set.insert(parent);
-        engine.finish_frame();
-
-        assert!(engine.taffy.style(parent.into()).is_ok());
-        assert_eq!(engine.taffy.child_count(parent.0), 0);
-        assert!(engine.taffy.dirty(parent.0).unwrap());
-        assert!(!engine.live_layout_nodes.contains(&child));
-        assert_eq!(engine.taffy.total_node_count(), 1);
-    }
-
-    #[test]
-    fn pruning_detects_an_omitted_child_when_a_new_child_replaces_it() {
-        let mut engine = TaffyLayoutEngine::new();
-        let old_child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        let parent = engine.request_layout(Style::default(), px(16.), 1.0, &[old_child]);
-        engine.finish_frame();
-        assert_eq!(engine.taffy.total_node_count(), 2);
-
-        // Keep the parent and replace its old child with a newly allocated child. The claimed
-        // set stays the same size as the old live-node list, but the unclaimed old child remains
-        // allocated until finish_frame and must still be pruned.
-        engine.frame_layout_nodes.push(parent);
-        engine.frame_layout_node_set.insert(parent);
-        let replacement = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        engine
-            .taffy
-            .set_children(parent.0, &[replacement.0])
-            .expect(EXPECT_MESSAGE);
-        assert_eq!(
-            engine.frame_layout_node_set.len(),
-            engine.live_layout_nodes.len()
-        );
-        assert_eq!(engine.taffy.total_node_count(), 3);
-
-        engine.finish_frame();
-
-        assert!(!engine.live_layout_nodes.contains(&old_child));
-        assert_eq!(engine.taffy.child_count(parent.0), 1);
-        assert_eq!(engine.taffy.get_child_id(parent.0, 0), replacement.0);
-        assert_eq!(engine.taffy.total_node_count(), 2);
-        assert_eq!(engine.live_layout_node_count(), 2);
-    }
-
-    #[test]
-    fn retained_child_can_be_reparented_before_the_old_parent_is_pruned() {
-        let mut engine = TaffyLayoutEngine::new();
-        let child = engine.request_layout(Style::default(), px(16.), 1.0, &[]);
-        let old_parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
-        engine.finish_frame();
-
-        // The child belongs to a cached subtree but its old parent is not retained.
-        engine.retain_subtree(child);
-        let new_parent = engine.request_layout(Style::default(), px(16.), 1.0, &[child]);
-        engine.finish_frame();
-
-        assert_eq!(engine.live_layout_node_count(), 2);
-        assert!(!engine.live_layout_nodes.contains(&old_parent));
-        assert_eq!(engine.taffy.parent(child.0), Some(new_parent.0));
-        assert_eq!(engine.taffy.child_count(new_parent.0), 1);
-
-        // Pruning the reparented subtree removes each node once and leaves no stale child link.
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 0);
-    }
-
-    #[test]
-    fn frame_bound_measured_closures_are_released_after_the_frame() {
-        let mut engine = TaffyLayoutEngine::new();
-        let measured =
-            engine.request_measured_layout(Style::default(), px(16.), 1.0, |_, _, _, _| {
-                crate::size(px(1.), px(1.))
-            });
-        assert!(engine.taffy.get_node_context(measured.into()).is_some());
-        engine.finish_frame();
-        assert!(engine.taffy.get_node_context(measured.into()).is_none());
-
-        let retained = engine.request_retained_measured_layout(
-            Style::default(),
-            px(16.),
-            1.0,
-            |_, _, _, _| crate::size(px(2.), px(2.)),
-        );
-        engine.finish_frame();
-        assert!(engine.taffy.get_node_context(retained.into()).is_some());
-        engine.retain_subtree(retained);
-        engine.finish_frame();
-        assert!(engine.taffy.get_node_context(retained.into()).is_some());
     }
 
     #[test]
@@ -2748,7 +1762,7 @@ mod tests {
             ResolvedDirection::RightToLeft
         );
         assert_eq!(
-            engine.taffy.style(rtl_child.into()).unwrap().direction,
+            engine.node(rtl_child).style.direction,
             taffy::style::Direction::Rtl
         );
         assert_eq!(
@@ -2914,6 +1928,144 @@ mod tests {
         assert_eq!(
             taffy_border.left,
             taffy::style::LengthPercentage::length(2.0)
+        );
+    }
+
+    struct Measured {
+        key: u32,
+        calls: Rc<Cell<usize>>,
+    }
+
+    impl MeasureKey for u32 {
+        fn same(&self, previous: &dyn MeasureKey) -> bool {
+            previous.as_any().downcast_ref::<u32>() == Some(self)
+        }
+
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+
+    impl crate::IntoElement for Measured {
+        type Element = Self;
+
+        fn into_element(self) -> Self {
+            self
+        }
+    }
+
+    impl crate::Element for Measured {
+        type RequestLayoutState = ();
+        type PrepaintState = ();
+
+        fn id(&self) -> Option<crate::ElementId> {
+            None
+        }
+
+        fn source_location(&self) -> Option<&'static core::panic::Location<'static>> {
+            None
+        }
+
+        fn request_layout(
+            &mut self,
+            _: Option<&crate::GlobalElementId>,
+            _: Option<&crate::InspectorElementId>,
+            window: &mut Window,
+            _: &mut App,
+        ) -> (LayoutId, ()) {
+            let calls = self.calls.clone();
+            let layout_id = window.request_keyed_measured_layout(
+                Style::default(),
+                self.key,
+                move |_, _, _, _| {
+                    calls.set(calls.get() + 1);
+                    crate::size(px(10.), px(10.))
+                },
+            );
+            (layout_id, ())
+        }
+
+        fn prepaint(
+            &mut self,
+            _: Option<&crate::GlobalElementId>,
+            _: Option<&crate::InspectorElementId>,
+            _: crate::Bounds<Pixels>,
+            _: &mut (),
+            _: &mut Window,
+            _: &mut App,
+        ) {
+        }
+
+        fn paint(
+            &mut self,
+            _: Option<&crate::GlobalElementId>,
+            _: Option<&crate::InspectorElementId>,
+            _: crate::Bounds<Pixels>,
+            _: &mut (),
+            _: &mut (),
+            _: &mut Window,
+            _: &mut App,
+        ) {
+        }
+    }
+
+    struct Row {
+        keys: Vec<u32>,
+        calls: Rc<Cell<usize>>,
+    }
+
+    impl crate::Render for Row {
+        fn render(
+            &mut self,
+            _: &mut Window,
+            _: &mut crate::Context<Self>,
+        ) -> impl crate::IntoElement {
+            use crate::{ParentElement as _, Styled as _};
+            crate::div()
+                .flex()
+                .flex_wrap()
+                .w(px(25.))
+                .children(self.keys.iter().map(|key| Measured {
+                    key: *key,
+                    calls: self.calls.clone(),
+                }))
+        }
+    }
+
+    #[crate::test]
+    fn unchanged_nodes_keep_their_layout_when_their_view_renders_again(
+        cx: &mut crate::TestAppContext,
+    ) {
+        let calls = Rc::new(Cell::new(0));
+        let window = cx.add_window({
+            let calls = calls.clone();
+            move |_, _| Row {
+                keys: vec![1, 2, 3],
+                calls,
+            }
+        });
+        let measured_first = calls.get();
+        assert!(measured_first >= 3);
+
+        // Render again without changes: each node only replays its last measurement.
+        calls.set(0);
+        window.update(cx, |_, _, cx| cx.notify()).unwrap();
+        cx.run_until_parked();
+        assert_eq!(calls.get(), 3);
+
+        // A changed key measures that node like a new one, and its siblings still replay.
+        calls.set(0);
+        window
+            .update(cx, |row, _, cx| {
+                row.keys[1] = 20;
+                cx.notify();
+            })
+            .unwrap();
+        cx.run_until_parked();
+        assert!(
+            calls.get() > 3,
+            "the changed node is measured again: {}",
+            calls.get()
         );
     }
 }

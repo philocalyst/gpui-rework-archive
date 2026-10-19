@@ -439,7 +439,7 @@ mod tests {
             },
         });
         let tile = atlas
-            .get_or_insert_with(key.clone(), &mut || {
+            .get_or_insert_with(key, &mut || {
                 Ok(Some((
                     Size {
                         width: DevicePixels(8),

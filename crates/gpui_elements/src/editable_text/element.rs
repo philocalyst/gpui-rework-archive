@@ -101,27 +101,34 @@ pub struct EditableTextElement {
     // This reference is shared with the action handlers, which are processed between renders
     // and therefore cannot otherwise access state attached to the view.
     state_entity: Rc<RefCell<WeakEntity<EditableTextState>>>,
-    /// Configures whether the field supports multiple lines of text.
-    /// Disabling this prevents actions like `enter` and navigating up and down.
+    /// Sets whether the field holds several lines of text.
     ///
-    /// Inputs containing newlines, such as pasted text, are not automatically sanitized.
-    /// This is a limitation of the current state of implementation and requires further iteration.
+    /// With `false`, Enter and Tab propagate to the surrounding view, and Up and
+    /// Down move to the start and end of the text. Newlines in inserted text,
+    /// including pasted text, are removed.
     #[setters(generate, rename = "multiline")]
     supports_multiline: bool,
-    /// Assigns the text that should be displayed when storage of the element is empty.
+    /// Sets the text shown while the field is empty.
     #[setters(generate, strip_option, into)]
     placeholder: Option<SharedString>,
-    /// Configures whether the element is enabled and can accept input.
+    /// Sets whether the field accepts edits.
+    ///
+    /// When `false`, typing, paste, cut and delete do nothing, and multi-line fields
+    /// also ignore Enter and Tab. The field can still be focused, so the user can
+    /// select and copy the text.
     #[setters(generate)]
     accepts_input: bool,
     colors: EditableTextColors,
-    /// Sets the blinking interval of the caret.
+    /// Sets the time between caret blinks, and applies it to the field's caret.
+    ///
+    /// A zero duration turns blinking off. The interval is applied on each frame
+    /// that the element lays out, so it takes effect without any extra setup.
     #[setters(generate, strip_option)]
     caret_blink_interval: Option<Duration>,
-    /// Sets the width of the caret / text-cursor.
+    /// Sets the width of the caret. The default is 2 pixels.
     #[setters(generate, rename = "caret_w", into)]
     caret_width: Pixels,
-    /// Sets the height of the caret / text-cursor.
+    /// Sets the height of the caret.
     ///
     /// Relative lengths are resolved against the current line height. The default is
     /// `relative(1.)`, which makes the caret as tall as the line.
@@ -170,7 +177,7 @@ impl EditableTextElement {
         self
     }
 
-    /// Sets the blinking interval to 500 milliseconds.
+    /// Sets the caret blink interval to 500 milliseconds.
     pub fn caret_blink_interval_500ms(self) -> Self {
         self.caret_blink_interval(BLINK_INTERVAL_500MS)
     }

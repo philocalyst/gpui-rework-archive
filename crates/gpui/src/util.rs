@@ -114,9 +114,6 @@ impl<T: Future> FutureExt for T {
     }
 }
 
-/// The future returned by [`FutureExt::with_timeout`]. It resolves to the wrapped
-/// future's output, or to [`Timeout`] if the timer fires first.
-///
 /// UTF-8 text range containment checks.
 pub trait TextRangeExt {
     /// Returns whether `range` is ordered, in bounds, and lies on character boundaries.
@@ -129,6 +126,8 @@ impl TextRangeExt for str {
     }
 }
 
+/// The future returned by [`FutureExt::with_timeout`]. It resolves to the wrapped
+/// future's output, or to [`Timeout`] if the timer fires first.
 #[pin_project::pin_project]
 pub struct WithTimeout<T> {
     #[pin]
@@ -137,10 +136,10 @@ pub struct WithTimeout<T> {
     timer: Task<()>,
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("Timed out before future resolved")]
 /// The error returned when a future given to [`FutureExt::with_timeout`] doesn't
 /// finish in time.
+#[derive(Debug, thiserror::Error)]
+#[error("Timed out before future resolved")]
 pub struct Timeout;
 
 impl<T: Future> Future for WithTimeout<T> {

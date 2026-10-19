@@ -127,7 +127,6 @@ pub struct Surface {
 /// The frame is scaled with [`ObjectFit::Contain`] unless you change it with [`Surface::object_fit`].
 /// Size the element with [`Styled`] methods, such as `.size_full()`, because the frame doesn't
 /// give it a size.
-
 pub fn surface(source: impl Into<SurfaceSource>) -> Surface {
     Surface {
         source: source.into(),

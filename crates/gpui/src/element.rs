@@ -170,7 +170,8 @@ use std::{
 /// });
 ///
 /// log.0.borrow_mut().clear();
-/// window.update(|_, window, _| window.refresh());
+/// // Notify the view so the next draw renders it again instead of reusing its output.
+/// window.update(|_, _, cx| cx.notify());
 /// window.draw();
 /// assert_eq!(*log.0.borrow(), ["request_layout", "prepaint", "paint"]);
 /// ```
@@ -349,7 +350,8 @@ impl<T: IntoElement> FluentBuilder for T {}
 /// GPUI calls `render` each time it draws the window and reaches this view. The view keeps its
 /// state in `self`, not in the elements it returns. Those elements are consumed by the frame and
 /// dropped, and the next call builds new ones. So `render` should only read state and build
-/// elements from it. [`Entity::cached`](crate::Entity::cached) skips the call while the view is unchanged.
+/// elements from it. GPUI skips the call while nothing the view read has changed; see
+/// [retained view rendering](crate::_documentation::concepts::retained_rendering).
 ///
 /// # Example
 ///
@@ -381,7 +383,8 @@ impl<T: IntoElement> FluentBuilder for T {}
 /// });
 ///
 /// renders.set(0);
-/// window.update(|_, window, _| window.refresh());
+/// // Notify the view so the next draw renders it again instead of reusing its output.
+/// window.update(|_, _, cx| cx.notify());
 /// window.draw();
 /// assert_eq!(renders.get(), 1);
 /// ```
@@ -452,7 +455,8 @@ impl Render for Empty {
 /// });
 ///
 /// renders.set(0);
-/// window.update(|_, window, _| window.refresh());
+/// // Notify the view so the next draw renders it again instead of reusing its output.
+/// window.update(|_, _, cx| cx.notify());
 /// window.draw();
 /// assert_eq!(renders.get(), 1);
 /// ```
@@ -622,14 +626,6 @@ trait ElementObject {
         window: &mut Window,
         cx: &mut App,
     ) -> Size<Pixels>;
-
-    fn layout_as_root_at_size(
-        &mut self,
-        available_space: Size<AvailableSpace>,
-        size: Size<Pixels>,
-        window: &mut Window,
-        cx: &mut App,
-    ) -> (LayoutId, Size<Pixels>);
 }
 
 /// An [`Element`] together with the state GPUI keeps while drawing it in one frame.
@@ -972,7 +968,6 @@ impl<E: Element> Drawable<E> {
     fn compute_layout_as_root(
         &mut self,
         available_space: Size<AvailableSpace>,
-        assigned_size: Option<Size<Pixels>>,
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Size<Pixels>) {
@@ -987,11 +982,7 @@ impl<E: Element> Drawable<E> {
                 inspector_id,
                 request_layout,
             } => {
-                if let Some(size) = assigned_size {
-                    window.compute_layout_with_root_size(layout_id, available_space, size, cx);
-                } else {
-                    window.compute_layout(layout_id, available_space, cx);
-                }
+                window.compute_layout(layout_id, available_space, cx);
                 self.phase = ElementDrawPhase::LayoutComputed {
                     layout_id,
                     global_id,
@@ -1008,12 +999,8 @@ impl<E: Element> Drawable<E> {
                 available_space: prev_available_space,
                 request_layout,
             } => {
-                if available_space != prev_available_space || assigned_size.is_some() {
-                    if let Some(size) = assigned_size {
-                        window.compute_layout_with_root_size(layout_id, available_space, size, cx);
-                    } else {
-                        window.compute_layout(layout_id, available_space, cx);
-                    }
+                if available_space != prev_available_space {
+                    window.compute_layout(layout_id, available_space, cx);
                 }
                 self.phase = ElementDrawPhase::LayoutComputed {
                     layout_id,
@@ -1036,18 +1023,7 @@ impl<E: Element> Drawable<E> {
         window: &mut Window,
         cx: &mut App,
     ) -> Size<Pixels> {
-        self.compute_layout_as_root(available_space, None, window, cx)
-            .1
-    }
-
-    pub(crate) fn layout_as_root_at_size(
-        &mut self,
-        available_space: Size<AvailableSpace>,
-        size: Size<Pixels>,
-        window: &mut Window,
-        cx: &mut App,
-    ) -> (LayoutId, Size<Pixels>) {
-        self.compute_layout_as_root(available_space, Some(size), window, cx)
+        self.compute_layout_as_root(available_space, window, cx).1
     }
 }
 
@@ -1083,17 +1059,6 @@ where
         cx: &mut App,
     ) -> Size<Pixels> {
         Drawable::layout_as_root(self, available_space, window, cx)
-    }
-
-    #[inline]
-    fn layout_as_root_at_size(
-        &mut self,
-        available_space: Size<AvailableSpace>,
-        size: Size<Pixels>,
-        window: &mut Window,
-        cx: &mut App,
-    ) -> (LayoutId, Size<Pixels>) {
-        Drawable::layout_as_root_at_size(self, available_space, size, window, cx)
     }
 }
 
@@ -1146,17 +1111,6 @@ impl AnyElement {
     /// Call this from a parent's `request_layout`, before the parent's own layout is requested.
     pub fn request_layout(&mut self, window: &mut Window, cx: &mut App) -> LayoutId {
         self.0.request_layout(window, cx)
-    }
-
-    pub(crate) fn layout_as_root_at_size(
-        &mut self,
-        available_space: Size<AvailableSpace>,
-        size: Size<Pixels>,
-        window: &mut Window,
-        cx: &mut App,
-    ) -> (LayoutId, Size<Pixels>) {
-        self.0
-            .layout_as_root_at_size(available_space, size, window, cx)
     }
 
     /// Runs the prepaint phase on the wrapped element, with the bounds that layout gave it.

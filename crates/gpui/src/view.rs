@@ -1,8 +1,11 @@
 use crate::{
-    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, Context, Element, ElementId, Entity,
-    EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex, Pixels,
-    Point, PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
-    ViewDependencies, WeakEntity,
+    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, ContentMask, Context, Dependencies, Element,
+    ElementId, Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId,
+    Modifiers, PaintIndex, Pixels, Point, PrepaintStateIndex, Render, RenderOnce,
+    ResolvedDirection, Style, StyleRefinement, TextStyle, UnicodeBidi, WeakEntity,
+    scene::ReplaySummary,
+    taffy::LayoutIsland,
+    window::{InputReads, a11y::A11yRecording},
 };
 use crate::{Empty, Window};
 use anyhow::Result;
@@ -11,7 +14,6 @@ use std::{
     any::{TypeId, type_name},
     fmt,
     ops::Range,
-    sync::Arc,
 };
 
 /// A type-erased handle to a view.
@@ -134,16 +136,8 @@ impl View for AnyView {
         Some(self.entity.entity_id())
     }
 
-    #[cfg(not(gpui_hot_reload))]
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
         (self.render)(&self, window, cx)
-    }
-
-    // The stored function pointer was captured from the original binary, so it must be looked up
-    // in the jump table to reach the patched render.
-    #[cfg(gpui_hot_reload)]
-    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        subsecond::HotFn::current(self.render).call((&self, window, cx))
     }
 }
 
@@ -324,20 +318,13 @@ impl<T: Render> View for Entity<T> {
 }
 
 impl<T: Render> Entity<T> {
-    /// Returns this entity as an element with a fixed root layout style.
+    /// Returns this entity as an element laid out at a fixed root style.
     ///
-    /// Entity-backed views retain naturally when passed directly as children. Use this method
-    /// when the parent should set the view's root layout style. GPUI reuses the rendered subtree
-    /// while the view's entity, tracked entity and global reads, and layout environment remain
-    /// unchanged. Reads made by nested views and deferred prepaint or paint work are tracked too.
-    /// A notification to a tracked entity, a tracked global revision change, or
-    /// [`Window::refresh`] causes the view to rebuild. Changes to bounds or inherited layout and
-    /// paint state can also require fresh output.
-    ///
-    /// `style` sets the retained root's layout contract. Give it dimensions and constraints that
-    /// fit the parent. For the invalidation rules and the distinction between natural and
-    /// fixed-style retention, see
-    /// [retained view rendering](crate::_documentation::concepts::retained_rendering).
+    /// An entity passed directly as a child already keeps its output while nothing it read has
+    /// changed, and sizes itself from its content. Use `cached` when the parent should decide the
+    /// view's root style instead: the view is laid out at `style`, and its content is laid out
+    /// within the bounds that style produces. See
+    /// [retained rendering](crate::_documentation::concepts::retained_rendering).
     #[track_caller]
     pub fn cached(self, style: StyleRefinement) -> ViewElement<Entity<T>> {
         ViewElement::with_type_name(self, type_name::<T>()).cached(style)
@@ -352,21 +339,33 @@ impl<T: Render> Entity<T> {
 #[doc(hidden)]
 pub struct ViewElement<V: View> {
     view: Option<V>,
-    mount: Option<ViewMount>,
+    entity_id: Option<EntityId>,
+    retention: Retention,
     #[cfg(feature = "profiler")]
     view_type_name: &'static str,
     #[cfg(debug_assertions)]
     source: &'static core::panic::Location<'static>,
 }
 
+enum Retention {
+    /// Rendered every frame, because the view may hold properties its parent passed in.
+    None,
+    /// Kept while nothing it read changed, sized by its content.
+    Natural,
+    /// Kept while nothing it read changed, laid out at a fixed root style.
+    Fixed(StyleRefinement),
+}
+
 impl<V: View> ViewElement<V> {
     /// Wraps `view` as an element. The element takes the view's entity id, if it has one.
+    ///
+    /// A view wrapped this way renders every frame, since its parent may hand it new
+    /// properties without notifying its entity. Entities and [`AnyView`]s placed as children
+    /// directly keep their output between frames instead.
     #[track_caller]
     pub fn new(view: V) -> Self {
         let mut element = Self::with_type_name(view, type_name::<V>());
-        if let Some(mount) = &mut element.mount {
-            mount.policy = ViewPolicy::Fresh;
-        }
+        element.retention = Retention::None;
         element
     }
 
@@ -375,13 +374,14 @@ impl<V: View> ViewElement<V> {
     #[track_caller]
     #[cfg_attr(not(feature = "profiler"), expect(unused_variables))]
     pub(crate) fn with_type_name(view: V, view_type_name: &'static str) -> Self {
-        let mount = view.entity_id().map(|entity_id| ViewMount {
-            entity_id,
-            mount_id: None,
-            policy: ViewPolicy::Retained { fixed_style: None },
-        });
+        let entity_id = view.entity_id();
         ViewElement {
-            mount,
+            entity_id,
+            retention: if entity_id.is_some() {
+                Retention::Natural
+            } else {
+                Retention::None
+            },
             #[cfg(feature = "profiler")]
             view_type_name,
             view: Some(view),
@@ -390,40 +390,20 @@ impl<V: View> ViewElement<V> {
         }
     }
 
-    /// Enable caching of this view's rendered subtree, laid out at `style`.
-    /// The composer supplies the layout style because caching skips rendering
-    /// the contents to measure them.
+    /// Lays this view out at `style` instead of sizing it by its content.
     ///
-    /// Crate-private on purpose: caching is only sound for entity-backed views,
-    /// where [`Context::notify`] is the contract that busts the cache. A stateless
-    /// view has no such contract, so a frozen subtree could never be invalidated.
-    /// Reach this through [`Entity::cached`] or [`AnyView::cached`], which are
-    /// entity-backed by construction.
+    /// Crate-private on purpose: keeping output is only sound for entity-backed views, where
+    /// [`Context::notify`] is the contract that busts it. Reach this through [`Entity::cached`]
+    /// or [`AnyView::cached`].
     pub(crate) fn cached(mut self, style: StyleRefinement) -> Self {
-        let mount = self
-            .mount
-            .as_mut()
-            .expect("only entity-backed views can retain a cached subtree");
-        mount.policy = ViewPolicy::Retained {
-            fixed_style: Some(Arc::new(style)),
-        };
+        debug_assert!(self.entity_id.is_some(), "only entity views can be cached");
+        self.retention = Retention::Fixed(style);
         self
     }
-}
 
-struct ViewMount {
-    entity_id: EntityId,
-    mount_id: Option<u32>,
-    policy: ViewPolicy,
-}
-
-enum ViewPolicy {
-    /// Explicitly constructed ViewElements remain fresh so parent-provided props are observed.
-    Fresh,
-    /// Entity and AnyView elements retain naturally; a style makes the root layout fixed.
-    Retained {
-        fixed_style: Option<Arc<StyleRefinement>>,
-    },
+    fn render(&mut self, window: &mut Window, cx: &mut App) -> AnyElement {
+        render_view(self.view.take().unwrap(), window, cx)
+    }
 }
 
 impl<V: View> IntoElement for ViewElement<V> {
@@ -434,225 +414,154 @@ impl<V: View> IntoElement for ViewElement<V> {
     }
 }
 
-/// The state a [`ViewElement`] carries from layout request through prepaint.
-///
-/// Kept as a public alias for compatibility; the retained view pipeline stores its prepared
-/// element directly in this optional slot without adding a wrapper allocation.
-#[doc(hidden)]
-pub type ViewElementRequestLayoutState = Option<AnyElement>;
-
-#[derive(Default)]
-pub(crate) struct ViewElementState {
-    cache: Option<ViewCache>,
+/// What a kept view carries between frames: its layout island, what it read, and where its
+/// output went in the last frame.
+pub(crate) struct ViewState {
+    island: LayoutIsland,
+    layout: Option<LayoutKey>,
+    dependencies: Dependencies,
+    /// The pointer and modifiers when the view last drew, if it read them.
+    input: Option<InputSnapshot>,
+    output: Option<ViewOutput>,
+    /// The element state its last render used, such as [`Window::use_keyed_state`], which is kept
+    /// alive while the view is reused.
+    render_states: Vec<(GlobalElementId, TypeId)>,
 }
 
-struct ViewCache {
-    layout: LayoutCache,
-    output: CachedOutput,
-}
-
-struct LayoutCache {
-    root: LayoutId,
-    claim_log: crate::taffy::LayoutClaimLog,
-    environment: crate::window::ViewEnvironment,
-    fixed_style: Option<Arc<StyleRefinement>>,
-    dependencies: ViewDependencies,
-    direction_contribution: Option<ResolvedDirection>,
-    frame_bound: bool,
-    mouse_position: Option<crate::Point<crate::Pixels>>,
-    request_layout_state_range: Range<usize>,
-    request_layout_state_generation: u64,
-}
-
-#[cfg(test)]
-pub(crate) fn retained_type_footprint() -> [(&'static str, usize); 4] {
-    [
-        ("StyleRefinement", std::mem::size_of::<StyleRefinement>()),
-        ("ViewPolicy", std::mem::size_of::<ViewPolicy>()),
-        ("LayoutCache", std::mem::size_of::<LayoutCache>()),
-        (
-            "ViewElement<AnyView>",
-            std::mem::size_of::<ViewElement<crate::AnyView>>(),
-        ),
-    ]
-}
-
-enum CachedOutput {
-    NeedsPrepaint,
-    Prepared(ViewOutput<Option<Range<PaintIndex>>>),
-    Painted(ViewOutput<Range<PaintIndex>>),
-}
-
-struct ViewOutput<P> {
-    key: ViewOutputKey,
-    prepaint_range: Range<PrepaintStateIndex>,
-    a11y_roots: Vec<accesskit::NodeId>,
-    paint: P,
-}
-
+/// What the view's layout depends on beyond its own state.
 #[derive(PartialEq)]
-struct ViewOutputKey {
+struct LayoutKey {
+    text_style: TextStyle,
+    rem_size: Pixels,
+    scale_factor: f32,
+}
+
+/// Where the view is drawn. Output recorded under one key can only be reused under an equal key.
+#[derive(PartialEq)]
+struct OutputKey {
     bounds: Bounds<Pixels>,
-    // Normally paint runs under the same ambient state as request_layout, so
-    // `None` avoids storing a second copy. Nested mask/opacity/input scopes are
-    // captured only when the prepaint environment differs from that baseline.
-    environment: Option<crate::window::ViewEnvironment>,
+    content_mask: ContentMask<Pixels>,
+    direction: ResolvedDirection,
+    unicode_bidi: UnicodeBidi,
 }
 
-impl ViewElementState {
-    /// Include roots created by deferred prepaint in the retained accessibility subtree.
-    ///
-    /// The owning view's prepaint finishes before Window runs deferred draws, so its initial
-    /// subtree snapshot cannot include those nodes. Window calls this only while the cached
-    /// output is prepared for the current frame; replayed deferred ranges must not append again.
-    pub(crate) fn extend_a11y_roots(&mut self, roots: &[accesskit::NodeId]) {
-        if roots.is_empty() {
-            return;
-        }
-        let Some(cache) = &mut self.cache else {
-            return;
-        };
-        if let CachedOutput::Prepared(output) = &mut cache.output {
-            output.a11y_roots.extend_from_slice(roots);
+/// The window input a view read while drawing, and what it was then.
+pub(crate) struct InputSnapshot {
+    reads: InputReads,
+    mouse_position: Point<Pixels>,
+    modifiers: Modifiers,
+    modality: crate::window::InputModality,
+}
+
+impl InputSnapshot {
+    fn new(reads: InputReads, window: &Window) -> Self {
+        Self {
+            reads,
+            mouse_position: window.mouse_position,
+            modifiers: window.modifiers,
+            modality: window.last_input_modality,
         }
     }
 
-    pub(crate) fn set_mouse_position_dependency(&mut self, position: crate::Point<crate::Pixels>) {
-        if let Some(cache) = &mut self.cache {
-            cache.layout.mouse_position = Some(position);
-        }
-    }
-
-    pub(crate) fn extend_dependencies(
-        &mut self,
-        dependencies: &ViewDependencies,
-        frame_bound: bool,
-    ) {
-        if let Some(cache) = &mut self.cache {
-            cache.layout.dependencies.extend(dependencies);
-            cache.layout.frame_bound |= frame_bound;
-        }
-    }
-
-    pub(crate) fn request_layout_state_origin(&self) -> Option<(Range<usize>, u64, LayoutId)> {
-        let cache = self.cache.as_ref()?;
-        Some((
-            cache.layout.request_layout_state_range.clone(),
-            cache.layout.request_layout_state_generation,
-            cache.layout.root,
-        ))
-    }
-
-    pub(crate) fn set_request_layout_state_origin(&mut self, range: Range<usize>, generation: u64) {
-        if let Some(cache) = &mut self.cache {
-            cache.layout.request_layout_state_range = range;
-            cache.layout.request_layout_state_generation = generation;
-        }
-    }
-
-    pub(crate) fn rebase_prepaint_range(
-        &mut self,
-        source: &Range<crate::window::PrepaintStateIndex>,
-        destination: &crate::window::PrepaintStateIndex,
-    ) {
-        let Some(cache) = &mut self.cache else { return };
-        match &mut cache.output {
-            CachedOutput::NeedsPrepaint => {}
-            CachedOutput::Prepared(output) => {
-                rebase_range(&mut output.prepaint_range, source, destination)
-            }
-            CachedOutput::Painted(output) => {
-                rebase_range(&mut output.prepaint_range, source, destination)
-            }
-        }
-    }
-
-    pub(crate) fn rebase_paint_range(
-        &mut self,
-        source: &Range<crate::window::PaintIndex>,
-        destination: &crate::window::PaintIndex,
-    ) {
-        let Some(cache) = &mut self.cache else { return };
-        match &mut cache.output {
-            CachedOutput::NeedsPrepaint => {}
-            CachedOutput::Prepared(output) => {
-                if let Some(range) = &mut output.paint {
-                    rebase_range(range, source, destination);
-                }
-            }
-            CachedOutput::Painted(output) => rebase_range(&mut output.paint, source, destination),
-        }
+    fn still_valid(&self, window: &Window) -> bool {
+        (!self.reads.contains(InputReads::POINTER) || self.mouse_position == window.mouse_position)
+            && (!self.reads.contains(InputReads::MODIFIERS) || self.modifiers == window.modifiers)
+            && (!self.reads.contains(InputReads::MODALITY)
+                || self.modality == window.last_input_modality)
     }
 }
 
-#[cfg(not(gpui_hot_reload))]
+struct ViewOutput {
+    key: OutputKey,
+    prepaint: Range<PrepaintStateIndex>,
+    paint: Range<PaintIndex>,
+    /// Whether `paint` belongs to the same frame as `prepaint`.
+    painted: bool,
+    /// The draw these ranges index into.
+    frame: u64,
+    /// The accessibility nodes drawn with it, if the tree was being built.
+    a11y: Option<A11yRecording>,
+    /// What replaying `paint` needs, kept after its first replay.
+    replay: Option<ReplaySummary>,
+}
+
+impl ViewOutput {
+    /// Whether this output has everything the current frame needs.
+    fn complete(&self, window: &Window) -> bool {
+        self.a11y.is_some() || !window.a11y.is_active()
+    }
+}
+
+impl ViewState {
+    /// Moves this view's prepaint range along with a replayed range of its parent, drawn in
+    /// `frame`. Output that wasn't drawn inside that range, in the previous frame, is dropped.
+    pub(crate) fn rebase_prepaint(
+        &mut self,
+        source: &Range<PrepaintStateIndex>,
+        destination: &PrepaintStateIndex,
+        frame: u64,
+    ) {
+        if let Some(output) = &mut self.output {
+            if output.painted
+                && output.frame + 1 == frame
+                && PrepaintStateIndex::within(&output.prepaint, source)
+            {
+                output.prepaint = output.prepaint.start.rebased(source, destination)
+                    ..output.prepaint.end.rebased(source, destination);
+                output.frame = frame;
+                output.painted = false;
+            } else {
+                self.output = None;
+            }
+        }
+    }
+
+    /// Moves this view's paint range along with a replayed range of its parent, drawn in `frame`.
+    pub(crate) fn rebase_paint(
+        &mut self,
+        source: &Range<PaintIndex>,
+        destination: &PaintIndex,
+        frame: u64,
+    ) {
+        if let Some(output) = &mut self.output {
+            if output.frame == frame && PaintIndex::within(&output.paint, source) {
+                output.paint = output.paint.start.rebased(source, destination)
+                    ..output.paint.end.rebased(source, destination);
+                output.painted = true;
+            } else {
+                self.output = None;
+            }
+        }
+    }
+
+    fn reusable(&self, entity_id: EntityId, layout: &LayoutKey, window: &Window, cx: &App) -> bool {
+        self.layout.as_ref() == Some(layout)
+            && !window.refreshing
+            && !window.dirty_views.contains(&entity_id)
+            && !cx.dependencies_changed(&self.dependencies, &window.dirty_views)
+            && self
+                .input
+                .as_ref()
+                .is_none_or(|input| input.still_valid(window))
+            && !window.is_inspector_picking(cx)
+            && self
+                .output
+                .as_ref()
+                .is_none_or(|output| output.complete(window))
+    }
+}
+
 #[inline]
 fn render_view<V: View>(view: V, window: &mut Window, cx: &mut App) -> AnyElement {
     view.render(window, cx).into_any_element()
 }
 
-/// Every view and component render passes through this hot-patchable boundary, so the
-/// patched code for that render and everything it calls runs on the next frame.
-#[cfg(gpui_hot_reload)]
-fn render_view<V: View>(view: V, window: &mut Window, cx: &mut App) -> AnyElement {
-    #[inline(never)]
-    fn render_view_impl<V: View>(view: V, window: &mut Window, cx: &mut App) -> AnyElement {
-        view.render(window, cx).into_any_element()
-    }
-
-    subsecond::HotFn::current(render_view_impl::<V>).call((view, window, cx))
-}
-
-trait RebaseRangeIndex: Sized {
-    fn rebase_from(&mut self, source: &Range<Self>, destination: &Self);
-}
-
-impl RebaseRangeIndex for PrepaintStateIndex {
-    fn rebase_from(&mut self, source: &Range<Self>, destination: &Self) {
-        PrepaintStateIndex::rebase_from(self, source, destination);
-    }
-}
-
-impl RebaseRangeIndex for PaintIndex {
-    fn rebase_from(&mut self, source: &Range<Self>, destination: &Self) {
-        PaintIndex::rebase_from(self, source, destination);
-    }
-}
-
-fn rebase_range<I: RebaseRangeIndex>(range: &mut Range<I>, source: &Range<I>, destination: &I) {
-    range.start.rebase_from(source, destination);
-    range.end.rebase_from(source, destination);
-}
-
-fn cache_is_valid(cache: &ViewCache, entity_id: EntityId, window: &Window, cx: &App) -> bool {
-    !window.refreshing
-        && !window.is_inspector_picking(cx)
-        && !window.inspector_is_open()
-        && !window.cached_view_mouse_position_changed(cache.layout.mouse_position)
-        && !window.dirty_views.contains(&entity_id)
-        && !cache.layout.frame_bound
-        && window.access_state_generation_is_live(cache.layout.request_layout_state_generation)
-        && cache
-            .layout
-            .dependencies
-            .entities
-            .is_disjoint(&window.dirty_views)
-        && cache
-            .layout
-            .dependencies
-            .globals
-            .iter()
-            .all(|(global_type, revision)| cx.global_revision(*global_type) == *revision)
-}
-
 impl<V: View> Element for ViewElement<V> {
-    type RequestLayoutState = ViewElementRequestLayoutState;
+    type RequestLayoutState = Option<AnyElement>;
     type PrepaintState = Option<AnyElement>;
 
     fn id(&self) -> Option<ElementId> {
-        self.mount
-            .as_ref()
-            .map(|mount| ElementId::View(mount.entity_id))
+        self.entity_id.map(ElementId::View)
     }
 
     fn source_location(&self) -> Option<&'static core::panic::Location<'static>> {
@@ -665,177 +574,72 @@ impl<V: View> Element for ViewElement<V> {
 
     fn request_layout(
         &mut self,
-        id: Option<&GlobalElementId>,
+        global_id: Option<&GlobalElementId>,
         _inspector_id: Option<&InspectorElementId>,
         window: &mut Window,
         cx: &mut App,
-    ) -> (LayoutId, Self::RequestLayoutState) {
-        if let Some(mount) = self.mount.as_mut() {
-            let entity_id = mount.entity_id;
-            let global_id = id.expect("entity-backed views must have an element id");
-            let mount_id = window.next_view_mount_id(global_id);
-            mount.mount_id = Some(mount_id);
-            let cache_id = Window::mounted_view_id(global_id, mount_id);
-
-            let fixed_style = match &mount.policy {
-                ViewPolicy::Fresh => {
-                    return window.with_rendered_view(entity_id, |window| {
-                        window.with_cached_view(cache_id, mount_id, |window| {
-                            let mut element = render_view(self.view.take().unwrap(), window, cx);
-                            let layout = element.request_layout(window, cx);
-                            (layout, Some(element))
-                        })
+    ) -> (LayoutId, Option<AnyElement>) {
+        #[cfg(feature = "profiler")]
+        let start = window.window_profiler.begin_view();
+        let result = match (self.entity_id, &self.retention) {
+            (None, _) => window.with_id(ElementId::Name(type_name::<V>().into()), |window| {
+                let mut element = self.render(window, cx);
+                (element.request_layout(window, cx), Some(element))
+            }),
+            (Some(entity_id), Retention::None) => window.with_rendered_view(entity_id, |window| {
+                let mut element = self.render(window, cx);
+                (element.request_layout(window, cx), Some(element))
+            }),
+            (Some(entity_id), _) => window.with_rendered_view(entity_id, |window| {
+                window.with_element_state::<ViewState, _>(global_id.unwrap(), |state, window| {
+                    let mut state = state.unwrap_or_else(|| ViewState {
+                        island: window.create_layout_island(),
+                        layout: None,
+                        dependencies: Dependencies::default(),
+                        input: None,
+                        output: None,
+                        render_states: Vec::new(),
                     });
-                }
-                ViewPolicy::Retained { fixed_style } => fixed_style.clone(),
-            };
-
-            let (layout_id, request) = window.with_rendered_view(entity_id, |window| {
-                window.with_cached_view(cache_id.clone(), mount_id, |window| {
-                    let environment = window.view_environment();
-                    window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
-                        let mut state = state.unwrap_or_default();
-                        let cache_is_reusable = state.cache.as_ref().is_some_and(|cache| {
-                            cache_is_valid(cache, entity_id, window, cx)
-                                && cache.layout.environment == environment
-                                && cache.layout.fixed_style == fixed_style
-                        });
-                        if cache_is_reusable {
-                            let cache = state.cache.as_ref().unwrap();
-                            let root = cache.layout.root;
-                            let request_layout_state_generation =
-                                cache.layout.request_layout_state_generation;
-                            let request_layout_state_range =
-                                cache.layout.request_layout_state_range.clone();
-                            window.retain_layout_subtree(root);
-                            let (request_layout_state_range, request_layout_state_generation) =
-                                if request_layout_state_generation
-                                    == window.rendered_access_state_generation()
-                                {
-                                    (
-                                        window.reuse_element_state_accesses(
-                                            request_layout_state_range,
-                                        ),
-                                        window.current_access_state_generation(),
-                                    )
-                                } else {
-                                    (request_layout_state_range, request_layout_state_generation)
-                                };
-                            if fixed_style.is_some() {
-                                window.set_layout_auto_direction_hint(
-                                    root,
-                                    cache.layout.direction_contribution,
-                                );
-                            }
-                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
-                            if cache.layout.mouse_position.is_some() {
-                                window.retain_cached_view_mouse_position_dependency();
-                            }
-                            state
-                                .cache
-                                .as_mut()
-                                .unwrap()
-                                .layout
-                                .request_layout_state_range = request_layout_state_range;
-                            state
-                                .cache
-                                .as_mut()
-                                .unwrap()
-                                .layout
-                                .request_layout_state_generation = request_layout_state_generation;
-                            window.note_view_reused();
-                            return ((root, None), state);
+                    let layout = LayoutKey {
+                        text_style: window.text_style(),
+                        rem_size: window.rem_size(),
+                        scale_factor: window.scale_factor(),
+                    };
+                    let element = if state.reusable(entity_id, &layout, window, cx) {
+                        cx.replay_dependencies(&state.dependencies);
+                        window.keep_element_states(&state.render_states);
+                        None
+                    } else {
+                        state.layout = Some(layout);
+                        state.output = None;
+                        Some(self.render_into_island(&mut state, window, cx))
+                    };
+                    let island = state.island.id();
+                    let layout_id = match &self.retention {
+                        Retention::Fixed(style) => {
+                            let mut root_style = Style::default();
+                            root_style.refine(style);
+                            let layout_id = window.request_layout(root_style, None, cx);
+                            window.anchor_layout_island(island, layout_id);
+                            // The parent can't see the content through a fixed node, so it gets
+                            // the direction the content would contribute to an `Auto` ancestor.
+                            let direction = window.layout_island_direction_contribution(island);
+                            window.set_layout_auto_direction_hint(layout_id, direction);
+                            layout_id
                         }
-
-                        let (
-                            (
-                                root,
-                                request_element,
-                                dependencies,
-                                direction_contribution,
-                                request_layout_state_range,
-                            ),
-                            claim_outcome,
-                        ) = window.with_layout_claim_scope(None, |window| {
-                            let result = if let Some(style) = &fixed_style {
-                                let mut root_style = Style::default();
-                                root_style.refine(style.as_ref());
-                                let root = window.request_layout(root_style, None, cx);
-                                let state_range_start = window.accessed_element_state_index();
-                                let ((element, direction_contribution), dependencies) = cx
-                                    .detect_accessed_dependencies(|cx| {
-                                        let mut element =
-                                            render_view(self.view.take().unwrap(), window, cx);
-                                        let child_layout = element.request_layout(window, cx);
-                                        let contribution =
-                                            window.layout_auto_direction_contribution(child_layout);
-                                        window.set_layout_auto_direction_hint(root, contribution);
-                                        (element, contribution)
-                                    });
-                                let request_layout_state_range =
-                                    window.accessed_element_state_range(state_range_start);
-                                (
-                                    root,
-                                    Some(element),
-                                    dependencies,
-                                    direction_contribution,
-                                    request_layout_state_range,
-                                )
-                            } else {
-                                let state_range_start = window.accessed_element_state_index();
-                                let ((element, root_layout), dependencies) = cx
-                                    .detect_accessed_dependencies(|cx| {
-                                        let mut element =
-                                            render_view(self.view.take().unwrap(), window, cx);
-                                        let root_layout = element.request_layout(window, cx);
-                                        (element, root_layout)
-                                    });
-                                let request_layout_state_range =
-                                    window.accessed_element_state_range(state_range_start);
-                                (
-                                    root_layout,
-                                    Some(element),
-                                    dependencies,
-                                    None,
-                                    request_layout_state_range,
-                                )
-                            };
-                            result
-                        });
-
-                        state.cache = Some(ViewCache {
-                            layout: LayoutCache {
-                                root,
-                                claim_log: claim_outcome.log,
-                                environment,
-                                fixed_style,
-                                dependencies,
-                                direction_contribution,
-                                frame_bound: false,
-                                mouse_position: None,
-                                request_layout_state_range,
-                                request_layout_state_generation: window
-                                    .current_access_state_generation(),
-                            },
-                            output: CachedOutput::NeedsPrepaint,
-                        });
-                        window.note_view_rebuilt();
-                        ((root, request_element), state)
-                    })
+                        _ => window.request_layout_island(island),
+                    };
+                    ((layout_id, element), state)
                 })
-            });
-            (layout_id, request)
-        } else {
-            // Stateless path: isolate subtree via type name (no entity identity).
-            window.with_id(
-                ElementId::Name(std::any::type_name::<V>().into()),
-                |window| {
-                    let mut element = render_view(self.view.take().unwrap(), window, cx);
-                    let layout_id = element.request_layout(window, cx);
-                    (layout_id, Some(element))
-                },
-            )
-        }
+            }),
+        };
+        #[cfg(feature = "profiler")]
+        window.window_profiler.end_view(
+            start,
+            self.view_type_name,
+            crate::profiler::ViewPhase::RequestLayout,
+        );
+        result
     }
 
     fn prepaint(
@@ -843,159 +647,99 @@ impl<V: View> Element for ViewElement<V> {
         global_id: Option<&GlobalElementId>,
         _inspector_id: Option<&InspectorElementId>,
         bounds: Bounds<Pixels>,
-        element: &mut Self::RequestLayoutState,
+        element: &mut Option<AnyElement>,
         window: &mut Window,
         cx: &mut App,
     ) -> Option<AnyElement> {
-        if let Some(mount) = self.mount.as_ref() {
-            let entity_id = mount.entity_id;
-            let mount_id = mount.mount_id.expect("request_layout sets the view mount");
-            let cache_id = Window::mounted_view_id(global_id.unwrap(), mount_id);
-            window.set_view_id(entity_id);
-
-            let fixed_style = match &mount.policy {
-                ViewPolicy::Fresh => {
-                    return window.with_rendered_view(entity_id, |window| {
-                        window.with_cached_view(cache_id, mount_id, |window| {
-                            let mut element = element.take().unwrap();
-                            element.prepaint(window, cx);
-                            Some(element)
-                        })
-                    });
-                }
-                ViewPolicy::Retained { fixed_style } => fixed_style.clone(),
-            };
-
-            window.with_rendered_view(entity_id, |window| {
-                window.with_cached_view(cache_id.clone(), mount_id, |window| {
-                    let mut fresh_element = element.take();
-                    let request_reused = fresh_element.is_none();
-                    let environment = window.view_environment();
-
-                    window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
-                        let mut state = state.unwrap_or_default();
-                        let cache = state.cache.as_mut().expect("retained view layout exists");
-                        let key = ViewOutputKey {
-                            bounds,
-                            environment: (environment != cache.layout.environment)
-                                .then_some(environment.clone()),
-                        };
-                        let can_replay = request_reused
-                            && cache.layout.fixed_style == fixed_style
-                            && cache_is_valid(cache, entity_id, window, cx)
-                            && matches!(&cache.output, CachedOutput::Painted(output) if output.key == key);
-                        let prepaint_start = window.prepaint_index();
-                        let a11y_start = window.a11y.cache_subtree_start();
-                        let (element, paint_source, a11y_roots) = if can_replay {
-                            let CachedOutput::Painted(output) =
-                                std::mem::replace(&mut cache.output, CachedOutput::NeedsPrepaint)
-                            else {
-                                unreachable!("replay requires a completed paint")
-                            };
-                            window.a11y.reuse_prepaint(&output.a11y_roots);
-                            window.reuse_prepaint(output.prepaint_range);
-                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
-                            (None, Some(output.paint), output.a11y_roots)
-                        } else {
-                            cache.output = CachedOutput::NeedsPrepaint;
-                            let ( (fresh_element, claim_log), dependencies) =
-                                cx.detect_accessed_dependencies(|cx| {
-                                    let mut fresh_element = fresh_element.take().unwrap_or_else(|| {
-                                        render_view(self.view.take().unwrap(), window, cx)
-                                    });
-                                    let mut claim_log =
-                                        std::mem::take(&mut cache.layout.claim_log);
-                                    if request_reused && fixed_style.is_none() {
-                                        let (layout_id, outcome) = window.with_layout_claim_scope(
-                                            Some(std::mem::take(&mut claim_log)),
-                                            |window| fresh_element.request_layout(window, cx),
-                                        );
-                                        claim_log = outcome.log;
-                                        let use_parent_layout = outcome.fully_replayed
-                                            && layout_id == cache.layout.root
-                                            && cache.layout.environment == environment
-                                            && !cache.layout.frame_bound
-                                            && cache_is_valid(cache, entity_id, window, cx);
-                                        if use_parent_layout {
-                                            // The retained parent already computed this exact tree this
-                                            // frame. Rebuild element state, then use those attached IDs.
-                                            #[cfg(test)]
-                                            window.note_layout_claim_replay();
-                                            fresh_element.prepaint(window, cx);
-                                        } else {
-                                            // A detached intrinsic layout can reparent retained child nodes.
-                                            // Rebuild this owner chain next frame to reconnect it safely.
-                                            window.mark_cached_views_frame_bound();
-                                            let (layout_id, _) = fresh_element.layout_as_root_at_size(
-                                                bounds.size.into(),
-                                                bounds.size,
-                                                window,
-                                                cx,
-                                            );
-                                            let structural_origin = window.with_absolute_element_offset(
-                                                Point::default(),
-                                                |window| window.layout_bounds(layout_id).origin,
-                                            );
-                                            fresh_element.prepaint_at(
-                                                bounds.origin - structural_origin,
-                                                window,
-                                                cx,
-                                            );
-                                        }
-                                    } else if request_reused || fixed_style.is_some() {
-                                        let (layout_id, _) = fresh_element.layout_as_root_at_size(
-                                            bounds.size.into(),
-                                            bounds.size,
-                                            window,
-                                            cx,
-                                        );
-                                        let structural_origin = window.with_absolute_element_offset(
-                                            Point::default(),
-                                            |window| window.layout_bounds(layout_id).origin,
-                                        );
-                                        fresh_element.prepaint_at(
-                                            bounds.origin - structural_origin,
-                                            window,
-                                            cx,
-                                        );
-                                    } else {
-                                        fresh_element.prepaint(window, cx);
-                                    }
-                                    (fresh_element, claim_log)
-                                });
-                            cache.layout.claim_log = claim_log;
-                            cache.layout.dependencies.extend(&dependencies);
-                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
-                            let roots = window.a11y.cache_subtree_roots(a11y_start);
-                            (Some(fresh_element), None, roots)
-                        };
-
-                        let prepaint_end = window.prepaint_index();
-                        cache.output = CachedOutput::Prepared(ViewOutput {
-                            key,
-                            prepaint_range: prepaint_start..prepaint_end,
-                            a11y_roots,
-                            paint: paint_source,
-                        });
-                        cache.layout.frame_bound =
-                            window.has_frame_bound_layout(&cache_id);
-                        (element, state)
-                    })
-                })
-            })
-        } else {
-            // Stateless path: just prepaint the element.
-            window.with_id(
-                ElementId::Name(std::any::type_name::<V>().into()),
-                |window| {
-                    let Some(mut element) = element.take() else {
-                        unreachable!("stateless views always render in request_layout")
-                    };
+        #[cfg(feature = "profiler")]
+        let start = window.window_profiler.begin_view();
+        let result = match (self.entity_id, &self.retention) {
+            (None, _) => window.with_id(ElementId::Name(type_name::<V>().into()), |window| {
+                let mut element = element.take().unwrap();
+                element.prepaint(window, cx);
+                Some(element)
+            }),
+            (Some(entity_id), Retention::None) => {
+                window.set_view_id(entity_id);
+                window.with_rendered_view(entity_id, |window| {
+                    let mut element = element.take().unwrap();
                     element.prepaint(window, cx);
                     Some(element)
-                },
-            )
-        }
+                })
+            }
+            (Some(entity_id), retention) => {
+                let fixed = matches!(retention, Retention::Fixed(_));
+                window.set_view_id(entity_id);
+                window.with_rendered_view(entity_id, |window| {
+                    window.with_element_state::<ViewState, _>(
+                        global_id.unwrap(),
+                        |state, window| {
+                            let mut state = state.unwrap();
+                            let key = OutputKey {
+                                bounds,
+                                content_mask: window.content_mask(),
+                                direction: window.resolved_direction(),
+                                unicode_bidi: window.resolved_unicode_bidi(),
+                            };
+                            let mut element = element.take();
+                            if element.is_none()
+                                && let Some(output) = state.output.as_mut()
+                                && output.painted
+                                && output.frame + 1 == window.frame_number
+                                && output.key == key
+                                && output.complete(window)
+                            {
+                                let start = window.prepaint_index();
+                                window.reuse_prepaint(output.prepaint.clone());
+                                if let Some(a11y) =
+                                    output.a11y.as_ref().filter(|_| window.a11y.is_active())
+                                {
+                                    window.a11y.replay(a11y);
+                                }
+                                output.prepaint = start..window.prepaint_index();
+                                output.frame = window.frame_number;
+                                output.painted = false;
+                                return (None, state);
+                            }
+
+                            // Drawn somewhere new: render again into the island, which keeps the
+                            // size its anchor was given this frame.
+                            let rendered_now = element.is_none();
+                            let mut element = match element.take() {
+                                Some(element) => element,
+                                None => self.render_into_island(&mut state, window, cx),
+                            };
+                            if fixed || rendered_now {
+                                window.layout_island(state.island.id(), bounds.size, cx);
+                            }
+                            let start = window.prepaint_index();
+                            let a11y = window.a11y.is_active().then(|| window.a11y.mark());
+                            let (_, dependencies) = record(&mut state, window, cx, |window, cx| {
+                                element.prepaint(window, cx)
+                            });
+                            state.dependencies.extend(dependencies);
+                            state.output = Some(ViewOutput {
+                                key,
+                                prepaint: start..window.prepaint_index(),
+                                paint: PaintIndex::default()..PaintIndex::default(),
+                                painted: false,
+                                frame: window.frame_number,
+                                a11y: a11y.map(|mark| window.a11y.record(mark)),
+                                replay: None,
+                            });
+                            (Some(element), state)
+                        },
+                    )
+                })
+            }
+        };
+        #[cfg(feature = "profiler")]
+        window.window_profiler.end_view(
+            start,
+            self.view_type_name,
+            crate::profiler::ViewPhase::Prepaint,
+        );
+        result
     }
 
     fn paint(
@@ -1003,75 +747,100 @@ impl<V: View> Element for ViewElement<V> {
         global_id: Option<&GlobalElementId>,
         _inspector_id: Option<&InspectorElementId>,
         _bounds: Bounds<Pixels>,
-        _request_layout: &mut Self::RequestLayoutState,
-        element: &mut Self::PrepaintState,
+        _request_layout: &mut Option<AnyElement>,
+        element: &mut Option<AnyElement>,
         window: &mut Window,
         cx: &mut App,
     ) {
-        if let Some(mount) = self.mount.as_ref() {
-            let entity_id = mount.entity_id;
-            let mount_id = mount.mount_id.expect("request_layout sets the view mount");
-            let cache_id = Window::mounted_view_id(global_id.unwrap(), mount_id);
-
-            if matches!(&mount.policy, ViewPolicy::Fresh) {
-                window.with_rendered_view(entity_id, |window| {
-                    window.with_cached_view(cache_id, mount_id, |window| {
-                        if let Some(element) = element {
-                            element.paint(window, cx);
+        #[cfg(feature = "profiler")]
+        let start = window.window_profiler.begin_view();
+        match (self.entity_id, &self.retention) {
+            (None, _) => window.with_id(ElementId::Name(type_name::<V>().into()), |window| {
+                element.as_mut().unwrap().paint(window, cx);
+            }),
+            (Some(entity_id), Retention::None) => window.with_rendered_view(entity_id, |window| {
+                element.as_mut().unwrap().paint(window, cx);
+            }),
+            (Some(entity_id), _) => window.with_rendered_view(entity_id, |window| {
+                window.with_element_state::<ViewState, _>(global_id.unwrap(), |state, window| {
+                    let mut state = state.unwrap();
+                    let start = window.paint_index();
+                    match element {
+                        Some(element) => {
+                            let ((), dependencies) =
+                                record(&mut state, window, cx, |window, cx| {
+                                    element.paint(window, cx)
+                                });
+                            state.dependencies.extend(dependencies);
                         }
-                    })
-                });
-                return;
-            }
-
-            window.with_rendered_view(entity_id, |window| {
-                window.with_cached_view(cache_id.clone(), mount_id, |window| {
-                    window.with_element_state::<ViewElementState, _>(&cache_id, |state, window| {
-                        let mut state = state.unwrap_or_default();
-                        let cache = state.cache.as_mut().expect("retained view layout exists");
-                        let CachedOutput::Prepared(prepared) =
-                            std::mem::replace(&mut cache.output, CachedOutput::NeedsPrepaint)
-                        else {
-                            unreachable!("prepaint must prepare output before paint")
-                        };
-                        let paint_start = window.paint_index();
-                        if let Some(element) = element {
-                            let (_, dependencies) =
-                                cx.detect_accessed_dependencies(|cx| element.paint(window, cx));
-                            cache.layout.dependencies.extend(&dependencies);
-                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
-                        } else {
-                            let paint_source = prepared
-                                .paint
-                                .as_ref()
-                                .expect("replayed prepaint has a completed paint range");
-                            window.a11y.reuse_paint(&prepared.a11y_roots);
-                            window.reuse_paint(paint_source.clone());
-                            cx.extend_accessed_dependencies(&cache.layout.dependencies);
+                        None => {
+                            let output = state.output.as_mut().unwrap();
+                            window.reuse_paint(output.paint.clone(), &mut output.replay);
                         }
-                        cache.layout.frame_bound |= window.has_frame_bound_layout(&cache_id);
-                        cache.output = CachedOutput::Painted(ViewOutput {
-                            key: prepared.key,
-                            prepaint_range: prepared.prepaint_range,
-                            paint: paint_start..window.paint_index(),
-                            a11y_roots: prepared.a11y_roots,
-                        });
-                        ((), state)
-                    })
-                })
-            });
-        } else {
-            // Stateless path: just paint the element.
-            window.with_id(
-                ElementId::Name(std::any::type_name::<V>().into()),
-                |window| {
-                    if let Some(element) = element {
-                        element.paint(window, cx);
                     }
-                },
-            );
+                    let output = state.output.as_mut().unwrap();
+                    output.paint = start..window.paint_index();
+                    output.painted = true;
+                    ((), state)
+                })
+            }),
         }
+        #[cfg(feature = "profiler")]
+        window.window_profiler.end_view(
+            start,
+            self.view_type_name,
+            crate::profiler::ViewPhase::Paint,
+        );
     }
+}
+
+impl<V: View> ViewElement<V> {
+    /// Renders the view into its island and requests its layout there, recording what it read.
+    fn render_into_island(
+        &mut self,
+        state: &mut ViewState,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> AnyElement {
+        let island = state.island.id();
+        state.input = None;
+        state.dependencies = Dependencies::default();
+        let states_start = window.element_states_mark();
+        let view = self.view.take().unwrap();
+        let (element, dependencies) = record(state, window, cx, |window, cx| {
+            window.with_layout_island(island, |window| {
+                let mut element = render_view(view, window, cx);
+                let root = element.request_layout(window, cx);
+                (element, root)
+            })
+        });
+        let (element, root) = element;
+        window.set_layout_island_root(island, root);
+        state.dependencies = dependencies;
+        state.render_states = window.element_states_since(states_start);
+        element
+    }
+}
+
+/// Runs `f`, returning what it read and noting whether it read the pointer or modifiers.
+fn record<R>(
+    state: &mut ViewState,
+    window: &mut Window,
+    cx: &mut App,
+    f: impl FnOnce(&mut Window, &mut App) -> R,
+) -> (R, Dependencies) {
+    let outer_reads = window.input_reads.replace(InputReads::empty());
+    let result = cx.record_dependencies(|cx| f(window, cx));
+    let reads = window.input_reads.get();
+    window.input_reads.set(outer_reads | reads);
+    if !reads.is_empty() {
+        let previous = state
+            .input
+            .take()
+            .map_or(InputReads::empty(), |input| input.reads);
+        state.input = Some(InputSnapshot::new(previous | reads, window));
+    }
+    result
 }
 
 /// A view that renders nothing.

@@ -1949,7 +1949,7 @@ impl MetalRenderer {
                 log::error!("Metal requires a CVPixelBuffer-backed surface");
                 continue;
             }
-            if CVPixelBufferGetPixelFormatType(&**image_buffer)
+            if CVPixelBufferGetPixelFormatType(image_buffer)
                 != kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
             {
                 log::error!("Metal requires a full-range bi-planar 4:2:0 pixel buffer");
@@ -1960,16 +1960,16 @@ impl MetalRenderer {
                 &self.core_video_texture_cache,
                 image_buffer,
                 objc2_metal::MTLPixelFormat::R8Unorm,
-                CVPixelBufferGetWidthOfPlane(&**image_buffer, 0),
-                CVPixelBufferGetHeightOfPlane(&**image_buffer, 0),
+                CVPixelBufferGetWidthOfPlane(image_buffer, 0),
+                CVPixelBufferGetHeightOfPlane(image_buffer, 0),
                 0,
             );
             let cb_cr_texture = create_core_video_texture(
                 &self.core_video_texture_cache,
                 image_buffer,
                 objc2_metal::MTLPixelFormat::RG8Unorm,
-                CVPixelBufferGetWidthOfPlane(&**image_buffer, 1),
-                CVPixelBufferGetHeightOfPlane(&**image_buffer, 1),
+                CVPixelBufferGetWidthOfPlane(image_buffer, 1),
+                CVPixelBufferGetHeightOfPlane(image_buffer, 1),
                 1,
             );
             let Some(y_metal_texture) = CVMetalTextureGetTexture(&y_texture) else {
@@ -2385,9 +2385,7 @@ mod tests {
         });
         let tile = renderer
             .sprite_atlas()
-            .get_or_insert_with(key.clone(), &mut || {
-                Ok(Some((tile_size, Cow::Owned(vec![64; 64]))))
-            })
+            .get_or_insert_with(key, &mut || Ok(Some((tile_size, Cow::Owned(vec![64; 64])))))
             .unwrap()
             .unwrap();
         let bounds = Bounds {
@@ -2953,7 +2951,7 @@ mod tests {
         });
         let tile = renderer
             .sprite_atlas()
-            .get_or_insert_with(key.clone(), &mut || {
+            .get_or_insert_with(key, &mut || {
                 Ok(Some((
                     Size {
                         width: DevicePixels(2),

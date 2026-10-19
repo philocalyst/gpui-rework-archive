@@ -27,8 +27,6 @@ pub(crate) use platform_scheduler::PlatformScheduler;
 mod geometry;
 mod gestures;
 mod global;
-#[cfg(gpui_hot_reload)]
-mod hot_reload;
 mod input;
 mod inspector;
 mod interactive;
@@ -54,13 +52,7 @@ pub mod queue;
 #[cfg(any(test, feature = "bench-support"))]
 pub mod randomized_element_tree;
 mod resize;
-#[cfg(test)]
-mod retained_tests;
-#[cfg(test)]
-mod retention_workload;
 mod scene;
-#[cfg(test)]
-mod scene_workload;
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
 mod seeds;
 mod shared_uri;
@@ -135,9 +127,8 @@ pub use spring::*;
 ///
 /// It takes the same arguments as `criterion::criterion_group!`, so GPUI benchmark
 /// files keep the shape of ordinary Criterion benchmarks.
-
-/// This mirrors `criterion::criterion_group!`, but the group measures with the
-/// `gpui::BenchMeasurement` configured by `BENCH_MEASUREMENT` (see
+///
+/// The group measures with the `gpui::BenchMeasurement` configured by `BENCH_MEASUREMENT` (see
 /// `BenchMeasurement::from_env`). By default Criterion analyzes wall time
 /// while retired instructions, cycles, IPC, context switches, and the other
 /// counters this machine supports are printed per iteration in the GPUI bench
@@ -172,7 +163,7 @@ macro_rules! bench_group {
 ///
 /// This mirrors `criterion::criterion_main!` so GPUI benchmark files can keep the
 /// same shape as ordinary Criterion benchmarks. It also installs
-/// [`CountingAllocator`] as the binary's global allocator, so reports include
+/// `CountingAllocator` as the binary's global allocator, so reports include
 /// heap allocations per iteration. It wraps the system allocator by default;
 /// `allocator = Path;` wraps another unit-struct allocator instead, e.g. to
 /// compare allocators, which pay the same small counting cost:

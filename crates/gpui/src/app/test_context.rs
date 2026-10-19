@@ -236,7 +236,6 @@ impl TestAppContext {
         self.update(|cx| cx.accessibility_force_disabled = true);
     }
 
-    /// Skip all drawing operations for the duration of this test.
     /// Turns off drawing for this app for the rest of the test.
     pub fn skip_drawing(&mut self) {
         self.app.borrow_mut().mode = GpuiMode::Test { skip_drawing: true };
@@ -275,7 +274,6 @@ impl TestAppContext {
         self.test_platform.set_idle_sleep_prevention_fails(fails);
     }
 
-    /// returns a new `TestAppContext` re-using the same executors to interleave tasks.
     /// Creates another app that shares this context's scheduler, so tasks from both apps interleave deterministically.
     ///
     /// The new app has its own state, windows and globals.
@@ -629,7 +627,6 @@ impl TestAppContext {
             .simulate_scale_factor_change(scale_factor);
     }
 
-    /// Returns true if there's an alert dialog open.
     /// Returns a receiver that gets the path and arguments of the next restart request.
     ///
     /// The app doesn't restart in a test. Calling this again replaces the previous
@@ -1195,14 +1192,12 @@ impl VisualTestContext {
         self.simulate_window_scale_factor_change(self.window, scale_factor)
     }
 
-    /// Returns the bounds of the element with the given debug selector.
-    ///
-    /// Returns `None` in builds without `debug_assertions`, which don't record
-    /// selectors; see [`crate::InteractiveElement::debug_selector`].
     /// Returns the bounds of the element with `debug_selector(selector)` in the last painted frame, or `None`.
     ///
     /// Draw the view first, so that the frame contains the element. Use this to click
-    /// an element without guessing its position.
+    /// an element without guessing its position. Builds without `debug_assertions` don't
+    /// record selectors, so there this always returns `None`; see
+    /// [`InteractiveElement::debug_selector`](crate::InteractiveElement::debug_selector).
     pub fn debug_bounds(&mut self, selector: &'static str) -> Option<Bounds<Pixels>> {
         self.update(|window, _| window.rendered_frame.debug_bounds.get(selector).copied())
     }
