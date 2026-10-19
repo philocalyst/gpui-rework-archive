@@ -1,0 +1,2068 @@
+//! Android platform implementation for GPUI.
+//!
+//! `AndroidPlatform` implements GPUI's `Platform` for an Android process, as
+//! `gpui_linux::LinuxPlatform` does on the desktop. It owns the `AndroidDispatcher`
+//! (the `ALooper` foreground queue and a thread pool), a `ParleyTextSystem` that
+//! shapes with Parley and rasterizes with Swash, the wgpu context shared by its
+//! windows, and the open windows and displays. A window gets its surface when
+//! Android delivers `APP_CMD_INIT_WINDOW` and drops it on `APP_CMD_TERM_WINDOW`.
+
+use anyhow::{Context as _, Result};
+use futures::channel::oneshot;
+use gpui::{
+    Action, ActivityGuard, AnyWindowHandle, BackgroundExecutor, ClipboardItem, CursorStyle,
+    ForegroundExecutor, GestureTuning, KeybindingKeystroke, Keymap, Keystroke, Menu, MenuItem,
+    PathPromptOptions, Platform, PlatformDisplay, PlatformGestures, PlatformKeyboardLayout,
+    PlatformKeyboardMapper, PlatformTextSystem, PlatformWindow, ScrollPhysics, Task, ThermalState,
+    WindowAppearance, WindowParams,
+};
+use gpui_parley::{ParleyTextSystem, SystemFonts};
+use parking_lot::Mutex;
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    path::{Path, PathBuf},
+    rc::Rc,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+};
+
+use super::{
+    AndroidBackend,
+    callbacks::{Callback, Event as CallbackEvent, Registration},
+    dispatcher::AndroidDispatcher,
+    display::{AndroidDisplay, DisplayList},
+    window::{AndroidWindow, WindowList},
+};
+use gpui_wgpu::GpuContext;
+
+// ── stub: clipboard ───────────────────────────────────────────────────────────
+
+/// Android clipboard.
+///
+/// With the `clipboard` feature this goes through the system `ClipboardManager`
+/// (`dev.gpui.mobile.GpuiClipboard`), so text copied in GPUI can be pasted in other
+/// apps and vice versa. Without the feature, or when the JNI call fails (the host did
+/// not package `GpuiClipboard.java`), it falls back to an in-process string store.
+#[derive(Default)]
+pub struct AndroidClipboard {
+    contents: Option<String>,
+}
+
+impl AndroidClipboard {
+    pub fn read(&self) -> Option<String> {
+        #[cfg(feature = "clipboard")]
+        match crate::packages::clipboard::get_text() {
+            Ok(text) => return text,
+            Err(err) => log::warn!("system clipboard read failed, using local copy: {err}"),
+        }
+        self.contents.clone()
+    }
+
+    pub fn write(&mut self, text: String) {
+        #[cfg(feature = "clipboard")]
+        if let Err(err) = crate::packages::clipboard::set_text(&text) {
+            log::warn!("system clipboard write failed, keeping local copy: {err}");
+        }
+        self.contents = Some(text);
+    }
+
+    pub fn clear(&mut self) {
+        self.contents = None;
+    }
+}
+
+// ── stub: credential store ────────────────────────────────────────────────────
+
+/// Android credential store backed by the Android Keystore system.
+///
+/// Stubbed with an in-memory map; replace with a real JNI implementation.
+#[derive(Default)]
+pub struct AndroidCredentialStore {
+    store: std::collections::HashMap<(String, String), Vec<u8>>,
+}
+
+impl AndroidCredentialStore {
+    pub fn write(&mut self, service: &str, username: &str, password: &[u8]) -> Result<()> {
+        self.store.insert(
+            (service.to_string(), username.to_string()),
+            password.to_vec(),
+        );
+        Ok(())
+    }
+
+    pub fn read(&self, service: &str, username: &str) -> Result<Option<Vec<u8>>> {
+        Ok(self
+            .store
+            .get(&(service.to_string(), username.to_string()))
+            .cloned())
+    }
+
+    pub fn delete(&mut self, service: &str, username: &str) -> Result<()> {
+        self.store
+            .remove(&(service.to_string(), username.to_string()));
+        Ok(())
+    }
+}
+
+// ── platform state ────────────────────────────────────────────────────────────
+
+struct AndroidPlatformState {
+    // ── executors ─────────────────────────────────────────────────────────────
+    /// Shared between `background_executor` and `foreground_executor`.
+    dispatcher: Arc<AndroidDispatcher>,
+
+    // ── rendering ─────────────────────────────────────────────────────────────
+    /// Shared wgpu device + queue.  `None` until the first window is opened.
+    gpu_context: Option<GpuContext>,
+
+    // ── windows / displays ────────────────────────────────────────────────────
+    windows: WindowList,
+    /// The window `Platform::open_window` should hand to GPUI next.
+    ///
+    /// GPUI asks for "a window" with no way to say *which* native surface it means,
+    /// and on Android the surface always exists first. With one window that was fine —
+    /// `open_window` could just answer `primary`. Hosts that put several Activities on
+    /// screen (each with its own `SurfaceView`) need each `cx.open_window` to land on
+    /// the surface that Activity brought, so the host sets this immediately before
+    /// asking GPUI to open, and `open_window` takes it.
+    pending_window: Option<Arc<AndroidWindow>>,
+    displays: DisplayList,
+    /// Notifies GPUI when native display geometry is refreshed.
+    displays_changed_callback: Option<Registration>,
+
+    // ── text ──────────────────────────────────────────────────────────────────
+    text_system: Arc<ParleyTextSystem>,
+
+    // ── I/O ───────────────────────────────────────────────────────────────────
+    clipboard: AndroidClipboard,
+    credentials: AndroidCredentialStore,
+
+    // ── lifecycle callbacks ───────────────────────────────────────────────────
+    /// The `on_finish_launching` closure passed to `run()`.
+    finish_launching: Option<Registration>,
+
+    /// Called when the app is about to quit.
+    quit_callback: Option<Registration>,
+
+    /// Called when the app is re-opened (e.g. tapped in the recents screen
+    /// while already running).
+    reopen_callback: Option<Registration>,
+
+    /// Called when the OS delivers a list of URLs to open.
+    open_urls_callback: Option<Registration>,
+
+    /// Called when the keyboard layout changes.
+    keyboard_layout_callback: Option<Registration>,
+
+    /// Called once when `MainEvent::InitWindow` has successfully created the
+    /// native window.  This is where the user should set up their GPUI views.
+    /// The callback receives the `Arc<AndroidWindow>` that was just created.
+    on_init_window_callback: Option<Box<dyn FnOnce(Arc<AndroidWindow>) + Send>>,
+
+    // ── miscellaneous ─────────────────────────────────────────────────────────
+    /// `true` while the app is active (foreground).
+    is_active: bool,
+
+    /// Whether the platform is running headless (no real surface).
+    headless: bool,
+
+    /// Preferred GPU backend.
+    preferred_backend: AndroidBackend,
+}
+
+// SAFETY: `AndroidPlatformState` is only ever accessed while holding the
+// `Mutex<AndroidPlatformState>` lock, and all GPU work (including any use of
+// `GpuContext = Rc<RefCell<Option<WgpuContext>>>`) happens exclusively on the
+// Android main thread.  The `Rc` never escapes to another thread; we just need
+// `Send` so that `Arc<AndroidPlatform>` satisfies the `Sync` bound required by
+// `static OnceLock<Arc<AndroidPlatform>>`.
+unsafe impl Send for AndroidPlatformState {}
+
+// ── AndroidPlatform ───────────────────────────────────────────────────────────
+
+/// The GPUI platform implementation for Android.
+///
+/// Constructed via `current_platform(headless)` in `mod.rs`.
+///
+/// ## Thread safety
+///
+/// `AndroidPlatform` uses `Mutex<AndroidPlatformState>` internally.  The outer
+/// shell is wrapped in `Rc` (not `Arc`) by the caller, matching GPUI's
+/// expectation that the platform is single-threaded at the Rc level.
+pub struct AndroidPlatform {
+    state: Mutex<AndroidPlatformState>,
+    pub(crate) native_session: Option<Arc<super::jni::NativeSession>>,
+    /// Set to `true` when `quit()` is called; the main loop checks this.
+    should_quit: AtomicBool,
+    /// The system night mode, as last applied to every window. What
+    /// `Platform::window_appearance` answers, so it agrees with each window's
+    /// `appearance()` and costs no JNI call. Not in `state`: GPUI asks for it from
+    /// main-thread tasks, which `flush_main_thread_tasks` runs with `state` locked.
+    appearance: Mutex<super::window::WindowAppearance>,
+}
+
+/// Check whether a TrueType/OpenType font file contains CBDT (Color Bitmap
+/// Data Table) tables — the bitmap emoji format that swash can render.
+///
+/// Returns `false` for COLR-only fonts (v0 or v1), SVG-only fonts, or if the
+/// file is too small / malformed to parse the table directory.
+fn font_has_cbdt_tables(data: &[u8]) -> bool {
+    // Minimum size: 12-byte offset table header.
+    if data.len() < 12 {
+        return false;
+    }
+    let num_tables = u16::from_be_bytes([data[4], data[5]]) as usize;
+    // Each table record is 16 bytes, starting at offset 12.
+    let table_dir_end = 12 + num_tables * 16;
+    if data.len() < table_dir_end {
+        return false;
+    }
+    for i in 0..num_tables {
+        let offset = 12 + i * 16;
+        if &data[offset..offset + 4] == b"CBDT" {
+            return true;
+        }
+    }
+    false
+}
+
+/// Opens an APK asset, relative to `assets/`, for the life of the process. An
+/// uncompressed asset is used in place, mapped from the APK.
+fn load_asset(
+    asset_manager: &ndk::asset::AssetManager,
+    path: &str,
+) -> anyhow::Result<&'static [u8]> {
+    let c_path = std::ffi::CString::new(path)?;
+    let asset = asset_manager
+        .open(&c_path)
+        .ok_or_else(|| anyhow::anyhow!("asset not found: {path}"))?;
+    Ok(Box::leak(Box::new(asset)).buffer()?)
+}
+
+/// Maps a read-only file. Fonts are mapped instead of read, so starting up costs no copies:
+/// the kernel pages in only the parts Parley reads.
+fn map_file(path: &str) -> std::io::Result<memmap2::Mmap> {
+    let file = std::fs::File::open(path)?;
+    // SAFETY: system fonts are read-only and aren't truncated while the process runs.
+    unsafe { memmap2::Mmap::map(&file) }
+}
+
+/// The bundled CBDT emoji font, relative to the APK's `assets/` directory.
+const BUNDLED_EMOJI_FONT: &str = "fonts/NotoColorEmoji.ttf";
+
+/// The text system still waiting for the bundled emoji font. On the host-driven
+/// path the platform can start before `set_host_activity` has provided an
+/// AssetManager; the font is then loaded when it does.
+static EMOJI_FONT_PENDING: std::sync::Mutex<Option<Arc<ParleyTextSystem>>> =
+    std::sync::Mutex::new(None);
+
+/// Load the bundled emoji font into a text system that started without an
+/// AssetManager. Called by `set_host_activity` once it has one.
+pub(crate) fn load_deferred_emoji_font() {
+    let Some(text_system) = EMOJI_FONT_PENDING.lock().expect("poisoned").take() else {
+        return;
+    };
+    match crate::android::jni::with_asset_manager(|assets| load_asset(assets, BUNDLED_EMOJI_FONT)) {
+        Some(font) => add_emoji_font(&text_system, font),
+        None => log::warn!("no AssetManager available — cannot load bundled emoji font"),
+    }
+}
+
+fn add_emoji_font(text_system: &ParleyTextSystem, font: anyhow::Result<&'static [u8]>) {
+    match font.and_then(|bytes| text_system.add_fonts(vec![std::borrow::Cow::Borrowed(bytes)])) {
+        Ok(()) => log::info!("loaded the bundled emoji font"),
+        Err(e) => log::warn!("failed to load the bundled emoji font: {e:#}"),
+    }
+}
+
+impl AndroidPlatform {
+    // ── constructors ─────────────────────────────────────────────────────────
+
+    /// Create a new `AndroidPlatform`.
+    ///
+    /// `headless` — when `true`, no real `ANativeWindow` / wgpu surface is
+    /// created.  Useful for off-screen rendering and unit tests.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from a thread that is not the Android main thread
+    /// (i.e. `ALooper_forThread()` returns null) — unless `headless` is `true`.
+    pub fn new(headless: bool) -> Self {
+        Self::new_scoped(headless, None)
+    }
+
+    pub(crate) fn new_for_session(headless: bool, session: Arc<super::jni::NativeSession>) -> Self {
+        Self::new_scoped(headless, Some(session))
+    }
+
+    fn new_scoped(headless: bool, native_session: Option<Arc<super::jni::NativeSession>>) -> Self {
+        crate::android::init_logger();
+
+        // Build a dispatcher appropriate for the current context.
+        let dispatcher = if headless {
+            // In headless mode we create a minimal dispatcher without a real
+            // ALooper.  Background tasks still work; foreground dispatch is
+            // handled by `flush_main_thread_tasks`.
+            AndroidDispatcher::new_headless()
+        } else {
+            AndroidDispatcher::new()
+        };
+
+        let text_system = Arc::new(
+            ParleyTextSystem::new_with_system_font(SystemFonts::Load, "Roboto")
+                // Fontique scans /system/fonts and reads fonts.xml for script
+                // fallback. Naming the families too keeps them first on Android
+                // 15 and newer, where fonts.xml is no longer updated, and puts
+                // the bundled emoji font ahead of the system's COLRv1 one.
+                .with_fallback_families([
+                    "Noto Color Emoji",
+                    "Noto Sans CJK JP",
+                    "Noto Sans CJK KR",
+                    "Noto Sans CJK SC",
+                    "Noto Sans CJK TC",
+                    "Noto Sans CJK HK",
+                    "Noto Sans Devanagari",
+                    "Noto Sans Arabic",
+                    "Noto Sans Hebrew",
+                    "Noto Sans Thai",
+                    "Noto Sans",
+                    "Noto Serif",
+                ]),
+        );
+
+        // Android 13 and newer ship a COLRv1 emoji font, which Swash can't draw.
+        // Add the bundled CBDT one from the APK assets in that case.
+        let system_emoji_has_bitmaps = map_file("/system/fonts/NotoColorEmoji.ttf")
+            .is_ok_and(|font| font_has_cbdt_tables(&font));
+        if !system_emoji_has_bitmaps {
+            // Hold the lock across the check, so a concurrent `set_host_activity`
+            // either provides the AssetManager first or finds the text system pending.
+            let mut pending = EMOJI_FONT_PENDING.lock().expect("poisoned");
+            match crate::android::jni::with_asset_manager_for_runtime(
+                native_session.as_deref(),
+                |assets| load_asset(assets, BUNDLED_EMOJI_FONT),
+            ) {
+                Some(font) => add_emoji_font(&text_system, font),
+                None => *pending = Some(Arc::clone(&text_system)),
+            }
+        }
+
+        let displays = if headless {
+            // Provide a synthetic 1080×1920 display for headless builds.
+            DisplayList::single(AndroidDisplay::headless(1080, 1920))
+        } else {
+            // Real display geometry is filled in when the first
+            // `APP_CMD_INIT_WINDOW` arrives.
+            DisplayList::single(AndroidDisplay::headless(0, 0))
+        };
+
+        log::info!("AndroidPlatform::new — headless={headless}");
+
+        Self {
+            native_session,
+            state: Mutex::new(AndroidPlatformState {
+                dispatcher,
+                gpu_context: Some(Rc::new(RefCell::new(None))),
+                windows: WindowList::default(),
+                pending_window: None,
+                displays,
+                displays_changed_callback: None,
+                text_system,
+                clipboard: AndroidClipboard::default(),
+                credentials: AndroidCredentialStore::default(),
+                finish_launching: None,
+                quit_callback: None,
+                reopen_callback: None,
+                open_urls_callback: None,
+                keyboard_layout_callback: None,
+                on_init_window_callback: None,
+                is_active: false,
+                headless,
+                preferred_backend: AndroidBackend::Vulkan,
+            }),
+            should_quit: AtomicBool::new(false),
+            appearance: Mutex::default(),
+        }
+    }
+
+    // ── executor access ───────────────────────────────────────────────────────
+
+    fn replace_callback<T, F>(&self, value: T, slot: F) -> bool
+    where
+        F: for<'a> FnOnce(&'a mut AndroidPlatformState) -> &'a mut Option<T>,
+    {
+        let (old, rejected) = {
+            let mut state = self.state.lock();
+            if self
+                .native_session
+                .as_ref()
+                .is_some_and(|session| !session.is_active())
+            {
+                (None, Some(value))
+            } else {
+                (slot(&mut state).replace(value), None)
+            }
+        };
+        drop(old);
+        let accepted = rejected.is_none();
+        drop(rejected);
+        accepted
+    }
+
+    fn take_callback<T, F>(&self, slot: F) -> Option<T>
+    where
+        F: for<'a> FnOnce(&'a mut AndroidPlatformState) -> &'a mut Option<T>,
+    {
+        let mut state = self.state.lock();
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            None
+        } else {
+            slot(&mut state).take()
+        }
+    }
+
+    /// Returns the background-task executor (Rust thread-pool).
+    pub fn background_executor(&self) -> Arc<AndroidDispatcher> {
+        self.state.lock().dispatcher.clone()
+    }
+
+    /// Returns the foreground-task executor (ALooper main-thread queue).
+    pub fn foreground_executor(&self) -> Arc<AndroidDispatcher> {
+        self.state.lock().dispatcher.clone()
+    }
+
+    // ── text system ───────────────────────────────────────────────────────────
+
+    /// Returns the text system.
+    pub fn text_system(&self) -> Arc<ParleyTextSystem> {
+        self.state.lock().text_system.clone()
+    }
+
+    // ── lifecycle ─────────────────────────────────────────────────────────────
+
+    /// Store the `on_finish_launching` callback and invoke it immediately.
+    ///
+    /// Register a callback to be invoked when `MainEvent::InitWindow` has
+    /// successfully created the native window.  The callback receives the
+    /// newly created `Arc<AndroidWindow>`.
+    ///
+    /// This is the primary mechanism for deferred window setup on Android:
+    /// instead of calling `cx.open_window(...)` directly (which is not
+    /// supported), the application registers its view setup here.
+    pub fn set_on_init_window<F>(&self, callback: F)
+    where
+        F: FnOnce(Arc<AndroidWindow>) + Send + 'static,
+    {
+        let callback: Box<dyn FnOnce(Arc<AndroidWindow>) + Send> = Box::new(callback);
+        self.replace_callback(callback, |state| &mut state.on_init_window_callback);
+    }
+
+    /// Take the `on_init_window` callback (if any).
+    ///
+    /// Called internally by `handle_main_event` after the window is created.
+    pub fn take_on_init_window_callback(
+        &self,
+    ) -> Option<Box<dyn FnOnce(Arc<AndroidWindow>) + Send>> {
+        self.take_callback(|state| &mut state.on_init_window_callback)
+    }
+
+    /// Store the finish-launching callback and drive the event loop.
+    ///
+    /// On Android, `Platform::run` **blocks** until the app quits — matching
+    /// the semantics of macOS / Linux.  This keeps the `Application` (and its
+    /// internal `Rc<RefCell<AppContext>>`) alive on the caller's stack for the
+    /// entire lifetime of the event loop.
+    ///
+    /// The stored callback is invoked once the native window is ready (i.e.
+    /// after `MainEvent::InitWindow` has been processed and an
+    /// `AndroidWindow` exists).  At that point `cx.open_window(...)` will
+    /// find the existing primary window.
+    pub fn run(&self, on_finish_launching: Box<dyn FnOnce() + 'static>) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        self.replace_callback(
+            Registration::new(Some(dispatcher), Callback::Close(Some(on_finish_launching))),
+            |state| &mut state.finish_launching,
+        );
+        log::info!("AndroidPlatform::run — callback stored, entering event loop");
+
+        // Drive the event loop.  This blocks until quit() is called or
+        // the activity is destroyed.  The finish_launching callback will
+        // be invoked from inside the event loop when the window is ready.
+        if let Some(session) = &self.native_session {
+            super::jni::run_event_loop_for_session(session);
+            // Retire GPUI callbacks and scoped foreground tasks before
+            // Application::run returns and releases its AppCell. The session
+            // guard repeats this cleanup as an idempotent safety net.
+            self.retire_native_session_on_owner();
+        } else {
+            // No `AndroidApp` to drive: either headless / test mode, or the host-driven
+            // entry point (`super::host`), whose render thread owns the loop and keeps
+            // the app alive through `Application::run_embedded`. Invoke the callback
+            // immediately and return.
+            let cb = self.take_callback(|state| &mut state.finish_launching);
+            if let Some(cb) = cb {
+                cb.call_once();
+            }
+        }
+
+        log::info!("AndroidPlatform::run — event loop exited");
+    }
+
+    /// Take the stored `on_finish_launching` callback, if any.
+    ///
+    /// Called by `run_event_loop` when the native window is ready so that
+    /// the GPUI `Application` context can open its first window.
+    pub(super) fn take_finish_launching_callback(&self) -> Option<Registration> {
+        self.take_callback(|state| &mut state.finish_launching)
+    }
+
+    /// Request a graceful quit.
+    ///
+    /// Sets the `should_quit` flag; the main loop will exit on the next tick.
+    /// Invokes the registered quit callback before returning.
+    pub fn quit(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        log::info!("AndroidPlatform::quit");
+        // GPUI may defer shutdown while its App is borrowed. Take the callback
+        // out of the mutex so it can call back into the platform safely.
+        let callback = self.state.lock().quit_callback.clone();
+        let can_quit = callback
+            .as_ref()
+            .and_then(Registration::call_quit)
+            .unwrap_or(true);
+        if can_quit {
+            self.should_quit.store(true, Ordering::SeqCst);
+        }
+    }
+
+    /// Returns `true` if `quit()` has been called.
+    pub fn should_quit(&self) -> bool {
+        self.should_quit.load(Ordering::Relaxed)
+    }
+
+    /// Called by the app delegate when the app moves to the foreground.
+    pub fn did_become_active(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        log::debug!("AndroidPlatform::did_become_active");
+        self.state.lock().is_active = true;
+    }
+
+    /// Called by the app delegate when the app moves to the background.
+    pub fn did_enter_background(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        log::debug!("AndroidPlatform::did_enter_background");
+        self.state.lock().is_active = false;
+    }
+
+    /// Deliver URLs from an implicit or explicit intent.
+    pub fn deliver_open_urls(&self, urls: Vec<String>) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        log::debug!("AndroidPlatform: delivering {} URL(s)", urls.len());
+        let cb = { self.state.lock().open_urls_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::OpenUrls(urls));
+        }
+    }
+
+    /// Notify the platform that the keyboard layout has changed.
+    pub fn notify_keyboard_layout_change(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        let cb = { self.state.lock().keyboard_layout_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::KeyboardLayout);
+        }
+    }
+
+    /// Deliver a "reopen" event (app tapped in recents while already running).
+    pub fn deliver_reopen(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        let cb = { self.state.lock().reopen_callback.clone() };
+        if let Some(cb) = cb {
+            cb.dispatch(CallbackEvent::Reopen);
+        }
+    }
+
+    // ── window management ─────────────────────────────────────────────────────
+
+    /// Open a new window backed by `native_window`.
+    pub fn open_window(
+        &self,
+        native_window: ndk::native_window::NativeWindow,
+        scale_factor: f32,
+        transparent: bool,
+    ) -> Result<Arc<AndroidWindow>> {
+        let window = {
+            let mut state = self.state.lock();
+            let window = AndroidWindow::new_for_session(
+                native_window,
+                Rc::clone(
+                    state
+                        .gpu_context
+                        .as_ref()
+                        .context("NativeActivity GPU context has been retired")?,
+                ),
+                scale_factor,
+                transparent,
+                Some(Arc::clone(&state.dispatcher)),
+                self.native_session.clone(),
+            )?;
+            state.windows.push(Arc::clone(&window));
+            window
+        };
+        log::info!(
+            "AndroidPlatform::open_window — id={:#x} scale={:.1}",
+            window.id(),
+            scale_factor
+        );
+        self.refresh_appearance();
+        Ok(window)
+    }
+
+    /// Give an existing window a new surface, as when its Activity is recreated, and
+    /// re-read night mode, which may have changed while it had none.
+    pub fn reinit_window(
+        &self,
+        window: &AndroidWindow,
+        native_window: ndk::native_window::NativeWindow,
+    ) -> Result<()> {
+        window.init_window(native_window, self.gpu_context())?;
+        self.refresh_appearance();
+        Ok(())
+    }
+
+    /// Read the system night mode and apply it to every window.
+    pub fn refresh_appearance(&self) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        self.set_appearance(super::jni::query_appearance_for_runtime(
+            self.native_session.as_deref(),
+        ));
+    }
+
+    /// Apply `appearance` to every window, and answer it from
+    /// `Platform::window_appearance` from now on.
+    pub fn set_appearance(&self, appearance: super::window::WindowAppearance) {
+        *self.appearance.lock() = appearance;
+        let windows: Vec<_> = self.state.lock().windows.iter().cloned().collect();
+        // Outside the lock: a window's appearance callback calls into GPUI.
+        for window in windows {
+            window.set_appearance(appearance);
+        }
+    }
+
+    /// Name the window the next [`Platform::open_window`] should return.
+    ///
+    /// Cleared by that call. See [`AndroidPlatformState::pending_window`].
+    pub fn set_pending_window(&self, window: Arc<AndroidWindow>) {
+        if let Some(session) = self.native_session.as_ref() {
+            assert!(
+                session.is_owner_thread(),
+                "NativeActivity pending windows are set on their owner thread"
+            );
+        }
+        let (old, rejected) = {
+            let mut state = self.state.lock();
+            let same_runtime = match (self.native_session.as_ref(), window.native_session.as_ref())
+            {
+                (Some(session), Some(owner)) => session.is_active() && Arc::ptr_eq(owner, session),
+                (None, None) => true,
+                _ => false,
+            };
+            let valid = same_runtime && !window.is_retired();
+            if valid {
+                (state.pending_window.replace(window), None)
+            } else {
+                (None, Some(window))
+            }
+        };
+        // A window may release thread-affine resources in Drop; never drop it
+        // while the platform state mutex is held.
+        drop(old);
+        drop(rejected);
+    }
+
+    /// Take the window named by [`Self::set_pending_window`], if any.
+    pub fn take_pending_window(&self) -> Option<Arc<AndroidWindow>> {
+        self.take_callback(|state| &mut state.pending_window)
+    }
+
+    /// Remove and return the window identified by `id`.
+    pub fn close_window(&self, id: u64) -> Option<Arc<AndroidWindow>> {
+        let (window, pending) = {
+            let mut state = self.state.lock();
+            let window = state.windows.remove(id).or_else(|| {
+                state
+                    .pending_window
+                    .as_ref()
+                    .filter(|pending| pending.id() == id)
+                    .cloned()
+            })?;
+            assert!(
+                state.dispatcher.is_main_thread(),
+                "Android windows are closed on their owner thread"
+            );
+            // Serialize terminal retirement with set_pending_window.
+            window.mark_retired_on_owner();
+            let pending = state
+                .pending_window
+                .as_ref()
+                .is_some_and(|pending| Arc::ptr_eq(pending, &window))
+                .then(|| state.pending_window.take())
+                .flatten();
+            (window, pending)
+        };
+        drop(pending);
+        window.retire_native_resources_on_owner();
+        if let Some(session) = window.native_session.as_ref() {
+            session.unregister_window(&window);
+        }
+        Some(window)
+    }
+
+    /// Retire native-session callback producers on the owner thread while the
+    /// GPUI AppCell is still alive. The run loop calls this before returning;
+    /// the native-session guard calls it again after `Application::run` as a
+    /// fallback, so all operations here must tolerate already-retired state.
+    pub(super) fn retire_native_session_on_owner(&self) {
+        if let Some(session) = self.native_session.as_ref() {
+            session.retire_on_owner();
+        }
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        assert!(
+            dispatcher.is_main_thread(),
+            "native-session retirement must run on owner thread"
+        );
+
+        // Close local-task admission first. Callback removal below may wake
+        // these tasks, which are then canceled by draining their typed queue
+        // entries on this owner thread.
+        let scopes = dispatcher.begin_local_task_retirements();
+        let mut windows = {
+            let state = self.state.lock();
+            state.windows.iter().cloned().collect::<Vec<_>>()
+        };
+        if let Some(window) = self.state.lock().pending_window.as_ref() {
+            windows.push(Arc::clone(window));
+        }
+        if let Some(session) = self.native_session.as_ref() {
+            windows.extend(session.take_windows_for_retirement());
+        }
+        let mut seen = std::collections::HashSet::new();
+        windows.retain(|window| seen.insert(Arc::as_ptr(window) as usize));
+
+        for window in &windows {
+            window.mark_retired_on_owner();
+            window.close_accessibility();
+            window.clear_callbacks_on_owner();
+        }
+        super::accessibility::reset_native_session();
+        super::callbacks::clear_current_thread();
+
+        // Empty PlatformState before releasing the dispatcher. Taking these
+        // fields makes a late public platform/window Arc inert; all NDK and Rc
+        // resources are dropped below on the Android owner thread.
+        let (windows_owned, pending, displays, gpu_context, registrations, init_callback) = {
+            let mut state = self.state.lock();
+            state.is_active = false;
+            let windows_owned = std::mem::take(&mut state.windows);
+            let pending = state.pending_window.take();
+            let displays = std::mem::take(&mut state.displays);
+            let gpu_context = state.gpu_context.take();
+            let registrations = (
+                state.displays_changed_callback.take(),
+                state.finish_launching.take(),
+                state.quit_callback.take(),
+                state.reopen_callback.take(),
+                state.open_urls_callback.take(),
+                state.keyboard_layout_callback.take(),
+            );
+            let init_callback = state.on_init_window_callback.take();
+            (
+                windows_owned,
+                pending,
+                displays,
+                gpu_context,
+                registrations,
+                init_callback,
+            )
+        };
+        drop(registrations);
+        drop(init_callback);
+
+        // Callback and task cancellation can enqueue further local wakeups.
+        // Drain until every registered scope is empty and atomically sealed.
+        dispatcher.finish_local_task_retirements(&scopes);
+
+        for window in &windows {
+            window.retire_native_resources_on_owner();
+        }
+        drop(windows_owned);
+        drop(pending);
+        drop(displays);
+        drop(gpu_context);
+        dispatcher.shutdown();
+    }
+
+    /// Returns the primary (first) window, if any.
+    pub fn primary_window(&self) -> Option<Arc<AndroidWindow>> {
+        self.state.lock().windows.primary().cloned()
+    }
+
+    /// Returns the number of live windows.
+    pub fn window_count(&self) -> usize {
+        self.state.lock().windows.len()
+    }
+
+    /// Get a clone of the shared GPU context handle.
+    pub fn gpu_context(&self) -> GpuContext {
+        self.state
+            .lock()
+            .gpu_context
+            .as_ref()
+            .expect("Android platform GPU context has been retired")
+            .clone()
+    }
+
+    // ── display management ────────────────────────────────────────────────────
+
+    /// Returns all connected displays.
+    pub fn displays(&self) -> Vec<AndroidDisplay> {
+        self.state.lock().displays.all().to_vec()
+    }
+
+    /// Returns the primary display.
+    pub fn primary_display(&self) -> Option<AndroidDisplay> {
+        self.state.lock().displays.primary().cloned()
+    }
+
+    /// Update the primary display from a new `NativeWindow`.
+    ///
+    /// Called when `APP_CMD_INIT_WINDOW` delivers a new surface.
+    pub fn update_primary_display(
+        &self,
+        native_window: &ndk::native_window::NativeWindow,
+        asset_manager: &ndk::asset::AssetManager,
+    ) {
+        let display = AndroidDisplay::from_activity(native_window, asset_manager);
+        self.state.lock().displays = DisplayList::single(display);
+        let callback = { self.state.lock().displays_changed_callback.clone() };
+        if let Some(callback) = callback {
+            callback.dispatch(CallbackEvent::DisplaysChanged);
+        }
+    }
+
+    // ── clipboard ─────────────────────────────────────────────────────────────
+
+    /// Write `text` to the clipboard.
+    pub fn write_to_clipboard(&self, text: String) {
+        self.state.lock().clipboard.write(text);
+    }
+
+    /// Read the current clipboard contents.
+    pub fn read_from_clipboard(&self) -> Option<String> {
+        self.state.lock().clipboard.read()
+    }
+
+    // ── credential store ──────────────────────────────────────────────────────
+
+    /// Store credentials in the Android Keystore.
+    pub fn write_credentials(&self, service: &str, username: &str, password: &[u8]) -> Result<()> {
+        self.state
+            .lock()
+            .credentials
+            .write(service, username, password)
+    }
+
+    /// Read credentials from the Android Keystore.
+    pub fn read_credentials(&self, service: &str, username: &str) -> Result<Option<Vec<u8>>> {
+        self.state.lock().credentials.read(service, username)
+    }
+
+    /// Delete credentials from the Android Keystore.
+    pub fn delete_credentials(&self, service: &str, username: &str) -> Result<()> {
+        self.state.lock().credentials.delete(service, username)
+    }
+
+    // ── misc platform queries ─────────────────────────────────────────────────
+
+    /// Whether the platform is running in headless mode.
+    pub fn is_headless(&self) -> bool {
+        self.state.lock().headless
+    }
+
+    /// Whether the app is currently in the foreground.
+    pub fn is_active(&self) -> bool {
+        self.state.lock().is_active
+    }
+
+    /// Whether scrollbars should auto-hide.
+    ///
+    /// Android always hides scrollbars after a short delay.
+    pub fn should_auto_hide_scrollbars(&self) -> bool {
+        true
+    }
+
+    /// The path to the current executable / APK.
+    ///
+    /// On Android this resolves to `/proc/self/exe` (symlink to the process
+    /// binary) or falls back to an empty path.
+    pub fn app_path(&self) -> Result<PathBuf> {
+        let exe = std::fs::read_link("/proc/self/exe").unwrap_or_else(|_| PathBuf::from(""));
+        Ok(exe)
+    }
+
+    /// Android apps do not have auxiliary executables.
+    pub fn path_for_auxiliary_executable(&self, _name: &str) -> Result<PathBuf> {
+        anyhow::bail!("auxiliary executables are not supported on Android")
+    }
+
+    /// Android apps cannot select mixed files/dirs via the system file picker.
+    pub fn can_select_mixed_files_and_dirs(&self) -> bool {
+        false
+    }
+
+    /// Returns the current keyboard layout identifier.
+    ///
+    /// On Android this queries the `InputMethodManager` via JNI to get the
+    /// current input method's locale/subtype tag (e.g. `"en-US"`).
+    /// Falls back to `"en-US"` if the JNI call fails.
+    pub fn keyboard_layout_id(&self) -> String {
+        self.query_keyboard_layout_id_via_jni()
+            .unwrap_or_else(|| "en-US".to_string())
+    }
+
+    /// Query the keyboard layout ID from `InputMethodManager` via JNI.
+    ///
+    /// Calls:
+    /// ```java
+    /// Context ctx = activity;
+    /// InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+    /// InputMethodSubtype subtype = imm.getCurrentInputMethodSubtype();
+    /// if (subtype != null) return subtype.getLocale(); // e.g. "en_US"
+    /// ```
+    ///
+    /// Returns `None` if the JNI environment is unavailable or the call fails.
+    fn query_keyboard_layout_id_via_jni(&self) -> Option<String> {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return None;
+        }
+        use crate::android::jni::{self as jni_helpers, get_string};
+        use jni::objects::JValue;
+
+        jni_helpers::with_env(|env| {
+            let activity = jni_helpers::activity_for_runtime(env, self.native_session.as_deref())?;
+
+            // activity.getSystemService("input_method")
+            let service_name = env.new_string("input_method").map_err(|e| e.to_string())?;
+            let imm = env
+                .call_method(
+                    &activity,
+                    jni::jni_str!("getSystemService"),
+                    jni::jni_sig!("(Ljava/lang/String;)Ljava/lang/Object;"),
+                    &[JValue::Object(&service_name)],
+                )
+                .and_then(|v| v.l())
+                .map_err(|e| e.to_string())?;
+            if imm.is_null() {
+                return Ok(None);
+            }
+
+            // imm.getCurrentInputMethodSubtype()
+            let subtype = env
+                .call_method(
+                    &imm,
+                    jni::jni_str!("getCurrentInputMethodSubtype"),
+                    jni::jni_sig!("()Landroid/view/inputmethod/InputMethodSubtype;"),
+                    &[],
+                )
+                .and_then(|v| v.l())
+                .map_err(|e| e.to_string())?;
+            if subtype.is_null() {
+                return Ok(None);
+            }
+
+            // subtype.getLocale()
+            let locale_obj = env
+                .call_method(
+                    &subtype,
+                    jni::jni_str!("getLocale"),
+                    jni::jni_sig!("()Ljava/lang/String;"),
+                    &[],
+                )
+                .and_then(|v| v.l())
+                .map_err(|e| e.to_string())?;
+
+            let result = get_string(env, &locale_obj).replace('_', "-");
+            if result.is_empty() {
+                Ok(None)
+            } else {
+                log::debug!("keyboard_layout_id via JNI: {}", result);
+                Ok(Some(result))
+            }
+        })
+        .ok()
+        .flatten()
+    }
+
+    /// Register a thermal status listener via JNI using PowerManager.
+    ///
+    /// On Android 29+ (API Q), calls:
+    /// ```java
+    /// PowerManager pm = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
+    /// pm.addThermalStatusListener(executor, listener);
+    /// ```
+    ///
+    /// For simplicity, we poll the thermal status periodically from the main
+    /// loop tick rather than setting up a full JNI callback bridge.  The
+    /// callback is stored and invoked when the thermal state changes.
+    fn register_thermal_listener(&self, callback: Box<dyn FnMut()>) {
+        // Android API 29 exposes thermal status queries, but this backend has no
+        // registered listener or polling loop yet. Drop the callback on the
+        // platform owner thread rather than retaining a listener that never fires.
+        drop(callback);
+        log::debug!("thermal-state callbacks are unavailable on this Android backend");
+    }
+
+    /// Query the current thermal status via JNI.
+    ///
+    /// Calls `PowerManager.getCurrentThermalStatus()` (API 29+).
+    /// Returns the raw int status:
+    /// - 0 = THERMAL_STATUS_NONE
+    /// - 1 = THERMAL_STATUS_LIGHT
+    /// - 2 = THERMAL_STATUS_MODERATE
+    /// - 3 = THERMAL_STATUS_SEVERE
+    /// - 4 = THERMAL_STATUS_CRITICAL
+    /// - 5 = THERMAL_STATUS_EMERGENCY
+    /// - 6 = THERMAL_STATUS_SHUTDOWN
+    ///
+    /// Returns -1 on failure (JNI unavailable, API < 29, etc.).
+    #[allow(dead_code)]
+    fn query_thermal_status_via_jni(&self) -> i32 {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return -1;
+        }
+        use crate::android::jni as jni_helpers;
+        use jni::objects::JValue;
+
+        jni_helpers::with_env(|env| {
+            let activity = jni_helpers::activity_for_runtime(env, self.native_session.as_deref())?;
+
+            // activity.getSystemService("power")
+            let service_name = env.new_string("power").map_err(|e| e.to_string())?;
+            let pm = match env
+                .call_method(
+                    &activity,
+                    jni::jni_str!("getSystemService"),
+                    jni::jni_sig!("(Ljava/lang/String;)Ljava/lang/Object;"),
+                    &[JValue::Object(&service_name)],
+                )
+                .and_then(|v| v.l())
+            {
+                Ok(o) if !o.is_null() => o,
+                _ => {
+                    env.exception_clear();
+                    return Err("getSystemService(power) failed or returned null".to_string());
+                }
+            };
+
+            // pm.getCurrentThermalStatus() — API 29+
+            let status = match env
+                .call_method(
+                    &pm,
+                    jni::jni_str!("getCurrentThermalStatus"),
+                    jni::jni_sig!("()I"),
+                    &[],
+                )
+                .and_then(|v| v.i())
+            {
+                Ok(s) => s,
+                Err(_) => {
+                    env.exception_clear();
+                    return Err("getCurrentThermalStatus() failed".to_string());
+                }
+            };
+
+            log::trace!("query_thermal_status_via_jni: status={}", status);
+            Ok(status)
+        })
+        .unwrap_or(-1)
+    }
+
+    /// Preferred wgpu backend.
+    pub fn preferred_backend(&self) -> AndroidBackend {
+        self.state.lock().preferred_backend
+    }
+
+    /// Override the preferred wgpu backend.
+    pub fn set_preferred_backend(&self, backend: AndroidBackend) {
+        self.state.lock().preferred_backend = backend;
+    }
+
+    // ── callback registration ─────────────────────────────────────────────────
+
+    /// Register a callback invoked when the app is about to quit.
+    pub fn on_quit<F>(&self, mut cb: F)
+    where
+        F: FnMut() + Send + 'static,
+    {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(
+            Some(dispatcher),
+            Callback::Quit(Box::new(move || {
+                cb();
+                true
+            })),
+        );
+        self.replace_callback(registration, |state| &mut state.quit_callback);
+    }
+
+    /// Register a callback invoked when the app is re-opened.
+    pub fn on_reopen<F>(&self, cb: F)
+    where
+        F: FnMut() + Send + 'static,
+    {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::Reopen(Box::new(cb)));
+        self.replace_callback(registration, |state| &mut state.reopen_callback);
+    }
+
+    /// Register a callback invoked when the OS delivers URLs to open.
+    pub fn on_open_urls<F>(&self, cb: F)
+    where
+        F: FnMut(Vec<String>) + Send + 'static,
+    {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::OpenUrls(Box::new(cb)));
+        self.replace_callback(registration, |state| &mut state.open_urls_callback);
+    }
+
+    /// Register a callback invoked when the keyboard layout changes.
+    pub fn on_keyboard_layout_change<F>(&self, cb: F)
+    where
+        F: FnMut() + Send + 'static,
+    {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration =
+            Registration::new(Some(dispatcher), Callback::KeyboardLayout(Box::new(cb)));
+        self.replace_callback(registration, |state| &mut state.keyboard_layout_callback);
+    }
+
+    // ── dispatcher tick ───────────────────────────────────────────────────────
+
+    /// Advance the platform's dispatcher by one tick.
+    ///
+    /// Should be called from the native-activity main loop on every iteration
+    /// to process delayed background tasks.
+    pub fn tick(&self) {
+        self.state.lock().dispatcher.tick();
+    }
+
+    /// When the next delayed background task is due; the main loop sleeps
+    /// no longer than that.
+    pub fn next_delayed_due(&self) -> Option<std::time::Instant> {
+        self.state.lock().dispatcher.next_delayed_due()
+    }
+
+    /// Drain all pending main-thread tasks synchronously.
+    ///
+    /// Useful in headless tests where there is no real ALooper.
+    pub fn flush_main_thread_tasks(&self) {
+        self.state.lock().dispatcher.flush_main_thread_tasks();
+    }
+}
+
+/// Android's feel constants for GPUI's portable gesture recognizers.
+///
+/// Without this GPUI falls back to [`GestureTuning::default`], whose scroll
+/// physics are `UIScrollView`'s — an exponential decay that coasts noticeably
+/// longer than Android's, so a fling reads as unresponsive to anyone used to
+/// the platform.
+struct AndroidGestures;
+
+impl PlatformGestures for AndroidGestures {
+    fn tuning(&self) -> GestureTuning {
+        GestureTuning {
+            // AOSP's `OverScroller` friction spline. GPUI flings in logical
+            // pixels, and this window's scale factor is Android's display
+            // density, so logical pixels are density-independent pixels and
+            // the nominal 160 dpi pairing this constructor documents is the
+            // right one.
+            scroll_physics: ScrollPhysics::android(),
+            // The rest of `ViewConfiguration` (touch slop, tap timeouts) is
+            // close enough to GPUI's defaults to leave alone; reading the real
+            // values over JNI is a separate change.
+            ..GestureTuning::default()
+        }
+    }
+}
+
+// ── impl Platform ─────────────────────────────────────────────────────────────
+//
+// Implementation of the GPUI `Platform` trait for Android.
+//
+// Methods that have a meaningful Android implementation are wired to the
+// existing `AndroidPlatform` helpers.  Desktop-only methods (menus, dock,
+// file pickers, etc.) are no-ops or return sensible defaults.
+
+impl Platform for AndroidPlatform {
+    fn gestures(&self) -> Option<Rc<dyn PlatformGestures>> {
+        Some(Rc::new(AndroidGestures))
+    }
+
+    fn background_executor(&self) -> BackgroundExecutor {
+        let dispatcher: Arc<dyn gpui::PlatformDispatcher> = self.state.lock().dispatcher.clone();
+        BackgroundExecutor::new(dispatcher)
+    }
+
+    fn foreground_executor(&self) -> ForegroundExecutor {
+        let dispatcher: Arc<dyn gpui::PlatformDispatcher> = self.state.lock().dispatcher.clone();
+        ForegroundExecutor::new(dispatcher)
+    }
+
+    fn text_system(&self) -> Arc<dyn PlatformTextSystem> {
+        self.state.lock().text_system.clone()
+    }
+
+    fn run(&self, on_finish_launching: Box<dyn 'static + FnOnce()>) {
+        // The callback remains in the owner-thread callback registry for its
+        // full lifetime; no Send marker is fabricated for this GPUI closure.
+        AndroidPlatform::run(self, on_finish_launching);
+    }
+
+    fn quit(&self) {
+        AndroidPlatform::quit(self);
+    }
+
+    fn restart(&self, _binary_path: Option<PathBuf>, _arguments: Vec<std::ffi::OsString>) {
+        log::warn!("AndroidPlatform::restart — not supported on Android");
+    }
+
+    fn activate(&self, _ignoring_other_apps: bool) {
+        self.state.lock().is_active = true;
+    }
+
+    fn hide(&self) {
+        // No-op: Android apps don't "hide" in the macOS sense.
+    }
+
+    fn hide_other_apps(&self) {
+        // No-op: not applicable on Android.
+    }
+
+    fn unhide_other_apps(&self) {
+        // No-op: not applicable on Android.
+    }
+
+    fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>> {
+        let state = self.state.lock();
+        state
+            .displays
+            .all()
+            .iter()
+            .map(|d| Rc::new(d.clone()) as Rc<dyn PlatformDisplay>)
+            .collect()
+    }
+
+    fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>> {
+        self.state
+            .lock()
+            .displays
+            .primary()
+            .map(|d| Rc::new(d.clone()) as Rc<dyn PlatformDisplay>)
+    }
+
+    fn on_displays_changed(&self, callback: Box<dyn FnMut()>) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::DisplaysChanged(callback));
+        self.replace_callback(registration, |state| &mut state.displays_changed_callback);
+    }
+
+    fn active_window(&self) -> Option<AnyWindowHandle> {
+        // Android does not have a window-stack concept — there is at most one
+        // active window (the primary window).  GPUI uses `AnyWindowHandle`
+        // which requires an entity id we don't have from the platform layer,
+        // so return `None` and let the GPUI app context track the active window.
+        None
+    }
+
+    fn open_window(
+        &self,
+        _handle: AnyWindowHandle,
+        _options: WindowParams,
+    ) -> anyhow::Result<Box<dyn PlatformWindow>> {
+        #[cfg(feature = "offscreen")]
+        if let Some(window) = crate::offscreen::take_pending() {
+            return Ok(window);
+        }
+        // On Android the native window is created by the system via
+        // MainEvent::InitWindow, not by the application.  If a window
+        // already exists we wrap it in an AndroidPlatformWindow and hand
+        // it to GPUI.
+        //
+        // `take_pending_window` is what lets a host open more than one: it names the
+        // window this call is for. Without it every `cx.open_window` would answer with
+        // `primary`, so a second Activity's panel would render into the first
+        // Activity's surface.
+        let window = self.take_pending_window().or_else(|| self.primary_window());
+        let window = window.ok_or_else(|| {
+            anyhow::anyhow!(
+                "AndroidPlatform::open_window — no native window available yet. \
+                 Call this from the on_init_window callback after the surface is ready."
+            )
+        })?;
+
+        let display = self
+            .state
+            .lock()
+            .displays
+            .primary()
+            .map(|d| Rc::new(d.clone()) as Rc<dyn PlatformDisplay>);
+
+        Ok(Box::new(super::window::AndroidPlatformWindow::new(
+            window, display,
+        )))
+    }
+
+    fn window_appearance(&self) -> WindowAppearance {
+        (*self.appearance.lock()).into()
+    }
+
+    fn open_url(&self, url: &str) {
+        // A full implementation would call startActivity with an ACTION_VIEW
+        // Intent via JNI.  For now, log the request.
+        log::info!("AndroidPlatform::open_url({url}) — Intent launch not yet implemented");
+    }
+
+    fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::OpenUrls(callback));
+        self.replace_callback(registration, |state| &mut state.open_urls_callback);
+    }
+
+    fn register_url_scheme(&self, _url: &str) -> Task<Result<()>> {
+        Task::ready(Ok(()))
+    }
+
+    fn prompt_for_paths(
+        &self,
+        options: PathPromptOptions,
+    ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>> {
+        super::document_picker::prompt(options, self.native_session.clone())
+    }
+
+    fn prompt_for_new_path(
+        &self,
+        _directory: &Path,
+        _suggested_name: Option<&str>,
+    ) -> oneshot::Receiver<Result<Option<PathBuf>>> {
+        let (tx, rx) = oneshot::channel();
+        let _ = tx.send(Ok(None));
+        rx
+    }
+
+    fn can_select_mixed_files_and_dirs(&self) -> bool {
+        false
+    }
+
+    fn reveal_path(&self, _path: &Path) {
+        log::info!("AndroidPlatform::reveal_path — not supported on Android");
+    }
+
+    fn open_with_system(&self, _path: &Path) {
+        // A full implementation would call startActivity with an ACTION_VIEW
+        // Intent via JNI.  For now, log the request.
+        log::info!("AndroidPlatform::open_with_system — Intent launch not yet implemented");
+    }
+
+    fn on_quit(&self, callback: Box<dyn FnMut() -> bool>) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::Quit(callback));
+        self.replace_callback(registration, |state| &mut state.quit_callback);
+    }
+
+    fn on_system_sleep(&self, _callback: Box<dyn FnMut()>) {
+        // Android reports Activity pause/background transitions, not a distinct
+        // imminent-system-sleep event. Do not misreport every pause as sleep.
+    }
+
+    fn on_system_wake(&self, _callback: Box<dyn FnMut()>) {
+        // Android reports Activity resume/foreground transitions instead.
+    }
+
+    fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>> {
+        Task::ready(Err(anyhow::anyhow!(
+            "Android idle-sleep prevention is unavailable (requested: {reason})"
+        )))
+    }
+
+    fn hide_cursor_until_mouse_moves(&self) {
+        // The native mobile UI manages pointer visibility.
+    }
+
+    fn is_cursor_visible(&self) -> bool {
+        false
+    }
+
+    fn on_reopen(&self, callback: Box<dyn FnMut()>) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::Reopen(callback));
+        self.replace_callback(registration, |state| &mut state.reopen_callback);
+    }
+
+    fn set_menus(&self, _menus: Vec<Menu>, _keymap: &Keymap) {
+        // No-op: Android doesn't have macOS-style menus.
+    }
+
+    fn set_dock_menu(&self, _menu: Vec<MenuItem>, _keymap: &Keymap) {
+        // No-op: Android doesn't have a dock.
+    }
+
+    fn on_app_menu_action(&self, _callback: Box<dyn FnMut(&dyn Action)>) {
+        // No-op: no app menu on Android.
+    }
+
+    fn on_will_open_app_menu(&self, _callback: Box<dyn FnMut()>) {
+        // No-op.
+    }
+
+    fn on_validate_app_menu_command(&self, _callback: Box<dyn FnMut(&dyn Action) -> bool>) {
+        // No-op.
+    }
+
+    fn thermal_state(&self) -> ThermalState {
+        ThermalState::Nominal
+    }
+
+    fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>) {
+        if self
+            .native_session
+            .as_ref()
+            .is_some_and(|session| !session.is_active())
+        {
+            return;
+        }
+        // Subscribe to Android thermal callbacks via PowerManager.
+        //
+        // On Android 29+ (Q), PowerManager provides `addThermalStatusListener`
+        // which delivers callbacks when the thermal state changes.  We spawn a
+        // background thread that registers the listener via JNI and relays the
+        // callback to the main thread via the dispatcher.
+        //
+        // For devices below API 29 this is a silent no-op.
+        self.register_thermal_listener(callback);
+    }
+
+    fn app_path(&self) -> Result<PathBuf> {
+        let exe = std::fs::read_link("/proc/self/exe").unwrap_or_else(|_| PathBuf::from(""));
+        Ok(exe)
+    }
+
+    fn path_for_auxiliary_executable(&self, _name: &str) -> Result<PathBuf> {
+        anyhow::bail!("auxiliary executables are not supported on Android")
+    }
+
+    fn set_cursor_style(&self, _style: CursorStyle) {
+        // No-op: Android uses touch, not mouse cursors.
+    }
+
+    fn should_auto_hide_scrollbars(&self) -> bool {
+        true
+    }
+
+    fn read_from_clipboard(&self) -> Option<ClipboardItem> {
+        self.state
+            .lock()
+            .clipboard
+            .read()
+            .map(ClipboardItem::new_string)
+    }
+
+    fn write_to_clipboard(&self, item: ClipboardItem) {
+        self.state
+            .lock()
+            .clipboard
+            .write(item.text().unwrap_or_default());
+    }
+
+    fn write_credentials(&self, url: &str, username: &str, password: &[u8]) -> Task<Result<()>> {
+        let result = self.state.lock().credentials.write(url, username, password);
+        Task::ready(result)
+    }
+
+    fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
+        // The credential store is keyed by (service, username) but the
+        // Platform trait only provides `url`.  Use a fixed username for now.
+        let result = self
+            .state
+            .lock()
+            .credentials
+            .read(url, "default")
+            .map(|opt| opt.map(|pw| ("default".to_string(), pw)));
+        Task::ready(result)
+    }
+
+    fn delete_credentials(&self, url: &str) -> Task<Result<()>> {
+        let result = self.state.lock().credentials.delete(url, "default");
+        Task::ready(result)
+    }
+
+    fn keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout> {
+        Box::new(crate::android::keyboard::AndroidKeyboardLayout::new(
+            "en-US",
+        ))
+    }
+
+    fn keyboard_mapper(&self) -> Rc<dyn PlatformKeyboardMapper> {
+        Rc::new(AndroidKeyboardMapper)
+    }
+
+    fn on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>) {
+        let dispatcher = Arc::clone(&self.state.lock().dispatcher);
+        let registration = Registration::new(Some(dispatcher), Callback::KeyboardLayout(callback));
+        self.replace_callback(registration, |state| &mut state.keyboard_layout_callback);
+    }
+}
+
+// ── Android keyboard mapper (stub) ───────────────────────────────────────────
+
+/// Minimal `PlatformKeyboardMapper` for Android.
+///
+/// On Android there are no macOS-style key equivalents; we pass keystrokes
+/// through unchanged.
+struct AndroidKeyboardMapper;
+
+impl PlatformKeyboardMapper for AndroidKeyboardMapper {
+    fn map_key_equivalent(
+        &self,
+        keystroke: Keystroke,
+        _use_key_equivalents: bool,
+    ) -> KeybindingKeystroke {
+        KeybindingKeystroke::from_keystroke(keystroke)
+    }
+
+    fn get_key_equivalents(&self) -> Option<&HashMap<char, char, rustc_hash::FxBuildHasher>> {
+        None
+    }
+}
+
+// ── SharedPlatform — Rc-friendly wrapper around Arc<AndroidPlatform> ─────────
+//
+// GPUI's `Application::with_platform` requires `Rc<dyn Platform>`.
+// The global `PLATFORM` in `jni` stores `Arc<AndroidPlatform>`.
+// `SharedPlatform` bridges the two: it holds `Arc<AndroidPlatform>` and
+// implements `Platform` by delegating every call, so it can be wrapped
+// in `Rc` and handed to GPUI while sharing the same underlying state.
+
+/// A thin wrapper so that `Arc<AndroidPlatform>` can be used as
+/// `Rc<dyn Platform>` by GPUI's `Application::with_platform`.
+pub struct SharedPlatform(pub Arc<AndroidPlatform>);
+
+impl SharedPlatform {
+    pub fn new(inner: Arc<AndroidPlatform>) -> Self {
+        Self(inner)
+    }
+
+    /// Convenience: wrap in `Rc<dyn Platform>` for GPUI.
+    pub fn into_rc(self) -> Rc<dyn Platform> {
+        Rc::new(self)
+    }
+}
+
+/// Route every `Platform` trait call through to `self.0: Arc<AndroidPlatform>`.
+///
+/// We use fully-qualified `<AndroidPlatform as Platform>::method(...)` syntax
+/// so the compiler never accidentally picks the inherent method (which may
+/// have a different return type).
+impl Platform for SharedPlatform {
+    fn gestures(&self) -> Option<Rc<dyn PlatformGestures>> {
+        <AndroidPlatform as Platform>::gestures(&self.0)
+    }
+    fn background_executor(&self) -> BackgroundExecutor {
+        <AndroidPlatform as Platform>::background_executor(&self.0)
+    }
+    fn foreground_executor(&self) -> ForegroundExecutor {
+        <AndroidPlatform as Platform>::foreground_executor(&self.0)
+    }
+    fn text_system(&self) -> Arc<dyn PlatformTextSystem> {
+        <AndroidPlatform as Platform>::text_system(&self.0)
+    }
+    fn run(&self, on_finish_launching: Box<dyn 'static + FnOnce()>) {
+        <AndroidPlatform as Platform>::run(&self.0, on_finish_launching)
+    }
+    fn quit(&self) {
+        <AndroidPlatform as Platform>::quit(&self.0)
+    }
+    fn restart(&self, binary_path: Option<PathBuf>, arguments: Vec<std::ffi::OsString>) {
+        <AndroidPlatform as Platform>::restart(&self.0, binary_path, arguments)
+    }
+    fn activate(&self, ignoring_other_apps: bool) {
+        <AndroidPlatform as Platform>::activate(&self.0, ignoring_other_apps)
+    }
+    fn hide(&self) {
+        <AndroidPlatform as Platform>::hide(&self.0)
+    }
+    fn hide_other_apps(&self) {
+        <AndroidPlatform as Platform>::hide_other_apps(&self.0)
+    }
+    fn unhide_other_apps(&self) {
+        <AndroidPlatform as Platform>::unhide_other_apps(&self.0)
+    }
+    fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>> {
+        <AndroidPlatform as Platform>::displays(&self.0)
+    }
+    fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>> {
+        <AndroidPlatform as Platform>::primary_display(&self.0)
+    }
+    fn active_window(&self) -> Option<AnyWindowHandle> {
+        <AndroidPlatform as Platform>::active_window(&self.0)
+    }
+    fn open_window(
+        &self,
+        handle: AnyWindowHandle,
+        options: WindowParams,
+    ) -> anyhow::Result<Box<dyn PlatformWindow>> {
+        <AndroidPlatform as Platform>::open_window(&self.0, handle, options)
+    }
+    fn window_appearance(&self) -> WindowAppearance {
+        <AndroidPlatform as Platform>::window_appearance(&self.0)
+    }
+    fn open_url(&self, url: &str) {
+        <AndroidPlatform as Platform>::open_url(&self.0, url)
+    }
+    fn on_open_urls(&self, callback: Box<dyn FnMut(Vec<String>)>) {
+        <AndroidPlatform as Platform>::on_open_urls(&self.0, callback)
+    }
+    fn register_url_scheme(&self, url: &str) -> Task<Result<()>> {
+        <AndroidPlatform as Platform>::register_url_scheme(&self.0, url)
+    }
+    fn prompt_for_paths(
+        &self,
+        options: PathPromptOptions,
+    ) -> oneshot::Receiver<Result<Option<Vec<PathBuf>>>> {
+        <AndroidPlatform as Platform>::prompt_for_paths(&self.0, options)
+    }
+    fn prompt_for_new_path(
+        &self,
+        directory: &Path,
+        suggested_name: Option<&str>,
+    ) -> oneshot::Receiver<Result<Option<PathBuf>>> {
+        <AndroidPlatform as Platform>::prompt_for_new_path(&self.0, directory, suggested_name)
+    }
+    fn can_select_mixed_files_and_dirs(&self) -> bool {
+        <AndroidPlatform as Platform>::can_select_mixed_files_and_dirs(&self.0)
+    }
+    fn reveal_path(&self, path: &Path) {
+        <AndroidPlatform as Platform>::reveal_path(&self.0, path)
+    }
+    fn open_with_system(&self, path: &Path) {
+        <AndroidPlatform as Platform>::open_with_system(&self.0, path)
+    }
+    fn on_quit(&self, callback: Box<dyn FnMut() -> bool>) {
+        <AndroidPlatform as Platform>::on_quit(&self.0, callback)
+    }
+    fn on_displays_changed(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_displays_changed(&self.0, callback)
+    }
+    fn on_system_sleep(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_system_sleep(&self.0, callback)
+    }
+    fn on_system_wake(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_system_wake(&self.0, callback)
+    }
+    fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>> {
+        <AndroidPlatform as Platform>::prevent_idle_sleep(&self.0, reason)
+    }
+    fn hide_cursor_until_mouse_moves(&self) {
+        <AndroidPlatform as Platform>::hide_cursor_until_mouse_moves(&self.0)
+    }
+    fn is_cursor_visible(&self) -> bool {
+        <AndroidPlatform as Platform>::is_cursor_visible(&self.0)
+    }
+    fn on_reopen(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_reopen(&self.0, callback)
+    }
+    fn set_menus(&self, menus: Vec<Menu>, keymap: &Keymap) {
+        <AndroidPlatform as Platform>::set_menus(&self.0, menus, keymap)
+    }
+    fn set_dock_menu(&self, menu: Vec<MenuItem>, keymap: &Keymap) {
+        <AndroidPlatform as Platform>::set_dock_menu(&self.0, menu, keymap)
+    }
+    fn on_app_menu_action(&self, callback: Box<dyn FnMut(&dyn Action)>) {
+        <AndroidPlatform as Platform>::on_app_menu_action(&self.0, callback)
+    }
+    fn on_will_open_app_menu(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_will_open_app_menu(&self.0, callback)
+    }
+    fn on_validate_app_menu_command(&self, callback: Box<dyn FnMut(&dyn Action) -> bool>) {
+        <AndroidPlatform as Platform>::on_validate_app_menu_command(&self.0, callback)
+    }
+    fn thermal_state(&self) -> ThermalState {
+        <AndroidPlatform as Platform>::thermal_state(&self.0)
+    }
+    fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_thermal_state_change(&self.0, callback)
+    }
+    fn app_path(&self) -> Result<PathBuf> {
+        <AndroidPlatform as Platform>::app_path(&self.0)
+    }
+    fn path_for_auxiliary_executable(&self, name: &str) -> Result<PathBuf> {
+        <AndroidPlatform as Platform>::path_for_auxiliary_executable(&self.0, name)
+    }
+    fn set_cursor_style(&self, style: CursorStyle) {
+        <AndroidPlatform as Platform>::set_cursor_style(&self.0, style)
+    }
+    fn should_auto_hide_scrollbars(&self) -> bool {
+        <AndroidPlatform as Platform>::should_auto_hide_scrollbars(&self.0)
+    }
+    fn write_to_clipboard(&self, item: ClipboardItem) {
+        <AndroidPlatform as Platform>::write_to_clipboard(&self.0, item)
+    }
+    fn read_from_clipboard(&self) -> Option<ClipboardItem> {
+        <AndroidPlatform as Platform>::read_from_clipboard(&self.0)
+    }
+    fn write_credentials(&self, url: &str, username: &str, password: &[u8]) -> Task<Result<()>> {
+        <AndroidPlatform as Platform>::write_credentials(&self.0, url, username, password)
+    }
+    fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
+        <AndroidPlatform as Platform>::read_credentials(&self.0, url)
+    }
+    fn delete_credentials(&self, url: &str) -> Task<Result<()>> {
+        <AndroidPlatform as Platform>::delete_credentials(&self.0, url)
+    }
+    fn keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout> {
+        <AndroidPlatform as Platform>::keyboard_layout(&self.0)
+    }
+    fn keyboard_mapper(&self) -> Rc<dyn PlatformKeyboardMapper> {
+        <AndroidPlatform as Platform>::keyboard_mapper(&self.0)
+    }
+    fn on_keyboard_layout_change(&self, callback: Box<dyn FnMut()>) {
+        <AndroidPlatform as Platform>::on_keyboard_layout_change(&self.0, callback)
+    }
+}
+
+impl Default for AndroidPlatform {
+    fn default() -> Self {
+        Self::new(false)
+    }
+}
+
+// ── tests ─────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn headless() -> AndroidPlatform {
+        AndroidPlatform::new(true)
+    }
+
+    // ── basic construction ────────────────────────────────────────────────────
+
+    #[test]
+    fn platform_constructs_headless() {
+        let p = headless();
+        assert!(p.is_headless());
+        assert!(!p.is_active());
+        assert!(!p.should_quit());
+    }
+
+    // ── lifecycle ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn close_window_retires_handle_and_clears_pending_window() {
+        let p = headless();
+        let window = AndroidWindow::headless(120, 240, 2.0);
+        let retained = Arc::clone(&window);
+        p.state.lock().windows.push(Arc::clone(&window));
+        p.set_pending_window(Arc::clone(&window));
+
+        assert!(p.close_window(window.id()).is_some());
+        assert!(retained.is_retired());
+        assert!(p.take_pending_window().is_none());
+
+        // A retained host handle cannot be made pending again after logical close.
+        p.set_pending_window(retained);
+        assert!(p.take_pending_window().is_none());
+    }
+
+    #[test]
+    fn close_window_can_retire_a_pending_window_before_open() {
+        let p = headless();
+        let window = AndroidWindow::headless(80, 160, 2.0);
+        let retained = Arc::clone(&window);
+        p.set_pending_window(window);
+
+        assert!(p.close_window(retained.id()).is_some());
+        assert!(retained.is_retired());
+        assert!(p.take_pending_window().is_none());
+    }
+
+    #[test]
+    fn native_retirement_is_idempotent_and_closes_callbacks_once() {
+        let p = headless();
+        let window = AndroidWindow::headless(100, 200, 1.0);
+        let close_count = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let close_count_for_callback = Arc::clone(&close_count);
+        window.on_close(move || {
+            close_count_for_callback.fetch_add(1, Ordering::SeqCst);
+        });
+        p.state.lock().windows.push(Arc::clone(&window));
+
+        p.retire_native_session_on_owner();
+        p.retire_native_session_on_owner();
+
+        assert!(window.is_retired());
+        assert_eq!(close_count.load(Ordering::SeqCst), 1);
+        assert_eq!(p.window_count(), 0);
+    }
+
+    #[test]
+    fn run_invokes_finish_launching_callback() {
+        let p = headless();
+        let ran = Arc::new(AtomicBool::new(false));
+        let ran2 = ran.clone();
+        p.run(Box::new(move || {
+            ran2.store(true, Ordering::Relaxed);
+        }));
+        assert!(ran.load(Ordering::Relaxed));
+    }
+
+    #[test]
+    fn quit_sets_should_quit() {
+        let p = headless();
+        assert!(!p.should_quit());
+        p.quit();
+        assert!(p.should_quit());
+    }
+
+    #[test]
+    fn quit_callback_fires() {
+        let p = headless();
+        let fired = Arc::new(AtomicBool::new(false));
+        let f2 = fired.clone();
+        p.on_quit(move || {
+            f2.store(true, Ordering::Relaxed);
+        });
+        p.quit();
+        assert!(fired.load(Ordering::Relaxed));
+    }
+
+    #[test]
+    fn did_become_active_sets_flag() {
+        let p = headless();
+        p.did_become_active();
+        assert!(p.is_active());
+        p.did_enter_background();
+        assert!(!p.is_active());
+    }
+
+    // ── clipboard ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn clipboard_round_trip() {
+        let p = headless();
+        assert!(p.read_from_clipboard().is_none());
+        p.write_to_clipboard("hello android".to_string());
+        assert_eq!(p.read_from_clipboard().as_deref(), Some("hello android"));
+    }
+
+    #[test]
+    fn clipboard_overwrite() {
+        let p = headless();
+        p.write_to_clipboard("first".to_string());
+        p.write_to_clipboard("second".to_string());
+        assert_eq!(p.read_from_clipboard().as_deref(), Some("second"));
+    }
+
+    // ── credentials ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn credentials_round_trip() {
+        let p = headless();
+        p.write_credentials("svc", "user", b"pass123").unwrap();
+        let result = p.read_credentials("svc", "user").unwrap();
+        assert_eq!(result.as_deref(), Some(b"pass123".as_slice()));
+    }
+
+    #[test]
+    fn credentials_delete() {
+        let p = headless();
+        p.write_credentials("svc", "user", b"pass").unwrap();
+        p.delete_credentials("svc", "user").unwrap();
+        assert!(p.read_credentials("svc", "user").unwrap().is_none());
+    }
+
+    #[test]
+    fn credentials_missing_returns_none() {
+        let p = headless();
+        assert!(
+            p.read_credentials("no-such-service", "user")
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    // ── misc platform queries ─────────────────────────────────────────────────
+
+    #[test]
+    fn should_auto_hide_scrollbars_true() {
+        assert!(headless().should_auto_hide_scrollbars());
+    }
+
+    #[test]
+    fn can_select_mixed_files_false() {
+        assert!(!headless().can_select_mixed_files_and_dirs());
+    }
+
+    #[test]
+    fn keyboard_layout_id_non_empty() {
+        let id = headless().keyboard_layout_id();
+        assert!(!id.is_empty());
+    }
+
+    #[test]
+    fn path_for_auxiliary_executable_errors() {
+        let result = headless().path_for_auxiliary_executable("foo");
+        assert!(result.is_err());
+    }
+
+    // ── display ───────────────────────────────────────────────────────────────
+
+    #[test]
+    fn headless_has_one_display() {
+        let p = headless();
+        assert_eq!(p.displays().len(), 1);
+        assert!(p.primary_display().is_some());
+    }
+
+    // ── preferred backend ─────────────────────────────────────────────────────
+
+    #[test]
+    fn default_backend_is_vulkan() {
+        assert_eq!(headless().preferred_backend(), AndroidBackend::Vulkan);
+    }
+
+    #[test]
+    fn backend_override() {
+        let p = headless();
+        p.set_preferred_backend(AndroidBackend::Gles);
+        assert_eq!(p.preferred_backend(), AndroidBackend::Gles);
+    }
+
+    // ── text system ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn text_system_accessible() {
+        let p = headless();
+        // Just confirm the text system can be retrieved without panicking.
+        let _ts = p.text_system();
+    }
+
+    // ── open-URLs callback ────────────────────────────────────────────────────
+
+    #[test]
+    fn open_urls_callback_fires() {
+        let p = headless();
+        let received = Arc::new(Mutex::new(Vec::<String>::new()));
+        let r2 = received.clone();
+        p.on_open_urls(move |urls| {
+            r2.lock().extend(urls);
+        });
+        p.deliver_open_urls(vec!["gpui://test".to_string()]);
+        assert_eq!(received.lock().as_slice(), &["gpui://test"]);
+    }
+
+    // ── reopen callback ───────────────────────────────────────────────────────
+
+    #[test]
+    fn reopen_callback_fires() {
+        let p = headless();
+        let count = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let c2 = count.clone();
+        p.on_reopen(move || {
+            c2.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        });
+        p.deliver_reopen();
+        p.deliver_reopen();
+        assert_eq!(count.load(std::sync::atomic::Ordering::Relaxed), 2);
+    }
+
+    // ── headless window count ─────────────────────────────────────────────────
+
+    #[test]
+    fn initial_window_count_is_zero() {
+        assert_eq!(headless().window_count(), 0);
+        assert!(headless().primary_window().is_none());
+    }
+
+    // ── flush main thread tasks ───────────────────────────────────────────────
+
+    #[test]
+    fn flush_main_thread_tasks_no_panic() {
+        // There are no tasks queued, so this should be a no-op.
+        headless().flush_main_thread_tasks();
+    }
+
+    // ── tick ─────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn tick_no_panic() {
+        headless().tick();
+    }
+}

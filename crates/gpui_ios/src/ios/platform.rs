@@ -67,7 +67,7 @@ impl IosPlatform {
     pub fn new() -> Self {
         let dispatcher = Arc::new(AppleDispatcher::new());
 
-        let text_system: Arc<dyn PlatformTextSystem> = Arc::new(gpui_apple::AppleTextSystem::new());
+        let text_system: Arc<dyn PlatformTextSystem> = Arc::new(gpui_apple::MacTextSystem::new());
 
         let state = Rc::new(IosPlatformState {
             application: IosApplicationState::default(),
@@ -239,9 +239,7 @@ impl Platform for IosPlatform {
     }
 
     fn active_window(&self) -> Option<AnyWindowHandle> {
-        // iOS typically has one active window
-        // This would need to track the current key window
-        None
+        self.0.application.active_window()
     }
 
     fn open_window(

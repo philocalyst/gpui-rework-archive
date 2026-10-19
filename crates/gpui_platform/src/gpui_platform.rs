@@ -2,7 +2,7 @@
 //!
 //! Call [`application`] to get a [`gpui::Application`] for an interactive app,
 //! or [`headless`] for tests and tools that don't need a display. This crate
-//! picks the macOS, iOS, Windows, Linux or web platform for you, so your code needs
+//! picks the macOS, iOS, Android, Windows, Linux or web platform for you, so your code needs
 //! no `#[cfg]` gates for each OS. It also re-exports [`Platform`], the trait
 //! that each platform implements.
 //!
@@ -166,6 +166,11 @@ pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
     #[cfg(target_os = "ios")]
     {
         gpui_ios::current_platform(headless)
+    }
+
+    #[cfg(target_os = "android")]
+    {
+        gpui_mobile::current_platform(headless)
     }
 
     #[cfg(target_os = "macos")]

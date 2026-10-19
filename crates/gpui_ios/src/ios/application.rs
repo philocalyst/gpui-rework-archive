@@ -1,5 +1,5 @@
 use super::{CallbackSlot, platform::IosPlatformState, window::IosWindowState};
-use gpui::{AppLifecyclePhase, WindowVisibility};
+use gpui::{AnyWindowHandle, AppLifecyclePhase, WindowVisibility};
 use objc2::{
     ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message, define_class, extern_class,
     extern_methods, msg_send,
@@ -116,6 +116,16 @@ impl IosApplicationState {
                 }
             }
         }
+    }
+
+    pub(super) fn active_window(&self) -> Option<AnyWindowHandle> {
+        let mut active_window = None;
+        self.with_windows(|window| {
+            if active_window.is_none() && window.is_active() {
+                active_window = Some(window.handle());
+            }
+        });
+        active_window
     }
 
     fn finish_launching(&self) {

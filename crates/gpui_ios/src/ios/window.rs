@@ -12,28 +12,34 @@
 use super::events::*;
 use super::text_input::TextInputView;
 use super::{CallbackSlot, IosDisplay, platform::IosPlatformState};
+use accesskit_ios::SubclassingAdapter;
+use gpui::accesskit::{ActionHandler, ActivationHandler, DeactivationHandler};
 use gpui::{
-    AnyWindowHandle, Bounds, Capslock, DevicePixels, DispatchEventResult, DisplayId, Edges,
-    GpuSpecs, Modifiers, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
+    A11yCallbacks, AnyWindowHandle, Bounds, Capslock, DevicePixels, DispatchEventResult, DisplayId,
+    Edges, GpuSpecs, Modifiers, Pixels, PlatformAtlas, PlatformDisplay, PlatformInput,
     PlatformInputHandler, PlatformWindow, Point, PromptButton, PromptLevel, RequestFrameOptions,
     Scene, Size, TextInputConfiguration, TextInputStateChange, TouchEvent, TouchId, TouchPhase,
     WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowInsets,
     WindowParams, WindowVisibility, px, size,
 };
-use gpui_apple::metal_renderer::{Context as MetalContext, MetalRenderer};
+use gpui_apple::metal_renderer::MetalRenderer;
 use objc2::rc::Retained;
-use objc2::runtime::AnyClass;
+use objc2::runtime::{AnyClass, ProtocolObject};
 use objc2::{ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
-use objc2_foundation::{NSNotification, NSNotificationCenter, NSObjectProtocol, NSSet, NSValue};
+use objc2_foundation::{
+    NSNotification, NSNotificationCenter, NSNumber, NSObjectProtocol, NSSet, NSValue,
+};
 use objc2_quartz_core::CAMetalLayer;
 use objc2_ui_kit::{
-    NSValueUIGeometryExtensions, UIKeyboardFrameEndUserInfoKey,
-    UIKeyboardWillChangeFrameNotification, UIKeyboardWillHideNotification, UIStatusBarStyle,
+    NSValueUIGeometryExtensions, UIKeyboardAnimationDurationUserInfoKey,
+    UIKeyboardFrameEndUserInfoKey, UIKeyboardWillChangeFrameNotification,
+    UIKeyboardWillHideNotification, UIStatusBarStyle, UITextInteraction, UITextInteractionDelegate,
+    UITextInteractionMode,
 };
 use objc2_ui_kit::{
-    UIEvent, UIScreen, UITouch, UITraitCollection, UITraitEnvironment, UIUserInterfaceStyle,
-    UIView, UIViewAutoresizing, UIViewController, UIWindow, UIWindowScene,
+    UICoordinateSpace, UIEvent, UIScreen, UITouch, UITraitCollection, UITraitEnvironment,
+    UIUserInterfaceStyle, UIView, UIViewAutoresizing, UIViewController, UIWindow, UIWindowScene,
 };
 use parking_lot::Mutex;
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle, UiKitDisplayHandle, UiKitWindowHandle};
@@ -43,14 +49,46 @@ use std::{
     ptr::NonNull,
     rc::{Rc, Weak},
     sync::Arc,
+    time::{Duration, Instant},
 };
 
 const KEYBOARD_DISMISS_DISTANCE: Pixels = px(24.);
+struct IosA11yActivationHandler(Box<dyn Fn() -> Option<gpui::accesskit::TreeUpdate> + Send>);
+
+impl ActivationHandler for IosA11yActivationHandler {
+    fn request_initial_tree(&mut self) -> Option<gpui::accesskit::TreeUpdate> {
+        (self.0)()
+    }
+}
+
+struct IosA11yActionHandler(Box<dyn Fn(gpui::accesskit::ActionRequest) + Send>);
+
+impl ActionHandler for IosA11yActionHandler {
+    fn do_action(&mut self, request: gpui::accesskit::ActionRequest) {
+        (self.0)(request)
+    }
+}
+
+struct IosA11yDeactivationHandler(Box<dyn Fn() + Send>);
+
+impl DeactivationHandler for IosA11yDeactivationHandler {
+    fn deactivate_accessibility(&mut self) {
+        (self.0)()
+    }
+}
 
 #[derive(Clone, Copy)]
 struct KeyboardDismissTouch {
     id: TouchId,
     start_position: Point<Pixels>,
+}
+
+#[derive(Clone, Copy)]
+struct KeyboardInsetAnimation {
+    started_at: Instant,
+    duration: Duration,
+    from: f32,
+    to: f32,
 }
 
 /// Global storage for the current status bar style.
@@ -136,6 +174,41 @@ define_class!(
 
     unsafe impl NSObjectProtocol for MetalView {}
 
+    unsafe impl UITextInteractionDelegate for MetalView {
+        #[unsafe(method(interactionShouldBegin:atPoint:))]
+        fn interaction_should_begin_at_point(
+            &self,
+            _interaction: &UITextInteraction,
+            location: CGPoint,
+        ) -> bool {
+            let point = gpui::point(px(location.x as f32), px(location.y as f32));
+            let state = self.ivars().with_window(|window| {
+                window.with_input_handler(|handler| {
+                    (handler.query_accepts_focused_text_input(), handler.element_bounds())
+                })
+            }).flatten();
+            let (focused, bounds) = state.unwrap_or((false, None));
+            focused && bounds.is_some_and(|bounds| bounds.contains(&point))
+        }
+
+        #[unsafe(method(interactionWillBegin:))]
+        fn interaction_will_begin(&self, _interaction: &UITextInteraction) {
+            let should_show_keyboard = self
+                .ivars()
+                .with_window(|window| {
+                    window
+                        .with_input_handler(|handler| {
+                            handler.query_accepts_focused_text_input()
+                        })
+                        .unwrap_or(false)
+                })
+                .unwrap_or(false);
+            if should_show_keyboard {
+                self.ivars().with_window(IosWindowState::show_keyboard);
+            }
+        }
+    }
+
     impl MetalView {
         #[unsafe(method(layerClass))]
         fn layer_class() -> &'static AnyClass {
@@ -209,6 +282,7 @@ impl std::ops::Deref for IosWindow {
 #[allow(clippy::type_complexity)]
 pub(crate) struct IosWindowState {
     platform: Weak<IosPlatformState>,
+    handle: AnyWindowHandle,
     keyboard_observers:
         RefCell<Vec<Retained<objc2::runtime::ProtocolObject<dyn NSObjectProtocol>>>>,
     /// The UIWindow object
@@ -219,6 +293,8 @@ pub(crate) struct IosWindowState {
     view: Retained<MetalView>,
     /// The hidden text input view for keyboard input
     text_input_view: Retained<TextInputView>,
+    /// UIKit selection gestures attached to the visible Metal view and backed by the text proxy.
+    text_interaction: Retained<UITextInteraction>,
     /// Current bounds in pixels
     bounds: Cell<Bounds<Pixels>>,
     /// Scale factor
@@ -229,6 +305,7 @@ pub(crate) struct IosWindowState {
     force_next_frame: Cell<bool>,
     /// Callback for input events
     input_callback: CallbackSlot<Box<dyn FnMut(PlatformInput) -> DispatchEventResult>>,
+    a11y_adapter: RefCell<Option<SubclassingAdapter>>,
     /// Callback for active status changes
     active_status_callback: CallbackSlot<Box<dyn FnMut(bool)>>,
     visibility: Cell<WindowVisibility>,
@@ -252,6 +329,7 @@ pub(crate) struct IosWindowState {
     insets_changed_callback: CallbackSlot<Box<dyn FnMut(WindowInsets)>>,
     keyboard_dismiss_touch: Cell<Option<KeyboardDismissTouch>>,
     keyboard_height: Cell<f32>,
+    keyboard_animation: Cell<Option<KeyboardInsetAnimation>>,
     /// Current mouse position (from touch)
     mouse_position: Cell<Point<Pixels>>,
     /// Current modifiers
@@ -262,7 +340,7 @@ pub(crate) struct IosWindowState {
 impl IosWindow {
     #[allow(deprecated)] // Window construction can precede scene connection.
     pub fn new(
-        _handle: AnyWindowHandle,
+        handle: AnyWindowHandle,
         _params: WindowParams,
         platform: &Rc<IosPlatformState>,
     ) -> anyhow::Result<Self> {
@@ -308,9 +386,6 @@ impl IosWindow {
         view_controller.setView(Some(&view));
         window.setRootViewController(Some(&view_controller));
 
-        // Make the window visible
-        window.makeKeyAndVisible();
-
         // Create a hidden text input view for keyboard handling.
         // Uses our custom GPUITextInputView which implements UIKeyInput
         // so iOS actually routes keyboard text to us.
@@ -320,19 +395,24 @@ impl IosWindow {
         text_input_view.setUserInteractionEnabled(true);
         view.addSubview(&text_input_view);
 
+        let text_interaction =
+            UITextInteraction::textInteractionForMode(UITextInteractionMode::Editable, main_thread);
+        unsafe { text_interaction.setTextInput(Some(text_input_view.as_super().as_super())) };
+        text_interaction.setDelegate(Some(ProtocolObject::from_ref(&*view)));
+        view.addInteraction(&ProtocolObject::from_ref(&*text_interaction));
+
         let pixel_w = (screen_bounds_cg.size.width * scale) as i32;
         let pixel_h = (screen_bounds_cg.size.height * scale) as i32;
-        let mut renderer = MetalRenderer::from_layer(
-            MetalContext::default(),
-            layer
-                .downcast_ref::<CAMetalLayer>()
-                .ok_or_else(|| anyhow::anyhow!("UIKit view must have a CAMetalLayer"))?,
-            false,
-        );
+        let renderer_layer = layer
+            .downcast::<CAMetalLayer>()
+            .map_err(|_| anyhow::anyhow!("UIKit view must have a CAMetalLayer"))?;
+        let mut renderer =
+            MetalRenderer::new_for_layer(renderer_layer, Arc::new(Mutex::default()), false);
         renderer.update_drawable_size(size(DevicePixels(pixel_w), DevicePixels(pixel_h)));
 
         let state = IosWindowState {
             platform: Rc::downgrade(platform),
+            handle,
             keyboard_observers: RefCell::default(),
             display_id: Cell::new(IosDisplay::from_screen(window.screen()).id()),
             display_changed_callback: CallbackSlot::default(),
@@ -340,12 +420,14 @@ impl IosWindow {
             view_controller,
             view,
             text_input_view,
+            text_interaction,
             bounds: Cell::new(screen_bounds),
             scale_factor: Cell::new(scale_factor),
             input_handler: CallbackSlot::default(),
             request_frame_callback: CallbackSlot::default(),
             force_next_frame: Cell::new(true),
             input_callback: CallbackSlot::default(),
+            a11y_adapter: RefCell::default(),
             active_status_callback: CallbackSlot::default(),
             visibility: Cell::new(WindowVisibility::Visible),
             visibility_callback: CallbackSlot::default(),
@@ -359,6 +441,7 @@ impl IosWindow {
             insets_changed_callback: CallbackSlot::default(),
             keyboard_dismiss_touch: Cell::new(None),
             keyboard_height: Cell::new(0.),
+            keyboard_animation: Cell::new(None),
             mouse_position: Cell::new(Point::default()),
             modifiers: Cell::new(Modifiers::default()),
             renderer: Mutex::new(renderer),
@@ -384,9 +467,18 @@ impl IosWindow {
 }
 
 impl IosWindowState {
+    pub(super) fn handle(&self) -> AnyWindowHandle {
+        self.handle
+    }
+
+    pub(super) fn is_active(&self) -> bool {
+        self.window.isKeyWindow()
+    }
+
     pub(super) fn attach_to_scene(&self, scene: &UIWindowScene) {
         self.window.setWindowScene(Some(scene));
         self.window.makeKeyAndVisible();
+        self.notify_visibility_change(WindowVisibility::Visible);
         self.handle_layout_change();
     }
 
@@ -397,7 +489,8 @@ impl IosWindowState {
             let window = Rc::downgrade(self);
             let frame_change_block =
                 block2::RcBlock::new(move |notification: NonNull<NSNotification>| {
-                    let Some(user_info) = notification.as_ref().userInfo() else {
+                    let notification = notification.as_ref();
+                    let Some(user_info) = notification.userInfo() else {
                         return;
                     };
                     let Some(frame_value) = user_info.objectForKey(UIKeyboardFrameEndUserInfoKey)
@@ -407,16 +500,28 @@ impl IosWindowState {
                     let Some(frame_value) = frame_value.downcast_ref::<NSValue>() else {
                         return;
                     };
-                    let frame = frame_value.CGRectValue();
+                    let raw_frame = frame_value.CGRectValue();
                     if let Some(window) = window.upgrade() {
-                        window.set_keyboard_height(frame.size.height as f32);
+                        let screen_space = window.window.screen().coordinateSpace();
+                        let converted_frame = window
+                            .window
+                            .convertRect_fromCoordinateSpace(raw_frame, &screen_space);
+                        let bounds = window.view.bounds();
+                        let inset = keyboard_bottom_inset(bounds, converted_frame);
+                        window.animate_keyboard_height(
+                            inset,
+                            keyboard_animation_duration(notification),
+                        );
                     }
                 });
 
             let window = Rc::downgrade(self);
-            let hide_block = block2::RcBlock::new(move |_notification: NonNull<NSNotification>| {
+            let hide_block = block2::RcBlock::new(move |notification: NonNull<NSNotification>| {
                 if let Some(window) = window.upgrade() {
-                    window.set_keyboard_height(0.);
+                    window.animate_keyboard_height(
+                        0.,
+                        keyboard_animation_duration(notification.as_ref()),
+                    );
                 }
             });
 
@@ -503,6 +608,7 @@ impl IosWindowState {
     }
 
     pub(super) fn request_frame(&self) {
+        self.advance_keyboard_animation();
         self.request_frame_callback.with(|callback| {
             let force_render = self.force_next_frame.replace(false);
             callback(RequestFrameOptions {
@@ -553,12 +659,49 @@ impl IosWindowState {
     }
 
     fn set_keyboard_height(&self, height: f32) {
+        self.keyboard_animation.set(None);
+        self.apply_keyboard_height(height);
+    }
+
+    fn animate_keyboard_height(&self, height: f32, duration: Duration) {
         let height = height.max(0.);
-        if (self.keyboard_height.get() - height).abs() <= 0.5 {
+        let from = self.keyboard_height.get();
+        if duration.is_zero() || (from - height).abs() <= 0.1 {
+            self.set_keyboard_height(height);
+            return;
+        }
+        self.keyboard_animation.set(Some(KeyboardInsetAnimation {
+            started_at: Instant::now(),
+            duration,
+            from,
+            to: height,
+        }));
+        self.force_next_frame.set(true);
+    }
+
+    fn advance_keyboard_animation(&self) {
+        let Some(animation) = self.keyboard_animation.get() else {
+            return;
+        };
+        let progress =
+            animation.started_at.elapsed().as_secs_f64() / animation.duration.as_secs_f64();
+        if progress >= 1.0 {
+            self.keyboard_animation.set(None);
+            self.apply_keyboard_height(animation.to);
+        } else {
+            let t = progress as f32;
+            let eased = t * t * (3. - 2. * t);
+            self.apply_keyboard_height(animation.from + (animation.to - animation.from) * eased);
+        }
+    }
+
+    fn apply_keyboard_height(&self, height: f32) {
+        let height = height.max(0.);
+        if (self.keyboard_height.get() - height).abs() <= 0.1 {
             return;
         }
         self.keyboard_height.set(height);
-        if height <= 0. {
+        if height <= 0.1 {
             self.keyboard_dismiss_touch.set(None);
         }
         self.notify_insets_changed();
@@ -658,6 +801,10 @@ impl Drop for IosWindow {
 
         *self.view_controller.ivars().0.borrow_mut() = Weak::new();
         *self.view.ivars().0.borrow_mut() = Weak::new();
+        self.view
+            .removeInteraction(&ProtocolObject::from_ref(&*self.text_interaction));
+        self.text_interaction.setDelegate(None);
+        unsafe { self.text_interaction.setTextInput(None) };
         self.text_input_view.set_window(Weak::new());
         self.text_input_view.removeFromSuperview();
     }
@@ -761,8 +908,9 @@ impl PlatformWindow for IosWindow {
         None
     }
 
-    fn activate(&self) {
+    fn activate(&self, _token: Option<&str>) -> bool {
         self.window.makeKeyAndVisible();
+        true
     }
 
     fn is_active(&self) -> bool {
@@ -812,6 +960,8 @@ impl PlatformWindow for IosWindow {
 
     fn on_active_status_change(&self, callback: Box<dyn FnMut(bool)>) {
         self.active_status_callback.set(callback);
+        self.window.makeKeyAndVisible();
+        self.notify_active_status_change(self.window.isKeyWindow());
     }
 
     fn visibility(&self) -> WindowVisibility {
@@ -893,11 +1043,89 @@ impl PlatformWindow for IosWindow {
     fn set_text_input_configuration(&mut self, configuration: TextInputConfiguration) {
         self.text_input_view.set_configuration(&configuration);
     }
+
+    fn a11y_init(&self, callbacks: A11yCallbacks) {
+        let adapter = unsafe {
+            SubclassingAdapter::for_window(
+                Retained::<UIWindow>::as_ptr(&self.window)
+                    .cast_mut()
+                    .cast::<c_void>(),
+                IosA11yActivationHandler(callbacks.activation),
+                IosA11yActionHandler(callbacks.action),
+                IosA11yDeactivationHandler(callbacks.deactivation),
+            )
+        };
+        self.a11y_adapter.borrow_mut().replace(adapter);
+    }
+
+    fn a11y_tree_update(&self, tree_update: gpui::accesskit::TreeUpdate) {
+        let events = self
+            .a11y_adapter
+            .borrow()
+            .as_ref()
+            .and_then(|adapter| adapter.update_if_active(|| tree_update));
+        if let Some(events) = events {
+            events.raise();
+        }
+    }
+}
+
+fn keyboard_animation_duration(notification: &NSNotification) -> Duration {
+    notification
+        .userInfo()
+        .and_then(|user_info| unsafe {
+            user_info.objectForKey(UIKeyboardAnimationDurationUserInfoKey)
+        })
+        .and_then(|value| {
+            value
+                .downcast_ref::<NSNumber>()
+                .map(|number| number.doubleValue())
+        })
+        .filter(|seconds| seconds.is_finite() && *seconds > 0.)
+        .map_or(Duration::ZERO, |seconds| {
+            Duration::from_secs_f64(seconds.min(1.))
+        })
+}
+
+/// How much of the bottom of `bounds` a docked keyboard covers. A floating or split keyboard
+/// doesn't span the view's width down to its bottom edge, so it covers nothing.
+fn keyboard_bottom_inset(bounds: CGRect, keyboard: CGRect) -> f32 {
+    let bottom = bounds.origin.y + bounds.size.height;
+    let docked = keyboard.origin.x <= bounds.origin.x + 0.5
+        && keyboard.origin.x + keyboard.size.width >= bounds.origin.x + bounds.size.width - 0.5
+        && keyboard.origin.y + keyboard.size.height >= bottom - 0.5;
+    let inset = bottom - keyboard.origin.y;
+    if docked && inset > 0. {
+        inset.min(bounds.size.height) as f32
+    } else {
+        0.
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::CallbackSlot;
+    use super::{CallbackSlot, keyboard_bottom_inset};
+    use objc2_core_foundation::{CGPoint, CGRect, CGSize};
+
+    #[test]
+    fn keyboard_inset_uses_only_full_width_bottom_intersection() {
+        let bounds = CGRect::new(CGPoint::new(20.0, 40.0), CGSize::new(400.0, 800.0));
+        let docked = CGRect::new(CGPoint::new(20.0, 540.0), CGSize::new(400.0, 400.0));
+        assert_eq!(keyboard_bottom_inset(bounds, docked), 300.0);
+
+        let floating = CGRect::new(CGPoint::new(80.0, 340.0), CGSize::new(240.0, 220.0));
+        assert_eq!(keyboard_bottom_inset(bounds, floating), 0.0);
+
+        let split = CGRect::new(CGPoint::new(20.0, 540.0), CGSize::new(170.0, 400.0));
+        assert_eq!(keyboard_bottom_inset(bounds, split), 0.0);
+    }
+
+    #[test]
+    fn keyboard_inset_rejects_invalid_geometry() {
+        let bounds = CGRect::new(CGPoint::ZERO, CGSize::new(400.0, 800.0));
+        let invalid = CGRect::new(CGPoint::new(0.0, f64::NAN), CGSize::new(400.0, 300.0));
+        assert_eq!(keyboard_bottom_inset(bounds, invalid), 0.0);
+    }
 
     #[test]
     fn callback_is_unavailable_during_dispatch_and_restored_afterward() {

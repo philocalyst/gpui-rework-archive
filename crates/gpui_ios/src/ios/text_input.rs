@@ -4,7 +4,7 @@ use gpui::{
     TextInputStateChange, px,
 };
 use objc2::rc::{Retained, Weak};
-use objc2::runtime::{AnyObject, ProtocolObject};
+use objc2::runtime::{AnyObject, ProtocolObject, Sel};
 use objc2::{DefinedClass, MainThreadMarker, MainThreadOnly, Message, define_class, msg_send, sel};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{
@@ -153,6 +153,92 @@ define_class!(
                 self.ivars().keyboard_eligible.set(false);
             }
             resigned
+        }
+
+        #[unsafe(method(canPerformAction:withSender:))]
+        unsafe fn can_perform_action(&self, action: Sel, sender: Option<&AnyObject>) -> bool {
+            if ![sel!(selectAll:), sel!(copy:), sel!(cut:), sel!(paste:)].contains(&action) {
+                return unsafe { msg_send![super(self), canPerformAction: action, withSender: sender] };
+            }
+            self.with_handler(|handler| {
+                if !handler.query_accepts_focused_text_input() {
+                    false
+                } else if action == sel!(selectAll:) {
+                    document_range(handler).is_some_and(|range| {
+                        !range.is_empty()
+                            && handler
+                                .selected_text_range(false)
+                                .is_none_or(|selection| selection.range != range)
+                    })
+                } else if action == sel!(paste:) {
+                    can_edit(handler) && unsafe { UIPasteboard::generalPasteboard().hasStrings() }
+                } else {
+                    selected_text(handler).is_some()
+                }
+            })
+            .unwrap_or(false)
+        }
+
+        #[unsafe(method(selectAll:))]
+        fn select_all(&self, _sender: Option<&AnyObject>) {
+            let mut changed = false;
+            self.edit(|handler| {
+                if let Some(range) = document_range(handler)
+                    && handler
+                        .selected_text_range(false)
+                        .is_none_or(|selection| selection.range != range)
+                {
+                    handler.set_selected_text_range(range);
+                    changed = true;
+                }
+            });
+            if changed {
+                self.notify_edit_menu_change(false);
+            }
+        }
+
+        #[unsafe(method(copy:))]
+        fn copy(&self, _sender: Option<&AnyObject>) {
+            let text = self
+                .with_handler(|handler| {
+                    handler
+                        .query_accepts_focused_text_input()
+                        .then(|| selected_text(handler))
+                        .flatten()
+                })
+                .flatten();
+            if let Some((_, text)) = text {
+                set_pasteboard_string(&text);
+            }
+        }
+
+        #[unsafe(method(cut:))]
+        fn cut(&self, _sender: Option<&AnyObject>) {
+            let mut changed = false;
+            self.edit(|handler| {
+                if let Some((range, text)) = selected_text(handler) {
+                    set_pasteboard_string(&text);
+                    handler.replace_text_in_range(Some(range), "");
+                    changed = true;
+                }
+            });
+            if changed {
+                self.notify_edit_menu_change(true);
+            }
+        }
+
+        #[unsafe(method(paste:))]
+        fn paste(&self, _sender: Option<&AnyObject>) {
+            let mut changed = false;
+            self.edit(|handler| {
+                if let Some(text) = unsafe { UIPasteboard::generalPasteboard().string() } {
+                    handler.replace_text_in_range(None, &text.to_string());
+                    changed = true;
+                }
+            });
+            if changed {
+                self.notify_edit_menu_change(true);
+            }
         }
 
         #[unsafe(method(reconcileTextInput))]
@@ -538,12 +624,7 @@ impl TextInputView {
     fn edit(&self, callback: impl FnOnce(&mut PlatformInputHandler)) {
         let previous = self.ivars().native_edit.replace(true);
         self.with_handler(|handler| {
-            let selected = handler.selected_text_range(false);
-            let marked = handler.marked_text_range();
-            let selection_allowed =
-                selected.is_some_and(|selection| allowed_range(handler, &selection.range));
-            let marked_allowed = marked.is_none_or(|range| allowed_range(handler, &range));
-            if handler.query_accepts_focused_text_input() && selection_allowed && marked_allowed {
+            if can_edit(handler) {
                 callback(handler);
             }
         });
@@ -552,6 +633,14 @@ impl TextInputView {
 
     fn document_range(&self) -> Option<Range<usize>> {
         self.with_handler(document_range).flatten()
+    }
+
+    fn notify_edit_menu_change(&self, content_changed: bool) {
+        self.ivars().selection_changed.set(true);
+        if content_changed {
+            self.ivars().content_changed.set(true);
+        }
+        self.refresh_keyboard();
     }
 
     fn bounds(&self, range: Range<usize>) -> Option<CGRect> {
@@ -673,6 +762,35 @@ fn document_range(handler: &mut PlatformInputHandler) -> Option<Range<usize>> {
 
 fn allowed_range(handler: &mut PlatformInputHandler, range: &Range<usize>) -> bool {
     document_range(handler).is_some_and(|editable| contains_range(&editable, range))
+}
+
+/// Whether the focused input can take an edit: its selection, and any marked text, lie in the
+/// editable range.
+fn can_edit(handler: &mut PlatformInputHandler) -> bool {
+    handler.query_accepts_focused_text_input()
+        && handler
+            .selected_text_range(false)
+            .is_some_and(|selection| allowed_range(handler, &selection.range))
+        && handler
+            .marked_text_range()
+            .is_none_or(|range| allowed_range(handler, &range))
+}
+
+fn set_pasteboard_string(text: &str) {
+    unsafe { UIPasteboard::generalPasteboard().setString(Some(&NSString::from_str(text))) };
+}
+
+fn selected_text(handler: &mut PlatformInputHandler) -> Option<(Range<usize>, String)> {
+    let range = handler.selected_text_range(false)?.range;
+    if range.is_empty() || !allowed_range(handler, &range) {
+        return None;
+    }
+    let mut adjusted = None;
+    let text = handler.text_for_range(range.clone(), &mut adjusted)?;
+    if adjusted.is_some_and(|adjusted| adjusted != range) {
+        return None;
+    }
+    Some((range, text))
 }
 
 fn read_text(
