@@ -8729,11 +8729,11 @@ impl PaintQuad {
     }
 }
 
-/// Returns a quad with every property set: bounds, corner radii, background, border and border style.
+/// Returns a quad with bounds, radii, background, border widths, border color and border style.
 ///
-/// Use [`fill`] or [`outline`] when you need only one of these. Corner radii larger than the bounds
-/// produce sharp corners where the arcs meet, and dashed borders don't look right with them.
-/// `Corners::clamp_radii_for_quad_size` keeps the radii within the bounds.
+/// Use fill or outline when you need only some properties. Radii larger than bounds produce sharp
+/// corners where the arcs meet; clamp radii when that is not wanted.
+#[deprecated(note = "replaced with builder syntax for PaintQuad")]
 pub fn quad(
     bounds: Bounds<Pixels>,
     corner_radii: impl Into<Corners<Pixels>>,
@@ -8742,69 +8742,31 @@ pub fn quad(
     border_color: impl Into<Background>,
     border_style: BorderStyle,
 ) -> PaintQuad {
-    PaintQuad {
-        bounds,
-        corner_radii: corner_radii.into(),
-        corner_smoothing: 0.0,
-        background: background.into(),
-        border_widths: border_widths.into(),
-        border_color: border_color.into(),
-        border_style,
-        border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
-        border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
-    }
+    PaintQuad::new(bounds)
+        .corner_radii(corner_radii)
+        .background(background)
+        .border_widths(border_widths)
+        .border_color(border_color)
+        .border_style(border_style)
 }
 
-/// Returns a quad with no border and no corner radius, filled with `background`.
-///
-/// # Examples
-///
-/// ```
-/// # use gpui::{Bounds, fill, point, px, rgb, size};
-/// let bounds = Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.)));
-/// let quad = fill(bounds, rgb(0xf5f5f4));
-/// assert_eq!(quad.border_widths.top, px(0.));
-/// ```
+/// Returns a filled quad with no border and no corner radius.
+#[deprecated(note = "replaced with builder syntax for PaintQuad")]
 pub fn fill(bounds: impl Into<Bounds<Pixels>>, background: impl Into<Background>) -> PaintQuad {
-    PaintQuad {
-        bounds: bounds.into(),
-        corner_radii: (0.).into(),
-        corner_smoothing: 0.0,
-        background: background.into(),
-        border_widths: (0.).into(),
-        border_color: transparent_black().into(),
-        border_style: BorderStyle::default(),
-        border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
-        border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
-    }
+    PaintQuad::new(bounds).background(background)
 }
 
-/// Returns a transparent quad with a 1px border of `border_color` and the given `border_style`.
-///
-/// # Examples
-///
-/// ```
-/// # use gpui::{BorderStyle, Bounds, outline, point, px, rgb, size};
-/// let bounds = Bounds::new(point(px(0.), px(0.)), size(px(40.), px(20.)));
-/// let quad = outline(bounds, rgb(0x2563eb), BorderStyle::Solid);
-/// assert_eq!(quad.border_widths.top, px(1.));
-/// ```
+/// Returns a transparent quad with a 1px border and the given border style.
+#[deprecated(note = "replaced with builder syntax for PaintQuad")]
 pub fn outline(
     bounds: impl Into<Bounds<Pixels>>,
     border_color: impl Into<Background>,
     border_style: BorderStyle,
 ) -> PaintQuad {
-    PaintQuad {
-        bounds: bounds.into(),
-        corner_radii: (0.).into(),
-        corner_smoothing: 0.0,
-        background: transparent_black().into(),
-        border_widths: (1.).into(),
-        border_color: border_color.into(),
-        border_style,
-        border_dashed_length: crate::scene::DEFAULT_BORDER_DASHED_LENGTH,
-        border_dashed_gap: crate::scene::DEFAULT_BORDER_DASHED_GAP,
-    }
+    PaintQuad::new(bounds)
+        .border_widths(1f32)
+        .border_color(border_color)
+        .border_style(border_style)
 }
 
 #[cfg(test)]

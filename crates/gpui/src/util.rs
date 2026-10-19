@@ -114,6 +114,18 @@ impl<T: Future> FutureExt for T {
     }
 }
 
+/// UTF-8 text range containment checks.
+pub trait TextRangeExt {
+    /// Returns whether `range` is ordered, in bounds, and lies on character boundaries.
+    fn contains_range(&self, range: &std::ops::Range<usize>) -> bool;
+}
+
+impl TextRangeExt for str {
+    fn contains_range(&self, range: &std::ops::Range<usize>) -> bool {
+        self.get(range.clone()).is_some()
+    }
+}
+
 /// The future returned by [`FutureExt::with_timeout`]. It resolves to the wrapped
 /// future's output, or to [`Timeout`] if the timer fires first.
 #[pin_project::pin_project]
