@@ -125,12 +125,10 @@ strum.workspace = true
 sum_tree.workspace = true
 taffy = { workspace = true, features = [
     "std",
-    "taffy_tree",
     "flexbox",
     "grid",
     "block_layout",
     "float_layout",
-    "content_size",
 ] }
 thiserror.workspace = true
 tracing.workspace = true

@@ -2,6 +2,7 @@ use crate::elements::div::ScrollHandle;
 use crate::elements::text::{
     TruncationCandidate, text_layout_fits, truncate_with_measured_candidates,
 };
+use crate::taffy::MeasureKey;
 use crate::{
     App, AvailableSpace, Bounds, Display, InlineBidiScope, InlineBoxRequest, InlineLayout,
     InlineLayoutRequest, InlineTextMetrics, InlineTextStyle, LayoutId, Pixels, Point, Position,
@@ -15,7 +16,7 @@ use smallvec::SmallVec;
 use std::{
     cell::{Ref, RefCell},
     ops::Range,
-    rc::{Rc, Weak},
+    rc::Rc,
     sync::Arc,
 };
 use unicode_segmentation::UnicodeSegmentation;
@@ -54,6 +55,65 @@ struct InlineDocument {
     boxes: Vec<InlineBoxRequest>,
     box_layout_ids: Vec<LayoutId>,
     spans: Vec<InlineSpan>,
+}
+
+/// Documents are equal when they would lay out the same. Span directions resolve later, from
+/// nodes compared by the layout engine.
+impl PartialEq for InlineDocument {
+    fn eq(&self, other: &Self) -> bool {
+        self.text == other.text
+            && self.runs == other.runs
+            && self.text_styles == other.text_styles
+            && self.boxes == other.boxes
+            && self.spans.len() == other.spans.len()
+            && self.spans.iter().zip(&other.spans).all(|(span, other)| {
+                span.text_range == other.text_range
+                    && span.box_range == other.box_range
+                    && span.unicode_bidi == other.unicode_bidi
+            })
+    }
+}
+
+/// What a paragraph's size depends on, besides the space it gets, and the paragraph's
+/// measurement.
+struct ParagraphKey {
+    document: Rc<InlineDocument>,
+    text_style: TextStyle,
+    unicode_bidi: UnicodeBidi,
+    rem_size: Pixels,
+    scale_factor: f32,
+    font_generation: u64,
+    measurement: Rc<RefCell<Option<InlineParagraphMeasurement>>>,
+}
+
+impl MeasureKey for ParagraphKey {
+    fn same(&self, previous: &dyn MeasureKey) -> bool {
+        previous
+            .as_any()
+            .downcast_ref::<Self>()
+            .is_some_and(|previous| {
+                self.document == previous.document
+                    && self.text_style == previous.text_style
+                    && self.unicode_bidi == previous.unicode_bidi
+                    && self.rem_size == previous.rem_size
+                    && self.scale_factor == previous.scale_factor
+                    && self.font_generation == previous.font_generation
+            })
+    }
+
+    fn inherit(&self, previous: &dyn MeasureKey) -> bool {
+        let Some(previous) = previous.as_any().downcast_ref::<Self>() else {
+            return false;
+        };
+        let measurement = previous.measurement.borrow().clone();
+        let measured = measurement.is_some();
+        *self.measurement.borrow_mut() = measurement;
+        measured
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl InlineDocument {
@@ -168,157 +228,13 @@ impl InlineDocument {
     }
 }
 
+#[derive(Clone)]
 struct InlineParagraphMeasurement {
     truncate_width: Option<Pixels>,
     options: crate::TextLayoutOptions,
     bidi_scopes: Vec<InlineBidiScope>,
     document: Rc<InlineDocument>,
     layout: Arc<InlineLayout>,
-}
-
-#[derive(Clone, PartialEq)]
-struct InlineSpanMemoKey {
-    text_range: Range<usize>,
-    box_range: Range<usize>,
-    direction: crate::ResolvedDirection,
-    unicode_bidi: UnicodeBidi,
-}
-
-#[derive(Clone, PartialEq)]
-struct InlineParagraphMemoKey {
-    spans: Vec<InlineSpanMemoKey>,
-    text_style: TextStyle,
-    font_size: Pixels,
-    line_height: Pixels,
-    text_metrics: InlineTextMetrics,
-    rem_size: Pixels,
-    scale_factor_bits: u32,
-    direction: crate::ResolvedDirection,
-    unicode_bidi: UnicodeBidi,
-    font_generation: usize,
-}
-
-/// Snapshot of exact plain-paragraph shaping inputs. Direction handles are read once here so the
-/// key remains immutable even though an InlineDocument's span handles are mutable cells.
-pub(crate) struct InlineParagraphMemo {
-    key: InlineParagraphMemoKey,
-    document: Rc<InlineDocument>,
-    measurement: Weak<RefCell<Option<InlineParagraphMeasurement>>>,
-}
-
-impl InlineParagraphMemo {
-    #[allow(clippy::too_many_arguments)]
-    fn new(
-        document: &Rc<InlineDocument>,
-        measurement: &Rc<RefCell<Option<InlineParagraphMeasurement>>>,
-        text_style: &TextStyle,
-        font_size: Pixels,
-        line_height: Pixels,
-        text_metrics: InlineTextMetrics,
-        rem_size: Pixels,
-        scale_factor: f32,
-        direction: crate::ResolvedDirection,
-        unicode_bidi: UnicodeBidi,
-        font_generation: usize,
-    ) -> Option<Self> {
-        if !document.boxes.is_empty()
-            || !document.box_layout_ids.is_empty()
-            || direction != crate::ResolvedDirection::LeftToRight
-            || unicode_bidi != UnicodeBidi::Normal
-            // The document text remains in the key and is safe under a static LTR ancestor.
-            // Auto/RTL ancestors disable paragraph reuse before requesting descendants.
-            || document.spans.iter().any(|span| {
-                span.unicode_bidi != UnicodeBidi::Normal
-                    || span.direction.get() != crate::ResolvedDirection::LeftToRight
-            })
-        {
-            return None;
-        }
-
-        let spans = document
-            .spans
-            .iter()
-            .map(|span| InlineSpanMemoKey {
-                text_range: span.text_range.clone(),
-                box_range: span.box_range.clone(),
-                direction: span.direction.get(),
-                unicode_bidi: span.unicode_bidi,
-            })
-            .collect();
-
-        Some(Self {
-            key: InlineParagraphMemoKey {
-                spans,
-                text_style: text_style.clone(),
-                font_size,
-                line_height,
-                text_metrics,
-                rem_size,
-                scale_factor_bits: scale_factor.to_bits(),
-                direction,
-                unicode_bidi,
-                font_generation,
-            },
-            document: document.clone(),
-            measurement: Rc::downgrade(measurement),
-        })
-    }
-
-    pub(crate) fn can_adopt_from(&self, previous: &Self) -> bool {
-        self.key == previous.key
-            && self.document.text == previous.document.text
-            && self.document.runs == previous.document.runs
-            && self.document.text_styles == previous.document.text_styles
-    }
-
-    pub(crate) fn adopt_from(&self, previous: &Self) -> bool {
-        if !self.can_adopt_from(previous) {
-            return false;
-        }
-
-        let (Some(previous_measurement), Some(current_measurement)) =
-            (previous.measurement.upgrade(), self.measurement.upgrade())
-        else {
-            return false;
-        };
-        if Rc::ptr_eq(&previous_measurement, &current_measurement) {
-            return false;
-        }
-
-        let (options, bidi_scopes, layout) = {
-            let Ok(previous_measurement) = previous_measurement.try_borrow() else {
-                return false;
-            };
-            let Some(previous_measurement) = previous_measurement.as_ref() else {
-                return false;
-            };
-            if previous_measurement.truncate_width.is_some()
-                || !previous_measurement.layout.boxes.is_empty()
-            {
-                return false;
-            }
-            (
-                previous_measurement.options,
-                previous_measurement.bidi_scopes.clone(),
-                previous_measurement.layout.clone(),
-            )
-        };
-
-        let Ok(mut current_measurement) = current_measurement.try_borrow_mut() else {
-            return false;
-        };
-        if current_measurement.is_some() {
-            return false;
-        }
-        current_measurement.replace(InlineParagraphMeasurement {
-            truncate_width: None,
-            options,
-            bidi_scopes,
-            document: self.document.clone(),
-            layout,
-        });
-        true
-    }
 }
 
 struct InlineParagraph {
@@ -492,92 +408,80 @@ impl InlineParagraphCollector<'_> {
             x_height: self.window.text_system().x_height(font_id, font_size),
         };
 
+        // A paragraph keeps its layout only while its spans keep theirs, since their directions
+        // resolve later.
+        let key = document
+            .spans
+            .iter()
+            .all(|span| self.window.layout_inherited(span.layout_id))
+            .then(|| ParagraphKey {
+                document: document.clone(),
+                text_style: text_style.clone(),
+                unicode_bidi: self.unicode_bidi,
+                rem_size: self.window.rem_size(),
+                scale_factor: self.window.scale_factor(),
+                font_generation: self.window.text_system().font_generation(),
+                measurement: measurement.clone(),
+            });
         let measured_document = document.clone();
         let measurement_cache = measurement.clone();
         let unicode_bidi = self.unicode_bidi;
-        let direction = self.window.resolved_direction();
-        let rem_size = self.window.rem_size();
-        let scale_factor = self.window.scale_factor();
 
-        let font_generation = self.window.text_system().font_generation();
-        let memo = if self.window.inline_text_reuse_disabled {
-            None
-        } else {
-            InlineParagraphMemo::new(
-                &document,
-                &measurement,
-                &text_style,
-                font_size,
-                line_height,
-                text_metrics,
-                rem_size,
-                scale_factor,
-                direction,
-                unicode_bidi,
-                font_generation,
-            )
-        };
-        let measure = move |known_dimensions: Size<Option<Pixels>>,
-                            available_space: Size<AvailableSpace>,
-                            resolved_direction: crate::ResolvedDirection,
-                            text_system: &WindowTextSystem| {
-            let (options, truncation) = TextLayout::layout_options(
-                &text_style,
-                known_dimensions,
-                available_space,
-                resolved_direction,
-                unicode_bidi,
-            );
-
-            let bidi_scopes = measured_document.bidi_scopes();
-
-            if let Some(measurement) =
-                measurement_cache.borrow().as_ref() as Option<&InlineParagraphMeasurement>
-                && measurement.truncate_width == truncation.width
-                && measurement.options == options
-                && measurement.bidi_scopes == bidi_scopes
-                && text_system.font_generation() == font_generation
-            {
-                return measurement.layout.size;
-            }
-
-            let request = InlineLayoutRequest {
-                text: &measured_document.text,
-                runs: &measured_document.runs,
-                text_styles: &measured_document.text_styles,
-                boxes: &measured_document.boxes,
-                font_size,
-                line_height,
-                text_metrics,
-                options,
-                bidi_scopes: &bidi_scopes,
-            };
-            let (document, layout) = measured_document.layout(request, &truncation, text_system);
-
-            let size = layout.size;
-            measurement_cache
-                .borrow_mut()
-                .replace(InlineParagraphMeasurement {
-                    truncate_width: truncation.width,
-                    options,
-                    bidi_scopes,
-                    document,
-                    layout,
-                });
-
-            size
-        };
-        let paragraph_style = Style {
+        let style = Style {
             display: Display::Block,
             ..Style::default()
         };
-        let layout_id = self.window.request_retained_inline_paragraph_layout(
-            paragraph_style,
-            rem_size,
-            scale_factor,
-            memo,
-            measure,
-        );
+        let measure = move |known_dimensions, available_space, window: &mut Window, _cx: &mut App| {
+                let (options, truncation) = TextLayout::layout_options(
+                    &text_style,
+                    known_dimensions,
+                    available_space,
+                    window.resolved_direction(),
+                    unicode_bidi,
+                );
+
+                let bidi_scopes = measured_document.bidi_scopes();
+
+                if let Some(measurement) =
+                    measurement_cache.borrow().as_ref() as Option<&InlineParagraphMeasurement>
+                    && measurement.truncate_width == truncation.width
+                    && measurement.options == options
+                    && measurement.bidi_scopes == bidi_scopes
+                {
+                    return measurement.layout.size;
+                }
+
+                let request = InlineLayoutRequest {
+                    text: &measured_document.text,
+                    runs: &measured_document.runs,
+                    text_styles: &measured_document.text_styles,
+                    boxes: &measured_document.boxes,
+                    font_size,
+                    line_height,
+                    text_metrics,
+                    options,
+                    bidi_scopes: &bidi_scopes,
+                };
+                let (document, layout) =
+                    measured_document.layout(request, &truncation, window.text_system());
+
+                let size = layout.size;
+                measurement_cache
+                    .borrow_mut()
+                    .replace(InlineParagraphMeasurement {
+                        truncate_width: truncation.width,
+                        options,
+                        bidi_scopes,
+                        document,
+                        layout,
+                    });
+
+                size
+            };
+        let layout_id = match key {
+            Some(key) => self.window.request_keyed_measured_layout(style, key, measure),
+            None => self.window.request_measured_layout(style, measure),
+        };
 
         self.frame_state.flow_child_layout_ids.push(layout_id);
         self.frame_state.paragraphs.push(InlineParagraph {
@@ -628,18 +532,15 @@ impl InlineDivFrameState {
 
         paragraph_collector.finish_paragraph();
 
-        let node_id = paragraph_collector
-            .window
-            .request_layout_with_logical_children(
-                style.clone(),
-                paragraph_collector
-                    .frame_state
-                    .flow_child_layout_ids
-                    .iter()
-                    .copied(),
-                children,
-                paragraph_collector.cx,
-            );
+        let node_id = paragraph_collector.window.request_layout(
+            style.clone(),
+            paragraph_collector
+                .frame_state
+                .flow_child_layout_ids
+                .iter()
+                .copied(),
+            paragraph_collector.cx,
+        );
 
         (node_id, paragraph_collector.frame_state)
     }
@@ -796,86 +697,4 @@ fn merge_fragments(regions: &mut Vec<Bounds<Pixels>>) {
     }
 
     *regions = merged;
-}
-
-#[cfg(test)]
-mod retained_memo_tests {
-    use super::*;
-    use crate::{ResolvedDirection, TaffyLayoutEngine, px};
-
-    #[test]
-    fn pruned_inline_paragraph_claim_falls_back_before_taffy_access() {
-        let make_document = || {
-            Rc::new(InlineDocument {
-                text: "plain paragraph".to_owned(),
-                ..InlineDocument::default()
-            })
-        };
-        let text_style = TextStyle::default();
-        let mut engine = TaffyLayoutEngine::new();
-
-        let first_document = make_document();
-        let first_measurement = Rc::new(RefCell::new(None));
-        let first_memo = InlineParagraphMemo::new(
-            &first_document,
-            &first_measurement,
-            &text_style,
-            px(12.0),
-            px(14.0),
-            InlineTextMetrics::default(),
-            px(16.0),
-            1.0,
-            ResolvedDirection::LeftToRight,
-            UnicodeBidi::Normal,
-            0,
-        )
-        .unwrap();
-
-        engine.begin_layout_claim_scope(None);
-        let old = engine.request_retained_inline_paragraph_layout(
-            Style::default(),
-            px(16.0),
-            1.0,
-            Some(first_memo),
-            |_, _, _, _| size(px(100.0), px(14.0)),
-        );
-        let initial = engine.finish_layout_claim_scope();
-        engine.finish_frame();
-
-        // Leave the paragraph's flat claim log in the retained state while allowing ordinary
-        // subtree pruning to reclaim the detached allocation.
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 0);
-
-        let next_document = make_document();
-        let next_measurement = Rc::new(RefCell::new(None));
-        let next_memo = InlineParagraphMemo::new(
-            &next_document,
-            &next_measurement,
-            &text_style,
-            px(12.0),
-            px(14.0),
-            InlineTextMetrics::default(),
-            px(16.0),
-            1.0,
-            ResolvedDirection::LeftToRight,
-            UnicodeBidi::Normal,
-            0,
-        )
-        .unwrap();
-
-        engine.begin_layout_claim_scope(Some(initial.log));
-        let replacement = engine.request_retained_inline_paragraph_layout(
-            Style::default(),
-            px(16.0),
-            1.0,
-            Some(next_memo),
-            |_, _, _, _| size(px(100.0), px(14.0)),
-        );
-        let fallback = engine.finish_layout_claim_scope();
-        assert!(!fallback.fully_replayed);
-        assert_ne!(replacement, old);
-        engine.finish_frame();
-        assert_eq!(engine.live_layout_node_count(), 1);
-    }
 }

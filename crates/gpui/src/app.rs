@@ -4,7 +4,7 @@ use crate::{
     BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError, CursorStyle, DispatchPhase,
     DisplayChanges, DisplayEvent, DisplayId, EventEmitter, ExternalDragPayload, FocusHandle,
     FocusMap, ForegroundExecutor, Global, HapticFeedbackStyle, KeyBinding, KeyContext, Keymap,
-    Keystroke, LayoutId, Menu, MenuItem, MissingGlyph, OwnedMenu, PathPromptOptions, Pixels,
+    Keystroke, LayoutId, Menu, MenuItem, OwnedMenu, PathPromptOptions, Pixels,
     Platform, PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, Point, Priority,
     PromptBuilder, PromptButton, PromptHandle, PromptLevel, Render, RenderImage,
     RenderablePromptHandle, Reservation, ScreenCaptureSource, SharedString, SubscriberSet,
@@ -41,7 +41,6 @@ use std::{
 
 #[cfg(any(feature = "inspector", debug_assertions))]
 use crate::InspectorElementRegistry;
-#[cfg(target_os = "macos")]
 use crate::asset_cache::CachedLoad;
 pub use async_context::*;
 #[cfg(feature = "bench-support")]
@@ -84,12 +83,6 @@ pub const SHUTDOWN_TIMEOUT: Duration = Duration::from_millis(200);
 #[doc(hidden)]
 pub struct AppCell {
     app: RefCell<App>,
-}
-
-#[derive(Default)]
-struct GlobalDependencyState {
-    revision: u64,
-    windows: FxHashMap<WindowId, WindowInvalidator>,
 }
 
 impl AppCell {
@@ -362,8 +355,6 @@ impl Application {
             let cx = &mut *this.borrow_mut();
             // Some platforms only connect to their display server in `run`.
             cx.displays_changed();
-            #[cfg(gpui_hot_reload)]
-            crate::hot_reload::init(cx);
             on_finish_launching(cx);
         }));
 
@@ -393,8 +384,6 @@ impl Application {
             let cx = &mut *this.borrow_mut();
             // Some platforms only connect to their display server in `run`.
             cx.displays_changed();
-            #[cfg(gpui_hot_reload)]
-            crate::hot_reload::init(cx);
             on_finish_launching(cx);
         }));
         ApplicationHandle { app: self.0 }
@@ -511,7 +500,6 @@ fn display_events(
     removed.chain(added_or_changed).collect()
 }
 type Listener = Box<dyn FnMut(&dyn Any, &mut App) -> bool + 'static>;
-type MissingGlyphCallback = Box<dyn FnMut(&[MissingGlyph], &mut App) + 'static>;
 pub(crate) type KeystrokeObserver =
     Box<dyn FnMut(&KeystrokeEvent, &mut Window, &mut App) -> bool + 'static>;
 type QuitHandler = Box<dyn FnOnce(&mut App) -> LocalBoxFuture<'static, ()> + 'static>;
@@ -531,64 +519,6 @@ type NewEntityListener = Box<dyn FnMut(AnyEntity, &mut Option<&mut Window>, &mut
 /// # use gpui::QuitMode;
 /// assert_eq!(QuitMode::default(), QuitMode::Default);
 /// ```
-struct MissingGlyphCallbackEntry {
-    registration: Rc<()>,
-    callback: Option<MissingGlyphCallback>,
-}
-
-#[derive(Default)]
-struct MissingGlyphCallbackSlot {
-    entry: RefCell<Option<MissingGlyphCallbackEntry>>,
-}
-
-impl MissingGlyphCallbackSlot {
-    fn replace(&self, callback: MissingGlyphCallback) -> Rc<()> {
-        let registration = Rc::new(());
-        self.entry.borrow_mut().replace(MissingGlyphCallbackEntry {
-            registration: registration.clone(),
-            callback: Some(callback),
-        });
-        registration
-    }
-
-    fn invoke(&self, missing_glyphs: &[MissingGlyph], cx: &mut App) {
-        let Some((registration, mut callback)) =
-            self.entry.borrow_mut().as_mut().and_then(|entry| {
-                entry
-                    .callback
-                    .take()
-                    .map(|callback| (entry.registration.clone(), callback))
-            })
-        else {
-            return;
-        };
-        callback(missing_glyphs, cx);
-
-        let mut entry = self.entry.borrow_mut();
-        let is_current = entry
-            .as_ref()
-            .is_some_and(|entry| Rc::ptr_eq(&entry.registration, &registration));
-        if is_current {
-            let Some(entry) = entry.as_mut() else {
-                return;
-            };
-            entry.callback = Some(callback);
-        }
-    }
-
-    fn remove(&self, registration: &Rc<()>) -> bool {
-        let mut entry = self.entry.borrow_mut();
-        let is_current = entry
-            .as_ref()
-            .is_some_and(|entry| Rc::ptr_eq(&entry.registration, registration));
-        if is_current {
-            entry.take();
-        }
-        is_current
-    }
-}
-
-/// Defines when the application should automatically quit.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum QuitMode {
     /// Behaves like [`QuitMode::LastWindowClosed`] on Linux and Windows, and like
@@ -969,6 +899,48 @@ enum PlatformOwnedDragState {
     RestoredInSourceWindow,
 }
 
+/// What a view read while it drew: entities, globals and handle revisions, with the revision
+/// each was at.
+#[derive(Default)]
+pub(crate) struct Dependencies {
+    entities: Vec<EntityId>,
+    globals: Vec<(TypeId, u64)>,
+    revisions: Vec<(Revision, u64)>,
+}
+
+impl Dependencies {
+    pub(crate) fn extend(&mut self, other: Dependencies) {
+        self.entities.extend(other.entities);
+        self.entities.sort_unstable();
+        self.entities.dedup();
+        self.globals.extend(other.globals);
+        self.globals.sort_unstable();
+        self.globals.dedup_by_key(|(global_type, _)| *global_type);
+        // A later phase saw the later revision, so it wins.
+        for (revision, seen) in other.revisions {
+            match self.revisions.iter_mut().find(|(known, _)| known.same(&revision)) {
+                Some(entry) => entry.1 = seen,
+                None => self.revisions.push((revision, seen)),
+            }
+        }
+    }
+}
+
+/// A counter for state that lives outside entities, such as a list's scroll position, so the
+/// views that read it are drawn again when it changes. The owner bumps it on every mutation.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Revision(Rc<Cell<u64>>);
+
+impl Revision {
+    pub(crate) fn bump(&self) {
+        self.0.set(self.0.get().wrapping_add(1));
+    }
+
+    fn same(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 /// The state of a running application: its entities, windows, globals and key bindings.
 ///
 /// You get a `&mut App` from the callback passed to [`Application::run`], from
@@ -1021,7 +993,6 @@ pub struct App {
     pub(crate) keystroke_observers: SubscriberSet<(), KeystrokeObserver>,
     pub(crate) keystroke_interceptors: SubscriberSet<(), KeystrokeObserver>,
     pub(crate) keyboard_layout_observers: SubscriberSet<(), Handler>,
-    missing_glyph_callback: Rc<MissingGlyphCallbackSlot>,
     pub(crate) thermal_state_observers: SubscriberSet<(), Handler>,
     pub(crate) display_observers: SubscriberSet<(), DisplayHandler>,
     /// The connected displays, as of the platform's last display change
@@ -1048,6 +1019,9 @@ pub struct App {
     // the tokio runtime. As any task attempting to spawn a blocking tokio task,
     // might panic.
     pub(crate) globals_by_type: TypeIdHashMap<Box<dyn Any>>,
+    global_revisions: TypeIdHashMap<u64>,
+    global_reads: RefCell<Vec<TypeId>>,
+    revision_reads: RefCell<Vec<Revision>>,
     // Entities which are retained until explicitly removed from the app or dropped at end of life-cycle.
     // This is an alternative way to define "global" data which uses entities.
     // There can be multiple entities of a given type & each `Entity<T>` is stored as `Box<dyn Any>`.
@@ -1062,9 +1036,6 @@ pub struct App {
     // below is plain data, the drop order is insignificant here
     pub(crate) pending_notifications: FxHashSet<EntityId>,
     pub(crate) pending_global_notifications: TypeIdHashSet,
-    accessed_global_revisions: RefCell<FxHashMap<TypeId, u64>>,
-    global_dependencies: FxHashMap<TypeId, GlobalDependencyState>,
-    tracked_globals: FxHashMap<WindowId, FxHashSet<TypeId>>,
     pub(crate) restart_path: Option<PathBuf>,
     pub(crate) restart_arguments: Vec<OsString>,
     pub(crate) layout_id_buffer: Vec<LayoutId>, // We recycle this memory across layout requests.
@@ -1151,6 +1122,9 @@ impl App {
                 asset_registry,
                 http_client,
                 globals_by_type: Default::default(),
+                global_revisions: Default::default(),
+                global_reads: Default::default(),
+                revision_reads: Default::default(),
                 global_entities: Default::default(),
                 entities,
                 new_entity_observers: SubscriberSet::new(),
@@ -1165,9 +1139,6 @@ impl App {
                 pending_effects: VecDeque::new(),
                 pending_notifications: FxHashSet::default(),
                 pending_global_notifications: Default::default(),
-                accessed_global_revisions: RefCell::new(FxHashMap::default()),
-                global_dependencies: FxHashMap::default(),
-                tracked_globals: FxHashMap::default(),
                 observers: SubscriberSet::new(),
                 tracked_entities: FxHashMap::default(),
                 window_invalidators_by_entity: FxHashMap::default(),
@@ -1177,7 +1148,6 @@ impl App {
                 keystroke_observers: SubscriberSet::new(),
                 keystroke_interceptors: SubscriberSet::new(),
                 keyboard_layout_observers: SubscriberSet::new(),
-                missing_glyph_callback: Rc::default(),
                 thermal_state_observers: SubscriberSet::new(),
                 display_observers: SubscriberSet::new(),
                 displays: read_displays(platform.as_ref()),
@@ -1371,7 +1341,6 @@ impl App {
     #[cfg(all(feature = "test-support", not(any(test, gpui_leak_detection))))]
     pub fn assert_no_new_leaks(&self, _snapshot: &LeakDetectorSnapshot) {}
 
-    /// Quit the application gracefully.
     /// Runs the quit handlers, closes every window and flushes pending effects.
     ///
     /// The platform calls this when the app quits. Handlers registered with
@@ -1506,8 +1475,6 @@ impl App {
         self.platform.graphical_environment()
     }
 
-    /// Returns the current policy for hiding the cursor in response to
-    /// keyboard input.
     /// Returns the policy that decides when GPUI hides the cursor while typing.
     ///
     /// Defaults to [`CursorHideMode::OnTypingAndAction`].
@@ -1623,85 +1590,112 @@ impl App {
         })
     }
 
-    pub(crate) fn detect_accessed_dependencies<R>(
+    /// Runs `callback` and returns what it read: the entities, and the globals at their
+    /// current revisions. Reads by nested recordings count for the enclosing ones too.
+    pub(crate) fn record_dependencies<R>(
         &mut self,
         callback: impl FnOnce(&mut App) -> R,
-    ) -> (R, ViewDependencies) {
-        let mut previous_entities = mem::take(self.entities.accessed_entities.get_mut());
-        let mut previous_globals = mem::take(self.accessed_global_revisions.get_mut());
+    ) -> (R, Dependencies) {
+        let entities_start = self.entities.access_log.get_mut().len();
+        let globals_start = self.global_reads.get_mut().len();
+        let revisions_start = self.revision_reads.get_mut().len();
+        *self.entities.recordings.get_mut() += 1;
         let result = callback(self);
-        let entities = mem::take(self.entities.accessed_entities.get_mut());
-        let globals = mem::take(self.accessed_global_revisions.get_mut());
-        previous_entities.extend(entities.iter().copied());
-        for (global_type, revision) in &globals {
-            previous_globals.entry(*global_type).or_insert(*revision);
-        }
-        *self.entities.accessed_entities.get_mut() = previous_entities;
-        *self.accessed_global_revisions.get_mut() = previous_globals;
-        (result, ViewDependencies { entities, globals })
-    }
+        let recordings = self.entities.recordings.get_mut();
+        *recordings -= 1;
+        let outermost = *recordings == 0;
 
-    pub(crate) fn extend_accessed_dependencies(&mut self, dependencies: &ViewDependencies) {
-        self.entities.extend_accessed(&dependencies.entities);
-        for (global_type, revision) in &dependencies.globals {
-            self.accessed_global_revisions
-                .get_mut()
-                .entry(*global_type)
-                .or_insert(*revision);
-        }
-    }
-
-    pub(crate) fn clear_accessed_global_revisions(&mut self) {
-        self.accessed_global_revisions.get_mut().clear();
-    }
-
-    pub(crate) fn take_accessed_global_revisions(&mut self) -> FxHashMap<TypeId, u64> {
-        mem::take(self.accessed_global_revisions.get_mut())
-    }
-
-    pub(crate) fn restore_accessed_global_revisions(&mut self, revisions: FxHashMap<TypeId, u64>) {
-        *self.accessed_global_revisions.get_mut() = revisions;
-    }
-
-    pub(crate) fn global_revision(&self, global_type: TypeId) -> u64 {
-        self.global_dependencies
-            .get(&global_type)
-            .map(|deps| deps.revision)
-            .unwrap_or_default()
-    }
-
-    pub(crate) fn record_global_dependencies(
-        &mut self,
-        window_handle: AnyWindowHandle,
-        invalidator: WindowInvalidator,
-        globals: &FxHashMap<TypeId, u64>,
-    ) {
-        if globals
+        let log = self.entities.access_log.get_mut();
+        let mut entities = log[entities_start..].to_vec();
+        entities.sort_unstable();
+        entities.dedup();
+        let reads = self.global_reads.get_mut();
+        let mut globals: Vec<(TypeId, u64)> = reads[globals_start..]
             .iter()
-            .any(|(kind, revision)| self.global_revision(*kind) != *revision)
-        {
-            invalidator.set_dirty(true);
-        }
-        let mut tracked = mem::take(self.tracked_globals.entry(window_handle.id).or_default());
-        for kind in tracked.iter().filter(|kind| !globals.contains_key(kind)) {
-            let remove_entry = self.global_dependencies.get_mut(kind).is_some_and(|deps| {
-                deps.windows.remove(&window_handle.id);
-                deps.windows.is_empty() && deps.revision == 0
-            });
-            if remove_entry {
-                self.global_dependencies.remove(kind);
+            .map(|global_type| (*global_type, 0))
+            .collect();
+        let revision_reads = self.revision_reads.get_mut();
+        let mut revisions: Vec<(Revision, u64)> = Vec::new();
+        for revision in revision_reads.drain(revisions_start..) {
+            if !revisions.iter().any(|(known, _)| known.same(&revision)) {
+                let seen = revision.0.get();
+                revisions.push((revision, seen));
             }
         }
-        for kind in globals.keys().filter(|kind| !tracked.contains(kind)) {
-            self.global_dependencies
-                .entry(*kind)
-                .or_default()
-                .windows
-                .insert(window_handle.id, invalidator.clone());
+        if !outermost {
+            // Enclosing recordings depend on these too.
+            revision_reads.extend(revisions.iter().map(|(revision, _)| revision.clone()));
         }
-        tracked.clear();
-        tracked.extend(globals.keys().copied());
-        *self.tracked_globals.entry(window_handle.id).or_default() = tracked;
+        if outermost {
+            log.clear();
+            reads.clear();
+        }
+        globals.sort_unstable();
+        globals.dedup();
+        for (global_type, revision) in &mut globals {
+            *revision = self.global_revision(*global_type);
+        }
+        (
+            result,
+            Dependencies {
+                entities,
+                globals,
+                revisions,
+            },
+        )
+    }
+
+    /// Counts `dependencies` as read again, as when a view's output is reused.
+    pub(crate) fn replay_dependencies(&mut self, dependencies: &Dependencies) {
+        for entity_id in &dependencies.entities {
+            self.entities.note_access(*entity_id);
+        }
+        for (global_type, _) in &dependencies.globals {
+            self.note_global_read(*global_type);
+        }
+        for (revision, _) in &dependencies.revisions {
+            self.note_revision(revision);
+        }
+    }
+
+    /// Records that the drawing view read state versioned by `revision`.
+    pub(crate) fn note_revision(&self, revision: &Revision) {
+        if self.entities.recordings.get() > 0 {
+            self.revision_reads.borrow_mut().push(revision.clone());
+        }
+    }
+
+    /// Returns whether anything in `dependencies` changed: an entity in `dirty`, or a global
+    /// written since it was read.
+    pub(crate) fn dependencies_changed(
+        &self,
+        dependencies: &Dependencies,
+        dirty: &FxHashSet<EntityId>,
+    ) -> bool {
+        dependencies.entities.iter().any(|id| dirty.contains(id))
+            || dependencies
+                .globals
+                .iter()
+                .any(|(global_type, revision)| self.global_revision(*global_type) != *revision)
+            || dependencies
+                .revisions
+                .iter()
+                .any(|(revision, seen)| revision.0.get() != *seen)
+    }
+
+    fn note_global_read(&self, global_type: TypeId) {
+        if self.entities.recordings.get() > 0 {
+            self.global_reads.borrow_mut().push(global_type);
+        }
+    }
+
+    fn global_revision(&self, global_type: TypeId) -> u64 {
+        self.global_revisions.get(&global_type).copied().unwrap_or(0)
+    }
+
+    fn global_changed(&mut self, global_type: TypeId) {
+        *self.global_revisions.entry(global_type).or_default() += 1;
+        self.push_effect(Effect::NotifyGlobalObservers { global_type });
     }
 
     pub(crate) fn record_entities_accessed(
@@ -2023,7 +2017,6 @@ impl App {
         self.platform.prevent_idle_sleep(reason)
     }
 
-    /// Invokes a handler when the thermal state changes
     /// Calls `callback` when the system's thermal state changes.
     ///
     /// The subscription stays active while you hold it.
@@ -2112,7 +2105,6 @@ impl App {
         subscription
     }
 
-    /// Invokes a handler when the system wakes from sleep.
     /// Calls `callback` when the system wakes from sleep.
     ///
     /// Use it to reconnect to network services or refresh data that went stale
@@ -2168,7 +2160,6 @@ impl App {
         subscription
     }
 
-    /// Returns the appearance of the application's windows.
     /// Returns whether the windows use the light or dark appearance.
     ///
     /// This is the system setting unless [`App::set_window_appearance`] overrides it.
@@ -2494,7 +2485,6 @@ impl App {
         self.platform.set_activation_policy(policy);
     }
 
-    /// Returns the SVG renderer used by the application.
     /// Returns the SVG renderer that draws the app's SVG assets.
     pub fn svg_renderer(&self) -> SvgRenderer {
         self.svg_renderer.clone()
@@ -2719,11 +2709,6 @@ impl App {
     /// callback receives the [`Window`] and the [`App`]. Returns `None` if the entity has
     /// no current window, if that window has closed, or if the window is already being
     /// updated higher up the call stack.
-    /// Run `f` against the entity's *current* window — the most recently
-    /// rendered window that referenced the entity, or its creation window if
-    /// it has yet to be rendered. Returns `None` if the entity has no
-    /// current window, or if that window has been closed, or if it is
-    /// already on the update stack.
     #[inline(always)]
     pub fn with_window<R>(
         &mut self,
@@ -2784,7 +2769,6 @@ impl App {
         self.background_executor.is_test()
     }
 
-    /// Obtains a reference to the executor, which can be used to spawn futures.
     /// Returns the [`ForegroundExecutor`], which runs futures on the main thread.
     ///
     /// # Panics
@@ -2844,8 +2828,6 @@ impl App {
         Ok(())
     }
 
-    /// Spawns the future returned by the given function on the main thread. The closure will be invoked
-    /// with [AsyncApp], which allows the application state to be accessed across await points.
     /// Runs an async block on the main thread, with an [`AsyncApp`] for access to app state.
     ///
     /// The closure receives `&mut AsyncApp`. Use it to update entities and windows after
@@ -2940,72 +2922,10 @@ impl App {
         &self.text_system
     }
 
-    /// Invokes a callback with grapheme clusters that exhausted font fallback.
-    ///
-    /// Registering a callback replaces the previous callback and enables missing-glyph
-    /// detection. The callback runs on the foreground executor after shaping has
-    /// released its internal locks. Dropping its subscription disables detection until
-    /// another callback is registered.
-    ///
-    /// Reports are queued without blocking shaping, then deduplicated before delivery.
-    /// The bounded queue can drop reports on overflow. Dropped reports may be reported
-    /// again when the text is reshaped; no retry is scheduled automatically.
-    pub fn on_missing_glyphs(
-        &self,
-        callback: impl FnMut(&[MissingGlyph], &mut App) + 'static,
-    ) -> Subscription {
-        let registration = self.missing_glyph_callback.replace(Box::new(callback));
-
-        if let Some(mut receiver) = self.text_system.take_missing_glyph_receiver() {
-            let callback = self.missing_glyph_callback.clone();
-            self.spawn(async move |cx| {
-                while let Ok(missing_glyphs) = receiver.recv().await {
-                    cx.update(|cx| callback.invoke(&missing_glyphs, cx));
-                }
-            })
-            .detach();
-        }
-        self.text_system.enable_missing_glyph_reporting();
-
-        let callback = self.missing_glyph_callback.clone();
-        let text_system = self.text_system.clone();
-        Subscription::new(move || {
-            if callback.remove(&registration) {
-                text_system.disable_missing_glyph_reporting();
-            }
-        })
-    }
-
-    fn note_global_read(&self, global_type: TypeId) {
-        let revision = self.global_revision(global_type);
-        self.accessed_global_revisions
-            .borrow_mut()
-            .entry(global_type)
-            .or_insert(revision);
-    }
-
-    fn advance_global_revision(&mut self, global_type: TypeId) {
-        let dependencies = self.global_dependencies.entry(global_type).or_default();
-        dependencies.revision = dependencies
-            .revision
-            .checked_add(1)
-            .expect("global dependency revision exhausted");
-        for invalidator in dependencies.windows.values() {
-            invalidator.set_dirty(true);
-        }
-    }
-
-    fn note_global_write(&mut self, global_type: TypeId) {
-        self.advance_global_revision(global_type);
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
-    }
-
-    /// Check whether a global of the given type has been assigned.
     /// Returns whether a global of type `G` has been set.
     pub fn has_global<G: Global>(&self) -> bool {
-        let global_type = TypeId::of::<G>();
-        self.note_global_read(global_type);
-        self.globals_by_type.contains_key(&global_type)
+        self.note_global_read(TypeId::of::<G>());
+        self.globals_by_type.contains_key(&TypeId::of::<G>())
     }
 
     /// Returns the global of type `G`.
@@ -3044,8 +2964,7 @@ impl App {
     #[track_caller]
     pub fn global_mut<G: Global>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
-        self.note_global_read(global_type);
-        self.note_global_write(global_type);
+        self.global_changed(global_type);
         self.globals_by_type
             .get_mut(&global_type)
             .and_then(|any_state| any_state.downcast_mut::<G>())
@@ -3057,8 +2976,7 @@ impl App {
     /// Like [`App::global_mut`], this notifies global observers.
     pub fn default_global<G: Global + Default>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
-        self.note_global_read(global_type);
-        self.note_global_write(global_type);
+        self.global_changed(global_type);
         self.globals_by_type
             .entry(global_type)
             .or_insert_with(|| Box::<G>::default())
@@ -3085,17 +3003,14 @@ impl App {
     /// ```
     pub fn set_global<G: Global>(&mut self, global: G) {
         let global_type = TypeId::of::<G>();
-        self.note_global_write(global_type);
+        self.global_changed(global_type);
         self.globals_by_type.insert(global_type, Box::new(global));
     }
 
     /// Clear all stored globals. Does not notify global observers.
     #[cfg(any(test, feature = "test-support"))]
     pub fn clear_globals(&mut self) {
-        let globals = mem::take(&mut self.globals_by_type);
-        for global_type in globals.keys().copied() {
-            self.advance_global_revision(global_type);
-        }
+        self.globals_by_type.drain();
     }
 
     /// Removes the global of type `G` and returns it.
@@ -3107,8 +3022,7 @@ impl App {
     /// Panics if no global of type `G` has been set.
     pub fn remove_global<G: Global>(&mut self) -> G {
         let global_type = TypeId::of::<G>();
-        self.note_global_read(global_type);
-        self.note_global_write(global_type);
+        self.global_changed(global_type);
         *self
             .globals_by_type
             .remove(&global_type)
@@ -3160,7 +3074,6 @@ impl App {
     /// Move the global of the given type to the stack.
     #[track_caller]
     pub(crate) fn lease_global<G: Global>(&mut self) -> GlobalLease<G> {
-        self.advance_global_revision(TypeId::of::<G>());
         GlobalLease::new(
             self.globals_by_type
                 .remove(&TypeId::of::<G>())
@@ -3173,7 +3086,7 @@ impl App {
     pub(crate) fn end_global_lease<G: Global>(&mut self, lease: GlobalLease<G>) {
         let global_type = TypeId::of::<G>();
 
-        self.note_global_write(global_type);
+        self.global_changed(global_type);
         self.globals_by_type.insert(global_type, lease.global);
     }
 
@@ -3255,15 +3168,14 @@ impl App {
         })
     }
 
-    /// Calls `f` for every key-down that reaches any window of the app.
+    /// Calls `f` for every keystroke that reaches any window of the app.
     ///
-    /// The callback runs after action and event handling has finished, so it sees the
-    /// keystrokes that were not handled earlier. Use [`App::intercept_keystrokes`] to
-    /// see keystrokes before they are dispatched. Keep the returned [`Subscription`] alive.
-    /// Register a callback to be invoked after a keystroke is resolved in any window,
-    /// including the action that handled it, if any. Keystrokes consumed by an
-    /// interceptor or raw keyboard event handler are not observed.
-    /// Standalone modifiers are observed on release.
+    /// The callback runs after action and event handling has finished, and the event
+    /// names the action that handled the keystroke, if any. Keystrokes consumed by an
+    /// interceptor or a raw keyboard event handler are not observed, and a modifier
+    /// pressed on its own is observed when it is released. Use
+    /// [`App::intercept_keystrokes`] to see keystrokes before they are dispatched. Keep
+    /// the returned [`Subscription`] alive.
     pub fn observe_keystrokes(
         &mut self,
         mut f: impl FnMut(&KeystrokeEvent, &mut Window, &mut App) + 'static,
@@ -3956,21 +3868,6 @@ impl App {
                         }
                     }
 
-                    if let Some(tracked) = cx.tracked_globals.remove(&window_id) {
-                        for global_type in tracked {
-                            let remove_entry = cx
-                                .global_dependencies
-                                .get_mut(&global_type)
-                                .is_some_and(|deps| {
-                                    deps.windows.remove(&window_id);
-                                    deps.windows.is_empty() && deps.revision == 0
-                                });
-                            if remove_entry {
-                                cx.global_dependencies.remove(&global_type);
-                            }
-                        }
-                    }
-
                     cx.window_closed_observers.clone().retain(&(), |callback| {
                         callback(cx, window_id);
                         true
@@ -4284,8 +4181,7 @@ impl<G: Global> DerefMut for GlobalLease<G> {
     }
 }
 
-/// Contains the state of a drag in progress, started by dragging an element in a window or
-/// by dragging into the app from the underlying platform.
+/// The state of a drag in progress, started by dragging an element in a window.
 ///
 /// Set with [`App::start_drag`]. Read it with [`App::active_drag`]. It is cleared by
 /// [`App::stop_drag`] when the drop happens.
@@ -4323,10 +4219,7 @@ impl AnyDrag {
         }
     }
 
-    /// Assigns a constructor of an external payload to be called when the drag moves outside
-    /// of the application window. The closure builds the payload only if the drag leaves the
-    /// window.
-
+    /// Sets [`AnyDrag::external_payload_source`]: the closure builds the payload if the drag leaves the window.
     pub fn external_payload(
         mut self,
         predicate: impl FnOnce(&mut Window, &mut App) -> Option<ExternalDragPayload> + 'static,
@@ -4375,7 +4268,6 @@ pub enum InputPreference {
     KeyBindings,
 }
 
-/// A keystroke event, and potentially the associated action
 /// A keystroke that reached the app, with the action it resolved to, if any.
 ///
 /// Passed to the callbacks from [`App::observe_keystrokes`] and [`App::intercept_keystrokes`].
@@ -4393,7 +4285,6 @@ pub struct KeystrokeEvent {
     /// even when this is [`InputPreference::CharacterInput`].
     pub input_preference: InputPreference,
 
-    /// The action that was resolved for the keystroke, if any
     /// The action the keystroke resolved to, or `None` if no binding matched. Always
     /// `None` in an `intercept_keystrokes` callback.
     pub action: Option<Box<dyn Action>>,
@@ -4457,7 +4348,6 @@ impl<'a, T> Drop for GpuiBorrow<'a, T> {
 #[cfg(test)]
 mod test {
     use std::{
-        any::TypeId,
         cell::{Cell, RefCell},
         ffi::OsString,
         path::PathBuf,
@@ -4467,106 +4357,7 @@ mod test {
     #[cfg(unix)]
     use std::os::unix::ffi::OsStringExt;
 
-    use crate::{
-        AnyWindowHandle, AppContext, Context, Empty, FallbackFontClass, Global, IntoElement,
-        MissingGlyph, Render, TestAppContext, Window,
-    };
-
-    struct DependencyGlobal;
-    impl Global for DependencyGlobal {}
-
-    #[gpui::test]
-    fn nested_dependency_scopes_capture_and_restore_reads(cx: &mut TestAppContext) {
-        let preexisting = cx.new(|_| ());
-        let nested = cx.new(|_| ());
-        cx.update(|app| {
-            app.set_global(DependencyGlobal);
-            let global_type = TypeId::of::<DependencyGlobal>();
-            let captured_revision = app.global_revision(global_type);
-            app.entities.read(&preexisting);
-            let ((), outer) = app.detect_accessed_dependencies(|app| {
-                let _ = app.global::<DependencyGlobal>();
-                app.entities.read(&nested);
-                let ((), inner) = app.detect_accessed_dependencies(|app| {
-                    let _ = app.global::<DependencyGlobal>();
-                    app.entities.read(&nested);
-                });
-                assert!(inner.entities.contains(&nested.entity_id()));
-                assert_eq!(inner.globals.get(&global_type), Some(&captured_revision));
-            });
-
-            assert!(!outer.entities.contains(&preexisting.entity_id()));
-            assert!(outer.entities.contains(&nested.entity_id()));
-            assert_eq!(outer.globals.get(&global_type), Some(&captured_revision));
-            assert!(
-                app.entities
-                    .accessed_entities
-                    .borrow()
-                    .contains(&preexisting.entity_id())
-            );
-            assert!(
-                app.entities
-                    .accessed_entities
-                    .borrow()
-                    .contains(&nested.entity_id())
-            );
-            assert_eq!(
-                app.accessed_global_revisions.borrow().get(&global_type),
-                Some(&captured_revision)
-            );
-
-            app.entities.clear_accessed();
-            app.clear_accessed_global_revisions();
-            app.extend_accessed_dependencies(&outer);
-            assert!(
-                app.entities
-                    .accessed_entities
-                    .borrow()
-                    .contains(&nested.entity_id())
-            );
-            assert_eq!(
-                app.accessed_global_revisions.borrow().get(&global_type),
-                Some(&captured_revision)
-            );
-        });
-    }
-
-    #[gpui::test]
-    fn closing_window_releases_tracked_global_dependencies(cx: &mut TestAppContext) {
-        let window: AnyWindowHandle = cx.add_window(|_, _| Empty).into();
-        cx.update(|app| {
-            app.set_global(DependencyGlobal);
-            let global_type = TypeId::of::<DependencyGlobal>();
-            let revision = app.global_revision(global_type);
-            app.update_window(window, |_, window_state, app| {
-                let mut globals = collections::FxHashMap::default();
-                globals.insert(global_type, revision);
-                app.record_global_dependencies(window, window_state.invalidator.clone(), &globals);
-                window_state.remove_window();
-            })
-            .unwrap();
-
-            assert!(!app.tracked_globals.contains_key(&window.id));
-            assert!(
-                app.global_dependencies
-                    .get(&global_type)
-                    .is_none_or(|dependencies| !dependencies.windows.contains_key(&window.id))
-            );
-        });
-    }
-
-    #[gpui::test]
-    fn clearing_globals_advances_the_retained_revision(cx: &mut TestAppContext) {
-        cx.update(|app| {
-            app.set_global(DependencyGlobal);
-            let global_type = TypeId::of::<DependencyGlobal>();
-            let before_clear = app.global_revision(global_type);
-            let _ = app.global::<DependencyGlobal>();
-            app.clear_globals();
-            assert!(app.global_revision(global_type) > before_clear);
-            assert!(app.try_global::<DependencyGlobal>().is_none());
-        });
-    }
+    use crate::{AppContext, Context, Empty, IntoElement, Render, TestAppContext, Window};
 
     struct RenderCounter(Rc<Cell<usize>>);
 
@@ -4592,65 +4383,6 @@ mod test {
         cx.to_async().refresh();
 
         assert_eq!(render_count.get(), render_count_before_refresh + 1);
-    }
-
-    #[gpui::test]
-    fn missing_glyph_callbacks_follow_subscription_lifetime(cx: &mut TestAppContext) {
-        let observed = Rc::new(RefCell::new(Vec::new()));
-        let subscription = cx.update(|cx| {
-            let observed = observed.clone();
-            cx.on_missing_glyphs(move |missing_glyphs, _| {
-                observed.borrow_mut().extend_from_slice(missing_glyphs);
-            })
-        });
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("active")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(observed.borrow().as_slice(), &[missing_glyph("active")]);
-
-        let second_observed = Rc::new(RefCell::new(Vec::new()));
-        let second_subscription = cx.update(|cx| {
-            let second_observed = second_observed.clone();
-            cx.on_missing_glyphs(move |missing_glyphs, _| {
-                second_observed
-                    .borrow_mut()
-                    .extend_from_slice(missing_glyphs);
-            })
-        });
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("replacement")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(observed.borrow().as_slice(), &[missing_glyph("active")]);
-        assert_eq!(
-            second_observed.borrow().as_slice(),
-            &[missing_glyph("replacement")]
-        );
-
-        drop(subscription);
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("after old drop")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(
-            second_observed.borrow().as_slice(),
-            &[
-                missing_glyph("replacement"),
-                missing_glyph("after old drop")
-            ]
-        );
-
-        drop(second_subscription);
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("inactive")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(second_observed.borrow().len(), 2);
     }
 
     #[test]
@@ -4784,9 +4516,5 @@ mod test {
         let (path, restart_arguments) = restart.await.expect("restart was not requested");
         assert_eq!(path, Some(restart_path));
         assert_eq!(restart_arguments, arguments);
-    }
-
-    fn missing_glyph(grapheme: &'static str) -> MissingGlyph {
-        MissingGlyph::new(grapheme.into(), FallbackFontClass::Proportional)
     }
 }

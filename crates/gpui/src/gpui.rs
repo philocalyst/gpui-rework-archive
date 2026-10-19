@@ -27,8 +27,6 @@ pub(crate) use platform_scheduler::PlatformScheduler;
 mod geometry;
 mod gestures;
 mod global;
-#[cfg(gpui_hot_reload)]
-mod hot_reload;
 mod input;
 mod inspector;
 mod interactive;
@@ -54,13 +52,7 @@ pub mod queue;
 #[cfg(any(test, feature = "bench-support"))]
 pub mod randomized_element_tree;
 mod resize;
-#[cfg(test)]
-mod retained_tests;
-#[cfg(test)]
-mod retention_workload;
 mod scene;
-#[cfg(test)]
-mod scene_workload;
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
 mod seeds;
 mod shared_uri;
@@ -619,3 +611,7 @@ pub struct GpuSpecs {
     /// Further information about the driver, as reported by the graphics backend.
     pub driver_info: String,
 }
+
+#[cfg(test)]
+#[path = "/tmp/sync-review/bench/ce_bench.rs"]
+mod cross_engine_bench;

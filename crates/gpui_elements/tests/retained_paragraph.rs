@@ -1,28 +1,29 @@
+//! A retained paragraph must paint exactly what a new window paints for the same state, with real
+//! Parley shaping, across re-renders that keep or change its layout.
+
 use gpui::PlatformTextSystem;
 use gpui::prelude::*;
 use gpui::{
-    Entity, HeadlessAppContext, LayoutDirection, ViewElement, Window, WindowHandle, div, px, rgb,
-    size,
+    Bounds, Entity, HeadlessAppContext, LayoutDirection, Pixels, ScaledPixels, Window,
+    WindowHandle, div, px, rgb, size,
 };
 use gpui_fonts::{IBM_PLEX, NOTO_ARABIC, NOTO_HEBREW};
 use gpui_parley::{ParleyTextSystem, SystemFonts};
 use std::borrow::Cow;
 
-const WINDOW_SIZE: f32 = 520.;
-
 fn ink() -> gpui::Hsla {
     gpui::rgb_to_hsla(rgb(0x243b53))
 }
 
-struct ParagraphPanel {
+#[derive(Clone)]
+struct Panel {
     text: String,
-    width: gpui::Pixels,
+    width: Pixels,
 }
 
-impl Render for ParagraphPanel {
-    fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
+impl Render for Panel {
+    fn render(&mut self, _: &mut Window, _: &mut gpui::Context<Self>) -> impl IntoElement {
         div()
-            .debug_selector(|| "REAL_PARLEY_PARAGRAPH".into())
             .w(self.width)
             .text_size(px(22.))
             .text_color(ink())
@@ -32,110 +33,86 @@ impl Render for ParagraphPanel {
     }
 }
 
-struct ParagraphRoot {
-    panel: Entity<ParagraphPanel>,
-    top_gap: gpui::Pixels,
+#[derive(Clone)]
+struct Root {
+    panel: Entity<Panel>,
+    top_gap: Pixels,
     auto_direction: bool,
-    force_fresh_child: bool,
 }
 
-impl Render for ParagraphRoot {
-    fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
-        let panel = if self.force_fresh_child {
-            ViewElement::new(self.panel.clone()).into_any_element()
-        } else {
-            self.panel.clone().into_any_element()
-        };
-        let mut root = div()
+impl Render for Root {
+    fn render(&mut self, _: &mut Window, _: &mut gpui::Context<Self>) -> impl IntoElement {
+        let root = div()
             .size_full()
-            .child(div().w_full().h(self.top_gap).flex_shrink_0());
+            .child(div().w_full().h(self.top_gap).flex_shrink_0())
+            .child(self.panel.clone());
         if self.auto_direction {
-            root = root.direction(LayoutDirection::Auto);
+            root.direction(LayoutDirection::Auto)
+        } else {
+            root
         }
-        root.child(panel)
     }
 }
 
-fn open_pair(
-    cx: &mut HeadlessAppContext,
-    force_fresh_child: bool,
-    text: &str,
-) -> (Entity<ParagraphPanel>, WindowHandle<ParagraphRoot>) {
-    let panel = cx.update(|app| {
-        app.new(|_| ParagraphPanel {
-            text: text.to_owned(),
-            width: px(350.),
-        })
-    });
+fn open(cx: &mut HeadlessAppContext, panel: Panel, top_gap: Pixels, auto: bool) -> WindowHandle<Root> {
+    let panel = cx.update(|app| app.new(|_| panel));
     let window = cx
-        .open_window(size(px(WINDOW_SIZE), px(250.)), {
-            let panel = panel.clone();
-            move |_, app| {
-                app.new(|_| ParagraphRoot {
-                    panel,
-                    top_gap: px(0.),
-                    auto_direction: false,
-                    force_fresh_child,
-                })
-            }
+        .open_window(size(px(520.), px(250.)), move |_, app| {
+            app.new(|_| Root {
+                panel,
+                top_gap,
+                auto_direction: auto,
+            })
         })
         .unwrap();
-    (panel, window)
+    cx.run_until_parked();
+    window
 }
 
-fn glyphs(
-    cx: &mut HeadlessAppContext,
-    window: WindowHandle<ParagraphRoot>,
-) -> Vec<gpui::Bounds<gpui::ScaledPixels>> {
-    cx.glyph_bounds(window.into(), ink()).unwrap()
+/// The painted glyphs' bounds, sorted, since draw order may differ between equal frames.
+fn glyphs(cx: &mut HeadlessAppContext, window: WindowHandle<Root>) -> Vec<Bounds<ScaledPixels>> {
+    let mut glyphs = cx.glyph_bounds(window.into(), ink()).unwrap();
+    glyphs.sort_by(|a, b| {
+        (a.origin.y.0, a.origin.x.0, a.size.width.0, a.size.height.0)
+            .partial_cmp(&(b.origin.y.0, b.origin.x.0, b.size.width.0, b.size.height.0))
+            .unwrap()
+    });
+    glyphs
 }
 
-fn assert_same_real_glyphs(
-    cx: &mut HeadlessAppContext,
-    retained: WindowHandle<ParagraphRoot>,
-    fresh: WindowHandle<ParagraphRoot>,
-    phase: &str,
-) -> Vec<gpui::Bounds<gpui::ScaledPixels>> {
-    let retained_glyphs = glyphs(cx, retained);
-    let fresh_glyphs = glyphs(cx, fresh);
-    assert!(
-        !retained_glyphs.is_empty(),
-        "{phase}: Parley must paint real glyph sprites"
-    );
-    assert!(
-        !fresh_glyphs.is_empty(),
-        "{phase}: fresh oracle must paint real glyph sprites"
-    );
-    assert_eq!(
-        retained_glyphs, fresh_glyphs,
-        "{phase}: retained output must match a forced-fresh render"
-    );
-    retained_glyphs
+/// Checks the retained window against a new window with the same state, and returns its glyphs.
+fn check(cx: &mut HeadlessAppContext, retained: WindowHandle<Root>, phase: &str) -> Vec<Bounds<ScaledPixels>> {
+    cx.run_until_parked();
+    let (root, panel) = cx.update(|app| {
+        let root = retained.read(app).unwrap().clone();
+        let panel = root.panel.read(app).clone();
+        (root, panel)
+    });
+    let fresh = open(cx, panel, root.top_gap, root.auto_direction);
+    let expected = glyphs(cx, fresh);
+    let actual = glyphs(cx, retained);
+    cx.update(|app| fresh.update(app, |_, window, _| window.remove_window()).unwrap());
+    assert!(!expected.is_empty(), "{phase}: Parley paints glyphs");
+    assert_eq!(actual, expected, "{phase}: retained output matches a new window");
+    actual
 }
 
-fn update_root(
-    cx: &mut HeadlessAppContext,
-    window: WindowHandle<ParagraphRoot>,
-    update: impl FnOnce(&mut ParagraphRoot),
-) {
+fn update_root(cx: &mut HeadlessAppContext, window: WindowHandle<Root>, f: impl FnOnce(&mut Root)) {
     cx.update(|app| {
         window
-            .update(app, |root, _window, cx| {
-                update(root);
+            .update(app, |root, _, cx| {
+                f(root);
                 cx.notify();
             })
-            .unwrap();
+            .unwrap()
     });
 }
 
-fn update_panel(
-    cx: &mut HeadlessAppContext,
-    panel: &Entity<ParagraphPanel>,
-    update: impl FnOnce(&mut ParagraphPanel),
-) {
+fn update_panel(cx: &mut HeadlessAppContext, window: WindowHandle<Root>, f: impl FnOnce(&mut Panel)) {
     cx.update(|app| {
+        let panel = window.read(app).unwrap().panel.clone();
         panel.update(app, |panel, cx| {
-            update(panel);
+            f(panel);
             cx.notify();
         });
     });
@@ -155,93 +132,51 @@ fn system() -> ParleyTextSystem {
 }
 
 #[test]
-fn retained_default_block_paragraph_matches_real_parley_fresh_layout() {
+fn retained_paragraph_matches_a_new_window() {
     let mut cx = HeadlessAppContext::new(std::sync::Arc::new(system()));
-    let initial_text = "Retained paragraph shaping starts left to right with IBM Plex; Hebrew שלום and Arabic مرحبا use embedded fallback fonts. This text wraps at several widths.";
-    let (retained_panel, retained) = open_pair(&mut cx, false, initial_text);
-    let (fresh_panel, fresh) = open_pair(&mut cx, true, initial_text);
-    cx.run_until_parked();
-
-    let initial = assert_same_real_glyphs(&mut cx, retained, fresh, "initial LTR paragraph");
-
-    // An unchanged notification gives the retained child a clean cache-hit frame before the
-    // origin-only move that should reuse its paragraph shape.
-    update_root(&mut cx, retained, |_| {});
-    update_root(&mut cx, fresh, |_| {});
-    cx.run_until_parked();
-    assert_eq!(
-        initial,
-        assert_same_real_glyphs(&mut cx, retained, fresh, "clean cache hit")
-    );
-
-    update_root(&mut cx, retained, |root| root.top_gap = px(17.));
-    update_root(&mut cx, fresh, |root| root.top_gap = px(17.));
-    cx.run_until_parked();
-    let moved = assert_same_real_glyphs(&mut cx, retained, fresh, "origin-only move");
-    assert_ne!(
-        initial, moved,
-        "the real glyph sprites must move with their paragraph origin"
-    );
-
-    update_panel(&mut cx, &retained_panel, |panel| panel.width = px(205.));
-    update_panel(&mut cx, &fresh_panel, |panel| panel.width = px(205.));
-    cx.run_until_parked();
-    let narrowed = assert_same_real_glyphs(&mut cx, retained, fresh, "changed width constraints");
-    assert_ne!(
-        moved, narrowed,
-        "narrower constraints should change wrapped glyph geometry"
-    );
-
-    let changed_text = "Changed text key: this Latin-first paragraph is longer and includes Hebrew שלום and Arabic مرحبا fallback.";
-    update_panel(&mut cx, &retained_panel, |panel| {
-        panel.text = changed_text.to_owned()
-    });
-    update_panel(&mut cx, &fresh_panel, |panel| {
-        panel.text = changed_text.to_owned()
-    });
-    cx.run_until_parked();
-    let changed = assert_same_real_glyphs(&mut cx, retained, fresh, "changed text key");
-    assert_ne!(
-        narrowed, changed,
-        "changed content should produce different real glyph geometry"
-    );
-
-    // Change to Hebrew-first content while the parent still inherits the default LTR direction.
-    // Then enable Auto without changing the paragraph, so the direction transition is isolated.
-    let hebrew_text =
-        "שלום עולם — inherited LTR paragraph before Auto; Arabic مرحبا uses fallback too.";
-    update_panel(&mut cx, &retained_panel, |panel| {
-        panel.text = hebrew_text.to_owned()
-    });
-    update_panel(&mut cx, &fresh_panel, |panel| {
-        panel.text = hebrew_text.to_owned()
-    });
-    cx.run_until_parked();
-    let inherited = assert_same_real_glyphs(
+    let text = "Retained paragraph shaping starts left to right with IBM Plex; Hebrew שלום and \
+                Arabic مرحبا use embedded fallback fonts. This text wraps at several widths.";
+    let window = open(
         &mut cx,
-        retained,
-        fresh,
-        "Hebrew-first text with inherited LTR",
+        Panel {
+            text: text.into(),
+            width: px(350.),
+        },
+        px(0.),
+        false,
     );
-    assert_ne!(
-        changed, inherited,
-        "the Hebrew-first text key must be distinct"
-    );
+    let initial = check(&mut cx, window, "first frame");
 
-    update_root(&mut cx, retained, |root| root.auto_direction = true);
-    update_root(&mut cx, fresh, |root| root.auto_direction = true);
-    cx.run_until_parked();
-    let rtl = assert_same_real_glyphs(&mut cx, retained, fresh, "Auto RTL parent transition");
-    assert_ne!(
-        inherited, rtl,
-        "RTL text-start alignment must change the painted glyph positions"
-    );
+    // Renders that change nothing keep the paragraph's layout and measurement.
+    update_root(&mut cx, window, |_| {});
+    assert_eq!(check(&mut cx, window, "parent renders again"), initial);
+    update_panel(&mut cx, window, |_| {});
+    assert_eq!(check(&mut cx, window, "panel renders again"), initial);
 
-    update_root(&mut cx, retained, |_| {});
-    update_root(&mut cx, fresh, |_| {});
-    cx.run_until_parked();
-    assert_eq!(
-        rtl,
-        assert_same_real_glyphs(&mut cx, retained, fresh, "second RTL frame")
-    );
+    update_root(&mut cx, window, |root| root.top_gap = px(17.));
+    let moved = check(&mut cx, window, "moved");
+    assert_ne!(moved, initial);
+
+    update_panel(&mut cx, window, |panel| panel.width = px(205.));
+    let narrowed = check(&mut cx, window, "narrower");
+    assert_ne!(narrowed, moved);
+
+    update_panel(&mut cx, window, |panel| {
+        panel.text = "Changed text: longer, with Hebrew שלום and Arabic مرحبا fallback.".into()
+    });
+    let changed = check(&mut cx, window, "changed text");
+    assert_ne!(changed, narrowed);
+
+    // Hebrew-first text under an inherited left-to-right direction, then an Auto parent, which
+    // makes the paragraph right-to-left without changing it.
+    update_panel(&mut cx, window, |panel| {
+        panel.text = "שלום עולם — inherited direction first; Arabic مرحبا falls back too.".into()
+    });
+    let inherited = check(&mut cx, window, "Hebrew text, inherited direction");
+    update_root(&mut cx, window, |root| root.auto_direction = true);
+    let rtl = check(&mut cx, window, "Auto parent");
+    assert_ne!(rtl, inherited);
+
+    update_panel(&mut cx, window, |_| {});
+    assert_eq!(check(&mut cx, window, "right-to-left panel renders again"), rtl);
 }

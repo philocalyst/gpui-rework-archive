@@ -1,11 +1,10 @@
 use crate::{
-    ActiveTooltip, AnyView, App, AppContext, AvailableSpace, Bounds, DispatchPhase, Element,
-    ElementId, GlobalElementId, HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId,
-    IntoElement, LayoutId, LineLayout, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
-    ParagraphDirection, Pixels, Point, ShapedText, ShapedTextLayout, SharedString, Size, TextAlign,
-    TextLayoutOptions, TextOverflow, TextRangeExt, TextRun, TextStyle, TextTransform, TooltipId,
-    UnicodeBidi, WhiteSpace, Window, WindowTextSystem, px, register_tooltip_mouse_handlers,
-    set_tooltip_on_window,
+    ActiveTooltip, AnyView, App, AppContext, Bounds, DispatchPhase, Element, ElementId,
+    GlobalElementId, HighlightStyle, Hitbox, HitboxBehavior, InspectorElementId, IntoElement,
+    LayoutId, LineLayout, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParagraphDirection, Pixels,
+    Point, ShapedText, ShapedTextLayout, SharedString, Size, TextAlign, TextLayoutOptions,
+    TextOverflow, TextRangeExt, TextRun, TextStyle, TextTransform, TooltipId, UnicodeBidi,
+    WhiteSpace, Window, px, register_tooltip_mouse_handlers, set_tooltip_on_window,
 };
 use anyhow::Context as _;
 use gpui_util::ResultExt;
@@ -999,33 +998,9 @@ impl TextLayout {
         paragraph_direction: ParagraphDirection,
         unicode_bidi: UnicodeBidi,
         window: &mut Window,
-        _cx: &mut App,
+        cx: &mut App,
     ) -> (SharedString, Cow<'runs, [TextRun]>) {
-        let _ = line_height;
-        Self::apply_truncation_with_text_system(
-            text,
-            text_style,
-            font_size,
-            wrap_width,
-            truncation,
-            runs,
-            paragraph_direction,
-            unicode_bidi,
-            window.text_system(),
-        )
-    }
-
-    fn apply_truncation_with_text_system<'runs>(
-        text: SharedString,
-        text_style: &TextStyle,
-        font_size: Pixels,
-        wrap_width: Option<Pixels>,
-        truncation: &TextLayoutTruncation,
-        runs: &'runs [TextRun],
-        paragraph_direction: ParagraphDirection,
-        unicode_bidi: UnicodeBidi,
-        text_system: &WindowTextSystem,
-    ) -> (SharedString, Cow<'runs, [TextRun]>) {
+        let _ = (line_height, cx);
         let Some(truncate_width) = truncation.width else {
             return (text, Cow::Borrowed(runs));
         };
@@ -1040,7 +1015,7 @@ impl TextLayout {
             truncation.source,
             paragraph_direction,
             unicode_bidi,
-            text_system,
+            window,
         )
     }
 
@@ -1051,6 +1026,56 @@ impl TextLayout {
         window: &mut Window,
         _: &mut App,
     ) -> LayoutId {
+        /// What the text's size depends on, besides the space it gets, and its layout.
+        struct TextKey {
+            text: SharedString,
+            runs: Arc<[TextRun]>,
+            text_style: TextStyle,
+            font_size: Pixels,
+            line_height: Pixels,
+            font_generation: u64,
+            state: TextLayout,
+        }
+
+        impl crate::taffy::MeasureKey for TextKey {
+            fn same(&self, previous: &dyn crate::taffy::MeasureKey) -> bool {
+                previous
+                    .as_any()
+                    .downcast_ref::<Self>()
+                    .is_some_and(|previous| {
+                        self.text == previous.text
+                            && self.runs == previous.runs
+                            && self.text_style == previous.text_style
+                            && self.font_size == previous.font_size
+                            && self.line_height == previous.line_height
+                            && self.font_generation == previous.font_generation
+                    })
+            }
+
+            fn inherit(&self, previous: &dyn crate::taffy::MeasureKey) -> bool {
+                let Some(previous) = previous.as_any().downcast_ref::<Self>() else {
+                    return false;
+                };
+                let layout = previous.state.0.layout.borrow().as_ref().map(|layout| {
+                    TextLayoutInner {
+                        document: layout.document.as_ref().map(|document| ShapedText {
+                            layout: document.layout.clone(),
+                            text: document.text.clone(),
+                        }),
+                        bounds: None,
+                        ..*layout
+                    }
+                });
+                let measured = layout.is_some();
+                *self.state.0.layout.borrow_mut() = layout;
+                measured
+            }
+
+            fn as_any(&self) -> &dyn std::any::Any {
+                self
+            }
+        }
+
         let text_style = window.text_style();
         let text = apply_text_transform_preserving_byte_len(text, text_style.text_transform);
         let font_size = text_style.font_size.to_pixels(window.rem_size());
@@ -1074,20 +1099,25 @@ impl TextLayout {
             line_height,
         };
 
-        let rem_size = window.rem_size();
-        let scale_factor = window.scale_factor();
-        let unicode_bidi = window.resolved_unicode_bidi();
-        let measure = {
+        let key = TextKey {
+            text: text.clone(),
+            runs: runs.clone(),
+            text_style: text_style.clone(),
+            font_size,
+            line_height,
+            font_generation: window.text_system().font_generation(),
+            state: self.clone(),
+        };
+        let layout_id = window.request_keyed_measured_layout(Default::default(), key, {
             let element_state = self.clone();
-            move |known_dimensions: Size<Option<Pixels>>,
-                  available_space: Size<AvailableSpace>,
-                  resolved_direction: crate::ResolvedDirection,
-                  text_system: &WindowTextSystem| {
+
+            move |known_dimensions, available_space, window, cx| {
+                let unicode_bidi = window.resolved_unicode_bidi();
                 let (options, truncation) = Self::layout_options(
                     &text_style,
                     known_dimensions,
                     available_space,
-                    resolved_direction,
+                    window.resolved_direction(),
                     unicode_bidi,
                 );
                 let truncate_width = truncation.width;
@@ -1107,18 +1137,21 @@ impl TextLayout {
                     return text_layout.size;
                 }
 
-                let (text, runs) = Self::apply_truncation_with_text_system(
+                let (text, runs) = Self::apply_truncation(
                     text.clone(),
                     &text_style,
                     font_size,
+                    line_height,
                     options.wrap_width,
                     &truncation,
                     &runs,
                     options.direction,
                     options.unicode_bidi,
-                    text_system,
+                    window,
+                    cx,
                 );
-                let document = text_system
+                let document = window
+                    .text_system()
                     .shape_text_with_options(text, font_size, &runs, options)
                     .log_err();
 
@@ -1147,31 +1180,9 @@ impl TextLayout {
 
                 size
             }
-        };
-        let collecting_inline = window.collecting_inline;
-        let allow_inline_reuse = !window.inline_text_reuse_disabled;
-        let layout_id = if collecting_inline {
-            window.request_retained_inline_text_span_layout(
-                Default::default(),
-                rem_size,
-                scale_factor,
-                &content,
-                measure,
-            )
-        } else {
-            window.request_retained_measured_layout(
-                Default::default(),
-                rem_size,
-                scale_factor,
-                measure,
-            )
-        };
+        });
 
-        if collecting_inline && allow_inline_reuse {
-            window.publish_replayable_inline_text_content(layout_id, content);
-        } else {
-            window.publish_inline_content(layout_id, content);
-        }
+        window.publish_inline_content(layout_id, content);
         self.0.layout_id.set(Some(layout_id));
         layout_id
     }
@@ -1232,14 +1243,13 @@ impl TextLayout {
 
         let line_height = element_state.line_height;
         if let Some(document) = &element_state.document {
-            let text_style = window.text_style();
             if matches!(pass, TextPaintPass::All | TextPaintPass::Background) {
                 document
                     .paint_background(
                         bounds.origin,
                         line_height,
-                        text_style.text_align,
-                        Some(bounds),
+                        TextAlign::Left,
+                        None,
                         window,
                         cx,
                     )
@@ -1250,8 +1260,8 @@ impl TextLayout {
                     .paint(
                         bounds.origin,
                         line_height,
-                        text_style.text_align,
-                        Some(bounds),
+                        TextAlign::Left,
+                        None,
                         window,
                         cx,
                     )
@@ -1426,7 +1436,7 @@ fn truncate_to_shaped_layout<'a>(
     direction: TruncateFrom,
     paragraph_direction: ParagraphDirection,
     unicode_bidi: UnicodeBidi,
-    text_system: &WindowTextSystem,
+    window: &mut Window,
 ) -> (SharedString, Cow<'a, [TextRun]>) {
     let options = TextLayoutOptions {
         wrap_width,
@@ -1435,7 +1445,10 @@ fn truncate_to_shaped_layout<'a>(
         text_align: TextAlign::Left,
         ..Default::default()
     };
-    let Ok(document) = text_system.shape_text_with_options(text.clone(), font_size, runs, options)
+    let Ok(document) =
+        window
+            .text_system()
+            .shape_text_with_options(text.clone(), font_size, runs, options)
     else {
         return (text, Cow::Borrowed(runs));
     };
@@ -1485,7 +1498,8 @@ fn truncate_to_shaped_layout<'a>(
             direction,
         );
 
-        text_system
+        window
+            .text_system()
             .shape_text_with_options(
                 SharedString::from(affix),
                 font_size,
@@ -1548,7 +1562,8 @@ fn truncate_to_shaped_layout<'a>(
         runs,
         direction,
         |candidate| {
-            let fits = text_system
+            let fits = window
+                .text_system()
                 .shape_text_with_options(
                     candidate.text.clone(),
                     font_size,
@@ -2141,6 +2156,7 @@ impl Element for InteractiveText {
 
                     let text_layout = text_layout.clone();
                     let mouse_down = interactive_state.mouse_down_index.clone();
+                    let current_view = window.current_view();
                     if let Some(mouse_down_index) = mouse_down.get() {
                         let hitbox = hitbox.clone();
                         let clickable_ranges = mem::take(&mut self.clickable_ranges);
@@ -2162,20 +2178,20 @@ impl Element for InteractiveText {
                                     }
 
                                     mouse_down.take();
-                                    window.refresh();
+                                    cx.notify(current_view);
                                 }
                             },
                         );
                     } else {
                         let hitbox = hitbox.clone();
-                        window.on_mouse_event(move |event: &MouseDownEvent, phase, window, _| {
+                        window.on_mouse_event(move |event: &MouseDownEvent, phase, window, cx| {
                             if phase == DispatchPhase::Bubble
                                 && hitbox.is_hovered(window)
                                 && let Ok(mouse_down_index) =
                                     text_layout.index_for_position(event.position)
                             {
                                 mouse_down.set(Some(mouse_down_index));
-                                window.refresh();
+                                cx.notify(current_view);
                             }
                         });
                     }
