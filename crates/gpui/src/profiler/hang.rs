@@ -35,10 +35,10 @@ use super::journal::{
 
 /// Detects foreground hangs by polling the journal.
 ///
-/// Detection is post-hoc: a hang is reported once an explicit presentation
-/// or foreground-idle boundary completes its interval. Work that never
-/// yields back to the foreground is not observed until it does. Available
-/// with the `profiler` feature.
+/// Detection is post-hoc: a hang is reported once an explicit presentation,
+/// completed frame skip, or foreground-idle boundary completes its interval.
+/// Work that never yields back to the foreground is not observed until it does.
+/// Available with the `profiler` feature.
 pub struct HangDetector {
     collector: ForegroundJournalCollector,
     sealer: IntervalSealer,
@@ -156,7 +156,7 @@ pub struct HangIncident {
 /// Recorded explicitly so consumers can separate the two classes without
 /// re-deriving them from `stall_ms`, which stops working whenever the
 /// detector's thresholds change. Available with the `profiler` feature.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum HangTrigger {
     /// A single event blocked the foreground for at least the hang threshold.

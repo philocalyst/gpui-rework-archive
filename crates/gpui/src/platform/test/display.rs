@@ -5,7 +5,7 @@ use std::time::Duration;
 /// A fake display that the test platform reports as its only screen.
 ///
 /// It is 1920 by 1080 logical pixels, with its origin at `(0, 0)`. Each one gets a new UUID.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct TestDisplay {
     id: DisplayId,
     uuid: uuid::Uuid,

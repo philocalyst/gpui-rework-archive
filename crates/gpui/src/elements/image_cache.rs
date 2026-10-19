@@ -179,20 +179,11 @@ impl Element for ImageCacheElement {
     }
 }
 
-/// A background load of one image, shared so that every caller waits on the same work.
+/// Owns an image load and its cached result.
 ///
-/// Its output is the decoded image or the error.
-pub type ImageLoadingTask = Shared<Task<Result<Arc<RenderImage>, ImageCacheError>>>;
-
-/// An entry in a [`RetainAllImageCache`]: a load in progress, or its finished result.
-pub enum ImageCacheItem {
-    /// The image is still loading. [`ImageCacheItem::get`] moves the item to `Loaded` once the task
-    /// finishes.
-    Loading(ImageLoadingTask),
-    /// The load finished with this result. Errors are kept too, so a failed image is not retried
-    /// until its entry is removed.
-    Loaded(Result<Arc<RenderImage>, ImageCacheError>),
-}
+/// Dropping the entry cancels a pending load. Image caches must remove loaded
+/// images from windows before discarding the entry.
+pub struct ImageCacheItem(CachedLoad<Result<Arc<RenderImage>, ImageCacheError>>);
 
 impl std::fmt::Debug for ImageCacheItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -203,19 +194,20 @@ impl std::fmt::Debug for ImageCacheItem {
 }
 
 impl ImageCacheItem {
-    /// Returns the result if the load has finished, without waiting.
-    ///
-    /// Once the load has finished, the item is stored as [`ImageCacheItem::Loaded`]. Returns `None`
-    /// while the load is still running.
-    pub fn get(&mut self) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
-        match self {
-            ImageCacheItem::Loading(task) => {
-                let res = task.now_or_never()?;
-                *self = ImageCacheItem::Loaded(res.clone());
-                Some(res)
-            }
-            ImageCacheItem::Loaded(res) => Some(res.clone()),
-        }
+    /// Starts loading an image into a new cache entry.
+    pub fn new(source: &Resource, cx: &mut App) -> Self {
+        let future = AssetLogger::<ImageAssetLoader>::load(source.clone(), cx);
+        Self(CachedLoad::new(future, cx))
+    }
+
+    /// Returns the cached result without subscribing to completion notifications.
+    pub fn get(&self) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
+        self.0.get()
+    }
+
+    /// Returns the cached result or subscribes the current view to completion.
+    pub fn use_image(&self, window: &Window) -> Option<Result<Arc<RenderImage>, ImageCacheError>> {
+        self.0.use_by(window.current_view())
     }
 }
 

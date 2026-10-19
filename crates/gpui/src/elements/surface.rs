@@ -18,8 +18,8 @@ use refineable::Refineable;
 #[derive(Clone)]
 pub enum SurfaceSource {
     /// A macOS image buffer from CoreVideo.
-    #[cfg(target_os = "macos")]
-    Surface(CVPixelBuffer),
+    #[cfg(any(target_os = "macos", target_os = "ios"))]
+    Surface(CFRetained<CVPixelBuffer>),
     /// A GPU texture, with its size in device pixels.
     #[cfg(any(
         target_os = "linux",
@@ -50,7 +50,7 @@ pub enum SurfaceSource {
 impl std::fmt::Debug for SurfaceSource {
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
             SurfaceSource::Surface(ref buf) => _f.debug_tuple("Surface").field(buf).finish(),
             #[cfg(any(
                 target_os = "linux",
@@ -72,10 +72,11 @@ impl std::fmt::Debug for SurfaceSource {
 impl SurfaceSource {
     fn size(&self) -> Size<DevicePixels> {
         match self {
-            #[cfg(target_os = "macos")]
-            SurfaceSource::Surface(buffer) => {
-                crate::size(buffer.get_width().into(), buffer.get_height().into())
-            }
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            SurfaceSource::Surface(buffer) => crate::size(
+                CVPixelBufferGetWidth(buffer).into(),
+                CVPixelBufferGetHeight(buffer).into(),
+            ),
             #[cfg(any(
                 target_os = "linux",
                 target_os = "freebsd",
@@ -182,6 +183,10 @@ impl Element for Surface {
         &mut self,
         _global_id: Option<&GlobalElementId>,
         _inspector_id: Option<&InspectorElementId>,
+        #[cfg_attr(
+            not(any(target_os = "macos", target_os = "ios")),
+            allow(unused_variables)
+        )]
         _bounds: Bounds<Pixels>,
         _: &mut Self::RequestLayoutState,
         _: &mut Self::PrepaintState,

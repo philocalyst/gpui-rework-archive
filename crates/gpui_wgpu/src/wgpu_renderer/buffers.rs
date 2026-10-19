@@ -34,6 +34,15 @@ impl InstanceTransport {
         }
     }
 
+    /// Bytes from one element to the next. Downlevel elements start on a texel, so the
+    /// shaders fetch each texel once and select its components statically.
+    pub(super) fn element_stride(self, element_size: u64) -> u64 {
+        match self {
+            Self::StorageBuffer => element_size,
+            Self::DataTexture => element_size.next_multiple_of(TEXEL_BYTES),
+        }
+    }
+
     /// Byte alignment between batches; the downlevel base must land on a texel.
     pub(super) fn batch_alignment(self, element_stride: u64) -> u64 {
         match self {
@@ -95,17 +104,26 @@ impl InstanceUpload {
         if values.is_empty() {
             return Some(self.empty_batch());
         }
-        let stride = std::mem::size_of::<T>() as u64;
-        let data = shader_interface::slice_as_bytes(values);
+        let element_size = std::mem::size_of::<T>();
+        let stride = self.transport.element_stride(element_size as u64);
         let count = u32::try_from(values.len()).ok()?;
-        let (offset, range_offset) = self.allocate_batch(data.len() as u64, stride, count)?;
+        let size = stride.checked_mul(count as u64)?;
+        let (offset, range_offset) = self.allocate_batch(size, stride, count)?;
         let staging = self
             .staging
             .as_mut()
             .expect("non-empty frame uploads have mapped staging memory");
-        staging
-            .slice(offset as usize..(offset + data.len() as u64) as usize)
-            .copy_from_slice(data);
+        let mut destination = staging.slice(offset as usize..(offset + size) as usize);
+        if stride == element_size as u64 {
+            destination.copy_from_slice(shader_interface::slice_as_bytes(values));
+        } else {
+            for (index, value) in values.iter().enumerate() {
+                let start = index * stride as usize;
+                destination
+                    .slice(start..start + element_size)
+                    .copy_from_slice(shader_interface::bytes_of(value));
+            }
+        }
         Some(self.batch(offset, stride, count, range_offset))
     }
 
@@ -118,7 +136,8 @@ impl InstanceUpload {
             return Some(self.empty_batch());
         }
         let count = u32::try_from(count).ok()?;
-        let stride = std::mem::size_of::<T>() as u64;
+        let element_size = std::mem::size_of::<T>();
+        let stride = self.transport.element_stride(element_size as u64);
         let size = stride.checked_mul(count as u64)?;
         let (offset, range_offset) = self.allocate_batch(size, stride, count)?;
         let staging = self.staging.as_mut()?;
@@ -126,9 +145,9 @@ impl InstanceUpload {
         let mut values = values.into_iter();
         for index in 0..count {
             let value = values.next()?;
-            let index = index as u64;
+            let start = (index as u64 * stride) as usize;
             destination
-                .slice((index * stride) as usize..((index + 1) * stride) as usize)
+                .slice(start..start + element_size)
                 .copy_from_slice(shader_interface::bytes_of(&value));
         }
         if values.next().is_some() {
@@ -187,32 +206,42 @@ impl InstanceUpload {
         }
     }
 
-    pub(super) fn finish(&mut self, encoder: &mut wgpu::CommandEncoder) {
-        // Dropping the mapped views schedules queue writes before the next submission.
+    /// Finalizes frame-local uploads and returns the data-texture copy command buffer, if any.
+    ///
+    /// The copy is submitted before the draw command buffer. WebGL2 reads instance payloads
+    /// from the texture in the vertex stage, so recording its upload after render passes would
+    /// make the first draw observe the previous frame's texture contents.
+    pub(super) fn finish(&mut self, device: &wgpu::Device) -> Option<wgpu::CommandBuffer> {
+        // Dropping mapped views schedules queue writes before the next submission.
         self.staging.take();
         self.range_upload.take();
-        if let Some(copy) = &self.texture_copy {
-            let used_texels = self.cursor.div_ceil(TEXEL_BYTES);
-            if used_texels > 0 {
-                let height = used_texels.div_ceil(u64::from(DATA_TEXTURE_WIDTH));
-                encoder.copy_buffer_to_texture(
-                    wgpu::TexelCopyBufferInfo {
-                        buffer: &copy.staging,
-                        layout: wgpu::TexelCopyBufferLayout {
-                            offset: 0,
-                            bytes_per_row: Some(DATA_TEXTURE_WIDTH * TEXEL_BYTES as u32),
-                            rows_per_image: Some(height as u32),
-                        },
-                    },
-                    copy.texture.as_image_copy(),
-                    wgpu::Extent3d {
-                        width: DATA_TEXTURE_WIDTH,
-                        height: height as u32,
-                        depth_or_array_layers: 1,
-                    },
-                );
-            }
+        let copy = self.texture_copy.as_ref()?;
+        let used_texels = self.cursor.div_ceil(TEXEL_BYTES);
+        if used_texels == 0 {
+            return None;
         }
+
+        let height = used_texels.div_ceil(u64::from(DATA_TEXTURE_WIDTH));
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("gpui_instance_texture_upload"),
+        });
+        encoder.copy_buffer_to_texture(
+            wgpu::TexelCopyBufferInfo {
+                buffer: &copy.staging,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(DATA_TEXTURE_WIDTH * TEXEL_BYTES as u32),
+                    rows_per_image: Some(height as u32),
+                },
+            },
+            copy.texture.as_image_copy(),
+            wgpu::Extent3d {
+                width: DATA_TEXTURE_WIDTH,
+                height: height as u32,
+                depth_or_array_layers: 1,
+            },
+        );
+        Some(encoder.finish())
     }
 }
 

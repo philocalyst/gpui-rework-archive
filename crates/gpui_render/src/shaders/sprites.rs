@@ -8,6 +8,7 @@ pub mod underline {
         pub order: u32,
         pub padding: u32,
         pub bounds: Bounds,
+        pub clip_bounds: Bounds,
         pub content_mask: ContentMask,
         pub color: Hsla,
         pub thickness: f32,
@@ -56,7 +57,7 @@ pub mod underline {
             position: vertex.clip_position,
             color: hsla_to_rgba(underline.color),
             underline_id: instance_id,
-            clip_distances: clip_distances(vertex.viewport_position, underline.content_mask.bounds),
+            clip_distances: clip_distances(vertex.viewport_position, underline.clip_bounds),
         }
     }
 

@@ -43,12 +43,12 @@ pub(crate) enum PowerState {
 /// and total duration. Available with the `profiler` feature.
 pub const TASK_POLL_FLOOR: Duration = Duration::from_micros(100);
 
-/// How long a dirty frame can hold up foreground-idle boundaries without being presented.
-///
-/// A window that never presents, such as a hidden or occluded window that gets no frame
-/// callbacks, would otherwise block idle boundaries forever. After this deadline the frame
-/// no longer blocks them. The open interval still seals only at a presentation or idle
-/// boundary, so a hang and the frame it starved stay in one interval. Available with the
+/// A dirty frame that has not been presented by this deadline stops blocking
+/// foreground-idle boundaries, so a window that never presents (hidden or
+/// occluded windows receive no frame callbacks) cannot suppress boundaries
+/// indefinitely. Expiry only unblocks: the open interval still seals at a
+/// presentation, completed frame skip, or idle boundary, keeping a starving
+/// hang and the callback it starved in one interval. Available with the
 /// `profiler` feature.
 pub const FRAME_DEADLINE: Duration = Duration::from_secs(1);
 
@@ -147,6 +147,41 @@ pub struct InputTiming {
     pub end: Instant,
     /// Whether handling the input invalidated a window.
     pub caused_invalidation: bool,
+}
+
+/// A frame callback entering the foreground, without implying foreground work.
+#[derive(Debug, Copy, Clone)]
+pub struct PlatformSignal {
+    /// The window receiving the callback.
+    pub window_id: WindowId,
+    /// When the platform requested the callback, if its clock is supported.
+    pub signal_at: Option<Instant>,
+    /// When foreground handling began.
+    pub handled_at: Instant,
+    /// Whether the callback came from the platform or local scheduling.
+    pub source: crate::FrameRequestSource,
+}
+
+/// Why a completed frame request did not draw a new frame.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum FrameSkipReason {
+    /// The callback completed without needing a new render.
+    NoRenderNeeded,
+    /// An inactive window deferred drawing.
+    InactiveFrameRateLimit,
+    /// Thermal throttling deferred drawing.
+    ThermalFrameRateLimit,
+}
+
+/// A completed frame request that returned without drawing a new frame.
+#[derive(Debug, Copy, Clone)]
+pub struct FrameSkipped {
+    /// The window whose callback returned.
+    pub window_id: WindowId,
+    /// When the foreground completed this callback.
+    pub at: Instant,
+    /// Why no new frame was drawn.
+    pub reason: FrameSkipReason,
 }
 
 /// The exact count and total duration of task polls below [`TASK_POLL_FLOOR`].

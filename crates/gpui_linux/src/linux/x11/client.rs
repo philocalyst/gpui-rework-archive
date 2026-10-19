@@ -520,6 +520,7 @@ impl X11Connection {
                 pinch_scale: 1.0,
                 gpu_context: Rc::new(RefCell::new(None)),
                 compositor_gpu,
+                gpu_requirements: None,
                 scale_factor,
 
                 xkb_context,
@@ -642,23 +643,9 @@ impl X11Client {
         Ok(())
     }
 
-        Ok(X11Client(Rc::new(RefCell::new(X11ClientState {
-            modifiers: Modifiers::default(),
-            capslock: Capslock::default(),
-            last_modifiers_changed_event: Modifiers::default(),
-            last_capslock_changed_event: Capslock::default(),
-            event_loop: Some(event_loop),
-            loop_handle: handle,
-            common,
-            last_click: Instant::now(),
-            last_mouse_button: None,
-            last_location: Point::new(px(0.0), px(0.0)),
-            current_count: 0,
-            pinch_scale: 1.0,
-            gpu_context: Rc::new(RefCell::new(None)),
-            compositor_gpu,
-            gpu_requirements: None,
-            scale_factor,
+    pub(crate) fn has_windows(&self) -> bool {
+        !self.0.borrow().windows.is_empty()
+    }
 
     pub(crate) fn graphical_environment(&self) -> GraphicalEnvironment {
         self.0.borrow().graphical_environment.clone()
@@ -1683,25 +1670,26 @@ impl X11Client {
         .map(|display| Rc::new(display) as Rc<dyn PlatformDisplay>)
     }
 
-    fn display(&self, id: DisplayId) -> Option<Rc<dyn PlatformDisplay>> {
-        let state = self.0.borrow();
-
-        Some(Rc::new(
-            X11Display::new(
-                &state.xcb_connection,
-                state.scale_factor,
-                u64::from(id) as usize,
-            )
-            .ok()?,
-        ))
-    }
-
-    fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
+    pub(crate) fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
         if let Ok(reqs) = requirements.downcast::<gpui_wgpu::WgpuDeviceRequirements>() {
             self.0.borrow_mut().gpu_requirements = Some(*reqs);
         } else {
             log::warn!("set_gpu_requirements: unexpected type, expected WgpuDeviceRequirements");
         }
+    }
+
+    #[cfg(feature = "screen-capture")]
+    pub(crate) fn is_screen_capture_supported(&self) -> bool {
+        true
+    }
+
+    #[cfg(feature = "screen-capture")]
+    pub(crate) fn screen_capture_sources(
+        &self,
+    ) -> futures::channel::oneshot::Receiver<anyhow::Result<Vec<Rc<dyn gpui::ScreenCaptureSource>>>>
+    {
+        let foreground_executor = self.0.borrow().common.borrow().foreground_executor.clone();
+        gpui::scap_screen_capture::scap_screen_sources(&foreground_executor)
     }
 
     pub(crate) fn open_window(

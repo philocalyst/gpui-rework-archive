@@ -46,15 +46,15 @@ pub struct ScenePlanRequirements {
     pub surface_count: usize,
     /// The number of [`crate::BackdropFilter`]s to draw.
     pub backdrop_filter_count: usize,
-    /// The number of content-filter groups that draw into an isolated target.
+    /// The number of filter or grouped-opacity groups that draw into an isolated target.
     pub isolated_filter_count: usize,
     /// The number of isolated targets needed at the deepest level of nesting.
     pub isolated_target_count: usize,
     /// Whether any path is rasterized into an offscreen target.
     pub uses_path_target: bool,
-    /// Whether a backdrop filter or an isolated content-filter group needs an offscreen target.
+    /// Whether a backdrop filter or an isolated filter or opacity group needs an offscreen target.
     pub uses_offscreen_target: bool,
-    /// Whether any filter needs a blur target.
+    /// Whether a foreground or backdrop filter needs a temporary blur target.
     pub uses_blur_target: bool,
 }
 
@@ -298,7 +298,7 @@ pub enum PrimitiveBatch {
     Surfaces(Range<usize>),
     /// Backdrop filters, as indices into [`Scene::backdrop_filters`].
     BackdropFilters(Range<usize>),
-    /// A content-filter boundary, as an index into [`Scene::filter_boundaries`].
+    /// A filter or grouped-opacity boundary, as an index into [`Scene::filter_boundaries`].
     FilterBoundary(usize),
 }
 
@@ -307,14 +307,14 @@ pub enum PrimitiveBatch {
 pub enum RenderCommand {
     /// A normal primitive batch.
     Batch(PrimitiveBatch),
-    /// Begin rendering a content-filter group.
+    /// Begin rendering a filter or grouped-opacity group.
     BeginFilter {
         /// Index of the opening boundary in [`Scene::filter_boundaries`].
         boundary_index: usize,
         /// Whether this group renders inline or into an isolated target.
         target: FilterRenderTarget,
     },
-    /// Finish and composite a content-filter group.
+    /// Finish and composite a filter or grouped-opacity group.
     EndFilter {
         /// Index of the matched opening boundary in [`Scene::filter_boundaries`].
         boundary_index: usize,

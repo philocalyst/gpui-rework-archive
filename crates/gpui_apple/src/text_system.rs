@@ -29,13 +29,13 @@ impl MacTextSystem {
     }
 }
 
-impl Default for AppleTextSystem {
+impl Default for MacTextSystem {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PlatformTextSystem for AppleTextSystem {
+impl PlatformTextSystem for MacTextSystem {
     fn add_fonts(&self, fonts: Vec<Cow<'static, [u8]>>) -> Result<()> {
         self.parley.add_fonts(fonts)
     }
@@ -127,8 +127,7 @@ mod renderer {
         base::{CGFloat, kCGImageAlphaPremultipliedLast},
         color_space::CGColorSpace,
         context::{CGContext, CGLineJoin, CGTextDrawingMode},
-        display::CGPoint,
-        geometry::CGAffineTransform,
+        geometry::{CGAffineTransform, CGPoint},
     };
     use core_text::{
         font,

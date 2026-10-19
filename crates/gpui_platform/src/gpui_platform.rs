@@ -2,7 +2,7 @@
 //!
 //! Call [`application`] to get a [`gpui::Application`] for an interactive app,
 //! or [`headless`] for tests and tools that don't need a display. This crate
-//! picks the macOS, Windows, Linux or web platform for you, so your code needs
+//! picks the macOS, iOS, Windows, Linux or web platform for you, so your code needs
 //! no `#[cfg]` gates for each OS. It also re-exports [`Platform`], the trait
 //! that each platform implements.
 //!
@@ -84,6 +84,16 @@ pub fn application() -> gpui::Application {
 /// ```
 pub fn headless() -> gpui::Application {
     gpui::Application::with_platform(current_platform(true))
+}
+
+/// Returns a Linux app that may switch among `allowed_modes`.
+///
+/// It starts windowed in the process's own environment, or headless if that names no allowed
+/// display server. Set another initial mode with [`gpui::Application::with_windowing`], and
+/// switch later with [`gpui::App::request_windowing`].
+#[cfg(any(target_os = "linux", target_os = "freebsd"))]
+pub fn linux(allowed_modes: gpui::WindowingModes) -> gpui::Application {
+    gpui::Application::with_platform(gpui_linux::linux_platform(allowed_modes))
 }
 
 /// The rendering backend that the web platform uses.
@@ -183,6 +193,22 @@ pub fn current_platform(headless: bool) -> Rc<dyn Platform> {
     }
 }
 
+/// Returns the current platform's text system for benchmark contexts, built once per
+/// thread and shared by every context on it.
+///
+/// `#[gpui::bench]` creates a context for every Criterion routine call. Building a whole
+/// platform each time only to take its text system leaks the platform's threads on Linux
+/// (a 20-worker dispatcher and a timer thread per call), which slows every later
+/// benchmark in the process.
+#[cfg(feature = "bench-support")]
+pub fn bench_text_system() -> std::sync::Arc<dyn gpui::PlatformTextSystem> {
+    thread_local! {
+        static TEXT_SYSTEM: std::sync::Arc<dyn gpui::PlatformTextSystem> =
+            current_platform(true).text_system();
+    }
+    TEXT_SYSTEM.with(|text_system| text_system.clone())
+}
+
 /// Returns a [`gpui::PlatformHeadlessRenderer`] for drawing without a window.
 ///
 /// Returns `None` on platforms that have no headless renderer. It is available
@@ -193,10 +219,10 @@ pub fn current_headless_renderer() -> anyhow::Result<Option<Box<dyn gpui::Platfo
 {
     #[cfg(target_os = "macos")]
     {
-        Some(
+        Ok(Some(
             Box::new(gpui_apple::metal_renderer::MetalHeadlessRenderer::new())
                 as Box<dyn gpui::PlatformHeadlessRenderer>,
-        )
+        ))
     }
 
     #[cfg(target_os = "linux")]

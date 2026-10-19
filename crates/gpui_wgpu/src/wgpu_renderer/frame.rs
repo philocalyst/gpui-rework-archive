@@ -29,7 +29,15 @@ pub(super) fn render_to_view(
     renderer.retain_surface_cache(&scene.surfaces);
 
     match FrameEncoder::new(renderer, scene, targets).encode(readback) {
-        Ok(command_buffer) => Some(renderer.resources().queue.submit([command_buffer])),
+        Ok(command_buffers) => {
+            let queue = &renderer.resources().queue;
+            Some(match command_buffers.upload {
+                // Both command buffers enter one queue submission. This orders the mapped
+                // staging writes and data-texture copy before any vertex shader samples it.
+                Some(upload) => queue.submit([upload, command_buffers.draw]),
+                None => queue.submit([command_buffers.draw]),
+            })
+        }
         Err(DrawError::ExternalSurface) => None,
         Err(DrawError::CapacityPlanningInvariant) => {
             log::error!("frame storage exceeded its precomputed capacity");
@@ -40,6 +48,11 @@ pub(super) fn render_to_view(
             None
         }
     }
+}
+
+struct FrameCommandBuffers {
+    upload: Option<wgpu::CommandBuffer>,
+    draw: wgpu::CommandBuffer,
 }
 
 pub(super) struct ReadbackCopy<'a> {
@@ -125,7 +138,16 @@ impl PreparedTargets {
 }
 
 fn begin_frame(renderer: &mut WgpuRenderer) -> bool {
-    let Some(error) = renderer.faults.pending_error.lock().unwrap().take() else {
+    // The generation belongs to this renderer, so polling cannot consume an error
+    // notification from another renderer sharing the same device.
+    let surface_error = renderer.faults.pending_error.take();
+    let error = surface_error.or_else(|| {
+        renderer
+            .faults
+            .device_errors
+            .observe_error(&mut renderer.faults.observed_error_generation)
+    });
+    let Some(error) = error else {
         renderer.faults.consecutive_failed_frames = 0;
         renderer.atlas.before_frame();
         return true;
@@ -247,7 +269,7 @@ impl FrameRequirements {
         let mut instance_batches = 0_u64;
         let mut reserve = |element_size: usize, count: usize| {
             if count > 0 {
-                let stride = element_size as u64;
+                let stride = transport.element_stride(element_size as u64);
                 storage_bytes = storage_bytes.next_multiple_of(transport.batch_alignment(stride));
                 storage_bytes = storage_bytes.saturating_add(stride.saturating_mul(count as u64));
                 instance_batches += 1;
@@ -348,7 +370,7 @@ impl<'a> FrameEncoder<'a> {
     fn encode(
         mut self,
         readback: Option<ReadbackCopy<'_>>,
-    ) -> Result<wgpu::CommandBuffer, DrawError> {
+    ) -> Result<FrameCommandBuffers, DrawError> {
         let result = self.encode_commands();
         if result.is_ok() {
             if let Some(offscreen) = &self.offscreen {
@@ -374,10 +396,13 @@ impl<'a> FrameEncoder<'a> {
                 );
             }
         }
-        self.instances.finish(&mut self.encoder);
+        // QueueWriteBufferView bytes must be committed before submitting either command
+        // buffer. The data-texture copy has to execute before scene draws that sample it,
+        // even though instance payloads are populated while those draws are encoded.
+        let upload = self.instances.finish(&self.renderer.resources().device);
         self.renderer.resources().finish_frame_uploads();
-        let command_buffer = self.encoder.finish();
-        result.map(|()| command_buffer)
+        let draw = self.encoder.finish();
+        result.map(|()| FrameCommandBuffers { upload, draw })
     }
 
     fn encode_commands(&mut self) -> DrawResult {

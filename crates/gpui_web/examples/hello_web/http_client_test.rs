@@ -1,12 +1,7 @@
-//! Exercises Fetch response-body contention between the browser and real workers.
-//!
-//! The browser harness supplies chunked Fetch streams while the production HTTP
-//! client pumps them on the main thread and background workers consume them.
+//! Exercises Fetch-backed HTTP clients shared between the browser and real workers.
 
-use futures::AsyncReadExt as _;
-use gpui::Platform as _;
+use gpui::{Platform as _, http_client::HttpClient as _};
 use gpui_web::WebPlatform;
-use http_client::HttpClient as _;
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
@@ -24,11 +19,15 @@ pub async fn test_worker_fetch(url: String) -> Result<(), JsValue> {
         background.spawn(async move {
             anyhow::ensure!(
                 std::thread::current().id() != main_thread,
-                "response body must be read on a real worker"
+                "request must execute on a real worker"
             );
-            let mut response = client.get(&url, Default::default(), true).await?;
-            let mut bytes = Vec::new();
-            response.body_mut().read_to_end(&mut bytes).await?;
+            let response = client.get(&url, true).await?;
+            anyhow::ensure!(
+                response.status.is_success(),
+                "HTTP request failed: {}",
+                response.status
+            );
+            let bytes = response.body;
             anyhow::ensure!(bytes.len() == 32768 * 3, "response did not reach EOF");
             for (index, chunk) in bytes.chunks_exact(3).enumerate() {
                 let expected = [
@@ -36,7 +35,7 @@ pub async fn test_worker_fetch(url: String) -> Result<(), JsValue> {
                     (index % 239) as u8,
                     (index % 227) as u8,
                 ];
-                anyhow::ensure!(chunk == expected, "response chunks must remain ordered");
+                anyhow::ensure!(chunk == expected, "response bytes must remain ordered");
             }
             anyhow::Ok(())
         })

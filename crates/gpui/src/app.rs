@@ -1,7 +1,8 @@
 use crate::{
-    Action, ActionBuildError, ActionRegistry, Any, AnyView, AnyWindowHandle, AppContext, Arena,
-    ArenaBox, Asset, AssetRegistry, BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError,
-    CursorStyle, DispatchPhase, DisplayId, EventEmitter, ExternalDragPayload, FocusHandle,
+    Action, ActionBuildError, ActionRegistry, ActivationPolicy, ActivityGuard, Any, AnyView,
+    AnyWindowHandle, AppContext, AppLifecyclePhase, Arena, ArenaBox, Asset, AssetRegistry,
+    BackgroundExecutor, Bounds, ClipboardItem, ClipboardReadError, CursorStyle, DispatchPhase,
+    DisplayChanges, DisplayEvent, DisplayId, EventEmitter, ExternalDragPayload, FocusHandle,
     FocusMap, ForegroundExecutor, Global, HapticFeedbackStyle, KeyBinding, KeyContext, Keymap,
     Keystroke, LayoutId, Menu, MenuItem, OwnedMenu, PathPromptOptions, Pixels, Platform,
     PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, Point, Priority,
@@ -9,7 +10,7 @@ use crate::{
     RenderablePromptHandle, Reservation, ScreenCaptureSource, SharedString, SubscriberSet,
     Subscription, SvgRenderer, SystemNotification, SystemNotificationResponse, Task,
     TextRenderingMode, TextSystem, ThermalState, Window, WindowAppearance, WindowButtonLayout,
-    WindowHandle, WindowId, WindowInvalidator,
+    WindowHandle, WindowId, WindowInvalidator, WindowingRequest,
     colors::{Colors, GlobalColors},
     hash,
     http_client::{HttpClient, NullHttpClient},
@@ -18,11 +19,7 @@ use crate::{
 use anyhow::{Context as _, Result, anyhow};
 use collections::{FxHashMap, FxHashSet, HashMap, TypeIdHashMap, TypeIdHashSet, VecDeque};
 use derive_more::{Deref, DerefMut};
-use futures::{
-    Future, FutureExt,
-    channel::oneshot,
-    future::{LocalBoxFuture, Shared},
-};
+use futures::{Future, FutureExt, channel::oneshot, future::LocalBoxFuture};
 use gpui_util::{ResultExt, debug_panic};
 use itertools::Itertools;
 use parking_lot::RwLock;
@@ -42,6 +39,16 @@ use std::{
     time::Duration,
 };
 
+#[cfg(any(feature = "inspector", debug_assertions))]
+use crate::InspectorElementRegistry;
+use crate::asset_cache::CachedLoad;
+pub use async_context::*;
+#[cfg(feature = "bench-support")]
+pub use bench_context::{
+    BenchAppContext, BenchMeasurement, BenchReport, BenchWindowContext, CountingAllocator,
+    MetricReport, bench_platform,
+};
+
 mod async_context;
 #[cfg(feature = "bench-support")]
 mod bench_context;
@@ -56,9 +63,6 @@ mod test_context;
 #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
 mod visual_test_context;
 
-pub use async_context::*;
-#[cfg(feature = "bench-support")]
-pub use bench_context::{BenchAppContext, BenchReport, BenchWindowContext, bench_platform};
 pub use context::*;
 pub use entity_map::*;
 #[cfg(any(test, feature = "test-support"))]
@@ -69,11 +73,6 @@ pub use test_app::*;
 pub use test_context::*;
 #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
 pub use visual_test_context::*;
-
-#[cfg(any(feature = "inspector", debug_assertions))]
-use crate::InspectorElementRegistry;
-#[cfg(target_os = "macos")]
-use crate::MacActivationPolicy;
 
 /// The duration for which native applications wait for futures returned from
 /// [Context::on_app_quit] before fully quitting.
@@ -310,8 +309,8 @@ impl Application {
     /// The method exists only on macOS, so cross-platform code calls it behind
     /// `#[cfg(target_os = "macos")]`.
     #[cfg(target_os = "macos")]
-    pub fn with_activation_policy(self, policy: MacActivationPolicy) -> Self {
-        self.0.borrow().platform.set_mac_activation_policy(policy);
+    pub fn with_activation_policy(self, policy: ActivationPolicy) -> Self {
+        self.0.borrow().platform.set_activation_policy(policy);
         self
     }
 
@@ -323,6 +322,22 @@ impl Application {
     /// and the app keeps running in the page.
     ///
     /// See the [`Application`] example for a complete `main`.
+    /// Sets the windowing mode the app starts in. See [`App::request_windowing`].
+    ///
+    /// Defaults to windowed. On Linux, the default environment is the process's own, and the app
+    /// starts headless if that names no allowed display server. On macOS, headless means the app
+    /// starts without a Dock icon or menu bar ([`ActivationPolicy::Accessory`]). Has no effect on
+    /// other platforms.
+    pub fn with_windowing(self, request: WindowingRequest) -> Self {
+        self.0.borrow().platform.set_initial_windowing(request);
+        self
+    }
+
+    /// Start the application. The provided callback will be called once the
+    /// app is fully launched.
+    ///
+    /// On WebAssembly, this returns immediately and retains the app for the lifetime
+    /// of the Wasm instance. Use [`Self::run_embedded`] to control its lifetime explicitly.
     pub fn run<F>(self, on_finish_launching: F)
     where
         F: 'static + FnOnce(&mut App),
@@ -485,7 +500,6 @@ fn display_events(
     removed.chain(added_or_changed).collect()
 }
 type Listener = Box<dyn FnMut(&dyn Any, &mut App) -> bool + 'static>;
-type MissingGlyphCallback = Box<dyn FnMut(&[MissingGlyph], &mut App) + 'static>;
 pub(crate) type KeystrokeObserver =
     Box<dyn FnMut(&KeystrokeEvent, &mut Window, &mut App) -> bool + 'static>;
 type QuitHandler = Box<dyn FnOnce(&mut App) -> LocalBoxFuture<'static, ()> + 'static>;
@@ -885,6 +899,52 @@ enum PlatformOwnedDragState {
     RestoredInSourceWindow,
 }
 
+/// What a view read while it drew: entities, globals and handle revisions, with the revision
+/// each was at.
+#[derive(Default)]
+pub(crate) struct Dependencies {
+    entities: Vec<EntityId>,
+    globals: Vec<(TypeId, u64)>,
+    revisions: Vec<(Revision, u64)>,
+}
+
+impl Dependencies {
+    pub(crate) fn extend(&mut self, other: Dependencies) {
+        self.entities.extend(other.entities);
+        self.entities.sort_unstable();
+        self.entities.dedup();
+        self.globals.extend(other.globals);
+        self.globals.sort_unstable();
+        self.globals.dedup_by_key(|(global_type, _)| *global_type);
+        // A later phase saw the later revision, so it wins.
+        for (revision, seen) in other.revisions {
+            match self
+                .revisions
+                .iter_mut()
+                .find(|(known, _)| known.same(&revision))
+            {
+                Some(entry) => entry.1 = seen,
+                None => self.revisions.push((revision, seen)),
+            }
+        }
+    }
+}
+
+/// A counter for state that lives outside entities, such as a list's scroll position, so the
+/// views that read it are drawn again when it changes. The owner bumps it on every mutation.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Revision(Rc<Cell<u64>>);
+
+impl Revision {
+    pub(crate) fn bump(&self) {
+        self.0.set(self.0.get().wrapping_add(1));
+    }
+
+    fn same(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 /// The state of a running application: its entities, windows, globals and key bindings.
 ///
 /// You get a `&mut App` from the callback passed to [`Application::run`], from
@@ -937,7 +997,6 @@ pub struct App {
     pub(crate) keystroke_observers: SubscriberSet<(), KeystrokeObserver>,
     pub(crate) keystroke_interceptors: SubscriberSet<(), KeystrokeObserver>,
     pub(crate) keyboard_layout_observers: SubscriberSet<(), Handler>,
-    missing_glyph_callback: Rc<MissingGlyphCallbackSlot>,
     pub(crate) thermal_state_observers: SubscriberSet<(), Handler>,
     pub(crate) display_observers: SubscriberSet<(), DisplayHandler>,
     /// The connected displays, as of the platform's last display change
@@ -964,6 +1023,9 @@ pub struct App {
     // the tokio runtime. As any task attempting to spawn a blocking tokio task,
     // might panic.
     pub(crate) globals_by_type: TypeIdHashMap<Box<dyn Any>>,
+    global_revisions: TypeIdHashMap<u64>,
+    global_reads: RefCell<Vec<TypeId>>,
+    revision_reads: RefCell<Vec<Revision>>,
     // Entities which are retained until explicitly removed from the app or dropped at end of life-cycle.
     // This is an alternative way to define "global" data which uses entities.
     // There can be multiple entities of a given type & each `Entity<T>` is stored as `Box<dyn Any>`.
@@ -1007,7 +1069,6 @@ pub struct App {
     /// Whether windows build their accessibility tree every frame without an
     /// assistive-technology client. See [`Application::with_accessibility_forced`].
     pub(crate) accessibility_forced: bool,
-    flushing_effects: bool,
     pending_updates: usize,
     quit_mode: QuitMode,
     quitting: bool,
@@ -1058,11 +1119,16 @@ impl App {
                 foreground_executor,
                 #[cfg(feature = "profiler")]
                 foreground_journal,
+                #[cfg(all(feature = "profiler", not(target_family = "wasm")))]
+                hang_monitor: None,
                 svg_renderer: SvgRenderer::new(asset_registry.clone()),
                 loading_assets: Default::default(),
                 asset_registry,
                 http_client,
                 globals_by_type: Default::default(),
+                global_revisions: Default::default(),
+                global_reads: Default::default(),
+                revision_reads: Default::default(),
                 global_entities: Default::default(),
                 entities,
                 new_entity_observers: SubscriberSet::new(),
@@ -1086,7 +1152,6 @@ impl App {
                 keystroke_observers: SubscriberSet::new(),
                 keystroke_interceptors: SubscriberSet::new(),
                 keyboard_layout_observers: SubscriberSet::new(),
-                missing_glyph_callback: Rc::default(),
                 thermal_state_observers: SubscriberSet::new(),
                 display_observers: SubscriberSet::new(),
                 displays: read_displays(platform.as_ref()),
@@ -1269,6 +1334,17 @@ impl App {
         self.entities.assert_no_new_leaks(snapshot)
     }
 
+    /// Without leak detection compiled in, this records nothing.
+    #[cfg(all(feature = "test-support", not(any(test, gpui_leak_detection))))]
+    pub fn leak_detector_snapshot(&self) -> LeakDetectorSnapshot {
+        LeakDetectorSnapshot::default()
+    }
+
+    /// Without leak detection compiled in, this checks nothing. Set
+    /// `GPUI_LEAK_DETECTION` when building to enable it.
+    #[cfg(all(feature = "test-support", not(any(test, gpui_leak_detection))))]
+    pub fn assert_no_new_leaks(&self, _snapshot: &LeakDetectorSnapshot) {}
+
     /// Runs the quit handlers, closes every window and flushes pending effects.
     ///
     /// The platform calls this when the app quits. Handlers registered with
@@ -1366,6 +1442,41 @@ impl App {
     /// that happen when the last window closes.
     pub fn quit(&self) {
         self.platform.quit();
+    }
+
+    /// Switches the platform between headless and windowed modes.
+    ///
+    /// On Linux, headless means no display server: windows opened afterwards lay out and handle
+    /// input but draw nothing. Windowed, the platform connects to the display server the
+    /// environment names. On macOS, the modes set the [`ActivationPolicy`]: headless is
+    /// `Accessory` (no Dock icon or menu bar) and windowed is `Regular`. Switching to windowed
+    /// doesn't activate the app: call [`App::activate`] for that.
+    ///
+    /// The returned task resolves once the switch has been applied. It fails if the platform is
+    /// already in the requested mode (switching to another display server means going headless
+    /// first), if the platform doesn't allow the mode or can't switch at all, if any window is
+    /// open (a window belongs to the display server that opened it), or if the display server
+    /// can't be reached.
+    pub fn request_windowing(&self, request: WindowingRequest) -> Task<anyhow::Result<()>> {
+        if !self.windows.is_empty() {
+            return Task::ready(Err(anyhow::anyhow!(
+                "cannot switch windowing modes while windows are open"
+            )));
+        }
+        self.platform.request_windowing(request)
+    }
+
+    /// The environment of the display server the platform is connected to, or `None` while
+    /// headless. Its activation token is always unset, since the connection has used it.
+    ///
+    /// Programs an app launches inherit this process's environment, which may name another
+    /// graphical session, or none if the app started headless. Pass them this one with
+    /// [`GraphicalEnvironment::apply_to`](crate::GraphicalEnvironment::apply_to).
+    ///
+    /// On macOS, the environment carries nothing, and this is `None` while the activation
+    /// policy is `Accessory`. Always `None` on platforms that can't switch windowing modes.
+    pub fn graphical_environment(&self) -> Option<crate::GraphicalEnvironment> {
+        self.platform.graphical_environment()
     }
 
     /// Returns the policy that decides when GPUI hides the cursor while typing.
@@ -1483,20 +1594,115 @@ impl App {
         })
     }
 
-    pub(crate) fn detect_accessed_entities<R>(
+    /// Runs `callback` and returns what it read: the entities, and the globals at their
+    /// current revisions. Reads by nested recordings count for the enclosing ones too.
+    pub(crate) fn record_dependencies<R>(
         &mut self,
         callback: impl FnOnce(&mut App) -> R,
-    ) -> (R, FxHashSet<EntityId>) {
-        let accessed_entities_start = self.entities.accessed_entities.get_mut().clone();
+    ) -> (R, Dependencies) {
+        let entities_start = self.entities.access_log.get_mut().len();
+        let globals_start = self.global_reads.get_mut().len();
+        let revisions_start = self.revision_reads.get_mut().len();
+        *self.entities.recordings.get_mut() += 1;
         let result = callback(self);
-        let entities_accessed_in_callback = self
-            .entities
-            .accessed_entities
-            .get_mut()
-            .difference(&accessed_entities_start)
+        let recordings = self.entities.recordings.get_mut();
+        *recordings -= 1;
+        let outermost = *recordings == 0;
+
+        let log = self.entities.access_log.get_mut();
+        let mut entities = log[entities_start..].to_vec();
+        entities.sort_unstable();
+        entities.dedup();
+        let reads = self.global_reads.get_mut();
+        let mut globals: Vec<(TypeId, u64)> = reads[globals_start..]
+            .iter()
+            .map(|global_type| (*global_type, 0))
+            .collect();
+        let revision_reads = self.revision_reads.get_mut();
+        let mut revisions: Vec<(Revision, u64)> = Vec::new();
+        for revision in revision_reads.drain(revisions_start..) {
+            if !revisions.iter().any(|(known, _)| known.same(&revision)) {
+                let seen = revision.0.get();
+                revisions.push((revision, seen));
+            }
+        }
+        if !outermost {
+            // Enclosing recordings depend on these too.
+            revision_reads.extend(revisions.iter().map(|(revision, _)| revision.clone()));
+        }
+        if outermost {
+            log.clear();
+            reads.clear();
+        }
+        globals.sort_unstable();
+        globals.dedup();
+        for (global_type, revision) in &mut globals {
+            *revision = self.global_revision(*global_type);
+        }
+        (
+            result,
+            Dependencies {
+                entities,
+                globals,
+                revisions,
+            },
+        )
+    }
+
+    /// Counts `dependencies` as read again, as when a view's output is reused.
+    pub(crate) fn replay_dependencies(&mut self, dependencies: &Dependencies) {
+        for entity_id in &dependencies.entities {
+            self.entities.note_access(*entity_id);
+        }
+        for (global_type, _) in &dependencies.globals {
+            self.note_global_read(*global_type);
+        }
+        for (revision, _) in &dependencies.revisions {
+            self.note_revision(revision);
+        }
+    }
+
+    /// Records that the drawing view read state versioned by `revision`.
+    pub(crate) fn note_revision(&self, revision: &Revision) {
+        if self.entities.recordings.get() > 0 {
+            self.revision_reads.borrow_mut().push(revision.clone());
+        }
+    }
+
+    /// Returns whether anything in `dependencies` changed: an entity in `dirty`, or a global
+    /// written since it was read.
+    pub(crate) fn dependencies_changed(
+        &self,
+        dependencies: &Dependencies,
+        dirty: &FxHashSet<EntityId>,
+    ) -> bool {
+        dependencies.entities.iter().any(|id| dirty.contains(id))
+            || dependencies
+                .globals
+                .iter()
+                .any(|(global_type, revision)| self.global_revision(*global_type) != *revision)
+            || dependencies
+                .revisions
+                .iter()
+                .any(|(revision, seen)| revision.0.get() != *seen)
+    }
+
+    fn note_global_read(&self, global_type: TypeId) {
+        if self.entities.recordings.get() > 0 {
+            self.global_reads.borrow_mut().push(global_type);
+        }
+    }
+
+    fn global_revision(&self, global_type: TypeId) -> u64 {
+        self.global_revisions
+            .get(&global_type)
             .copied()
-            .collect::<FxHashSet<EntityId>>();
-        (result, entities_accessed_in_callback)
+            .unwrap_or(0)
+    }
+
+    fn global_changed(&mut self, global_type: TypeId) {
+        *self.global_revisions.entry(global_type).or_default() += 1;
+        self.push_effect(Effect::NotifyGlobalObservers { global_type });
     }
 
     pub(crate) fn record_entities_accessed(
@@ -1813,6 +2019,11 @@ impl App {
         self.platform.thermal_state()
     }
 
+    /// Prevents idle sleep while the returned guard is held.
+    pub fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>> {
+        self.platform.prevent_idle_sleep(reason)
+    }
+
     /// Calls `callback` when the system's thermal state changes.
     ///
     /// The subscription stays active while you hold it.
@@ -1831,6 +2042,76 @@ impl App {
         subscription
     }
 
+    /// Invokes a handler when the system is about to sleep.
+    ///
+    /// The platform gives the process only a short time before suspending, so
+    /// handlers should record state or cancel work rather than start it.
+    pub fn on_system_sleep<F>(&self, mut callback: F) -> Subscription
+    where
+        F: 'static + FnMut(&mut App),
+    {
+        let (subscription, activate) = self.system_sleep_observers.insert(
+            (),
+            Box::new(move |cx| {
+                callback(cx);
+                true
+            }),
+        );
+        activate();
+        subscription
+    }
+
+    pub(crate) fn displays_changed(&mut self) {
+        let current = read_displays(self.platform.as_ref());
+        let events = display_events(&self.displays, &current);
+        self.displays = current;
+        for event in &events {
+            let DisplayEvent::Changed { id, .. } = *event else {
+                continue;
+            };
+            for handle in self.windows() {
+                self.update_window(handle, |_, window, cx| {
+                    if window.display_id == Some(id) {
+                        window.notify_display_observers(cx);
+                    }
+                })
+                .log_err();
+            }
+        }
+        for event in events {
+            self.display_observers
+                .clone()
+                .retain(&(), |callback| (callback)(event, self));
+        }
+    }
+
+    pub(crate) fn knows_display(&self, id: DisplayId) -> bool {
+        self.displays.contains_key(&id)
+    }
+
+    /// The refresh interval of a connected display, as of the platform's last
+    /// display change notification.
+    pub(crate) fn display_refresh_interval(&self, id: DisplayId) -> Option<Duration> {
+        self.displays.get(&id)?.refresh_interval
+    }
+
+    /// Invokes a handler when a display is connected, disconnected, or its
+    /// properties change.
+    pub fn observe_displays<F>(&self, mut callback: F) -> Subscription
+    where
+        F: 'static + FnMut(DisplayEvent, &mut App),
+    {
+        let (subscription, activate) = self.display_observers.insert(
+            (),
+            Box::new(move |event, cx| {
+                callback(event, cx);
+                true
+            }),
+        );
+        activate();
+        subscription
+    }
+
     /// Calls `callback` when the system wakes from sleep.
     ///
     /// Use it to reconnect to network services or refresh data that went stale
@@ -1840,6 +2121,42 @@ impl App {
         F: 'static + FnMut(&mut App),
     {
         let (subscription, activate) = self.system_wake_observers.insert(
+            (),
+            Box::new(move |cx| {
+                callback(cx);
+                true
+            }),
+        );
+        activate();
+        subscription
+    }
+
+    /// Observes mobile application lifecycle changes. Desktop platforms do not
+    /// emit these events. On iOS these currently describe the single connected
+    /// scene, not individual windows.
+    ///
+    /// Save important changes incrementally: neither disconnection nor quit is
+    /// guaranteed before the system terminates a backgrounded application.
+    /// Dropping the returned subscription removes the observer.
+    pub fn on_app_lifecycle(
+        &self,
+        mut callback: impl FnMut(AppLifecyclePhase, &mut App) + 'static,
+    ) -> Subscription {
+        let (subscription, activate) = self.app_lifecycle_observers.insert(
+            (),
+            Box::new(move |phase, cx| {
+                callback(phase, cx);
+                true
+            }),
+        );
+        activate();
+        subscription
+    }
+
+    /// Observes mobile memory-pressure warnings so applications can release
+    /// expendable caches. Dropping the subscription removes the observer.
+    pub fn on_memory_warning(&self, mut callback: impl FnMut(&mut App) + 'static) -> Subscription {
+        let (subscription, activate) = self.memory_warning_observers.insert(
             (),
             Box::new(move |cx| {
                 callback(cx);
@@ -2163,6 +2480,18 @@ impl App {
         self.quit_mode = mode;
     }
 
+    /// Sets whether the application participates in the system's foreground UI.
+    ///
+    /// Only has an effect on macOS, where [`Self::request_windowing`] normally sets it. Use this
+    /// for an accessory app that shows windows, such as a menu bar utility. It overrides the
+    /// policy until the next [`Self::request_windowing`], and the app counts as headless while
+    /// `Accessory`. After switching to [`ActivationPolicy::Regular`], activate the app yourself
+    /// with [`Self::activate`]; otherwise its menu bar may not appear until the app is
+    /// reactivated.
+    pub fn set_activation_policy(&mut self, policy: ActivationPolicy) {
+        self.platform.set_activation_policy(policy);
+    }
+
     /// Returns the SVG renderer that draws the app's SVG assets.
     pub fn svg_renderer(&self) -> SvgRenderer {
         self.svg_renderer.clone()
@@ -2387,6 +2716,7 @@ impl App {
     /// callback receives the [`Window`] and the [`App`]. Returns `None` if the entity has
     /// no current window, if that window has closed, or if the window is already being
     /// updated higher up the call stack.
+    #[inline(always)]
     pub fn with_window<R>(
         &mut self,
         entity_id: EntityId,
@@ -2440,6 +2770,12 @@ impl App {
         &self.background_executor
     }
 
+    /// Whether this app runs on the deterministic test scheduler. See
+    /// [`BackgroundExecutor::is_test`].
+    pub fn is_test(&self) -> bool {
+        self.background_executor.is_test()
+    }
+
     /// Returns the [`ForegroundExecutor`], which runs futures on the main thread.
     ///
     /// # Panics
@@ -2458,6 +2794,45 @@ impl App {
     #[cfg(feature = "profiler")]
     pub fn foreground_journal(&self) -> crate::profiler::journal::ForegroundJournal {
         self.foreground_journal.clone()
+    }
+
+    /// Starts detecting foreground hangs on a dedicated thread.
+    ///
+    /// Nothing is spawned unless the app calls this. The thread polls a
+    /// detector over this app's foreground journal every `config.interval`
+    /// and passes each poll's incidents, including empty polls, to `on_poll`
+    /// on that thread. When the app quits, a final poll with
+    /// [`HangMonitorPollReason::Flush`] runs during shutdown, concurrently
+    /// with quit handlers and within [`SHUTDOWN_TIMEOUT`], so `on_poll` can
+    /// deliver batched results.
+    ///
+    /// # Errors
+    ///
+    /// Fails if the monitor was already started or its thread can't be
+    /// spawned.
+    ///
+    /// [`HangMonitorPollReason::Flush`]: crate::profiler::hang::HangMonitorPollReason::Flush
+    #[cfg(all(feature = "profiler", not(target_family = "wasm")))]
+    pub fn start_hang_monitor(
+        &mut self,
+        config: crate::profiler::hang::HangMonitorConfig,
+        on_poll: impl FnMut(crate::profiler::hang::HangMonitorPoll) + Send + 'static,
+    ) -> Result<(), crate::profiler::hang::HangMonitorError> {
+        use crate::profiler::hang::{HangDetector, HangMonitor, HangMonitorError};
+
+        if self.hang_monitor.is_some() {
+            debug_assert!(false, "the hang monitor was started twice");
+            return Err(HangMonitorError::AlreadyStarted);
+        }
+        let detector = HangDetector::new(
+            self.foreground_journal(),
+            config.threshold,
+            config.frame_budget,
+        );
+        let monitor = HangMonitor::spawn(detector, config.interval, on_poll)
+            .map_err(HangMonitorError::Spawn)?;
+        self.hang_monitor = Some(monitor);
+        Ok(())
     }
 
     /// Runs an async block on the main thread, with an [`AsyncApp`] for access to app state.
@@ -2556,6 +2931,7 @@ impl App {
 
     /// Returns whether a global of type `G` has been set.
     pub fn has_global<G: Global>(&self) -> bool {
+        self.note_global_read(TypeId::of::<G>());
         self.globals_by_type.contains_key(&TypeId::of::<G>())
     }
 
@@ -2567,6 +2943,7 @@ impl App {
     /// global may be missing.
     #[track_caller]
     pub fn global<G: Global>(&self) -> &G {
+        self.note_global_read(TypeId::of::<G>());
         self.globals_by_type
             .get(&TypeId::of::<G>())
             .map(|any_state| any_state.downcast_ref::<G>().unwrap())
@@ -2575,6 +2952,7 @@ impl App {
 
     /// Returns the global of type `G`, or `None` if it has not been set.
     pub fn try_global<G: Global>(&self) -> Option<&G> {
+        self.note_global_read(TypeId::of::<G>());
         self.globals_by_type
             .get(&TypeId::of::<G>())
             .map(|any_state| any_state.downcast_ref::<G>().unwrap())
@@ -2593,7 +2971,7 @@ impl App {
     #[track_caller]
     pub fn global_mut<G: Global>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.global_changed(global_type);
         self.globals_by_type
             .get_mut(&global_type)
             .and_then(|any_state| any_state.downcast_mut::<G>())
@@ -2605,7 +2983,7 @@ impl App {
     /// Like [`App::global_mut`], this notifies global observers.
     pub fn default_global<G: Global + Default>(&mut self) -> &mut G {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.global_changed(global_type);
         self.globals_by_type
             .entry(global_type)
             .or_insert_with(|| Box::<G>::default())
@@ -2632,7 +3010,7 @@ impl App {
     /// ```
     pub fn set_global<G: Global>(&mut self, global: G) {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.global_changed(global_type);
         self.globals_by_type.insert(global_type, Box::new(global));
     }
 
@@ -2651,7 +3029,7 @@ impl App {
     /// Panics if no global of type `G` has been set.
     pub fn remove_global<G: Global>(&mut self) -> G {
         let global_type = TypeId::of::<G>();
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.global_changed(global_type);
         *self
             .globals_by_type
             .remove(&global_type)
@@ -2715,7 +3093,7 @@ impl App {
     pub(crate) fn end_global_lease<G: Global>(&mut self, lease: GlobalLease<G>) {
         let global_type = TypeId::of::<G>();
 
-        self.push_effect(Effect::NotifyGlobalObservers { global_type });
+        self.global_changed(global_type);
         self.globals_by_type.insert(global_type, lease.global);
     }
 
@@ -2797,11 +3175,14 @@ impl App {
         })
     }
 
-    /// Calls `f` for every key-down that reaches any window of the app.
+    /// Calls `f` for every keystroke that reaches any window of the app.
     ///
-    /// The callback runs after action and event handling has finished, so it sees the
-    /// keystrokes that were not handled earlier. Use [`App::intercept_keystrokes`] to
-    /// see keystrokes before they are dispatched. Keep the returned [`Subscription`] alive.
+    /// The callback runs after action and event handling has finished, and the event
+    /// names the action that handled the keystroke, if any. Keystrokes consumed by an
+    /// interceptor or a raw keyboard event handler are not observed, and a modifier
+    /// pressed on its own is observed when it is released. Use
+    /// [`App::intercept_keystrokes`] to see keystrokes before they are dispatched. Keep
+    /// the returned [`Subscription`] alive.
     pub fn observe_keystrokes(
         &mut self,
         mut f: impl FnMut(&KeystrokeEvent, &mut Window, &mut App) + 'static,
@@ -3376,13 +3757,15 @@ impl App {
         self.loading_assets.contains_key(&asset_id)
     }
 
-    /// Starts loading the asset `A` for `source` in the background, or returns the load already in progress.
+    /// Starts loading an uncached asset and returns its result once available.
     ///
-    /// The result is a shared task that resolves to the asset output, and a flag that is
-    /// `true` only for the call that started the load. Concurrent calls for the same
-    /// `source` share one [`Asset::load`] and its cached result. Use
-    /// [`App::remove_asset`] to load it again.
-    pub fn fetch_asset<A: Asset>(&mut self, source: &A::Source) -> (Shared<Task<A::Output>>, bool) {
+    /// Pending loads and completed results are cached until [`Self::remove_asset`].
+    /// This method does not subscribe a view to completion notifications.
+    pub fn fetch_asset<A: Asset>(&mut self, source: &A::Source) -> Option<A::Output> {
+        self.asset_entry::<A>(source).get()
+    }
+
+    pub(crate) fn asset_entry<A: Asset>(&mut self, source: &A::Source) -> &CachedLoad<A::Output> {
         let asset_id = (TypeId::of::<A>(), hash(source));
         if !self.loading_assets.contains_key(&asset_id) {
             let future = A::load(source.clone(), self);
@@ -3883,6 +4266,15 @@ pub struct AnyTooltip {
     pub check_visible_and_update: Rc<dyn Fn(Bounds<Pixels>, &mut Window, &mut App) -> bool>,
 }
 
+/// Whether a keystroke should prefer character input or key bindings.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InputPreference {
+    /// Prefer typing text over triggering key bindings.
+    CharacterInput,
+    /// Dispatch key bindings normally, if any match.
+    KeyBindings,
+}
+
 /// A keystroke that reached the app, with the action it resolved to, if any.
 ///
 /// Passed to the callbacks from [`App::observe_keystrokes`] and [`App::intercept_keystrokes`].
@@ -3890,6 +4282,15 @@ pub struct AnyTooltip {
 pub struct KeystrokeEvent {
     /// The keystroke that was pressed.
     pub keystroke: Keystroke,
+
+    /// Whether this keystroke should prefer character input or key bindings.
+    /// This is [`InputPreference::CharacterInput`] when the platform prefers text for the key
+    /// (e.g. AltGr on Windows) and the focused input accepts text. Interceptors still receive
+    /// these keystrokes and can consume them.
+    ///
+    /// If the keystroke is part of a multi-stroke binding, it still waits as pending input
+    /// even when this is [`InputPreference::CharacterInput`].
+    pub input_preference: InputPreference,
 
     /// The action the keystroke resolved to, or `None` if no binding matched. Always
     /// `None` in an `intercept_keystrokes` callback.
@@ -3963,10 +4364,7 @@ mod test {
     #[cfg(unix)]
     use std::os::unix::ffi::OsStringExt;
 
-    use crate::{
-        AppContext, Context, Empty, FallbackFontClass, IntoElement, MissingGlyph, Render,
-        TestAppContext, Window,
-    };
+    use crate::{AppContext, Context, Empty, IntoElement, Render, TestAppContext, Window};
 
     struct RenderCounter(Rc<Cell<usize>>);
 
@@ -3994,65 +4392,6 @@ mod test {
         assert_eq!(render_count.get(), render_count_before_refresh + 1);
     }
 
-    #[gpui::test]
-    fn missing_glyph_callbacks_follow_subscription_lifetime(cx: &mut TestAppContext) {
-        let observed = Rc::new(RefCell::new(Vec::new()));
-        let subscription = cx.update(|cx| {
-            let observed = observed.clone();
-            cx.on_missing_glyphs(move |missing_glyphs, _| {
-                observed.borrow_mut().extend_from_slice(missing_glyphs);
-            })
-        });
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("active")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(observed.borrow().as_slice(), &[missing_glyph("active")]);
-
-        let second_observed = Rc::new(RefCell::new(Vec::new()));
-        let second_subscription = cx.update(|cx| {
-            let second_observed = second_observed.clone();
-            cx.on_missing_glyphs(move |missing_glyphs, _| {
-                second_observed
-                    .borrow_mut()
-                    .extend_from_slice(missing_glyphs);
-            })
-        });
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("replacement")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(observed.borrow().as_slice(), &[missing_glyph("active")]);
-        assert_eq!(
-            second_observed.borrow().as_slice(),
-            &[missing_glyph("replacement")]
-        );
-
-        drop(subscription);
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("after old drop")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(
-            second_observed.borrow().as_slice(),
-            &[
-                missing_glyph("replacement"),
-                missing_glyph("after old drop")
-            ]
-        );
-
-        drop(second_subscription);
-        cx.update(|cx| {
-            cx.text_system()
-                .report_missing_glyphs_in_test(vec![missing_glyph("inactive")]);
-        });
-        cx.run_until_parked();
-        assert_eq!(second_observed.borrow().len(), 2);
-    }
-
     #[test]
     fn embedded_update_flushes_effects() {
         let cx = TestAppContext::single();
@@ -4067,6 +4406,28 @@ mod test {
         });
 
         assert!(completed.get());
+    }
+
+    #[gpui::test]
+    fn nested_update_defers_new_effects_until_current_effect_returns(cx: &mut TestAppContext) {
+        let order = Rc::new(RefCell::new(Vec::new()));
+        cx.update({
+            let order = order.clone();
+            move |cx| {
+                cx.defer(move |cx| {
+                    order.borrow_mut().push("outer-start");
+                    cx.update({
+                        let order = order.clone();
+                        |cx| {
+                            cx.defer(move |_| order.borrow_mut().push("nested"));
+                        }
+                    });
+                    order.borrow_mut().push("outer-end");
+                });
+            }
+        });
+
+        assert_eq!(*order.borrow(), ["outer-start", "outer-end", "nested"]);
     }
 
     #[gpui::test]
@@ -4162,9 +4523,5 @@ mod test {
         let (path, restart_arguments) = restart.await.expect("restart was not requested");
         assert_eq!(path, Some(restart_path));
         assert_eq!(restart_arguments, arguments);
-    }
-
-    fn missing_glyph(grapheme: &'static str) -> MissingGlyph {
-        MissingGlyph::new(grapheme.into(), FallbackFontClass::Proportional)
     }
 }

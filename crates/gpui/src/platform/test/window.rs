@@ -1,10 +1,12 @@
 use crate::{
     AnyWindowHandle, AtlasKey, AtlasTextureId, AtlasTile, Bounds, DevicePixels,
-    DispatchEventResult, GlyphAtlasCache, GlyphAtlasEntry, GpuSpecs, Pixels, PlatformAtlas,
-    PlatformDisplay, PlatformHeadlessRenderer, PlatformInput, PlatformInputHandler, PlatformWindow,
-    Point, PromptButton, RenderGlyphParams, RequestFrameOptions, Scene, Size, TestPlatform,
-    TextInputConfiguration, TextInputStateChange, TileId, ValidatedRasterizedGlyph,
-    WindowAppearance, WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowParams,
+    DispatchEventResult, DisplayId, GlyphAtlasCache, GlyphAtlasEntry, GpuSpecs, HeadlessAtlas,
+    Pixels, PlatformAtlas, PlatformDisplay, PlatformHeadlessRenderer, PlatformInput,
+    PlatformInputHandler, PlatformWindow, Point, PromptButton, RenderGlyphParams,
+    RequestFrameOptions, Scene, Size, TestDisplay, TestPlatform, TextInputConfiguration,
+    TextInputStateChange, TileId, ValidatedRasterizedGlyph, WindowAppearance,
+    WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowInsets, WindowParams,
+    WindowVisibility,
 };
 use gpui_util::ResultExt as _;
 #[cfg(any(test, feature = "test-support"))]
@@ -13,6 +15,7 @@ use parking_lot::Mutex;
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
 use std::{
     cell::Cell,
+    collections::HashMap,
     path::PathBuf,
     rc::{Rc, Weak},
     sync::{self, Arc},
@@ -179,7 +182,64 @@ impl TestWindow {
         self.0.lock().visible
     }
 
-    /// Returns every [`TextInputConfiguration`] sent to this window, oldest first.
+    pub fn simulate_visibility_change(&self, visibility: WindowVisibility) {
+        let callback = {
+            let mut state = self.0.lock();
+            state.visibility = visibility;
+            state.visibility_callback.take()
+        };
+        if let Some(mut callback) = callback {
+            callback(visibility);
+            self.0.lock().visibility_callback = Some(callback);
+        }
+    }
+
+    /// Moves the window to the display with the given ID.
+    pub fn simulate_move_to_display(&self, display_id: DisplayId) {
+        let callback = {
+            let mut state = self.0.lock();
+            state.display = Rc::new(TestDisplay::with_id(display_id));
+            state.display_changed_callback.take()
+        };
+        if let Some(mut callback) = callback {
+            callback();
+            self.0.lock().display_changed_callback = Some(callback);
+        }
+    }
+
+    pub fn simulate_visual_viewport_change(&self, bounds: Bounds<Pixels>) {
+        let callback = {
+            let mut state = self.0.lock();
+            state.visual_viewport = Some(bounds);
+            state.visual_viewport_callback.take()
+        };
+        if let Some(mut callback) = callback {
+            callback();
+            self.0.lock().visual_viewport_callback = Some(callback);
+        }
+    }
+
+    pub fn simulate_insets_change(&self, insets: WindowInsets) {
+        let callback = {
+            let mut state = self.0.lock();
+            state.insets = insets.clone();
+            state.insets_callback.take()
+        };
+        if let Some(mut callback) = callback {
+            callback(insets);
+            self.0.lock().insets_callback = Some(callback);
+        }
+    }
+
+    pub fn virtual_keyboard_requests(&self) -> usize {
+        self.0.lock().virtual_keyboard_requests
+    }
+
+    pub fn virtual_keyboard_dismissals(&self) -> usize {
+        self.0.lock().virtual_keyboard_dismissals
+    }
+
+    /// Every [`TextInputConfiguration`] forwarded to this window, in order.
     pub fn text_input_configurations(&self) -> Vec<TextInputConfiguration> {
         self.0.lock().text_input_configurations.clone()
     }
@@ -636,6 +696,7 @@ impl TestAtlasState {
 
 impl TestAtlas {
     /// Creates an empty atlas.
+    #[cfg(test)]
     pub fn new() -> Self {
         TestAtlas(Mutex::new(TestAtlasState {
             next_id: 0,
@@ -655,13 +716,13 @@ impl TestAtlas {
 impl PlatformAtlas for TestAtlas {
     fn get_or_insert_with<'a>(
         &self,
-        key: &crate::AtlasKey,
+        key: crate::AtlasKey,
         build: &mut dyn FnMut() -> anyhow::Result<
             Option<(Size<crate::DevicePixels>, std::borrow::Cow<'a, [u8]>)>,
         >,
     ) -> anyhow::Result<Option<crate::AtlasTile>> {
         let mut state = self.0.lock();
-        if let Some(&tile) = state.tiles.get(key) {
+        if let Some(&tile) = state.tiles.get(&key) {
             return Ok(Some(tile));
         }
         drop(state);
@@ -672,7 +733,7 @@ impl PlatformAtlas for TestAtlas {
 
         let mut state = self.0.lock();
 
-        Ok(Some(state.insert_tile(key.clone(), size)))
+        Ok(Some(state.insert_tile(key, size)))
     }
 
     fn get_or_insert_glyph_with(

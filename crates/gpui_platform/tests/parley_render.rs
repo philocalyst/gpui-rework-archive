@@ -130,10 +130,9 @@ fn main() {
             let text_system = platform.text_system();
 
             HeadlessAppContext::with_platform(text_system, std::sync::Arc::new(()), || {
-                Some(Box::new(
-                    gpui_wgpu::WgpuHeadlessRenderer::new()
-                        .expect("failed to initialize the headless WGPU renderer"),
-                ) as Box<dyn gpui::PlatformHeadlessRenderer>)
+                gpui_wgpu::WgpuHeadlessRenderer::new().map(|renderer| {
+                    Some(Box::new(renderer) as Box<dyn gpui::PlatformHeadlessRenderer>)
+                })
             })
         };
 

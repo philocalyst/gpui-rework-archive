@@ -48,6 +48,9 @@ pub mod profiler;
     feature = "bench-support"
 ))]
 pub mod queue;
+/// A seeded, mutable element tree for benchmarks and tests of GPUI rendering.
+#[cfg(any(test, feature = "bench-support"))]
+pub mod randomized_element_tree;
 mod resize;
 mod scene;
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
@@ -125,6 +128,18 @@ pub use spring::*;
 /// It takes the same arguments as `criterion::criterion_group!`, so GPUI benchmark
 /// files keep the shape of ordinary Criterion benchmarks.
 ///
+/// The group measures with the `gpui::BenchMeasurement` configured by `BENCH_MEASUREMENT` (see
+/// `BenchMeasurement::from_env`). By default Criterion analyzes wall time
+/// while retired instructions, cycles, IPC, context switches, and the other
+/// counters this machine supports are printed per iteration in the GPUI bench
+/// report. `BENCH_MEASUREMENT=instructions` makes Criterion analyze
+/// process-wide instructions instead, `foreground-instructions` the benchmark
+/// thread's alone, and `wall-time` disables all counters. A
+/// `config = ...` expression may set any other Criterion option; its
+/// measurement is replaced. To measure with something else, call
+/// `criterion::criterion_group!` directly with
+/// `config = criterion::Criterion::default().with_measurement(gpui::BenchMeasurement::new(...))`.
+///
 /// [`gpui::bench`]: crate::bench
 #[macro_export]
 macro_rules! bench_group {
@@ -144,7 +159,21 @@ macro_rules! bench_group {
     };
 }
 
-/// Defines the entry point for the benchmark groups, like `criterion::criterion_main!`.
+/// Defines the entry point for GPUI Criterion benchmark groups.
+///
+/// This mirrors `criterion::criterion_main!` so GPUI benchmark files can keep the
+/// same shape as ordinary Criterion benchmarks. It also installs
+/// `CountingAllocator` as the binary's global allocator, so reports include
+/// heap allocations per iteration. It wraps the system allocator by default;
+/// `allocator = Path;` wraps another unit-struct allocator instead, e.g. to
+/// compare allocators, which pay the same small counting cost:
+///
+/// ```ignore
+/// gpui::bench_main!(allocator = mimalloc::MiMalloc; benches);
+/// ```
+///
+/// `allocator = none;` installs no global allocator, leaving Rust's default and
+/// dropping the allocation metrics from reports.
 #[macro_export]
 macro_rules! bench_main {
     (allocator = none; $($groups:tt)*) => {

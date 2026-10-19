@@ -1068,7 +1068,9 @@ impl DirectXRenderer {
         texture_id: AtlasTextureId,
         instances: InstanceRange,
     ) -> Result<()> {
-        let texture_view = self.atlas.get_texture_view(texture_id);
+        let Some(texture_view) = self.atlas.get_texture_view(texture_id) else {
+            return Ok(());
+        };
         self.pipelines.mono_sprites.draw_instances(
             &self.frame_bindings()?,
             Some(&texture_view),
@@ -1081,7 +1083,9 @@ impl DirectXRenderer {
         texture_id: AtlasTextureId,
         instances: InstanceRange,
     ) -> Result<()> {
-        let texture_view = self.atlas.get_texture_view(texture_id);
+        let Some(texture_view) = self.atlas.get_texture_view(texture_id) else {
+            return Ok(());
+        };
         self.pipelines.subpixel_sprites.draw_instances(
             &self.frame_bindings()?,
             Some(&texture_view),
@@ -1095,7 +1099,9 @@ impl DirectXRenderer {
         instances: InstanceRange,
         smoothed: bool,
     ) -> Result<()> {
-        let texture_view = self.atlas.get_texture_view(texture_id);
+        let Some(texture_view) = self.atlas.get_texture_view(texture_id) else {
+            return Ok(());
+        };
         self.pipelines.poly_sprites.draw_instances_variant(
             &self.frame_bindings()?,
             Some(&texture_view),
@@ -2375,6 +2381,7 @@ fn create_blend_state_no_blend(device: &ID3D11Device) -> Result<ID3D11BlendState
     }
 }
 
+/// Create a CPU-writable dynamic constant buffer of the given byte size (rounded up to 16).
 #[inline]
 pub(crate) fn create_vertex_shader(
     device: &ID3D11Device,

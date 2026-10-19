@@ -32,8 +32,9 @@ pub fn new_renderer(
     context: Context,
     bounds: gpui::Size<f32>,
     transparent: bool,
+    display_p3: bool,
 ) -> anyhow::Result<Renderer> {
-    MacWgpuRenderer::new(context, bounds, transparent)
+    MacWgpuRenderer::new(context, bounds, transparent, display_p3)
 }
 
 pub struct MacWgpuRenderer {
@@ -42,8 +43,13 @@ pub struct MacWgpuRenderer {
 }
 
 impl MacWgpuRenderer {
-    fn new(context: Context, bounds: gpui::Size<f32>, transparent: bool) -> anyhow::Result<Self> {
-        let layer = new_window_layer(transparent);
+    fn new(
+        context: Context,
+        bounds: gpui::Size<f32>,
+        transparent: bool,
+        display_p3: bool,
+    ) -> anyhow::Result<Self> {
+        let layer = new_window_layer(transparent, display_p3);
         let config = WgpuSurfaceConfig {
             // The view resizes this to device pixels once it knows its scale factor.
             size: Size {
@@ -138,7 +144,7 @@ mod tests {
     #[test]
     fn transparency_survives_resizing() {
         let mut renderer =
-            MacWgpuRenderer::new(Context::default(), gpui::size(64.0, 64.0), false).unwrap();
+            MacWgpuRenderer::new(Context::default(), gpui::size(64.0, 64.0), false, false).unwrap();
         assert!(renderer.layer.is_opaque());
 
         renderer.update_transparency(true);
@@ -155,7 +161,7 @@ mod tests {
     #[test]
     fn renders_scenes_to_images() {
         let mut renderer =
-            MacWgpuRenderer::new(Context::default(), gpui::size(32.0, 16.0), false).unwrap();
+            MacWgpuRenderer::new(Context::default(), gpui::size(32.0, 16.0), false, false).unwrap();
         // A red quad over the left half.
         let bounds = |width| gpui::Bounds {
             origin: gpui::point(gpui::ScaledPixels(0.0), gpui::ScaledPixels(0.0)),

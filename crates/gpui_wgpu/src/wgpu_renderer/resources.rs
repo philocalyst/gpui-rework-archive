@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    num::NonZeroU64,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, num::NonZeroU64, sync::Arc};
 
 use collections::FxHashMap;
 use gpui::ScenePlanRequirements;
@@ -79,7 +75,6 @@ struct BlurBindGroups {
 
 pub(super) struct ResourceMetadata {
     pub(super) globals: GlobalBufferLayout,
-    pub(super) last_error: Arc<Mutex<Option<String>>>,
 }
 
 pub(super) struct GlobalBufferLayout {
@@ -162,7 +157,6 @@ impl WgpuResources {
         let globals_bind_group = create_globals("globals_bind_group", 0);
         let path_globals_bind_group =
             create_globals("path_globals_bind_group", path_globals_offset);
-        let last_error = context.uncaptured_error_slot();
         let surface_cache = SurfaceCache::new(&device)?;
 
         let metadata = ResourceMetadata {
@@ -171,7 +165,6 @@ impl WgpuResources {
                 font_offset: gamma_offset,
                 maximum_uniform_buffer_size: device.limits().max_buffer_size.min(u32::MAX as u64),
             },
-            last_error,
         };
         let resources = Self {
             instances: InstanceBufferArena::new(&device, &bind_group_layouts, renderer_tier),

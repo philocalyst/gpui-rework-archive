@@ -3,6 +3,8 @@
 //! This replaces the macOS-only `HeadlessMetalAppContext` with a platform-neutral
 //! implementation backed by `TestPlatform`. Tests supply a real `PlatformTextSystem`
 //! to get accurate glyph measurements while keeping everything else deterministic.
+//! (e.g. `DirectWriteTextSystem` on Windows, `AppleTextSystem` on macOS) to get
+//! accurate glyph measurements while keeping everything else deterministic.
 //!
 //! Optionally, a renderer factory can be provided to enable real GPU rendering
 //! and screenshot capture via [`HeadlessAppContext::capture_screenshot`].

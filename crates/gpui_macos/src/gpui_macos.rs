@@ -11,7 +11,6 @@ mod haptic_feedback;
 mod keyboard;
 mod pasteboard;
 mod system_notifications;
-mod text_system;
 
 #[cfg(feature = "screen-capture")]
 mod screen_capture;
@@ -27,13 +26,11 @@ mod platform;
 mod window;
 mod window_appearance;
 
-pub(crate) use dispatcher::*;
 pub(crate) use display::*;
 pub(crate) use display_link::*;
-pub(crate) use gpui_apple::{AppleActivity, AppleDispatcher};
+pub(crate) use gpui_apple::MacTextSystem;
 pub(crate) use keyboard::*;
 pub(crate) use platform::*;
-pub(crate) use text_system::*;
 pub(crate) use window::*;
 
 pub use platform::MacPlatform;

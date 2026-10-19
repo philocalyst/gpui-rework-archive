@@ -1,5 +1,5 @@
 [package]
-name = "gpui_ios"
+name = "gpui_ce_ios"
 version = "0.1.0"
 edition.workspace = true
 publish.workspace = true
@@ -9,6 +9,7 @@ license = "Apache-2.0"
 workspace = true
 
 [lib]
+name = "gpui_ios"
 path = "src/gpui_ios.rs"
 crate-type = ["staticlib", "rlib"]
 doctest = false
@@ -37,13 +38,14 @@ slotmap.workspace = true
 
 [target.'cfg(target_os = "ios")'.dependencies]
 anyhow.workspace = true
+accesskit_ios.workspace = true
 block2.workspace = true
 futures.workspace = true
 gpui_apple = { workspace = true, features = ["font-kit"] }
 log.workspace = true
 objc2.workspace = true
 objc2-foundation = { workspace = true, features = ["NSThread", "NSOperation", "block2"] }
-objc2-ui-kit.workspace = true
+objc2-ui-kit = { workspace = true, features = ["UITextInteraction", "UIInteraction"] }
 objc2-quartz-core = { workspace = true, features = ["CADisplayLink"] }
 objc2-core-foundation = { workspace = true, default-features = true }
 parking_lot.workspace = true

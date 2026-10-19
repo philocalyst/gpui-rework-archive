@@ -2340,6 +2340,74 @@ mod tests {
     }
 
     #[test]
+    fn path_with_position_preserves_paths_without_positions() {
+        for input in [
+            "",
+            "/",
+            "thf/",
+            "/test/cool/",
+            "/test/Ῥόδος/",
+            "parent//file.rs",
+            "parent/./file.rs",
+            "parent/file.rs/.",
+            "parent:12:3/file.rs/",
+            "file.rs:invalid/",
+            " parent/file.rs ",
+            r"C:\test\cool\",
+            r"C:\test\Ῥόδος\",
+            r"\\server\share\cool\",
+        ] {
+            let parsed = PathWithPosition::parse_str(input);
+            assert_eq!(parsed.path.as_os_str(), Path::new(input).as_os_str());
+            assert_eq!(parsed.row, None, "{input}");
+            assert_eq!(parsed.column, None, "{input}");
+        }
+    }
+
+    #[test]
+    fn path_with_position_preserves_repeated_filename() {
+        for (input, expected_path) in [
+            ("file.rs/file.rs:12:3", "file.rs/file.rs"),
+            ("file.rs-backups/file.rs(12,3)", "file.rs-backups/file.rs"),
+            ("😀.rs/😀.rs:12:3", "😀.rs/😀.rs"),
+            ("parent/a(b).rs(12,3)", "parent/a(b).rs"),
+            ("parent/😀(b).rs(12,3)", "parent/😀(b).rs"),
+            ("parent/a(b).rs:(12,3)", "parent/a(b).rs"),
+            (r"src\file.rs\file.rs:12:3", r"src\file.rs\file.rs"),
+        ] {
+            assert_eq!(
+                PathWithPosition::parse_str(input),
+                PathWithPosition {
+                    path: PathBuf::from(expected_path),
+                    row: Some(12),
+                    column: Some(3),
+                },
+                "{input}",
+            );
+        }
+    }
+
+    #[test]
+    fn path_with_position_preserves_parent_position_like_components() {
+        for (input, expected_path, row) in [
+            ("parent:12:3/file.rs", "parent:12:3/file.rs", None),
+            ("parent:12:3/file.rs:4:in", "parent:12:3/file.rs", Some(4)),
+            (" parent/file.rs ", " parent/file.rs ", None),
+            (" parent/file.rs:4:in ", " parent/file.rs", Some(4)),
+        ] {
+            assert_eq!(
+                PathWithPosition::parse_str(input),
+                PathWithPosition {
+                    path: PathBuf::from(expected_path),
+                    row,
+                    column: None,
+                },
+                "{input}",
+            );
+        }
+    }
+
+    #[test]
     fn path_with_position_parse_posix_path() {
         // Test POSIX filename edge cases
         // Read more at https://en.wikipedia.org/wiki/Filename
@@ -2726,6 +2794,14 @@ mod tests {
             sanitized_path.to_string(),
             "C:\\Users\\someone\\test_file.rs"
         );
+    }
+
+    #[test]
+    #[cfg(target_os = "windows")]
+    fn test_sanitized_path_verbatim_unc() {
+        let path: Arc<Path> = PathBuf::from("\\\\?\\UNC\\server\\share\\file.txt").into();
+        let sanitized_path = SanitizedPath::from_arc(path);
+        assert_eq!(sanitized_path.to_string(), "\\\\server\\share\\file.txt");
     }
 
     #[test]
@@ -3147,7 +3223,12 @@ mod tests {
                 Some(rel_path("a/b/c").to_arc()),
             ),
             (PathStyle::Unix, "/a/b/c", "", None),
-            (PathStyle::Unix, "/a/b//c", "/a/b/", None),
+            (
+                PathStyle::Unix,
+                "/a/b//c",
+                "/a/b/",
+                Some(rel_path("c").to_arc()),
+            ),
             (PathStyle::Unix, "/a/bc", "/a/b", None),
             (
                 PathStyle::Unix,
@@ -3174,7 +3255,12 @@ mod tests {
                 Some(rel_path("a/b/c").to_arc()),
             ),
             (PathStyle::Windows, "C:\\a\\b\\c", "", None),
-            (PathStyle::Windows, "C:\\a\\b\\\\c", "C:\\a\\b\\", None),
+            (
+                PathStyle::Windows,
+                "C:\\a\\b\\\\c",
+                "C:\\a\\b\\",
+                Some(rel_path("c").to_arc()),
+            ),
             (PathStyle::Windows, "C:\\a\\bc", "C:\\a\\b", None),
             (
                 PathStyle::Windows,
@@ -3201,8 +3287,10 @@ mod tests {
                 child,
                 parent,
                 style
-                    .strip_prefix(child.as_ref(), parent.as_ref())
-                    .map(|rel_path| rel_path.to_arc()),
+                    .strip_prefix(Path::new(child), Path::new(parent))
+                    .ok()
+                    .and_then(|rel_path| RelPath::new(rel_path, style).ok())
+                    .map(|rel_path| Arc::from(rel_path.as_ref())),
             )
         });
         pretty_assertions::assert_eq!(actual, expected);

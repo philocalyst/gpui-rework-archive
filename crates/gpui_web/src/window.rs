@@ -470,6 +470,8 @@ impl WebWindowInner {
                     callback(RequestFrameOptions {
                         require_presentation: false,
                         force_render,
+                        signal_at: None,
+                        signal_source: FrameRequestSource::NativeCallback,
                     })
                 },
             );
@@ -1041,7 +1043,7 @@ impl PlatformWindow for WebWindow {
     }
 
     fn gpu_specs(&self) -> Option<GpuSpecs> {
-        self.inner.state.borrow().renderer.gpu_specs()
+        Some(self.inner.state.borrow().renderer.gpu_specs())
     }
 
     fn gpu_context_info(&self) -> Option<Box<dyn std::any::Any>> {

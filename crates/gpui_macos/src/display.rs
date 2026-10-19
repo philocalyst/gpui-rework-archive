@@ -1,11 +1,15 @@
 use anyhow::Result;
 use core_foundation::base::CFRelease;
 use core_foundation::uuid::{CFUUIDGetUUIDBytes, CFUUIDRef};
-use core_graphics::display::{CGDirectDisplayID, CGDisplayBounds, CGGetActiveDisplayList};
-use gpui::{Bounds, DisplayId, Pixels, PlatformDisplay, point, px, size};
-use objc2::{MainThreadMarker, msg_send, rc::Retained};
+use core_graphics::display::{
+    CGDirectDisplayID, CGDisplay, CGDisplayBounds, CGGetActiveDisplayList,
+};
+use gpui::{Bounds, DisplayId, Pixels, PlatformDisplay, point, px, refresh_interval_from_hz, size};
+use objc2::runtime::Bool;
+use objc2::{MainThreadMarker, msg_send, rc::Retained, sel};
 use objc2_app_kit::NSScreen;
 use objc2_foundation::NSString;
+use std::time::Duration;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -140,22 +144,17 @@ impl PlatformDisplay for MacDisplay {
     }
 
     fn refresh_interval(&self) -> Option<Duration> {
-        // `maximumFramesPerSecond` is the ProMotion maximum, where the
-        // display mode's rate is 0 on built-in panels.
-        let screen_hertz = unsafe {
-            let screen = self.get_nsscreen();
-            let supports_maximum: BOOL = if screen == nil {
-                NO
-            } else {
-                msg_send![screen, respondsToSelector: sel!(maximumFramesPerSecond)]
-            };
-            if supports_maximum == YES {
-                let frames_per_second: isize = msg_send![screen, maximumFramesPerSecond];
+        let screen_hertz = self.get_nsscreen().map_or(0.0, |screen| unsafe {
+            let supports_maximum: Bool =
+                msg_send![&*screen, respondsToSelector: sel!(maximumFramesPerSecond)];
+            if supports_maximum.as_bool() {
+                let frames_per_second: isize = msg_send![&*screen, maximumFramesPerSecond];
                 frames_per_second as f64
             } else {
                 0.0
             }
-        };
+        });
+
         refresh_interval_from_hz(screen_hertz).or_else(|| {
             CGDisplay::new(self.0)
                 .display_mode()

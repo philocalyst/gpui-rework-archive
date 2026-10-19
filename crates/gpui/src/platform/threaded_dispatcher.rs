@@ -363,6 +363,39 @@ impl ThreadedDispatcher {
         ran_any
     }
 
+    #[cfg(any(test, feature = "bench-support"))]
+    pub(crate) fn run_until_with_frames<R>(
+        &self,
+        mut ready: impl FnMut() -> Option<R>,
+        mut dispatch_frames: impl FnMut() -> bool,
+    ) -> R {
+        assert!(
+            self.is_main_thread(),
+            "main tasks must run on the main thread"
+        );
+        loop {
+            if let Some(result) = ready() {
+                return result;
+            }
+            let ran_task = self.run_one_main_task();
+            // A completion poll must not pull an unrelated animation frame
+            // into the measured operation.
+            if let Some(result) = ready() {
+                return result;
+            }
+            let dispatched_frames = dispatch_frames();
+            if ran_task || dispatched_frames {
+                continue;
+            }
+
+            let mut inflight = self.idle.inflight.lock();
+            if self.main_queue_has_work() {
+                continue;
+            }
+            self.idle.condvar.wait(&mut inflight);
+        }
+    }
+
     /// Cancels every armed timer, and returns how many were canceled.
     ///
     /// Use it between workloads that share one dispatcher, so a timer from the earlier workload

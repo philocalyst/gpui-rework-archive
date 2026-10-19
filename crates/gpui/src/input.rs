@@ -68,6 +68,17 @@ pub fn utf16_to_utf8_offset(text: &str, utf16_offset: usize) -> usize {
 /// the same meaning as the matching method on [`InputHandler`], which documents
 /// the platform side.
 ///
+/// On touch platforms, dismissing the software keyboard can leave the view focused. Call
+/// [`Window::request_virtual_keyboard`] from an editing gesture, such as a tap on the field,
+/// to show it again. After edits or selection changes that your app makes itself, call
+/// [`Window::notify_text_input_changed`] or [`Window::notify_text_selection_changed`] so the
+/// platform's text services stay in sync. UIKit also needs
+/// [`text_length_utf16`](Self::text_length_utf16), or a bounded
+/// [`text_input_editable_range`](Self::text_input_editable_range), and
+/// [`set_selected_text_range`](Self::set_selected_text_range). For native selection
+/// rectangles, implement [`selection_bounds_for_range`](Self::selection_bounds_for_range),
+/// which returns all of a range's line fragments at once.
+///
 /// The text guide has a complete editable field: [text input](crate::_documentation::guides::text_input).
 ///
 /// # Examples
@@ -291,6 +302,18 @@ pub trait EntityInputHandler: 'static + Sized {
     /// to map a screen position to text.
     ///
     /// `point` is in window coordinates, in logical pixels.
+    /// See [`InputHandler::selection_bounds_for_range`] for details.
+    fn selection_bounds_for_range(
+        &mut self,
+        _range_utf16: Range<usize>,
+        _element_bounds: Bounds<Pixels>,
+        _window: &mut Window,
+        _cx: &mut Context<Self>,
+    ) -> Vec<Bounds<Pixels>> {
+        Vec::new()
+    }
+
+    /// See [`InputHandler::character_index_for_point`] for details
     fn character_index_for_point(
         &mut self,
         point: crate::Point<Pixels>,

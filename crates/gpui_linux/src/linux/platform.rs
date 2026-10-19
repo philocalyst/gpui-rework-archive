@@ -29,6 +29,8 @@ use calloop::{EventLoop, LoopHandle, LoopSignal, channel::Sender};
 use futures::channel::oneshot;
 use gpui_util::{ResultExt as _, new_std_command};
 #[cfg(any(feature = "wayland", feature = "x11"))]
+use gpui_wgpu::WgpuDeviceRequirements;
+#[cfg(any(feature = "wayland", feature = "x11"))]
 use xkbcommon::xkb::{self, Keycode, Keysym, State};
 
 use crate::linux::{
@@ -37,10 +39,10 @@ use crate::linux::{
 };
 use gpui::{
     Action, ActivityGuard, AnyWindowHandle, BackgroundExecutor, ClipboardItem, CursorStyle,
-    DisplayId, ForegroundExecutor, Keymap, Menu, MenuItem, OwnedMenu, PathPromptOptions, Platform,
-    PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, PlatformTextSystem,
+    ForegroundExecutor, GraphicalEnvironment, Keymap, Menu, MenuItem, OwnedMenu, PathPromptOptions,
+    Platform, PlatformDisplay, PlatformKeyboardLayout, PlatformKeyboardMapper, PlatformTextSystem,
     PlatformWindow, Result, RunnableVariant, SharedString, Task, ThermalState, WindowAppearance,
-    WindowButtonLayout, WindowParams,
+    WindowButtonLayout, WindowParams, WindowingModes, WindowingRequest,
 };
 #[cfg(any(feature = "wayland", feature = "x11"))]
 use gpui::{Pixels, Point, px};
@@ -59,44 +61,6 @@ pub(crate) const KEYRING_LABEL: &str = "gpui-ce";
 #[cfg(any(feature = "wayland", feature = "x11"))]
 const FILE_PICKER_PORTAL_MISSING: &str =
     "Couldn't open file picker due to missing xdg-desktop-portal implementation.";
-
-pub(crate) trait LinuxClient {
-    fn compositor_name(&self) -> &'static str;
-    fn with_common<R>(&self, f: impl FnOnce(&mut LinuxCommon) -> R) -> R;
-    fn keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout>;
-    fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>>;
-    #[allow(unused)]
-    fn display(&self, id: DisplayId) -> Option<Rc<dyn PlatformDisplay>>;
-    fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>>;
-
-    fn open_window(
-        &self,
-        handle: AnyWindowHandle,
-        options: WindowParams,
-    ) -> anyhow::Result<Box<dyn PlatformWindow>>;
-    fn set_cursor_style(&self, style: CursorStyle);
-    fn hide_cursor_until_mouse_moves(&self) {}
-    fn is_cursor_visible(&self) -> bool {
-        true
-    }
-    fn open_uri(&self, uri: &str);
-    fn reveal_path(&self, path: PathBuf);
-    fn write_to_primary(&self, item: ClipboardItem);
-    fn write_to_clipboard(&self, item: ClipboardItem);
-    fn read_from_primary(&self) -> Option<ClipboardItem>;
-    fn read_from_clipboard(&self) -> Option<ClipboardItem>;
-    fn active_window(&self) -> Option<AnyWindowHandle>;
-    fn window_stack(&self) -> Option<Vec<AnyWindowHandle>>;
-    fn set_gpu_requirements(&self, _requirements: Box<dyn std::any::Any>) {}
-    fn run(&self);
-
-    #[cfg(any(feature = "wayland", feature = "x11"))]
-    fn window_identifier(
-        &self,
-    ) -> impl Future<Output = Option<ashpd::WindowIdentifier>> + Send + 'static {
-        std::future::ready::<Option<ashpd::WindowIdentifier>>(None)
-    }
-}
 
 #[derive(Default)]
 pub(crate) struct PlatformHandlers {
@@ -342,6 +306,8 @@ pub(crate) struct LinuxPlatform {
     /// A requested switch waiting for the event loop to apply it.
     pending_mode: RefCell<Option<WindowingRequest>>,
     transition_waiter: RefCell<Option<oneshot::Sender<anyhow::Result<()>>>>,
+    #[cfg(any(feature = "wayland", feature = "x11"))]
+    gpu_requirements: RefCell<Option<WgpuDeviceRequirements>>,
 }
 
 /// What a Wayland connection made at startup may use from this process's environment.
@@ -383,6 +349,8 @@ impl LinuxPlatform {
             startup_environment: RefCell::new(Some(startup)),
             pending_mode: RefCell::new(None),
             transition_waiter: RefCell::new(None),
+            #[cfg(any(feature = "wayland", feature = "x11"))]
+            gpu_requirements: RefCell::new(None),
         }
     }
 
@@ -481,6 +449,7 @@ impl LinuxPlatform {
     fn replace_connection(&self, connection: DisplayConnection) {
         let previous = std::mem::replace(&mut *self.connection.borrow_mut(), connection);
         drop(previous);
+        self.apply_gpu_requirements_to_connection();
         // The app caches the keyboard layout and the displays, which belong to
         // the connection.
         let callback = self
@@ -505,6 +474,24 @@ impl LinuxPlatform {
                 .callbacks
                 .displays_changed
                 .get_or_insert(callback);
+        }
+    }
+
+    #[cfg(any(feature = "wayland", feature = "x11"))]
+    fn apply_gpu_requirements_to_connection(&self) {
+        let Some(requirements) = self.gpu_requirements.borrow().clone() else {
+            return;
+        };
+        match &*self.connection.borrow() {
+            DisplayConnection::Headless(_) => {}
+            #[cfg(feature = "wayland")]
+            DisplayConnection::Wayland(connection) => {
+                connection.set_gpu_requirements(Box::new(requirements));
+            }
+            #[cfg(feature = "x11")]
+            DisplayConnection::X11(connection) => {
+                connection.set_gpu_requirements(Box::new(requirements));
+            }
         }
     }
 
@@ -775,6 +762,22 @@ impl Platform for LinuxPlatform {
         self.connection.borrow().displays()
     }
 
+    fn on_displays_changed(&self, callback: Box<dyn FnMut()>) {
+        self.with_common(|common| common.callbacks.displays_changed = Some(callback));
+    }
+
+    #[cfg(feature = "screen-capture")]
+    fn is_screen_capture_supported(&self) -> bool {
+        self.connection.borrow().is_screen_capture_supported()
+    }
+
+    #[cfg(feature = "screen-capture")]
+    fn screen_capture_sources(
+        &self,
+    ) -> oneshot::Receiver<Result<Vec<Rc<dyn gpui::ScreenCaptureSource>>>> {
+        self.connection.borrow().screen_capture_sources()
+    }
+
     fn active_window(&self) -> Option<AnyWindowHandle> {
         self.connection.borrow().active_window()
     }
@@ -792,12 +795,24 @@ impl Platform for LinuxPlatform {
     }
 
     fn set_gpu_requirements(&self, requirements: Box<dyn std::any::Any>) {
-        self.inner.set_gpu_requirements(requirements);
+        #[cfg(any(feature = "wayland", feature = "x11"))]
+        {
+            match requirements.downcast::<WgpuDeviceRequirements>() {
+                Ok(requirements) => {
+                    *self.gpu_requirements.borrow_mut() = Some(*requirements);
+                    self.apply_gpu_requirements_to_connection();
+                }
+                Err(_) => log::warn!(
+                    "set_gpu_requirements: unexpected type, expected WgpuDeviceRequirements"
+                ),
+            }
+        }
+        #[cfg(not(any(feature = "wayland", feature = "x11")))]
+        drop(requirements);
     }
 
     fn set_keyring_label(&self, label: SharedString) {
-        self.inner
-            .with_common(|common| common.keyring_label = label);
+        self.with_common(|common| common.keyring_label = label);
     }
 
     fn open_url(&self, url: &str) {
@@ -1075,9 +1090,7 @@ impl Platform for LinuxPlatform {
         let url = url.to_string();
         let username = username.to_string();
         let password = password.to_vec();
-        let label = self
-            .inner
-            .with_common(|common| common.keyring_label.clone());
+        let label = self.with_common(|common| common.keyring_label.clone());
         self.background_executor().spawn(async move {
             let keyring = oo7::Keyring::new().await?;
             keyring.unlock().await?;
@@ -1095,9 +1108,7 @@ impl Platform for LinuxPlatform {
 
     fn read_credentials(&self, url: &str) -> Task<Result<Option<(String, Vec<u8>)>>> {
         let url = url.to_string();
-        let label = self
-            .inner
-            .with_common(|common| common.keyring_label.clone());
+        let label = self.with_common(|common| common.keyring_label.clone());
         self.background_executor().spawn(async move {
             let keyring = oo7::Keyring::new().await?;
             keyring.unlock().await?;
@@ -1126,9 +1137,7 @@ impl Platform for LinuxPlatform {
 
     fn delete_credentials(&self, url: &str) -> Task<Result<()>> {
         let url = url.to_string();
-        let label = self
-            .inner
-            .with_common(|common| common.keyring_label.clone());
+        let label = self.with_common(|common| common.keyring_label.clone());
         self.background_executor().spawn(async move {
             let keyring = oo7::Keyring::new().await?;
             keyring.unlock().await?;

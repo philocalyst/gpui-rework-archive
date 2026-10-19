@@ -30,7 +30,8 @@ pub(crate) type PlatformScreenCaptureFrame = WindowsScreenCaptureFrame;
 #[cfg(not(feature = "screen-capture"))]
 pub(crate) type PlatformScreenCaptureFrame = ();
 #[cfg(all(target_os = "macos", feature = "screen-capture"))]
-pub(crate) type PlatformScreenCaptureFrame = core_video::image_buffer::CVImageBuffer;
+pub(crate) type PlatformScreenCaptureFrame =
+    objc2_core_foundation::CFRetained<objc2_core_video::CVImageBuffer>;
 #[cfg(all(
     feature = "screen-capture",
     not(any(target_os = "macos", target_os = "windows"))
@@ -63,7 +64,7 @@ use image::codecs::gif::GifDecoder;
 use image::{AnimationDecoder as _, DynamicImage, Frame};
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
 use scheduler::Instant;
-pub use scheduler::RunnableMeta;
+pub use scheduler::{LocalTaskScope, RunnableMeta};
 use schemars::JsonSchema;
 use seahash::SeaHasher;
 use serde::{Deserialize, Serialize};
@@ -175,6 +176,8 @@ pub enum ActivationPolicy {
     Regular,
     /// Run without foreground application UI while retaining the ability to open windows.
     Accessory,
+    /// Run in the background without windows; the app cannot be activated.
+    Prohibited,
 }
 
 #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
@@ -370,16 +373,8 @@ bitflags::bitflags! {
 }
 
 /// The activation policy for a macOS application.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum MacActivationPolicy {
-    /// The application is an ordinary app that appears in the Dock and may have a user interface.
-    #[default]
-    Regular,
-    /// The application doesn't appear in the Dock and doesn't have a menu bar, but it may be activated programmatically or by clicking on one of its windows.
-    Accessory,
-    /// The application doesn't appear in the Dock and may not create windows or be activated.
-    Prohibited,
-}
+#[deprecated(note = "renamed to `ActivationPolicy`")]
+pub type MacActivationPolicy = ActivationPolicy;
 
 /// The operating system or browser that GPUI runs on, as seen by the [`App`].
 ///
@@ -400,9 +395,6 @@ pub trait Platform: 'static {
     fn foreground_executor(&self) -> ForegroundExecutor;
     /// Returns the platform's text system, which shapes and rasterizes glyphs.
     fn text_system(&self) -> Arc<dyn PlatformTextSystem>;
-
-    /// Sets the macOS activation policy. Only `gpui_macos` overrides this; other platforms ignore the call.
-    fn set_mac_activation_policy(&self, _policy: MacActivationPolicy) {}
     /// Starts the event loop and calls `on_finish_launching` once the application is ready.
     ///
     /// This method blocks until the application exits. Create windows inside
@@ -414,6 +406,18 @@ pub trait Platform: 'static {
     /// running briefly. The web backend only logs a warning, because a page can't quit
     /// itself.
     fn quit(&self);
+    /// Sets the windowing mode the platform starts in. Called before run. See
+    /// Application::with_windowing.
+    fn set_initial_windowing(&self, _request: WindowingRequest) {}
+    /// Requests a switch between headless and windowed modes while the application is running.
+    ///
+    /// The returned task resolves when the platform has applied the change. Platforms that do
+    /// not support switching return an error from the default implementation.
+    fn request_windowing(&self, _request: WindowingRequest) -> Task<anyhow::Result<()>> {
+        Task::ready(Err(anyhow::anyhow!(
+            "this platform cannot switch between headless and windowed modes"
+        )))
+    }
     /// Restarts the application by launching a new process and quitting this one.
     ///
     /// `binary_path` defaults to the current executable when `None`, and `arguments`
@@ -424,6 +428,8 @@ pub trait Platform: 'static {
     /// When `ignoring_other_apps` is `true`, the application takes focus even if
     /// another application is active. The web backend ignores the call.
     fn activate(&self, ignoring_other_apps: bool);
+    /// Sets the initial or current activation policy. Has no effect outside macOS.
+    fn set_activation_policy(&self, _policy: ActivationPolicy) {}
     /// Hides all of the application's windows. macOS hides them. Windows does nothing,
     /// and Linux logs a message and ignores the call.
     fn hide(&self);
@@ -438,6 +444,11 @@ pub trait Platform: 'static {
     fn displays(&self) -> Vec<Rc<dyn PlatformDisplay>>;
     /// Returns the display that new windows open on by default, or `None` if there is none.
     fn primary_display(&self) -> Option<Rc<dyn PlatformDisplay>>;
+    /// Registers the callback invoked when displays may have been added or
+    /// removed, or a display's properties may have changed. GPUI rereads
+    /// [`Self::displays`] to find out what changed, so calls may be spurious.
+    /// The callback runs on the main thread outside of any window update.
+    fn on_displays_changed(&self, callback: Box<dyn FnMut()>);
     /// Returns the handle of the window that currently has focus, if any.
     fn active_window(&self) -> Option<AnyWindowHandle>;
     /// Returns the open windows from front to back, or `None` if the platform doesn't track stacking order.
@@ -548,6 +559,8 @@ pub trait Platform: 'static {
     fn on_quit(&self, callback: Box<dyn FnMut() -> bool>);
     /// Registers the callback run when the user activates the running application again, such as clicking its Dock icon on macOS.
     fn on_reopen(&self, callback: Box<dyn FnMut()>);
+    /// Registers the callback invoked when the system is about to sleep.
+    fn on_system_sleep(&self, callback: Box<dyn FnMut()>);
     /// Registers the callback run after the system wakes from sleep.
     fn on_system_wake(&self, callback: Box<dyn FnMut()>);
 
@@ -611,6 +624,11 @@ pub trait Platform: 'static {
     fn thermal_state(&self) -> ThermalState;
     /// Registers the callback run when [`Platform::thermal_state`] changes. Read the new state from the platform inside the callback.
     fn on_thermal_state_change(&self, callback: Box<dyn FnMut()>);
+    /// Requests that the operating system keep the device awake while the returned guard lives.
+    ///
+    /// The reason explains the activity to the platform and may be shown in system UI. Dropping
+    /// the ActivityGuard releases the request. The task resolves with the guard or an error if
+    /// the platform cannot create the activity request.
     fn prevent_idle_sleep(&self, reason: &str) -> Task<Result<ActivityGuard>>;
 
     /// Sets the application's identifier and user-visible name.
@@ -658,6 +676,11 @@ pub trait Platform: 'static {
     /// Returns an empty string by default.
     fn compositor_name(&self) -> &'static str {
         ""
+    }
+    /// The environment of the display server a platform that can switch windowing modes is
+    /// connected to. See [`App::graphical_environment`].
+    fn graphical_environment(&self) -> Option<GraphicalEnvironment> {
+        None
     }
     /// Returns the path of the running application's executable.
     fn app_path(&self) -> Result<PathBuf>;
@@ -766,6 +789,14 @@ pub trait PlatformDisplay: Debug {
 
     /// Returns the display's full bounds in logical pixels, including areas such as the taskbar.
     fn bounds(&self) -> Bounds<Pixels>;
+
+    /// The time between the display's refreshes. Variable refresh rate
+    /// displays report their maximum rate. `None` when the platform doesn't
+    /// report it.
+    ///
+    /// May query the operating system; GPUI caches it per display, see
+    /// [`Window::refresh_interval`](crate::Window::refresh_interval).
+    fn refresh_interval(&self) -> Option<Duration>;
 
     /// Returns the usable bounds, excluding the menu bar, Dock and taskbar.
     ///
@@ -1217,6 +1248,16 @@ pub struct A11yCallbacks {
     pub deactivation: Box<dyn Fn() + Send + 'static>,
 }
 
+/// The source of a platform frame request's timestamp.
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+pub enum FrameRequestSource {
+    /// An OS callback or compositor-paced frame request.
+    #[default]
+    NativeCallback,
+    /// A refresh timer, retry, queued wakeup, or fallback sleep paced by the app.
+    LocalSchedule,
+}
+
 /// Options for a frame the platform asks GPUI to draw. The platform passes them to
 /// the callback registered with [`PlatformWindow::on_request_frame`].
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -1417,6 +1458,26 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn window_bounds(&self) -> WindowBounds;
     /// Returns the drawable size, excluding the titlebar, in logical pixels.
     fn content_size(&self) -> Size<Pixels>;
+    /// Returns the visible viewport in logical pixels relative to the content origin.
+    ///
+    /// This may be smaller or offset when a keyboard or zoom obscures content;
+    /// it must not change the full layout size returned by `content_size`.
+    /// Implementations should return a frame snapshot, not query platform layout here.
+    fn visual_viewport_bounds(&self) -> Bounds<Pixels> {
+        Bounds::new(Point::default(), self.content_size())
+    }
+    /// Registers a callback when visible geometry may have changed.
+    ///
+    /// This requests a frame; backends can sample the new viewport and safe-area
+    /// geometry in `prepare_frame` rather than updating it inside the callback.
+    fn on_visual_viewport_changed(&self, _callback: Box<dyn FnMut()>) {}
+    /// Samples platform geometry before a draw, returning whether view caches must be invalidated.
+    ///
+    /// Geometry getters must remain consistent throughout the ensuing draw.
+    /// Do not invoke callbacks here: GPUI is already updating this window.
+    fn prepare_frame(&self) -> bool {
+        false
+    }
     /// Resizes the window's content area to `size`, in logical pixels.
     fn resize(&mut self, size: Size<Pixels>);
     /// Returns the number of device pixels per logical pixel.
@@ -1459,6 +1520,9 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn request_attention(&self) {}
     /// Returns whether this window has keyboard focus.
     fn is_active(&self) -> bool;
+    /// The current [`WindowVisibility`]. Read once when the window is created;
+    /// afterwards changes arrive through [`Self::on_visibility_change`].
+    fn visibility(&self) -> WindowVisibility;
     /// Returns whether the mouse is over this window.
     fn is_hovered(&self) -> bool;
     /// Returns how the window background is drawn.
@@ -1493,6 +1557,10 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn on_input(&self, callback: Box<dyn FnMut(PlatformInput) -> DispatchEventResult>);
     /// Registers the callback run when the window gains or loses focus. It receives `true` when the window is active.
     fn on_active_status_change(&self, callback: Box<dyn FnMut(bool)>);
+    /// Registers the callback invoked when [`Self::visibility`] changes. Only
+    /// transitions are reported; the callback runs on the main thread outside
+    /// of any window update.
+    fn on_visibility_change(&self, callback: Box<dyn FnMut(WindowVisibility)>);
     /// Registers the callback run when the mouse enters or leaves the window. It receives `true` on enter.
     fn on_hover_status_change(&self, callback: Box<dyn FnMut(bool)>);
     /// Registers the callback run when the content size or scale factor changes. It
@@ -1500,6 +1568,10 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn on_resize(&self, callback: Box<dyn FnMut(Size<Pixels>, f32)>);
     /// Registers the callback run when the window moves.
     fn on_moved(&self, callback: Box<dyn FnMut()>);
+    /// Registers the callback invoked when the window moves to another
+    /// display. Calls may be spurious. The callback runs on the main thread
+    /// outside of any window update.
+    fn on_display_changed(&self, callback: Box<dyn FnMut()>);
     /// Registers the callback run when the user asks to close the window. Return `false` to keep it open.
     fn on_should_close(&self, callback: Box<dyn FnMut() -> bool>);
     /// Registers the callback the platform calls to find out which titlebar control, if any, the mouse is over.
@@ -1572,6 +1644,18 @@ pub trait PlatformWindow: HasWindowHandle + HasDisplayHandle {
     fn toggle_window_tab_overview(&self) {}
     /// Sets the identifier that groups windows into one native tab group. macOS only.
     fn set_tabbing_identifier(&self, _identifier: Option<String>) {}
+
+    /// Captures opaque, platform-specific state for restoring this native window later.
+    ///
+    /// Returns None when the backend has no restorable state. The bytes are only meaningful to
+    /// the backend that produced them; the default implementation returns None.
+    fn native_window_state(&self) -> Option<Vec<u8>> {
+        None
+    }
+    /// Restores state previously returned by PlatformWindow::native_window_state.
+    ///
+    /// The default implementation does nothing on platforms without native state restoration.
+    fn restore_native_window_state(&self, _state: &[u8]) {}
 
     /// Returns the window's Win32 `HWND`. Windows only.
     #[cfg(target_os = "windows")]
@@ -1778,6 +1862,55 @@ pub trait PlatformDispatcher: Send + Sync {
     ) {
         let _ = timeout;
         self.dispatch_on_main_thread(runnable, Priority::Low);
+    }
+
+    /// Creates an owner-thread local-task scope for platforms that retire event loops.
+    #[doc(hidden)]
+    fn create_local_task_scope(&self) -> Option<Arc<LocalTaskScope>> {
+        None
+    }
+
+    /// Dispatches a scoped runnable through the normal owner-thread queue.
+    #[doc(hidden)]
+    fn dispatch_local_task(&self, _scope: Arc<LocalTaskScope>, runnable: RunnableVariant) {
+        self.dispatch_on_main_thread(runnable, Priority::default());
+    }
+
+    /// Dispatches a scoped runnable through the owner's idle queue.
+    #[doc(hidden)]
+    fn dispatch_local_task_when_idle(
+        &self,
+        _scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+        timeout: Option<Duration>,
+    ) {
+        self.dispatch_on_main_thread_when_idle(runnable, timeout);
+    }
+
+    /// Enqueues a scoped runnable for owner-thread destruction without polling.
+    #[doc(hidden)]
+    fn dispatch_local_task_cancellation(
+        &self,
+        _scope: Arc<LocalTaskScope>,
+        runnable: RunnableVariant,
+    ) {
+        self.dispatch_on_main_thread(runnable, Priority::High);
+    }
+
+    /// Begins retiring a scope after switching its queue to cancellation mode.
+    #[doc(hidden)]
+    fn begin_local_task_retirement(&self, scope: &Arc<LocalTaskScope>) {
+        scope.begin_retirement();
+    }
+
+    /// Drops one batch of queued cancellation runnables on the owner thread.
+    #[doc(hidden)]
+    fn drain_local_task_retirements(&self, _scope: &Arc<LocalTaskScope>) {}
+
+    /// Finishes retirement only after all scoped queues and tasks are empty.
+    #[doc(hidden)]
+    fn finish_local_task_retirement(&self, scope: &Arc<LocalTaskScope>) -> bool {
+        scope.seal_if_quiescent()
     }
 
     fn idle_time_remaining(&self) -> Option<Duration> {
@@ -2585,6 +2718,7 @@ pub trait PlatformAtlas {
     ///
     /// `build` returns `None` when there is nothing to draw, and then this returns
     /// `Ok(None)`. Returns an error if the pixels fail validation or the atlas is full.
+    /// The builder runs with the atlas locked and must not re-enter the same atlas.
     fn get_or_insert_with<'a>(
         &self,
         key: AtlasKey,
@@ -2683,7 +2817,13 @@ impl<Backend: AtlasBackend> AtlasState<Backend> {
 /// tiles without uploading any pixels, so glyph, SVG, and image painting can
 /// run to completion in tests and headless platforms.
 #[derive(Default)]
-pub struct HeadlessAtlas(parking_lot::Mutex<AtlasState<HeadlessAtlasBackend>>);
+pub struct HeadlessAtlas(parking_lot::Mutex<HeadlessAtlasState>);
+
+#[derive(Default)]
+struct HeadlessAtlasState {
+    atlas: AtlasState<HeadlessAtlasBackend>,
+    glyph_cache: GlyphAtlasCache,
+}
 
 #[doc(hidden)]
 #[derive(Default)]
@@ -2725,16 +2865,39 @@ impl PlatformAtlas for HeadlessAtlas {
         key: AtlasKey,
         build: &mut dyn FnMut() -> Result<Option<(Size<DevicePixels>, Cow<'a, [u8]>)>>,
     ) -> Result<Option<AtlasTile>> {
-        self.0.lock().get_or_insert_with(key, build)
+        self.0.lock().atlas.get_or_insert_with(key, build)
+    }
+
+    fn get_or_insert_glyph_with(
+        &self,
+        params: &RenderGlyphParams,
+        build: &mut dyn FnMut() -> Result<ValidatedRasterizedGlyph>,
+    ) -> Result<GlyphAtlasEntry> {
+        let mut state = self.0.lock();
+        if let Some(entry) = state.glyph_cache.get(params) {
+            return Ok(entry);
+        }
+
+        let glyph = build()?;
+        let tile = if glyph.size == Size::default() {
+            None
+        } else {
+            let key = AtlasKey::from((params.clone(), glyph.format));
+            let mut pixels = || Ok(Some((glyph.size, Cow::Borrowed(glyph.pixels.as_slice()))));
+            state.atlas.get_or_insert_with(key, &mut pixels)?
+        };
+        Ok(state.glyph_cache.insert(params, &glyph, tile))
     }
 
     fn remove(&self, key: &AtlasKey) {
-        self.0.lock().remove(key);
+        let mut state = self.0.lock();
+        state.glyph_cache.remove(key);
+        state.atlas.remove(key);
     }
 
     #[cfg(any(test, feature = "test-support", feature = "bench-support"))]
     fn contains(&self, key: &AtlasKey) -> bool {
-        self.0.lock().contains(key)
+        self.0.lock().atlas.contains(key)
     }
 }
 
@@ -2994,6 +3157,20 @@ impl PlatformInputHandler {
             .update(|window, cx| self.handler.bounds_for_range(range_utf16, window, cx))
             .ok()
             .flatten()
+    }
+
+    /// Returns selection rectangles for a range of UTF-16 code units in document order.
+    ///
+    /// The platform uses these logical-pixel bounds to position selection UI. A backend may
+    /// return an empty vector when selection geometry is unavailable; IME candidate placement
+    /// can still use bounds_for_range. If the window has closed, this also returns an empty vector.
+    pub fn selection_bounds_for_range(&mut self, range_utf16: Range<usize>) -> Vec<Bounds<Pixels>> {
+        self.cx
+            .update(|window, cx| {
+                self.handler
+                    .selection_bounds_for_range(range_utf16, window, cx)
+            })
+            .unwrap_or_default()
     }
 
     /// Returns whether macOS press-and-hold should stay enabled for this handler.

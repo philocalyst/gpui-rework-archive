@@ -136,10 +136,10 @@ pub struct WithTimeout<T> {
     timer: Task<()>,
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("Timed out before future resolved")]
 /// The error returned when a future given to [`FutureExt::with_timeout`] doesn't
 /// finish in time.
+#[derive(Debug, thiserror::Error)]
+#[error("Timed out before future resolved")]
 pub struct Timeout;
 
 impl<T: Future> Future for WithTimeout<T> {

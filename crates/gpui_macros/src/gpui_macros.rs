@@ -355,6 +355,28 @@ pub fn test(args: TokenStream, function: TokenStream) -> TokenStream {
 /// The benchmark crate needs `criterion` and `gpui_platform` as dev-dependencies,
 /// because the generated code calls both. Enable the `bench-support` feature on
 /// `gpui`, which provides `BenchAppContext`.
+///
+/// A benchmark that takes a `StdRng` parameter (by value, in any position) is run
+/// once per seed, with the RNG seeded from it. Seeds are chosen exactly as for
+/// `#[gpui::test]`: `seed = N`, `seeds(...)`, and `iterations = N` take the same
+/// meaning, and the `SEED` and `ITERATIONS` environment variables override them the
+/// same way, so one `SEED` reproduces a test or a benchmark. Each seed is its own
+/// Criterion benchmark, named `<input>/seed-<seed>` (or `<function>/seed-<seed>`
+/// without inputs), and the RNG is rebuilt for every Criterion routine call so all
+/// samples measure the same seed. The generated code seeds it through gpui's own
+/// `rand`, so the crate needs `rand` only to name `StdRng` in the signature.
+///
+/// ```ignore
+/// #[gpui::bench(inputs = families(), iterations = 6)]
+/// fn full_refresh(family: &Family, mut rng: StdRng, cx: &mut BenchAppContext) {
+///     let tree = family.sample(&mut rng);
+///     // ...
+/// }
+/// ```
+///
+/// The benchmark crate must add `criterion` and `gpui_platform` (with its
+/// `test-support` feature) to its dev-dependencies and enable gpui's `bench`
+/// feature, since the generated code references all three.
 #[proc_macro_attribute]
 pub fn bench(args: TokenStream, function: TokenStream) -> TokenStream {
     bench::bench(args, function)

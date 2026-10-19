@@ -92,6 +92,7 @@ fn unplanned_mixed_scene(count: usize) -> Scene {
             order: (index * 2 + 1) as u32,
             padding: 0,
             bounds,
+            clip_bounds: bounds,
             content_mask: ContentMask {
                 bounds,
                 ..Default::default()

@@ -1,4 +1,4 @@
-use crate::{App, EntityId, SharedString, SharedUri, Task};
+use crate::{App, AppContext, EntityId, SharedString, SharedUri, Task};
 use collections::FxHashSet;
 use futures::{Future, TryFutureExt};
 
@@ -10,6 +10,61 @@ use std::mem;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::Arc;
+
+pub(crate) struct CachedLoad<T> {
+    state: Rc<RefCell<CachedLoadState<T>>>,
+    // Keep the owner outside the state so publishing a result cannot cancel its own task.
+    _task: Task<()>,
+}
+
+enum CachedLoadState<T> {
+    Loading(FxHashSet<EntityId>),
+    Loaded(T),
+}
+
+impl<T: Clone + Send + 'static> CachedLoad<T> {
+    pub(crate) fn new(future: impl Future<Output = T> + Send + 'static, cx: &App) -> Self {
+        let state = Rc::new(RefCell::new(CachedLoadState::Loading(FxHashSet::default())));
+        let task = cx.background_executor().spawn(future);
+        let task = cx.spawn({
+            let state = Rc::downgrade(&state);
+            async move |cx| {
+                let result = task.await;
+                let Some(state) = state.upgrade() else {
+                    return;
+                };
+                let previous =
+                    mem::replace(&mut *state.borrow_mut(), CachedLoadState::Loaded(result));
+                let CachedLoadState::Loading(views) = previous else {
+                    unreachable!("a cached load completes only once");
+                };
+                cx.update(|cx| {
+                    for view in views {
+                        cx.notify(view);
+                    }
+                });
+            }
+        });
+        Self { state, _task: task }
+    }
+
+    pub(crate) fn get(&self) -> Option<T> {
+        match &*self.state.borrow() {
+            CachedLoadState::Loading(_) => None,
+            CachedLoadState::Loaded(result) => Some(result.clone()),
+        }
+    }
+
+    pub(crate) fn use_by(&self, view: EntityId) -> Option<T> {
+        match &mut *self.state.borrow_mut() {
+            CachedLoadState::Loading(views) => {
+                views.insert(view);
+                None
+            }
+            CachedLoadState::Loaded(result) => Some(result.clone()),
+        }
+    }
+}
 
 /// Where an image or other asset is loaded from: a URL, a file path, or a name in the registry.
 ///

@@ -111,6 +111,14 @@ impl List {
 #[derive(Clone)]
 pub struct ListState(Rc<RefCell<StateInner>>);
 
+impl ListState {
+    fn state_mut(&self) -> std::cell::RefMut<'_, StateInner> {
+        let state = self.0.borrow_mut();
+        state.revision.bump();
+        state
+    }
+}
+
 impl std::fmt::Debug for ListState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("ListState")
@@ -118,6 +126,8 @@ impl std::fmt::Debug for ListState {
 }
 
 struct StateInner {
+    /// Bumped on every mutation, so views that drew the list are drawn again.
+    revision: crate::Revision,
     last_layout_bounds: Option<Bounds<Pixels>>,
     last_padding: Option<Edges<Pixels>>,
     items: SumTree<ListItem>,
@@ -394,6 +404,7 @@ impl ListState {
     /// ```
     pub fn new(item_count: usize, alignment: ListAlignment, overdraw: Pixels) -> Self {
         let this = Self(Rc::new(RefCell::new(StateInner {
+            revision: Default::default(),
             last_layout_bounds: None,
             last_padding: None,
             items: SumTree::default(),
@@ -419,7 +430,7 @@ impl ListState {
     /// again after the width changes, and after [`Self::reset`], [`Self::remeasure`] or
     /// [`Self::remeasure_items`].
     pub fn measure_all(self) -> Self {
-        self.0.borrow_mut().measuring_behavior = ListMeasuringBehavior::Measure(false);
+        self.state_mut().measuring_behavior = ListMeasuringBehavior::Measure(false);
         self
     }
 
@@ -459,7 +470,7 @@ impl ListState {
     /// ```
     pub fn reset(&self, element_count: usize) {
         let old_count = {
-            let state = &mut *self.0.borrow_mut();
+            let state = &mut *self.state_mut();
             state.reset = true;
             state.measuring_behavior.reset();
             state.logical_scroll_top = None;
@@ -484,7 +495,7 @@ impl ListState {
             width: px(0.),
             height,
         };
-        let mut state = self.0.borrow_mut();
+        let mut state = self.state_mut();
         let new_items = state
             .items
             .iter()
@@ -519,7 +530,7 @@ impl ListState {
     }
 
     fn remeasure_items_with_scroll_anchor(&self, range: Range<usize>, scroll_anchor: ScrollAnchor) {
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
 
         if let Some(scroll_top) = state.logical_scroll_top {
             if range.contains(&scroll_top.item_ix) {
@@ -653,7 +664,7 @@ impl ListState {
         old_range: Range<usize>,
         focus_handles: impl IntoIterator<Item = Option<FocusHandle>>,
     ) {
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
 
         let mut old_items = state.items.cursor::<Count>(());
         let mut new_items = old_items.slice(&Count(old_range.start), Bias::Right);
@@ -735,7 +746,7 @@ impl ListState {
         &self,
         handler: impl FnMut(&ListScrollEvent, &mut Window, &mut App) + 'static,
     ) {
-        self.0.borrow_mut().scroll_handler = Some(Box::new(handler))
+        self.state_mut().scroll_handler = Some(Box::new(handler))
     }
 
     /// Returns the first visible row, and the pixel offset into that row.
@@ -793,7 +804,7 @@ impl ListState {
         }
 
         let current_offset = self.logical_scroll_top();
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
 
         if distance < px(0.) {
             state.follow_state.stop_following();
@@ -825,7 +836,7 @@ impl ListState {
     /// next paint walks back from the end and shows the bottom of the last row, even while that row
     /// is still growing, as when text streams in. The scroll takes effect on the next paint.
     pub fn scroll_to_end(&self) {
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
         let item_count = state.items.summary().count;
         state.pending_scroll = None;
         state.logical_scroll_top = Some(ListOffset {
@@ -852,7 +863,7 @@ impl ListState {
     /// assert!(!state.is_following_tail());
     /// ```
     pub fn set_follow_mode(&self, mode: FollowMode) {
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
 
         match mode {
             FollowMode::Normal => {
@@ -890,7 +901,7 @@ impl ListState {
     /// assert!(!state.is_following_tail());
     /// ```
     pub fn pause_following_tail(&self) {
-        self.0.borrow_mut().follow_state.stop_following();
+        self.state_mut().follow_state.stop_following();
     }
 
     /// Returns whether the list is following the tail right now.
@@ -920,7 +931,7 @@ impl ListState {
     /// assert_eq!(state.logical_scroll_top().offset_in_item, px(10.));
     /// ```
     pub fn scroll_to(&self, mut scroll_top: ListOffset) {
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
         let item_count = state.items.summary().count;
         if scroll_top.item_ix >= item_count {
             scroll_top.item_ix = item_count;
@@ -971,7 +982,7 @@ impl ListState {
     /// });
     /// ```
     pub fn scroll_to_reveal_item(&self, ix: usize) {
-        let state = &mut *self.0.borrow_mut();
+        let state = &mut *self.state_mut();
 
         let mut scroll_top = state.logical_scroll_top();
         let height = state
@@ -1041,14 +1052,14 @@ impl ListState {
     /// Until [`Self::scrollbar_drag_ended`], the scrollbar uses the content height from this moment,
     /// so the thumb doesn't move while rows in the overdraw are measured.
     pub fn scrollbar_drag_started(&self) {
-        let mut state = self.0.borrow_mut();
+        let mut state = self.state_mut();
         state.scrollbar_drag_start_height = Some(state.items.summary().height);
     }
 
     /// Tells the list that the scrollbar drag has ended, so the scrollbar uses the live content
     /// height again. See [`Self::scrollbar_drag_started`].
     pub fn scrollbar_drag_ended(&self) {
-        self.0.borrow_mut().scrollbar_drag_start_height.take();
+        self.state_mut().scrollbar_drag_start_height.take();
     }
 
     /// Returns whether the scrollbar is being dragged.
@@ -1066,7 +1077,7 @@ impl ListState {
     /// It is clamped to the content. A drag to the end while the list is in [`FollowMode::Tail`]
     /// resumes following the tail, and any other position stops it. Does nothing before the first paint.
     pub fn set_offset_from_scrollbar(&self, point: Point<Pixels>) {
-        self.0.borrow_mut().set_offset_from_scrollbar(point);
+        self.state_mut().set_offset_from_scrollbar(point);
     }
 
     /// Returns the largest scroll distance, as a positive `y`.
@@ -1774,11 +1785,12 @@ impl Element for List {
         window: &mut Window,
         cx: &mut App,
     ) -> (crate::LayoutId, Self::RequestLayoutState) {
+        cx.note_revision(&self.state.0.borrow().revision);
         let layout_id = match self.sizing_behavior {
             ListSizingBehavior::Infer => {
                 let style = self.base_style();
                 window.with_text_style(style.text_style().cloned(), |window| {
-                    let state = &mut *self.state.0.borrow_mut();
+                    let state = &mut *self.state.state_mut();
 
                     let available_height = if let Some(last_bounds) = state.last_layout_bounds {
                         last_bounds.size.height
@@ -1848,7 +1860,7 @@ impl Element for List {
         window: &mut Window,
         cx: &mut App,
     ) -> ListPrepaintState {
-        let state = &mut *self.state.0.borrow_mut();
+        let state = &mut *self.state.state_mut();
         state.reset = false;
 
         let style = self.base_style();
@@ -1938,7 +1950,7 @@ impl Element for List {
             if phase == DispatchPhase::Bubble && hitbox_id.should_handle_scroll(window) {
                 accumulated_scroll_delta = accumulated_scroll_delta.coalesce(event.delta);
                 let pixel_delta = accumulated_scroll_delta.pixel_delta(px(20.));
-                list_state.0.borrow_mut().scroll(
+                list_state.state_mut().scroll(
                     &scroll_top,
                     height,
                     pixel_delta,

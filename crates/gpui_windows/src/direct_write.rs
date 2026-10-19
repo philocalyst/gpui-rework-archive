@@ -76,8 +76,8 @@ struct FontDataOwner {
 }
 
 impl DirectWriteTextSystem {
-    pub(crate) fn new(directx_devices: &DirectXDevices) -> Result<Self> {
-        Self::new_inner(Some(directx_devices))
+    pub(crate) fn new(directx_devices: Option<&DirectXDevices>) -> Result<Self> {
+        Self::new_inner(directx_devices)
     }
 
     pub(crate) fn new_headless() -> Result<Self> {
@@ -96,16 +96,15 @@ impl DirectWriteTextSystem {
         Ok(Self { parley, renderer })
     }
 
-    /// Uses `directx_devices` to rasterize color glyphs, replacing any previous devices, for
-    /// example after the device was lost.
     pub(crate) fn handle_gpu_lost(&self, directx_devices: &DirectXDevices) -> Result<()> {
         self.renderer.write().handle_gpu_lost(directx_devices)
     }
 
-    /// Releases the GPU state, when the platform switches to headless mode.
-    pub(crate) fn release_gpu(&self) {
-        self.state.write().gpu_state = None;
-    }
+    /// Releases GPU state when the platform returns to a headless windowing mode.
+    ///
+    /// This backend rasterizes glyphs into owned CPU bitmaps, so it has no GPU
+    /// resources to release.
+    pub(crate) fn release_gpu(&self) {}
 }
 
 impl PlatformTextSystem for DirectWriteTextSystem {
@@ -1132,7 +1131,7 @@ mod tests {
     #[test]
     fn native_color_survives_device_recovery() -> Result<()> {
         let devices = DirectXDevices::new()?;
-        let system = DirectWriteTextSystem::new(&devices)?;
+        let system = DirectWriteTextSystem::new(Some(&devices))?;
         let font_id = system.font_id(&font("Segoe UI Emoji"))?;
         let glyph_id = system
             .glyph_for_char(font_id, '😀')

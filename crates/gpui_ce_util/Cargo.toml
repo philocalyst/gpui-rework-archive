@@ -10,8 +10,6 @@ repository = "https://github.com/gpui-ce/gpui-ce"
 [lib]
 name = "gpui_util"
 path = "src/lib.rs"
-
-[lib]
 doctest = false
 
 [dependencies]

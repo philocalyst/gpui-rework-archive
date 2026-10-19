@@ -257,10 +257,8 @@ impl BenchReport {
         })
     }
 
-    /// Prints the report to stderr, with the name of the benchmark it belongs to.
-    ///
-    /// This prints nothing when no frames or foreground work were recorded.
-    pub fn print(&self, benchmark_name: Option<&'static str>) {
+    /// Prints this report to stderr.
+    pub fn print(&self, benchmark_name: &str) {
         let frame_snapshot = self.frame_snapshot.borrow();
         if frame_snapshot.is_empty() && self.metrics.is_empty() {
             return;
@@ -618,6 +616,8 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Runs queued foreground tasks on this thread, and waits for background work in flight to finish.
     ///
     /// Timers that aren't due yet are not waited for. See [`ThreadedDispatcher::run_until_idle`].
+    /// Scheduled frames are delivered after each task poll and whenever no task is ready,
+    /// but animations alone don't keep this running.
     pub fn run_until_idle(&self) {
         let dispatcher = self
             .background_executor
@@ -661,7 +661,9 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Runs main-thread tasks until `ready` returns `Some`, and returns that value.
     ///
     /// Unlike [`BenchAppContext::run_until_idle`], this stops as soon as `ready` is
-    /// satisfied, leaving other queued work pending.
+    /// satisfied, leaving other queued work pending. Until then, scheduled frames run
+    /// after each task poll and while waiting for work. `ready` is checked before frames
+    /// are delivered, so this doesn't wait for a final presentation.
     pub fn run_until<R>(&self, ready: impl FnMut() -> Option<R>) -> R {
         self.background_executor
             .dispatcher()
@@ -679,7 +681,9 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
     /// Measures `benchmark` with Criterion's iteration loop.
     ///
     /// `benchmark` runs once per Criterion iteration and receives this context, so it
-    /// can update GPUI state. Window draws it triggers are recorded in the report.
+    /// can update GPUI state. After each iteration the scheduled frames are delivered,
+    /// without running other foreground tasks, and the window draws are recorded in the
+    /// report.
     ///
     /// # Panics
     ///
@@ -805,19 +809,22 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         self.replace_bencher(bencher);
     }
 
-    /// Measures how long one update of `view` takes to produce a presented frame.
+    /// Measures unpaced update and rendering work for an entity in its current window.
     ///
-    /// Each iteration runs `update` on `view` inside the window that holds it. Flushing
-    /// the update's effects draws the window, and the frame is then presented, which
-    /// includes submitting it to the GPU when a renderer is configured. The entity must
-    /// be in the window's render tree, such as the root view or one of its children.
+    /// Each iteration runs `update` against the entity in its current window. In
+    /// renderer measurements, effects flush without drawing until the platform
+    /// frame callback. The entity should be part of the window's render tree, such as the
+    /// root view or a child of it.
     ///
-    /// Frame events come from the GPUI frame profiler
-    /// ([`crate::profiler::record_frame_event`]), which is enabled for the duration of the measurement.
+    /// Each iteration first pumps at most the initial ready task count, delivering
+    /// pending frames after every poll. It then runs `update` and delivers pending
+    /// frames again. Nested actions and effects finish before frame delivery.
+    /// This measures work and rendering cost, not display latency: there is no
+    /// pacing, and the report's frame budget does not control execution.
     ///
-    /// # Panics
-    ///
-    /// Panics if `view` has no current window, or if a measurement is already running.
+    /// Frame events are collected through the GPUI frame profiler
+    /// ([`crate::profiler::record_frame_event`]), which is enabled for the
+    /// duration of the measurement.
     pub fn bench_renderer<V>(
         &mut self,
         view: Entity<V>,
@@ -858,13 +865,174 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
         self.replace_bencher(bencher);
     }
 
-    /// Opens a window with an empty root view, runs queued work, and returns a [`BenchWindowContext`] for it.
+    /// Measures finite rendering sessions with fresh, untimed setup for each iteration.
     ///
-    /// The window is sized to the test display, like [`TestAppContext::add_window`](crate::TestAppContext::add_window).
+    /// `setup` returns session state, its window, and a shared stop flag.
+    /// Loop turns pump at most the initial ready foreground task count, then call
+    /// `input` with a zero-based turn number unless stopped. Pending frames are
+    /// delivered after each task poll and input callback. Between polls, the stop
+    /// flag and session deadline are checked. The ready batch snapshots a count,
+    /// not task identities; rendering after a poll does not inject another input.
+    /// This is an unpaced work-and-render policy, not OS event-loop emulation.
+    /// Once stopped, only scheduled platform frame callbacks run until the window
+    /// is clean and its final changes have been submitted for presentation.
+    /// Pending animation callbacks alone do not delay completion.
+    /// Turns run without pacing or explicit OS-thread yields. A clean turn need not draw.
+    ///
+    /// Store `true` with release ordering to stop. Stopping does not imply success:
+    /// validate the workload in `Input::drop` or retained fixture state afterward.
+    /// Setup, session state destruction, and report aggregation are outside both
+    /// timing and tracing. Own outstanding tasks in `Input` so dropping it cancels
+    /// them; do not detach session work that could leak into subsequent iterations.
     ///
     /// # Panics
     ///
-    /// Panics if the window can't be opened.
+    /// Panics if the window is removed or stopping and final presentation exceed `timeout`.
+    /// The deadline is checked between polls and frames and cannot preempt a blocking task
+    /// poll, input callback, draw, or present.
+    pub fn bench_renderer_session<Input>(
+        &mut self,
+        timeout: Duration,
+        mut setup: impl FnMut(&mut Self) -> (Input, AnyWindowHandle, Arc<AtomicBool>),
+        mut input: impl FnMut(&mut Input, u64, &mut Window, &mut App),
+    ) {
+        let bencher = self.take_bencher("bench_renderer_session");
+        let mut setup_context = self.clone();
+        let mut benchmark_context = self.clone();
+        let dispatcher = self.background_executor.dispatcher().clone();
+        let dispatcher = dispatcher
+            .as_threaded()
+            .expect("validated in BenchAppContext::build");
+        let report = self.report.clone();
+        report.metrics.discard_pending();
+        let iterations = std::cell::Cell::new(0);
+
+        bencher.iter_batched_ref(
+            || {
+                setup_context.settle();
+                let input = setup(&mut setup_context);
+                setup_context.dispatch_pending_frames(|| true);
+                MeasuredTaskInput {
+                    input,
+                    trace_scope: Some(TraceScope::start(
+                        setup_context.foreground_journal_collector(),
+                    )),
+                }
+            },
+            |measured_input| {
+                iterations.set(iterations.get() + 1);
+                let (state, window, stopped) = &mut measured_input.input;
+                let started = Instant::now();
+                let check_deadline = || {
+                    assert!(
+                        started.elapsed() < timeout,
+                        "renderer session did not stop within {timeout:?} with final changes presented"
+                    );
+                };
+                let can_poll = || {
+                    check_deadline();
+                    !stopped.load(Ordering::Acquire)
+                };
+                let is_finished = |cx: &Self| {
+                    if !stopped.load(Ordering::Acquire) {
+                        return false;
+                    }
+                    // Animation callbacks alone must not keep a stopped session alive.
+                    let app = cx.app.borrow();
+                    let window = app
+                        .windows
+                        .get(window.window_id())
+                        .and_then(Option::as_deref)
+                        .expect("renderer session window must remain open");
+                    !window.invalidator.is_dirty() && !window.needs_present.get()
+                };
+                let dispatch_frames = |cx: &Self| {
+                    check_deadline();
+                    cx.dispatch_pending_frames(|| {
+                        check_deadline();
+                        !is_finished(cx)
+                    });
+                    check_deadline();
+                };
+                let mut frame = 0;
+                loop {
+                    check_deadline();
+                    if is_finished(&benchmark_context) {
+                        break;
+                    }
+                    if can_poll() {
+                        dispatcher.run_ready_main_tasks_with(&can_poll, || {
+                            dispatch_frames(&benchmark_context);
+                        });
+                        if !can_poll() {
+                            continue;
+                        }
+                        benchmark_context
+                            .update_window(*window, |_, window, cx| {
+                                if can_poll() {
+                                    input(state, frame, window, cx);
+                                }
+                            })
+                            .expect("renderer session window must remain open");
+                    }
+                    dispatch_frames(&benchmark_context);
+                    frame += 1;
+                }
+                MeasuredTaskOutput {
+                    trace_scope: measured_input.trace_scope.take(),
+                    report: report.clone(),
+                    _output: (),
+                }
+            },
+            criterion::BatchSize::PerIteration,
+        );
+        report.metrics.record_sample(iterations.get());
+        self.replace_bencher(bencher);
+    }
+
+    fn dispatch_pending_frames(&self, mut should_continue: impl FnMut() -> bool) -> bool {
+        let pending: Vec<_> = {
+            let mut app = self.app.borrow_mut();
+            app.windows
+                .values_mut()
+                .filter_map(|window| {
+                    let window = window.as_deref_mut()?;
+                    let handle = window.window_handle();
+                    let platform_window = window
+                        .platform_window
+                        .as_test()
+                        .expect("benchmark platform window");
+                    platform_window
+                        .frame_scheduled()
+                        .then(|| (handle, platform_window.clone()))
+                })
+                .collect()
+        };
+
+        let mut dispatched = false;
+        for (handle, window) in pending {
+            if !should_continue() {
+                break;
+            }
+            // An earlier callback may have closed another window in the batch.
+            let is_open = self
+                .app
+                .borrow()
+                .windows
+                .get(handle.window_id())
+                .and_then(Option::as_deref)
+                .is_some();
+            if is_open {
+                dispatched |= window.simulate_scheduled_frame();
+            }
+        }
+        dispatched
+    }
+
+    /// Adds an active window with an empty root view for benchmark setup.
+    ///
+    /// Activation is settled before returning so renderer measurements exercise
+    /// foreground animation rather than the inactive-window frame throttle.
     pub fn add_empty_window(&mut self) -> BenchWindowContext<'a, 'measurement> {
         let bounds = {
             let app = self.app.borrow();

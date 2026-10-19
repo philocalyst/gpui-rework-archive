@@ -193,6 +193,12 @@ pub struct ItemSize {
 }
 
 impl UniformListScrollHandle {
+    fn revised(&self) -> std::cell::RefMut<'_, UniformListScrollState> {
+        let state = self.0.borrow_mut();
+        state.base_handle.revision().bump();
+        state
+    }
+
     /// Creates a handle that isn't attached to a list yet.
     ///
     /// Pass it to [`UniformList::track_scroll`] when you build the list.
@@ -245,7 +251,7 @@ impl UniformListScrollHandle {
     /// window.read(|rows, _| assert_eq!(rows.scroll.0.borrow().base_handle.offset().y, px(-96.)));
     /// ```
     pub fn scroll_to_item(&self, ix: usize, strategy: ScrollStrategy) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset: 0,
@@ -260,7 +266,7 @@ impl UniformListScrollHandle {
     /// when a row must land at a fixed position, such as the top after a keyboard jump. The scroll
     /// takes effect on the next prepaint; see [`Self::scroll_to_item`] for an example.
     pub fn scroll_to_item_strict(&self, ix: usize, strategy: ScrollStrategy) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset: 0,
@@ -279,7 +285,7 @@ impl UniformListScrollHandle {
     ///
     /// This is non-strict, so a row that is visible below the cleared rows doesn't move the list.
     pub fn scroll_to_item_with_offset(&self, ix: usize, strategy: ScrollStrategy, offset: usize) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset,
@@ -296,7 +302,7 @@ impl UniformListScrollHandle {
         strategy: ScrollStrategy,
         offset: usize,
     ) {
-        self.0.borrow_mut().deferred_scroll_to_item = Some(DeferredScrollToItem {
+        self.revised().deferred_scroll_to_item = Some(DeferredScrollToItem {
             item_index: ix,
             strategy,
             offset,
@@ -598,10 +604,9 @@ impl Element for UniformList {
                         Some(style.scroll_mask(bounds, window.rem_size())),
                         |window| {
                             for (mut item, ix) in items.into_iter().zip(visible_range.clone()) {
+                                let item_top = item_height_f64 * ix as f64 - scroll_top;
                                 let item_origin = padded_bounds.origin
-                                    + scroll_offset
-                                    + point(Pixels::ZERO, item_height * ix);
-
+                                    + point(scroll_offset.x, Pixels::from(item_top));
                                 let available_width = if can_scroll_horizontally {
                                     padded_bounds.size.width + scroll_offset.x.abs()
                                 } else {

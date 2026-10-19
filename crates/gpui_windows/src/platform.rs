@@ -16,12 +16,11 @@ use gpui_util::{ResultExt, get_powershell, new_std_command};
 use itertools::Itertools;
 use parking_lot::RwLock;
 use smallvec::SmallVec;
-use windows::Win32::Graphics::Direct3D11::ID3D11Device;
 use windows::{
     UI::ViewManagement::UISettings,
     Win32::{
         Foundation::*,
-        Graphics::Gdi::*,
+        Graphics::{Direct3D11::ID3D11Device, Gdi::*},
         Security::Credentials::*,
         System::{
             Com::*,
@@ -64,7 +63,8 @@ pub struct WindowsPlatform {
     icon: HICON,
     background_executor: BackgroundExecutor,
     foreground_executor: ForegroundExecutor,
-    text_system: Arc<DirectWriteTextSystem>,
+    text_system: Arc<dyn PlatformTextSystem>,
+    direct_write_text_system: Option<Arc<DirectWriteTextSystem>>,
     drop_target_helper: Option<IDropTargetHelper>,
     /// Flag to instruct the `VSyncProvider` thread to invalidate the directx devices
     /// as resizing them has failed, causing us to have lost at least the render target.
@@ -182,22 +182,24 @@ impl WindowsPlatform {
         unsafe {
             OleInitialize(None).context("unable to initialize Windows OLE")?;
         }
-        let (directx_devices, text_system) = if !headless {
-            let devices = DirectXDevices::new().context("Creating DirectX devices")?;
-            let text_system = Arc::new(
-                DirectWriteTextSystem::new(&devices)
-                    .context("Error creating DirectWriteTextSystem")?,
+        // A platform that can become windowed needs the real text system from the start: the app
+        // keeps the one it's created with. It gets DirectX devices when it becomes windowed.
+        let (text_system, direct_write_text_system) = if !headless {
+            let dw_text_system = Arc::new(
+                DirectWriteTextSystem::new(None).context("Error creating DirectWriteTextSystem")?,
             );
-
-            (Some(devices), text_system)
+            (
+                dw_text_system.clone() as Arc<dyn PlatformTextSystem>,
+                Some(dw_text_system),
+            )
         } else {
             let text_system = Arc::new(
                 DirectWriteTextSystem::new_headless()
                     .context("Error creating headless DirectWriteTextSystem")?,
             );
-
-            (None, text_system)
+            (text_system as Arc<dyn PlatformTextSystem>, None)
         };
+
         let (main_sender, main_receiver) = PriorityQueueReceiver::new();
         let validation_number = if usize::BITS == 64 {
             rand::random::<u64>() as usize
@@ -275,6 +277,7 @@ impl WindowsPlatform {
             background_executor,
             foreground_executor,
             text_system,
+            direct_write_text_system,
             suspend_resume_notification: RefCell::new(None),
             disable_direct_composition,
             has_package_identity: has_package_identity(),
@@ -432,11 +435,16 @@ impl WindowsPlatform {
         let Some(directx_devices) = self.inner.state.directx_devices.borrow().clone() else {
             return;
         };
+        let Some(direct_write_text_system) = &self.direct_write_text_system else {
+            return;
+        };
+        let stop = Arc::new(AtomicBool::new(false));
+        *self.vsync_stop.borrow_mut() = Some(stop.clone());
         let mut directx_device = directx_devices;
         let platform_window: SafeHwnd = self.handle.into();
         let validation_number = self.inner.validation_number;
         let all_windows = Arc::downgrade(&self.raw_window_handles);
-        let text_system = Arc::downgrade(&self.text_system);
+        let text_system = Arc::downgrade(direct_write_text_system);
         let invalidate_devices = self.invalidate_devices.clone();
 
         std::thread::Builder::new()
@@ -724,7 +732,7 @@ impl Platform for WindowsPlatform {
     #[cfg(feature = "screen-capture")]
     fn screen_capture_sources(
         &self,
-    ) -> oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
+    ) -> futures::channel::oneshot::Receiver<Result<Vec<Rc<dyn ScreenCaptureSource>>>> {
         gpui::screen_capture::screen_sources(&self.foreground_executor)
     }
 

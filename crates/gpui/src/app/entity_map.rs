@@ -6,7 +6,7 @@ use parking_lot::{RwLock, RwLockUpgradableReadGuard};
 use slotmap::{KeyData, SecondaryMap, SlotMap};
 use std::{
     any::{Any, TypeId, type_name},
-    cell::RefCell,
+    cell::{Cell, RefCell},
     cmp::Ordering,
     fmt::{self, Display},
     hash::{Hash, Hasher},
@@ -64,6 +64,9 @@ impl Display for EntityId {
 pub(crate) struct EntityMap {
     entities: SecondaryMap<EntityId, Box<dyn Any>>,
     pub accessed_entities: RefCell<FxHashSet<EntityId>>,
+    /// While a dependency recording is open, every entity read, in order and with repeats.
+    pub(crate) access_log: RefCell<Vec<EntityId>>,
+    pub(crate) recordings: Cell<usize>,
     ref_counts: Arc<RwLock<EntityRefCounts>>,
 }
 
@@ -84,6 +87,8 @@ impl EntityMap {
         Self {
             entities: SecondaryMap::new(),
             accessed_entities: RefCell::new(FxHashSet::default()),
+            access_log: RefCell::default(),
+            recordings: Cell::new(0),
             ref_counts: Arc::new(RwLock::new(EntityRefCounts {
                 counts: SlotMap::with_key(),
                 dropped_entity_ids: Vec::new(),
@@ -133,8 +138,7 @@ impl EntityMap {
     where
         T: 'static,
     {
-        let mut accessed_entities = self.accessed_entities.get_mut();
-        accessed_entities.insert(slot.entity_id);
+        self.note_access(slot.entity_id);
 
         let handle = slot.0;
         self.entities.insert(handle.entity_id, Box::new(entity));
@@ -185,12 +189,6 @@ impl EntityMap {
         );
     }
 
-    pub fn extend_accessed(&mut self, entities: &FxHashSet<EntityId>) {
-        self.accessed_entities
-            .get_mut()
-            .extend(entities.iter().copied());
-    }
-
     pub fn clear_accessed(&mut self) {
         self.accessed_entities.get_mut().clear();
     }
@@ -218,14 +216,20 @@ impl EntityMap {
 
     #[inline(never)]
     fn read_inner(&self, entity_id: EntityId) -> Option<&dyn Any> {
-        let mut accessed_entities = self.accessed_entities.borrow_mut();
-        accessed_entities.insert(entity_id);
+        self.note_access(entity_id);
         self.entities.get(entity_id).map(Box::as_ref)
+    }
+
+    pub(crate) fn note_access(&self, entity_id: EntityId) {
+        self.accessed_entities.borrow_mut().insert(entity_id);
+        if self.recordings.get() > 0 {
+            self.access_log.borrow_mut().push(entity_id);
+        }
     }
 
     #[inline(never)]
     fn lease_inner(&mut self, entity_id: EntityId) -> Option<Box<dyn Any>> {
-        self.accessed_entities.get_mut().insert(entity_id);
+        self.note_access(entity_id);
         self.entities.remove(entity_id)
     }
 
@@ -811,6 +815,9 @@ impl AnyWeakEntity {
     ///
     /// If this method panics because of a leaked handle, set the `LEAK_BACKTRACE` environment variable to
     /// see where the handle was created:
+    /// With leak detection enabled (build with `GPUI_LEAK_DETECTION=1`), a failure
+    /// lists each leaked handle. Also set the `LEAK_BACKTRACE` environment variable
+    /// to see where they were allocated:
     ///
     /// ```bash
     /// GPUI_LEAK_DETECTION=1 LEAK_BACKTRACE=1 cargo test my_test
@@ -821,7 +828,12 @@ impl AnyWeakEntity {
     /// - Panics if any strong handles to the entity are still alive.
     /// - Panics if the entity was dropped in the current update. Its resources are kept until that update
     ///   finishes.
-    #[cfg(any(test, feature = "leak-detection"))]
+    #[cfg(any(
+        test,
+        feature = "test-support",
+        feature = "leak-detection",
+        gpui_leak_detection
+    ))]
     pub fn assert_released(&self) {
         #[cfg(any(test, gpui_leak_detection))]
         self.entity_ref_counts
@@ -990,6 +1002,7 @@ impl<T: 'static> WeakEntity<T> {
     /// assert!(weak.update(cx, |counter, _cx| counter.count += 1).is_err());
     /// # });
     /// ```
+    #[inline(always)]
     pub fn update<C, R>(
         &self,
         cx: &mut C,
@@ -1006,6 +1019,7 @@ impl<T: 'static> WeakEntity<T> {
     ///
     /// Returns an error if the entity has been released, or if it isn't shown in a window that is
     /// currently available.
+    #[inline(always)]
     pub fn update_in<C, R>(
         &self,
         cx: &mut C,
@@ -1024,6 +1038,7 @@ impl<T: 'static> WeakEntity<T> {
     /// Calls `read` with the entity if it still exists. Returns an error if it has been released.
     ///
     /// Use this when you only need to read the value. It works with any [`AppContext`].
+    #[inline(always)]
     pub fn read_with<C, R>(&self, cx: &C, read: impl FnOnce(&T, &App) -> R) -> Result<R>
     where
         C: AppContext,
@@ -1148,7 +1163,13 @@ pub(crate) struct LeakDetector {
 ///
 /// Take one with [`App::leak_detector_snapshot`], and pass it to [`App::assert_no_new_leaks`]. The
 /// check ignores entities that were already alive when the snapshot was taken.
-#[cfg(any(test, feature = "leak-detection"))]
+#[cfg(any(
+    test,
+    feature = "test-support",
+    feature = "leak-detection",
+    gpui_leak_detection
+))]
+#[derive(Default)]
 pub struct LeakDetectorSnapshot {
     #[cfg(any(test, gpui_leak_detection))]
     entity_ids: collections::HashSet<EntityId>,

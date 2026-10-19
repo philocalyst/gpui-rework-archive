@@ -19,7 +19,7 @@ pub const DISABLE_DIRECT_COMPOSITION_ENV: &str = "GPUI_DISABLE_DIRECT_COMPOSITIO
 /// creates and retains EGL state even when a Vulkan adapter is eventually selected.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[cfg(not(target_family = "wasm"))]
-pub(crate) enum NativeBackend {
+pub enum NativeBackend {
     #[cfg(target_vendor = "apple")]
     Metal,
     #[cfg(target_os = "windows")]
@@ -43,11 +43,11 @@ pub(crate) struct NativeInstance {
 #[cfg(not(target_family = "wasm"))]
 impl NativeBackend {
     #[cfg(target_vendor = "apple")]
-    const PREFERENCE: &'static [Self] = &[Self::Metal];
+    pub(crate) const PREFERENCE: &'static [Self] = &[Self::Metal];
     #[cfg(target_os = "windows")]
-    const PREFERENCE: &'static [Self] = &[Self::Dx12, Self::Vulkan, Self::Gl];
+    pub(crate) const PREFERENCE: &'static [Self] = &[Self::Dx12, Self::Vulkan, Self::Gl];
     #[cfg(not(any(target_vendor = "apple", target_os = "windows")))]
-    const PREFERENCE: &'static [Self] = &[Self::Vulkan, Self::Gl];
+    pub(crate) const PREFERENCE: &'static [Self] = &[Self::Vulkan, Self::Gl];
 
     pub(crate) fn instance(
         self,
@@ -85,10 +85,21 @@ impl NativeBackend {
 
     pub(crate) fn try_in_preference_order<T>(
         operation: &'static str,
+        attempt: impl FnMut(Self) -> anyhow::Result<T>,
+    ) -> anyhow::Result<T> {
+        Self::try_in_order(operation, Self::PREFERENCE, attempt)
+    }
+
+    pub(crate) fn try_in_order<T>(
+        operation: &'static str,
+        backends: &[Self],
         mut attempt: impl FnMut(Self) -> anyhow::Result<T>,
     ) -> anyhow::Result<T> {
+        if backends.is_empty() {
+            anyhow::bail!("no native GPU backends supplied for {operation}");
+        }
         let mut failures = SmallVec::<[NativeBackendFailure; 3]>::new();
-        for &backend in Self::PREFERENCE {
+        for &backend in backends {
             match attempt(backend) {
                 Ok(value) => return Ok(value),
                 Err(source) => failures.push(NativeBackendFailure { backend, source }),
@@ -181,6 +192,7 @@ struct SelectedAdapter {
     device: CreatedDevice,
 }
 
+#[derive(Clone)]
 pub struct WgpuContext {
     pub instance: wgpu::Instance,
     pub adapter: wgpu::Adapter,
@@ -190,8 +202,7 @@ pub struct WgpuContext {
     dual_source_blending: bool,
     color_texture_format: wgpu::TextureFormat,
     renderer_tier: RendererTier,
-    device_lost: Arc<AtomicBool>,
-    uncaptured_error: Arc<Mutex<Option<String>>>,
+    errors: Arc<DeviceErrorState>,
 }
 
 /// The resource transport selected for a device.
@@ -217,6 +228,20 @@ pub enum WebBackendPreference {
     Auto,
     WebGpu,
     WebGl,
+}
+
+#[cfg(target_family = "wasm")]
+fn web_backend_options(preference: WebBackendPreference) -> wgpu::BackendOptions {
+    let mut options = wgpu::BackendOptions::default();
+    if preference != WebBackendPreference::WebGpu {
+        // Browser WebGL cannot block in clientWaitSync with a timeout. wgpu's surface
+        // teardown/reconfigure waits for submitted work, so use its documented browser
+        // workaround whenever GL is an available backend. Completion callbacks and device
+        // maintenance may report work complete before it has physically finished; native GL
+        // and Browser WebGPU keep defaults.
+        options.gl.fence_behavior = wgpu::GlFenceBehavior::AutoFinish;
+    }
+    options
 }
 
 #[cfg(target_family = "wasm")]
@@ -478,13 +503,37 @@ impl WgpuContext {
             texture_format,
             self.adapter.get_info(),
             self.backend,
-            Arc::clone(&self.device_lost),
+            Arc::clone(&self.errors.lost),
         )
     }
 
     /// Creates a native device without a presentation surface.
+    ///
+    /// Creating a device takes tens of milliseconds, and tests and benchmarks create a headless
+    /// renderer for every window they open, so a device without extra requirements is shared by
+    /// the whole process until it is lost. The cache is a static that is never dropped, because
+    /// wgpu's queue reads its own thread-locals on drop, which panics during thread teardown.
     #[cfg(not(target_family = "wasm"))]
     pub fn new_headless(
+        extra_requirements: Option<&WgpuDeviceRequirements>,
+    ) -> anyhow::Result<Self> {
+        static SHARED: Mutex<Option<WgpuContext>> = Mutex::new(None);
+        if extra_requirements.is_some() {
+            return Self::create_headless(extra_requirements);
+        }
+        let mut shared = SHARED.lock().unwrap();
+        if let Some(context) = shared.as_ref()
+            && !context.device_lost()
+        {
+            return Ok(context.clone());
+        }
+        let context = Self::create_headless(None)?;
+        *shared = Some(context.clone());
+        Ok(context)
+    }
+
+    #[cfg(not(target_family = "wasm"))]
+    fn create_headless(
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
         NativeBackend::try_in_preference_order("a headless GPU context", |backend| {
@@ -513,7 +562,17 @@ impl WgpuContext {
         adapter_policy: SoftwareAdapterPolicy,
         extra_requirements: Option<&WgpuDeviceRequirements>,
     ) -> anyhow::Result<Self> {
-        let device_id_filter = Self::device_id_filter();
+        let device_id_filter = match std::env::var("ZED_DEVICE_ID") {
+            Ok(val) => parse_pci_id(&val)
+                .context("Failed to parse device ID from `ZED_DEVICE_ID` environment variable")
+                .log_err(),
+            Err(std::env::VarError::NotPresent) => None,
+            err => {
+                err.context("Failed to read value of `ZED_DEVICE_ID` environment variable")
+                    .log_err();
+                None
+            }
+        };
 
         // Select an adapter by actually testing surface configuration with the real device.
         // This is the only reliable way to determine compatibility on hybrid GPU systems.
@@ -552,7 +611,7 @@ impl WgpuContext {
         let descriptor = wgpu::InstanceDescriptor {
             backends,
             flags: wgpu::InstanceFlags::default(),
-            backend_options: wgpu::BackendOptions::default(),
+            backend_options: web_backend_options(preference),
             memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
             display: Some(Box::new(WebDisplaySource)),
         };
@@ -572,7 +631,6 @@ impl WgpuContext {
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
-                apply_limit_buckets: false,
             })
             .await
             .map_err(|error| {
@@ -598,7 +656,7 @@ impl WgpuContext {
         adapter: wgpu::Adapter,
         device: CreatedDevice,
     ) -> anyhow::Result<Self> {
-        let (device_lost, uncaptured_error) = install_device_callbacks(&device.device);
+        let errors = DeviceErrorState::install(&device.device);
         let info = adapter.get_info();
         log::info!("Selected GPU adapter: {:?} ({:?})", info.name, info.backend);
         #[cfg(target_family = "wasm")]
@@ -621,8 +679,7 @@ impl WgpuContext {
             dual_source_blending: device.dual_source_blending,
             color_texture_format: device.color_texture_format,
             renderer_tier: device.renderer_tier,
-            device_lost,
-            uncaptured_error,
+            errors,
         })
     }
 
@@ -674,7 +731,6 @@ impl WgpuContext {
                 memory_hints: wgpu::MemoryHints::MemoryUsage,
                 trace: wgpu::Trace::Off,
                 experimental_features: wgpu::ExperimentalFeatures::disabled(),
-                default_queue: wgpu::QueueDescriptor::default(),
             })
             .await
             .map_err(|e| anyhow::anyhow!("Failed to create wgpu device: {e}"))?;
@@ -845,59 +901,6 @@ impl WgpuContext {
         anyhow::bail!("No GPU adapter found that can configure the display surface")
     }
 
-    /// Sort adapters into a single priority order. Tiers (from highest to lowest):
-    ///
-    /// 1. ZED_DEVICE_ID match — explicit user override
-    /// 2. Compositor GPU match — the GPU the display server is rendering on
-    /// 3. Device type (Discrete > Integrated > Other > Virtual > Cpu).
-    ///    "Other" ranks above "Virtual" because OpenGL seems to count as "Other".
-    /// 4. Backend — prefer Vulkan/Metal/Dx12 over GL/etc.
-    #[cfg(not(target_family = "wasm"))]
-    fn sort_adapters(
-        adapters: &mut [wgpu::Adapter],
-        device_id_filter: Option<u32>,
-        compositor_gpu: Option<&CompositorGpuHint>,
-    ) {
-        adapters.sort_by_key(|adapter| {
-            let info = adapter.get_info();
-            // Backends like OpenGL report device=0 for all adapters, so
-            // device-based matching is only meaningful when non-zero.
-            let device_known = info.device != 0;
-            let user_override: u8 = match device_id_filter {
-                Some(id) if device_known && info.device == id => 0,
-                _ => 1,
-            };
-            let compositor_match: u8 = match compositor_gpu {
-                Some(hint)
-                    if device_known
-                        && info.vendor == hint.vendor_id
-                        && info.device == hint.device_id =>
-                {
-                    0
-                }
-                _ => 1,
-            };
-            let type_priority: u8 = match info.device_type {
-                wgpu::DeviceType::DiscreteGpu => 0,
-                wgpu::DeviceType::IntegratedGpu => 1,
-                wgpu::DeviceType::Other => 2,
-                wgpu::DeviceType::VirtualGpu => 3,
-                wgpu::DeviceType::Cpu => 4,
-            };
-            let backend_priority: u8 = match info.backend {
-                wgpu::Backend::Vulkan | wgpu::Backend::Metal | wgpu::Backend::Dx12 => 0,
-                _ => 1,
-            };
-
-            (
-                user_override,
-                compositor_match,
-                type_priority,
-                backend_priority,
-            )
-        });
-    }
-
     /// Try to use an adapter with a surface by creating a device and testing configuration.
     /// Returns the device and queue if successful, allowing them to be reused.
     #[cfg(not(target_family = "wasm"))]
@@ -922,7 +925,6 @@ impl WgpuContext {
         let test_config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: caps.formats[0],
-            color_space: wgpu::SurfaceColorSpace::Auto,
             width: 64,
             height: 64,
             present_mode: wgpu::PresentMode::Fifo,
@@ -1005,52 +1007,111 @@ impl WgpuContext {
         self.errors.device_lost()
     }
 
-    /// The device-wide error state, shared with renderers on this device.
+    /// Returns a clone of the device_lost flag for sharing with renderers.
+    pub(crate) fn device_lost_flag(&self) -> Arc<AtomicBool> {
+        Arc::clone(&self.errors.lost)
+    }
+
+    /// This device with the WebGL2 instance transport, to test it on any adapter.
+    #[cfg(all(test, feature = "test-support"))]
+    pub(crate) fn with_webgl2_transport(&self) -> Self {
+        Self {
+            renderer_tier: RendererTier::WebGl2,
+            dual_source_blending: false,
+            ..self.clone()
+        }
+    }
+
+    /// Returns the device-wide error state, shared by all renderers using this device.
     pub fn errors(&self) -> &Arc<DeviceErrorState> {
         &self.errors
     }
+}
 
-    pub(crate) fn uncaptured_error_slot(&self) -> Arc<Mutex<Option<String>>> {
-        Arc::clone(&self.uncaptured_error)
+/// Errors reported by wgpu's device-wide callbacks.
+///
+/// A device has exactly one lost callback and one uncaptured-error callback, so this
+/// state is installed once per device and shared by every renderer using it.
+#[derive(Default)]
+pub struct DeviceErrorState {
+    lost: Arc<AtomicBool>,
+    last_error: Mutex<DeviceErrorData>,
+}
+
+#[derive(Default)]
+struct DeviceErrorData {
+    generation: u64,
+    latest: Option<String>,
+}
+
+impl DeviceErrorState {
+    fn install(device: &wgpu::Device) -> Arc<Self> {
+        let errors = Arc::new(Self::default());
+        device.set_device_lost_callback({
+            let errors = Arc::clone(&errors);
+            move |reason, message| {
+                log::error!("wgpu device lost: reason={reason:?}, message={message}");
+                if reason != wgpu::DeviceLostReason::Destroyed {
+                    errors.lost.store(true, Ordering::Relaxed);
+                }
+            }
+        });
+        device.on_uncaptured_error(Arc::new({
+            let errors = Arc::clone(&errors);
+            move |error| errors.record(error.to_string())
+        }));
+        errors
+    }
+
+    /// Returns true if the GPU device was lost (e.g., due to driver crash, suspend/resume).
+    pub fn device_lost(&self) -> bool {
+        self.lost.load(Ordering::Relaxed)
+    }
+
+    fn record(&self, error: String) {
+        let mut state = self.last_error.lock().unwrap();
+        state.generation = state.generation.wrapping_add(1);
+        state.latest = Some(error);
+    }
+
+    /// Returns the latest error once per observer, without consuming shared state.
+    /// Start each observer at zero, including after switching devices, so errors
+    /// raised during construction are observed. Multiple errors between observations
+    /// coalesce to the latest error; this is not an error queue.
+    pub fn observe_error(&self, generation: &mut u64) -> Option<String> {
+        let state = self.last_error.lock().unwrap();
+        if *generation == state.generation {
+            return None;
+        }
+        *generation = state.generation;
+        state.latest.clone()
+    }
+
+    /// The generation an observer should start from to see only errors raised after
+    /// this call, for a renderer joining a device other renderers already used.
+    pub fn current_generation(&self) -> u64 {
+        self.last_error.lock().unwrap().generation
     }
 }
 
 fn renderer_tier(adapter: &wgpu::Adapter) -> RendererTier {
-    let limits = adapter.limits();
-    let flags = adapter.get_downlevel_capabilities().flags;
-    if limits.max_storage_buffers_per_shader_stage > 0
-        && flags.contains(wgpu::DownlevelFlags::VERTEX_STORAGE)
-        && flags.contains(wgpu::DownlevelFlags::FRAGMENT_STORAGE)
-    {
-        RendererTier::Modern
-    } else {
-        RendererTier::WebGl2
-    }
+    renderer_tier_for(
+        &adapter.limits(),
+        adapter.get_downlevel_capabilities().flags,
+    )
 }
 
-fn install_device_callbacks(
-    device: &wgpu::Device,
-) -> (Arc<AtomicBool>, Arc<Mutex<Option<String>>>) {
-    let device_lost = Arc::new(AtomicBool::new(false));
-    device.set_device_lost_callback({
-        let device_lost = Arc::clone(&device_lost);
-        move |reason, message| {
-            log::error!("wgpu device lost: reason={reason:?}, message={message}");
-            if reason != wgpu::DeviceLostReason::Destroyed {
-                device_lost.store(true, Ordering::Relaxed);
-            }
-        }
-    });
-    let uncaptured_error = Arc::new(Mutex::new(None));
-    device.on_uncaptured_error(Arc::new({
-        let uncaptured_error = Arc::clone(&uncaptured_error);
-        move |error| {
-            let message = error.to_string();
-            log::error!("uncaptured wgpu error: {message}");
-            *uncaptured_error.lock().unwrap() = Some(message);
-        }
-    }));
-    (device_lost, uncaptured_error)
+fn renderer_tier_for(limits: &wgpu::Limits, flags: wgpu::DownlevelFlags) -> RendererTier {
+    let modern_storage_flags = wgpu::DownlevelFlags::VERTEX_STORAGE
+        | wgpu::DownlevelFlags::FRAGMENT_STORAGE
+        | wgpu::DownlevelFlags::BUFFER_BINDINGS_NOT_16_BYTE_ALIGNED;
+    if limits.max_storage_buffers_per_shader_stage > 0 && flags.contains(modern_storage_flags) {
+        RendererTier::Modern
+    } else {
+        // The generated storage-buffer ABI includes 248-byte Quad records. Devices that
+        // require 16-byte-multiple binding sizes must use the packed data-texture transport.
+        RendererTier::WebGl2
+    }
 }
 
 #[cfg(not(target_family = "wasm"))]
@@ -1072,7 +1133,114 @@ fn parse_pci_id(id: &str) -> anyhow::Result<u32> {
 
 #[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
-    use super::{NativeBackend, SoftwareAdapterPolicy, parse_pci_id};
+    use super::{
+        NativeBackend, RendererTier, SoftwareAdapterPolicy, parse_pci_id, renderer_tier_for,
+    };
+
+    #[test]
+    fn device_errors_are_observed_independently_and_coalesce_to_latest() {
+        let errors = super::DeviceErrorState::default();
+        let mut first_generation = 0;
+        let mut second_generation = 0;
+
+        errors.record("first".to_owned());
+        assert_eq!(
+            errors.observe_error(&mut first_generation).as_deref(),
+            Some("first")
+        );
+        assert_eq!(
+            errors.observe_error(&mut second_generation).as_deref(),
+            Some("first")
+        );
+        assert_eq!(errors.observe_error(&mut first_generation), None);
+        assert_eq!(errors.observe_error(&mut second_generation), None);
+
+        errors.record("intermediate".to_owned());
+        errors.record("latest".to_owned());
+        assert_eq!(errors.current_generation(), 3);
+        assert_eq!(
+            errors.observe_error(&mut first_generation).as_deref(),
+            Some("latest")
+        );
+        assert_eq!(
+            errors.observe_error(&mut second_generation).as_deref(),
+            Some("latest")
+        );
+        assert_eq!(first_generation, 3);
+        assert_eq!(second_generation, 3);
+    }
+
+    #[test]
+    fn a_new_observer_can_join_after_existing_errors() {
+        let errors = super::DeviceErrorState::default();
+        errors.record("construction".to_owned());
+
+        let mut catch_up = 0;
+        assert_eq!(
+            errors.observe_error(&mut catch_up).as_deref(),
+            Some("construction")
+        );
+
+        let mut after_join = errors.current_generation();
+        assert_eq!(errors.observe_error(&mut after_join), None);
+        errors.record("after join".to_owned());
+        assert_eq!(
+            errors.observe_error(&mut after_join).as_deref(),
+            Some("after join")
+        );
+    }
+
+    #[test]
+    fn replacement_device_uses_a_fresh_error_generation() {
+        let old_device = super::DeviceErrorState::default();
+        let mut renderer_generation = 0;
+        old_device.record("old device error".to_owned());
+        assert_eq!(
+            old_device
+                .observe_error(&mut renderer_generation)
+                .as_deref(),
+            Some("old device error")
+        );
+        assert_eq!(renderer_generation, 1);
+
+        let recovered_device = super::DeviceErrorState::default();
+        let mut stale_generation = renderer_generation;
+        let mut recovered_renderer_generation = 0;
+        recovered_device.record("recovery construction error".to_owned());
+        assert_eq!(
+            recovered_device.observe_error(&mut stale_generation),
+            None,
+            "reusing the old generation would miss the first error on the replacement device"
+        );
+        assert_eq!(
+            recovered_device
+                .observe_error(&mut recovered_renderer_generation)
+                .as_deref(),
+            Some("recovery construction error")
+        );
+        assert_eq!(recovered_renderer_generation, 1);
+    }
+
+    #[test]
+    fn storage_tier_requires_unaligned_binding_size_support() {
+        let mut limits = wgpu::Limits::default();
+        limits.max_storage_buffers_per_shader_stage = 1;
+        let storage_flags =
+            wgpu::DownlevelFlags::VERTEX_STORAGE | wgpu::DownlevelFlags::FRAGMENT_STORAGE;
+
+        assert_eq!(
+            renderer_tier_for(&limits, storage_flags),
+            RendererTier::WebGl2,
+            "storage support alone cannot bind the 248-byte Quad record on a 16-byte-aligned device"
+        );
+        assert_eq!(
+            renderer_tier_for(
+                &limits,
+                storage_flags | wgpu::DownlevelFlags::BUFFER_BINDINGS_NOT_16_BYTE_ALIGNED,
+            ),
+            RendererTier::Modern,
+        );
+    }
 
     #[test]
     fn native_backend_fallbacks_are_individually_initialized() {
@@ -1145,6 +1313,29 @@ mod tests {
         assert_eq!(
             parse_pci_id(&format!("{:#x}", 0x1234)).unwrap(),
             parse_pci_id(&format!("{:#X}", 0x1234)).unwrap(),
+        );
+    }
+}
+
+#[cfg(all(test, target_family = "wasm"))]
+mod web_backend_options_tests {
+    use super::{WebBackendPreference, web_backend_options};
+
+    #[test]
+    fn browser_gl_uses_nonblocking_fence_workaround_but_webgpu_does_not() {
+        for preference in [WebBackendPreference::Auto, WebBackendPreference::WebGl] {
+            assert!(
+                web_backend_options(preference)
+                    .gl
+                    .fence_behavior
+                    .is_auto_finish()
+            );
+        }
+        assert!(
+            !web_backend_options(WebBackendPreference::WebGpu)
+                .gl
+                .fence_behavior
+                .is_auto_finish()
         );
     }
 }

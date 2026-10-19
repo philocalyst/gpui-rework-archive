@@ -142,6 +142,8 @@ pub(crate) struct A11y {
     pub(crate) focus_ids: FxHashMap<NodeId, FocusId>,
     pub(crate) node_bounds: FxHashMap<NodeId, Bounds<Pixels>>,
     pub(crate) action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
+    /// Last frame's action listeners, which reused views carry into this frame.
+    previous_action_listeners: FxHashMap<NodeId, Vec<(Action, A11yActionListener)>>,
     /// The window's title, used to label the root node so assistive
     /// technology can tell windows apart.
     window_title: Option<SharedString>,
@@ -172,6 +174,7 @@ impl A11y {
             focus_ids: FxHashMap::default(),
             node_bounds: FxHashMap::default(),
             action_listeners: FxHashMap::default(),
+            previous_action_listeners: FxHashMap::default(),
             window_title,
             last_focus_without_node: None,
             debug: debug::A11yDebug::default(),
@@ -213,6 +216,10 @@ impl A11y {
     /// is connected. Takes effect on the next frame.
     pub(crate) fn set_forced(&mut self, forced: bool) {
         self.forced = forced;
+    }
+
+    pub(crate) fn is_enabled(&self) -> bool {
+        !self.force_disabled
     }
 
     pub(crate) fn is_active(&self) -> bool {
@@ -273,8 +280,87 @@ impl A11y {
     pub(crate) fn begin_frame(&mut self) {
         self.focus_ids.clear();
         self.node_bounds.clear();
-        self.action_listeners.clear();
+        self.previous_action_listeners = std::mem::take(&mut self.action_listeners);
         self.nodes.begin_frame(self.window_title.as_ref());
+    }
+
+    /// Marks where a view starts adding nodes, for [`Self::record`].
+    pub(crate) fn mark(&self) -> A11yMark {
+        A11yMark {
+            nodes: self.nodes.all_nodes.len(),
+            children: self
+                .nodes
+                .nodes_stack
+                .last()
+                .map_or(0, |node| node.children().len()),
+            focus: self.nodes.focus,
+            active_descendant: self.nodes.active_descendant,
+        }
+    }
+
+    /// Copies what was added to the tree since `mark`, so a reused view can [replay](Self::replay)
+    /// it without running its prepaint again.
+    pub(crate) fn record(&self, mark: A11yMark) -> A11yRecording {
+        let nodes = self.nodes.all_nodes[mark.nodes..].to_vec();
+        let children = self
+            .nodes
+            .nodes_stack
+            .last()
+            .map_or(&[][..], |node| &node.children()[mark.children..])
+            .to_vec();
+        fn lookup<T: Copy>(
+            nodes: &[(NodeId, accesskit::Node)],
+            map: &FxHashMap<NodeId, T>,
+        ) -> Vec<(NodeId, T)> {
+            nodes
+                .iter()
+                .filter_map(|(id, _)| Some((*id, *map.get(id)?)))
+                .collect()
+        }
+        A11yRecording {
+            bounds: lookup(&nodes, &self.node_bounds),
+            focusable: lookup(&nodes, &self.focus_ids),
+            focus: self.nodes.focus.filter(|_| mark.focus.is_none()),
+            active_descendant: self
+                .nodes
+                .active_descendant
+                .filter(|_| mark.active_descendant.is_none()),
+            #[cfg(debug_assertions)]
+            info: nodes
+                .iter()
+                .filter_map(|(id, _)| Some((*id, self.nodes.node_info.get(id)?.clone())))
+                .collect(),
+            nodes,
+            children,
+        }
+    }
+
+    /// Adds a recorded view's nodes back under the open node, with their bounds, focus and action
+    /// listeners.
+    pub(crate) fn replay(&mut self, recording: &A11yRecording) {
+        for (id, node) in &recording.nodes {
+            if self.nodes.can_push(*id) {
+                self.nodes.all_nodes.push((*id, node.clone()));
+            }
+            if let Some(listeners) = self.previous_action_listeners.remove(id) {
+                self.action_listeners.insert(*id, listeners);
+            }
+        }
+        if let Some(parent) = self.nodes.nodes_stack.last_mut() {
+            for id in &recording.children {
+                parent.push_child(*id);
+            }
+        }
+        self.node_bounds.extend(recording.bounds.iter().copied());
+        self.focus_ids.extend(recording.focusable.iter().copied());
+        if let Some(id) = recording.focus {
+            self.nodes.set_focus(id);
+        }
+        if let Some(id) = recording.active_descendant {
+            self.nodes.set_active_descendant(id);
+        }
+        #[cfg(debug_assertions)]
+        self.nodes.node_info.extend(recording.info.iter().cloned());
     }
 
     /// Finalize the tree and produce a [`TreeUpdate`] for the platform adapter.
@@ -406,6 +492,27 @@ impl<'a> A11ySubtreeBuilder<'a> {
             .current_node_mut()
             .expect("A11ySubtreeBuilder exists only while its element's node is on the stack")
     }
+}
+
+/// Where the tree stood when a view started drawing. See [`A11y::mark`].
+pub(crate) struct A11yMark {
+    nodes: usize,
+    children: usize,
+    focus: Option<NodeId>,
+    active_descendant: Option<NodeId>,
+}
+
+/// The nodes one view added to the tree in a frame. See [`A11y::record`].
+pub(crate) struct A11yRecording {
+    nodes: Vec<(NodeId, accesskit::Node)>,
+    /// The nodes added directly under the node that was open when the view drew.
+    children: Vec<NodeId>,
+    bounds: Vec<(NodeId, Bounds<Pixels>)>,
+    focusable: Vec<(NodeId, FocusId)>,
+    focus: Option<NodeId>,
+    active_descendant: Option<NodeId>,
+    #[cfg(debug_assertions)]
+    info: Vec<(NodeId, debug::NodeDebugInfo)>,
 }
 
 pub(crate) struct A11yNodeBuilder {
@@ -679,7 +786,7 @@ mod tests {
     // in gpui's own `test` attribute macro and shadow the standard one.
     use super::{A11y, A11yNodeBuilder, ROOT_NODE_ID};
     use crate::FocusId;
-    use accesskit::{NodeId, Role};
+    use accesskit::{NodeId, Role, TreeUpdate};
     use std::sync::{Arc, atomic::AtomicBool};
 
     fn test_node() -> accesskit::Node {
@@ -715,6 +822,24 @@ mod tests {
         let mut a11y = A11y::new(Arc::new(AtomicBool::new(true)), true, true, None);
         a11y.sync_active_flag();
         assert!(!a11y.is_active());
+    }
+
+    #[test]
+    fn accessibility_enabled_is_independent_of_activation() {
+        for force_disabled in [false, true] {
+            for active in [false, true] {
+                let mut a11y = A11y::new(
+                    Arc::new(AtomicBool::new(active)),
+                    force_disabled,
+                    false,
+                    None,
+                );
+                a11y.sync_active_flag();
+
+                assert_eq!(a11y.is_enabled(), !force_disabled);
+                assert_eq!(a11y.is_active(), !force_disabled && active);
+            }
+        }
     }
 
     #[test]
@@ -947,5 +1072,126 @@ mod tests {
 
         let update = a11y.end_frame(Default::default());
         assert_eq!(update.focus, a);
+    }
+
+    #[gpui::test]
+    fn reused_views_keep_their_nodes_focus_and_listeners(cx: &mut crate::TestAppContext) {
+        use crate::{
+            AnyWindowHandle, AppContext, Context, Entity, FocusHandle, InteractiveElement,
+            IntoElement, ParentElement, Render, StatefulInteractiveElement, Styled, Window, div,
+            px,
+        };
+        use std::{cell::Cell, rc::Rc};
+
+        struct Button {
+            label: &'static str,
+            focus: FocusHandle,
+            renders: Rc<Cell<usize>>,
+            presses: Rc<Cell<usize>>,
+        }
+
+        impl Render for Button {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                self.renders.set(self.renders.get() + 1);
+                let presses = self.presses.clone();
+                div()
+                    .id("button")
+                    .role(Role::Button)
+                    .aria_label(self.label)
+                    .track_focus(&self.focus)
+                    .size(px(10.))
+                    .on_a11y_action(accesskit::Action::Click, move |_, _, _| {
+                        presses.set(presses.get() + 1)
+                    })
+            }
+        }
+
+        struct Host(Entity<Button>, Entity<Button>);
+
+        impl Render for Host {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                div()
+                    .id("host")
+                    .role(Role::Group)
+                    .child(self.0.clone())
+                    .child(self.1.clone())
+            }
+        }
+
+        let renders = Rc::new(Cell::new(0));
+        let presses = Rc::new(Cell::new(0));
+        let button = |label, cx: &mut crate::TestAppContext| {
+            let (renders, presses) = (renders.clone(), presses.clone());
+            cx.new(|cx| Button {
+                label,
+                focus: cx.focus_handle(),
+                renders,
+                presses,
+            })
+        };
+        let (first, second) = (button("first", cx), button("second", cx));
+        let window = cx.add_window({
+            let (first, second) = (first.clone(), second.clone());
+            move |_, _| Host(first, second)
+        });
+        let window = AnyWindowHandle::from(window);
+        let draw = |cx: &mut crate::TestAppContext| {
+            cx.update_window(window, |_, window, cx| {
+                window.draw(cx).clear(cx);
+                window.a11y_tree().unwrap().clone()
+            })
+            .unwrap()
+        };
+        let find = |tree: &TreeUpdate, label: &str| {
+            tree.nodes
+                .iter()
+                .find(|(_, node)| node.label() == Some(label))
+                .map(|(id, _)| *id)
+                .unwrap()
+        };
+
+        cx.update_window(window, |_, window, cx| {
+            window.set_a11y_forced(true);
+            let focus = second.read(cx).focus.clone();
+            focus.focus(window, cx);
+        })
+        .unwrap();
+        let before = draw(cx);
+        let second_id = find(&before, "second");
+        assert_eq!(before.focus, second_id);
+
+        let renders_before = renders.get();
+        first.update(cx, |button, cx| {
+            button.label = "changed";
+            cx.notify();
+        });
+        let after = draw(cx);
+        assert_eq!(
+            renders.get(),
+            renders_before + 1,
+            "only the changed view renders"
+        );
+
+        let mut expected = before.clone();
+        let first_id = find(&before, "first");
+        for (id, node) in &mut expected.nodes {
+            if *id == first_id {
+                node.set_label("changed");
+            }
+        }
+        assert_eq!(
+            after, expected,
+            "the reused view's nodes and focus are unchanged"
+        );
+
+        cx.update_window(window, |_, window, cx| {
+            window.perform_a11y_action(second_id, accesskit::Action::Click, None, cx)
+        })
+        .unwrap();
+        assert_eq!(
+            presses.get(),
+            1,
+            "the reused view's action listener survives"
+        );
     }
 }

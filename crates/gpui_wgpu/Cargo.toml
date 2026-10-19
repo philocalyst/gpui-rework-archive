@@ -11,11 +11,11 @@ workspace = true
 
 [lib]
 path = "src/gpui_wgpu.rs"
-doctest = false
 
 [features]
 default = []
 test-support = ["gpui/test-support", "dep:image"]
+bench-support = ["gpui/bench-support", "dep:image"]
 custom-gpu = ["gpui/custom-gpu"]
 wgpu-surfaces = ["gpui/wgpu-surfaces"]
 
@@ -39,10 +39,11 @@ wgsl-rs.workspace = true
 pollster.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
-core-foundation.workspace = true
-core-video.workspace = true
 metal.workspace = true
 objc2.workspace = true
+objc2-core-foundation.workspace = true
+objc2-core-video = { workspace = true, features = ["objc2", "CVPixelBuffer", "CVPixelBufferIOSurface", "CVMetalTexture", "CVMetalTextureCache", "CVReturn", "objc2-io-surface", "objc2-metal"] }
+objc2-io-surface = { version = "0.3", default-features = false, features = ["std", "objc2-core-foundation", "IOSurfaceRef"] }
 objc2-metal = "0.3"
 
 [target.'cfg(target_os = "windows")'.dependencies]

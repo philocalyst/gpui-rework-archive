@@ -86,6 +86,13 @@ impl WgpuRenderer {
         let width = target.size.width.0 as u32;
         let height = target.size.height.0 as u32;
         let bytes_per_row = width * 4;
+        let output_len = (bytes_per_row as usize)
+            .checked_mul(height as usize)
+            .ok_or_else(|| anyhow::anyhow!("offscreen image size overflowed host memory"))?;
+        let mut pixels = Vec::new();
+        pixels.try_reserve_exact(output_len).map_err(|error| {
+            anyhow::anyhow!("failed to allocate offscreen image pixels: {error}")
+        })?;
         let (sender, receiver) = std::sync::mpsc::sync_channel(1);
         target
             .readback
@@ -106,7 +113,6 @@ impl WgpuRenderer {
             .map_err(|error| anyhow::anyhow!("failed to map offscreen readback: {error}"))?;
 
         let mapped = target.readback.slice(..).get_mapped_range();
-        let mut pixels = Vec::with_capacity(bytes_per_row as usize * height as usize);
         for row in mapped.chunks_exact(target.padded_bytes_per_row as usize) {
             pixels.extend_from_slice(&row[..bytes_per_row as usize]);
         }
@@ -150,6 +156,11 @@ pub struct WgpuHeadlessRenderer {
 }
 
 impl WgpuHeadlessRenderer {
+    /// Returns the active adapter's maximum 2D texture dimension.
+    pub fn max_texture_size(&self) -> u32 {
+        self.renderer.max_texture_size()
+    }
+
     pub fn new() -> anyhow::Result<Self> {
         let context = WgpuContext::new_headless(None)?;
         let renderer = WgpuRenderer::new_headless(
@@ -232,5 +243,67 @@ impl gpui::PlatformHeadlessRenderer for WgpuHeadlessRenderer {
 
     fn sprite_atlas(&self) -> Arc<dyn gpui::PlatformAtlas> {
         self.renderer.sprite_atlas().clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::WgpuHeadlessRenderer;
+    use gpui::{
+        AtlasKey, Bounds, ContentMask, Corners, DevicePixels, ImageId, PlatformAtlas,
+        PolychromeSprite, RenderImageParams, ScaledPixels, Scene, ShaderBool, Size,
+    };
+    use std::borrow::Cow;
+
+    #[test]
+    fn skips_sprites_with_released_atlas_textures() -> anyhow::Result<()> {
+        let mut renderer = WgpuHeadlessRenderer::new()?;
+        let atlas = renderer.renderer.sprite_atlas().clone();
+        let key = AtlasKey::Image(RenderImageParams {
+            image_id: ImageId(1),
+            frame_index: 0,
+        });
+        let tile_size = Size {
+            width: DevicePixels(1),
+            height: DevicePixels(1),
+        };
+        let mut build = || Ok(Some((tile_size, Cow::Owned(vec![255, 255, 255, 255]))));
+        let tile = atlas
+            .get_or_insert_with(key.clone(), &mut build)?
+            .expect("test image should be inserted");
+        assert!(atlas.get_texture_info(tile.texture_id).is_some());
+        atlas.remove(&key);
+        assert!(atlas.get_texture_info(tile.texture_id).is_none());
+
+        let bounds = Bounds {
+            origin: gpui::Point {
+                x: ScaledPixels(0.0),
+                y: ScaledPixels(0.0),
+            },
+            size: Size {
+                width: ScaledPixels(8.0),
+                height: ScaledPixels(8.0),
+            },
+        };
+        let mut scene = Scene::default();
+        scene.insert_primitive(PolychromeSprite {
+            order: 0,
+            grayscale: ShaderBool::default(),
+            opacity: 1.0,
+            corner_smoothing: 0.0,
+            bounds,
+            content_mask: ContentMask {
+                bounds,
+                ..ContentMask::default()
+            },
+            corner_radii: Corners::default(),
+            tile,
+        });
+        scene.finish();
+
+        let image = renderer.renderer.render_to_image(&scene)?;
+
+        assert!(image.pixels().all(|pixel| pixel.0 == [0, 0, 0, 255]));
+        Ok(())
     }
 }

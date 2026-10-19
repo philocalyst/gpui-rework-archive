@@ -28,24 +28,19 @@
 use crate::{PaintQuad, TextAlign};
 
 #[cfg(test)]
-use crate::{
-    AnyWindowHandle, Context, HighlightStyle, InputEvent, Keystroke, StyledText, TestAppContext,
-    canvas, hsla, util::FluentBuilder,
-};
-
-#[cfg(test)]
-use std::{cell::Cell, rc::Weak};
+use crate::{HighlightStyle, StyledText, hsla};
 
 use crate::{
     Action, AnyDrag, AnyElement, AnyTooltip, AnyView, App, AppContext, Bounds, ClickEvent,
     CursorStyle, DispatchPhase, Display, Element, ElementId, Entity, EntityId, ExternalDragPayload,
-    FocusHandle, Global, GlobalElementId, Hitbox, HitboxBehavior, HitboxId, InspectorElementId,
-    IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton, KeyboardClickEvent,
-    LayoutId, ModifiersChangedEvent, MouseButton, MouseClickEvent, MouseDownEvent, MouseExitEvent,
-    MouseMoveEvent, MousePressureEvent, MouseUpEvent, OngoingScroll, Overflow, ParentElement,
-    PinchEvent, Pixels, Point, PointerChangeCause, Render, ScrollWheelEvent, SharedString, Size,
-    Style, StyleRefinement, StyleTransitionContext, StyleTransitionState, StyleTransitions, Styled,
-    Task, TooltipId, Visibility, Window, WindowControlArea, point, px, size,
+    FileDropEvent, FocusHandle, Global, GlobalElementId, Hitbox, HitboxBehavior, HitboxId,
+    InspectorElementId, IntoElement, IsZero, KeyContext, KeyDownEvent, KeyUpEvent, KeyboardButton,
+    KeyboardClickEvent, LayoutId, LongPressEvent, ModifiersChangedEvent, MouseButton,
+    MouseClickEvent, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MousePressureEvent,
+    MouseUpEvent, OngoingScroll, Overflow, ParentElement, PinchEvent, Pixels, Point,
+    PointerChangeCause, Render, ScrollWheelEvent, SharedString, Size, Style, StyleRefinement,
+    StyleTransitionContext, StyleTransitionState, StyleTransitions, Styled, Task, TooltipId,
+    TouchPhase, Visibility, Window, WindowControlArea, point, px, size,
 };
 use collections::HashMap;
 use gpui_util::ResultExt;
@@ -390,6 +385,28 @@ impl Interactivity {
             }));
     }
 
+    /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
+    /// leaves this element's window while the element is hovered.
+    ///
+    /// This is a window-local exit event, not notification that the platform drag session ended.
+    /// The imperative API equivalent to [`InteractiveElement::on_file_drop_exit`].
+    ///
+    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    pub fn on_file_drop_exit(
+        &mut self,
+        listener: impl Fn(&FileDropEvent, &mut Window, &mut App) + 'static,
+    ) {
+        self.file_drop_exit_listeners
+            .push(Box::new(move |event, phase, hitbox, window, cx| {
+                if phase == DispatchPhase::Bubble
+                    && matches!(event, FileDropEvent::Exited)
+                    && hitbox.id.is_hovered_ignoring_last_input(window)
+                {
+                    (listener)(event, window, cx);
+                }
+            }));
+    }
+
     /// Runs `listener` for pointer moves during a drag of type `T`, in the capture phase.
     ///
     /// The listener runs for every move while a drag of type `T` is active, including moves outside this element.
@@ -679,21 +696,6 @@ impl Interactivity {
         }));
     }
 
-    /// Sets a style function that applies while a dragged value is over this element.
-    ///
-    /// The style applies only if this element has a drop listener for the dragged type. Use
-    /// [`DropListener::on_drag_over`] when the style depends on the dragged type. This is the imperative equivalent of
-    /// [`InteractiveElement::on_drag_over_any`].
-    pub fn on_drag_over_any(
-        &mut self,
-        predicate: impl Fn(StyleRefinement, &dyn Any, &mut Window, &mut App) -> StyleRefinement
-        + 'static,
-    ) {
-        self.drag_over_style = Some(Box::new(move |value, window, app| {
-            predicate(StyleRefinement::default(), value, window, app)
-        }));
-    }
-
     /// Runs `listener` when this element is clicked, or when it is activated from the keyboard.
     ///
     /// A mouse click fires when the left button is pressed and released over the element without the pointer
@@ -804,10 +806,29 @@ impl Interactivity {
         });
     }
 
+    /// Sets a style function that applies while a dragged value is over this element.
+    ///
+    /// The style applies only if this element has a drop listener for the dragged type. Use
+    /// [`DropListener::on_drag_over`] when the style depends on the dragged type. This is the imperative equivalent of
+    /// [`InteractiveElement::on_drag_over_any`].
+    pub fn on_drag_over_any(
+        &mut self,
+        predicate: impl Fn(StyleRefinement, &dyn Any, &mut Window, &mut App) -> StyleRefinement
+        + 'static,
+    ) {
+        self.drag_over_style = Some(Box::new(move |value, window, app| {
+            predicate(StyleRefinement::default(), value, window, app)
+        }));
+    }
+
     /// Runs `listener` with `true` when the pointer enters this element and with `false` when it leaves.
     ///
     /// Transitions caused by layout changes under a stationary pointer also run the listener. The listener does not
     /// run while a drag is in progress. This is the imperative equivalent of [`StatefulInteractiveElement::on_hover`].
+    ///
+    /// After keyboard input, hover stays off until the pointer moves, a button is pressed or the screen is touched. Set
+    /// [`HoverListenerMode::InputModalityIndependent`] with [`Self::hover_listener_mode`] to keep tracking it.
+    #[inline(always)]
     pub fn on_hover(&mut self, listener: impl Fn(&bool, &mut Window, &mut App) + 'static)
     where
         Self: Sized,
@@ -850,8 +871,8 @@ impl Interactivity {
     /// Sets a function that builds a tooltip view shown while the pointer rests over this element.
     ///
     /// The tooltip is hidden as soon as the pointer leaves the element, so the user cannot move onto it. Use
-    /// [`Interactivity::hoverable_tooltip`] for a tooltip that stays open. This is the imperative equivalent of
-    /// [`StatefulInteractiveElement::tooltip`].
+    /// [`Interactivity::hoverable_tooltip`] for a tooltip that stays open. A long press on a touch screen also shows
+    /// it. This is the imperative equivalent of [`StatefulInteractiveElement::tooltip`].
     ///
     /// # Panics
     ///
@@ -868,6 +889,16 @@ impl Interactivity {
             build: Rc::new(build_tooltip),
             hoverable: false,
         });
+    }
+
+    /// Sets how [`Self::on_hover`] responds to key presses while the mouse is stationary.
+    /// This affects only the hover listener, not hover styles or tooltips. The imperative API
+    /// equivalent to [`StatefulInteractiveElement::hover_listener_mode`].
+    pub fn hover_listener_mode(&mut self, mode: HoverListenerMode)
+    where
+        Self: Sized,
+    {
+        self.hover_listener_mode = mode;
     }
 
     /// Sets a function that builds a tooltip view that stays open while the pointer is over it.
@@ -896,8 +927,8 @@ impl Interactivity {
 
     /// Sets how long the pointer must rest over this element before its tooltip appears.
     ///
-    /// The default is 500 milliseconds. This is the imperative equivalent of
-    /// [`StatefulInteractiveElement::tooltip_show_delay`].
+    /// The default is 500 milliseconds. A long press on a touch screen shows the tooltip as soon as it's recognized.
+    /// This is the imperative equivalent of [`StatefulInteractiveElement::tooltip_show_delay`].
     pub fn tooltip_show_delay(&mut self, delay: Duration) {
         self.tooltip_show_delay = Some(delay);
     }
@@ -977,6 +1008,21 @@ pub trait InteractiveElement: Sized {
     ///
     /// Every other method on this trait is implemented by calling this one, so implement it by returning a field.
     fn interactivity(&mut self) -> &mut Interactivity;
+
+    /// Bind the given callback to [`FileDropEvent::Exited`] when a platform file drag
+    /// leaves this element's window while the element is hovered.
+    ///
+    /// This is a window-local exit event, not notification that the platform drag session ended.
+    /// The fluent API equivalent to [`Interactivity::on_file_drop_exit`].
+    ///
+    /// See [`Context::listener`](crate::Context::listener) to get access to a view's state from this callback.
+    fn on_file_drop_exit(
+        mut self,
+        listener: impl Fn(&FileDropEvent, &mut Window, &mut App) + 'static,
+    ) -> Self {
+        self.interactivity().on_file_drop_exit(listener);
+        self
+    }
 
     /// Animates changes to this element's style properties over time.
     ///
@@ -1146,19 +1192,20 @@ pub trait InteractiveElement: Sized {
         self
     }
 
-    #[cfg(any(test, feature = "test-support"))]
     /// Sets a name for this element that tests can use to find its bounds.
     ///
     /// Pass the name to [`VisualTestContext::debug_bounds`](crate::VisualTestContext::debug_bounds) to get the bounds of
-    /// the element in a test. This method is available only with the `test-support` feature or in tests; in other
-    /// builds it is a no-op.
+    /// the element in a test. Selectors are recorded only in tests and in debug builds with the `test-support` feature;
+    /// elsewhere this is a no-op, so `test-support` can stay enabled in release builds.
+    #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
+    #[inline(always)]
     fn debug_selector(mut self, f: impl FnOnce() -> String) -> Self {
         self.interactivity().debug_selector = Some(f());
         self
     }
 
-    #[cfg(not(any(test, feature = "test-support")))]
-    /// Does nothing in this build. The debug selector is available only in tests and with `test-support`.
+    /// Does nothing in this build. Selectors are recorded only in tests and in debug builds with `test-support`.
+    #[cfg(not(any(test, all(debug_assertions, feature = "test-support"))))]
     #[inline]
     fn debug_selector(self, _: impl FnOnce() -> String) -> Self {
         self
@@ -1360,6 +1407,7 @@ pub trait InteractiveElement: Sized {
         self.interactivity().capture_pinch(listener);
         self
     }
+
     /// Runs `listener` when an action of type `A` is dispatched to this element, during the capture phase.
     ///
     /// The capture phase runs before the bubble phase, so the listener sees the action before this element's
@@ -1471,6 +1519,7 @@ pub trait InteractiveElement: Sized {
     /// Runs `listener` when the set of pressed modifier keys changes.
     ///
     /// The fluent equivalent of [`Interactivity::on_modifiers_changed`].
+    #[inline(always)]
     fn on_modifiers_changed(
         mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,
@@ -1924,6 +1973,7 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     /// The listener receives the action data the client sent, if any, along with the window and the app. Use it to let a
     /// screen reader press a button or change a value. See the [accessibility guide](crate::_documentation::guides::accessibility)
     /// for an overview.
+    #[inline(always)]
     fn on_a11y_action(
         mut self,
         action: accesskit::Action,
@@ -2057,6 +2107,7 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     ///         }
     ///     });
     /// ```
+    #[inline(always)]
     fn on_click(mut self, listener: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> Self
     where
         Self: Sized,
@@ -2164,11 +2215,25 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     ///
     /// The listener does not run while a drag is in progress. Transitions caused by layout changes under a stationary
     /// pointer also run it.
+    ///
+    /// After keyboard input, hover stays off until the pointer moves, a button is pressed or the screen is touched. Set
+    /// [`HoverListenerMode::InputModalityIndependent`] with [`Self::hover_listener_mode`] to keep tracking it.
     fn on_hover(mut self, listener: impl Fn(&bool, &mut Window, &mut App) + 'static) -> Self
     where
         Self: Sized,
     {
         self.interactivity().on_hover(listener);
+        self
+    }
+
+    /// Sets how [`Self::on_hover`] responds to key presses while the mouse is stationary.
+    /// This affects only the hover listener, not hover styles or tooltips. The fluent API
+    /// equivalent to [`Interactivity::hover_listener_mode`].
+    fn hover_listener_mode(mut self, mode: HoverListenerMode) -> Self
+    where
+        Self: Sized,
+    {
+        self.interactivity().hover_listener_mode(mode);
         self
     }
 
@@ -2189,8 +2254,8 @@ pub trait StatefulInteractiveElement: InteractiveElement {
     ///
     /// The tooltip appears after the show delay, which is 500 milliseconds by default. It hides when the pointer leaves
     /// the element, so the user cannot move onto it. It is not shown while a button is pressed on the element or after
-    /// keyboard input. Use [`hoverable_tooltip`](Self::hoverable_tooltip) for a tooltip that stays open. Tooltips need an
-    /// id.
+    /// keyboard input. A long press on a touch screen also shows it. Use [`hoverable_tooltip`](Self::hoverable_tooltip)
+    /// for a tooltip that stays open. Tooltips need an id.
     ///
     /// # Example
     ///
@@ -2236,7 +2301,7 @@ pub trait StatefulInteractiveElement: InteractiveElement {
 
     /// Sets how long the pointer must rest over this element before its tooltip appears.
     ///
-    /// The default is 500 milliseconds.
+    /// The default is 500 milliseconds. A long press on a touch screen shows the tooltip as soon as it's recognized.
     fn tooltip_show_delay(mut self, delay: Duration) -> Self
     where
         Self: Sized,
@@ -2360,6 +2425,7 @@ pub struct DropListener<T: ?Sized> {
     /// Runs when a value of this type is released over the element and [`can_drop`](DropListener::can_drop) allows it.
     pub on_drop: Option<OnDropFn<T>>,
 }
+
 impl<T> Default for DropListener<T> {
     fn default() -> Self {
         Self {
@@ -2369,6 +2435,7 @@ impl<T> Default for DropListener<T> {
         }
     }
 }
+
 impl<T: Sized + 'static> DropListener<T> {
     /// Sets a predicate that decides whether this handler receives drops, which runs only while the pointer is over the element.
     ///
@@ -2463,6 +2530,29 @@ impl<T: Sized + 'static> DropListener<T> {
             can_drop,
             on_drag_over,
             on_drop,
+        }
+    }
+}
+
+/// Controls how [`StatefulInteractiveElement::on_hover`] responds to key presses while the mouse
+/// is stationary.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum HoverListenerMode {
+    /// Use input-modality-aware hit testing. Keyboard input suppresses hover until the mouse moves
+    /// again, unless pointer capture or an active mouse-down interaction keeps the listener hovered.
+    #[default]
+    InputModalityAware,
+    /// Use hit testing even when the last input was from the keyboard. This changes only
+    /// keyboard-modality filtering; all other [`StatefulInteractiveElement::on_hover`] behavior
+    /// remains unchanged.
+    InputModalityIndependent,
+}
+
+impl HoverListenerMode {
+    fn is_hovered(self, hitbox: &Hitbox, window: &Window) -> bool {
+        match self {
+            Self::InputModalityAware => hitbox.is_hovered(window),
+            Self::InputModalityIndependent => hitbox.id.is_hovered_ignoring_last_input(window),
         }
     }
 }
@@ -2818,10 +2908,6 @@ impl Element for Div {
             (child_max - child_min).into()
         };
 
-        if let Some(scroll_handle) = self.interactivity.tracked_scroll_handle.as_ref() {
-            scroll_handle.scroll_to_active_item();
-        }
-
         self.interactivity.prepaint(
             global_id,
             inspector_id,
@@ -3045,6 +3131,7 @@ pub struct Interactivity {
     pub(crate) click_listeners: Vec<ClickListener>,
     pub(crate) aux_click_listeners: Vec<ClickListener>,
     pub(crate) drag_listener: Option<DragListener>,
+    pub(crate) hover_listener_mode: HoverListenerMode,
     pub(crate) hover_region_listeners: Vec<Box<dyn HoverRegionListener>>,
     /// Resolves a cursor from the current pointer position and this element's bounds.
     pub(crate) cursor_style_resolver: Option<CursorStyleResolver>,
@@ -3066,7 +3153,7 @@ pub struct Interactivity {
     #[cfg(any(feature = "inspector", debug_assertions))]
     pub(crate) source_location: Option<&'static core::panic::Location<'static>>,
 
-    #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
+    #[cfg(any(test, feature = "test-support"))]
     pub(crate) debug_selector: Option<String>,
 }
 
@@ -3112,6 +3199,10 @@ impl Interactivity {
         cx: &mut App,
         f: impl FnOnce(Style, &mut Window, &mut App) -> LayoutId,
     ) -> LayoutId {
+        if let Some(scroll_handle) = &self.tracked_scroll_handle {
+            cx.note_revision(&scroll_handle.revision());
+        }
+
         #[cfg(any(feature = "inspector", debug_assertions))]
         window.with_inspector_state(
             _inspector_id,
@@ -3375,7 +3466,13 @@ impl Interactivity {
                 .map(|handle| handle.0.borrow_mut());
             if let Some(mut scroll_handle_state) = tracked_scroll_handle.as_deref_mut() {
                 scroll_handle_state.overflow = style.overflow;
+                scroll_handle_state.bounds = bounds;
                 scroll_to_bottom = mem::take(&mut scroll_handle_state.scroll_to_bottom);
+                ScrollHandle::scroll_to_active_item_in_state(
+                    scroll_handle_state,
+                    bounds,
+                    style.overflow,
+                );
             }
 
             let rem_size = window.rem_size();
@@ -3455,11 +3552,9 @@ impl Interactivity {
                         .truncate(self.hover_region_listeners.len());
                 }
 
-                #[cfg(any(test, all(debug_assertions, feature = "test-support")))]
+                #[cfg(any(feature = "test-support", test))]
                 if let Some(debug_selector) = &self.debug_selector {
-                    window
-                        .next_frame
-                        .record_debug_bounds(debug_selector.clone(), bounds);
+                    window.record_debug_bounds(debug_selector.clone(), bounds);
                 }
 
                 self.paint_hover_group_handler(window, cx);
@@ -3904,17 +3999,18 @@ impl Interactivity {
                     .get_or_insert_with(Default::default)
                     .clone();
 
+                let current_view = window.current_view();
                 window.on_mouse_event({
                     let pending_mouse_down = pending_mouse_down.clone();
                     let hitbox = hitbox.clone();
                     let has_aux_click_listeners = !aux_click_listeners.is_empty();
-                    move |event: &MouseDownEvent, phase, window, _cx| {
+                    move |event: &MouseDownEvent, phase, window, cx| {
                         if phase == DispatchPhase::Bubble
                             && (event.button == MouseButton::Left || has_aux_click_listeners)
                             && hitbox.is_hovered(window)
                         {
                             *pending_mouse_down.borrow_mut() = Some(event.clone());
-                            window.refresh();
+                            cx.notify(current_view);
                         }
                     }
                 });
@@ -4027,7 +4123,7 @@ impl Interactivity {
                             let mut pending_mouse_down = pending_mouse_down.borrow_mut();
                             if pending_mouse_down.is_some() && hitbox.is_hovered(window) {
                                 captured_mouse_down = pending_mouse_down.take();
-                                window.refresh();
+                                cx.notify(current_view);
                             } else if pending_mouse_down.is_some() {
                                 // Clear the pending mouse down event (without firing click handlers)
                                 // if the hitbox is not being hovered.
@@ -4035,7 +4131,7 @@ impl Interactivity {
                                 // immediately after being clicked.
                                 // See https://github.com/zed-industries/zed/issues/24600 for more details
                                 pending_mouse_down.take();
-                                window.refresh();
+                                cx.notify(current_view);
                             }
                         }
                         // Fire click handlers during the bubble phase.
@@ -4072,6 +4168,7 @@ impl Interactivity {
                 for (listener, state) in self.hover_region_listeners.iter().zip(states) {
                     let observe = listener.bind(state);
                     let region_hitbox = hitbox.clone();
+                    let hover_listener_mode = self.hover_listener_mode;
                     let pending_mouse_down = element_state
                         .pending_mouse_down
                         .get_or_insert_with(Default::default)
@@ -4085,7 +4182,9 @@ impl Interactivity {
                             || !layout_changed && pending_mouse_down.borrow().is_some()
                         {
                             None
-                        } else if change.position.is_some() && !region_hitbox.is_hovered(window) {
+                        } else if change.position.is_some()
+                            && !hover_listener_mode.is_hovered(&region_hitbox, window)
+                        {
                             None
                         } else {
                             change.position
@@ -4149,12 +4248,13 @@ impl Interactivity {
                 .get_or_insert_with(Default::default)
                 .clone();
 
+            let current_view = window.current_view();
             {
                 let active_state = active_state.clone();
-                window.on_mouse_event(move |_: &MouseUpEvent, phase, window, _cx| {
+                window.on_mouse_event(move |_: &MouseUpEvent, phase, _window, cx| {
                     if phase == DispatchPhase::Capture && active_state.borrow().is_clicked() {
                         *active_state.borrow_mut() = ElementClickedState::default();
-                        window.refresh();
+                        cx.notify(current_view);
                     }
                 });
             }
@@ -4165,7 +4265,7 @@ impl Interactivity {
                     .as_ref()
                     .and_then(|group_active| GroupHitboxes::get(&group_active.group, cx));
                 let hitbox = hitbox.clone();
-                window.on_mouse_event(move |_: &MouseDownEvent, phase, window, _cx| {
+                window.on_mouse_event(move |_: &MouseDownEvent, phase, window, cx| {
                     if phase == DispatchPhase::Bubble && !window.default_prevented() {
                         let group_hovered = active_group_hitbox
                             .is_some_and(|group_hitbox_id| group_hitbox_id.is_hovered(window));
@@ -4175,7 +4275,7 @@ impl Interactivity {
                                 group: group_hovered,
                                 element: element_hovered,
                             };
-                            window.refresh();
+                            cx.notify(current_view);
                         }
                     }
                 });
@@ -4484,7 +4584,11 @@ impl Interactivity {
         style
     }
 
-    pub(crate) fn write_a11y_info(&self, node: &mut accesskit::Node) {
+    /// Writes this element's accessibility metadata and actions to an AccessKit node.
+    ///
+    /// A custom element that composes an `Interactivity` calls this from its
+    /// [`Element::write_a11y_info`] so the fluent accessibility properties land on its own node.
+    pub fn write_a11y_info(&self, node: &mut accesskit::Node) {
         if let Some(id) = &self.aria.author_id {
             node.set_author_id(id.to_string());
         }
@@ -4606,6 +4710,8 @@ pub struct InteractiveElementState {
     ongoing_scroll: Option<Rc<RefCell<OngoingScroll>>>,
     pub(crate) active_tooltip: Option<Rc<RefCell<Option<ActiveTooltip>>>>,
     pub(crate) style_transitions: Option<Box<StyleTransitionState>>,
+
+    long_press_tooltip_active: Option<Rc<Cell<bool>>>,
 }
 
 /// Whether an element, or a group that contains it, is pressed by the mouse.
@@ -5198,6 +5304,7 @@ impl ScrollAnchor {
             last_origin: Default::default(),
         }
     }
+
     /// Scrolls the anchored element's parent so that the anchored element is at the top of the viewport.
     ///
     /// The scroll happens on the next frame, after the anchored element has been painted and its position is known.
@@ -5214,6 +5321,8 @@ impl ScrollAnchor {
 
 #[derive(Default, Debug)]
 struct ScrollHandleState {
+    /// Bumped by the methods that move the scroll position from outside the element.
+    revision: crate::Revision,
     offset: Rc<RefCell<Point<Pixels>>>,
     ongoing_scroll: Rc<RefCell<OngoingScroll>>,
     bounds: Bounds<Pixels>,
@@ -5263,6 +5372,10 @@ impl ScrollHandle {
     /// Creates a new scroll handle with no scroll state. The offset is zero until an element is tracked with it.
     pub fn new() -> Self {
         Self(Rc::default())
+    }
+
+    pub(crate) fn revision(&self) -> crate::Revision {
+        self.0.borrow().revision.clone()
     }
 
     /// Returns the current scroll offset.
@@ -5335,6 +5448,7 @@ impl ScrollHandle {
     /// The scroll happens during the next prepaint. If the element is not scrollable on the axis, nothing happens.
     pub fn scroll_to_item(&self, ix: usize) {
         let mut state = self.0.borrow_mut();
+        state.revision.bump();
         state.active_item = Some(ScrollActiveItem {
             index: ix,
             strategy: ScrollStrategy::default(),
@@ -5346,6 +5460,7 @@ impl ScrollHandle {
     /// The scroll happens during the next prepaint.
     pub fn scroll_to_top_of_item(&self, ix: usize) {
         let mut state = self.0.borrow_mut();
+        state.revision.bump();
         state.active_item = Some(ScrollActiveItem {
             index: ix,
             strategy: ScrollStrategy::Top,
@@ -5355,9 +5470,19 @@ impl ScrollHandle {
     /// Scrolls the minimal amount to either ensure that the child is
     /// fully visible or the top element of the view depends on the
     /// scroll strategy
+    #[cfg(test)]
     fn scroll_to_active_item(&self) {
         let mut state = self.0.borrow_mut();
+        let viewport_bounds = state.bounds;
+        let overflow = state.overflow;
+        Self::scroll_to_active_item_in_state(&mut state, viewport_bounds, overflow);
+    }
 
+    fn scroll_to_active_item_in_state(
+        state: &mut ScrollHandleState,
+        viewport_bounds: Bounds<Pixels>,
+        overflow: Point<Overflow>,
+    ) {
         let Some(active_item) = state.active_item else {
             return;
         };
@@ -5368,32 +5493,32 @@ impl ScrollHandle {
 
                 match active_item.strategy {
                     ScrollStrategy::FirstVisible => {
-                        if state.overflow.y == Overflow::Scroll {
+                        if overflow.y == Overflow::Scroll {
                             let child_height = bounds.size.height;
-                            let viewport_height = state.bounds.size.height;
+                            let viewport_height = viewport_bounds.size.height;
                             if child_height > viewport_height {
-                                scroll_offset.y = state.bounds.top() - bounds.top();
-                            } else if bounds.top() + scroll_offset.y < state.bounds.top() {
-                                scroll_offset.y = state.bounds.top() - bounds.top();
-                            } else if bounds.bottom() + scroll_offset.y > state.bounds.bottom() {
-                                scroll_offset.y = state.bounds.bottom() - bounds.bottom();
+                                scroll_offset.y = viewport_bounds.top() - bounds.top();
+                            } else if bounds.top() + scroll_offset.y < viewport_bounds.top() {
+                                scroll_offset.y = viewport_bounds.top() - bounds.top();
+                            } else if bounds.bottom() + scroll_offset.y > viewport_bounds.bottom() {
+                                scroll_offset.y = viewport_bounds.bottom() - bounds.bottom();
                             }
                         }
                     }
                     ScrollStrategy::Top => {
-                        scroll_offset.y = state.bounds.top() - bounds.top();
+                        scroll_offset.y = viewport_bounds.top() - bounds.top();
                     }
                 }
 
-                if state.overflow.x == Overflow::Scroll {
+                if overflow.x == Overflow::Scroll {
                     let child_width = bounds.size.width;
-                    let viewport_width = state.bounds.size.width;
+                    let viewport_width = viewport_bounds.size.width;
                     if child_width > viewport_width {
-                        scroll_offset.x = state.bounds.left() - bounds.left();
-                    } else if bounds.left() + scroll_offset.x < state.bounds.left() {
-                        scroll_offset.x = state.bounds.left() - bounds.left();
-                    } else if bounds.right() + scroll_offset.x > state.bounds.right() {
-                        scroll_offset.x = state.bounds.right() - bounds.right();
+                        scroll_offset.x = viewport_bounds.left() - bounds.left();
+                    } else if bounds.left() + scroll_offset.x < viewport_bounds.left() {
+                        scroll_offset.x = viewport_bounds.left() - bounds.left();
+                    } else if bounds.right() + scroll_offset.x > viewport_bounds.right() {
+                        scroll_offset.x = viewport_bounds.right() - bounds.right();
                     }
                 }
                 None
@@ -5406,6 +5531,7 @@ impl ScrollHandle {
     /// Scrolls to the bottom of the content on the next prepaint.
     pub fn scroll_to_bottom(&self) {
         let mut state = self.0.borrow_mut();
+        state.revision.bump();
         state.scroll_to_bottom = true;
     }
 
@@ -5415,6 +5541,7 @@ impl ScrollHandle {
     /// down makes the offset more negative. Values outside the scrollable range are clamped during the next prepaint.
     pub fn set_offset(&self, mut position: Point<Pixels>) {
         let state = self.0.borrow();
+        state.revision.bump();
         *state.offset.borrow_mut() = position;
     }
 
@@ -5460,6 +5587,11 @@ impl ScrollHandle {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        AnyWindowHandle, Context, GestureTuning, InputEvent, Keystroke, MouseMoveEvent,
+        TestAppContext, TouchEvent, TouchId, canvas, util::FluentBuilder as _,
+    };
+    use std::{cell::Cell, rc::Weak};
 
     #[gpui::test]
     fn tracked_scroll_reports_children_to_prepaint_listener(cx: &mut TestAppContext) {
@@ -5502,6 +5634,61 @@ mod tests {
         assert_eq!(bounds[1].top(), bounds[0].bottom());
         assert_eq!(scroll_handle.bounds_for_item(0), Some(bounds[0]));
         assert_eq!(scroll_handle.bounds_for_item(1), Some(bounds[1]));
+    }
+
+    #[gpui::test]
+    fn tracked_scroll_item_uses_current_viewport_when_it_shrinks(cx: &mut TestAppContext) {
+        struct ResizableScrollView {
+            height: Pixels,
+            handle: ScrollHandle,
+        }
+
+        impl Render for ResizableScrollView {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                div()
+                    .id("resizable-scroll")
+                    .w(px(100.))
+                    .h(self.height)
+                    .flex()
+                    .flex_col()
+                    .overflow_y_scroll()
+                    .track_scroll(&self.handle)
+                    .children((0..4).map(|_| div().h(px(30.)).flex_shrink_0()))
+            }
+        }
+
+        let handle = ScrollHandle::new();
+        let window = cx.open_window(size(px(100.), px(100.)), |_, _| ResizableScrollView {
+            height: px(100.),
+            handle: handle.clone(),
+        });
+        cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+
+        let old_viewport = handle.bounds();
+        let target = handle.bounds_for_item(2).unwrap();
+        assert_eq!(old_viewport.size.height, px(100.));
+        assert!(target.top() >= old_viewport.top());
+        assert!(target.bottom() <= old_viewport.bottom());
+
+        window
+            .update(cx, |view, window, _cx| {
+                view.height = px(40.);
+                window.refresh();
+            })
+            .unwrap();
+        // This child was visible in the previous 100px viewport, but must
+        // move for the new 40px viewport in the frame that lays out the resize.
+        handle.scroll_to_item(2);
+        cx.update_window(window.into(), |_, window, cx| window.draw(cx).clear(cx))
+            .unwrap();
+
+        let viewport = handle.bounds();
+        let target = handle.bounds_for_item(2).unwrap();
+        let offset = handle.offset();
+        assert_eq!(viewport.size.height, px(40.));
+        assert!(target.top() + offset.y >= viewport.top());
+        assert!(target.bottom() + offset.y <= viewport.bottom());
     }
 
     #[gpui::test]

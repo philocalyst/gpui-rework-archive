@@ -815,10 +815,11 @@ mod tests {
             &sampler,
         );
 
-        let mut encoder =
-            device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        upload.finish(&mut encoder);
-        let _commands = encoder.finish();
+        let upload_commands = upload.finish(device);
+        assert!(
+            upload_commands.is_some(),
+            "non-empty downlevel batches need an upload copy"
+        );
         Ok(())
     }
 }

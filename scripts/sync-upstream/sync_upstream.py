@@ -96,6 +96,9 @@ TRACKED_CRATES: dict[str, str] = {
     # which MOVED crates/util/src/rel_path.rs into it. Tracked so the split arrives through the
     # merge (see MOVE detection below) instead of leaving a stale duplicate in gpui_zed_util.
     "gpui_path": "path",
+    "gpui_apple": "gpui_apple",
+    "gpui_ios": "gpui_ios",
+    "gpui_bench_metrics": "bench_metrics",
 }
 
 VENDOR_BRANCH: str = _env("SYNC_VENDOR_BRANCH", "vendor/zed-gpui")
@@ -289,15 +292,26 @@ def replay_commit(tree: str, parent: str, original: str) -> str:
     return git("commit-tree", tree, "-p", parent, env=env, input_text=body).stdout.strip()
 
 
+def check_tracked_crates(sha: str) -> None:
+    """Fail when upstream has a gpui crate that TRACKED_CRATES doesn't map, instead of dropping it."""
+    present = {entry for entry in gout("ls-tree", "-d", "--name-only", f"{sha}:crates").split()
+               if entry.startswith("gpui")}
+    unknown = present - {up.split("/", 1)[0] for up in TRACKED_CRATES.values()}
+    if unknown:
+        die(f"upstream {sha[:12]} has unmapped GPUI crate(s): {', '.join(sorted(unknown))}; "
+            "add them to TRACKED_CRATES")
+
+
 def build_vendor_history(parent: str, frm: str, to: str) -> str:
     """Replay upstream gpui-touching commits frm..to as a filtered chain onto <parent>.
 
-    Merge commits and commits with no net change inside the tracked crates are dropped.
-    Echoes the new tip sha.
+    Merge commits are replayed as ordinary commits, so changes made only while merging aren't
+    lost. Commits with no net change inside the tracked crates are dropped. Echoes the new tip.
     """
+    check_tracked_crates(to)
     prev = parent
     replayed = 0
-    listing = gout("rev-list", "--reverse", "--topo-order", "--no-merges",
+    listing = gout("rev-list", "--reverse", "--topo-order",
                    f"{frm}..{to}", "--", *tracked_pathspec())
     for commit in listing.split():
         tree = filtered_tree(commit)
@@ -307,6 +321,8 @@ def build_vendor_history(parent: str, frm: str, to: str) -> str:
             continue  # no net change inside the tracked crates
         prev = replay_commit(tree, prev, commit)
         replayed += 1
+    if gout("rev-parse", f"{prev}^{{tree}}") != filtered_tree(to):
+        die(f"the filtered replay doesn't reproduce the tracked crates at {to[:12]}")
     log(f"replayed {replayed} upstream gpui commit(s) into vendor history")
     return prev
 

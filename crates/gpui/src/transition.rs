@@ -144,8 +144,12 @@ impl<T: Lerp + Clone + PartialEq + 'static> Transition<T> {
 
     fn sample(&self, cx: &mut App) -> Ref<'_, TransitionCache<T>> {
         if self.cache.borrow().value.is_none() {
-            let mut state = self.state.as_mut(cx);
-            let sample = state.sample(Instant::now());
+            // Sampling updates presentation bookkeeping, not the transition's logical goal.
+            // Avoid the mutable-borrow guard here because dropping it notifies every view that
+            // read this state, which would invalidate the frame that just sampled it.
+            let sample = self
+                .state
+                .update(cx, |state, _| state.sample(Instant::now()));
 
             *self.cache.borrow_mut() = TransitionCache {
                 value: Some(sample.value),

@@ -12,8 +12,8 @@ use std::{cell::Cell, panic::Location, rc::Rc};
 use gpui::{
     App, Bounds, Context, CursorStyle, DispatchPhase, Element, ElementId, GlobalElementId, Hitbox,
     HitboxBehavior, InspectorElementId, IntoElement, LayoutId, MouseButton, MouseDownEvent,
-    MouseMoveEvent, MouseUpEvent, Pixels, QuitMode, Render, Style, Window, WindowBounds,
-    WindowOptions, colors::Colors, div, fill, point, prelude::*, px, rgb, size,
+    MouseMoveEvent, MouseUpEvent, PaintQuad, Pixels, QuitMode, Render, Style, Window, WindowBounds,
+    WindowOptions, colors::Colors, div, point, prelude::*, px, rgb, size,
 };
 
 struct Slider {
@@ -117,10 +117,19 @@ impl Element for Slider {
         let radius = track_height / 2.;
         let filled = Bounds::new(track.origin, size(x - track.origin.x, track_height));
         let knob = Bounds::centered_at(point(x, track.center().y), size(knob_size, knob_size));
-        window.paint_quad(fill(track, colors.separator).corner_radii(radius));
-        window.paint_quad(fill(filled, accent).corner_radii(radius));
         window.paint_quad(
-            fill(knob, colors.background)
+            PaintQuad::new(track)
+                .background(colors.separator)
+                .corner_radii(radius),
+        );
+        window.paint_quad(
+            PaintQuad::new(filled)
+                .background(accent)
+                .corner_radii(radius),
+        );
+        window.paint_quad(
+            PaintQuad::new(knob)
+                .background(colors.background)
                 .corner_radii(knob.size.width / 2.)
                 .border_widths(px(2.))
                 .border_color(accent),

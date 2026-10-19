@@ -1464,13 +1464,58 @@ impl WindowProfiler {
         journal::end_foreground_turn();
     }
 
-    /// Records the start of a window draw. Pair it with [`Self::end_draw`].
+    /// Records when the frame signal for the frame the next draw will produce
+    /// fired. Coalesced signals report the first.
+    pub fn record_frame_signal(&mut self, signal_at: Option<Instant>) {
+        self.frame_signal_at = signal_at;
+    }
+
+    /// Sets the refresh interval of the window's display, which frames drawn
+    /// from now on are attributed to.
+    pub fn set_refresh_interval(&mut self, refresh_interval: Option<Duration>) {
+        self.refresh_interval = refresh_interval;
+    }
+
+    /// Records the beginning of a window draw.
     pub fn begin_draw(&mut self) {
         journal::begin_foreground_turn();
         let started_at = Instant::now();
         journal::record_frame_pending(self.window_id, started_at);
         self.active_activities
             .push(WindowActivity::Draw { started_at });
+    }
+
+    /// Records the phases of the window draw in progress.
+    pub fn record_draw_phases(&mut self, phases: DrawPhases) {
+        self.draw_phases = phases;
+    }
+
+    /// Records the start of one phase of drawing a view, returning its start
+    /// time to pass to [`WindowProfiler::end_view`].
+    pub fn begin_view(&mut self) -> Instant {
+        self.nested_view_time.push(Duration::ZERO);
+        Instant::now()
+    }
+
+    /// Records the end of a view phase begun at `start`, journaling it when
+    /// its own work reached [`VIEW_TIMING_FLOOR`].
+    pub fn end_view(&mut self, start: Instant, name: &'static str, phase: ViewPhase) {
+        let end = Instant::now();
+        let duration = end.saturating_duration_since(start);
+        let nested = self.nested_view_time.pop().unwrap_or_default();
+        if let Some(parent_nested) = self.nested_view_time.last_mut() {
+            *parent_nested += duration;
+        }
+        let self_duration = duration.saturating_sub(nested);
+        if self_duration >= VIEW_TIMING_FLOOR {
+            journal::record_view(ViewTiming {
+                name,
+                phase,
+                start,
+                end,
+                self_duration,
+            });
+        }
     }
 
     /// Records the end of the draw that [`Self::begin_draw`] started, and returns how long it took.
@@ -1793,6 +1838,43 @@ mod tests {
             .filter(|task| !task.poll_duration().is_zero())
             .count();
         assert_eq!(retained, 2, "only the 200 and 100 microsecond polls count");
+    }
+
+    #[test]
+    fn interruptions_drop_latency_samples_but_hiding_keeps_draw_work() {
+        for sleep in [false, true] {
+            let (_journal, _guard) = journal::install_test_foreground_journal(64, 4);
+            let id = WindowId::from(1);
+            let mut profiler = WindowProfiler::new(id).expect("valid histograms");
+            let old = Instant::now() - Duration::from_secs(1);
+            record_test_draw(&mut profiler, old);
+            profiler.record_present_at(old, old, true, true);
+            profiler.first_input_at = Some(old);
+            profiler.pending_input_count = 1;
+            profiler.begin_draw();
+            if sleep {
+                journal::record_power_transition(journal::PowerState::Suspended);
+                journal::record_power_transition(journal::PowerState::Awake);
+            } else {
+                journal::record_window_visibility(id, crate::WindowVisibility::Hidden);
+                journal::record_window_visibility(id, crate::WindowVisibility::Visible);
+            }
+            profiler.end_draw(Some(old), 1);
+            let now = Instant::now();
+            profiler.record_present_at(now, now, true, true);
+            assert_eq!(
+                profiler.draw_duration_histogram.len(),
+                if sleep { 1 } else { 2 }
+            );
+            assert_eq!(profiler.input_latency_histogram.len(), 0);
+            assert_eq!(profiler.dirty_to_present_histogram.len(), 1);
+            assert_eq!(profiler.present_interval_histogram.len(), 0);
+            profiler.begin_draw();
+            profiler.end_draw(Some(Instant::now()), 1);
+            let now = Instant::now();
+            profiler.record_present_at(now, now, true, true);
+            assert_eq!(profiler.dirty_to_present_histogram.len(), 2);
+        }
     }
 
     #[test]

@@ -78,7 +78,7 @@ fn mask(width: f32, height: f32) -> ContentMask<ScaledPixels> {
 fn tile(renderer: &WgpuHeadlessRenderer, key: AtlasKey, bytes: Vec<u8>) -> AtlasTile {
     renderer
         .sprite_atlas()
-        .get_or_insert_with(&key, &mut || {
+        .get_or_insert_with(key, &mut || {
             Ok(Some((
                 Size {
                     width: DevicePixels(8),
@@ -160,6 +160,7 @@ fn every_primitive_kind_renders() {
         order: 0,
         padding: 0,
         bounds: underline_bounds,
+        clip_bounds: underline_bounds,
         content_mask: full_mask(),
         color: white.into(),
         thickness: ScaledPixels(4.0),
@@ -579,4 +580,114 @@ fn content_mask_fades_quad_edges() {
     close(60, 2, 64);
     // The unfaded right edge still clips hard at the mask boundary.
     assert_eq!(pixel(101, 50)[0], 0);
+}
+#[test]
+fn split_wavy_underline_preserves_fade_ramp_and_phase() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let geometry = bounds(20.0, 40.0, 160.0, 8.0);
+    let mask = ContentMask {
+        bounds: geometry,
+        fade_out: Edges {
+            left: ScaledPixels(24.0),
+            ..Default::default()
+        },
+    };
+
+    let mut reference = Scene::default();
+    reference.insert_primitive(Quad {
+        bounds: bounds(0.0, 0.0, TARGET.width.0 as f32, TARGET.height.0 as f32),
+        content_mask: full_mask(),
+        background: solid_background(gpui::black()),
+        ..Default::default()
+    });
+    reference.insert_primitive(Underline {
+        order: 0,
+        padding: 0,
+        bounds: geometry,
+        clip_bounds: geometry,
+        content_mask: mask,
+        color: gpui::white().into(),
+        thickness: ScaledPixels(3.0),
+        wavy: ShaderBool::Enabled,
+    });
+    reference.finish();
+    let reference = renderer
+        .render_scene_to_image(&reference, TARGET)
+        .expect("reference frame");
+
+    let mut split = Scene::default();
+    split.insert_primitive(Quad {
+        bounds: bounds(0.0, 0.0, TARGET.width.0 as f32, TARGET.height.0 as f32),
+        content_mask: full_mask(),
+        background: solid_background(gpui::black()),
+        ..Default::default()
+    });
+    // The gap [28, 40] divides the original left fade ramp [20, 44]. Both pieces retain full
+    // geometry and the original mask; only their hard clip rectangles differ.
+    for clip_bounds in [bounds(20.0, 40.0, 8.0, 8.0), bounds(40.0, 40.0, 140.0, 8.0)] {
+        split.insert_primitive(Underline {
+            order: 0,
+            padding: 0,
+            bounds: geometry,
+            clip_bounds,
+            content_mask: mask,
+            color: gpui::white().into(),
+            thickness: ScaledPixels(3.0),
+            wavy: ShaderBool::Enabled,
+        });
+    }
+    split.finish();
+    let split = renderer
+        .render_scene_to_image(&split, TARGET)
+        .expect("split frame");
+    for y in 0..TARGET.height.0 as u32 {
+        for x in 0..TARGET.width.0 as u32 {
+            let actual = split.get_pixel(x, y).0;
+            if (28..40).contains(&x) {
+                assert_eq!(actual, [0, 0, 0, 255], "exclusion at ({x}, {y})");
+            } else {
+                assert_eq!(
+                    actual,
+                    reference.get_pixel(x, y).0,
+                    "fade/phase at ({x}, {y})"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn underline_hard_clip_intersects_zero_fade_content_mask() {
+    let mut renderer = WgpuHeadlessRenderer::new().expect("headless renderer");
+    let geometry = bounds(20.0, 40.0, 160.0, 8.0);
+    let mask = ContentMask {
+        bounds: bounds(60.0, 40.0, 30.0, 8.0),
+        ..Default::default()
+    };
+    let mut scene = Scene::default();
+    scene.insert_primitive(Quad {
+        bounds: bounds(0.0, 0.0, TARGET.width.0 as f32, TARGET.height.0 as f32),
+        content_mask: full_mask(),
+        background: solid_background(gpui::black()),
+        ..Default::default()
+    });
+    scene.insert_primitive(Underline {
+        order: 0,
+        padding: 0,
+        bounds: geometry,
+        // A caller may supply a hard clip larger than the original mask; the shader still
+        // intersects both rectangles even though this mask has no fade ramps.
+        clip_bounds: bounds(0.0, 0.0, 310.0, 100.0),
+        content_mask: mask,
+        color: gpui::white().into(),
+        thickness: ScaledPixels(4.0),
+        wavy: ShaderBool::Disabled,
+    });
+    scene.finish();
+    let image = renderer
+        .render_scene_to_image(&scene, TARGET)
+        .expect("underline frame");
+    assert_eq!(image.get_pixel(55, 44).0, [0, 0, 0, 255]);
+    assert_eq!(image.get_pixel(75, 44).0, [255, 255, 255, 255]);
+    assert_eq!(image.get_pixel(95, 44).0, [0, 0, 0, 255]);
 }
