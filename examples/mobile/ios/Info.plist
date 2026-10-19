@@ -7,11 +7,11 @@
   <key>CFBundleExecutable</key>
   <string>gpui-ce-mobile-example-ios</string>
   <key>CFBundleIdentifier</key>
-  <string>dev.gpui.mobile.acceptance</string>
+  <string>dev.gpui.mobile.example</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>GPUI Mobile Acceptance</string>
+  <string>GPUI Mobile</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

@@ -64,8 +64,6 @@ static INIT_WINDOW_DONE: AtomicBool = AtomicBool::new(false);
 /// Whether the GPUI native library has completed initialization.
 ///
 /// Set after the first native window is ready and its init callbacks run.
-/// This does not prove a frame has been presented; the recreation test uses
-/// the separate generation-scoped present signal below.
 pub static NATIVE_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 /// Deferred lifecycle flags.
@@ -374,7 +372,6 @@ pub(crate) struct NativeSession {
     pub(crate) generation: u64,
     app: Mutex<Option<AndroidApp>>,
     active: AtomicBool,
-    presented: AtomicBool,
     back_down_consumed: AtomicBool,
     owner_thread: std::thread::ThreadId,
     windows: NativeWindowRegistry,
@@ -795,7 +792,6 @@ pub fn java_vm() -> *mut c_void {
 /// must use [`activity`] inside a JNI environment so the session and local reference
 /// lifetimes are explicit. The returned host pointer is valid only while the host
 /// retains its Activity registration.
-#[deprecated(note = "use activity(env); raw Activity pointers are host-only")]
 pub fn activity_as_ptr() -> *mut c_void {
     HOST_ACTIVITY
         .lock()
@@ -980,12 +976,6 @@ fn host_ui_mode() -> Result<i32, String> {
         }
         result.e()
     })
-}
-
-/// The system night mode as a window appearance.
-pub(crate) fn query_appearance() -> crate::android::window::WindowAppearance {
-    let session = native_session();
-    query_appearance_for_runtime(session.as_deref())
 }
 
 pub(crate) fn query_appearance_for_runtime(
@@ -1839,7 +1829,6 @@ pub fn init_platform(app: &AndroidApp) -> Result<NativeSessionGuard, String> {
         generation: NEXT_NATIVE_SESSION.fetch_add(1, Ordering::Relaxed),
         app: Mutex::new(Some(app.clone())),
         active: AtomicBool::new(true),
-        presented: AtomicBool::new(false),
         back_down_consumed: AtomicBool::new(false),
         owner_thread: std::thread::current().id(),
         windows: NativeWindowRegistry::default(),
@@ -2061,11 +2050,6 @@ static SHOWN_KEYBOARD: std::sync::Mutex<Option<crate::KeyboardType>> = std::sync
 static DISMISSED_KEYBOARD: std::sync::Mutex<Option<crate::KeyboardType>> =
     std::sync::Mutex::new(None);
 
-/// IME event 5: the system already hid the keyboard; remember it for a tap to undo.
-pub(crate) fn keyboard_hidden_by_user() {
-    keyboard_hidden_by_user_for_runtime(None);
-}
-
 pub(crate) fn keyboard_hidden_by_user_for_runtime(native_session: Option<&NativeSession>) {
     let _ = with_current_runtime_state(native_session, || {
         let shown = SHOWN_KEYBOARD.lock().expect("poisoned").take();
@@ -2075,23 +2059,12 @@ pub(crate) fn keyboard_hidden_by_user_for_runtime(native_session: Option<&Native
     });
 }
 
-pub(crate) fn keyboard_dismissed() -> bool {
-    let session = native_session();
-    keyboard_dismissed_for_runtime(session.as_deref()).unwrap_or(false)
-}
-
 pub(crate) fn keyboard_dismissed_for_runtime(
     native_session: Option<&NativeSession>,
 ) -> Option<bool> {
     with_current_runtime_state(native_session, || {
         DISMISSED_KEYBOARD.lock().expect("poisoned").is_some()
     })
-}
-
-/// Show the keyboard [`keyboard_hidden_by_user`] took away again.
-pub(crate) fn reshow_dismissed_keyboard() {
-    let session = native_session();
-    reshow_dismissed_keyboard_for_runtime(session.as_deref());
 }
 
 pub(crate) fn reshow_dismissed_keyboard_for_runtime(native_session: Option<&NativeSession>) {
@@ -2205,10 +2178,6 @@ pub(crate) fn hide_keyboard_for_runtime(native_session: Option<&NativeSession>) 
     }
 }
 
-pub(super) fn reset_keyboard_composition() {
-    let session = native_session();
-    reset_keyboard_composition_for_runtime(session.as_deref());
-}
 pub(super) fn reset_keyboard_composition_for_runtime(native_session: Option<&NativeSession>) {
     let Some(session) = with_current_runtime_state(native_session, super::text_input::new_session)
     else {
@@ -2228,31 +2197,6 @@ pub(super) fn reset_keyboard_composition_for_runtime(native_session: Option<&Nat
     });
 }
 
-/// Publish an immutable editor snapshot for Android InputConnection query methods.
-///
-/// This only writes volatile Java-side state; it never calls into GPUI or waits
-/// on the Android UI thread.
-pub(super) fn sync_input_snapshot(
-    session: u64,
-    text: &str,
-    selection_start: i32,
-    selection_end: i32,
-    marked_start: i32,
-    marked_end: i32,
-    generation: u64,
-) {
-    let native_session = native_session();
-    sync_input_snapshot_for_runtime(
-        native_session.as_deref(),
-        session,
-        text,
-        selection_start,
-        selection_end,
-        marked_start,
-        marked_end,
-        generation,
-    );
-}
 pub(super) fn sync_input_snapshot_for_runtime(
     native_session: Option<&NativeSession>,
     session: u64,
@@ -2291,38 +2235,6 @@ pub(super) fn sync_input_snapshot_for_runtime(
 /// Receive system-bar, cutout, and IME insets in physical pixels from the
 /// Activity's UI-thread WindowInsets listener. The GPUI owner thread applies
 /// the latest snapshot after its looper wakes.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeRuntimeGeneration(
-    _env: *mut c_void,
-    _class: *mut c_void,
-) -> i64 {
-    native_session().map_or(0, |session| session.generation as i64)
-}
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeRuntimeInitialized(
-    _env: *mut c_void,
-    _class: *mut c_void,
-) -> u8 {
-    u8::from(
-        native_session().is_some_and(|session| session.is_active())
-            && NATIVE_INITIALIZED.load(Ordering::Acquire),
-    )
-}
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativePresentedFrameGeneration(
-    _env: *mut c_void,
-    _class: *mut c_void,
-) -> i64 {
-    native_session()
-        .filter(|session| session.is_active() && session.presented.load(Ordering::Acquire))
-        .map_or(0, |session| session.generation as i64)
-}
-pub(crate) fn note_presented_frame(session: &NativeSession) {
-    if session.is_active() {
-        session.presented.store(true, Ordering::Release);
-    }
-}
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeInsets(
     _env: *mut c_void,
@@ -2403,8 +2315,7 @@ pub unsafe extern "C" fn Java_dev_gpui_mobile_GpuiInputActivity_nativeIme(
 // ── JNI export for GpuiActivity splash screen ────────────────────────────────
 
 /// Called from `GpuiActivity.nativeIsInitialized()` to check whether the
-/// native library has initialized. This does not prove a frame was presented;
-/// use the session-scoped presented-frame signal for that distinction.
+/// native library has initialized.
 ///
 /// The AndroidX SplashScreen API calls this via `setKeepOnScreenCondition`
 /// to hold the splash visible until GPUI is ready.
@@ -2577,7 +2488,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(deprecated)]
     fn activity_as_ptr_returns_null_before_init() {
         let ptr = activity_as_ptr();
         assert!(ptr.is_null());

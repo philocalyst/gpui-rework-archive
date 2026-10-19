@@ -1,36 +1,11 @@
 //! Android platform implementation for GPUI.
 //!
-//! `AndroidPlatform` is the top-level struct that ties together all Android-
-//! specific sub-systems and implements the platform-level contract that GPUI
-//! expects.  It mirrors the role played by `gpui_linux::LinuxPlatform` /
-//! `gpui_linux::HeadlessClient` on the desktop side.
-//!
-//! ## Architecture
-//!
-//! ```text
-//! AndroidPlatform
-//!   ├── AndroidDispatcher  — ALooper foreground queue + Rust thread-pool
-//!   ├── AndroidTextSystem  — cosmic-text + swash shaping / rasterisation
-//!   ├── WgpuContext        — shared wgpu device + queue (lazily initialised)
-//!   ├── WindowList         — live AndroidWindow instances
-//!   └── DisplayList        — connected AndroidDisplay instances
-//! ```
-//!
-//! ## Lifecycle
-//!
-//! 1. `AndroidPlatform::new(headless)` is called from `current_platform()` on
-//!    the Android main thread (inside `ANativeActivity_onCreate`).
-//! 2. `run(on_finish_launching)` stores the finish-launching callback; it is
-//!    invoked as soon as the platform is set up.
-//! 3. `APP_CMD_INIT_WINDOW` → `open_window` or `window.init_window()`.
-//! 4. `APP_CMD_TERM_WINDOW` → `window.term_window()`.
-//! 5. `quit()` sets the shutdown flag; the main loop exits on the next tick.
-//!
-//! ## No GPUI workspace dependency
-//!
-//! All GPUI trait / type references are **stubbed out** locally so this file
-//! compiles in isolation.  Replace the stub section with `use gpui::*` when
-//! building inside the full workspace.
+//! `AndroidPlatform` implements GPUI's `Platform` for an Android process, as
+//! `gpui_linux::LinuxPlatform` does on the desktop. It owns the `AndroidDispatcher`
+//! (the `ALooper` foreground queue and a thread pool), a `ParleyTextSystem` that
+//! shapes with Parley and rasterizes with Swash, the wgpu context shared by its
+//! windows, and the open windows and displays. A window gets its surface when
+//! Android delivers `APP_CMD_INIT_WINDOW` and drops it on `APP_CMD_TERM_WINDOW`.
 
 use anyhow::{Context as _, Result};
 use futures::channel::oneshot;
@@ -254,31 +229,25 @@ fn font_has_cbdt_tables(data: &[u8]) -> bool {
     false
 }
 
-/// Load a file from the Android APK assets directory via the NDK
-/// `AAssetManager`.
-///
-/// `path` is relative to the `assets/` directory in the APK (e.g.
-/// `"fonts/NotoColorEmoji.ttf"`).
-fn load_asset_bytes(
+/// Opens an APK asset, relative to `assets/`, for the life of the process. An
+/// uncompressed asset is used in place, mapped from the APK.
+fn load_asset(
     asset_manager: &ndk::asset::AssetManager,
     path: &str,
-) -> anyhow::Result<Vec<u8>> {
-    use std::ffi::CString;
-
-    let c_path = CString::new(path)?;
-
-    // Open the asset.  `AssetManager::open` returns `Option<Asset>`.
-    let mut asset = asset_manager
+) -> anyhow::Result<&'static [u8]> {
+    let c_path = std::ffi::CString::new(path)?;
+    let asset = asset_manager
         .open(&c_path)
         .ok_or_else(|| anyhow::anyhow!("asset not found: {path}"))?;
+    Ok(Box::leak(Box::new(asset)).buffer()?)
+}
 
-    // Read straight into one buffer of the asset's size: the emoji font is
-    // ~10 MB, and mapping it first and copying would hold it twice.
-    let mut bytes = Vec::with_capacity(asset.length());
-    std::io::Read::read_to_end(&mut asset, &mut bytes)
-        .map_err(|e| anyhow::anyhow!("failed to read asset {path}: {e}"))?;
-
-    Ok(bytes)
+/// Maps a read-only file. Fonts are mapped instead of read, so starting up costs no copies:
+/// the kernel pages in only the parts Parley reads.
+fn map_file(path: &str) -> std::io::Result<memmap2::Mmap> {
+    let file = std::fs::File::open(path)?;
+    // SAFETY: system fonts are read-only and aren't truncated while the process runs.
+    unsafe { memmap2::Mmap::map(&file) }
 }
 
 /// The bundled CBDT emoji font, relative to the APK's `assets/` directory.
@@ -296,20 +265,16 @@ pub(crate) fn load_deferred_emoji_font() {
     let Some(text_system) = EMOJI_FONT_PENDING.lock().expect("poisoned").take() else {
         return;
     };
-    match crate::android::jni::with_asset_manager(|assets| {
-        load_asset_bytes(assets, BUNDLED_EMOJI_FONT)
-    }) {
-        Some(Ok(bytes)) => {
-            log::info!(
-                "loaded bundled CBDT emoji font from assets ({} bytes)",
-                bytes.len()
-            );
-            if let Err(e) = text_system.add_fonts(vec![std::borrow::Cow::Owned(bytes)]) {
-                log::warn!("failed to add bundled emoji font: {e:#}");
-            }
-        }
-        Some(Err(e)) => log::warn!("failed to load bundled emoji font from assets: {e:#}"),
+    match crate::android::jni::with_asset_manager(|assets| load_asset(assets, BUNDLED_EMOJI_FONT)) {
+        Some(font) => add_emoji_font(&text_system, font),
         None => log::warn!("no AssetManager available — cannot load bundled emoji font"),
+    }
+}
+
+fn add_emoji_font(text_system: &ParleyTextSystem, font: anyhow::Result<&'static [u8]>) {
+    match font.and_then(|bytes| text_system.add_fonts(vec![std::borrow::Cow::Borrowed(bytes)])) {
+        Ok(()) => log::info!("loaded the bundled emoji font"),
+        Err(e) => log::warn!("failed to load the bundled emoji font: {e:#}"),
     }
 }
 
@@ -348,9 +313,10 @@ impl AndroidPlatform {
 
         let text_system = Arc::new(
             ParleyTextSystem::new_with_system_font(SystemFonts::Load, "Roboto")
-                // Android's bundled/system fonts must be named explicitly in
-                // the shaping fallback list; SystemFonts::Load may not enumerate
-                // Android's font directory in Fontique's system provider.
+                // Fontique scans /system/fonts and reads fonts.xml for script
+                // fallback. Naming the families too keeps them first on Android
+                // 15 and newer, where fonts.xml is no longer updated, and puts
+                // the bundled emoji font ahead of the system's COLRv1 one.
                 .with_fallback_families([
                     "Noto Color Emoji",
                     "Noto Sans CJK JP",
@@ -367,127 +333,20 @@ impl AndroidPlatform {
                 ]),
         );
 
-        // Load Android system fonts so GPUI's fallback chain can resolve.
-        // GPUI tries ".SystemUIFont" → ".ZedMono" → … → "Noto Sans" → "DejaVu Sans" → "Arial".
-        // Android ships Roboto and DroidSans in /system/fonts/.  We load them
-        // explicitly because cosmic-text's fontdb may not scan Android paths.
-        {
-            let font_paths: &[&str] = &[
-                // Core UI fonts
-                "/system/fonts/Roboto-Regular.ttf",
-                "/system/fonts/Roboto-Bold.ttf",
-                "/system/fonts/Roboto-Italic.ttf",
-                "/system/fonts/Roboto-BoldItalic.ttf",
-                "/system/fonts/Roboto-Medium.ttf",
-                "/system/fonts/Roboto-Light.ttf",
-                "/system/fonts/Roboto-Thin.ttf",
-                "/system/fonts/RobotoFlex-Regular.ttf",
-                // Monospace
-                "/system/fonts/DroidSans.ttf",
-                "/system/fonts/DroidSans-Bold.ttf",
-                "/system/fonts/DroidSansMono.ttf",
-                "/system/fonts/RobotoMono-Regular.ttf",
-                // Noto Sans (wide Unicode coverage)
-                "/system/fonts/NotoSans-Regular.ttf",
-                "/system/fonts/NotoSans-Bold.ttf",
-                "/system/fonts/NotoSans-Italic.ttf",
-                "/system/fonts/NotoSans-BoldItalic.ttf",
-                "/system/fonts/NotoSansCJK-Regular.ttc",
-                "/system/fonts/NotoSansDevanagari-Regular.otf",
-                "/system/fonts/NotoSansArabic-Regular.ttf",
-                "/system/fonts/NotoSansHebrew-Regular.ttf",
-                "/system/fonts/NotoSansThai-Regular.ttf",
-                // Emoji fonts — loaded so glyphs like 🦀 ✅ ❤️ render.
-                // NOTE: On Android 13+ (API 33+) the system NotoColorEmoji.ttf
-                // uses COLR v1 color outlines which swash cannot render.  We
-                // detect this below and load a bundled CBDT-based fallback
-                // instead.  The flag font is still useful regardless.
-                "/system/fonts/NotoColorEmojiFlags.ttf",
-                // Serif (fallback)
-                "/system/fonts/NotoSerif-Regular.ttf",
-                "/system/fonts/NotoSerif-Bold.ttf",
-            ];
-            let mut font_data: Vec<std::borrow::Cow<'static, [u8]>> = Vec::new();
-            for path in font_paths {
-                match std::fs::read(path) {
-                    Ok(bytes) => {
-                        log::info!("loaded system font: {path} ({} bytes)", bytes.len());
-                        font_data.push(std::borrow::Cow::Owned(bytes));
-                    }
-                    Err(e) => {
-                        log::debug!("skipping system font {path}: {e}");
-                    }
-                }
-            }
-
-            // ── Emoji font: prefer CBDT (bitmap) over COLR v1 ───────────
-            //
-            // swash can render CBDT/CBLC bitmap emoji and COLR v0 colour
-            // outlines, but NOT COLR v1 (used by Android 13+ / API 33+).
-            // If the system font lacks CBDT tables we load a bundled
-            // CBDT-based NotoColorEmoji from the APK assets instead.
-            let system_emoji_path = "/system/fonts/NotoColorEmoji.ttf";
-            let mut emoji_loaded = false;
-
-            if let Ok(system_emoji_bytes) = std::fs::read(system_emoji_path) {
-                if font_has_cbdt_tables(&system_emoji_bytes) {
-                    log::info!(
-                        "system emoji font has CBDT tables — using it ({} bytes)",
-                        system_emoji_bytes.len()
-                    );
-                    font_data.push(std::borrow::Cow::Owned(system_emoji_bytes));
-                    emoji_loaded = true;
-                } else {
-                    log::info!(
-                        "system emoji font is COLR v1 (no CBDT) — will try bundled fallback"
-                    );
-                }
-            }
-
-            let mut emoji_deferred = false;
-            if !emoji_loaded {
-                // Try loading the bundled CBDT NotoColorEmoji from APK assets.
-                // The lock is held across the check, so a concurrent
-                // `set_host_activity` either provides the AssetManager first or
-                // finds the text system pending afterwards.
-                let mut pending = EMOJI_FONT_PENDING.lock().expect("poisoned");
-                if let Some(result) = crate::android::jni::with_asset_manager_for_runtime(
-                    native_session.as_deref(),
-                    |assets| load_asset_bytes(assets, BUNDLED_EMOJI_FONT),
-                ) {
-                    match result {
-                        Ok(bytes) => {
-                            log::info!(
-                                "loaded bundled CBDT emoji font from assets ({} bytes)",
-                                bytes.len()
-                            );
-                            font_data.push(std::borrow::Cow::Owned(bytes));
-                            emoji_loaded = true;
-                        }
-                        Err(e) => {
-                            log::warn!("failed to load bundled emoji font from assets: {e:#}");
-                        }
-                    }
-                } else {
-                    log::warn!(
-                        "no AssetManager yet — the bundled emoji font loads once \
-                         set_host_activity provides one"
-                    );
-                    *pending = Some(Arc::clone(&text_system));
-                    emoji_deferred = true;
-                }
-            }
-
-            if !emoji_loaded && !emoji_deferred {
-                log::warn!("no compatible emoji font loaded — emoji glyphs may not render");
-            }
-
-            if !font_data.is_empty() {
-                if let Err(e) = text_system.add_fonts(font_data) {
-                    log::warn!("failed to add system fonts: {e:#}");
-                }
-            } else {
-                log::warn!("no system fonts found in /system/fonts/");
+        // Android 13 and newer ship a COLRv1 emoji font, which Swash can't draw.
+        // Add the bundled CBDT one from the APK assets in that case.
+        let system_emoji_has_bitmaps = map_file("/system/fonts/NotoColorEmoji.ttf")
+            .is_ok_and(|font| font_has_cbdt_tables(&font));
+        if !system_emoji_has_bitmaps {
+            // Hold the lock across the check, so a concurrent `set_host_activity`
+            // either provides the AssetManager first or finds the text system pending.
+            let mut pending = EMOJI_FONT_PENDING.lock().expect("poisoned");
+            match crate::android::jni::with_asset_manager_for_runtime(
+                native_session.as_deref(),
+                |assets| load_asset(assets, BUNDLED_EMOJI_FONT),
+            ) {
+                Some(font) => add_emoji_font(&text_system, font),
+                None => *pending = Some(Arc::clone(&text_system)),
             }
         }
 

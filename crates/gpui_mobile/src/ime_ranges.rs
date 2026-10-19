@@ -69,6 +69,10 @@ pub(crate) fn deletion_ranges(
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::reversed_empty_ranges,
+    reason = "reversed ranges are backward selections"
+)]
 mod tests {
     use super::{deletion_ranges, selection_after_deletion};
 

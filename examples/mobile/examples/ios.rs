@@ -1,7 +1,5 @@
-//! Native UIKit/Metal entry point for the shared mobile acceptance view.
-//!
-//! The platform registry selects GPUI CE's canonical `gpui_ios` backend; this
-//! binary only creates the common window and contains no UIKit bridge of its own.
+//! The iOS example app. `gpui_platform` selects the iOS backend, so this only opens the
+//! shared window.
 use gpui_ce_mobile_example::open_main_window;
 
 fn main() {

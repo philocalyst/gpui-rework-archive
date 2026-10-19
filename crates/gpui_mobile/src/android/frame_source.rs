@@ -42,7 +42,7 @@ use std::{
     cell::RefCell,
     ptr,
     sync::{
-        Mutex, OnceLock,
+        OnceLock,
         atomic::{AtomicBool, AtomicPtr, Ordering},
         mpsc,
     },
@@ -51,6 +51,7 @@ use std::{
 
 use crate::frame_pacer::FramePacer;
 use ndk::looper::ForeignLooper;
+use parking_lot::Mutex;
 
 /// Longest the loop blocks with nothing due; a missed wakeup costs at most
 /// this much latency instead of a frozen app.
@@ -91,12 +92,7 @@ static OFF_THREAD_DEMAND: AtomicBool = AtomicBool::new(false);
 /// session is replaced. The vsync worker is process-lived; its pending demand
 /// and the loop-thread pacer are entry-scoped.
 pub(crate) fn reset_native_session() {
-    let old_looper = {
-        let mut main_looper = MAIN_LOOPER
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        main_looper.take()
-    };
+    let old_looper = MAIN_LOOPER.lock().take();
     drop(old_looper);
     POST_REQUESTED.store(false, Ordering::Release);
     FRAME_DUE.store(false, Ordering::Release);
@@ -109,12 +105,7 @@ pub(crate) fn reset_native_session() {
 /// `ALooper_prepare`). Idempotent; spawns the vsync thread on first use.
 pub(crate) fn install() {
     let looper = ForeignLooper::for_thread();
-    let old_looper = {
-        let mut main_looper = MAIN_LOOPER
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        std::mem::replace(&mut *main_looper, looper)
-    };
+    let old_looper = std::mem::replace(&mut *MAIN_LOOPER.lock(), looper);
     drop(old_looper);
 
     let has_choreographer = *VSYNC_THREAD.get_or_init(spawn_vsync_thread);
@@ -213,11 +204,7 @@ fn wake_vsync_looper() {
 fn wake_main_looper() {
     // Clone the acquired reference while synchronized, then call the NDK after
     // unlocking. A concurrent reset may release the slot but not this clone.
-    let looper = MAIN_LOOPER
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner())
-        .as_ref()
-        .cloned();
+    let looper = MAIN_LOOPER.lock().clone();
     if let Some(looper) = looper {
         looper.wake();
     }

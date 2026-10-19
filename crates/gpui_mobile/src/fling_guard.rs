@@ -333,7 +333,7 @@ mod tests {
                     canvas(
                         |_, _, _| (),
                         move |_, _, window, _| {
-                            let claimed = claimed.clone();
+                            let claimed = claimed;
                             window.on_mouse_event(
                                 move |event: &TouchDragEvent, phase, window, cx| {
                                     if phase.bubble()

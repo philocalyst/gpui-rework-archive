@@ -1,9 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application>
-        <activity
-            android:name="dev.gpui.mobile.GpuiPlatformViewProbeActivity"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|keyboard|navigation|uiMode|density"
-            android:exported="false"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
-    </application>
-</manifest>

@@ -1,10 +1,10 @@
-//! Shared Rust entry points and acceptance view used by the iOS and Android hosts.
+//! The view and entry points shared by the iOS and Android example apps.
 use gpui::{
     App, Context, Render, ScrollHandle, Window, WindowHandle, WindowOptions, div, prelude::*,
 };
 use gpui_elements::editable_text::text_input;
 
-/// Small interactive view used to validate host input, accessibility, and redraw.
+/// A small interactive view that exercises touch, text input, accessibility and keyboard insets.
 pub struct MobileExample {
     count: usize,
     scroll_handle: ScrollHandle,
@@ -35,13 +35,13 @@ impl Render for MobileExample {
         div()
             .size_full()
             // GPUI defaults to black text; NativeActivity surfaces start black.
-            // Paint an explicit light canvas so the acceptance sample is visible.
+            // Paint an explicit light canvas so the sample is visible.
             .bg(gpui::rgb(0xffffff))
             .flex()
             .flex_col()
             .child(
                 div()
-                    .id("acceptance.scroll")
+                    .id("example.scroll")
                     .flex_1()
                     .min_h_0()
                     .flex()
@@ -54,21 +54,21 @@ impl Render for MobileExample {
                     .pb(gpui::px(16.))
                     .child(
                         div()
-                            .id("acceptance.heading")
+                            .id("example.heading")
                             .role(accesskit::Role::Heading)
-                            .aria_label("GPUI mobile acceptance")
-                            .child("GPUI mobile acceptance"),
+                            .aria_label("GPUI mobile example")
+                            .child("GPUI mobile example"),
                     )
                     .child(
                         div()
-                            .id("acceptance.lifecycle")
+                            .id("example.lifecycle")
                             .role(accesskit::Role::Label)
                             .aria_label(lifecycle_text)
                             .child(lifecycle_text),
                     )
                     .child(
                         div()
-                            .id("acceptance.keyboard-inset")
+                            .id("example.keyboard-inset")
                             .role(accesskit::Role::Label)
                             .aria_label(format!("Keyboard inset: {ime_bottom} px"))
                             .child(format!("Keyboard inset: {ime_bottom} px")),
@@ -92,7 +92,7 @@ impl Render for MobileExample {
                             .child("Increment"),
                     )
                     .child(
-                        text_input("acceptance.editor")
+                        text_input("example.editor")
                             .aria_label("Editor")
                             .placeholder("Editor")
                             .placeholder_color(gpui::rgb(0x666666))
@@ -104,7 +104,7 @@ impl Render for MobileExample {
                     .children((0..12).map(|index| div().child(format!("Scroll item {index}"))))
                     .child(
                         div()
-                            .id("acceptance.scroll-end")
+                            .id("example.scroll-end")
                             .role(accesskit::Role::Label)
                             .aria_label("Scroll end")
                             .child("Scroll end"),
@@ -124,14 +124,6 @@ pub fn open_main_window(cx: &mut App) -> anyhow::Result<WindowHandle<MobileExamp
             last_viewport_geometry: None,
         })
     })
-}
-
-/// Run the shared example through the selected GPUI CE platform.
-pub fn run() {
-    gpui_platform::application().run(|cx| {
-        open_main_window(cx).expect("failed to open mobile example window");
-        cx.activate(true);
-    });
 }
 
 #[cfg(target_os = "android")]

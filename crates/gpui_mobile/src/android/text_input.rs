@@ -171,64 +171,70 @@ pub(super) fn drain(
     sync_snapshot(slot, native_session);
 }
 
+/// The document state the platform's input connection last received.
+#[derive(PartialEq)]
+struct Snapshot {
+    session: u64,
+    text: String,
+    anchor: i32,
+    focus: i32,
+    marked: (i32, i32),
+    generation: u64,
+}
+
+thread_local! {
+    static LAST_SNAPSHOT: RefCell<Option<Snapshot>> = const { RefCell::new(None) };
+}
+
+/// Sends the focused input's text, selection and composition to the input connection, unless it
+/// already has them. This runs after every drain, so an unchanged document isn't sent again.
 fn sync_snapshot(
     slot: &Rc<RefCell<Option<PlatformInputHandler>>>,
     native_session: Option<&super::jni::NativeSession>,
 ) {
-    let Some(mut handler) = slot.borrow_mut().take() else {
-        super::jni::sync_input_snapshot_for_runtime(
-            native_session,
-            SESSION.load(Ordering::Acquire),
-            "",
-            0,
-            0,
-            -1,
-            -1,
-            PROCESSED_GENERATION.load(Ordering::Acquire),
-        );
-        return;
+    let mut snapshot = Snapshot {
+        session: SESSION.load(Ordering::Acquire),
+        text: String::new(),
+        anchor: 0,
+        focus: 0,
+        marked: (-1, -1),
+        generation: PROCESSED_GENERATION.load(Ordering::Acquire),
     };
-    let mut adjusted = None;
-    let text = handler.text_for_range(0..usize::MAX, &mut adjusted);
-    let selection = handler.selected_text_range(false);
-    let marked = handler.marked_text_range();
-    let mut current = slot.borrow_mut();
-    if current.is_none() {
-        *current = Some(handler);
+    let handler = slot.borrow_mut().take();
+    if let Some(mut handler) = handler {
+        let mut adjusted = None;
+        let text = handler.text_for_range(0..usize::MAX, &mut adjusted);
+        let selection = handler.selected_text_range(false);
+        let marked = handler.marked_text_range();
+        slot.borrow_mut().get_or_insert(handler);
+        if let (Some(text), Some(selection)) = (text, selection) {
+            let range = selection.range;
+            let (anchor, focus) = if selection.reversed {
+                (range.end, range.start)
+            } else {
+                (range.start, range.end)
+            };
+            snapshot.text = text;
+            snapshot.anchor = anchor as i32;
+            snapshot.focus = focus as i32;
+            snapshot.marked =
+                marked.map_or((-1, -1), |range| (range.start as i32, range.end as i32));
+        }
     }
-    drop(current);
-
-    let (Some(text), Some(selection)) = (text, selection) else {
-        super::jni::sync_input_snapshot_for_runtime(
-            native_session,
-            SESSION.load(Ordering::Acquire),
-            "",
-            0,
-            0,
-            -1,
-            -1,
-            PROCESSED_GENERATION.load(Ordering::Acquire),
-        );
+    if LAST_SNAPSHOT.with(|last| last.borrow().as_ref() == Some(&snapshot)) {
         return;
-    };
-    let (anchor, focus) = if selection.reversed {
-        (selection.range.end, selection.range.start)
-    } else {
-        (selection.range.start, selection.range.end)
-    };
-    let (marked_start, marked_end) = marked
-        .map(|range| (range.start as i32, range.end as i32))
-        .unwrap_or((-1, -1));
+    }
     super::jni::sync_input_snapshot_for_runtime(
         native_session,
-        SESSION.load(Ordering::Acquire),
-        &text,
-        anchor as i32,
-        focus as i32,
-        marked_start,
-        marked_end,
-        PROCESSED_GENERATION.load(Ordering::Acquire),
+        snapshot.session,
+        &snapshot.text,
+        snapshot.anchor,
+        snapshot.focus,
+        snapshot.marked.0,
+        snapshot.marked.1,
+        snapshot.generation,
     );
+    LAST_SNAPSHOT.with(|last| *last.borrow_mut() = Some(snapshot));
 }
 
 pub(super) fn finish_composition(
@@ -251,33 +257,4 @@ pub(super) fn finish_composition(
         }
     }
     super::jni::reset_keyboard_composition_for_runtime(native_session);
-}
-
-/// Keep the original TextInput callback contract for clients without a platform
-/// input handler. Its backspace sentinel deletes one character per callback;
-/// exact UTF-16 ranges and forward deletion require PlatformInputHandler.
-#[cfg(test)]
-fn forward_legacy_text(kind: i32, text: &str, before: usize, mut dispatch: impl FnMut(&str)) {
-    match kind {
-        1 => dispatch(text),
-        2 | 3 => {
-            for _ in 0..before {
-                dispatch("\x08");
-            }
-        }
-        _ => {}
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::forward_legacy_text;
-    #[test]
-    fn legacy_inputs_receive_commits_and_backspace_sentinels() {
-        let mut received = Vec::new();
-        for (kind, text, before) in [(0, "ni", 0), (1, "你", 0), (2, "", 1), (3, "", 2)] {
-            forward_legacy_text(kind, text, before, |text| received.push(text.to_owned()));
-        }
-        assert_eq!(received, vec!["你", "\x08", "\x08", "\x08"]);
-    }
 }

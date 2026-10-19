@@ -219,9 +219,6 @@ public class GpuiInputActivity extends NativeActivity {
         handleSystemBack();
     }
 
-    private boolean imeVisibleForTest() { return isImeVisible(); }
-    private boolean keyboardSessionActiveForTest() { return keyboardSessionActive; }
-    private boolean inputProxyFocusedForTest() { return input != null && input.hasFocus(); }
 
     // Keep API 33 types in a nested class so API 26-32 don't resolve them.
     private static final class Api33Back implements android.window.OnBackInvokedCallback {
@@ -716,11 +713,5 @@ public class GpuiInputActivity extends NativeActivity {
     private native void nativeInsets(int safeTop, int safeRight, int safeBottom, int safeLeft,
                                      int imeTop, int imeRight, int imeBottom, int imeLeft);
 
-    private static native long nativeRuntimeGeneration();
-    private static native boolean nativeRuntimeInitialized();
-    private static native long nativePresentedFrameGeneration();
 
-    private static long runtimeGenerationForTest() { return nativeRuntimeGeneration(); }
-    private static boolean runtimeInitializedForTest() { return nativeRuntimeInitialized(); }
-    private static long presentedFrameGenerationForTest() { return nativePresentedFrameGeneration(); }
 }

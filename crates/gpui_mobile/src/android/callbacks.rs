@@ -8,7 +8,7 @@
 
 use std::{
     cell::RefCell,
-    collections::VecDeque,
+    collections::{HashMap, VecDeque},
     num::NonZeroU64,
     sync::{
         Arc,
@@ -19,7 +19,6 @@ use std::{
 
 use super::window::WindowAppearance;
 use super::{AndroidKeyEvent, DevicePixels, Size, TouchPoint, dispatcher::AndroidDispatcher};
-use crate::owner_thread_registry::OwnerThreadRegistry;
 use gpui::{RequestFrameOptions, WindowInsets};
 
 static NEXT_CALLBACK_ID: AtomicU64 = AtomicU64::new(1);
@@ -28,9 +27,20 @@ static NEXT_CALLBACK_ID: AtomicU64 = AtomicU64::new(1);
 pub(super) struct CallbackId(NonZeroU64);
 
 thread_local! {
-    static CALLBACKS: OwnerThreadRegistry<Callback> = OwnerThreadRegistry::new();
+    /// The callbacks registered on this thread. Only their ids cross threads. A callback is
+    /// moved out before it runs or drops, so it can register and remove callbacks itself.
+    static CALLBACKS: RefCell<HashMap<u64, Callback>> = RefCell::new(HashMap::new());
     static LOCAL_EVENTS: RefCell<VecDeque<(CallbackId, Arc<AtomicBool>, Event)>> = RefCell::new(VecDeque::new());
     static DRAINING_LOCAL_EVENTS: RefCell<bool> = const { RefCell::new(false) };
+}
+
+fn store(id: CallbackId, callback: Callback) {
+    let previous = CALLBACKS.with(|callbacks| callbacks.borrow_mut().insert(id.0.get(), callback));
+    debug_assert!(previous.is_none());
+}
+
+fn take(id: CallbackId) -> Option<Callback> {
+    CALLBACKS.with(|callbacks| callbacks.borrow_mut().remove(&id.0.get()))
 }
 
 pub(super) enum Callback {
@@ -93,11 +103,7 @@ impl Registration {
             .try_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
             .expect("Android callback ID space exhausted");
         let id = CallbackId(NonZeroU64::new(raw).expect("callback IDs start at one"));
-        CALLBACKS.with(|callbacks| {
-            let previous = callbacks.insert(id.0.get(), callback);
-            debug_assert!(previous.is_none());
-            drop(previous);
-        });
+        store(id, callback);
         Self(Arc::new(RegistrationInner {
             id,
             active: Arc::new(AtomicBool::new(true)),
@@ -128,7 +134,7 @@ impl Registration {
             return None;
         }
         let id = self.0.id;
-        let mut callback = CALLBACKS.with(|callbacks| callbacks.remove(id.0.get()))?;
+        let mut callback = take(id)?;
         let result = match &mut callback {
             Callback::Key(callback) => Some(callback(event)),
             _ => {
@@ -137,11 +143,7 @@ impl Registration {
             }
         };
         if self.0.active.load(Ordering::Acquire) {
-            CALLBACKS.with(|callbacks| {
-                let previous = callbacks.insert(id.0.get(), callback);
-                debug_assert!(previous.is_none());
-                drop(previous);
-            });
+            store(id, callback);
         }
         result
     }
@@ -172,7 +174,7 @@ impl Registration {
             "one-shot callback called off owner thread"
         );
         let id = self.0.id;
-        let Some(mut callback) = CALLBACKS.with(|callbacks| callbacks.remove(id.0.get())) else {
+        let Some(mut callback) = take(id) else {
             return false;
         };
         match &mut callback {
@@ -196,7 +198,7 @@ impl Registration {
             "quit callback called off owner thread"
         );
         let id = self.0.id;
-        let mut callback = CALLBACKS.with(|callbacks| callbacks.remove(id.0.get()))?;
+        let mut callback = take(id)?;
         let result = match &mut callback {
             Callback::Quit(callback) => Some(callback()),
             _ => {
@@ -205,11 +207,7 @@ impl Registration {
             }
         };
         if self.0.active.load(Ordering::Acquire) {
-            CALLBACKS.with(|callbacks| {
-                let previous = callbacks.insert(id.0.get(), callback);
-                debug_assert!(previous.is_none());
-                drop(previous);
-            });
+            store(id, callback);
         }
         result
     }
@@ -258,7 +256,7 @@ fn invoke(id: CallbackId, active: Arc<AtomicBool>, event: Event) {
     if !active.load(Ordering::Acquire) {
         return;
     }
-    let Some(mut callback) = CALLBACKS.with(|callbacks| callbacks.remove(id.0.get())) else {
+    let Some(mut callback) = take(id) else {
         return;
     };
     let reusable = match (&mut callback, event) {
@@ -316,16 +314,12 @@ fn invoke(id: CallbackId, active: Arc<AtomicBool>, event: Event) {
         }
     };
     if reusable && active.load(Ordering::Acquire) {
-        CALLBACKS.with(|callbacks| {
-            let previous = callbacks.insert(id.0.get(), callback);
-            debug_assert!(previous.is_none());
-            drop(previous);
-        });
+        store(id, callback);
     }
 }
 
 fn remove(id: CallbackId) {
-    let removed = CALLBACKS.with(|callbacks| callbacks.remove(id.0.get()));
+    let removed = take(id);
     // Drop user state after the TLS RefCell borrow is gone. Destructors may
     // reenter callback registration or dispatch.
     drop(removed);
@@ -333,7 +327,7 @@ fn remove(id: CallbackId) {
 
 pub(super) fn clear_current_thread() {
     LOCAL_EVENTS.with(|events| events.borrow_mut().clear());
-    let callbacks = CALLBACKS.with(OwnerThreadRegistry::take_all);
+    let callbacks = CALLBACKS.with(|callbacks| std::mem::take(&mut *callbacks.borrow_mut()));
     // Callback destructors can touch the platform; never run them under the
     // TLS registry borrow.
     drop(callbacks);

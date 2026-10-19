@@ -11,7 +11,6 @@ workspace = true
 
 [lib]
 name = "gpui_mobile"
-crate-type = ["staticlib", "cdylib", "rlib"]
 
 [features]
 default = []
@@ -33,6 +32,7 @@ image = { workspace = true, optional = true }
 jni = "0.22"
 gpui_parley = { workspace = true, features = ["system-fonts"] }
 libc.workspace = true
+memmap2 = "0.9"
 ndk = { version = "0.9", features = ["nativewindow"] }
 ndk-context = "0.1"
 ndk-sys = "0.6"

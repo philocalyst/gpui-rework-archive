@@ -231,7 +231,8 @@ fn delegate_class(env: &mut JNIEnv) -> &'static JClass<'static> {
             let dex_class_loader_class = env
                 .find_class("dalvik/system/InMemoryDexClassLoader")
                 .unwrap();
-            let dex_bytes = super::accesskit_classes::ACCESSKIT_CLASSES;
+            // The unchanged classes.dex of the accesskit_android 0.7.5 release.
+            let dex_bytes = include_bytes!("accesskit_classes.dex");
             let dex_buffer = unsafe {
                 env.new_direct_byte_buffer(dex_bytes.as_ptr() as *mut u8, dex_bytes.len())
             }

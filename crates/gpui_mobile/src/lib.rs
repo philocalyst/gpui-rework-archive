@@ -5,11 +5,8 @@
 
 pub use gpui;
 
-#[cfg(all(feature = "offscreen", any(target_os = "android", test)))]
+#[cfg(all(feature = "offscreen", target_os = "android"))]
 pub mod offscreen;
-
-#[cfg(any(test, target_os = "android"))]
-pub(crate) mod owner_thread_registry;
 
 #[cfg(any(test, target_os = "android"))]
 mod fling_guard;

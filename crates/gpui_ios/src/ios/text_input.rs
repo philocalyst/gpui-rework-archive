@@ -157,58 +157,36 @@ define_class!(
 
         #[unsafe(method(canPerformAction:withSender:))]
         unsafe fn can_perform_action(&self, action: Sel, sender: Option<&AnyObject>) -> bool {
-            let handled = self.with_handler(|handler| {
-                if !handler.query_accepts_focused_text_input() {
-                    return false;
-                }
-                if action == sel!(selectAll:) {
-                    let Some(range) = editable_text_range(handler) else {
-                        return false;
-                    };
-                    return !range.is_empty()
-                        && handler
-                            .selected_text_range(false)
-                            .is_none_or(|selection| selection.range != range);
-                }
-                if action == sel!(copy:) || action == sel!(cut:) {
-                    return selected_text(handler).is_some();
-                }
-                if action == sel!(paste:) {
-                    let has_text = unsafe { UIPasteboard::generalPasteboard().hasStrings() };
-                    return has_text
-                        && handler.selected_text_range(false).is_some_and(|selection| {
-                            allowed_range(handler, &selection.range)
-                                && handler
-                                    .marked_text_range()
-                                    .is_none_or(|range| allowed_range(handler, &range))
-                        });
-                }
-                false
-            })
-            .unwrap_or(false);
-            if handled {
-                true
-            } else if action == sel!(selectAll:)
-                || action == sel!(copy:)
-                || action == sel!(cut:)
-                || action == sel!(paste:)
-            {
-                false
-            } else {
-                unsafe { msg_send![super(self), canPerformAction: action withSender: sender] }
+            if ![sel!(selectAll:), sel!(copy:), sel!(cut:), sel!(paste:)].contains(&action) {
+                return unsafe { msg_send![super(self), canPerformAction: action, withSender: sender] };
             }
+            self.with_handler(|handler| {
+                if !handler.query_accepts_focused_text_input() {
+                    false
+                } else if action == sel!(selectAll:) {
+                    document_range(handler).is_some_and(|range| {
+                        !range.is_empty()
+                            && handler
+                                .selected_text_range(false)
+                                .is_none_or(|selection| selection.range != range)
+                    })
+                } else if action == sel!(paste:) {
+                    can_edit(handler) && unsafe { UIPasteboard::generalPasteboard().hasStrings() }
+                } else {
+                    selected_text(handler).is_some()
+                }
+            })
+            .unwrap_or(false)
         }
 
         #[unsafe(method(selectAll:))]
         fn select_all(&self, _sender: Option<&AnyObject>) {
             let mut changed = false;
             self.edit(|handler| {
-                let Some(range) = editable_text_range(handler) else {
-                    return;
-                };
-                if handler
-                    .selected_text_range(false)
-                    .is_none_or(|selection| selection.range != range)
+                if let Some(range) = document_range(handler)
+                    && handler
+                        .selected_text_range(false)
+                        .is_none_or(|selection| selection.range != range)
                 {
                     handler.set_selected_text_range(range);
                     changed = true;
@@ -230,10 +208,7 @@ define_class!(
                 })
                 .flatten();
             if let Some((_, text)) = text {
-                unsafe {
-                    UIPasteboard::generalPasteboard()
-                        .setString(Some(&NSString::from_str(&text)));
-                }
+                set_pasteboard_string(&text);
             }
         }
 
@@ -241,15 +216,11 @@ define_class!(
         fn cut(&self, _sender: Option<&AnyObject>) {
             let mut changed = false;
             self.edit(|handler| {
-                let Some((range, text)) = selected_text(handler) else {
-                    return;
-                };
-                unsafe {
-                    UIPasteboard::generalPasteboard()
-                        .setString(Some(&NSString::from_str(&text)));
+                if let Some((range, text)) = selected_text(handler) {
+                    set_pasteboard_string(&text);
+                    handler.replace_text_in_range(Some(range), "");
+                    changed = true;
                 }
-                handler.replace_text_in_range(Some(range), "");
-                changed = true;
             });
             if changed {
                 self.notify_edit_menu_change(true);
@@ -258,38 +229,12 @@ define_class!(
 
         #[unsafe(method(paste:))]
         fn paste(&self, _sender: Option<&AnyObject>) {
-            let eligible = self
-                .with_handler(|handler| {
-                    handler.query_accepts_focused_text_input()
-                        && handler.selected_text_range(false).is_some_and(|selection| {
-                            allowed_range(handler, &selection.range)
-                                && handler
-                                    .marked_text_range()
-                                    .is_none_or(|range| allowed_range(handler, &range))
-                        })
-                })
-                .unwrap_or(false);
-            if !eligible {
-                return;
-            }
-            let Some(text) = (unsafe { UIPasteboard::generalPasteboard().string() }) else {
-                return;
-            };
-            let text = text.to_string();
             let mut changed = false;
             self.edit(|handler| {
-                let Some(selection) = handler.selected_text_range(false) else {
-                    return;
-                };
-                if !allowed_range(handler, &selection.range)
-                    || handler
-                        .marked_text_range()
-                        .is_some_and(|range| !allowed_range(handler, &range))
-                {
-                    return;
+                if let Some(text) = unsafe { UIPasteboard::generalPasteboard().string() } {
+                    handler.replace_text_in_range(None, &text.to_string());
+                    changed = true;
                 }
-                handler.replace_text_in_range(None, &text);
-                changed = true;
             });
             if changed {
                 self.notify_edit_menu_change(true);
@@ -299,8 +244,7 @@ define_class!(
         #[unsafe(method(reconcileTextInput))]
         fn reconcile_text_input(&self) {
             self.ivars().update_pending.set(false);
-            let desired = self.ivars().keyboard_desired.get();
-            let eligible = desired
+            let eligible = self.ivars().keyboard_desired.get()
                 && self.with_handler(|handler| {
                     if !handler.query_accepts_focused_text_input() { return false; }
                     let Some(document) = document_range(handler) else { return false; };
@@ -308,20 +252,13 @@ define_class!(
                         .is_some_and(|selection| contains_range(&document, &selection.range))
                 }).unwrap_or(false);
             self.ivars().keyboard_eligible.set(eligible);
-            let first_before = self.isFirstResponder();
-            let can_become = self.canBecomeFirstResponder();
-            let mut become_result = None;
-            if can_become {
-                if !first_before { become_result = Some(self.becomeFirstResponder()); }
-            } else if first_before {
+            if self.canBecomeFirstResponder() {
+                if !self.isFirstResponder() { self.becomeFirstResponder(); }
+            } else if self.isFirstResponder() {
                 let previous = self.ivars().reconciling_responder.replace(true);
                 self.resignFirstResponder();
                 self.ivars().reconciling_responder.set(previous);
             }
-            super::window::test_log_ime(&format!(
-                "[GPUI-IME-TEST] reconcile desired={desired} eligible={eligible} can_become={can_become} first_before={first_before} first_after={} become_result={become_result:?}",
-                self.isFirstResponder(),
-            ));
             if self.ivars().configuration_changed.replace(false) && self.isFirstResponder() {
                 self.reloadInputViews();
             }
@@ -434,8 +371,7 @@ define_class!(
         }
         #[unsafe(method(setSelectedTextRange:))]
         fn set_selected_text_range(&self, range: Option<&UITextRange>) {
-            let range = range.and_then(|range| self.validated_range(range));
-            if let Some(range) = range {
+            if let Some(range) = range.and_then(|range| self.validated_range(range)) {
                 self.edit(|handler| {
                     if allowed_range(handler, &range) { handler.set_selected_text_range(range); }
                 });
@@ -597,12 +533,10 @@ define_class!(
         #[unsafe(method_id(closestPositionToPoint:))]
         fn closest_position(&self, point: CGPoint) -> Option<Retained<UITextPosition>> {
             self.with_handler(|handler| {
-                handler
-                    .character_index_for_point(gpui::point(px(point.x as f32), px(point.y as f32)))
-                    .filter(|offset| allowed_range(handler, &(*offset..*offset)))
-            })
-            .flatten()
-            .map(|offset| self.new_position(offset))
+                let offset = handler.character_index_for_point(gpui::point(px(point.x as f32), px(point.y as f32)))?;
+                allowed_range(handler, &(offset..offset)).then_some(offset)
+            }).flatten()
+                .map(|offset| self.new_position(offset))
         }
         #[unsafe(method_id(closestPositionToPoint:withinRange:))]
         fn closest_position_within_range(&self, point: CGPoint, range: &UITextRange) -> Option<Retained<UITextPosition>> {
@@ -690,12 +624,7 @@ impl TextInputView {
     fn edit(&self, callback: impl FnOnce(&mut PlatformInputHandler)) {
         let previous = self.ivars().native_edit.replace(true);
         self.with_handler(|handler| {
-            let selected = handler.selected_text_range(false);
-            let marked = handler.marked_text_range();
-            let selection_allowed =
-                selected.is_some_and(|selection| allowed_range(handler, &selection.range));
-            let marked_allowed = marked.is_none_or(|range| allowed_range(handler, &range));
-            if handler.query_accepts_focused_text_input() && selection_allowed && marked_allowed {
+            if can_edit(handler) {
                 callback(handler);
             }
         });
@@ -835,11 +764,20 @@ fn allowed_range(handler: &mut PlatformInputHandler, range: &Range<usize>) -> bo
     document_range(handler).is_some_and(|editable| contains_range(&editable, range))
 }
 
-fn editable_text_range(handler: &mut PlatformInputHandler) -> Option<Range<usize>> {
-    handler
-        .text_input_editable_range()
-        .or_else(|| handler.text_length_utf16().map(|length| 0..length))
-        .filter(|range| range.start <= range.end)
+/// Whether the focused input can take an edit: its selection, and any marked text, lie in the
+/// editable range.
+fn can_edit(handler: &mut PlatformInputHandler) -> bool {
+    handler.query_accepts_focused_text_input()
+        && handler
+            .selected_text_range(false)
+            .is_some_and(|selection| allowed_range(handler, &selection.range))
+        && handler
+            .marked_text_range()
+            .is_none_or(|range| allowed_range(handler, &range))
+}
+
+fn set_pasteboard_string(text: &str) {
+    unsafe { UIPasteboard::generalPasteboard().setString(Some(&NSString::from_str(text))) };
 }
 
 fn selected_text(handler: &mut PlatformInputHandler) -> Option<(Range<usize>, String)> {

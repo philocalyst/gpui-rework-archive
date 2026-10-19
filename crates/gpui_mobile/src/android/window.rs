@@ -332,13 +332,6 @@ struct WindowState {
     /// Whether the window background should be transparent.
     transparent: bool,
 
-    /// Address of the last `ANativeWindow` used to build the renderer surface.
-    ///
-    /// Kept across `term_window` for diagnostics only. The old surface and native
-    /// window are released there; pointer equality after a later init is not treated
-    /// as proof that Android returned the same live window object.
-    surface_window_addr: usize,
-
     // ── callbacks ─────────────────────────────────────────────────────────
     request_frame_callback: Option<Registration>,
     touch_callback: Option<Registration>,
@@ -506,7 +499,6 @@ impl AndroidWindow {
         .context("failed to create gpui_wgpu renderer")?;
 
         let id = native_window.ptr().as_ptr() as u64;
-        let surface_window_addr = native_window.ptr().as_ptr() as usize;
 
         let state = Arc::new(Mutex::new(WindowState {
             native_window: Some(native_window),
@@ -520,7 +512,6 @@ impl AndroidWindow {
             appearance: WindowAppearance::Light,
             is_active: true,
             transparent,
-            surface_window_addr,
             request_frame_callback: None,
             touch_callback: None,
             key_callback: None,
@@ -599,7 +590,6 @@ impl AndroidWindow {
         let (mut renderer, native_window, gpu_context) = {
             let mut state = self.state.lock();
             state.is_active = false;
-            state.surface_window_addr = 0;
             let renderer = state.renderer.take();
             let native_window = state.native_window.take();
             let gpu_context = state.gpu_context.take();
@@ -629,7 +619,6 @@ impl AndroidWindow {
             appearance: WindowAppearance::Light,
             is_active: false,
             transparent: false,
-            surface_window_addr: 0,
             request_frame_callback: None,
             touch_callback: None,
             key_callback: None,
@@ -684,22 +673,13 @@ impl AndroidWindow {
         // EGL/Android may reuse a BufferQueue for a new ANativeWindow pointer,
         // and creating/configuring the replacement first can fail with
         // EGL_BAD_ALLOC while the old EGL surface still owns that queue.
-        let incoming_addr = native_window.ptr().as_ptr() as usize;
-        let previous_window_addr = state.surface_window_addr;
         if let Some(renderer) = state.renderer.as_mut() {
-            let same_window = previous_window_addr == incoming_addr;
-            log::info!(
-                "AndroidWindow::init_window — {} native window, rebuilding surface {}×{}",
-                if same_window { "same" } else { "new" },
-                width,
-                height
-            );
+            log::info!("AndroidWindow::init_window — rebuilding surface {width}×{height}");
             let raw = Self::raw_window(&native_window);
             // Dropping renderer resources drops the old wgpu Surface and its EGL
             // swapchain before `recover` creates the new platform surface. The
             // renderer keeps its context and Atlas Arc; recovery clears stale atlas
             // tiles so the forced full frame below rerasterizes them.
-            renderer.unconfigure_surface();
             renderer.destroy();
             renderer
                 .recover(&raw)
@@ -708,23 +688,18 @@ impl AndroidWindow {
                 gpui::DevicePixels(width),
                 gpui::DevicePixels(height),
             ));
-            state.surface_window_addr = incoming_addr;
         } else {
-            // First init or after a full destroy — create a fresh renderer.
-            let ctx = if state
-                .gpu_context
-                .as_ref()
-                .is_some_and(|context| context.borrow().is_some())
-            {
-                Rc::clone(state.gpu_context.as_ref().expect("checked above"))
-            } else {
-                // Use the context from the platform; store it in our state too.
-                state.gpu_context = Some(Rc::clone(&gpu_context));
-                gpu_context
+            // First init or after a full destroy — create a fresh renderer, on the window's
+            // own context when it still has a live one, or on the platform's.
+            let ctx = match &state.gpu_context {
+                Some(context) if context.borrow().is_some() => Rc::clone(context),
+                _ => {
+                    state.gpu_context = Some(Rc::clone(&gpu_context));
+                    gpu_context
+                }
             };
             let renderer = Self::create_renderer(&native_window, ctx, width, height, transparent)?;
             state.renderer = Some(renderer);
-            state.surface_window_addr = incoming_addr;
             log::info!(
                 "AndroidWindow::init_window — created new renderer {}×{}",
                 width,
@@ -787,7 +762,6 @@ impl AndroidWindow {
         // The renderer wrapper, GPU context, and atlas Arc remain available for
         // recovery when the next native window is initialized.
         if let Some(renderer) = state.renderer.as_mut() {
-            renderer.unconfigure_surface();
             renderer.destroy();
             log::info!(
                 "AndroidWindow::term_window — surface resources dropped (renderer context retained)"
@@ -903,11 +877,7 @@ impl AndroidWindow {
             }
         };
 
-        if renderer.draw(scene) {
-            if let Some(session) = &self.native_session {
-                super::jni::note_presented_frame(session);
-            }
-        }
+        renderer.draw(scene);
 
         // Put the renderer back.
         let mut state = self.state.lock();
@@ -1600,19 +1570,6 @@ impl PlatformWindow for AndroidPlatformWindow {
             .load(std::sync::atomic::Ordering::Acquire)
         {
             return;
-        }
-        static DIAGNOSTIC_UPDATES: std::sync::OnceLock<std::sync::atomic::AtomicUsize> =
-            std::sync::OnceLock::new();
-        let diagnostic_index = DIAGNOSTIC_UPDATES
-            .get_or_init(|| std::sync::atomic::AtomicUsize::new(0))
-            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        if diagnostic_index < 4 {
-            let summary: String = format!("{tree_update:#?}").chars().take(16000).collect();
-            log::info!(
-                "Android AccessKit TreeUpdate diagnostic {} (truncated at 16000 chars): {}",
-                diagnostic_index,
-                summary
-            );
         }
         if let Some(handlers) = self.window.a11y.lock().expect("poisoned").clone() {
             super::accessibility::update(&handlers, tree_update);
