@@ -180,16 +180,18 @@ impl<F: Future> Future for RegisteredLocalFuture<F> {
     }
 }
 
-/// An executor for one session, for futures that are not Send.
+/// An executor for one session, for futures that are not `Send`.
 ///
-/// Tasks spawned on a LocalExecutor run in order on whichever thread drains
-/// the dispatch destination it was built with. Futures are polled and dropped
-/// on the thread that spawned them.
+/// Tasks spawned on a `LocalExecutor` run in order on whichever thread drains
+/// the dispatch destination it was built with. That is the main thread for the
+/// default session, or a dedicated thread for a session created with
+/// [`LocalExecutor::spawn_dedicated`]. Futures spawned here are polled and
+/// dropped on the thread that spawned them.
 #[derive(Clone)]
 pub struct LocalExecutor {
     session_id: SessionId,
     scheduler: Arc<dyn Scheduler>,
-    // Spawned tasks' schedule callbacks each hold an Arc clone of this
+    // Spawned tasks' schedule callbacks each hold an `Arc` clone of this
     // closure, so the destination it captures stays alive as long as work
     // could still land on it.
     dispatch: Arc<dyn Fn(Runnable<RunnableMeta>) + Send + Sync>,
@@ -564,7 +566,7 @@ impl BackgroundExecutor {
         self.scheduler.as_test().is_some()
     }
 
-    /// Spawns a closure on a new session that has its own LocalExecutor.
+    /// Spawns a closure on a new session that has its own [`LocalExecutor`].
     ///
     /// The closure runs on a new OS thread under the platform scheduler, or on
     /// the test scheduler's loop under `TestScheduler`. Its future can use

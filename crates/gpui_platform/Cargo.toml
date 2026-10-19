@@ -5,36 +5,63 @@ description.workspace = true
 edition.workspace = true
 publish.workspace = true
 license = "Apache-2.0"
+
 [lints]
 workspace = true
+
 [lib]
 path = "src/gpui_platform.rs"
 doctest = false
+
 [features]
 default = ["multithreaded"]
+# Threads in the browser: needs a nightly toolchain and a cross-origin-isolated
+# page. Off, gpui_web builds on stable.
 multithreaded = ["gpui_web/multithreaded"]
-bench-support = ["gpui/bench-support", "gpui_apple/bench-support", "gpui_macos/bench-support", "gpui_wgpu/bench-support"]
+bench-support = [
+  "gpui/bench-support",
+  "gpui_apple/bench-support",
+  "gpui_macos/bench-support",
+  "gpui_wgpu/bench-support",
+]
 font-kit = ["gpui_macos/font-kit"]
 inspector = ["gpui/inspector"]
-test-support = ["gpui/test-support", "gpui_apple/test-support", "gpui_macos/test-support", "gpui_windows/test-support", "gpui_wgpu/test-support"]
-screen-capture = ["gpui/screen-capture", "gpui_macos/screen-capture", "gpui_windows/screen-capture", "gpui_linux/screen-capture"]
+test-support = [
+  "gpui/test-support",
+  "gpui_apple/test-support",
+  "gpui_macos/test-support",
+  "gpui_windows/test-support",
+  "gpui_wgpu/test-support",
+]
+screen-capture = [
+  "gpui/screen-capture",
+  "gpui_macos/screen-capture",
+  "gpui_windows/screen-capture",
+  "gpui_linux/screen-capture",
+]
 runtime_shaders = ["gpui_macos/runtime_shaders", "gpui_ios/runtime_shaders"]
+# macOS windows draw with the WGPU renderer instead of Metal. Custom GPU
+# controls also need gpui_wgpu's `custom-gpu` feature to share its device.
 macos-wgpu = ["gpui_macos/wgpu"]
 wayland = ["gpui_linux/wayland"]
 x11 = ["gpui_linux/x11"]
+
 [[bench]]
 name = "focus_cleanup"
 path = "../gpui/benches/focus_cleanup.rs"
 harness = false
 required-features = ["bench-support"]
+
 [[bench]]
 name = "inspector_render"
 harness = false
 required-features = ["bench-support"]
+
 [[bench]]
 name = "randomized_element_tree"
 harness = false
 required-features = ["bench-support"]
+
 [dependencies]
 anyhow.workspace = true
 gpui = { workspace = true, default-features = false }
@@ -47,27 +74,36 @@ gpui_fonts = { path = "../gpui_ce_fonts", version = "0.2.2", package = "gpui-ce-
 [target.'cfg(target_os = "macos")'.dependencies]
 gpui_apple.workspace = true
 gpui_macos.workspace = true
+
 [target.'cfg(target_os = "ios")'.dependencies]
 gpui_ios.workspace = true
+
 [target.'cfg(target_os = "android")'.dependencies]
 gpui_mobile.workspace = true
+
 [target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "windows"))'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
 gpui_wgpu = { workspace = true, features = ["test-support"] }
+
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
 gpui_apple = { workspace = true, features = ["test-support"] }
 gpui_macos = { workspace = true, features = ["test-support"] }
+
 [target.'cfg(target_os = "windows")'.dependencies]
 gpui_windows.workspace = true
 gpui = { workspace = true, features = ["windows-manifest"] }
+
 [target.'cfg(any(target_os = "linux", target_os = "freebsd"))'.dependencies]
 gpui_linux.workspace = true
+
 [target.'cfg(target_os = "linux")'.dependencies]
 gpui_wgpu = { workspace = true, optional = true }
+
 [target.'cfg(target_family = "wasm")'.dependencies]
 gpui_web = { path = "../gpui_web", version = "0.1.0", package = "gpui_ce_web", default-features = false }
 console_error_panic_hook.workspace = true
+
 [[test]]
 name = "parley_render"
 path = "tests/parley_render.rs"

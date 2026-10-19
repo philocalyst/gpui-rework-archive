@@ -179,9 +179,6 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 
 
 [dev-dependencies]
-# Examples in the documentation use `TestApp`, so GPUI's own tests always
-# build with `test-support`.
-gpui = { path = ".", package = "gpui-ce", features = ["test-support"] }
 accesskit_consumer.workspace = true
 backtrace.workspace = true
 smol.workspace = true
@@ -192,14 +189,15 @@ gpui_ce_elements = { path = "../gpui_elements" }
 futures-concurrency.workspace = true
 postage = { workspace = true, features = ["blocking"] }
 web-time.workspace = true
-gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11"] }
+# Enable TestApp for doctests through the existing platform dependency. A self
+# dependency would link GPUI's Windows application manifest twice in unit tests.
+gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11", "test-support"] }
 gpui_fonts = { path = "../gpui_ce_fonts", version = "0.2.2", package = "gpui-ce-fonts" }
 gpui_util.workspace = true
 lyon = { version = "1.0", features = ["extra"] }
 rand = { workspace = true, default-features = true }
 scheduler = { workspace = true, features = ["test-support"] }
 image = { workspace = true, features = ["png"] }
-
 unicode-segmentation.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
@@ -222,7 +220,7 @@ ignored = [
 ignored-paths = ["src/_ownership_and_data_flow.rs", "benches/focus_cleanup.rs"]
 
 
-# Examples in examples are discovered automatically. Benchmarks live in
+# Examples in `examples/*.rs` are discovered automatically. Benchmarks live in
 # a subdirectory so they stay out of the way of the examples people read.
 
 [[example]]

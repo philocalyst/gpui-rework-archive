@@ -999,8 +999,8 @@ impl From<ResizeEdge> for CursorStyle {
 
 /// Whether a window draws its own titlebar and borders, or the window server does.
 ///
-/// Set this with WindowOptions::window_decorations. Linux Wayland and X11 backends honor it;
-/// other backends ignore it. This type describes the appearance of a window.
+/// Set this with [`WindowOptions::window_decorations`]. Linux's Wayland and X11
+/// backends honor it. The other backends ignore it.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Default)]
 pub enum WindowDecorations {
     /// The window server draws the titlebar and borders.

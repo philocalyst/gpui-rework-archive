@@ -264,7 +264,6 @@ gpui_macros = { path = "./crates/gpui_macros/", version = "0.1.0", package = "gp
 gpui_shared_string = { path = "./crates/gpui_shared_string/", version = "0.1.0", package = "gpui_ce_shared_string" }
 gpui_tokio = { path = "./crates/gpui_tokio/", version = "0.1.0", package = "gpui_ce_tokio" }
 
-tendril = "0.5"
 dispatch2 = { version = "0.3", default-features = false, features = ["std"] }
 objc2-security = { version = "0.3.2", default-features = false, features = ["std", "SecBase", "SecItem"] }
 objc2-core-video = { version = "=0.3.2", default-features = false, features = ["CVBuffer", "CVImageBuffer"] }

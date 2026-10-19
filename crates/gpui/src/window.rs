@@ -5477,7 +5477,7 @@ impl Window {
 
     /// Returns the content mask in effect, which is the window's bounds unless a parent has clipped it.
     ///
-    /// Call it during prepaint or paint. See Window::with_content_mask.
+    /// Call it during prepaint or paint. See [`Window::with_content_mask`].
     pub fn content_mask(&self) -> ContentMask<Pixels> {
         self.invalidator.debug_assert_paint_or_prepaint();
         self.content_mask_stack
@@ -5835,9 +5835,7 @@ impl Window {
         result
     }
 
-    /// Paint the drop shadows into the scene at the current z-index. Inset shadows are
-    /// skipped; paint those after the element background. Corner smoothing ranges from
-    /// circular corners at 0.0 to maximum smoothing at 1.0.
+    /// Paints the outer shadows in `shadows` behind an element of `bounds` and `corner_radii`.
     ///
     /// Paint these before the element's background, so the shadow sits under it. Inset shadows
     /// are skipped; paint those with [`Window::paint_inset_shadows`] after the background.
@@ -6176,8 +6174,8 @@ impl Window {
 
     /// Paints a strikethrough line of `width` starting at `origin`, using `style`.
     ///
-    /// The line is drawn at the current z-index and clipped by the content mask. Opacity scopes
-    /// composite it with their group. Call it during paint.
+    /// The line is drawn at the current z-index, and the content mask and element opacity apply
+    /// to it. Call it during paint.
     pub fn paint_strikethrough(
         &mut self,
         origin: Point<Pixels>,
@@ -6455,11 +6453,10 @@ impl Window {
 
     /// Paints `data` into `bounds`, scaled to fit `image_bounds`.
     ///
-    /// Paints data into bounds, scaled to fit image_bounds.
-    ///
-    /// The visible region is bounds intersected with image_bounds. frame_index selects an animated
-    /// image frame; grayscale controls grayscale rendering. corner_smoothing ranges from circular
-    /// corners at 0.0 to maximum smoothing at 1.0. Returns an error if upload fails.
+    /// The visible region is `bounds.intersect(&image_bounds)`, and `corner_radii` round the
+    /// corners of `bounds`. `frame_index` selects a frame of an animated image, and `grayscale`
+    /// paints the image in grayscale. Returns an error if the image can't be uploaded to the
+    /// renderer. Call it during paint.
     pub fn paint_image(
         &mut self,
         bounds: Bounds<Pixels>,
@@ -9804,10 +9801,10 @@ impl From<[u8; 20]> for ElementId {
     }
 }
 
-/// A rectangle with an optional background and border, ready for Window::paint_quad.
+/// A rectangle with a background and optional border, ready for [`Window::paint_quad`].
 ///
-/// Build one with fill, outline or quad, then adjust it with builder methods. Its fields are in
-/// logical pixels. Colors retain their own alpha; element opacity scopes composite the group once.
+/// Build one with [`PaintQuad::new`], then set its background, border and corners with the
+/// builder methods. Its fields are in logical pixels. It is painted into the active opacity group.
 #[derive(Clone, derive_setters::Setters)]
 #[setters(into, generate = false)]
 pub struct PaintQuad {
@@ -9852,7 +9849,7 @@ impl PaintQuad {
         }
     }
 
-    /// Sets corner smoothing, clamped to 0.0 through 1.0.
+    /// Sets the corner smoothing, clamped to the range `0.0..=1.0`.
     pub fn corner_smoothing(self, amount: f32) -> Self {
         PaintQuad {
             corner_smoothing: amount.clamp(0.0, 1.0),
