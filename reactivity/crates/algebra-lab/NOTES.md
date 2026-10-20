@@ -1,4 +1,8 @@
-# Inverse-free affine path product frontier
+# Inverse-free path product frontier
+
+The exact translation specialization is documented in [EXACT.md](EXACT.md),
+with a genuine associative integer monoid,64-byte records and viewport rebasing.
+The original affine CSV below was recorded at commit9614712 before that iteration.
 
 This is an executable data-structure experiment, not a renderer integration or
 an adoption recommendation. A rooted array-based link-cut forest updates a local
@@ -29,7 +33,7 @@ public integration tests and example. It lives at
 on another spike, legacy GPUI, third-party algorithm implementation, or native
 host is required. All code is safe Rust with `forbid(unsafe_code)`.
 
-Seven public tests cover 15,000 seeded randomized mutation steps with four
+The seven original affine/structural public tests cover 15,000 seeded randomized mutation steps with four
 independent parentwalk queries per step, ordered noncommutative coefficients,
 singular collapse/recovery, cut/link/reparent, failed cycles, foreign keys,
 numeric-range recovery, explicit numerical non-equivalence, exact node storage,
@@ -39,7 +43,7 @@ run. Deep cold access and destruction use no recursive stack.
 
 ## Representation and invariants
 
-Each node has four u32 indexes (`left`, `right`, combined auxiliary/path `up`, and
+Each approximate-affine node has four u32 indexes (`left`, `right`, combined auxiliary/path `up`, and
 represented `parent`) plus local and cached six-f64 matrices: **112 bytes** on
 this target. Cached invalid products use a private NaN sentinel in coefficient
 `a`. Admitted inputs are finite, so the sentinel is unambiguous without unsafe,
