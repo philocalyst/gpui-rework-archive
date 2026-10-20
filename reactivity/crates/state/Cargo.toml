@@ -1,0 +1,10 @@
+[package]
+name = "gpui_reactivity_state"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+description = "Explicit state and publication protocol primitives for the reactivity spike"
+
+[lib]
+path = "src/lib.rs"
