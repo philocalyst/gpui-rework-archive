@@ -235,6 +235,23 @@ impl Tree {
     pub(crate) fn slot(&self, id: NodeId) -> usize {
         id.index as usize
     }
+    #[cfg(feature = "layout")]
+    pub(crate) fn layout_key(&self, id: NodeId) -> u64 {
+        (u64::from(id.generation) << 32) | u64::from(id.index)
+    }
+    #[cfg(feature = "layout")]
+    pub(crate) fn node_for_layout_key(&self, key: u64) -> NodeId {
+        let id = NodeId {
+            arena: self.arena,
+            generation: (key >> 32) as u32,
+            index: key as u32,
+        };
+        assert!(
+            self.contains(id),
+            "layout engine ids name live nodes in this tree"
+        );
+        id
+    }
     fn optional_index(&self, id: Option<NodeId>) -> Result<u32, TreeError> {
         id.map_or(Ok(NIL), |id| self.index(id))
     }

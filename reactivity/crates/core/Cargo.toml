@@ -5,3 +5,12 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+cephal = { path = "../../vendor/cephal", optional = true }
+
+[features]
+default = []
+layout = ["dep:cephal"]
+
+[[example]]
+name = "retained_layout"
+required-features = ["layout"]
