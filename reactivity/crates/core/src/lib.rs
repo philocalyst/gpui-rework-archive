@@ -4,6 +4,8 @@
 pub mod damage;
 pub mod geometry;
 pub mod inspect;
+#[cfg(feature = "layout")]
+pub mod layout;
 pub mod spatial;
 pub mod tree;
 
