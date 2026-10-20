@@ -1,9 +1,9 @@
-//! Experimental rooted link-cut forest for ordered, inverse-free affine products.
+//! Rooted link-cut experiments: exact subpixel translations and approximate affine products.
 //!
 //! No subtree bounds, damage, clipping, layout or paint skipping are provided.
 //! Keys are append-only, arena-scoped capabilities. Queries mutate preferred
 //! paths; operations are amortized O(log n), not worst-case logarithmic.
-//! See `NOTES.md` for numerical limits, primary sources and benchmark protocol.
+//! See `EXACT.md` for the integer proof/viewport path and `NOTES.md` for affine limits.
 #![forbid(unsafe_code)]
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -19,6 +19,8 @@ pub enum Error {
     NotRoot,
     InvalidTransform,
     NumericRange,
+    DifferentComponent,
+    RendererRange,
 }
 
 /// Six f64 coefficients: [a c tx; b d ty; 0 0 1]. Singular maps are legal.
@@ -118,32 +120,155 @@ pub struct Work {
     pub compositions: u64,
 }
 
-struct Node {
+mod translation;
+use translation::ExactTranslations;
+pub use translation::{RelativeTranslation, SUBPIXELS_PER_PIXEL, Translation, WideTranslation};
+
+// Private algebra seam: production admission requires associative combine on all
+// reachable values. ApproxAffine explicitly does not satisfy exact IEEE laws;
+// ExactTranslations does, with a path-length overflow proof in translation.rs.
+trait Algebra {
+    type Local: Copy;
+    type Product: Copy;
+    fn validate(value: Self::Local) -> Result<(), Error>;
+    fn lift(value: Self::Local) -> Self::Product;
+    fn combine(left: Self::Product, right: Self::Product) -> Self::Product;
+    fn finish(value: Self::Product) -> Result<Self::Product, Error>;
+}
+struct ApproxAffine;
+impl Algebra for ApproxAffine {
+    type Local = Affine;
+    type Product = Affine;
+    fn validate(value: Affine) -> Result<(), Error> {
+        if value.is_admitted() {
+            Ok(())
+        } else {
+            Err(Error::InvalidTransform)
+        }
+    }
+    fn lift(value: Affine) -> Affine {
+        value
+    }
+    fn combine(left: Affine, right: Affine) -> Affine {
+        if left.a.is_nan() || right.a.is_nan() {
+            return Affine {
+                a: f64::NAN,
+                ..Affine::IDENTITY
+            };
+        }
+        left.compose(right).unwrap_or(Affine {
+            a: f64::NAN,
+            ..Affine::IDENTITY
+        })
+    }
+    fn finish(value: Affine) -> Result<Affine, Error> {
+        if value.a.is_nan() {
+            Err(Error::NumericRange)
+        } else {
+            Ok(value)
+        }
+    }
+}
+
+/// Approximate six-f64 path products. See the cancellation characterization:
+/// query history can change rounding; this is not the exact coordinate lane.
+pub struct Forest(Dynamic<ApproxAffine>);
+/// Sparse coordinate-space forest with exact 1/256-pixel translations.
+/// Per-node payload is 64 bytes; do not allocate one for every UI primitive.
+pub struct TranslationForest(Dynamic<ExactTranslations>);
+
+// Only wrappers are generated. There is one splay/cut/link implementation below.
+macro_rules! forest_api {
+    ($forest:ident, $algebra:ty, $local:ty, $product:ty) => {
+        impl Default for $forest {
+            fn default() -> Self {
+                Self::new()
+            }
+        }
+        impl $forest {
+            pub fn new() -> Self {
+                Self(Dynamic::new())
+            }
+            pub fn len(&self) -> usize {
+                self.0.len()
+            }
+            pub fn is_empty(&self) -> bool {
+                self.0.is_empty()
+            }
+            pub fn node_bytes() -> usize {
+                Dynamic::<$algebra>::node_bytes()
+            }
+            pub fn allocated_bytes(&self) -> usize {
+                self.0.allocated_bytes()
+            }
+            pub fn reserve_nodes(&mut self, additional: usize) -> Result<(), Error> {
+                self.0.reserve_nodes(additional)
+            }
+            pub fn work(&self) -> Work {
+                self.0.work()
+            }
+            pub fn reset_work(&mut self) {
+                self.0.reset_work();
+            }
+            pub fn insert(&mut self, parent: Option<Key>, local: $local) -> Result<Key, Error> {
+                self.0.insert(parent, local)
+            }
+            pub fn parent(&self, key: Key) -> Result<Option<Key>, Error> {
+                self.0.parent(key)
+            }
+            pub fn local(&self, key: Key) -> Result<$local, Error> {
+                self.0.local(key)
+            }
+            pub fn set_local(&mut self, key: Key, local: $local) -> Result<(), Error> {
+                self.0.set_local(key, local)
+            }
+            pub fn world(&mut self, key: Key) -> Result<$product, Error> {
+                self.0.world(key)
+            }
+            pub fn cut(&mut self, key: Key) -> Result<Option<Key>, Error> {
+                self.0.cut(key)
+            }
+            pub fn link(&mut self, root: Key, parent: Key) -> Result<(), Error> {
+                self.0.link(root, parent)
+            }
+            pub fn reparent(&mut self, key: Key, parent: Option<Key>) -> Result<(), Error> {
+                self.0.reparent(key, parent)
+            }
+        }
+    };
+}
+forest_api!(Forest, ApproxAffine, Affine, Affine);
+forest_api!(
+    TranslationForest,
+    ExactTranslations,
+    Translation,
+    WideTranslation
+);
+
+struct Node<A: Algebra> {
     left: u32,
     right: u32,
     // Auxiliary parent if its child link names this node; otherwise path parent.
     up: u32,
     // Represented parent remains stable across rotations, for inspection/cut API.
     parent: u32,
-    local: Affine,
-    // Admitted matrices are finite; NaN in cached `a` is a private range-error
-    // sentinel. This saves Option's tag without transmute or a layout assumption.
-    product: Affine,
+    local: A::Local,
+    product: A::Product,
 }
 
-pub struct Forest {
+struct Dynamic<A: Algebra> {
     arena: u64,
-    nodes: Vec<Node>,
+    nodes: Vec<Node<A>>,
     work: Work,
 }
 
-impl Default for Forest {
+impl<A: Algebra> Default for Dynamic<A> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Forest {
+impl<A: Algebra> Dynamic<A> {
     pub fn new() -> Self {
         let arena = NEXT_ARENA
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
@@ -175,7 +300,7 @@ impl Forest {
         self.nodes.is_empty()
     }
     pub fn node_bytes() -> usize {
-        std::mem::size_of::<Node>()
+        std::mem::size_of::<Node<A>>()
     }
     pub fn allocated_bytes(&self) -> usize {
         self.nodes.capacity() * Self::node_bytes()
@@ -189,11 +314,9 @@ impl Forest {
 
     /// Append a fresh node, optionally attached under an existing node. Existing
     /// nodes cannot be descendants of a not-yet-created node, so linking is O(1).
-    pub fn insert(&mut self, parent: Option<Key>, local: Affine) -> Result<Key, Error> {
+    pub fn insert(&mut self, parent: Option<Key>, local: A::Local) -> Result<Key, Error> {
         let parent = self.optional(parent)?;
-        if !local.is_admitted() {
-            return Err(Error::InvalidTransform);
-        }
+        A::validate(local)?;
         let index = u32::try_from(self.nodes.len()).map_err(|_| Error::Capacity)?;
         if index == NIL {
             return Err(Error::Capacity);
@@ -204,7 +327,7 @@ impl Forest {
             up: parent,
             parent,
             local,
-            product: local,
+            product: A::lift(local),
         });
         Ok(self.key(index))
     }
@@ -212,14 +335,12 @@ impl Forest {
         let i = self.index(key)?;
         Ok((self.node(i).parent != NIL).then(|| self.key(self.node(i).parent)))
     }
-    pub fn local(&self, key: Key) -> Result<Affine, Error> {
+    pub fn local(&self, key: Key) -> Result<A::Local, Error> {
         Ok(self.node(self.index(key)?).local)
     }
-    pub fn set_local(&mut self, key: Key, local: Affine) -> Result<(), Error> {
+    pub fn set_local(&mut self, key: Key, local: A::Local) -> Result<(), Error> {
         let i = self.index(key)?;
-        if !local.is_admitted() {
-            return Err(Error::InvalidTransform);
-        }
+        A::validate(local)?;
         self.access(i);
         self.node_mut(i).local = local;
         self.pull(i);
@@ -227,10 +348,10 @@ impl Forest {
     }
     /// Expose the represented root-to-node path. Its auxiliary in-order product
     /// is parent-first, so multiplication order is left × local × right.
-    pub fn world(&mut self, key: Key) -> Result<Affine, Error> {
+    pub fn world(&mut self, key: Key) -> Result<A::Product, Error> {
         let i = self.index(key)?;
         self.access(i);
-        self.product(i).ok_or(Error::NumericRange)
+        A::finish(self.node(i).product)
     }
     pub fn cut(&mut self, key: Key) -> Result<Option<Key>, Error> {
         let i = self.index(key)?;
@@ -274,10 +395,10 @@ impl Forest {
         Ok(())
     }
 
-    fn node(&self, i: u32) -> &Node {
+    fn node(&self, i: u32) -> &Node<A> {
         &self.nodes[i as usize]
     }
-    fn node_mut(&mut self, i: u32) -> &mut Node {
+    fn node_mut(&mut self, i: u32) -> &mut Node<A> {
         &mut self.nodes[i as usize]
     }
     fn key(&self, index: u32) -> Key {
@@ -300,27 +421,20 @@ impl Forest {
         let p = self.node(i).up;
         p == NIL || (self.node(p).left != i && self.node(p).right != i)
     }
-    fn product(&self, i: u32) -> Option<Affine> {
-        let product = self.node(i).product;
-        (!product.a.is_nan()).then_some(product)
-    }
     fn pull(&mut self, i: u32) {
         self.work.pulls += 1;
         let n = self.node(i);
         let (left, right, local) = (n.left, n.right, n.local);
-        let mut product = Some(local);
+        let mut product = A::lift(local);
         if left != NIL {
             self.work.compositions += 1;
-            product = self.product(left).and_then(|l| l.compose(local).ok());
+            product = A::combine(self.node(left).product, product);
         }
         if right != NIL {
             self.work.compositions += 1;
-            product = product.and_then(|p| self.product(right).and_then(|r| p.compose(r).ok()));
+            product = A::combine(product, self.node(right).product);
         }
-        self.node_mut(i).product = product.unwrap_or(Affine {
-            a: f64::NAN,
-            ..Affine::IDENTITY
-        });
+        self.node_mut(i).product = product;
     }
     fn rotate(&mut self, i: u32) {
         self.work.rotations += 1;
