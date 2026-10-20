@@ -43,10 +43,10 @@ impl Rect {
     pub fn contains(self, p: Point) -> bool {
         self.is_valid()
             && !self.is_empty()
-            && p.x >= self.x
-            && p.y >= self.y
-            && p.x < self.x + self.width
-            && p.y < self.y + self.height
+            && p.x as f64 >= self.x as f64
+            && p.y as f64 >= self.y as f64
+            && (p.x as f64) < self.x as f64 + self.width as f64
+            && (p.y as f64) < self.y as f64 + self.height as f64
     }
     pub fn intersection(self, other: Self) -> Self {
         let x = self.x.max(other.x);
@@ -183,17 +183,62 @@ pub enum MappedBounds {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct CoordinateSpace {
-    transform: Affine,
+    matrix: [f64; 6],
+    uncertain: bool,
 }
 impl CoordinateSpace {
     pub const fn new(transform: Affine) -> Self {
-        Self { transform }
+        Self {
+            matrix: [
+                transform.a as f64,
+                transform.b as f64,
+                transform.c as f64,
+                transform.d as f64,
+                transform.tx as f64,
+                transform.ty as f64,
+            ],
+            uncertain: false,
+        }
     }
-    pub const fn transform(self) -> Affine {
-        self.transform
+    /// The composed CPU mapping retains wide intermediates between ancestors.
+    pub const fn coefficients(self) -> [f64; 6] {
+        self.matrix
+    }
+    /// Compose without narrowing between ancestors. A lost invertible product
+    /// remains uncertain, causing full damage rather than an empty rectangle.
+    pub fn compose(self, child: Affine) -> Self {
+        let [a, b, c, d, x, y] = self.matrix;
+        let child = Self::new(child);
+        let [e, f, g, h, u, v] = child.matrix;
+        let matrix = [
+            a * e + c * f,
+            b * e + d * f,
+            a * g + c * h,
+            b * g + d * h,
+            a * u + c * v + x,
+            b * u + d * v + y,
+        ];
+        let det = matrix[0] * matrix[3] - matrix[1] * matrix[2];
+        let lost_rank = self.is_invertible() && child.is_invertible() && det == 0.0;
+        Self {
+            matrix,
+            uncertain: self.uncertain || lost_rank || !det.is_finite(),
+        }
+    }
+    pub fn is_invertible(self) -> bool {
+        let [a, b, c, d, _, _] = self.matrix;
+        !self.uncertain && self.matrix.into_iter().all(f64::is_finite) && a * d - b * c != 0.0
     }
     pub fn to_window(self, point: Point) -> Option<Point> {
-        self.transform.apply(point)
+        let [a, b, c, d, x, y] = self.matrix;
+        if self.uncertain {
+            return None;
+        }
+        let result = Point {
+            x: (a * point.x as f64 + c * point.y as f64 + x) as f32,
+            y: (b * point.x as f64 + d * point.y as f64 + y) as f32,
+        };
+        (result.x.is_finite() && result.y.is_finite()).then_some(result)
     }
     pub fn to_local(self, point: Point) -> Option<Point> {
         let (x, y) = self.local_f64(point)?;
@@ -204,16 +249,15 @@ impl CoordinateSpace {
         (result.x.is_finite() && result.y.is_finite()).then_some(result)
     }
     fn local_f64(self, point: Point) -> Option<(f64, f64)> {
-        let t = self.transform;
-        if !t.is_finite() || !point.x.is_finite() || !point.y.is_finite() {
+        if !self.is_invertible() || !point.x.is_finite() || !point.y.is_finite() {
             return None;
         }
-        let (a, b, c, d) = (t.a as f64, t.b as f64, t.c as f64, t.d as f64);
+        let [a, b, c, d, tx, ty] = self.matrix;
         let det = a * d - b * c;
         if det == 0.0 {
             return None;
         }
-        let (x, y) = (point.x as f64 - t.tx as f64, point.y as f64 - t.ty as f64);
+        let (x, y) = (point.x as f64 - tx, point.y as f64 - ty);
         Some(((d * x - c * y) / det, (a * y - b * x) / det))
     }
     /// Finite AABB convenience accessor. Use `mapped_bounds` for damage: `None`
@@ -226,11 +270,11 @@ impl CoordinateSpace {
     }
     /// Conservative forward bound independent of inverse representability.
     pub fn mapped_bounds(self, rect: Rect) -> MappedBounds {
-        let t = self.transform;
-        if !rect.is_valid() || !t.is_finite() {
+        if !rect.is_valid() || self.uncertain || !self.matrix.into_iter().all(f64::is_finite) {
             return MappedBounds::Unbounded;
         }
-        let det = t.a as f64 * t.d as f64 - t.b as f64 * t.c as f64;
+        let [a, b, c, d, tx, ty] = self.matrix;
+        let det = a * d - b * c;
         if rect.is_empty() || det == 0.0 {
             return MappedBounds::Empty;
         }
@@ -240,8 +284,8 @@ impl CoordinateSpace {
         let mut min = [f64::INFINITY; 2];
         let mut max = [f64::NEG_INFINITY; 2];
         for p in points {
-            let x = t.a as f64 * p[0] + t.c as f64 * p[1] + t.tx as f64;
-            let y = t.b as f64 * p[0] + t.d as f64 * p[1] + t.ty as f64;
+            let x = a * p[0] + c * p[1] + tx;
+            let y = b * p[0] + d * p[1] + ty;
             min[0] = min[0].min(x);
             min[1] = min[1].min(y);
             max[0] = max[0].max(x);

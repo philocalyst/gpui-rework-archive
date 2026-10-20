@@ -46,14 +46,19 @@ impl Damage {
             self.full();
             return;
         }
-        let rect = rect.intersection(Rect::new(0.0, 0.0, self.width as f32, self.height as f32));
-        if rect.is_empty() {
+        // Keep endpoint arithmetic wider than storage: 64.0 + 1e-6 rounds back
+        // to 64.0 in f32, but still covers pixels in the following tile.
+        let left = (rect.x as f64).max(0.0);
+        let top = (rect.y as f64).max(0.0);
+        let right = (rect.x as f64 + rect.width as f64).min(self.width as f64);
+        let bottom = (rect.y as f64 + rect.height as f64).min(self.height as f64);
+        if right <= left || bottom <= top {
             return;
         }
-        let x0 = (rect.x / TILE as f32).floor() as u32;
-        let y0 = (rect.y / TILE as f32).floor() as u32;
-        let x1 = ((rect.x + rect.width) / TILE as f32).ceil() as u32;
-        let y1 = ((rect.y + rect.height) / TILE as f32).ceil() as u32;
+        let x0 = (left / TILE as f64).floor() as u32;
+        let y0 = (top / TILE as f64).floor() as u32;
+        let x1 = (right / TILE as f64).ceil() as u32;
+        let y1 = (bottom / TILE as f64).ceil() as u32;
         for y in y0..y1.min(self.rows) {
             for x in x0..x1.min(self.columns) {
                 self.set((y * self.columns + x) as usize);

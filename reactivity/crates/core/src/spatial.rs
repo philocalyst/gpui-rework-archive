@@ -1,12 +1,17 @@
-use crate::{
-    Affine, CoordinateSpace, Damage, Geometry, NodeId, NodeKind, Point, Rect, Tree, TreeError,
-};
+use crate::{CoordinateSpace, Damage, Geometry, NodeId, NodeKind, Point, Rect, Tree, TreeError};
 
 const ABSENT: u32 = u32::MAX;
 struct Record {
     slot: u32,
     geometry: Geometry,
-    world: Affine,
+    world: CoordinateSpace,
+}
+
+/// Hit result and the number of nodes examined, for inspection and work gates.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct HitTest {
+    pub node: Option<NodeId>,
+    pub visited: usize,
 }
 
 /// Optional geometry extension to the topology. Geometry records are dense and
@@ -19,7 +24,7 @@ pub struct SpatialTree {
     directory: Vec<u32>,
     records: Vec<Record>,
     damage: Damage,
-    scratch: Vec<(NodeId, Affine)>,
+    scratch: Vec<(NodeId, CoordinateSpace)>,
     visited: u64,
 }
 impl SpatialTree {
@@ -60,13 +65,13 @@ impl SpatialTree {
     }
     pub fn coordinate_space(&self, node: NodeId) -> Result<CoordinateSpace, TreeError> {
         self.tree.index(node)?;
-        Ok(CoordinateSpace::new(self.inherited_world(Some(node))))
+        Ok(self.inherited_world(Some(node)))
     }
     pub fn window_bounds(&self, node: NodeId) -> Result<Option<Rect>, TreeError> {
         self.tree.index(node)?;
         Ok(self
             .record(node)
-            .and_then(|r| CoordinateSpace::new(r.world).bounds(r.geometry.bounds)))
+            .and_then(|r| r.world.bounds(r.geometry.bounds)))
     }
     /// Setting identical geometry does no work. Invalid data leaves all state and damage unchanged.
     pub fn set_geometry(
@@ -96,7 +101,7 @@ impl SpatialTree {
             self.records.push(Record {
                 slot: slot as u32,
                 geometry,
-                world: Affine::IDENTITY,
+                world: CoordinateSpace::new(crate::Affine::IDENTITY),
             });
         }
         self.refresh_subtree(node);
@@ -126,39 +131,42 @@ impl SpatialTree {
     /// ancestor clips are checked; conservative AABBs never decide a hit.
     /// This foundation uses a linear hit scan, not a retained spatial index.
     pub fn hit_test(&self, point: Point) -> Option<NodeId> {
-        self.tree
-            .preorder()
-            .filter(|&node| {
-                let Some(record) = self.record(node) else {
-                    return false;
-                };
-                if !CoordinateSpace::new(record.world).hit(record.geometry.bounds, point) {
-                    return false;
-                }
-                let mut ancestor = Some(node);
-                while let Some(id) = ancestor {
-                    if let Some(r) = self.record(id) {
-                        let space = CoordinateSpace::new(r.world);
-                        // A singular ancestor invalidates the descendant space too.
-                        if !r.world.is_invertible() {
-                            return false;
-                        }
-                        if r.geometry.clip.is_some_and(|clip| !space.hit(clip, point)) {
-                            return false;
-                        }
-                    }
-                    ancestor = self.tree.parent(id).unwrap();
-                }
-                true
-            })
-            .last()
+        self.query_hit(point).node
+    }
+    /// Tests each visited node's own clip once. A rejected clip or singular
+    /// space prunes its descendants, so ancestor checks cannot become quadratic
+    /// on a deep chain. No per-query stack or allocation is needed.
+    pub fn query_hit(&self, point: Point) -> HitTest {
+        let mut result = HitTest::default();
+        let mut nodes = self.tree.preorder();
+        while let Some(node) = nodes.next() {
+            result.visited += 1;
+            let Some(record) = self.record(node) else {
+                continue;
+            };
+            let space = record.world;
+            if !record.world.is_invertible()
+                || record
+                    .geometry
+                    .clip
+                    .is_some_and(|clip| !space.hit(clip, point))
+            {
+                nodes.skip_descendants(node);
+                continue;
+            }
+            // Parent bounds do not clip children unless a clip was declared.
+            if space.hit(record.geometry.bounds, point) {
+                result.node = Some(node);
+            }
+        }
+        result
     }
     /// Allocated payload; no allocator headers or struct headers included.
     pub fn allocated_bytes(&self) -> usize {
         self.tree.allocated_bytes()
             + self.directory.capacity() * 4
             + self.records.capacity() * std::mem::size_of::<Record>()
-            + self.scratch.capacity() * std::mem::size_of::<(NodeId, Affine)>()
+            + self.scratch.capacity() * std::mem::size_of::<(NodeId, CoordinateSpace)>()
             + self.damage.allocated_bytes()
     }
     pub fn geometry_record_bytes() -> usize {
@@ -168,14 +176,14 @@ impl SpatialTree {
         let index = *self.directory.get(self.tree.slot(node))?;
         (index != ABSENT).then(|| &self.records[index as usize])
     }
-    fn inherited_world(&self, mut node: Option<NodeId>) -> Affine {
+    fn inherited_world(&self, mut node: Option<NodeId>) -> CoordinateSpace {
         while let Some(id) = node {
             if let Some(record) = self.record(id) {
                 return record.world;
             }
             node = self.tree.parent(id).unwrap();
         }
-        Affine::IDENTITY
+        CoordinateSpace::new(crate::Affine::IDENTITY)
     }
     fn erase_record(&mut self, node: NodeId) {
         Self::erase_slot(&mut self.directory, &mut self.records, self.tree.slot(node));
@@ -195,8 +203,7 @@ impl SpatialTree {
         for id in self.tree.subtree(node).unwrap() {
             self.visited += 1;
             if let Some(record) = self.record(id) {
-                let bounds =
-                    CoordinateSpace::new(record.world).mapped_bounds(record.geometry.bounds);
+                let bounds = record.world.mapped_bounds(record.geometry.bounds);
                 self.damage.add_mapped(bounds);
             }
         }
@@ -214,7 +221,7 @@ impl SpatialTree {
                 world = inherited.compose(record.geometry.transform);
                 record.world = world;
                 self.damage
-                    .add_mapped(CoordinateSpace::new(world).mapped_bounds(record.geometry.bounds));
+                    .add_mapped(world.mapped_bounds(record.geometry.bounds));
             }
             if let Some(child) = self.tree.children(Some(node)).unwrap().next() {
                 self.scratch.push((node, inherited));

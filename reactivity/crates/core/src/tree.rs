@@ -314,6 +314,29 @@ pub struct Preorder<'a> {
     next: u32,
     root: u32,
 }
+impl Preorder<'_> {
+    // Called only for the node most recently yielded by this iterator. The tree
+    // stays immutably borrowed, so its links and generation cannot change.
+    pub(crate) fn skip_descendants(&mut self, node: NodeId) {
+        let mut current = self.tree.slot(node) as u32;
+        loop {
+            if current == self.root {
+                self.next = NIL;
+                return;
+            }
+            let entry = &self.tree.entries[current as usize];
+            if entry.next != NIL {
+                self.next = entry.next;
+                return;
+            }
+            if entry.parent == NIL {
+                self.next = NIL;
+                return;
+            }
+            current = entry.parent;
+        }
+    }
+}
 impl Iterator for Preorder<'_> {
     type Item = NodeId;
     fn next(&mut self) -> Option<NodeId> {

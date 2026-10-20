@@ -237,6 +237,81 @@ fn sparse_record_swap_remove_and_slot_reuse_preserve_survivors() {
     assert_eq!(tree.hit_test(Point { x: 131.0, y: 1.0 }), Some(fresh));
 }
 
+#[test]
+fn deep_hit_queries_are_linear_and_rejected_clips_prune_descendants() {
+    let mut tree = SpatialTree::new(128, 128).unwrap();
+    let root = tree.insert(None, NodeKind::Element).unwrap();
+    tree.set_geometry(root, Some(geometry(0.0, 0.0))).unwrap();
+    let mut last = root;
+    for _ in 1..20_000 {
+        last = tree.insert(Some(last), NodeKind::Element).unwrap();
+        tree.set_geometry(last, Some(geometry(0.0, 0.0))).unwrap();
+    }
+    let point = Point { x: 1.0, y: 1.0 };
+    let query = tree.query_hit(point);
+    assert_eq!(query.node, Some(last));
+    assert_eq!(query.visited, 20_000);
+
+    let mut clipped = geometry(0.0, 0.0);
+    clipped.clip = Some(Rect::new(40.0, 40.0, 4.0, 4.0));
+    tree.set_geometry(root, Some(clipped)).unwrap();
+    let sibling = tree.insert(None, NodeKind::Element).unwrap();
+    tree.set_geometry(sibling, Some(geometry(0.0, 0.0)))
+        .unwrap();
+    let query = tree.query_hit(point);
+    assert_eq!(query.node, Some(sibling));
+    assert_eq!(
+        query.visited, 2,
+        "skip descendants but keep following forest roots"
+    );
+}
+
+#[test]
+fn sub_ulp_extents_at_tile_boundaries_remain_damaged_and_hittable() {
+    let mut damage = Damage::new(128, 128).unwrap();
+    let point = Point { x: 64.0, y: 0.0 };
+    let narrow = Rect::new(64.0, 0.0, 1e-6, 1.0);
+    assert!(narrow.contains(point));
+    assert!(CoordinateSpace::new(Affine::IDENTITY).hit(narrow, point));
+    damage.add(narrow);
+    assert_eq!(damage.tile_count(), 1);
+    assert!(covered(&damage, point));
+
+    damage.clear();
+    damage.add(Rect::new(63.999_996, 0.0, 4e-6, 1.0));
+    assert_eq!(damage.tile_count(), 2);
+}
+
+#[test]
+fn wide_ancestor_composition_does_not_erase_recoverable_geometry() {
+    let mut tree = SpatialTree::new(128, 64).unwrap();
+    let root = tree.insert(None, NodeKind::Element).unwrap();
+    let middle = tree.insert(Some(root), NodeKind::Element).unwrap();
+    let leaf = tree.insert(Some(middle), NodeKind::Element).unwrap();
+    for node in [root, middle] {
+        tree.set_geometry(
+            node,
+            Some(Geometry {
+                transform: Affine::scale(1e-30, 1.0),
+                ..Geometry::default()
+            }),
+        )
+        .unwrap();
+    }
+    tree.clear_damage();
+    tree.set_geometry(
+        leaf,
+        Some(Geometry {
+            bounds: Rect::new(0.0, 0.0, 1e30, 1.0),
+            transform: Affine::scale(1e30, 1.0),
+            clip: None,
+        }),
+    )
+    .unwrap();
+    assert!(!tree.damage().is_empty());
+    assert_eq!(tree.hit_test(Point { x: 0.5, y: 0.5 }), Some(leaf));
+}
+
 struct Rng(u64);
 impl Rng {
     fn next(&mut self, n: usize) -> usize {

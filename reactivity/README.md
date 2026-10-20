@@ -1,6 +1,9 @@
 # Retained-tree foundation
 
-This independent workspace is a clean-room, dependency-free implementation spike.
+This independent workspace contains clean-room implementation experiments.
+The core and state defaults are dependency-free; native hosting and Cephal layout
+are optional. [The plan](PLAN.md) and [experiment register](EXPERIMENTS.md) record
+the architectural choices and their acceptance gates.
 It does not add code or dependencies to the legacy GPUI workspace. Run:
 
 ```sh
@@ -28,7 +31,7 @@ without geometry inherits its parent's coordinate mapping and has no bounds or
 clip. Geometry transforms map local to parent, and parents compose outside children.
 Bounds are conservative forward AABBs; hit testing inversely maps the point and
 checks the local rectangle and each ancestor clip. Floating point corner and inverse
-point evaluation uses f64 intermediates. A finite inverse need not be representable
+point evaluation and retained ancestor composition use f64 intermediates. A finite inverse need not be representable
 as an f32 matrix for point mapping to succeed. Singular mappings have no surface or
 hit region. Nonfinite geometry declarations fail without changing retained data.
 Composition overflow or unrepresentable forward extents produces `MappedBounds::Unbounded`,
@@ -52,8 +55,8 @@ On the tested x86_64 Rust 1.97.1 target, `size_of` reports:
 | Tree header | 56 | One tree |
 | Topology slot | 28 | High-water number of slots |
 | Spatial slot directory | 4 | Per topology slot, only for SpatialTree |
-| Declared geometry record | 88 | Dense; only nodes with Geometry |
-| Traversal scratch entry | 40 | High-water subtree depth on spatial mutations |
+| Declared geometry record | 120 | Dense; only nodes with Geometry; wide oracle mapping |
+| Traversal scratch entry | 72 | High-water subtree depth on spatial mutations |
 | Damage bitmap | 8 | Per 64 viewport tiles |
 | Touched-word index | 8 | Per touched bitmap word, reused after clear |
 | SpatialTree header | 208 | Includes Tree/Damage headers and vector handles |
@@ -68,8 +71,10 @@ A topology-only Tree pays neither the directory nor spatial/damage storage.
 Insertion and link edits are O(1), cycle checking is O(ancestor depth), and removal
 is O(subtree size) with no temporary node queue. Spatial mutation visits affected
 nodes and uses O(depth) reusable scratch. Locating an inherited mapping through
-geometry-free ancestors is O(depth). Hit testing is a linear preorder scan with
-ancestor clip checks; there is no tile hit index or paint-store cache here.
+geometry-free ancestors is O(depth). Hit testing is a linear preorder scan that
+tests each clip once and prunes rejected subtrees; it does not repeat every
+ancestor test for every candidate. `query_hit` reports visits. There is no tile
+hit index or paint-store cache here.
 No final performance claim from the design microbenchmarks is inherited by this spike.
 
 Validation includes 18,000 randomized topology edits against a separate adjacency
@@ -77,7 +82,11 @@ oracle, 700 randomized spatial mutations against from-scratch f64 matrix composi
 5,600 independent inverse-hit queries, old/new damage pixel coverage, 100,000-node
 deep topology removal/reuse, 30,000-node spatial refresh/removal, rotated ancestor
 clips, foreign/stale ids, sparse-record relocation, repeated damage bounds, and
-large-forward/tiny-inverse numerical regressions.
+large-forward/tiny-inverse numerical regressions. Additional review tests cover
+sub-ULP damage at tile boundaries, 20,000-level hit-query work, and an ancestor
+scale chain that underflows in f32 before later scales recover visible geometry.
+This correctness oracle pays for wide mappings; sparse coordinate-space
+experiments target its retained cost.
 
 The result is a mutable retained-tree substrate, not the final runtime. It does not
 implement atomic logical/presentation epochs, authoring frames, reconciliation,
