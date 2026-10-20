@@ -3,5 +3,16 @@
 version = 4
 
 [[package]]
+name = "cephal"
+version = "0.1.1"
+
+[[package]]
 name = "gpui_reactivity_core"
+version = "0.1.0"
+dependencies = [
+ "cephal",
+]
+
+[[package]]
+name = "gpui_reactivity_state"
 version = "0.1.0"

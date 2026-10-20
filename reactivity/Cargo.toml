@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/*"]
+exclude = ["vendor/cephal"]
 resolver = "3"
 
 [workspace.package]
