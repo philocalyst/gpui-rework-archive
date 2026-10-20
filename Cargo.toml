@@ -1,4 +1,5 @@
 [workspace]
+exclude = ["reactivity", "reactivity/vendor/winit", "reactivity/vendor/cephal"]
 members = [
   "./crates/gpui/",
   "./crates/gpui_render/",
