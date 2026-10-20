@@ -262,7 +262,7 @@ ci:
         })
         (run-check "check examples" {
             cargo build --package gpui-ce --examples
-            cargo check --package gpui_ce_web --target wasm32-unknown-unknown
+            cargo check --package gpui_ce_web --target wasm32-unknown-unknown --no-default-features
         })
         (if (available "typos") { run-check "typos" { typos } } else { skip "typos" "not installed" })
         (if (available "cargo-machete") { run-check "cargo machete" { cargo machete } } else { skip "cargo machete" "install: cargo install cargo-machete" })
@@ -436,7 +436,8 @@ publish dry="false":
 
     # Topological publish order. Vendored support crates first, then core,
     # then renderers/platform leaves, with gpui_platform LAST (it has
-    # target-conditional deps on every platform crate).
+    # target-conditional deps on every platform crate). Every versioned
+    # dependency edge — including dev-dependencies — points backwards here.
     let crates = [
         "crates/gpui_ce_util/Cargo.toml"
         "crates/gpui_collections/Cargo.toml"
@@ -454,17 +455,37 @@ publish dry="false":
         "crates/gpui/Cargo.toml"
 
         # renderers / platform leaves
+        "crates/gpui_render/Cargo.toml"
+        "crates/gpui_ce_parley/Cargo.toml"
         "crates/gpui_wgpu/Cargo.toml"
         "crates/gpui_tokio/Cargo.toml"
+        "crates/gpui_apple/Cargo.toml"
         "crates/gpui_macos/Cargo.toml"
         "crates/gpui_linux/Cargo.toml"
         "crates/gpui_windows/Cargo.toml"
         "crates/gpui_web/Cargo.toml"
+        "crates/gpui_mobile/Cargo.toml"
+        "crates/gpui_ios/Cargo.toml"
         "crates/gpui_elements/Cargo.toml"
 
         "crates/gpui_platform/Cargo.toml"
 
     ]
+
+    # crates.io rejects uploads with missing metadata, and `--dry-run` aborts
+    # before the upload that would reveal it. Check the fields the registry
+    # requires on the resolved metadata, so inherited `.workspace = true`
+    # values count and a missing one fails here, before anything is uploaded.
+    let metadata = (^cargo metadata --no-deps --format-version 1 | from json)
+    let missing = ($crates | each {|manifest|
+        let manifest_path = ($manifest | path expand)
+        let package = ($metadata.packages | where manifest_path == $manifest_path | first)
+        let absent = ["description" "license"] | where {|field| ($package | get -o $field | default "" | str trim | str length) == 0 }
+        $absent | each {|field| $"($package.name): ($field)" }
+    } | flatten)
+    if ($missing | length) > 0 {
+        error make {msg: $"Crates missing registry metadata: ($missing | str join ', ')"}
+    }
 
     let dry_flag = if $dry_run { ["--dry-run"] } else { [] }
 
@@ -525,14 +546,10 @@ publish dry="false":
         } else {
             []
         }
-        # `gpui-ce` has test/example-only edges to `gpui_ce_platform`, while the
-        # Windows platform implementation has the reciprocal `gpui-ce` edge.
-        # Cargo cannot represent the packaged crate and that local cycle in a
-        # single verification lockfile. The release CI builds every target in
-        # the workspace before this recipe; package the archive here and leave
-        # its all-target compilation to that complete workspace check.
-        let no_verify = if $name == "gpui" { ["--no-verify"] } else { [] }
-        run-external "cargo" "publish" "--manifest-path" $manifest "--allow-dirty" ...$dry_flag ...$no_verify ...$patch_flags
+        # `gpui-ce`'s test-only edges to `gpui_ce_platform` and `gpui_ce_fonts`
+        # are path-only dev-dependencies, so Cargo drops them from the packaged
+        # manifest and verification builds against the crates.io graph alone.
+        run-external "cargo" "publish" "--manifest-path" $manifest "--allow-dirty" ...$dry_flag ...$patch_flags
         if $env.LAST_EXIT_CODE != 0 {
             error make {msg: $"Failed to publish ($name)"}
         }

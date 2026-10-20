@@ -1,3 +1,5 @@
+extern crate gpui_ce_platform as gpui_platform;
+
 use std::{cell::RefCell, rc::Rc, time::Duration};
 
 use gpui::{AppContext as _, BenchAppContext, Entity, EntityId, FocusHandle, WeakFocusHandle};

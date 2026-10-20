@@ -98,7 +98,6 @@ TRACKED_CRATES: dict[str, str] = {
     "gpui_path": "path",
     "gpui_apple": "gpui_apple",
     "gpui_ios": "gpui_ios",
-    "gpui_bench_metrics": "bench_metrics",
 }
 
 VENDOR_BRANCH: str = _env("SYNC_VENDOR_BRANCH", "vendor/zed-gpui")

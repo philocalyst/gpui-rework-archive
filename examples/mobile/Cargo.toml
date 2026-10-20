@@ -19,7 +19,7 @@ path = "examples/ios.rs"
 gpui.workspace = true
 accesskit.workspace = true
 gpui_platform.workspace = true
-gpui_elements = { path = "../../crates/gpui_elements", version = "0.1.0", package = "gpui_ce_elements" }
+gpui_elements = { path = "../../crates/gpui_elements", version = "0.3.0", package = "gpui_ce_elements" }
 anyhow.workspace = true
 log.workspace = true
 

@@ -1,8 +1,9 @@
 [package]
 name = "gpui_ce_ios"
-version = "0.1.0"
+version = "0.3.0"
 edition.workspace = true
 publish.workspace = true
+description.workspace = true
 license = "Apache-2.0"
 
 [lints]
@@ -32,7 +33,7 @@ runtime_shaders = ["gpui_apple/runtime_shaders"]
 gpui.workspace = true
 
 [target.'cfg(target_os = "ios")'.dev-dependencies]
-gpui_platform.workspace = true
+gpui_platform = { path = "../gpui_platform", package = "gpui_ce_platform" }
 objc2-ui-kit = { workspace = true, features = ["UIConversationContext"] }
 slotmap.workspace = true
 

@@ -1,6 +1,6 @@
 [package]
 name = "gpui_ce_mobile"
-version = "0.1.0"
+version = "0.3.0"
 description = "Android platform backend for GPUI CE"
 edition.workspace = true
 publish.workspace = true

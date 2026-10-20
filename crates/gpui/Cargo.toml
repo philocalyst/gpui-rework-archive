@@ -1,6 +1,6 @@
 [package]
 name = "gpui-ce"
-version = "0.2.2"
+version = "0.3.0"
 edition.workspace = true
 authors = ["Nathan Sobo <nathan@zed.dev>"]
 description = "A community fork of Zed's GPU-accelerated UI framework"
@@ -37,7 +37,7 @@ test-support = [
   "dep:postage",
   "dep:web-time",
 ]
-bench-support = ["profiler", "dep:criterion", "dep:bench_metrics"]
+bench-support = ["profiler", "dep:criterion", "dep:libc", "dep:perf-event"]
 # Preserve the published feature name while consumers migrate to `bench-support`.
 bench = ["bench-support"]
 inspector = ["gpui_macros/inspector"]
@@ -68,7 +68,6 @@ backtrace.workspace = true
 bitflags.workspace = true
 
 collections.workspace = true
-bench_metrics = { workspace = true, optional = true }
 criterion = { workspace = true, optional = true }
 ctor.workspace = true
 derive_more = { workspace = true, features = ["add", "add_assign", "mul", "mul_assign", "not"] }
@@ -166,6 +165,12 @@ objc2-metal = { version = "0.3", optional = true }
 [target.'cfg(any(target_os = "linux", target_os = "android"))'.dependencies]
 libc.workspace = true
 
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true, optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+perf-event = { workspace = true, optional = true }
+
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows = { workspace = true, features = [
@@ -182,7 +187,6 @@ windows-061 = { workspace = true, features = ["Win32_Graphics_Direct3D11"] }
 accesskit_consumer.workspace = true
 backtrace.workspace = true
 smol.workspace = true
-bench_metrics = { workspace = true, features = ["test-support"] }
 collections = { workspace = true, features = ["test-support"] }
 env_logger.workspace = true
 gpui_ce_elements = { path = "../gpui_elements" }
@@ -191,8 +195,13 @@ postage = { workspace = true, features = ["blocking"] }
 web-time.workspace = true
 # Enable TestApp for doctests through the existing platform dependency. A self
 # dependency would link GPUI's Windows application manifest twice in unit tests.
-gpui_platform = { workspace = true, features = ["font-kit", "wayland", "x11", "test-support"] }
-gpui_fonts = { path = "../gpui_ce_fonts", version = "0.2.2", package = "gpui-ce-fonts" }
+gpui_platform = { path = "../gpui_platform", package = "gpui_ce_platform", features = [
+  "font-kit",
+  "wayland",
+  "x11",
+  "test-support",
+] }
+gpui_fonts = { path = "../gpui_ce_fonts", package = "gpui-ce-fonts" }
 gpui_util.workspace = true
 lyon = { version = "1.0", features = ["extra"] }
 rand = { workspace = true, default-features = true }

@@ -9,8 +9,8 @@ use std::{
     time::{Duration, Instant},
 };
 
+pub use crate::bench_metrics::{BenchMeasurement, CountingAllocator, MetricReport};
 use anyhow::{Result, anyhow};
-pub use bench_metrics::{BenchMeasurement, CountingAllocator, MetricReport};
 use hdrhistogram::Histogram;
 
 use crate::{
@@ -1049,7 +1049,7 @@ impl<'a, 'measurement> BenchAppContext<'a, 'measurement> {
                 .into();
             // An active renderer workload must not inherit the platform
             // callback's inactive-window animation throttle.
-            app.update_window(window, |_, window, _| window.activate_window())
+            app.update_window(window, |_, window, _| window.activate())
                 .expect("failed to activate newly created benchmark window");
             window
         };
@@ -1455,13 +1455,13 @@ mod tests {
         counter: Arc<AtomicU64>,
         benchmark: impl Fn(&mut BenchAppContext, &Arc<AtomicU64>),
     ) -> Vec<u64> {
-        let platform = bench_platform(None, Arc::new(crate::NoopTextSystem::new()));
+        let platform = bench_platform(None, Arc::new(crate::TestTextSystem::new()));
         let report = BenchReport::default();
         let mut criterion = criterion::Criterion::default()
             .with_measurement(
                 BenchMeasurement::new(criterion::measurement::WallTime).with_secondary(
                     "fake counter",
-                    bench_metrics::FakeCounter::new(counter.clone()),
+                    crate::bench_metrics::FakeCounter::new(counter.clone()),
                 ),
             )
             .without_plots()
@@ -1658,6 +1658,7 @@ mod tests {
         let platform = bench_platform(None, Arc::new(crate::TestTextSystem::new()));
         let name = "benchmark_contexts_forward_global_entity_operations";
         let mut criterion = criterion::Criterion::default()
+            .with_measurement(BenchMeasurement::new(criterion::measurement::WallTime))
             .without_plots()
             .sample_size(10)
             .warm_up_time(Duration::from_millis(1))

@@ -834,8 +834,9 @@ impl MetalRenderer {
             texture_descriptor.set_width(size.width.0 as u64);
             texture_descriptor.set_height(size.height.0 as u64);
             texture_descriptor.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
-            texture_descriptor
-                .set_usage(metal::MTLTextureUsage::RenderTarget | metal::MTLTextureUsage::ShaderRead);
+            texture_descriptor.set_usage(
+                metal::MTLTextureUsage::RenderTarget | metal::MTLTextureUsage::ShaderRead,
+            );
             // Like the atlas, only Apple GPUs can create shared textures on macOS;
             // Intel Macs cannot, even with unified memory. iOS has no managed storage.
             let uses_shared_storage = cfg!(target_os = "ios") || self.is_apple_gpu;
@@ -847,8 +848,12 @@ impl MetalRenderer {
             let target_texture = self.device.new_texture(&texture_descriptor);
 
             let mut instance_buffer = self.acquire_instance_buffer(scene);
-            let command_buffer =
-                self.draw_primitives_to_texture(scene, &mut instance_buffer, &target_texture, size)?;
+            let command_buffer = self.draw_primitives_to_texture(
+                scene,
+                &mut instance_buffer,
+                &target_texture,
+                size,
+            )?;
 
             if !uses_shared_storage {
                 let blit = command_buffer.new_blit_command_encoder();
@@ -920,8 +925,12 @@ impl MetalRenderer {
                 .expect("just ensured the render target exists");
 
             let mut instance_buffer = self.acquire_instance_buffer(scene);
-            let command_buffer =
-                self.draw_primitives_to_texture(scene, &mut instance_buffer, &target_texture, size)?;
+            let command_buffer = self.draw_primitives_to_texture(
+                scene,
+                &mut instance_buffer,
+                &target_texture,
+                size,
+            )?;
             self.release_instance_buffer_when_complete(&command_buffer, instance_buffer);
             command_buffer.commit();
             Ok(())

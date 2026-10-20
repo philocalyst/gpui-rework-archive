@@ -24,6 +24,9 @@ mod elements;
 mod executor;
 mod platform_scheduler;
 pub(crate) use platform_scheduler::PlatformScheduler;
+/// Criterion measurements beyond wall time, for benchmarks built on GPUI.
+#[cfg(feature = "bench-support")]
+pub mod bench_metrics;
 mod geometry;
 mod gestures;
 mod global;

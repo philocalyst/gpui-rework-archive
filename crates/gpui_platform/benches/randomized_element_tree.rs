@@ -18,6 +18,8 @@
 //! The tree's own work counters are asserted after each measured loop: a faster frame that
 //! stopped rendering the changed element is not an improvement.
 
+extern crate gpui_ce_platform as gpui_platform;
+
 use std::{
     cell::RefCell,
     fmt,
@@ -180,7 +182,7 @@ fn measure_in_window(
     mut mutate: impl FnMut(&mut RandomizedElementTree, &mut Window, &mut Context<RandomizedElementTree>),
 ) -> Measured {
     let config = input.config;
-    let before_window = bench_metrics::allocation_stats();
+    let before_window = gpui::bench_metrics::allocation_stats();
     let mut window = cx.add_empty_window();
     let tree = window.update(|window, cx| {
         window.replace_root(cx, |_, cx| {
@@ -188,7 +190,11 @@ fn measure_in_window(
         })
     });
     cx.run_until_idle();
-    describe_once(input, before_window, bench_metrics::allocation_stats());
+    describe_once(
+        input,
+        before_window,
+        gpui::bench_metrics::allocation_stats(),
+    );
 
     let snapshot = tree.read_with(cx, |tree, _| tree.snapshot());
     assert_eq!(snapshot.descendant_count(), config.element_count());
@@ -210,12 +216,13 @@ fn measure_in_window(
     let mut frames_that_rendered = 0;
     let mut entity_renders = 0;
     let mut summary = SeedTotals::default();
-    let mut previous_iteration: Option<(Instant, Option<bench_metrics::AllocationStats>)> = None;
+    let mut previous_iteration: Option<(Instant, Option<gpui::bench_metrics::AllocationStats>)> =
+        None;
     cx.bench_renderer(tree, |tree, window, cx| {
         // From one iteration's start to the next is one whole iteration, the frame
         // included, as Criterion times it; the reads add well under a microsecond.
         let now = Instant::now();
-        let stats = bench_metrics::allocation_stats();
+        let stats = gpui::bench_metrics::allocation_stats();
         if let Some((started, started_stats)) = previous_iteration {
             summary.elapsed += now - started;
             summary.iterations += 1;
@@ -257,8 +264,8 @@ thread_local! {
 /// warm-up and every sample, and each call builds the same tree.
 fn describe_once(
     input: &TreeInput,
-    before_window: Option<bench_metrics::AllocationStats>,
-    after_first_frame: Option<bench_metrics::AllocationStats>,
+    before_window: Option<gpui::bench_metrics::AllocationStats>,
+    after_first_frame: Option<gpui::bench_metrics::AllocationStats>,
 ) {
     let is_new =
         LAST_DESCRIBED.with(|last| last.borrow_mut().replace(input.config)) != Some(input.config);

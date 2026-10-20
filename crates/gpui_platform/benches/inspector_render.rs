@@ -1,3 +1,5 @@
+extern crate gpui_ce_platform as gpui_platform;
+
 use std::{cell::Cell, fmt, rc::Rc, time::Duration};
 
 use gpui::{
