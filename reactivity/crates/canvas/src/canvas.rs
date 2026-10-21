@@ -1691,36 +1691,7 @@ fn render_band<W: PixelWriter>(
             };
             if let Some((image, sampling)) = image {
                 let bounds = [left, top, right, bottom];
-                if image.needs_decode_memo() {
-                    render_cached_image(
-                        &mut samples,
-                        &command,
-                        bounds,
-                        &mut stats,
-                        image,
-                        sampling,
-                    );
-                } else if command.map.axis_aligned() {
-                    image_axis::render(
-                        &mut samples,
-                        &command,
-                        bounds,
-                        &mut stats,
-                        image,
-                        sampling,
-                        |x, y| image.texel(x, y),
-                    );
-                } else {
-                    render_image(&mut samples, &command, bounds, &mut stats, |x, y| {
-                        image.sample(
-                            x,
-                            y,
-                            command.rect.width as f64,
-                            command.rect.height as f64,
-                            sampling,
-                        )
-                    });
-                }
+                render_image_command(&mut samples, &command, bounds, &mut stats, image, sampling);
                 continue;
             }
             for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
@@ -1770,6 +1741,37 @@ fn render_band<W: PixelWriter>(
         }
     }
     stats
+}
+
+// Keep image dispatch and its typed closures out of the common raster loop.
+// In particular, adding an image path must not duplicate that dispatch in each
+// output-format loop or extend the live ranges of ordinary rect/glyph state.
+#[inline(never)]
+fn render_image_command(
+    samples: &mut Samples,
+    command: &BorrowedCommand<'_>,
+    bounds: [usize; 4],
+    stats: &mut RenderStats,
+    image: ImageView<'_>,
+    sampling: ImageSampling,
+) {
+    if image.needs_decode_memo() {
+        render_cached_image(samples, command, bounds, stats, image, sampling);
+    } else if command.map.axis_aligned() {
+        image_axis::render(samples, command, bounds, stats, image, sampling, |x, y| {
+            image.texel(x, y)
+        });
+    } else {
+        render_image(samples, command, bounds, stats, |x, y| {
+            image.sample(
+                x,
+                y,
+                command.rect.width as f64,
+                command.rect.height as f64,
+                sampling,
+            )
+        });
+    }
 }
 
 // Keep image-only scratch off image-free raster frames. Direct linear/HDR and
