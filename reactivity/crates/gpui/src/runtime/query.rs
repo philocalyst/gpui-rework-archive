@@ -143,18 +143,12 @@ impl<'a> Part<'a> {
     }
 }
 
-#[derive(Clone, Copy)]
-enum MatchText {
-    Exact,
-    Contains,
-    Name,
-    Description,
-}
-
 pub struct Query<'a, M: View + 'static> {
     runtime: Option<&'a Runtime<M>>,
     role: Option<Role>,
-    text: Option<(&'a str, MatchText)>,
+    text: Option<(&'a str, bool)>,
+    name: Option<&'a str>,
+    description: Option<&'a str>,
     within: Option<Target>,
 }
 impl<'a, M: View + 'static> Query<'a, M> {
@@ -162,46 +156,34 @@ impl<'a, M: View + 'static> Query<'a, M> {
     where
         'a: 'b,
     {
-        Query {
-            runtime: self.runtime,
-            role: self.role,
-            text: Some((text, MatchText::Exact)),
-            within: self.within,
-        }
+        let mut query: Query<'b, M> = self;
+        query.text = Some((text, false));
+        query
     }
     pub fn containing<'b>(self, text: &'b str) -> Query<'b, M>
     where
         'a: 'b,
     {
-        Query {
-            runtime: self.runtime,
-            role: self.role,
-            text: Some((text, MatchText::Contains)),
-            within: self.within,
-        }
+        let mut query: Query<'b, M> = self;
+        query.text = Some((text, true));
+        query
     }
-    /// Match the accessible name, independently of edited value/visual text.
+    /// Match the accessible name in conjunction with other dimensions.
     pub fn name<'b>(self, name: &'b str) -> Query<'b, M>
     where
         'a: 'b,
     {
-        Query {
-            runtime: self.runtime,
-            role: self.role,
-            text: Some((name, MatchText::Name)),
-            within: self.within,
-        }
+        let mut query: Query<'b, M> = self;
+        query.name = Some(name);
+        query
     }
     pub fn description<'b>(self, description: &'b str) -> Query<'b, M>
     where
         'a: 'b,
     {
-        Query {
-            runtime: self.runtime,
-            role: self.role,
-            text: Some((description, MatchText::Description)),
-            within: self.within,
-        }
+        let mut query: Query<'b, M> = self;
+        query.description = Some(description);
+        query
     }
     /// Restrict this query to one presented subtree, including its root.
     pub fn within(mut self, target: Target) -> Self {
@@ -230,14 +212,13 @@ impl<'a, M: View + 'static> Query<'a, M> {
     }
     fn matches(&self, part: Part<'_>) -> bool {
         self.role.is_none_or(|role| part.role() == role)
-            && self.text.is_none_or(|(text, kind)| {
-                let actual = match kind {
-                    MatchText::Exact | MatchText::Contains => part.text(),
-                    MatchText::Name => part.name(),
-                    MatchText::Description => part.description(),
-                };
-                actual.is_some_and(|actual| {
-                    if matches!(kind, MatchText::Contains) {
+            && self.name.is_none_or(|name| part.name() == Some(name))
+            && self
+                .description
+                .is_none_or(|description| part.description() == Some(description))
+            && self.text.is_none_or(|(text, contains)| {
+                part.text().is_some_and(|actual| {
+                    if contains {
                         actual.contains(text)
                     } else {
                         actual == text
@@ -293,6 +274,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime: self.inner.as_deref(),
             role: None,
             text: None,
+            name: None,
+            description: None,
             within: None,
         }
     }
@@ -301,6 +284,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime: self.inner.as_deref(),
             role: Some(role),
             text: None,
+            name: None,
+            description: None,
             within: None,
         }
     }
