@@ -1867,6 +1867,10 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 self.layout_nodes.push(id);
             }
+            // A fresh arena only appends, in declaration order, with one
+            // generation. Keep complete capabilities sorted for measurement
+            // routing without rebuilding a map on every layout pass.
+            debug_assert!(self.layout_nodes.is_sorted());
         } else {
             // Auto-width lists depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
@@ -1899,12 +1903,7 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         let before = self.layout.stats();
-        let lookup = self
-            .layout_nodes
-            .iter()
-            .enumerate()
-            .map(|(index, id)| (*id, index))
-            .collect::<BTreeMap<_, _>>();
+        let layout_nodes = &self.layout_nodes;
         let mut failure = None;
         let nodes = &self.nodes;
         let texts = &mut self.texts;
@@ -1921,7 +1920,10 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            let node = &nodes[lookup[&id]];
+            let index = layout_nodes
+                .binary_search(&id)
+                .expect("measurement names a node in the current layout arena");
+            let node = &nodes[index];
             match node.text_slot().get_mut(texts).unwrap().shape(
                 service,
                 node.style.font_size,
