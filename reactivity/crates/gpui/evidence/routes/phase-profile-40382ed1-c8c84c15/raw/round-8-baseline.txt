@@ -1,0 +1,16 @@
+count,every,exact,stage,ns,allocations,requested,delta,retained,peak
+route_profile,phase=describe,mount=true,flatten_ns=2279430,preflight_ns=81252,reconcile_ns=498171,identity_index_finalize_ns=23331
+route_profile,phase=present,sequence=1,layout_setup_ns=955031,layout_compute_ns=1760259,paint_commit_ns=750627
+route_profile,phase=describe,mount=true,flatten_ns=786848,preflight_ns=79852,reconcile_ns=441589,identity_index_finalize_ns=86672
+route_profile,phase=present,sequence=1,layout_setup_ns=940511,layout_compute_ns=2101886,paint_commit_ns=710076
+4096,1,true,mount,5189055,5305,8768281,2059469,2059469,2984360
+route_profile,phase=describe,mount=false,flatten_ns=1380171,preflight_ns=80982,reconcile_ns=1446042,identity_index_finalize_ns=42961
+4096,1,true,equal,2984547,5191,5846445,0,2059469,2981888
+route_profile,phase=describe,mount=false,flatten_ns=1119375,preflight_ns=19940,reconcile_ns=1132306,identity_index_finalize_ns=32550
+route_profile,phase=present,sequence=2,layout_setup_ns=200,layout_compute_ns=770,paint_commit_ns=331287
+4096,1,true,disable,2681480,1100,6207477,-196608,1862861,2785280
+route_profile,phase=describe,mount=false,flatten_ns=1379171,preflight_ns=80601,reconcile_ns=1147396,identity_index_finalize_ns=39191
+route_profile,phase=present,sequence=3,layout_setup_ns=170,layout_compute_ns=500,paint_commit_ns=731516
+4096,1,true,restore,3436686,5196,6404085,196608,2059469,2981888
+4096,1,true,dispatch,8391,0,0,0,2059469,0
+4096,1,true,drop,79322,0,0,-2059469,0,0
