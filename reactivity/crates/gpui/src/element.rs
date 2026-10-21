@@ -248,7 +248,6 @@ impl<'a> El<'a> {
                 text: element.text.take(),
                 style: element.style,
                 on_click: element.on_click.take(),
-                editable: element.kind == NodeKind::Input,
             });
             pending.extend(children.into_iter().rev().map(|child| (Some(index), child)));
         }
@@ -262,7 +261,6 @@ pub(crate) struct DraftNode<'a> {
     pub(crate) text: Option<Text<'a>>,
     pub(crate) style: Style,
     pub(crate) on_click: Option<Handler>,
-    pub(crate) editable: bool,
 }
 
 pub fn div<'a>() -> El<'a> {
@@ -668,7 +666,6 @@ mod tests {
             .fg(Color::rgb(1, 2, 3))
             .transform(Affine::translation(10.0, 20.0))
             .flatten();
-        assert!(nodes[0].editable);
         assert_eq!(nodes[0].kind.role(), Role::TextInput);
         assert!(nodes[0].text.as_ref().unwrap().signal().is_some());
         assert_eq!(nodes[0].style.width, Some(320.0));
