@@ -11,6 +11,7 @@ use super::library::catalogue::{Catalogue, TrackId};
 pub const RESULTS: ListId = ListId::new(1);
 pub const PAGE_LIMIT: usize = 128;
 pub const QUERY_BYTES: usize = 256;
+pub const CANCELLATION_BATCH: usize = 128;
 
 #[derive(Clone)]
 pub struct Query {
@@ -86,12 +87,31 @@ impl Write for Title {
         Ok(())
     }
 }
+#[cfg(test)] // The uncancelled oracle and cost fixture share the real scan.
 pub fn search(input: SearchInput) -> Result<SearchPage, SearchError> {
-    let query = input.query?;
+    search_cancellable(input, |_| false).expect("uncancelled search completes")
+}
+/// The callback observes progress at most 128 tracks apart, including before
+/// allocation and after the final batch. True discards the partial page. The
+/// production worker reads only its borrowed completion cancellation hint.
+pub fn search_cancellable(
+    input: SearchInput,
+    mut cancelled: impl FnMut(usize) -> bool,
+) -> Option<Result<SearchPage, SearchError>> {
+    if cancelled(0) {
+        return None;
+    }
+    let query = match input.query {
+        Ok(query) => query,
+        Err(error) => return Some(Err(error)),
+    };
     let needle = query.as_str().as_bytes();
     let mut ids = Vec::with_capacity(PAGE_LIMIT);
     let mut matches = 0;
     for index in 0..input.count {
+        if index != 0 && index.is_multiple_of(CANCELLATION_BATCH) && cancelled(index) {
+            return None;
+        }
         let mut title = Title {
             bytes: [0; 64],
             length: 0,
@@ -109,15 +129,18 @@ pub fn search(input: SearchInput) -> Result<SearchPage, SearchError> {
             }
         }
     }
-    Ok(SearchPage {
+    if cancelled(input.count) {
+        return None;
+    }
+    Some(Ok(SearchPage {
         query,
         ids,
         matches,
         scanned: input.count,
-    })
+    }))
 }
 type Job = (SearchInput, Completion<SearchPage, SearchError>);
-/// Explicit one-worker service: one queued job, 256KiB reserved stack, one
+/// Explicit one-worker service: one queued job, 256 KiB reserved stack, one
 /// running job. Dropping its sender closes the loop after owned work returns;
 /// the UI never joins a worker or waits for channel space.
 pub struct SearchWorker {
@@ -131,9 +154,11 @@ impl SearchWorker {
             .stack_size(256 * 1024)
             .spawn(move || {
                 while let Ok((input, completion)) = receiver.recv() {
-                    // Full/closed keeps the original result in the returned error;
-                    // this question service drops it after terminal notification.
-                    let _ = completion.run(input, search);
+                    // Stop obsolete work at the next bounded checkpoint. None
+                    // abandons only this physical cap and wakes owner admission.
+                    let _ = completion.run_cancellable(input, |input, cancellation| {
+                        search_cancellable(input, |_| cancellation.is_cancelled())
+                    });
                 }
             })?;
         Ok(Self { sender })

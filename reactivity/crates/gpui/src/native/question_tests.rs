@@ -101,12 +101,21 @@ fn native_question_result_and_credit_wake_without_unrelated_input() {
         let (input, completion) = jobs.recv().unwrap();
         assert_eq!(input, "A");
         first_wait.recv().unwrap();
-        completion.complete(Ok("obsolete A".into())).unwrap();
+        // The owner superseded A before releasing this worker. The helper
+        // abandons it without executing its compute closure, then WorkReady
+        // must retire that physical credit and dispatch B without input polling.
+        completion
+            .run_cancellable(input, |_, _| panic!("obsolete work must not start"))
+            .unwrap();
         let (input, completion) = jobs.recv().unwrap();
         assert_eq!(input, "B");
         second_wait.recv().unwrap();
-        assert!(!completion.is_cancelled());
-        completion.complete(Ok("Answer B".into())).unwrap();
+        completion
+            .run_cancellable(input, |input, cancellation| {
+                assert!(!cancellation.is_cancelled());
+                Some(Ok(format!("Answer {input}")))
+            })
+            .unwrap();
     });
     let (questions, answer) = Questions::new()
         .question(Search::QUERY, Clone::clone, move |input, completion| {

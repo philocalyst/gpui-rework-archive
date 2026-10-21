@@ -265,6 +265,20 @@ pub struct Completion<T, E> {
     stamp: Option<RequestStamp>,
     version: InputVersion,
 }
+
+/// Borrowed cancellation hint for one physical completion. This grants no UI
+/// access and owns no lease; only normal owner admission can accept a result.
+/// A worker may poll it while computing without cloning a controller Arc.
+pub struct Cancellation<'a> {
+    current: &'a AtomicU64,
+    ticket: u64,
+}
+impl Cancellation<'_> {
+    #[inline]
+    pub fn is_cancelled(&self) -> bool {
+        self.current.load(Ordering::Acquire) != self.ticket
+    }
+}
 pub enum CompleteError<T, E> {
     Closed(Result<T, E>),
 }
@@ -306,15 +320,55 @@ impl<T, E> Completion<T, E> {
     /// Execute on an existing worker. The owner must only enqueue this work;
     /// this helper catches a worker panic separately from a domain error E.
     pub fn run<I>(
-        mut self,
+        self,
         input: I,
         compute: impl FnOnce(I) -> Result<T, E>,
+    ) -> Result<(), CompleteError<T, E>> {
+        self.run_cancellable(input, |input, _| Some(compute(input)))
+    }
+
+    /// Execute on an existing worker with a scoped cancellation hint. Return
+    /// None to abandon this physical completion without constructing an answer.
+    /// A current abandoned request becomes Fault; a superseded one only frees
+    /// credit for the newest pending input. Cancellation remains advisory: the
+    /// owner validates every returned answer even after the final check.
+    ///
+    /// ```compile_fail
+    /// use gpui::{Cancellation, Completion};
+    /// fn escape(cap: Completion<(), std::convert::Infallible>) -> Cancellation<'static> {
+    ///     let mut saved = None;
+    ///     cap.run_cancellable((), |_, cancellation| { saved = Some(cancellation); None }).unwrap();
+    ///     saved.unwrap()
+    /// }
+    /// ```
+    /// ```compile_fail
+    /// use gpui::Completion;
+    /// fn detached(cap: Completion<(), std::convert::Infallible>) {
+    ///     cap.run_cancellable((), |_, cancellation| {
+    ///         std::thread::spawn(move || cancellation.is_cancelled());
+    ///         None
+    ///     }).unwrap();
+    /// }
+    /// ```
+    pub fn run_cancellable<I>(
+        mut self,
+        input: I,
+        compute: impl FnOnce(I, Cancellation<'_>) -> Option<Result<T, E>>,
     ) -> Result<(), CompleteError<T, E>> {
         if self.is_cancelled() {
             return Ok(());
         }
-        match catch_unwind(AssertUnwindSafe(|| compute(input))) {
-            Ok(value) => self.complete(value),
+        match catch_unwind(AssertUnwindSafe(|| {
+            compute(
+                input,
+                Cancellation {
+                    current: &self.controller.as_ref().unwrap().current,
+                    ticket: self.stamp.as_ref().unwrap().ticket(),
+                },
+            )
+        })) {
+            Ok(Some(value)) => self.complete(value),
+            Ok(None) => Ok(()),
             Err(_) => {
                 let controller = self.controller.take().unwrap();
                 self.stamp.take();
@@ -338,6 +392,44 @@ mod tests {
     use super::*;
     use std::convert::Infallible;
     use std::sync::atomic::AtomicUsize;
+
+    #[test]
+    fn cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it() {
+        let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
+        let stamp = scope.producer(1).unwrap().begin().unwrap();
+        let controller = Arc::new(Controller::new());
+        controller.mailbox.begin();
+        controller.current.store(stamp.ticket(), Ordering::Release);
+        let cap = Completion::<u64, Infallible> {
+            controller: Some(controller.clone()),
+            stamp: Some(stamp),
+            version: InputVersion {
+                field: crate::FieldId::new(1),
+                revision: crate::Signal::new(0).revision(),
+                coarse: 0,
+                policy: 0,
+            },
+        };
+        let memory = allocation_counter::measure(|| {
+            cap.run_cancellable((), |_, cancellation| {
+                assert_eq!(Arc::strong_count(&controller), 2);
+                assert!(!cancellation.is_cancelled());
+                controller.current.store(0, Ordering::Release);
+                assert!(cancellation.is_cancelled());
+                None
+            })
+            .unwrap();
+        });
+        assert_eq!(memory.count_total, 0);
+        assert_eq!(Arc::strong_count(&controller), 1);
+        assert_eq!(controller.mailbox.freeze(), Some(ABANDONED));
+        assert!(controller.mailbox.take().is_none());
+        println!(
+            "borrowed_cancellation_bytes={},allocations={},controller_leases_during_compute=2",
+            size_of::<Cancellation<'_>>(),
+            memory.count_total,
+        );
+    }
 
     #[test]
     fn closed_completion_returns_the_same_owned_result() {

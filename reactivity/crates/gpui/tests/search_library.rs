@@ -18,9 +18,13 @@ fn open() -> (
     let (done, finished) = mpsc::channel();
     std::thread::spawn(move || {
         while let Ok((input, completion)) = jobs.recv() {
-            let page = search_library::search(input);
-            let count = page.as_ref().map_or(0, |page| page.scanned);
-            let _ = completion.complete(page);
+            let mut count = 0;
+            let _ = completion.run_cancellable(input, |input, cancellation| {
+                search_library::search_cancellable(input, |scanned| {
+                    count = scanned;
+                    cancellation.is_cancelled()
+                })
+            });
             if done.send(count).is_err() {
                 break;
             }
@@ -142,6 +146,167 @@ fn worker_matches_an_independent_full_scan_and_bounds_utf8_input_and_result_page
         search_library::search(search_library::freeze(&"é".repeat(129), 1)),
         Err(SearchError::QueryTooLong)
     ));
+}
+
+#[test]
+fn a_cancelled_catalogue_scan_releases_credit_at_a_bounded_checkpoint_for_the_latest_query() {
+    type Job = (SearchInput, Completion<SearchPage, SearchError>);
+    let (send, jobs) = mpsc::channel::<Job>();
+    let (questions, results) = Questions::new()
+        .question(
+            SearchLibrary::QUERY,
+            |query| search_library::freeze(query, 250_000),
+            move |input, cap| {
+                send.send((input, cap)).unwrap();
+                Ok(())
+            },
+        )
+        .unwrap();
+    let mut win = Win::with_questions(
+        SearchLibrary::new(250_000, results),
+        questions,
+        WindowOptions::default(),
+    )
+    .unwrap();
+    let (input, cap) = jobs.recv().unwrap();
+    let (checkpoint, reached) = mpsc::channel();
+    let (resume, wait) = mpsc::channel();
+    let worker = std::thread::spawn(move || {
+        let mut scanned = 0;
+        cap.run_cancellable(input, |input, cancellation| {
+            search_library::search_cancellable(input, |progress| {
+                scanned = progress;
+                if progress == search_library::CANCELLATION_BATCH {
+                    checkpoint.send(()).unwrap();
+                    wait.recv().unwrap();
+                }
+                cancellation.is_cancelled()
+            })
+        })
+        .unwrap();
+        scanned
+    });
+    reached.recv().unwrap();
+    win.set(SearchLibrary::QUERY, "Track 000042".into())
+        .unwrap();
+    assert!(
+        jobs.try_recv().is_err(),
+        "old physical work has not stopped yet"
+    );
+    resume.send(()).unwrap();
+    assert_eq!(worker.join().unwrap(), search_library::CANCELLATION_BATCH);
+    win.deliver_ready(8).unwrap();
+    assert_eq!(win.question_status(results), Ok(QuestionStatus::Pending));
+    let (input, cap) = jobs
+        .try_recv()
+        .expect("latest work starts after the cancellation wake");
+    cap.run_cancellable(input, |input, cancellation| {
+        search_library::search_cancellable(input, |_| cancellation.is_cancelled())
+    })
+    .unwrap();
+    win.deliver_ready(8).unwrap();
+    let answer = win
+        .with_ready(results, |page| {
+            (
+                page.query.as_str().to_owned(),
+                page.ids.iter().map(|id| id.0).collect::<Vec<_>>(),
+                page.scanned,
+            )
+        })
+        .unwrap()
+        .unwrap();
+    assert_eq!(answer, ("Track 000042".into(), vec![42], 250_000));
+}
+
+#[test]
+#[ignore = "manual release cancellation-latency evidence; run alone on a quiet CPU"]
+fn paired_real_library_cancellation_cost() {
+    fn measure(cooperative: bool, supersede: bool) -> (u128, usize) {
+        type Job = (SearchInput, Completion<SearchPage, SearchError>);
+        let (send, jobs) = mpsc::channel::<Job>();
+        let (questions, results) = Questions::new()
+            .question(
+                SearchLibrary::QUERY,
+                |query| search_library::freeze(query, 250_000),
+                move |input, cap| {
+                    send.send((input, cap)).unwrap();
+                    Ok(())
+                },
+            )
+            .unwrap();
+        let mut win = Win::with_questions(
+            SearchLibrary::new(250_000, results),
+            questions,
+            WindowOptions::default(),
+        )
+        .unwrap();
+        let (input, cap) = jobs.recv().unwrap();
+        let (checkpoint, reached) = mpsc::channel();
+        let (resume, wait) = mpsc::channel();
+        let (done, finished) = mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            let mut scanned = 0;
+            cap.run_cancellable(input, |input, cancellation| {
+                search_library::search_cancellable(input, |progress| {
+                    scanned = progress;
+                    if progress == search_library::CANCELLATION_BATCH {
+                        checkpoint.send(()).unwrap();
+                        wait.recv().unwrap();
+                    }
+                    cooperative && cancellation.is_cancelled()
+                })
+            })
+            .unwrap();
+            done.send(scanned).unwrap();
+        });
+        reached.recv().unwrap();
+        if supersede {
+            win.set(SearchLibrary::QUERY, "Track 000042".into())
+                .unwrap();
+        }
+        let started = std::time::Instant::now();
+        resume.send(()).unwrap();
+        let scanned = finished.recv().unwrap();
+        if supersede {
+            win.deliver_ready(8).unwrap();
+            let (_, next) = jobs.try_recv().expect("newest physical dispatch is ready");
+            assert!(!next.is_cancelled());
+            drop(next);
+        }
+        let elapsed = started.elapsed().as_nanos();
+        worker.join().unwrap();
+        if !supersede {
+            assert_eq!(scanned, 250_000);
+            win.deliver_ready(8).unwrap();
+            assert_eq!(
+                win.with_ready(results, |page| page.matches).unwrap(),
+                Some(250_000)
+            );
+        } else {
+            assert_eq!(scanned, if cooperative { 128 } else { 250_000 });
+        }
+        (elapsed, scanned)
+    }
+    println!("round,kind,cooperative,ns,scanned");
+    for round in 0..7 {
+        for supersede in [false, true] {
+            for cooperative in if round % 2 == 0 {
+                [false, true]
+            } else {
+                [true, false]
+            } {
+                let (elapsed, scanned) = measure(cooperative, supersede);
+                println!(
+                    "{round},{},{cooperative},{elapsed},{scanned}",
+                    if supersede {
+                        "obsolete_to_new_dispatch"
+                    } else {
+                        "current_remaining_scan"
+                    }
+                );
+            }
+        }
+    }
 }
 
 #[test]

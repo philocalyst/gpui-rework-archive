@@ -108,6 +108,104 @@ fn queued_model_callback_supersedes_a_completion_in_the_same_batch() {
     drain(&mut win);
     assert!(win.contains_text("current B").unwrap());
 }
+
+#[test]
+fn cancellable_none_faults_current_work_but_frees_superseded_credit_without_faulting_newer_work() {
+    let (mut win, jobs, answer) = open();
+    let (_, current) = jobs.recv().unwrap();
+    current
+        .run_cancellable((), |_, cancellation| {
+            assert!(!cancellation.is_cancelled());
+            None
+        })
+        .unwrap();
+    drain(&mut win);
+    assert_eq!(win.question_status(answer), Ok(QuestionStatus::Fault));
+    assert!(win.contains_text("Abandoned").unwrap());
+
+    win.retry(answer).unwrap();
+    let (_, old) = jobs.recv().unwrap();
+    let (started, entered) = mpsc::channel();
+    let (resume, wait) = mpsc::channel();
+    let worker = std::thread::spawn(move || {
+        old.run_cancellable((), |_, cancellation| {
+            started.send(()).unwrap();
+            wait.recv().unwrap();
+            assert!(cancellation.is_cancelled());
+            None
+        })
+        .unwrap();
+    });
+    entered.recv().unwrap();
+    win.set(Model::QUERY, "B".into()).unwrap();
+    let before = win.question_info(answer).unwrap();
+    assert!(before.completion_leased);
+    assert!(
+        jobs.try_recv().is_err(),
+        "physical credit is still occupied"
+    );
+    resume.send(()).unwrap();
+    worker.join().unwrap();
+    win.deliver_ready(8).unwrap();
+    assert_eq!(win.question_status(answer), Ok(QuestionStatus::Pending));
+    let (input, current) = jobs
+        .try_recv()
+        .expect("newest input starts after retirement");
+    assert_eq!(input, "B");
+    current
+        .run_cancellable(input, |input, cancellation| {
+            assert!(!cancellation.is_cancelled());
+            Some(Ok(format!("Answer {input}")))
+        })
+        .unwrap();
+    drain(&mut win);
+    assert_eq!(win.question_status(answer), Ok(QuestionStatus::Ready));
+    assert!(win.contains_text("Answer B").unwrap());
+}
+
+#[test]
+fn cancellable_worker_panic_and_owner_close_keep_their_distinct_lifecycle() {
+    let (mut win, jobs, answer) = open();
+    jobs.recv()
+        .unwrap()
+        .1
+        .run_cancellable((), |_, _| panic!("cancellable worker panic"))
+        .unwrap();
+    drain(&mut win);
+    assert_eq!(win.question_status(answer), Ok(QuestionStatus::Fault));
+    assert!(win.contains_text("WorkerPanicked").unwrap());
+    win.retry(answer).unwrap();
+    let (_, current) = jobs.recv().unwrap();
+    let (started, entered) = mpsc::channel();
+    let (resume, wait) = mpsc::channel();
+    let worker = std::thread::spawn(move || {
+        let value = String::from("same owned closed result");
+        let pointer = value.as_ptr() as usize;
+        let result = current.run_cancellable(value, |value, cancellation| {
+            started.send(()).unwrap();
+            wait.recv().unwrap();
+            assert!(
+                !cancellation.is_cancelled(),
+                "unrelated exact edit is not cancellation"
+            );
+            started.send(()).unwrap();
+            wait.recv().unwrap();
+            assert!(cancellation.is_cancelled());
+            // An advisory hint cannot force cooperative code to stop. Closed
+            // must still return the exact owned result when it ignores the hint.
+            Some(Ok(value))
+        });
+        let value = result.unwrap_err().into_value().unwrap();
+        assert_eq!(value.as_ptr() as usize, pointer);
+    });
+    entered.recv().unwrap();
+    win.set(Model::THEME, 2).unwrap();
+    resume.send(()).unwrap();
+    entered.recv().unwrap();
+    win.close();
+    resume.send(()).unwrap();
+    worker.join().unwrap();
+}
 #[test]
 fn forwarded_reader_projection_routes_new_controls_to_the_contained_child() {
     struct Child {
