@@ -208,3 +208,91 @@ fn disjoint_workers_repair_the_same_tiles_without_touching_other_bands() {
         assert!(canvas.stats().parallel);
     }
 }
+
+#[test]
+fn randomized_repairs_cross_partial_tile_and_viewport_edges() {
+    fn next(seed: &mut u64) -> u32 {
+        *seed = seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+        (*seed >> 32) as u32
+    }
+    fn scalar(seed: &mut u64, range: f32) -> f32 {
+        (next(seed) % 10001) as f32 / 10000.0 * range
+    }
+    let mut seed = 8128973;
+    for (width, height) in [
+        (1, 1),
+        (15, 17),
+        (16, 16),
+        (17, 31),
+        (32, 33),
+        (79, 53),
+        (97, 81),
+    ] {
+        for proofs in [false, true] {
+            let mut canvas = Canvas::recording(width, height, Default::default()).unwrap();
+            canvas.set_tile_proofs(proofs);
+            let mut pixels = vec![0; (width * height) as usize];
+            canvas.clear(Color::WHITE);
+            canvas.render_bgrx(&mut pixels).unwrap();
+            for turn in 0..120 {
+                let mut candidate = canvas.stage();
+                candidate.clear(if turn % 23 == 0 {
+                    Color::BLACK
+                } else {
+                    Color::WHITE
+                });
+                for _ in 0..next(&mut seed) % 18 {
+                    let rect = Rect::new(
+                        scalar(&mut seed, 15.0) - 7.0,
+                        scalar(&mut seed, 15.0) - 7.0,
+                        scalar(&mut seed, 30.0) + 0.01,
+                        scalar(&mut seed, 30.0) + 0.01,
+                    );
+                    let transform = Affine {
+                        a: if next(&mut seed).is_multiple_of(2) {
+                            1.0
+                        } else {
+                            -1.0
+                        },
+                        b: scalar(&mut seed, 1.0) - 0.5,
+                        c: scalar(&mut seed, 1.0) - 0.5,
+                        d: 1.0,
+                        tx: scalar(&mut seed, width as f32 + 30.0) - 15.0,
+                        ty: scalar(&mut seed, height as f32 + 30.0) - 15.0,
+                    };
+                    let clip = Rect::new(
+                        scalar(&mut seed, width as f32),
+                        scalar(&mut seed, height as f32),
+                        scalar(&mut seed, width as f32),
+                        scalar(&mut seed, height as f32),
+                    );
+                    let color = Color::rgba(
+                        next(&mut seed) as u8,
+                        next(&mut seed) as u8,
+                        next(&mut seed) as u8,
+                        next(&mut seed) as u8,
+                    );
+                    candidate.fill_rect(rect, transform, clip, color).unwrap();
+                }
+                let damage = candidate.commit_with_damage();
+                let mut expected = vec![0; pixels.len()];
+                canvas.render_bgrx(&mut expected).unwrap();
+                for (index, (old, new)) in pixels.iter().zip(&expected).enumerate() {
+                    if old != new {
+                        let [left, top, right, bottom] = damage.bounds().expect("changed support");
+                        let x = index as u32 % width;
+                        let y = index as u32 / width;
+                        assert!(x >= left && x < right && y >= top && y < bottom);
+                    }
+                }
+                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
+                assert_eq!(
+                    pixels, expected,
+                    "{width}×{height}, proofs={proofs}, turn={turn}"
+                );
+            }
+        }
+    }
+}
