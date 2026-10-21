@@ -445,7 +445,9 @@ impl<M> Sources<M> {
     /// Register an owner dependency. Typed edits also re-describe the owner, so
     /// ordinary branches, formatting and other snapshot reads remain current.
     pub fn field<T: 'static>(self, source: Source<M, T>) -> Self
-    where M: 'static {
+    where
+        M: 'static,
+    {
         let mut schema = self.direct(source);
         schema.owner_fields.push(source.id());
         schema
@@ -1000,8 +1002,11 @@ mod tests {
     fn owner_dependency_is_the_default_and_direct_ports_are_explicit() {
         let ordinary = Sources::new().field(FIRST);
         let direct = Sources::new().direct(FIRST);
-        assert_eq!(ordinary.invalidates_owner(FIRST.id()),Ok(true));
-        assert_eq!(direct.invalidates_owner(FIRST.id()),Ok(false));
-        assert_eq!(direct.invalidates_owner(COUNT.id()),Err(BindError::UnknownField(COUNT.id())));
+        assert_eq!(ordinary.invalidates_owner(FIRST.id()), Ok(true));
+        assert_eq!(direct.invalidates_owner(FIRST.id()), Ok(false));
+        assert_eq!(
+            direct.invalidates_owner(COUNT.id()),
+            Err(BindError::UnknownField(COUNT.id()))
+        );
     }
 }

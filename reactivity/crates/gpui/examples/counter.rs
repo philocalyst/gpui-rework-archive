@@ -1,0 +1,43 @@
+//! The ordinary runtime/input/layout/font/raster path, without a native adapter.
+use gpui::prelude::*;
+
+struct Counter {
+    count: Signal<u32>,
+}
+impl Counter {
+    const COUNT: Source<Self, u32> =
+        Source::new(FieldId::new(1), "count", |m| &m.count, |m| &mut m.count);
+}
+impl View for Counter {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::COUNT)
+    }
+    fn view(&self) -> El<'_> {
+        column((
+            text(&self.count).text_lg(),
+            button("Increment")
+                .p(8)
+                .bg(rgb(0xdbeafe))
+                .on_click(Self::COUNT.update(|count| *count += 1)),
+        ))
+        .p(12)
+        .gap(8)
+    }
+}
+fn main() -> Result<(), gpui::Error> {
+    let win = Win::with_size(
+        Counter {
+            count: Signal::new(0),
+        },
+        240,
+        120,
+    )?;
+    win.click(win.button("Increment"))?;
+    println!("{}", win.snapshot()?.to_json()?);
+    println!(
+        "pixel digest: {:016x}; counters: {:?}",
+        win.scene_digest()?,
+        win.counters()
+    );
+    Ok(())
+}
