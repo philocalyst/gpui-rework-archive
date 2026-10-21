@@ -4,6 +4,38 @@ The renderer borrows the canonical prepared canvas scene. It uploads geometry,
 tile references and missing glyph masks, then composites the same 4×4 sample
 lattice in linear light. Submission never requests a CPU output image.
 
+## Replaying the prepared packet
+
+`Renderer::render(scene, target)` always validates and prepares the borrowed
+scene. A repeated borrow, Canvas address, sequence number, or equality of its
+public headers does not establish scene identity. Every new render attempt
+discards the previous packet's replay eligibility before it can change buffers,
+images, or the glyph atlas; a failed attempt cannot replay partially overwritten
+resources under the previous scene.
+
+After successful preparation, `Renderer::redraw(target)` explicitly submits that
+renderer-owned packet again. It returns `Ok(None)` when no packet is eligible.
+An eligible packet retains one bind group and its dimensions, alongside the
+existing buffers, vectors and resource caches. Replay skips scene traversal,
+admission, CSR construction, image-key checks, uploads and binding creation.
+It still clears and draws the entire newly acquired target and submits commands;
+it does not acknowledge presentation or depend on preserved swapchain contents.
+The source scene and its borrowed image/mask leases may be dropped after prepare.
+
+The target must meet the same device/view contract as `render`, and have the
+prepared dimensions and renderer format. A wrong-size/format replay target
+returns `InvalidScene` while leaving the eligible packet available for retry.
+Changing a diagnostic mode invalidates the packet; setting the same mode does
+not. A recreated renderer begins with no packet.
+
+The native GPU adapter binds this seam privately to the window-qualified
+`PresentationToken` returned with its untouched complete scene. Different tokens
+use full preparation; no public token-plus-scene API trusts caller pairing.
+`Stats::packet_reused` and CPU validation/binning/upload/binding counters describe
+the last successful submission. Retained draw/sample counts still describe work
+submitted to the GPU. These counters are neither GPU timings nor an allocation
+claim about wgpu, command encoding, submission or OS presentation.
+
 ## Spatial precision
 
 The GPU does not promise universal CPU byte parity. Canonical inverses are f64;

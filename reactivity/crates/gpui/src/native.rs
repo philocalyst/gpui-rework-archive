@@ -237,6 +237,28 @@ struct GpuSurface {
     config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
     errors: Arc<DeviceErrors>,
+    packet_token: Option<crate::PresentationToken>,
+}
+impl GpuSurface {
+    fn render(
+        &mut self,
+        scene: gpui_canvas::PreparedScene<'_>,
+        token: crate::PresentationToken,
+        target: &wgpu::TextureView,
+    ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+        // Only this private callback binds the unmodified owner scene to its
+        // opaque namespace-qualified token. Public PreparedScene headers alone
+        // cannot establish identity and Renderer::render stays unkeyed.
+        if self.packet_token == Some(token)
+            && let Some(submitted) = self.renderer.redraw(target)?
+        {
+            return Ok(submitted);
+        }
+        self.packet_token = None;
+        let submitted = self.renderer.render(scene, target)?;
+        self.packet_token = Some(token);
+        Ok(submitted)
+    }
 }
 type CpuSurface = softbuffer::Surface<Arc<NativeWindow>, Arc<NativeWindow>>;
 enum Graphics {
@@ -457,6 +479,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             handle,
             renderer,
             errors,
+            packet_token: None,
             config: surface_config([size.width.max(1), size.height.max(1)], format),
         })));
         self.resize([size.width, size.height])
@@ -571,11 +594,11 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             };
             match graphics.handle.get_current_texture() {
                 wgpu::CurrentSurfaceTexture::Success(frame) => {
-                    let renderer = &mut graphics.renderer;
                     let owner = self.owner.as_mut().expect("surface has an owner");
                     let view = frame.texture.create_view(&Default::default());
-                    let rendered = owner
-                        .with_scene(|scene, token| renderer.render(scene, &view).map(|_| token))?;
+                    let rendered = owner.with_scene(|scene, token| {
+                        graphics.render(scene, token, &view).map(|_| token)
+                    })?;
                     let token = match rendered {
                         Ok(token) => token,
                         Err(error)
@@ -730,7 +753,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             };
             let view = frame.texture.create_view(&Default::default());
             let token = owner
-                .with_scene(|scene, token| gpu.renderer.render(scene, &view).map(|_| token))??;
+                .with_scene(|scene, token| gpu.render(scene, token, &view).map(|_| token))??;
             window.pre_present_notify();
             frame.present();
             owner.presented(token).map_err(NativeError::from)
@@ -1181,6 +1204,88 @@ mod tests {
         frames: Vec<PresentedFrame>,
         edited_during_upgrade: bool,
         cancelled_generation: bool,
+        exposure_submissions: Option<u64>,
+    }
+    fn exercise_window_packet_namespaces(gpu: &mut GpuSurface) {
+        struct Fill(crate::Color);
+        impl View for Fill {
+            fn view(&self) -> crate::El<'_> {
+                crate::div().w(32).h(24).bg(self.0)
+            }
+        }
+        let options = WindowOptions {
+            size: [32, 24],
+            ..Default::default()
+        };
+        // Both fresh windows begin at S0/first sequence; only their namespace differs.
+        let a = Win::recording(Fill(crate::Color::rgb(200, 20, 30)), options).unwrap();
+        let b = Win::recording(Fill(crate::Color::rgb(20, 30, 200)), options).unwrap();
+        let token_a = a.with_scene(|_, token| token).unwrap();
+        let token_b = b.with_scene(|_, token| token).unwrap();
+        assert_ne!(token_a, token_b);
+        let texture = gpu
+            .renderer
+            .device()
+            .create_texture(&wgpu::TextureDescriptor {
+                label: Some("native namespace oracle"),
+                size: wgpu::Extent3d {
+                    width: 32,
+                    height: 24,
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: gpu.renderer.format(),
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            });
+        let target = texture.create_view(&Default::default());
+        for (window, reused) in [(&a, false), (&a, true), (&b, false), (&a, false)] {
+            window
+                .with_scene(|scene, token| gpu.render(scene, token, &target))
+                .unwrap()
+                .unwrap();
+            assert_eq!(gpu.renderer.stats().packet_reused, reused);
+        }
+        // A renderer mode change invalidates its packet even though the native
+        // token is still current. The adapter must fall back to full admission.
+        gpu.renderer.set_tile_proofs(false);
+        a.with_scene(|scene, token| gpu.render(scene, token, &target))
+            .unwrap()
+            .unwrap();
+        assert!(!gpu.renderer.stats().packet_reused);
+        gpu.renderer.set_tile_proofs(true);
+        a.with_scene(|scene, token| gpu.render(scene, token, &target))
+            .unwrap()
+            .unwrap();
+        // Failed replacement revokes the old native binding as well. The public
+        // GPU regression exercises a failure after actual image/atlas mutation.
+        assert!(
+            b.with_scene(|mut scene, token| {
+                scene.width += 1;
+                gpu.render(scene, token, &target)
+            })
+            .unwrap()
+            .is_err()
+        );
+        assert!(gpu.packet_token.is_none());
+        a.with_scene(|scene, token| gpu.render(scene, token, &target))
+            .unwrap()
+            .unwrap();
+        assert!(!gpu.renderer.stats().packet_reused);
+    }
+    #[test]
+    fn packet_gpu_header_ledger() {
+        eprintln!(
+            "packet_gpu_layout,Renderer={},Stats={},GpuSurface={},NativeHost={},Canvas={},PreparedScene={}",
+            size_of::<Renderer>(),
+            size_of::<gpui_gpu::Stats>(),
+            size_of::<GpuSurface>(),
+            size_of::<NativeHost<test_todos::Todos>>(),
+            size_of::<gpui_canvas::Canvas>(),
+            size_of::<gpui_canvas::PreparedScene<'_>>()
+        );
     }
     impl Script {
         fn collect_feedback(&mut self) {
@@ -1412,15 +1517,67 @@ mod tests {
                             let stats = gpu.renderer.stats();
                             if self.host.renderer_policy == RendererPolicy::Gpu {
                                 assert!(stats.submissions >= 5);
-                                assert_eq!(
-                                    stats.mask_upload_bytes, 0,
-                                    "transform-only update reuses glyph atlas"
-                                );
+                                if self.exposure_submissions.is_none() {
+                                    assert_eq!(
+                                        stats.mask_upload_bytes, 0,
+                                        "transform-only update reuses glyph atlas"
+                                    );
+                                }
                             } else {
                                 assert!(
                                     stats.submissions >= 1,
                                     "real Auto handoff submitted through Wgpu"
                                 );
+                            }
+                            if let Some(previous) = self.exposure_submissions {
+                                if stats.submissions == previous {
+                                    return;
+                                }
+                                assert!(
+                                    stats.packet_reused,
+                                    "same-token OS exposure replays the packet"
+                                );
+                                assert_eq!(
+                                    (
+                                        stats.validated_draws,
+                                        stats.binning_tile_visits,
+                                        stats.instance_upload_bytes,
+                                        stats.bind_group_creations
+                                    ),
+                                    (0, 0, 0, 0)
+                                );
+                            } else {
+                                exercise_window_packet_namespaces(gpu);
+                                // Restore this owner's packet after the foreign-window oracle.
+                                owner
+                                    .with_scene(|scene, token| {
+                                        let texture = gpu.renderer.device().create_texture(
+                                            &wgpu::TextureDescriptor {
+                                                label: Some("restore native owner packet"),
+                                                size: wgpu::Extent3d {
+                                                    width: scene.width,
+                                                    height: scene.height,
+                                                    depth_or_array_layers: 1,
+                                                },
+                                                mip_level_count: 1,
+                                                sample_count: 1,
+                                                dimension: wgpu::TextureDimension::D2,
+                                                format: gpu.renderer.format(),
+                                                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                                                view_formats: &[],
+                                            },
+                                        );
+                                        gpu.render(
+                                            scene,
+                                            token,
+                                            &texture.create_view(&Default::default()),
+                                        )
+                                        .unwrap();
+                                    })
+                                    .unwrap();
+                                self.exposure_submissions = Some(gpu.renderer.stats().submissions);
+                                self.host.request_redraw();
+                                return;
                             }
                             eprintln!("native GPU port: {stats:?}");
                         }
@@ -1530,6 +1687,7 @@ mod tests {
                 frames: Vec::new(),
                 edited_during_upgrade: false,
                 cancelled_generation: false,
+                exposure_submissions: None,
             };
             let (mut driver, wake) = Driver::new(&event_loop, script);
             driver.host_mut().host.wake = Some(wake);

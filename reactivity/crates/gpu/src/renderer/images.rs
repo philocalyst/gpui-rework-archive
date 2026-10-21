@@ -35,6 +35,9 @@ impl Images {
     pub(super) fn stats(&self) -> ImageStats {
         self.stats
     }
+    pub(super) fn redrawn(&mut self) {
+        self.stats.uploaded_bytes = 0;
+    }
     pub(super) fn metadata(&self, key: ImageKey, sampling: ImageSampling) -> [u32; 2] {
         let entry = self.entries[&key];
         [
