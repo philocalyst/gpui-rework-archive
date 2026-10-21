@@ -70,33 +70,37 @@ do not pretend a canceled worker has stopped retaining memory. When the old cap
 publishes its terminal state, the owner acquires that state before reusing the
 credit. Queued results carry independent owned tickets and versions.
 
-`Completion::complete` consumes the cap. Full and Closed return the same owned
-`Result<T,E>`. Drop publishes Abandoned; `run` catches a worker panic separately
+`Completion::complete` consumes the cap. Closed returns the same owned
+`Result<T,E>`; the linear response has no Full case. Drop publishes Abandoned; `run` catches a worker panic separately
 from domain E. Start rejection cancels the logical gate and cooperative hint,
 but keeps the physical credit occupied if the executor retained the cap. A
 hung executor or intentionally forgotten cap therefore prevents another
 physical dispatch; this slice supplies no forced thread termination or timeout.
 
-The terminal store is Release and has its own wake after publication: enqueue
-can wake before that store. The owner combines a visible terminal and payload
-in one frozen batch. If they race, bounded staging/rearm schedules another turn.
-Three new Loom cases model this credit/wake seam, including the negative missing
-terminal-wake variant; they do not model std channel internals or the OS queue.
+The response slot is a safe Mutex<Option<Message>> inside one controller Arc.
+The producer unlocks, Release-publishes its terminal, then posts one wake. Owner
+staging acquires the terminal before try-locking the response: the sole writer
+has already unlocked, and another cap cannot exist until owner retirement.
+Close only sets an atomic closed flag and drops the owner Arc lease; it never
+locks or waits for a descheduled producer. The last Arc uniquely reclaims any
+unconsumed response. A physical cap can defer that reclamation, but cannot admit
+work after owner revocation. No user payload destructor runs inside the mutex.
 
-Close revokes scope, cancels current work, drops pending/ready/error values,
-closes receivers, and releases executor closures before model destruction.
-Late sends cannot enter the owner. An enqueue racing revocation may return
-success but is never admitted afterward. Retained senders/completion caps can
-retain channel/controller backing until dropped. Native proxy/OS event posting
-allocation is not measured by owner-thread allocation counters.
+Close also revokes scope, cancels current work, releases UI-owned staged/ready/
+pending values and executor closures before model destruction. A send racing
+close can return success but is never admitted afterward. Retained physical caps
+can retain controller backing and one response until dropped. Native proxy/OS
+event posting allocation is not measured by owner-thread allocation counters.
+Seven same-source Loom cases check publication, close races, exact drops,
+physical reuse and a producer paused inside the mutex while close must return.
 
 ## Concrete bounds and costs
 
 The framework bounds the number of physical work snapshots, not arbitrary
 generic payload bytes. At most one running/queued result, one latest pending
 input, and one previous ready result exist per question. During replacement a
-new owned result may overlap the previous ready allocation. The existing
-channel/staging retention bound is capacity plus staging capacity. Per-lane
+new owned result may overlap the previous ready allocation. Only one physical response can exist in the mailbox OR frozen staging: its
+credit is returned after admission, not while staging. Per-lane
 FIFO applies; there is no cross-lane ordering or atomic cohort guarantee.
 The static chain is intended for a small declared set: staging can scan
 O(lanes × budget), lookup traverses the typed chain, and monomorphized code grows
@@ -111,23 +115,27 @@ the UI stays responsive because this work runs on that service. No native
 thread is spawned implicitly by the question API. The original synchronous
 Library remains available; `library --search` selects this proof.
 
-Question declaration allocates a cold scope, bounded channel/staging and one
-controller. A Completion clones that controller lease once per physical job;
+The first u64/Infallible question allocates a cold scope and one controller
+(2 allocations/152 requested bytes headlessly; 200 bytes with native wake).
+Additional questions share the scope and allocate one controller each.
+The response and staging storage scale with concrete result size; see the
+storage matrix for the corresponding growth of the inline window type. A Completion clones that controller lease once per physical job;
 it is not a per-node/per-message result allocation. Each projected description
 currently allocates TWO boxes: the typed-erased projector plus existing cold
 ElementExtra. It also contributes a fixed status/content region. Folding these
 boxes would require changing ordinary El storage, its concrete public type, or
 introducing lower-level erased ownership machinery; this slice keeps the clear
 safe boundary. No zero-description-allocation or frame-time improvement claim
-is made. See `reader-question-evidence.txt` for measured byte requests and
-timing commands/results.
+is made. See `question-mailbox.md` for current byte requests and evidence;
+`reader-question-evidence.txt` preserves the earlier channel baseline.
 
 ## Validation
 
 `cargo test -p gpui` includes question owner tests, compiler rejection of escaping
 borrows/frozen borrowed input/reentrant mutation, and a real Library oracle.
-`cargo test -p gpui_reactivity_ownership_lab --features loom --test question_credit`
-checks the new synchronization protocol. With an actual X11 display,
+`cargo test -p gpui_reactivity_ownership_lab --features loom --test question_mailbox`
+checks the exact current synchronization implementation; question_credit keeps
+the earlier channel-based protocol experiment as historical evidence. With an actual X11 display,
 `cargo test -p gpui --features x11 --lib native_question_result_and_credit_wake_without_unrelated_input -- --ignored --nocapture --test-threads=1`
 requires result and credit progress through real WorkReady callbacks; a watchdog
 only fails the test and never polls delivery. The existing native adapter,

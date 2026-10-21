@@ -121,10 +121,6 @@ impl<T> Remote<T> {
             Err(TrySendError::Disconnected(value)) => Err(SendError::Closed(value)),
         }
     }
-    pub(crate) fn signal(&self) {
-        #[cfg(feature = "native")]
-        self.notification.signal();
-    }
 }
 
 /// The unique owned receiver. There is no public receive operation: delivery
@@ -163,14 +159,6 @@ impl<T> Inbox<T> {
             }
             None => Stage::Empty,
         }
-    }
-    pub(crate) fn pop(&mut self) -> Option<T> {
-        self.staging.pop_front()
-    }
-    #[cfg(feature = "native")]
-    pub(crate) fn attach(&mut self, wake: &Wake) {
-        let _ = self.notification.wake.set(wake.clone());
-        self.notification.signal();
     }
 }
 

@@ -1,6 +1,6 @@
 //! A typed, inert read key. Question state belongs to the window's static lane
 //! chain; workers carry owned input and a linear completion, never an owner borrow.
-use crate::{El, Remote, SendError};
+use crate::El;
 use gpui_reactivity_state::{RequestStamp, Revision};
 use std::{
     any::Any,
@@ -10,11 +10,16 @@ use std::{
     panic::{AssertUnwindSafe, catch_unwind},
     sync::{
         Arc,
-        atomic::{AtomicU8, AtomicU64, Ordering},
+        atomic::{AtomicU64, Ordering},
     },
 };
 
+mod linear_mailbox;
 pub(crate) mod question;
+mod sync {
+    pub(super) use std::sync::{Mutex, TryLockError, atomic};
+}
+use linear_mailbox::Mailbox;
 pub use question::{QuestionSet, Questions};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -80,7 +85,6 @@ pub enum StartError {
 pub enum QuestionFault {
     Revoked,
     Abandoned,
-    QueueFull,
     WorkerPanicked,
     ExecutorPanicked,
     InputUnavailable,
@@ -218,23 +222,31 @@ pub(crate) struct Message<T, E> {
 // not reuse its immutable local launched ticket until acquiring a terminal
 // state. The unique cap is the sole Running -> terminal writer; after publish
 // it cannot touch this lease again. Queued messages carry independent stamps.
-const IDLE: u8 = 0;
-const RUNNING: u8 = 1;
-const DELIVERED: u8 = 2;
 const ABANDONED: u8 = 3;
-const FULL: u8 = 4;
 const PANICKED: u8 = 5;
 pub(crate) struct Controller<T, E> {
-    remote: Remote<Message<T, E>>,
-    state: AtomicU8,
+    mailbox: Mailbox<Message<T, E>>,
     current: AtomicU64,
+    #[cfg(feature = "native")]
+    wake: std::sync::OnceLock<gpui_reactivity_host::native::Wake>,
 }
 impl<T, E> Controller<T, E> {
+    fn new() -> Self {
+        Self {
+            mailbox: Mailbox::new(),
+            current: AtomicU64::new(0),
+            #[cfg(feature = "native")]
+            wake: std::sync::OnceLock::new(),
+        }
+    }
+    fn signal(&self) {
+        #[cfg(feature = "native")]
+        if let Some(wake) = self.wake.get() {
+            wake.signal();
+        }
+    }
     fn terminal(&self, state: u8) {
-        self.state.store(state, Ordering::Release);
-        // Sending the result can wake before this release. Wake again so a UI
-        // turn which observed Running cannot strand newly returned credit.
-        self.remote.signal();
+        self.mailbox.finish(state, || self.signal());
     }
 }
 
@@ -254,20 +266,18 @@ pub struct Completion<T, E> {
     version: InputVersion,
 }
 pub enum CompleteError<T, E> {
-    Full(Result<T, E>),
     Closed(Result<T, E>),
 }
 impl<T, E> CompleteError<T, E> {
     pub fn into_value(self) -> Result<T, E> {
         match self {
-            Self::Full(value) | Self::Closed(value) => value,
+            Self::Closed(value) => value,
         }
     }
 }
 impl<T, E> fmt::Debug for CompleteError<T, E> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
-            Self::Full(_) => "Full(outcome)",
             Self::Closed(_) => "Closed(outcome)",
         })
     }
@@ -287,21 +297,12 @@ impl<T, E> Completion<T, E> {
             version: self.version,
             value,
         };
-        match controller.remote.try_send(message) {
-            Ok(()) => {
-                controller.terminal(DELIVERED);
-                Ok(())
-            }
-            Err(SendError::Full(message)) => {
-                controller.terminal(FULL);
-                Err(CompleteError::Full(message.value))
-            }
-            Err(SendError::Closed(message)) => {
-                controller.terminal(DELIVERED);
-                Err(CompleteError::Closed(message.value))
-            }
-        }
+        controller
+            .mailbox
+            .complete(message, || controller.signal())
+            .map_err(|message| CompleteError::Closed(message.value))
     }
+
     /// Execute on an existing worker. The owner must only enqueue this work;
     /// this helper catches a worker panic separately from a domain error E.
     pub fn run<I>(
@@ -335,87 +336,74 @@ impl<T, E> Drop for Completion<T, E> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gpui_reactivity_state::OwnerRegistry;
     use std::convert::Infallible;
+    use std::sync::atomic::AtomicUsize;
 
-    struct Capability {
-        completion: Completion<String, Infallible>,
-        inbox: crate::Inbox<Message<String, Infallible>>,
-        control: Arc<Controller<String, Infallible>>,
-        _scope: gpui_reactivity_state::OwnerScope,
-    }
-    fn capability() -> Capability {
-        let mut scope = OwnerRegistry::new().mount().unwrap();
-        let mut gate = scope.producer(1).unwrap();
-        let stamp = gate.begin().unwrap();
-        let version = InputVersion {
-            field: crate::FieldId::new(1),
-            revision: crate::Signal::new(0).revision(),
-            coarse: 0,
-            policy: 0,
-        };
-        let (remote, inbox) = Remote::bounded(1);
-        let control = Arc::new(Controller {
-            remote,
-            state: AtomicU8::new(RUNNING),
-            current: AtomicU64::new(stamp.ticket()),
-        });
-        Capability {
-            completion: Completion {
-                controller: Some(control.clone()),
-                stamp: Some(stamp),
-                version,
+    #[test]
+    fn closed_completion_returns_the_same_owned_result() {
+        let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
+        let stamp = scope.producer(1).unwrap().begin().unwrap();
+        let controller = Arc::new(Controller::new());
+        controller.mailbox.begin();
+        controller.current.store(stamp.ticket(), Ordering::Release);
+        let cap = Completion::<String, Infallible> {
+            controller: Some(controller.clone()),
+            stamp: Some(stamp),
+            version: InputVersion {
+                field: crate::FieldId::new(1),
+                revision: crate::Signal::new(0).revision(),
+                coarse: 0,
+                policy: 0,
             },
-            inbox,
-            control,
-            _scope: scope,
+        };
+        controller.current.store(0, Ordering::Release);
+        controller.mailbox.close();
+        assert!(cap.is_cancelled());
+        let value = String::from("retain exact allocation");
+        let pointer = value.as_ptr();
+        let value = cap.complete(Ok(value)).unwrap_err().into_value().unwrap();
+        assert_eq!(value.as_ptr(), pointer);
+    }
+
+    #[test]
+    fn close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic() {
+        struct Probe {
+            mailbox: Arc<Mailbox<Probe>>,
+            drops: Arc<AtomicUsize>,
+            panic: bool,
+        }
+        impl Drop for Probe {
+            fn drop(&mut self) {
+                assert!(self.mailbox.unlocked());
+                self.drops.fetch_add(1, Ordering::SeqCst);
+                assert!(!self.panic, "payload drop panic outside mailbox mutex");
+            }
+        }
+        for panic in [false, true] {
+            let mailbox = Arc::new(Mailbox::new());
+            mailbox.begin();
+            let drops = Arc::new(AtomicUsize::new(0));
+            let probe = Probe {
+                mailbox: mailbox.clone(),
+                drops: drops.clone(),
+                panic,
+            };
+            assert!(
+                mailbox
+                    .complete(probe, || assert!(mailbox.unlocked()))
+                    .is_ok()
+            );
+            let (_, value) = mailbox.freeze().unwrap();
+            mailbox.retire();
+            mailbox.close();
+            let result = catch_unwind(AssertUnwindSafe(|| drop(value)));
+            assert_eq!(result.is_err(), panic);
+            assert!(mailbox.unlocked());
+            mailbox.close();
+            assert_eq!(drops.load(Ordering::SeqCst), 1);
         }
     }
-    #[test]
-    fn full_and_closed_keep_the_same_owned_result_and_publish_terminal_once() {
-        let Capability {
-            completion,
-            mut inbox,
-            control,
-            _scope,
-        } = capability();
-        let payload = String::from("current result payload");
-        let pointer = payload.as_ptr();
-        // Defensive Full fixture: the public linear-cap/one-credit path cannot
-        // duplicate a result, so inject an unrelated older message internally.
-        let mut other_scope = OwnerRegistry::new().mount().unwrap();
-        let stamp = other_scope.producer(9).unwrap().begin().unwrap();
-        control
-            .remote
-            .try_send(Message {
-                stamp,
-                version: completion.version,
-                value: Ok("old".into()),
-            })
-            .unwrap();
-        let returned = match completion.complete(Ok(payload)) {
-            Err(CompleteError::Full(value)) => value.unwrap(),
-            _ => panic!("full"),
-        };
-        assert_eq!(returned.as_ptr(), pointer);
-        assert_eq!(control.state.load(Ordering::Acquire), FULL);
-        inbox.close();
-        let Capability {
-            completion,
-            mut inbox,
-            control,
-            _scope,
-        } = capability();
-        inbox.close();
-        let payload = String::from("closed result payload");
-        let pointer = payload.as_ptr();
-        let returned = match completion.complete(Ok(payload)) {
-            Err(CompleteError::Closed(value)) => value.unwrap(),
-            _ => panic!("closed"),
-        };
-        assert_eq!(returned.as_ptr(), pointer);
-        assert_eq!(control.state.load(Ordering::Acquire), DELIVERED);
-    }
+
     #[test]
     fn absent_plan_and_static_producer_projection_allocation_ledger() {
         struct Model {
@@ -447,6 +435,10 @@ mod tests {
                     .unwrap(),
             );
         });
+        assert_eq!(
+            cold.count_total, 2,
+            "one shared scope and one response controller"
+        );
         let (questions, reader) = built.unwrap();
         let mut descriptor = None;
         let projection = allocation_counter::measure(|| {

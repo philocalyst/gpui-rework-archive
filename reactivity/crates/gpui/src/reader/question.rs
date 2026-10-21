@@ -1,7 +1,7 @@
 //! Concrete question slots are consed into the existing static lane chain.
 use super::*;
 use crate::{
-    FieldId, Inbox, Source, Sources,
+    FieldId, Source, Sources,
     identity::Sites,
     remote::{LaneSet, Stage, sealed},
 };
@@ -103,19 +103,14 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             namespace: self.namespace,
             site: NonZeroU64::new(self.next_site).unwrap(),
         };
-        let (remote, inbox) = Remote::bounded(1);
         let lanes = QuestionLane {
             source,
             freeze: Some(freeze),
             start: Some(start),
             key,
             gate,
-            inbox,
-            controller: Arc::new(Controller {
-                remote,
-                state: AtomicU8::new(IDLE),
-                current: AtomicU64::new(0),
-            }),
+            controller: Some(Arc::new(Controller::new())),
+            staged: None,
             state: State::Empty,
             version: None,
             ticket: 0,
@@ -185,8 +180,8 @@ pub struct QuestionLane<M, V, I, T, E, F, S, L> {
     start: Option<S>,
     key: ReaderKey,
     gate: RequestGate,
-    inbox: Inbox<Message<T, E>>,
-    controller: Arc<Controller<T, E>>,
+    staged: Option<Message<T, E>>,
+    controller: Option<Arc<Controller<T, E>>>,
     state: State<T, E>,
     version: Option<InputVersion>,
     ticket: u64,
@@ -199,11 +194,20 @@ pub struct QuestionLane<M, V, I, T, E, F, S, L> {
     cursor: usize,
     stats: QuestionStats,
 }
+impl<M, V, I, T, E, F, S, L> QuestionLane<M, V, I, T, E, F, S, L> {
+    #[inline]
+    fn control(&self) -> &Arc<Controller<T, E>> {
+        self.controller.as_ref().expect("live question controller")
+    }
+}
 impl<M, V, I, T, E, F, S, L> Drop for QuestionLane<M, V, I, T, E, F, S, L> {
     fn drop(&mut self) {
         // Natural Win/failed-mount destruction must cancel the cooperative
-        // hint as well as closing the subsequently dropped channel receiver.
-        self.controller.current.store(0, Ordering::Release);
+        // hint as well as relinquishing its response-owner lease.
+        if let Some(controller) = self.controller.take() {
+            controller.current.store(0, Ordering::Release);
+            controller.mailbox.close();
+        }
     }
 }
 impl<M, V, I, T: 'static, E: std::error::Error + 'static, F, S, L: ReaderValues> ReaderValues
@@ -261,23 +265,23 @@ where
 {
     fn fault(&mut self, error: QuestionFault) {
         self.stats.framework_faults = self.stats.framework_faults.saturating_add(1);
-        self.controller.current.store(0, Ordering::Release);
+        self.control().current.store(0, Ordering::Release);
         self.gate.cancel();
         self.pending = None;
         let previous = self.state.take_previous();
         self.state = State::Fault(StoredFault::Framework(error), previous);
     }
     fn start_pending(&mut self) -> bool {
-        if self.controller.state.load(Ordering::Acquire) != IDLE {
+        if !self.control().mailbox.idle() {
             return false;
         }
         let Some(work) = self.pending.take() else {
             return false;
         };
         self.running_ticket = Some(work.stamp.ticket());
-        self.controller.state.store(RUNNING, Ordering::Release);
+        self.control().mailbox.begin();
         let completion = Completion {
-            controller: Some(self.controller.clone()),
+            controller: Some(self.control().clone()),
             stamp: Some(work.stamp),
             version: work.version,
         };
@@ -347,9 +351,7 @@ where
         };
         self.ticket = stamp.ticket();
         self.version = Some(version);
-        self.controller
-            .current
-            .store(self.ticket, Ordering::Release);
+        self.control().current.store(self.ticket, Ordering::Release);
         if matches!(self.state, State::Pending(_)) {
             self.stats.superseded = self.stats.superseded.saturating_add(1);
         }
@@ -396,46 +398,18 @@ where
         if index != 0 {
             return self.tail.stage(index - 1);
         }
-        // Payloads are frozen before their returned credit is consumed. Reusing
-        // the one physical slot never changes a queued message's owned stamp.
-        match self.inbox.stage() {
-            Stage::Empty => {}
-            Stage::Ready => {
-                let state = self.controller.state.load(Ordering::Acquire);
-                if state > RUNNING {
-                    self.staged_terminal = Some(state);
-                }
-                return Stage::Ready;
-            }
-            Stage::Limited => {
-                let state = self.controller.state.load(Ordering::Acquire);
-                if state > RUNNING {
-                    // The one cap already has its sole result frozen. Returning
-                    // credit in that same batch cannot reveal another payload.
-                    self.staged_terminal = Some(state);
-                    return Stage::Empty;
-                }
-                return Stage::Limited;
-            }
+        if self.staged_terminal.is_some() {
+            return Stage::Empty;
         }
-        if self.staged_terminal.is_none() {
-            let state = self.controller.state.load(Ordering::Acquire);
-            if state > RUNNING {
-                // A send may have followed the first empty receive but preceded
-                // this acquire. Freeze that payload before returning its credit.
-                match self.inbox.stage() {
-                    Stage::Ready => {
-                        self.staged_terminal = Some(state);
-                        return Stage::Ready;
-                    }
-                    Stage::Empty | Stage::Limited => {}
-                }
-                self.staged_terminal = Some(state);
-                return Stage::Ready;
-            }
+        if let Some((terminal, message)) = self.control().mailbox.freeze() {
+            self.staged = message;
+            self.staged_terminal = Some(terminal);
+            Stage::Ready
+        } else {
+            Stage::Empty
         }
-        Stage::Empty
     }
+
     fn apply(&mut self, model: &mut M, applied: &mut usize) {
         self.tail.apply(model, applied);
     }
@@ -455,7 +429,7 @@ where
         applied: &mut usize,
     ) -> Result<(), crate::Error> {
         let mut binding_error = None;
-        while let Some(message) = self.inbox.pop() {
+        while let Some(message) = self.staged.take() {
             let current = match self.source.borrow_registered(model, sources) {
                 Ok(signal) => signal,
                 Err(error) => {
@@ -499,11 +473,10 @@ where
                 .running_ticket
                 .take()
                 .expect("terminal belongs to one launched cap");
-            self.controller.state.store(IDLE, Ordering::Release);
+            self.control().mailbox.retire();
             if ticket == self.ticket && matches!(self.state, State::Pending(_)) {
                 let failure = match terminal {
                     ABANDONED => Some(QuestionFault::Abandoned),
-                    FULL => Some(QuestionFault::QueueFull),
                     PANICKED => Some(QuestionFault::WorkerPanicked),
                     _ => None,
                 };
@@ -523,13 +496,19 @@ where
         tail
     }
     fn close(&mut self) {
-        self.controller.current.store(0, Ordering::Release);
         self.gate.revoke();
+        // Relinquish the owner lease before running input/result destructors.
+        // A still-running physical cap owns any deferred response reclamation.
+        if let Some(controller) = self.controller.take() {
+            controller.current.store(0, Ordering::Release);
+            controller.mailbox.close();
+        }
+        self.staged = None;
+        self.staged_terminal = None;
         self.pending = None;
         self.state = State::Empty;
         self.freeze.take();
         self.start.take();
-        self.inbox.close();
         self.tail.close();
     }
     fn start_questions(&mut self) -> bool {
@@ -538,11 +517,14 @@ where
     }
     #[cfg(feature = "native")]
     fn attach(&mut self, wake: &gpui_reactivity_host::native::Wake) {
-        self.inbox.attach(wake);
+        let _ = self.control().wake.set(wake.clone());
+        self.control().signal();
         self.tail.attach(wake);
     }
     fn signal(&self) {
-        self.controller.remote.signal();
+        if let Some(controller) = &self.controller {
+            controller.signal();
+        }
         self.tail.signal();
     }
 }
@@ -664,7 +646,7 @@ mod tests {
             QuestionStatus::Fault
         );
         assert!(plan.lanes.pending.is_none());
-        assert_eq!(plan.lanes.controller.current.load(Ordering::Acquire), 0);
+        assert_eq!(plan.lanes.control().current.load(Ordering::Acquire), 0);
         plan.lanes.coarse = 0;
         plan.lanes.policy = u64::MAX;
         assert!(
@@ -707,7 +689,7 @@ mod tests {
                 .is_err()
         );
         assert!(plan.lanes.running_ticket.is_none());
-        assert_eq!(plan.lanes.controller.state.load(Ordering::Acquire), IDLE);
+        assert!(plan.lanes.control().mailbox.idle());
     }
     #[test]
     fn a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever() {
@@ -742,7 +724,7 @@ mod tests {
             plan.lanes.read(reader.key).unwrap().info.status,
             QuestionStatus::Fault
         );
-        assert_eq!(plan.lanes.controller.state.load(Ordering::Acquire), IDLE);
+        assert!(plan.lanes.control().mailbox.idle());
         plan.lanes
             .refresh_self(&model, &sources, Change::Retry(reader.key))
             .unwrap();

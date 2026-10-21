@@ -1,0 +1,88 @@
+Safe single-response transport experiment, 2026-10-21
+Source baseline: c6ac1481d1ca0050afea6f1d15104937006b6ab8
+Candidate: this commit, isolated /root/gpui-production-question-mailbox.
+Rust1.97.1 (8bab26f4f2026-07-14), AMD Ryzen7 3700X, Linuxx86_64.
+No production dependencies, first-party unsafe, framework executor or new global.
+
+Final authoritative verification uses CARGO_TARGET_DIR=/tmp/gpui-mailbox-target
+only for the candidate. Baseline instrumentation lives in separate detached
+/root/gpui-question-channel-baseline, not the reviewed Reader worktree.
+An early shared target directory produced an integration binary reporting the
+baseline storage in a candidate invocation; those public-test runs were
+discarded. All final candidate gates were rerun in its isolated directory.
+Preserved direct timing executables have distinct verified SHA and symbols.
+
+Gates (source /tmp/gpui-native-env.sh, build jobs2):
+ cargo test -p gpui --features native,x11,wayland
+   247 passed cases/doctests; ignored native surfaces explicitly run below.
+ cargo clippy -p gpui --features native,x11,wayland --all-targets -- -D warnings
+   pass, native profile including AccessKit.
+ cargo test -p gpui --lib reader::tests::absent_plan_and_static_producer_projection_allocation_ledger -- --nocapture
+   headless first declaration2alloc152B; projection2alloc88B unchanged.
+   Reader16,Completion72,InputVersion32,Controller96,El176; plan456,bound448.
+ cargo test -p gpui --test question_storage -- --nocapture
+   exact values in question-mailbox.md table. Fixture copied unchanged onto
+   detached c6 baseline; baseline results5alloc vs candidate2 across all cases.
+ cargo test -p gpui_reactivity_ownership_lab --features loom --test question_mailbox
+   7 passed, exact private transport source under the Loom sync facade.
+ DISPLAY=:94 cargo test -p gpui --features native,x11,wayland --lib native_question_result_and_credit_wake_without_unrelated_input -- --ignored --nocapture --test-threads=1
+   1 passed0.16s, actual WorkReady obsoleteA→currentB with unrelated exact edit.
+ DISPLAY=:94 cargo test -p gpui --features native,x11,wayland --lib native_library_250k -- --ignored --nocapture --test-threads=1
+   1 passed10.29s, actual wheel/pointer/resize/resume on the250K Library.
+   Xvfb21.1.24,1280x800x24; CPU/Vulkan environment from the native env file.
+ Native declaration counter also measured2alloc200B/Controller144 vs c6
+   6alloc952B/Controller40. Native bound lane440→448B.
+ No macOS/Windows execution claim. Root owns final combined cross-checks.
+
+Close preemption proof: exact source Loom case holds the producer's mutex and
+waits for a resume channel. The owner calls atomic close then sends resume.
+Any locking close would introduce a Loom-detected wait cycle; current close
+returns. A second case verifies a remaining physical lease defers one payload
+until its Arc drops, with no post-close admission. No timed sleep is used.
+Publication wake proof and old-notification/lease-reuse cases use actual std/
+Loom-shared code, not a separately rewritten channel abstraction. Standard
+tests cover a payload destructor panic outside the mutex; public tests cover
+staged response drop on earlier model-callback panic and ready+late-cap close.
+
+Timing source: existing crates/gpui/tests/question_cost.rs, unchanged.
+SHA25639aa3f736c401bcda4e4d7d1e742347e6d02761cc41b0f14fe9e2bc44085ad0b.
+Build each source separately: cargo test --release -p gpui --test question_cost --no-run
+Copy each resulting executable before switching source/target.
+Baseline executable SHA256:
+ b272c95acebb3ce87f2f96ed2261a690fe9f65b96ff08dec49498715a3e37324
+Initial locking-close candidate SHA256:
+ eacb014cfefc45170f058176c06833a3f1bb6e1bd2be9587e82a6c9088358fff
+Final atomic-close candidate SHA256:
+ d10ab25c54b99376b8f7c41641cfaf96a0d8e7537567fddc54dd389eb6e916ca
+Both candidates verified by nm/objdump to contain the specialized Mailbox
+implementation, rather than the baseline channel. The final binary includes
+atomic close and Option owner-lease cleanup.
+
+Capture: taskset -c2 <preserved-executable> --ignored --nocapture --test-threads=1
+5 fresh-process pairs, order alternated; each program warms both10turns then
+runs7 internal alternating rounds of200turns per case. Rows within a process
+are not independent fresh-process samples. No LTO/profile override.
+Root+production_sources explicitly paused heavy work for each quiet capture.
+question-mailbox-cost-contended.csv: initial attempt overlapped root gates;
+  retained but not used. question channel220267ns vs mutex222741ns median.
+question-mailbox-cost-locking-close.csv: quiet initial safe baseline:
+  question220373→219789ns; Remote control254002→252857ns.
+question-mailbox-cost.csv: quiet final atomic-close safe implementation:
+  question222404→225427ns (+1.36%, ranges217768..239156 /221038..242341).
+  Remote control255722→261772ns (+2.37%,250743..273592 /256863..281510).
+These are owner-turn costs, not asynchronous search execution or OS presents.
+No win is claimed, and the losing final observation is kept.
+
+Actual release codegen, GNU binutils2.46 nm-S-C/objdump-d-C:
+ c6 Completion<u64,Infallible>::complete723B; start_pending1097B;
+    QuestionSet::stage601B; close248B.
+ final Completion::complete394B PLUS outlined Mailbox::complete457B;
+    start_pending1280B; stage690B; close292B.
+ Do not count the394B wrapper alone as code shrink. The outlined helper adds
+ a real call; no helper-inline optimization is hidden in the measurements.
+ Producer fast path has lock cmpxchg, payload moves, unlock xchg, then the
+ terminal byte store. Owner staging has try-lock cmpxchg/unlock; contention
+ diagnoses the invariant instead of calling a blocking mutex lock. The native
+ Wake follows terminal publication; this headless executable omits OS posting.
+ Preserving safe synchronization is deliberate: no tested application benefit
+ currently justifies a new unsafe cell API, ownership proof and drop protocol.
