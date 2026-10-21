@@ -1,0 +1,35 @@
+{
+  "measured_source": "75b02d0b40f136896d571b0c0e046d19555cf8ba",
+  "followup_parent": "182f1892e01505099b0dea4d55dabd7032bf17f8",
+  "query_sha256": "965d3eb80b05eafdf83c865035b37897296a9a58e049e6f1aaf567a0607b54f4",
+  "scope": "Unmeasured private same-cohort constructors; all prior performance captures retain their original pins.",
+  "consumer": {
+    "path": "/tmp/gpui-spaces-construct-inline-consumer",
+    "sha256": "94c3f0c61431375d5e033fe5173c56b2cd7be240e988539304c0bbaac59e6b26",
+    "regular_gpui_rlib_sha256": "1dfbbad97c20c25232062932c4d87f1d04fae291fdc632e6cac084319493df97",
+    "text_bytes": 2900055,
+    "visit_bytes": 859,
+    "visit_stack_reservation_bytes": 312,
+    "asm_sha256": "f1e145e7aeae8c3543143e251034a176c38849e1a59a3a60d5343a7f4eaacada"
+  },
+  "comparison": "Visit instruction multiset, code size and stack reservation match measured 75b. LLVM schedules the existing add $56,node_pointer before output stores rather than after them. No claim of byte identity or a new timing result.",
+  "oracle": {
+    "rows": 45,
+    "matches_baseline": true,
+    "profile": "debug"
+  },
+  "gates": {
+    "public_geometry_and_query_cases": 5,
+    "private_cohort_cases": 1,
+    "native_semantic_cases": 20,
+    "native_semantic_manual_ignores": 4,
+    "strict_clippy": "x11,wayland all-targets -D warnings"
+  },
+  "abandoned_outline_form": {
+    "consumer_sha256": "ae78b819695daaedf3f5b973b66a48facfbc32dd117b4c1503ce775801a54999",
+    "text_bytes": 2900359,
+    "visit_bytes": 1022,
+    "stack_reservation_bytes": 424,
+    "reason": "Private iterator constructor outlined; an inline hint restores loop shape without changing membership proof."
+  }
+}

@@ -43,12 +43,14 @@ authority. Internal paint/input/snapshot loops keep their existing explicit
 indices. Scoped queries select subslices of the same full Context, so the dense
 offset remains global to the correct immutable P.
 
-Private Part constructors receive references selected from that Context's sheet;
-the borrow fixes the allocation for the Part lifetime. Lifetime equality alone
-does not prove allocation membership. Current private callsites establish that
-invariant and debug assertions check it. Making the private constructors select
-only from Context-owned slices could localize that proof and remove debug
-per-item checks; that is an assessed follow-up, not part of this measured cut.
+The measured cut's private Part constructors receive references selected from
+that Context's sheet; debug assertions check membership. Lifetime equality alone
+does not prove allocation membership. The later, unmeasured construction
+follow-up replaces that entry point with `Context::parts(range)` and `part_at`:
+both select references directly from the Context-owned slice. No caller can pair
+a foreign node with the lane, and no explicit per-item debug membership check is
+needed. The immutable borrow fixes the allocation throughout the Part lifetime.
+The measured source pins and all three captures remain unchanged.
 
 ## Allocation and retained cost
 
@@ -192,8 +194,8 @@ and avoids common indexed access, but the remaining broad visitor loss persists.
 
 ## Emitted consumer loop and recommendation
 
-The initial binary outlined Part::transform (356 B) and unclipped_bounds
-(161 B); the baseline inlined both. An inline hint removed the former, but LLVM
+The initial unit binary outlined Part::transform (356 B) and unclipped_bounds
+(161 B); the baseline unit binary inlined both. An inline hint removed the former, but LLVM
 still outlined a 396 B unclipped wrapper. The separate annotation commit makes
 that wrapper visible to callers and removes repeated per-node getter calls.
 It improves the large visitor regression without removing it.
@@ -209,6 +211,73 @@ call to the core CoordinateSpace bounds helper spills live reconstructed
 coefficients around the call; no claim is made that the full projection overhead
 is an unavoidable mathematical cost. Consumer `.text`/binary hashes are recorded
 in the provenance; this diagnostic consumer adds no public API.
+
+The separately compiled baseline consumer differs from its unit instantiation:
+its `inspect` loop inlines `Win::visit` but calls the 105 B
+[`Part::unclipped_bounds` wrapper](presented-spaces-baseline-part-bounds.asm).
+The [baseline caller](presented-spaces-baseline-consumer-visit.asm) copies the
+stored 24 B affine as a vector and two scalar values and copies the existing
+16 B local rectangle. The candidate reconstructs six scalar coefficients and
+the zero-origin rectangle. Each present node decodes the niche-encoded Spaces
+enum, branches on common/shared/dense storage, and merges six coefficient
+addresses before loading them. Those values remain live across the
+[core bounds call](presented-spaces-core-bounds.asm), producing six separate
+16 B XMM spills and reloads. Dense alone computes the address offset and checked
+slice index; absent maps bypass both storage selection and this offset. There is
+still per-node output assembly and loop bookkeeping in the absent branch.
+
+Thus removing Part getter calls did not remove lane dispatch, scalar
+materialization or the opaque call boundary. The measured candidate's visitor
+is 859 B with a 312 B stack reservation; baseline `inspect` is 384 B with a
+152 B reservation and separately calls the 105 B/80 B-stack Part wrapper.
+These are individual emitted-function facts, not a claim that the stack totals
+or timings add directly. A future once-per-visit storage selection would need
+its own implementation and measurements. No such strategy is included here.
+
+### Unmeasured constructor follow-up
+
+`Context::parts(range)` and accessibility-only `part_at(index)` now create Parts
+by selecting directly from the Context's own slice. They replace the reference
+accepting entry point and its per-item debug checks. Dense index derivation stays
+lazy and uses the same immutable allocation. The new private cohort test checks
+both construction paths across acknowledged, pending, dense and rebuilt sheets.
+
+The first iterator formulation outlined the constructor in an ordinary external
+consumer: visitor size grew from 859 to 1,022 B and its stack reservation from
+312 to 424 B. An `inline` hint on that small constructor removes the setup call.
+The [final emitted visitor](presented-spaces-constructed-consumer-visit.asm)
+returns to 859 B/312 B and the same 2,900,055 B total `.text` as measured 75b.
+The instruction multiset is identical, but the bytes are not: LLVM moves the
+existing 56 B node-pointer increment earlier within the output-store block.
+There is no new timing claim for this scheduling difference. Binary, regular
+rlib, source and assembly hashes are pinned separately in
+[the constructor provenance](presented-spaces-construction.json).
+
+After the final hint/cfg changes, all five focused public geometry/query cases,
+the private construction test, all 20 focused native semantic/Consumer cases
+(four manual ignores), and strict native `x11,wayland` all-target Clippy pass.
+The [final-source debug oracle](presented-spaces-oracle-constructed.csv) matches
+all 45 baseline transform/geometry/pixel hashes. These checks supplement the
+earlier full-suite and actual native gates; the full suite and actual native
+scripts were not repeated for a private constructor plus its inline hint.
+
+### Independent core-kernel opportunity, not implemented
+
+The shared core bounds kernel still evaluates four corners. Selecting each
+axis's two extremal corners from coefficient signs could preserve its existing
+multiply/add order while halving the number of axis expressions. A finite-result
+fast path has a monotonicity proof: if all four selected axis results are finite,
+their endpoint products and selected sums are finite, and every mixed corner is
+between those extrema under the same IEEE operations. Corner signed-zero choice
+is erased by the existing outward `next_down`/`next_up` conversion.
+
+A universal substitution needs more proof. Ancestor composition retains f64
+coefficients that may exceed f32 range; valid local f32 coordinates can therefore
+overflow products. The existing corner reducer ignores individual NaN corners.
+A bounded first implementation could preserve all existing admission checks and
+fall back to the unchanged four-corner path whenever a selected result is
+nonfinite. No core-kernel edit is part of this branch, and a later shared-kernel
+win would benefit both P80 and P56 independently.
 
 Recommendation: hold the storage cut out of main for now. The exact memory
 savings and frozen-sheet ownership are validated, but common mount/drop remains

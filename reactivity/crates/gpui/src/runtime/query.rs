@@ -26,24 +26,21 @@ impl<'a> Context<'a> {
                 .map(|metadata| &metadata.presented),
         }
     }
-    fn part(&self, node: &'a Presented) -> Part<'_> {
-        // Every caller iterates or selects from self.nodes (possibly a scoped
-        // subslice). Check the private cohort invariant in debug builds too.
-        debug_assert!(self.index(node) < self.nodes.len());
-        Part {
+    // Both constructors select from this Context's slice. Callers cannot pair
+    // a foreign reference with its lane, and no membership scan is needed.
+    #[cfg(any(feature = "accessibility", test))]
+    fn part_at(&self, index: usize) -> Option<Part<'_>> {
+        self.nodes.get(index).map(|node| Part {
             node,
             context: self,
-        }
+        })
     }
     #[inline]
-    fn index(&self, node: &Presented) -> usize {
-        // part() receives this reference from self.nodes. The immutable borrow
-        // keeps that allocation alive and fixed. Only Dense needs this offset.
-        let offset = std::ptr::from_ref(node).addr() - self.nodes.as_ptr().addr();
-        debug_assert!(offset.is_multiple_of(std::mem::size_of::<Presented>()));
-        let index = offset / std::mem::size_of::<Presented>();
-        debug_assert!(index < self.nodes.len());
-        index
+    fn parts(&self, range: std::ops::Range<usize>) -> impl Iterator<Item = Part<'_>> {
+        self.nodes[range].iter().map(|node| Part {
+            node,
+            context: self,
+        })
     }
 }
 
@@ -67,20 +64,23 @@ impl SemanticSheet<'_> {
         self.0.nodes.len()
     }
     pub(crate) fn part_at(&self, index: usize) -> Option<Part<'_>> {
-        self.0.nodes.get(index).map(|node| self.0.part(node))
+        self.0.part_at(index)
     }
     pub(crate) fn children(&self, index: usize) -> impl Iterator<Item = Part<'_>> {
+        let start = index.saturating_add(1).min(self.0.nodes.len());
         self.0
-            .nodes
-            .iter()
-            .skip(index + 1)
-            .take_while(move |node| node.parent.index().is_some_and(|parent| parent >= index))
-            .filter(move |node| node.parent.index() == Some(index))
-            .map(|node| self.0.part(node))
+            .parts(start..self.0.nodes.len())
+            .take_while(move |part| {
+                part.node
+                    .parent
+                    .index()
+                    .is_some_and(|parent| parent >= index)
+            })
+            .filter(move |part| part.node.parent.index() == Some(index))
     }
     pub(crate) fn visit(&self, mut visitor: impl FnMut(Part<'_>)) {
-        for node in self.0.nodes {
-            visitor(self.0.part(node));
+        for part in self.0.parts(0..self.0.nodes.len()) {
+            visitor(part);
         }
     }
 }
@@ -102,6 +102,14 @@ pub struct Part<'a> {
     context: &'a Context<'a>,
 }
 impl<'a> Part<'a> {
+    #[inline]
+    fn dense_index(self) -> usize {
+        // The two private constructors select node from context.nodes. The
+        // immutable borrow keeps the same allocation alive and fixed. This is
+        // address arithmetic only; no pointer is reconstructed or dereferenced.
+        (std::ptr::from_ref(self.node).addr() - self.context.nodes.as_ptr().addr())
+            / std::mem::size_of::<Presented>()
+    }
     #[cfg(feature = "accessibility")]
     pub(crate) fn native_id(self) -> u64 {
         self.node.identity
@@ -195,7 +203,7 @@ impl<'a> Part<'a> {
     pub fn transform(self) -> Option<crate::Affine> {
         self.context
             .spaces
-            .transform_with(self.node, || self.context.index(self.node))
+            .transform_with(self.node, || self.dense_index())
     }
     /// Conservative full window-physical bounds, derived only when requested.
     /// Native adapters add the window-to-screen mapping. This differs from
@@ -258,9 +266,9 @@ impl<'a, M: View + 'static> Query<'a, M> {
         self.within = Some(target);
         self
     }
-    fn scope(&self, runtime: &'a Runtime<M>) -> Result<&'a [Presented], Error> {
+    fn scope(&self, runtime: &'a Runtime<M>) -> Result<std::ops::Range<usize>, Error> {
         let Some(target) = self.within else {
-            return Ok(&runtime.presented);
+            return Ok(0..runtime.presented.len());
         };
         let identity = runtime.sites.resolve(target).ok_or(Error::StaleTarget)?;
         let root = runtime
@@ -276,7 +284,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
             .iter()
             .position(|node| node.parent.index().is_none_or(|parent| parent < root))
             .unwrap_or(following.len());
-        Ok(&runtime.presented[root..root + 1 + len])
+        Ok(root..root + 1 + len)
     }
     fn matches(&self, part: Part<'_>) -> bool {
         self.role.is_none_or(|role| part.role() == role)
@@ -300,8 +308,8 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let runtime = self.runtime.ok_or(Error::Closed)?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for node in self.scope(runtime)? {
-            count += usize::from(self.matches(context.part(node)));
+        for part in context.parts(self.scope(runtime)?) {
+            count += usize::from(self.matches(part));
         }
         Ok(count)
     }
@@ -314,10 +322,10 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let mut identity = 0;
         let mut count = 0;
         let context = Context::new(runtime);
-        for node in self.scope(runtime)? {
-            if self.matches(context.part(node)) {
+        for part in context.parts(self.scope(runtime)?) {
+            if self.matches(part) {
                 count += 1;
-                identity = node.identity;
+                identity = part.node.identity;
             }
         }
         match count {
@@ -411,8 +419,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for node in &runtime.presented {
-            visitor(context.part(node));
+        for part in context.parts(0..context.nodes.len()) {
+            visitor(part);
         }
         Ok(())
     }
@@ -462,15 +470,20 @@ mod geometry_tests {
         let runtime = window.runtime().unwrap();
         let context = Context::new(runtime);
         assert_eq!(std::mem::size_of::<Part<'_>>(), 16);
+        for (index, part) in context.parts(0..context.nodes.len()).enumerate() {
+            assert!(std::ptr::eq(part.node, &runtime.presented[index]));
+            assert_eq!(part.dense_index(), index);
+        }
+        assert!(context.part_at(context.nodes.len()).is_none());
         for (index, expected) in runtime.presented.iter().enumerate() {
-            let part = context.part(expected);
+            let part = context.part_at(index).unwrap();
             // Every private constructor selects from this exact allocation.
             assert!(std::ptr::eq(part.node, expected));
             assert!(std::ptr::eq(
                 part.context.nodes.as_ptr(),
                 runtime.presented.as_ptr()
             ));
-            assert_eq!(context.index(part.node), index);
+            assert_eq!(part.dense_index(), index);
             assert_eq!(
                 part.transform(),
                 runtime.presented_spaces.transform(index, expected)
