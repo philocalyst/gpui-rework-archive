@@ -1,0 +1,105 @@
+{
+  "base": "b60af3a4f9",
+  "compiler": "rustc 1.97.1",
+  "profile": "Cargo release; consumers rustc opt-level=3, symbol-mangling-version=v0; GPUI consumer cfg tokio_unstable",
+  "sources_sha256": {
+    "reactivity/crates/core/src/geometry.rs": "669d4b7ec8ca84f62cd372f867dbf626590a50a534ee29712f3690fe6c82ac32",
+    "reactivity/crates/core/src/geometry_bounds_tests.rs": "33a91c1a91a1c7c27f47e2219d54c5e44d7edc240a0de7990ed744b2a5c22b26",
+    "reactivity/crates/core/evidence/bounds-kernel-consumer.rs": "3e42cea6f93fdd5b2099a1b204bf8d9db56d509c76b753d156a5f08c2516c51a",
+    "reactivity/crates/core/evidence/bounds-kernel-gpui-consumer.rs": "ce1d77cde49e0db6ecc367ac186750ee589a9106f9b27c319ac38c17f56197df"
+  },
+  "executables": {
+    "baseline_core": {
+      "path": "/tmp/gpui-bounds-baseline-consumer",
+      "sha256": "05a3fb94be512ac8d0cd62868fd0ceda83833009662ab7920720a4c0f1d25e04",
+      "text_bytes": 261395,
+      "symbols": {
+        "callee": {
+          "address": "0000000000015f30",
+          "bytes": 1146,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds",
+          "asm": "bounds-kernel-baseline-core-callee.asm"
+        },
+        "inspect": {
+          "address": "0000000000015cd0",
+          "bytes": 6,
+          "symbol": "bounds_kernel_consumer::inspect",
+          "asm": "bounds-kernel-baseline-core-inspect.asm"
+        }
+      },
+      "functional_stdout": "bounds,fb7aa0eceda61519"
+    },
+    "baseline_gpui": {
+      "path": "/tmp/gpui-bounds-baseline-gpui-consumer",
+      "sha256": "397a301d3ad76e6fd09b95166ff92acb7f8dce4f81b59f28b1604953eedebd9e",
+      "text_bytes": 2894855,
+      "symbols": {
+        "callee": {
+          "address": "00000000006cf1e0",
+          "bytes": 1161,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds",
+          "asm": "bounds-kernel-baseline-gpui-callee.asm"
+        },
+        "inspect": {
+          "address": "00000000004e9f90",
+          "bytes": 384,
+          "symbol": "bounds_kernel_gpui_consumer::inspect",
+          "asm": "bounds-kernel-baseline-gpui-inspect.asm"
+        },
+        "part_bounds": {
+          "address": "00000000004ecb20",
+          "bytes": 105,
+          "symbol": "<gpui::runtime::query::Part>::unclipped_bounds",
+          "asm": "bounds-kernel-baseline-gpui-part_bounds.asm"
+        }
+      },
+      "functional_stdout": "consumer,0,129\nconsumer,1,129\nconsumer,2,129"
+    },
+    "candidate_core": {
+      "path": "/tmp/gpui-bounds-candidate-consumer",
+      "sha256": "d1c2c7680e13fddd253233632937ace2cc4808b3c858d8efbcac76c295462271",
+      "text_bytes": 261603,
+      "symbols": {
+        "callee": {
+          "address": "0000000000015f40",
+          "bytes": 1356,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds",
+          "asm": "bounds-kernel-candidate-core-callee.asm"
+        },
+        "inspect": {
+          "address": "0000000000015ce0",
+          "bytes": 6,
+          "symbol": "bounds_kernel_consumer::inspect",
+          "asm": "bounds-kernel-candidate-core-inspect.asm"
+        }
+      },
+      "functional_stdout": "bounds,fb7aa0eceda61519"
+    },
+    "candidate_gpui": {
+      "path": "/tmp/gpui-bounds-candidate-gpui-consumer",
+      "sha256": "36183a238713a891ee3f6b6d0e86524e4c6fb56ea8b558bd3ea876af01084d70",
+      "text_bytes": 2895063,
+      "symbols": {
+        "callee": {
+          "address": "00000000006cf1f0",
+          "bytes": 1375,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds",
+          "asm": "bounds-kernel-candidate-gpui-callee.asm"
+        },
+        "inspect": {
+          "address": "00000000004e9fa0",
+          "bytes": 384,
+          "symbol": "bounds_kernel_gpui_consumer::inspect",
+          "asm": "bounds-kernel-candidate-gpui-inspect.asm"
+        },
+        "part_bounds": {
+          "address": "00000000004ecb30",
+          "bytes": 105,
+          "symbol": "<gpui::runtime::query::Part>::unclipped_bounds",
+          "asm": "bounds-kernel-candidate-gpui-part_bounds.asm"
+        }
+      },
+      "functional_stdout": "consumer,0,129\nconsumer,1,129\nconsumer,2,129"
+    }
+  }
+}

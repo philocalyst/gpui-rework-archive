@@ -280,17 +280,37 @@ impl CoordinateSpace {
         }
         let (x, y) = (rect.x as f64, rect.y as f64);
         let (right, bottom) = (x + rect.width as f64, y + rect.height as f64);
-        let points = [[x, y], [right, y], [x, bottom], [right, bottom]];
-        let mut min = [f64::INFINITY; 2];
-        let mut max = [f64::NEG_INFINITY; 2];
-        for p in points {
-            let x = a * p[0] + c * p[1] + tx;
-            let y = b * p[0] + d * p[1] + ty;
-            min[0] = min[0].min(x);
-            min[1] = min[1].min(y);
-            max[0] = max[0].max(x);
-            max[1] = max[1].max(y);
-        }
+        let axis = |u: f64, v: f64, translation: f64| {
+            let (low_x, high_x) = if u < 0.0 { (right, x) } else { (x, right) };
+            let (low_y, high_y) = if v < 0.0 { (bottom, y) } else { (y, bottom) };
+            [
+                u * low_x + v * low_y + translation,
+                u * high_x + v * high_y + translation,
+            ]
+        };
+        let [min_x, max_x] = axis(a, c, tx);
+        let [min_y, max_y] = axis(b, d, ty);
+        let (min, max) = if [min_x, min_y, max_x, max_y].into_iter().all(f64::is_finite) {
+            // Rounded multiplication and addition are monotone while finite.
+            // Keep the corner expression's operation order, not center/extents
+            // reassociation. Outward rounding below erases zero-sign choices.
+            ([min_x, min_y], [max_x, max_y])
+        } else {
+            // Wide ancestor composition can overflow corner products. Preserve
+            // the original reducer's NaN/Infinity behavior on that rare path.
+            let points = [[x, y], [right, y], [x, bottom], [right, bottom]];
+            let mut min = [f64::INFINITY; 2];
+            let mut max = [f64::NEG_INFINITY; 2];
+            for p in points {
+                let x = a * p[0] + c * p[1] + tx;
+                let y = b * p[0] + d * p[1] + ty;
+                min[0] = min[0].min(x);
+                min[1] = min[1].min(y);
+                max[0] = max[0].max(x);
+                max[1] = max[1].max(y);
+            }
+            (min, max)
+        };
         // Outward rounding covers exact affine corner positions after f32 conversion.
         let min = min.map(|v| (v as f32).next_down());
         let max = max.map(|v| (v as f32).next_up());
@@ -318,6 +338,10 @@ impl CoordinateSpace {
         })
     }
 }
+
+#[cfg(test)]
+#[path = "geometry_bounds_tests.rs"]
+mod bounds_tests;
 
 /// Explicit spatial data. A topology-only node has identity mapping and no surface/clip.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
