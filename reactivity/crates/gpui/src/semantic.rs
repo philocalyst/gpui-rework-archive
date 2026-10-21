@@ -34,7 +34,7 @@ pub(crate) struct AnnotationDraft<'a> {
 }
 
 // The existing list-extension pointer pays for annotations only when requested.
-// Combined boxes the list payload to keep the common cold enum at 64 bytes.
+// Combined boxes the list payload to keep the common cold enum at 56 bytes.
 pub(crate) enum ElementExtra<'a> {
     List(crate::list::ListSpec<'a>),
     Semantic(Annotations<'a>),
