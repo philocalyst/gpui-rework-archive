@@ -97,12 +97,20 @@ includes the subsequent cancellation and sample-storage integration. The paralle
 Canvas gate was paused during separate quiet benchmark captures; its elapsed
 wall time includes that pause and is not a suite-speed measurement.
 
+The later [output-conversion checks](evidence/output-cache-checks.json) pin source
+b4598cb303: 79 release parallel Canvas cases/doctests, strict all-target accessible
+native Clippy, all 19 Vulkan readbacks and the real Todo multi-renderer script
+pass. [Warnings-denied desktop cross-checks](evidence/output-cache-platform-checks.json)
+also pass for aarch64 macOS and Windows MSVC. These are actual adapter compilation,
+not execution on those operating systems.
+
 ## Measurements and their boundaries
 
 | Change | Evidence | Limit |
 | --- | --- | --- |
 | Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Full native upload remains; excludes event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
 | Exact sample promotion | [Sample storage](crates/canvas/SAMPLE_STORAGE.md): moving-caret fixture full raster 21.53→6.06 ms; 48-label SDR preparation+raster 16.90→13.87 ms | Adds 4 KiB+32 B initialized worker scratch; no retained reduction; native upload/latency excluded |
+| Exact output reuse | [General controls](crates/canvas/SAMPLE_STORAGE.md): the one-pixel cache further lowers 48-label HDR preparation+raster 17.30→14.64 ms and sheared translucent boxes 2.78→1.94 ms | SDR flat serial panels lose 1.65–1.77%; small stack-only cache, no retained reduction or native latency claim |
 | Lazy fonts and scoped shaping | [Startup](crates/gpui/STARTUP.md): Gallery median 80.038→40.525 ms on default-reset Xvfb; 23.302 ms with -noreset | Display reset is an environmental cost; warm filesystem, fresh processes, present acknowledgement rather than scanout |
 | CPU-first blank | [Memory CSV](crates/gpui/evidence-native-memory-auto-swash.csv): roughly 8.5 MiB PSS, one idle thread, no GPU probe on this device-less Linux host | Predates representation/solid changes; driver/compositor bytes are separate |
 | Canonical retained runs | [Canvas](crates/canvas/README.md): 32K-glyph grouped fixture retained heap 4,456,500→1,269,876 B; peak 6,689,076→1,795,060 B | Unique-mask heap is neutral; Canvas header grows 208 B; flat traversal can lose |
@@ -138,8 +146,8 @@ of production: its exact 8-byte node saving did not justify unresolved phase cos
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. The source b0a85781ea snapshot contains **27,333 first-party src lines** and
-**19,402 external test/example lines** across production and experimental crates.
+are separate. The source b4598cb303 snapshot contains **27,838 first-party src lines** and
+**20,407 external test/example lines** across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
 Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
 their tests/examples. Vendoring has not made those dependencies disappear.
