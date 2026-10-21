@@ -1,0 +1,539 @@
+{
+  "sources": {
+    "pre_axis": "0c050e0147778f48672090f1f32a7d2311510749",
+    "adaptive": "3e47fbaa56",
+    "output_cache": "62f6841939"
+  },
+  "binaries": {
+    "pre_axis": {
+      "path": "/tmp/gpui-damage-target/release/examples/parallel",
+      "sha256": "630e37364ac9bb4174ba84741796be8cc25382aa9c62148bed0a72d321fa6240"
+    },
+    "adaptive": {
+      "path": "/tmp/gpui-adaptive-evidence/parallel-adaptive-baseline",
+      "sha256": "1d0ea03ccb86995a99fc3670514569796090d6b124cdaca646bfdff1268b41c2"
+    },
+    "output_cache": {
+      "path": "/tmp/gpui-axis-target/release/examples/parallel",
+      "sha256": "f50dfe2e7c67dfcfef87fd1a161b6c779ba770b70487043b1afe5aa2621765f1"
+    }
+  },
+  "captures": [
+    {
+      "format": "sdr",
+      "pair": 0,
+      "version": "pre_axis",
+      "started_unix": 1792604389.0958948,
+      "elapsed_seconds": 0.8809797763824463,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 0,
+      "version": "adaptive",
+      "started_unix": 1792604389.9769394,
+      "elapsed_seconds": 0.7197010517120361,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 0,
+      "version": "output_cache",
+      "started_unix": 1792604390.6967034,
+      "elapsed_seconds": 0.7026777267456055,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 0,
+      "version": "pre_axis",
+      "started_unix": 1792604391.399452,
+      "elapsed_seconds": 1.1400930881500244,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 0,
+      "version": "adaptive",
+      "started_unix": 1792604392.5396109,
+      "elapsed_seconds": 0.9380688667297363,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 0,
+      "version": "output_cache",
+      "started_unix": 1792604393.4777462,
+      "elapsed_seconds": 0.7985403537750244,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 1,
+      "version": "adaptive",
+      "started_unix": 1792604394.2763739,
+      "elapsed_seconds": 0.7079043388366699,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 1,
+      "version": "output_cache",
+      "started_unix": 1792604394.9843423,
+      "elapsed_seconds": 0.7099463939666748,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 1,
+      "version": "pre_axis",
+      "started_unix": 1792604395.6943662,
+      "elapsed_seconds": 0.8775548934936523,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 1,
+      "version": "adaptive",
+      "started_unix": 1792604396.5719879,
+      "elapsed_seconds": 0.9224081039428711,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 1,
+      "version": "output_cache",
+      "started_unix": 1792604397.4944632,
+      "elapsed_seconds": 0.7869982719421387,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 1,
+      "version": "pre_axis",
+      "started_unix": 1792604398.2815259,
+      "elapsed_seconds": 1.1251888275146484,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 2,
+      "version": "output_cache",
+      "started_unix": 1792604399.406784,
+      "elapsed_seconds": 0.7114057540893555,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 2,
+      "version": "pre_axis",
+      "started_unix": 1792604400.1182752,
+      "elapsed_seconds": 0.8943557739257812,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 2,
+      "version": "adaptive",
+      "started_unix": 1792604401.0126925,
+      "elapsed_seconds": 0.7102468013763428,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 2,
+      "version": "output_cache",
+      "started_unix": 1792604401.723006,
+      "elapsed_seconds": 0.7864608764648438,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 2,
+      "version": "pre_axis",
+      "started_unix": 1792604402.5095417,
+      "elapsed_seconds": 1.1346559524536133,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 2,
+      "version": "adaptive",
+      "started_unix": 1792604403.6442735,
+      "elapsed_seconds": 0.915992259979248,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 3,
+      "version": "pre_axis",
+      "started_unix": 1792604404.5603325,
+      "elapsed_seconds": 0.8845524787902832,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 3,
+      "version": "adaptive",
+      "started_unix": 1792604405.4449537,
+      "elapsed_seconds": 0.7114391326904297,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 3,
+      "version": "output_cache",
+      "started_unix": 1792604406.1564565,
+      "elapsed_seconds": 0.7046239376068115,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 3,
+      "version": "pre_axis",
+      "started_unix": 1792604406.861145,
+      "elapsed_seconds": 1.1290440559387207,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 3,
+      "version": "adaptive",
+      "started_unix": 1792604407.990253,
+      "elapsed_seconds": 0.9122369289398193,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 3,
+      "version": "output_cache",
+      "started_unix": 1792604408.9025655,
+      "elapsed_seconds": 0.7967336177825928,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 4,
+      "version": "adaptive",
+      "started_unix": 1792604409.6993778,
+      "elapsed_seconds": 0.7109060287475586,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 4,
+      "version": "output_cache",
+      "started_unix": 1792604410.4103606,
+      "elapsed_seconds": 0.7071609497070312,
+      "rows": 25
+    },
+    {
+      "format": "sdr",
+      "pair": 4,
+      "version": "pre_axis",
+      "started_unix": 1792604411.1175845,
+      "elapsed_seconds": 0.889678955078125,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 4,
+      "version": "adaptive",
+      "started_unix": 1792604412.007339,
+      "elapsed_seconds": 0.92337965965271,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 4,
+      "version": "output_cache",
+      "started_unix": 1792604412.9307816,
+      "elapsed_seconds": 0.7913727760314941,
+      "rows": 25
+    },
+    {
+      "format": "hdr",
+      "pair": 4,
+      "version": "pre_axis",
+      "started_unix": 1792604413.7222226,
+      "elapsed_seconds": 1.121748685836792,
+      "rows": 25
+    }
+  ],
+  "median_of_process_medians_us": {
+    "sdr": {
+      "flat": {
+        "0": {
+          "pre_axis": 191.871,
+          "adaptive": 183.172,
+          "output_cache": 186.19
+        },
+        "1": {
+          "pre_axis": 200.234,
+          "adaptive": 191.664,
+          "output_cache": 194.018
+        },
+        "2": {
+          "pre_axis": 118.38,
+          "adaptive": 114.593,
+          "output_cache": 115.859
+        },
+        "4": {
+          "pre_axis": 73.391,
+          "adaptive": 72.486,
+          "output_cache": 72.382
+        },
+        "8": {
+          "pre_axis": 59.244,
+          "adaptive": 59.333,
+          "output_cache": 56.672
+        }
+      },
+      "large_flat": {
+        "0": {
+          "pre_axis": 1633.002,
+          "adaptive": 1553.751,
+          "output_cache": 1581.231
+        },
+        "1": {
+          "pre_axis": 1665.2,
+          "adaptive": 1568.811,
+          "output_cache": 1600.348
+        },
+        "2": {
+          "pre_axis": 856.755,
+          "adaptive": 821.698,
+          "output_cache": 827.288
+        },
+        "4": {
+          "pre_axis": 515.001,
+          "adaptive": 475.727,
+          "output_cache": 471.93
+        },
+        "8": {
+          "pre_axis": 353.931,
+          "adaptive": 318.693,
+          "output_cache": 328.897
+        }
+      },
+      "labels": {
+        "0": {
+          "pre_axis": 16903.889,
+          "adaptive": 13869.242,
+          "output_cache": 13750.319
+        },
+        "1": {
+          "pre_axis": 16963.879,
+          "adaptive": 13878.862,
+          "output_cache": 13764.28
+        },
+        "2": {
+          "pre_axis": 8586.447,
+          "adaptive": 7026.753,
+          "output_cache": 6947.502
+        },
+        "4": {
+          "pre_axis": 4524.158,
+          "adaptive": 3666.1,
+          "output_cache": 3871.355
+        },
+        "8": {
+          "pre_axis": 2753.5,
+          "adaptive": 2397.873,
+          "output_cache": 2329.611
+        }
+      },
+      "shear": {
+        "0": {
+          "pre_axis": 3200.066,
+          "adaptive": 1952.346,
+          "output_cache": 1850.06
+        },
+        "1": {
+          "pre_axis": 3231.98,
+          "adaptive": 1976.163,
+          "output_cache": 1874.081
+        },
+        "2": {
+          "pre_axis": 1645.429,
+          "adaptive": 1006.402,
+          "output_cache": 960.894
+        },
+        "4": {
+          "pre_axis": 975.105,
+          "adaptive": 626.017,
+          "output_cache": 630.277
+        },
+        "8": {
+          "pre_axis": 642.084,
+          "adaptive": 422.329,
+          "output_cache": 414.739
+        }
+      },
+      "boundary": {
+        "0": {
+          "pre_axis": 18.322,
+          "adaptive": 12.91,
+          "output_cache": 12.822
+        },
+        "1": {
+          "pre_axis": 25.457,
+          "adaptive": 18.644,
+          "output_cache": 18.343
+        },
+        "2": {
+          "pre_axis": 18.45,
+          "adaptive": 14.698,
+          "output_cache": 15.744
+        },
+        "4": {
+          "pre_axis": 20.875,
+          "adaptive": 17.714,
+          "output_cache": 17.934
+        },
+        "8": {
+          "pre_axis": 24.121,
+          "adaptive": 21.28,
+          "output_cache": 20.657
+        }
+      }
+    },
+    "hdr": {
+      "flat": {
+        "0": {
+          "pre_axis": 169.786,
+          "adaptive": 165.118,
+          "output_cache": 162.13
+        },
+        "1": {
+          "pre_axis": 179.425,
+          "adaptive": 174.163,
+          "output_cache": 169.989
+        },
+        "2": {
+          "pre_axis": 115.939,
+          "adaptive": 110.396,
+          "output_cache": 108.655
+        },
+        "4": {
+          "pre_axis": 75.351,
+          "adaptive": 76.802,
+          "output_cache": 74.79
+        },
+        "8": {
+          "pre_axis": 68.237,
+          "adaptive": 66.125,
+          "output_cache": 67.806
+        }
+      },
+      "large_flat": {
+        "0": {
+          "pre_axis": 1523.983,
+          "adaptive": 1475.679,
+          "output_cache": 1452.755
+        },
+        "1": {
+          "pre_axis": 1560.954,
+          "adaptive": 1570.044,
+          "output_cache": 1453.092
+        },
+        "2": {
+          "pre_axis": 802.631,
+          "adaptive": 791.877,
+          "output_cache": 758.273
+        },
+        "4": {
+          "pre_axis": 493.921,
+          "adaptive": 465.563,
+          "output_cache": 474.854
+        },
+        "8": {
+          "pre_axis": 446.85,
+          "adaptive": 450.617,
+          "output_cache": 407.995
+        }
+      },
+      "labels": {
+        "0": {
+          "pre_axis": 21225.792,
+          "adaptive": 17303.727,
+          "output_cache": 14638.619
+        },
+        "1": {
+          "pre_axis": 21220.151,
+          "adaptive": 17333.207,
+          "output_cache": 14649.059
+        },
+        "2": {
+          "pre_axis": 10919.687,
+          "adaptive": 8777.441,
+          "output_cache": 7385.741
+        },
+        "4": {
+          "pre_axis": 5692.284,
+          "adaptive": 4656.221,
+          "output_cache": 3944.886
+        },
+        "8": {
+          "pre_axis": 3631.789,
+          "adaptive": 3034.106,
+          "output_cache": 2362.181
+        }
+      },
+      "shear": {
+        "0": {
+          "pre_axis": 4359.682,
+          "adaptive": 2775.254,
+          "output_cache": 1938.115
+        },
+        "1": {
+          "pre_axis": 4391.142,
+          "adaptive": 2790.391,
+          "output_cache": 1963.906
+        },
+        "2": {
+          "pre_axis": 2251.512,
+          "adaptive": 1416.851,
+          "output_cache": 1002.555
+        },
+        "4": {
+          "pre_axis": 1306.019,
+          "adaptive": 838.868,
+          "output_cache": 620.953
+        },
+        "8": {
+          "pre_axis": 815.458,
+          "adaptive": 506.694,
+          "output_cache": 426.276
+        }
+      },
+      "boundary": {
+        "0": {
+          "pre_axis": 20.988,
+          "adaptive": 14.878,
+          "output_cache": 13.667
+        },
+        "1": {
+          "pre_axis": 27.435,
+          "adaptive": 20.237,
+          "output_cache": 19.147
+        },
+        "2": {
+          "pre_axis": 18.919,
+          "adaptive": 15.653,
+          "output_cache": 15.562
+        },
+        "4": {
+          "pre_axis": 25.467,
+          "adaptive": 17.026,
+          "output_cache": 18.803
+        },
+        "8": {
+          "pre_axis": 25.648,
+          "adaptive": 21.659,
+          "output_cache": 21.744
+        }
+      }
+    }
+  }
+}

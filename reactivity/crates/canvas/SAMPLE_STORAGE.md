@@ -73,4 +73,46 @@ separate and still allocates: median 1,001-draw repair preparation is 180.19→1
 CPU preparation/raster measurements on the shared Linux Ryzen host, excluding
 native upload, event delivery, compositor, scanout and competitor applications.
 The caret scene favors uniform rectangular interiors; text, general affine,
-HDR and parallel controls are separate adoption checks, not inferred wins.
+HDR and parallel controls are measured separately below.
+
+## General scenes and output conversion
+
+The unchanged public `parallel` example measures preparation plus raster for
+five scenes, serial execution and owned 1/2/4/8-worker pools. Each process reports
+the median of seven warm batches. Five fresh-process repetitions rotate three
+kernel versions in both SDR and linear HDR: the pre-axis renderer, axis plus
+promotion, and one additional exact output-conversion cache. All 750 CSV rows
+retain the same scene/format digest across versions and workers. Pool/font
+creation and native presentation are excluded. Raw rows, executable hashes,
+per-process diagnostics and every median are in
+[the control ledger](evidence/samples/controls/measurements.json).
+
+The last version remembers only the immediately preceding nonuniform pixel's
+four working-color bit patterns and encoded output, inside each band's stack.
+An exact match copies the final bytes instead of repeating output profile,
+transfer or half-float conversion. There is no retained palette, hashing,
+approximate comparison, synchronization or allocation. Comparing all channel
+bits preserves distinct positive/negative zeros; a two-pixel public HDR test
+requires both signs in the same tile. The complete release parallel Canvas
+suite now passes 78 cases/doctests and strict all-target Clippy.
+
+| Scene | Pre-axis serial | Axis + promotion | Plus output cache | Output |
+| --- | ---: | ---: | ---: | --- |
+| 640×480, 48 labels | 16.904 ms | 13.869 ms | 13.750 ms | SDR |
+| 320×240, 48 sheared translucent boxes | 3.200 ms | 1.952 ms | 1.850 ms | SDR |
+| 4×32 boundary scene | 18.322 µs | 12.910 µs | 12.822 µs | SDR |
+| 640×480, 48 labels | 21.226 ms | 17.304 ms | 14.639 ms | HDR |
+| 320×240, 48 sheared translucent boxes | 4.360 ms | 2.775 ms | 1.938 ms | HDR |
+| 4×32 boundary scene | 20.988 µs | 14.878 µs | 13.667 µs | HDR |
+
+The eight-worker label medians are 2.754→2.398→2.330 ms SDR and
+3.632→3.034→2.362 ms HDR. Tiny boundary scenes still lose to scheduling:
+the final SDR kernel is 12.822 µs serial versus 20.657 µs with eight workers.
+Serial remains the default and the explicit scheduling threshold is unchanged.
+
+Retain the output-cache losses: SDR flat 640×360 serial is 183.172→186.190 µs
+(+1.65%) versus axis/promotion alone, and 1920×1080 is 1.554→1.581 ms (+1.77%).
+The HDR boundary scene with eight workers is 21.659→21.744 µs (+0.39%).
+Flat-tile output already converts once per tile, so the extra sampled-pixel cache
+offers no conversion reduction there. These finite shared-host observations do
+not establish a universal win, hardware-GPU speedup or application input latency.
