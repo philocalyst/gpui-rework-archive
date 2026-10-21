@@ -1,0 +1,37 @@
+{
+  "executables": {
+    "baseline": [
+      {
+        "path": "/tmp/gpui-bounds-provenance-baseline-consumer",
+        "sha256": "d53cd4d36566bf4cffd448f6f27fc27003eb2d782e28002b2c586660e1d2be68"
+      },
+      {
+        "path": "/tmp/gpui-bounds-provenance-baseline-gpui-consumer",
+        "sha256": "6d500be0a4865ea2d326a8fc7c8b5912cd58c0b5d8bf5e054de22889d303d428"
+      },
+      {
+        "path": "/tmp/gpui-bounds-provenance-baseline-copies",
+        "sha256": "8c2a31c98e0e7a09f848142684d97655878fd1a4c25fade1d8c21c007dde066a"
+      }
+    ],
+    "candidate": [
+      {
+        "path": "/tmp/gpui-bounds-provenance-candidate-consumer",
+        "sha256": "20d3d1293d4e26b5e206823fdf3a69e4255f0549ac71c2da7cc0605bb0dc0922"
+      },
+      {
+        "path": "/tmp/gpui-bounds-provenance-candidate-gpui-consumer",
+        "sha256": "b6e712ae67d452fa69ed3adcf107c261a78249ab5747b7fd29391457b197747b"
+      },
+      {
+        "path": "/tmp/gpui-bounds-provenance-candidate-copies",
+        "sha256": "646acd978f6760eef6d22f04dcb93e6d13b3718990e36ca120935892c843afa6"
+      }
+    ]
+  },
+  "cpu": 2,
+  "pairs": 7,
+  "platform": "Linux-6.18.54-x86_64-with-glibc2.42",
+  "source": "60da69440b3458fb0a4c2f4b4f6f79eb0584e507",
+  "scope": "Core public calls and ordinary downstream Win::visit. Mount/raster/native startup are outside timed loops."
+}
