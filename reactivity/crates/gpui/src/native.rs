@@ -34,7 +34,7 @@ mod upgrade;
     )
 ))]
 #[path = "../examples/support/library.rs"]
-mod test_library;
+pub(crate) mod test_library;
 
 #[cfg(all(
     test,
@@ -1069,7 +1069,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
     target_os = "linux"
 ))]
 #[path = "../examples/support/todos.rs"]
-mod test_todos;
+pub(crate) mod test_todos;
 
 #[cfg(all(
     test,

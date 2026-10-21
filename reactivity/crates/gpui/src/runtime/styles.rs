@@ -63,6 +63,9 @@ impl Builder {
         }
     }
 
+    // Runtime is instantiated in downstream applications too. Keep this
+    // per-node helper available to their optimizer, not just our unit harness.
+    #[inline]
     pub(super) fn push(&mut self, style: &Style) {
         if matches!(self.mode, Building::Default) && !exact_eq(style, &Style::DEFAULT) {
             self.mode = if self.total <= SMALL_OWNER {
