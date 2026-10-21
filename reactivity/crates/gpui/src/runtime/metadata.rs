@@ -364,7 +364,7 @@ impl<M: View + 'static> Runtime<M> {
                                 continue;
                             }
                             let index = destination.node();
-                            let identity = self.nodes[index].identity;
+                            let identity = self.nodes[index].identity();
                             let Some(node) = self
                                 .presented
                                 .get(index)
@@ -437,7 +437,11 @@ impl<M: View + 'static> Runtime<M> {
                         if let Some(fanout) = self.fanout.get(&field) {
                             for destination in &fanout.destinations {
                                 if destination.port() != Port::Visual {
-                                    patch(metadata, self.nodes[destination.node()].identity, false);
+                                    patch(
+                                        metadata,
+                                        self.nodes[destination.node()].identity(),
+                                        false,
+                                    );
                                 }
                             }
                         }
