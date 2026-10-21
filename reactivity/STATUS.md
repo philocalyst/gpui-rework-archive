@@ -79,6 +79,11 @@ not discrete-GPU performance. The X11 solid-window script confirms zero client
 SHM mappings for certified solid frames and a 2,097,152-byte mapping for its
 normal 800×600 buffer; server/compositor storage remains separate.
 
+The [integrated image-axis follow-up](evidence/image-axis-integration/checks.json)
+at `71ce05bb92` passes 116 parallel Canvas cases/doctests, all 23 Vulkan
+readbacks, the real X11 image/pointer/resize/recovery script, and strict native
+all-target Clippy. These scoped checks supplement the complete campaign above.
+
 Earlier source-pinned reports remain intact: the
 [21-gate baseline](evidence/checks.json) at `5b0a38b222`,
 [cached-cmap checks](evidence/cmap-integration-checks.json) at `76f5be8493` and
@@ -92,7 +97,8 @@ mount/traversal regressions.
 
 | Change | Evidence | Limit |
 | --- | --- | --- |
-| Immutable packed images | [Image evidence](crates/gpui/evidence/images.md): 48 covers share one 65,536-byte source; stable GPU pixel uploads and warm raster allocations are zero | Image-free owner adds 16 requested B and no allocations; serial CPU image fixtures cost 47–70 ms; per-scene 64 MiB cap does not cap overlapping cohorts/process memory |
+| Immutable packed images | [Image evidence](crates/gpui/evidence/images.md): 48 covers share one 65,536-byte source; stable GPU pixel uploads and warm raster allocations are zero | Image-free owner adds 16 requested B and no allocations; per-scene 64 MiB cap does not cap overlapping cohorts/process memory |
+| Exact image-axis taps | [Guarded CPU controls](crates/canvas/evidence/image-axis-outlined/README.md): one-image preparation+raster 46.50→6.27 ms; 48 shared covers 70.12→22.78 ms | Image-only transient taps/cache; flat no-image control loses 5.08%, tiny control 1.70%; sheared control is noisy. No native/GPU latency claim |
 | Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Full native upload remains; excludes event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
 | Exact sample promotion | [Sample storage](crates/canvas/SAMPLE_STORAGE.md): moving-caret fixture full raster 21.53→6.06 ms; 48-label SDR preparation+raster 16.90→13.87 ms | Adds 4 KiB+32 B initialized worker scratch; no retained reduction; native upload/latency excluded |
 | Exact output reuse | [General controls](crates/canvas/SAMPLE_STORAGE.md): the one-pixel cache further lowers 48-label HDR preparation+raster 17.30→14.64 ms and sheared translucent boxes 2.78→1.94 ms | SDR flat serial panels lose 1.65–1.77%; small stack-only cache, no retained reduction or native latency claim |
@@ -122,11 +128,25 @@ The measurement rows pin their own baselines. Dense text, thin leases, color
 packing and row derivation were measured independently; their percentages are
 not additive, and a combined native memory/performance improvement is not inferred.
 
-No competitor victory, near-zero native memory floor, universal byte parity or
-order-of-magnitude feature-equivalent simplification has been established.
+The [audited native-default comparison](benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/README.md)
+pins JustRach NanoUI, MyGo, and GPUI `724ece73cb`, with 100 fresh starts,
+1,000 clicks and five idle samples per accepted cell. GPUI's three fixtures
+measure 16.07–31.61 ms median spawn-to-X11-pixel and 0.197–1.944 ms median
+click-to-changed-pixel on Xvfb. Geometry/pixel preflights and the rejected
+NanoUI binary mismatch are preserved. This is a scoped software/X11 comparison,
+not compositor/scanout timing or an all-application result.
+
+The [matched memory-floor diagnostic](docs/memory-floor-attribution-luna.md)
+separates truly blank windows from zero-row text fixtures. The default blank
+window measures 11,515 KiB median PSS in three samples. The optional-feature
+contrast attributes roughly 3 MiB mostly file-backed PSS to the accessibility
+bundle under this setup; disabling accessibility is not a product optimization.
+
+Near-zero native memory, universal byte parity and an order-of-magnitude
+feature-equivalent simplification have not been established.
 Reports retain losing cases. The full Hummingbird source audit is
 [pinned separately](docs/hummingbird-source-audit-luna.md). The keyed-list and
-worker-delivery foundations are integrated; images, complete async admission,
+worker-delivery and image foundations are integrated; complete async admission,
 media and richer input remain prerequisites for that port.
 The [packed-dimension experiment](crates/gpui/evidence/dimensions.md) remains out
 of production: its exact 8-byte node saving did not justify unresolved phase costs.
