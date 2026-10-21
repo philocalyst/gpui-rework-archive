@@ -183,6 +183,7 @@ impl<'a> Part<'a> {
     }
     /// Absolute node-local to window-physical transform, already including
     /// ancestors and DPI. Applying it again as a parent transform is incorrect.
+    #[inline]
     pub fn transform(self) -> Option<crate::Affine> {
         self.context.spaces.transform(self.index, self.node())
     }
@@ -190,6 +191,9 @@ impl<'a> Part<'a> {
     /// Native adapters add the window-to-screen mapping. This differs from
     /// `bounds()` for partially clipped elements and must not be used as a hit
     /// predicate. No second full rectangle is retained per semantic node.
+    // Keep lane reconstruction visible to callers that also request transform
+    // or local bounds, so they share its checked lookup rather than repeat it.
+    #[inline(always)]
     pub fn unclipped_bounds(self) -> Option<Rect> {
         self.transform().and_then(|map| {
             gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node().local_rect())
