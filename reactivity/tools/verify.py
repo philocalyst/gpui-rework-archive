@@ -81,6 +81,10 @@ if args.native_x11:
     checks.append(("native-library", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
                                      "--features", "x11", "native_library_250k", "--", "--ignored",
                                      "--nocapture", "--test-threads=1"]))
+    checks.append(("native-unicode", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                     "--features", "x11", "--lib",
+                                     "native_unicode_keyboard_and_surface_match_complete_cpu_pixels",
+                                     "--", "--ignored", "--nocapture", "--test-threads=1"]))
 if args.native_atspi:
     if not args.atspi_launcher or not os.access(args.atspi_launcher, os.X_OK):
         parser.error("--native-atspi requires an executable --atspi-launcher or GPUI_AT_SPI_LAUNCHER")
@@ -104,7 +108,7 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
-    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "question-credit", "question-mailbox",
+    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "native-unicode", "question-credit", "question-mailbox",
                 "native-atspi", "native-no-bus", "accessibility-schema"):
         entry["passed_tests"] = sum(int(count) for count in re.findall(
             r"test result: ok\. (\d+) passed;", log))
