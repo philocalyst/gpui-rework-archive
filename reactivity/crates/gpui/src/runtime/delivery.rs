@@ -96,9 +96,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             Ok(())
         });
         let revoked = runtime.poisoned || runtime.source_epoch == u64::MAX;
-        if revoked {
-            lanes.close();
-        } else if more {
+        // The borrowed turn already retired its lanes before returning.
+        if !revoked && more {
             lanes.signal();
         }
         let delivery = Delivery {
