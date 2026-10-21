@@ -23,6 +23,9 @@ use crate::{
 
 mod upgrade;
 
+#[cfg(all(test, feature = "x11", target_os = "linux"))]
+mod list_tests;
+
 #[derive(Debug)]
 pub enum NativeError {
     Runtime(Error),
