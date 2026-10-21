@@ -6,6 +6,7 @@ use crate::{
 use std::{collections::HashMap, sync::Arc};
 
 mod glyph_axis;
+mod image_axis;
 mod samples;
 use glyph_axis::GlyphAxis;
 use samples::Samples;
@@ -1699,6 +1700,16 @@ fn render_band<W: PixelWriter>(
                         image,
                         sampling,
                     );
+                } else if command.map.axis_aligned() {
+                    image_axis::render(
+                        &mut samples,
+                        &command,
+                        bounds,
+                        &mut stats,
+                        image,
+                        sampling,
+                        |x, y| image.texel(x, y),
+                    );
                 } else {
                     render_image(&mut samples, &command, bounds, &mut stats, |x, y| {
                         image.sample(
@@ -1772,9 +1783,15 @@ fn render_cached_image(
     image: ImageView<'_>,
     sampling: ImageSampling,
 ) {
-    crate::image::with_decode_memo(image, |image| {
+    crate::image::with_decode_memo(image, |sampler| {
+        if command.map.axis_aligned() {
+            image_axis::render(samples, command, bounds, stats, image, sampling, |x, y| {
+                sampler.texel(x, y)
+            });
+            return;
+        }
         render_image(samples, command, bounds, stats, |x, y| {
-            image.sample(
+            sampler.sample(
                 x,
                 y,
                 command.rect.width as f64,

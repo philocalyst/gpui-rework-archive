@@ -338,12 +338,15 @@ impl<'a> ImageView<'a> {
         let b = texel(column(left + 1.0), row(top));
         let c = texel(column(left), row(top + 1.0));
         let d = texel(column(left + 1.0), row(top + 1.0));
-        Some(std::array::from_fn(|i| {
-            let upper = a[i] * (1.0 - fx) + b[i] * fx;
-            let lower = c[i] * (1.0 - fx) + d[i] * fx;
-            upper * (1.0 - fy) + lower * fy
-        }))
+        Some(lerp(lerp(a, b, fx), lerp(c, d, fx), fy))
     }
+}
+
+// Shared by scalar and separable sampling. Keep both multiplications and the
+// addition even when the endpoints match: replacing them changes rounding.
+#[inline]
+pub(crate) fn lerp(a: [f32; 4], b: [f32; 4], fraction: f32) -> [f32; 4] {
+    std::array::from_fn(|i| a[i] * (1.0 - fraction) + b[i] * fraction)
 }
 
 /// Tile-scoped exact decode memoization. No decoded image survives the render
@@ -381,23 +384,21 @@ impl ImageSampler<'_, '_> {
         sampling: ImageSampling,
     ) -> Option<[f32; 4]> {
         let image = self.image;
-        image.sample_with(x, y, width, height, sampling, |x, y| {
-            if matches!(image.pixels, ImagePixels::LinearPremultiplied(_)) {
-                return image.texel(x, y);
-            }
-            let index = y * image.width as usize + x;
-            // A small two-dimensional torus preserves nearby filter taps even
-            // for power-of-two image strides. Full indices still prove hits.
-            let slot = (x & 15) | ((y & 15) << 4);
-            let cached = &mut self.cache[slot];
-            if cached.index != index {
-                *cached = Decoded {
-                    index,
-                    color: image.texel(x, y),
-                };
-            }
-            cached.color
-        })
+        image.sample_with(x, y, width, height, sampling, |x, y| self.texel(x, y))
+    }
+    pub(crate) fn texel(&mut self, x: usize, y: usize) -> [f32; 4] {
+        let image = self.image;
+        let index = y * image.width as usize + x;
+        // Full indices prove hits; collisions only repeat conversion.
+        let slot = (x & 15) | ((y & 15) << 4);
+        let cached = &mut self.cache[slot];
+        if cached.index != index {
+            *cached = Decoded {
+                index,
+                color: image.texel(x, y),
+            };
+        }
+        cached.color
     }
 }
 
