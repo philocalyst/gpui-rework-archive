@@ -420,13 +420,13 @@ fn invalid_inputs_and_caps_do_not_corrupt_scene() {
 }
 
 #[test]
-fn fontdue_native_pixels_and_transformed_cells_match_independent_oracles() {
+fn swash_native_pixels_and_transformed_cells_match_independent_oracles() {
     let mut text = TextSystem::bundled().unwrap();
-    let font = fontdue::Font::from_bytes(FONT, fontdue::FontSettings::default()).unwrap();
+
     for content in ["H", "j", "é"] {
         let layout = text.shape(content, 22.0, None).unwrap();
         let glyph = layout.glyphs()[0];
-        let (metrics, mask) = font.rasterize_indexed(glyph.id, 22.0);
+        let (metrics, mask) = reference_mask(glyph.id, 22.0);
         let origin = Point {
             x: 12.0,
             y: 32.0 - layout.baseline,
@@ -455,7 +455,7 @@ fn fontdue_native_pixels_and_transformed_cells_match_independent_oracles() {
     }
     let layout = text.shape("H", 12.0, None).unwrap();
     let glyph = layout.glyphs()[0];
-    let (metrics, mask) = font.rasterize_indexed(glyph.id, 12.0);
+    let (metrics, mask) = reference_mask(glyph.id, 12.0);
     let origin = Point { x: 4.0, y: 2.0 };
     let transform = Affine {
         a: -1.0,
@@ -566,4 +566,26 @@ fn no_sample_draw_preserves_the_entire_background_at_quantization_thresholds() {
             }
         }
     }
+}
+
+// Fresh independent context, no production cache/preflight/placement conversion.
+fn reference_mask(glyph: u16, size: f32) -> (fontdue::Metrics, Vec<u8>) {
+    let mut context = swash::scale::ScaleContext::new();
+    let font = swash::FontRef::from_index(FONT, 0).unwrap();
+    let mut scaler = context.builder(font).size(size).hint(false).build();
+    let image = swash::scale::Render::new(&[swash::scale::Source::Outline])
+        .format(swash::zeno::Format::Alpha)
+        .render(&mut scaler, glyph)
+        .unwrap();
+    let p = image.placement;
+    (
+        fontdue::Metrics {
+            xmin: p.left,
+            ymin: p.top - p.height as i32,
+            width: p.width as usize,
+            height: p.height as usize,
+            ..Default::default()
+        },
+        image.data,
+    )
 }

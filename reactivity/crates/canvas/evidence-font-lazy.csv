@@ -1,0 +1,7 @@
+services,init_ns,init_live,init_peak,init_allocs,shape_ns,shape_live,prepare_ns,prepare_live,prepare_peak,render_ns,render_live,mask_payload,clear_live,drop_services_live,digest
+1,84782,56,56,1,299836,256,113213,8767,11263,828818,19400,1207,-4328,-360,8963869237621293549
+2,81392,56,56,1,265916,256,110842,8767,11263,826178,19400,1207,-4328,-432,8963869237621293549
+8,83072,56,56,1,260115,256,108163,8767,11263,828308,19400,1207,-4328,-864,8963869237621293549
+# Fontdue same executable: parse_ns=24421825,live=12519432,peak=12548152,allocs=170881
+# Fresh release process per count, Ryzen7 3700X, rustc1.97.1, Linux x86_64.
+# Phase counters track requested thread-local allocator bytes; vectors/output allocated outside measured phase are documented in README.
