@@ -412,7 +412,8 @@ impl Canvas {
             ..RenderStats::default()
         };
         let mut scratch = [[0.0f32; 4]; TILE * TILE * 16];
-        let clear_bytes = self.color_config.encode(self.clear);
+        let encoder = self.color_config.encoder();
+        let clear_bytes = encoder.encode(self.clear);
         for pixel in self.pixels.chunks_exact_mut(4) {
             pixel.copy_from_slice(&clear_bytes);
         }
@@ -476,16 +477,14 @@ impl Canvas {
                     }
                 }
             }
-            let uniform_bytes = uniform.map(|color| {
-                self.color_config
-                    .encode(sample_mean(std::iter::repeat_n(color, 16)))
-            });
+            let uniform_bytes =
+                uniform.map(|color| encoder.encode(sample_mean(std::iter::repeat_n(color, 16))));
             for y in top..bottom {
                 for x in left..right {
                     let rgba = uniform_bytes.unwrap_or_else(|| {
                         let start = ((y - top) * TILE + x - left) * 16;
                         let average = sample_mean(scratch[start..start + 16].iter().copied());
-                        self.color_config.encode(average)
+                        encoder.encode(average)
                     });
                     let offset = (y * self.width + x) * 4;
                     self.pixels[offset..offset + 4].copy_from_slice(&rgba);

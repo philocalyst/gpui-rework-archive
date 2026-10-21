@@ -171,7 +171,15 @@ impl ColorConfig {
         }
         Ok(())
     }
-    pub(crate) fn encode(self, color: [f32; 4]) -> [u8; 4] {
+    pub(crate) fn encoder(self) -> OutputEncoder {
+        OutputEncoder {
+            config: self,
+            opaque: (self.profile == OutputProfile::Srgb && self.mapping == SdrMapping::Clip)
+                .then(|| &*OPAQUE_SRGB),
+        }
+    }
+    #[inline(never)]
+    fn encode_general(self, color: [f32; 4]) -> [u8; 4] {
         let alpha = color[3].clamp(0.0, 1.0);
         if alpha == 0.0 {
             return [0; 4];
@@ -197,6 +205,31 @@ impl ColorConfig {
         }
         output[3] = (alpha * 255.0).round() as u8;
         output
+    }
+}
+
+/// Select profile handling and initialize the exact table once per raster pass,
+/// keeping the LazyLock check and the general converter's stack out of pixels.
+#[derive(Clone, Copy)]
+pub(crate) struct OutputEncoder {
+    config: ColorConfig,
+    opaque: Option<&'static OpaqueSrgb>,
+}
+impl OutputEncoder {
+    #[inline]
+    pub(crate) fn encode(self, color: [f32; 4]) -> [u8; 4] {
+        if color[3] == 1.0
+            && let Some(quantizer) = self.opaque
+        {
+            [
+                quantizer.encode(color[0]),
+                quantizer.encode(color[1]),
+                quantizer.encode(color[2]),
+                255,
+            ]
+        } else {
+            self.config.encode_general(color)
+        }
     }
 }
 
@@ -258,5 +291,151 @@ fn encode_transfer(v: f64) -> f64 {
         12.92 * v
     } else {
         v.signum() * (1.055 * a.powf(1.0 / 2.4) - 0.055)
+    }
+}
+
+/// Exact final-byte quantization for opaque, clipped sRGB output. Positive IEEE
+/// f32 bit patterns have numeric order. A seven-mantissa-bit bucket crosses at
+/// most one byte threshold, so lookup + one comparison replaces a power call.
+///
+/// Thresholds are found against this build's reference transfer function, not an
+/// approximate gamma fit. Initializing all 3 KiB requires no heap allocation.
+struct OpaqueSrgb {
+    thresholds: [u32; 256],
+    buckets: [u8; 2048],
+}
+static OPAQUE_SRGB: std::sync::LazyLock<OpaqueSrgb> = std::sync::LazyLock::new(|| {
+    let thresholds = std::array::from_fn(|index| {
+        if index == 255 {
+            // A sentinel makes all u8 bucket values valid threshold indices.
+            return u32::MAX;
+        }
+        let mut low = 0;
+        let mut high = 1.0f32.to_bits();
+        while low < high {
+            let middle = low + (high - low) / 2;
+            if opaque_reference(f32::from_bits(middle)) > index as u8 {
+                high = middle;
+            } else {
+                low = middle + 1;
+            }
+        }
+        low
+    });
+    // Buckets cover [2^-15, 2), and the admitted lookup domain ends at one.
+    // Masking the index proves the array bound without an unsafe load.
+    assert!(thresholds[0] >= 0x3800_0000);
+    let buckets = std::array::from_fn(|index| {
+        let low = ((0x3800 + index as u32) << 16).min(1.0f32.to_bits());
+        let high = (low + 0xffff).min(1.0f32.to_bits());
+        let first = thresholds.partition_point(|&threshold| threshold <= low);
+        let last = thresholds.partition_point(|&threshold| threshold <= high);
+        assert!(
+            last - first <= 1,
+            "sRGB quantizer bucket crosses two thresholds"
+        );
+        first as u8
+    });
+    OpaqueSrgb {
+        thresholds,
+        buckets,
+    }
+});
+fn opaque_reference(value: f32) -> u8 {
+    (encode_transfer(f64::from(value).clamp(0.0, 1.0)) * 255.0).round() as u8
+}
+impl OpaqueSrgb {
+    #[inline]
+    fn encode(&self, value: f32) -> u8 {
+        if value <= 0.0 {
+            return 0;
+        }
+        if value >= 1.0 {
+            return 255;
+        }
+        let bits = value.to_bits();
+        if bits < self.thresholds[0] {
+            return 0;
+        }
+        let base = self.buckets[((bits >> 16) as usize) & 2047];
+        base + u8::from(bits >= self.thresholds[usize::from(base)])
+    }
+}
+
+#[cfg(test)]
+mod quantizer_tests {
+    use super::*;
+
+    #[test]
+    fn quantizer_matches_reference_at_all_thresholds_and_bucket_edges() {
+        let quantizer = &*OPAQUE_SRGB;
+        for &boundary in &quantizer.thresholds[..255] {
+            for bits in boundary - 1..=boundary + 1 {
+                let value = f32::from_bits(bits);
+                assert_eq!(quantizer.encode(value), opaque_reference(value));
+            }
+        }
+        for bucket in 0x3800..=0x3f80 {
+            for bits in [(bucket << 16) - 1, bucket << 16, (bucket << 16) + 1] {
+                let value = f32::from_bits(bits);
+                assert_eq!(quantizer.encode(value), opaque_reference(value));
+            }
+        }
+        for value in [-f32::MAX, -0.0, 0.0, f32::from_bits(1), f32::MAX] {
+            assert_eq!(quantizer.encode(value), opaque_reference(value));
+        }
+        assert_eq!(std::mem::size_of::<OpaqueSrgb>(), 3072);
+    }
+
+    #[test]
+    #[ignore = "107 million inputs; run explicitly with --release"]
+    fn every_in_range_float_matches_the_reference_quantizer() {
+        let quantizer = &*OPAQUE_SRGB;
+        // Below the first threshold the result is identically zero; outside
+        // [0,1] clipping is exact. Cover every float in the remaining domain.
+        for bits in quantizer.thresholds[0] - 1..=1.0f32.to_bits() {
+            let value = f32::from_bits(bits);
+            assert_eq!(quantizer.encode(value), opaque_reference(value), "{bits:x}");
+        }
+    }
+
+    #[test]
+    #[ignore = "timing experiment; run explicitly with --release --nocapture"]
+    fn opaque_quantizer_microbenchmark() {
+        use std::{
+            hint::black_box,
+            time::{Duration, Instant},
+        };
+        fn measure(values: &[f32], encode: impl Fn(f32) -> u8) -> (Duration, u64) {
+            let start = Instant::now();
+            let mut checksum = 0;
+            for _ in 0..50 {
+                for &value in values {
+                    checksum += u64::from(encode(black_box(value)));
+                }
+            }
+            (start.elapsed() / 50, checksum)
+        }
+        let mut state = 0x1234_5678u32;
+        let values: Vec<_> = (0..640 * 480 * 3)
+            .map(|_| {
+                state ^= state << 13;
+                state ^= state >> 17;
+                state ^= state << 5;
+                (state >> 8) as f32 / 16_777_215.0
+            })
+            .collect();
+        let start = Instant::now();
+        let quantizer = &*OPAQUE_SRGB;
+        let init = start.elapsed();
+        let reference = measure(&values, opaque_reference);
+        let exact = measure(&values, |value| quantizer.encode(value));
+        assert_eq!(reference.1, exact.1);
+        eprintln!(
+            "init={init:?}; 640x480 RGB reference={:?}, exact={:?}; bytes={}",
+            reference.0,
+            exact.0,
+            std::mem::size_of::<OpaqueSrgb>()
+        );
     }
 }

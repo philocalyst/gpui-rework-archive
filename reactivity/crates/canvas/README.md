@@ -214,3 +214,36 @@ cold RSS increment; sharing removes repeated parsed copies rather than solving
 that initial cost. Demand initialization remains necessary. Per-service mutable
 raster caches, retained command masks and their existing caps remain independent.
 Public header sizes remain Color 20, Glyph 16 and TextLayout 48 bytes.
+
+## Exact opaque sRGB quantization
+
+Opaque clipped sRGB output uses an exact byte quantizer in place of three
+per-pixel power functions. The final linear channels are f32. Their ordered
+positive IEEE bit patterns select a seven-mantissa-bit bucket and compare one
+byte boundary. All buckets cross at most one boundary; initialization checks
+that invariant. The 3 KiB static table is derived from this build's existing f64
+transfer/rounding implementation, rather than an approximate gamma fit. It
+allocates no heap. A raster pass selects its encoder once, keeping lazy table
+initialization and the general converter's stack out of the pixel loop.
+Translucent output, P3 output and tone mapping retain the general conversion.
+
+The exhaustive release test compares all **107,011,406** f32 values from just
+below the first nonzero threshold through one. Below that threshold the result
+is zero; values outside [0,1] are clipped. Normal tests check every quantization
+threshold and bucket boundary. Reproduce the exhaustive check and isolated
+conversion timing with:
+
+```sh
+cargo test -p gpui_canvas --release every_in_range_float_matches -- --ignored
+cargo test -p gpui_canvas --release opaque_quantizer_microbenchmark -- --ignored --nocapture
+```
+
+[Paired renderer measurements](evidence-color.csv) retain the reference run,
+the table experiment and the final encoder split, under the same protocol as
+the baseline above. The 48-label scene decreased from 29–31 ms to 14–16 ms;
+sheared rectangles decreased from about 7.3 ms to 3.0–3.2 ms. These are shared
+host CPU runs, without display submission, rather than latency guarantees.
+Small boundary-heavy scenes and geometry sampling remain costs. Assembly
+inspection confirmed table loads/comparisons on the opaque path; power/round
+library calls remain in initialization and the general converter. This changes
+conversion work, not sampling quality, color profiles or the output byte contract.
