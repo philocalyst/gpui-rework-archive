@@ -96,8 +96,12 @@ requirements, not made-up replacement glyphs.
 ## Work and memory
 
 One tightly packed output image costs **4×width×height bytes**. There is no full
-float image. One 16×16 tile retains 16 premultiplied-linear samples per pixel:
-**65,536 bytes** of stack scratch, reused for the frame. Convex inverse-mapped
+float image. A 16×16 tile starts with one exact working color per pixel and
+promotes a pixel to sixteen colors only when coverage diverges. Fully initialized
+stack scratch costs **69,664 bytes** per active band, reused across its tiles;
+this includes the 64 KiB sample array, 4 KiB uniform lane and 32-byte promotion
+mask. [The proof and paired costs](SAMPLE_STORAGE.md) include stack initialization,
+the uncompressed oracle and the limits of the measured speedup. Convex inverse-mapped
 full-tile certificates bypass sample tests; full opaque rectangles cut prior tile
 commands. Uniform tile prefixes fold once and need no scratch writes. Strict
 margin guards cover the admitted f64 arithmetic; uncertain cases sample normally.
@@ -339,7 +343,7 @@ shear/reflection, text, partial bands, width one, and both proof paths. Existing
 independent exhaustive geometry and glyph-mask oracles also pass after the
 kernel refactor. Clean output access remains zero raster work.
 
-Each active band uses one 64 KiB stack sample tile; at most one such tile is
+Each active band uses one 69,664-byte stack tile; at most one such tile is
 active per pool worker. This replaces the serial tile rather than retaining a
 second image. The pool requests 512 KiB stack reservation per worker, including
 that tile. Pool metadata, TLS, allocator arenas and OS guard/rounding costs are
@@ -380,7 +384,7 @@ can be selected with `ColorConfig::linear_hdr(profile, reference_white_nits)`.
 Both serial and parallel raster schedules instantiate the same eight-byte writer;
 `pixels`/`try_pixels` return the selected format, and output capacity is 8×width×height
 instead of 4×width×height. There is still one optional image, no full-frame f32
-intermediate, and one 64 KiB sample tile per active worker. Staged commits reuse
+intermediate, and one 69,664-byte sample tile per active worker. Staged commits reuse
 the selected-format output allocation. The supplied metadata describes linear
 premultiplication, D65 primaries, reference white, and final IEEE-binary16 finite
 saturation; those bytes alone do not enable an HDR monitor or OS surface.
@@ -410,8 +414,9 @@ The band kernel now writes empty tiles directly from a cached clear pixel,
 uniform tiles from one encoded summary, and boundary tiles from their sample
 mean. This removes the preceding whole-band clear pass and its redundant writes
 under all nonempty tiles. A uniform summary is already its exact sample mean,
-so it also needs no sixteen-value reduction. The single fixed sample array
-remains; no branch-heavy optional-array representation is required.
+so it also needs no sixteen-value reduction. The later
+[per-pixel promotion](SAMPLE_STORAGE.md) extends this exact uniform representation
+inside nonuniform tiles while retaining fully initialized fixed arrays.
 
 [Paired runs](evidence-single-write.csv) compare binaries from the preceding
 `ed876fe8e0` implementation and this kernel, alternating twice on the same host.
