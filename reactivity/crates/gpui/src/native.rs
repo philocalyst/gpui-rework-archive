@@ -12,11 +12,11 @@ use winit::{
     dpi::LogicalSize,
     event::{ElementState, MouseButton, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop},
-    keyboard::{Key, ModifiersState, NamedKey},
+    keyboard::{Key as NativeKey, ModifiersState, NamedKey},
     window::Window as NativeWindow,
 };
 
-use crate::{Commit, Error, Point, Target, View, Win, WindowOptions};
+use crate::{Commit, Error, Key, Point, Target, View, Win, WindowOptions};
 
 mod upgrade;
 
@@ -232,7 +232,6 @@ struct NativeHost<V: View + 'static> {
     graphics: Option<Graphics>,
     pointer: Option<Point>,
     pressed: Option<Target>,
-    focused: Option<Target>,
     occluded: bool,
     error: Option<NativeError>,
     wake: Option<Wake>,
@@ -262,7 +261,6 @@ impl<V: View + 'static> NativeHost<V> {
             graphics: None,
             pointer: None,
             pressed: None,
-            focused: None,
             occluded: false,
             error: None,
             wake: None,
@@ -661,7 +659,7 @@ impl<V: View + 'static> NativeHost<V> {
                 }
             }
             Err(Error::NotInput | Error::NotInteractive) => {}
-            Err(Error::StaleTarget) => self.focused = None,
+            Err(Error::StaleTarget | Error::PresentationStale) => {}
             Err(error @ (Error::Canvas(_) | Error::Layout(_) | Error::PresentationPanicked)) => {
                 if let Some(handler) = &self.presentation_error {
                     handler(&error);
@@ -673,25 +671,25 @@ impl<V: View + 'static> NativeHost<V> {
         }
         Ok(())
     }
-    fn key_input(&mut self, key: &Key, text: Option<&str>) -> Result<(), NativeError> {
+    fn key_input(&mut self, key: &NativeKey, text: Option<&str>) -> Result<(), NativeError> {
         if self.modifiers.control_key() || self.modifiers.super_key() {
             return Ok(());
         }
-        let (Some(owner), Some(target)) = (&mut self.owner, self.focused) else {
+        let Some(owner) = &mut self.owner else {
             return Ok(());
         };
-        let result = match key {
-            Key::Named(NamedKey::Backspace) => owner.backspace(target),
-            Key::Named(NamedKey::Enter) => owner.activate(target),
-            Key::Named(NamedKey::Space) => match owner.type_text(target, " ") {
-                Err(Error::NotInput) => owner.activate(target),
-                result => result,
-            },
-            _ => match text.filter(|text| !text.chars().any(char::is_control)) {
-                Some(text) => owner.type_text(target, text),
+        let key = match key {
+            NativeKey::Named(NamedKey::Backspace) => Key::Backspace,
+            NativeKey::Named(NamedKey::Enter) => Key::Enter,
+            NativeKey::Named(NamedKey::Space) => Key::Space,
+            NativeKey::Named(NamedKey::Tab) if self.modifiers.shift_key() => Key::ReverseTab,
+            NativeKey::Named(NamedKey::Tab) => Key::Tab,
+            _ => match text {
+                Some(text) => Key::Text(text),
                 None => return Ok(()),
             },
         };
+        let result = owner.key(key);
         self.input_result(result)
     }
     fn window_event(
@@ -726,7 +724,9 @@ impl<V: View + 'static> NativeHost<V> {
             }
             WindowEvent::Focused(false) => {
                 self.pressed = None;
-                self.focused = None;
+                if let Some(owner) = &mut self.owner {
+                    owner.clear_focus()?;
+                }
                 self.modifiers = ModifiersState::empty();
             }
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
@@ -754,7 +754,14 @@ impl<V: View + 'static> NativeHost<V> {
                 };
                 if *state == ElementState::Pressed {
                     self.pressed = hit;
-                    self.focused = hit;
+                    match hit {
+                        Some(target) => {
+                            owner.focus(target)?;
+                        }
+                        None => {
+                            owner.clear_focus()?;
+                        }
+                    }
                 } else if let Some(target) =
                     self.pressed.take().filter(|target| Some(*target) == hit)
                 {
@@ -887,6 +894,7 @@ mod tests {
         retained_target: Option<Target>,
         frames: Rc<RefCell<Vec<PresentedFrame>>>,
         edited_during_upgrade: bool,
+        cancelled_generation: bool,
     }
     impl Script {
         fn step(&mut self, event_loop: &ActiveEventLoop) {
@@ -906,35 +914,84 @@ mod tests {
                 0 => {
                     if self.host.renderer_policy == RendererPolicy::Auto {
                         assert_eq!(self.frames.borrow()[0].renderer, RendererKind::ReferenceCpu);
-                        if self.host.upgrade_policy.allow_cpu && self.host.upgrade.is_some() {
+                        if self.host.upgrade_policy.allow_cpu
+                            && self.host.upgrade.is_some()
+                            && !self.cancelled_generation
+                        {
                             // Cancel an owned initialization generation without
                             // waiting for its worker; a late result cannot attach.
                             self.host.dispatch(event_loop, Callback::Suspended);
                             assert!(self.host.upgrade.is_none());
                             self.host.dispatch(event_loop, Callback::Resumed);
+                            self.cancelled_generation = true;
+                            // Tab cannot use the detached sheet. Resume must
+                            // actually present again before navigation proceeds.
+                            self.host
+                                .key_input(&NativeKey::Named(NamedKey::Tab), None)
+                                .unwrap();
+                            assert_eq!(self.host.owner.as_ref().unwrap().focused().unwrap(), None);
+                            return;
                         }
                     }
                     let owner = self.host.owner.as_mut().unwrap();
-                    self.host.focused = Some(owner.input());
+                    let input = owner.input();
+                    assert_eq!(owner.focused().unwrap(), None);
                     self.host
-                        .key_input(&Key::Character("Ship".into()), Some("Ship"))
+                        .key_input(&NativeKey::Named(NamedKey::Tab), None)
+                        .unwrap();
+                    assert_eq!(
+                        self.host.owner.as_ref().unwrap().focused().unwrap(),
+                        Some(input)
+                    );
+                    self.host
+                        .key_input(&NativeKey::Named(NamedKey::Tab), None)
+                        .unwrap();
+                    assert_eq!(
+                        self.host.owner.as_ref().unwrap().focused().unwrap(),
+                        Some(self.host.owner.as_ref().unwrap().button("Add"))
+                    );
+                    self.host.modifiers = ModifiersState::SHIFT;
+                    self.host
+                        .key_input(&NativeKey::Named(NamedKey::Tab), None)
+                        .unwrap();
+                    self.host.modifiers = ModifiersState::empty();
+                    assert_eq!(
+                        self.host.owner.as_ref().unwrap().focused().unwrap(),
+                        Some(input)
+                    );
+                    self.host
+                        .window_event(event_loop, &WindowEvent::Focused(false))
+                        .unwrap();
+                    assert_eq!(self.host.owner.as_ref().unwrap().focused().unwrap(), None);
+                    self.host
+                        .key_input(&NativeKey::Named(NamedKey::Tab), None)
                         .unwrap();
                     self.host
-                        .key_input(&Key::Named(NamedKey::Space), Some(" "))
+                        .key_input(&NativeKey::Character("Ship".into()), Some("Ship"))
                         .unwrap();
                     self.host
-                        .key_input(&Key::Character("new GPUI".into()), Some("new GPUI"))
+                        .key_input(&NativeKey::Named(NamedKey::Space), Some(" "))
+                        .unwrap();
+                    self.host
+                        .key_input(&NativeKey::Character("new GPUI".into()), Some("new GPUI"))
                         .unwrap();
                     // Unsupported shaping retains the accepted source edit and
                     // old sheet; ordinary backspace repairs it without exit.
                     self.host
-                        .key_input(&Key::Character("अ".into()), Some("अ"))
+                        .key_input(&NativeKey::Character("अ".into()), Some("अ"))
                         .unwrap();
                     let failed = self.host.owner.as_ref().unwrap().snapshot().unwrap();
                     assert!(failed.source_epoch > failed.presentation_epoch);
+                    self.host
+                        .key_input(&NativeKey::Named(NamedKey::Tab), None)
+                        .unwrap();
+                    assert_eq!(
+                        self.host.owner.as_ref().unwrap().focused().unwrap(),
+                        Some(input)
+                    );
                     assert_eq!(self.faults.get(), 1);
                     self.host
-                        .key_input(&Key::Named(NamedKey::Backspace), None)
+                        .key_input(&NativeKey::Named(NamedKey::Backspace), None)
                         .unwrap();
                 }
                 1 => {
@@ -1018,10 +1075,11 @@ mod tests {
                         && !matches!(self.host.graphics, Some(Graphics::Gpu(_)))
                     {
                         if !self.edited_during_upgrade {
-                            self.host.focused = Some(owner.input());
+                            let input = owner.input();
+                            owner.focus(input).unwrap();
                             self.host
                                 .key_input(
-                                    &Key::Character("while preparing".into()),
+                                    &NativeKey::Character("while preparing".into()),
                                     Some("while preparing"),
                                 )
                                 .unwrap();
@@ -1174,6 +1232,7 @@ mod tests {
                 retained_target: None,
                 frames,
                 edited_during_upgrade: false,
+                cancelled_generation: false,
             };
             let (mut driver, wake) = Driver::new(&event_loop, script);
             driver.host_mut().host.wake = Some(wake);

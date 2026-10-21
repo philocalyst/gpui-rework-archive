@@ -28,7 +28,9 @@ const MAX_NODES: usize = 100_000;
 // Cephal's algorithms recurse even though public description disposal does not.
 const MAX_LAYOUT_DEPTH: usize = 128;
 
+mod input;
 mod query;
+pub use input::Key;
 pub use query::{Part, Query};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -309,6 +311,7 @@ struct Runtime<M> {
     by_identity: BTreeMap<u64, usize>,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
+    focused: Option<Target>,
     sites: Sites,
     overrides: Overrides,
     layout: LayoutTree,
@@ -416,6 +419,7 @@ impl<M: View + 'static> Win<M> {
             by_identity: BTreeMap::new(),
             fanout: BTreeMap::new(),
             next_identity: 1,
+            focused: None,
             sites: Sites::new(),
             overrides: Overrides::default(),
             layout: LayoutTree::new(),
@@ -617,14 +621,20 @@ impl<M: View + 'static> Win<M> {
         if hit != identity {
             return Err(Error::NotHittable);
         }
+        runtime.focus(target)?;
         runtime.activate(target)
     }
     pub fn click_at(&mut self, point: Point) -> Result<Commit, Error> {
         let runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.current_presentation()?;
-        let identity = runtime.hit(point).ok_or(Error::NotHittable)?;
+        let Some(identity) = runtime.hit(point) else {
+            runtime.focused = None;
+            runtime.changed_nodes = 0;
+            return Err(Error::NotHittable);
+        };
         let target = runtime.sites.target(identity);
+        runtime.focus(target)?;
         runtime.activate(target)
     }
     /// The editing floor inserts at the end; full selection/IME is a host/text
@@ -886,6 +896,7 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn poison(&mut self) {
+        self.focused = None;
         self.poisoned = true;
         self.logical_valid = false;
         self.prepared = None;
@@ -938,6 +949,7 @@ impl<M: View + 'static> Runtime<M> {
         };
         if let Err(error) = result {
             self.logical_valid = false;
+            self.focused = None;
             return Err(error);
         }
         self.present()
@@ -1016,6 +1028,7 @@ impl<M: View + 'static> Runtime<M> {
             Ok(Ok(())) => Ok(()),
             Ok(Err(error)) => {
                 self.logical_valid = false;
+                self.focused = None;
                 Err(error)
             }
             Err(_) => {
@@ -1204,6 +1217,7 @@ impl<M: View + 'static> Runtime<M> {
         self.overrides
             .retain(|identity| self.by_identity.contains_key(&identity));
         self.logical_valid = true;
+        self.prune_focus();
         self.changed_nodes = changed;
         Ok(())
     }

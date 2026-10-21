@@ -32,8 +32,8 @@ pub use identity::Target;
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use runtime::{
-    Commit, Counters, Error, Part, PresentationToken, Query, SetError, Snapshot, SnapshotNode, Win,
-    WindowOptions,
+    Commit, Counters, Error, Key, Part, PresentationToken, Query, SetError, Snapshot, SnapshotNode,
+    Win, WindowOptions,
 };
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
 pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
@@ -56,8 +56,8 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff, Point, Rect, Signal,
-        Source, Sources, Target, View, Win, button, column, div, label, oklch, rgb, row, text,
-        text_input,
+        Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff, Key, Point, Rect,
+        Signal, Source, Sources, Target, View, Win, button, column, div, label, oklch, rgb, row,
+        text, text_input,
     };
 }
