@@ -1,0 +1,14 @@
+{
+  "source_commit": "e012ac5aa3e9f12e40cf22da62e881393b6daf94",
+  "recorded_utc": "2026-10-21T17:47:17.658094+00:00",
+  "checks": "checks.json",
+  "checks_sha256": "d6f6b1c3b39da19ba51fdbbdd8a36778b5e4d5b385eca195836f072076321ae7",
+  "successful_gates": 20,
+  "workspace_debug_passed": 424,
+  "workspace_release_passed": 424,
+  "parallel_canvas_passed": 78,
+  "vulkan_readback_passed": 19,
+  "native_scripts_passed": 6,
+  "runtime": "Linux/NixOS; Mesa26.1.4 llvmpipe/LLVM21.1.8; Xvfb94",
+  "scope": "Actual Linux software Vulkan and native X11/AT-SPI; no hardware GPU, Windows runtime or macOS runtime claim. Parallel Canvas elapsed wall time includes a pause during separately captured quiet benchmarks."
+}

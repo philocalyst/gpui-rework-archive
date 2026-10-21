@@ -223,6 +223,16 @@ after production presentation, resize and suspend/resume. The repair path keeps
 full native upload; client damage alone does not prove server preservation.
 See [the exact proof and measurements](crates/gpui/RETAINED_DAMAGE.md).
 
+The sample-storage regression compares 2,400 complete public-API images against
+the uncompressed sixteen-color path across SDR/HDR, sRGB/P3, partial tiles,
+reflected/sheared translucent geometry and real glyphs. An exhaustive private
+oracle covers every binary sixteen-sample mask with earlier/later layers and
+neighbor isolation. Separable axis masks have a distinct scalar membership
+oracle; disabling tile proofs alone does not disable that axis optimization.
+The actual Vulkan suite includes a no-sample HDR draw that preserves numeric zero
+while allowing the GPU to erase its sign. CPU uniform and expanded paths preserve
+identical clear bits. See [the storage proof](crates/canvas/SAMPLE_STORAGE.md).
+
 Compile passing examples and intended-diagnostic failures: borrowed operand
 escape, owner mutation while a description is used, internal cursor escape and
 both nested frame directions, wrong field/target/value, reader mutation,

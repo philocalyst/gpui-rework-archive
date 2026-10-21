@@ -12,7 +12,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 92.443,
+    "elapsed_seconds": 191.507,
     "log": "workspace-debug.txt"
   },
   {
@@ -32,7 +32,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 136.573,
+    "elapsed_seconds": 86.121,
     "log": "workspace-clippy.txt"
   },
   {
@@ -49,7 +49,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 59.026,
+    "elapsed_seconds": 66.436,
     "log": "workspace-release.txt"
   },
   {
@@ -69,7 +69,7 @@
       "loom_protocol"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 7.617,
+    "elapsed_seconds": 7.54,
     "log": "loom.txt"
   },
   {
@@ -89,9 +89,30 @@
       "question_credit"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.168,
+    "elapsed_seconds": 0.293,
     "log": "question-credit.txt",
     "passed_tests": 3
+  },
+  {
+    "check": "question-mailbox",
+    "argv": [
+      "cargo",
+      "test",
+      "--release",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui_reactivity_ownership_lab",
+      "--features",
+      "loom",
+      "--test",
+      "question_mailbox"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.443,
+    "log": "question-mailbox.txt",
+    "passed_tests": 9
   },
   {
     "check": "native-check",
@@ -108,7 +129,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 5.882,
+    "elapsed_seconds": 40.251,
     "log": "native-check.txt"
   },
   {
@@ -126,7 +147,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 5.396,
+    "elapsed_seconds": 13.128,
     "log": "native-minimal-check.txt"
   },
   {
@@ -147,7 +168,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 7.731,
+    "elapsed_seconds": 9.415,
     "log": "native-clippy.txt"
   },
   {
@@ -166,7 +187,7 @@
       "native::accessibility::"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 29.237,
+    "elapsed_seconds": 76.881,
     "log": "accessibility-schema.txt",
     "passed_tests": 20
   },
@@ -184,7 +205,7 @@
       "parallel"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 21.913,
+    "elapsed_seconds": 145.566,
     "log": "parallel-canvas.txt"
   },
   {
@@ -203,7 +224,7 @@
       "retained_layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.129,
+    "elapsed_seconds": 0.221,
     "log": "layout-example.txt"
   },
   {
@@ -242,7 +263,7 @@
       "--check"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.733,
+    "elapsed_seconds": 1.296,
     "log": "format.txt"
   },
   {
@@ -261,9 +282,9 @@
       "render"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 10.77,
+    "elapsed_seconds": 9.343,
     "log": "gpu-vulkan.txt",
-    "passed_tests": 18
+    "passed_tests": 19
   },
   {
     "check": "native-x11",
@@ -284,7 +305,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 52.983,
+    "elapsed_seconds": 148.068,
     "log": "native-x11.txt",
     "passed_tests": 1
   },
@@ -307,7 +328,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 1.102,
+    "elapsed_seconds": 38.686,
     "log": "native-remote.txt",
     "passed_tests": 1
   },
@@ -331,7 +352,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.31,
+    "elapsed_seconds": 0.553,
     "log": "native-question.txt",
     "passed_tests": 1
   },
@@ -354,7 +375,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 10.578,
+    "elapsed_seconds": 7.364,
     "log": "native-library.txt",
     "passed_tests": 1
   },
@@ -366,7 +387,7 @@
       "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 4.575,
+    "elapsed_seconds": 7.105,
     "log": "native-atspi.txt",
     "passed_tests": 1
   },
@@ -392,7 +413,7 @@
       "--nocapture"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.443,
+    "elapsed_seconds": 0.493,
     "log": "native-no-bus.txt",
     "passed_tests": 1
   }

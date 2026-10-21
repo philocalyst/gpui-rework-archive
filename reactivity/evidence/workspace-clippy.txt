@@ -1,4 +1,7 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
     Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Checking gpui_reactivity_ownership_lab v0.1.0 (/root/gpui-ce3/reactivity/crates/ownership-lab)
     Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
     Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 18.39s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 25s
