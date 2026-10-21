@@ -38,7 +38,7 @@ geometry retains its scalar sampling and conservative full-tile proof. A private
 oracle compares every resulting membership bit with that original scalar path,
 including subnormals, cancellation and neighbors of quarter-pixel boundaries.
 
-The complete release parallel Canvas suite passes 77 cases/doctests; strict
+At that isolated source, the release parallel Canvas suite passes 77 cases/doctests; strict
 all-target parallel Clippy passes. The promotion unit oracle exercises all 65,536
 binary coverage patterns with preceding/subsequent translucent layers and an
 untouched neighbor. The public randomized regression compares 2,400 complete
@@ -94,7 +94,7 @@ transfer or half-float conversion. There is no retained palette, hashing,
 approximate comparison, synchronization or allocation. Comparing all channel
 bits preserves distinct positive/negative zeros; a two-pixel public HDR test
 requires both signs in the same tile. The complete release parallel Canvas
-suite now passes 78 cases/doctests and strict all-target Clippy.
+suite at that isolated source passes 78 cases/doctests and strict all-target Clippy.
 
 | Scene | Pre-axis serial | Axis + promotion | Plus output cache | Output |
 | --- | ---: | ---: | ---: | --- |
@@ -116,3 +116,45 @@ The HDR boundary scene with eight workers is 21.659→21.744 µs (+0.39%).
 Flat-tile output already converts once per tile, so the extra sampled-pixel cache
 offers no conversion reduction there. These finite shared-host observations do
 not establish a universal win, hardware-GPU speedup or application input latency.
+
+## Separable glyph addresses
+
+Axis-aligned glyphs now share the original sample-to-mask address calculation
+across each tile column and row. Four column addresses and four row offsets
+reconstruct the same sixteen correlated coverage values. If all sixteen sites
+address one cell, one mask-byte fetch supplies them all. Reflection, clip/domain
+comparisons and normalization retain the scalar sampler's f64 operation order.
+Dropping zero off-diagonal terms can change a zero sign, which changes neither
+half-open membership nor the integer cell address. General affine glyphs keep
+the scalar sampler.
+
+The helper borrows its immutable raster. Its address tables occupy 1,032 bytes
+on x86-64, transiently inside a worker; no scene, command, node, allocation or
+resource lease is added. The original samples are not averaged before blending.
+An independent scalar oracle covers every coverage bit, all alpha values,
+reflections, quarter-boundary neighbors, subnormal extents, large cancellation,
+partial tiles, narrower/disjoint command bins and all signed-zero off-diagonals.
+The isolated release Canvas suite and strict parallel Clippy passed; the two
+private address oracles also passed after the adversarial bounds extension.
+Combined native/GPU verification is recorded separately in the workspace report.
+
+Five alternating fresh-process pairs use the unchanged general-scene example.
+The [complete ledger](evidence/glyph-axis/README.md) retains 500 timed rows,
+activation checks, source/binary hashes and an excluded earlier capture whose
+saved baseline was found to contain the new algorithm. Corrected binaries use
+separate source trees and target directories. These medians isolate this change
+from the preceding output-cache kernel:
+
+| 48-label scene | Previous serial | Glyph axes serial | Previous 8 workers | Glyph axes 8 workers |
+| --- | ---: | ---: | ---: | ---: |
+| SDR | 13.805 ms | 5.728 ms | 2.491 ms | 1.119 ms |
+| Linear HDR | 14.695 ms | 6.676 ms | 2.684 ms | 1.236 ms |
+
+Geometric/address queries fall 1,846,272→126,744; retained capacities and each
+scene/profile digest agree across versions and workers. The non-text controls
+retain losses: SDR serial flat +2.05%, large flat +2.12%, shear +2.62% and
+boundary +2.88%; HDR serial shear +2.29% and boundary +3.06%. Scheduling noise
+is larger for some tiny parallel cells: HDR flat at four workers loses 15.76%.
+No whole-application or native-latency speedup is inferred. The capture predates
+the integrated Unicode planner, whose shaping and memory costs have their own
+[ledger](TEXT.md).

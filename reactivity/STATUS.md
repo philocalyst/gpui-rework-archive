@@ -13,8 +13,8 @@ describe the intended complete system; this page records what is connected now.
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned one-source admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Multi-input Reader/cohort graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal, borrowed Rustybuzz shaping sessions, lazy Swash masks, logical layout with physical-density rasterization | Selection, IME, grapheme editing and complete font/script fallback remain |
-| Canvas | Canonical grouped display list, linear-light 4×4 sampling, exact per-pixel sample promotion, separable axis masks, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
+| Layout and text | Cephal, scoped Parley/HarfRust Unicode paragraphs, immutable bounded bundled fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
+| Canvas | Canonical grouped display list, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
@@ -42,10 +42,13 @@ AccessKit tree mirror or historical ID map; the native adapter retains its own
 required tree. Stock Linux adapter construction starts background work even
 before activation, so lazy conversion is not a zero-cost native AT claim.
 
-On the current 64-bit build, Node is 128 B, an actual text-site entry is 72 B,
+On the current 64-bit build, Node is 40 B, an actual text-site entry is 80 B,
 Presented is 80 B and a frozen list-row entry is 24 B. Author Color is 16 B and
-Style is 88 B. These are exact retained layouts, not whole-window memory figures;
-layout/font/scene storage and native services remain separately owned.
+Style is 88 B. Resolved styles use an owner-owned default/dense/shared lane with
+bounded exact discovery and an unrestricted dense fallback; its header adds 40 B
+per owner. Unicode TextLayout is 56 B, eight bytes larger than its predecessor.
+These are exact retained layouts, not whole-window memory figures; layout/font/scene
+storage and native services remain separately owned.
 
 ## Current verification
 
@@ -111,6 +114,9 @@ not execution on those operating systems.
 | Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Full native upload remains; excludes event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
 | Exact sample promotion | [Sample storage](crates/canvas/SAMPLE_STORAGE.md): moving-caret fixture full raster 21.53→6.06 ms; 48-label SDR preparation+raster 16.90→13.87 ms | Adds 4 KiB+32 B initialized worker scratch; no retained reduction; native upload/latency excluded |
 | Exact output reuse | [General controls](crates/canvas/SAMPLE_STORAGE.md): the one-pixel cache further lowers 48-label HDR preparation+raster 17.30→14.64 ms and sheared translucent boxes 2.78→1.94 ms | SDR flat serial panels lose 1.65–1.77%; small stack-only cache, no retained reduction or native latency claim |
+| Exact glyph addresses | [500-row controls](crates/canvas/evidence/glyph-axis/README.md): 48-label SDR preparation+raster 13.80→5.73 ms, HDR 14.70→6.68 ms | Adds 1,032 B transient address tables per worker; several non-text serial controls lose 2–3%; excludes native upload and predates Unicode integration |
+| Current-owner style sharing | [Style evidence](crates/gpui/evidence/retained-styles.md): Node 128→40 B; repeated whole owners save about 16% requested retained bytes | Adds 40 B owner header; unique payload neutral; two-style coarse descriptions lose about 10%, first inspector densification 10–20% |
+| One Unicode layout | [Text evidence](crates/canvas/TEXT.md): 1000-label owner mount 14.79→12.85 ms, requested peak 2.11→1.93 MB | Retains 8,304 B more, prepare loses 4.6%, empty native PSS adds 194 KiB; Linux text-only cut, no native IME/selection claim |
 | Lazy fonts and scoped shaping | [Startup](crates/gpui/STARTUP.md): Gallery median 80.038→40.525 ms on default-reset Xvfb; 23.302 ms with -noreset | Display reset is an environmental cost; warm filesystem, fresh processes, present acknowledgement rather than scanout |
 | CPU-first blank | [Memory CSV](crates/gpui/evidence-native-memory-auto-swash.csv): roughly 8.5 MiB PSS, one idle thread, no GPU probe on this device-less Linux host | Predates representation/solid changes; driver/compositor bytes are separate |
 | Canonical retained runs | [Canvas](crates/canvas/README.md): 32K-glyph grouped fixture retained heap 4,456,500→1,269,876 B; peak 6,689,076→1,795,060 B | Unique-mask heap is neutral; Canvas header grows 208 B; flat traversal can lose |
