@@ -18,15 +18,39 @@ impl AsRef<[u8]> for FontBytes {
     }
 }
 
-pub(super) struct Planner {
+/// Only the borrowed cmap survives parsing; the full Face's unrelated table
+/// descriptors are not retained in the scoped planner.
+struct Cmap<'font>(Option<ttf_parser::cmap::Table<'font>>);
+impl<'font> Cmap<'font> {
+    fn parse(bytes: &'font [u8]) -> Result<Self, Error> {
+        let face = ttf_parser::Face::parse(bytes, 0).map_err(|_| Error::InvalidFont)?;
+        Ok(Self(face.tables().cmap))
+    }
+    fn glyph_index(&self, code_point: char) -> Option<ttf_parser::GlyphId> {
+        // Preserve Face::glyph_index's Unicode filter, subtable order and
+        // first-match semantics, including a returned glyph zero.
+        for subtable in self.0?.subtables {
+            if subtable.is_unicode()
+                && let Some(id) = subtable.glyph_index(u32::from(code_point))
+            {
+                return Some(id);
+            }
+        }
+        None
+    }
+}
+
+pub(super) struct Planner<'font> {
     fonts: FontContext,
     context: LayoutContext<()>,
     faces: FontSet,
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
+    primary_cmap: Cmap<'font>,
+    fallback_cmaps: Option<[Cmap<'static>; 2]>,
 }
-impl Planner {
-    pub fn new(primary: &FontFace) -> Result<Self, Error> {
+impl<'font> Planner<'font> {
+    pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
         let faces = FontSet {
             primary: primary.clone(),
             fallbacks: [None, None],
@@ -44,6 +68,8 @@ impl Planner {
             faces,
             blob_ids: [None; 3],
             sets: [Some(base), None, None, None],
+            primary_cmap: Cmap::parse(&primary.0.bytes)?,
+            fallback_cmaps: None,
         };
         result.register(0)?;
         Ok(result)
@@ -57,10 +83,7 @@ impl Planner {
         Ok(())
     }
     fn coverage(&mut self, text: &str) -> Result<u8, Error> {
-        let face = ttf_parser::Face::parse(&self.faces.primary.0.bytes, 0)
-            .map_err(|_| Error::InvalidFont)?;
         let ignorable = CodePointSetData::new::<DefaultIgnorableCodePoint>();
-        let mut fallback_faces = None;
         let mut needed = 0_u8;
         for c in text.chars() {
             if matches!(c, '\r' | '\n' | '\u{85}' | '\u{2028}' | '\u{2029}')
@@ -71,24 +94,22 @@ impl Planner {
             if c.is_control() {
                 return Err(Error::UnsupportedControl(c));
             }
-            if face.glyph_index(c).is_some_and(|g| g.0 != 0) {
+            if self.primary_cmap.glyph_index(c).is_some_and(|g| g.0 != 0) {
                 continue;
             }
             if !self.faces.primary.0.bundled {
                 return Err(Error::MissingGlyph(c));
             }
-            // Inspect borrowed cmap tables once, without creating a font lease
-            // or registering a family until actual missing coverage needs it.
-            if fallback_faces.is_none() {
-                fallback_faces = Some([
-                    ttf_parser::Face::parse(FontFace::fallback_bytes(1)?, 0)
-                        .map_err(|_| Error::InvalidFont)?,
-                    ttf_parser::Face::parse(FontFace::fallback_bytes(2)?, 0)
-                        .map_err(|_| Error::InvalidFont)?,
+            // These static views remain lazy: primary-only passes never parse
+            // or touch the fallback faces. No font lease is needed to inspect.
+            if self.fallback_cmaps.is_none() {
+                self.fallback_cmaps = Some([
+                    Cmap::parse(FontFace::fallback_bytes(1)?)?,
+                    Cmap::parse(FontFace::fallback_bytes(2)?)?,
                 ]);
             }
             let mut covered = 0_u8;
-            for (index, fallback) in fallback_faces.as_ref().unwrap().iter().enumerate() {
+            for (index, fallback) in self.fallback_cmaps.as_ref().unwrap().iter().enumerate() {
                 if fallback.glyph_index(c).is_some_and(|glyph| glyph.0 != 0) {
                     covered |= 1 << index;
                 }
@@ -470,6 +491,86 @@ fn register_font(
 mod tests {
     use super::*;
     use parley::Cursor;
+
+    fn cmap_record(bytes: &[u8]) -> usize {
+        let count = u16::from_be_bytes(bytes[4..6].try_into().unwrap());
+        (0..usize::from(count))
+            .map(|index| 12 + index * 16)
+            .find(|&record| &bytes[record..record + 4] == b"cmap")
+            .unwrap()
+    }
+
+    fn compare_cmap(bytes: &[u8]) {
+        let face = ttf_parser::Face::parse(bytes, 0).unwrap();
+        let cached = Cmap::parse(bytes).unwrap();
+        for code in 0..=0x10ffff {
+            if let Some(character) = char::from_u32(code) {
+                assert_eq!(
+                    cached.glyph_index(character),
+                    face.glyph_index(character),
+                    "U+{code:04X}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn cached_cmaps_match_face_for_every_scalar_and_absent_or_custom_tables() {
+        for bytes in [&PRIMARY_BYTES[..], &ARABIC_BYTES[..], &HEBREW_BYTES[..]] {
+            compare_cmap(bytes);
+        }
+        let mut missing = PRIMARY_BYTES.to_vec();
+        let record = cmap_record(&missing);
+        missing[record..record + 4].copy_from_slice(b"zmap");
+        assert!(Cmap::parse(&missing).unwrap().0.is_none());
+        compare_cmap(&missing);
+
+        // Three format-0 subtables: ignore the non-Unicode first table, prefer
+        // the first Unicode mapping for A, and continue past its missing B.
+        let mut custom = PRIMARY_BYTES.to_vec();
+        let record = cmap_record(&custom);
+        let offset = custom.len() as u32;
+        let mut cmap = vec![0, 0, 0, 3];
+        for (index, (platform, encoding)) in
+            [(1_u16, 0_u16), (3, 1), (0, 3)].into_iter().enumerate()
+        {
+            cmap.extend(platform.to_be_bytes());
+            cmap.extend(encoding.to_be_bytes());
+            cmap.extend((28 + index as u32 * 262).to_be_bytes());
+        }
+        for index in 0..3 {
+            cmap.extend([0, 0, 1, 6, 0, 0]); // format, length, language
+            let mut glyphs = [0; 256];
+            glyphs[b'A' as usize] = [10, 7, 8][index];
+            glyphs[b'B' as usize] = if index == 2 { 9 } else { 0 };
+            cmap.extend(glyphs);
+        }
+        custom[record + 8..record + 12].copy_from_slice(&offset.to_be_bytes());
+        custom[record + 12..record + 16].copy_from_slice(&(cmap.len() as u32).to_be_bytes());
+        custom.extend(cmap);
+        let cached = Cmap::parse(&custom).unwrap();
+        assert_eq!(cached.glyph_index('A'), Some(ttf_parser::GlyphId(7)));
+        assert_eq!(cached.glyph_index('B'), Some(ttf_parser::GlyphId(9)));
+        assert_eq!(cached.glyph_index('C'), None);
+        compare_cmap(&custom);
+
+        // Format 13 can return Some(GlyphId(0)), despite the subtable API's
+        // general documentation. Face stops there; do not skip to the later A.
+        let offset = offset as usize;
+        let length = custom.len() - offset;
+        custom[offset + 16..offset + 20].copy_from_slice(&(length as u32).to_be_bytes());
+        let mut zero = vec![0, 13, 0, 0];
+        for value in [28_u32, 0, 1, u32::from('A'), u32::from('A'), 0] {
+            zero.extend(value.to_be_bytes());
+        }
+        custom.extend(zero);
+        custom[record + 12..record + 16].copy_from_slice(&((length + 28) as u32).to_be_bytes());
+        assert_eq!(
+            Cmap::parse(&custom).unwrap().glyph_index('A'),
+            Some(ttf_parser::GlyphId(0))
+        );
+        compare_cmap(&custom);
+    }
 
     #[test]
     fn indexed_cursor_geometry_matches_original_at_every_byte_and_affinity() {

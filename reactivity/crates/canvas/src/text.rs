@@ -258,9 +258,9 @@ pub(crate) struct Raster {
 /// layout owns one immutable FontSet lease shared by layouts from this pass.
 pub struct TextShaper<'font> {
     font: &'font FontFace,
-    planner: Option<Box<planner::Planner>>,
+    planner: Option<Box<planner::Planner<'font>>>,
 }
-impl TextShaper<'_> {
+impl<'font> TextShaper<'font> {
     pub fn shape(
         &mut self,
         text: &str,
