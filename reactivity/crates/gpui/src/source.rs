@@ -140,6 +140,16 @@ pub trait TextValue: sealed::TextValue + 'static {
     fn parse_text(text: &str) -> Result<Self, &'static str>
     where
         Self: Sized;
+    #[doc(hidden)]
+    fn from_text(input: String) -> Result<Self, (String, &'static str)>
+    where
+        Self: Sized,
+    {
+        match Self::parse_text(&input) {
+            Ok(value) => Ok(value),
+            Err(reason) => Err((input, reason)),
+        }
+    }
 }
 
 impl sealed::TextValue for String {}
@@ -149,6 +159,9 @@ impl TextValue for String {
     }
     fn parse_text(text: &str) -> Result<Self, &'static str> {
         Ok(text.to_owned())
+    }
+    fn from_text(input: String) -> Result<Self, (String, &'static str)> {
+        Ok(input)
     }
 }
 
@@ -332,16 +345,6 @@ impl<M, T: TextValue> Field<M> for Source<M, T> {
         }
     }
     fn write_text(&self, model: &mut M, input: String) -> Result<Revision, TextEditError> {
-        let value = match T::parse_text(&input) {
-            Ok(value) => value,
-            Err(reason) => {
-                return Err(TextEditError {
-                    field: self.id,
-                    input,
-                    reason: TextEditErrorKind::InvalidValue(reason),
-                });
-            }
-        };
         let read = (self.read)(model) as *const Signal<T>;
         let signal = (self.write)(model);
         if !std::ptr::eq(read, signal as *const Signal<T>) {
@@ -351,6 +354,18 @@ impl<M, T: TextValue> Field<M> for Source<M, T> {
                 reason: TextEditErrorKind::Binding(BindError::ProjectionMismatch(self.id)),
             });
         }
+        // Holding &mut Signal does not mark the value. Parse completely before
+        // dereferencing it mutably; String edits can move their input directly.
+        let value = match T::from_text(input) {
+            Ok(value) => value,
+            Err((input, reason)) => {
+                return Err(TextEditError {
+                    field: self.id,
+                    input,
+                    reason: TextEditErrorKind::InvalidValue(reason),
+                });
+            }
+        };
         **signal = value;
         Ok(signal.revision())
     }
@@ -666,6 +681,16 @@ mod tests {
         let value = text.borrowed_value();
         assert!(matches!(value, Cow::Borrowed(_)));
         assert_eq!(value.as_ptr(), signal.as_ptr());
+    }
+
+    #[test]
+    fn string_edits_transfer_the_owned_input_allocation() {
+        let sources = sources();
+        let mut model = model();
+        let input = "input moved into the signal".to_owned();
+        let pointer = input.as_ptr();
+        sources.write_text(&mut model, FIRST.id(), input).unwrap();
+        assert_eq!(model.first.as_ptr(), pointer);
     }
 
     #[test]
