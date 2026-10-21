@@ -40,6 +40,8 @@ pub use input::Key;
 use metadata::{Declared, Destination, Metadata, Port, Publish};
 pub use metadata::{ListInfo, ListItemInfo};
 pub use query::{Part, Query};
+#[cfg(feature = "accessibility")]
+pub(crate) use query::{SemanticSheet, SemanticState};
 pub use semantics::{Action, ActionKind, Actions};
 
 #[derive(Clone, Copy, Debug, PartialEq)]

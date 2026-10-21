@@ -21,10 +21,16 @@ use crate::{
     remote::{DeliveryError, Inbox, Lane, LaneSet},
 };
 
+#[cfg(feature = "accessibility")]
+mod accessibility;
 mod upgrade;
 
 #[derive(Debug)]
 pub enum NativeError {
+    /// The native accessibility FIFO/payload budget or activation counter was exhausted.
+    /// AccessKit cannot return Busy; this window fails closed instead.
+    #[cfg(feature = "accessibility")]
+    AccessibilityOverloaded,
     Runtime(Error),
     Graphics(gpui_gpu::Error),
     Platform(String),
@@ -253,6 +259,8 @@ impl DeviceErrors {
 }
 
 struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
+    #[cfg(feature = "accessibility")]
+    accessibility: Option<accessibility::Bridge>,
     opening: Option<Window<V, L>>,
     instance: Option<wgpu::Instance>,
     renderer_policy: RendererPolicy,
@@ -282,6 +290,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
     fn new(opening: Window<V, L>) -> Self {
         let renderer_policy = opening.renderer;
         Self {
+            #[cfg(feature = "accessibility")]
+            accessibility: None,
             opening: Some(opening),
             instance: None,
             renderer_policy,
@@ -310,6 +320,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
     }
     fn resumed(&mut self, event_loop: &ActiveEventLoop) -> Result<(), NativeError> {
         if let Some(opening) = self.opening.take() {
+            #[cfg(feature = "accessibility")]
+            let accessibility_title = opening.title.clone();
             self.presentation_error = opening.presentation_error;
             self.presentation_feedback = opening.presentation_feedback;
             let window = Arc::new(
@@ -334,6 +346,17 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             )?;
             if let Some(wake) = &self.wake {
                 owner.attach_wake(wake);
+            }
+            #[cfg(feature = "accessibility")]
+            {
+                self.accessibility = Some(accessibility::Bridge::new(
+                    event_loop,
+                    &window,
+                    self.wake.clone().ok_or_else(|| {
+                        platform("native accessibility requires an attached driver wake")
+                    })?,
+                    accessibility_title,
+                ));
             }
             self.owner = Some(owner);
             self.window = Some(window);
@@ -731,8 +754,18 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         event_loop: &ActiveEventLoop,
         event: &WindowEvent,
     ) -> Result<(), NativeError> {
+        #[cfg(feature = "accessibility")]
+        if let (Some(bridge), Some(window)) = (&mut self.accessibility, &self.window) {
+            bridge.process_event(window, event);
+        }
         match event {
-            WindowEvent::CloseRequested => event_loop.exit(),
+            WindowEvent::CloseRequested => {
+                #[cfg(feature = "accessibility")]
+                {
+                    self.accessibility = None;
+                }
+                event_loop.exit();
+            }
             WindowEvent::Resized(size) => self.resize([size.width, size.height])?,
             WindowEvent::ScaleFactorChanged { .. } => {
                 if let Some(window) = &self.window {
@@ -879,6 +912,26 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                 Ok(())
             }
             Callback::WorkReady => {
+                #[cfg(feature = "accessibility")]
+                if let (Some(bridge), Some(owner)) = (&mut self.accessibility, &mut self.owner) {
+                    match bridge.drain(owner) {
+                        Ok(results) => {
+                            for result in results.into_iter().flatten() {
+                                if let Err(error) = self.input_result(result) {
+                                    self.error = Some(error);
+                                    event_loop.exit();
+                                    return;
+                                }
+                            }
+                        }
+                        Err(error) => {
+                            self.accessibility = None;
+                            self.error = Some(error);
+                            event_loop.exit();
+                            return;
+                        }
+                    }
+                }
                 if let Some(owner) = &mut self.owner {
                     let before = owner.runtime_epoch();
                     let result = match owner.deliver_ready(64) {
@@ -938,6 +991,16 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                     .map(|_| ())
                     .map_err(NativeError::from)
             }
+            Callback::Exiting => {
+                #[cfg(feature = "accessibility")]
+                {
+                    self.accessibility = None;
+                }
+                if let Some(owner) = &mut self.owner {
+                    owner.close();
+                }
+                Ok(())
+            }
             Callback::Window { id, event }
                 if self.window.as_ref().is_some_and(|window| window.id() == id) =>
             {
@@ -949,17 +1012,38 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             self.error = Some(error);
             event_loop.exit();
         }
+        #[cfg(feature = "accessibility")]
+        if self.error.is_none()
+            && let (Some(bridge), Some(owner)) = (&mut self.accessibility, &self.owner)
+            && let Err(error) = bridge.sync(owner)
+        {
+            self.accessibility = None;
+            self.error = Some(error);
+            event_loop.exit();
+        }
     }
 }
 
-#[cfg(all(test, feature = "x11", target_os = "linux"))]
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
 #[path = "../examples/support/todos.rs"]
 mod test_todos;
 
-#[cfg(all(test, feature = "x11", target_os = "linux"))]
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
 mod solid_tests;
 
-#[cfg(all(test, feature = "x11", target_os = "linux"))]
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
 mod tests {
     use super::*;
     use crate::{
@@ -1343,6 +1427,10 @@ mod tests {
     }
 }
 
-#[cfg(all(test, feature = "x11", target_os = "linux"))]
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
 #[path = "native/remote_tests.rs"]
 mod remote_tests;

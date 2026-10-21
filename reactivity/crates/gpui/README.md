@@ -33,7 +33,12 @@ cargo run -p gpui --features x11 --example workbench -- --gpu
 cargo run -p gpui --features x11 --example graphics
 ```
 
-Linux can instead enable `wayland`; macOS/Windows use `native`.
+Linux can instead enable `wayland`; macOS/Windows use `desktop`.
+These normal desktop profiles include the real native AccessKit adapter.
+`native`, `x11-minimal` and `wayland-minimal` are explicitly AT-disabled transport
+diagnostics; the default headless build remains dependency-light. See
+[native accessibility](ACCESSIBILITY.md) for ownership, action quotas, actual
+AT-SPI proof commands, measured costs and the remaining OS/virtual-item limits.
 `Application::run(root)` opens a default document window;
 `Application::run_window(Window::document(root).title("Todos").size(540, 620))`
 configures it. `RendererPolicy::Auto` presents software first, initializes a

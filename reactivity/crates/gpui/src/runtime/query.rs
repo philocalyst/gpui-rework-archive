@@ -32,6 +32,29 @@ impl<'a> Context<'a> {
     }
 }
 
+/// A checked, borrowed P. Native projection cannot fail halfway through an
+/// adapter update: this borrow freezes its already-validated context throughout
+/// conversion, with no callbacks into application code.
+#[cfg(feature = "accessibility")]
+pub(crate) struct SemanticSheet<'a>(Context<'a>);
+#[cfg(feature = "accessibility")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct SemanticState {
+    pub token: Option<crate::PresentationToken>,
+    pub epoch: u64,
+    pub valid: bool,
+    pub focus: Option<Target>,
+    pub size: [u32; 2],
+}
+#[cfg(feature = "accessibility")]
+impl SemanticSheet<'_> {
+    pub(crate) fn visit(&self, mut visitor: impl FnMut(Part<'_>)) {
+        for node in self.0.nodes {
+            visitor(self.0.part(node));
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 /// Borrowed semantic data cannot outlive a visitor invocation.
 ///
@@ -49,6 +72,10 @@ pub struct Part<'a> {
     context: &'a Context<'a>,
 }
 impl<'a> Part<'a> {
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn native_id(self) -> u64 {
+        self.node.identity
+    }
     /// Stable window-qualified identity, also used by input and inspector APIs.
     /// Merely reading a target does not grant it a particular action.
     pub fn target(self) -> Target {
@@ -268,6 +295,48 @@ fn sheet<M: View + 'static>(runtime: &Runtime<M>) -> Result<(), Error> {
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn accessibility_sheet(&self) -> Result<SemanticSheet<'_>, Error> {
+        let runtime = self.runtime()?;
+        sheet(runtime)?;
+        if runtime.next_identity > u64::MAX / 2 {
+            return Err(Error::ResourceLimit);
+        }
+        Ok(SemanticSheet(Context::new(runtime)))
+    }
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn accessibility_state(&self) -> Result<SemanticState, Error> {
+        let runtime = self.runtime()?;
+        runtime.live()?;
+        // Native even IDs name sites; odd IDs name projected text children.
+        // Keep this projection's finite namespace explicit and checked.
+        if runtime.next_identity > u64::MAX / 2 {
+            return Err(Error::ResourceLimit);
+        }
+        Ok(SemanticState {
+            // A candidate token is not the token of the still-displayed sheet.
+            token: runtime
+                .prepared
+                .is_none()
+                .then_some(runtime.latest_token)
+                .flatten(),
+            epoch: runtime.presentation_epoch,
+            valid: runtime.presentation_valid,
+            focus: runtime.focused,
+            size: runtime.presentation_size,
+        })
+    }
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn accessibility_target(&self, id: u64) -> Result<Target, Error> {
+        if id == 0 {
+            return Err(Error::StaleTarget);
+        }
+        let runtime = self.runtime()?;
+        runtime.live()?;
+        let target = runtime.sites.target(id);
+        runtime.resolve(target)?;
+        Ok(target)
+    }
     pub fn query(&self) -> Query<'_, M> {
         Query {
             runtime: self.inner.as_deref(),
