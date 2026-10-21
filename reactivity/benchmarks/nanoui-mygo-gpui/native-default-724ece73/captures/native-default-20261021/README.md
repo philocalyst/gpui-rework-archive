@@ -11,8 +11,11 @@ was `/tmp/gpui-luna-nanoui-output/bin/luna-bench` (SHA-256
 `run-one.sh` actually launched `/root/gpui-bench-luna/comparators/nanoui/zig-out/bin/luna-bench`
 (SHA-256 `b2d9c6f4ce2745a1e8d9b68c07f831ab2f7756eb349ed14a2c50891403f513a8`).
 All nine apps passed the separate pixel/geometry/one-click preflight. The
-corrected NanoUI recapture then used the same manifest binary and emitted a
-per-cell binary path/SHA guard before launch. Each cell records
+corrected NanoUI recapture used the manifest binary. Its wrapper enables
+`LUNA_REQUIRE_BINARY_IDENTITY=1`, and `run-one.sh` checks the resolved app
+path SHA before each observer process launch. The wrapper also dry-runs all
+three resolved app paths before starting the recapture. This guard is opt-in in
+`run-one.sh` (default `0`); ordinary default paths remain available. Each cell records
 100 fresh process startups, 10 marker-toggle clicks per process (1,000 click
 samples), and five 750 ms idle RSS/PSS/thread samples. `summarize.py` verifies
 sample counts and computes `summary.csv` from raw nanosecond logs. `order.csv`
@@ -35,8 +38,9 @@ NanoUI rows in the table use the corrected recapture in
 files in this directory are invalid diagnostics and are excluded from
 `final-summary.csv`. The final nine-cell summary combines the six valid GPUI/MyGo
 cells with the three corrected NanoUI cells. These are measurements of this
-exact fixture and host, not universal framework rankings. The sample sizes are 100 for latency percentiles and only
-five for memory/thread medians. The click endpoint is the X server drawable's
+exact fixture and host, not universal framework rankings. Startup percentiles
+use n=100 launches per cell; click percentiles use n=1,000 clicks per cell.
+Idle RSS/PSS/thread medians use n=5 samples per cell. The click endpoint is the X server drawable's
 exact marker-pixel transition after XTEST press/release. It includes application
 input/event/render response and X server observation, but excludes vblank,
 compositor presentation, scanout, and photons. The observer waits on X socket
