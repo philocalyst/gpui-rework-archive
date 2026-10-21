@@ -1,0 +1,66 @@
+{
+  "source_commit": "c894ff7c410b404dabc744e35090d6fc7e062940",
+  "isolated_source_commit": "d5325f6480",
+  "checks": [
+    {
+      "name": "default",
+      "command": "cargo test --locked --offline -p gpui",
+      "cwd": "/root/gpui-semantic-stream/reactivity",
+      "environment": {
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_TARGET_DIR": "/root/gpui-ce3/reactivity/target"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 298,
+      "log": "default.txt",
+      "sha256": "d0d006d319e123d1242f94ccc7bbfd0bc381260de0fedd9cd369beb501720b26"
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy --locked --offline -p gpui --features x11,wayland --all-targets -- -D warnings",
+      "cwd": "/root/gpui-semantic-stream/reactivity",
+      "environment": {
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_TARGET_DIR": "/root/gpui-ce3/reactivity/target"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "clippy.txt",
+      "sha256": "8829f813abffb6eb52e05a53ab2765fc34509cb8438af85d4070232b0c5b48cb"
+    },
+    {
+      "name": "format",
+      "command": "cargo fmt -p gpui --check",
+      "cwd": "/root/gpui-semantic-stream/reactivity",
+      "environment": {
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_TARGET_DIR": "/root/gpui-ce3/reactivity/target"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "format.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "layout",
+      "command": "cargo test --locked --offline -p gpui --lib runtime::parent_tests::compact_parent_covers_the_admitted_index_domain -- --exact --nocapture",
+      "cwd": "/root/gpui-semantic-stream/reactivity",
+      "environment": {
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_TARGET_DIR": "/root/gpui-ce3/reactivity/target"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "layout.txt",
+      "sha256": "192bf33c3ab4b6a24fb5797b6451e6337ea46c5530eac71a978c1707b2ac8769"
+    }
+  ],
+  "layouts_bytes": {
+    "Node": 40,
+    "Presented": 80,
+    "RuntimeHeader": 2384,
+    "TextSite": 80
+  },
+  "allocation_claim": "32 complete semantic writes to std::io::sink, zero framework allocations; caller writer allocation is outside this bound. No retained tree or record added.",
+  "scope": "Borrowed Part semantic projection, not a byte dump of platform-specific AccessKit nodes or a source/replay persistence format. Overlapping case counts are not additive. No startup, click latency or RSS claim."
+}
