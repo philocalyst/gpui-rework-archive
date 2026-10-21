@@ -115,6 +115,8 @@ fn overlap_survives_scroll_reorder_and_prepend_but_offscreen_target_never_revive
     assert_eq!(win.root().unwrap().selected, Some(ItemKey::new(101)));
     win.update(|m| m.reverse = true).unwrap();
     assert_eq!(item(&win, 101), kept);
+    win.activate(kept).unwrap();
+    assert_eq!(win.root().unwrap().selected, Some(ItemKey::new(101)));
     win.scroll_to_key(list, ItemKey::new(100)).unwrap();
     assert_ne!(item(&win, 100), departed);
     assert_eq!(win.activate(departed), Err(Error::StaleTarget));

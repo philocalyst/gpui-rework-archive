@@ -1099,8 +1099,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn snapshot(&self) -> Result<Snapshot, Error> {
         self.snapshot_with_targets(false)
     }
-    /// Inspect every live site, including noninteractive containers. Address
-    /// records are allocated only when explicitly requested by an inspector.
+    /// Inspect the acknowledged sheet, including targets for current
+    /// noninteractive sites. Targets are derived without an address table.
     pub fn inspect(&self) -> Result<Snapshot, Error> {
         self.snapshot_with_targets(true)
     }
@@ -1109,11 +1109,21 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut nodes = Vec::with_capacity(runtime.presented.len());
         for index in 0..runtime.presented.len() {
             let node = &runtime.presented[index];
-            let actionable = runtime.by_identity.get(&node.identity).is_some_and(|&i| {
-                runtime.nodes[i].handler.is_some() || runtime.nodes[i].kind() == NodeKind::Input
-            });
             let identity = node.identity;
-            let mut snapshot = SnapshotNode {
+            // A destructor panic may interrupt destructive reconciliation.
+            // The old sheet remains diagnostic; current addresses do not.
+            let target = if runtime.logical_valid
+                && !runtime.poisoned
+                && let Some(&index) = runtime.by_identity.get(&identity)
+                && (all_targets
+                    || runtime.nodes[index].handler.is_some()
+                    || runtime.nodes[index].kind() == NodeKind::Input)
+            {
+                Some(runtime.sites.target(identity))
+            } else {
+                None
+            };
+            let snapshot = SnapshotNode {
                 identity,
                 parent: node.parent.index(),
                 role: format!("{:?}", node.kind.role()),
@@ -1128,15 +1138,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     .transform
                     .get()
                     .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty]),
-                target: None,
+                target,
             };
-            if (all_targets || actionable)
-                && runtime.by_identity.contains_key(&identity)
-                && runtime.logical_valid
-                && !runtime.poisoned
-            {
-                snapshot.target = Some(runtime.sites.target(identity));
-            }
             nodes.push(snapshot);
         }
         Ok(Snapshot {
