@@ -114,6 +114,59 @@ pub mod ui {
         integer
     }
 
+    pub fn pair_square(value: Vec2f) -> Vec2f {
+        pair_add(
+            pair_product(value.x, value.x),
+            pair_add(
+                pair_product(2.0 * value.x, value.y),
+                pair_product(value.y, value.y),
+            ),
+        )
+    }
+
+    pub fn corner_distance(position: Vec2f, extent: f32, radius: f32) -> Vec2f {
+        let left = pair_add(vec2f(radius, 0.0), -position);
+        let right = pair_add(position, -pair_sum(extent, -radius));
+        let mut distance = vec2f(0.0, 0.0);
+        if pair_negative(-left) {
+            distance = left;
+        }
+        if pair_negative(pair_add(distance, -right)) {
+            distance = right;
+        }
+        distance
+    }
+
+    pub fn rounded_contains(draw: Draw, point: Vec2f, radius: f32, scale: f32) -> bool {
+        let correction = get!(CORRECTIONS)[draw.atlas.w as usize];
+        let x = pair_add(
+            pair_dot(draw.inverse_x.xyz(), correction.x.xyz(), point),
+            vec2f(-draw.local.x, 0.0),
+        );
+        let y = pair_add(
+            pair_dot(draw.inverse_y.xyz(), correction.y.xyz(), point),
+            vec2f(-draw.local.y, 0.0),
+        );
+        if pair_negative(x)
+            || pair_negative(y)
+            || !pair_negative(pair_add(x, vec2f(-draw.local.z, 0.0)))
+            || !pair_negative(pair_add(y, vec2f(-draw.local.w, 0.0)))
+        {
+            return false;
+        }
+        let dx = pair_scale(corner_distance(x, draw.local.z, radius), scale);
+        let dy = pair_scale(corner_distance(y, draw.local.w, radius), scale);
+        let r = radius * scale;
+        let residual = pair_add(
+            pair_add(pair_square(dx), pair_square(dy)),
+            -pair_product(r, r),
+        );
+        if pair_negative(-residual) {
+            return false;
+        }
+        true
+    }
+
     pub fn outside_clip_max(
         point: f32,
         start: f32,
@@ -218,6 +271,17 @@ pub mod ui {
         {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
+        if (draw.atlas.x & 0x40000000) != 0 && (draw.atlas.x & 0x80000000) == 0 {
+            if rounded_contains(
+                draw,
+                point,
+                bitcast_f32(draw.atlas.y),
+                bitcast_f32(draw.atlas.z),
+            ) {
+                return draw.color;
+            }
+            return vec4f(0.0, 0.0, 0.0, 0.0);
+        }
         let h = vec3f(point.x, point.y, 1.0);
         let local = vec2f(dot(draw.inverse_x.xyz(), h), dot(draw.inverse_y.xyz(), h));
         let position = local - draw.local.xy();
@@ -277,6 +341,11 @@ pub mod ui {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
         if is_image {
+            if (draw.atlas.y & 16) != 0
+                && !rounded_contains(draw, point, draw.color.x, draw.color.y)
+            {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
             if linear {
                 let a = image_texel(draw, cell, dimensions);
                 let b = image_texel(draw, cell + vec2f(1.0, 0.0), dimensions);

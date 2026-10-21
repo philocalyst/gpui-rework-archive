@@ -40,6 +40,11 @@ type Projected<'a> = (
     Option<crate::list::RowMap>,
 );
 pub(crate) enum ElementExtra<'a> {
+    Geometry {
+        style: crate::property::GeometryStyle,
+        inner: Option<Box<ElementExtra<'a>>>,
+        semantic: Option<Box<Annotations<'a>>>,
+    },
     Image {
         spec: crate::image::ImageSpec<'a>,
         semantic: Option<Box<Annotations<'a>>>,
@@ -57,14 +62,56 @@ pub(crate) enum ElementExtra<'a> {
     },
 }
 impl<'a> ElementExtra<'a> {
+    pub fn base_mut(&mut self) -> &mut Self {
+        match self {
+            Self::Geometry {
+                inner: Some(inner), ..
+            } => inner.base_mut(),
+            _ => self,
+        }
+    }
+    pub fn set_geometry(&mut self, value: crate::property::GeometryStyle) {
+        match self {
+            Self::Image { spec, .. } => spec.geometry = value,
+            Self::Geometry { style, .. } => *style = value,
+            _ => {
+                let previous = std::mem::replace(
+                    self,
+                    Self::Geometry {
+                        style: value,
+                        inner: None,
+                        semantic: None,
+                    },
+                );
+                if let Self::Semantic(annotations) = previous {
+                    if let Self::Geometry { semantic, .. } = self {
+                        *semantic = Some(Box::new(annotations));
+                    }
+                } else if let Self::Geometry { inner, .. } = self {
+                    *inner = Some(Box::new(previous));
+                }
+            }
+        }
+    }
     pub fn list_mut(&mut self) -> Option<&mut crate::list::ListSpec<'a>> {
         match self {
+            Self::Geometry { inner, .. } => inner.as_deref_mut().and_then(Self::list_mut),
             Self::List(list) => Some(list),
             Self::Combined { list, .. } => Some(list),
             Self::Semantic(_) | Self::Reader { .. } | Self::Image { .. } => None,
         }
     }
     pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
+        if let Self::Geometry {
+            inner, semantic, ..
+        } = self
+        {
+            return if let Some(inner) = inner {
+                inner.annotations_mut()
+            } else {
+                semantic.get_or_insert_with(Default::default)
+            };
+        }
         if matches!(self, Self::List(_)) {
             let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
             if let Self::List(list) = previous {
@@ -79,7 +126,7 @@ impl<'a> ElementExtra<'a> {
                 semantic.get_or_insert_with(Default::default)
             }
             Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
-            Self::List(_) => unreachable!(),
+            Self::List(_) | Self::Geometry { .. } => unreachable!(),
         }
     }
     pub fn into_parts(
@@ -89,8 +136,24 @@ impl<'a> ElementExtra<'a> {
         Annotations<'a>,
         Option<Projected<'a>>,
         Option<crate::image::ImageSpec<'a>>,
+        Option<crate::property::GeometryStyle>,
     ) {
         match self {
+            Self::Geometry {
+                style,
+                inner,
+                semantic,
+            } => {
+                let (list, annotations, projector, image, _) =
+                    inner.map(|inner| inner.into_parts()).unwrap_or_default();
+                (
+                    list,
+                    semantic.map(|s| *s).unwrap_or(annotations),
+                    projector,
+                    image,
+                    Some(style),
+                )
+            }
             Self::Reader {
                 projector,
                 semantic,
@@ -100,16 +163,18 @@ impl<'a> ElementExtra<'a> {
                 semantic.map(|s| *s).unwrap_or_default(),
                 Some((projector, map)),
                 None,
+                None,
             ),
             Self::Image { spec, semantic } => (
                 None,
                 semantic.map(|s| *s).unwrap_or_default(),
                 None,
                 Some(spec),
+                Some(spec.geometry),
             ),
-            Self::List(list) => (Some(list), Annotations::default(), None, None),
-            Self::Semantic(semantic) => (None, semantic, None, None),
-            Self::Combined { list, semantic } => (Some(*list), semantic, None, None),
+            Self::List(list) => (Some(list), Annotations::default(), None, None, None),
+            Self::Semantic(semantic) => (None, semantic, None, None, None),
+            Self::Combined { list, semantic } => (Some(*list), semantic, None, None, None),
         }
     }
 }

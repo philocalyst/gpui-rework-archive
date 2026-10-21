@@ -11,6 +11,7 @@ struct Context<'a> {
     nodes: &'a [Presented],
     focused: Option<Target>,
     metadata: Option<&'a super::metadata::Sheet>,
+    geometry: Option<&'a super::geometry::Geometry>,
 }
 impl<'a> Context<'a> {
     fn new<M>(runtime: &'a Runtime<M>) -> Self {
@@ -18,6 +19,10 @@ impl<'a> Context<'a> {
             sites: &runtime.sites,
             nodes: &runtime.presented,
             focused: runtime.focused,
+            geometry: runtime
+                .metadata
+                .as_ref()
+                .and_then(|m| m.geometry.as_deref()),
             metadata: runtime
                 .metadata
                 .as_ref()
@@ -167,6 +172,13 @@ impl<'a> Part<'a> {
             .flatten()
     }
     /// Physical viewport-clipped bounds of the acknowledged presentation.
+    /// Uniform local radius from this acknowledged sheet, independent of a
+    /// newer logical inspector edit or an unacknowledged visual candidate.
+    pub fn corner_radius(self) -> f32 {
+        self.context
+            .geometry
+            .map_or(0.0, |g| g.frozen_radius(self.node.identity))
+    }
     pub fn bounds(self) -> Rect {
         self.node.bounds
     }

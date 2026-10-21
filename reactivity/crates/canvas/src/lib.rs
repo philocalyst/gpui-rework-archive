@@ -8,7 +8,7 @@ mod image;
 mod text;
 pub use canvas::{
     Canvas, CanvasScene, GlyphMask, PreparedDraw, PreparedGroup, PreparedPlacement, PreparedScene,
-    PreparedSource, RenderStats, SceneStorage, sampled_rect_clip,
+    PreparedSource, RenderStats, SceneStorage, rounded_rect_contains, sampled_rect_clip,
 };
 pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
@@ -16,7 +16,7 @@ pub use color::{
 };
 pub use damage::DamageRegion;
 pub use image::{
-    AlphaMode, Image, ImageKey, ImagePixels, ImageProfile, ImageSampling, ImageView,
+    AlphaMode, Image, ImageKey, ImageOptions, ImagePixels, ImageProfile, ImageSampling, ImageView,
     MAX_IMAGE_SCENE_BYTES,
 };
 pub use text::{
