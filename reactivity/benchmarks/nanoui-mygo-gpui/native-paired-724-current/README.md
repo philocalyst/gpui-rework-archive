@@ -1,15 +1,18 @@
-# Frozen-724 versus current-GPUI native capture (prepared, not run)
+# Frozen-724 versus current-GPUI native capture
 
-This is a fail-closed runner for the isolated GPUI parent/candidate comparison.
-It runs only after root changes both reviewed preflight records to the exact
-line `status=pass` and issues a quiet-window START. Do not run it during builds,
-AT/native tests, or another capture.
+This is the fail-closed runner and record for the completed isolated GPUI
+parent/candidate comparison. The full raw campaign is in
+[`results/paired-724-current-dcdadf4-20261021/README.md`](results/paired-724-current-dcdadf4-20261021/README.md).
+The raw sample files, order, manifest, and derived summary are checked by that
+directory's `sha256.txt`.
 
 Before capture, set all required path and SHA variables and run the script with
 `LUNA_GUARD_ONLY=1`. That mode validates both sources, manifests, binaries,
 observer identity, display socket, fixture, and all six workload/source cells,
 then exits without creating a results directory or launching an observer. Root
-must inspect that output before a timed run.
+reviewed this guard mode before the accepted run. A rerun must use a new unique
+campaign ID and a fresh root-reviewed preflight status; this document records
+the exact guard-only invocation used to revalidate the committed selectors.
 
 The baseline is the published cleanroom build at GPUI
 `724ece73cb665a1f6d83e97ae7d431eee11a887a`; the candidate is the cleanroom
@@ -59,3 +62,29 @@ preflights observed `ReferenceCpu` for both. AccessKit is compiled in both;
 the latest current preflight found no activatable session-bus AT-SPI service,
 so the capture must not be described as an active assistive-technology run.
 Fonts and renderer differences from NanoUI/MyGo are outside this pair.
+
+## Revalidate the committed selectors
+
+From `/root/gpui-bench-luna/reactivity`, with the private persistent Xvfb `:97`
+running, this command runs all six source/binary/preflight guards and no
+application or observer. It requires the exact worktrees, manifests, reviewed
+preflight records, and executable hashes used by the accepted campaign:
+
+```sh
+LUNA_PAIR_ID=guard-only-724-current-dcdadf4-20261021 \
+LUNA_DISPLAY=:97 \
+LUNA_BASELINE_BINARY=/tmp/gpui-luna-current-native-target/release/examples/luna_bench \
+LUNA_BASELINE_SHA=795b54cc4c8feef2d39fb4f73e4fd6b7cf2799b45fadec192888564fb85b6a91 \
+LUNA_BASELINE_SOURCE_TREE=/root/gpui-current-native-bench/reactivity \
+LUNA_BASELINE_MANIFEST=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-default-724ece73/build-manifest.txt \
+LUNA_BASELINE_PREFLIGHT_RECORD=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-default-724ece73/preflights/private97-20261021-click/record.txt \
+LUNA_CURRENT_BINARY=/tmp/gpui-current-dcdadf4-luna-bench-9f26a0f112e1b34c67ad0ad57649037f5c135d776e05d77deaeeacc08b81785f \
+LUNA_CURRENT_SHA=9f26a0f112e1b34c67ad0ad57649037f5c135d776e05d77deaeeacc08b81785f \
+LUNA_CURRENT_SOURCE_TREE=/root/gpui-current-main-bench/reactivity \
+LUNA_CURRENT_MANIFEST=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-current-dcdadf4/build-manifest.txt \
+LUNA_CURRENT_PREFLIGHT_RECORD=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-current-dcdadf4/preflights/private99-dcdadf4-current-v2/record.txt \
+LUNA_OBSERVER_BINARY=/tmp/gpui-bench-observer-target/release/luna-x11-observer \
+LUNA_OBSERVER_SHA=b4f84c80caa854d974643a2c20823537601a04745a7bcf320be356732b42f88b \
+LUNA_GUARD_ONLY=1 \
+./benchmarks/nanoui-mygo-gpui/native-paired-724-current/capture-paired.sh
+```
