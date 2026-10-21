@@ -1,0 +1,116 @@
+{
+  "source_commit": "c11e89da1ec292a6ef7f0203e3929f9138e6fe04",
+  "scope": "Dense current routes and reused cold viewport owner, actual Linux X11 Todo/Library and AccessKit schema; prototype source, not integrated main.",
+  "checks": [
+    {
+      "check": "owners-native-schema",
+      "argv": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--tests"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 79.584,
+      "log": "owners-native-schema.txt",
+      "log_sha256": "26a377a61e16928a6158d7fae7f434466c69e02a71c4dd5dd6fff472e4c25c5f",
+      "passed_tests": 261
+    },
+    {
+      "check": "native-todo",
+      "argv": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_todo_port",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 77.198,
+      "log": "native-todo.txt",
+      "log_sha256": "cb0bfce983e9f57e4dd4e6d212560f6160e8a5f295ecfa34fd4de2eebe6b5a21",
+      "passed_tests": 1
+    },
+    {
+      "check": "native-library",
+      "argv": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_library_250k",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 6.245,
+      "log": "native-library.txt",
+      "log_sha256": "379f4ad52d66e1756276725c1bc566a95ec5cd1d14b1099ca22bfe52a756b86f",
+      "passed_tests": 1
+    },
+    {
+      "check": "clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--all-targets",
+        "--features",
+        "x11,wayland",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 69.85,
+      "log": "clippy.txt",
+      "log_sha256": "4a5fe36fa7076f9ea9192134f7a4c792a5b45681e503cc7cdb033c8e6de49c2d"
+    },
+    {
+      "check": "fmt",
+      "argv": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "-p",
+        "gpui",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.421,
+      "log": "fmt.txt",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

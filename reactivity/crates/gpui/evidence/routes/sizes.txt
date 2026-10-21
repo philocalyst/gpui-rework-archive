@@ -1,0 +1,187 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running unittests src/lib.rs (/tmp/gpui-pan-viewports-target/debug/deps/gpui-aebc76ce785e8e01)
+
+running 1 test
+Parent=4 Map=24 Node=24 Presented=80
+TextLayout=56 Shaped=64 OptionShaped=64 RuntimeHeader=2352 TextSite=80 OptionTextSite=80
+test runtime::parent_tests::compact_parent_covers_the_admitted_index_domain ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 81 filtered out; finished in 0.00s
+
+     Running tests/acceptance.rs (/tmp/gpui-pan-viewports-target/debug/deps/acceptance-eb96a1480589e52f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/application.rs (/tmp/gpui-pan-viewports-target/debug/deps/application-af0cd8cf0162c48f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/color_packing.rs (/tmp/gpui-pan-viewports-target/debug/deps/color_packing-7fadef0972576c54)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/components.rs (/tmp/gpui-pan-viewports-target/debug/deps/components-20b9a9922029f1e8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+     Running tests/dpi.rs (/tmp/gpui-pan-viewports-target/debug/deps/dpi-dceee23f592522d9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/field_identity.rs (/tmp/gpui-pan-viewports-target/debug/deps/field_identity-349bd30c0f7a7ff3)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/focus.rs (/tmp/gpui-pan-viewports-target/debug/deps/focus-f1235275c30f1574)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/identity_recovery.rs (/tmp/gpui-pan-viewports-target/debug/deps/identity_recovery-3551a063aecbf042)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/immutable_text.rs (/tmp/gpui-pan-viewports-target/debug/deps/immutable_text-c9a1acda774f63d0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/inspector.rs (/tmp/gpui-pan-viewports-target/debug/deps/inspector-9b7c3e37bc717f78)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/library.rs (/tmp/gpui-pan-viewports-target/debug/deps/library-de889fb4dab0cb31)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests/lists.rs (/tmp/gpui-pan-viewports-target/debug/deps/lists-db224b0f09eeacb4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+
+     Running tests/ports.rs (/tmp/gpui-pan-viewports-target/debug/deps/ports-bd4579fef75fab37)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/presentation.rs (/tmp/gpui-pan-viewports-target/debug/deps/presentation-4abebb91dc398f3a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/queries.rs (/tmp/gpui-pan-viewports-target/debug/deps/queries-78490f8869924773)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/question_cost.rs (/tmp/gpui-pan-viewports-target/debug/deps/question_cost-8511db1397092ce8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/question_mailbox.rs (/tmp/gpui-pan-viewports-target/debug/deps/question_mailbox-44bd91105068972d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/question_storage.rs (/tmp/gpui-pan-viewports-target/debug/deps/question_storage-ad812fbadcaabaa2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/questions.rs (/tmp/gpui-pan-viewports-target/debug/deps/questions-2070c8bb32a8f549)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.00s
+
+     Running tests/remote.rs (/tmp/gpui-pan-viewports-target/debug/deps/remote-9bb98ab6afa770fa)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+     Running tests/retained_styles.rs (/tmp/gpui-pan-viewports-target/debug/deps/retained_styles-ba53bf9543fa2705)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/routes.rs (/tmp/gpui-pan-viewports-target/debug/deps/routes-3a98b05057027a5b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests/runtime.rs (/tmp/gpui-pan-viewports-target/debug/deps/runtime-3f1441bc5b083b44)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+     Running tests/search_library.rs (/tmp/gpui-pan-viewports-target/debug/deps/search_library-9acf22e074722b99)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/semantic_metadata.rs (/tmp/gpui-pan-viewports-target/debug/deps/semantic_metadata-c9dcddf6f7eee60d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+     Running tests/semantics.rs (/tmp/gpui-pan-viewports-target/debug/deps/semantics-61fa4b4b91046989)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/text_cache.rs (/tmp/gpui-pan-viewports-target/debug/deps/text_cache-3fc32add0ce238ae)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/unicode_text.rs (/tmp/gpui-pan-viewports-target/debug/deps/unicode_text-e5482a5c205709ba)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
