@@ -50,7 +50,7 @@ impl<'a> Part<'a> {
         self.context.sites.target(self.node.identity)
     }
     pub fn parent(self) -> Option<Target> {
-        self.node.parent.map(|index| {
+        self.node.parent.index().map(|index| {
             self.context
                 .sites
                 .target(self.context.nodes[index].identity)
@@ -95,7 +95,7 @@ impl<'a> Part<'a> {
     /// Absolute node-local to window-physical transform, already including
     /// ancestors and DPI. Applying it again as a parent transform is incorrect.
     pub fn transform(self) -> Option<crate::Affine> {
-        self.node.transform
+        self.node.transform.get()
     }
     /// Conservative full window-physical bounds, derived only when requested.
     /// Native adapters add the window-to-screen mapping. This differs from
@@ -104,6 +104,7 @@ impl<'a> Part<'a> {
     pub fn unclipped_bounds(self) -> Option<Rect> {
         self.node
             .transform
+            .get()
             .and_then(|map| gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node.rect))
     }
 }
@@ -158,7 +159,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let following = &runtime.presented[root + 1..];
         let len = following
             .iter()
-            .position(|node| node.parent.is_none_or(|parent| parent < root))
+            .position(|node| node.parent.index().is_none_or(|parent| parent < root))
             .unwrap_or(following.len());
         Ok(&runtime.presented[root..root + 1 + len])
     }

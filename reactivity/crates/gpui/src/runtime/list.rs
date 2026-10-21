@@ -336,7 +336,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             if node.kind == NodeKind::List {
                 break runtime.sites.target(node.identity);
             }
-            cursor = node.parent.ok_or(Error::NotHittable)?;
+            cursor = node.parent.index().ok_or(Error::NotHittable)?;
         };
         self.scroll(target, delta)
     }
@@ -355,6 +355,7 @@ impl<M: View + 'static> Runtime<M> {
         if !node.bounds.contains(point)
             || !node
                 .transform
+                .get()
                 .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
         {
             return false;
@@ -362,17 +363,18 @@ impl<M: View + 'static> Runtime<M> {
         if self.lists.is_empty() {
             return true;
         }
-        let mut cursor = node.parent;
+        let mut cursor = node.parent.index();
         while let Some(index) = cursor {
             let node = &self.presented[index];
             if matches!(node.kind, NodeKind::List | NodeKind::ListItem)
                 && !node
                     .transform
+                    .get()
                     .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
             {
                 return false;
             }
-            cursor = node.parent;
+            cursor = node.parent.index();
         }
         true
     }
@@ -381,7 +383,7 @@ impl<M: View + 'static> Runtime<M> {
             if self.nodes[index].kind == NodeKind::ListItem {
                 return true;
             }
-            match self.nodes[index].parent {
+            match self.nodes[index].parent.index() {
                 Some(parent) => index = parent,
                 None => return false,
             }
