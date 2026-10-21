@@ -108,6 +108,15 @@ macro_rules! make_dispatch {
                 }
             }
 
+            fn present_solid(&mut self, color: u32) -> Result<bool, SoftBufferError> {
+                match self {
+                    $(
+                        $(#[$attr])*
+                        Self::$name(inner) => inner.present_solid(color),
+                    )*
+                }
+            }
+
             fn buffer_mut(&mut self) -> Result<BufferDispatch<'_, D, W>, SoftBufferError> {
                 match self {
                     $(

@@ -115,6 +115,28 @@ impl<D: HasDisplayHandle, W: HasWindowHandle> Surface<D, W> {
         self.surface_impl.resize(width, height)
     }
 
+    /// Try presenting a uniform image with no client framebuffer.
+    ///
+    /// `color` is exactly 0x00RRGGBB; a nonzero high byte is rejected before
+    /// submission. Call [`Surface::resize`] first. `Ok(true)` means the backend
+    /// accepted this presentation, not that a monitor has scanned it out.
+    /// `Ok(false)` means unsupported and leaves presentation/buffer age unchanged;
+    /// use [`Surface::buffer_mut`] and ordinary buffer presentation instead.
+    /// A successful solid presentation invalidates the next buffer's age.
+    ///
+    /// Currently supported on X11 using a server-side rectangle fill. Other
+    /// backends return `Ok(false)`. X11 client pixel storage is allocated lazily
+    /// by `buffer_mut`, and released by successful solid presentation.
+    pub fn present_solid(&mut self, color: u32) -> Result<bool, SoftBufferError> {
+        if color & 0xff00_0000 != 0 {
+            return Err(SoftBufferError::PlatformError(
+                Some("solid color must be 0x00RRGGBB".into()),
+                None,
+            ));
+        }
+        self.surface_impl.present_solid(color)
+    }
+
     /// Copies the window contents into a buffer.
     ///
     /// ## Platform Dependent Behavior

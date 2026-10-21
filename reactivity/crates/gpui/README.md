@@ -123,3 +123,28 @@ It submits actual surface frames, exercises the keyboard/pointer adapter,
 resizes, edits a typed inspector property and suspends/recreates the surface.
 The model and targets survive; unsupported shaping repairs through backspace.
 The GPU crate has separate actual readback conformance tests.
+
+The CPU host first queries the canonical zero-command solid-color certificate.
+On X11 it can present that opaque sRGB SDR color using a checked server fill,
+without allocating a client transport image. Other scenes/backends use the
+ordinary software buffer. Both paths acknowledge the exact prepared owner token
+only after their actual native presentation succeeds. An unsupported solid hook
+does not acknowledge anything.
+
+The same native test now checks complete X11 window readback for solid colors,
+regular gradient images and damaged updates, invalid-color admission, buffer
+age across both transitions, actual resize and suspend/resume. It reports
+`GPUI_SOLID_MEMORY` measurements of the client's named softbuffer SHM mappings.
+These exclude diagnostic readback vectors, the server's window storage and the
+OS compositor. X11's transient 4KiB SHM capability probe is unchanged. Both
+MIT-SHM and disabled-MIT-SHM wire presentation are exercised independently;
+only the former has a client SHM mapping to measure.
+
+[Recorded mapping measurements](evidence-native-solid.csv) on Xvfb 21.1.24 at
+800×600 show 2,097,152 mapped bytes, 1,876 KiB RSS and 938 KiB PSS for the ordinary
+buffer after a server readback barrier. Initial solid presentation and the return
+to solid both retain zero client SHM mappings. Actual resize to 400×300 and
+suspend/resume remain at zero. These are transport-mapping measurements in one
+native test process, not whole-application memory or startup-latency claims.
+The wire rows measure SHM only; ordinary wire presentation still owns a pixel
+vector until solid presentation releases it.

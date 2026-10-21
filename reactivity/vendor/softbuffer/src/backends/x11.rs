@@ -329,11 +329,8 @@ impl<D: HasDisplayHandle + ?Sized, W: HasWindowHandle> SurfaceInterface<D, W> fo
 
         if self.size != Some((width, height)) {
             self.buffer_presented = false;
-            self.buffer
-                .resize(self.display.connection(), width.get(), height.get())
-                .swbuf_err("Failed to resize X11 buffer")?;
-
-            // We successfully resized the buffer.
+            // Pixel storage is only needed if buffer_mut is requested. A solid
+            // server-side frame has no client-sized framebuffer to allocate.
             self.size = Some((width, height));
         }
 
@@ -345,9 +342,60 @@ impl<D: HasDisplayHandle + ?Sized, W: HasWindowHandle> SurfaceInterface<D, W> fo
 
         // Finish waiting on the previous `shm::PutImage` request, if any.
         self.buffer.finish_wait(self.display.connection())?;
+        let (width, height) = self
+            .size
+            .expect("Must set size before calling buffer_mut()");
+        self.buffer
+            .resize(self.display.connection(), width.get(), height.get())
+            .swbuf_err("Failed to resize X11 buffer")?;
 
         // We can now safely call `buffer_mut` on the buffer.
         Ok(BufferImpl(self))
+    }
+
+    fn present_solid(&mut self, color: u32) -> Result<bool, SoftBufferError> {
+        let (width, height) = self.size.ok_or_else(|| {
+            SoftBufferError::PlatformError(
+                Some("Must set size before solid presentation".into()),
+                None,
+            )
+        })?;
+        let connection = self.display.connection();
+        // An unbuffered frame cannot advance the history of stale pixel memory.
+        // Invalidate before any fallible operation that can affect visibility.
+        self.buffer_presented = false;
+        self.buffer.release(connection)?;
+        #[cfg(target_endian = "little")]
+        let own_order = ImageOrder::LSB_FIRST;
+        #[cfg(target_endian = "big")]
+        let own_order = ImageOrder::MSB_FIRST;
+        // GC pixels are protocol integers, whereas put_image sends raw native
+        // bytes. Match supported_visuals' opposite-image-endian mask policy.
+        let pixel = if connection.setup().image_byte_order == own_order {
+            color
+        } else {
+            color.swap_bytes()
+        };
+        connection
+            .change_gc(self.gc, &xproto::ChangeGCAux::new().foreground(pixel))
+            .swbuf_err("Failed to send solid color")?
+            .check()
+            .swbuf_err("Failed to set solid color")?;
+        connection
+            .poly_fill_rectangle(
+                self.window,
+                self.gc,
+                &[xproto::Rectangle {
+                    x: 0,
+                    y: 0,
+                    width: width.get(),
+                    height: height.get(),
+                }],
+            )
+            .swbuf_err("Failed to send solid presentation")?
+            .check()
+            .swbuf_err("Failed to present solid color")?;
+        Ok(true)
     }
 
     fn fetch(&mut self) -> Result<Vec<u32>, SoftBufferError> {
@@ -527,6 +575,24 @@ impl<D: HasDisplayHandle + ?Sized, W: HasWindowHandle + ?Sized> BufferInterface
 }
 
 impl Buffer {
+    /// Release our backing only after the server has finished its previous read.
+    fn release(&mut self, conn: &impl Connection) -> Result<(), SoftBufferError> {
+        self.finish_wait(conn)?;
+        match self {
+            Buffer::Shm(shm) => {
+                if let Some((_, id)) = &shm.seg {
+                    conn.shm_detach(*id)
+                        .swbuf_err("Failed to send SHM detach")?
+                        .check()
+                        .swbuf_err("Failed to detach inactive SHM buffer")?;
+                    shm.seg = None;
+                }
+            }
+            Buffer::Wire(wire) => wire.0 = Vec::new(),
+        }
+        Ok(())
+    }
+
     /// Resize the buffer to the given size.
     fn resize(
         &mut self,
