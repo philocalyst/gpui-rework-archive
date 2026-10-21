@@ -1,0 +1,15 @@
+X11_VISUAL,33,16711680,65280,255
+X11_SCREEN,1280,800,325,203,24
+2026/10/21 16:38:37 mygo: native UI draws without the GPU: there is none
+STARTUP,0,3844604168,4292613150
+WINDOW_GEOMETRY,0,4194306,240,100,800,600,240,100,24
+SCREENSHOT,0,/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-default-724ece73/preflights/private97-20261021/mygo-eager-0.ppm
+PREFLIGHT_TEXT,0,button_dark_pixels=598,first_row_dark_pixels=0
+PREFLIGHT_ROWS,0,app=mygo,mode=eager,requested=0,visible_ids=none,materialized_expected=0,viewport=784x530,row_height=24
+WINDOW,0,800,600
+STARTUP_P50_NS,1,3844604168
+STARTUP_P95_NS,1,3844604168
+STARTUP_P99_NS,1,3844604168
+CLICK_P50_NS,0,NA
+CLICK_P95_NS,0,NA
+CLICK_P99_NS,0,NA

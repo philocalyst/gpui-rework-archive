@@ -21,15 +21,32 @@ case "$APP" in
     else export LUNA_RENDERER=auto; BIN=/tmp/gpui-bench-gpui-x11; fi
     ;;
   mygo)
-    BIN=/tmp/luna-bench-mygo
+    BIN=${LUNA_MYGO_BINARY:-/tmp/luna-bench-mygo}
     if [[ "$PROFILE" == "cpu-matched" ]]; then export MYGO_GPU=0; else unset MYGO_GPU || true; fi
     if [[ -n "${LUNA_STAGES:-}" ]]; then export MYGO_FRAME_STATS=all; else unset MYGO_FRAME_STATS || true; fi
     ;;
   nanoui)
-    BIN=/root/gpui-bench-luna/comparators/nanoui/zig-out/bin/luna-bench
+    BIN=${LUNA_NANOUI_BINARY:-/root/gpui-bench-luna/comparators/nanoui/zig-out/bin/luna-bench}
     ;;
   *) echo "unknown APP=$APP" >&2; exit 2 ;;
 esac
+if [[ "${LUNA_REQUIRE_BINARY_IDENTITY:-0}" == 1 ]]; then
+  case "$APP" in
+    gpui) expected=${LUNA_GPUI_EXPECTED_SHA:-} ;;
+    mygo) expected=${LUNA_MYGO_EXPECTED_SHA:-} ;;
+    nanoui) expected=${LUNA_NANOUI_EXPECTED_SHA:-} ;;
+  esac
+  [[ -n "$expected" ]] || { echo "missing expected binary SHA for $APP" >&2; exit 2; }
+  actual=$(sha256sum "$BIN" | cut -d' ' -f1)
+  [[ "$actual" == "$expected" ]] || {
+    echo "$APP binary identity mismatch: expected $expected, got $actual at $BIN" >&2
+    exit 1
+  }
+  echo "BINARY_IDENTITY,$APP,$BIN,$actual"
+fi
+if [[ "${LUNA_DRY_RUN:-0}" == 1 ]]; then
+  exit 0
+fi
 if [[ "$APP" != gpui ]]; then
   source "$DIR/prepare-runtime.sh"
 fi
