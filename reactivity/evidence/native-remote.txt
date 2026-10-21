@@ -1,157 +1,178 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 37.39s
-     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui-f69bae5e87ace9bf)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.84s
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui-574ecd9c191394a6)
 
 running 1 test
 test native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 98 filtered out; finished in 0.24s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 111 filtered out; finished in 0.14s
 
-     Running tests/acceptance.rs (reactivity/target/debug/deps/acceptance-d6af1c9fde3c02f7)
+     Running tests/acceptance.rs (reactivity/target/debug/deps/acceptance-49cde695ccf13f09)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
 
-     Running tests/application.rs (reactivity/target/debug/deps/application-db0acbe9cb6c75fb)
+     Running tests/application.rs (reactivity/target/debug/deps/application-703f934f8e889c90)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
 
-     Running tests/color_packing.rs (reactivity/target/debug/deps/color_packing-9a266cc910da3681)
+     Running tests/color_packing.rs (reactivity/target/debug/deps/color_packing-d84aad773e1d6a66)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running tests/components.rs (reactivity/target/debug/deps/components-f1b9d1c57a974683)
+     Running tests/components.rs (reactivity/target/debug/deps/components-7f4604af7e23a7b6)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
 
-     Running tests/dpi.rs (reactivity/target/debug/deps/dpi-b7facb4cbd6c97a9)
+     Running tests/dpi.rs (reactivity/target/debug/deps/dpi-6c4ed03ec4831e54)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
 
-     Running tests/field_identity.rs (reactivity/target/debug/deps/field_identity-59f316284cd7e7bf)
+     Running tests/field_identity.rs (reactivity/target/debug/deps/field_identity-df655b0227938e3c)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running tests/focus.rs (reactivity/target/debug/deps/focus-d8bb61992524075a)
+     Running tests/focus.rs (reactivity/target/debug/deps/focus-dee56ebcb27884e9)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
 
-     Running tests/identity_recovery.rs (reactivity/target/debug/deps/identity_recovery-e971a0be49ee343e)
+     Running tests/identity_recovery.rs (reactivity/target/debug/deps/identity_recovery-d351dad1673a0cac)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running tests/immutable_text.rs (reactivity/target/debug/deps/immutable_text-6dc446364fbc0aa0)
+     Running tests/immutable_text.rs (reactivity/target/debug/deps/immutable_text-73d23ca47dbf3185)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
 
-     Running tests/inspector.rs (reactivity/target/debug/deps/inspector-2837324e3245d2fd)
+     Running tests/inspector.rs (reactivity/target/debug/deps/inspector-9e879b389df28eea)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
 
-     Running tests/library.rs (reactivity/target/debug/deps/library-88f02bab102327bb)
+     Running tests/library.rs (reactivity/target/debug/deps/library-88b895ae85ef37da)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
 
-     Running tests/lists.rs (reactivity/target/debug/deps/lists-77fa990860a17ddd)
+     Running tests/lists.rs (reactivity/target/debug/deps/lists-a8ccace64d27d272)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
 
-     Running tests/ports.rs (reactivity/target/debug/deps/ports-a994eda4c75db0f1)
+     Running tests/ports.rs (reactivity/target/debug/deps/ports-edc372ff1296d918)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
 
-     Running tests/presentation.rs (reactivity/target/debug/deps/presentation-7af4a87ae1c93ed5)
+     Running tests/presentation.rs (reactivity/target/debug/deps/presentation-24a62a97bc77122e)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
 
-     Running tests/queries.rs (reactivity/target/debug/deps/queries-4768a9dc17ed8bf7)
+     Running tests/queries.rs (reactivity/target/debug/deps/queries-e89e5253e964aa15)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
 
-     Running tests/question_cost.rs (reactivity/target/debug/deps/question_cost-01d61cb15716d403)
+     Running tests/question_cost.rs (reactivity/target/debug/deps/question_cost-89f1fa866931cbe6)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running tests/question_mailbox.rs (reactivity/target/debug/deps/question_mailbox-0a7ec90dc3a1d2db)
+     Running tests/question_mailbox.rs (reactivity/target/debug/deps/question_mailbox-8caa23d47a52265c)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
 
-     Running tests/question_storage.rs (reactivity/target/debug/deps/question_storage-ba628ae0780c6a89)
+     Running tests/question_storage.rs (reactivity/target/debug/deps/question_storage-043b950f7c46ddda)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
 
-     Running tests/questions.rs (reactivity/target/debug/deps/questions-526713a136267645)
+     Running tests/questions.rs (reactivity/target/debug/deps/questions-2297fc916821606d)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.00s
 
-     Running tests/remote.rs (reactivity/target/debug/deps/remote-81401730f4cfda69)
+     Running tests/remote.rs (reactivity/target/debug/deps/remote-9b976bc679df1659)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
 
-     Running tests/runtime.rs (reactivity/target/debug/deps/runtime-0b0da3098e1704d2)
+     Running tests/retained_styles.rs (reactivity/target/debug/deps/retained_styles-f8a5f581d7ed26d1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/runtime.rs (reactivity/target/debug/deps/runtime-f6428b5eeea4bc50)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
 
-     Running tests/search_library.rs (reactivity/target/debug/deps/search_library-8206e51abfc0e941)
+     Running tests/search_library.rs (reactivity/target/debug/deps/search_library-c81df7299cf6da7a)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
 
-     Running tests/semantic_metadata.rs (reactivity/target/debug/deps/semantic_metadata-d2414983daa2aaf2)
+     Running tests/semantic_metadata.rs (reactivity/target/debug/deps/semantic_metadata-31d278d448c26e5e)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
 
-     Running tests/semantics.rs (reactivity/target/debug/deps/semantics-61519f4a7c3301f9)
+     Running tests/semantics.rs (reactivity/target/debug/deps/semantics-d8058eb758595dcf)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
 
-     Running tests/text_cache.rs (reactivity/target/debug/deps/text_cache-e7dd2d29a2e66da2)
+     Running tests/text_cache.rs (reactivity/target/debug/deps/text_cache-bda1b53978793909)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/unicode_text.rs (reactivity/target/debug/deps/unicode_text-9639c7b44290fbdf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s

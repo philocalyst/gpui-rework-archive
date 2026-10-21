@@ -1,4 +1,4 @@
-    Finished `release` profile [optimized] target(s) in 0.16s
+    Finished `release` profile [optimized] target(s) in 0.15s
      Running tests/question_credit.rs (reactivity/target/release/deps/question_credit-ab3230a95e8c88a2)
 
 running 3 tests

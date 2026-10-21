@@ -12,7 +12,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 191.507,
+    "elapsed_seconds": 141.082,
     "log": "workspace-debug.txt"
   },
   {
@@ -32,7 +32,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 86.121,
+    "elapsed_seconds": 127.809,
     "log": "workspace-clippy.txt"
   },
   {
@@ -49,7 +49,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 66.436,
+    "elapsed_seconds": 225.888,
     "log": "workspace-release.txt"
   },
   {
@@ -69,7 +69,7 @@
       "loom_protocol"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 7.54,
+    "elapsed_seconds": 8.322,
     "log": "loom.txt"
   },
   {
@@ -89,7 +89,7 @@
       "question_credit"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.293,
+    "elapsed_seconds": 0.342,
     "log": "question-credit.txt",
     "passed_tests": 3
   },
@@ -110,7 +110,7 @@
       "question_mailbox"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.443,
+    "elapsed_seconds": 0.27,
     "log": "question-mailbox.txt",
     "passed_tests": 9
   },
@@ -129,7 +129,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 40.251,
+    "elapsed_seconds": 31.439,
     "log": "native-check.txt"
   },
   {
@@ -147,7 +147,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 13.128,
+    "elapsed_seconds": 5.784,
     "log": "native-minimal-check.txt"
   },
   {
@@ -168,7 +168,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 9.415,
+    "elapsed_seconds": 5.756,
     "log": "native-clippy.txt"
   },
   {
@@ -187,7 +187,7 @@
       "native::accessibility::"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 76.881,
+    "elapsed_seconds": 56.76,
     "log": "accessibility-schema.txt",
     "passed_tests": 20
   },
@@ -205,7 +205,7 @@
       "parallel"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 145.566,
+    "elapsed_seconds": 42.275,
     "log": "parallel-canvas.txt"
   },
   {
@@ -224,7 +224,7 @@
       "retained_layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.221,
+    "elapsed_seconds": 0.517,
     "log": "layout-example.txt"
   },
   {
@@ -263,7 +263,7 @@
       "--check"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 1.296,
+    "elapsed_seconds": 3.099,
     "log": "format.txt"
   },
   {
@@ -282,9 +282,9 @@
       "render"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 9.343,
+    "elapsed_seconds": 28.125,
     "log": "gpu-vulkan.txt",
-    "passed_tests": 19
+    "passed_tests": 20
   },
   {
     "check": "native-x11",
@@ -305,7 +305,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 148.068,
+    "elapsed_seconds": 65.293,
     "log": "native-x11.txt",
     "passed_tests": 1
   },
@@ -328,7 +328,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 38.686,
+    "elapsed_seconds": 12.237,
     "log": "native-remote.txt",
     "passed_tests": 1
   },
@@ -352,7 +352,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.553,
+    "elapsed_seconds": 0.243,
     "log": "native-question.txt",
     "passed_tests": 1
   },
@@ -375,8 +375,32 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 7.364,
+    "elapsed_seconds": 2.542,
     "log": "native-library.txt",
+    "passed_tests": 1
+  },
+  {
+    "check": "native-unicode",
+    "argv": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "x11",
+      "--lib",
+      "native_unicode_keyboard_and_surface_match_complete_cpu_pixels",
+      "--",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.303,
+    "log": "native-unicode.txt",
     "passed_tests": 1
   },
   {
@@ -387,7 +411,7 @@
       "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 7.105,
+    "elapsed_seconds": 4.52,
     "log": "native-atspi.txt",
     "passed_tests": 1
   },
@@ -413,7 +437,7 @@
       "--nocapture"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.493,
+    "elapsed_seconds": 0.303,
     "log": "native-no-bus.txt",
     "passed_tests": 1
   }

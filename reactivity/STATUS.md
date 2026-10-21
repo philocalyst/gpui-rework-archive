@@ -52,18 +52,19 @@ storage and native services remain separately owned.
 
 ## Current verification
 
-[checks.json](evidence/checks.json) records twenty successful gates with exact commands,
-exit status and elapsed time, run against source commit e012ac5aa3:
+[checks.json](evidence/checks.json) records twenty-one successful gates with exact commands,
+exit status and elapsed time, run against source commit 5b0a38b222:
 
-- Debug and release workspace suites: **424 passing cases/doctests each**.
+- Debug and release workspace suites: **458 passing cases/doctests each**.
 - Strict workspace Clippy and first-party formatting: pass.
-- Explicit parallel Canvas suite: **78 passing cases**, overlapping the workspace suite.
+- Explicit parallel Canvas suite: **100 passing cases**, overlapping the workspace suite.
 - Optimized Loom protocol suites: **6 existing cases, 3 historical question-credit cases and 9 production-mailbox cases**; finite proof scope in [TESTING](TESTING.md).
-- Actual Vulkan conformance: **19 passing readback cases**, including all five author color layouts through SDR/HDR, 24 signed/fractional inverse-lattice clipping fixtures and numeric signed-zero preservation with tile proofs enabled and disabled.
+- Actual Vulkan conformance: **20 passing readback cases**, including mixed Unicode fallback at fractional density/reflection, all five author color layouts through SDR/HDR, 24 signed/fractional inverse-lattice clipping fixtures and numeric signed-zero preservation with tile proofs enabled and disabled.
 - Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
 - Actual X11 worker delivery: **one script** checking real wakes, committed-error repair and shutdown without a polling timer.
 - Actual X11 Reader delivery: **one script** checking obsolete-credit retirement and latest-result acknowledgement without polling or unrelated input.
 - Actual X11 250K Library: **one script** checking wheel/pointer routing, source/presentation separation, row target lifetimes, resize, suspend/resume and full server-pixel equality.
+- Actual X11 Unicode: **one script** checking mixed-script keyboard delivery, retained Input identity, acknowledged epochs and complete native-surface/CPU pixel equality.
 - Accessibility schema/action/transition suite: **20 passing cases** using the actual pinned Consumer, overlapping the accessible native tests rather than the headless workspace count.
 - Actual Linux AT-SPI client: **one script** reading native names/content, focusing, editing, invoking and reactivating; activation and semantic-only name changes require no new frame.
 - Actual absent-session-bus native presentation: **one script**.
@@ -96,11 +97,11 @@ typechecking of the actual adapters, not execution on those operating systems.
 
 The earlier [sealed question integration](evidence/question-integration-checks.json)
 pins its five scoped checks to source c3ae3584d4; the complete report above also
-includes the subsequent cancellation and sample-storage integration. The parallel
-Canvas gate was paused during separate quiet benchmark captures; its elapsed
-wall time includes that pause and is not a suite-speed measurement.
+includes the subsequent cancellation, style storage, Unicode and glyph-axis integration.
+The workspace-release gate was paused during a separate quiet benchmark capture;
+its elapsed wall time includes that pause and is not a suite-speed measurement.
 
-The later [output-conversion checks](evidence/output-cache-checks.json) pin source
+The earlier [output-conversion checks](evidence/output-cache-checks.json) pin source
 b4598cb303: 79 release parallel Canvas cases/doctests, strict all-target accessible
 native Clippy, all 19 Vulkan readbacks and the real Todo multi-renderer script
 pass. [Warnings-denied desktop cross-checks](evidence/output-cache-platform-checks.json)
@@ -152,11 +153,12 @@ of production: its exact 8-byte node saving did not justify unresolved phase cos
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. The source b4598cb303 snapshot contains **27,838 first-party src lines** and
-**20,407 external test/example lines** across production and experimental crates.
-Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
-Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
-their tests/examples. Vendoring has not made those dependencies disappear.
+are separate. The source 5b0a38b222 snapshot contains **29,849 crate src lines** and
+**21,976 external test/example lines** across production and experimental crates.
+Src includes embedded tests; it is not a production SLOC claim. Standalone comparison
+harnesses outside crates are excluded. Complete Winit, Cephal, Softbuffer, Wgpu-HAL
+and Parley sources total **145,898 Rust lines**, including their tests/examples.
+Vendoring has not made those dependencies disappear.
 
 [Baseline](evidence/baseline.json) pins the original 260,010 physical Rust lines
 and inspector/transforms/testing branch deltas. Legacy remains a plumbing and

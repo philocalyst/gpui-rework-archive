@@ -1,4 +1,44 @@
+    Checking naga v29.0.4
+   Compiling zbus_xml v5.2.1
+    Checking zbus v5.19.0
+    Checking wgpu-types v29.0.4
+    Checking gpu-allocator v0.28.0
+    Checking fontique v0.11.1
+    Checking icu_segmenter v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking harfrust v0.12.0
+   Compiling futures-macro v0.3.34
+    Checking winit v0.30.13 (/root/gpui-ce3/reactivity/vendor/winit)
+    Checking ttf-parser v0.25.1
+    Checking softbuffer v0.4.8 (/root/gpui-ce3/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-ce3/reactivity/crates/state)
+    Checking zbus-lockstep v0.5.2
+   Compiling zbus-lockstep-macros v0.5.2
+    Checking futures-util v0.3.34
+    Checking parley v0.11.1 (/root/gpui-ce3/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
     Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Checking atspi-common v0.13.0
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-ce3/reactivity/crates/host)
+    Checking wgpu-naga-bridge v29.0.4
+    Checking wgsl-rs v0.1.0-beta.1
+    Checking wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+    Checking atspi-proxies v0.13.0
+    Checking accesskit_atspi_common v0.21.0
+    Checking atspi v0.29.0
+    Checking accesskit_unix v0.24.0
+    Checking wgpu-core-deps-windows-linux-android v29.0.4
+    Checking wgpu-core v29.0.4
+    Checking accesskit_winit v0.34.1
+    Checking wgpu v29.0.4
     Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
     Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 40.09s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 31.38s
