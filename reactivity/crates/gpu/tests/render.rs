@@ -863,3 +863,56 @@ fn inverse_lattice_clips_preserve_actual_vulkan_pixels() {
         }
     });
 }
+
+#[test]
+fn all_authored_color_layouts_reach_real_sdr_and_hdr_targets() {
+    pollster::block_on(async {
+        let colors = [
+            Color::srgb(-0.2, 1.3, 0.35, 0.7).unwrap(),
+            Color::display_p3(1.2, -0.3, 0.4, 0.7).unwrap(),
+            Color::linear_display_p3(4.0, -0.25, 0.5, 0.7).unwrap(),
+            Color::linear_srgb(-0.25, 4.0, 0.5, 0.7).unwrap(),
+            Color::oklch(0.7, 0.15, 120.0, 0.7).unwrap(),
+        ];
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let mut renderer = renderer(format).await;
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for color in colors {
+                let mut canvas = Canvas::recording(3, 2, config).unwrap();
+                if format == wgpu::TextureFormat::Rgba16Float {
+                    canvas.clear(color);
+                } else {
+                    // The SDR GPU surface contract requires an opaque clear.
+                    canvas.clear(Color::WHITE);
+                    let rect = Rect::new(0.0, 0.0, 3.0, 2.0);
+                    canvas
+                        .fill_rect(rect, Affine::IDENTITY, rect, color)
+                        .unwrap();
+                }
+                let actual = readback(&mut renderer, &canvas);
+                let expected = canvas.pixels();
+                if format == wgpu::TextureFormat::Rgba16Float {
+                    for (a, b) in actual.chunks_exact(2).zip(expected.chunks_exact(2)) {
+                        assert!(
+                            u16::from_le_bytes([a[0], a[1]])
+                                .abs_diff(u16::from_le_bytes([b[0], b[1]]))
+                                <= 1,
+                            "{color:?}: {actual:?} != {expected:?}"
+                        );
+                    }
+                } else {
+                    for (&a, &b) in actual.iter().zip(expected) {
+                        assert!(a.abs_diff(b) <= 1, "{color:?}: {actual:?} != {expected:?}");
+                    }
+                }
+            }
+        }
+    });
+}

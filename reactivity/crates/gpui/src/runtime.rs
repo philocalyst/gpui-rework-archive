@@ -2672,9 +2672,9 @@ mod semantic_storage_ledger {
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
-        assert_eq!(size_of::<Node>(), 136);
+        assert_eq!(size_of::<Node>(), 128);
         assert_eq!(size_of::<Presented>(), 80);
-        assert_eq!(size_of::<crate::El<'_>>(), 184);
+        assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<metadata::Row>(), 24);
         assert_eq!(size_of::<Destination>(), 4);

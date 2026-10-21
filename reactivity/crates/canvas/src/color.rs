@@ -13,10 +13,24 @@ pub enum ColorSpace {
 
 /// Finite, straight-alpha tagged color. Construction validates representability
 /// in the extended-linear-sRGB working domain; no gamut clipping occurs here.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy)]
 pub struct Color {
-    channels: [f32; 4],
-    space: ColorSpace,
+    words: [u32; 4],
+}
+impl std::fmt::Debug for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Color")
+            .field("channels", &self.channels())
+            .field("space", &self.space())
+            .finish()
+    }
+}
+impl PartialEq for Color {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // The fallback preserves f32 equality for signed zeros in every space.
+        self.words == other.words || self.equal_components(*other)
+    }
 }
 impl Default for Color {
     fn default() -> Self {
@@ -24,29 +38,24 @@ impl Default for Color {
     }
 }
 impl Color {
+    #[inline(never)]
+    fn equal_components(self, other: Self) -> bool {
+        self.space() == other.space() && self.channels() == other.channels()
+    }
     // The default neutral palette uses the same authoring space as `oklch`.
-    pub const BLACK: Self = Self {
-        channels: [0.0, 0.0, 0.0, 1.0],
-        space: ColorSpace::Oklch,
-    };
-    pub const WHITE: Self = Self {
-        channels: [1.0, 0.0, 0.0, 1.0],
-        space: ColorSpace::Oklch,
-    };
-    pub const TRANSPARENT: Self = Self {
-        channels: [0.0; 4],
-        space: ColorSpace::Oklch,
-    };
+    pub const BLACK: Self = Self::pack([0.0, 0.0, 0.0, 1.0], ColorSpace::Oklch);
+    pub const WHITE: Self = Self::pack([1.0, 0.0, 0.0, 1.0], ColorSpace::Oklch);
+    pub const TRANSPARENT: Self = Self::pack([0.0; 4], ColorSpace::Oklch);
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
-        Self {
-            channels: [
+        Self::pack(
+            [
                 r as f32 / 255.0,
                 g as f32 / 255.0,
                 b as f32 / 255.0,
                 a as f32 / 255.0,
             ],
-            space: ColorSpace::Srgb,
-        }
+            ColorSpace::Srgb,
+        )
     }
     pub const fn rgb(r: u8, g: u8, b: u8) -> Self {
         Self::rgba(r, g, b, 255)
@@ -80,40 +89,116 @@ impl Color {
             }
             channels[2] = wrap_hue(channels[2] as f64);
         }
-        let color = Self { channels, space };
         // Explicit numerical admission, far beyond SDR. Keeping working values
         // <=1e20 leaves ample headroom for f32 source-over intermediates.
-        if color
-            .linear_rgb()
+        if linear_rgb(channels, space)
             .iter()
             .any(|v| !v.is_finite() || v.abs() > 1e20)
         {
             return Err(Error::ColorOutOfRange);
         }
-        Ok(color)
+        Ok(Self::pack(channels, space))
+    }
+    // Prefixes 00/01/10 keep all RGB bits for encoded sRGB, encoded P3,
+    // and linear P3. Prefix 11 uses bit 95 to distinguish linear sRGB's
+    // directly bounded coefficients from Oklch's nonnegative normalized hue.
+    // Alpha has one uniform layout. Admission never depends on libm accuracy
+    // or a matrix inverse bound; packing follows the original validation.
+    const fn pack(channels: [f32; 4], space: ColorSpace) -> Self {
+        let [r, g, b, a] = [
+            channels[0].to_bits(),
+            channels[1].to_bits(),
+            channels[2].to_bits(),
+            channels[3].to_bits(),
+        ];
+        let alpha = unit_code(a);
+        let words = match space {
+            ColorSpace::Srgb | ColorSpace::DisplayP3 | ColorSpace::LinearDisplayP3 => {
+                let tag = match space {
+                    ColorSpace::Srgb => 0,
+                    ColorSpace::DisplayP3 => 1,
+                    _ => 2,
+                };
+                [r, g, b, alpha | (tag << 30)]
+            }
+            ColorSpace::LinearSrgb => {
+                // The direct 1e20 < 2^67 bound gives biased exponents <=193;
+                // the generously sized base-199 codec still fits 23 bits.
+                let exponents =
+                    (((r >> 23) & 255) * 199 + ((g >> 23) & 255)) * 199 + ((b >> 23) & 255);
+                let [rp, gp, bp] = [rgb_payload(r), rgb_payload(g), rgb_payload(b)];
+                // Each payload is 24 bits. Left shifts intentionally retain
+                // only the low part of a lane; its remainder goes next door.
+                [
+                    rp | (gp << 24),
+                    (gp >> 8) | (bp << 16),
+                    (bp >> 16) | (exponents << 8),
+                    alpha | 0xc000_0000,
+                ]
+            }
+            ColorSpace::Oklch => {
+                // wrap_hue produces finite nonnegative hue, including +0.
+                // Its unused sign bit holds the variant; L/C stay raw f32.
+                [r, g, b | 0x8000_0000, alpha | 0xc000_0000]
+            }
+        };
+        Self { words }
     }
     /// Authored components and alpha. For Oklch these are [L,C,h_degrees,a].
+    #[inline]
     pub const fn channels(self) -> [f32; 4] {
-        self.channels
+        let [w0, w1, w2, w3] = self.words;
+        let alpha = self.alpha();
+        if w3 >> 30 != 3 {
+            return [
+                f32::from_bits(w0),
+                f32::from_bits(w1),
+                f32::from_bits(w2),
+                alpha,
+            ];
+        }
+        if w2 >> 31 != 0 {
+            return [
+                f32::from_bits(w0),
+                f32::from_bits(w1),
+                f32::from_bits(w2 & 0x7fff_ffff),
+                alpha,
+            ];
+        }
+        let exponents = (w2 >> 8) & 0x7f_ffff;
+        let rg = exponents / 199;
+        [
+            rgb_value(w0 & 0xff_ffff, rg / 199),
+            rgb_value(((w0 >> 24) | (w1 << 8)) & 0xff_ffff, rg % 199),
+            rgb_value(((w1 >> 16) | (w2 << 16)) & 0xff_ffff, exponents % 199),
+            alpha,
+        ]
     }
     pub const fn space(self) -> ColorSpace {
-        self.space
+        match self.words[3] >> 30 {
+            0 => ColorSpace::Srgb,
+            1 => ColorSpace::DisplayP3,
+            2 => ColorSpace::LinearDisplayP3,
+            _ if self.words[2] >> 31 == 0 => ColorSpace::LinearSrgb,
+            _ => ColorSpace::Oklch,
+        }
     }
     pub const fn alpha(self) -> f32 {
-        self.channels[3]
+        unit_value(self.words[3] & 0x3fff_ffff)
     }
     pub fn with_alpha(self, alpha: f32) -> Result<Self, Error> {
-        let mut channels = self.channels;
+        let mut channels = self.channels();
         channels[3] = alpha;
-        Self::new(channels, self.space)
+        Self::new(channels, self.space())
     }
     /// Straight-alpha extended linear sRGB. Negative/out-of-gamut values survive.
+    #[inline]
     pub fn to_linear_srgb(self) -> [f32; 4] {
         let rgb = self.linear_rgb();
         [rgb[0] as f32, rgb[1] as f32, rgb[2] as f32, self.alpha()]
     }
     pub fn convert(self, space: ColorSpace) -> Result<Self, Error> {
-        if space == self.space {
+        if space == self.space() {
             return Ok(self);
         }
         let mut rgb = self.linear_rgb();
@@ -145,32 +230,9 @@ impl Color {
             space,
         )
     }
+    #[inline]
     fn linear_rgb(self) -> [f64; 3] {
-        if self.space == ColorSpace::Oklch {
-            let [lightness, chroma, hue, _] = self.channels;
-            if chroma == 0.0 {
-                return [(lightness as f64).powi(3); 3];
-            }
-            let (sin, cos) = (hue as f64).to_radians().sin_cos();
-            let lab = [lightness as f64, chroma as f64 * cos, chroma as f64 * sin];
-            let lms = matrix(OKLAB_TO_LMS, lab).map(|v| v.powi(3));
-            return matrix(XYZ_TO_SRGB, matrix(LMS_TO_XYZ, lms));
-        }
-        let mut rgb = [
-            self.channels[0] as f64,
-            self.channels[1] as f64,
-            self.channels[2] as f64,
-        ];
-        if matches!(self.space, ColorSpace::Srgb | ColorSpace::DisplayP3) {
-            rgb = rgb.map(decode_transfer);
-        }
-        if matches!(
-            self.space,
-            ColorSpace::DisplayP3 | ColorSpace::LinearDisplayP3
-        ) {
-            rgb = matrix(XYZ_TO_SRGB, matrix(P3_TO_XYZ, rgb));
-        }
-        rgb
+        linear_rgb(self.channels(), self.space())
     }
     pub(crate) fn premultiplied(self) -> [f32; 4] {
         let mut v = self.to_linear_srgb();
@@ -179,6 +241,47 @@ impl Color {
         }
         v
     }
+}
+const fn unit_code(bits: u32) -> u32 {
+    if bits == 0x8000_0000 {
+        0x3f80_0001
+    } else {
+        bits
+    }
+}
+const fn unit_value(code: u32) -> f32 {
+    f32::from_bits(if code == 0x3f80_0001 {
+        0x8000_0000
+    } else {
+        code
+    })
+}
+const fn rgb_payload(bits: u32) -> u32 {
+    (bits & 0x7f_ffff) | ((bits >> 8) & 0x80_0000)
+}
+const fn rgb_value(payload: u32, exponent: u32) -> f32 {
+    f32::from_bits((payload & 0x7f_ffff) | ((payload & 0x80_0000) << 8) | (exponent << 23))
+}
+#[inline]
+fn linear_rgb(channels: [f32; 4], space: ColorSpace) -> [f64; 3] {
+    if space == ColorSpace::Oklch {
+        let [lightness, chroma, hue, _] = channels;
+        if chroma == 0.0 {
+            return [(lightness as f64).powi(3); 3];
+        }
+        let (sin, cos) = (hue as f64).to_radians().sin_cos();
+        let lab = [lightness as f64, chroma as f64 * cos, chroma as f64 * sin];
+        let lms = matrix(OKLAB_TO_LMS, lab).map(|v| v.powi(3));
+        return matrix(XYZ_TO_SRGB, matrix(LMS_TO_XYZ, lms));
+    }
+    let mut rgb = [channels[0] as f64, channels[1] as f64, channels[2] as f64];
+    if matches!(space, ColorSpace::Srgb | ColorSpace::DisplayP3) {
+        rgb = rgb.map(decode_transfer);
+    }
+    if matches!(space, ColorSpace::DisplayP3 | ColorSpace::LinearDisplayP3) {
+        rgb = matrix(XYZ_TO_SRGB, matrix(P3_TO_XYZ, rgb));
+    }
+    rgb
 }
 /// Opaque perceptual authoring color. For transparency use `Color::oklch`.
 pub fn oklch(lightness: f32, chroma: f32, hue: f32) -> Result<Color, Error> {
@@ -800,7 +903,125 @@ mod half_tests {
         }
     }
     #[test]
-    fn authored_color_keeps_twenty_byte_provenance_header() {
-        assert_eq!(std::mem::size_of::<Color>(), 20);
+    fn authored_color_keeps_sixteen_byte_provenance_header() {
+        assert_eq!(std::mem::size_of::<Color>(), 16);
+    }
+}
+
+#[cfg(test)]
+mod packing_tests {
+    use super::*;
+
+    // Independent bitstream reference: decode a whole integer using the
+    // documented field offsets and division by 199^2, not the production
+    // word-splice helpers or its quotient-of-quotient reconstruction.
+    fn reference_channels(words: [u32; 4]) -> [u32; 4] {
+        let bits = words
+            .iter()
+            .enumerate()
+            .fold(0_u128, |all, (i, &word)| all | ((word as u128) << (32 * i)));
+        let alpha = words[3] & 0x3fff_ffff;
+        let alpha = if alpha == 0x3f80_0001 {
+            0x8000_0000
+        } else {
+            alpha
+        };
+        if words[3] >> 30 != 3 {
+            return [words[0], words[1], words[2], alpha];
+        }
+        if bits & (1_u128 << 95) != 0 {
+            return [words[0], words[1], words[2] & 0x7fff_ffff, alpha];
+        }
+        let code = ((bits >> 72) & 0x7f_ffff) as u32;
+        let exponents = [code / 39601, code / 199 % 199, code % 199];
+        let mut out = [0, 0, 0, alpha];
+        for i in 0..3 {
+            let payload = ((bits >> (24 * i)) & 0xff_ffff) as u32;
+            out[i] = (payload & 0x7f_ffff) | (exponents[i] << 23) | ((payload & 0x80_0000) << 8);
+        }
+        out
+    }
+
+    #[test]
+    fn every_base199_exponent_triple_round_trips() {
+        // Tests the codec beyond the public <=1e20 working bound too. All
+        // 199^3 triples must preserve mantissas, sign bits and lane boundaries.
+        for r in 0..199_u32 {
+            for g in 0..199_u32 {
+                for b in 0..199_u32 {
+                    let serial = (r * 199 + g) * 199 + b;
+                    let raw = [
+                        (r << 23) | (serial & 0x7f_ffff) | ((serial & 1) << 31),
+                        (g << 23) | ((!serial) & 0x7f_ffff) | ((serial & 2) << 30),
+                        (b << 23)
+                            | (serial.wrapping_mul(0x9e37) & 0x7f_ffff)
+                            | ((serial & 4) << 29),
+                        if serial & 1 == 0 {
+                            0x8000_0000
+                        } else {
+                            0x3f80_0000
+                        },
+                    ];
+                    let packed = Color::pack(raw.map(f32::from_bits), ColorSpace::LinearSrgb);
+                    assert_eq!(packed.channels().map(f32::to_bits), raw);
+                    assert_eq!(reference_channels(packed.words), raw);
+                    assert_eq!(packed.space(), ColorSpace::LinearSrgb);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn raw_rgb_and_oklch_layouts_preserve_every_lane() {
+        let mut rng = 0x586d_d91a_u32;
+        for _ in 0..16384 {
+            let mut next = || {
+                rng ^= rng << 13;
+                rng ^= rng >> 17;
+                rng ^= rng << 5;
+                rng
+            };
+            let rgb = [next(), next(), next()];
+            for alpha in [0, 0x8000_0000, 1, 0x3f7f_ffff, 0x3f80_0000] {
+                let raw = [rgb[0], rgb[1], rgb[2], alpha];
+                for space in [
+                    ColorSpace::Srgb,
+                    ColorSpace::DisplayP3,
+                    ColorSpace::LinearDisplayP3,
+                ] {
+                    // Full RGB layouts have no representability assumptions;
+                    // even NaN/Inf bit patterns are a codec-level oracle only.
+                    let color = Color::pack(raw.map(f32::from_bits), space);
+                    assert_eq!(color.channels().map(f32::to_bits), raw);
+                    assert_eq!(reference_channels(color.words), raw);
+                    assert_eq!(color.space(), space);
+                    assert_eq!(color.alpha().to_bits(), alpha);
+                }
+                // Oklch keeps both first words raw; only hue's sign bit is
+                // unavailable. Exercise every other bit independently of
+                // public admission, including arbitrary L/C sign patterns.
+                let raw = [rgb[0], rgb[1], rgb[2] & 0x7fff_ffff, alpha];
+                let color = Color::pack(raw.map(f32::from_bits), ColorSpace::Oklch);
+                assert_eq!(color.channels().map(f32::to_bits), raw);
+                assert_eq!(reference_channels(color.words), raw);
+                assert_eq!(color.space(), ColorSpace::Oklch);
+            }
+        }
+        for lightness in [0, 0x8000_0000, 1, 0x3f7f_ffff, 0x3f80_0000] {
+            for chroma in [0, 0x8000_0000, 1, 0x3f80_0001, 0x7f7f_ffff] {
+                for hue in [0, 1, 0x3f80_0000, 0x43b3_ffff] {
+                    for alpha in [0, 0x8000_0000, 1, 0x3f80_0000] {
+                        let raw = [lightness, chroma, hue, alpha];
+                        let color = Color::pack(raw.map(f32::from_bits), ColorSpace::Oklch);
+                        assert_eq!(color.channels().map(f32::to_bits), raw);
+                        assert_eq!(reference_channels(color.words), raw);
+                        assert_eq!(color.alpha().to_bits(), alpha);
+                        assert_eq!(color.space(), ColorSpace::Oklch);
+                    }
+                }
+            }
+        }
+        assert_eq!(std::mem::size_of::<Color>(), 16);
+        assert_eq!(std::mem::align_of::<Color>(), 4);
     }
 }

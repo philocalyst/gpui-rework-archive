@@ -5,7 +5,7 @@ Use `oklch(l,c,h)?` for opaque authoring colors, or
 chroma must be finite and nonnegative. Hue must be finite, in degrees, and wraps
 into [0,360). This Rust constructor rejects invalid ranges rather than applying
 CSS parser clamping. All converted working channels must remain within ±1e20.
-Oklch components remain in the 20-byte tagged `Color`; the neutral defaults
+Author components remain bit-exact in the [16-byte tagged `Color`](COLOR_PACKING.md); the neutral defaults
 BLACK, WHITE and TRANSPARENT also use Oklch. `rgb(hex)` and byte RGB/RGBA
 constructors continue to author sRGB.
 
