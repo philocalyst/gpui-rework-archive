@@ -2,7 +2,7 @@
 //! availability is frozen with the acknowledged sheet, not read from ahead-of-
 //! frame model state. No separate mutable accessibility tree is retained.
 use super::{Commit, Error, NodeKind, View, Win};
-use crate::Target;
+use crate::{Target, remote::LaneSet};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ActionKind {
@@ -60,7 +60,7 @@ impl Actions {
     }
 }
 
-impl<M: View + 'static> Win<M> {
+impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Perform an advertised semantic action through the production input path.
     /// Position-free edits can repair a failed presentation while the preceding
     /// sheet remains valid. Removed, foreign and quarantined targets cannot act.

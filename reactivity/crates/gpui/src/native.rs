@@ -16,7 +16,10 @@ use winit::{
     window::Window as NativeWindow,
 };
 
-use crate::{Commit, Error, Key, Point, Target, View, Win, WindowOptions};
+use crate::{
+    Commit, Error, Key, Point, Target, View, Win, WindowOptions,
+    remote::{DeliveryError, Inbox, Lane, LaneSet},
+};
 
 mod upgrade;
 
@@ -78,7 +81,9 @@ pub enum RendererPolicy {
     ReferenceCpu,
 }
 /// An owned root plus native opening policy. Components never receive Winit.
-pub struct Window<V> {
+pub struct Window<V: View + 'static, L: LaneSet<V> = ()> {
+    // Receivers close before the root is destroyed, including an unopened window.
+    lanes: L,
     root: V,
     title: String,
     size: [u32; 2],
@@ -86,15 +91,34 @@ pub struct Window<V> {
     presentation_feedback: Option<PresentationFeedback>,
     renderer: RendererPolicy,
 }
-impl<V: View> Window<V> {
+impl<V: View + 'static> Window<V> {
     pub fn document(root: V) -> Self {
         Self {
             root,
+            lanes: (),
             title: "GPUI".into(),
             size: [800, 600],
             presentation_error: None,
             presentation_feedback: None,
             renderer: RendererPolicy::Auto,
+        }
+    }
+}
+impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
+    /// Bind a typed FIFO completion lane when this window mounts.
+    pub fn with_inbox<T: Send + 'static, F: FnMut(&mut V, T) + 'static>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Window<V, Lane<T, F, L>> {
+        Window {
+            root: self.root,
+            lanes: Lane::new(inbox, receive, self.lanes),
+            title: self.title,
+            size: self.size,
+            presentation_error: self.presentation_error,
+            presentation_feedback: self.presentation_feedback,
+            renderer: self.renderer,
         }
     }
     pub fn title(mut self, title: impl Into<String>) -> Self {
@@ -132,7 +156,9 @@ impl crate::Application {
     pub fn run<V: View + 'static>(root: V) -> Result<(), NativeError> {
         Self::run_window(Window::document(root))
     }
-    pub fn run_window<V: View + 'static>(window: Window<V>) -> Result<(), NativeError> {
+    pub fn run_window<V: View + 'static, L: LaneSet<V> + 'static>(
+        window: Window<V, L>,
+    ) -> Result<(), NativeError> {
         let event_loop = EventLoop::new().map_err(platform)?;
         let host = NativeHost::new(window);
         let (mut driver, wake) = Driver::new(&event_loop, host);
@@ -226,12 +252,12 @@ impl DeviceErrors {
     }
 }
 
-struct NativeHost<V: View + 'static> {
-    opening: Option<Window<V>>,
+struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
+    opening: Option<Window<V, L>>,
     instance: Option<wgpu::Instance>,
     renderer_policy: RendererPolicy,
     window: Option<Arc<NativeWindow>>,
-    owner: Option<Win<V>>,
+    owner: Option<Win<V, L>>,
     graphics: Option<Graphics>,
     pointer: Option<Point>,
     pressed: Option<Target>,
@@ -252,8 +278,8 @@ struct NativeHost<V: View + 'static> {
     #[cfg(test)]
     upgrade_rejection: Option<String>,
 }
-impl<V: View + 'static> NativeHost<V> {
-    fn new(opening: Window<V>) -> Self {
+impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
+    fn new(opening: Window<V, L>) -> Self {
         let renderer_policy = opening.renderer;
         Self {
             opening: Some(opening),
@@ -297,14 +323,19 @@ impl<V: View + 'static> NativeHost<V> {
                     .map_err(platform)?,
             );
             let size = window.inner_size();
-            self.owner = Some(Win::recording_scaled(
+            let mut owner = Win::recording_lanes(
                 opening.root,
+                opening.lanes,
                 WindowOptions {
                     size: [size.width.max(1), size.height.max(1)],
                     ..WindowOptions::default()
                 },
                 window.scale_factor() as f32,
-            )?);
+            )?;
+            if let Some(wake) = &self.wake {
+                owner.attach_wake(wake);
+            }
+            self.owner = Some(owner);
             self.window = Some(window);
         }
         if self.graphics.is_none() {
@@ -784,7 +815,7 @@ impl<V: View + 'static> NativeHost<V> {
         Ok(())
     }
 }
-impl<V: View + 'static> Host for NativeHost<V> {
+impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
     fn dispatch(&mut self, event_loop: &ActiveEventLoop, callback: Callback<'_>) {
         if !matches!(&callback, Callback::Suspended | Callback::Exiting)
             && let Some(fault) = self.graphics.as_ref().and_then(Graphics::fault)
@@ -825,6 +856,37 @@ impl<V: View + 'static> Host for NativeHost<V> {
                 Ok(())
             }
             Callback::WorkReady => {
+                if let Some(owner) = &mut self.owner {
+                    let before = owner.runtime_epoch();
+                    let result = match owner.deliver_ready(64) {
+                        Ok(delivery) => Ok(delivery.commit),
+                        Err(DeliveryError {
+                            error,
+                            delivery: Some(delivery),
+                        }) if delivery.commit.source_epoch > before
+                            && !matches!(error, Error::OwnerPanicked | Error::Poisoned) =>
+                        {
+                            if let Some(handler) = &mut self.presentation_error {
+                                handler(&error);
+                            } else {
+                                eprintln!(
+                                    "GPUI completion presentation failed; applied={} S={} P={}: {}",
+                                    delivery.applied,
+                                    delivery.commit.source_epoch,
+                                    delivery.commit.presentation_epoch,
+                                    error
+                                );
+                            }
+                            Ok(delivery.commit)
+                        }
+                        Err(failure) => Err(failure.error),
+                    };
+                    if let Err(error) = self.input_result(result) {
+                        self.error = Some(error);
+                        event_loop.exit();
+                        return;
+                    }
+                }
                 if self.upgrade.is_some() {
                     self.request_redraw();
                 }
@@ -1257,3 +1319,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(all(test, feature = "x11", target_os = "linux"))]
+#[path = "native/remote_tests.rs"]
+mod remote_tests;

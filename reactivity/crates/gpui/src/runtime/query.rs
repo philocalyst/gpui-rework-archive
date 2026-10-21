@@ -2,7 +2,7 @@
 //! application users. Queries never construct a diagnostic snapshot or mirror.
 use super::{Actions, Error, Presented, Runtime, Target, View, Win};
 use crate::identity::Sites;
-use crate::{Rect, Role};
+use crate::{Rect, Role, remote::LaneSet};
 
 // One borrowed context on the visitor stack, not a context pointer or semantic
 // mirror retained per node. Every part borrows this same acknowledged sheet.
@@ -188,7 +188,7 @@ fn sheet<M: View + 'static>(runtime: &Runtime<M>) -> Result<(), Error> {
         Err(Error::PresentationStale)
     }
 }
-impl<M: View + 'static> Win<M> {
+impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn query(&self) -> Query<'_, M> {
         Query {
             runtime: self.inner.as_deref(),
