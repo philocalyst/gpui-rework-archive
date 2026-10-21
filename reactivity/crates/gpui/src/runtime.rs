@@ -1597,9 +1597,6 @@ impl<M: View + 'static> Runtime<M> {
         let mut routes = std::mem::take(&mut self.routes);
         routes.clear();
         routes.reserve_exact(route_count);
-        // Preserve the map's bulk-build path; incremental inserts would add
-        // a tree search for every node during an otherwise linear description.
-        let mut locations = Vec::with_capacity(drafts.len());
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
         let mut texts =
@@ -1706,12 +1703,10 @@ impl<M: View + 'static> Runtime<M> {
             node.parent = Parent::new(parent);
             node.ordinal = ordinal;
             styles.push(&style);
-            let route = draft.on_click.map(|handler| {
-                // At most MAX_NODES routes are admitted, strictly below u32::MAX.
-                let slot = NonZeroU32::new(routes.len() as u32 + 1).unwrap();
+            let has_handler = draft.on_click.is_some();
+            if let Some(handler) = draft.on_click {
                 routes.push(handler);
-                slot
-            });
+            }
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
@@ -1720,14 +1715,7 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 TextSlot::NONE
             };
-            node.content = Content::new(node.kind(), text_slot).with_handler(route.is_some());
-            locations.push((
-                node.identity(),
-                NodeLocator {
-                    node: index as u32,
-                    route,
-                },
-            ));
+            node.content = Content::new(node.kind(), text_slot).with_handler(has_handler);
             changed += usize::from(node_changed);
             nodes.push(node);
         }
@@ -1843,7 +1831,28 @@ impl<M: View + 'static> Runtime<M> {
         self.fanout = fanout;
         routes.shrink_to_fit();
         self.routes = routes;
-        self.by_identity = locations.into_iter().collect();
+        // Keep index construction out of reconciliation and preserve the map's
+        // bulk-build path. Dense routes follow the same admitted node order.
+        let mut next_route = 0;
+        self.by_identity = self
+            .nodes
+            .iter()
+            .enumerate()
+            .map(|(index, node)| {
+                let route = node.has_handler().then(|| {
+                    next_route += 1;
+                    NonZeroU32::new(next_route).unwrap()
+                });
+                (
+                    node.identity(),
+                    NodeLocator {
+                        node: index as u32,
+                        route,
+                    },
+                )
+            })
+            .collect();
+        debug_assert_eq!(next_route as usize, self.routes.len());
         self.overrides
             .retain(|identity| self.by_identity.contains_key(&identity));
         if let Some(metadata) = &mut self.metadata {
