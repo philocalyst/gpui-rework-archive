@@ -164,7 +164,7 @@ fn ahead_of_frame_source_cannot_rewrite_advertised_value_or_actions() {
     let input = win.input();
     win.perform(input, Action::Focus).unwrap();
     assert!(matches!(
-        win.perform(input, Action::SetValue("क")),
+        win.perform(input, Action::SetValue("漢")),
         Err(Error::Canvas(_))
     ));
     win.visit(|part| {

@@ -1,8 +1,9 @@
 # gpui_canvas
 
 A real software text/canvas foundation independent of legacy GPUI. It shapes
-OpenType glyph IDs/positions with pinned rustybuzz 0.20.1 and rasterizes those
-same IDs on demand with pinned Swash 0.2.10 (Skrifa 0.44.0). Full Noto Sans 2.015 and its OFL license are
+OpenType glyph IDs/positions with pinned Parley 0.11.1 / HarfRust 0.12.0 and
+rasterizes those same IDs on demand with pinned Swash 0.2.10 (Skrifa 0.44.0).
+Full Noto Sans 2.015 and lazy Arabic/Hebrew fallback fonts with OFL licenses are
 bundled; `TextSystem::new` also accepts caller-supplied font bytes. Nothing reads
 an absolute asset path. [Font provenance](assets/README.md).
 
@@ -27,13 +28,19 @@ let rgba=canvas.pixels();
 # Ok::<(),gpui_canvas::Error>(())
 ```
 
-`TextLayout` owns glyph positions, UTF-8 clusters, advance width, line height,
-first baseline and font-face identity. A layout can paint through any service
-sharing that face; independently constructed faces reject it. Positions do not
-keep a face alive: retain a FontFace or TextSystem while its layout needs fresh
-rasterization. Painting does not reshape. Wrapping prefers
-whitespace, then whole shaping clusters, and reshapes each resulting line. An
-indivisible cluster may exceed the requested width. The ink bound describes
+`TextLayout` owns glyph positions, original UTF-8 clusters, advance width, line
+height, first baseline and immutable font-set leases. Old layouts keep their
+exact fonts alive after shaping contexts and caches are dropped. A layout can
+paint through another service sharing its primary face; independently created
+faces reject it. Parley’s scoped Unicode paragraph/bidi/script/line planner is
+dropped immediately after lowering into this one canonical layout. CRLF is one
+paragraph separator and source bytes are never renumbered. Wrapping keeps atomic
+shaping clusters intact; an indivisible cluster may exceed the requested width.
+Painting never reshapes. Requested interactive layouts additionally expose typed
+byte/affinity caret destinations; ordinary labels retain no caret map.
+See [text architecture, limits and measured costs](TEXT.md).
+
+The ink bound describes
 conservative source-raster support; device sampling must also be included when
 using it for damage. Successful direct drawing appends commands; clear starts a
 new scene. Appending after pixels rerenders the retained scene. A clean pixels
@@ -86,12 +93,13 @@ out-of-domain or excessively large inverse coefficients return InvalidGeometry.
 There is no silent rotated-clip AABB approximation. Rounded/path clips, borders,
 images, gradients, effects and custom shaders are not implemented by this API.
 
-Text currently supports one strong script per paragraph: Latin, Greek or
-Cyrillic, with common/inherited characters. Missing glyphs, mixed/other scripts,
-bidi formatting controls, tabs and unsupported directions return explicit errors.
-No font fallback, bidi paragraph resolver, editing/caret model, variation API,
-color glyph or LCD text support is claimed. These are production integration
-requirements, not made-up replacement glyphs.
+Text uses original-byte paragraph, Unicode bidi/script/grapheme/line planning.
+Bundled coverage includes Latin, Greek, Cyrillic, Devanagari, Hebrew and Arabic;
+actual missing glyphs are errors. Fallback families are explicitly bounded and
+lazy, with no OS discovery. Tabs/C0 controls, color glyphs, variation authoring,
+vertical writing, native range selection and IME remain outside this API. Typed
+caret geometry is opt-in through `TextShaper::shape_interactive`; it is a layout
+foundation rather than an editor. See [the exact limits and proofs](TEXT.md).
 
 ## Work and memory
 
@@ -111,9 +119,11 @@ independent f64 polygon/sample oracle permits one byte of final rounding error.
 Limits are 16,777,216 pixels, 16,384 pixels per side, 65,536 commands, 4,194,304
 tile references, 32 MiB distinct leased mask payload per admitted scene, 8 MiB
 cached mask payload and 4,096 cache entries, 1 MiB per raster, 16 MiB font input,
-32 KiB text input, 32K glyphs and a 1 MiB cumulative shaping-input work budget.
-The wrapping work budget bounds repeated suffix shaping, returning ResourceLimit
-instead of allowing quadratic pathological input work without a bound.
+32 KiB source text and 32K retained glyphs. The scoped planner has its own
+bounded shaping scratch/operation limits; transient expansion is checked before
+lowering, not charged as if it were only the retained glyph count. The vendored
+[cluster/range repairs and count-domain audit](../../vendor/parley/GPUI_PATCHES.md)
+and [current requested-allocation measurements](TEXT.md) describe that cost.
 A staged scene can temporarily retain old+new command/mask sets; at the maxima,
 old/new leases plus cache have a conservative 72 MiB mask-payload bound. Actual
 shared masks usually overlap. The cache cap is independent from live command
@@ -161,12 +171,17 @@ little or no benefit, and may lose to proof setup. Forty-eight real 16px labels
 at 640×480 cost about 31 ms on this baseline. That is useful correctness evidence,
 not an acceptable final text-performance target or a claim of GPUI completion.
 
-Verified primary library APIs: [rustybuzz 0.20.1](https://docs.rs/rustybuzz/0.20.1/rustybuzz/),
+Current primary APIs: [Parley 0.11.1](https://docs.rs/parley/0.11.1/parley/),
+[HarfRust 0.12.0](https://docs.rs/harfrust/0.12.0/harfrust/),
 [Swash scaling](https://docs.rs/swash/latest/swash/scale/index.html),
-[Skrifa outline API](https://docs.rs/skrifa/0.44.0/skrifa/outline/),
-[Unicode script 0.5.8](https://docs.rs/unicode-script/0.5.8/unicode_script/).
+[Skrifa outline API](https://docs.rs/skrifa/0.44.0/skrifa/outline/).
+Rustybuzz 0.20.1 is now a dev-only independent shaping oracle.
 
 ## Lazy outline font lifetime and measured memory
+
+The observations in this section predate Unicode paragraph planning; current
+paired shaping/native measurements and the layout-header increase are in
+[TEXT.md](TEXT.md). The lazy outline/raster lifetime remains in use.
 
 Each FontFace is one Arc to immutable `{bytes, stable Swash key, checked ID}`.
 There is no eagerly compiled glyph array. Face admission parses borrowed font

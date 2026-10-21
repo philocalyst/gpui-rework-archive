@@ -238,7 +238,7 @@ mod tests {
             match MODE {
                 1 => panic!("view fault"),
                 2 => text_input(&self.input),
-                3 => text("क"),
+                3 => text("漢"),
                 _ => div(),
             }
         }

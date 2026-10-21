@@ -96,7 +96,7 @@ fn a_failed_unicode_visual_candidate_cannot_rewrite_old_names_and_value() {
     let old = token(&win);
     win.presented(old).unwrap();
     assert!(matches!(
-        win.set(Document::VALUE, "\u{05d0}".into()),
+        win.set(Document::VALUE, "漢".into()),
         Err(gpui::SetError::Committed {
             error: Error::Canvas(_),
             ..

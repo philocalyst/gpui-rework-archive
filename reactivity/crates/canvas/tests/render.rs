@@ -235,10 +235,13 @@ fn real_shaping_ligatures_unicode_measure_and_paint_are_stable() {
             .glyphs()
             .is_empty()
     );
-    assert!(matches!(
-        text.shape("Latin Ω", 22.0, None),
-        Err(Error::UnsupportedScript('Ω'))
-    ));
+    assert!(
+        !text
+            .shape("Latin Ω", 22.0, None)
+            .unwrap()
+            .glyphs()
+            .is_empty()
+    );
     assert_eq!(layout.glyphs(), repeat.glyphs());
     assert_eq!(layout.width, repeat.width);
     let ink = text.ink_bounds(&layout).unwrap();
@@ -284,7 +287,7 @@ fn real_shaping_ligatures_unicode_measure_and_paint_are_stable() {
 }
 
 #[test]
-fn wrapped_runs_keep_utf8_clusters_and_reshape_lines() {
+fn wrapped_runs_keep_utf8_and_whole_shaping_clusters() {
     let text = TextSystem::new(FONT).unwrap();
     let one = text.shape("office", 18.0, None).unwrap();
     let source = "office café office café";
@@ -372,10 +375,12 @@ fn invalid_inputs_and_caps_do_not_corrupt_scene() {
         text.shape("a\tb", 12.0, None),
         Err(Error::UnsupportedControl('\t'))
     ));
-    assert!(matches!(
-        text.shape("a\u{202e}b", 12.0, None),
-        Err(Error::UnsupportedControl('\u{202e}'))
-    ));
+    assert!(
+        text.shape("a\u{202e}b", 12.0, None)
+            .unwrap()
+            .runs()
+            .any(|run| run.direction() == gpui_canvas::TextDirection::RightToLeft)
+    );
     assert!(matches!(
         text.shape("\u{10ffff}", 12.0, None),
         Err(Error::MissingGlyph(_))

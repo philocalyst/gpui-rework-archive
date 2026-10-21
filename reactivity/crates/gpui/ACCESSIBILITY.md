@@ -220,6 +220,9 @@ ordered children, parent and focus against an independently rebuilt full tree.
 It includes 100,000 P entries, direct field and inspector edits, containers,
 geometry, frozen list reindexing, DPI changes, synthetic shape replacement,
 missing acknowledgements, a failed newer preparation and metadata patched after
-preparation. The renderer still rejects CR control characters and Greek script;
-TextRun schema tests with CRLF/non-BMP data prove encoding only, not renderer
-coverage. The actual AT-SPI Todo proof was rerun with sparse publication enabled.
+preparation. The renderer now shapes original-byte CRLF paragraphs, mixed Latin,
+Greek, Cyrillic, Devanagari, Hebrew and Arabic with explicit bundled coverage.
+The actual AT-SPI Todo proof includes Greek/Hebrew/Arabic SetTextContents and
+GetText. Non-BMP TextRun schema fixtures still prove encoding only when no
+bundled glyph coverage exists; this adds no native range selection or IME.
+The actual AT-SPI Todo proof was rerun with sparse publication enabled.

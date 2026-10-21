@@ -14,7 +14,10 @@ pub use color::{
     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
 };
 pub use damage::DamageRegion;
-pub use text::{FontFace, Glyph, GlyphKey, TextLayout, TextShaper, TextSystem};
+pub use text::{
+    CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextDirection, TextLayout, TextLine,
+    TextOffset, TextPosition, TextSelection, TextShaper, TextSystem,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {

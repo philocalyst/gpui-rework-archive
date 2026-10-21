@@ -174,7 +174,7 @@ fn presentation_and_description_failures_keep_later_queued_repairs_and_never_rep
         .unwrap();
     let input = win.input();
     win.focus(input).unwrap();
-    remote.try_send(ResultMessage::Title("क".into())).unwrap();
+    remote.try_send(ResultMessage::Title("漢".into())).unwrap();
     remote
         .try_send(ResultMessage::Title("recovered".into()))
         .unwrap();

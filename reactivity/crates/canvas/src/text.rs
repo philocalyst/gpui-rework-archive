@@ -17,18 +17,32 @@ use swash::{
     scale::{Render, ScaleContext, Source},
     zeno::Format,
 };
-use unicode_script::{Script, UnicodeScript};
+mod layout;
+mod paragraph;
+mod planner;
+use layout::Details;
+pub use layout::{
+    CaretAffinity, GlyphRun, TextDirection, TextLine, TextOffset, TextPosition, TextSelection,
+};
 
 const MAX_TEXT: usize = 32 * 1024;
 const MAX_GLYPHS: usize = 32 * 1024;
 const CACHE_BYTES: usize = 8 * 1024 * 1024;
+// Named immutable arrays guarantee one linked payload per bundled face even
+// when coverage probing and lazy registration land in different codegen units.
+static PRIMARY_BYTES: [u8; 2_049_096] = *include_bytes!("../assets/NotoSans.ttf");
+static ARABIC_BYTES: [u8; 240_456] = *include_bytes!("../assets/arabic/NotoSansArabic-Regular.ttf");
+static HEBREW_BYTES: [u8; 26_900] = *include_bytes!("../assets/hebrew/NotoSansHebrew-Regular.ttf");
 static NEXT_FONT: AtomicU64 = AtomicU64::new(1);
 static BUNDLED_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
+static ARABIC_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
+static HEBREW_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
 
 struct FontData {
     bytes: Cow<'static, [u8]>,
     raster_key: CacheKey,
     id: u64,
+    bundled: bool,
 }
 
 /// Shared immutable font bytes. Clone this handle to share backing and font
@@ -40,20 +54,39 @@ impl FontFace {
     /// Noto Sans 2.015, upstream provenance and OFL in assets/README.md.
     /// Cold initialization is serialized; shaping and rasterization never lock.
     pub fn bundled() -> Result<Self, Error> {
-        // The slot always contains a valid Weak. Parsing publishes nothing until
-        // complete; recovering poison after a parser panic cannot expose partial
-        // FontData or corrupt the previous immutable face.
-        let mut slot = match BUNDLED_FONT.lock() {
+        Self::shared_static(&BUNDLED_FONT, &PRIMARY_BYTES, true)
+    }
+    fn fallback_bytes(slot: usize) -> Result<&'static [u8], Error> {
+        match slot {
+            1 => Ok(&ARABIC_BYTES),
+            2 => Ok(&HEBREW_BYTES),
+            _ => Err(Error::ForeignLayout),
+        }
+    }
+    fn fallback(slot: usize) -> Result<Self, Error> {
+        let registry = match slot {
+            1 => &ARABIC_FONT,
+            2 => &HEBREW_FONT,
+            _ => return Err(Error::ForeignLayout),
+        };
+        Self::shared_static(registry, Self::fallback_bytes(slot)?, false)
+    }
+    fn shared_static(
+        registry: &Mutex<Weak<FontData>>,
+        bytes: &'static [u8],
+        bundled: bool,
+    ) -> Result<Self, Error> {
+        let mut slot = match registry.lock() {
             Ok(slot) => slot,
             Err(poison) => {
-                BUNDLED_FONT.clear_poison();
+                registry.clear_poison();
                 poison.into_inner()
             }
         };
         if let Some(data) = slot.upgrade() {
             return Ok(Self(data));
         }
-        let face = Self::from_data(Cow::Borrowed(include_bytes!("../assets/NotoSans.ttf")))?;
+        let face = Self::from_data(Cow::Borrowed(bytes), bundled)?;
         *slot = Arc::downgrade(&face.0);
         Ok(face)
     }
@@ -63,17 +96,16 @@ impl FontFace {
         if bytes.is_empty() || bytes.len() > 16 * 1024 * 1024 {
             return Err(Error::ResourceLimit);
         }
-        Self::from_data(Cow::Owned(bytes.to_vec()))
+        Self::from_data(Cow::Owned(bytes.to_vec()), false)
     }
-    fn from_data(bytes: Cow<'static, [u8]>) -> Result<Self, Error> {
-        let parsed =
-            rustybuzz::ttf_parser::Face::parse(&bytes, 0).map_err(|_| Error::InvalidFont)?;
+    fn from_data(bytes: Cow<'static, [u8]>, bundled: bool) -> Result<Self, Error> {
+        let parsed = ttf_parser::Face::parse(&bytes, 0).map_err(|_| Error::InvalidFont)?;
         // This service deliberately supports outline alpha masks, not bitmap,
         // SVG or layered-color fallback. Reject rather than return empty tofu.
         for tag in [*b"COLR", *b"CBDT", *b"EBDT", *b"sbix", *b"SVG "] {
             if parsed
                 .raw_face()
-                .table(rustybuzz::ttf_parser::Tag::from_bytes(&tag))
+                .table(ttf_parser::Tag::from_bytes(&tag))
                 .is_some()
             {
                 return Err(Error::UnsupportedFontFormat);
@@ -92,14 +124,15 @@ impl FontFace {
             bytes,
             raster_key,
             id,
+            bundled,
         })))
     }
-    /// Borrows a shaping session. Tables are parsed on the first shape only;
-    /// reuse the session across a pass, then drop it to release the tables.
+    /// Borrows one scoped planner session for a pass. Coverage still parses a
+    /// primary Face view per string; dropping the session releases its caches.
     pub fn shaper(&self) -> TextShaper<'_> {
         TextShaper {
-            font: &self.0,
-            face: None,
+            font: self,
+            planner: None,
         }
     }
     /// Process-local identity, not byte equality or a persistent font ID.
@@ -119,9 +152,19 @@ impl std::fmt::Debug for FontFace {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Glyph {
     pub id: u16,
+    font: FontSlot,
+    simple_tail_bytes: u8,
     pub cluster: u32,
     pub x: f32,
     pub baseline: f32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct FontSlot(u8);
+impl Glyph {
+    pub(crate) fn font_slot(self) -> usize {
+        usize::from(self.font.0)
+    }
 }
 
 /// Process-local immutable raster identity. Equal keys identify the same font
@@ -153,8 +196,27 @@ impl GlyphKey {
     }
 }
 
-/// Owned positions from one FontFace, accepted by any service sharing that face.
-/// A layout does not keep font backing alive. Advance bounds and ink differ.
+#[derive(Clone, Debug)]
+struct FontSet {
+    primary: FontFace,
+    fallbacks: [Option<FontFace>; 2],
+}
+impl FontSet {
+    fn face(&self, slot: usize) -> Result<&FontFace, Error> {
+        if slot == 0 {
+            Ok(&self.primary)
+        } else {
+            self.fallbacks
+                .get(slot - 1)
+                .and_then(Option::as_ref)
+                .ok_or(Error::ForeignLayout)
+        }
+    }
+}
+
+/// Owned positions and immutable face leases. Accepted by any service sharing
+/// the primary face; fallback slots always retain their exact original faces.
+/// Advance bounds and ink differ.
 #[derive(Clone, Debug)]
 pub struct TextLayout {
     pub width: f32,
@@ -162,7 +224,8 @@ pub struct TextLayout {
     pub baseline: f32,
     font_size: f32,
     glyphs: Vec<Glyph>,
-    font_id: u64,
+    fonts: Arc<FontSet>,
+    mapping: Option<Box<Details>>,
 }
 impl TextLayout {
     pub fn font_size(&self) -> f32 {
@@ -191,10 +254,11 @@ pub(crate) struct Raster {
 /// table allocations on drop. Returned layouts do not borrow this parser.
 ///
 /// This separates read-only shaping from a service's mutable glyph cache without
-/// a self reference, permanent table cache, lock, or per-string reference count.
+/// a self reference, permanent table cache or shared mutable lock. Each returned
+/// layout owns one immutable FontSet lease shared by layouts from this pass.
 pub struct TextShaper<'font> {
-    font: &'font FontData,
-    face: Option<rustybuzz::Face<'font>>,
+    font: &'font FontFace,
+    planner: Option<Box<planner::Planner>>,
 }
 impl TextShaper<'_> {
     pub fn shape(
@@ -203,216 +267,56 @@ impl TextShaper<'_> {
         font_size: f32,
         max_width: Option<f32>,
     ) -> Result<TextLayout, Error> {
-        if !font_size.is_finite() || !(0.0..=512.0).contains(&font_size) || font_size == 0.0 {
+        self.shape_mode(text, font_size, max_width, false)
+    }
+    /// Requests original-byte, grapheme-safe caret geometry as cold layout data.
+    /// This does not create selection state or advertise native range actions.
+    pub fn shape_interactive(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<TextLayout, Error> {
+        self.shape_mode(text, font_size, max_width, true)
+    }
+    fn shape_mode(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+        interactive: bool,
+    ) -> Result<TextLayout, Error> {
+        if !font_size.is_finite() || !(0.0..=512.0).contains(&font_size) || font_size == 0. {
             return Err(Error::InvalidFontSize);
         }
-        if max_width.is_some_and(|w| !w.is_finite() || w <= 0.0) {
+        if max_width.is_some_and(|w| !w.is_finite() || w <= 0.) {
             return Err(Error::InvalidWidth);
         }
         if text.len() > MAX_TEXT {
             return Err(Error::ResourceLimit);
         }
-        if self.face.is_none() {
-            self.face =
-                Some(rustybuzz::Face::from_slice(&self.font.bytes, 0).ok_or(Error::InvalidFont)?);
+        if self.planner.is_none() {
+            self.planner = Some(Box::new(planner::Planner::new(self.font)?));
         }
-        let face = self.face.as_ref().ok_or(Error::InvalidFont)?;
-        let mut paragraph_script = None;
-        for c in text.chars() {
-            if c == '\n' {
-                paragraph_script = None;
-                continue;
-            }
-            if c.is_control()
-                || matches!(c,'\u{200e}'|'\u{200f}'|'\u{2028}'|'\u{2029}'|'\u{202a}'..='\u{202e}'|'\u{2066}'..='\u{2069}')
-            {
-                return Err(Error::UnsupportedControl(c));
-            }
-            if face.glyph_index(c).is_none_or(|id| id.0 == 0) {
-                return Err(Error::MissingGlyph(c));
-            }
-            let script = c.script();
-            if matches!(script, Script::Common | Script::Inherited) {
-                continue;
-            }
-            if !matches!(script, Script::Latin | Script::Greek | Script::Cyrillic)
-                || paragraph_script.is_some_and(|previous| previous != script)
-            {
-                return Err(Error::UnsupportedScript(c));
-            }
-            paragraph_script = Some(script);
-        }
-        // Same font-unit line metrics/rounding as the previous backend. Shaping
-        // and layout do not depend on which requested glyphs have been painted.
-        let scale = font_size / face.units_per_em() as f32;
-        let ascent = face.ascender() as f32 * scale;
-        let line_height = ((i32::from(face.ascender()) - i32::from(face.descender())
-            + i32::from(face.line_gap())) as f32
-            * scale)
-            .max(font_size);
-        let mut result = TextLayout {
-            width: 0.0,
-            height: line_height,
-            baseline: ascent,
-            font_size,
-            glyphs: Vec::new(),
-            font_id: self.font.id,
-        };
-        let mut line = 0usize;
-        let mut paragraph_offset = 0;
-        let mut shaping_budget = 1024 * 1024;
-        for paragraph in text.split('\n') {
-            if paragraph.is_empty() {
-                line += 1;
-                paragraph_offset += 1;
-                continue;
-            }
-            let (positions, width) =
-                Self::shape_line(face, paragraph, font_size, &mut shaping_budget)?;
-            if max_width.is_none_or(|w| width <= w) {
-                Self::append(&mut result, positions, paragraph_offset, line, line_height)?;
-                line += 1;
-            } else {
-                // Greedy cluster-boundary wrapping. Prefer whitespace boundaries,
-                // then reshape each chosen line so its edge shaping is authoritative.
-                let limit = max_width.unwrap();
-                let mut start = 0;
-                while start < paragraph.len() {
-                    let (all, _) = Self::shape_line(
-                        face,
-                        &paragraph[start..],
-                        font_size,
-                        &mut shaping_budget,
-                    )?;
-                    let mut end = paragraph.len();
-                    let mut preferred = None;
-                    let mut last_cluster = start;
-                    for (i, g) in all.iter().enumerate() {
-                        let cluster = start + g.cluster as usize;
-                        if cluster == last_cluster && i != 0 {
-                            continue;
-                        }
-                        if cluster > start
-                            && paragraph[..cluster]
-                                .chars()
-                                .next_back()
-                                .is_some_and(char::is_whitespace)
-                        {
-                            preferred = Some(cluster);
-                        }
-                        if g.x > limit && cluster > start {
-                            end = preferred.filter(|v| *v > start).unwrap_or(cluster);
-                            break;
-                        }
-                        last_cluster = cluster;
-                    }
-                    // The last cluster's advance may cross the limit, so select
-                    // an earlier complete cluster if no overflow origin existed.
-                    let mut shaped = Self::shape_line(
-                        face,
-                        &paragraph[start..end],
-                        font_size,
-                        &mut shaping_budget,
-                    )?;
-                    while shaped.1 > limit {
-                        let previous = shaped
-                            .0
-                            .iter()
-                            .map(|g| g.cluster as usize)
-                            .filter(|c| *c > 0)
-                            .max();
-                        let Some(previous) = previous else {
-                            break;
-                        }; // indivisible cluster may overflow
-                        end = start + previous;
-                        shaped = Self::shape_line(
-                            face,
-                            &paragraph[start..end],
-                            font_size,
-                            &mut shaping_budget,
-                        )?;
-                    }
-                    Self::append(
-                        &mut result,
-                        shaped.0,
-                        paragraph_offset + start,
-                        line,
-                        line_height,
-                    )?;
-                    result.width = result.width.max(shaped.1);
-                    line += 1;
-                    start = end;
-                }
-            }
-            result.width = result.width.max(if max_width.is_none_or(|w| width <= w) {
-                width
-            } else {
-                0.0
-            });
-            paragraph_offset += paragraph.len() + 1;
-        }
-        result.height = line.max(1) as f32 * line_height;
-        Ok(result)
-    }
-    fn append(
-        layout: &mut TextLayout,
-        mut glyphs: Vec<Glyph>,
-        offset: usize,
-        line: usize,
-        line_height: f32,
-    ) -> Result<(), Error> {
-        if layout.glyphs.len() + glyphs.len() > MAX_GLYPHS {
-            return Err(Error::ResourceLimit);
-        }
-        for g in &mut glyphs {
-            g.cluster += offset as u32;
-            g.baseline += layout.baseline + line as f32 * line_height;
-        }
-        layout.glyphs.extend(glyphs);
-        Ok(())
-    }
-    fn shape_line(
-        face: &rustybuzz::Face<'_>,
-        text: &str,
-        size: f32,
-        budget: &mut usize,
-    ) -> Result<(Vec<Glyph>, f32), Error> {
-        *budget = budget.checked_sub(text.len()).ok_or(Error::ResourceLimit)?;
-        let mut buffer = rustybuzz::UnicodeBuffer::new();
-        buffer.push_str(text);
-        buffer.guess_segment_properties();
-        if buffer.direction() != rustybuzz::Direction::LeftToRight {
-            return Err(Error::UnsupportedDirection);
-        }
-        let shaped = rustybuzz::shape(face, &[], buffer);
-        let scale = size / face.units_per_em() as f32;
-        let mut x = 0.0;
-        let mut glyphs = Vec::with_capacity(shaped.len());
-        for (info, pos) in shaped.glyph_infos().iter().zip(shaped.glyph_positions()) {
-            if info.glyph_id == 0 {
-                return Err(Error::InvalidFont);
-            }
-            glyphs.push(Glyph {
-                id: info.glyph_id as u16,
-                cluster: info.cluster,
-                x: x + pos.x_offset as f32 * scale,
-                baseline: -(pos.y_offset as f32) * scale,
-            });
-            x += pos.x_advance as f32 * scale;
-        }
-        Ok((glyphs, x))
+        self.planner
+            .as_mut()
+            .unwrap()
+            .shape(text, font_size, max_width, interactive)
     }
 }
 
-/// One explicitly supplied font, horizontal single-script LTR paragraphs,
-/// Latin/Greek/Cyrillic plus common/inherited characters, bounded grayscale cache.
-/// No system font discovery, fallback, bidi paragraph resolution or editing model.
+/// Horizontal Unicode paragraph shaping and a bounded grayscale raster cache.
+/// Bundled text lazily resolves Hebrew/Arabic outline fallback. Custom primary
+/// fonts have explicit coverage errors; no OS font discovery or color fallback.
 pub struct TextSystem {
     face: FontFace,
-    cache: HashMap<(u16, u32), Arc<Raster>>,
+    rasters: RasterCache,
+}
+#[derive(Default)]
+struct RasterCache {
+    cache: HashMap<GlyphKey, Arc<Raster>>,
     cache_bytes: usize,
-    // No scaler or outline storage until the first requested glyph. A boxed
-    // owner keeps every unused service's header small; no shared raster lock.
+    // No scaler/outline storage until the first requested glyph.
     scaler: Option<Box<ScaleContext>>,
 }
 impl TextSystem {
@@ -427,24 +331,20 @@ impl TextSystem {
     pub fn from_font(face: FontFace) -> Self {
         Self {
             face,
-            cache: HashMap::new(),
-            cache_bytes: 0,
-            scaler: None,
+            rasters: RasterCache::default(),
         }
     }
     pub fn font_face(&self) -> &FontFace {
         &self.face
     }
     pub fn cache_bytes(&self) -> usize {
-        self.cache_bytes
+        self.rasters.cache_bytes
     }
     pub fn clear_cache(&mut self) {
-        self.cache.clear();
-        self.cache_bytes = 0;
-        self.scaler = None;
+        self.rasters.clear_cache();
     }
     /// Shapes one string. For a batch, borrow a [`TextShaper`] from
-    /// [`FontFace::shaper`] to parse the immutable shaping tables only once.
+    /// [`FontFace::shaper`] to reuse planner tables and scratch across the pass.
     pub fn shape(
         &self,
         text: &str,
@@ -454,26 +354,78 @@ impl TextSystem {
         self.face.shaper().shape(text, font_size, max_width)
     }
     pub(crate) fn validate(&self, layout: &TextLayout) -> Result<(), Error> {
-        if layout.font_id != self.face.0.id {
+        if !layout.fonts.primary.same_face(&self.face) {
             Err(Error::ForeignLayout)
         } else {
             Ok(())
         }
     }
-    pub(crate) fn raster_key(&self, id: u16, size: f32) -> GlyphKey {
-        GlyphKey {
-            face: self.face.0.id,
-            glyph: id,
+    pub(crate) fn layout_key(
+        &self,
+        layout: &TextLayout,
+        glyph: Glyph,
+        size: f32,
+    ) -> Result<GlyphKey, Error> {
+        let face = layout.fonts.face(glyph.font_slot())?;
+        Ok(GlyphKey {
+            face: face.0.id,
+            glyph: glyph.id,
             size: size.to_bits(),
-        }
+        })
     }
-    pub(crate) fn raster(&mut self, id: u16, size: f32) -> Result<Arc<Raster>, Error> {
+    pub(crate) fn layout_raster(
+        &mut self,
+        layout: &TextLayout,
+        glyph: Glyph,
+        size: f32,
+    ) -> Result<Arc<Raster>, Error> {
+        self.rasters
+            .raster(layout.fonts.face(glyph.font_slot())?, glyph.id, size)
+    }
+    /// Conservative local raster bounds, useful for damage and paint geometry.
+    pub fn ink_bounds(&self, layout: &TextLayout) -> Result<Rect, Error> {
+        self.validate(layout)?;
+        let mut min = [f32::INFINITY; 2];
+        let mut max = [f32::NEG_INFINITY; 2];
+        for g in &layout.glyphs {
+            let Some([left, bottom, right, top]) = outline_bounds(
+                &layout.fonts.face(g.font_slot())?.0.bytes,
+                g.id,
+                layout.font_size,
+            )?
+            else {
+                continue;
+            };
+            min[0] = min[0].min(g.x + left - 1.0);
+            min[1] = min[1].min(g.baseline - top - 1.0);
+            max[0] = max[0].max(g.x + right + 1.0);
+            max[1] = max[1].max(g.baseline - bottom + 1.0);
+        }
+        Ok(if min[0].is_finite() {
+            Rect::new(min[0], min[1], max[0] - min[0], max[1] - min[1])
+        } else {
+            Rect::default()
+        })
+    }
+}
+
+impl RasterCache {
+    fn clear_cache(&mut self) {
+        self.cache.clear();
+        self.cache_bytes = 0;
+        self.scaler = None;
+    }
+    fn raster(&mut self, face: &FontFace, id: u16, size: f32) -> Result<Arc<Raster>, Error> {
         if !size.is_finite() || size <= 0.0 || size > 4096.0 {
             return Err(Error::InvalidFontSize);
         }
-        let key = (id, size.to_bits());
+        let key = GlyphKey {
+            face: face.0.id,
+            glyph: id,
+            size: size.to_bits(),
+        };
         if !self.cache.contains_key(&key) {
-            let bounds = outline_bounds(&self.face.0.bytes, id, size)?;
+            let bounds = outline_bounds(&face.0.bytes, id, size)?;
             let estimated = if let Some(r) = bounds {
                 ((r[2] - r[0] + 2.0) as usize)
                     .checked_mul((r[3] - r[1] + 2.0) as usize)
@@ -491,9 +443,8 @@ impl TextSystem {
                 // This is the narrow outline-alpha path of the existing GPUI
                 // SwashGlyphRasterizer: stable face key, unhinted default instance,
                 // native placement and owned grayscale coverage, no color fallback.
-                let mut font =
-                    FontRef::from_index(&self.face.0.bytes, 0).ok_or(Error::InvalidFont)?;
-                font.key = self.face.0.raster_key;
+                let mut font = FontRef::from_index(&face.0.bytes, 0).ok_or(Error::InvalidFont)?;
+                font.key = face.0.raster_key;
                 let context = self
                     .scaler
                     .get_or_insert_with(|| Box::new(ScaleContext::with_max_entries(1)));
@@ -538,7 +489,7 @@ impl TextSystem {
                 key,
                 Arc::new(Raster {
                     key: GlyphKey {
-                        face: self.face.0.id,
+                        face: face.0.id,
                         glyph: id,
                         size: size.to_bits(),
                     },
@@ -548,28 +499,6 @@ impl TextSystem {
             );
         }
         Ok(Arc::clone(&self.cache[&key]))
-    }
-    /// Conservative local raster bounds, useful for damage and paint geometry.
-    pub fn ink_bounds(&self, layout: &TextLayout) -> Result<Rect, Error> {
-        self.validate(layout)?;
-        let mut min = [f32::INFINITY; 2];
-        let mut max = [f32::NEG_INFINITY; 2];
-        for g in &layout.glyphs {
-            let Some([left, bottom, right, top]) =
-                outline_bounds(&self.face.0.bytes, g.id, layout.font_size)?
-            else {
-                continue;
-            };
-            min[0] = min[0].min(g.x + left - 1.0);
-            min[1] = min[1].min(g.baseline - top - 1.0);
-            max[0] = max[0].max(g.x + right + 1.0);
-            max[1] = max[1].max(g.baseline - bottom + 1.0);
-        }
-        Ok(if min[0].is_finite() {
-            Rect::new(min[0], min[1], max[0] - min[0], max[1] - min[1])
-        } else {
-            Rect::default()
-        })
     }
 }
 
@@ -694,21 +623,27 @@ mod font_tests {
         let old_id = faces[0].0.id;
         let service = TextSystem::from_font(faces[0].clone());
         let layout = service.shape("office", 18.0, None).unwrap();
-        assert!(service.scaler.is_none());
+        assert!(service.rasters.scaler.is_none());
         service.ink_bounds(&layout).unwrap();
-        assert!(service.scaler.is_none());
+        assert!(service.rasters.scaler.is_none());
         drop(service);
         drop(faces);
+        assert!(
+            weak.upgrade().is_some(),
+            "owned layout keeps its exact font lease"
+        );
+        let shared = FontFace::bundled().unwrap();
+        assert_eq!(shared.0.id, old_id);
+        assert_eq!(
+            TextSystem::from_font(shared.clone()).validate(&layout),
+            Ok(())
+        );
+        drop(shared);
+        drop(layout);
         assert!(weak.upgrade().is_none());
         assert!(BUNDLED_FONT.lock().unwrap().upgrade().is_none());
-        // Positions alone do not pin the immutable font backing.
-        assert_eq!(layout.font_id, old_id);
         let renewed = FontFace::bundled().unwrap();
         assert!(renewed.0.id > old_id);
-        assert_eq!(
-            TextSystem::from_font(renewed.clone()).validate(&layout),
-            Err(Error::ForeignLayout)
-        );
         let renewed_weak = Arc::downgrade(&renewed.0);
         drop(renewed);
         assert!(renewed_weak.upgrade().is_none());
