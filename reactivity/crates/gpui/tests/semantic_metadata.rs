@@ -421,7 +421,7 @@ impl View for Rows {
             .bg(Color::WHITE)
     }
 }
-fn list_metadata(win: &Win<Rows>) -> (Vec<ListInfo>, Vec<ListItemInfo>) {
+fn list_metadata<M: View + 'static>(win: &Win<M>) -> (Vec<ListInfo>, Vec<ListItemInfo>) {
     let mut lists = vec![];
     let mut rows = vec![];
     win.visit(|part| {
@@ -499,6 +499,133 @@ fn list_position_count_and_key_are_frozen_with_p_not_read_from_logical_s() {
     win.update(|m| m.broken = false).unwrap();
     win.presented(token(&win)).unwrap();
     assert_eq!(list_metadata(&win).0[0].count, 102);
+}
+
+#[test]
+fn nested_realized_rows_keep_their_immediate_frozen_list_parent() {
+    struct Nested {
+        len: usize,
+        inner: Rows,
+        transform: Affine,
+    }
+    impl ItemSource for Nested {
+        fn len(&self) -> usize {
+            self.len
+        }
+        fn key(&self, index: usize) -> ItemKey {
+            ItemKey::new(index as u64)
+        }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            let index = usize::try_from(key.get()).ok()?;
+            (index < self.len).then_some(index)
+        }
+        fn row(&self, index: usize) -> El<'_> {
+            column((
+                text("Outer row"),
+                uniform_list(ListId::new(100 + index as u64), &self.inner, 24)
+                    .h(48)
+                    .w(120),
+            ))
+        }
+    }
+    impl View for Nested {
+        fn view(&self) -> El<'_> {
+            uniform_list(LIST, self, 96)
+                .h(144)
+                .w(160)
+                .transform(self.transform)
+        }
+    }
+    fn check(win: &Win<Nested>, outer_count: u32, inner_count: u32) -> usize {
+        let mut preceding: Vec<(Target, Role, Option<ListInfo>)> = Vec::new();
+        let mut rows = 0;
+        win.visit(|part| {
+            if part.role() == Role::ListItem {
+                let item = part.list_item().expect("every row wrapper has metadata");
+                let parent = part.parent().expect("a row has a parent");
+                let (_, role, list) = preceding
+                    .iter()
+                    .find(|(target, _, _)| *target == parent)
+                    .expect("the list precedes its row in P");
+                assert_eq!(*role, Role::List);
+                let list = list.expect("the immediate parent has frozen list metadata");
+                assert_eq!(item.list, parent);
+                assert_eq!(item.count, list.count);
+                assert!(item.index < item.count);
+                if list.id == LIST {
+                    assert_eq!(item.count, outer_count);
+                    assert_eq!(item.key.get(), u64::from(item.index));
+                } else {
+                    assert_eq!(item.count, inner_count);
+                    assert_eq!(item.key.get(), 1000 + u64::from(item.index));
+                }
+                rows += 1;
+            } else {
+                assert!(
+                    part.list_item().is_none(),
+                    "descendants are not row wrappers"
+                );
+            }
+            preceding.push((part.target(), part.role(), part.list()));
+        })
+        .unwrap();
+        rows
+    }
+    for transform in [
+        Affine::IDENTITY,
+        Affine {
+            a: -1.0,
+            tx: 160.25,
+            ty: 0.25,
+            ..Affine::IDENTITY
+        },
+        Affine::translation(-1000.0, 0.0),
+    ] {
+        for len in [0, 1, 4] {
+            let mut win = Win::recording(
+                Nested {
+                    len,
+                    inner: Rows {
+                        len: 3,
+                        reverse: false,
+                        broken: false,
+                    },
+                    transform,
+                },
+                WindowOptions {
+                    size: [240, 200],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            win.resize_scaled([240, 200], 1.25).unwrap();
+            win.presented(token(&win)).unwrap();
+            let count = check(&win, len as u32, 3);
+            if len == 0 || transform.tx < -900.0 {
+                assert_eq!(count, 0);
+            } else {
+                assert!(count > 0);
+            }
+            let list = win.list(LIST).unwrap();
+            win.scroll(list, 12.25).unwrap();
+            win.presented(token(&win)).unwrap();
+            check(&win, len as u32, 3);
+            let frozen = list_metadata(&win);
+            win.update(|model| {
+                model.len += 1;
+                model.inner.len = 5;
+            })
+            .unwrap();
+            assert_eq!(
+                list_metadata(&win),
+                frozen,
+                "pending S cannot supply parent counts"
+            );
+            check(&win, len as u32, 3);
+            win.presented(token(&win)).unwrap();
+            check(&win, len as u32 + 1, 5);
+        }
+    }
 }
 
 #[path = "../examples/support/library.rs"]

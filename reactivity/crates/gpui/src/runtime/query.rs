@@ -132,12 +132,18 @@ impl<'a> Part<'a> {
     /// Frozen position/key/count for this published row wrapper. Descendants
     /// can walk parent targets; positions are never inferred from keys or y.
     pub fn list_item(self) -> Option<super::ListItemInfo> {
-        let row = self.context.metadata?.row(self.node.identity)?;
+        let metadata = self.context.metadata?;
+        let row = metadata.row(self.node.identity)?;
+        // Row wrappers are immediate children of their list in this SAME P.
+        // The parent already freezes the count; neither field needs repeating
+        // per row, and current logical list state must never supply them.
+        let parent = &self.context.nodes[self.node.parent.index()?];
+        let list = metadata.list(parent.identity)?;
         Some(super::ListItemInfo {
-            list: self.context.sites.target(row.list_identity),
+            list: self.context.sites.target(parent.identity),
             key: row.key,
             index: row.index,
-            count: row.count,
+            count: list.count,
         })
     }
     pub fn value(self) -> Option<&'a str> {

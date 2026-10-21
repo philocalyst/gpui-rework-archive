@@ -75,10 +75,8 @@ pub(super) struct Sheet {
 #[derive(Clone)]
 pub(super) struct Row {
     pub identity: u64,
-    pub list_identity: u64,
     pub key: ItemKey,
     pub index: u32,
-    pub count: u32,
 }
 #[derive(Clone)]
 pub(super) struct TextSlot {
@@ -141,7 +139,7 @@ impl Sheet {
         metadata: &Metadata,
         identity: u64,
         list: Option<ListInfo>,
-        row: Option<(&ListRow, &ListState)>,
+        row: Option<&ListRow>,
     ) {
         let names = metadata.effective(identity);
         if names.explicit_name {
@@ -159,13 +157,11 @@ impl Sheet {
         if let Some(info) = list {
             self.lists.push((identity, info));
         }
-        if let Some((row, list)) = row {
+        if let Some(row) = row {
             self.rows.push(Row {
                 identity,
-                list_identity: list.identity,
                 key: row.key,
                 index: row.index,
-                count: list.viewport.len as u32,
             });
         }
     }
@@ -285,9 +281,7 @@ impl<M: View + 'static> Runtime<M> {
                 metadata,
                 node.identity,
                 lists.get(&node.identity).copied(),
-                self.list_rows
-                    .get(&node.identity)
-                    .map(|row| (row, &self.lists[&row.list])),
+                self.list_rows.get(&node.identity),
             );
         }
         sheet.sort();

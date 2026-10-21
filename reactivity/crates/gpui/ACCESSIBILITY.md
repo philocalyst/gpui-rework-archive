@@ -83,6 +83,13 @@ not implement UIA ItemContainer/VirtualizedItem, remote row realization, or nati
 AT scrolling; users can scroll the real Library window and the bounded native
 tree then follows acknowledged rows.
 
+The frozen GPUI row sidecar stores only identity, key and index (24 bytes on
+64-bit targets). Its immediate parent in P already owns the list identity and
+frozen count. Deriving those fields saves 8 bytes per reserved row slot and
+removes a logical-list lookup during capture; reading a row adds a lookup in the
+frozen list column. Nested, partially clipped and reflected lists retain this
+parent invariant. No current logical source data supplies an old P row's count.
+
 ## Native action admission
 
 Direct native handlers own only transport and wake capabilities. They do not

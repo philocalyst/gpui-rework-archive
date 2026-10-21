@@ -2223,9 +2223,7 @@ impl<M: View + 'static> Runtime<M> {
                     metadata,
                     node.identity,
                     list_metadata.get(&node.identity).copied(),
-                    self.list_rows
-                        .get(&node.identity)
-                        .map(|row| (row, &self.lists[&row.list])),
+                    self.list_rows.get(&node.identity),
                 );
             }
         }
@@ -2669,6 +2667,7 @@ mod semantic_storage_ledger {
         assert_eq!(size_of::<Presented>(), 88);
         assert_eq!(size_of::<crate::El<'_>>(), 184);
         assert_eq!(size_of::<ListRow>(), 32);
+        assert_eq!(size_of::<metadata::Row>(), 24);
         assert_eq!(size_of::<Destination>(), 4);
         assert_eq!(allocation("absent", crate::div), (0, 0));
         assert_eq!(
