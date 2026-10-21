@@ -18,6 +18,10 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Virtual-list review](virtual-list-api-review-luna.md) | Bounded row realization, keyed lifetime, local coordinates and semantic authority |
 | [Accessibility frontier](accessibility-frontier-luna.md) | Native activation, sparse semantic updates, virtual-item protocols, geometry contracts and primary framework/paper review |
 | [Accessibility deltas](accessibility-incremental-luna.md) | Exact sparse projection without a second semantic tree, structural fallbacks, label/value schema and native proof boundaries |
+| [Accessibility text and virtualization](accessibility-text-virtualization-luna.md) | Chromium/Compose/Qt comparisons, frozen row derivation, text offset contracts and focus across lost surfaces |
+| [Reader/cohort implementation seam](reader-cohort-implementation-luna.md) | Typed Library question, exact input-version admission, source replacement and bounded completion ownership; Salsa/Bevy/Adapton comparisons |
+| [Field and immutable text ownership](text-ownership-luna.md) | Checked source namespace, thin text leases, exact Triomphe allocation comparison and dependency costs |
+| [Lossless color packing](color-packing-luna.md) | Word-aligned Oklch, bounded Linear sRGB exponent codec and exact 16-byte author colors without narrowing HDR admission |
 | [Review dispositions](../REVIEW.md) | Links to all six adversarial reports and their final status |
 
 [Input manifest](inputs/manifest.json) hashes the supplied original
