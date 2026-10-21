@@ -2499,20 +2499,6 @@ mod tests {
     use crate::{div, text};
 
     #[test]
-    fn target_lookup_return_layouts() {
-        eprintln!(
-            "lookup_abi,Error={},ResultIndex={},ResultIdentityIndex={},OptionIndex={},OptionIdentity={},Node={},Presented={}",
-            size_of::<Error>(),
-            size_of::<Result<usize, Error>>(),
-            size_of::<Result<(u64, usize), Error>>(),
-            size_of::<Option<usize>>(),
-            size_of::<Option<u64>>(),
-            size_of::<Node>(),
-            size_of::<Presented>()
-        );
-    }
-
-    #[test]
     fn native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels() {
         struct Rectangle;
         impl View for Rectangle {
