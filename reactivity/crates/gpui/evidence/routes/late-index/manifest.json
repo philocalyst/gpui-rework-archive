@@ -1,0 +1,48 @@
+{
+  "source_commits": {
+    "baseline": "40382ed1d9ce1c01b556df062f3ab94b52e71dbe",
+    "candidate": "c8c84c15be1cbd35c67ca07015d3df31c13ea367"
+  },
+  "binaries": {
+    "baseline": {
+      "path": "/tmp/gpui-routes-c11-baseline-303e7901280e2467e490563535b33a88faf5ea9f50918d6a1b8ac24e8cef0c1d",
+      "sha256": "303e7901280e2467e490563535b33a88faf5ea9f50918d6a1b8ac24e8cef0c1d"
+    },
+    "candidate": {
+      "path": "/tmp/gpui-routes-c8-fixture-505524ac734889c1ee6085fd92c3ffa22073506f260a0a64567c6b9fe0538840",
+      "sha256": "505524ac734889c1ee6085fd92c3ffa22073506f260a0a64567c6b9fe0538840",
+      "build_output_path": "/tmp/gpui-pan-viewports-release-target/release/examples/route_storage_measure"
+    }
+  },
+  "fixture_sha256": "86d82a641b8d68aafdd68ff0a7a20f7cddd3a8d847b7cd9ee77608a318080fdb",
+  "rounds": 11,
+  "cpu": 2,
+  "scope": "Fresh-process alternating warm-code recording owners; no native/peer/scanout or cold-start claim. Complete route disable/restore and 100 activations are included; inspection and pixel preflight excluded from measured phases.",
+  "elapsed_seconds": 12.586,
+  "raw_sha256": {
+    "raw-00-baseline.csv": "9be1cd066b5b17eaea37c1a08a93c6a7f8f4be8fabd26cf3ee3e1032c8c7b65e",
+    "raw-00-candidate.csv": "8bceaf5bda418370896e49558f4102ef8e15dc89b230a954cbde30a2537dc8b0",
+    "raw-01-baseline.csv": "4c8f0251cd67dd3bbef65997a597efe56c976346a9c3ee43bb8b1ee688e03ed0",
+    "raw-01-candidate.csv": "deb86066ba78916250610e071af81122736071241feac9d3671be5ea72052f59",
+    "raw-02-baseline.csv": "fe7677d3604d981e1a5b14859d08aba24cc7f4d426a01de0adf8ef147842e2cf",
+    "raw-02-candidate.csv": "959d868284c1230d1cf3b66ba64ed77adb4003a6edb0acdbef5d383a27f26d67",
+    "raw-03-baseline.csv": "5029ab5d5fd0232d07a7851a9ac970b9806cbe1d8466f899cb1ef623f7a740aa",
+    "raw-03-candidate.csv": "e5481ab3a255032c575c708462cc26851ea862f2593db76860f13896ee5d6646",
+    "raw-04-baseline.csv": "66e99a512c8d2b2a0f71f0f16360e165f627abd750cda22528f9f45c6748ede7",
+    "raw-04-candidate.csv": "cf822ec37fc045cd051b1c7395e8da157e658687a4de3f76fe5f929407d094d3",
+    "raw-05-baseline.csv": "154eaf9b60b57c47eebf7d084ae92267616e011cc6af825eb2673ca215560e78",
+    "raw-05-candidate.csv": "eda9084db9a6b48f1a145e91a2ba73bfed761204908eaf8a882776d453ca0fa6",
+    "raw-06-baseline.csv": "8bd099f541254625d2f72188ae65fa13e968a56df8d049d8379552a390749c3d",
+    "raw-06-candidate.csv": "770521260c8d9bb0347c2c1ed7488e071f5418f4bd8be587aca071f2594fdaa8",
+    "raw-07-baseline.csv": "efdc64f232d8d975135176a22ddbdf4d70973fdcb9b4e310d8f0c236506717da",
+    "raw-07-candidate.csv": "1cc41ae076ca73849aa0815fd51429024cfb7a06323eb20b3eba1103280dc9ca",
+    "raw-08-baseline.csv": "c9c75835ce85707fc0c2df8eca3e360e4d8ca051eddcd4943b49b9e6192686fa",
+    "raw-08-candidate.csv": "525b469a3e5517d842ba504da3bcc9df5767be5afce885a3c80d97ab5f7eb156",
+    "raw-09-baseline.csv": "840fdd7aa08837a0a3110a884ae81605d1270d3b519fc7f7f82969942640c0fc",
+    "raw-09-candidate.csv": "af56460cbb99644e689e45eb7c3ed52666f7499f125c9051d053b2c421a8a98f",
+    "raw-10-baseline.csv": "7ec9a9e0adc71e3223dddde511b102702f66f9d3d53a77faf70f501849da971a",
+    "raw-10-candidate.csv": "69e7d01c36e5542d0b74829a4a106c6365709aa9c1d1ed13ef20a99098e5fb77"
+  },
+  "paired_sha256": "129cc66615e19f4adf03c5ce69315878725a531d6e182fba581aa277e5c74495",
+  "paired_lf_sha256": "88183561c72f5b79268ea36609e1d01b9bf5c06d86efd73f18cbe69e39147669"
+}

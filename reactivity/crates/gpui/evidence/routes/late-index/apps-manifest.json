@@ -1,0 +1,23 @@
+{
+  "source_commits": {
+    "baseline": "40382ed1d9ce1c01b556df062f3ab94b52e71dbe",
+    "candidate": "c8c84c15be1cbd35c67ca07015d3df31c13ea367"
+  },
+  "binaries": {
+    "baseline": {
+      "path": "/tmp/gpui-routes-c11-baseline-f2559c8f21f5c6998c59c931dcf3110172262835419be58bcf610000be6662aa",
+      "sha256": "f2559c8f21f5c6998c59c931dcf3110172262835419be58bcf610000be6662aa"
+    },
+    "candidate": {
+      "path": "/tmp/gpui-routes-c8-apps-b46473ad33c0f7a65760381be684d5aed5dd1208b9f367a98060bb1d83f34069",
+      "sha256": "b46473ad33c0f7a65760381be684d5aed5dd1208b9f367a98060bb1d83f34069",
+      "build_output_path": "/tmp/gpui-pan-viewports-release-target/release/deps/gpui-9bd20898650b3580"
+    }
+  },
+  "elapsed_seconds": 16.936,
+  "cpu": 2,
+  "rounds": 5,
+  "scope": "Existing unchanged style-cost public-operation fixtures; 3 warm batches per fresh process,5 alternating pairs. Mount fixture excludes drop from timer. Native input/upload/scanout excluded.",
+  "paired_sha256": "37d38ab96a9d178a254b4c441523c483639c30c61c26e6478a34d846b9739aaa",
+  "paired_lf_sha256": "b66ae3f732a0004f36e85115dc07098d92fec2499db92bdaf7b01c244b84fe28"
+}
