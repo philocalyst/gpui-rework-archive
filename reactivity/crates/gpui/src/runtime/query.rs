@@ -32,7 +32,7 @@ impl<'a> Part<'a> {
 }
 
 pub struct Query<'a, M: View + 'static> {
-    window: &'a Win<M>,
+    runtime: Option<&'a Runtime<M>>,
     role: Option<Role>,
     text: Option<(&'a str, bool)>,
 }
@@ -42,7 +42,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
         'a: 'b,
     {
         Query {
-            window: self.window,
+            runtime: self.runtime,
             role: self.role,
             text: Some((text, false)),
         }
@@ -52,7 +52,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
         'a: 'b,
     {
         Query {
-            window: self.window,
+            runtime: self.runtime,
             role: self.role,
             text: Some((text, true)),
         }
@@ -72,14 +72,17 @@ impl<'a, M: View + 'static> Query<'a, M> {
     /// Count the presented matches without minting target records.
     pub fn count(&self) -> Result<usize, Error> {
         let mut count = 0;
-        self.window
-            .visit(|part| count += usize::from(self.matches(part)))?;
+        let runtime = self.runtime.ok_or(Error::Closed)?;
+        sheet(runtime)?;
+        for node in &runtime.presented {
+            count += usize::from(self.matches(Part { node }));
+        }
         Ok(count)
     }
     /// Resolve one unique live match. Ambiguity is an error, not first-match
     /// dispatch to a possibly different instance of a reusable component.
     pub fn one(&self) -> Result<Target, Error> {
-        let runtime = self.window.runtime()?;
+        let runtime = self.runtime.ok_or(Error::Closed)?;
         runtime.live()?;
         runtime.current_presentation()?;
         let mut identity = 0;
@@ -109,14 +112,14 @@ fn sheet<M: View + 'static>(runtime: &Runtime<M>) -> Result<(), Error> {
 impl<M: View + 'static> Win<M> {
     pub fn query(&self) -> Query<'_, M> {
         Query {
-            window: self,
+            runtime: self.inner.as_deref(),
             role: None,
             text: None,
         }
     }
     pub fn role(&self, role: Role) -> Query<'_, M> {
         Query {
-            window: self,
+            runtime: self.inner.as_deref(),
             role: Some(role),
             text: None,
         }
