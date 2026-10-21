@@ -161,7 +161,7 @@ impl<'a> PreparedScene<'a> {
     }
 }
 
-/// Retained software display list. Only RGBA8 output is full-frame storage.
+/// Retained software display list. Only the selected output format is full-frame storage.
 /// Rendering uses one fixed linear-premultiplied tile, then encodes once.
 /// `clear` begins a new scene; appending after `pixels` rerenders the retained scene.
 pub struct Canvas {
@@ -208,7 +208,7 @@ impl Canvas {
         Ok(canvas)
     }
     fn allocate_pixels(&mut self) -> Result<(), Error> {
-        let length = self.width * self.height * 4;
+        let length = self.width * self.height * self.color_config.bytes_per_pixel();
         if self.pixels.len() != length {
             self.pixels
                 .try_reserve_exact(length - self.pixels.len())
@@ -459,8 +459,9 @@ impl Canvas {
         self.references += refs;
         Ok(())
     }
-    /// Premultiplied encoded-profile RGBA8, top-left origin, tightly packed rows.
-    /// Both supported profiles use the sRGB transfer curve; see color_config().
+    /// Premultiplied output, top-left origin, tightly packed rows. RGBA8 uses
+    /// encoded-profile channels; RGBA16Float is linear little-endian binary16.
+    /// Primaries, transfer and reference white are declared by color_config().metadata().
     /// Linear composition precedes a single tile encoding. A clean call does no work.
     pub fn pixels(&mut self) -> &[u8] {
         self.try_pixels()
@@ -534,7 +535,14 @@ impl Canvas {
             indices: &self.indices,
             tile_proofs: self.tile_proofs,
         };
-        let rendered = schedule.render(frame, self.color_config.encoder(), &mut self.pixels);
+        let rendered = match self.color_config.format {
+            crate::PixelFormat::Rgba8Premultiplied => {
+                schedule.render(frame, self.color_config.encoder(), &mut self.pixels)
+            }
+            crate::PixelFormat::Rgba16Float => {
+                schedule.render(frame, self.color_config.half_encoder(), &mut self.pixels)
+            }
+        };
         stats.full_rect_tiles = rendered.full_rect_tiles;
         stats.skipped_command_tiles = rendered.skipped_command_tiles;
         stats.boundary_pixels = rendered.boundary_pixels;

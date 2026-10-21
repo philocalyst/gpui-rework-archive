@@ -1,5 +1,8 @@
 //! cargo run --release -p gpui_canvas --features parallel --example parallel
-use gpui_canvas::{Affine, Canvas, Color, Point, Rect, RenderPool, TextLayout, TextSystem};
+use gpui_canvas::{
+    Affine, Canvas, Color, ColorConfig, OutputProfile, Point, Rect, RenderPool, TextLayout,
+    TextSystem,
+};
 use std::{hint::black_box, time::Instant};
 
 fn scene(canvas: &mut Canvas, text: &mut TextSystem, label: &TextLayout, kind: &str) {
@@ -71,6 +74,12 @@ fn digest(bytes: &[u8]) -> u64 {
         .fold(0u64, |hash, &b| hash.wrapping_mul(16777619) ^ b as u64)
 }
 fn main() {
+    let config = if std::env::var_os("GPUI_RENDER_HDR").is_some() {
+        ColorConfig::linear_hdr(OutputProfile::Srgb, 203.0).unwrap()
+    } else {
+        ColorConfig::default()
+    };
+    eprintln!("output={config:?}");
     let mut text = TextSystem::bundled().unwrap();
     let label = text.shape("office café 012345", 16., None).unwrap();
     let pools: Vec<_> = [1, 2, 4, 8]
@@ -91,7 +100,7 @@ fn main() {
         for (workers, pool) in
             std::iter::once((0, None)).chain(pools.iter().map(|p| (p.workers(), Some(p))))
         {
-            let mut canvas = Canvas::new(width, height).unwrap();
+            let mut canvas = Canvas::with_color_config(width, height, config).unwrap();
             scene(&mut canvas, &mut text, &label, kind);
             let first = match pool {
                 Some(pool) => canvas.pixels_with(pool),

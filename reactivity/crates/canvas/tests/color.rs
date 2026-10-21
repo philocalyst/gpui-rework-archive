@@ -78,7 +78,7 @@ fn final_mapping_occurs_after_extended_linear_composition() {
 }
 
 #[test]
-fn p3_bytes_are_explicitly_profiled_and_hdr_requests_fail() {
+fn p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output() {
     let config = ColorConfig {
         profile: OutputProfile::DisplayP3,
         ..ColorConfig::default()
@@ -89,17 +89,17 @@ fn p3_bytes_are_explicitly_profiled_and_hdr_requests_fail() {
     assert_eq!(canvas.color_config(), config);
     canvas.clear(Color::WHITE);
     assert_eq!(canvas.pixels(), [255, 255, 255, 255]);
-    assert!(matches!(
-        Canvas::with_color_config(
-            1,
-            1,
-            ColorConfig {
-                format: PixelFormat::Rgba16Float,
-                ..config
-            }
-        ),
-        Err(Error::UnsupportedPixelFormat)
-    ));
+    let mut hdr = Canvas::with_color_config(
+        1,
+        1,
+        ColorConfig {
+            format: PixelFormat::Rgba16Float,
+            ..config
+        },
+    )
+    .unwrap();
+    hdr.clear(Color::linear_display_p3(4.0, 0.5, -0.25, 1.0).unwrap());
+    assert_eq!(hdr.pixels(), [0, 0x44, 0, 0x38, 0, 0xb4, 0, 0x3c]);
 }
 
 #[test]
