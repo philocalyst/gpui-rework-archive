@@ -593,8 +593,7 @@ impl<M: View + 'static> Runtime<M> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         match catch_unwind(AssertUnwindSafe(|| handler.invoke(&mut self.model))) {
-            Ok(true) => {}
-            Ok(false) => return Err(BindError::ReceiverMismatch.into()),
+            Ok(result) => result?,
             Err(_) => {
                 self.poison();
                 return Err(Error::OwnerPanicked);

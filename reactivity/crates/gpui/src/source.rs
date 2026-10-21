@@ -117,10 +117,10 @@ impl<M, T: 'static, F: Fn(&mut T)> FieldAction<M, T, F> {
     ) -> Result<(), BindError> {
         self.source.validate_registered(model, sources)
     }
-    pub(crate) fn invoke(&self, model: &mut M) {
-        self.source
-            .modify(model, &self.update)
-            .expect("invalid typed source route");
+    /// Validate exclusive projector agreement before exposing `&mut T`.
+    /// A checked declaration error is not an application callback panic.
+    pub(crate) fn invoke(&self, model: &mut M) -> Result<(), BindError> {
+        self.source.modify(model, &self.update)
     }
 }
 
@@ -844,7 +844,7 @@ mod tests {
         let action = COUNT.update(|value| *value += 1);
         assert_eq!(action.field_id(), COUNT.id());
         action.validate_registered(&model, &sources).unwrap();
-        action.invoke(&mut model);
+        action.invoke(&mut model).unwrap();
         assert_eq!(*model.count, 5);
         assert_eq!(model.first.revision().get(), 0);
         let imposter = Source::new(
@@ -958,7 +958,7 @@ mod tests {
             value.entries.push(3);
         });
         action.validate_registered(&owner, &sources).unwrap();
-        action.invoke(&mut owner);
+        action.invoke(&mut owner).unwrap();
         assert_eq!(
             *owner.domain,
             Domain {
