@@ -515,7 +515,8 @@ impl TextSystem {
 }
 
 // A no-allocation control-hull pen preflights the same default outline used
-// by Swash. Bezier curves lie in their control hull. Guard one device pixel
+// by Swash. The count is checked after traversal, not an early parser abort.
+// Bezier curves lie in their control hull. Guard one device pixel
 // after floor/ceil for raster rounding; reject excessive outlines before render.
 fn outline_bounds(bytes: &[u8], glyph: u16, size: f32) -> Result<Option<[f32; 4]>, Error> {
     let font = skrifa::FontRef::from_index(bytes, 0).map_err(|_| Error::InvalidFont)?;

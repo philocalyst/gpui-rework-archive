@@ -187,12 +187,14 @@ After final strong release, the registry retains one expired weak allocation:
 No permanent strong font, TLS, per-glyph shared lock, or eager geometry remains.
 
 A Skrifa control-hull pen preflights only the requested outline: finite bounded
-coordinates, at most 65,536 segments, at most 1 MiB backend outline scratch and
+coordinates, admission of at most 65,536 emitted segments, at most 1 MiB backend outline scratch and
 at most 1 MiB estimated mask. A Bezier lies within its control hull; floor/ceil
 plus a one-pixel margin protects raster placement. Actual returned mask length
 and the 8 MiB cache cap are checked independently. Bounds can be loose, so an
 unusually curved outline can be rejected conservatively. This is a resource
 admission policy, not a claim that untrusted font parsing is allocation-free.
+The segment count is checked after outline traversal; it limits accepted work,
+not the number of callbacks executed before returning an error.
 
 The narrow production path adapts the outline/alpha/placement glue already used
 by the repository's `crates/gpui_ce_parley/src/store.rs` SwashGlyphRasterizer.
@@ -200,7 +202,8 @@ It uses the default variation instance and unhinted grayscale outlines. Fontdue
 is now a dev-only quality oracle. AA output intentionally changes: 84 masks over
 Latin, Greek, Cyrillic, accents, descenders and physical scales 1/1.25/2 preserve
 all tested dimensions/placements, while 4,779 of 18,333 coverage bytes differ;
-RMS error versus Fontdue is 1.5101 on the 0–255 scale. A fresh independent Swash
+RMS error versus Fontdue is 1.5101 on the 0–255 scale (maximum difference17).
+The regression cap is four RMS levels, with exact per-paragraph glyph counts. A fresh independent Swash
 context supplies native-mask and transformed-cell exact renderer oracles.
 This is neither universal font parity nor a visual quality proof for every font.
 Color/bitmap/SVG font formats are rejected explicitly instead of silently
