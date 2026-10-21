@@ -125,3 +125,8 @@ pub(crate) struct RowDraft {
     pub y: f32,
     pub height: f32,
 }
+
+pub(crate) enum ViewportDraft {
+    List(ListDraft),
+    Scroll(crate::scroll::ScrollDraft),
+}

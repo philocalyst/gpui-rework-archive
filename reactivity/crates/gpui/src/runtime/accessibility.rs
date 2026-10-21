@@ -102,7 +102,7 @@ impl Collect<'_> {
         previous: Option<&Presented>,
         next: &Presented,
         metadata: Option<&Metadata>,
-        list: Option<ListInfo>,
+        list: Option<scroll::ViewportInfo>,
         row: Option<&ListRow>,
     ) {
         if !self.exact {
@@ -143,7 +143,8 @@ impl Collect<'_> {
             || frozen
                 .and_then(|m| m.list(previous.identity))
                 .map(|l| l.count)
-                != list.map(|l| l.count)
+                != list.and_then(scroll::ViewportInfo::list).map(|l| l.count)
+            || !scroll::same_payload(frozen.map(|m| &m.viewports), previous.identity, list)
             || frozen
                 .and_then(|m| m.row(previous.identity))
                 .map(|r| r.index)

@@ -39,8 +39,10 @@ mod delivery;
 mod image;
 mod input;
 mod list;
+mod scroll;
 mod turn;
 use list::{ListRow, ListState, ScrollRequest};
+use scroll::{ViewportKey, ViewportState};
 mod metadata;
 mod query;
 mod semantics;
@@ -95,6 +97,7 @@ pub enum Error {
     Property(PropertyError),
     Serialization(String),
     List(ListError),
+    Scroll(crate::ScrollError),
     Question(crate::QuestionFault),
 }
 impl std::fmt::Display for Error {
@@ -134,6 +137,11 @@ impl From<PropertyError> for Error {
     }
 }
 
+impl From<crate::ScrollError> for Error {
+    fn from(error: crate::ScrollError) -> Self {
+        Self::Scroll(error)
+    }
+}
 impl From<ListError> for Error {
     fn from(error: ListError) -> Self {
         Self::List(error)
@@ -394,6 +402,7 @@ mod parent_tests {
             NodeKind::Button,
             NodeKind::List,
             NodeKind::ListItem,
+            NodeKind::Scroll,
         ] {
             let empty = Content::new(kind, TextSlot::NONE);
             assert_eq!(empty.kind(), kind);
@@ -471,7 +480,7 @@ impl TextSlot {
 }
 /// A closed kind and an optional admitted text-lane index fit in one word.
 /// Zero in the upper bits means no text; the lower three bits hold one of the
-/// six explicitly encoded kinds. No Rust enum representation is reinterpreted.
+/// eight explicitly encoded kinds. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
 const _: () = assert!(MAX_NODES <= (u32::MAX >> 3) as usize);
@@ -486,6 +495,7 @@ impl Content {
             NodeKind::List => 4,
             NodeKind::ListItem => 5,
             NodeKind::Image => 6,
+            NodeKind::Scroll => 7,
         };
         let text = if text.0 == u32::MAX {
             0
@@ -508,7 +518,8 @@ impl Content {
             4 => NodeKind::List,
             5 => NodeKind::ListItem,
             6 => NodeKind::Image,
-            _ => unreachable!("Content constructs only declared kinds"),
+            7 => NodeKind::Scroll,
+            _ => unreachable!("three-bit kind"),
         }
     }
     #[inline]
@@ -644,7 +655,7 @@ struct Runtime<M> {
     sites: Sites,
     overrides: Overrides,
     metadata: Option<Box<Metadata>>,
-    lists: BTreeMap<ListId, ListState>,
+    viewports: BTreeMap<ViewportKey, ViewportState>,
     list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
     layout_nodes: Vec<NodeId>,
@@ -840,7 +851,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             sites,
             overrides: Overrides::default(),
             metadata: None,
-            lists: BTreeMap::new(),
+            viewports: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
             layout_nodes: Vec::new(),
@@ -1023,7 +1034,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             let identity = node.identity();
             runtime.layout_dirty.insert(identity);
         }
-        if !runtime.logical_valid || !runtime.lists.is_empty() {
+        if !runtime.logical_valid || runtime.has_lists() {
             runtime.describe(false)?;
         }
         runtime.present()
@@ -1238,7 +1249,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime.styles.set(index, after, count);
             runtime.dirty = true;
         }
-        if !runtime.lists.is_empty() {
+        if runtime.has_lists() {
             runtime.describe(false)?;
         }
         runtime.present()
@@ -1359,7 +1370,7 @@ impl<M: View + 'static> Runtime<M> {
             .filter(|identity| {
                 self.logical_valid
                     && self.by_identity.get(identity).is_some_and(|&index| {
-                        self.lists.is_empty()
+                        !self.has_lists()
                             || !self.in_list(index)
                             || self
                                 .prepared
@@ -1395,7 +1406,7 @@ impl<M: View + 'static> Runtime<M> {
     fn describe_inner(
         &mut self,
         mount: bool,
-        scroll: Option<ScrollRequest>,
+        scroll: &[ScrollRequest],
         readers: &dyn crate::reader::ReaderValues,
     ) -> Result<(), Error> {
         let reuse_identities = self.logical_valid;
@@ -1406,7 +1417,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut seen = BTreeSet::new();
         let crate::element::Description {
             nodes: drafts,
-            lists: list_drafts,
+            viewports: viewport_drafts,
             annotations: annotation_drafts,
             images: image_drafts,
         } = self.model.view().flatten_lists(
@@ -1416,20 +1427,38 @@ impl<M: View + 'static> Runtime<M> {
                 if !seen.insert(id) {
                     return Err(ListError::DuplicateList(id));
                 }
-                let previous = self.lists.get(&id);
-                let style =
-                    previous.map_or(style, |state| self.overrides.resolve(state.identity, style));
+                let previous = self
+                    .viewports
+                    .get(&ViewportKey::List(id))
+                    .and_then(ViewportState::list)
+                    .map(|state| (state.identity, state));
+                let style = previous.map_or(style, |(identity, _)| {
+                    self.overrides.resolve(identity, style)
+                });
+                let previous = previous.map(|(_, state)| state);
                 list::plan(
                     previous,
                     style,
                     source,
                     row_height,
                     scroll
-                        .filter(|request| request.id == id)
+                        .iter()
+                        .find(|request| request.id == id)
                         .map(|request| request.position),
                 )
             },
         )?;
+        let mut scroll_drafts = Vec::new();
+        let list_drafts: Vec<_> = viewport_drafts
+            .into_iter()
+            .filter_map(|draft| match draft {
+                crate::list::ViewportDraft::List(list) => Some(list),
+                crate::list::ViewportDraft::Scroll(scroll) => {
+                    scroll_drafts.push(scroll);
+                    None
+                }
+            })
+            .collect();
         let list_indices: BTreeMap<_, _> = list_drafts
             .iter()
             .map(|list| (list.index, list.id))
@@ -1551,9 +1580,12 @@ impl<M: View + 'static> Runtime<M> {
         let mut keyed_rows = BTreeMap::new();
         let mut keyed_lists = BTreeMap::new();
         let old_list_ids: BTreeMap<_, _> = self
-            .lists
+            .viewports
             .iter()
-            .map(|(&id, state)| (state.identity, id))
+            .filter_map(|(&key, state)| match (key, state) {
+                (ViewportKey::List(id), ViewportState::List(state)) => Some((state.identity, id)),
+                _ => None,
+            })
             .collect();
         let mut old_counts: BTreeMap<Option<u64>, usize> = BTreeMap::new();
         for (index, node) in old.iter().enumerate() {
@@ -1732,13 +1764,14 @@ impl<M: View + 'static> Runtime<M> {
                 .any(|(old, new)| *old != new.identity());
         self.topology_changed |= topology;
         self.dirty |= topology;
-        let mut lists = BTreeMap::new();
+        let mut viewports = BTreeMap::new();
         let mut list_rows = BTreeMap::new();
         for draft in list_drafts {
             let identity = nodes[draft.index].identity();
             let changed = self
-                .lists
-                .get(&draft.id)
+                .viewports
+                .get(&ViewportKey::List(draft.id))
+                .and_then(ViewportState::list)
                 .is_none_or(|old| old.viewport != draft.plan.viewport);
             self.dirty |= changed;
             for row in draft.rows {
@@ -1763,16 +1796,39 @@ impl<M: View + 'static> Runtime<M> {
                     },
                 );
             }
-            lists.insert(
-                draft.id,
-                ListState {
+            viewports.insert(
+                ViewportKey::List(draft.id),
+                ViewportState::List(ListState {
                     identity,
                     viewport: draft.plan.viewport,
                     anchor: draft.plan.anchor,
-                },
+                }),
             );
         }
-        if !annotation_drafts.is_empty() || !lists.is_empty() || self.metadata.is_some() {
+        for draft in scroll_drafts {
+            let identity = nodes[draft.index].identity();
+            let offset = self
+                .viewports
+                .get(&ViewportKey::Scroll(identity))
+                .and_then(ViewportState::scroll)
+                .map_or(crate::ScrollOffset::default(), |state| state.offset);
+            if self
+                .viewports
+                .get(&ViewportKey::Scroll(identity))
+                .and_then(ViewportState::scroll)
+                .is_none_or(|state| state.axes != draft.axes)
+            {
+                self.dirty = true;
+            }
+            viewports.insert(
+                ViewportKey::Scroll(identity),
+                ViewportState::Scroll(scroll::ScrollState {
+                    axes: draft.axes,
+                    offset,
+                }),
+            );
+        }
+        if !annotation_drafts.is_empty() || !viewports.is_empty() || self.metadata.is_some() {
             let metadata = self
                 .metadata
                 .get_or_insert_with(|| Box::new(Metadata::default()));
@@ -1827,7 +1883,7 @@ impl<M: View + 'static> Runtime<M> {
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
-        self.lists = lists;
+        self.viewports = viewports;
         self.list_rows = list_rows;
         self.nodes = nodes;
         self.styles = styles.finish();
@@ -1986,6 +2042,10 @@ impl<M: View + 'static> Runtime<M> {
         if self.metadata.as_deref().is_some_and(Metadata::unused) {
             self.metadata = None;
         }
+        // Virtual rows can leave P solely because an ordinary ancestor moved.
+        // Revalidate focus after the actual sheet swap, before native focus is
+        // observed. Ordinary offscreen descendants remain in P and keep focus.
+        self.prune_focus();
         // No-op edits may extend complete coverage, but failed preparations do
         // not. Re-acknowledging after loss therefore never covers a failed S.
         self.presentation_epoch = self.complete_epoch;
@@ -2057,15 +2117,16 @@ impl<M: View + 'static> Runtime<M> {
             // routing without rebuilding a map on every layout pass.
             debug_assert!(self.layout_nodes.is_sorted());
         } else {
-            // Auto-width lists depend on their immediate parent's flow. A
+            // Auto-sized viewports depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
-            for list in self.lists.values() {
-                let index = self.by_identity[&list.identity];
+            for (&key, state) in &self.viewports {
+                let identity = state.identity(key);
+                let index = self.by_identity[&identity];
                 if self.nodes[index].parent.index().is_some_and(|parent| {
                     self.layout_dirty.contains(&self.nodes[parent].identity())
                 }) {
-                    self.layout_dirty.insert(list.identity);
+                    self.layout_dirty.insert(identity);
                 }
             }
             for identity in &self.layout_dirty {
@@ -2151,11 +2212,11 @@ impl<M: View + 'static> Runtime<M> {
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
-        let list_mode = !self.lists.is_empty();
+        let list_mode = !self.viewports.is_empty();
         let list_capacity = if list_mode { self.nodes.len() } else { 0 };
         let mut clips: Vec<Rect> = Vec::with_capacity(list_capacity);
         let mut hit_clips: Vec<Rect> = Vec::with_capacity(list_capacity);
-        let mut inside_list: Vec<bool> = Vec::with_capacity(list_capacity);
+        let mut clip_membership: Vec<u8> = Vec::with_capacity(list_capacity);
         let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
         let mut metadata_sheet = self.metadata_sheet();
@@ -2164,7 +2225,11 @@ impl<M: View + 'static> Runtime<M> {
             .as_ref()
             .map(|images| images.candidate())
             .transpose()?;
-        let list_metadata = self.list_metadata();
+        let viewport_geometry = if list_mode {
+            scroll::geometry(self, &mut spaces, &mut published)?
+        } else {
+            scroll::ViewportBuild::default()
+        };
         #[cfg(feature = "accessibility")]
         let base_stamp = self.semantic_stamp();
         #[cfg(feature = "accessibility")]
@@ -2182,10 +2247,24 @@ impl<M: View + 'static> Runtime<M> {
                 .get(index + 1)
                 .is_some_and(|child| child.parent.index() == Some(index));
             let style = self.styles.get(index);
+            let parent_is_viewport = self.nodes[index].parent.index().is_some_and(|parent| {
+                matches!(self.nodes[parent].kind(), NodeKind::List | NodeKind::Scroll)
+            });
+            let parent_identity = self.nodes[index]
+                .parent
+                .index()
+                .map(|parent| self.nodes[parent].identity());
             let node = &mut self.nodes[index];
             let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
-                |parent| spaces[parent],
+                |parent| {
+                    let base = spaces[parent];
+                    if let Some(offset) = viewport_geometry.offset(parent_identity.unwrap()) {
+                        base.translated(-offset.x, -offset.y)
+                    } else {
+                        base
+                    }
+                },
             );
             let space = parent
                 .compose(Affine::translation(layout.location.x, layout.location.y))
@@ -2207,16 +2286,34 @@ impl<M: View + 'static> Runtime<M> {
                         || node
                             .parent
                             .index()
-                            .is_some_and(|parent| inside_list[parent]),
+                            .is_some_and(|parent| clip_membership[parent] & 1 != 0),
                 )
             } else {
                 (viewport, viewport, false)
             };
+            let in_scroll = node.kind() == NodeKind::Scroll
+                || node.parent.index().is_some_and(|parent| {
+                    clip_membership
+                        .get(parent)
+                        .is_some_and(|flags| flags & 2 != 0)
+                });
             if list_mode {
-                inside_list.push(in_list);
+                clip_membership.push(u8::from(in_list) | (u8::from(in_scroll) << 1));
             }
-            if matches!(node.kind(), NodeKind::List | NodeKind::ListItem) {
-                (clip, hit_clip) = list::viewport_clip(clip, hit_clip, transform, rect, size)?;
+            if matches!(
+                node.kind(),
+                NodeKind::List | NodeKind::ListItem | NodeKind::Scroll
+            ) {
+                (clip, hit_clip) = list::viewport_clip(clip, hit_clip, transform, rect, size)
+                    .map_err(|error| {
+                        if node.kind() == NodeKind::Scroll
+                            && matches!(error, Error::List(ListError::UnsupportedTransform))
+                        {
+                            Error::Scroll(crate::ScrollError::UnsupportedTransform)
+                        } else {
+                            error
+                        }
+                    })?;
             }
             if list_mode {
                 clips.push(clip);
@@ -2225,19 +2322,20 @@ impl<M: View + 'static> Runtime<M> {
             let raw_bounds = transform
                 .and_then(|map| CoordinateSpace::new(map).bounds(rect))
                 .unwrap_or_default();
-            let bounds = if in_list || node.kind() == NodeKind::List {
+            let bounds = if in_list || in_scroll || node.kind() == NodeKind::List {
                 list::clipped_bounds(raw_bounds, hit_clip)
             } else {
                 raw_bounds.intersection(viewport)
             };
-            if style.bg.alpha() > 0.0 {
+            let paint = !in_scroll || !bounds.is_empty();
+            if paint && style.bg.alpha() > 0.0 {
                 scene.fill_rect(
                     rect,
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
                     clip,
                     style.bg,
                 )?;
-            } else if node.handler.is_some() || node.kind() == NodeKind::Input {
+            } else if paint && (node.handler.is_some() || node.kind() == NodeKind::Input) {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
                 scene.fill_rect(
@@ -2247,7 +2345,7 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
-            if let Some(text) = node.text_slot().get_mut(&mut self.texts) {
+            if paint && let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
                 let shape = text.shape(
@@ -2268,7 +2366,7 @@ impl<M: View + 'static> Runtime<M> {
                     scale_factor,
                 )?;
             }
-            if let Some(image) = node.content.image_use() {
+            if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
                 scene.draw_image(
                     resource,
@@ -2290,7 +2388,11 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 node.parent
             };
-            if in_list && bounds.is_empty() && (!has_children || hit_clip.is_empty()) {
+            if in_list
+                && bounds.is_empty()
+                && (!has_children || hit_clip.is_empty())
+                && (!in_scroll || hit_clip.is_empty())
+            {
                 published.push(published_parent);
                 continue;
             }
@@ -2315,7 +2417,11 @@ impl<M: View + 'static> Runtime<M> {
                     || style.bg.alpha() > 0.0
                     || node.handler.is_some()
                     || matches!(node.kind(), NodeKind::Input | NodeKind::Image),
-                actions: Actions::for_node(node.kind(), node.handler.is_some()),
+                actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
+                    node.parent.index().is_some_and(|parent| {
+                        clip_membership.get(parent).is_some_and(|flags| *flags != 0)
+                    }) || parent_is_viewport,
+                ),
             });
             #[cfg(feature = "accessibility")]
             if let Some(observation) = &mut observation {
@@ -2325,7 +2431,10 @@ impl<M: View + 'static> Runtime<M> {
                     self.presented.get(index),
                     &presented[index],
                     self.metadata.as_deref(),
-                    list_metadata.get(&node.identity()).copied(),
+                    viewport_geometry.info(
+                        node.identity(),
+                        [f64::from(rect.width), f64::from(rect.height)],
+                    ),
                     self.list_rows.get(&node.identity()),
                 );
             }
@@ -2335,7 +2444,6 @@ impl<M: View + 'static> Runtime<M> {
                 sheet.capture(
                     metadata,
                     node.identity(),
-                    list_metadata.get(&node.identity()).copied(),
                     self.list_rows.get(&node.identity()),
                 );
             }
@@ -2370,15 +2478,31 @@ impl<M: View + 'static> Runtime<M> {
                     .map_or(DamageRegion::default(), |prepared| prepared.damage),
             )
         };
+        for (&key, state) in &mut self.viewports {
+            if let (ViewportKey::Scroll(identity), ViewportState::Scroll(state)) = (key, state)
+                && let Some(offset) = viewport_geometry.offset(identity)
+            {
+                state.offset = offset;
+            }
+        }
         for (&identity, row) in &mut self.list_rows {
             row.visible = visible_rows.contains(&identity);
         }
         if let Some(canvas) = replacement {
             self.canvas = canvas;
         }
-        if let Some(sheet) = metadata_sheet
+        if let Some(mut sheet) = metadata_sheet
             && let Some(metadata) = &mut self.metadata
         {
+            // Reuse the geometry allocation as the immutable P column. Virtual
+            // row clipping can omit a declared viewport; the existing logical
+            // to published scratch proves exact admitted identity without a map.
+            sheet.viewports = viewport_geometry.freeze(|identity| {
+                let index = self.by_identity[&identity];
+                published[index]
+                    .index()
+                    .filter(|&index| presented[index].identity == identity)
+            });
             metadata.candidate = Some(sheet);
         }
         if let Some(leases) = image_leases {
@@ -2390,6 +2514,9 @@ impl<M: View + 'static> Runtime<M> {
             nodes: presented,
             damage,
         });
+        // Virtual coordinate/target admission already consults this completed
+        // candidate. Keep interaction focus at the same revocation boundary.
+        self.prune_focus();
         self.latest_token = Some(token);
         self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;

@@ -49,6 +49,12 @@ mod destination_tests;
     target_os = "linux"
 ))]
 mod list_tests;
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod scroll_tests;
 
 #[derive(Debug)]
 pub enum NativeError {
@@ -939,16 +945,20 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                     .window
                     .as_ref()
                     .map_or(1.0, |window| window.scale_factor());
-                let dy = match delta {
-                    MouseScrollDelta::LineDelta(_, y) => -f64::from(*y) * 32.0,
-                    MouseScrollDelta::PixelDelta(position) => -position.y / scale,
+                let (dx, dy) = match delta {
+                    MouseScrollDelta::LineDelta(x, y) => {
+                        (-f64::from(*x) * 32.0, -f64::from(*y) * 32.0)
+                    }
+                    MouseScrollDelta::PixelDelta(position) => {
+                        (-position.x / scale, -position.y / scale)
+                    }
                 };
-                if !dy.is_finite() {
+                if !dx.is_finite() || !dy.is_finite() {
                     return Ok(());
                 }
                 // A scroll changes the hit cohort, cancelling an in-progress press.
                 self.pressed = None;
-                let result = owner.scroll_at(point, dy);
+                let result = owner.scroll_at_2d(point, crate::ScrollDelta { x: dx, y: dy });
                 match result {
                     Err(Error::NotHittable | Error::PresentationStale) => {}
                     result => self.input_result(result)?,

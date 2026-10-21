@@ -62,12 +62,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.after_admission(None, questions != 0)
     }
     pub(super) fn describe(&mut self, mount: bool) -> Result<(), Error> {
-        self.describe_with(mount, None)
+        self.describe_with(mount, &[])
     }
     pub(super) fn describe_with(
         &mut self,
         mount: bool,
-        scroll: Option<ScrollRequest>,
+        scroll: &[ScrollRequest],
     ) -> Result<(), Error> {
         let was_valid = self.logical_valid;
         match catch_unwind(AssertUnwindSafe(|| {
@@ -85,7 +85,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             Ok(Err(error)) => {
                 // A rejected presentation-only scroll has not edited the model
                 // or reached reconciliation; its acknowledged cohort stays live.
-                self.logical_valid = scroll.is_some() && was_valid;
+                self.logical_valid = !scroll.is_empty() && was_valid;
                 if !self.logical_valid {
                     self.focused = None;
                 }

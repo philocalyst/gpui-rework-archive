@@ -485,3 +485,18 @@ fn unrepresentable_forward_bounds_damage_viewport_and_tiny_inverse_stays_hittabl
     assert_eq!(tree.hit_test(Point { x: 0.05, y: 5.0 }), Some(node));
     assert!(covered(tree.damage(), Point { x: 0.05, y: 5.0 }));
 }
+
+#[test]
+fn wide_translation_cancels_before_output_narrowing() {
+    let base = CoordinateSpace::new(Affine::translation(100_000_000.0, 2.0));
+    let translated = base.translated(-100_000_000.125, -1.75);
+    assert_eq!(
+        translated.coefficients(),
+        [1.0, 0.0, 0.0, 1.0, -0.125, 0.25]
+    );
+    assert_eq!(
+        translated.to_window(Point { x: 0.0, y: 0.0 }),
+        Some(Point { x: -0.125, y: 0.25 })
+    );
+    assert!(!base.translated(f64::INFINITY, 0.0).is_invertible());
+}

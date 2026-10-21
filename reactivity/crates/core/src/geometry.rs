@@ -204,6 +204,17 @@ impl CoordinateSpace {
     pub const fn coefficients(self) -> [f64; 6] {
         self.matrix
     }
+    /// Compose a local translation without first narrowing a wide scroll offset.
+    /// This permits large layout origins and offsets to cancel before the final
+    /// paint mapping is admitted at its output precision.
+    pub fn translated(self, x: f64, y: f64) -> Self {
+        let [a, b, c, d, tx, ty] = self.matrix;
+        let matrix = [a, b, c, d, a * x + c * y + tx, b * x + d * y + ty];
+        Self {
+            matrix,
+            uncertain: self.uncertain || !x.is_finite() || !y.is_finite(),
+        }
+    }
     /// Compose without narrowing between ancestors. A lost invertible product
     /// remains uncertain, causing full damage rather than an empty rectangle.
     pub fn compose(self, child: Affine) -> Self {

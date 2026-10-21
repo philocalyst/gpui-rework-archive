@@ -21,6 +21,7 @@ pub mod property;
 mod reader;
 mod remote;
 mod runtime;
+mod scroll;
 pub mod semantic;
 mod shared_text;
 pub mod source;
@@ -54,6 +55,9 @@ pub use runtime::{
     Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
     PresentationToken, Query, SetError, Snapshot, SnapshotNode, Win, WindowOptions,
 };
+pub use scroll::{
+    Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,
+};
 pub use semantic::SemanticText;
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
 pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
@@ -76,9 +80,9 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Action, ActionKind, Affine, AlphaMode, Color, Component, El, Element, FieldId, Flex, Flow,
-        Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource, Key, ListId,
-        Point, Rect, Remote, Signal, Source, Sources, Target, View, Win, button, column, div,
-        image, label, oklch, rgb, row, text, text_input, uniform_list,
+        Action, ActionKind, Affine, AlphaMode, Axis, Color, Component, El, Element, FieldId, Flex,
+        Flow, Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource, Key, ListId,
+        Point, Rect, Remote, ScrollDelta, ScrollOffset, Signal, Source, Sources, Target, View, Win,
+        button, column, div, image, label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }
