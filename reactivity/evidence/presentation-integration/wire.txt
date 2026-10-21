@@ -1,0 +1,20 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running unittests src/lib.rs (target/debug/deps/gpui-3eaf6c563bc32a3a)
+
+running 1 test
+GPUI_X11_TRANSFER,WIRE,0,0,184,128,94208,94232
+GPUI_X11_TRANSFER,WIRE,0,0,184,128,94208,94232
+GPUI_X11_TRANSFER,WIRE,0,0,184,128,94208,94232
+test native::destination_tests::wire_fallback_still_uploads_full_for_empty_and_partial_scene_damage ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 123 filtered out; finished in 0.03s
+

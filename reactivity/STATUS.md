@@ -16,8 +16,8 @@ describe the intended complete system; this page records what is connected now.
 | Layout and text | Cephal, scoped Parley/HarfRust Unicode paragraphs, immutable bounded bundled fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
-| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
-| Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
+| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets and explicit admitted-packet replay | Replay still draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
+| Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI, suspend/recreate and observed X11 destination invalidation | Unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
 | Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library, including explicit worker search and restored domain inputs | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
 
@@ -91,6 +91,16 @@ scripts. Their isolated transport evidence also includes 3 credit and 9
 exact-source mailbox Loom cases; those models do not prove the sequential
 input-family settlement logic.
 
+The [combined presentation checks](evidence/presentation-integration/checks.json)
+pin source `dcdadf4d52` and record **17 successful gates**: 500 workspace
+cases/doctests, 108 accessible native unit cases and 29 actual Vulkan readbacks;
+strict native Clippy and formatting; seven actual X11 application/destination
+scripts; no-SHM Wire fallback, AT-SPI activation/actions/reactivation and
+presentation without a session bus. Strict all-target desktop Clippy passes for
+the actual Apple aarch64 and Windows MSVC adapters. These counts overlap the
+earlier campaigns; the desktop checks are cross-compilation, and Vulkan uses
+llvmpipe. This is correctness evidence, not hardware timing or memory evidence.
+
 Earlier source-pinned reports remain intact: the
 [21-gate baseline](evidence/checks.json) at `5b0a38b222`,
 [cached-cmap checks](evidence/cmap-integration-checks.json) at `76f5be8493` and
@@ -99,6 +109,10 @@ at `f8f318fb8a`. A callback panic can interrupt destructive reconciliation; old
 presented content/geometry stays inspectable while every target is revoked.
 The Node24 and P56 storage prototypes remain isolated because of their measured
 mount/traversal regressions.
+The [ordered identity index](crates/gpui/evidence/identity-order/README.md) and
+[bounded dense index](crates/gpui/evidence/identity-order-dense/README.md) also
+remain isolated: their allocation/lookup savings did not justify application
+regressions. The production owner retains its 2,384-byte header and BTree lookup.
 
 ## Measurements and their boundaries
 
@@ -106,7 +120,9 @@ mount/traversal regressions.
 | --- | --- | --- |
 | Immutable packed images | [Image evidence](crates/gpui/evidence/images.md): 48 covers share one 65,536-byte source; stable GPU pixel uploads and warm raster allocations are zero | Image-free owner adds 16 requested B and no allocations; per-scene 64 MiB cap does not cap overlapping cohorts/process memory |
 | Exact image-axis taps | [Guarded CPU controls](crates/canvas/evidence/image-axis-outlined/README.md): one-image preparation+raster 46.50→6.27 ms; 48 shared covers 70.12→22.78 ms | Image-only transient taps/cache; flat no-image control loses 5.08%, tiny control 1.70%; sheared control is noisy. No native/GPU latency claim |
-| Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Full native upload remains; excludes event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
+| Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Excludes native upload/event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
+| Observed X11 destination | [Protocol and pixel evidence](docs/native-destination-invalidation.md): partial scene change uploads 4,356 image bytes versus 94,208 for the full fixture; unchanged native host layouts | SHM path only; exposure/unknown destination requires full repair and Wire keeps full uploads. Image bytes are not total protocol traffic, latency or RSS |
+| GPU packet replay | [Replay evidence](crates/gpu/README.md): same admitted scene skips CPU validation, binning, scene uploads and binding creation; fresh targets still receive a complete draw | Renderer grows 48 B and native GpuSurface 64 B, plus one opaque backend bind group; no GPU timing or pixel-preservation claim |
 | Exact sample promotion | [Sample storage](crates/canvas/SAMPLE_STORAGE.md): moving-caret fixture full raster 21.53→6.06 ms; 48-label SDR preparation+raster 16.90→13.87 ms | Adds 4 KiB+32 B initialized worker scratch; no retained reduction; native upload/latency excluded |
 | Exact output reuse | [General controls](crates/canvas/SAMPLE_STORAGE.md): the one-pixel cache further lowers 48-label HDR preparation+raster 17.30→14.64 ms and sheared translucent boxes 2.78→1.94 ms | SDR flat serial panels lose 1.65–1.77%; small stack-only cache, no retained reduction or native latency claim |
 | Exact glyph addresses | [500-row controls](crates/canvas/evidence/glyph-axis/README.md): 48-label SDR preparation+raster 13.80→5.73 ms, HDR 14.70→6.68 ms | Adds 1,032 B transient address tables per worker; several non-text serial controls lose 2–3%; excludes native upload and predates Unicode integration |
@@ -149,6 +165,13 @@ window measures 11,515 KiB median PSS in three samples. The optional-feature
 contrast attributes roughly 3 MiB mostly file-backed PSS to the accessibility
 bundle under this setup; disabling accessibility is not a product optimization.
 
+The [ThinLTO floor diagnostic](evidence/empty-floor-lto/README.md) reduces the
+matched executable file by 19.1%, while default/ThinLTO startup and resident-memory
+ranges overlap. Its startup endpoint is a parent-observed presentation marker,
+not the X11 pixel endpoint above. The first insufficiently guarded capture is
+preserved and excluded; the corrected capture guards source/config and executable
+identity. No release-profile change was adopted from this diagnostic.
+
 Near-zero native memory, universal byte parity and an order-of-magnitude
 feature-equivalent simplification have not been established.
 Reports retain losing cases. The full Hummingbird source audit is
@@ -162,11 +185,12 @@ of production: its exact 8-byte node saving did not justify unresolved phase cos
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. The source 5b0a38b222 snapshot contains **29,849 crate src lines** and
-**21,976 external test/example lines** across production and experimental crates.
+are separate. The source dcdadf4d52 snapshot contains **34,155 crate src lines** and
+**24,509 external test/example/other lines**, or **58,664 first-party crate lines**,
+across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Standalone comparison
 harnesses outside crates are excluded. Complete Winit, Cephal, Softbuffer, Wgpu-HAL
-and Parley sources total **145,898 Rust lines**, including their tests/examples.
+and Parley sources total **145,962 Rust lines**, including their tests/examples.
 Vendoring has not made those dependencies disappear.
 
 [Baseline](evidence/baseline.json) pins the original 260,010 physical Rust lines

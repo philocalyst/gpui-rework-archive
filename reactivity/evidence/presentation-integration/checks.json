@@ -1,0 +1,411 @@
+{
+  "source_commit": "dcdadf4d527cb669c13d9e99271bb1f956f95a1f",
+  "checks": [
+    {
+      "check": "workspace",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--workspace"
+      ],
+      "environment": {},
+      "exit_code": 0,
+      "passed_cases_and_doctests": 500,
+      "log": "workspace.txt",
+      "sha256": "c9258887d255596490c2cc5f592c5bf24dbc1c14d93a3c3ad469a1a4519d565e"
+    },
+    {
+      "check": "vulkan",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "vulkan-tests",
+        "--test",
+        "render"
+      ],
+      "environment": {},
+      "exit_code": 0,
+      "passed_cases_and_doctests": 29,
+      "log": "vulkan.txt",
+      "sha256": "f393eb0f19a4cbf5a7b4849f6bd0020256b0db909edee54156a59f9d091681e7"
+    },
+    {
+      "check": "native-units",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib"
+      ],
+      "environment": {},
+      "exit_code": 0,
+      "passed_cases_and_doctests": 108,
+      "log": "native-units.txt",
+      "sha256": "4057427d642745caeedcb983c22f0ae96b83fadca2ff419589a5e7151ee2c367"
+    },
+    {
+      "check": "clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11,wayland",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {},
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "clippy.txt",
+      "sha256": "c74e950290e33701c3ff64424bfa90c9c2e81fc5ecfc481e2755234882c5247a"
+    },
+    {
+      "check": "format",
+      "argv": [
+        "cargo",
+        "fmt",
+        "-p",
+        "gpui",
+        "-p",
+        "gpui_gpu",
+        "--check"
+      ],
+      "environment": {},
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "format.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "check": "apple",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "-Zbuild-std=std,panic_abort",
+        "--target",
+        "aarch64-apple-darwin",
+        "-p",
+        "gpui",
+        "--features",
+        "desktop",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {
+        "RUSTC_BOOTSTRAP": "1",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_TARGET_DIR": "/tmp/gpui-accesskit-apple-target"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "apple.txt",
+      "sha256": "cf1fcca6985125fc73a2627d2e10a352fcf2d7d54940c7787e1da33239407025"
+    },
+    {
+      "check": "windows",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "-Zbuild-std=std,panic_abort",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "-p",
+        "gpui",
+        "--features",
+        "desktop",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {
+        "RUSTC_BOOTSTRAP": "1",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_TARGET_DIR": "/tmp/gpui-accesskit-windows-msvc-target",
+        "CC_x86_64_pc_windows_msvc": "clang-cl"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "windows.txt",
+      "sha256": "5b93586b98a086915888e49f317e7691b2d951f9d25403e913916c944d8bdbe8"
+    },
+    {
+      "check": "native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native_todo_port_presents_edits_pointer_actions_resize_and_inspection.txt",
+      "sha256": "4fd3c6cac36375151c59c407923e565b2d4039b59fc4b73bc9fb1bcba0cddbd5"
+    },
+    {
+      "check": "native_remote_results_wake_bounded_owner_turns_without_polling",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_remote_results_wake_bounded_owner_turns_without_polling",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native_remote_results_wake_bounded_owner_turns_without_polling.txt",
+      "sha256": "acad1b07a20d920884ebf7b399b6e847fb34c3d8c405a778845218063a0352c3"
+    },
+    {
+      "check": "native_question_result_and_credit_wake_without_unrelated_input",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_question_result_and_credit_wake_without_unrelated_input",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native_question_result_and_credit_wake_without_unrelated_input.txt",
+      "sha256": "bc372f3ca246b99e851359837f0906ae6464a1d1c4edb437075a978fced477cf"
+    },
+    {
+      "check": "native_library_250k_wheel_pointer_resize_resume",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_library_250k_wheel_pointer_resize_resume",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native_library_250k_wheel_pointer_resize_resume.txt",
+      "sha256": "38b7c8ccd2fd2a409d425eea05eb253a42c46fd126074ef25a9b87ae4c18b478"
+    },
+    {
+      "check": "native_unicode_keyboard_and_surface_match_complete_cpu_pixels",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_unicode_keyboard_and_surface_match_complete_cpu_pixels",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native_unicode_keyboard_and_surface_match_complete_cpu_pixels.txt",
+      "sha256": "f30b4fdb7d6cb8c17bbea42109dfdc4b9ebc57b28edde0a2f917e6108088b1ba"
+    },
+    {
+      "check": "native_image_pointer_resize_resume_matches_complete_surface",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_image_pointer_resize_resume_matches_complete_surface",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native_image_pointer_resize_resume_matches_complete_surface.txt",
+      "sha256": "c06f2f8af30aabbb346355a9e7feec78f1740cac4ec54e8d900b7f3e2f862083"
+    },
+    {
+      "check": "destination_invalidation_controls_actual_x11_uploads_and_failure_retry",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "destination_invalidation_controls_actual_x11_uploads_and_failure_retry",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "environment": {
+        "DISPLAY": ":94"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "destination_invalidation_controls_actual_x11_uploads_and_failure_retry.txt",
+      "sha256": "9c1124c196058414a5d44df607b86aa8b8bdf694abcd9db889e1d936559e8edb"
+    },
+    {
+      "check": "wire",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native::destination_tests::wire_fallback_still_uploads_full_for_empty_and_partial_scene_damage",
+        "--",
+        "--ignored",
+        "--exact",
+        "--nocapture"
+      ],
+      "environment": {
+        "DISPLAY": ":100",
+        "server": "Xvfb21.1.24 800x600x24; MIT-SHM explicitly disabled; private server stopped afterwards."
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "wire.txt",
+      "sha256": "d3442333205047af55bcd42d38036ccb7ebdcc340570fe6ffb0eb8f160fdf334"
+    },
+    {
+      "check": "atspi",
+      "argv": [
+        "bash",
+        "tools/test_atspi.sh",
+        "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
+      ],
+      "environment": {
+        "DISPLAY": ":94",
+        "session_bus": "isolated dbus-run-session; actual native AT-SPI client"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "atspi.txt",
+      "sha256": "cf0586849036cbd3c19ae32ea4ce284e36f1b304e174a0937c3c85f422a6185c"
+    },
+    {
+      "check": "no-bus",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
+        "--",
+        "--ignored",
+        "--exact",
+        "--nocapture"
+      ],
+      "environment": {
+        "DISPLAY": ":94",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/tmp/gpui-no-session-bus"
+      },
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "no-bus.txt",
+      "sha256": "56966f29c1cfd203e4e02d35a643f957a7d12c478edf818bc7116b69abdcaa5a"
+    }
+  ],
+  "scope": "Combined declared question families, exact image axes, X11 observed destination invalidation and GPU packet replay. Debug/native integration with actual Vulkan and X11/AT-SPI execution; desktop cross-checks are compilation only. Does not replace prior complete22-gate campaign or constitute latency/RSS/hardware-GPU evidence.",
+  "runtime_environment": "Rust1.97.1/Linux/Xvfb94; Mesa26.1.4 llvmpipe/LLVM21.1.8 software Vulkan; private no-SHM Xvfb100 for Wire proof."
+}

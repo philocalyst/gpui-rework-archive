@@ -1,63 +1,65 @@
 {
   "method": "Physical Rust lines including comments, blanks and embedded tests. Library means src/, not production acceptance. Counts on-disk first-party crates/ and vendor/; excludes target/ and archived original design examples under docs/inputs/.",
-  "source_code_head": "3c06caac7cad96b60526862a9e06e20ebd0dc164",
+  "source_code_head": "dcdadf4d527cb669c13d9e99271bb1f956f95a1f",
   "crates": {
     "algebra-lab": {
+      "tests": 487,
       "examples": 826,
-      "library": 648,
-      "tests": 487
+      "library": 648
     },
     "api-lab": {
-      "library": 379,
-      "tests": 323
+      "tests": 323,
+      "library": 379
     },
     "canvas": {
-      "tests": 4352,
-      "examples": 1079,
-      "library": 6311
+      "other": 10,
+      "tests": 4342,
+      "examples": 1250,
+      "library": 6789
     },
     "core": {
+      "tests": 1178,
       "examples": 117,
-      "library": 1805,
-      "tests": 1178
+      "library": 1805
     },
     "coverage-lab": {
+      "tests": 416,
       "examples": 186,
-      "library": 854,
-      "tests": 416
+      "library": 854
     },
     "gpu": {
+      "tests": 1741,
       "examples": 387,
-      "library": 1777,
-      "tests": 1273
+      "library": 1873
     },
     "gpui": {
-      "tests": 7513,
-      "examples": 2380,
-      "library": 17783
+      "other": 43,
+      "tests": 8131,
+      "examples": 2417,
+      "library": 19317
     },
     "host": {
-      "library": 210,
-      "tests": 53
+      "tests": 53,
+      "library": 210
     },
     "ownership-lab": {
+      "tests": 920,
       "examples": 205,
-      "library": 396,
-      "tests": 920
+      "library": 396
     },
     "retained": {
+      "tests": 325,
       "examples": 120,
-      "library": 549,
-      "tests": 325
+      "library": 549
     },
     "state": {
-      "library": 620,
-      "tests": 400
+      "tests": 400,
+      "library": 620
     },
     "template-lab": {
+      "tests": 369,
       "examples": 263,
-      "library": 715,
-      "tests": 369
+      "library": 715
     }
   },
   "vendor": {
@@ -79,7 +81,7 @@
     },
     "winit": {
       "rust_files": 174,
-      "physical_lines": 59252
+      "physical_lines": 59316
     }
   }
 }
