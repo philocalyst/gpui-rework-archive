@@ -790,6 +790,17 @@ impl<M: View + 'static> Win<M> {
         let (width, height) = (runtime.canvas.width(), runtime.canvas.height());
         Ok(read(runtime.canvas.try_pixels()?, width, height))
     }
+    /// Render the latest complete sheet directly into a native software surface.
+    /// Words are 0x00RRGGBB; no internal CPU image or extra frame copy is created.
+    /// The host must acknowledge the returned token only after its buffer present
+    /// succeeds. Rendering here alone cannot restore coordinate authority.
+    pub fn render_bgrx(&self, destination: &mut [u32]) -> Result<PresentationToken, Error> {
+        let mut runtime = self.borrow()?;
+        runtime.live()?;
+        let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
+        runtime.canvas.render_bgrx(destination)?;
+        Ok(token)
+    }
     pub fn scene_digest(&self) -> Result<u64, Error> {
         self.with_pixels(|pixels, _, _| {
             pixels.iter().fold(0xcbf29ce484222325, |hash, byte| {
@@ -1552,6 +1563,32 @@ mod tests {
         assert_eq!(win.inner.borrow().canvas.stats().render_count, 0);
         assert!(win.inner.borrow().text.is_none());
     }
+    #[test]
+    fn software_surface_rendering_keeps_the_native_runtime_free_of_cpu_image_storage() {
+        struct Rectangle;
+        impl View for Rectangle {
+            fn view(&self) -> crate::El<'_> {
+                div().size(8).bg(Color::BLACK)
+            }
+        }
+        let win = Win::recording(
+            Rectangle,
+            WindowOptions {
+                size: [8, 8],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let mut destination = vec![0xffffffff; 64];
+        let token = win.render_bgrx(&mut destination).unwrap();
+        assert!(destination.iter().all(|word| *word == 0));
+        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
+        assert_eq!(win.inner.borrow().canvas.stats().render_count, 1);
+        assert!(!win.snapshot().unwrap().presentation_valid);
+        win.presented(token).unwrap();
+        assert!(win.snapshot().unwrap().presentation_valid);
+    }
+
     #[test]
     fn rectangle_windows_do_not_initialize_font_services() {
         struct Rectangle;
