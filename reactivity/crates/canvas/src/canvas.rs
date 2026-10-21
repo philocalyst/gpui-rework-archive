@@ -17,6 +17,8 @@ pub struct RenderStats {
     pub full_rect_tiles: usize,
     pub skipped_command_tiles: usize,
     pub boundary_pixels: usize,
+    /// Geometric membership queries. Separable rectangle axes share queries
+    /// across tile rows and columns instead of testing every 2D sample.
     pub sample_tests: usize,
     pub retained_mask_bytes: usize,
     /// Exact capacities of typed draw/resource Vec lanes; excludes opaque
@@ -33,6 +35,9 @@ struct Mapping {
     inverse: [f64; 6],
 }
 impl Mapping {
+    fn axis_aligned(self) -> bool {
+        self.inverse[1] == 0.0 && self.inverse[2] == 0.0
+    }
     fn new(t: Affine) -> Result<Self, Error> {
         if !t.is_finite()
             || [t.a, t.b, t.c, t.d, t.tx, t.ty]
@@ -1486,7 +1491,19 @@ fn render_band<W: PixelWriter>(
                     blend(value, command.color, 1.0);
                     continue;
                 }
-            } else if let Some(value) = uniform.take() {
+            }
+            let axis = if !full
+                && matches!(command.source, BorrowedSource::Rect)
+                && command.map.axis_aligned()
+            {
+                match AxisCoverage::new(&command, [left, top, right, bottom], &mut stats) {
+                    Some(axis) => Some(axis),
+                    None => continue,
+                }
+            } else {
+                None
+            };
+            if !full && let Some(value) = uniform.take() {
                 // A uniform prefix needs no tile storage until an edge or
                 // glyph makes its sample colors differ.
                 scratch.fill(value);
@@ -1495,6 +1512,10 @@ fn render_band<W: PixelWriter>(
                 for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
                     let coverages = if full {
                         [1.0; 16]
+                    } else if let Some(axis) = &axis {
+                        stats.boundary_pixels += 1;
+                        let mask = (axis.x[x - left] * 0x1111) & axis.y[y - top];
+                        std::array::from_fn(|i| ((mask >> i) & 1) as f32)
                     } else {
                         stats.boundary_pixels += 1;
                         sample(&command, x, y, &mut stats)
@@ -1646,6 +1667,33 @@ fn full_tile(
 ) -> bool {
     let r = command.rect;
     let c = command.clip;
+    if command.map.axis_aligned() {
+        // For separable monotone axes, the first and last actual sample bound
+        // every other sample. Use the same finite inverse predicate, avoiding
+        // a continuous-corner error envelope or forward-rounding assumptions.
+        if left < command.bounds[0]
+            || top < command.bounds[1]
+            || right > command.bounds[2]
+            || bottom > command.bounds[3]
+        {
+            return false;
+        }
+        let (x0, y0) = (left as f64 + 0.125, top as f64 + 0.125);
+        let (x1, y1) = (right as f64 - 0.125, bottom as f64 - 0.125);
+        if x0 < c.x as f64
+            || y0 < c.y as f64
+            || x1 >= c.x as f64 + c.width as f64
+            || y1 >= c.y as f64 + c.height as f64
+        {
+            return false;
+        }
+        let (lx0, ly0) = command.map.local(x0, y0);
+        let (lx1, ly1) = command.map.local(x1, y1);
+        return lx0.min(lx1) >= r.x as f64
+            && ly0.min(ly1) >= r.y as f64
+            && lx0.max(lx1) < r.x as f64 + r.width as f64
+            && ly0.max(ly1) < r.y as f64 + r.height as f64;
+    }
     if (left as f64) < c.x as f64
         || (top as f64) < c.y as f64
         || right as f64 > c.x as f64 + c.width as f64
@@ -1670,6 +1718,77 @@ fn full_tile(
         }
     }
     true
+}
+
+// A rectangle's 4×4 membership factors into four X bits and four Y bits.
+// Evaluate each axis once per tile column/row rather than at every sample of
+// every pixel. Their outer product retains correlated coverage at overlaps.
+// This is ephemeral stack data; no retained command or Canvas header grows.
+struct AxisCoverage {
+    x: [u16; TILE],
+    y: [u16; TILE],
+}
+impl AxisCoverage {
+    fn new(
+        command: &BorrowedCommand<'_>,
+        tile: [usize; 4],
+        stats: &mut RenderStats,
+    ) -> Option<Self> {
+        let mut result = Self {
+            x: [0; TILE],
+            y: [0; TILE],
+        };
+        let mut any = [0; 2];
+        for axis in 0..2 {
+            let (scale, translation, min, extent, clip, clip_extent) = if axis == 0 {
+                (
+                    command.map.inverse[0],
+                    command.map.inverse[4],
+                    command.rect.x,
+                    command.rect.width,
+                    command.clip.x,
+                    command.clip.width,
+                )
+            } else {
+                (
+                    command.map.inverse[3],
+                    command.map.inverse[5],
+                    command.rect.y,
+                    command.rect.height,
+                    command.clip.y,
+                    command.clip.height,
+                )
+            };
+            let (bits, stride) = if axis == 0 { (1, 1) } else { (0xf, 4) };
+            let first = tile[axis].max(command.bounds[axis]);
+            let end = tile[axis + 2].min(command.bounds[axis + 2]);
+            for pixel in first..end {
+                let mut mask = 0;
+                for (sample, offset) in SAMPLES.into_iter().enumerate() {
+                    stats.sample_tests += 1;
+                    let world = pixel as f64 + offset;
+                    // Zero off-diagonal products cannot affect membership;
+                    // both signs of zero compare identically at the edges.
+                    let local = scale * world + translation;
+                    if world >= clip as f64
+                        && world < clip as f64 + clip_extent as f64
+                        && local >= min as f64
+                        && local < min as f64 + extent as f64
+                    {
+                        mask |= bits << (sample * stride);
+                    }
+                }
+                any[axis] |= mask;
+                let index = pixel - tile[axis];
+                if axis == 0 {
+                    result.x[index] = mask;
+                } else {
+                    result.y[index] = mask;
+                }
+            }
+        }
+        (any[0] != 0 && any[1] != 0).then_some(result)
+    }
 }
 fn sample(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderStats) -> [f32; 16] {
     let r = command.rect;
@@ -1756,6 +1875,79 @@ fn sample_mean(samples: impl Iterator<Item = [f32; 4]>) -> [f32; 4] {
 #[cfg(test)]
 mod scaled_mask_tests {
     use super::*;
+
+    #[test]
+    fn separable_masks_and_certificates_match_every_scalar_sample() {
+        let rects = [
+            Rect::new(0.0, 0.0, 32.0, 32.0),
+            Rect::new(0.125, 0.375, 15.875, 2.3),
+            Rect::new(-10.0, 2.0, 25.0, 5.0),
+            Rect::new(1_000_000.0 + 0.125, 1_000_000.0 + 0.375, 20.0, 20.0),
+            Rect::new(0.125, 0.125, f32::from_bits(1), 1.0),
+        ];
+        for sx in [-3.1, -1.0, -0.7, 0.3, 1.0, 3.1] {
+            for sy in [-1.7, -1.0, 1.0, 2.25] {
+                for (tx, ty) in [
+                    (0.0, 0.0),
+                    (0.125, 0.375),
+                    (0.125f32.next_up(), (-0.125f32).next_down()),
+                    (-1_000_000.0, -1_000_000.0),
+                ] {
+                    let map = Mapping::new(Affine {
+                        a: sx,
+                        b: -0.0,
+                        c: 0.0,
+                        d: sy,
+                        tx,
+                        ty,
+                    })
+                    .unwrap();
+                    for rect in rects {
+                        for clip in [
+                            Rect::new(-0.0, 0.0, 32.0, 32.0),
+                            Rect::new(0.125, 0.375, 17.0, 20.0),
+                            Rect::new(0.125f32.next_down(), 0.375f32.next_up(), 31.0, 31.0),
+                        ] {
+                            let command = BorrowedCommand {
+                                rect,
+                                clip,
+                                map,
+                                source: BorrowedSource::Rect,
+                                color: [0.0; 4],
+                                bounds: [0, 0, 32, 32],
+                            };
+                            for tile in [[0, 0, 16, 16], [16, 16, 31, 29], [0, 4, 1, 5]] {
+                                let axis =
+                                    AxisCoverage::new(&command, tile, &mut RenderStats::default());
+                                let mut entirely_covered = true;
+                                for y in tile[1]..tile[3] {
+                                    for x in tile[0]..tile[2] {
+                                        let scalar =
+                                            sample(&command, x, y, &mut RenderStats::default());
+                                        let actual = axis.as_ref().map_or([0.0; 16], |axis| {
+                                            let mask = (axis.x[x - tile[0]] * 0x1111)
+                                                & axis.y[y - tile[1]];
+                                            std::array::from_fn(|i| ((mask >> i) & 1) as f32)
+                                        });
+                                        assert_eq!(
+                                            actual, scalar,
+                                            "scale={sx},{sy}; shift={tx},{ty}; rect={rect:?}; clip={clip:?}; x={x},y={y}"
+                                        );
+                                        entirely_covered &=
+                                            scalar.iter().all(|&value| value == 1.0);
+                                    }
+                                }
+                                assert_eq!(
+                                    full_tile(&command, tile[0], tile[1], tile[2], tile[3]),
+                                    entirely_covered,
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     #[test]
     fn normalized_mask_obeys_half_open_local_edges_before_texel_rounding() {
