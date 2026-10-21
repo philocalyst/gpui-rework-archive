@@ -3,6 +3,10 @@
 use super::*;
 use crate::{ItemKey, SemanticText};
 
+// Packed destinations reserve two low bits for the port independently of the
+// compact parent's larger domain. Keep future node-cap changes checked too.
+const _: () = assert!(MAX_NODES <= (u32::MAX >> 2) as usize + 1);
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Port {
     Visual = 0,

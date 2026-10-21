@@ -2374,8 +2374,10 @@ mod semantic_storage_ledger {
             size_of::<crate::list::ListSpec<'_>>(),
             size_of::<crate::semantic::AnnotationDraft<'_>>()
         );
-        assert_eq!(size_of::<Node>(), 232);
-        assert_eq!(size_of::<Presented>(), 104);
+        // Parent/transform packing and the source namespace niche are shared
+        // baseline improvements; semantic columns add no hot-node fields.
+        assert_eq!(size_of::<Node>(), 216);
+        assert_eq!(size_of::<Presented>(), 88);
         assert_eq!(size_of::<crate::El<'_>>(), 184);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<Destination>(), 4);

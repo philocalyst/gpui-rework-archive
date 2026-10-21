@@ -670,6 +670,10 @@ impl<M> Sources<M> {
     where
         M: 'static,
     {
+        if self.schema_error.is_none() && component.id.scope() != 0 {
+            self.schema_error = Some(BindError::NonLocalDeclaration(component.id));
+            return self;
+        }
         if self
             .components
             .iter()
@@ -1500,6 +1504,11 @@ mod component_tests {
         );
         assert_eq!(
             Sources::new().direct(misplaced).validate(&mut model),
+            Err(BindError::NonLocalDeclaration(id))
+        );
+        let misplaced = Component::new(id, "misplaced", |m: &Parent| &m.right, |m| &mut m.right);
+        assert_eq!(
+            Sources::new().component(misplaced).validate(&mut model),
             Err(BindError::NonLocalDeclaration(id))
         );
     }
