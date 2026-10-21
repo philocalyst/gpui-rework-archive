@@ -128,6 +128,20 @@ impl<V: View + 'static> Window<V> {
     }
 }
 impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
+    pub fn questions<Q: LaneSet<V>>(
+        self,
+        questions: crate::Questions<V, Q>,
+    ) -> Window<V, crate::reader::QuestionSet<Q, L>> {
+        Window {
+            lanes: questions.bind(self.lanes),
+            root: self.root,
+            title: self.title,
+            size: self.size,
+            presentation_error: self.presentation_error,
+            presentation_feedback: self.presentation_feedback,
+            renderer: self.renderer,
+        }
+    }
     /// Bind a typed FIFO completion lane when this window mounts.
     pub fn with_inbox<T: Send + 'static, F: FnMut(&mut V, T) + 'static>(
         self,
@@ -1444,6 +1458,8 @@ mod tests {
     }
 }
 
+#[cfg(all(test, feature = "x11", target_os = "linux"))]
+mod question_tests;
 #[cfg(all(
     test,
     any(feature = "x11", feature = "x11-minimal"),

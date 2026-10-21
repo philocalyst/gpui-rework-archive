@@ -17,6 +17,7 @@ mod list;
 #[cfg(feature = "native")]
 mod native;
 pub mod property;
+mod reader;
 mod remote;
 mod runtime;
 pub mod semantic;
@@ -36,6 +37,10 @@ pub use identity::Target;
 pub use list::{ItemKey, ItemSource, ListError, ListId, ListViewport, uniform_list};
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
+pub use reader::{
+    CompleteError, Completion, Failure, InputVersion, QuestionFault, QuestionInfo, QuestionStats,
+    QuestionStatus, Questions, Reader, StartError,
+};
 pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]
 pub use remote::{Lane, LaneSet};

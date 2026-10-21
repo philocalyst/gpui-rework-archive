@@ -224,6 +224,35 @@ impl Drop for El<'_> {
 }
 
 impl<'a> El<'a> {
+    pub(crate) fn reader(projector: Box<dyn crate::reader::Projector + 'a>) -> Self {
+        let mut element = Self::new(NodeKind::Div, None);
+        element.extra = Some(Box::new(crate::semantic::ElementExtra::Reader {
+            projector,
+            semantic: None,
+            map: None,
+        }));
+        element
+    }
+    /// First-read fallback for a Reader projection. Refreshing retains its
+    /// preceding ready child; failures remain a distinct visible verdict.
+    pub fn loading(mut self, render: fn() -> El<'static>) -> Self {
+        match self.extra.as_deref_mut() {
+            Some(crate::semantic::ElementExtra::Reader { projector, .. }) => {
+                projector.loading(render)
+            }
+            _ => panic!("loading belongs to a Reader projection"),
+        }
+        self
+    }
+    pub fn failed(mut self, render: for<'v> fn(crate::Failure<'v>) -> El<'v>) -> Self {
+        match self.extra.as_deref_mut() {
+            Some(crate::semantic::ElementExtra::Reader { projector, .. }) => {
+                projector.failed(render)
+            }
+            _ => panic!("failed belongs to a Reader projection"),
+        }
+        self
+    }
     fn new(kind: NodeKind, text: Option<Text<'a>>) -> Self {
         Self {
             kind,
@@ -372,6 +401,18 @@ impl<'a> El<'a> {
                 }));
             }
             pending.extend(element.children.iter_mut());
+            if let Some(crate::semantic::ElementExtra::Reader {
+                map: pending_map, ..
+            }) = element.extra.as_deref_mut()
+            {
+                let previous = pending_map.take();
+                *pending_map = Some(Box::new(move |child: &mut El<'_>| {
+                    if let Some(previous) = &previous {
+                        previous(child);
+                    }
+                    child.map_handlers(map);
+                }));
+            }
         }
     }
 
@@ -391,7 +432,7 @@ impl<'a> El<'a> {
     /// borrowed operands only when the runtime promotes a changed destination.
     #[cfg(test)]
     pub(crate) fn flatten(self) -> Vec<DraftNode<'a>> {
-        self.flatten_lists(usize::MAX, |_, _, _, _| {
+        self.flatten_lists(usize::MAX, &(), |_, _, _, _| {
             Err(crate::ListError::MissingViewport)
         })
         .unwrap()
@@ -401,6 +442,7 @@ impl<'a> El<'a> {
     pub(crate) fn flatten_lists(
         self,
         limit: usize,
+        readers: &'a dyn crate::reader::ReaderValues,
         mut plan: impl FnMut(
             crate::ListId,
             Style,
@@ -427,11 +469,18 @@ impl<'a> El<'a> {
                     height,
                 });
             }
-            let (spec, annotation) = element
+            let (spec, annotation, projector) = element
                 .extra
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            if let Some((projector, map)) = projector {
+                let mut child = projector.render(readers);
+                if let Some(map) = map {
+                    map(&mut child);
+                }
+                element.children.push(child);
+            }
             if !annotation.is_empty() {
                 annotations.push(crate::semantic::AnnotationDraft {
                     node: index,

@@ -1,5 +1,9 @@
 //! Bounded owned messages. Workers have transport capabilities, never UI access.
-use crate::{Commit, Error};
+use crate::{
+    Commit, Error,
+    reader::{Outcome, ReaderKey, ReaderValues, question::Change},
+    source::Sources,
+};
 #[cfg(feature = "native")]
 use gpui_reactivity_host::native::Wake;
 use std::collections::VecDeque;
@@ -117,6 +121,10 @@ impl<T> Remote<T> {
             Err(TrySendError::Disconnected(value)) => Err(SendError::Closed(value)),
         }
     }
+    pub(crate) fn signal(&self) {
+        #[cfg(feature = "native")]
+        self.notification.signal();
+    }
 }
 
 /// The unique owned receiver. There is no public receive operation: delivery
@@ -133,9 +141,36 @@ pub struct Inbox<T> {
     notification: Arc<Notification>,
 }
 impl<T> Inbox<T> {
-    fn close(&mut self) {
+    pub(crate) fn close(&mut self) {
         self.receiver.take();
         self.staging.clear();
+    }
+    pub(crate) fn stage(&mut self) -> Stage {
+        if self.capacity == 0 {
+            return Stage::Empty;
+        }
+        if self.staging.len() == self.capacity {
+            return Stage::Limited;
+        }
+        match self
+            .receiver
+            .as_ref()
+            .and_then(|receiver| receiver.try_recv().ok())
+        {
+            Some(value) => {
+                self.staging.push_back(value);
+                Stage::Ready
+            }
+            None => Stage::Empty,
+        }
+    }
+    pub(crate) fn pop(&mut self) -> Option<T> {
+        self.staging.pop_front()
+    }
+    #[cfg(feature = "native")]
+    pub(crate) fn attach(&mut self, wake: &Wake) {
+        let _ = self.notification.wake.set(wake.clone());
+        self.notification.signal();
     }
 }
 
@@ -163,18 +198,28 @@ impl std::fmt::Display for DeliveryError {
 }
 impl std::error::Error for DeliveryError {}
 
-mod sealed {
+pub(crate) mod sealed {
     pub trait Sealed {}
 }
 /// Internal static receiver chain. Applications infer this type through with_inbox.
 #[doc(hidden)]
-pub trait LaneSet<M>: sealed::Sealed {
+pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     const EMPTY: bool;
+    const QUESTIONS: bool = false;
     fn count(&self) -> usize;
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
     fn stage(&mut self, index: usize) -> Stage;
     fn apply(&mut self, model: &mut M, applied: &mut usize);
+    fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
+        Ok(false)
+    }
+    fn apply_questions(&mut self, _: &M, _: &Sources<M>, _: &mut usize) -> Result<(), Error> {
+        Ok(())
+    }
+    fn start_questions(&mut self) -> bool {
+        false
+    }
     fn close(&mut self);
     #[cfg(feature = "native")]
     fn attach(&mut self, wake: &Wake);
@@ -225,8 +270,14 @@ impl<T, F, L> Lane<T, F, L> {
     }
 }
 impl<T, F, L> sealed::Sealed for Lane<T, F, L> {}
+impl<T, F, L: ReaderValues> ReaderValues for Lane<T, F, L> {
+    fn read(&self, key: ReaderKey) -> Option<Outcome<'_>> {
+        self.tail.read(key)
+    }
+}
 impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
     const EMPTY: bool = false;
+    const QUESTIONS: bool = L::QUESTIONS;
     fn count(&self) -> usize {
         1 + self.tail.count()
     }
@@ -240,24 +291,7 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
         if index != 0 {
             return self.tail.stage(index - 1);
         }
-        if self.inbox.capacity == 0 {
-            return Stage::Empty;
-        }
-        if self.inbox.staging.len() == self.inbox.capacity {
-            return Stage::Limited;
-        }
-        match self
-            .inbox
-            .receiver
-            .as_ref()
-            .and_then(|receiver| receiver.try_recv().ok())
-        {
-            Some(value) => {
-                self.inbox.staging.push_back(value);
-                Stage::Ready
-            }
-            None => Stage::Empty,
-        }
+        self.inbox.stage()
     }
     fn apply(&mut self, model: &mut M, applied: &mut usize) {
         while let Some(value) = self.inbox.staging.pop_front() {
@@ -269,6 +303,20 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
     fn close(&mut self) {
         self.inbox.close();
         self.tail.close();
+    }
+    fn refresh(&mut self, model: &M, sources: &Sources<M>, change: Change) -> Result<bool, Error> {
+        self.tail.refresh(model, sources, change)
+    }
+    fn apply_questions(
+        &mut self,
+        model: &M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+    ) -> Result<(), Error> {
+        self.tail.apply_questions(model, sources, applied)
+    }
+    fn start_questions(&mut self) -> bool {
+        self.tail.start_questions()
     }
     #[cfg(feature = "native")]
     fn attach(&mut self, wake: &Wake) {
