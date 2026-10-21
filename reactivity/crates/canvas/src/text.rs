@@ -8,7 +8,7 @@ use std::{
     borrow::Cow,
     collections::HashMap,
     sync::{
-        Arc, Mutex, OnceLock, Weak,
+        Arc, Mutex, Weak,
         atomic::{AtomicU64, Ordering},
     },
 };
@@ -99,7 +99,7 @@ impl FontFace {
     pub fn shaper(&self) -> TextShaper<'_> {
         TextShaper {
             font: &self.0,
-            face: OnceLock::new(),
+            face: None,
         }
     }
     /// Process-local identity, not byte equality or a persistent font ID.
@@ -194,11 +194,11 @@ pub(crate) struct Raster {
 /// a self reference, permanent table cache, lock, or per-string reference count.
 pub struct TextShaper<'font> {
     font: &'font FontData,
-    face: OnceLock<Option<rustybuzz::Face<'font>>>,
+    face: Option<rustybuzz::Face<'font>>,
 }
 impl TextShaper<'_> {
     pub fn shape(
-        &self,
+        &mut self,
         text: &str,
         font_size: f32,
         max_width: Option<f32>,
@@ -212,11 +212,11 @@ impl TextShaper<'_> {
         if text.len() > MAX_TEXT {
             return Err(Error::ResourceLimit);
         }
-        let face = self
-            .face
-            .get_or_init(|| rustybuzz::Face::from_slice(&self.font.bytes, 0))
-            .as_ref()
-            .ok_or(Error::InvalidFont)?;
+        if self.face.is_none() {
+            self.face =
+                Some(rustybuzz::Face::from_slice(&self.font.bytes, 0).ok_or(Error::InvalidFont)?);
+        }
+        let face = self.face.as_ref().ok_or(Error::InvalidFont)?;
         let mut paragraph_script = None;
         for c in text.chars() {
             if c == '\n' {

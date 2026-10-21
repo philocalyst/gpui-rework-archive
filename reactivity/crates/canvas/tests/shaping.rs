@@ -4,7 +4,7 @@ use std::hint::black_box;
 #[test]
 fn borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity() {
     let face = FontFace::bundled().unwrap();
-    let batch = face.shaper();
+    let mut batch = face.shaper();
     let service = TextSystem::from_font(face.clone());
     for (text, width) in [
         ("office café AVATAR", None),
@@ -57,7 +57,7 @@ fn batch_parses_once_and_releases_tables_without_an_idle_cache() {
         }
     });
     let batched = allocation_counter::measure(|| {
-        let batch = face.shaper();
+        let mut batch = face.shaper();
         for _ in 0..8 {
             black_box(batch.shape("office café AVATAR", 16.0, None).unwrap());
         }

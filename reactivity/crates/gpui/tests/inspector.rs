@@ -15,7 +15,7 @@ impl View for Panel {
 
 #[test]
 fn typed_inspection_preserves_presence_and_reveals_updated_component_defaults() {
-    let window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
+    let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     assert!(window.snapshot().unwrap().nodes[0].target.is_none());
     let panel = window.inspect().unwrap().nodes[0].target.unwrap();
     assert_eq!(window.property(panel, WIDTH).unwrap(), Some(20.0));
@@ -45,7 +45,7 @@ fn typed_inspection_preserves_presence_and_reveals_updated_component_defaults() 
 
 #[test]
 fn paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output() {
-    let window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
+    let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     let panel = window.inspect().unwrap().nodes[0].target.unwrap();
     let original = window.scene_digest().unwrap();
     window.reset_counters().unwrap();
@@ -70,7 +70,7 @@ fn paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output() {
 
 #[test]
 fn invalid_and_foreign_inspector_edits_fail_before_source_admission() {
-    let window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
+    let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     let panel = window.inspect().unwrap().nodes[0].target.unwrap();
     assert!(matches!(
         window.set_property(panel, WIDTH, Contribution::Set(Some(f32::NAN))),
@@ -82,7 +82,7 @@ fn invalid_and_foreign_inspector_edits_fail_before_source_admission() {
         window.contribution(panel, WIDTH).unwrap(),
         Contribution::Inherit
     );
-    let other = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
+    let mut other = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     assert_eq!(
         other.set_property(panel, WIDTH, Contribution::Set(Some(10.0))),
         Err(Error::StaleTarget)

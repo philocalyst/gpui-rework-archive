@@ -9,6 +9,7 @@
 #[cfg(test)]
 extern crate self as gpui;
 
+mod application;
 mod component;
 mod element;
 mod identity;
@@ -19,18 +20,19 @@ mod runtime;
 pub mod source;
 mod style;
 
+pub use application::{Application, DemoApplication};
 pub use component::Component;
 pub use element::{
-    ChildSeq, El, Element, IntoHandler, button, column, div, label, row, text, text_input,
+    ChildSeq, El, Element, IntoHandler, Role, button, column, div, label, row, text, text_input,
 };
 pub use gpui_canvas::{ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping, oklch};
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
 #[cfg(feature = "native")]
-pub use native::{Application, NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
+pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use runtime::{
-    Commit, Counters, Error, PresentationToken, SetError, Snapshot, SnapshotNode, Win,
+    Commit, Counters, Error, Part, PresentationToken, Query, SetError, Snapshot, SnapshotNode, Win,
     WindowOptions,
 };
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};

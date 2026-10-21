@@ -24,7 +24,7 @@ fn options(size: [u32; 2]) -> WindowOptions {
 
 #[test]
 fn layout_units_transform_once_into_matching_physical_pixels_and_hits() {
-    let win = Win::with_options_scaled(BoxView, options([128, 80]), 2.0).unwrap();
+    let mut win = Win::with_options_scaled(BoxView, options([128, 80]), 2.0).unwrap();
     let snapshot = win.snapshot().unwrap();
     assert_eq!(snapshot.scale_factor, 2.0);
     assert_eq!(snapshot.requested_scale_factor, 2.0);
@@ -49,7 +49,7 @@ fn layout_units_transform_once_into_matching_physical_pixels_and_hits() {
 
 #[test]
 fn changing_density_at_equal_size_requires_ack_without_rerunning_view_or_changing_targets() {
-    let win = Win::recording_scaled(BoxView, options([128, 80]), 1.0).unwrap();
+    let mut win = Win::recording_scaled(BoxView, options([128, 80]), 1.0).unwrap();
     win.presented(win.with_scene(|_, token| token).unwrap())
         .unwrap();
     let target = win.snapshot().unwrap().nodes[0].target.unwrap();
@@ -91,7 +91,7 @@ fn changing_density_at_equal_size_requires_ack_without_rerunning_view_or_changin
 
 #[test]
 fn invalid_density_is_rejected_before_requested_geometry_or_authority_changes() {
-    let win = Win::with_options(BoxView, options([128, 80])).unwrap();
+    let mut win = Win::with_options(BoxView, options([128, 80])).unwrap();
     let before = win.snapshot().unwrap();
     for scale in [0.0, -1.0, f32::NAN, f32::INFINITY, f32::from_bits(1)] {
         assert_eq!(
@@ -117,7 +117,7 @@ impl View for Label {
 }
 #[test]
 fn runtime_uses_physical_font_masks_while_layout_and_shaping_stay_logical() {
-    let scaled = Win::with_options_scaled(
+    let mut scaled = Win::with_options_scaled(
         Label {
             size: 16.0,
             padding: 2.0,
@@ -126,7 +126,7 @@ fn runtime_uses_physical_font_masks_while_layout_and_shaping_stay_logical() {
         2.0,
     )
     .unwrap();
-    let physical = Win::with_options(
+    let mut physical = Win::with_options(
         Label {
             size: 32.0,
             padding: 4.0,
@@ -155,7 +155,7 @@ fn runtime_uses_physical_font_masks_while_layout_and_shaping_stay_logical() {
 
 #[test]
 fn failed_physical_font_admission_keeps_the_old_sheet_and_recovers_at_old_density() {
-    let win = Win::recording_scaled(
+    let mut win = Win::recording_scaled(
         Label {
             size: 256.0,
             padding: 0.0,

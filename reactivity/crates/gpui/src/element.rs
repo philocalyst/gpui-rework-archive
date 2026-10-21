@@ -20,8 +20,8 @@ pub(crate) enum NodeKind {
     Button,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum Role {
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+pub enum Role {
     Generic,
     Text,
     TextInput,

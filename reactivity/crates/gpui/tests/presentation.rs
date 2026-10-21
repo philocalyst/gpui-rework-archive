@@ -51,7 +51,7 @@ fn target(win: &Win<Rectangle>) -> gpui::Target {
 
 #[test]
 fn initial_recording_has_no_input_authority_until_actual_acknowledgement() {
-    let win = recording();
+    let mut win = recording();
     let before = win.snapshot().unwrap();
     assert_eq!(before.source_epoch, 0);
     assert_eq!(before.presentation_epoch, 0);
@@ -75,7 +75,6 @@ fn initial_recording_has_no_input_authority_until_actual_acknowledgement() {
         .with_scene(|scene, token| {
             assert_eq!((scene.width, scene.height), (64, 64));
             assert_eq!(scene.draws().count(), 1);
-            assert_eq!(win.update(|_| {}), Err(Error::Borrowed));
             token
         })
         .unwrap();
@@ -95,7 +94,7 @@ fn initial_recording_has_no_input_authority_until_actual_acknowledgement() {
 
 #[test]
 fn unseen_visual_candidates_block_coordinate_routing_even_after_noop_edits() {
-    let win = recording();
+    let mut win = recording();
     let initial = token(&win);
     win.presented(initial).unwrap();
     let addressed = target(&win);
@@ -125,7 +124,7 @@ fn unseen_visual_candidates_block_coordinate_routing_even_after_noop_edits() {
 
 #[test]
 fn pending_coherent_sheet_survives_newer_preparation_failure_and_can_be_acknowledged() {
-    let win = recording();
+    let mut win = recording();
     win.presented(token(&win)).unwrap();
     let addressed = target(&win);
     win.update(|m| m.bright = true).unwrap();
@@ -158,8 +157,8 @@ fn pending_coherent_sheet_survives_newer_preparation_failure_and_can_be_acknowle
 
 #[test]
 fn tokens_reject_foreign_namespaces_and_replaced_candidates() {
-    let a = recording();
-    let b = recording();
+    let mut a = recording();
+    let mut b = recording();
     let original = token(&a);
     let foreign = token(&b);
     assert_ne!(original, foreign);
@@ -174,7 +173,7 @@ fn tokens_reject_foreign_namespaces_and_replaced_candidates() {
 
 #[test]
 fn resize_keeps_targets_and_source_epoch_but_requires_new_geometry_ack() {
-    let win = recording();
+    let mut win = recording();
     let first = token(&win);
     win.presented(first).unwrap();
     let addressed = target(&win);
@@ -217,7 +216,7 @@ fn resize_keeps_targets_and_source_epoch_but_requires_new_geometry_ack() {
 
 #[test]
 fn headless_keeps_automatic_presentation_and_resize_behavior() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Rectangle {
             bright: false,
             broken: false,
@@ -243,7 +242,7 @@ fn headless_keeps_automatic_presentation_and_resize_behavior() {
 
 #[test]
 fn surface_loss_revokes_coordinates_until_current_scene_is_presented_again() {
-    let win = recording();
+    let mut win = recording();
     let current = token(&win);
     win.presented(current).unwrap();
     let addressed = target(&win);
@@ -278,7 +277,7 @@ fn surface_loss_revokes_coordinates_until_current_scene_is_presented_again() {
 
 #[test]
 fn reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source() {
-    let win = recording();
+    let mut win = recording();
     let current = token(&win);
     win.presented(current).unwrap();
     win.presentation_lost().unwrap();
@@ -294,7 +293,7 @@ fn reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source() {
 
 #[test]
 fn software_surface_rendering_returns_the_exact_unacknowledged_scene_token() {
-    let win = recording();
+    let mut win = recording();
     let mut words = vec![0xffffffff; 64 * 64];
     let initial = win.render_bgrx(&mut words).unwrap();
     assert_eq!(initial, token(&win));

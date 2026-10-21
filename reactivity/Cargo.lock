@@ -649,6 +649,7 @@ dependencies = [
 name = "gpui"
 version = "0.1.0"
 dependencies = [
+ "allocation-counter",
  "cephal",
  "gpui_canvas",
  "gpui_gpu",
@@ -659,6 +660,7 @@ dependencies = [
  "serde",
  "serde_json",
  "softbuffer",
+ "triomphe",
 ]
 
 [[package]]
@@ -2195,6 +2197,12 @@ dependencies = [
  "tracing-core",
  "tracing-log",
 ]
+
+[[package]]
+name = "triomphe"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b40688ea6389c8171614b25491f71d4a27946e0c7ce2da1c6de27e25abf1a0ae"
 
 [[package]]
 name = "ttf-parser"

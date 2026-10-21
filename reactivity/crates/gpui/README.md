@@ -20,7 +20,7 @@ impl View for Counter {
             .on_click(Self::COUNT.update(|count| *count += 1))))
     }
 }
-let win = Win::demo(Counter { count: Signal::new(0) });
+let mut win = Win::demo(Counter { count: Signal::new(0) });
 win.click(win.button("Increment")).unwrap();
 assert_eq!(win.with_model(|m| *m.count).unwrap(), 1);
 ```
@@ -80,8 +80,8 @@ source edit whose derived presentation failed. `OwnerFault` reports a consumed
 operation that panicked; arbitrary Rust values/destructors cannot be rolled
 back. Ordinary handler panic quarantines the owner and revokes its targets.
 
-Public targets have window namespaces and generations independent of preorder
-or layout IDs. Unkeyed child-count changes remount the affected run. Stable
+Public targets combine a window namespace and a never-reused retained ID,
+independent of preorder or layout IDs. Unkeyed child-count changes remount the affected run. Stable
 unrelated subtrees retain their targets. Layout and paint share admitted
 transforms; wide ancestor composition can recover before a visible descendant
 is narrowed. Failed candidate preparation preserves the preceding complete
@@ -89,7 +89,8 @@ sheet and pixel allocation; position-free text editing can recover it.
 
 `property` exposes typed selectors and their shared reflection catalog.
 `Win::inspect` explicitly addresses noninteractive sites; ordinary snapshots
-only mint action targets. `set_property` adds a sparse inspector contribution;
+only expose action targets. Target queries allocate no capability table.
+`set_property` adds a sparse inspector contribution;
 `Contribution::Inherit` removes it and reveals the latest component declaration.
 An explicit automatic width is `WIDTH` with `Set(None)`, distinct from inheritance.
 Paint/transform edits skip owner description and Cephal. No duplicate base style

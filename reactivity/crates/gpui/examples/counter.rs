@@ -39,7 +39,7 @@ fn main() -> Result<(), gpui::NativeError> {
 }
 #[cfg(not(feature = "native"))]
 fn main() -> Result<(), gpui::Error> {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Counter {
             count: Signal::new(0),
         },

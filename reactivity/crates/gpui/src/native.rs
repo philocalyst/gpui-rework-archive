@@ -125,8 +125,7 @@ impl<V: View> Window<V> {
     }
 }
 
-pub struct Application;
-impl Application {
+impl crate::Application {
     pub fn run<V: View + 'static>(root: V) -> Result<(), NativeError> {
         Self::run_window(Window::document(root))
     }
@@ -387,11 +386,11 @@ impl<V: View + 'static> NativeHost<V> {
                 return Err(NativeError::Runtime(Error::ResourceLimit));
             }
         }
-        if let Some(owner) = &self.owner {
+        if let Some(owner) = &mut self.owner {
             owner.resize_scaled(size, self.window.as_ref().unwrap().scale_factor() as f32)?;
         }
         if let Some(graphics) = &mut self.graphics {
-            if let Some(owner) = &self.owner {
+            if let Some(owner) = &mut self.owner {
                 owner.presentation_lost()?;
             }
             match graphics {
@@ -437,7 +436,7 @@ impl<V: View + 'static> NativeHost<V> {
         }
         if let Some(Graphics::ReferenceCpu(surface)) = &mut self.graphics {
             let window = self.window.as_ref().expect("surface has a window");
-            let owner = self.owner.as_ref().expect("surface has an owner");
+            let owner = self.owner.as_mut().expect("surface has an owner");
             let mut buffer = surface.buffer_mut().map_err(platform)?;
             let token = owner.render_bgrx(&mut buffer)?;
             window.pre_present_notify();
@@ -456,7 +455,7 @@ impl<V: View + 'static> NativeHost<V> {
             match graphics.handle.get_current_texture() {
                 wgpu::CurrentSurfaceTexture::Success(frame) => {
                     let renderer = &mut graphics.renderer;
-                    let owner = self.owner.as_ref().expect("surface has an owner");
+                    let owner = self.owner.as_mut().expect("surface has an owner");
                     let view = frame.texture.create_view(&Default::default());
                     let rendered = owner
                         .with_scene(|scene, token| renderer.render(scene, &view).map(|_| token))?;
@@ -512,7 +511,7 @@ impl<V: View + 'static> NativeHost<V> {
                     self.resize([size.width, size.height])?;
                 }
                 wgpu::CurrentSurfaceTexture::Lost if attempt == 0 => {
-                    if let Some(owner) = &self.owner {
+                    if let Some(owner) = &mut self.owner {
                         owner.presentation_lost()?;
                     }
                     self.upgrade = None;
@@ -595,7 +594,7 @@ impl<V: View + 'static> NativeHost<V> {
         let size = window.inner_size();
         gpu.config.width = size.width.max(1);
         gpu.config.height = size.height.max(1);
-        let owner = self.owner.as_ref().expect("upgrade has an owner");
+        let owner = self.owner.as_mut().expect("upgrade has an owner");
         let result = (|| {
             if gpu.errors.take().is_some() {
                 return Err(NativeError::SurfaceUnavailable);
@@ -659,7 +658,7 @@ impl<V: View + 'static> NativeHost<V> {
         if self.modifiers.control_key() || self.modifiers.super_key() {
             return Ok(());
         }
-        let (Some(owner), Some(target)) = (&self.owner, self.focused) else {
+        let (Some(owner), Some(target)) = (&mut self.owner, self.focused) else {
             return Ok(());
         };
         let result = match key {
@@ -717,7 +716,7 @@ impl<V: View + 'static> NativeHost<V> {
                 button: MouseButton::Left,
                 ..
             } => {
-                let Some(owner) = &self.owner else {
+                let Some(owner) = &mut self.owner else {
                     return Ok(());
                 };
                 let hit = match self
@@ -763,7 +762,7 @@ impl<V: View + 'static> Host for NativeHost<V> {
         {
             let result = match fault {
                 DeviceFault::Lost if self.recoveries == 0 => {
-                    if let Some(owner) = &self.owner
+                    if let Some(owner) = &mut self.owner
                         && let Err(error) = owner.presentation_lost()
                     {
                         self.error = Some(error.into());
@@ -819,7 +818,7 @@ impl<V: View + 'static> Host for NativeHost<V> {
                 self.instance = None;
                 self.graphics = None;
                 self.owner
-                    .as_ref()
+                    .as_mut()
                     .map(Win::presentation_lost)
                     .transpose()
                     .map(|_| ())
@@ -874,7 +873,7 @@ mod tests {
                 "native script timed out at stage {}",
                 self.stage
             );
-            let Some(owner) = &self.host.owner else {
+            let Some(owner) = &mut self.host.owner else {
                 return;
             };
             let sheet = owner.snapshot().unwrap();
@@ -893,7 +892,7 @@ mod tests {
                             self.host.dispatch(event_loop, Callback::Resumed);
                         }
                     }
-                    let owner = self.host.owner.as_ref().unwrap();
+                    let owner = self.host.owner.as_mut().unwrap();
                     self.host.focused = Some(owner.input());
                     self.host
                         .key_input(&Key::Character("Ship".into()), Some("Ship"))
@@ -1026,7 +1025,7 @@ mod tests {
                             );
                         }
                     }
-                    let owner = self.host.owner.as_ref().unwrap();
+                    let owner = self.host.owner.as_mut().unwrap();
                     let target = owner.find_text("Ship new GPUI").unwrap();
                     assert_eq!(
                         owner.property(target, TRANSFORM).unwrap(),

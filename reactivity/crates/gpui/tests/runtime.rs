@@ -1,8 +1,5 @@
 use gpui::{Error, prelude::*};
-use std::{
-    cell::RefCell,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 struct Counter {
     count: Signal<u32>,
@@ -33,7 +30,7 @@ impl View for Counter {
 
 #[test]
 fn direct_fanout_reads_once_and_promotes_one_shared_text_payload() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Counter {
             count: Signal::new(1),
             plain: 0,
@@ -63,7 +60,7 @@ fn direct_fanout_reads_once_and_promotes_one_shared_text_payload() {
 
 #[test]
 fn arbitrary_methods_refresh_plain_fields_and_equal_revision_signal_replacement() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Counter {
             count: Signal::new(0),
             plain: 0,
@@ -115,7 +112,7 @@ impl View for Nested {
 
 #[test]
 fn targets_survive_preorder_shifts_in_an_unrelated_sibling_subtree() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Nested {
             expanded: false,
             presses: 0,
@@ -146,40 +143,8 @@ fn targets_survive_preorder_shifts_in_an_unrelated_sibling_subtree() {
     assert_eq!(win.with_model(|m| m.presses).unwrap(), 1);
 }
 
-struct Reentry {
-    window: Rc<RefCell<Option<Weak<Win<Self>>>>>,
-    rejected: bool,
-}
-impl Reentry {
-    fn attempt(&mut self) {
-        let win = self.window.borrow().as_ref().unwrap().upgrade().unwrap();
-        self.rejected = win.update(|_| {}).unwrap_err() == Error::Borrowed;
-    }
-}
-impl View for Reentry {
-    fn view(&self) -> El<'_> {
-        button("reenter").on_click(Self::attempt)
-    }
-}
-
-#[test]
-fn recursive_dispatch_is_rejected_without_reborrowing_the_owner() {
-    let cell = Rc::new(RefCell::new(None));
-    let win = Rc::new(
-        Win::with_size(
-            Reentry {
-                window: cell.clone(),
-                rejected: false,
-            },
-            120,
-            40,
-        )
-        .unwrap(),
-    );
-    *cell.borrow_mut() = Some(Rc::downgrade(&win));
-    win.activate(win.button("reenter")).unwrap();
-    assert!(win.with_model(|m| m.rejected).unwrap());
-}
+// Exclusive Win borrowing rejects recursive mutation statically; the public
+// Win API carries compile-fail coverage for that ownership boundary.
 
 struct PanicOwner {
     value: u32,
@@ -198,7 +163,7 @@ impl View for PanicOwner {
 
 #[test]
 fn handler_panics_poison_and_revoke_without_claiming_rollback() {
-    let win = Win::with_size(PanicOwner { value: 0 }, 120, 40).unwrap();
+    let mut win = Win::with_size(PanicOwner { value: 0 }, 120, 40).unwrap();
     let target = win.button("panic");
     let old = win.scene_digest().unwrap();
     assert_eq!(win.activate(target), Err(Error::OwnerPanicked));
@@ -233,7 +198,7 @@ impl View for Input {
 
 #[test]
 fn input_edits_use_the_registered_string_source_and_share_the_fanout() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Input {
             content: Signal::new(String::new()),
         },
@@ -286,7 +251,7 @@ impl View for Transformed {
 
 #[test]
 fn rotated_button_hit_uses_the_exact_painted_matrix_not_its_aabb() {
-    let win = Win::with_size(Transformed { presses: 0 }, 200, 160).unwrap();
+    let mut win = Win::with_size(Transformed { presses: 0 }, 200, 160).unwrap();
     let snapshot = win.snapshot().unwrap();
     let node = snapshot
         .nodes
@@ -329,7 +294,7 @@ fn wide_ancestor_products_recover_before_admitting_a_visible_primitive() {
             el
         }
     }
-    let win = Win::with_size(Compensated, 8, 8).unwrap();
+    let mut win = Win::with_size(Compensated, 8, 8).unwrap();
     win.with_pixels(|pixels, _, _| {
         assert!(
             pixels
@@ -372,7 +337,7 @@ impl View for DomainOwner {
 
 #[test]
 fn a_non_text_non_clone_domain_action_uses_the_production_dispatcher() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         DomainOwner {
             domain: Signal::new(Domain {
                 enabled: false,
@@ -423,7 +388,7 @@ impl View for BadScene {
 
 #[test]
 fn a_rejected_partial_scene_keeps_the_same_output_buffer_and_complete_sheet() {
-    let win = Win::with_size(BadScene { broken: false }, 180, 120).unwrap();
+    let mut win = Win::with_size(BadScene { broken: false }, 180, 120).unwrap();
     let recover = win.button("recover");
     let old = win.scene_digest().unwrap();
     let pointer = win.with_pixels(|p, _, _| p.as_ptr() as usize).unwrap();
@@ -464,7 +429,7 @@ fn a_transparent_sites_handler_presence_publishes_new_hit_eligibility() {
             }
         }
     }
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         OptionalRoute {
             enabled: false,
             presses: 0,
@@ -516,7 +481,7 @@ fn a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning() 
             ))
         }
     }
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Owner {
             first: Signal::new(1),
             second: Signal::new(7),
@@ -633,15 +598,14 @@ fn rejected_resource(
 
 #[test]
 fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
-    let win = resources();
+    let mut win = resources();
     let drops = Rc::new(std::cell::Cell::new(0));
     let value = Resource::new(&drops);
     let pointer = value.bytes.as_ptr();
-    let borrowed = win
-        .with_model(|_| win.set(Resources::FIRST, value))
-        .unwrap()
-        .unwrap_err();
-    let value = rejected_resource(borrowed, Error::Borrowed, pointer);
+    let mut closed = resources();
+    closed.close();
+    let rejected = closed.set(Resources::FIRST, value).unwrap_err();
+    let value = rejected_resource(rejected, Error::Closed, pointer);
     let unknown = win.set(Resources::UNKNOWN, value).unwrap_err();
     let value = rejected_resource(
         unknown,
@@ -676,7 +640,7 @@ fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
 
 #[test]
 fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
-    let win = resources();
+    let mut win = resources();
     let drops = Rc::new(std::cell::Cell::new(0));
     let value = Resource::new(&drops);
     let pointer = value.bytes.as_ptr();
@@ -700,7 +664,7 @@ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
     drop(value);
     assert_eq!(drops.get(), 1);
 
-    let win = resources();
+    let mut win = resources();
     let drops = Rc::new(std::cell::Cell::new(0));
     let value = Resource::new(&drops);
     let pointer = value.bytes.as_ptr();
@@ -723,7 +687,7 @@ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
 
 #[test]
 fn committed_sets_report_the_actual_epochs_without_returning_a_consumed_value() {
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Input {
             content: Signal::new("ok".into()),
         },
@@ -775,7 +739,7 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() 
         }
     }
     let drops = Rc::new(RefCell::new(Vec::new()));
-    let win = Win::with_size(
+    let mut win = Win::with_size(
         Owner {
             value: Signal::new(Owned {
                 id: 1,

@@ -31,7 +31,7 @@ impl View for Counter {
 
 #[test]
 fn typed_actions_use_real_input_and_pixels_without_redescribing_the_owner() {
-    let window = Win::with_size(Counter::default(), 180, 100).unwrap();
+    let mut window = Win::with_size(Counter::default(), 180, 100).unwrap();
     let original = window.scene_digest().unwrap();
     let increment = window.button("Increment");
     window.reset_counters().unwrap();
@@ -88,7 +88,7 @@ impl View for Branch {
 
 #[test]
 fn ordinary_rust_branches_react_with_the_default_source_registration() {
-    let window = Win::with_size(Branch::default(), 120, 40).unwrap();
+    let mut window = Win::with_size(Branch::default(), 120, 40).unwrap();
     window.reset_counters().unwrap();
     window.set(Branch::SHOW, true).unwrap();
     assert!(
@@ -124,7 +124,7 @@ impl View for Rows {
 
 #[test]
 fn unkeyed_child_run_changes_revoke_targets_instead_of_retargeting_them() {
-    let window = Win::with_size(Rows::default(), 180, 100).unwrap();
+    let mut window = Win::with_size(Rows::default(), 180, 100).unwrap();
     let original = window.button("original");
     window.update(|model| model.prepend = true).unwrap();
     assert_eq!(window.activate(original), Err(Error::StaleTarget));
@@ -134,12 +134,12 @@ fn unkeyed_child_run_changes_revoke_targets_instead_of_retargeting_them() {
 
 #[test]
 fn restoration_preserves_source_values_and_remints_dispatch_authority() {
-    let window = Win::with_size(Counter::default(), 180, 100).unwrap();
+    let mut window = Win::with_size(Counter::default(), 180, 100).unwrap();
     let original = window.button("Increment");
     window.activate(original).unwrap();
     let json = window.source_json().unwrap();
     assert_eq!(json, "{\"count\":1}");
-    let restored = Win::<Counter>::from_json(&json).unwrap();
+    let mut restored = Win::<Counter>::from_json(&json).unwrap();
     assert_eq!(
         restored
             .with_model(|model| (*model.count, model.count.revision().get()))
@@ -173,7 +173,7 @@ impl View for Editor {
 
 #[test]
 fn presentation_failure_preserves_source_edits_and_the_previous_complete_image() {
-    let window = Win::with_size(
+    let mut window = Win::with_size(
         Editor {
             content: Signal::new("ok".into()),
         },
@@ -223,7 +223,7 @@ fn output_color_configuration_reaches_the_real_pixel_surface() {
                 .bg(Color::display_p3(1.0, 0.0, 0.0, 1.0).unwrap())
         }
     }
-    let window = Win::with_options(
+    let mut window = Win::with_options(
         Panel,
         WindowOptions {
             size: [8, 8],

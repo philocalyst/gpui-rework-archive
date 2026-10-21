@@ -114,7 +114,7 @@ fn values(win: &Win<Pair>) -> (u32, u32, u32, u32, String, String) {
 }
 #[test]
 fn identical_component_types_dispatch_methods_actions_and_editable_ports_to_their_own_state() {
-    let win = Win::with_size(Pair::new(), 420, 300).unwrap();
+    let mut win = Win::with_size(Pair::new(), 420, 300).unwrap();
     let left = win.button("Left exact");
     let right = win.button("Right exact");
     let inputs: Vec<_> = win
@@ -158,11 +158,11 @@ fn identical_component_types_dispatch_methods_actions_and_editable_ports_to_thei
 fn moving_and_restoring_models_preserves_state_and_remints_target_authority() {
     let win = Win::with_size(Pair::new(), 420, 300).unwrap();
     let target = win.button("Left exact");
-    let moved = Box::new(win);
+    let mut moved = Box::new(win);
     moved.click(target).unwrap();
     moved.type_text(moved.input(), "saved").unwrap();
     let encoded = moved.source_json().unwrap();
-    let restored = Win::<Pair>::from_json(&encoded).unwrap();
+    let mut restored = Win::<Pair>::from_json(&encoded).unwrap();
     assert_eq!(values(&restored), values(&moved));
     assert_eq!(restored.activate(target), Err(Error::StaleTarget));
     restored.click(restored.button("Right method")).unwrap();
@@ -171,7 +171,7 @@ fn moving_and_restoring_models_preserves_state_and_remints_target_authority() {
 }
 #[test]
 fn changing_component_owners_at_equal_ordinals_revokes_old_targets() {
-    let win = Win::with_size(Pair::new(), 420, 300).unwrap();
+    let mut win = Win::with_size(Pair::new(), 420, 300).unwrap();
     let left = win.button("Left exact");
     let right = win.button("Right exact");
     win.update(|m| m.swap = true).unwrap();
@@ -185,7 +185,7 @@ fn changing_component_owners_at_equal_ordinals_revokes_old_targets() {
 fn an_action_with_a_bad_component_writer_is_checked_before_mutation_or_epoch_admission() {
     let mut pair = Pair::new();
     pair.bad_writer = true;
-    let win = Win::with_size(pair, 420, 300).unwrap();
+    let mut win = Win::with_size(pair, 420, 300).unwrap();
     for label in ["Left exact", "Left method"] {
         assert_eq!(
             win.activate(win.button(label)),
@@ -228,7 +228,7 @@ impl View for Conservative {
 }
 #[test]
 fn default_registration_refreshes_parent_snapshots_even_when_the_child_field_is_direct() {
-    let win = Win::new(Conservative {
+    let mut win = Win::new(Conservative {
         child: Counter::new("Child"),
     })
     .unwrap();
@@ -255,7 +255,7 @@ impl View for Outer {
 }
 #[test]
 fn nested_component_roots_qualify_reused_ids_and_compose_typed_route_authority() {
-    let win = Win::new(Outer { pair: Pair::new() }).unwrap();
+    let mut win = Win::new(Outer { pair: Pair::new() }).unwrap();
     win.reset_counters().unwrap();
     win.click(win.button("Right exact")).unwrap();
     assert_eq!(
@@ -345,7 +345,7 @@ fn registration_checks_exclusive_projection_before_describing_the_owner() {
 fn visual_parentage_does_not_infer_model_ownership_or_exclusive_access() {
     let mut pair = Pair::new();
     pair.nested_visual = true;
-    let win = Win::new(pair).unwrap();
+    let mut win = Win::new(pair).unwrap();
     win.click(win.button("Right exact")).unwrap();
     win.type_text(win.input(), "left only").unwrap();
     assert_eq!(values(&win), (0, 1, 0, 0, "left only".into(), "".into()));
@@ -379,7 +379,7 @@ impl View for Panicking {
 }
 #[test]
 fn panicking_component_projectors_follow_the_owner_quarantine_boundary() {
-    let win = Win::new(Panicking {
+    let mut win = Win::new(Panicking {
         child: Counter::new("Child"),
         bad: true,
     })

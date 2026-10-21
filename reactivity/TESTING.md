@@ -3,12 +3,49 @@
 Tests configure the production host rather than instantiate a second application
 engine. The same owner dispatcher, source barriers, schema setters, sheet
 publication, input routing and visitors serve native apps, `Application::demo`,
-`Win::demo`, the inspector, accessibility and tests. Those application APIs remain
-implementation gates; the current labs are not an existing demo runtime.
+`Win::demo`, the inspector and tests. The synchronous production surface exists
+in `gpui`; complete accessibility, virtual time and ready-worker delivery remain
+separate implementation gates.
 The supplied `final/10-quality.md` supplies the broader feature corpus, subject
 to [CONTRACT.md](CONTRACT.md)'s explicit semantic amendments.
 
 ## The public testing cut
+
+The implemented synchronous cut uses ordinary exclusively owned windows:
+
+```rust,ignore
+let app = Application::demo();
+let mut search = app.open(SearchPage::default())?;
+search.type_text(search.role(Role::TextInput).one()?, "ban")?;
+search.click(search.role(Role::Button).text("Find").one()?)?;
+assert!(search.contains_text("banana")?);
+assert_eq!(search.root()?.hits.len(), 3);
+```
+
+Each `Win<V>` owns its actual production runtime. Demo application configuration
+opens windows of different model types without an index, shared owner, shadow
+dispatcher or registry. The returned windows own their lifetimes; closing a
+window drops its model and resources. Queries borrow `&Win`; edits, input and
+presentation acknowledgement require `&mut Win`. Rust rejects mutation during a
+source/scene read. There is no production `Rc`, `RefCell` or `Cell` in this window
+engine. Immutable text uses Triomphe leases between source and presented epochs;
+fonts/masks/backend resources have their separate immutable resource leases.
+
+`role`, `contains_text`, `bounds`, `filter_count`, `root` and borrowed `visit`
+avoid diagnostic snapshots. Unique queries reject ambiguity rather than select
+an arbitrary component instance. Counts/visitors observe the acknowledged sheet
+while a source edit awaits repair; resolving a new query target requires a current
+presentation. Target stamps combine the window namespace and checked monotonic
+retained ID, so querying allocates no capability table. Checked description
+recovery remounts invalid identities; presentation-only failure preserves targets
+for position-free editing repair. Query tests assert zero allocations across
+5,000 operations and compiler tests reject escaped visitor data/reentrant mutation.
+
+Source persistence uses `source_json`/`from_json`; restoration remints targets.
+Snapshots/inspection and explicit pixel diagnostics remain available when those
+artifacts are needed. Keyboard/focus unification, virtual time, completion control
+and replay will be implemented through production facilities, not dummy test-only
+timers or a second event loop. The contracts below specify those next gates.
 
 Choose time, worker delivery and native/resource adapters at application creation.
 The native adapter supplies real events/time/completion; demo adapters supply

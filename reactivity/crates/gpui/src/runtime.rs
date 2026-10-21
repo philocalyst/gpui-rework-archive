@@ -1,13 +1,12 @@
 //! One serial owner turn, a retained logical description, and an admitted sheet.
 //! Layout is private scratch; the canvas stages commands without another output
-//! framebuffer. Public callbacks never run through an active owner borrow.
+//! framebuffer. Callbacks carry ordinary Rust borrows; there is no shared mutable owner cell.
 use std::{
-    cell::{RefCell, RefMut},
     collections::{BTreeMap, BTreeSet},
     num::NonZeroU64,
     panic::{AssertUnwindSafe, catch_unwind},
-    rc::Rc,
 };
+use triomphe::Arc;
 
 use gpui_canvas::{Canvas, ColorConfig, PreparedScene, TextLayout, TextShaper, TextSystem};
 use gpui_reactivity_core::{
@@ -29,6 +28,9 @@ const MAX_NODES: usize = 100_000;
 // Cephal's algorithms recurse even though public description disposal does not.
 const MAX_LAYOUT_DEPTH: usize = 128;
 
+mod query;
+pub use query::{Part, Query};
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WindowOptions {
     /// Physical output dimensions in device pixels.
@@ -46,7 +48,7 @@ impl Default for WindowOptions {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Error {
-    Borrowed,
+    Closed,
     Poisoned,
     OwnerPanicked,
     PresentationPanicked,
@@ -59,6 +61,7 @@ pub enum Error {
     NotInput,
     NotHittable,
     MissingElement,
+    AmbiguousElement { matches: usize },
     UnregisteredInput { node: usize },
     DepthLimit { node: usize },
     ResourceLimit,
@@ -254,7 +257,7 @@ struct Node {
     parent: Option<usize>,
     ordinal: u32,
     kind: NodeKind,
-    text: Option<Rc<str>>,
+    text: Option<Arc<str>>,
     field: Option<FieldId>,
     component_scope: u32,
     style: Style,
@@ -264,7 +267,7 @@ struct Node {
 impl Node {
     fn shape<'n>(
         &'n mut self,
-        service: &TextShaper<'_>,
+        service: &mut TextShaper<'_>,
         width: Option<f32>,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
@@ -288,7 +291,7 @@ struct Presented {
     identity: u64,
     parent: Option<usize>,
     kind: NodeKind,
-    text: Option<Rc<str>>,
+    text: Option<Arc<str>>,
     rect: Rect,
     transform: Option<Affine>,
     bounds: Rect,
@@ -335,12 +338,27 @@ struct Runtime<M> {
     changed_nodes: usize,
 }
 
-/// A scope-owned serial window runtime. Every input adapter uses these same
-/// operations. `demo` is the convenient headless constructor, with real pixels.
+/// An exclusively owned serial window runtime. Every input adapter uses these
+/// same operations. Mutation requires `&mut Win`; queries borrow `&Win`.
+///
+/// ```compile_fail
+/// use gpui::{El, View, Win, text};
+/// struct Page;
+/// impl View for Page { fn view(&self) -> El<'_> { text("page") } }
+/// let mut win = Win::demo(Page);
+/// win.with_model(|_| win.update(|_| {}).unwrap()).unwrap();
+/// ```
+///
+/// ```compile_fail
+/// use gpui::{El, View, Win, text};
+/// struct Page;
+/// impl View for Page { fn view(&self) -> El<'_> { text("page") } }
+/// let mut win = Win::demo(Page);
+/// win.with_scene(|_, _| win.close()).unwrap();
+/// ```
 pub struct Win<M: View + 'static> {
-    inner: RefCell<Runtime<M>>,
+    inner: Option<Box<Runtime<M>>>,
 }
-
 impl<M: View + 'static> Win<M> {
     pub fn new(model: M) -> Result<Self, Error> {
         Self::with_options(model, WindowOptions::default())
@@ -433,22 +451,36 @@ impl<M: View + 'static> Win<M> {
         runtime.describe(true)?;
         runtime.present()?;
         Ok(Self {
-            inner: RefCell::new(runtime),
+            inner: Some(Box::new(runtime)),
         })
     }
-    fn borrow(&self) -> Result<RefMut<'_, Runtime<M>>, Error> {
-        self.inner.try_borrow_mut().map_err(|_| Error::Borrowed)
+    fn runtime_mut(&mut self) -> Result<&mut Runtime<M>, Error> {
+        self.inner.as_deref_mut().ok_or(Error::Closed)
+    }
+    fn runtime(&self) -> Result<&Runtime<M>, Error> {
+        self.inner.as_deref().ok_or(Error::Closed)
+    }
+    /// Revoke this owned window and release its model and retained resources.
+    pub fn close(&mut self) {
+        self.inner.take();
+    }
+    pub fn is_closed(&self) -> bool {
+        self.inner.is_none()
     }
 
     /// Arbitrary model edits conservatively refresh snapshots and structure.
-    pub fn update(&self, edit: impl FnOnce(&mut M)) -> Result<Commit, Error> {
-        self.borrow()?.operation(None, |model, _| {
+    pub fn update(&mut self, edit: impl FnOnce(&mut M)) -> Result<Commit, Error> {
+        self.runtime_mut()?.operation(None, |model, _| {
             edit(model);
             Ok(())
         })
     }
-    pub fn set<T: 'static>(&self, source: Source<M, T>, value: T) -> Result<Commit, SetError<T>> {
-        let mut runtime = match self.borrow() {
+    pub fn set<T: 'static>(
+        &mut self,
+        source: Source<M, T>,
+        value: T,
+    ) -> Result<Commit, SetError<T>> {
+        let runtime = match self.runtime_mut() {
             Ok(runtime) => runtime,
             Err(error) => return Err(SetError::Rejected { error, value }),
         };
@@ -489,8 +521,8 @@ impl<M: View + 'static> Win<M> {
         }
     }
     /// Position-free semantic activation validates the current logical target.
-    pub fn activate(&self, target: Target) -> Result<Commit, Error> {
-        self.borrow()?.activate(target)
+    pub fn activate(&mut self, target: Target) -> Result<Commit, Error> {
+        self.runtime_mut()?.activate(target)
     }
 
     /// Borrow the latest complete command sheet and its acknowledgement token.
@@ -501,41 +533,37 @@ impl<M: View + 'static> Win<M> {
         &self,
         read: impl FnOnce(PreparedScene<'_>, PresentationToken) -> R,
     ) -> Result<R, Error> {
-        let runtime = self.inner.try_borrow().map_err(|_| Error::Borrowed)?;
+        let runtime = self.runtime()?;
         runtime.live()?;
         let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
         Ok(read(runtime.canvas.prepared_scene(), token))
     }
     /// Acknowledge only after the backend's actual submit/present succeeded.
     /// An older coherent candidate remains eligible if a newer preparation failed.
-    pub fn presented(&self, token: PresentationToken) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn presented(&mut self, token: PresentationToken) -> Result<Commit, Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.acknowledge(token)
     }
     /// Revoke coordinate authority when a backend loses/detaches its surface.
     /// Commands, diagnostic geometry and current token stay available for redraw;
     /// only a subsequent actual presentation acknowledgement restores authority.
-    pub fn presentation_lost(&self) -> Result<(), Error> {
-        let mut runtime = self.borrow()?;
+    pub fn presentation_lost(&mut self) -> Result<(), Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.presentation_valid = false;
         Ok(())
     }
     /// Change physical viewport constraints without changing source epoch or
     /// target namespace. Equal size is an idle operation; invalid size is rejected.
-    pub fn resize(&self, size: [u32; 2]) -> Result<Commit, Error> {
-        let scale = self
-            .inner
-            .try_borrow()
-            .map_err(|_| Error::Borrowed)?
-            .requested_scale_factor;
+    pub fn resize(&mut self, size: [u32; 2]) -> Result<Commit, Error> {
+        let scale = self.runtime()?.requested_scale_factor;
         self.resize_scaled(size, scale)
     }
     /// Change physical size or device density. Equal size AND density is idle.
     /// Scale must be finite, positive, and produce finite f32 logical constraints.
-    pub fn resize_scaled(&self, size: [u32; 2], scale_factor: f32) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn resize_scaled(&mut self, size: [u32; 2], scale_factor: f32) -> Result<Commit, Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         if size == runtime.requested_size && scale_factor == runtime.requested_scale_factor {
             return Ok(runtime.commit());
@@ -557,7 +585,7 @@ impl<M: View + 'static> Win<M> {
     }
     /// The same acknowledged-sheet hit kernel used by click_at and click.
     pub fn hit_target(&self, point: Point) -> Result<Option<Target>, Error> {
-        let mut runtime = self.borrow()?;
+        let runtime = self.runtime()?;
         runtime.live()?;
         runtime.current_presentation()?;
         Ok(runtime
@@ -566,8 +594,8 @@ impl<M: View + 'static> Win<M> {
     }
 
     /// Test input still goes through admitted geometry and the ordinary hit path.
-    pub fn click(&self, target: Target) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn click(&mut self, target: Target) -> Result<Commit, Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         runtime.current_presentation()?;
@@ -591,8 +619,8 @@ impl<M: View + 'static> Win<M> {
         }
         runtime.activate(target)
     }
-    pub fn click_at(&self, point: Point) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn click_at(&mut self, point: Point) -> Result<Commit, Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.current_presentation()?;
         let identity = runtime.hit(point).ok_or(Error::NotHittable)?;
@@ -601,18 +629,18 @@ impl<M: View + 'static> Win<M> {
     }
     /// The editing floor inserts at the end; full selection/IME is a host/text
     /// layer. Character boundaries are preserved by the backspace operation.
-    pub fn type_text(&self, target: Target, text: &str) -> Result<Commit, Error> {
-        self.borrow()?
+    pub fn type_text(&mut self, target: Target, text: &str) -> Result<Commit, Error> {
+        self.runtime_mut()?
             .edit_text(target, |value| value.push_str(text))
     }
-    pub fn backspace(&self, target: Target) -> Result<Commit, Error> {
-        self.borrow()?.edit_text(target, |value| {
+    pub fn backspace(&mut self, target: Target) -> Result<Commit, Error> {
+        self.runtime_mut()?.edit_text(target, |value| {
             value.pop();
         })
     }
     /// Retry a pending presentation, or do zero description/layout/paint work.
-    pub fn settle(&self) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn settle(&mut self) -> Result<Commit, Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.changed_nodes = 0;
         if !runtime.logical_valid {
@@ -621,17 +649,20 @@ impl<M: View + 'static> Win<M> {
         runtime.present()
     }
     pub fn with_model<R>(&self, read: impl FnOnce(&M) -> R) -> Result<R, Error> {
-        let runtime = self.inner.try_borrow().map_err(|_| Error::Borrowed)?;
-        Ok(read(&runtime.model))
+        Ok(read(self.root()?))
+    }
+    /// Ordinary typed source-state borrow. An edit or close while this reference
+    /// is live is a compile error, without a runtime borrow guard.
+    pub fn root(&self) -> Result<&M, Error> {
+        Ok(&self.runtime()?.model)
     }
     pub fn counters(&self) -> Counters {
-        self.inner
-            .try_borrow()
-            .expect("window is in an owner turn")
+        self.runtime()
+            .expect("window is closed or in an owner turn")
             .counters
     }
-    pub fn reset_counters(&self) -> Result<(), Error> {
-        self.borrow()?.counters = Counters::default();
+    pub fn reset_counters(&mut self) -> Result<(), Error> {
+        self.runtime_mut()?.counters = Counters::default();
         Ok(())
     }
     pub fn snapshot(&self) -> Result<Snapshot, Error> {
@@ -643,7 +674,7 @@ impl<M: View + 'static> Win<M> {
         self.snapshot_with_targets(true)
     }
     fn snapshot_with_targets(&self, all_targets: bool) -> Result<Snapshot, Error> {
-        let mut runtime = self.borrow()?;
+        let runtime = self.runtime()?;
         let mut nodes = Vec::with_capacity(runtime.presented.len());
         for index in 0..runtime.presented.len() {
             let node = &runtime.presented[index];
@@ -692,7 +723,7 @@ impl<M: View + 'static> Win<M> {
     /// Current logical property; the complete displayed sheet may lag after a
     /// presentation error. Inspect its epoch before using displayed geometry.
     pub fn property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
-        let runtime = self.borrow()?;
+        let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         Ok(property.get(&runtime.nodes[runtime.by_identity[&identity]].style))
@@ -702,7 +733,7 @@ impl<M: View + 'static> Win<M> {
         target: Target,
         property: Property<T>,
     ) -> Result<Contribution<T>, Error> {
-        let runtime = self.borrow()?;
+        let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         Ok(runtime.overrides.get(identity, property))
@@ -710,12 +741,12 @@ impl<M: View + 'static> Win<M> {
     /// A typed inspector contribution. Validation precedes editing; inheritance
     /// removes the contribution and reveals the latest component declaration.
     pub fn set_property<T: PartialEq>(
-        &self,
+        &mut self,
         target: Target,
         property: Property<T>,
         contribution: Contribution<T>,
     ) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         let epoch = runtime
@@ -766,7 +797,7 @@ impl<M: View + 'static> Win<M> {
             .expect("input was not found in the presented sheet")
     }
     fn find(&self, kind: NodeKind, label: Option<&str>) -> Result<Target, Error> {
-        let mut runtime = self.borrow()?;
+        let runtime = self.runtime()?;
         runtime.live()?;
         if !runtime.logical_valid {
             return Err(Error::PresentationStale);
@@ -786,8 +817,8 @@ impl<M: View + 'static> Win<M> {
     /// CPU diagnostic rendering of the latest coherent commands. In recording
     /// mode this explicitly allocates the optional image, but never acknowledges
     /// native presentation. Optional image allocation failures return Canvas errors.
-    pub fn with_pixels<R>(&self, read: impl FnOnce(&[u8], u32, u32) -> R) -> Result<R, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn with_pixels<R>(&mut self, read: impl FnOnce(&[u8], u32, u32) -> R) -> Result<R, Error> {
+        let runtime = self.runtime_mut()?;
         let (width, height) = (runtime.canvas.width(), runtime.canvas.height());
         Ok(read(runtime.canvas.try_pixels()?, width, height))
     }
@@ -795,14 +826,14 @@ impl<M: View + 'static> Win<M> {
     /// Words are 0x00RRGGBB; no internal CPU image or extra frame copy is created.
     /// The host must acknowledge the returned token only after its buffer present
     /// succeeds. Rendering here alone cannot restore coordinate authority.
-    pub fn render_bgrx(&self, destination: &mut [u32]) -> Result<PresentationToken, Error> {
-        let mut runtime = self.borrow()?;
+    pub fn render_bgrx(&mut self, destination: &mut [u32]) -> Result<PresentationToken, Error> {
+        let runtime = self.runtime_mut()?;
         runtime.live()?;
         let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
         runtime.canvas.render_bgrx(destination)?;
         Ok(token)
     }
-    pub fn scene_digest(&self) -> Result<u64, Error> {
+    pub fn scene_digest(&mut self) -> Result<u64, Error> {
         self.with_pixels(|pixels, _, _| {
             pixels.iter().fold(0xcbf29ce484222325, |hash, byte| {
                 (hash ^ *byte as u64).wrapping_mul(0x100000001b3)
@@ -813,7 +844,7 @@ impl<M: View + 'static> Win<M> {
     where
         M: Serialize,
     {
-        let runtime = self.inner.try_borrow().map_err(|_| Error::Borrowed)?;
+        let runtime = self.runtime()?;
         serde_json::to_string(&runtime.model)
             .map_err(|error| Error::Serialization(error.to_string()))
     }
@@ -857,7 +888,6 @@ impl<M: View + 'static> Runtime<M> {
     fn poison(&mut self) {
         self.poisoned = true;
         self.logical_valid = false;
-        self.sites.revoke();
         self.prepared = None;
         self.latest_token = None;
     }
@@ -908,7 +938,6 @@ impl<M: View + 'static> Runtime<M> {
         };
         if let Err(error) = result {
             self.logical_valid = false;
-            self.sites.revoke();
             return Err(error);
         }
         self.present()
@@ -987,7 +1016,6 @@ impl<M: View + 'static> Runtime<M> {
             Ok(Ok(())) => Ok(()),
             Ok(Err(error)) => {
                 self.logical_valid = false;
-                self.sites.revoke();
                 Err(error)
             }
             Err(_) => {
@@ -997,6 +1025,7 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn describe_inner(&mut self, mount: bool) -> Result<(), Error> {
+        let reuse_identities = self.logical_valid;
         self.sources.validate(&mut self.model)?;
         self.counters.descriptions += 1;
         if !mount {
@@ -1090,8 +1119,9 @@ impl<M: View + 'static> Runtime<M> {
             let parent_identity = parent.map(|parent| nodes[parent].identity);
             // A shape change invalidates the entire unkeyed run. Equal kinds
             // at shifted ordinals must not silently retarget an old capability.
-            let run_survives =
-                old_counts.get(&parent_identity).copied().unwrap_or(0) == new_counts[ordinal_slot];
+            let run_survives = reuse_identities
+                && old_counts.get(&parent_identity).copied().unwrap_or(0)
+                    == new_counts[ordinal_slot];
             let previous = run_survives
                 .then(|| sites.get(&(parent_identity, ordinal, draft.kind)))
                 .flatten()
@@ -1123,7 +1153,7 @@ impl<M: View + 'static> Runtime<M> {
                 node.text = text.as_deref().map(|text| {
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += text.len() as u64;
-                    Rc::from(text)
+                    Arc::from(text)
                 });
                 node.shaped = None;
                 self.layout_dirty.insert(node.identity);
@@ -1171,7 +1201,6 @@ impl<M: View + 'static> Runtime<M> {
             .enumerate()
             .map(|(i, node)| (node.identity, i))
             .collect();
-        self.sites.retain(&self.by_identity);
         self.overrides
             .retain(|identity| self.by_identity.contains_key(&identity));
         self.logical_valid = true;
@@ -1184,13 +1213,13 @@ impl<M: View + 'static> Runtime<M> {
         };
         self.counters.source_reads += 1;
         let value = self.sources.read_text(&self.model, field, fanout.codec)?;
-        let mut promoted: Option<Rc<str>> = None;
+        let mut promoted: Option<Arc<str>> = None;
         for &index in &fanout.destinations {
             self.counters.destination_compares += 1;
             let node = &mut self.nodes[index];
             if node.text.as_deref() != Some(value.as_ref()) {
                 if promoted.is_none() {
-                    promoted = Some(Rc::from(value.as_ref()));
+                    promoted = Some(Arc::from(value.as_ref()));
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += value.len() as u64;
                 }
@@ -1287,7 +1316,7 @@ impl<M: View + 'static> Runtime<M> {
         // this pass. A single face lease lets the raster cache remain mutable;
         // neither a string nor a glyph increments its reference count.
         let font = self.text.as_ref().map(|text| text.font_face().clone());
-        let shaper = font.as_ref().map(|font| font.shaper());
+        let mut shaper = font.as_ref().map(|font| font.shaper());
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -1321,7 +1350,7 @@ impl<M: View + 'static> Runtime<M> {
             .collect::<BTreeMap<_, _>>();
         let mut failure = None;
         let nodes = &mut self.nodes;
-        let service = &shaper;
+        let service = &mut shaper;
         let mut measure = |id: NodeId, input: MeasureInput| {
             let width = input
                 .known_dimensions
@@ -1332,7 +1361,7 @@ impl<M: View + 'static> Runtime<M> {
                     AvailableSpace::MaxContent => None,
                 });
             let service = service
-                .as_ref()
+                .as_mut()
                 .expect("measured text has an initialized service");
             match nodes[lookup[&id]].shape(service, width) {
                 Ok(shape) => MeasureOutput {
@@ -1413,7 +1442,7 @@ impl<M: View + 'static> Runtime<M> {
                 let fg = node.style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
                 let shape = node.shape(
-                    shaper.as_ref().expect("text initialized before layout"),
+                    shaper.as_mut().expect("text initialized before layout"),
                     Some(layout.content_box_width()),
                 )?;
                 scene.draw_text_scaled(
@@ -1563,7 +1592,7 @@ mod tests {
                 div().size(8).bg(Color::BLACK)
             }
         }
-        let win = Win::recording(
+        let mut win = Win::recording(
             Rectangle,
             WindowOptions {
                 size: [32, 24],
@@ -1571,8 +1600,8 @@ mod tests {
             },
         )
         .unwrap();
-        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
-        assert_eq!(win.inner.borrow().canvas.stats().render_count, 0);
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 0);
         let token = win
             .with_scene(|scene, token| {
                 assert_eq!(scene.draws().count(), 1);
@@ -1581,12 +1610,12 @@ mod tests {
             .unwrap();
         win.presented(token).unwrap();
         win.resize([40, 30]).unwrap();
-        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
         let token = win.with_scene(|_, token| token).unwrap();
         win.presented(token).unwrap();
-        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
-        assert_eq!(win.inner.borrow().canvas.stats().render_count, 0);
-        assert!(win.inner.borrow().text.is_none());
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 0);
+        assert!(win.runtime().unwrap().text.is_none());
     }
     #[test]
     fn software_surface_rendering_keeps_the_native_runtime_free_of_cpu_image_storage() {
@@ -1596,7 +1625,7 @@ mod tests {
                 div().size(8).bg(Color::BLACK)
             }
         }
-        let win = Win::recording(
+        let mut win = Win::recording(
             Rectangle,
             WindowOptions {
                 size: [8, 8],
@@ -1607,8 +1636,8 @@ mod tests {
         let mut destination = vec![0xffffffff; 64];
         let token = win.render_bgrx(&mut destination).unwrap();
         assert!(destination.iter().all(|word| *word == 0));
-        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
-        assert_eq!(win.inner.borrow().canvas.stats().render_count, 1);
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 1);
         assert!(!win.snapshot().unwrap().presentation_valid);
         win.presented(token).unwrap();
         assert!(win.snapshot().unwrap().presentation_valid);
@@ -1623,7 +1652,7 @@ mod tests {
             }
         }
         let win = Win::with_size(Rectangle, 8, 8).unwrap();
-        assert!(win.inner.borrow().text.is_none());
+        assert!(win.runtime().unwrap().text.is_none());
         assert_eq!(win.counters().measure_calls, 0);
     }
 
@@ -1635,13 +1664,13 @@ mod tests {
                 text(&self.0)
             }
         }
-        let win = Win::with_size(Name("unchanged".into()), 160, 40).unwrap();
-        let pointer = Rc::as_ptr(win.inner.borrow().nodes[0].text.as_ref().unwrap());
+        let mut win = Win::with_size(Name("unchanged".into()), 160, 40).unwrap();
+        let pointer = Arc::as_ptr(win.runtime().unwrap().nodes[0].text.as_ref().unwrap());
         win.reset_counters().unwrap();
         win.update(|m| m.0 = m.0.clone()).unwrap();
         assert!(std::ptr::eq(
             pointer,
-            Rc::as_ptr(win.inner.borrow().nodes[0].text.as_ref().unwrap())
+            Arc::as_ptr(win.runtime().unwrap().nodes[0].text.as_ref().unwrap())
         ));
         assert_eq!(win.counters().text_promotions, 0);
         assert_eq!(win.counters().layout_runs, 0);
@@ -1667,7 +1696,7 @@ mod tests {
                 }
             }
         }
-        let win = Win::with_size(
+        let mut win = Win::with_size(
             Content {
                 text: true,
                 broken: false,
@@ -1676,7 +1705,7 @@ mod tests {
             40,
         )
         .unwrap();
-        assert!(win.inner.borrow().text.is_some());
+        assert!(win.runtime().unwrap().text.is_some());
         assert!(
             win.update(|m| {
                 m.text = false;
@@ -1685,12 +1714,12 @@ mod tests {
             .is_err()
         );
         assert!(
-            win.inner.borrow().text.is_some(),
+            win.runtime().unwrap().text.is_some(),
             "the failed candidate did not replace the text sheet"
         );
         win.update(|m| m.broken = false).unwrap();
-        assert!(win.inner.borrow().text.is_none());
+        assert!(win.runtime().unwrap().text.is_none());
         win.update(|m| m.text = true).unwrap();
-        assert!(win.inner.borrow().text.is_some());
+        assert!(win.runtime().unwrap().text.is_some());
     }
 }

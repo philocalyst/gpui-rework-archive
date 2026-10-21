@@ -8,7 +8,7 @@ use gpui::{Error, Win};
 
 #[test]
 fn tutorial_port_uses_the_ordinary_input_and_serialization_interface() {
-    let win = Win::with_size(todos::Todos::default(), 540, 620).unwrap();
+    let mut win = Win::with_size(todos::Todos::default(), 540, 620).unwrap();
     let input = win.input();
     win.reset_counters().unwrap();
     win.type_text(input, "Port a real app").unwrap();
@@ -33,7 +33,7 @@ fn tutorial_port_uses_the_ordinary_input_and_serialization_interface() {
 
 #[test]
 fn component_graphics_port_reuses_layout_for_geometry_and_color_updates() {
-    let win = Win::with_size(graphics::Graphics::default(), 560, 440).unwrap();
+    let mut win = Win::with_size(graphics::Graphics::default(), 560, 440).unwrap();
     let original = win.scene_digest().unwrap();
     win.reset_counters().unwrap();
     win.click(win.button("Rotate")).unwrap();
@@ -50,7 +50,7 @@ fn component_graphics_port_reuses_layout_for_geometry_and_color_updates() {
 
 #[test]
 fn complete_application_views_compose_without_rewriting_their_state_or_routes() {
-    let win = Win::recording(
+    let mut win = Win::recording(
         workspace::Workspace::default(),
         gpui::WindowOptions {
             size: [1100, 720],
@@ -58,19 +58,19 @@ fn complete_application_views_compose_without_rewriting_their_state_or_routes() 
         },
     )
     .unwrap();
-    let acknowledge = || {
+    let acknowledge = |win: &mut Win<workspace::Workspace>| {
         let token = win.with_scene(|_, token| token).unwrap();
         win.presented(token).unwrap();
     };
-    acknowledge();
+    acknowledge(&mut win);
     let rotate = win.button("Rotate");
     win.reset_counters().unwrap();
     win.type_text(win.input(), "Independent child application")
         .unwrap();
     assert_eq!(win.counters().owner_reruns, 0);
-    acknowledge();
+    acknowledge(&mut win);
     win.click(win.button("Add")).unwrap();
-    acknowledge();
+    acknowledge(&mut win);
     assert!(win.find_text("Independent child application").is_ok());
     assert_eq!(
         win.button("Rotate"),
@@ -80,7 +80,7 @@ fn complete_application_views_compose_without_rewriting_their_state_or_routes() 
     let before = win.scene_digest().unwrap();
     win.reset_counters().unwrap();
     win.click(rotate).unwrap();
-    acknowledge();
+    acknowledge(&mut win);
     assert_eq!(win.counters().layout_runs, 0);
     assert_ne!(win.scene_digest().unwrap(), before);
     assert!(win.find_text("1 left").is_ok());

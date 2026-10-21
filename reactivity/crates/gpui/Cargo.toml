@@ -7,6 +7,7 @@ description = "Clean-room GPUI implementation: typed views and coherent retained
 publish = false
 
 [dependencies]
+triomphe = { version = "=0.1.16", default-features = false, features = ["std"] }
 gpui_reactivity_core = { path = "../core", features = ["layout"] }
 gpui_reactivity_state = { path = "../state", features = ["serde"] }
 gpui_canvas = { path = "../canvas" }
@@ -23,6 +24,9 @@ default = []
 native = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
 x11 = ["native", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
 wayland = ["native", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+
+[dev-dependencies]
+allocation-counter = "=0.8.1"
 
 [[example]]
 name = "workbench"

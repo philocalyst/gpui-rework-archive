@@ -8,7 +8,7 @@ use std::time::Instant;
 
 fn measure<V: View + 'static>(name: &str, model: V, size: [u32; 2]) -> Result<(), gpui::Error> {
     let started = Instant::now();
-    let win = Win::recording(
+    let mut win = Win::recording(
         model,
         WindowOptions {
             size,
