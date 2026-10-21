@@ -78,7 +78,7 @@ impl Script {
                     0,
                     "logical resize must not allocate pixels"
                 );
-                let Some(Graphics::ReferenceCpu(surface)) = &mut self.host.graphics else {
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
                     panic!("CPU surface")
                 };
                 assert!(surface.fetch().unwrap().iter().all(|&p| p == 0x00ff_ffff));
@@ -166,7 +166,7 @@ impl Script {
             1 => {
                 assert!(self.host.presented_frames >= 2);
                 assert_eq!(backing("native_redraw"), 0);
-                let Some(Graphics::ReferenceCpu(surface)) = &mut self.host.graphics else {
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
                     panic!("CPU surface")
                 };
                 assert!(surface.fetch().unwrap().iter().all(|&p| p == 0x00ff_ffff));
@@ -186,7 +186,7 @@ impl Script {
                 {
                     return;
                 }
-                let Some(Graphics::ReferenceCpu(surface)) = &mut self.host.graphics else {
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
                     panic!("CPU surface")
                 };
                 let pixels = surface.fetch().unwrap();
@@ -210,7 +210,7 @@ impl Script {
             }
             3 => {
                 assert_eq!(backing("resumed"), 0);
-                let Some(Graphics::ReferenceCpu(surface)) = &mut self.host.graphics else {
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
                     panic!("CPU surface")
                 };
                 assert!(surface.fetch().unwrap().iter().all(|&p| p == 0x00ff_ffff));

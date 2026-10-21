@@ -1,5 +1,5 @@
 use crate::text::Raster;
-use crate::{Affine, Color, ColorConfig, Error, Point, Rect, TextLayout, TextSystem};
+use crate::{Affine, Color, ColorConfig, DamageRegion, Error, Point, Rect, TextLayout, TextSystem};
 use std::{collections::HashMap, sync::Arc};
 
 const TILE: usize = 16;
@@ -287,6 +287,27 @@ struct BorrowedCommand<'a> {
     source: BorrowedSource<'a>,
     color: [f32; 4],
     bounds: [usize; 4],
+}
+impl BorrowedCommand<'_> {
+    fn unchanged(self, other: Self) -> bool {
+        fn rect_bits(rect: Rect) -> [u32; 4] {
+            [rect.x, rect.y, rect.width, rect.height].map(f32::to_bits)
+        }
+        self.bounds == other.bounds
+            && rect_bits(self.rect) == rect_bits(other.rect)
+            && rect_bits(self.clip) == rect_bits(other.clip)
+            && self.map.inverse.map(f64::to_bits) == other.map.inverse.map(f64::to_bits)
+            && self.color.map(f32::to_bits) == other.color.map(f32::to_bits)
+            && match (self.source, other.source) {
+                (BorrowedSource::Rect, BorrowedSource::Rect) => true,
+                (BorrowedSource::Glyph(left), BorrowedSource::Glyph(right)) => {
+                    // Both immutable leases are alive during comparison, so
+                    // allocation identity cannot undergo reuse here.
+                    std::ptr::eq(left, right)
+                }
+                _ => false,
+            }
+    }
 }
 impl DisplayList {
     fn len(&self) -> usize {
@@ -774,6 +795,40 @@ impl Canvas {
     pub fn stats(&self) -> RenderStats {
         self.stats
     }
+    fn damage_from(&self, previous: &Self) -> DamageRegion {
+        let full = DamageRegion::checked_canvas_bounds([0, 0, self.width, self.height]);
+        if previous.width != self.width
+            || previous.height != self.height
+            || previous.color_config != self.color_config
+            || previous.clear.map(f32::to_bits) != self.clear.map(f32::to_bits)
+        {
+            return full;
+        }
+        let mut damage = DamageRegion::default();
+        let mut previous = previous.commands.iter();
+        let mut next = self.commands.iter();
+        // Zip may consume an unmatched item from its first iterator. Bound the
+        // shared prefix explicitly so removals retain their old support.
+        for _ in 0..previous.len().min(next.len()) {
+            let old = previous.next().unwrap();
+            let new = next.next().unwrap();
+            if !old.unchanged(new) {
+                damage = damage
+                    .union(DamageRegion::checked_canvas_bounds(old.bounds))
+                    .union(DamageRegion::checked_canvas_bounds(new.bounds));
+                if damage == full {
+                    return full;
+                }
+            }
+        }
+        for command in previous.chain(next) {
+            damage = damage.union(DamageRegion::checked_canvas_bounds(command.bounds));
+            if damage == full {
+                return full;
+            }
+        }
+        damage
+    }
     pub fn prepared_scene(&self) -> PreparedScene<'_> {
         PreparedScene {
             width: self.width as u32,
@@ -1063,7 +1118,19 @@ impl Canvas {
     /// existing dirty state, so later diagnostic pixels remain coherent.
     pub fn render_bgrx(&mut self, destination: &mut [u32]) -> Result<(), Error> {
         self.validate_bgrx(destination.len())?;
-        self.render_output(&Serial, Some(destination));
+        self.render_output(&Serial, Some(destination), None);
+        Ok(())
+    }
+    /// Repair tiles intersecting `region` in a preserved external image.
+    /// The caller owns buffer-age validation and must ensure the remaining
+    /// pixels already match this scene. This never changes diagnostic pixels.
+    pub fn render_bgrx_region(
+        &mut self,
+        destination: &mut [u32],
+        region: DamageRegion,
+    ) -> Result<(), Error> {
+        self.validate_bgrx(destination.len())?;
+        self.render_output(&Serial, Some(destination), Some(region));
         Ok(())
     }
     #[cfg(feature = "parallel")]
@@ -1073,7 +1140,18 @@ impl Canvas {
         pool: &RenderPool,
     ) -> Result<(), Error> {
         self.validate_bgrx(destination.len())?;
-        self.render_output(pool, Some(destination));
+        self.render_output(pool, Some(destination), None);
+        Ok(())
+    }
+    #[cfg(feature = "parallel")]
+    pub fn render_bgrx_region_with(
+        &mut self,
+        destination: &mut [u32],
+        region: DamageRegion,
+        pool: &RenderPool,
+    ) -> Result<(), Error> {
+        self.validate_bgrx(destination.len())?;
+        self.render_output(pool, Some(destination), Some(region));
         Ok(())
     }
     fn validate_bgrx(&self, length: usize) -> Result<(), Error> {
@@ -1092,27 +1170,51 @@ impl Canvas {
         Ok(())
     }
     fn render(&mut self, schedule: &impl RenderSchedule) {
-        self.render_output(schedule, None);
+        self.render_output(schedule, None, None);
     }
-    fn render_output(&mut self, schedule: &impl RenderSchedule, external: Option<&mut [u32]>) {
-        let columns = self.width.div_ceil(TILE);
-        let rows = self.height.div_ceil(TILE);
-        let tiles = columns * rows;
+    fn render_output(
+        &mut self,
+        schedule: &impl RenderSchedule,
+        external: Option<&mut [u32]>,
+        region: Option<DamageRegion>,
+    ) {
+        let [left, top, right, bottom] = region
+            .map_or([0, 0, self.width as u32, self.height as u32], |region| {
+                region.bounds().unwrap_or_default()
+            });
+        let tile_bounds = [
+            (left as usize).min(self.width) / TILE,
+            (top as usize).min(self.height) / TILE,
+            (right as usize).min(self.width).div_ceil(TILE),
+            (bottom as usize).min(self.height).div_ceil(TILE),
+        ];
+        if tile_bounds[0] == tile_bounds[2] || tile_bounds[1] == tile_bounds[3] {
+            self.stats = RenderStats {
+                render_count: self.stats.render_count,
+                commands: self.commands.len(),
+                retained_mask_bytes: self.mask_bytes,
+                command_bytes: self.commands.bytes(),
+                bin_bytes: self.bin_bytes(),
+                ..RenderStats::default()
+            };
+            return;
+        }
+        let tiles = (tile_bounds[2] - tile_bounds[0]) * (tile_bounds[3] - tile_bounds[1]);
         self.offsets.clear();
         self.offsets.resize(tiles + 1, 0);
         for command in self.commands.iter() {
-            visit_tiles(&command, columns, |tile| self.offsets[tile + 1] += 1);
+            visit_tiles(&command, tile_bounds, |tile| self.offsets[tile + 1] += 1);
         }
         for i in 1..self.offsets.len() {
             self.offsets[i] += self.offsets[i - 1];
         }
         self.indices.clear();
-        self.indices.resize(self.references, 0);
+        self.indices.resize(*self.offsets.last().unwrap(), 0);
         // Counting cursor is transient O(tile count), never O(pixel count).
         self.cursor.clear();
         self.cursor.extend_from_slice(&self.offsets[..tiles]);
         for (index, command) in self.commands.iter().enumerate() {
-            visit_tiles(&command, columns, |tile| {
+            visit_tiles(&command, tile_bounds, |tile| {
                 self.indices[self.cursor[tile]] = index as u32;
                 self.cursor[tile] += 1;
             });
@@ -1120,12 +1222,10 @@ impl Canvas {
         let mut stats = RenderStats {
             render_count: self.stats.render_count.saturating_add(1),
             commands: self.commands.len(),
-            tile_references: self.references,
+            tile_references: self.indices.len(),
             retained_mask_bytes: self.mask_bytes,
             command_bytes: self.commands.bytes(),
-            bin_bytes: self.offsets.capacity() * std::mem::size_of::<usize>()
-                + self.cursor.capacity() * std::mem::size_of::<usize>()
-                + self.indices.capacity() * 4,
+            bin_bytes: self.bin_bytes(),
             ..RenderStats::default()
         };
         let frame = Frame {
@@ -1136,6 +1236,7 @@ impl Canvas {
             offsets: &self.offsets,
             indices: &self.indices,
             tile_proofs: self.tile_proofs,
+            tile_bounds,
         };
         let rendered = if let Some(words) = external {
             schedule.render(frame, BgrxEncoder(self.color_config.encoder()), words)
@@ -1153,9 +1254,14 @@ impl Canvas {
         stats.skipped_command_tiles = rendered.skipped_command_tiles;
         stats.boundary_pixels = rendered.boundary_pixels;
         stats.sample_tests = rendered.sample_tests;
-        stats.output_bands = rows;
+        stats.output_bands = tile_bounds[3] - tile_bounds[1];
         stats.parallel = rendered.parallel;
         self.stats = stats;
+    }
+    fn bin_bytes(&self) -> usize {
+        self.offsets.capacity() * std::mem::size_of::<usize>()
+            + self.cursor.capacity() * std::mem::size_of::<usize>()
+            + self.indices.capacity() * 4
     }
 }
 
@@ -1170,6 +1276,7 @@ struct Frame<'a> {
     offsets: &'a [usize],
     indices: &'a [u32],
     tile_proofs: bool,
+    tile_bounds: [usize; 4],
 }
 
 /// Format dispatch happens once per frame, not through a pixel function pointer.
@@ -1218,6 +1325,8 @@ impl RenderSchedule for Serial {
         pixels
             .chunks_mut(TILE * frame.width * W::ELEMENTS)
             .enumerate()
+            .skip(frame.tile_bounds[1])
+            .take(frame.tile_bounds[3] - frame.tile_bounds[1])
             .map(|(index, band)| render_band(frame, writer, index, band))
             .fold(RenderStats::default(), combine_stats)
     }
@@ -1292,20 +1401,28 @@ impl RenderSchedule for RenderPool {
         use rayon::prelude::*;
         // Estimate distinguishes a proven uniform viewport fill from sampled
         // edges/text. It chooses scheduling only and cannot affect the pixels.
-        let work = frame
-            .commands
-            .iter()
-            .fold(frame.width * frame.height, |work, command| {
+        let pixel_bounds = [
+            frame.tile_bounds[0] * TILE,
+            frame.tile_bounds[1] * TILE,
+            (frame.tile_bounds[2] * TILE).min(frame.width),
+            (frame.tile_bounds[3] * TILE).min(frame.height),
+        ];
+        let work = frame.commands.iter().fold(
+            (pixel_bounds[2] - pixel_bounds[0]) * (pixel_bounds[3] - pixel_bounds[1]),
+            |work, command| {
                 let [left, top, right, bottom] = command.bounds;
+                let area = right
+                    .min(pixel_bounds[2])
+                    .saturating_sub(left.max(pixel_bounds[0]))
+                    * bottom
+                        .min(pixel_bounds[3])
+                        .saturating_sub(top.max(pixel_bounds[1]));
                 let uniform = frame.tile_proofs
                     && matches!(command.source, BorrowedSource::Rect)
                     && full_tile(&command, 0, 0, frame.width, frame.height);
-                work.saturating_add(if uniform {
-                    (right - left) * (bottom - top) / 256
-                } else {
-                    (right - left) * (bottom - top) * 16
-                })
-            });
+                work.saturating_add(if uniform { area / 256 } else { area * 16 })
+            },
+        );
         if work < self.min_work || frame.height <= TILE {
             return Serial.render(frame, writer, pixels);
         }
@@ -1313,6 +1430,8 @@ impl RenderSchedule for RenderPool {
             pixels
                 .par_chunks_mut(TILE * frame.width * W::ELEMENTS)
                 .enumerate()
+                .skip(frame.tile_bounds[1])
+                .take(frame.tile_bounds[3] - frame.tile_bounds[1])
                 .map(|(index, band)| render_band(frame, writer, index, band))
                 .reduce(RenderStats::default, combine_stats)
         });
@@ -1327,16 +1446,17 @@ fn render_band<W: PixelWriter>(
     band_index: usize,
     pixels: &mut [W::Element],
 ) -> RenderStats {
-    let columns = frame.width.div_ceil(TILE);
+    let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
     let mut scratch = [[0.0f32; 4]; TILE * TILE * 16];
     // All admitted writers emit at most eight elements. These fixed local buffers
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [W::Element::default(); 8];
     writer.write(frame.clear, &mut clear[..W::ELEMENTS]);
-    for tile in band_index * columns..(band_index + 1) * columns {
+    for column in 0..columns {
+        let tile = (band_index - frame.tile_bounds[1]) * columns + column;
         let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
-        let left = tile % columns * TILE;
+        let left = (frame.tile_bounds[0] + column) * TILE;
         let top = band_index * TILE;
         let right = (left + TILE).min(frame.width);
         let bottom = (top + TILE).min(frame.height);
@@ -1483,6 +1603,15 @@ impl CanvasScene<'_> {
         self.target.references = self.pending.references;
         self.target.dirty = true;
     }
+
+    /// Replace the scene and return conservative changed support relative to
+    /// its preceding commands. It does not certify an external buffer's age.
+    /// Dropping an uncommitted candidate still leaves the old scene untouched.
+    pub fn commit_with_damage(self) -> DamageRegion {
+        let damage = self.pending.damage_from(self.target);
+        self.commit();
+        damage
+    }
 }
 fn validate_rect(rect: Rect) -> Result<(), Error> {
     if !rect.is_valid()
@@ -1495,11 +1624,16 @@ fn validate_rect(rect: Rect) -> Result<(), Error> {
         Ok(())
     }
 }
-fn visit_tiles(command: &BorrowedCommand<'_>, columns: usize, mut visit: impl FnMut(usize)) {
+fn visit_tiles(
+    command: &BorrowedCommand<'_>,
+    tile_bounds: [usize; 4],
+    mut visit: impl FnMut(usize),
+) {
     let [x, y, r, b] = command.bounds;
-    for ty in y / TILE..=(b - 1) / TILE {
-        for tx in x / TILE..=(r - 1) / TILE {
-            visit(ty * columns + tx);
+    let columns = tile_bounds[2] - tile_bounds[0];
+    for ty in (y / TILE).max(tile_bounds[1])..b.div_ceil(TILE).min(tile_bounds[3]) {
+        for tx in (x / TILE).max(tile_bounds[0])..r.div_ceil(TILE).min(tile_bounds[2]) {
+            visit((ty - tile_bounds[1]) * columns + tx - tile_bounds[0]);
         }
     }
 }

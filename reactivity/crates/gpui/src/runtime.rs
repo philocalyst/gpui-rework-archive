@@ -8,7 +8,9 @@ use std::{
     panic::{AssertUnwindSafe, catch_unwind},
 };
 
-use gpui_canvas::{Canvas, ColorConfig, PreparedScene, TextLayout, TextShaper, TextSystem};
+use gpui_canvas::{
+    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextShaper, TextSystem,
+};
 use gpui_reactivity_core::{
     Affine, CoordinateSpace, NodeId, Point, Rect,
     layout::{AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size},
@@ -535,9 +537,39 @@ struct Presented {
     actions: Actions,
 }
 struct Prepared {
-    size: [u32; 2],
+    // Successful Canvas admission bounds each axis to 16,384. Packing the
+    // extents leaves room for damage without growing this 64-bit header.
+    size: [u16; 2],
     scale_factor: f32,
     nodes: Vec<Presented>,
+    damage: DamageRegion,
+}
+
+/// Surface-local transitions, advanced only after successful native presents.
+/// Three rectangles cover buffer ages through four without retaining frames or
+/// allocating a queue. Older or undefined buffers require a complete redraw.
+#[cfg(any(feature = "native", test))]
+#[derive(Default)]
+pub(crate) struct SurfaceDamage {
+    recent: [DamageRegion; 3],
+    known: u8,
+}
+#[cfg(any(feature = "native", test))]
+impl SurfaceDamage {
+    pub(crate) fn since(&self, age: u8) -> Option<DamageRegion> {
+        let count = age.checked_sub(1)?;
+        (age <= self.known).then(|| {
+            self.recent[..usize::from(count)]
+                .iter()
+                .copied()
+                .fold(DamageRegion::default(), DamageRegion::union)
+        })
+    }
+
+    pub(crate) fn presented(&mut self, damage: DamageRegion) {
+        self.recent = [damage, self.recent[0], self.recent[1]];
+        self.known = (self.known + 1).min(4);
+    }
 }
 struct Runtime<M> {
     model: M,
@@ -1204,6 +1236,31 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.canvas.render_bgrx(destination)?;
         Ok(token)
     }
+    /// Native-only repair from certified intervening surface transitions.
+    /// None means unknown contents and requires a complete redraw. Returns the
+    /// current P-to-C transition for history only after successful presentation.
+    #[cfg(any(feature = "native", test))]
+    pub(crate) fn render_preserved_bgrx(
+        &mut self,
+        destination: &mut [u32],
+        intervening: Option<DamageRegion>,
+    ) -> Result<(PresentationToken, DamageRegion), Error> {
+        let mut runtime = self.runtime_mut()?;
+        runtime.live()?;
+        let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
+        let damage = runtime
+            .prepared
+            .as_ref()
+            .map_or(DamageRegion::default(), |p| p.damage);
+        if let Some(intervening) = intervening.filter(|_| !runtime.automatic_presentation) {
+            runtime
+                .canvas
+                .render_bgrx_region(destination, intervening.union(damage))?;
+        } else {
+            runtime.canvas.render_bgrx(destination)?;
+        }
+        Ok((token, damage))
+    }
     pub fn scene_digest(&mut self) -> Result<u64, Error> {
         self.with_pixels(|pixels, _, _| {
             pixels.iter().fold(0xcbf29ce484222325, |hash, byte| {
@@ -1812,7 +1869,7 @@ impl<M: View + 'static> Runtime<M> {
         let newly_presented = prepared.is_some() || !self.presentation_valid;
         if let Some(prepared) = prepared {
             self.presented = prepared.nodes;
-            self.presentation_size = prepared.size;
+            self.presentation_size = prepared.size.map(u32::from);
             self.presentation_scale_factor = prepared.scale_factor;
         }
         if let Some(metadata) = &mut self.metadata
@@ -1857,6 +1914,10 @@ impl<M: View + 'static> Runtime<M> {
         } else {
             None
         };
+        let prepared_size = [
+            u16::try_from(size[0]).map_err(|_| gpui_canvas::Error::InvalidDimensions)?,
+            u16::try_from(size[1]).map_err(|_| gpui_canvas::Error::InvalidDimensions)?,
+        ];
         if self.text.is_none() && !self.texts.is_empty() {
             self.text = Some(TextSystem::bundled()?);
         }
@@ -2165,7 +2226,18 @@ impl<M: View + 'static> Runtime<M> {
                 presented.len(),
             );
         }
-        scene.commit();
+        let damage = if self.automatic_presentation {
+            // Automatic headless acknowledgement retains no external surface
+            // to repair. Do not compare commands for an unused capability.
+            scene.commit();
+            DamageRegion::default()
+        } else {
+            scene.commit_with_damage().union(
+                self.prepared
+                    .as_ref()
+                    .map_or(DamageRegion::default(), |prepared| prepared.damage),
+            )
+        };
         for (&identity, row) in &mut self.list_rows {
             row.visible = visible_rows.contains(&identity);
         }
@@ -2178,9 +2250,10 @@ impl<M: View + 'static> Runtime<M> {
             metadata.candidate = Some(sheet);
         }
         self.prepared = Some(Prepared {
-            size,
+            size: prepared_size,
             scale_factor,
             nodes: presented,
+            damage,
         });
         self.latest_token = Some(token);
         self.complete_epoch = self.source_epoch;
@@ -2335,6 +2408,151 @@ mod tests {
         assert!(!win.snapshot().unwrap().presentation_valid);
         win.presented(token).unwrap();
         assert!(win.snapshot().unwrap().presentation_valid);
+    }
+
+    #[test]
+    fn preserved_surface_repairs_coalesced_candidates_and_keeps_failed_edits_out() {
+        struct Patch {
+            x: f32,
+            color: Color,
+            broken: bool,
+        }
+        impl View for Patch {
+            fn view(&self) -> crate::El<'_> {
+                div()
+                    .w(80)
+                    .h(48)
+                    .bg(Color::WHITE)
+                    .child(div().size(8).bg(self.color).transform(if self.broken {
+                        Affine::scale(f32::MAX, f32::MAX)
+                    } else {
+                        Affine::translation(self.x, 3.0)
+                    }))
+            }
+        }
+        let mut win = Win::recording(
+            Patch {
+                x: 2.0,
+                color: Color::BLACK,
+                broken: false,
+            },
+            WindowOptions {
+                size: [80, 48],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let mut output = vec![0xdeadbeef; 80 * 48];
+        let initial = win.render_preserved_bgrx(&mut output, None).unwrap().0;
+        win.presented(initial).unwrap();
+        win.update(|model| model.x = 20.0).unwrap();
+        // A second successful C supersedes the first before either is shown.
+        win.update(|model| {
+            model.x = 40.0;
+            model.color = Color::rgb(220, 20, 30);
+        })
+        .unwrap();
+        let coherent = win.with_scene(|_, token| token).unwrap();
+        assert!(win.update(|model| model.broken = true).is_err());
+        assert_eq!(win.with_scene(|_, token| token).unwrap(), coherent);
+        let mut expected = vec![0; output.len()];
+        win.render_bgrx(&mut expected).unwrap();
+        let full_work = win.runtime().unwrap().canvas.stats().full_rect_tiles;
+        assert_eq!(
+            win.render_preserved_bgrx(&mut output, Some(DamageRegion::default()))
+                .unwrap()
+                .0,
+            coherent
+        );
+        assert_eq!(output, expected);
+        assert!(win.runtime().unwrap().canvas.stats().full_rect_tiles < full_work);
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
+        let commit = win.presented(coherent).unwrap();
+        assert!(commit.source_epoch > commit.presentation_epoch);
+        // Re-exposing a preserved image needs submission but no rerasterization.
+        let renders = win.runtime().unwrap().canvas.stats().render_count;
+        win.render_preserved_bgrx(&mut output, Some(DamageRegion::default()))
+            .unwrap();
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, renders);
+        // Undefined and older images are never trusted without age history.
+        for age in [0, 2, 255] {
+            output.fill(0xdeadbeef);
+            win.render_preserved_bgrx(&mut output, SurfaceDamage::default().since(age))
+                .unwrap();
+            assert_eq!(output, expected);
+        }
+        win.update(|model| {
+            model.broken = false;
+            model.x = 8.0;
+        })
+        .unwrap();
+        win.render_bgrx(&mut expected).unwrap();
+        win.render_preserved_bgrx(&mut output, Some(DamageRegion::default()))
+            .unwrap();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn surface_damage_repairs_aged_buffers_and_falls_back_when_history_expires() {
+        struct Patch(f32);
+        impl View for Patch {
+            fn view(&self) -> crate::El<'_> {
+                div().size(80).bg(Color::WHITE).child(
+                    div()
+                        .size(6)
+                        .bg(Color::BLACK)
+                        .transform(Affine::translation(self.0, 2.0)),
+                )
+            }
+        }
+        assert_eq!(std::mem::size_of::<SurfaceDamage>(), 26);
+        let mut win = Win::recording(
+            Patch(0.0),
+            WindowOptions {
+                size: [80, 80],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        // Five independent swapchain images exercise both retained history and
+        // expired ages. Their pixels exist only in this reference oracle.
+        let mut buffers = (0..5)
+            .map(|_| (vec![0xdeadbeef; 80 * 80], None))
+            .collect::<Vec<_>>();
+        let mut history = SurfaceDamage::default();
+        let mut expected = vec![0; 80 * 80];
+        let mut repaired_old = false;
+        let mut expired = false;
+        for frame in 0u8..64 {
+            win.update(|model| model.0 = f32::from(frame % 60)).unwrap();
+            if frame.is_multiple_of(7) {
+                // A never-presented C must contribute its old support too.
+                win.update(|model| model.0 += 7.0).unwrap();
+            }
+            if frame == 23 {
+                win.presentation_lost().unwrap();
+            }
+            win.render_bgrx(&mut expected).unwrap();
+            let index = (usize::from(frame) * 7 + usize::from(frame / 9)) % 5;
+            let (buffer, last_frame) = &mut buffers[index];
+            let age = last_frame.map_or(0, |last| frame - last);
+            let intervening = history.since(age);
+            repaired_old |= age > 1 && intervening.is_some();
+            expired |= age > 4 && intervening.is_none();
+            let (token, damage) = win.render_preserved_bgrx(buffer, intervening).unwrap();
+            assert_eq!(*buffer, expected, "frame {frame}, buffer age {age}");
+            win.presented(token).unwrap();
+            history.presented(damage);
+            *last_frame = Some(frame);
+        }
+        assert!(repaired_old && expired);
+        // A new surface/size starts a new history; past deltas grant no trust.
+        history = SurfaceDamage::default();
+        assert!(history.since(0).is_none());
+        assert!(history.since(2).is_none());
+        assert!(history.since(255).is_none());
+        assert!(history.since(1).is_none());
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
     }
 
     #[test]
@@ -2596,6 +2814,7 @@ mod semantic_storage_ledger {
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
         assert_eq!(size_of::<Node>(), 128);
+        assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<Presented>(), 80);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<ListRow>(), 32);
