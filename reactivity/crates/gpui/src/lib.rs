@@ -20,7 +20,7 @@ pub use gpui_canvas::{ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMa
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
-pub use runtime::{Commit, Counters, Error, SetError, Snapshot, SnapshotNode, Win, WindowOptions};
+pub use runtime::{Commit, Counters, Error, PresentationToken, SetError, Snapshot, SnapshotNode, Win, WindowOptions};
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
 pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
 
