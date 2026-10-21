@@ -98,3 +98,25 @@ fn raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces
         .unwrap();
     assert_ne!(keys(&canvas), initial);
 }
+
+#[test]
+fn recording_canvas_allocates_sole_cpu_image_only_on_request() {
+    let mut canvas = Canvas::recording(53, 29, Default::default()).unwrap();
+    assert_eq!(canvas.output_bytes(), 0);
+    canvas.clear(Color::WHITE);
+    assert_eq!(canvas.prepared_scene().draws().len(), 0);
+    assert_eq!(canvas.output_bytes(), 0);
+    let first = canvas.try_pixels().unwrap();
+    assert_eq!(first.len(), 53 * 29 * 4);
+    assert!(first.chunks_exact(4).all(|pixel| pixel == [255; 4]));
+    let pointer = first.as_ptr();
+    {
+        let mut candidate = canvas.stage();
+        candidate.clear(Color::BLACK);
+        candidate.commit();
+    }
+    assert_eq!(canvas.try_pixels().unwrap().as_ptr(), pointer);
+    assert_eq!(canvas.stats().render_count, 2);
+    assert_eq!(canvas.try_pixels().unwrap().as_ptr(), pointer);
+    assert_eq!(canvas.stats().render_count, 2);
+}

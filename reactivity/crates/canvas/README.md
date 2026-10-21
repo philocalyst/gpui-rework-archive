@@ -264,3 +264,10 @@ Narrowing the inverse to f32 requires backend-specific precision validation;
 the CPU's f64 coverage certificates do not certify a different shader domain.
 The retained command remains 136 bytes on x86_64; this export adds no forward
 matrix or resource clone per glyph. CPU tile bins are disposable derived data.
+
+`Canvas::recording(width, height, config)` retains no CPU image. Native rendering
+can consume the prepared scene directly. The first `try_pixels()` allocates the
+sole output image and reports allocation failure; later scene commits reuse it.
+`output_bytes()` exposes retained image capacity. `new` and `with_color_config`
+keep their eager allocation behavior. The infallible `pixels()` convenience
+panics on allocation failure; fallible hosts should use `try_pixels()`.
