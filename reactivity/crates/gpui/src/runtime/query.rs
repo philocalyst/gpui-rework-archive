@@ -112,6 +112,7 @@ pub struct Query<'a, M: View + 'static> {
     runtime: Option<&'a Runtime<M>>,
     role: Option<Role>,
     text: Option<(&'a str, bool)>,
+    within: Option<Target>,
 }
 impl<'a, M: View + 'static> Query<'a, M> {
     pub fn text<'b>(self, text: &'b str) -> Query<'b, M>
@@ -122,6 +123,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
             runtime: self.runtime,
             role: self.role,
             text: Some((text, false)),
+            within: self.within,
         }
     }
     pub fn containing<'b>(self, text: &'b str) -> Query<'b, M>
@@ -132,7 +134,33 @@ impl<'a, M: View + 'static> Query<'a, M> {
             runtime: self.runtime,
             role: self.role,
             text: Some((text, true)),
+            within: self.within,
         }
+    }
+    /// Restrict this query to one presented subtree, including its root.
+    pub fn within(mut self, target: Target) -> Self {
+        self.within = Some(target);
+        self
+    }
+    fn scope(&self, runtime: &'a Runtime<M>) -> Result<&'a [Presented], Error> {
+        let Some(target) = self.within else {
+            return Ok(&runtime.presented);
+        };
+        let identity = runtime.sites.resolve(target).ok_or(Error::StaleTarget)?;
+        let root = runtime
+            .presented
+            .iter()
+            .position(|node| node.identity == identity)
+            .ok_or(Error::StaleTarget)?;
+        // Preorder makes a subtree contiguous. Its first following nonmember
+        // attaches before root (or has no parent), so no ancestor walks or
+        // retained subtree-end column are needed for scoped semantic queries.
+        let following = &runtime.presented[root + 1..];
+        let len = following
+            .iter()
+            .position(|node| node.parent.is_none_or(|parent| parent < root))
+            .unwrap_or(following.len());
+        Ok(&runtime.presented[root..root + 1 + len])
     }
     fn matches(&self, part: Part<'_>) -> bool {
         self.role.is_none_or(|role| part.role() == role)
@@ -152,7 +180,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let runtime = self.runtime.ok_or(Error::Closed)?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for node in &runtime.presented {
+        for node in self.scope(runtime)? {
             count += usize::from(self.matches(context.part(node)));
         }
         Ok(count)
@@ -166,7 +194,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let mut identity = 0;
         let mut count = 0;
         let context = Context::new(runtime);
-        for node in &runtime.presented {
+        for node in self.scope(runtime)? {
             if self.matches(context.part(node)) {
                 count += 1;
                 identity = node.identity;
@@ -194,6 +222,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime: self.inner.as_deref(),
             role: None,
             text: None,
+            within: None,
         }
     }
     pub fn role(&self, role: Role) -> Query<'_, M> {
@@ -201,6 +230,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime: self.inner.as_deref(),
             role: Some(role),
             text: None,
+            within: None,
         }
     }
     pub fn contains_text(&self, text: &str) -> Result<bool, Error> {

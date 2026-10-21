@@ -84,6 +84,7 @@ fn query_reads_the_acknowledged_sheet_while_source_edits_wait_for_repair() {
     let mut win = Win::demo(page());
     let input = win.role(Role::TextInput).one().unwrap();
     assert!(win.type_text(input, "अ").is_err());
+    assert_eq!(win.query().within(input).count().unwrap(), 1);
     assert_eq!(win.role(Role::Text).text("ready").count().unwrap(), 1);
     assert_eq!(
         win.role(Role::TextInput).one(),
@@ -94,4 +95,55 @@ fn query_reads_the_acknowledged_sheet_while_source_edits_wait_for_repair() {
     assert_eq!(win.role(Role::Text).text("ready").count().unwrap(), 1);
     win.presentation_lost().unwrap();
     assert_eq!(win.role(Role::Text).count(), Err(Error::PresentationStale));
+}
+
+#[test]
+fn scoped_preorder_queries_match_an_independent_parent_walk_for_every_subtree() {
+    struct Nested;
+    impl View for Nested {
+        fn view(&self) -> El<'_> {
+            column((
+                button("outer").child(row((
+                    button("inner").child(text("label")),
+                    button("sibling"),
+                ))),
+                row((text("branch"), button("next"))),
+                button("last"),
+            ))
+        }
+    }
+    let win = Win::demo(Nested);
+    let mut parts = Vec::new();
+    win.visit(|part| parts.push((part.target(), part.parent(), part.role())))
+        .unwrap();
+    for &(root, _, _) in &parts {
+        let expected = |buttons: bool| {
+            parts
+                .iter()
+                .filter(|&&(target, _, role)| {
+                    if buttons && role != Role::Button {
+                        return false;
+                    }
+                    let mut cursor = Some(target);
+                    while let Some(target) = cursor {
+                        if target == root {
+                            return true;
+                        }
+                        cursor = parts.iter().find(|part| part.0 == target).unwrap().1;
+                    }
+                    false
+                })
+                .count()
+        };
+        assert_eq!(win.query().within(root).count().unwrap(), expected(false));
+        assert_eq!(
+            win.role(Role::Button).within(root).count().unwrap(),
+            expected(true)
+        );
+    }
+    let last = win.button("last");
+    assert_eq!(win.query().within(last).one().unwrap(), last);
+    assert_eq!(win.query().within(last).count().unwrap(), 1);
+    let foreign = Win::demo(Nested).button("last");
+    assert_eq!(win.query().within(foreign).count(), Err(Error::StaleTarget));
 }

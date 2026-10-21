@@ -18,6 +18,8 @@ pub(crate) enum NodeKind {
     Text,
     Input,
     Button,
+    List,
+    ListItem,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
@@ -26,6 +28,8 @@ pub enum Role {
     Text,
     TextInput,
     Button,
+    List,
+    ListItem,
 }
 
 impl NodeKind {
@@ -35,6 +39,8 @@ impl NodeKind {
             Self::Text => Role::Text,
             Self::Input => Role::TextInput,
             Self::Button => Role::Button,
+            Self::List => Role::List,
+            Self::ListItem => Role::ListItem,
         }
     }
 }
@@ -196,6 +202,7 @@ pub struct El<'a> {
     style: Style,
     on_click: Option<Handler>,
     components: ComponentBoundaries,
+    list: Option<Box<crate::list::ListSpec<'a>>>,
 }
 
 // The declaration payload order is explicitly preorder: local text/route first,
@@ -224,7 +231,23 @@ impl<'a> El<'a> {
             style: Style::default(),
             on_click: None,
             components: ComponentBoundaries::default(),
+            list: None,
         }
+    }
+
+    pub(crate) fn uniform_list(
+        id: crate::ListId,
+        source: &'a dyn crate::ItemSource,
+        row_height: f64,
+    ) -> Self {
+        let mut element = Self::new(NodeKind::List, None);
+        element.list = Some(Box::new(crate::list::ListSpec {
+            id,
+            source,
+            row_height,
+            map: None,
+        }));
+        element
     }
 
     pub fn child<C, S>(mut self, children: C) -> Self
@@ -307,7 +330,7 @@ impl<'a> El<'a> {
         f(self)
     }
 
-    pub(crate) fn map_handlers(&mut self, map: &mut impl FnMut(Handler) -> Handler) {
+    pub(crate) fn map_handlers(&mut self, map: impl Fn(Handler) -> Handler + Copy + 'static) {
         let mut pending = vec![self];
         while let Some(element) = pending.pop() {
             if let Some(handler) = element.on_click.take() {
@@ -318,6 +341,15 @@ impl<'a> El<'a> {
                 let check = item.check.take().expect("boundary check is installed");
                 item.check = Some(map(check));
                 boundary = item.next.0.as_deref_mut();
+            }
+            if let Some(spec) = element.list.as_mut() {
+                let previous = spec.map.take();
+                spec.map = Some(Box::new(move |row: &mut El<'_>| {
+                    if let Some(previous) = &previous {
+                        previous(row);
+                    }
+                    row.map_handlers(map);
+                }));
             }
             pending.extend(element.children.iter_mut());
         }
@@ -337,12 +369,86 @@ impl<'a> El<'a> {
 
     /// Consumes each header once, transferring routes/owned operands and copying
     /// borrowed operands only when the runtime promotes a changed destination.
+    #[cfg(test)]
     pub(crate) fn flatten(self) -> Vec<DraftNode<'a>> {
+        self.flatten_lists(usize::MAX, |_, _, _, _| {
+            Err(crate::ListError::MissingViewport)
+        })
+        .unwrap()
+        .0
+    }
+
+    pub(crate) fn flatten_lists(
+        self,
+        limit: usize,
+        mut plan: impl FnMut(
+            crate::ListId,
+            Style,
+            &dyn crate::ItemSource,
+            f64,
+        ) -> Result<crate::list::ListPlan, crate::ListError>,
+    ) -> Result<(Vec<DraftNode<'a>>, Vec<crate::list::ListDraft>), crate::ListError> {
+        use crate::list::{ListDraft, RowDraft};
         let mut output = Vec::new();
-        let mut pending = vec![(None, self)];
-        while let Some((parent, mut element)) = pending.pop() {
-            let index = u32::try_from(output.len()).expect("element count exceeds u32::MAX");
-            let children = std::mem::take(&mut element.children);
+        let mut lists: Vec<ListDraft> = Vec::new();
+        let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, f32, f32)>)];
+        while let Some((parent, mut element, slot)) = pending.pop() {
+            if output.len() >= limit {
+                return Err(crate::ListError::ResourceLimit);
+            }
+            let index = output.len() as u32;
+            if let Some((list, key, y, height)) = slot {
+                lists[list].rows.push(RowDraft {
+                    index: index as usize,
+                    key,
+                    y,
+                    height,
+                });
+            }
+            if let Some(spec) = element.list.take() {
+                let mut list_plan = plan(spec.id, element.style, spec.source, spec.row_height)?;
+                let list = lists.len();
+                let start = list_plan.viewport.visible_range.start;
+                let row_height = list_plan.viewport.row_height;
+                let intra = list_plan.viewport.offset - start as f64 * row_height;
+                let mut rows = Vec::with_capacity(list_plan.keys.len());
+                for (offset, key) in list_plan.keys.iter().copied().enumerate() {
+                    let item_index = start + offset;
+                    let y = (offset as f64 * row_height - intra) as f32;
+                    let mut row = spec.source.row(item_index);
+                    if let Some(map) = &spec.map {
+                        map(&mut row);
+                    }
+                    let mut wrapper = Self::new(NodeKind::ListItem, None);
+                    wrapper.children.push(row);
+                    wrapper.style.height = Some(row_height as f32);
+                    rows.push((
+                        Some(index),
+                        wrapper,
+                        Some((list, key, y, row_height as f32)),
+                    ));
+                }
+                if spec.source.len() != list_plan.viewport.len {
+                    return Err(crate::ListError::ChangedSource);
+                }
+                // Keys have served their admission purpose. Retain only row metadata.
+                list_plan.keys.clear();
+                lists.push(ListDraft {
+                    index: index as usize,
+                    id: spec.id,
+                    plan: list_plan,
+                    rows: Vec::with_capacity(rows.len()),
+                });
+                pending.extend(rows.into_iter().rev());
+            } else {
+                let children = std::mem::take(&mut element.children);
+                pending.extend(
+                    children
+                        .into_iter()
+                        .rev()
+                        .map(|child| (Some(index), child, None)),
+                );
+            }
             output.push(DraftNode {
                 parent,
                 kind: element.kind,
@@ -351,9 +457,8 @@ impl<'a> El<'a> {
                 on_click: element.on_click.take(),
                 components: std::mem::take(&mut element.components),
             });
-            pending.extend(children.into_iter().rev().map(|child| (Some(index), child)));
         }
-        output
+        Ok((output, lists))
     }
 }
 

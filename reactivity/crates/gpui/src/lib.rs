@@ -13,6 +13,7 @@ mod application;
 mod component;
 mod element;
 mod identity;
+mod list;
 #[cfg(feature = "native")]
 mod native;
 pub mod property;
@@ -30,6 +31,7 @@ pub use gpui_canvas::{ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMa
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
+pub use list::{ItemKey, ItemSource, ListError, ListId, ListViewport, uniform_list};
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
@@ -60,8 +62,9 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff, Inbox, Key, Point,
-        Rect, Remote, Signal, Source, Sources, Target, View, Win, button, column, div, label,
-        oklch, rgb, row, text, text_input,
+        Action, ActionKind, Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff,
+        Inbox, ItemKey, ItemSource, Key, ListId, Point, Rect, Remote, Signal, Source, Sources,
+        Target, View, Win, button, column, div, label, oklch, rgb, row, text, text_input,
+        uniform_list,
     };
 }

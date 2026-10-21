@@ -20,7 +20,7 @@ use gpui_reactivity_core::{
 use serde::Serialize;
 
 use crate::{
-    Target, View,
+    ListError, ListId, Target, View,
     element::{Handler, NodeKind},
     identity::Sites,
     property::{Contribution, Overrides, Property, PropertyError},
@@ -35,6 +35,8 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 
 mod delivery;
 mod input;
+mod list;
+use list::{ListRow, ListState, ScrollRequest};
 mod query;
 mod semantics;
 pub use input::Key;
@@ -82,6 +84,7 @@ pub enum Error {
     Canvas(gpui_canvas::Error),
     Property(PropertyError),
     Serialization(String),
+    List(ListError),
 }
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -112,6 +115,12 @@ impl From<TextEditError> for Error {
 impl From<PropertyError> for Error {
     fn from(error: PropertyError) -> Self {
         Self::Property(error)
+    }
+}
+
+impl From<ListError> for Error {
+    fn from(error: ListError) -> Self {
+        Self::List(error)
     }
 }
 
@@ -323,6 +332,8 @@ struct Runtime<M> {
     focused: Option<Target>,
     sites: Sites,
     overrides: Overrides,
+    lists: BTreeMap<ListId, ListState>,
+    list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
     layout_nodes: Vec<NodeId>,
     layout_dirty: BTreeSet<u64>,
@@ -471,6 +482,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             focused: None,
             sites,
             overrides: Overrides::default(),
+            lists: BTreeMap::new(),
+            list_rows: BTreeMap::new(),
             layout,
             layout_nodes: Vec::new(),
             layout_dirty: BTreeSet::new(),
@@ -653,7 +666,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             let identity = node.identity;
             runtime.layout_dirty.insert(identity);
         }
-        if !runtime.logical_valid {
+        if !runtime.logical_valid || !runtime.lists.is_empty() {
             runtime.describe(false)?;
         }
         runtime.present()
@@ -685,6 +698,13 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 map.apply(Point {
                     x: node.rect.width * 0.5,
                     y: node.rect.height * 0.5,
+                })
+            })
+            .filter(|point| node.bounds.contains(*point))
+            .or_else(|| {
+                (!node.bounds.is_empty()).then_some(Point {
+                    x: node.bounds.x + node.bounds.width * 0.5,
+                    y: node.bounds.y + node.bounds.height * 0.5,
                 })
             })
             .ok_or(Error::NotHittable)?;
@@ -852,6 +872,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime.nodes[index].style = after;
             runtime.dirty = true;
         }
+        if !runtime.lists.is_empty() {
+            runtime.describe(false)?;
+        }
         runtime.present()
     }
     pub fn try_button(&self, label: &str) -> Result<Target, Error> {
@@ -942,11 +965,24 @@ impl<M: View + 'static> Runtime<M> {
     fn resolve(&self, target: Target) -> Result<u64, Error> {
         self.sites
             .resolve(target)
-            .filter(|identity| self.logical_valid && self.by_identity.contains_key(identity))
+            .filter(|identity| {
+                self.logical_valid
+                    && self.by_identity.get(identity).is_some_and(|&index| {
+                        self.lists.is_empty()
+                            || !self.in_list(index)
+                            || self
+                                .prepared
+                                .as_ref()
+                                .map_or(self.presented.as_slice(), |p| &p.nodes)
+                                .iter()
+                                .any(|node| node.identity == *identity)
+                    })
+            })
             .ok_or(Error::StaleTarget)
     }
     fn current_presentation(&self) -> Result<(), Error> {
         if self.logical_valid
+            && !self.dirty
             && self.presentation_valid
             && self.prepared.is_none()
             && self.source_epoch == self.presentation_epoch
@@ -1090,11 +1126,19 @@ impl<M: View + 'static> Runtime<M> {
         })
     }
     fn describe(&mut self, mount: bool) -> Result<(), Error> {
-        match catch_unwind(AssertUnwindSafe(|| self.describe_inner(mount))) {
+        self.describe_with(mount, None)
+    }
+    fn describe_with(&mut self, mount: bool, scroll: Option<ScrollRequest>) -> Result<(), Error> {
+        let was_valid = self.logical_valid;
+        match catch_unwind(AssertUnwindSafe(|| self.describe_inner(mount, scroll))) {
             Ok(Ok(())) => Ok(()),
             Ok(Err(error)) => {
-                self.logical_valid = false;
-                self.focused = None;
+                // A rejected presentation-only scroll has not edited the model
+                // or reached reconciliation; its acknowledged cohort stays live.
+                self.logical_valid = scroll.is_some() && was_valid;
+                if !self.logical_valid {
+                    self.focused = None;
+                }
                 Err(error)
             }
             Err(_) => {
@@ -1103,14 +1147,42 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
     }
-    fn describe_inner(&mut self, mount: bool) -> Result<(), Error> {
+    fn describe_inner(&mut self, mount: bool, scroll: Option<ScrollRequest>) -> Result<(), Error> {
         let reuse_identities = self.logical_valid;
         self.sources.validate(&mut self.model)?;
         self.counters.descriptions += 1;
         if !mount {
             self.counters.owner_reruns += 1;
         }
-        let drafts = self.model.view().flatten();
+        let mut seen = BTreeSet::new();
+        let (drafts, list_drafts) =
+            self.model
+                .view()
+                .flatten_lists(MAX_NODES, |id, style, source, row_height| {
+                    if !seen.insert(id) {
+                        return Err(ListError::DuplicateList(id));
+                    }
+                    let previous = self.lists.get(&id);
+                    let style = previous
+                        .map_or(style, |state| self.overrides.resolve(state.identity, style));
+                    list::plan(
+                        previous,
+                        style,
+                        source,
+                        row_height,
+                        scroll
+                            .filter(|request| request.id == id)
+                            .map(|request| request.position),
+                    )
+                })?;
+        let list_indices: BTreeMap<_, _> = list_drafts
+            .iter()
+            .map(|list| (list.index, list.id))
+            .collect();
+        let row_indices: BTreeMap<_, _> = list_drafts
+            .iter()
+            .flat_map(|list| list.rows.iter().map(move |row| (row.index, (list.id, row))))
+            .collect();
         if drafts.len() > MAX_NODES {
             return Err(Error::ResourceLimit);
         }
@@ -1174,6 +1246,13 @@ impl<M: View + 'static> Runtime<M> {
             .map(Some)
             .collect::<Vec<_>>();
         let mut sites = BTreeMap::new();
+        let mut keyed_rows = BTreeMap::new();
+        let mut keyed_lists = BTreeMap::new();
+        let old_list_ids: BTreeMap<_, _> = self
+            .lists
+            .iter()
+            .map(|(&id, state)| (state.identity, id))
+            .collect();
         let mut old_counts: BTreeMap<Option<u64>, usize> = BTreeMap::new();
         for (index, node) in old.iter().enumerate() {
             let node = node.as_ref().unwrap();
@@ -1182,6 +1261,12 @@ impl<M: View + 'static> Runtime<M> {
                 .map(|parent| old[parent].as_ref().unwrap().identity);
             *old_counts.entry(parent).or_default() += 1;
             sites.insert((parent, node.ordinal, node.kind), index);
+            if let Some(row) = self.list_rows.get(&node.identity).filter(|row| row.visible) {
+                keyed_rows.insert((parent, row.key, node.kind), index);
+            }
+            if let Some(&id) = old_list_ids.get(&node.identity) {
+                keyed_lists.insert((parent, id, node.kind), index);
+            }
         }
         let old_ids = old
             .iter()
@@ -1201,9 +1286,20 @@ impl<M: View + 'static> Runtime<M> {
             let run_survives = reuse_identities
                 && old_counts.get(&parent_identity).copied().unwrap_or(0)
                     == new_counts[ordinal_slot];
-            let previous = run_survives
-                .then(|| sites.get(&(parent_identity, ordinal, draft.kind)))
-                .flatten()
+            let previous_index = if let Some((_, row)) = row_indices.get(&index) {
+                reuse_identities
+                    .then(|| keyed_rows.get(&(parent_identity, row.key, draft.kind)))
+                    .flatten()
+            } else if let Some(&id) = list_indices.get(&index) {
+                reuse_identities
+                    .then(|| keyed_lists.get(&(parent_identity, id, draft.kind)))
+                    .flatten()
+            } else {
+                run_survives
+                    .then(|| sites.get(&(parent_identity, ordinal, draft.kind)))
+                    .flatten()
+            };
+            let previous = previous_index
                 .and_then(|&old_index| old[old_index].take())
                 .filter(|node| node.component_scope == component_scopes[index]);
             let mut node_changed = previous.is_none();
@@ -1272,6 +1368,47 @@ impl<M: View + 'static> Runtime<M> {
                 .any(|(old, new)| *old != new.identity);
         self.topology_changed |= topology;
         self.dirty |= topology;
+        let mut lists = BTreeMap::new();
+        let mut list_rows = BTreeMap::new();
+        for draft in list_drafts {
+            let identity = nodes[draft.index].identity;
+            let changed = self
+                .lists
+                .get(&draft.id)
+                .is_none_or(|old| old.viewport != draft.plan.viewport);
+            self.dirty |= changed;
+            for row in draft.rows {
+                let identity = nodes[row.index].identity;
+                if self
+                    .list_rows
+                    .get(&identity)
+                    .is_none_or(|old| old.y != row.y || old.height != row.height)
+                {
+                    self.layout_dirty.insert(identity);
+                    self.dirty = true;
+                }
+                list_rows.insert(
+                    identity,
+                    ListRow {
+                        list: draft.id,
+                        key: row.key,
+                        y: row.y,
+                        height: row.height,
+                        visible: true,
+                    },
+                );
+            }
+            lists.insert(
+                draft.id,
+                ListState {
+                    identity,
+                    viewport: draft.plan.viewport,
+                    anchor: draft.plan.anchor,
+                },
+            );
+        }
+        self.lists = lists;
+        self.list_rows = list_rows;
         self.nodes = nodes;
         self.fanout = fanout;
         self.by_identity = self
@@ -1405,7 +1542,11 @@ impl<M: View + 'static> Runtime<M> {
                 let id = self.layout.insert(
                     parent,
                     gpui_reactivity_core::NodeKind::Element,
-                    layout_style(node.style),
+                    list::row_style(
+                        node,
+                        node.parent.map(|index| &self.nodes[index]),
+                        self.list_rows.get(&node.identity),
+                    ),
                 )?;
                 if node.text.is_some() {
                     self.layout.set_measure(id, Some(measure_marker))?;
@@ -1413,11 +1554,29 @@ impl<M: View + 'static> Runtime<M> {
                 self.layout_nodes.push(id);
             }
         } else {
+            // Auto-width lists depend on their immediate parent's flow. A
+            // retained parent change must refresh the child's grow/basis too,
+            // including inspector contributions applied before description.
+            for list in self.lists.values() {
+                let index = self.by_identity[&list.identity];
+                if self.nodes[index]
+                    .parent
+                    .is_some_and(|parent| self.layout_dirty.contains(&self.nodes[parent].identity))
+                {
+                    self.layout_dirty.insert(list.identity);
+                }
+            }
             for identity in &self.layout_dirty {
                 let index = self.by_identity[identity];
                 let id = self.layout_nodes[index];
-                self.layout
-                    .set_style(id, layout_style(self.nodes[index].style))?;
+                self.layout.set_style(
+                    id,
+                    list::row_style(
+                        &self.nodes[index],
+                        self.nodes[index].parent.map(|parent| &self.nodes[parent]),
+                        self.list_rows.get(identity),
+                    ),
+                )?;
                 self.layout.mark_dirty(id)?;
             }
         }
@@ -1477,11 +1636,22 @@ impl<M: View + 'static> Runtime<M> {
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
+        let list_mode = !self.lists.is_empty();
+        let list_capacity = if list_mode { self.nodes.len() } else { 0 };
+        let mut clips: Vec<Rect> = Vec::with_capacity(list_capacity);
+        let mut hit_clips: Vec<Rect> = Vec::with_capacity(list_capacity);
+        let mut inside_list: Vec<bool> = Vec::with_capacity(list_capacity);
+        let mut published: Vec<Option<usize>> = Vec::with_capacity(list_capacity);
+        let mut visible_rows = BTreeSet::new();
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
             let layout = self.layout.layout(self.layout_nodes[index])?;
+            let has_children = self
+                .nodes
+                .get(index + 1)
+                .is_some_and(|child| child.parent == Some(index));
             let node = &mut self.nodes[index];
             let parent = node.parent.map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
@@ -1497,15 +1667,39 @@ impl<M: View + 'static> Runtime<M> {
                 (space.is_invertible() && candidate.is_finite() && candidate.is_invertible())
                     .then_some(candidate);
             let rect = Rect::new(0.0, 0.0, layout.size.width, layout.size.height);
-            let bounds = transform
+            let (mut clip, mut hit_clip, in_list) = if list_mode {
+                (
+                    node.parent.map_or(viewport, |parent| clips[parent]),
+                    node.parent.map_or(viewport, |parent| hit_clips[parent]),
+                    node.kind == NodeKind::ListItem
+                        || node.parent.is_some_and(|parent| inside_list[parent]),
+                )
+            } else {
+                (viewport, viewport, false)
+            };
+            if list_mode {
+                inside_list.push(in_list);
+            }
+            if matches!(node.kind, NodeKind::List | NodeKind::ListItem) {
+                (clip, hit_clip) = list::viewport_clip(clip, hit_clip, transform, rect, size)?;
+            }
+            if list_mode {
+                clips.push(clip);
+                hit_clips.push(hit_clip);
+            }
+            let raw_bounds = transform
                 .and_then(|map| CoordinateSpace::new(map).bounds(rect))
-                .unwrap_or_default()
-                .intersection(viewport);
+                .unwrap_or_default();
+            let bounds = if in_list || node.kind == NodeKind::List {
+                list::clipped_bounds(raw_bounds, hit_clip)
+            } else {
+                raw_bounds.intersection(viewport)
+            };
             if node.style.bg.alpha() > 0.0 {
                 scene.fill_rect(
                     rect,
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
-                    viewport,
+                    clip,
                     node.style.bg,
                 )?;
             } else if node.handler.is_some() || node.kind == NodeKind::Input {
@@ -1514,7 +1708,7 @@ impl<M: View + 'static> Runtime<M> {
                 scene.fill_rect(
                     rect,
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
-                    viewport,
+                    clip,
                     Color::TRANSPARENT,
                 )?;
             }
@@ -1533,14 +1727,28 @@ impl<M: View + 'static> Runtime<M> {
                         y: layout.padding.top,
                     },
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
-                    viewport,
+                    clip,
                     fg,
                     scale_factor,
                 )?;
             }
+            if in_list && bounds.is_empty() && (!has_children || hit_clip.is_empty()) {
+                published.push(node.parent.and_then(|parent| published[parent]));
+                continue;
+            }
+            if node.kind == NodeKind::ListItem {
+                visible_rows.insert(node.identity);
+            }
+            if list_mode {
+                published.push(Some(presented.len()));
+            }
             presented.push(Presented {
                 identity: node.identity,
-                parent: node.parent,
+                parent: if list_mode {
+                    node.parent.and_then(|parent| published[parent])
+                } else {
+                    node.parent
+                },
                 kind: node.kind,
                 text: node.text.clone(),
                 rect,
@@ -1557,6 +1765,9 @@ impl<M: View + 'static> Runtime<M> {
         // recording retains no CPU image, while same-size headless updates reuse
         // the selected output allocation. No model borrow is published.
         scene.commit();
+        for (&identity, row) in &mut self.list_rows {
+            row.visible = visible_rows.contains(&identity);
+        }
         if let Some(canvas) = replacement {
             self.canvas = canvas;
         }
@@ -1592,11 +1803,7 @@ impl<M: View + 'static> Runtime<M> {
             return None;
         }
         for (index, node) in self.presented.iter().enumerate().rev() {
-            if node.hittable
-                && node
-                    .transform
-                    .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
-            {
+            if node.hittable && self.sheet_hit(index, point) {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
