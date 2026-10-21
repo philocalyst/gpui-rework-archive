@@ -66,6 +66,7 @@ impl ItemSource for Library {
         let id = self.catalogue.id(index);
         row((
             button("Play")
+                .name(format!("Play {}", self.catalogue.title(id)))
                 .w(64)
                 .h(32)
                 .bg(rgb(0xdbeafe))
@@ -98,6 +99,7 @@ impl View for Library {
             ))
             .gap(12),
             uniform_list(self.list_id, self, ROW_HEIGHT)
+                .name("Library recordings")
                 .h(self.viewport_height)
                 .w(700),
             text(match self.selected {

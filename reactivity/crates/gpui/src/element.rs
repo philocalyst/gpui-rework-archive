@@ -202,7 +202,7 @@ pub struct El<'a> {
     style: Style,
     on_click: Option<Handler>,
     components: ComponentBoundaries,
-    list: Option<Box<crate::list::ListSpec<'a>>>,
+    extra: Option<Box<crate::semantic::ElementExtra<'a>>>,
 }
 
 // The declaration payload order is explicitly preorder: local text/route first,
@@ -211,6 +211,7 @@ pub struct El<'a> {
 impl Drop for El<'_> {
     fn drop(&mut self) {
         drop(self.text.take());
+        drop(self.extra.take());
         drop(self.on_click.take());
         let mut pending = std::mem::take(&mut self.children);
         pending.reverse();
@@ -231,7 +232,7 @@ impl<'a> El<'a> {
             style: Style::default(),
             on_click: None,
             components: ComponentBoundaries::default(),
-            list: None,
+            extra: None,
         }
     }
 
@@ -241,13 +242,32 @@ impl<'a> El<'a> {
         row_height: f64,
     ) -> Self {
         let mut element = Self::new(NodeKind::List, None);
-        element.list = Some(Box::new(crate::list::ListSpec {
-            id,
-            source,
-            row_height,
-            map: None,
-        }));
+        element.extra = Some(Box::new(crate::semantic::ElementExtra::List(
+            crate::list::ListSpec {
+                id,
+                source,
+                row_height,
+                map: None,
+            },
+        )));
         element
+    }
+
+    /// An explicit accessible name, separate from an input's edited value.
+    pub fn name(mut self, name: impl IntoText<'a>) -> Self {
+        self.annotations_mut().name = Some(name.into_text());
+        self
+    }
+    pub fn description(mut self, description: impl IntoText<'a>) -> Self {
+        self.annotations_mut().description = Some(description.into_text());
+        self
+    }
+    fn annotations_mut(&mut self) -> &mut crate::semantic::Annotations<'a> {
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+            })
+            .annotations_mut()
     }
 
     pub fn child<C, S>(mut self, children: C) -> Self
@@ -342,7 +362,7 @@ impl<'a> El<'a> {
                 item.check = Some(map(check));
                 boundary = item.next.0.as_deref_mut();
             }
-            if let Some(spec) = element.list.as_mut() {
+            if let Some(spec) = element.extra.as_mut().and_then(|extra| extra.list_mut()) {
                 let previous = spec.map.take();
                 spec.map = Some(Box::new(move |row: &mut El<'_>| {
                     if let Some(previous) = &previous {
@@ -375,7 +395,7 @@ impl<'a> El<'a> {
             Err(crate::ListError::MissingViewport)
         })
         .unwrap()
-        .0
+        .nodes
     }
 
     pub(crate) fn flatten_lists(
@@ -387,25 +407,38 @@ impl<'a> El<'a> {
             &dyn crate::ItemSource,
             f64,
         ) -> Result<crate::list::ListPlan, crate::ListError>,
-    ) -> Result<(Vec<DraftNode<'a>>, Vec<crate::list::ListDraft>), crate::ListError> {
+    ) -> Result<Description<'a>, crate::ListError> {
         use crate::list::{ListDraft, RowDraft};
         let mut output = Vec::new();
         let mut lists: Vec<ListDraft> = Vec::new();
-        let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, f32, f32)>)];
+        let mut annotations = Vec::new();
+        let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
                 return Err(crate::ListError::ResourceLimit);
             }
             let index = output.len() as u32;
-            if let Some((list, key, y, height)) = slot {
+            if let Some((list, key, item_index, y, height)) = slot {
                 lists[list].rows.push(RowDraft {
                     index: index as usize,
                     key,
+                    item_index,
                     y,
                     height,
                 });
             }
-            if let Some(spec) = element.list.take() {
+            let (spec, annotation) = element
+                .extra
+                .take()
+                .map(|extra| extra.into_parts())
+                .unwrap_or_default();
+            if !annotation.is_empty() {
+                annotations.push(crate::semantic::AnnotationDraft {
+                    node: index,
+                    text: annotation,
+                });
+            }
+            if let Some(spec) = spec {
                 let mut list_plan = plan(spec.id, element.style, spec.source, spec.row_height)?;
                 let list = lists.len();
                 let start = list_plan.viewport.visible_range.start;
@@ -425,7 +458,14 @@ impl<'a> El<'a> {
                     rows.push((
                         Some(index),
                         wrapper,
-                        Some((list, key, y, row_height as f32)),
+                        Some((
+                            list,
+                            key,
+                            u32::try_from(item_index)
+                                .map_err(|_| crate::ListError::ResourceLimit)?,
+                            y,
+                            row_height as f32,
+                        )),
                     ));
                 }
                 if spec.source.len() != list_plan.viewport.len {
@@ -458,7 +498,11 @@ impl<'a> El<'a> {
                 components: std::mem::take(&mut element.components),
             });
         }
-        Ok((output, lists))
+        Ok(Description {
+            nodes: output,
+            lists,
+            annotations,
+        })
     }
 }
 
@@ -484,6 +528,11 @@ impl Drop for ComponentBoundaries {
     }
 }
 
+pub(crate) struct Description<'a> {
+    pub nodes: Vec<DraftNode<'a>>,
+    pub lists: Vec<crate::list::ListDraft>,
+    pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,
+}
 pub(crate) struct DraftNode<'a> {
     pub(crate) parent: Option<u32>,
     pub(crate) kind: NodeKind,

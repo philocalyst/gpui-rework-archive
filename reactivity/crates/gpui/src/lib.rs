@@ -19,6 +19,7 @@ mod native;
 pub mod property;
 mod remote;
 mod runtime;
+pub mod semantic;
 pub mod source;
 mod style;
 
@@ -38,9 +39,10 @@ pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]
 pub use remote::{Lane, LaneSet};
 pub use runtime::{
-    Action, ActionKind, Actions, Commit, Counters, Error, Key, Part, PresentationToken, Query,
-    SetError, Snapshot, SnapshotNode, Win, WindowOptions,
+    Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
+    PresentationToken, Query, SetError, Snapshot, SnapshotNode, Win, WindowOptions,
 };
+pub use semantic::SemanticText;
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
 pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
 

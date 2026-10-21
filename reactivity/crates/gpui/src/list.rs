@@ -120,6 +120,7 @@ pub(crate) struct ListDraft {
 }
 pub(crate) struct RowDraft {
     pub index: usize,
+    pub item_index: u32,
     pub key: ItemKey,
     pub y: f32,
     pub height: f32,
