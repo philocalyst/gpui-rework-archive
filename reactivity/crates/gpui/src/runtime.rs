@@ -115,6 +115,61 @@ pub struct Commit {
     pub changed_nodes: usize,
 }
 
+/// Ownership and commit status of a failed typed source assignment.
+/// A rejected assignment returns its original payload, even when a projector
+/// fault has already poisoned the owner. Once consumed, arbitrary destructor faults
+/// cannot promise recovery or rollback; a committed source is never relabeled
+/// rejected merely because its presentation failed.
+pub enum SetError<T> {
+    Rejected { error: Error, value: T },
+    Committed { error: Error, commit: Commit },
+    OwnerFault { error: Error },
+}
+impl<T> std::fmt::Debug for SetError<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rejected { error, .. } => f
+                .debug_struct("Rejected")
+                .field("error", error)
+                .field("value_type", &std::any::type_name::<T>())
+                .finish_non_exhaustive(),
+            Self::Committed { error, commit } => f
+                .debug_struct("Committed")
+                .field("error", error)
+                .field("commit", commit)
+                .finish(),
+            Self::OwnerFault { error } => {
+                f.debug_struct("OwnerFault").field("error", error).finish()
+            }
+        }
+    }
+}
+impl<T> std::fmt::Display for SetError<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rejected { error, .. } => write!(f, "source assignment rejected: {error}"),
+            Self::Committed { error, commit } => write!(
+                f,
+                "source assignment committed at epoch {}; subsequent processing failed: {error}",
+                commit.source_epoch
+            ),
+            Self::OwnerFault { error } => write!(
+                f,
+                "source assignment consumed its value before an owner fault: {error}"
+            ),
+        }
+    }
+}
+impl<T> std::error::Error for SetError<T> {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(match self {
+            Self::Rejected { error, .. }
+            | Self::Committed { error, .. }
+            | Self::OwnerFault { error } => error,
+        })
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct SnapshotNode {
     pub identity: u64,
@@ -289,22 +344,46 @@ impl<M: View + 'static> Win<M> {
             Ok(())
         })
     }
-    pub fn set<T: 'static>(&self, source: Source<M, T>, value: T) -> Result<Commit, Error> {
-        let mut runtime = self.borrow()?;
-        runtime.live()?;
-        match catch_unwind(AssertUnwindSafe(|| {
-            source.validate_registered(&runtime.model, &runtime.sources)
-        })) {
-            Ok(result) => result?,
-            Err(_) => {
-                runtime.poison();
-                return Err(Error::OwnerPanicked);
+    pub fn set<T: 'static>(&self, source: Source<M, T>, value: T) -> Result<Commit, SetError<T>> {
+        let mut runtime = match self.borrow() {
+            Ok(runtime) => runtime,
+            Err(error) => return Err(SetError::Rejected { error, value }),
+        };
+        let mut value = Some(value);
+        let previous_epoch = runtime.source_epoch;
+        let result = (|| {
+            runtime.live()?;
+            match catch_unwind(AssertUnwindSafe(|| {
+                source.validate_registered(&runtime.model, &runtime.sources)
+            })) {
+                Ok(result) => result?,
+                Err(_) => {
+                    runtime.poison();
+                    return Err(Error::OwnerPanicked);
+                }
             }
+            runtime.operation(Some(source.id()), |model, _| {
+                source.modify(model, |old| {
+                    // Projector agreement and mutable-value admission have
+                    // succeeded. This is the only ownership-transfer point.
+                    *old = value.take().expect("source assignment runs once");
+                })?;
+                Ok(())
+            })
+        })();
+        match result {
+            Ok(commit) => Ok(commit),
+            Err(error) => Err(if let Some(value) = value {
+                SetError::Rejected { error, value }
+            } else if runtime.source_epoch != previous_epoch {
+                SetError::Committed {
+                    error,
+                    commit: runtime.commit(),
+                }
+            } else {
+                SetError::OwnerFault { error }
+            }),
         }
-        runtime.operation(Some(source.id()), |model, _| {
-            source.modify(model, |old| *old = value)?;
-            Ok(())
-        })
     }
     /// Position-free semantic activation validates the current logical target.
     pub fn activate(&self, target: Target) -> Result<Commit, Error> {
