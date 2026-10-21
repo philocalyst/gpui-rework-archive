@@ -65,7 +65,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Position-free edits can repair a failed presentation while the preceding
     /// sheet remains valid. Removed, foreign and quarantined targets cannot act.
     pub fn perform(&mut self, target: Target, action: Action<'_>) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         if !runtime.presentation_valid {

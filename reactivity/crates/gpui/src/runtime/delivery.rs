@@ -10,14 +10,13 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         inbox: Inbox<T>,
         receive: F,
     ) -> Result<Win<M, Lane<T, F, L>>, Error> {
-        let Self { lanes, mut inner } = self;
-        let runtime = inner.as_deref_mut().ok_or(Error::Closed)?;
+        let runtime = self.runtime()?;
         runtime.live()?;
-        let revoked = runtime
-            .remote_revoked
-            .get_or_insert_with(|| Shared::new(AtomicBool::new(false)));
-        let mut lane = Lane::new(inbox, receive, lanes);
-        lane.bind_head(revoked);
+        if runtime.source_epoch == u64::MAX {
+            return Err(Error::EpochExhausted);
+        }
+        let Self { lanes, inner } = self;
+        let lane = Lane::new(inbox, receive, lanes);
         Ok(Win { lanes: lane, inner })
     }
 
@@ -51,9 +50,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         }
         runtime.changed_nodes = 0;
         if budget != 0 && lanes.count() != 0 && runtime.source_epoch == u64::MAX {
-            if let Some(revoked) = &runtime.remote_revoked {
-                revoked.store(true, Ordering::Release);
-            }
             lanes.close();
             return Err(DeliveryError {
                 error: Error::EpochExhausted,
@@ -101,9 +97,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         });
         let revoked = runtime.poisoned || runtime.source_epoch == u64::MAX;
         if revoked {
-            if let Some(revoked) = &runtime.remote_revoked {
-                revoked.store(true, Ordering::Release);
-            }
             lanes.close();
         } else if more {
             lanes.signal();
@@ -258,10 +251,27 @@ mod tests {
         assert_eq!(failure.delivery.unwrap().received, 0);
         assert!(!win.snapshot().unwrap().poisoned);
         drop(rejected);
-        win.close();
+        let (new_sender, new_inbox) = Remote::bounded(2);
+        new_sender
+            .try_send(Payload {
+                value: 4,
+                dropped: dropped.clone(),
+            })
+            .unwrap();
+        assert!(matches!(
+            win.with_inbox(new_inbox, |_: &mut Owner, _: Payload| {}),
+            Err(Error::EpochExhausted)
+        ));
+        assert!(matches!(
+            new_sender.try_send(Payload {
+                value: 5,
+                dropped: dropped.clone()
+            }),
+            Err(SendError::Closed(_))
+        ));
         drop(dropped);
         let mut values = observe.into_iter().collect::<Vec<_>>();
         values.sort_unstable();
-        assert_eq!(values, [1, 2, 3]);
+        assert_eq!(values, [1, 2, 3, 4, 5]);
     }
 }

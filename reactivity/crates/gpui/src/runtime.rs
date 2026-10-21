@@ -5,10 +5,6 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     num::NonZeroU64,
     panic::{AssertUnwindSafe, catch_unwind},
-    sync::{
-        Arc as Shared,
-        atomic::{AtomicBool, Ordering},
-    },
 };
 use triomphe::Arc;
 
@@ -357,7 +353,6 @@ struct Runtime<M> {
     canvas: Canvas,
     text: Option<TextSystem>,
     poisoned: bool,
-    remote_revoked: Option<Shared<AtomicBool>>,
     counters: Counters,
     changed_nodes: usize,
 }
@@ -384,6 +379,31 @@ pub struct Win<M: View + 'static, L: LaneSet<M> = ()> {
     // Declaration order closes every receiver before the model is dropped.
     lanes: L,
     inner: Option<Box<Runtime<M>>>,
+}
+// A private exclusive borrow ties owner faults to receiver cleanup before a
+// public operation returns. No model/reference-counted state is shared. The
+// empty chain's constant erases this cleanup path from ordinary windows.
+struct RuntimeMut<'a, M: View + 'static, L: LaneSet<M>> {
+    runtime: &'a mut Runtime<M>,
+    lanes: &'a mut L,
+}
+impl<M: View + 'static, L: LaneSet<M>> std::ops::Deref for RuntimeMut<'_, M, L> {
+    type Target = Runtime<M>;
+    fn deref(&self) -> &Self::Target {
+        self.runtime
+    }
+}
+impl<M: View + 'static, L: LaneSet<M>> std::ops::DerefMut for RuntimeMut<'_, M, L> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.runtime
+    }
+}
+impl<M: View + 'static, L: LaneSet<M>> Drop for RuntimeMut<'_, M, L> {
+    fn drop(&mut self) {
+        if !L::EMPTY && (self.runtime.poisoned || self.runtime.source_epoch == u64::MAX) {
+            self.lanes.close();
+        }
+    }
 }
 impl<M: View + 'static> Win<M> {
     pub fn new(model: M) -> Result<Self, Error> {
@@ -507,7 +527,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             canvas,
             text: None,
             poisoned: false,
-            remote_revoked: None,
             counters: Counters::default(),
             changed_nodes: 0,
         };
@@ -515,16 +534,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             lanes: pending.lanes,
             inner: Some(Box::new(runtime)),
         };
-        if window.lanes.count() != 0 {
-            let runtime = window.inner.as_deref_mut().expect("new owner exists");
-            let revoked = runtime
-                .remote_revoked
-                .get_or_insert_with(|| Shared::new(AtomicBool::new(false)));
-            window.lanes.bind(revoked);
-        }
-        let runtime = window.runtime_mut()?;
+        let mut runtime = window.runtime_mut()?;
         runtime.describe(true)?;
         runtime.present()?;
+        drop(runtime);
         Ok(window)
     }
     #[cfg(feature = "native")]
@@ -536,19 +549,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Self, Error> {
         Self::mount_lanes(model, lanes, options, false, scale_factor)
     }
-    fn runtime_mut(&mut self) -> Result<&mut Runtime<M>, Error> {
-        self.inner.as_deref_mut().ok_or(Error::Closed)
+    fn runtime_mut(&mut self) -> Result<RuntimeMut<'_, M, L>, Error> {
+        Ok(RuntimeMut {
+            runtime: self.inner.as_deref_mut().ok_or(Error::Closed)?,
+            lanes: &mut self.lanes,
+        })
     }
     fn runtime(&self) -> Result<&Runtime<M>, Error> {
         self.inner.as_deref().ok_or(Error::Closed)
     }
     /// Revoke this owned window and release its model and retained resources.
     pub fn close(&mut self) {
-        if let Some(runtime) = self.inner.as_ref()
-            && let Some(revoked) = &runtime.remote_revoked
-        {
-            revoked.store(true, Ordering::Release);
-        }
         self.lanes.close();
         self.inner.take();
     }
@@ -568,7 +579,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         source: Source<M, T>,
         value: T,
     ) -> Result<Commit, SetError<T>> {
-        let runtime = match self.runtime_mut() {
+        let mut runtime = match self.runtime_mut() {
             Ok(runtime) => runtime,
             Err(error) => return Err(SetError::Rejected { error, value }),
         };
@@ -629,7 +640,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Acknowledge only after the backend's actual submit/present succeeded.
     /// An older coherent candidate remains eligible if a newer preparation failed.
     pub fn presented(&mut self, token: PresentationToken) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.acknowledge(token)
     }
@@ -637,7 +648,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Commands, diagnostic geometry and current token stay available for redraw;
     /// only a subsequent actual presentation acknowledgement restores authority.
     pub fn presentation_lost(&mut self) -> Result<(), Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.presentation_valid = false;
         Ok(())
@@ -651,7 +662,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Change physical size or device density. Equal size AND density is idle.
     /// Scale must be finite, positive, and produce finite f32 logical constraints.
     pub fn resize_scaled(&mut self, size: [u32; 2], scale_factor: f32) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         if size == runtime.requested_size && scale_factor == runtime.requested_scale_factor {
             return Ok(runtime.commit());
@@ -683,7 +694,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 
     /// Test input still goes through admitted geometry and the ordinary hit path.
     pub fn click(&mut self, target: Target) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         runtime.current_presentation()?;
@@ -716,7 +727,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.activate(target)
     }
     pub fn click_at(&mut self, point: Point) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.current_presentation()?;
         let Some(identity) = runtime.hit(point) else {
@@ -741,7 +752,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     }
     /// Retry a pending presentation, or do zero description/layout/paint work.
     pub fn settle(&mut self) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.changed_nodes = 0;
         if !runtime.logical_valid {
@@ -847,7 +858,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         property: Property<T>,
         contribution: Contribution<T>,
     ) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         let epoch = runtime
@@ -922,7 +933,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// mode this explicitly allocates the optional image, but never acknowledges
     /// native presentation. Optional image allocation failures return Canvas errors.
     pub fn with_pixels<R>(&mut self, read: impl FnOnce(&[u8], u32, u32) -> R) -> Result<R, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         let (width, height) = (runtime.canvas.width(), runtime.canvas.height());
         Ok(read(runtime.canvas.try_pixels()?, width, height))
     }
@@ -931,7 +942,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// The host must acknowledge the returned token only after its buffer present
     /// succeeds. Rendering here alone cannot restore coordinate authority.
     pub fn render_bgrx(&mut self, destination: &mut [u32]) -> Result<PresentationToken, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
         runtime.canvas.render_bgrx(destination)?;
@@ -995,9 +1006,6 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn poison(&mut self) {
-        if let Some(revoked) = &self.remote_revoked {
-            revoked.store(true, Ordering::Release);
-        }
         self.focused = None;
         self.poisoned = true;
         self.logical_valid = false;

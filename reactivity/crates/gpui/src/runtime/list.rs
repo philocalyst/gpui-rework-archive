@@ -293,7 +293,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         self.scroll_list(target, ScrollPosition::Key(key))
     }
     fn scroll_list(&mut self, target: Target, position: ScrollPosition) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.current_presentation()?;
         let id = runtime.list_id(target)?;
