@@ -83,13 +83,18 @@ mod tests {
             let baseline_allocation = allocation_counter::measure(|| {
                 baseline = Some(triomphe::Arc::<str>::from(payload.as_str()))
             });
-            let expected_baseline = (8 + length).next_multiple_of(8);
+            let word = size_of::<usize>();
+            let expected_baseline = (word + length).next_multiple_of(word);
             assert_eq!(baseline_allocation.count_total, 1);
             assert_eq!(baseline_allocation.bytes_total, expected_baseline as u64);
             assert_eq!(thin_allocation.count_total, u64::from(length != 0));
             assert_eq!(
                 thin_allocation.bytes_total,
-                if length == 0 { 0 } else { (16 + length) as u64 }
+                if length == 0 {
+                    0
+                } else {
+                    (2 * word + length) as u64
+                }
             );
             assert_eq!(thin.as_ref().unwrap().as_ref(), payload);
             let pointer = thin.as_ref().unwrap().as_ptr();
