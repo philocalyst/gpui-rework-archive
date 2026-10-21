@@ -4,6 +4,8 @@ use gpui_canvas::{
     PreparedPlacement, PreparedScene, SdrMapping,
 };
 use std::{borrow::Cow, collections::HashMap};
+mod images;
+pub use images::ImageStats;
 
 const MAX_DRAWS: usize = 65_536;
 const MAX_REFERENCES: usize = 4 * 1024 * 1024;
@@ -99,7 +101,7 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
         clip: group.clip,
         bounds: p.bounds,
         color: group.color,
-        mask: p.mask,
+        source: p.source,
     }
 }
 fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
@@ -271,6 +273,7 @@ pub struct Renderer {
     indices: Buffer,
     corrections: Buffer,
     atlas: Atlas,
+    images: Option<Box<images::Images>>,
     records: Vec<Word>,
     ranges: Vec<[u32; 2]>,
     references: Vec<u32>,
@@ -363,6 +366,7 @@ impl Renderer {
             indices,
             corrections,
             atlas,
+            images: None,
             records: Vec::new(),
             ranges: Vec::new(),
             references: Vec::new(),
@@ -385,6 +389,9 @@ impl Renderer {
     }
     pub fn stats(&self) -> Stats {
         self.stats
+    }
+    pub fn image_stats(&self) -> Option<ImageStats> {
+        self.images.as_ref().map(|images| images.stats())
     }
     /// Diagnostic schema oracle: keep old inline fields for every draw.
     pub fn set_grouped_records(&mut self, enabled: bool) {
@@ -487,7 +494,7 @@ impl Renderer {
                 compact_draws += group.placements().len();
                 for p in group.placements() {
                     let draw = prepared(group, p);
-                    has_masks |= draw.mask.is_some();
+                    has_masks |= draw.source.mask().is_some();
                     let r = draw.local_rect;
                     let address = self.records.len() as u32;
                     self.records.extend_from_slice(&[
@@ -510,7 +517,7 @@ impl Renderer {
                 for p in group.placements() {
                     let draw = prepared(group, p);
                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
-                    has_masks |= draw.mask.is_some();
+                    has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
                     self.records
                         .extend_from_slice(&inline_words(draw, error, correction));
@@ -528,6 +535,14 @@ impl Renderer {
                 }
             }
         }
+        images::prepare(
+            &self.device,
+            &self.queue,
+            &mut self.draws,
+            &mut self.images,
+            self.records.len(),
+            scene,
+        )?;
         let mask_bytes = self.prepare_atlas(scene, has_masks)?;
         // Patch only resource coordinates after every draw has passed admission.
         // Metadata words/correction indices and private common addresses remain.
@@ -538,10 +553,19 @@ impl Renderer {
                 word += 5;
             }
             for p in group.placements() {
-                let atlas = p.mask.map_or([0; 3], |mask| {
-                    let t = self.atlas.entries[&mask.key];
-                    [t.x, t.y, t.width | (t.height << 16)]
-                });
+                let atlas = if let Some((image, sampling)) = p.source.image() {
+                    let [offset, flags] = self
+                        .images
+                        .as_ref()
+                        .unwrap()
+                        .metadata(image.key(), sampling);
+                    [offset, flags, image.width() | (image.height() << 16)]
+                } else {
+                    p.source.mask().map_or([0; 3], |mask| {
+                        let t = self.atlas.entries[&mask.key];
+                        [t.x, t.y, t.width | (t.height << 16)]
+                    })
+                };
                 self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
                 word += if compact { 2 } else { 6 };
             }
@@ -849,7 +873,7 @@ fn full_tile(
     width: u32,
     height: u32,
 ) -> bool {
-    if draw.mask.is_some()
+    if !draw.source.is_solid()
         || draw.color[3] != 1.0
         // Source-over can change -0 to +0 according to the backdrop's sign.
         // A negative subnormal may also flush to -0 before that addition.
@@ -978,14 +1002,14 @@ fn validate_draw(
     if !magnitude.is_finite() || magnitude > f64::from(f32::MAX) / 32.0 {
         return Err(Error::Precision { draw: index });
     }
-    if let Some(mask) = draw.mask {
-        let scale_x = mask.width as f64 / f64::from(local.width);
-        let scale_y = mask.height as f64 / f64::from(local.height);
+    if let Some([width, height]) = draw.source.dimensions() {
+        let scale_x = width as f64 / f64::from(local.width);
+        let scale_y = height as f64 / f64::from(local.height);
         if !scale_x.is_finite()
             || !scale_y.is_finite()
             || scale_x > f64::from(f32::MAX) / 32.0
             || scale_y > f64::from(f32::MAX) / 32.0
-            || magnitude * mask.width.max(mask.height) as f64 > f64::from(f32::MAX) / 32.0
+            || magnitude * width.max(height) as f64 > f64::from(f32::MAX) / 32.0
         {
             return Err(Error::Precision { draw: index });
         }
@@ -1120,7 +1144,7 @@ mod tests {
             clip: Rect::new(0.0, 0.0, 1.0, 1.0),
             bounds: Rect::new(0.0, 0.0, 1.0, 1.0),
             color: [1.0; 4],
-            mask: None,
+            source: gpui_canvas::PreparedSource::Solid,
         };
         assert!(validate_draw(draw, 7, 1, 1).is_ok());
         draw.inverse = [3e38, 0.0, 0.0, 3e38, 3e38, 3e38];
@@ -1146,7 +1170,7 @@ mod tests {
                 clip: Rect::new(0.0, 0.0, 16.0, 16.0),
                 bounds: Rect::new(0.0, 0.0, 16.0, 16.0),
                 color: [1.0; 4],
-                mask: None,
+                source: gpui_canvas::PreparedSource::Solid,
             };
             let error = validate_draw(draw, 0, 16, 16).unwrap();
             if !full_tile(draw, error, 0, 1, 16, 16) {

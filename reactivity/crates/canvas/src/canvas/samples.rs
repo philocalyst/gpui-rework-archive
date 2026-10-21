@@ -53,6 +53,32 @@ impl Samples {
         }
     }
 
+    pub(super) fn blend_sources(&mut self, pixel: usize, sources: [Option<[f32; 4]>; 16]) {
+        let bit = 1 << (pixel % 64);
+        if self.mixed[pixel / 64] & bit == 0 {
+            let bits = sources[0].map(|color| color.map(f32::to_bits));
+            if sources
+                .iter()
+                .all(|color| color.map(|c| c.map(f32::to_bits)) == bits)
+            {
+                if let Some(source) = sources[0] {
+                    blend(&mut self.uniform[pixel], source, 1.0);
+                }
+                return;
+            }
+            self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
+            self.mixed[pixel / 64] |= bit;
+        }
+        for (sample, source) in self.samples[pixel * 16..pixel * 16 + 16]
+            .iter_mut()
+            .zip(sources)
+        {
+            if let Some(source) = source {
+                blend(sample, source, 1.0);
+            }
+        }
+    }
+
     #[inline]
     pub(super) fn color(&self, pixel: usize) -> [f32; 4] {
         if self.mixed[pixel / 64] & (1 << (pixel % 64)) == 0 {

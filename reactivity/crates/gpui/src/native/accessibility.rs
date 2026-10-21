@@ -290,6 +290,7 @@ fn projected_node(part: Part<'_>) -> Node {
         Role::Button => accesskit::Role::Button,
         Role::List => accesskit::Role::List,
         Role::ListItem => accesskit::Role::ListItem,
+        Role::Image => accesskit::Role::Image,
     };
     let mut node = Node::new(role);
     if role == accesskit::Role::Label {

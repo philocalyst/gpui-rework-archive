@@ -13,6 +13,7 @@ mod application;
 mod component;
 mod element;
 mod identity;
+mod image;
 mod list;
 #[cfg(feature = "native")]
 mod native;
@@ -30,10 +31,14 @@ pub use component::Component;
 pub use element::{
     ChildSeq, El, Element, IntoHandler, Role, button, column, div, label, row, text, text_input,
 };
-pub use gpui_canvas::{ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping, oklch};
+pub use gpui_canvas::{
+    AlphaMode, ColorConfig, ColorSpace, Image, ImageKey, ImagePixels, ImageProfile, ImageSampling,
+    OutputProfile, PixelFormat, SdrMapping, oklch,
+};
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
+pub use image::image;
 pub use list::{ItemKey, ItemSource, ListError, ListId, ListViewport, uniform_list};
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
@@ -70,9 +75,9 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Action, ActionKind, Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff,
-        Inbox, ItemKey, ItemSource, Key, ListId, Point, Rect, Remote, Signal, Source, Sources,
-        Target, View, Win, button, column, div, label, oklch, rgb, row, text, text_input,
-        uniform_list,
+        Action, ActionKind, Affine, AlphaMode, Color, Component, El, Element, FieldId, Flex, Flow,
+        Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource, Key, ListId,
+        Point, Rect, Remote, Signal, Source, Sources, Target, View, Win, button, column, div,
+        image, label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }

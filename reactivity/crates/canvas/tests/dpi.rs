@@ -32,7 +32,7 @@ fn two_x_density_uses_real_physical_masks_and_matches_physical_font_rendering() 
     assert_eq!(scaled.pixels(), direct.pixels());
     let scene = scaled.prepared_scene();
     for draw in scene.draws() {
-        let mask = draw.mask.unwrap();
+        let mask = draw.source.mask().unwrap();
         assert_eq!(mask.width as f32, draw.local_rect.width * 2.0);
         assert_eq!(mask.height as f32, draw.local_rect.height * 2.0);
     }
@@ -84,7 +84,7 @@ fn density_one_preserves_existing_pixels_and_fractional_density_uses_physical_ra
     let old_keys: Vec<_> = ordinary
         .prepared_scene()
         .draws()
-        .map(|d| d.mask.unwrap().key)
+        .map(|d| d.source.mask().unwrap().key)
         .collect();
     scaled.clear(Color::TRANSPARENT);
     scaled
@@ -98,10 +98,12 @@ fn density_one_preserves_existing_pixels_and_fractional_density_uses_physical_ra
             1.25,
         )
         .unwrap();
-    for (old, new) in old_keys
-        .into_iter()
-        .zip(scaled.prepared_scene().draws().map(|d| d.mask.unwrap().key))
-    {
+    for (old, new) in old_keys.into_iter().zip(
+        scaled
+            .prepared_scene()
+            .draws()
+            .map(|d| d.source.mask().unwrap().key),
+    ) {
         assert_ne!(old, new);
     }
     assert!(scaled.pixels().chunks_exact(4).any(|p| p[3] > 0));

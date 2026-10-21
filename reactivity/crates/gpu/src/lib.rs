@@ -2,5 +2,5 @@
 #![forbid(unsafe_code)]
 mod renderer;
 pub mod shader;
-pub use renderer::{Error, Renderer, Stats};
+pub use renderer::{Error, ImageStats, Renderer, Stats};
 pub use wgpu;

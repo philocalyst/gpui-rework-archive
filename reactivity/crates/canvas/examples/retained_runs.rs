@@ -68,7 +68,7 @@ fn main() {
             digest = digest
                 .wrapping_mul(31)
                 .wrapping_add(draw.local_rect.x.to_bits() as u64);
-            if let Some(mask) = draw.mask {
+            if let Some(mask) = draw.source.mask() {
                 digest ^= mask.coverage.len() as u64;
             }
         }

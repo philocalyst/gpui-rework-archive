@@ -1,5 +1,8 @@
 use crate::text::Raster;
-use crate::{Affine, Color, ColorConfig, DamageRegion, Error, Point, Rect, TextLayout, TextSystem};
+use crate::{
+    Affine, Color, ColorConfig, DamageRegion, Error, Image, ImageKey, ImageSampling, ImageView,
+    Point, Rect, TextLayout, TextSystem,
+};
 use std::{collections::HashMap, sync::Arc};
 
 mod glyph_axis;
@@ -195,6 +198,9 @@ pub fn sampled_rect_clip(
 // the renderer and exported scene resolve the same checked private addresses.
 const INLINE_DRAW: u32 = 1 << 31;
 const RECT_SOURCE: u32 = u32::MAX;
+const IMAGE_SOURCE: u32 = 1 << 31;
+const NEAREST_SOURCE: u32 = 1 << 30;
+const RESOURCE_INDEX: u32 = NEAREST_SOURCE - 1;
 const _: () = assert!(MAX_COMMANDS < INLINE_DRAW as usize);
 
 #[derive(Clone, Copy)]
@@ -283,11 +289,36 @@ struct DisplayList {
     placements: Vec<Placement>,
     masks: Vec<Arc<Raster>>,
     mask_index: MaskIndex,
+    images: Option<Box<ImageResources>>,
+}
+#[derive(Default)]
+struct ImageResources {
+    values: Vec<Image>,
+    index: HashMap<ImageKey, u32>,
+    bytes: usize,
 }
 #[derive(Clone, Copy)]
 enum BorrowedSource<'a> {
     Rect,
     Glyph(&'a Raster),
+    ImageNearest(&'a Image),
+    ImageLinear(&'a Image),
+}
+impl<'a> BorrowedSource<'a> {
+    fn prepared(self) -> PreparedSource<'a> {
+        match self {
+            Self::Rect => PreparedSource::Solid,
+            Self::Glyph(mask) => PreparedSource::Mask(mask_view(mask)),
+            Self::ImageNearest(image) => PreparedSource::Image {
+                image: image.view(),
+                sampling: ImageSampling::Nearest,
+            },
+            Self::ImageLinear(image) => PreparedSource::Image {
+                image: image.view(),
+                sampling: ImageSampling::Linear,
+            },
+        }
+    }
 }
 #[derive(Clone, Copy)]
 struct BorrowedCommand<'a> {
@@ -315,6 +346,10 @@ impl BorrowedCommand<'_> {
                     // allocation identity cannot undergo reuse here.
                     std::ptr::eq(left, right)
                 }
+                (BorrowedSource::ImageNearest(left), BorrowedSource::ImageNearest(right))
+                | (BorrowedSource::ImageLinear(left), BorrowedSource::ImageLinear(right)) => {
+                    left == right
+                }
                 _ => false,
             }
     }
@@ -332,19 +367,29 @@ impl DisplayList {
         self.placements.clear();
         self.masks.clear();
         self.mask_index.clear();
+        self.images = None;
     }
     fn storage(&self) -> SceneStorage {
         SceneStorage {
             header_bytes: size_of::<Self>(),
+            resource_header_bytes: self
+                .images
+                .as_ref()
+                .map_or(0, |_| size_of::<ImageResources>()),
             order_bytes: self.order.capacity() * size_of::<u32>(),
             inline_bytes: self.inline.capacity() * size_of::<InlineDraw>()
                 + self.inline_sources.capacity() * size_of::<u32>(),
             common_bytes: self.commons.capacity() * size_of::<Common>()
                 + self.group_ranges.capacity() * size_of::<[u32; 2]>(),
             placement_bytes: self.placements.capacity() * size_of::<Placement>(),
-            resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>(),
-            resource_index_capacity: self.mask_index.capacity(),
-            resource_entries: self.masks.len(),
+            resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
+                + self
+                    .images
+                    .as_ref()
+                    .map_or(0, |r| r.values.capacity() * size_of::<Image>()),
+            resource_index_capacity: self.mask_index.capacity()
+                + self.images.as_ref().map_or(0, |r| r.index.capacity()),
+            resource_entries: self.masks.len() + self.images.as_ref().map_or(0, |r| r.values.len()),
         }
     }
     fn bytes(&self) -> usize {
@@ -381,6 +426,14 @@ impl DisplayList {
             bounds: geometry.bounds.map(usize::from),
             source: if source == RECT_SOURCE {
                 BorrowedSource::Rect
+            } else if source & IMAGE_SOURCE != 0 {
+                let image =
+                    &self.images.as_ref().unwrap().values[(source & RESOURCE_INDEX) as usize];
+                if source & NEAREST_SOURCE != 0 {
+                    BorrowedSource::ImageNearest(image)
+                } else {
+                    BorrowedSource::ImageLinear(image)
+                }
             } else {
                 BorrowedSource::Glyph(&self.masks[source as usize])
             },
@@ -470,6 +523,42 @@ pub struct GlyphMask<'a> {
     pub coverage: &'a [u8],
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum PreparedSource<'a> {
+    Solid,
+    Mask(GlyphMask<'a>),
+    Image {
+        image: ImageView<'a>,
+        sampling: ImageSampling,
+    },
+}
+impl<'a> PreparedSource<'a> {
+    pub fn dimensions(self) -> Option<[usize; 2]> {
+        match self {
+            Self::Solid => None,
+            Self::Mask(mask) => Some([mask.width, mask.height]),
+            Self::Image { image, .. } => Some([image.width() as usize, image.height() as usize]),
+        }
+    }
+    pub fn mask(self) -> Option<GlyphMask<'a>> {
+        if let Self::Mask(mask) = self {
+            Some(mask)
+        } else {
+            None
+        }
+    }
+    pub fn image(self) -> Option<(ImageView<'a>, ImageSampling)> {
+        if let Self::Image { image, sampling } = self {
+            Some((image, sampling))
+        } else {
+            None
+        }
+    }
+    pub fn is_solid(self) -> bool {
+        matches!(self, Self::Solid)
+    }
+}
+
 /// Canonical ordered draw, with the exact inverse used by the CPU reference.
 /// A backend narrowing f64 to f32 must validate its numeric/coverage contract.
 /// Color is premultiplied extended linear sRGB. Clip is in canvas coordinates;
@@ -484,7 +573,7 @@ pub struct PreparedDraw<'a> {
     pub clip: Rect,
     pub bounds: Rect,
     pub color: [f32; 4],
-    pub mask: Option<GlyphMask<'a>>,
+    pub source: PreparedSource<'a>,
 }
 
 /// Exact Vec-capacity ledger. HashMap bucket/control allocation is opaque:
@@ -493,6 +582,9 @@ pub struct PreparedDraw<'a> {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct SceneStorage {
     pub header_bytes: usize,
+    /// Separately boxed resource-vector/index headers. Excludes allocator
+    /// metadata, resource payloads, and opaque hash-table allocation overhead.
+    pub resource_header_bytes: usize,
     pub order_bytes: usize,
     pub inline_bytes: usize,
     pub common_bytes: usize,
@@ -516,7 +608,7 @@ impl SceneStorage {
 pub struct PreparedPlacement<'a> {
     pub local_rect: Rect,
     pub bounds: Rect,
-    pub mask: Option<GlyphMask<'a>>,
+    pub source: PreparedSource<'a>,
 }
 /// Borrowed typed group. Backends may upload common state once for all its
 /// placements; painter order is exactly the order returned by groups().
@@ -533,15 +625,11 @@ impl<'a> PreparedGroup<'a> {
         self,
     ) -> impl ExactSizeIterator<Item = PreparedPlacement<'a>> + DoubleEndedIterator {
         self.order.iter().map(move |&address| {
-            let (_, geometry, source) = self.commands.parts(address);
+            let (_, geometry, _) = self.commands.parts(address);
             PreparedPlacement {
                 local_rect: geometry.rect,
                 bounds: device_bounds(geometry.bounds),
-                mask: if source == RECT_SOURCE {
-                    None
-                } else {
-                    Some(mask_view(&self.commands.masks[source as usize]))
-                },
+                source: self.commands.get(address).source.prepared(),
             }
         })
     }
@@ -680,6 +768,13 @@ impl<'a> PreparedScene<'a> {
     pub fn masks(self) -> impl ExactSizeIterator<Item = GlyphMask<'a>> + DoubleEndedIterator {
         self.commands.masks.iter().map(|mask| mask_view(mask))
     }
+    /// Unique immutable image leases, borrowed without cloning a resource.
+    pub fn images(self) -> impl DoubleEndedIterator<Item = ImageView<'a>> {
+        self.commands
+            .images
+            .iter()
+            .flat_map(|r| r.values.iter().map(Image::view))
+    }
 
     pub fn draws(self) -> impl ExactSizeIterator<Item = PreparedDraw<'a>> + DoubleEndedIterator {
         self.commands.iter().map(|command| {
@@ -695,15 +790,7 @@ impl<'a> PreparedScene<'a> {
                     (bottom - top) as f32,
                 ),
                 color: command.color,
-                mask: match &command.source {
-                    BorrowedSource::Rect => None,
-                    BorrowedSource::Glyph(mask) => Some(GlyphMask {
-                        key: mask.key,
-                        width: mask.metrics.width,
-                        height: mask.metrics.height,
-                        coverage: &mask.pixels,
-                    }),
-                },
+                source: command.source.prepared(),
             }
         })
     }
@@ -889,6 +976,75 @@ impl Canvas {
                 .append(common, std::iter::once(command), false, Vec::new());
             self.dirty = true;
         }
+        Ok(())
+    }
+    /// Reconstruct immutable pixels across `rect`, using linear-premultiplied
+    /// texel colors. Geometry/clip use the same sample sites as other draws.
+    pub fn draw_image(
+        &mut self,
+        image: &Image,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        sampling: ImageSampling,
+    ) -> Result<(), Error> {
+        validate_rect(clip)?;
+        let resources = self.commands.images.as_deref();
+        let existing = resources.and_then(|r| r.index.get(&image.key()).copied());
+        let index = existing.unwrap_or_else(|| resources.map_or(0, |r| r.values.len() as u32));
+        let source = IMAGE_SOURCE
+            | index
+            | if sampling == ImageSampling::Nearest {
+                NEAREST_SOURCE
+            } else {
+                0
+            };
+        let common = Common {
+            clip,
+            map: Mapping::new(transform)?,
+            color: [1.0; 4],
+        };
+        let Some(command) = self.prepare(rect, transform, common, source)? else {
+            return Ok(());
+        };
+        let mut unpublished = None;
+        if existing.is_none() {
+            let bytes = resources
+                .map_or(0, |r| r.bytes)
+                .checked_add(image.pixel_bytes())
+                .ok_or(Error::ResourceLimit)?;
+            if bytes > crate::MAX_IMAGE_SCENE_BYTES {
+                return Err(Error::ResourceLimit);
+            }
+            let resources = if let Some(resources) = &mut self.commands.images {
+                resources.as_mut()
+            } else {
+                unpublished
+                    .insert(Box::<ImageResources>::default())
+                    .as_mut()
+            };
+            resources
+                .values
+                .try_reserve(1)
+                .map_err(|_| Error::ResourceLimit)?;
+            resources
+                .index
+                .try_reserve(1)
+                .map_err(|_| Error::ResourceLimit)?;
+        }
+        self.admit(std::slice::from_ref(&command), &[], 0)?;
+        if unpublished.is_some() {
+            self.commands.images = unpublished;
+        }
+        if existing.is_none() {
+            let resources = self.commands.images.as_mut().unwrap();
+            resources.values.push(image.clone());
+            resources.index.insert(image.key(), index);
+            resources.bytes += image.pixel_bytes();
+        }
+        self.commands
+            .append(common, std::iter::once(command), false, Vec::new());
+        self.dirty = true;
         Ok(())
     }
     /// Origin and layout positions are local to transform. Layout and glyph masks
@@ -1527,6 +1683,35 @@ fn render_band<W: PixelWriter>(
                 // glyph makes its sample colors differ.
                 samples.reset(value, frame.tile_proofs);
             }
+            let image = match command.source {
+                BorrowedSource::ImageNearest(image) => Some((image.view(), ImageSampling::Nearest)),
+                BorrowedSource::ImageLinear(image) => Some((image.view(), ImageSampling::Linear)),
+                _ => None,
+            };
+            if let Some((image, sampling)) = image {
+                let bounds = [left, top, right, bottom];
+                if image.needs_decode_memo() {
+                    render_cached_image(
+                        &mut samples,
+                        &command,
+                        bounds,
+                        &mut stats,
+                        image,
+                        sampling,
+                    );
+                } else {
+                    render_image(&mut samples, &command, bounds, &mut stats, |x, y| {
+                        image.sample(
+                            x,
+                            y,
+                            command.rect.width as f64,
+                            command.rect.height as f64,
+                            sampling,
+                        )
+                    });
+                }
+                continue;
+            }
             for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
                 for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
                     let coverages = if full {
@@ -1576,6 +1761,59 @@ fn render_band<W: PixelWriter>(
     stats
 }
 
+// Keep image-only scratch off image-free raster frames. Direct linear/HDR and
+// straight-sRGB byte-table inputs never construct or initialize a decode memo.
+#[inline(never)]
+fn render_cached_image(
+    samples: &mut Samples,
+    command: &BorrowedCommand<'_>,
+    bounds: [usize; 4],
+    stats: &mut RenderStats,
+    image: ImageView<'_>,
+    sampling: ImageSampling,
+) {
+    crate::image::with_decode_memo(image, |image| {
+        render_image(samples, command, bounds, stats, |x, y| {
+            image.sample(
+                x,
+                y,
+                command.rect.width as f64,
+                command.rect.height as f64,
+                sampling,
+            )
+        });
+    });
+}
+#[inline(never)]
+fn render_image(
+    samples: &mut Samples,
+    command: &BorrowedCommand<'_>,
+    [left, top, right, bottom]: [usize; 4],
+    stats: &mut RenderStats,
+    mut sample: impl FnMut(f64, f64) -> Option<[f32; 4]>,
+) {
+    for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
+        for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
+            let sources = std::array::from_fn(|i| {
+                stats.sample_tests += 1;
+                let wx = x as f64 + SAMPLES[i % 4];
+                let wy = y as f64 + SAMPLES[i / 4];
+                if wx < command.clip.x as f64
+                    || wy < command.clip.y as f64
+                    || wx >= command.clip.x as f64 + command.clip.width as f64
+                    || wy >= command.clip.y as f64 + command.clip.height as f64
+                {
+                    return None;
+                }
+                let (lx, ly) = command.map.local(wx, wy);
+                sample(lx - command.rect.x as f64, ly - command.rect.y as f64)
+            });
+            samples.blend_sources((y - top) * TILE + x - left, sources);
+            stats.boundary_pixels += 1;
+        }
+    }
+}
+
 /// Command-only candidate tied to one canvas. Dropping it leaves the published
 /// scene untouched. Commit requires no allocation or further validation.
 ///
@@ -1606,6 +1844,17 @@ impl CanvasScene<'_> {
         color: Color,
     ) -> Result<(), Error> {
         self.pending.fill_rect(rect, transform, clip, color)
+    }
+    pub fn draw_image(
+        &mut self,
+        image: &Image,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        sampling: ImageSampling,
+    ) -> Result<(), Error> {
+        self.pending
+            .draw_image(image, rect, transform, clip, sampling)
     }
     pub fn draw_text(
         &mut self,
@@ -1842,6 +2091,9 @@ fn sample(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderS
                     r.width as f64,
                     r.height as f64,
                 ),
+                BorrowedSource::ImageNearest(_) | BorrowedSource::ImageLinear(_) => {
+                    unreachable!("image samples carry full working colors")
+                }
             };
         }
     }

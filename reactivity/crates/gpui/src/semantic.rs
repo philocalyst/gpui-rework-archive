@@ -40,6 +40,10 @@ type Projected<'a> = (
     Option<crate::list::RowMap>,
 );
 pub(crate) enum ElementExtra<'a> {
+    Image {
+        spec: crate::image::ImageSpec<'a>,
+        semantic: Option<Box<Annotations<'a>>>,
+    },
     Reader {
         projector: Box<dyn crate::reader::Projector + 'a>,
         semantic: Option<Box<Annotations<'a>>>,
@@ -57,7 +61,7 @@ impl<'a> ElementExtra<'a> {
         match self {
             Self::List(list) => Some(list),
             Self::Combined { list, .. } => Some(list),
-            Self::Semantic(_) | Self::Reader { .. } => None,
+            Self::Semantic(_) | Self::Reader { .. } | Self::Image { .. } => None,
         }
     }
     pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
@@ -71,7 +75,9 @@ impl<'a> ElementExtra<'a> {
             }
         }
         match self {
-            Self::Reader { semantic, .. } => semantic.get_or_insert_with(Default::default),
+            Self::Reader { semantic, .. } | Self::Image { semantic, .. } => {
+                semantic.get_or_insert_with(Default::default)
+            }
             Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
             Self::List(_) => unreachable!(),
         }
@@ -82,6 +88,7 @@ impl<'a> ElementExtra<'a> {
         Option<crate::list::ListSpec<'a>>,
         Annotations<'a>,
         Option<Projected<'a>>,
+        Option<crate::image::ImageSpec<'a>>,
     ) {
         match self {
             Self::Reader {
@@ -92,10 +99,17 @@ impl<'a> ElementExtra<'a> {
                 None,
                 semantic.map(|s| *s).unwrap_or_default(),
                 Some((projector, map)),
+                None,
             ),
-            Self::List(list) => (Some(list), Annotations::default(), None),
-            Self::Semantic(semantic) => (None, semantic, None),
-            Self::Combined { list, semantic } => (Some(*list), semantic, None),
+            Self::Image { spec, semantic } => (
+                None,
+                semantic.map(|s| *s).unwrap_or_default(),
+                None,
+                Some(spec),
+            ),
+            Self::List(list) => (Some(list), Annotations::default(), None, None),
+            Self::Semantic(semantic) => (None, semantic, None, None),
+            Self::Combined { list, semantic } => (Some(*list), semantic, None, None),
         }
     }
 }
