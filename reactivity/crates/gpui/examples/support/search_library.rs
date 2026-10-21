@@ -1,4 +1,4 @@
-//! One bounded question over the Library catalogue protocol. The model stores
+//! One bounded two-input question over the Library catalogue protocol. The model stores
 //! domain state and an inert Reader; this explicitly owned service holds its
 //! worker outside the model. No executor, completion or loading flag is a field.
 use gpui::{Completion, Failure, Reader, StartError, prelude::*};
@@ -37,11 +37,17 @@ impl Query {
 pub struct SearchInput {
     query: Result<Query, SearchError>,
     count: usize,
+    descending: bool,
 }
+#[cfg(test)]
 pub fn freeze(value: &str, count: usize) -> SearchInput {
+    freeze_ordered(value, false, count)
+}
+pub fn freeze_ordered(value: &str, descending: bool, count: usize) -> SearchInput {
     SearchInput {
         query: Query::freeze(value),
         count,
+        descending,
     }
 }
 #[derive(Debug, PartialEq, Eq)]
@@ -57,6 +63,7 @@ impl std::error::Error for SearchError {}
 
 pub struct SearchPage {
     pub query: Query,
+    pub descending: bool,
     pub ids: Vec<TrackId>,
     pub matches: usize,
     #[allow(dead_code)] // Explicit work count consumed by tests and the cost fixture.
@@ -108,10 +115,15 @@ pub fn search_cancellable(
     let needle = query.as_str().as_bytes();
     let mut ids = Vec::with_capacity(PAGE_LIMIT);
     let mut matches = 0;
-    for index in 0..input.count {
-        if index != 0 && index.is_multiple_of(CANCELLATION_BATCH) && cancelled(index) {
+    for scanned in 0..input.count {
+        if scanned != 0 && scanned.is_multiple_of(CANCELLATION_BATCH) && cancelled(scanned) {
             return None;
         }
+        let index = if input.descending {
+            input.count - 1 - scanned
+        } else {
+            scanned
+        };
         let mut title = Title {
             bytes: [0; 64],
             length: 0,
@@ -134,6 +146,7 @@ pub fn search_cancellable(
     }
     Some(Ok(SearchPage {
         query,
+        descending: input.descending,
         ids,
         matches,
         scanned: input.count,
@@ -181,6 +194,7 @@ pub struct SearchLibrary {
     pub query: Signal<String>,
     pub results: Reader<SearchPage>,
     pub selected: Signal<u64>,
+    pub descending: Signal<bool>,
     catalogue: Catalogue,
 }
 /// Persist domain inputs, not Reader keys, queued work or executor authority.
@@ -188,6 +202,7 @@ pub struct SearchLibrary {
 pub struct LibraryState {
     query: String,
     selected: u64,
+    descending: bool,
     count: usize,
 }
 impl SearchLibrary {
@@ -199,11 +214,18 @@ impl SearchLibrary {
         |m| &m.selected,
         |m| &mut m.selected,
     );
+    pub const DESCENDING: Source<Self, bool> = Source::new(
+        FieldId::new(3),
+        "descending",
+        |m| &m.descending,
+        |m| &mut m.descending,
+    );
     pub fn new(count: usize, results: Reader<SearchPage>) -> Self {
         Self {
             query: Signal::new(String::new()),
             results,
             selected: Signal::new(u64::MAX),
+            descending: Signal::new(false),
             catalogue: Catalogue::new(count),
         }
     }
@@ -212,6 +234,7 @@ impl SearchLibrary {
         LibraryState {
             query: self.query.to_string(),
             selected: *self.selected,
+            descending: *self.descending,
             count: self.catalogue.len(),
         }
     }
@@ -220,6 +243,7 @@ impl SearchLibrary {
         Self {
             query: Signal::new(state.query),
             selected: Signal::new(state.selected),
+            descending: Signal::new(state.descending),
             results,
             catalogue: Catalogue::new(state.count),
         }
@@ -258,9 +282,14 @@ fn results(reader: Reader<SearchPage>) -> El<'static> {
                 // The query paired with these rows is part of the frozen answer. A new
                 // input value never relabels the preceding rows as its current result.
                 text(format!(
-                    "{} matches for ‘{}’ — showing at most {PAGE_LIMIT}",
+                    "{} matches for ‘{}’ — {} — showing at most {PAGE_LIMIT}",
                     page.matches,
-                    page.query.as_str()
+                    page.query.as_str(),
+                    if page.descending {
+                        "descending"
+                    } else {
+                        "ascending"
+                    }
                 )),
                 uniform_list(RESULTS, page, 32)
                     .name("Matching recordings")
@@ -273,7 +302,10 @@ fn results(reader: Reader<SearchPage>) -> El<'static> {
 }
 impl View for SearchLibrary {
     fn sources() -> Sources<Self> {
-        Sources::new().direct(Self::QUERY).direct(Self::SELECTED)
+        Sources::new()
+            .direct(Self::QUERY)
+            .direct(Self::SELECTED)
+            .direct(Self::DESCENDING)
     }
     fn view(&self) -> El<'_> {
         column((
@@ -287,6 +319,8 @@ impl View for SearchLibrary {
                 .description("Search titles; up to 128 matching rows are returned")
                 .w(700)
                 .h(32),
+            button("Reverse result order")
+                .on_click(Self::DESCENDING.update(|value| *value = !*value)),
             results(self.results),
             row((text("Selected recording ID:"), text(&self.selected))).gap(8),
         ))

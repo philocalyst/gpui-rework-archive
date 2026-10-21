@@ -9,17 +9,27 @@ use winit::platform::{run_on_demand::EventLoopExtRunOnDemand, x11::EventLoopBuil
 struct Search {
     query: Signal<String>,
     theme: Signal<u32>,
+    descending: Signal<bool>,
     answer: Reader<String>,
 }
 impl Search {
     const QUERY: Source<Self, String> =
         Source::new(FieldId::new(1), "query", |m| &m.query, |m| &mut m.query);
+    const DESCENDING: Source<Self, bool> = Source::new(
+        FieldId::new(3),
+        "descending",
+        |m| &m.descending,
+        |m| &mut m.descending,
+    );
     const THEME: Source<Self, u32> =
         Source::new(FieldId::new(2), "theme", |m| &m.theme, |m| &mut m.theme);
 }
 impl View for Search {
     fn sources() -> Sources<Self> {
-        Sources::new().direct(Self::QUERY).direct(Self::THEME)
+        Sources::new()
+            .direct(Self::QUERY)
+            .direct(Self::THEME)
+            .direct(Self::DESCENDING)
     }
     fn view(&self) -> El<'_> {
         column((
@@ -69,6 +79,7 @@ impl<L: LaneSet<Search> + 'static> Host for Script<L> {
             return;
         }
         if let Some(first) = self.first.take() {
+            owner.set(Search::DESCENDING, true).unwrap();
             owner.set(Search::QUERY, "B".into()).unwrap();
             first.send(()).unwrap();
             return;
@@ -77,10 +88,10 @@ impl<L: LaneSet<Search> + 'static> Host for Script<L> {
         if owner.question_status(answer).unwrap() != QuestionStatus::Ready {
             return;
         }
-        assert!(owner.contains_text("Answer B").unwrap());
+        assert!(owner.contains_text("Shown Answer B descending").unwrap());
         assert!(!owner.contains_text("obsolete A").unwrap());
         assert_eq!(*owner.root().unwrap().theme, 2);
-        assert!(self.ready_turns >= 2);
+        assert!(self.ready_turns >= 3);
         assert!(matches!(
             self.host.graphics,
             Some(Graphics::ReferenceCpu(..))
@@ -93,13 +104,13 @@ impl<L: LaneSet<Search> + 'static> Host for Script<L> {
 #[test]
 #[ignore = "requires real X11; deadline is only a watchdog, never a delivery poll"]
 fn native_question_result_and_credit_wake_without_unrelated_input() {
-    type Job = (String, Completion<String, Infallible>);
+    type Job = ((String, bool), Completion<String, Infallible>);
     let (send, jobs) = mpsc::sync_channel::<Job>(1);
     let (first, first_wait) = mpsc::channel();
     let (second, second_wait) = mpsc::channel();
     let worker = std::thread::spawn(move || {
         let (input, completion) = jobs.recv().unwrap();
-        assert_eq!(input, "A");
+        assert_eq!(input, ("A".to_string(), false));
         first_wait.recv().unwrap();
         // The owner superseded A before releasing this worker. The helper
         // abandons it without executing its compute closure, then WorkReady
@@ -108,27 +119,46 @@ fn native_question_result_and_credit_wake_without_unrelated_input() {
             .run_cancellable(input, |_, _| panic!("obsolete work must not start"))
             .unwrap();
         let (input, completion) = jobs.recv().unwrap();
-        assert_eq!(input, "B");
+        assert_eq!(input, ("B".to_string(), true));
         second_wait.recv().unwrap();
         completion
             .run_cancellable(input, |input, cancellation| {
                 assert!(!cancellation.is_cancelled());
-                Some(Ok(format!("Answer {input}")))
+                Some(Ok(format!(
+                    "Answer {} {}",
+                    input.0,
+                    if input.1 { "descending" } else { "ascending" }
+                )))
             })
             .unwrap();
     });
-    let (questions, answer) = Questions::new()
-        .question(Search::QUERY, Clone::clone, move |input, completion| {
-            send.try_send((input, completion))
-                .map_err(|error| match error {
-                    mpsc::TrySendError::Full(_) => StartError::Busy,
-                    mpsc::TrySendError::Disconnected(_) => StartError::Closed,
-                })
-        })
+    let (questions, upstream) = Questions::new()
+        .question(
+            (Search::QUERY, Search::DESCENDING),
+            |(query, descending)| (query.clone(), *descending),
+            move |input, completion| {
+                send.try_send((input, completion))
+                    .map_err(|error| match error {
+                        mpsc::TrySendError::Full(_) => StartError::Busy,
+                        mpsc::TrySendError::Disconnected(_) => StartError::Closed,
+                    })
+            },
+        )
+        .unwrap();
+    let (questions, answer) = questions
+        .question(
+            upstream,
+            Clone::clone,
+            |input, cap: Completion<String, Infallible>| {
+                cap.complete(Ok(format!("Shown {input}"))).unwrap();
+                Ok(())
+            },
+        )
         .unwrap();
     let opening = Window::document(Search {
         query: Signal::new("A".into()),
         theme: Signal::new(1),
+        descending: Signal::new(false),
         answer,
     })
     .questions(questions)

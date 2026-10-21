@@ -21,6 +21,31 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .map(|outcome| outcome.info)
             .ok_or(crate::QuestionFault::Revoked.into())
     }
+    /// Visit every declared input in order, without allocating a diagnostic
+    /// vector. Versions are the last valid observed cohort, including blocked
+    /// Readers; a binding rejection invalidates the pack and visits no members.
+    ///
+    /// ```compile_fail
+    /// use gpui::{Reader,View,Win,LaneSet};
+    /// fn reenter<M:View+'static,L:LaneSet<M>>(win:&mut Win<M,L>,reader:Reader<String>) {
+    ///     win.visit_question_inputs(reader,|_| { win.update(|_|{}).unwrap(); }).unwrap();
+    /// }
+    /// ```
+    pub fn visit_question_inputs<T>(
+        &self,
+        reader: crate::Reader<T>,
+        mut visit: impl FnMut(crate::QuestionInput),
+    ) -> Result<usize, Error> {
+        self.runtime()?.live()?;
+        let mut count = 0;
+        if !self.lanes.visit_inputs(reader.key, &mut |input| {
+            count += 1;
+            visit(input);
+        }) {
+            return Err(crate::QuestionFault::Revoked.into());
+        }
+        Ok(count)
+    }
     /// A scoped borrow only when the current answer is Ready. The callback
     /// cannot keep that borrow while replacing/closing this exclusive owner.
     ///

@@ -1,7 +1,8 @@
 //! Concrete question slots are consed into the existing static lane chain.
+use super::inputs::{Availability, QuestionInputs};
 use super::*;
 use crate::{
-    FieldId, Source, Sources,
+    FieldId, Sources,
     identity::Sites,
     remote::{LaneSet, Stage, sealed},
 };
@@ -11,6 +12,7 @@ use gpui_reactivity_state::{OwnerRegistry, OwnerScope, RequestGate};
 #[derive(Clone, Copy)]
 pub enum Change {
     Mount,
+    Dependencies,
     Source(Option<FieldId>),
     Retry(ReaderKey),
 }
@@ -41,8 +43,11 @@ impl<M> Questions<M> {
     }
 }
 impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
-    /// Freeze one explicit source and enqueue owned work through an existing
+    /// Freeze declared inputs and enqueue owned work through an existing
     /// executor/service. `start` must return promptly and must not run UI code.
+    /// Inputs are a Source, an earlier Reader from this same plan, or a nested
+    /// pair. Reader inputs freeze only Ready values; Pending/Fault retain no
+    /// authority to reuse their previous payload as a new snapshot.
     /// Exactly one physical completion can be outstanding; newer inputs retain
     /// only their latest frozen snapshot while waiting for that credit.
     ///
@@ -60,7 +65,7 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
         reason = "The inferred concrete lane stores all types once; an alias only moves these parameters."
     )]
     pub fn question<
-        V: 'static,
+        A: QuestionInputs<M>,
         I: Send + 'static,
         T: Send + 'static,
         E: std::error::Error + Send + 'static,
@@ -68,18 +73,18 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
         S,
     >(
         mut self,
-        source: Source<M, V>,
+        inputs: A,
         freeze: F,
         start: S,
     ) -> Result<
         (
-            Questions<M, QuestionLane<M, V, I, T, E, F, S, L>>,
+            Questions<M, QuestionLane<M, A, I, T, E, F, S, L>>,
             Reader<T>,
         ),
         QuestionFault,
     >
     where
-        F: Fn(&V) -> I,
+        F: for<'a> Fn(A::Borrowed<'a>) -> I,
         S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
     {
         self.next_site = self
@@ -103,8 +108,9 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             namespace: self.namespace,
             site: NonZeroU64::new(self.next_site).unwrap(),
         };
+        inputs.validate(key.namespace, key.site)?;
         let lanes = QuestionLane {
-            source,
+            inputs,
             freeze: Some(freeze),
             start: Some(start),
             key,
@@ -112,6 +118,7 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             controller: Some(Arc::new(Controller::new())),
             state: State::Empty,
             version: None,
+            marker: PhantomData,
             ticket: 0,
             coarse: 0,
             policy: 0,
@@ -149,6 +156,7 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
 enum StoredFault<E> {
     Domain(E),
     Framework(QuestionFault),
+    Dependency,
 }
 enum State<T, E> {
     Empty,
@@ -165,23 +173,32 @@ impl<T, E> State<T, E> {
         }
     }
 }
+enum FrozenInput<I> {
+    Ready(I),
+    Pending,
+    Fault,
+}
+struct Frozen<V, I> {
+    version: V,
+    input: FrozenInput<I>,
+}
 struct Work<I> {
     input: I,
     stamp: RequestStamp,
-    version: InputVersion,
 }
 
 /// Inferred implementation storage, not a model-managed task or an erased result.
 #[doc(hidden)]
-pub struct QuestionLane<M, V, I, T, E, F, S, L> {
-    source: Source<M, V>,
+pub struct QuestionLane<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> {
+    inputs: A,
     freeze: Option<F>,
     start: Option<S>,
     key: ReaderKey,
     gate: RequestGate,
     controller: Option<Arc<Controller<T, E>>>,
     state: State<T, E>,
-    version: Option<InputVersion>,
+    version: Option<A::Versions>,
+    marker: PhantomData<fn(M)>,
     ticket: u64,
     coarse: u64,
     policy: u64,
@@ -192,13 +209,15 @@ pub struct QuestionLane<M, V, I, T, E, F, S, L> {
     cursor: usize,
     stats: QuestionStats,
 }
-impl<M, V, I, T, E, F, S, L> QuestionLane<M, V, I, T, E, F, S, L> {
+impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> QuestionLane<M, A, I, T, E, F, S, L> {
     #[inline]
     fn control(&self) -> &Arc<Controller<T, E>> {
         self.controller.as_ref().expect("live question controller")
     }
 }
-impl<M, V, I, T, E, F, S, L> Drop for QuestionLane<M, V, I, T, E, F, S, L> {
+impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> Drop
+    for QuestionLane<M, A, I, T, E, F, S, L>
+{
     fn drop(&mut self) {
         // Natural Win/failed-mount destruction must cancel the cooperative
         // hint as well as relinquishing its response-owner lease.
@@ -208,8 +227,16 @@ impl<M, V, I, T, E, F, S, L> Drop for QuestionLane<M, V, I, T, E, F, S, L> {
         }
     }
 }
-impl<M, V, I, T: 'static, E: std::error::Error + 'static, F, S, L: ReaderValues> ReaderValues
-    for QuestionLane<M, V, I, T, E, F, S, L>
+impl<
+    M: 'static,
+    A: QuestionInputs<M>,
+    I,
+    T: 'static,
+    E: std::error::Error + 'static,
+    F,
+    S,
+    L: ReaderValues,
+> ReaderValues for QuestionLane<M, A, I, T, E, F, S, L>
 {
     fn read(&self, key: ReaderKey) -> Option<Outcome<'_>> {
         if key != self.key {
@@ -229,6 +256,10 @@ impl<M, V, I, T: 'static, E: std::error::Error + 'static, F, S, L: ReaderValues>
                 Some(match error {
                     StoredFault::Domain(error) => Failure::Domain(error),
                     StoredFault::Framework(error) => Failure::Framework(*error),
+                    StoredFault::Dependency => self
+                        .version
+                        .and_then(|version| self.inputs.failure(version, &self.tail))
+                        .unwrap_or(Failure::Framework(QuestionFault::InputUnavailable)),
                 }),
             ),
         };
@@ -236,7 +267,9 @@ impl<M, V, I, T: 'static, E: std::error::Error + 'static, F, S, L: ReaderValues>
             info: QuestionInfo {
                 status,
                 ticket: self.ticket,
-                input: self.version,
+                input: self
+                    .version
+                    .and_then(|v| self.inputs.single(v, self.coarse, self.policy)),
                 completion_leased: self.running_ticket.is_some(),
                 stats: self.stats,
             },
@@ -244,24 +277,44 @@ impl<M, V, I, T: 'static, E: std::error::Error + 'static, F, S, L: ReaderValues>
             failure,
         })
     }
+    fn visit_inputs(&self, key: ReaderKey, visit: &mut impl FnMut(QuestionInput)) -> bool {
+        if key != self.key {
+            return self.tail.visit_inputs(key, visit);
+        }
+        if let Some(version) = self.version {
+            self.inputs.visit(version, self.coarse, self.policy, visit);
+        }
+        true
+    }
 }
-impl<M, V, I, T, E, F, S, L> sealed::Sealed for QuestionLane<M, V, I, T, E, F, S, L> {}
+impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> sealed::Sealed
+    for QuestionLane<M, A, I, T, E, F, S, L>
+{
+}
 
 impl<
     M: 'static,
-    V: 'static,
+    A: QuestionInputs<M>,
     I: Send + 'static,
     T: Send + 'static,
     E: std::error::Error + Send + 'static,
     F,
     S,
     L: LaneSet<M>,
-> QuestionLane<M, V, I, T, E, F, S, L>
+> QuestionLane<M, A, I, T, E, F, S, L>
 where
-    F: Fn(&V) -> I,
+    F: for<'a> Fn(A::Borrowed<'a>) -> I,
     S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
 {
     fn fault(&mut self, error: QuestionFault) {
+        if matches!(
+            error,
+            QuestionFault::InputUnavailable | QuestionFault::Exhausted
+        ) {
+            // No successfully observed pack describes this failed admission.
+            // In particular, do not pair an old revision with a new coarse epoch.
+            self.version = None;
+        }
         self.stats.framework_faults = self.stats.framework_faults.saturating_add(1);
         self.control().current.store(0, Ordering::Release);
         self.gate.cancel();
@@ -281,7 +334,6 @@ where
         let completion = Completion {
             controller: Some(self.control().clone()),
             stamp: Some(work.stamp),
-            version: work.version,
         };
         self.stats.dispatched = self.stats.dispatched.saturating_add(1);
         match catch_unwind(AssertUnwindSafe(|| {
@@ -305,28 +357,33 @@ where
         sources: &Sources<M>,
         applied: &mut usize,
     ) -> Result<(), crate::Error> {
-        let current = match self.source.borrow_registered(model, sources) {
-            Ok(signal) => signal,
+        // The request stamp uniquely selects the current owner's inline pack.
+        // No duplicate version vector crosses the worker boundary.
+        let current = self
+            .inputs
+            .resolve(model, sources, &self.tail)
+            .map(|current| {
+                (
+                    current.version,
+                    matches!(current.availability, Availability::Ready(_)),
+                )
+            });
+        let (version, ready) = match current {
+            Ok(current) => current,
             Err(error) => {
                 self.fault(QuestionFault::InputUnavailable);
                 *applied += 1;
-                return Err(error.into());
+                return Err(error);
             }
         };
-        if Some(message.version) == self.version && message.version.revision != current.revision() {
-            // A nested/externally changed source may be discovered here
-            // even when a different exact edit did not refresh this slot.
-            // Its current ticket cannot become Ready or remain Pending
-            // after its only physical completion has already terminated.
+        let current_ticket = message.stamp.ticket() == self.ticket;
+        if current_ticket && (Some(version) != self.version || !ready) {
             self.fault(QuestionFault::InputUnavailable);
             self.stats.stale_results = self.stats.stale_results.saturating_add(1);
             *applied += 1;
             return Ok(());
         }
-        if Some(message.version) == self.version
-            && message.version.revision == current.revision()
-            && self.gate.accept(&message.stamp).is_ok()
-        {
+        if current_ticket && self.gate.accept(&message.stamp).is_ok() {
             self.state = match message.value {
                 Ok(value) => State::Ready(value),
                 Err(error) => {
@@ -341,6 +398,31 @@ where
         }
         Ok(())
     }
+    // Finish all borrowed resolution/freezing before mutating owner state.
+    // The generic borrowed family may have a destructor, so this boundary also
+    // makes its lifetime independent of the retained owned input.
+    fn freeze_input(
+        &self,
+        model: &M,
+        sources: &Sources<M>,
+        force: bool,
+    ) -> Result<Option<Frozen<A::Versions, I>>, crate::Error> {
+        let resolved = self.inputs.resolve(model, sources, &self.tail)?;
+        if !force && self.version == Some(resolved.version) {
+            return Ok(None);
+        }
+        let input = match resolved.availability {
+            Availability::Ready(value) => {
+                FrozenInput::Ready((self.freeze.as_ref().expect("live question"))(value))
+            }
+            Availability::Pending => FrozenInput::Pending,
+            Availability::Fault => FrozenInput::Fault,
+        };
+        Ok(Some(Frozen {
+            version: resolved.version,
+            input,
+        }))
+    }
     fn refresh_self(
         &mut self,
         model: &M,
@@ -348,8 +430,10 @@ where
         change: Change,
     ) -> Result<bool, crate::Error> {
         match change {
-            Change::Source(Some(field)) if field != self.source.id() => return Ok(false),
-            Change::Retry(key) if key != self.key => return Ok(false),
+            Change::Source(Some(field)) if !A::READERS && !self.inputs.contains(field) => {
+                return Ok(false);
+            }
+            Change::Retry(key) if key != self.key && !A::READERS => return Ok(false),
             Change::Source(None) => {
                 let Some(next) = self.coarse.checked_add(1) else {
                     self.fault(QuestionFault::Exhausted);
@@ -358,7 +442,7 @@ where
                 };
                 self.coarse = next;
             }
-            Change::Retry(_) => {
+            Change::Retry(key) if key == self.key => {
                 let Some(next) = self.policy.checked_add(1) else {
                     self.fault(QuestionFault::Exhausted);
                     self.gate.revoke();
@@ -368,21 +452,20 @@ where
             }
             _ => {}
         }
-        let signal = match self.source.borrow_registered(model, sources) {
-            Ok(signal) => signal,
+        let force = matches!(change, Change::Mount | Change::Source(None))
+            || matches!(change, Change::Retry(key) if key == self.key);
+        let frozen = match self.freeze_input(model, sources, force) {
+            Ok(Some(frozen)) => frozen,
+            Ok(None) => return Ok(false),
             Err(error) => {
                 self.fault(QuestionFault::InputUnavailable);
-                return Err(error.into());
+                return Err(error);
             }
         };
-        let input = (self.freeze.as_ref().expect("live question"))(signal);
-        self.stats.frozen = self.stats.frozen.saturating_add(1);
-        let version = InputVersion {
-            field: self.source.id(),
-            revision: signal.revision(),
-            coarse: self.coarse,
-            policy: self.policy,
-        };
+        let Frozen { version, input } = frozen;
+        if matches!(input, FrozenInput::Ready(_)) {
+            self.stats.frozen = self.stats.frozen.saturating_add(1);
+        }
         let stamp = match self.gate.begin() {
             Ok(stamp) => stamp,
             Err(_) => {
@@ -392,17 +475,32 @@ where
         };
         self.ticket = stamp.ticket();
         self.version = Some(version);
-        self.control().current.store(self.ticket, Ordering::Release);
+        self.control().current.store(
+            if matches!(input, FrozenInput::Ready(_)) {
+                self.ticket
+            } else {
+                0
+            },
+            Ordering::Release,
+        );
         if matches!(self.state, State::Pending(_)) {
             self.stats.superseded = self.stats.superseded.saturating_add(1);
         }
         let previous = self.state.take_previous();
-        self.state = State::Pending(previous);
-        self.pending = Some(Work {
-            input,
-            stamp,
-            version,
-        });
+        match input {
+            FrozenInput::Ready(input) => {
+                self.state = State::Pending(previous);
+                self.pending = Some(Work { input, stamp });
+            }
+            FrozenInput::Pending => {
+                self.state = State::Pending(previous);
+                self.pending = None;
+            }
+            FrozenInput::Fault => {
+                self.state = State::Fault(StoredFault::Dependency, previous);
+                self.pending = None;
+            }
+        }
         if !matches!(change, Change::Mount) {
             self.start_pending();
         }
@@ -412,16 +510,16 @@ where
 
 impl<
     M: 'static,
-    V: 'static,
+    A: QuestionInputs<M>,
     I: Send + 'static,
     T: Send + 'static,
     E: std::error::Error + Send + 'static,
     F,
     S,
     L: LaneSet<M>,
-> LaneSet<M> for QuestionLane<M, V, I, T, E, F, S, L>
+> LaneSet<M> for QuestionLane<M, A, I, T, E, F, S, L>
 where
-    F: Fn(&V) -> I,
+    F: for<'a> Fn(A::Borrowed<'a>) -> I,
     S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
 {
     const EMPTY: bool = false;
@@ -459,8 +557,9 @@ where
         sources: &Sources<M>,
         change: Change,
     ) -> Result<bool, crate::Error> {
-        let own = self.refresh_self(model, sources, change)?;
-        Ok(self.tail.refresh(model, sources, change)? || own)
+        let tail = self.tail.refresh(model, sources, change);
+        let own = self.refresh_self(model, sources, change);
+        tail.and_then(|tail| own.map(|own| tail || own))
     }
     fn apply_questions(
         &mut self,
@@ -468,12 +567,21 @@ where
         sources: &Sources<M>,
         applied: &mut usize,
     ) -> Result<(), crate::Error> {
-        let mut binding_error = None;
+        let mut binding_error = self.tail.apply_questions(model, sources, applied).err();
+        if A::READERS
+            && let Err(error) = self.refresh_self(model, sources, Change::Dependencies)
+            && binding_error.is_none()
+        {
+            binding_error = Some(error);
+        }
         if let Some(terminal) = self.staged_terminal.take() {
             // The staged terminal seals this response across ordinary callbacks.
             // Take only now, before retiring the physical credit.
             if let Some(message) = self.control().mailbox.take() {
-                binding_error = self.apply_response(message, model, sources, applied).err();
+                let own = self.apply_response(message, model, sources, applied).err();
+                if binding_error.is_none() {
+                    binding_error = own;
+                }
             }
             let ticket = self
                 .running_ticket
@@ -493,13 +601,12 @@ where
             }
             *applied += usize::from(self.start_pending());
         }
-        let tail = self.tail.apply_questions(model, sources, applied);
         // A checked binding rejection must still retire the physical lease.
         // Otherwise its already-staged terminal would have no next wake.
         if let Some(error) = binding_error {
             return Err(error);
         }
-        tail
+        Ok(())
     }
     fn close(&mut self) {
         self.gate.revoke();
@@ -545,6 +652,9 @@ pub struct QuestionSet<Q, L> {
 impl<Q: ReaderValues, L: ReaderValues> ReaderValues for QuestionSet<Q, L> {
     fn read(&self, key: ReaderKey) -> Option<Outcome<'_>> {
         self.lanes.read(key).or_else(|| self.tail.read(key))
+    }
+    fn visit_inputs(&self, key: ReaderKey, visit: &mut impl FnMut(QuestionInput)) -> bool {
+        self.lanes.visit_inputs(key, visit) || self.tail.visit_inputs(key, visit)
     }
 }
 impl<Q, L> sealed::Sealed for QuestionSet<Q, L> {}
@@ -616,6 +726,7 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Source;
     use std::convert::Infallible;
     struct Model {
         value: crate::Signal<u32>,
@@ -687,13 +798,17 @@ mod tests {
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         // Simulate a checked projection mismatch without invoking unsafe code or
         // constructing a forged request stamp. No rejected value is admitted.
-        plan.lanes.source = Source::new(FieldId::new(1), "value", |m| &m.other, |m| &mut m.other);
+        plan.lanes.inputs = Source::new(FieldId::new(1), "value", |m| &m.other, |m| &mut m.other);
         assert!(
             plan.lanes
                 .apply_questions(&model, &sources, &mut 0)
                 .is_err()
         );
         assert!(plan.lanes.running_ticket.is_none());
+        assert!(
+            plan.lanes.version.is_none(),
+            "rejected binding must not fabricate a diagnostic pack"
+        );
         assert!(plan.lanes.control().mailbox.idle());
     }
     #[test]
@@ -741,6 +856,17 @@ mod tests {
         assert_eq!(
             plan.lanes.read(reader.key).unwrap().info.status,
             QuestionStatus::Ready
+        );
+    }
+    #[test]
+    fn input_family_owner_record_ledger() {
+        println!(
+            "owner_record,State_u64_infallible={},Work_u64={},Source_version={},Reader_version={},QuestionInfo={}",
+            size_of::<State<u64, Infallible>>(),
+            size_of::<Work<u64>>(),
+            size_of::<Option<Revision>>(),
+            size_of::<Option<super::inputs::ReaderVersion>>(),
+            size_of::<QuestionInfo>()
         );
     }
 }
