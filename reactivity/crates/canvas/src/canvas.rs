@@ -84,6 +84,103 @@ impl Mapping {
                 + 1.0)
     }
 }
+/// Lower an axis-aligned transformed rectangle to this canvas's fixed 4×4
+/// sample lattice, intersected with `parent` and the physical viewport.
+///
+/// The returned rectangle is a raster clip, not continuous geometry for input
+/// or accessibility. Its quarter-pixel endpoints select exactly the samples
+/// selected by the ordinary canvas's finite inverse predicate, including
+/// reflections and inverse/forward rounding ties. A different sampling quality
+/// must re-lower the original geometry instead of reusing this clip.
+pub fn sampled_rect_clip(
+    transform: Affine,
+    rect: Rect,
+    parent: Rect,
+    viewport: [u32; 2],
+) -> Result<Rect, Error> {
+    validate_rect(rect)?;
+    validate_rect(parent)?;
+    let [width, height] = viewport;
+    let pixels = u64::from(width) * u64::from(height);
+    if pixels == 0 || pixels > MAX_PIXELS as u64 || width > 16_384 || height > 16_384 {
+        return Err(Error::InvalidDimensions);
+    }
+    if transform.b != 0.0 || transform.c != 0.0 {
+        return Err(Error::InvalidGeometry);
+    }
+    let map = Mapping::new(transform)?;
+    if rect.is_empty() || parent.is_empty() {
+        return Ok(Rect::default());
+    }
+    fn lower_bound(count: u32, mut predicate: impl FnMut(u32) -> bool) -> u32 {
+        let (mut low, mut high) = (0, count);
+        while low < high {
+            let mid = low + (high - low) / 2;
+            if predicate(mid) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        low
+    }
+    let mut intervals = [[0; 2]; 2];
+    for (axis, interval) in intervals.iter_mut().enumerate() {
+        let (minimum, extent, clip_start, clip_extent, side) = if axis == 0 {
+            (rect.x, rect.width, parent.x, parent.width, width)
+        } else {
+            (rect.y, rect.height, parent.y, parent.height, height)
+        };
+        let minimum = f64::from(minimum);
+        let maximum = minimum + f64::from(extent);
+        let clip_start = f64::from(clip_start);
+        let clip_end = clip_start + f64::from(clip_extent);
+        let increasing = map.inverse[if axis == 0 { 0 } else { 3 }] > 0.0;
+        let local = |world: f64| {
+            // Use the same finite multiply/add order as ordinary sample().
+            // Off-diagonal coefficients are ±0: the other positive sample
+            // coordinate cannot affect membership, including signed-zero ties.
+            let point = if axis == 0 {
+                map.local(world, 0.125)
+            } else {
+                map.local(0.125, world)
+            };
+            if axis == 0 { point.0 } else { point.1 }
+        };
+        let first = lower_bound(side * 4, |index| {
+            let world = f64::from(index) * 0.25 + 0.125;
+            world >= clip_start
+                && if increasing {
+                    local(world) >= minimum
+                } else {
+                    local(world) < maximum
+                }
+        });
+        let end = lower_bound(side * 4, |index| {
+            let world = f64::from(index) * 0.25 + 0.125;
+            world >= clip_end
+                || if increasing {
+                    local(world) >= maximum
+                } else {
+                    local(world) < minimum
+                }
+        });
+        if end <= first {
+            return Ok(Rect::default());
+        }
+        *interval = [first, end];
+    }
+    let [[left, right], [top, bottom]] = intervals;
+    // Midpoints between lattice samples preserve ordinary integer clip edges.
+    // Every integer here is <=65536, so all products/sums are exact in f32.
+    Ok(Rect::new(
+        left as f32 * 0.25,
+        top as f32 * 0.25,
+        (right - left) as f32 * 0.25,
+        (bottom - top) as f32 * 0.25,
+    ))
+}
+
 // One source of retained draw order. Compact typed lanes share text-run state;
 // the renderer and exported scene resolve the same checked private addresses.
 const INLINE_DRAW: u32 = 1 << 31;

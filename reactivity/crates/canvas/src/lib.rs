@@ -6,7 +6,7 @@ mod color;
 mod text;
 pub use canvas::{
     Canvas, CanvasScene, GlyphMask, PreparedDraw, PreparedGroup, PreparedPlacement, PreparedScene,
-    RenderStats, SceneStorage,
+    RenderStats, SceneStorage, sampled_rect_clip,
 };
 pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
