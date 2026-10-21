@@ -1,0 +1,26 @@
+{
+  "source": "788dbce027167c686003542b0ae0b7f342efadde",
+  "status": "rejected_after_valid_three_way_application_controls",
+  "default": {
+    "command": "cargo test --manifest-path reactivity/Cargo.toml --locked -p gpui",
+    "cases": 245,
+    "doctests": 19,
+    "failed": 0,
+    "ignored": 6,
+    "log": "default-tests.log"
+  },
+  "native_clippy": {
+    "command": "cargo clippy --manifest-path reactivity/Cargo.toml --locked -p gpui --features x11,wayland --all-targets -- -D warnings",
+    "exit_code": 0,
+    "log": "native-clippy.log"
+  },
+  "controls": {
+    "fixture_rows": 1890,
+    "app_rows": 1125,
+    "accepted": true,
+    "all_guards_passed": true,
+    "storage_equal_all_variants": true,
+    "directory": "serial-quiet-20261021"
+  },
+  "native_runtime_tests_run": false
+}
