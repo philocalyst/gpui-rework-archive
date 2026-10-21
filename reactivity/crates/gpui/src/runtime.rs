@@ -19,6 +19,7 @@ use crate::{
     Target, View,
     element::{Handler, NodeKind},
     identity::Sites,
+    property::{Contribution, Overrides, Property, PropertyError},
     source::{BindError, FieldId, Source, Sources, TextCodec, TextEditError},
     style::{Color, Flow, Style},
 };
@@ -61,6 +62,7 @@ pub enum Error {
     TextEdit(TextEditError),
     Layout(LayoutError),
     Canvas(gpui_canvas::Error),
+    Property(PropertyError),
     Serialization(String),
 }
 impl std::fmt::Display for Error {
@@ -87,6 +89,11 @@ impl From<gpui_canvas::Error> for Error {
 impl From<TextEditError> for Error {
     fn from(error: TextEditError) -> Self {
         Self::TextEdit(error)
+    }
+}
+impl From<PropertyError> for Error {
+    fn from(error: PropertyError) -> Self {
+        Self::Property(error)
     }
 }
 
@@ -261,6 +268,7 @@ struct Runtime<M> {
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
     sites: Sites,
+    overrides: Overrides,
     layout: LayoutTree,
     layout_nodes: Vec<NodeId>,
     layout_dirty: BTreeSet<u64>,
@@ -311,6 +319,7 @@ impl<M: View + 'static> Win<M> {
             fanout: BTreeMap::new(),
             next_identity: 1,
             sites: Sites::new(),
+            overrides: Overrides::default(),
             layout: LayoutTree::new(),
             layout_nodes: Vec::new(),
             layout_dirty: BTreeSet::new(),
@@ -460,6 +469,14 @@ impl<M: View + 'static> Win<M> {
         Ok(())
     }
     pub fn snapshot(&self) -> Result<Snapshot, Error> {
+        self.snapshot_with_targets(false)
+    }
+    /// Inspect every live site, including noninteractive containers. Address
+    /// records are allocated only when explicitly requested by an inspector.
+    pub fn inspect(&self) -> Result<Snapshot, Error> {
+        self.snapshot_with_targets(true)
+    }
+    fn snapshot_with_targets(&self, all_targets: bool) -> Result<Snapshot, Error> {
         let mut runtime = self.borrow()?;
         let mut nodes = Vec::with_capacity(runtime.presented.len());
         for index in 0..runtime.presented.len() {
@@ -484,7 +501,11 @@ impl<M: View + 'static> Win<M> {
                     .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty]),
                 target: None,
             };
-            if actionable && runtime.logical_valid && !runtime.poisoned {
+            if (all_targets || actionable)
+                && runtime.by_identity.contains_key(&identity)
+                && runtime.logical_valid
+                && !runtime.poisoned
+            {
                 snapshot.target = Some(runtime.sites.target(identity));
             }
             nodes.push(snapshot);
@@ -496,6 +517,59 @@ impl<M: View + 'static> Win<M> {
             poisoned: runtime.poisoned,
             nodes,
         })
+    }
+    /// Current logical property; the complete displayed sheet may lag after a
+    /// presentation error. Inspect its epoch before using displayed geometry.
+    pub fn property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
+        let runtime = self.borrow()?;
+        runtime.live()?;
+        let identity = runtime.resolve(target)?;
+        Ok(property.get(&runtime.nodes[runtime.by_identity[&identity]].style))
+    }
+    pub fn contribution<T>(
+        &self,
+        target: Target,
+        property: Property<T>,
+    ) -> Result<Contribution<T>, Error> {
+        let runtime = self.borrow()?;
+        runtime.live()?;
+        let identity = runtime.resolve(target)?;
+        Ok(runtime.overrides.get(identity, property))
+    }
+    /// A typed inspector contribution. Validation precedes editing; inheritance
+    /// removes the contribution and reveals the latest component declaration.
+    pub fn set_property<T: PartialEq>(
+        &self,
+        target: Target,
+        property: Property<T>,
+        contribution: Contribution<T>,
+    ) -> Result<Commit, Error> {
+        let mut runtime = self.borrow()?;
+        runtime.live()?;
+        let identity = runtime.resolve(target)?;
+        let epoch = runtime
+            .source_epoch
+            .checked_add(1)
+            .ok_or(Error::EpochExhausted)?;
+        let index = runtime.by_identity[&identity];
+        let before = runtime.nodes[index].style;
+        let after = runtime
+            .overrides
+            .set(identity, before, property, contribution)?;
+        runtime.source_epoch = epoch;
+        runtime.counters.source_operations += 1;
+        runtime.changed_nodes = usize::from(before != after);
+        if before != after {
+            if layout_changed(before, after) {
+                runtime.layout_dirty.insert(identity);
+            }
+            if before.font_size != after.font_size {
+                runtime.nodes[index].shaped = None;
+            }
+            runtime.nodes[index].style = after;
+            runtime.dirty = true;
+        }
+        runtime.present()
     }
     pub fn try_button(&self, label: &str) -> Result<Target, Error> {
         self.find(NodeKind::Button, Some(label))
@@ -847,14 +921,15 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
                 node_changed = true;
             }
-            if node.style != draft.style {
+            let style = self.overrides.resolve(node.identity, draft.style);
+            if node.style != style {
                 self.dirty = true;
                 node_changed = true;
             }
-            if layout_changed(node.style, draft.style) {
+            if layout_changed(node.style, style) {
                 self.layout_dirty.insert(node.identity);
             }
-            if node.style.font_size != draft.style.font_size {
+            if node.style.font_size != style.font_size {
                 node.shaped = None;
             }
             if node.handler.is_some() != draft.on_click.is_some() {
@@ -865,7 +940,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             node.parent = parent;
             node.ordinal = ordinal;
-            node.style = draft.style;
+            node.style = style;
             node.field = fields[index];
             node.handler = draft.on_click;
             changed += usize::from(node_changed);
@@ -888,6 +963,8 @@ impl<M: View + 'static> Runtime<M> {
             .map(|(i, node)| (node.identity, i))
             .collect();
         self.sites.retain(&self.by_identity);
+        self.overrides
+            .retain(|identity| self.by_identity.contains_key(&identity));
         self.logical_valid = true;
         self.changed_nodes = changed;
         Ok(())
