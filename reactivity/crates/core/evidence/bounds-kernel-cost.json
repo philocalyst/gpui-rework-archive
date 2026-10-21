@@ -1,0 +1,29 @@
+{
+  "executables": {
+    "baseline": [
+      {
+        "path": "/tmp/gpui-bounds-baseline-consumer",
+        "sha256": "05a3fb94be512ac8d0cd62868fd0ceda83833009662ab7920720a4c0f1d25e04"
+      },
+      {
+        "path": "/tmp/gpui-bounds-baseline-gpui-consumer",
+        "sha256": "397a301d3ad76e6fd09b95166ff92acb7f8dce4f81b59f28b1604953eedebd9e"
+      }
+    ],
+    "candidate": [
+      {
+        "path": "/tmp/gpui-bounds-candidate-consumer",
+        "sha256": "d1c2c7680e13fddd253233632937ace2cc4808b3c858d8efbcac76c295462271"
+      },
+      {
+        "path": "/tmp/gpui-bounds-candidate-gpui-consumer",
+        "sha256": "36183a238713a891ee3f6b6d0e86524e4c6fb56ea8b558bd3ea876af01084d70"
+      }
+    ]
+  },
+  "cpu": 2,
+  "pairs": 7,
+  "platform": "Linux-6.18.54-x86_64-with-glibc2.42",
+  "source": "27552412edaea1a8d2abac93ea650e3fc35d4788",
+  "scope": "Core public calls and ordinary downstream Win::visit. Mount/raster/native startup are outside timed loops."
+}

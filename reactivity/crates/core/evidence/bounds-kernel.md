@@ -52,7 +52,7 @@ reused endpoint products: six scalar and one packed multiplication likewise
 represent eight multiply lanes. It then performs sixteen scalar corner
 additions and eight min/eight max reductions. The implemented reduction is in
 corner additions and reductions; it does not halve actual emitted
-multiplications. There is no timing claim yet.
+multiplications. Arithmetic counts alone establish no timing improvement.
 
 The checked-in consumers compile against ordinary release rlibs in independent
 baseline/candidate Cargo targets. Optional timing loops keep setup, trig,
@@ -63,3 +63,53 @@ transforms. These measure call/visitor work, not native startup or full frames.
 The capture helper alternates fresh-process order and records every row,
 binary hash and current source commit. Run it only in an explicitly coordinated
 quiet CPU window.
+
+## Paired measurement and decision
+
+Reject this formulation for adoption on the measured target. Correctness and
+fewer corner additions/reductions do not establish a latency improvement.
+All seven pairs lose on ordinary finite core calls and each public visitor
+control. No further source variant or retiming is folded into these results.
+
+The frozen source is `27552412edaea1a8d2abac93ea650e3fc35d4788`, compared
+with baseline `b60af3a4f9` in a separate worktree/target. The capture checked
+clean source, every source-file hash, and all four executable hashes before
+starting. Root, production and research peers explicitly held heavy work for
+this window and were released immediately after capture. The helper ran seven
+alternating fresh-process pairs pinned to CPU 2 on the AMD Ryzen 7 3700X,
+using the same Rust 1.97.1 release consumers described above. All output
+digests/counts matched. The complete [84 raw rows](bounds-kernel-cost.csv),
+[capture pins](bounds-kernel-cost.json), [codegen pins](bounds-kernel-codegen.json)
+and [paired summary](bounds-kernel-summary.csv) are retained.
+
+| Operation | Baseline median | Candidate median | Median paired change | Paired range |
+| --- | ---: | ---: | ---: | ---: |
+| Finite rotated core call | 20.877 ns | 22.398 ns | +7.25% | +6.28 to +7.87% |
+| Empty core admission | 7.399 ns | 7.139 ns | -3.49% | -4.26 to -3.03% |
+| Composed-overflow fallback call | 16.364 ns | 22.363 ns | +36.46% | +34.96 to +37.28% |
+| 4,097-node common-transform visit | 93.329 µs | 97.409 µs | +4.20% | +3.63 to +7.74% |
+| 4,097-node two-transform visit | 93.672 µs | 97.751 µs | +4.49% | +3.04 to +5.01% |
+| 4,097-node unique-transform visit | 93.209 µs | 97.366 µs | +4.30% | +3.71 to +4.82% |
+
+Each core row times 1,280,000 public calls per process over a prebuilt
+256-case subset. Each visitor row times 100 ordinary public visits after
+construction and the initial render, requesting transform, local bounds and
+unclipped bounds for every node. Medians are per-variant operation times;
+percentage columns are medians/ranges of the seven within-pair ratios, so they
+need not equal the ratio of the displayed medians. These are call/visitor
+measurements, not full-frame or native application latency claims.
+
+The common-path source removes arithmetic, but emitted sign-mask selection and
+the finite-result guard add real work. These costs are consistent with the loss;
+this capture does not separately attribute cycles to each instruction class.
+The fallback additionally evaluates selected endpoints before rerunning the
+original reducer. Empty admission executes no endpoint work; its small win
+cannot be attributed to the new mathematical formulation.
+
+The retained owner/node/description layouts and allocation behavior are
+unchanged. Neither emitted callee reserves stack or calls another function.
+The core-only callee adds 210 B; the regular GPUI callee adds 214 B. Linked
+`.text` grows 261,395 to 261,603 B in the core consumer and 2,894,855 to
+2,895,063 B in the GPUI consumer, with no public visitor/wrapper size change.
+Keep the production kernel unchanged on main unless a later independently
+measured formulation improves these controls.
