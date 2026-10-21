@@ -179,37 +179,62 @@ fn consumer_validates_topology_names_values_full_geometry_and_live_focus() {
 
 #[test]
 fn scalar_text_run_has_exact_utf8_lengths_and_no_fabricated_selection() {
-    let value = "aé🦀";
-    let mut root = Node::new(accesskit::Role::Window);
-    root.push_child(NodeId(2));
-    let mut input = Node::new(accesskit::Role::TextInput);
-    input.set_value(value);
-    input.push_child(NodeId(3));
-    input.add_action(accesskit::Action::SetValue);
-    let run = text_run(value);
-    assert_eq!(run.character_lengths(), &[1, 2, 4]);
-    assert!(run.character_positions().is_none());
-    let tree = Tree::new(
-        TreeUpdate {
-            nodes: vec![(ROOT, root), (NodeId(2), input), (NodeId(3), run)],
-            tree: Some(TreeInfo::new(ROOT)),
-            tree_id: TreeId::ROOT,
-            focus: NodeId(2),
-        },
-        true,
-    );
-    let input = tree
-        .state()
-        .node_by_tree_local_id(NodeId(2), TreeId::ROOT)
-        .unwrap();
-    assert!(input.supports_text_ranges());
-    assert_eq!(input.document_range().text(), value);
-    assert!(input.raw_text_selection().is_none());
-    assert!(
-        !input
-            .data()
-            .supports_action(accesskit::Action::SetTextSelection)
-    );
+    for (value, lengths) in [("aé🦀", &[1, 2, 4][..]), ("aé🦀\r\n", &[1, 2, 4, 2][..])] {
+        let mut root = Node::new(accesskit::Role::Window);
+        root.push_child(NodeId(2));
+        let mut input = Node::new(accesskit::Role::TextInput);
+        input.set_value(value);
+        input.push_child(NodeId(3));
+        input.add_action(accesskit::Action::SetValue);
+        let run = text_run(value);
+        assert_eq!(run.character_lengths(), lengths);
+        assert!(run.character_positions().is_none());
+        let tree = Tree::new(
+            TreeUpdate {
+                nodes: vec![(ROOT, root), (NodeId(2), input), (NodeId(3), run)],
+                tree: Some(TreeInfo::new(ROOT)),
+                tree_id: TreeId::ROOT,
+                focus: NodeId(2),
+            },
+            true,
+        );
+        let input = tree
+            .state()
+            .node_by_tree_local_id(NodeId(2), TreeId::ROOT)
+            .unwrap();
+        assert!(input.supports_text_ranges());
+        assert_eq!(input.document_range().text(), value);
+        assert!(input.raw_text_selection().is_none());
+        assert!(
+            !input
+                .data()
+                .supports_action(accesskit::Action::SetTextSelection)
+        );
+    }
+}
+
+#[test]
+fn native_text_boundaries_keep_crlf_together_and_cover_every_utf8_byte() {
+    for (value, lengths) in [
+        ("", &[][..]),
+        ("\r\n", &[2][..]),
+        ("\r\n\r\n", &[2, 2][..]),
+        ("aé🦀\r\n", &[1, 2, 4, 2][..]),
+        ("a\rb\n", &[1, 1, 1, 1][..]),
+        ("\r\r\n", &[1, 2][..]),
+        ("\n\r", &[1, 1][..]),
+    ] {
+        let run = text_run(value);
+        assert_eq!(run.character_lengths(), lengths, "{value:?}");
+        let mut offset = 0;
+        for &length in run.character_lengths() {
+            offset += usize::from(length);
+            assert!(value.is_char_boundary(offset), "{value:?} at {offset}");
+        }
+        assert_eq!(offset, value.len(), "{value:?}");
+        assert!(run.character_positions().is_none());
+        assert!(!run.supports_action(accesskit::Action::SetTextSelection));
+    }
 }
 
 #[test]
@@ -415,8 +440,7 @@ fn semantic_only_change_advances_p_epoch_at_the_same_scene_token() {
     );
 }
 
-#[path = "../../../examples/support/library.rs"]
-mod library;
+use crate::native::test_library as library;
 
 #[test]
 fn library_projects_bounded_frozen_count_positions_and_never_resurrects_ids() {

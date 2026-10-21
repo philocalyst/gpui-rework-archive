@@ -56,7 +56,8 @@ not a claimed property of this implementation.
 Real nodes use checked even IDs derived from the window's nonreused retained
 identity. Zero names the synthetic window root. An input uses its adjacent odd
 ID for a native-only `TextRun`; exact UTF-8 byte lengths describe the existing
-editor's Unicode scalar units. The bridge rejects identities beyond `u64::MAX/2`
+editor's scalar units, with CRLF counted as one unit as AccessKit requires.
+The bridge rejects identities beyond `u64::MAX/2`
 with `ResourceLimit`. No public Target changes, historical ID map, or model
 address is involved.
 

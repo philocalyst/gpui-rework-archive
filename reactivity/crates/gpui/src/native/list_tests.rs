@@ -9,9 +9,7 @@ use winit::{
     platform::x11::EventLoopBuilderExtX11,
 };
 
-#[path = "../../examples/support/library.rs"]
-mod library;
-use library::{LIBRARY, Library, catalogue::TrackId};
+use super::test_library::{LIBRARY, Library, catalogue::TrackId};
 
 fn play(owner: &Win<Library>, key: u64) -> Target {
     let row = owner

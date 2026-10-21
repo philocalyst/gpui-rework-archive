@@ -7,6 +7,7 @@ drivers/display. Their absence never produces a passing graphics result.
 
 import argparse
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -36,6 +37,12 @@ checks = [
               "--test", "loom_protocol"]),
     ("native-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
                       "gpui", "--features", "x11,wayland", "--all-targets"]),
+    ("native-minimal-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
+                              "gpui", "--features", "x11-minimal,wayland-minimal", "--all-targets"]),
+    ("native-clippy", ["cargo", "clippy", *MANIFEST, "--locked", "-p", "gpui",
+                       "--features", "x11,wayland", "--all-targets", "--", "-D", "warnings"]),
+    ("accessibility-schema", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                              "--features", "x11,wayland", "--lib", "native::accessibility::tests"]),
     ("parallel-canvas", ["cargo", "test", *MANIFEST, "--locked", "-p",
                          "gpui_canvas", "--features", "parallel"]),
     ("layout-example", ["cargo", "run", *MANIFEST, "--locked", "-p",
@@ -47,6 +54,9 @@ checks = [
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--vulkan", action="store_true", help="require actual Vulkan readback conformance")
 parser.add_argument("--native-x11", action="store_true", help="require actual X11 native port/lifecycle execution")
+parser.add_argument("--native-atspi", action="store_true", help="require actual AT-SPI client and absent-bus native execution")
+parser.add_argument("--atspi-launcher", default=os.environ.get("GPUI_AT_SPI_LAUNCHER"),
+                    help="executable at-spi-bus-launcher path for --native-atspi")
 args = parser.parse_args()
 if args.vulkan:
     checks.append(("gpu-vulkan", ["cargo", "test", *MANIFEST, "--locked", "-p",
@@ -61,6 +71,16 @@ if args.native_x11:
     checks.append(("native-library", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
                                      "--features", "x11", "native_library_250k", "--", "--ignored",
                                      "--nocapture", "--test-threads=1"]))
+if args.native_atspi:
+    if not args.atspi_launcher or not os.access(args.atspi_launcher, os.X_OK):
+        parser.error("--native-atspi requires an executable --atspi-launcher or GPUI_AT_SPI_LAUNCHER")
+    checks.append(("native-atspi", ["bash", "reactivity/tools/test_atspi.sh",
+                                    str(pathlib.Path(args.atspi_launcher).resolve())]))
+    checks.append(("native-no-bus", ["env", "DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/gpui-no-session-bus",
+                                     "cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                     "--features", "x11", "--lib",
+                                     "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
+                                     "--", "--ignored", "--exact", "--nocapture"]))
 
 EVIDENCE.mkdir(exist_ok=True)
 report = []
@@ -74,7 +94,8 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
-    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-library"):
+    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-library",
+                "native-atspi", "native-no-bus", "accessibility-schema"):
         entry["passed_tests"] = sum(int(count) for count in re.findall(
             r"test result: ok\. (\d+) passed;", log))
         if result.returncode == 0 and entry["passed_tests"] == 0:

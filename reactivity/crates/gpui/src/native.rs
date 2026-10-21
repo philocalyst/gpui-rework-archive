@@ -25,7 +25,21 @@ use crate::{
 mod accessibility;
 mod upgrade;
 
-#[cfg(all(test, feature = "x11", target_os = "linux"))]
+#[cfg(all(
+    test,
+    any(
+        feature = "accessibility",
+        all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))
+    )
+))]
+#[path = "../examples/support/library.rs"]
+mod test_library;
+
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
 mod list_tests;
 
 #[derive(Debug)]

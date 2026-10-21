@@ -6,6 +6,6 @@ if [[ "$(uname -s)" != Darwin ]]; then
 fi
 presentation_workspace=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd -- "$presentation_workspace"
-cargo check --locked -p gpui --features native
+cargo check --locked -p gpui --features desktop
 # These binaries deliberately use harness=false: AppKit belongs on process main.
 cargo test --locked -p gpui_presenter_tests --test apple_metal_layers --test apple_software_layers

@@ -426,13 +426,21 @@ fn renamed_text(part: Part<'_>) -> bool {
 fn text_run(value: &str) -> Node {
     let mut node = Node::new(accesskit::Role::TextRun);
     node.set_value(value);
-    // The existing editor's unit is one Unicode scalar, not a grapheme. Each
-    // length is its exact UTF-8 byte count (1..=4), not an invented glyph metric.
+    // The editor currently uses scalars, not graphemes. AccessKit additionally
+    // requires a CRLF line ending to be one character with two UTF-8 bytes.
+    // This supplies text boundaries, never glyph metrics or selection support.
+    let mut chars = value.chars();
     node.set_character_lengths(
-        value
-            .chars()
-            .map(|c| c.len_utf8() as u8)
-            .collect::<Vec<_>>(),
+        std::iter::from_fn(|| {
+            let c = chars.next()?;
+            Some(if c == '\r' && chars.as_str().starts_with('\n') {
+                chars.next();
+                2
+            } else {
+                c.len_utf8() as u8
+            })
+        })
+        .collect::<Vec<_>>(),
     );
     node
 }

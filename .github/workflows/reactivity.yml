@@ -20,9 +20,9 @@ jobs:
           - os: ubuntu-latest
             features: x11,wayland
           - os: macos-latest
-            features: native
+            features: desktop
           - os: windows-latest
-            features: native
+            features: desktop
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -50,6 +50,8 @@ jobs:
         run: cargo test --locked -p gpui_canvas --features parallel
       - name: Native platform compilation and lint
         run: cargo clippy --locked -p gpui --features ${{ matrix.features }} --all-targets -- -D warnings
+      - name: Native accessibility schema and action protocol
+        run: cargo test --locked -p gpui --features ${{ matrix.features }} --lib native::accessibility::tests
       - name: Build native application ports
         run: cargo build --locked --release -p gpui --features ${{ matrix.features }} --examples
       - name: Present actual native content through software and Auto
