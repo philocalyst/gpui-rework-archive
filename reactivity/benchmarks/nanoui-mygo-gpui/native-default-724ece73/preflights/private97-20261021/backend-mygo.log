@@ -1,0 +1,11 @@
+X11_VISUAL,33,16711680,65280,255
+2026/10/21 16:39:23 mygo: native UI draws without the GPU: there is none
+2026/10/21 16:39:23 mygo: frame 1 took 2.3 ms: build 0.3, layout 1.0, paint 0.4, present 0.6 (drawn in memory), other 0.0; meanwhile the process made about 54 allocations, 87.6 KB, 4 text layouts; no GC
+STARTUP,0,55208434,4292613150
+WINDOW,0,800,600
+STARTUP_P50_NS,1,55208434
+STARTUP_P95_NS,1,55208434
+STARTUP_P99_NS,1,55208434
+CLICK_P50_NS,0,NA
+CLICK_P95_NS,0,NA
+CLICK_P99_NS,0,NA

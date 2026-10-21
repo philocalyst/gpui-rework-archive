@@ -1,0 +1,9 @@
+bfcf29736b7ffd24d08891219f1897a2f046bc63cd4d17c463ab0ac77414a39a  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/gpui-eager-0.raw
+2df910769f3d131b4a04d5d92d3c7077a5bace81c2bc11fca18441007688e108  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/gpui-eager-1000.raw
+30477d0dc10747a91a857600cf55da3372392fd375cf759189438a8147e9f290  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/gpui-virtual-250000.raw
+79bcf0e5bb06460e1481e564382f395d63a174b059944cf1773ebb126af1e16a  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/mygo-eager-0.raw
+5acaf2664c60d104f2003a7857f9f8d9ca9bceea979eb81b3a07ddd7e6afee7e  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/mygo-eager-1000.raw
+544971d1292040f5fcdab0057548cbc939dac0ef176cc3c61bbb061264fe5b98  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/mygo-virtual-250000.raw
+de9f48ee2a56978358356806386963d2abf5ba013069c1664214a2285b3d97a7  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/nanoui-eager-0.raw
+4deb229e671b19b14c9afda3ca2cfe5bf1388783667f3549d7e2a0bffbd366d3  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/nanoui-eager-1000.raw
+b5e6c71ed25500209f61922fa318eb324b61cc4c3a30b66eb941bf6f58a9b705  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/nanoui-virtual-250000.raw
