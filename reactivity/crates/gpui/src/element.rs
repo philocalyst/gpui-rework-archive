@@ -45,7 +45,7 @@ pub(crate) struct Handler(Box<dyn Route>);
 trait Route {
     fn validate(&self, receiver: &dyn Any, sources: &dyn Any)
     -> Result<Option<FieldId>, BindError>;
-    fn invoke(&self, receiver: &mut dyn Any) -> bool;
+    fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
 }
 
 impl Handler {
@@ -57,7 +57,7 @@ impl Handler {
         self.0.validate(receiver, sources)
     }
 
-    pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> bool {
+    pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
         self.0.invoke(receiver)
     }
 }
@@ -78,18 +78,20 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
         }
     }
 
-    fn invoke(&self, receiver: &mut dyn Any) -> bool {
-        let Some(receiver) = receiver.downcast_mut::<M>() else {
-            return false;
-        };
+    fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
+        let receiver = receiver
+            .downcast_mut::<M>()
+            .ok_or(BindError::ReceiverMismatch)?;
         (self.callback)(receiver);
-        true
+        Ok(())
     }
 }
 
 // Validation and invocation share the one source descriptor and update capture.
 // An exact action has one box allocation, rather than separately boxed callbacks
-// that duplicate Source. The runtime must validate before exact-source admission.
+// that duplicate Source. Mount checks registered read identity; invocation checks
+// exclusive projector agreement before exposing a mutable value to the callback.
+// The runtime must validate before exact-source admission.
 impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
     fn validate(
         &self,
@@ -106,12 +108,11 @@ impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
         Ok(Some(self.field_id()))
     }
 
-    fn invoke(&self, receiver: &mut dyn Any) -> bool {
-        let Some(receiver) = receiver.downcast_mut::<M>() else {
-            return false;
-        };
-        FieldAction::invoke(self, receiver);
-        true
+    fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
+        let receiver = receiver
+            .downcast_mut::<M>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        FieldAction::invoke(self, receiver)
     }
 }
 
@@ -531,7 +532,10 @@ mod tests {
         assert_eq!(std::mem::size_of_val(handler.0.as_ref()), 0);
         assert_eq!(size_of::<Handler>(), 2 * size_of::<usize>());
         let mut wrong_receiver = 10_u32;
-        assert!(!handler.invoke(&mut wrong_receiver));
+        assert_eq!(
+            handler.invoke(&mut wrong_receiver),
+            Err(BindError::ReceiverMismatch)
+        );
         assert_eq!(
             handler.validate(&wrong_receiver, &()),
             Err(BindError::ReceiverMismatch)
@@ -541,7 +545,7 @@ mod tests {
             other: Signal::new(7),
         };
         assert_eq!(handler.validate(&model, &Sources::<Model>::new()), Ok(None));
-        assert!(handler.invoke(&mut model));
+        assert_eq!(handler.invoke(&mut model), Ok(()));
         assert_eq!(*model.count, 2);
         assert_eq!(*model.other, 7);
     }
@@ -563,8 +567,8 @@ mod tests {
             handler.validate(&model, &()),
             Err(BindError::ReceiverMismatch)
         );
-        assert!(!handler.invoke(&mut 0_u32));
-        assert!(handler.invoke(&mut model));
+        assert_eq!(handler.invoke(&mut 0_u32), Err(BindError::ReceiverMismatch));
+        assert_eq!(handler.invoke(&mut model), Ok(()));
         assert_eq!(*model.count, 2);
         assert_eq!(*model.other, 7);
 

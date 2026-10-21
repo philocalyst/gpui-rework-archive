@@ -488,3 +488,67 @@ fn a_transparent_sites_handler_presence_publishes_new_hit_eligibility() {
     assert_eq!(win.activate(target), Err(Error::NotInteractive));
     assert_eq!(win.scene_digest().unwrap(), pixels);
 }
+
+#[test]
+fn a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning() {
+    struct Owner {
+        first: Signal<u32>,
+        second: Signal<u32>,
+    }
+    impl Owner {
+        const FIRST: Source<Self, u32> =
+            Source::new(FieldId::new(1), "first", |m| &m.first, |m| &mut m.first);
+        // The read identity matches the registry; the exclusive projection does
+        // not. Its callback must never run or even acquire a mutable value.
+        const BAD: Source<Self, u32> =
+            Source::new(FieldId::new(1), "bad", |m| &m.first, |m| &mut m.second);
+    }
+    impl View for Owner {
+        fn sources() -> Sources<Self> {
+            Sources::new().field(Self::FIRST)
+        }
+        fn view(&self) -> El<'_> {
+            column((
+                text(&self.first),
+                button("bad")
+                    .on_click(Self::BAD.update(|_| panic!("bad writer reached user callback"))),
+                button("good").on_click(Self::FIRST.update(|value| *value += 1)),
+            ))
+        }
+    }
+    let win = Win::with_size(
+        Owner {
+            first: Signal::new(1),
+            second: Signal::new(7),
+        },
+        160,
+        120,
+    )
+    .unwrap();
+    let old = win.scene_digest().unwrap();
+    win.reset_counters().unwrap();
+    assert_eq!(
+        win.activate(win.button("bad")),
+        Err(Error::Binding(gpui::BindError::ProjectionMismatch(
+            Owner::FIRST.id()
+        )))
+    );
+    assert_eq!(
+        win.with_model(|m| (
+            *m.first,
+            *m.second,
+            m.first.revision().get(),
+            m.second.revision().get()
+        ))
+        .unwrap(),
+        (1, 7, 0, 0)
+    );
+    let snapshot = win.snapshot().unwrap();
+    assert!(!snapshot.poisoned);
+    assert_eq!((snapshot.source_epoch, snapshot.presentation_epoch), (0, 0));
+    assert_eq!(win.counters().source_operations, 0);
+    assert_eq!(win.scene_digest().unwrap(), old);
+    let commit = win.activate(win.button("good")).unwrap();
+    assert_eq!((commit.source_epoch, commit.presentation_epoch), (1, 1));
+    assert_eq!(win.with_model(|m| (*m.first, *m.second)).unwrap(), (2, 7));
+}
