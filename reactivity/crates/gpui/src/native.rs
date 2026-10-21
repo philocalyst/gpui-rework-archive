@@ -1031,7 +1031,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
         }
         #[cfg(feature = "accessibility")]
         if self.error.is_none()
-            && let (Some(bridge), Some(owner)) = (&mut self.accessibility, &self.owner)
+            && let (Some(bridge), Some(owner)) = (&mut self.accessibility, &mut self.owner)
             && let Err(error) = bridge.sync(owner)
         {
             self.accessibility = None;

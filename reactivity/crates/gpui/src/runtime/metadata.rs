@@ -205,24 +205,31 @@ impl Metadata {
             && self.candidate.is_none()
             && self.presented.is_empty()
     }
-    pub fn effective(&self, identity: u64) -> Names {
+    pub(super) fn effective_refs(
+        &self,
+        identity: u64,
+    ) -> (Option<Option<&SharedText>>, Option<&SharedText>) {
         let base = self.base(identity);
-        let mut result = Names {
-            identity,
-            name: base.and_then(|base| base.name.clone()),
-            description: base.and_then(|base| base.description.clone()),
-            explicit_name: base.is_some_and(|base| base.name.is_some()),
-        };
+        let mut name = base.and_then(|base| base.name.as_ref()).map(Some);
+        let mut description = base.and_then(|base| base.description.as_ref());
         if let Some(values) = self.overrides.get(&identity) {
             if let Contribution::Set(value) = &values[0] {
-                result.name = value.clone();
-                result.explicit_name = true;
+                name = Some(value.as_ref());
             }
             if let Contribution::Set(value) = &values[1] {
-                result.description = value.clone();
+                description = value.as_ref();
             }
         }
-        result
+        (name, description)
+    }
+    pub fn effective(&self, identity: u64) -> Names {
+        let (name, description) = self.effective_refs(identity);
+        Names {
+            identity,
+            name: name.flatten().cloned(),
+            description: description.cloned(),
+            explicit_name: name.is_some(),
+        }
     }
 }
 
@@ -295,13 +302,98 @@ impl<M: View + 'static> Runtime<M> {
             return self.commit();
         }
         let candidate = self.prepared.is_some() || !self.presentation_valid;
+        let frozen = matches!(publish, Publish::All)
+            .then(|| {
+                let nodes = self
+                    .prepared
+                    .as_ref()
+                    .map_or(self.presented.as_slice(), |p| &p.nodes);
+                self.freeze_metadata(nodes)
+            })
+            .flatten();
+        #[cfg(feature = "accessibility")]
+        let base_stamp = self.semantic_stamp();
+        #[cfg(feature = "accessibility")]
+        let mut observation = self.accessibility.as_mut().and_then(|observer| {
+            if candidate {
+                observer.invalidate();
+                None
+            } else {
+                Some(observer.begin(base_stamp, self.presentation_size))
+            }
+        });
+        #[cfg(feature = "accessibility")]
+        if let Some(observation) = &mut observation {
+            match publish {
+                Publish::All => observation.full(),
+                Publish::Identity(identity) => {
+                    // Logical indices are hints only: clipped list entries can
+                    // shift P. Verify identity before using the cheap path.
+                    let part = self
+                        .by_identity
+                        .get(&identity)
+                        .and_then(|&index| {
+                            self.presented
+                                .get(index)
+                                .filter(|node| node.identity == identity)
+                                .map(|node| (index, node))
+                        })
+                        .or_else(|| {
+                            self.presented
+                                .iter()
+                                .enumerate()
+                                .find(|(_, node)| node.identity == identity)
+                        });
+                    if let Some((index, node)) = part
+                        && let Some(metadata) = self.metadata.as_deref()
+                    {
+                        observation.metadata(
+                            index,
+                            node,
+                            &metadata.presented,
+                            metadata.effective_refs(identity),
+                        );
+                    }
+                }
+                Publish::Field(field) => {
+                    if let Some(metadata) = self.metadata.as_deref()
+                        && let Some(fanout) = self.fanout.get(&field)
+                    {
+                        for destination in &fanout.destinations {
+                            if destination.port() == Port::Visual {
+                                continue;
+                            }
+                            let index = destination.node();
+                            let identity = self.nodes[index].identity;
+                            let Some(node) = self
+                                .presented
+                                .get(index)
+                                .filter(|node| node.identity == identity)
+                            else {
+                                // A mismatched hint cannot identify P. Avoid a
+                                // map or one scan per destination: full native
+                                // publication is the bounded conservative path.
+                                observation.full();
+                                break;
+                            };
+                            observation.metadata(
+                                index,
+                                node,
+                                &metadata.presented,
+                                metadata.effective_refs(identity),
+                            );
+                        }
+                    }
+                }
+            }
+        }
         {
             let nodes = self
                 .prepared
                 .as_ref()
                 .map_or(self.presented.as_slice(), |p| &p.nodes);
             if matches!(publish, Publish::All) {
-                if let Some(sheet) = self.freeze_metadata(nodes)
+                if let Some(sheet) = frozen
                     && let Some(metadata) = &mut self.metadata
                 {
                     if candidate {
@@ -357,9 +449,28 @@ impl<M: View + 'static> Runtime<M> {
         if self.metadata.as_deref().is_some_and(Metadata::unused) {
             self.metadata = None;
         }
+        #[cfg(feature = "accessibility")]
+        if let Some(observation) = observation {
+            observation.finish(
+                super::accessibility::Stamp {
+                    sequence: self.presented_sequence,
+                    epoch: self.source_epoch,
+                    size: self.presentation_size,
+                },
+                self.presented.len(),
+                self.presented.len(),
+            );
+        }
         self.complete_epoch = self.source_epoch;
         if !candidate {
             self.presentation_epoch = self.source_epoch;
+        }
+        #[cfg(feature = "accessibility")]
+        if !candidate {
+            let stamp = self.semantic_stamp();
+            if let Some(observer) = &mut self.accessibility {
+                observer.acknowledge(stamp);
+            }
         }
         self.commit()
     }

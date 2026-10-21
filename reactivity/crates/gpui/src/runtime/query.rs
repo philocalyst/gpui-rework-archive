@@ -48,6 +48,21 @@ pub(crate) struct SemanticState {
 }
 #[cfg(feature = "accessibility")]
 impl SemanticSheet<'_> {
+    pub(crate) fn len(&self) -> usize {
+        self.0.nodes.len()
+    }
+    pub(crate) fn part_at(&self, index: usize) -> Option<Part<'_>> {
+        self.0.nodes.get(index).map(|node| self.0.part(node))
+    }
+    pub(crate) fn children(&self, index: usize) -> impl Iterator<Item = Part<'_>> {
+        self.0
+            .nodes
+            .iter()
+            .skip(index + 1)
+            .take_while(move |node| node.parent.index().is_some_and(|parent| parent >= index))
+            .filter(move |node| node.parent.index() == Some(index))
+            .map(|node| self.0.part(node))
+    }
     pub(crate) fn visit(&self, mut visitor: impl FnMut(Part<'_>)) {
         for node in self.0.nodes {
             visitor(self.0.part(node));

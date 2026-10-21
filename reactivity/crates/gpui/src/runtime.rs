@@ -31,6 +31,8 @@ const _: () = assert!(MAX_NODES <= u32::MAX as usize);
 // Cephal's algorithms recurse even though public description disposal does not.
 const MAX_LAYOUT_DEPTH: usize = 128;
 
+#[cfg(feature = "accessibility")]
+mod accessibility;
 mod delivery;
 mod input;
 mod list;
@@ -556,6 +558,8 @@ struct Runtime<M> {
     presentation_epoch: u64,
     #[cfg(feature = "accessibility")]
     presented_sequence: Option<NonZeroU64>,
+    #[cfg(feature = "accessibility")]
+    accessibility: Option<Box<accessibility::Observer>>,
     presentation_valid: bool,
     presentation_size: [u32; 2],
     requested_size: [u32; 2],
@@ -734,6 +738,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             presentation_epoch: 0,
             #[cfg(feature = "accessibility")]
             presented_sequence: None,
+            #[cfg(feature = "accessibility")]
+            accessibility: None,
             presentation_valid: false,
             presentation_size: [0, 0],
             requested_size: options.size,
@@ -1816,6 +1822,10 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(feature = "accessibility")]
         {
             self.presented_sequence = Some(token.sequence);
+            let stamp = self.semantic_stamp();
+            if let Some(observer) = &mut self.accessibility {
+                observer.acknowledge(stamp);
+            }
         }
         self.presentation_valid = true;
         self.counters.presentations += u64::from(newly_presented);
@@ -1971,6 +1981,13 @@ impl<M: View + 'static> Runtime<M> {
         let mut visible_rows = BTreeSet::new();
         let mut metadata_sheet = self.metadata_sheet();
         let list_metadata = self.list_metadata();
+        #[cfg(feature = "accessibility")]
+        let base_stamp = self.semantic_stamp();
+        #[cfg(feature = "accessibility")]
+        let mut observation = self
+            .accessibility
+            .as_mut()
+            .map(|observer| observer.begin(base_stamp, size));
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
@@ -2100,6 +2117,18 @@ impl<M: View + 'static> Runtime<M> {
                     || node.kind() == NodeKind::Input,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()),
             });
+            #[cfg(feature = "accessibility")]
+            if let Some(observation) = &mut observation {
+                let index = presented.len() - 1;
+                observation.compare(
+                    index,
+                    self.presented.get(index),
+                    &presented[index],
+                    self.metadata.as_deref(),
+                    list_metadata.get(&node.identity).copied(),
+                    self.list_rows.get(&node.identity),
+                );
+            }
             if let Some(sheet) = &mut metadata_sheet
                 && let Some(metadata) = &self.metadata
             {
@@ -2116,6 +2145,18 @@ impl<M: View + 'static> Runtime<M> {
         // the selected output allocation. No model borrow is published.
         if let Some(sheet) = &mut metadata_sheet {
             sheet.sort();
+        }
+        #[cfg(feature = "accessibility")]
+        if let Some(observation) = observation {
+            observation.finish(
+                accessibility::Stamp {
+                    sequence: Some(sequence),
+                    epoch: self.source_epoch,
+                    size,
+                },
+                self.presented.len(),
+                presented.len(),
+            );
         }
         scene.commit();
         for (&identity, row) in &mut self.list_rows {
