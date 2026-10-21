@@ -134,7 +134,7 @@ pub(super) fn row_style(
     slot: Option<&ListRow>,
 ) -> cephal::Style {
     let mut style = layout_style(node.style);
-    if node.kind == NodeKind::List && node.style.width.is_none() {
+    if node.kind() == NodeKind::List && node.style.width.is_none() {
         use cephal::style::Dimension;
         if parent.is_none() {
             style.size.width = Dimension::percent(1.0);
@@ -380,7 +380,7 @@ impl<M: View + 'static> Runtime<M> {
     }
     pub(super) fn in_list(&self, mut index: usize) -> bool {
         loop {
-            if self.nodes[index].kind == NodeKind::ListItem {
+            if self.nodes[index].kind() == NodeKind::ListItem {
                 return true;
             }
             match self.nodes[index].parent.index() {

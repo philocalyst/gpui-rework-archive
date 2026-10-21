@@ -339,6 +339,35 @@ mod parent_tests {
     }
 
     #[test]
+    fn content_preserves_every_kind_and_admitted_text_index() {
+        assert_eq!(size_of::<Content>(), 4);
+        for kind in [
+            NodeKind::Div,
+            NodeKind::Text,
+            NodeKind::Input,
+            NodeKind::Button,
+            NodeKind::List,
+            NodeKind::ListItem,
+        ] {
+            let empty = Content::new(kind, TextSlot::NONE);
+            assert_eq!(empty.kind(), kind);
+            assert_eq!(empty.text_slot().0, u32::MAX);
+            for index in 0..MAX_NODES {
+                let content = Content::new(kind, TextSlot(index as u32));
+                assert_eq!(content.kind(), kind);
+                assert_eq!(content.text_slot().0, index as u32);
+                assert_ne!(content.0, empty.0);
+            }
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "text belongs to the admitted description")]
+    fn content_rejects_the_first_unadmitted_text_index() {
+        Content::new(NodeKind::Text, TextSlot(MAX_NODES as u32));
+    }
+
+    #[test]
     fn compact_map_preserves_finite_admitted_coefficients() {
         assert_eq!(size_of::<PresentedTransform>(), size_of::<Affine>());
         assert_eq!(PresentedTransform::new(None).get(), None);
@@ -392,15 +421,65 @@ impl TextSlot {
         }
     }
 }
+/// A closed kind and an optional admitted text-lane index fit in one word.
+/// Zero in the upper bits means no text; the lower three bits hold one of the
+/// six explicitly encoded kinds. No Rust enum representation is reinterpreted.
+#[derive(Clone, Copy)]
+struct Content(u32);
+const _: () = assert!(MAX_NODES <= (u32::MAX >> 3) as usize);
+impl Content {
+    fn new(kind: NodeKind, text: TextSlot) -> Self {
+        let kind = match kind {
+            NodeKind::Div => 0,
+            NodeKind::Text => 1,
+            NodeKind::Input => 2,
+            NodeKind::Button => 3,
+            NodeKind::List => 4,
+            NodeKind::ListItem => 5,
+        };
+        let text = if text.0 == u32::MAX {
+            0
+        } else {
+            assert!(
+                (text.0 as usize) < MAX_NODES,
+                "text belongs to the admitted description"
+            );
+            text.0 + 1
+        };
+        Self((text << 3) | kind)
+    }
+    fn kind(self) -> NodeKind {
+        match self.0 & 7 {
+            0 => NodeKind::Div,
+            1 => NodeKind::Text,
+            2 => NodeKind::Input,
+            3 => NodeKind::Button,
+            4 => NodeKind::List,
+            5 => NodeKind::ListItem,
+            _ => unreachable!("Content constructs only declared kinds"),
+        }
+    }
+    fn text_slot(self) -> TextSlot {
+        let text = self.0 >> 3;
+        TextSlot(if text == 0 { u32::MAX } else { text - 1 })
+    }
+}
 struct Node {
     identity: u64,
     parent: Parent,
     ordinal: u32,
-    kind: NodeKind,
-    text_slot: TextSlot,
+    content: Content,
     component_scope: u32,
     style: Style,
     handler: Option<Handler>,
+}
+impl Node {
+    fn kind(&self) -> NodeKind {
+        self.content.kind()
+    }
+    fn text_slot(&self) -> TextSlot {
+        self.content.text_slot()
+    }
 }
 impl TextSite {
     fn shape<'n>(
@@ -914,7 +993,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         for index in 0..runtime.presented.len() {
             let node = &runtime.presented[index];
             let actionable = runtime.by_identity.get(&node.identity).is_some_and(|&i| {
-                runtime.nodes[i].handler.is_some() || runtime.nodes[i].kind == NodeKind::Input
+                runtime.nodes[i].handler.is_some() || runtime.nodes[i].kind() == NodeKind::Input
             });
             let identity = node.identity;
             let mut snapshot = SnapshotNode {
@@ -1002,7 +1081,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 runtime.layout_dirty.insert(identity);
             }
             if before.font_size != after.font_size {
-                let slot = runtime.nodes[index].text_slot;
+                let slot = runtime.nodes[index].text_slot();
                 if let Some(text) = slot.get_mut(&mut runtime.texts) {
                     text.shaped = None;
                 }
@@ -1195,7 +1274,7 @@ impl<M: View + 'static> Runtime<M> {
         self.live()?;
         let identity = self.resolve(target)?;
         let index = self.by_identity[&identity];
-        if self.nodes[index].kind == NodeKind::Input {
+        if self.nodes[index].kind() == NodeKind::Input {
             self.changed_nodes = 0;
             return Ok(self.commit());
         }
@@ -1236,11 +1315,11 @@ impl<M: View + 'static> Runtime<M> {
         self.live()?;
         let identity = self.resolve(target)?;
         let node = &self.nodes[self.by_identity[&identity]];
-        if node.kind != NodeKind::Input {
+        if node.kind() != NodeKind::Input {
             return Err(Error::NotInput);
         }
         let field = node
-            .text_slot
+            .text_slot()
             .get(&self.texts)
             .and_then(|text| text.field)
             .ok_or(Error::UnregisteredInput {
@@ -1400,12 +1479,12 @@ impl<M: View + 'static> Runtime<M> {
                 .index()
                 .map(|parent| old[parent].as_ref().unwrap().identity);
             *old_counts.entry(parent).or_default() += 1;
-            sites.insert((parent, node.ordinal, node.kind), index);
+            sites.insert((parent, node.ordinal, node.kind()), index);
             if let Some(row) = self.list_rows.get(&node.identity).filter(|row| row.visible) {
-                keyed_rows.insert((parent, row.key, node.kind), index);
+                keyed_rows.insert((parent, row.key, node.kind()), index);
             }
             if let Some(&id) = old_list_ids.get(&node.identity) {
-                keyed_lists.insert((parent, id, node.kind), index);
+                keyed_lists.insert((parent, id, node.kind()), index);
             }
         }
         let old_ids = old
@@ -1457,14 +1536,13 @@ impl<M: View + 'static> Runtime<M> {
                     identity,
                     parent: Parent::new(parent),
                     ordinal,
-                    kind: draft.kind,
-                    text_slot: TextSlot::NONE,
+                    content: Content::new(draft.kind, TextSlot::NONE),
                     component_scope: component_scopes[index],
                     style: draft.style,
                     handler: None,
                 }
             };
-            let mut site = node.text_slot.take(&mut self.texts);
+            let mut site = node.text_slot().take(&mut self.texts);
             let text = draft.text.as_ref().map(|text| text.borrowed_value());
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
@@ -1507,7 +1585,7 @@ impl<M: View + 'static> Runtime<M> {
             node.ordinal = ordinal;
             node.style = style;
             node.handler = draft.on_click;
-            node.text_slot = if let Some(mut site) = site {
+            let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
                 texts.push(Some(site));
@@ -1515,6 +1593,7 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 TextSlot::NONE
             };
+            node.content = Content::new(node.kind(), text_slot);
             changed += usize::from(node_changed);
             nodes.push(node);
         }
@@ -1594,7 +1673,7 @@ impl<M: View + 'static> Runtime<M> {
             self.counters.destination_compares += 1;
             let node = &self.nodes[index];
             let text = node
-                .text_slot
+                .text_slot()
                 .get_mut(&mut self.texts)
                 .expect("visual fanout has text");
             if text.value.as_ref() != value.as_ref() {
@@ -1712,7 +1791,7 @@ impl<M: View + 'static> Runtime<M> {
                         self.list_rows.get(&node.identity),
                     ),
                 )?;
-                if node.text_slot.0 != u32::MAX {
+                if node.text_slot().0 != u32::MAX {
                     self.layout.set_measure(id, Some(measure_marker))?;
                 }
                 self.layout_nodes.push(id);
@@ -1772,12 +1851,11 @@ impl<M: View + 'static> Runtime<M> {
                 .as_mut()
                 .expect("measured text has an initialized service");
             let node = &nodes[lookup[&id]];
-            match node
-                .text_slot
-                .get_mut(texts)
-                .unwrap()
-                .shape(service, node.style.font_size, width)
-            {
+            match node.text_slot().get_mut(texts).unwrap().shape(
+                service,
+                node.style.font_size,
+                width,
+            ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
                         width: input.known_dimensions.width.unwrap_or(shape.width),
@@ -1848,7 +1926,7 @@ impl<M: View + 'static> Runtime<M> {
                     node.parent
                         .index()
                         .map_or(viewport, |parent| hit_clips[parent]),
-                    node.kind == NodeKind::ListItem
+                    node.kind() == NodeKind::ListItem
                         || node
                             .parent
                             .index()
@@ -1860,7 +1938,7 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 inside_list.push(in_list);
             }
-            if matches!(node.kind, NodeKind::List | NodeKind::ListItem) {
+            if matches!(node.kind(), NodeKind::List | NodeKind::ListItem) {
                 (clip, hit_clip) = list::viewport_clip(clip, hit_clip, transform, rect, size)?;
             }
             if list_mode {
@@ -1870,7 +1948,7 @@ impl<M: View + 'static> Runtime<M> {
             let raw_bounds = transform
                 .and_then(|map| CoordinateSpace::new(map).bounds(rect))
                 .unwrap_or_default();
-            let bounds = if in_list || node.kind == NodeKind::List {
+            let bounds = if in_list || node.kind() == NodeKind::List {
                 list::clipped_bounds(raw_bounds, hit_clip)
             } else {
                 raw_bounds.intersection(viewport)
@@ -1882,7 +1960,7 @@ impl<M: View + 'static> Runtime<M> {
                     clip,
                     node.style.bg,
                 )?;
-            } else if node.handler.is_some() || node.kind == NodeKind::Input {
+            } else if node.handler.is_some() || node.kind() == NodeKind::Input {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
                 scene.fill_rect(
@@ -1892,7 +1970,7 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
-            if let Some(text) = node.text_slot.get_mut(&mut self.texts) {
+            if let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = node.style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
                 let shape = text.shape(
@@ -1924,7 +2002,7 @@ impl<M: View + 'static> Runtime<M> {
                 published.push(published_parent);
                 continue;
             }
-            if node.kind == NodeKind::ListItem {
+            if node.kind() == NodeKind::ListItem {
                 visible_rows.insert(node.identity);
             }
             if list_mode {
@@ -1933,19 +2011,19 @@ impl<M: View + 'static> Runtime<M> {
             presented.push(Presented {
                 identity: node.identity,
                 parent: published_parent,
-                kind: node.kind,
+                kind: node.kind(),
                 text: node
-                    .text_slot
+                    .text_slot()
                     .get(&self.texts)
                     .map(|text| text.value.clone()),
                 rect,
                 transform: PresentedTransform::new(transform),
                 bounds,
-                hittable: node.text_slot.0 != u32::MAX
+                hittable: node.text_slot().0 != u32::MAX
                     || node.style.bg.alpha() > 0.0
                     || node.handler.is_some()
-                    || node.kind == NodeKind::Input,
-                actions: Actions::for_node(node.kind, node.handler.is_some()),
+                    || node.kind() == NodeKind::Input,
+                actions: Actions::for_node(node.kind(), node.handler.is_some()),
             });
         }
         // Everything fallible has finished. This transfers commands; native
@@ -2261,7 +2339,7 @@ mod tests {
             let mut slots: Vec<_> = runtime
                 .nodes
                 .iter()
-                .filter_map(|node| (node.text_slot.0 != u32::MAX).then_some(node.text_slot.0))
+                .filter_map(|node| (node.text_slot().0 != u32::MAX).then_some(node.text_slot().0))
                 .collect();
             slots.sort_unstable();
             assert_eq!(slots, (0..expected as u32).collect::<Vec<_>>());
