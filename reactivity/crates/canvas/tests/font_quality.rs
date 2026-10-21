@@ -9,6 +9,7 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
     let mut compared = 0;
     let mut changed = 0;
     let mut error = 0_u64;
+    let mut max_error = 0_u8;
     let mut bytes = 0;
     for content in ["office café AVATAR", "Αθήνα", "Привет", "jéÅ"] {
         for density in [1.0, 1.25, 2.0] {
@@ -33,7 +34,13 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
             let glyphs = layout
                 .glyphs()
                 .iter()
-                .filter(|g| old.rasterize_indexed(g.id, 16.0 * density).0.width != 0);
+                .filter(|g| old.rasterize_indexed(g.id, 16.0 * density).0.width != 0)
+                .collect::<Vec<_>>();
+            assert_eq!(
+                scene.draws().len(),
+                glyphs.len(),
+                "{content:?}, density={density}"
+            );
             for (draw, glyph) in scene.draws().zip(glyphs) {
                 let mask = draw.mask.unwrap();
                 let (metrics, prior) = old.rasterize_indexed(glyph.id, 16.0 * density);
@@ -46,6 +53,7 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
                 assert!(mask.coverage.iter().any(|&a| a != 0));
                 assert!(mask.coverage.iter().any(|&a| a != 0 && a != 255));
                 for (&a, b) in mask.coverage.iter().zip(prior) {
+                    max_error = max_error.max(a.abs_diff(b));
                     changed += usize::from(a != b);
                     error += (i64::from(a) - i64::from(b)).unsigned_abs().pow(2);
                     bytes += 1;
@@ -56,11 +64,13 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
         }
     }
     // This is an intentional rasterizer change, not exact Fontdue parity.
-    // Bound gross AA regressions while retaining the different backend's output.
-    assert!(compared > 80 && changed > 0);
-    assert!((error as f64 / bytes as f64).sqrt() < 24.0);
+    // Observed RMSE 1.51; a four-level RMS cap permits small backend/platform
+    // rounding changes, while rejecting widespread coverage shifts.
+    assert_eq!(compared, 84);
+    assert!(changed > 0);
+    assert!((error as f64 / bytes as f64).sqrt() < 4.0);
     eprintln!(
-        "mask_count={compared},mask_bytes={bytes},changed_bytes={changed},coverage_rmse={:.4}",
+        "mask_count={compared},mask_bytes={bytes},changed_bytes={changed},max_error={max_error},coverage_rmse={:.4}",
         (error as f64 / bytes as f64).sqrt()
     );
 }
