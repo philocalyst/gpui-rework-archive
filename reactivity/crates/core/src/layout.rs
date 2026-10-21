@@ -315,6 +315,28 @@ impl LayoutTree {
         root: NodeId,
         viewport: Size<AvailableSpace>,
     ) -> Result<bool, LayoutError> {
+        self.compute_inner(root, viewport, None)
+    }
+    /// Borrow a content service for this computation instead of storing it in
+    /// every measured node. Only nodes installed with `set_measure` invoke it.
+    ///
+    /// The callback must be pure for a fixed question during this compute. Its
+    /// external dependencies must be marked dirty before their answers change.
+    /// Neither the service nor any borrowed answer survives this method.
+    pub fn compute_with(
+        &mut self,
+        root: NodeId,
+        viewport: Size<AvailableSpace>,
+        measure: &mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput,
+    ) -> Result<bool, LayoutError> {
+        self.compute_inner(root, viewport, Some(measure))
+    }
+    fn compute_inner(
+        &mut self,
+        root: NodeId,
+        viewport: Size<AvailableSpace>,
+        measure: Option<&mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
+    ) -> Result<bool, LayoutError> {
         self.tree.index(root)?;
         if self.poisoned {
             return Err(LayoutError::Poisoned);
@@ -357,7 +379,10 @@ impl LayoutTree {
             self.pending.remove(node);
         }
         {
-            let mut engine = Engine { owner: self };
+            let mut engine = Engine {
+                owner: self,
+                measure,
+            };
             for node in selected {
                 let key = EngineId::new(engine.owner.tree.layout_key(node));
                 scheduler.mark(&mut engine, key);
@@ -446,10 +471,11 @@ impl LayoutTree {
 // Private view: Cephal's engine-local u64 ids cannot be used as public GPUI
 // capabilities. The codec includes generation; arena validation occurs at the
 // public boundary, and every engine id is minted from this adapter's topology.
-struct Engine<'a> {
+struct Engine<'a, 'service> {
     owner: &'a mut LayoutTree,
+    measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
 }
-impl Engine<'_> {
+impl Engine<'_, '_> {
     fn node(&self, node: EngineId) -> NodeId {
         self.owner.tree.node_for_layout_key(node.raw())
     }
@@ -472,7 +498,7 @@ impl Iterator for Children<'_> {
             .map(|id| EngineId::new(self.tree.layout_key(id)))
     }
 }
-impl EngineTree for Engine<'_> {
+impl EngineTree for Engine<'_, '_> {
     type ChildIter<'a>
         = Children<'a>
     where
@@ -516,9 +542,13 @@ impl EngineTree for Engine<'_> {
             .leaf_box(self.owner.style_ids[self.slot(node)])
     }
     fn measure(&mut self, node: EngineId, input: MeasureInput) -> MeasureOutput {
-        if let Some(measure) = self.owner.measures.get(&self.node(node)).copied() {
+        let node = self.node(node);
+        if let Some(measure) = self.owner.measures.get(&node).copied() {
             self.owner.stats.measure_calls += 1;
-            measure(input)
+            match &mut self.measure {
+                Some(service) => service(node, input),
+                None => measure(input),
+            }
         } else {
             MeasureOutput::from_size(input.known_dimensions.unwrap_or(Size::ZERO))
         }
@@ -558,7 +588,7 @@ impl EngineTree for Engine<'_> {
         }
     }
 }
-impl CacheAccess for Engine<'_> {
+impl CacheAccess for Engine<'_, '_> {
     fn cache(&self, node: EngineId) -> &NodeCache {
         self.owner.caches[self.slot(node)]
             .as_deref()
@@ -581,7 +611,7 @@ impl CacheAccess for Engine<'_> {
         self.owner.speculation = depth;
     }
 }
-impl Incremental for Engine<'_> {
+impl Incremental for Engine<'_, '_> {
     fn parent(&self, node: EngineId) -> Option<EngineId> {
         self.owner
             .tree

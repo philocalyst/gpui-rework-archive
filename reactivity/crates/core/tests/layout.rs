@@ -437,3 +437,76 @@ fn measurement_panic_poisoning_prevents_reusing_partial_layout() {
         Err(LayoutError::Poisoned)
     );
 }
+
+#[test]
+fn measured_content_service_is_borrowed_per_compute_and_invalidates_explicitly() {
+    fn fallback(_: MeasureInput) -> MeasureOutput {
+        panic!("the borrowed service must handle declared measured leaves")
+    }
+    let mut tree = LayoutTree::new();
+    let root = tree.insert(None, NodeKind::Element, flex()).unwrap();
+    let a = tree
+        .insert(Some(root), NodeKind::Element, Style::DEFAULT)
+        .unwrap();
+    let b = tree
+        .insert(Some(root), NodeKind::Element, Style::DEFAULT)
+        .unwrap();
+    tree.set_measure(a, Some(fallback)).unwrap();
+    tree.set_measure(b, Some(fallback)).unwrap();
+    let mut widths = BTreeMap::from([(a, 25.0), (b, 43.0)]);
+    let mut calls = Vec::new();
+    let compute =
+        |tree: &mut LayoutTree, widths: &BTreeMap<NodeId, f32>, calls: &mut Vec<NodeId>| {
+            tree.compute_with(root, viewport(200.0), &mut |node, input| {
+                calls.push(node);
+                MeasureOutput::from_size(Size {
+                    width: input.known_dimensions.width.unwrap_or(widths[&node]),
+                    height: input.known_dimensions.height.unwrap_or(12.0),
+                })
+            })
+            .unwrap()
+        };
+    assert!(compute(&mut tree, &widths, &mut calls));
+    assert_eq!(tree.layout(a).unwrap().size.width, 25.0);
+    assert_eq!(tree.layout(b).unwrap().size.width, 43.0);
+    assert!(calls.contains(&a) && calls.contains(&b));
+    calls.clear();
+    assert!(!compute(&mut tree, &widths, &mut calls));
+    assert!(calls.is_empty());
+    widths.insert(a, 61.0);
+    tree.mark_dirty(a).unwrap();
+    assert!(compute(&mut tree, &widths, &mut calls));
+    assert_eq!(tree.layout(a).unwrap().size.width, 61.0);
+    assert_eq!(tree.layout(b).unwrap().size.width, 43.0);
+    assert!(calls.contains(&a));
+    // Flex may ask the clean sibling a different available-space question.
+    // Stable content does not imply that every cached query remains reusable.
+}
+
+#[test]
+fn borrowed_measurement_panic_poisoning_ends_the_service_borrow() {
+    let mut tree = LayoutTree::new();
+    let root = tree
+        .insert(None, NodeKind::Element, Style::DEFAULT)
+        .unwrap();
+    tree.set_measure(root, Some(measure)).unwrap();
+    let mut owned_by_caller = String::from("available");
+    assert!(
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            tree.compute_with(root, viewport(100.0), &mut |_, _| {
+                owned_by_caller.push_str(" during measurement");
+                panic!("borrowed content service failed");
+            })
+        }))
+        .is_err()
+    );
+    owned_by_caller.clear();
+    assert!(tree.is_poisoned());
+    assert_eq!(tree.layout(root), Err(LayoutError::Poisoned));
+    assert_eq!(
+        tree.compute_with(root, viewport(100.0), &mut |_, _| {
+            panic!("a poisoned adapter must not invoke a new service")
+        }),
+        Err(LayoutError::Poisoned)
+    );
+}
