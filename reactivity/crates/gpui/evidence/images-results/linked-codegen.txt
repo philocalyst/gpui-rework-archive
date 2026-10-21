@@ -1,0 +1,137 @@
+
+baseline: 00000000004fb770 0000000000006b8a t <gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>
+
+
+/tmp/gpui-image-free-baseline:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004fb770 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>>:
+  4fb770:	55                   	push   %rbp
+  4fb771:	41 57                	push   %r15
+  4fb773:	41 56                	push   %r14
+  4fb775:	41 55                	push   %r13
+  4fb777:	41 54                	push   %r12
+  4fb779:	53                   	push   %rbx
+  4fb77a:	49 89 e3             	mov    %rsp,%r11
+  4fb77d:	49 81 eb 00 10 01 00 	sub    $0x11000,%r11
+  4fb784:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+  4fb78b:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4fb792:	00
+  4fb793:	4c 39 dc             	cmp    %r11,%rsp
+  4fb796:	75 ec                	jne    4fb784 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x14>
+  4fb798:	48 81 ec b8 0d 00 00 	sub    $0xdb8,%rsp
+  4fb79f:	48 89 fb             	mov    %rdi,%rbx
+  4fb7a2:	f6 c1 01             	test   $0x1,%cl
+  4fb7a5:	74 2b                	je     4fb7d2 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x62>
+  4fb7a7:	4c 89 c1             	mov    %r8,%rcx
+  4fb7aa:	48 c1 e9 20          	shr    $0x20,%rcx
+  4fb7ae:	66 41 39 c8          	cmp    %cx,%r8w
+  4fb7b2:	74 13                	je     4fb7c7 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x57>
+  4fb7b4:	4c 89 c7             	mov    %r8,%rdi
+  4fb7b7:	48 c1 ef 10          	shr    $0x10,%rdi
+  4fb7bb:	4c 89 c0             	mov    %r8,%rax
+  4fb7be:	48 c1 e8 30          	shr    $0x30,%rax
+  4fb7c2:	66 39 c7             	cmp    %ax,%di
+  4fb7c5:	75 26                	jne    4fb7ed <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x7d>
+  4fb7c7:	45 31 ed             	xor    %r13d,%r13d
+  4fb7ca:	31 ff                	xor    %edi,%edi
+  4fb7cc:	31 c9                	xor    %ecx,%ecx
+  4fb7ce:	31 c0                	xor    %eax,%eax
+
+
+candidate: 00000000005021c0 0000000000006744 t <gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>
+
+
+/tmp/gpui-image-free-candidate:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000005021c0 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>>:
+  5021c0:	55                   	push   %rbp
+  5021c1:	41 57                	push   %r15
+  5021c3:	41 56                	push   %r14
+  5021c5:	41 55                	push   %r13
+  5021c7:	41 54                	push   %r12
+  5021c9:	53                   	push   %rbx
+  5021ca:	49 89 e3             	mov    %rsp,%r11
+  5021cd:	49 81 eb 00 10 01 00 	sub    $0x11000,%r11
+  5021d4:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+  5021db:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  5021e2:	00
+  5021e3:	4c 39 dc             	cmp    %r11,%rsp
+  5021e6:	75 ec                	jne    5021d4 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x14>
+  5021e8:	48 81 ec f8 0d 00 00 	sub    $0xdf8,%rsp
+  5021ef:	48 89 94 24 58 02 00 	mov    %rdx,0x258(%rsp)
+  5021f6:	00
+  5021f7:	48 89 74 24 68       	mov    %rsi,0x68(%rsp)
+  5021fc:	48 89 fd             	mov    %rdi,%rbp
+  5021ff:	f6 c1 01             	test   $0x1,%cl
+  502202:	74 2a                	je     50222e <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x6e>
+  502204:	4c 89 c1             	mov    %r8,%rcx
+  502207:	48 c1 e9 20          	shr    $0x20,%rcx
+  50220b:	66 41 39 c8          	cmp    %cx,%r8w
+  50220f:	74 13                	je     502224 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x64>
+  502211:	4c 89 c2             	mov    %r8,%rdx
+  502214:	48 c1 ea 10          	shr    $0x10,%rdx
+  502218:	4c 89 c0             	mov    %r8,%rax
+  50221b:	48 c1 e8 30          	shr    $0x30,%rax
+  50221f:	66                   	data16
+
+
+candidate: 000000000050ed80 00000000000000c5 T gpui_canvas::canvas::render_cached_image
+
+
+/tmp/gpui-image-free-candidate:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000050ed80 <gpui_canvas::canvas::render_cached_image>:
+  50ed80:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+  50ed87:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  50ed8e:	00
+  50ed8f:	48 81 ec 58 08 00 00 	sub    $0x858,%rsp
+  50ed96:	44 88 4c 24 07       	mov    %r9b,0x7(%rsp)
+  50ed9b:	b8 58 00 00 00       	mov    $0x58,%eax
+  50eda0:	0f 57 c0             	xorps  %xmm0,%xmm0
+  50eda3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  50edaa:	84 00 00 00 00 00
+  50edb0:	0f 11 04 04          	movups %xmm0,(%rsp,%rax,1)
+  50edb4:	48 c7 44 04 10 ff ff 	movq   $0xffffffffffffffff,0x10(%rsp,%rax,1)
+  50edbb:	ff ff
+  50edbd:	0f 11 44 04 18       	movups %xmm0,0x18(%rsp,%rax,1)
+  50edc2:	48 c7 44 04 28 ff ff 	movq   $0xffffffffffffffff,0x28(%rsp,%rax,1)
+  50edc9:	ff ff
+  50edcb:	0f 11 44 04 30       	movups %xmm0,0x30(%rsp,%rax,1)
+  50edd0:	48 c7 44 04 40 ff ff 	movq   $0xffffffffffffffff,0x40(%rsp,%rax,1)
+  50edd7:	ff ff
+  50edd9:	0f 11 44 04 48       	movups %xmm0,0x48(%rsp,%rax,1)
+  50edde:	48 c7 44 04 58 ff ff 	movq   $0xffffffffffffffff,0x58(%rsp,%rax,1)
+  50ede5:	ff ff
+  50ede7:	48 83 c0 60          	add    $0x60,%rax
+  50edeb:	48 3d 58 18 00 00    	cmp    $0x1858,%rax
+  50edf1:	75 bd                	jne    50edb0 <gpui_canvas::canvas::render_cached_image+0x30>
+  50edf3:	49 8b 40 20          	mov    0x20(%r8),%rax
+  50edf7:	48 89 44 24 40       	mov    %rax,0x40(%rsp)
+  50edfc:	41 0f 10 00          	movups (%r8),%xmm0
+  50ee00:	41 0f 10 48 10       	movups 0x10(%r8),%xmm1
+  50ee05:	0f 29 4c 24 30       	movaps %xmm1,0x30(%rsp)
+  50ee0a:	0f 29 44 24 20       	movaps %xmm0,0x20(%rsp)
+  50ee0f:	48 8d 44 24 58       	lea    0x58(%rsp),%rax
+  50ee14:	48 89 44 24 48       	mov    %rax,0x48(%rsp)
+  50ee19:	48 8d 44 24 20       	lea    0x20(%rsp),%rax
+  50ee1e:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  50ee23:	48 89 74 24 10       	mov    %rsi,0x10(%rsp)
+  50ee28:	48 8d 44 24 07       	lea    0x7(%rsp),%rax
+  50ee2d:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
+  50ee32:	4c 8d 44 24 08       	lea    0x8(%rsp),%r8
+  50ee37:	ff 15 5b 8a 2a 00    	call   *0x2a8a5b(%rip)        # 7b7898 <_DYNAMIC+0x838>
+  50ee3d:	48 81 c4 58 18 00 00 	add    $0x1858,%rsp
+  50ee44:	c3                   	ret
+
+   text	   data	    bss	    dec	    hex	filename
+7905224	 155056	   4955	8065235	 7b10d3	/tmp/gpui-image-free-baseline
+7943456	 155736	   7027	8106219	 7bb0eb	/tmp/gpui-image-free-candidate

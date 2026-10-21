@@ -1,0 +1,13 @@
+AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: false }
+GPU_IMAGE_FRAME,shared48,3,163289.412,110.192
+GPU_IMAGE_FRAME,shared48,4,161307.048,122.733
+GPU_IMAGE_FRAME,shared48,5,160902.889,66.442
+GPU_IMAGE_FRAME,shared48,6,160996.731,107.132
+GPU_IMAGE_FRAME,shared48,7,160848.798,99.872
+GPU_IMAGE_FRAME,shared48,8,160694.934,82.272
+GPU_IMAGE_FRAME,shared48,9,160670.884,57.682
+GPU_IMAGE_FRAME,shared48,10,160744.315,60.071
+GPU_IMAGE_FRAME,shared48,11,160672.984,69.942
+GPU_IMAGE_FRAME,shared48,12,160794.746,53.541
+GPU_IMAGE_FRAME,shared48,13,161160.025,120.853
+GPU_IMAGE_FRAME,shared48,14,161249.387,3575.461

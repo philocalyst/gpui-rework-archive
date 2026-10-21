@@ -1,0 +1,2 @@
+case,resources,payload_bytes,prefix_bytes,gpu_buffer_bytes,cold_image_upload,cold_wall_us,warm_image_upload,wall_p50_us,wall_p95_us,wall_p99_us,host_p50_us,all_buffer_bytes
+flat,0,0,0,0,0,7430.387,0,1321.910,1340.780,1340.780,41.141,4308
