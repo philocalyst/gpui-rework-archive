@@ -506,6 +506,35 @@ pub struct PreparedScene<'a> {
     commands: &'a DisplayList,
 }
 impl<'a> PreparedScene<'a> {
+    /// Certify a command-free opaque sRGB/SDR scene for native solid fill.
+    /// Returns the exact same0x00RRGGBB word as render_bgrx, without an output
+    /// buffer, bins or raster work. Other scenes require the ordinary renderer.
+    /// This certifies content only; a host must still submit and acknowledge it.
+    pub fn solid_bgrx(self) -> Result<Option<u32>, Error> {
+        let pixels = u64::from(self.width) * u64::from(self.height);
+        if pixels == 0 || pixels > MAX_PIXELS as u64 || self.width > 16_384 || self.height > 16_384
+        {
+            return Err(Error::InvalidDimensions);
+        }
+        self.color_config.validate()?;
+        if self.clear.iter().any(|v| !v.is_finite()) || !(0.0..=1.0).contains(&self.clear[3]) {
+            return Err(Error::InvalidColor);
+        }
+        if self.clear[..3].iter().any(|v| v.abs() > 1e20) {
+            return Err(Error::ColorOutOfRange);
+        }
+        if self.commands.len() != 0
+            || self.clear[3] != 1.0
+            || self.color_config.profile != crate::OutputProfile::Srgb
+            || self.color_config.format != crate::PixelFormat::Rgba8Premultiplied
+        {
+            return Ok(None);
+        }
+        Ok(Some(pack_bgrx(
+            self.color_config.encoder().encode(self.clear),
+        )))
+    }
+
     pub fn storage(self) -> SceneStorage {
         self.commands.storage()
     }
@@ -1067,9 +1096,11 @@ impl PixelWriter for BgrxEncoder {
     const ELEMENTS: usize = 1;
     #[inline]
     fn write(self, color: [f32; 4], destination: &mut [u32]) {
-        let [red, green, blue, _] = self.0.encode(color);
-        destination[0] = (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
+        destination[0] = pack_bgrx(self.0.encode(color));
     }
+}
+fn pack_bgrx([red, green, blue, _]: [u8; 4]) -> u32 {
+    (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue)
 }
 trait RenderSchedule {
     fn render<W: PixelWriter>(
