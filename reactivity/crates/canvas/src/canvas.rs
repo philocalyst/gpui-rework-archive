@@ -525,7 +525,46 @@ impl Canvas {
         }
         Ok(&self.pixels)
     }
+    /// Render directly into native packed words (0x00RRGGBB), without creating
+    /// or updating the optional CPU RGBA image. The destination must contain
+    /// exactly width*height words. Only opaque sRGB/RGBA8 output is supported.
+    /// Every call renders its supplied buffer; external buffer identity/lifetime
+    /// and presentation are owned by the host. Internal cached pixels keep their
+    /// existing dirty state, so later diagnostic pixels remain coherent.
+    pub fn render_bgrx(&mut self, destination: &mut [u32]) -> Result<(), Error> {
+        self.validate_bgrx(destination.len())?;
+        self.render_output(&Serial, Some(destination));
+        Ok(())
+    }
+    #[cfg(feature = "parallel")]
+    pub fn render_bgrx_with(
+        &mut self,
+        destination: &mut [u32],
+        pool: &RenderPool,
+    ) -> Result<(), Error> {
+        self.validate_bgrx(destination.len())?;
+        self.render_output(pool, Some(destination));
+        Ok(())
+    }
+    fn validate_bgrx(&self, length: usize) -> Result<(), Error> {
+        if length != self.width * self.height {
+            return Err(Error::InvalidDimensions);
+        }
+        if self.color_config.format != crate::PixelFormat::Rgba8Premultiplied {
+            return Err(Error::UnsupportedPixelFormat);
+        }
+        if self.color_config.profile != crate::OutputProfile::Srgb {
+            return Err(Error::UnsupportedOutputProfile);
+        }
+        if self.clear[3] != 1.0 {
+            return Err(Error::NonOpaqueOutput);
+        }
+        Ok(())
+    }
     fn render(&mut self, schedule: &impl RenderSchedule) {
+        self.render_output(schedule, None);
+    }
+    fn render_output(&mut self, schedule: &impl RenderSchedule, external: Option<&mut [u32]>) {
         let columns = self.width.div_ceil(TILE);
         let rows = self.height.div_ceil(TILE);
         let tiles = columns * rows;
@@ -568,12 +607,16 @@ impl Canvas {
             indices: &self.indices,
             tile_proofs: self.tile_proofs,
         };
-        let rendered = match self.color_config.format {
-            crate::PixelFormat::Rgba8Premultiplied => {
-                schedule.render(frame, self.color_config.encoder(), &mut self.pixels)
-            }
-            crate::PixelFormat::Rgba16Float => {
-                schedule.render(frame, self.color_config.half_encoder(), &mut self.pixels)
+        let rendered = if let Some(words) = external {
+            schedule.render(frame, BgrxEncoder(self.color_config.encoder()), words)
+        } else {
+            match self.color_config.format {
+                crate::PixelFormat::Rgba8Premultiplied => {
+                    schedule.render(frame, self.color_config.encoder(), &mut self.pixels)
+                }
+                crate::PixelFormat::Rgba16Float => {
+                    schedule.render(frame, self.color_config.half_encoder(), &mut self.pixels)
+                }
             }
         };
         stats.full_rect_tiles = rendered.full_rect_tiles;
@@ -601,19 +644,36 @@ struct Frame<'a> {
 
 /// Format dispatch happens once per frame, not through a pixel function pointer.
 pub(crate) trait PixelWriter: Copy + Send + Sync {
-    const BYTES: usize;
-    fn write(self, color: [f32; 4], destination: &mut [u8]);
+    type Element: Copy + Default + Send + Sync;
+    const ELEMENTS: usize;
+    fn write(self, color: [f32; 4], destination: &mut [Self::Element]);
 }
 impl PixelWriter for crate::color::OutputEncoder {
-    const BYTES: usize = 4;
+    type Element = u8;
+    const ELEMENTS: usize = 4;
     #[inline]
     fn write(self, color: [f32; 4], destination: &mut [u8]) {
         destination.copy_from_slice(&self.encode(color));
     }
 }
+#[derive(Clone, Copy)]
+struct BgrxEncoder(crate::color::OutputEncoder);
+impl PixelWriter for BgrxEncoder {
+    type Element = u32;
+    const ELEMENTS: usize = 1;
+    #[inline]
+    fn write(self, color: [f32; 4], destination: &mut [u32]) {
+        let [red, green, blue, _] = self.0.encode(color);
+        destination[0] = (u32::from(red) << 16) | (u32::from(green) << 8) | u32::from(blue);
+    }
+}
 trait RenderSchedule {
-    fn render<W: PixelWriter>(&self, frame: Frame<'_>, writer: W, pixels: &mut [u8])
-    -> RenderStats;
+    fn render<W: PixelWriter>(
+        &self,
+        frame: Frame<'_>,
+        writer: W,
+        pixels: &mut [W::Element],
+    ) -> RenderStats;
 }
 struct Serial;
 impl RenderSchedule for Serial {
@@ -621,10 +681,10 @@ impl RenderSchedule for Serial {
         &self,
         frame: Frame<'_>,
         writer: W,
-        pixels: &mut [u8],
+        pixels: &mut [W::Element],
     ) -> RenderStats {
         pixels
-            .chunks_mut(TILE * frame.width * W::BYTES)
+            .chunks_mut(TILE * frame.width * W::ELEMENTS)
             .enumerate()
             .map(|(index, band)| render_band(frame, writer, index, band))
             .fold(RenderStats::default(), combine_stats)
@@ -695,7 +755,7 @@ impl RenderSchedule for RenderPool {
         &self,
         frame: Frame<'_>,
         writer: W,
-        pixels: &mut [u8],
+        pixels: &mut [W::Element],
     ) -> RenderStats {
         use rayon::prelude::*;
         // Estimate distinguishes a proven uniform viewport fill from sampled
@@ -719,7 +779,7 @@ impl RenderSchedule for RenderPool {
         }
         let mut stats = self.pool.install(|| {
             pixels
-                .par_chunks_mut(TILE * frame.width * W::BYTES)
+                .par_chunks_mut(TILE * frame.width * W::ELEMENTS)
                 .enumerate()
                 .map(|(index, band)| render_band(frame, writer, index, band))
                 .reduce(RenderStats::default, combine_stats)
@@ -733,15 +793,15 @@ fn render_band<W: PixelWriter>(
     frame: Frame<'_>,
     writer: W,
     band_index: usize,
-    pixels: &mut [u8],
+    pixels: &mut [W::Element],
 ) -> RenderStats {
     let columns = frame.width.div_ceil(TILE);
     let mut stats = RenderStats::default();
     let mut scratch = [[0.0f32; 4]; TILE * TILE * 16];
-    // All admitted writers emit at most eight bytes. These fixed local buffers
+    // All admitted writers emit at most eight elements. These fixed local buffers
     // cache uniform colors without a heap allocation or repeated transfer work.
-    let mut clear = [0u8; 8];
-    writer.write(frame.clear, &mut clear[..W::BYTES]);
+    let mut clear = [W::Element::default(); 8];
+    writer.write(frame.clear, &mut clear[..W::ELEMENTS]);
     for tile in band_index * columns..(band_index + 1) * columns {
         let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
         let left = tile % columns * TILE;
@@ -806,14 +866,14 @@ fn render_band<W: PixelWriter>(
         if !ordered.is_empty()
             && let Some(color) = uniform_color
         {
-            writer.write(color, &mut uniform_bytes[..W::BYTES]);
+            writer.write(color, &mut uniform_bytes[..W::ELEMENTS]);
         }
         for y in top..bottom {
             for x in left..right {
-                let offset = ((y - top) * frame.width + x) * W::BYTES;
-                let destination = &mut pixels[offset..offset + W::BYTES];
+                let offset = ((y - top) * frame.width + x) * W::ELEMENTS;
+                let destination = &mut pixels[offset..offset + W::ELEMENTS];
                 if uniform_color.is_some() {
-                    destination.copy_from_slice(&uniform_bytes[..W::BYTES]);
+                    destination.copy_from_slice(&uniform_bytes[..W::ELEMENTS]);
                 } else {
                     let color = {
                         let start = ((y - top) * TILE + x - left) * 16;

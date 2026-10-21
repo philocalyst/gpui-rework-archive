@@ -421,3 +421,28 @@ fractional-density keys and reject invalid requests atomically. An additional
 private edge oracle covers exact and adjacent floating local edges across seven
 densities. Native DPI integration and GPU precision validation are separate host
 responsibilities; the canvas supplies the same borrowed scene contract.
+
+## Direct native CPU output
+
+`render_bgrx(&mut [u32])` renders directly into a host-owned mapped buffer of
+exactly width×height words. Each word is `0x00RRGGBB` (B,G,R,0 bytes on
+little-endian hosts). It creates no canvas RGBA image and uses no byte casts or
+unsafe code. `render_bgrx_with(destination, &pool)` uses the same optional owned
+executor with disjoint mutable word bands. The private pixel writer is generic
+over byte or word elements; format dispatch stays outside the pixel kernel.
+
+This output requires sRGB/RGBA8 configuration and an opaque clear color.
+Unsupported profile, float format, alpha or dimensions return typed errors before
+writing any destination or changing render statistics. Authored P3/Oklch colors
+still convert through the normal working pipeline. The host owns output lifetime,
+resize, synchronization and the actual presentation acknowledgement.
+
+Each call renders the supplied buffer, including a new swap buffer when the scene
+is unchanged. It does not claim an external-buffer identity cache. The optional
+internal image keeps its dirty state: a later `pixels()` diagnostic is coherent,
+and an already-current internal image stays current. Public tests verify packed
+word equality against RGBA for alpha/text/affine/clip/SDR mappings, staged commits,
+new destinations, internal cache reuse, rejected output immutability, and exact
+1/2/4/8-worker word rendering with zero internal output capacity. This seam lets a
+native software presenter avoid loading a GPU backend and avoid a second canvas
+image; actual process/driver memory savings require host measurements.
