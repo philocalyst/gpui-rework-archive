@@ -1042,7 +1042,7 @@ fn sample(command: &Command, x: usize, y: usize, stats: &mut RenderStats) -> [f3
     values
 }
 fn mask_sample(mask: &Raster, x: f64, y: f64, width: f64, height: f64) -> f32 {
-    // Fontdue has already integrated outline coverage into each raster cell.
+    // The raster backend has already integrated outline coverage into each raster cell.
     // Reconstruct it as a piecewise-constant field, preserving that native AA
     // at integer placement. General affine resampling uses the common 4x4 grid;
     // this is bounded sampling, not a scalable outline or exact area renderer.
@@ -1088,14 +1088,11 @@ mod scaled_mask_tests {
 
     #[test]
     fn normalized_mask_obeys_half_open_local_edges_before_texel_rounding() {
-        let mut fonts = TextSystem::bundled().unwrap();
-        let layout = fonts.shape("H", 16.0, None).unwrap();
-        let original = fonts.raster(layout.glyphs()[0].id, 20.0).unwrap();
         // Uniform nonzero coverage makes accidental edge inclusion or an
         // interior lookup rounded beyond the last texel directly observable.
         let mask = Raster {
-            key: original.key,
-            metrics: fontdue::Metrics {
+            key: crate::text::GlyphKey::fixture(),
+            metrics: crate::text::RasterMetrics {
                 width: 17,
                 height: 9,
                 ..Default::default()

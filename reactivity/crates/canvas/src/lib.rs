@@ -16,6 +16,7 @@ pub enum Error {
     InvalidDimensions,
     InvalidGeometry,
     InvalidFont,
+    UnsupportedFontFormat,
     InvalidFontSize,
     InvalidWidth,
     ResourceLimit,

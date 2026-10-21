@@ -2,11 +2,11 @@
 
 A real software text/canvas foundation independent of legacy GPUI. It shapes
 OpenType glyph IDs/positions with pinned rustybuzz 0.20.1 and rasterizes those
-same IDs with pinned fontdue 0.9.4. Full Noto Sans 2.015 and its OFL license are
+same IDs on demand with pinned Swash 0.2.10 (Skrifa 0.44.0). Full Noto Sans 2.015 and its OFL license are
 bundled; `TextSystem::new` also accepts caller-supplied font bytes. Nothing reads
 an absolute asset path. [Font provenance](assets/README.md).
 
-`FontFace` shares immutable source bytes and parsed font geometry. Cloning a
+`FontFace` shares immutable source bytes and a stable raster identity. Cloning a
 face and passing it to `TextSystem::from_font` creates independent mutable glyph
 caches over that same font. `TextSystem::bundled/new` remain convenient constructors;
 `font_face()` borrows the handle and `same_face()` compares process-local identity.
@@ -73,7 +73,7 @@ a host must explicitly negotiate a matching presentation path.
 
 Rectangles and font masks use a fixed 4×4 per-pixel sample grid, retaining each
 sample through ordered composition. Averaging a primitive before composition
-would incorrectly correlate overlapping edges and is explicitly tested. Fontdue
+would incorrectly correlate overlapping edges and is explicitly tested. Swash
 already integrates outline coverage into grayscale cells; those cells are a
 piecewise-constant local field sampled by the common grid. Native integer mask
 placement preserves its antialiasing. This is finite sampling and bitmap
@@ -119,7 +119,7 @@ On the measured x86_64 target, a prepared command is 136 bytes before Vec slack.
 CSR offsets and reusable fill cursors use two usize arrays per tile; references
 use u32. Stats report actual command/bin Vec capacities, unique retained mask
 payload, sample tests and skipped predecessor tiles. Glyph cache table/control,
-Arc headers, mask-set buckets, fontdue compiled outline storage, font source
+Arc headers, mask-set buckets, bounded Swash scaler scratch, font source
 bytes, allocator slack and process/native-service overhead are separate costs;
 payload counts are not RSS. Preparing glyph runs allocates bounded command and
 mask-dedup scratch, and stores mask Arc leases per glyph command. There is no
@@ -130,10 +130,10 @@ raster/compositor pixel loops allocate nothing; warm CSR buffers are reused.
 
 Run `cargo test -p gpui_canvas`, the same with `--release`, and
 `cargo clippy -p gpui_canvas --all-targets -- -D warnings`.
-Seventeen integration tests cover color conversions/roundtrips, negative extended
+Integration tests cover color conversions/roundtrips, negative extended
 blending, declared P3 output, linear HDR bytes, alpha, correlated edges, randomized
 forward-polygon versus inverse-raster scenes, ligatures and Unicode, native
-fontdue pixel placement, transformed mask-cell sampling, UTF-8 wrapping,
+independent Swash pixel placement, transformed mask-cell sampling, UTF-8 wrapping,
 foreign-font rejection, clipped reflected text, resource caps and candidate
 failure/commit. A compile-fail doctest prevents candidate rasterization.
 The font registry unit test verifies Send+Sync, one parse across eight concurrent
@@ -160,63 +160,86 @@ at 640×480 cost about 31 ms on this baseline. That is useful correctness eviden
 not an acceptable final text-performance target or a claim of GPUI completion.
 
 Verified primary library APIs: [rustybuzz 0.20.1](https://docs.rs/rustybuzz/0.20.1/rustybuzz/),
-[fontdue 0.9.4 indexed raster/metrics](https://docs.rs/fontdue/0.9.4/fontdue/struct.Font.html),
+[Swash scaling](https://docs.rs/swash/latest/swash/scale/index.html),
+[Skrifa outline API](https://docs.rs/skrifa/0.44.0/skrifa/outline/),
 [Unicode script 0.5.8](https://docs.rs/unicode-script/0.5.8/unicode_script/).
 
-## Shared parsed-font measurements and lifetime
+## Lazy outline font lifetime and measured memory
 
-Each FontFace is one Arc to immutable `{bytes, fontdue Font, checked ID}`.
-The global bundled registry is a directly initialized `Mutex<Weak<FontData>>`;
-there is no permanent strong font, global glyph cache or TLS. Cold parsing is
-serialized so simultaneous initial callers share exactly one result. Shaping,
-measurement and rasterization read the immutable face without taking this lock.
-Only a fully parsed face is published. If initialization panics, the slot still
-contains a valid Weak, so the next acquisition recovers the poisoned cache lock
-and either upgrades or constructs a complete replacement.
+Each FontFace is one Arc to immutable `{bytes, stable Swash key, checked ID}`.
+There is no eagerly compiled glyph array. Face admission parses borrowed font
+headers, not every glyph's geometry. Noto Sans bytes remain borrowed static data;
+caller bytes are copied once. The bundled registry is a directly initialized
+`Mutex<Weak<FontData>>`. Only cold admission takes the lock; poisoning before
+publication is recovered because the slot always contains a valid Weak.
+The last strong owner releases caller bytes. A later bundled acquisition mints
+new identity, so old layouts cannot accidentally rebind.
 
-On this x86_64 build, FontFace is 8 bytes and TextSystem is 64, versus the prior
-280-byte per-service header. FontData's header is 224 bytes (including Fontdue's
-192-byte header); its outline buffers are separate allocations. The registry
-static is 16 bytes, plus the 8-byte ID counter. Before first use it has no heap
-backing. After final strong release, only one expired weak allocation remains:
-the 224-byte data header plus two usize atomic reference counts in the same
-allocation (240 bytes in this standard-library layout, before allocator slack).
-The source bytes are shared read-only static backing for the bundle; supplied
-font bytes are owned by their face. The last face/service drop releases parsed
-buffers and any owned source bytes. A later bundled acquisition reparses and
-mints a fresh ID; an old unleased layout cannot accidentally rebind to it.
+Each TextSystem owns an independent bounded mask cache and an optional boxed
+Swash ScaleContext, allocated only on its first nonempty requested outline.
+The context caches at most one face entry and uses a stable per-face CacheKey.
+`clear_cache` also releases its scaler scratch. Existing scene Arc leases remain
+valid. Measurement/ink bounds do not create the scaler. The header sizes on
+x86_64 are FontFace 8, TextSystem 72, FontData 40, RasterMetrics 24 (formerly
+Fontdue Metrics 64). The registry is 16 bytes plus the 8-byte ID counter.
+After final strong release, the registry retains one expired weak allocation:
+40-byte data header plus two usize atomic counts, 56 bytes before allocator slack.
+No permanent strong font, TLS, per-glyph shared lock, or eager geometry remains.
 
-Fresh-process observations, Linux x86_64 / Ryzen 7 3700X / rustc 1.97.1 release,
-no drawing or glyph-cache population, one run per count:
+A Skrifa control-hull pen preflights only the requested outline: finite bounded
+coordinates, at most 65,536 segments, at most 1 MiB backend outline scratch and
+at most 1 MiB estimated mask. A Bezier lies within its control hull; floor/ceil
+plus a one-pixel margin protects raster placement. Actual returned mask length
+and the 8 MiB cache cap are checked independently. Bounds can be loose, so an
+unusually curved outline can be rejected conservatively. This is a resource
+admission policy, not a claim that untrusted font parsing is allocation-free.
 
-| Simultaneous services | Prior per-service font: before/live/after-drop RSS KiB | Shared face: before/live/after-drop RSS KiB | Shared initialization |
-| --- | --- | --- | --- |
-| 1 | 2924 / 17608 / 17196 | 3464 / 18552 / 18232 | 28.177 ms |
-| 2 | 2988 / 30332 / 27116 | 3456 / 18468 / 18148 | 28.318 ms + 200 ns |
-| 8 | 2892 / 106200 / 79120 | 3444 / 18524 / 18080 | 27.927 ms + seven acquisitions of 40–220 ns |
+The narrow production path adapts the outline/alpha/placement glue already used
+by the repository's `crates/gpui_ce_parley/src/store.rs` SwashGlyphRasterizer.
+It uses the default variation instance and unhinted grayscale outlines. Fontdue
+is now a dev-only quality oracle. AA output intentionally changes: 84 masks over
+Latin, Greek, Cyrillic, accents, descenders and physical scales 1/1.25/2 preserve
+all tested dimensions/placements, while 4,779 of 18,333 coverage bytes differ;
+RMS error versus Fontdue is 1.5101 on the 0–255 scale. A fresh independent Swash
+context supplies native-mask and transformed-cell exact renderer oracles.
+This is neither universal font parity nor a visual quality proof for every font.
+Color/bitmap/SVG font formats are rejected explicitly instead of silently
+emitting empty masks. No fallback, variation authoring, LCD or hinted-text
+support is added by this change.
 
-The baseline is the actual text.rs at `968af6cb88`, using the same borrowed static
-font bytes and Fontdue settings, separately compiled with the same dependency
-versions. Its individual parses cost 27.9–29.5 ms. Eight service drops cost
-9.332 ms there versus 0.544 ms for the shared face. These are single observations,
-not latency distributions. Nanosecond warm-call timings include clock overhead.
-Different test binaries have different initial code/data residency; compare the
-growth with service count, not their small one-font RSS difference.
+Fresh-process release component observations (Ryzen 7 3700X, rustc 1.97.1,
+Linux x86_64, one run per count), reproduced by
+`cargo run --release -p gpui_canvas --example font_memory -- 1` (also 2 and 8):
 
-Reproduce the shared measurement with a fresh process for each count:
-`GPUI_FONT_SERVICES=8 cargo test --release -p gpui_canvas --test font_sharing live_services_measurement -- --ignored --exact --nocapture`.
-Repeat with 1 and 2. Tests were run through a temporary isolated manifest over
-the actual crate sources while the in-progress runtime workspace member lacked
-its manifest; no production dependency or parent manifest was replaced.
+| Services | Cold admission | Retained admission heap | Shape | First masks + command preparation | First direct BGRX frame |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 84.8 µs | 56 B / 1 allocation | 299.8 µs | 113.2 µs | 828.8 µs |
+| 2 | 81.4 µs | 56 B / 1 allocation | 265.9 µs | 110.8 µs | 826.2 µs |
+| 8 | 83.1 µs | 56 B / 1 allocation | 260.1 µs | 108.2 µs | 828.3 µs |
 
-Weak-expiry tests establish actual ownership release, while RSS remains high
-after drop because the allocator retains freed pages and mapped font/code pages
-remain resident. These measurements are not exact Fontdue heap attribution or
-evidence that all memory returns to the OS. One font still has roughly a 15 MiB
-cold RSS increment; sharing removes repeated parsed copies rather than solving
-that initial cost. Demand initialization remains necessary. Per-service mutable
-raster caches, retained command masks and their existing caps remain independent.
-Public header sizes remain Color 20, Glyph 16 and TextLayout 48 bytes.
+The actual shaped text is “office café AVATAR” at 16px, one label on a white
+640×480 scene. Unique mask payload is 1,207 B; preparation retains 8,767 B
+including scaler scratch, mask/table/control blocks and commands, with an
+11,263 B peak increment. Shape retains 256 B of positions. Render adds 19,400 B
+of reusable bin storage, with the caller's 1,228,800 B BGRX output allocated
+outside that phase. Service Vec storage is also allocated before admission;
+charge 72×count bytes plus its Vec header when comparing full ownership.
+The phase ledger's negative clear/drop counts include allocations from earlier
+phases; they are not leaks. A cache clear releases 4,328 requested bytes here,
+while scenes continue leasing masks. See [raw phases](evidence-font-lazy.csv).
+
+The same executable's Fontdue 0.9.4 cold parse takes 24.42 ms and retains
+12,519,432 requested heap bytes in 170,881 allocations; its transient peak varies
+with hash seeding. This measures requested allocator bytes, not resident pages.
+The previous shared-Fontdue implementation already avoided duplicate parsed
+copies across services; the new path removes its first-face geometry floor.
+Native CPU-reference observations before this change showed empty/Todo anon
+1,492/14,376 KiB (`gpui/evidence-native-memory-cpu.csv`); that process delta agrees
+with an eager font cost but is not exact causal heap attribution. Whole-process
+startup, OS first-present, RSS/PSS, and the CPU-first/GPU-upgrade path require
+separate native measurements. No sub-50ms application claim follows from these
+component results. Earlier canvas CSVs below use the Fontdue baseline and are
+historical rendering experiments, not newly measured Swash frame distributions.
 
 ## Exact opaque sRGB quantization
 
@@ -406,7 +429,7 @@ bearings/extents back in logical units. The window's device transform still maps
 that logical geometry to pixels. This produces real physical-resolution outlines;
 it does not enlarge an existing bitmap. The physical font size must be finite,
 positive and at most 4096 px; the existing 1 MiB per-mask cap still applies.
-Invalid density/product is rejected before Fontdue, including empty runs.
+Invalid density/product is rejected before rasterization, including empty runs.
 
 A glyph mask's coverage cells uniformly span its `PreparedDraw::local_rect`.
 Its pixel dimensions can therefore differ from logical dimensions. CPU and GPU
