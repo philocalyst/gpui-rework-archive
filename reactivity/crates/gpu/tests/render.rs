@@ -259,9 +259,11 @@ fn uniform_float_tiles_preserve_reference_output_bits() {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
         let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
         let viewport = Rect::new(0.0, 0.0, 32.0, 16.0);
-        for color in [
-            Color::linear_srgb(-0.0, 0.0, -2.0, 1.0).unwrap(),
-            Color::linear_srgb(1e19, -1e19, 0.00001, 1.0).unwrap(),
+        for (color, uniform_tiles) in [
+            (Color::linear_srgb(-0.0, 0.0, -2.0, 1.0).unwrap(), 0),
+            (Color::linear_srgb(-1e-40, 0.0, -2.0, 1.0).unwrap(), 0),
+            (Color::linear_srgb(1e-40, 0.0, -2.0, 1.0).unwrap(), 2),
+            (Color::linear_srgb(1e19, -1e19, 0.00001, 1.0).unwrap(), 2),
         ] {
             let mut canvas = Canvas::recording(32, 16, config).unwrap();
             canvas.clear(Color::linear_srgb(-1.0, 1.0, -1.0, 0.25).unwrap());
@@ -274,14 +276,7 @@ fn uniform_float_tiles_preserve_reference_output_bits() {
             let optimized = readback(&mut renderer, &canvas);
             assert_eq!(&optimized[..8], &reference[..8]);
             assert_eq!(optimized, reference);
-            assert_eq!(
-                renderer.stats().uniform_tiles,
-                if color.channels()[0].is_sign_negative() {
-                    0
-                } else {
-                    2
-                }
-            );
+            assert_eq!(renderer.stats().uniform_tiles, uniform_tiles);
         }
     });
 }

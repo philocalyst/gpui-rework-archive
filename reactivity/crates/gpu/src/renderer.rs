@@ -688,8 +688,9 @@ fn full_tile(
     if draw.mask.is_some()
         || draw.color[3] != 1.0
         // Source-over can change -0 to +0 according to the backdrop's sign.
-        // Such a draw is not a backdrop-independent byte value on float targets.
-        || draw.color.iter().any(|v| v.to_bits() == (-0.0_f32).to_bits())
+        // A negative subnormal may also flush to -0 before that addition.
+        // Neither is a backdrop-independent byte value on float targets.
+        || draw.color.iter().any(|v| v.is_sign_negative() && !v.is_normal())
     {
         return false;
     }
