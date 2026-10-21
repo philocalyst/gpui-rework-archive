@@ -167,7 +167,7 @@ fn main() {
                     "focus_first" | "focus_last" => {
                         let target = addressed.unwrap()[usize::from(stage.ends_with("last"))];
                         for _ in 0..operations {
-                            black_box(win.as_mut().unwrap().focus(target).unwrap());
+                            black_box(win.as_mut().unwrap().focus(black_box(target)).unwrap());
                         }
                     }
                     "property_first" | "property_last" => {
@@ -175,9 +175,13 @@ fn main() {
                         for _ in 0..operations {
                             assert_eq!(
                                 black_box(
-                                    win.as_ref().unwrap().property(target, BACKGROUND).unwrap()
-                                ),
-                                Color::TRANSPARENT
+                                    win.as_ref()
+                                        .unwrap()
+                                        .property(black_box(target), BACKGROUND)
+                                        .unwrap()
+                                )
+                                .alpha(),
+                                0.0
                             );
                         }
                     }
@@ -185,7 +189,7 @@ fn main() {
                         for _ in 0..operations {
                             win.as_mut()
                                 .unwrap()
-                                .activate(addressed.unwrap()[0])
+                                .activate(black_box(addressed.unwrap()[0]))
                                 .unwrap();
                         }
                         assert_eq!(
