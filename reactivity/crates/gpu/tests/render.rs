@@ -617,6 +617,43 @@ fn zero_coverage_draw_preserves_threshold_clear_and_hdr_bits() {
 }
 
 #[test]
+fn zero_coverage_hdr_preserves_numeric_zero_across_cpu_and_gpu() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        for proofs in [false, true] {
+            renderer.set_tile_proofs(proofs);
+            let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+            let mut canvas = Canvas::recording(1, 1, config).unwrap();
+            canvas.set_tile_proofs(proofs);
+            canvas.clear(Color::linear_srgb(-0.0, -0.0, -0.0, 1.0).unwrap());
+            let cpu_before = canvas.pixels().to_vec();
+            let gpu_before = readback(&mut renderer, &canvas);
+            canvas
+                .fill_rect(
+                    Rect::new(0.0, 0.0, 0.01, 0.01),
+                    Affine::IDENTITY,
+                    Rect::new(0.0, 0.0, 1.0, 1.0),
+                    Color::WHITE,
+                )
+                .unwrap();
+            let cpu_after = canvas.pixels().to_vec();
+            let gpu_after = readback(&mut renderer, &canvas);
+            assert_eq!(cpu_before, cpu_after, "CPU keeps the exact clear bits");
+            for pixels in [cpu_before, gpu_before, cpu_after, gpu_after] {
+                // Shader reductions may erase the sign of a zero. Require the
+                // same numeric color without promising cross-device zero signs.
+                let words: Vec<_> = pixels
+                    .chunks_exact(2)
+                    .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+                    .collect();
+                assert!(words[..3].iter().all(|value| value & 0x7fff == 0));
+                assert_eq!(words[3], 0x3c00);
+            }
+        }
+    });
+}
+
+#[test]
 fn maximum_admitted_tone_mapping_is_finite_and_bright() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
