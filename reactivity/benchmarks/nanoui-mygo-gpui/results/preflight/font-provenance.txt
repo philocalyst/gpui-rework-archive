@@ -1,0 +1,6 @@
+Font family: DejaVu Sans (Book)
+Fontconfig resolver: fc-match -f '%{file}' 'DejaVu Sans'
+Host-resolved source: /nix/store/ba8rnmi3ha6p3j8xc85hdq1p9dq3mr6q-dejavu-fonts-minimal-2.37/share/fonts/truetype/DejaVuSans.ttf
+NanoUI staged copy: /root/.local/share/fonts/luna-bench/DejaVuSans.ttf
+SHA-256 (source and staged copy): 58568c88a01b80dfc056daca3eeafd434a0380df1a48dda53f0de0d716109bbd
+Reason: the pinned NanoUI Linux font database scans normal font directories but did not discover the Nix store font through Fontconfig. Staging this host-resolved file makes the fixture's declared DejaVu Sans font available to NanoUI; it does not modify NanoUI source.
