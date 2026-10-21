@@ -1,0 +1,48 @@
+{
+  "source_commit": "88d65eae0a0e832e51a8c7156f236b1e3a8ec5dd",
+  "worktree": "/root/gpui-empty-floor-88/reactivity",
+  "fixture": "crates/gpui/examples/empty.rs",
+  "fixture_sha256": "419d6b422a034f213419cda3f09f794b5ac0d76320cdaa42d5e1f26b42044da8",
+  "renderer_support": "crates/gpui/examples/support/renderer.rs",
+  "renderer_support_sha256": "38eac98311473da85d2abefa16e0af384c358a8d5fed2aa60dfc77aeef4298f2",
+  "lock_sha256": "d4835c0d54448d6c5560b9fde1a3a43a9b5497e0d707140ce7c58f13b81ce99f",
+  "features": "x11 (includes accessibility + native)",
+  "rustc": "1.97.1 (8bab26f4f 2026-07-14)",
+  "cargo": "1.97.1 (c980f4866 2026-06-30)",
+  "host": "Linux x86_64 NixOS; kernel 6.18.54",
+  "variants": {
+    "default": {
+      "command": "cargo build --locked --release -p gpui --example empty --features x11",
+      "profile": "Cargo release defaults; no CARGO_PROFILE_* or RUSTFLAGS overrides",
+      "target_dir": "/root/gpui-empty-floor-target-default",
+      "jobs": 2,
+      "binary": "/root/gpui-empty-floor-target-default/release/examples/empty",
+      "binary_sha256": "627bab35bf73a4ac7974f1140dda37826662087411ac7a781cd44de48c056530",
+      "binary_bytes": 24558648,
+      "text_bytes": 19079607,
+      "data_bytes": 478064,
+      "bss_bytes": 10580,
+      "cargo_reported_build_time": "3m47s",
+      "build_log": "default-build.log"
+    },
+    "thin_lto_cgu1": {
+      "command": "CARGO_PROFILE_RELEASE_LTO=thin CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 cargo build --locked --release -p gpui --example empty --features x11 -vv",
+      "profile_overrides": {
+        "CARGO_PROFILE_RELEASE_LTO": "thin",
+        "CARGO_PROFILE_RELEASE_CODEGEN_UNITS": "1"
+      },
+      "target_dir": "/root/gpui-empty-floor-target-thin",
+      "jobs": 2,
+      "binary": "/root/gpui-empty-floor-target-thin/release/examples/empty",
+      "binary_sha256": "fa102d5bf72b947dd3fee4079c6299fa532bc639638eab7e715cfecd2cfd60ba",
+      "binary_bytes": 19884088,
+      "text_bytes": 16986851,
+      "data_bytes": 337832,
+      "bss_bytes": 11176,
+      "cargo_reported_build_time": "4m17s",
+      "build_log": "thin-build.log"
+    }
+  },
+  "runtime_or_accessibility_activation_observed": false,
+  "link_map": "not collected; these artifacts include ELF program headers and complete symbol-size dumps"
+}
