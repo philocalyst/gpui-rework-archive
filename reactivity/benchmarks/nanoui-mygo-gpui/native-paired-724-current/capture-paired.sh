@@ -29,6 +29,8 @@ BASELINE_EXPECTED_SHA=795b54cc4c8feef2d39fb4f73e4fd6b7cf2799b45fadec192888564fb8
 CURRENT_EXPECTED_SHA=9f26a0f112e1b34c67ad0ad57649037f5c135d776e05d77deaeeacc08b81785f
 OBSERVER_EXPECTED_PATH=/tmp/gpui-bench-observer-target/release/luna-x11-observer
 OBSERVER_EXPECTED_SHA=b4f84c80caa854d974643a2c20823537601a04745a7bcf320be356732b42f88b
+OBSERVER_SOURCE_EXPECTED_SHA=9b967168df1e38b6a83b828b1dff2099f47373bf89cbe299bfa58bf240dd64bd
+RUNNER_EXPECTED_SHA=6fe35ffc79dc7dc1b504cbd9048dc9fc8bdc4c8707236eefcba6895e7c073266
 [[ "$LUNA_DISPLAY" == :97 ]] || { echo 'capture requires the reviewed persistent private Xvfb :97' >&2; exit 2; }
 [[ -S /tmp/.X11-unix/X97 ]] || { echo 'private Xvfb :97 is not running' >&2; exit 2; }
 [[ "$LUNA_OBSERVER_BINARY" == "$OBSERVER_EXPECTED_PATH" ]] || {
@@ -47,16 +49,33 @@ has_line() {
 }
 
 verify_source() {
-  local side=$1 tree=$2 commit=$3
+  local side=$1 tree=$2 commit=$3 top item compiled_extra
+  top=$(git -C "$tree" rev-parse --show-toplevel)
+  [[ "$tree" == "$top/reactivity" ]] || {
+    echo "$side source path is not the nested reactivity workspace: $tree (git root $top)" >&2; return 1;
+  }
+  [[ -f "$tree/Cargo.toml" && -f "$tree/Cargo.lock" && -f "$tree/crates/gpui/Cargo.toml" ]] || {
+    echo "$side nested reactivity workspace manifests are missing" >&2; return 1;
+  }
   [[ $(git -C "$tree" rev-parse HEAD) == "$commit" ]] || {
     echo "$side source HEAD mismatch at $tree" >&2; return 1;
   }
-  git -C "$tree" diff --quiet "$commit" -- Cargo.toml Cargo.lock crates/ vendor/ || {
+  # Cargo can inherit settings from the worktree root, while compiled sources
+  # live below reactivity/. Check both configuration and the exact package tree.
+  local pathspecs=(.cargo/ reactivity/.cargo/ rust-toolchain rust-toolchain.toml rust-toolchain.yaml reactivity/rust-toolchain reactivity/rust-toolchain.toml reactivity/rust-toolchain.yaml reactivity/Cargo.toml reactivity/Cargo.lock reactivity/crates/ reactivity/vendor/)
+  git -C "$top" diff --quiet "$commit" -- "${pathspecs[@]}" || {
     echo "$side compiled source tree is modified" >&2; return 1;
   }
-  [[ -z $(git -C "$tree" ls-files --others --exclude-standard -- Cargo.toml Cargo.lock crates/ vendor/) ]] || {
-    echo "$side compiled source tree has untracked non-ignored files" >&2; return 1;
-  }
+  for compiled_extra in \
+    "$(git -C "$top" ls-files --others --exclude-standard -- "${pathspecs[@]}")" \
+    "$(git -C "$top" ls-files --others --ignored --exclude-standard -- "${pathspecs[@]}")"; do
+    while IFS= read -r item; do
+      [[ -z "$item" ]] && continue
+      [[ "$item" == reactivity/crates/gpui/examples/luna_bench.rs ]] || {
+        echo "$side unexpected untracked compiled/config input: $item" >&2; return 1;
+      }
+    done <<< "$compiled_extra"
+  done
   [[ $(sha256sum "$tree/crates/gpui/examples/luna_bench.rs" | cut -d' ' -f1) == "$FIXTURE_SHA" ]] || {
     echo "$side injected fixture SHA mismatch" >&2; return 1;
   }
@@ -70,19 +89,24 @@ verify_cell_identity() {
     tree=$LUNA_BASELINE_SOURCE_TREE commit=$BASELINE_COMMIT
     manifest=$LUNA_BASELINE_MANIFEST preflight=$LUNA_BASELINE_PREFLIGHT_RECORD
     has_line "$manifest" "gpui_source_commit=$BASELINE_COMMIT"
+    has_line "$manifest" "gpui_worktree=$(dirname "$tree")"
     has_line "$manifest" "gpui_binary=$LUNA_BASELINE_BINARY"
     has_line "$manifest" "gpui_binary_sha256=$expected"
     has_line "$manifest" "gpui_fixture_sha256=$FIXTURE_SHA"
     has_line "$manifest" "gpui_features=x11"
+    has_line "$manifest" 'gpui_renderer_policy=Auto'
+    has_line "$manifest" 'gpui_fixture=reactivity/crates/gpui/examples/luna_bench.rs'
   else
     bin=$LUNA_CURRENT_BINARY expected=$CURRENT_EXPECTED_SHA
     tree=$LUNA_CURRENT_SOURCE_TREE commit=$CURRENT_COMMIT
     manifest=$LUNA_CURRENT_MANIFEST preflight=$LUNA_CURRENT_PREFLIGHT_RECORD
     has_line "$manifest" "source_commit=$CURRENT_COMMIT"
+    has_line "$manifest" "source_worktree=$tree"
     has_line "$manifest" "binary=$LUNA_CURRENT_BINARY"
     has_line "$manifest" "binary_sha256=$expected"
     has_line "$manifest" "fixture_sha256=$FIXTURE_SHA"
     has_line "$manifest" 'features=x11 (includes accessibility)'
+    has_line "$manifest" 'renderer_policy=Auto'
     has_line "$manifest" 'workspace_root=/root/gpui-current-main-bench/reactivity'
     has_line "$manifest" 'package_id=path+file:///root/gpui-current-main-bench/reactivity/crates/gpui#0.1.0'
   fi
@@ -98,15 +122,18 @@ verify_cell_identity() {
   [[ $(sha256sum "$LUNA_OBSERVER_BINARY" | cut -d' ' -f1) == "$OBSERVER_EXPECTED_SHA" ]] || {
     echo 'observer executable SHA mismatch' >&2; return 1;
   }
+  [[ $(sha256sum "$DIR/../src/main.rs" | cut -d' ' -f1) == "$OBSERVER_SOURCE_EXPECTED_SHA" ]] || {
+    echo 'observer source SHA mismatch' >&2; return 1;
+  }
+  [[ $(sha256sum "$BASE/run-one.sh" | cut -d' ' -f1) == "$RUNNER_EXPECTED_SHA" ]] || {
+    echo 'run-one.sh changed from the reviewed runner source' >&2; return 1;
+  }
 }
 
 [[ $(sha256sum "$COMMON_FIXTURE" | cut -d' ' -f1) == "$FIXTURE_SHA" ]]
 [[ $(git -C "$BASE/../../../comparators/mygo" rev-parse HEAD) == ea23ad2975a87db9b20efe6690ffedf88f4fe4f3 ]]
 [[ $(git -C "$BASE/../../../comparators/nanoui" rev-parse HEAD) == dfa7f7ab4e890f643703f4ffe4d834ff10defd4f ]]
 OUT="$DIR/results/$LUNA_PAIR_ID"
-[[ ! -e "$OUT" ]] || { echo "refusing to overwrite $OUT" >&2; exit 2; }
-mkdir -p "$OUT"
-
 source /tmp/gpui-native-env.sh
 export DISPLAY=$LUNA_DISPLAY
 export PROFILE=native-default APP=gpui
@@ -122,6 +149,23 @@ if [[ "$LUNA_STARTS" != 100 || "$LUNA_CLICKS_PER_START" != 10 || "$LUNA_MEMORY_S
   exit 2
 fi
 
+# Validate both source identities for every planned cell before creating any
+# output or launching an observer. Later per-cell checks catch drift mid-run.
+workloads=('eager 0' 'eager 1000' 'virtual 250000')
+for workload in "${workloads[@]}"; do
+  read -r mode rows <<< "$workload"
+  for variant in baseline current; do
+    verify_cell_identity "$variant"
+    echo "GUARD_PASS,$variant,$mode,$rows"
+  done
+done
+if [[ "${LUNA_GUARD_ONLY:-0}" == 1 ]]; then
+  echo 'GUARD_ONLY_PASS,all six cells validated; no output directory or observer launched'
+  exit 0
+fi
+[[ ! -e "$OUT" ]] || { echo "refusing to overwrite $OUT" >&2; exit 2; }
+mkdir -p "$OUT"
+
 {
   echo "pair_id=$LUNA_PAIR_ID"
   echo "display=$LUNA_DISPLAY"
@@ -131,6 +175,8 @@ fi
   echo "current_binary_sha256=$LUNA_CURRENT_SHA"
   echo "fixture_sha256=$FIXTURE_SHA"
   echo "observer_sha256=$LUNA_OBSERVER_SHA"
+  echo "observer_source_sha256=$OBSERVER_SOURCE_EXPECTED_SHA"
+  echo "run_one_sha256=$RUNNER_EXPECTED_SHA"
   echo 'profile=native-default; renderer_policy=Auto'
   echo "protocol=starts:$LUNA_STARTS,clicks_per_start:$LUNA_CLICKS_PER_START,idle_samples:$LUNA_MEMORY_STARTS,idle_ms:$LUNA_IDLE_MS"
   echo 'pairing=two 100-start observer batches per workload; alternating source order across workload blocks; not per-event paired samples'
@@ -138,7 +184,6 @@ fi
   echo 'preflight_records_reviewed=true'
 } > "$OUT/manifest.txt"
 
-workloads=('eager 0' 'eager 1000' 'virtual 250000')
 index=0
 for workload in "${workloads[@]}"; do
   read -r mode rows <<< "$workload"
