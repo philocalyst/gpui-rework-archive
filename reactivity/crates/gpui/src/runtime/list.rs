@@ -130,16 +130,17 @@ pub(super) fn plan(
 }
 
 pub(super) fn row_style(
-    node: &Node,
-    parent: Option<&Node>,
+    kind: NodeKind,
+    declared: &Style,
+    parent: Option<Flow>,
     slot: Option<&ListRow>,
 ) -> cephal::Style {
-    let mut style = layout_style(node.style);
-    if node.kind() == NodeKind::List && node.style.width.is_none() {
+    let mut style = layout_style(declared);
+    if kind == NodeKind::List && declared.width.is_none() {
         use cephal::style::Dimension;
         if parent.is_none() {
             style.size.width = Dimension::percent(1.0);
-        } else if parent.is_some_and(|parent| parent.style.flow == Flow::Row) {
+        } else if parent == Some(Flow::Row) {
             style.flex_grow = 1.0;
             style.flex_basis = Dimension::length(0.0);
         }
