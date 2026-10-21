@@ -611,6 +611,12 @@ fn wait_readable<C: AsFd>(conn: &C, deadline: Instant) -> Result<bool, Box<dyn s
 }
 
 fn emit_summary(label: &str, values: &mut [Duration]) {
+    if values.is_empty() {
+        for p in [50, 95, 99] {
+            println!("{label}_P{p}_NS,0,NA");
+        }
+        return;
+    }
     values.sort();
     for (p, q) in [(50, 0.50), (95, 0.95), (99, 0.99)] {
         let d = values[((values.len() - 1) as f64 * q).round() as usize];
