@@ -6,7 +6,7 @@ mod color;
 mod text;
 pub use canvas::{Canvas, CanvasScene, RenderStats};
 pub use color::{Color, ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping, rgb};
-pub use text::{Glyph, TextLayout, TextSystem};
+pub use text::{FontFace, Glyph, TextLayout, TextSystem};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {
