@@ -1,0 +1,72 @@
+{
+  "base": "62f670dc2674cbf8854e01bdeea7a69a8e5f8f69",
+  "baseline": "5c912171c0576e178823ab62f88c5233167f99e0",
+  "fixture_sha256": "18956fcc9692e728380fa72f20248c42e0016fe4ce753359466f9656402d1491",
+  "rust": "1.97.1",
+  "machine": "AMD Ryzen 7 3700X 8-Core Processor",
+  "cpu_affinity": 2,
+  "profile": "Cargo default release",
+  "rustflags_environment": null,
+  "checked_in_build_rustflags": [
+    "-C",
+    "symbol-mangling-version=v0",
+    "--cfg",
+    "tokio_unstable"
+  ],
+  "scope": "Public Win operations instantiated inside the unit harness; recording mode except the independent public geometry/pixel oracle. No native latency, raster throughput or scanout timing claim.",
+  "executables": {
+    "inline": {
+      "path": "/tmp/gpui-spaces-inline",
+      "sha256": "510131a9f2bbd91de6fe366fa0eef7f4bb807b14ce523a27429589f7e8797bbe"
+    },
+    "candidate": {
+      "path": "/tmp/gpui-spaces-borrowed-final",
+      "sha256": "f9c87c3b3d68575cc45f9ca164684d1321799062e105675a4952ab9fffe91ed0"
+    }
+  },
+  "initial_candidate": "165321645f3f0972c1b8c0801c186df269ccc5b7",
+  "getter_candidate": "63769d3080a293baaf61a9cef338daccedf3f728",
+  "candidate": "75b02d0b40f136896d571b0c0e046d19555cf8ba",
+  "getter_executable": {
+    "path": "/tmp/gpui-spaces-getter",
+    "sha256": "574cb6c12e4c579aab800e90bfa9363b011ace638d535b845af61cf6d0edd517"
+  },
+  "initial_executable": {
+    "path": "/tmp/gpui-spaces-candidate",
+    "sha256": "ef0bcdaf64bc0ac8f25dca54af846604ee557021b4312fb0ae183b65d4c41c68"
+  },
+  "capture_elapsed_s": {
+    "initial": 12.68342858896358,
+    "getter": 13.175147633010056,
+    "final": 12.112892283010297
+  },
+  "rows_per_capture": 1470,
+  "fresh_process_pairs": 5,
+  "rounds_per_process": 3,
+  "constructor_assessment": "Lifetimes keep the immutable sheet allocation fixed; current private callsites establish membership. Debug assertions additionally check membership. A constructor that only selects from Context-owned slices would make that invariant local and remove debug per-item checking; not implemented in this measured cut.",
+  "downstream_geometry_consumer": {
+    "source": "presented-spaces-consumer.rs",
+    "source_sha256": "506fc52e7c90c4465c48ae718375bfb3326eb3f6d14eb6f72433f6ea684fc94c",
+    "baseline": {
+      "sha256": "29f6dd53f34e80bef0ba68c93ddeff013e6a51b6672f3c7597875692f2ed2af9",
+      "text_bytes": 2895735
+    },
+    "candidate": {
+      "sha256": "6d82fad2446767d6ed35ad11e16039dd4859f18420fb1aa06a3787f955da0ec0",
+      "text_bytes": 2900055
+    },
+    "rustc_args": [
+      "--edition=2024",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "symbol-mangling-version=v0",
+      "--cfg",
+      "tokio_unstable",
+      "--crate-name",
+      "presented_space_consumer"
+    ],
+    "candidate_regular_gpui_rlib_sha256": "3ea40a6f4355325a75c5fc2383808a6e6fc7a9de01fd025bc99c6648fc91055f",
+    "baseline_regular_gpui_rlib_sha256": "6b8c3b550221cc2657e26fa497e32e193aa22692c8210d336a3897f76820df85"
+  }
+}

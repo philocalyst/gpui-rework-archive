@@ -1,0 +1,16 @@
+{
+  "elapsed_s": 12.68342858896358,
+  "rows": 1470,
+  "pairs": 5,
+  "cpu": 2,
+  "executables": {
+    "inline": {
+      "path": "/tmp/gpui-spaces-inline",
+      "sha256": "510131a9f2bbd91de6fe366fa0eef7f4bb807b14ce523a27429589f7e8797bbe"
+    },
+    "candidate": {
+      "path": "/tmp/gpui-spaces-candidate",
+      "sha256": "ef0bcdaf64bc0ac8f25dca54af846604ee557021b4312fb0ae183b65d4c41c68"
+    }
+  }
+}

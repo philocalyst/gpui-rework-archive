@@ -1,0 +1,7 @@
+distinct,allocation_requests,requested_bytes,live_bytes,peak_bytes
+0,0,0,0,0
+1,0,0,0,0
+2,2,544,32,544
+32,1,512,512,512
+33,2,98816,98304,98816
+4096,2,98816,98304,98816
