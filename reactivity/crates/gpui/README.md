@@ -58,6 +58,25 @@ The Library uses the same public interface over 250,000 app-owned identifiers;
 its [keyed viewport](VIRTUAL_LIST.md) retains only realized rows. It is a
 catalogue/play-request surface, with no audio decoder or database integration.
 
+Flex recipes configure ordinary containers with literal layout values:
+
+```rust
+use gpui::prelude::*;
+let toolbar = row((button("Back"), button("Play")))
+    .w(320).h(48)
+    .layout(Flex::row().align(Align::Center).justify(Justify::SpaceBetween).wrap(true));
+```
+
+`align` selects cross-axis start/end/center/stretch/baseline; `justify` selects
+main-axis start/end/center or space-between/around/evenly. Wrapping follows the
+container's main axis. A recipe changes its flow and only the optional fields
+it specifies, preserving previous gap/alignment/distribution/wrap declarations.
+The typed inspector selectors `property::{ALIGN, JUSTIFY, WRAP}` edit those
+same destinations with `Contribution::Set`/`Inherit`; layout, pixels, pointer
+queries and native accessibility receive the resulting geometry through the
+ordinary presentation barrier. Reactive recipe inputs, reverse wrapping and
+per-item alignment remain outside this literal surface.
+
 [Typed questions](QUESTION_INPUTS.md) freeze declared Sources or earlier Ready
 Reader answers for application-owned workers. Source pairs borrow their values
 together; earlier Reader dependencies settle at the same owner barrier. Library

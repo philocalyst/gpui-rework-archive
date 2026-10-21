@@ -2458,9 +2458,14 @@ fn layout_changed(a: Style, b: Style) -> bool {
         || a.padding != b.padding
         || a.font_size != b.font_size
         || a.flow != b.flow
+        || a.align != b.align
+        || a.justify != b.justify
+        || a.wrap != b.wrap
 }
 fn layout_style(style: &Style) -> cephal::Style {
-    use cephal::style::{Dimension, Display, FlexDirection, LengthPercentage};
+    use cephal::style::{
+        AlignItems, Dimension, Display, FlexDirection, FlexWrap, JustifyContent, LengthPercentage,
+    };
     cephal::Style {
         display: Display::Flex,
         size: Size {
@@ -2477,6 +2482,26 @@ fn layout_style(style: &Style) -> cephal::Style {
             Flow::Column => FlexDirection::Column,
         },
         flex_shrink: 0.0,
+        align_items: Some(match style.align {
+            crate::Align::Start => AlignItems::FLEX_START,
+            crate::Align::End => AlignItems::FLEX_END,
+            crate::Align::Center => AlignItems::CENTER,
+            crate::Align::Stretch => AlignItems::STRETCH,
+            crate::Align::Baseline => AlignItems::BASELINE,
+        }),
+        justify_content: Some(match style.justify {
+            crate::Justify::Start => JustifyContent::FLEX_START,
+            crate::Justify::End => JustifyContent::FLEX_END,
+            crate::Justify::Center => JustifyContent::CENTER,
+            crate::Justify::SpaceBetween => JustifyContent::SPACE_BETWEEN,
+            crate::Justify::SpaceAround => JustifyContent::SPACE_AROUND,
+            crate::Justify::SpaceEvenly => JustifyContent::SPACE_EVENLY,
+        }),
+        flex_wrap: if style.wrap {
+            FlexWrap::Wrap
+        } else {
+            FlexWrap::NoWrap
+        },
         ..cephal::Style::DEFAULT
     }
 }

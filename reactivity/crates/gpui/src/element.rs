@@ -392,6 +392,15 @@ impl<'a> El<'a> {
         if let Some(gap) = recipe.gap {
             self.style.gap = gap;
         }
+        if let Some(align) = recipe.align {
+            self.style.align = align;
+        }
+        if let Some(justify) = recipe.justify {
+            self.style.justify = justify;
+        }
+        if let Some(wrap) = recipe.wrap {
+            self.style.wrap = wrap;
+        }
         self
     }
     pub fn flex(self) -> Self {

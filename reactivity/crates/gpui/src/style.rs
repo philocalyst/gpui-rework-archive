@@ -6,10 +6,36 @@ pub use gpui_canvas::{Color, rgb};
 pub use gpui_reactivity_core::Affine;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(u8)]
 pub enum Flow {
     Row,
     #[default]
     Column,
+}
+
+/// Alignment of children on a flex container's cross axis.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(u8)]
+pub enum Align {
+    Start,
+    End,
+    Center,
+    #[default]
+    Stretch,
+    Baseline,
+}
+
+/// Distribution of children along a flex container's main axis.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(u8)]
+pub enum Justify {
+    #[default]
+    Start,
+    End,
+    Center,
+    SpaceBetween,
+    SpaceAround,
+    SpaceEvenly,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -22,6 +48,9 @@ pub struct Style {
     pub(crate) fg: Color,
     pub(crate) bg: Color,
     pub(crate) flow: Flow,
+    pub(crate) align: Align,
+    pub(crate) justify: Justify,
+    pub(crate) wrap: bool,
     pub(crate) transform: Affine,
 }
 
@@ -35,6 +64,9 @@ impl Style {
         fg: Color::rgb(0, 0, 0),
         bg: Color::rgba(0, 0, 0, 0),
         flow: Flow::Column,
+        align: Align::Stretch,
+        justify: Justify::Start,
+        wrap: false,
         transform: Affine::IDENTITY,
     };
 }
@@ -79,6 +111,9 @@ pub(crate) fn nonnegative(value: impl IntoLength, field: &str) -> f32 {
 pub struct Flex {
     pub(crate) flow: Flow,
     pub(crate) gap: Option<f32>,
+    pub(crate) align: Option<Align>,
+    pub(crate) justify: Option<Justify>,
+    pub(crate) wrap: Option<bool>,
 }
 
 impl Flex {
@@ -86,16 +121,34 @@ impl Flex {
         Self {
             flow: Flow::Row,
             gap: None,
+            align: None,
+            justify: None,
+            wrap: None,
         }
     }
     pub const fn column() -> Self {
         Self {
             flow: Flow::Column,
             gap: None,
+            align: None,
+            justify: None,
+            wrap: None,
         }
     }
     pub fn gap(mut self, gap: impl IntoLength) -> Self {
         self.gap = Some(nonnegative(gap, "gap"));
+        self
+    }
+    pub const fn align(mut self, align: Align) -> Self {
+        self.align = Some(align);
+        self
+    }
+    pub const fn justify(mut self, justify: Justify) -> Self {
+        self.justify = Some(justify);
+        self
+    }
+    pub const fn wrap(mut self, wrap: bool) -> Self {
+        self.wrap = Some(wrap);
         self
     }
 }

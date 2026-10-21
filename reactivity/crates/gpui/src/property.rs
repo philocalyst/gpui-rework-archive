@@ -2,7 +2,7 @@
 //! reference; callers cannot supply a setter, validator or impact claim.
 //! Contributions retain presence separately from resolved destination equality.
 
-use crate::style::{Affine, Color, Flow, Style};
+use crate::style::{Affine, Align, Color, Flow, Justify, Style};
 use std::{collections::BTreeMap, fmt};
 
 /// Inclusive ceilings: Geometry includes hit/bounds/damage/paint; Layout also
@@ -27,6 +27,9 @@ pub enum PropertyId {
     Background = 7,
     Flow = 8,
     Transform = 9,
+    Align = 10,
+    Justify = 11,
+    Wrap = 12,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -36,6 +39,9 @@ pub enum ValueKind {
     Color,
     Flow,
     Transform,
+    Align,
+    Justify,
+    Flag,
 }
 
 #[derive(Debug)]
@@ -222,6 +228,9 @@ properties! {
     BACKGROUND, BACKGROUND_DECL, Color, Background, "background", Color, Paint, bg, |_| Ok(());
     FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, flow, |_| Ok(());
     TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, transform, finite_transform;
+    ALIGN, ALIGN_DECL, Align, Align, "align", Align, Layout, align, |_| Ok(());
+    JUSTIFY, JUSTIFY_DECL, Justify, Justify, "justify", Justify, Layout, justify, |_| Ok(());
+    WRAP, WRAP_DECL, bool, Wrap, "wrap", Flag, Layout, wrap, |_| Ok(());
 }
 
 /// Closed inspector seam. No boxed erased values, type IDs or external setters.
@@ -232,6 +241,9 @@ pub(crate) enum PropertyValue {
     Color(Color),
     Flow(Flow),
     Transform(Affine),
+    Align(Align),
+    Justify(Justify),
+    Flag(bool),
 }
 impl PropertyValue {
     pub(crate) fn kind(self) -> ValueKind {
@@ -241,6 +253,9 @@ impl PropertyValue {
             Self::Color(_) => ValueKind::Color,
             Self::Flow(_) => ValueKind::Flow,
             Self::Transform(_) => ValueKind::Transform,
+            Self::Align(_) => ValueKind::Align,
+            Self::Justify(_) => ValueKind::Justify,
+            Self::Flag(_) => ValueKind::Flag,
         }
     }
 }
@@ -430,7 +445,7 @@ mod tests {
     #[test]
     fn catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned() {
         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
-        assert_eq!(PROPERTIES.len(), 9);
+        assert_eq!(PROPERTIES.len(), 12);
         for (index, info) in PROPERTIES.iter().enumerate() {
             assert!(!info.name.is_empty());
             assert!(std::ptr::eq(*info, info.id.info()));
@@ -465,6 +480,12 @@ mod tests {
                 PropertyValue::Color(Color::rgb(9, 8, 7)),
             ),
             (PropertyId::Flow, PropertyValue::Flow(Flow::Row)),
+            (PropertyId::Align, PropertyValue::Align(Align::Center)),
+            (
+                PropertyId::Justify,
+                PropertyValue::Justify(Justify::SpaceBetween),
+            ),
+            (PropertyId::Wrap, PropertyValue::Flag(true)),
             (
                 PropertyId::Transform,
                 PropertyValue::Transform(Affine::translation(4.0, 8.0)),
