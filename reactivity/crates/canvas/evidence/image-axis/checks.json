@@ -1,0 +1,51 @@
+{
+  "source": "7be2c331854597eaa4a53753e3b9c9cac86ded5f",
+  "cwd": "/root/gpui-production-image-axis/reactivity",
+  "cargo_target_dir": "/tmp/gpui-unicode-target",
+  "environment_script": "/tmp/gpui-native-env.sh",
+  "xvfb": "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb :99 -screen 0 800x600x24 -nolisten tcp -ac",
+  "checks": [
+    {
+      "name": "debug-oracle",
+      "argv": "cargo test -p gpui_canvas --lib canvas::image_axis --offline",
+      "log": "checks/debug-oracle.log",
+      "sha256": "04877253450448704a1425b649e011d4e60fad971fc3f8a9972cb450927d1495"
+    },
+    {
+      "name": "release-oracle",
+      "argv": "cargo test -p gpui_canvas --release --lib canvas::image_axis --offline",
+      "log": "checks/release-oracle.log",
+      "sha256": "ac228cec4d125d011b6e2253121fb7eb40aec1649cf086338c5deed157b7a57b"
+    },
+    {
+      "name": "parallel-canvas",
+      "argv": "cargo test -p gpui_canvas --release --features parallel --lib --test images --offline",
+      "log": "checks/parallel-canvas.log",
+      "sha256": "a380ec0522301bdc05bc0be4b3cd0c91dc1df4e9aafa82387534ca35d6bd3180"
+    },
+    {
+      "name": "vulkan",
+      "argv": "cargo test -p gpui_gpu --features vulkan-tests --test render --offline",
+      "log": "checks/vulkan.log",
+      "sha256": "cf532905b2add70fd3364203ae986a02ad93cd50ad7faf0638841aa45a2c2bbf"
+    },
+    {
+      "name": "clippy",
+      "argv": "cargo clippy -p gpui_canvas --all-targets --features parallel --offline -- -D warnings",
+      "log": "checks/clippy.log",
+      "sha256": "203a6e30ba4b6bf0de70b9385d1fd9347a24d6178d9cb56184a672c9ce6d2e9e"
+    },
+    {
+      "name": "native",
+      "argv": "DISPLAY=:99 cargo test -p gpui --features x11 --lib native::image_tests::native_image_pointer_resize_resume_matches_complete_surface --offline -- --ignored --exact --nocapture",
+      "log": "checks/native.log",
+      "sha256": "4ed5743a4c63bce7103d94f9015bb4c75044cf692301f279379fbd420596327c"
+    },
+    {
+      "name": "owner",
+      "argv": "cargo test -p gpui --test images --offline",
+      "log": "checks/owner.log",
+      "sha256": "4ff5c111bb7b236b69da4a1e23155e1540d7b6714ddd2f04cfaa7f0fbbc4b246"
+    }
+  ]
+}
