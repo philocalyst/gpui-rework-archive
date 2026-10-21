@@ -56,6 +56,10 @@ service. Existing Readers can supply application-owned resources to a view.
   alpha is not a second hit map. Give meaningful images an explicit `.name`.
   Image names remain separate from text/input values and map to native Image role.
 
+Image resources are resolved during owner description. Ordinary model updates
+and owner-invalidating `Sources::field` operations redraw them; this slice does
+not add image-specific `Sources::direct` fanout.
+
 No color conversion happens by changing a resource's profile tag. Constructors
 validate before publishing an identity. Each new resource has an exact private
 monotonic identity, even when bytes are equal; caches never treat a hash or reused
@@ -65,7 +69,8 @@ address as proof that resources match.
 
 Each resource admits nonzero sides ≤16384 and at most 4,194,304 pixels, with an
 exact checked input length. `MAX_IMAGE_SCENE_BYTES` is 64 MiB of distinct payload
-in one logical/canonical scene. Repeated references do not consume it again.
+in one logical/canonical scene. Repeated references do not consume it again. GPUI counts declared logical ports,
+including layout-culled ports; Canvas counts admitted draw resources.
 GPU binding and numerical precision limits are checked separately.
 
 That scene cap is **not** a process/window cap: application assets, logical
