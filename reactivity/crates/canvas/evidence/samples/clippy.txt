@@ -1,0 +1,3 @@
+    Blocking waiting for file lock on package cache
+    Checking gpui_canvas v0.1.0 (/root/gpui-axis-samples/reactivity/crates/canvas)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.63s
