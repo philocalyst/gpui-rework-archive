@@ -3,7 +3,7 @@
 //! Public descriptions own headers/children and borrow operands. They have no
 //! ambient arena or generative frame lifetime. All structural traversal and
 //! disposal is iterative, including disposal before lowering and during unwind.
-use std::any::{Any, TypeId};
+use std::{any::Any, marker::PhantomData};
 
 use crate::{
     View,
@@ -40,21 +40,77 @@ impl NodeKind {
 
 /// A mount-site route. Its identity is the retained site, never a code address.
 /// Ordinary method items are zero-sized captures, so their Box needs no allocation.
-pub(crate) struct Handler {
-    pub(crate) receiver: TypeId,
-    pub(crate) callback: Box<Callback>,
-    pub(crate) exact_source: Option<FieldId>,
-    pub(crate) exact_check: Option<Box<ExactCheck>>,
+pub(crate) struct Handler(Box<dyn Route>);
+
+trait Route {
+    fn validate(&self, receiver: &dyn Any, sources: &dyn Any)
+    -> Result<Option<FieldId>, BindError>;
+    fn invoke(&self, receiver: &mut dyn Any) -> bool;
 }
-type Callback = dyn Fn(&mut dyn Any);
-type ExactCheck = dyn Fn(&dyn Any, &dyn Any) -> Result<(), BindError>;
 
 impl Handler {
+    pub(crate) fn validate(
+        &self,
+        receiver: &dyn Any,
+        sources: &dyn Any,
+    ) -> Result<Option<FieldId>, BindError> {
+        self.0.validate(receiver, sources)
+    }
+
     pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> bool {
-        if (*receiver).type_id() != self.receiver {
-            return false;
+        self.0.invoke(receiver)
+    }
+}
+
+// The receiver type is encoded in this implementation's vtable. PhantomData
+// contributes no storage, preserving a zero-sized route for method items.
+struct MethodRoute<M, F> {
+    callback: F,
+    model: PhantomData<fn(M)>,
+}
+
+impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
+    fn validate(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Option<FieldId>, BindError> {
+        if receiver.is::<M>() {
+            Ok(None)
+        } else {
+            Err(BindError::ReceiverMismatch)
         }
+    }
+
+    fn invoke(&self, receiver: &mut dyn Any) -> bool {
+        let Some(receiver) = receiver.downcast_mut::<M>() else {
+            return false;
+        };
         (self.callback)(receiver);
+        true
+    }
+}
+
+// Validation and invocation share the one source descriptor and update capture.
+// An exact action has one box allocation, rather than separately boxed callbacks
+// that duplicate Source. The runtime must validate before exact-source admission.
+impl<M: 'static, T: TextValue, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
+    fn validate(
+        &self,
+        receiver: &dyn Any,
+        sources: &dyn Any,
+    ) -> Result<Option<FieldId>, BindError> {
+        let receiver = receiver
+            .downcast_ref::<M>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        let sources = sources
+            .downcast_ref::<Sources<M>>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        self.validate_registered(receiver, sources)?;
+        Ok(Some(self.field_id()))
+    }
+
+    fn invoke(&self, receiver: &mut dyn Any) -> bool {
+        let Some(receiver) = receiver.downcast_mut::<M>() else {
+            return false;
+        };
+        FieldAction::invoke(self, receiver);
         true
     }
 }
@@ -267,18 +323,10 @@ pub trait IntoHandler<M, S>: sealed::Handler<M, S> {
 impl<M, F: Fn(&mut M) + 'static> sealed::Handler<M, shape::Method> for F {}
 impl<M: 'static, F: Fn(&mut M) + 'static> IntoHandler<M, shape::Method> for F {
     fn install(self, mut element: El<'_>) -> El<'_> {
-        element.on_click = Some(Handler {
-            receiver: TypeId::of::<M>(),
-            callback: Box::new(move |receiver| {
-                self(
-                    receiver
-                        .downcast_mut::<M>()
-                        .expect("route receiver type was validated"),
-                );
-            }),
-            exact_source: None,
-            exact_check: None,
-        });
+        element.on_click = Some(Handler(Box::new(MethodRoute {
+            callback: self,
+            model: PhantomData::<fn(M)>,
+        })));
         element
     }
 }
@@ -288,28 +336,7 @@ impl<M: 'static, T: TextValue, F: Fn(&mut T) + 'static> IntoHandler<M, shape::Fi
     for FieldAction<M, T, F>
 {
     fn install(self, mut element: El<'_>) -> El<'_> {
-        let source = self.source();
-        let id = self.field_id();
-        element.on_click = Some(Handler {
-            receiver: TypeId::of::<M>(),
-            callback: Box::new(move |receiver| {
-                self.invoke(
-                    receiver
-                        .downcast_mut::<M>()
-                        .expect("route receiver type was validated"),
-                );
-            }),
-            exact_source: Some(id),
-            exact_check: Some(Box::new(move |receiver, sources| {
-                let receiver = receiver
-                    .downcast_ref::<M>()
-                    .ok_or(BindError::ProjectionMismatch(id))?;
-                let sources = sources
-                    .downcast_ref::<Sources<M>>()
-                    .ok_or(BindError::ProjectionMismatch(id))?;
-                source.validate_registered(receiver, sources)
-            })),
-        });
+        element.on_click = Some(Handler(Box::new(self)));
         element
     }
 }
@@ -503,15 +530,19 @@ mod tests {
     fn method_items_keep_zero_sized_callback_and_receiver_check() {
         let mut nodes = button("increment").on_click(Model::increment).flatten();
         let handler = nodes[0].on_click.take().unwrap();
-        assert_eq!(std::mem::size_of_val(handler.callback.as_ref()), 0);
-        assert_eq!(handler.exact_source, None);
-        assert!(handler.exact_check.is_none());
+        assert_eq!(std::mem::size_of_val(handler.0.as_ref()), 0);
+        assert_eq!(size_of::<Handler>(), 2 * size_of::<usize>());
         let mut wrong_receiver = 10_u32;
         assert!(!handler.invoke(&mut wrong_receiver));
+        assert_eq!(
+            handler.validate(&wrong_receiver, &()),
+            Err(BindError::ReceiverMismatch)
+        );
         let mut model = Model {
             count: Signal::new(1),
             other: Signal::new(7),
         };
+        assert_eq!(handler.validate(&model, &Sources::<Model>::new()), Ok(None));
         assert!(handler.invoke(&mut model));
         assert_eq!(*model.count, 2);
         assert_eq!(*model.other, 7);
@@ -524,12 +555,17 @@ mod tests {
             other: Signal::new(7),
         };
         let sources = Sources::new().field(COUNT);
-        let mut nodes = button("increment")
-            .on_click(COUNT.update(|count| *count += 1))
-            .flatten();
+        let action = COUNT.update(|count| *count += 1);
+        let action_bytes = std::mem::size_of_val(&action);
+        let mut nodes = button("increment").on_click(action).flatten();
         let handler = nodes[0].on_click.take().unwrap();
-        assert_eq!(handler.exact_source, Some(COUNT.id()));
-        handler.exact_check.as_ref().unwrap()(&model, &sources).unwrap();
+        assert_eq!(std::mem::size_of_val(handler.0.as_ref()), action_bytes);
+        assert_eq!(handler.validate(&model, &sources), Ok(Some(COUNT.id())));
+        assert_eq!(
+            handler.validate(&model, &()),
+            Err(BindError::ReceiverMismatch)
+        );
+        assert!(!handler.invoke(&mut 0_u32));
         assert!(handler.invoke(&mut model));
         assert_eq!(*model.count, 2);
         assert_eq!(*model.other, 7);
@@ -545,7 +581,7 @@ mod tests {
             .flatten();
         let handler = nodes[0].on_click.take().unwrap();
         assert_eq!(
-            handler.exact_check.as_ref().unwrap()(&model, &sources),
+            handler.validate(&model, &sources),
             Err(BindError::ProjectionMismatch(COUNT.id()))
         );
         assert_eq!(*model.other, 7);
