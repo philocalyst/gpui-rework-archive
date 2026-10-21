@@ -35,6 +35,9 @@ checks = [
     ("loom", ["cargo", "test", "--release", *MANIFEST, "--locked", "-p",
               "gpui_reactivity_ownership_lab", "--features", "loom",
               "--test", "loom_protocol"]),
+    ("question-credit", ["cargo", "test", "--release", *MANIFEST, "--locked", "-p",
+                         "gpui_reactivity_ownership_lab", "--features", "loom",
+                         "--test", "question_credit"]),
     ("native-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
                       "gpui", "--features", "x11,wayland", "--all-targets"]),
     ("native-minimal-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
@@ -42,7 +45,7 @@ checks = [
     ("native-clippy", ["cargo", "clippy", *MANIFEST, "--locked", "-p", "gpui",
                        "--features", "x11,wayland", "--all-targets", "--", "-D", "warnings"]),
     ("accessibility-schema", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
-                              "--features", "x11,wayland", "--lib", "native::accessibility::tests"]),
+                              "--features", "x11,wayland", "--lib", "native::accessibility::"]),
     ("parallel-canvas", ["cargo", "test", *MANIFEST, "--locked", "-p",
                          "gpui_canvas", "--features", "parallel"]),
     ("layout-example", ["cargo", "run", *MANIFEST, "--locked", "-p",
@@ -68,6 +71,10 @@ if args.native_x11:
     checks.append(("native-remote", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
                                     "--features", "x11", "native_remote_results", "--", "--ignored",
                                     "--nocapture", "--test-threads=1"]))
+    checks.append(("native-question", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                      "--features", "x11", "--lib",
+                                      "native_question_result_and_credit_wake_without_unrelated_input",
+                                      "--", "--ignored", "--nocapture", "--test-threads=1"]))
     checks.append(("native-library", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
                                      "--features", "x11", "native_library_250k", "--", "--ignored",
                                      "--nocapture", "--test-threads=1"]))
@@ -94,7 +101,7 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
-    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-library",
+    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "question-credit",
                 "native-atspi", "native-no-bus", "accessibility-schema"):
         entry["passed_tests"] = sum(int(count) for count in re.findall(
             r"test result: ok\. (\d+) passed;", log))
