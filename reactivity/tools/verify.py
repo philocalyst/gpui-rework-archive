@@ -38,6 +38,9 @@ checks = [
     ("question-credit", ["cargo", "test", "--release", *MANIFEST, "--locked", "-p",
                          "gpui_reactivity_ownership_lab", "--features", "loom",
                          "--test", "question_credit"]),
+    ("question-mailbox", ["cargo", "test", "--release", *MANIFEST, "--locked", "-p",
+                          "gpui_reactivity_ownership_lab", "--features", "loom",
+                          "--test", "question_mailbox"]),
     ("native-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
                       "gpui", "--features", "x11,wayland", "--all-targets"]),
     ("native-minimal-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
@@ -101,7 +104,7 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
-    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "question-credit",
+    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "question-credit", "question-mailbox",
                 "native-atspi", "native-no-bus", "accessibility-schema"):
         entry["passed_tests"] = sum(int(count) for count in re.findall(
             r"test result: ok\. (\d+) passed;", log))
