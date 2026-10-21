@@ -7,7 +7,7 @@ describe the intended complete system; this page records what is connected now.
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
-| Public testing | Application::demo, borrowed semantic queries/visits, conjunctive name/description filters, actions, focus/keyboard, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time and replay remain |
+| Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, focus/keyboard, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time and replay remain |
 | Accessibility | Native AccessKit in ordinary desktop profiles, bounded exact acknowledged transitions, lazy active projection, revalidated actions; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; selection/IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
@@ -110,6 +110,16 @@ all-target Clippy also passes; those checks remain cross-compilation only.
 The three new style fields fit existing padding: Style remains 88 B, El 176 B,
 Node 40 B, Presented 80 B and Runtime 2,384 B on the measured 64-bit build.
 This is a literal layout surface; direct reactive style ports are still pending.
+
+The [semantic streaming checks](evidence/semantic-stream/checks.json) at source
+`c894ff7c41` pass **298 default GPUI cases/doctests**, strict accessible native
+all-target Clippy, formatting and the actual unchanged layout ledger. Six public
+cases cover pending/failed candidates, logical removal, virtual realization,
+writer failure, quarantine/close and 32 allocation-free sink writes. `semantics()`
+borrows the same `Part` getters as `visit`, with live focus and frozen acknowledged
+node data. It adds no retained tree or runtime field. This is diagnostic semantic
+serialization; source persistence, platform adapter projections and replay remain
+separate. No latency or resident-memory saving is claimed.
 
 Earlier source-pinned reports remain intact: the
 [21-gate baseline](evidence/checks.json) at `5b0a38b222`,
