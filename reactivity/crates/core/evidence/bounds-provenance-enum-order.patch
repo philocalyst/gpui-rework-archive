@@ -1,0 +1,14 @@
+--- a/reactivity/crates/core/src/geometry.rs
++++ b/reactivity/crates/core/src/geometry.rs
+@@ -191,9 +191,10 @@
+ #[derive(Clone, Copy, Debug, PartialEq)]
+ #[repr(u8)]
+ enum Domain {
+-    Direct,
++    // Composed/Uncertain retain the original boolean-shaped result encoding.
+     Composed,
+     Uncertain,
++    Direct,
+ }
+ impl PartialEq for CoordinateSpace {
+     #[inline]

@@ -1,0 +1,244 @@
+{
+  "base": "9176c2ce5e3de6eb5e60dae71e5ca6aa8ac77878",
+  "compiler": "rustc 1.97.1",
+  "profile": "Cargo release; consumers rustc opt-level=3, symbol-mangling-version=v0; GPUI consumer cfg tokio_unstable",
+  "sources_sha256": {
+    "reactivity/crates/core/src/geometry.rs": "69f1107031a8646235bf34c641c2ce621240f6ced60e6222b6fcdea2cfd58332",
+    "reactivity/crates/core/src/geometry_bounds_tests.rs": "463cc5cc9e149f344bf06de03f21e5b56a39d4c6c97c601049742053b3089bfe",
+    "reactivity/crates/gpui/tests/bounds_kernel.rs": "3facfff0e3487197482b51120fa3be5b48406789738ae5718f8257d39ff47912",
+    "reactivity/crates/core/evidence/bounds-provenance-consumer.rs": "c61aa58b0c8b97124142eb0b6995d7685090a166bf26ce701cdbdefa97952c2b",
+    "reactivity/crates/core/evidence/bounds-provenance-gpui-consumer.rs": "ce1d77cde49e0db6ecc367ac186750ee589a9106f9b27c319ac38c17f56197df",
+    "reactivity/crates/core/evidence/bounds-provenance-copies.rs": "4331470b3497b4ccc977be99fdb1593ffd1a186365392468e02f9ae0aae43c7e",
+    "reactivity/crates/core/evidence/bounds-provenance-capture.py": "be5bffd1ce2730da0a5f346a2cdff560fb859d2b967cd12ce8608c5cf8600b0f"
+  },
+  "executables": {
+    "baseline_core": {
+      "path": "/tmp/gpui-bounds-provenance-baseline-consumer",
+      "sha256": "d53cd4d36566bf4cffd448f6f27fc27003eb2d782e28002b2c586660e1d2be68",
+      "text_bytes": 261379,
+      "symbols": {
+        "callee": {
+          "address": "0000000000015f40",
+          "bytes": 1146,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        },
+        "inspect": {
+          "address": "0000000000015ce0",
+          "bytes": 6,
+          "symbol": "bounds_provenance_consumer::inspect"
+        }
+      },
+      "asm": "bounds-provenance-baseline-core.asm",
+      "functional_stdout": "bounds,fb7aa0eceda61519"
+    },
+    "baseline_gpui": {
+      "path": "/tmp/gpui-bounds-provenance-baseline-gpui-consumer",
+      "sha256": "6d500be0a4865ea2d326a8fc7c8b5912cd58c0b5d8bf5e054de22889d303d428",
+      "text_bytes": 2894855,
+      "symbols": {
+        "callee": {
+          "address": "00000000006cf1e0",
+          "bytes": 1161,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        },
+        "inspect": {
+          "address": "00000000004e9f90",
+          "bytes": 384,
+          "symbol": "bounds_provenance_gpui_consumer::inspect"
+        },
+        "part_bounds": {
+          "address": "00000000004ecb20",
+          "bytes": 105,
+          "symbol": "<gpui::runtime::query::Part>::unclipped_bounds"
+        }
+      },
+      "asm": "bounds-provenance-baseline-gpui.asm",
+      "functional_stdout": "consumer,0,129\nconsumer,1,129\nconsumer,2,129"
+    },
+    "baseline_copies": {
+      "path": "/tmp/gpui-bounds-provenance-baseline-copies",
+      "sha256": "8c2a31c98e0e7a09f848142684d97655878fd1a4c25fade1d8c21c007dde066a",
+      "text_bytes": 288279,
+      "symbols": {
+        "make": {
+          "address": "0000000000017da0",
+          "bytes": 27,
+          "symbol": "bounds_provenance_copies::make"
+        },
+        "compose": {
+          "address": "0000000000017e40",
+          "bytes": 6,
+          "symbol": "bounds_provenance_copies::compose"
+        },
+        "same": {
+          "address": "0000000000017dc0",
+          "bytes": 97,
+          "symbol": "bounds_provenance_copies::same"
+        },
+        "copy": {
+          "address": "0000000000017030",
+          "bytes": 31,
+          "symbol": "bounds_provenance_copies::copy"
+        },
+        "bounds": {
+          "address": "0000000000017e30",
+          "bytes": 6,
+          "symbol": "bounds_provenance_copies::bounds"
+        },
+        "compose_callee": {
+          "address": "0000000000019870",
+          "bytes": 530,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::compose"
+        },
+        "bounds_callee": {
+          "address": "00000000000193f0",
+          "bytes": 1146,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        }
+      },
+      "asm": "bounds-provenance-baseline-copies.asm",
+      "functional_stdout": "layouts,56,56,72,120\nequal,Finite(Rect { x: 1.9999999, y: -3.0000002, width: 7.0000014, height: 9.000002 }),Finite(Rect { x: 1.9999999, y: -3.0000002, width: 7.0000014, height: 9.000002 })\nspatial_payload,11816"
+    },
+    "candidate_core": {
+      "path": "/tmp/gpui-bounds-provenance-candidate-consumer",
+      "sha256": "20d3d1293d4e26b5e206823fdf3a69e4255f0549ac71c2da7cc0605bb0dc0922",
+      "text_bytes": 261587,
+      "symbols": {
+        "callee": {
+          "address": "0000000000015f50",
+          "bytes": 1325,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        },
+        "inspect": {
+          "address": "0000000000015cf0",
+          "bytes": 6,
+          "symbol": "bounds_provenance_consumer::inspect"
+        }
+      },
+      "asm": "bounds-provenance-candidate-core.asm",
+      "functional_stdout": "bounds,fb7aa0eceda61519"
+    },
+    "candidate_gpui": {
+      "path": "/tmp/gpui-bounds-provenance-candidate-gpui-consumer",
+      "sha256": "b6e712ae67d452fa69ed3adcf107c261a78249ab5747b7fd29391457b197747b",
+      "text_bytes": 2895063,
+      "symbols": {
+        "callee": {
+          "address": "00000000006cf1f0",
+          "bytes": 1340,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        },
+        "inspect": {
+          "address": "00000000004e9fa0",
+          "bytes": 384,
+          "symbol": "bounds_provenance_gpui_consumer::inspect"
+        },
+        "part_bounds": {
+          "address": "00000000004ecb30",
+          "bytes": 105,
+          "symbol": "<gpui::runtime::query::Part>::unclipped_bounds"
+        }
+      },
+      "asm": "bounds-provenance-candidate-gpui.asm",
+      "functional_stdout": "consumer,0,129\nconsumer,1,129\nconsumer,2,129"
+    },
+    "candidate_copies": {
+      "path": "/tmp/gpui-bounds-provenance-candidate-copies",
+      "sha256": "646acd978f6760eef6d22f04dcb93e6d13b3718990e36ca120935892c843afa6",
+      "text_bytes": 288487,
+      "symbols": {
+        "make": {
+          "address": "0000000000017db0",
+          "bytes": 27,
+          "symbol": "bounds_provenance_copies::make"
+        },
+        "compose": {
+          "address": "0000000000017e50",
+          "bytes": 6,
+          "symbol": "bounds_provenance_copies::compose"
+        },
+        "same": {
+          "address": "0000000000017dd0",
+          "bytes": 102,
+          "symbol": "bounds_provenance_copies::same"
+        },
+        "copy": {
+          "address": "0000000000017040",
+          "bytes": 31,
+          "symbol": "bounds_provenance_copies::copy"
+        },
+        "bounds": {
+          "address": "0000000000017e40",
+          "bytes": 6,
+          "symbol": "bounds_provenance_copies::bounds"
+        },
+        "compose_callee": {
+          "address": "0000000000019930",
+          "bytes": 563,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::compose"
+        },
+        "bounds_callee": {
+          "address": "0000000000019400",
+          "bytes": 1325,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        }
+      },
+      "asm": "bounds-provenance-candidate-copies.asm",
+      "functional_stdout": "layouts,56,56,72,120\nequal,Finite(Rect { x: 1.9999999, y: -3.0000002, width: 7.0000014, height: 9.000002 }),Finite(Rect { x: 1.9999999, y: -3.0000002, width: 7.0000014, height: 9.000002 })\nspatial_payload,11816"
+    }
+  },
+  "unmeasured_variants": {
+    "two-bool": {
+      "geometry_sha256": "f8e50a017127ec8d1582d8fe8e66168bb2520a0beff09b82807e0077218fb14f",
+      "patch": "bounds-provenance-two-bool.patch",
+      "scope": "Unmeasured library codegen alternative; selected-domain unit tests apply only to the main formulation.",
+      "executable_sha256": "46635811cf70dbd14bb1f159485ea36e29af64e4064f973b4d5429265733c0fc",
+      "symbols": {
+        "make": {
+          "address": "0000000000017db0",
+          "bytes": 29,
+          "symbol": "bounds_provenance_copies::make"
+        },
+        "compose": {
+          "address": "0000000000017e50",
+          "bytes": 6,
+          "symbol": "bounds_provenance_copies::compose"
+        },
+        "same": {
+          "address": "0000000000017dd0",
+          "bytes": 101,
+          "symbol": "bounds_provenance_copies::same"
+        },
+        "copy": {
+          "address": "0000000000017040",
+          "bytes": 31,
+          "symbol": "bounds_provenance_copies::copy"
+        },
+        "bounds": {
+          "address": "0000000000017e40",
+          "bytes": 6,
+          "symbol": "bounds_provenance_copies::bounds"
+        },
+        "compose_callee": {
+          "address": "0000000000019980",
+          "bytes": 542,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::compose"
+        },
+        "bounds_callee": {
+          "address": "0000000000019450",
+          "bytes": 1322,
+          "symbol": "<gpui_reactivity_core::geometry::CoordinateSpace>::mapped_bounds"
+        }
+      },
+      "functional_stdout": "layouts,56,56,72,120\nequal,Finite(Rect { x: 1.9999999, y: -3.0000002, width: 7.0000014, height: 9.000002 }),Finite(Rect { x: 1.9999999, y: -3.0000002, width: 7.0000014, height: 9.000002 })\nspatial_payload,11816",
+      "asm": "bounds-provenance-two-bool-copies.asm"
+    },
+    "enum-order": {
+      "geometry_sha256": "91c250a8d32190d58c612b5ae768efe653bf8bd39d9697390d427241fa49c8ce",
+      "patch": "bounds-provenance-enum-order.patch",
+      "scope": "Unmeasured library codegen alternative; selected-domain unit tests apply only to the main formulation.",
+      "executable_sha256": "8e972889055ca34e46c09a196b9281590777edcc483674316051521fd08edde2",
+      "note": "Earlier unmeasured wrapper driver; compose still 563 B. No capture uses this binary."
+    }
+  }
+}

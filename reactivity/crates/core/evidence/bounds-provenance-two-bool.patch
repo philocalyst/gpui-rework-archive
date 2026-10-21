@@ -1,0 +1,87 @@
+--- a/reactivity/crates/core/src/geometry.rs
++++ b/reactivity/crates/core/src/geometry.rs
+@@ -184,22 +184,16 @@
+ #[derive(Clone, Copy, Debug)]
+ pub struct CoordinateSpace {
+     matrix: [f64; 6],
++    uncertain: bool,
+     // Only new(Affine) grants this range certificate. Copying retains it;
+     // every composition discards it unconditionally.
+-    domain: Domain,
+-}
+-#[derive(Clone, Copy, Debug, PartialEq)]
+-#[repr(u8)]
+-enum Domain {
+-    Direct,
+-    Composed,
+-    Uncertain,
++    affine_origin: bool,
+ }
+ impl PartialEq for CoordinateSpace {
+     #[inline]
+     fn eq(&self, other: &Self) -> bool {
+         // Cached provenance is not part of the mapping's value equality.
+-        self.matrix == other.matrix && self.is_uncertain() == other.is_uncertain()
++        self.matrix == other.matrix && self.uncertain == other.uncertain
+     }
+ }
+ impl CoordinateSpace {
+@@ -213,12 +207,9 @@
+                 transform.tx as f64,
+                 transform.ty as f64,
+             ],
+-            domain: Domain::Direct,
+-        }
+-    }
+-    #[inline]
+-    const fn is_uncertain(&self) -> bool {
+-        matches!(self.domain, Domain::Uncertain)
++            uncertain: false,
++            affine_origin: true,
++        }
+     }
+     /// The composed CPU mapping retains wide intermediates between ancestors.
+     pub const fn coefficients(self) -> [f64; 6] {
+@@ -242,20 +233,17 @@
+         let lost_rank = self.is_invertible() && child.is_invertible() && det == 0.0;
+         Self {
+             matrix,
+-            domain: if self.is_uncertain() || lost_rank || !det.is_finite() {
+-                Domain::Uncertain
+-            } else {
+-                Domain::Composed
+-            },
++            uncertain: self.uncertain || lost_rank || !det.is_finite(),
++            affine_origin: false,
+         }
+     }
+     pub fn is_invertible(self) -> bool {
+         let [a, b, c, d, _, _] = self.matrix;
+-        !self.is_uncertain() && self.matrix.into_iter().all(f64::is_finite) && a * d - b * c != 0.0
++        !self.uncertain && self.matrix.into_iter().all(f64::is_finite) && a * d - b * c != 0.0
+     }
+     pub fn to_window(self, point: Point) -> Option<Point> {
+         let [a, b, c, d, x, y] = self.matrix;
+-        if self.is_uncertain() {
++        if self.uncertain {
+             return None;
+         }
+         let result = Point {
+@@ -294,7 +282,7 @@
+     }
+     /// Conservative forward bound independent of inverse representability.
+     pub fn mapped_bounds(self, rect: Rect) -> MappedBounds {
+-        if !rect.is_valid() || self.is_uncertain() || !self.matrix.into_iter().all(f64::is_finite) {
++        if !rect.is_valid() || self.uncertain || !self.matrix.into_iter().all(f64::is_finite) {
+             return MappedBounds::Unbounded;
+         }
+         let [a, b, c, d, tx, ty] = self.matrix;
+@@ -304,7 +292,7 @@
+         }
+         let (x, y) = (rect.x as f64, rect.y as f64);
+         let (right, bottom) = (x + rect.width as f64, y + rect.height as f64);
+-        let (min, max) = if matches!(self.domain, Domain::Direct) {
++        let (min, max) = if self.affine_origin {
+             let axis = |u: f64, v: f64, translation: f64| {
+                 let (low_x, high_x) = if u < 0.0 { (right, x) } else { (x, right) };
+                 let (low_y, high_y) = if v < 0.0 { (bottom, y) } else { (y, bottom) };

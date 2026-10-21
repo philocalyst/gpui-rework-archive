@@ -181,10 +181,26 @@ pub enum MappedBounds {
     Unbounded,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct CoordinateSpace {
     matrix: [f64; 6],
-    uncertain: bool,
+    // Only new(Affine) grants this range certificate. Copying retains it;
+    // every composition discards it unconditionally.
+    domain: Domain,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[repr(u8)]
+enum Domain {
+    Direct,
+    Composed,
+    Uncertain,
+}
+impl PartialEq for CoordinateSpace {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // Cached provenance is not part of the mapping's value equality.
+        self.matrix == other.matrix && self.is_uncertain() == other.is_uncertain()
+    }
 }
 impl CoordinateSpace {
     pub const fn new(transform: Affine) -> Self {
@@ -197,8 +213,12 @@ impl CoordinateSpace {
                 transform.tx as f64,
                 transform.ty as f64,
             ],
-            uncertain: false,
+            domain: Domain::Direct,
         }
+    }
+    #[inline]
+    const fn is_uncertain(&self) -> bool {
+        matches!(self.domain, Domain::Uncertain)
     }
     /// The composed CPU mapping retains wide intermediates between ancestors.
     pub const fn coefficients(self) -> [f64; 6] {
@@ -222,16 +242,20 @@ impl CoordinateSpace {
         let lost_rank = self.is_invertible() && child.is_invertible() && det == 0.0;
         Self {
             matrix,
-            uncertain: self.uncertain || lost_rank || !det.is_finite(),
+            domain: if self.is_uncertain() || lost_rank || !det.is_finite() {
+                Domain::Uncertain
+            } else {
+                Domain::Composed
+            },
         }
     }
     pub fn is_invertible(self) -> bool {
         let [a, b, c, d, _, _] = self.matrix;
-        !self.uncertain && self.matrix.into_iter().all(f64::is_finite) && a * d - b * c != 0.0
+        !self.is_uncertain() && self.matrix.into_iter().all(f64::is_finite) && a * d - b * c != 0.0
     }
     pub fn to_window(self, point: Point) -> Option<Point> {
         let [a, b, c, d, x, y] = self.matrix;
-        if self.uncertain {
+        if self.is_uncertain() {
             return None;
         }
         let result = Point {
@@ -270,7 +294,7 @@ impl CoordinateSpace {
     }
     /// Conservative forward bound independent of inverse representability.
     pub fn mapped_bounds(self, rect: Rect) -> MappedBounds {
-        if !rect.is_valid() || self.uncertain || !self.matrix.into_iter().all(f64::is_finite) {
+        if !rect.is_valid() || self.is_uncertain() || !self.matrix.into_iter().all(f64::is_finite) {
             return MappedBounds::Unbounded;
         }
         let [a, b, c, d, tx, ty] = self.matrix;
@@ -280,17 +304,39 @@ impl CoordinateSpace {
         }
         let (x, y) = (rect.x as f64, rect.y as f64);
         let (right, bottom) = (x + rect.width as f64, y + rect.height as f64);
-        let points = [[x, y], [right, y], [x, bottom], [right, bottom]];
-        let mut min = [f64::INFINITY; 2];
-        let mut max = [f64::NEG_INFINITY; 2];
-        for p in points {
-            let x = a * p[0] + c * p[1] + tx;
-            let y = b * p[0] + d * p[1] + ty;
-            min[0] = min[0].min(x);
-            min[1] = min[1].min(y);
-            max[0] = max[0].max(x);
-            max[1] = max[1].max(y);
-        }
+        let (min, max) = if matches!(self.domain, Domain::Direct) {
+            let axis = |u: f64, v: f64, translation: f64| {
+                let (low_x, high_x) = if u < 0.0 { (right, x) } else { (x, right) };
+                let (low_y, high_y) = if v < 0.0 { (bottom, y) } else { (y, bottom) };
+                [
+                    u * low_x + v * low_y + translation,
+                    u * high_x + v * high_y + translation,
+                ]
+            };
+            let [min_x, max_x] = axis(a, c, tx);
+            let [min_y, max_y] = axis(b, d, ty);
+            // Admitted f32-origin coefficients and rectangle endpoints bound
+            // every f64 expression below 2^259, so no result guard is needed.
+            // Rounded multiplication and addition are monotone while finite.
+            // Keep the corner expression's operation order, not center/extents
+            // reassociation. Outward rounding below erases zero-sign choices.
+            ([min_x, min_y], [max_x, max_y])
+        } else {
+            // Composition carries no f32-range certificate. Go directly to the
+            // original reducer, without computing selected endpoints first.
+            let points = [[x, y], [right, y], [x, bottom], [right, bottom]];
+            let mut min = [f64::INFINITY; 2];
+            let mut max = [f64::NEG_INFINITY; 2];
+            for p in points {
+                let x = a * p[0] + c * p[1] + tx;
+                let y = b * p[0] + d * p[1] + ty;
+                min[0] = min[0].min(x);
+                min[1] = min[1].min(y);
+                max[0] = max[0].max(x);
+                max[1] = max[1].max(y);
+            }
+            (min, max)
+        };
         // Outward rounding covers exact affine corner positions after f32 conversion.
         let min = min.map(|v| (v as f32).next_down());
         let max = max.map(|v| (v as f32).next_up());
@@ -318,6 +364,10 @@ impl CoordinateSpace {
         })
     }
 }
+
+#[cfg(test)]
+#[path = "geometry_bounds_tests.rs"]
+mod bounds_tests;
 
 /// Explicit spatial data. A topology-only node has identity mapping and no surface/clip.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
