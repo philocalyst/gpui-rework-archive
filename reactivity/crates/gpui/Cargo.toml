@@ -18,15 +18,27 @@ gpui_gpu = { path = "../gpu", optional = true }
 gpui_reactivity_host = { path = "../host", optional = true }
 pollster = { version = "=0.4.0", optional = true }
 softbuffer = { version = "=0.4.8", default-features = false, optional = true }
+accesskit = { version = "=0.25.1", optional = true }
+accesskit_winit = { version = "=0.34.1", default-features = false, features = ["accesskit_unix", "async-io", "rwh_06"], optional = true }
 
 [features]
 default = []
+accessibility = ["native", "dep:accesskit", "dep:accesskit_winit"]
 native = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
-x11 = ["native", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
-wayland = ["native", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+desktop = ["native", "accessibility"]
+x11 = ["x11-minimal", "accessibility"]
+wayland = ["wayland-minimal", "accessibility"]
+# Explicit AT-disabled transport diagnostics; ordinary shipped Linux profiles
+# above include the real AT-SPI adapter, not AccessKit's null Unix backend.
+x11-minimal = ["native", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
+wayland-minimal = ["native", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
 
 [dev-dependencies]
 allocation-counter = "=0.8.1"
+accesskit_consumer = "=0.39.1"
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+zbus = { version = "=5.19.0", features = ["blocking-api"] }
 
 [[example]]
 name = "workbench"
