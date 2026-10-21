@@ -1,4 +1,46 @@
-# Design and executable evidence
+# Implementation and evidence
+
+The clean-room workspace now includes a connected application implementation.
+Start at [crates/gpui/README.md](crates/gpui/README.md), rather than treating the
+initial design-only snapshot below as its current executable scope.
+
+| Integrated boundary | Executable behavior | Remaining limit |
+| --- | --- | --- |
+| `gpui` | Borrowed `View`, inline `Signal`, typed owner-relative sources/actions, exact text fanout, public input/serialization, generational Targets | One serial root owner; conservative ordinary-Rust re-description; no integrated complete async graph |
+| properties/inspector | Typed sealed selectors, common reflection catalog, sparse Set/Inherit overrides, transformed hit/paint through one geometry kernel | Full native inspector UI, theme cascade and keyed collection policies remain |
+| layout/text | Borrowed content measurement with Cephal, real Rustybuzz shaping, logical layout and physical-density glyph masks | Existing script/text-editing limits; no complete selection/IME/fallback stack |
+| `gpui_canvas` | Real ordered linear-light composition, 4×4 correlated samples, conservative tile proofs, one optional CPU image, safe external native BGRX output, optional disjoint parallel bands | Retained command representation is still being reduced; no complete effect/path library |
+| `gpui_gpu` | Actual `wgsl-rs` shader, ordered tile compositor, lazy R8 glyph atlas, inverse/clip boundary corrections, SDR and linear HDR target output | Spatial admission is bounded, not universal CPU byte parity; native HDR negotiation and remaining primitives are gates |
+| native application | Real vendored-Winit windows with GPU or direct software presentation, keyboard/pointer adapter, resizing/DPI, source/prepared/presented separation, surface-loss input revocation | Software-first background GPU upgrade is being integrated; multiwindow/shared-device/native guest composition remain |
+| application ports | Counter and tutorial Todo add/complete/filter/delete/undo, persistence; the exact same Todo model runs in native and headless tests | The tutorial's full selection/IME, appearance animation and timeout effects are not claimed ported |
+
+Current gates include 252 passing workspace/all-feature cases (including six
+Loom cases), four portable GPU checks and nine actual Vulkan readback cases.
+The separately enabled native X11 test has run both GPU and direct-software
+frontends: ordinary keyboard/pointer routes, recoverable shaping failure,
+resize, inspector transform, actual X11 pixel readback, suspend/recreate and
+target survival. The GPU suite runs on Mesa 26.1.4 llvmpipe here, which proves
+execution and output, not discrete-GPU performance or other-platform behavior.
+These results precede the ongoing startup/font changes; those must pass their
+own integration gates before replacing this evidence.
+
+Already-built release native measurements on Xvfb/Linux/NixOS show the driver
+floor matters far more than scene bytes: forcing software rendering reduces
+blank-window PSS from about 106 MiB with llvmpipe Vulkan to roughly 7 MiB, with
+one thread. The initial Todo software window is roughly 22 MiB PSS, exposing a
+large text floor. CPU ticks remain unchanged at one/three/five-second samples.
+See [native memory data](crates/gpui/evidence-native-memory-cpu.csv) and
+[the sampling tool](tools/native_memory.py). First-present timing is measured
+separately; no sub-50 ms or monitor-scanout claim follows from these samples.
+
+No legacy implementation has been deleted under a false feature-equivalence
+claim. The old source is still the behavior/plumbing reference; legacy device
+error generation, swapchain-image release before reconfigure, resource lease
+and whole-scene atlas lifetime rules inform the new integration. The following
+original design evidence remains useful history, not the current production
+coverage table.
+
+## Initial design-only snapshot
 
 Snapshot: 2026-10-20, branch `codex/reactivity-cleanroom` in `/root/gpui-ce3`.
 The complete design is indexed by [README.md](README.md). Its versioned contract

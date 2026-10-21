@@ -6,8 +6,13 @@
 //! the supported surface and integration gates.
 #![forbid(unsafe_code)]
 
+#[cfg(test)]
+extern crate self as gpui;
+
 mod element;
 mod identity;
+#[cfg(feature = "native")]
+mod native;
 pub mod property;
 mod runtime;
 pub mod source;
@@ -16,11 +21,16 @@ mod style;
 pub use element::{
     ChildSeq, El, Element, IntoHandler, button, column, div, label, row, text, text_input,
 };
-pub use gpui_canvas::{ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping};
+pub use gpui_canvas::{ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping, oklch};
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
-pub use runtime::{Commit, Counters, Error, PresentationToken, SetError, Snapshot, SnapshotNode, Win, WindowOptions};
+#[cfg(feature = "native")]
+pub use native::{Application, NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
+pub use runtime::{
+    Commit, Counters, Error, PresentationToken, SetError, Snapshot, SnapshotNode, Win,
+    WindowOptions,
+};
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
 pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
 
@@ -43,6 +53,6 @@ pub trait View {
 pub mod prelude {
     pub use crate::{
         Affine, Color, El, Element, FieldId, Flex, Flow, Handoff, Point, Rect, Signal, Source,
-        Sources, Target, View, Win, button, column, div, label, rgb, row, text, text_input,
+        Sources, Target, View, Win, button, column, div, label, oklch, rgb, row, text, text_input,
     };
 }

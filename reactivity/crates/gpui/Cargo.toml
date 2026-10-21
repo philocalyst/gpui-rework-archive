@@ -13,6 +13,25 @@ gpui_canvas = { path = "../canvas" }
 cephal = { path = "../../vendor/cephal", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+gpui_gpu = { path = "../gpu", optional = true }
+gpui_reactivity_host = { path = "../host", optional = true }
+pollster = { version = "=0.4.0", optional = true }
+softbuffer = { version = "=0.4.8", default-features = false, optional = true }
 
 [features]
 default = []
+native = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
+x11 = ["native", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
+wayland = ["native", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+
+[[example]]
+name = "workbench"
+required-features = ["native"]
+
+[[example]]
+name = "empty"
+required-features = ["native"]
+
+[[example]]
+name = "graphics"
+required-features = ["native"]

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-"""Run the combined experiment gates and save exact commands/output, failing closed."""
+"""Run portable implementation/lab gates and record commands/output, failing closed.
 
+Native surface and Vulkan readback gates are explicit opt-ins requiring their
+drivers/display. Their absence never produces a passing graphics result.
+"""
+
+import argparse
 import json
 import pathlib
 import subprocess
@@ -14,6 +19,7 @@ PACKAGES = (
     "gpui_reactivity_algebra_lab", "gpui_reactivity_template_lab",
     "gpui_reactivity_coverage_lab", "gpui_reactivity_ownership_lab",
     "reactivity-api-lab",
+    "gpui", "gpui_gpu", "gpui_canvas", "gpui_retained",
 )
 format_packages = [arg for package in PACKAGES for arg in ("-p", package)]
 checks = [
@@ -28,12 +34,24 @@ checks = [
               "gpui_reactivity_ownership_lab", "--features", "loom",
               "--test", "loom_protocol"]),
     ("native-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
-                      "gpui_reactivity_host", "--features", "x11,wayland"]),
+                      "gpui", "--features", "x11,wayland", "--all-targets"]),
     ("layout-example", ["cargo", "run", *MANIFEST, "--locked", "-p",
                         "gpui_reactivity_core", "--features", "layout",
                         "--example", "retained_layout"]),
     ("format", ["cargo", "fmt", *MANIFEST, *format_packages, "--check"]),
 ]
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--vulkan", action="store_true", help="require actual Vulkan readback conformance")
+parser.add_argument("--native-x11", action="store_true", help="require actual X11 native port/lifecycle execution")
+args = parser.parse_args()
+if args.vulkan:
+    checks.append(("gpu-vulkan", ["cargo", "test", *MANIFEST, "--locked", "-p",
+                                 "gpui_gpu", "--features", "vulkan-tests", "--test", "render"]))
+if args.native_x11:
+    checks.append(("native-x11", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                 "--features", "x11", "native_todo_port", "--", "--ignored",
+                                 "--nocapture", "--test-threads=1"]))
 
 EVIDENCE.mkdir(exist_ok=True)
 report = []

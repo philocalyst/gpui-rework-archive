@@ -1,9 +1,23 @@
-# GPUI reactivity clean-room design
+# GPUI clean-room implementation
+
+The independent [gpui crate](crates/gpui/README.md) now runs real views, typed
+state, Cephal layout, text, transformed input and live inspector properties.
+The Counter and Todo ports use the same engine in native windows and public
+headless tests. [Canvas](crates/canvas/README.md) supplies the reference renderer;
+[GPU](crates/gpu/README.md) consumes its borrowed canonical scene with `wgsl-rs`.
+
+```sh
+cd reactivity
+cargo run -p gpui --features x11 --example workbench -- --cpu
+cargo run -p gpui --features x11 --example workbench -- --gpu
+```
+
+This remains an implementation in progress. [STATUS.md](STATUS.md) distinguishes
+integrated application behavior, measured experiments and outstanding gates.
 
 Start with [DESIGN.md](DESIGN.md). [CONTRACT.md](CONTRACT.md) is the explicit
 revision-2 amendment to the supplied model. The design retains shared immutable
 structure, sparse typed instance differences and coherent leased presentation.
-[STATUS.md](STATUS.md) separates implemented proofs from integration work.
 
 | Document | Decision |
 | --- | --- |
