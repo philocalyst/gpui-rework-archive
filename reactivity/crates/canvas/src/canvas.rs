@@ -1461,6 +1461,10 @@ fn render_band<W: PixelWriter>(
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [W::Element::default(); 8];
     writer.write(frame.clear, &mut clear[..W::ELEMENTS]);
+    // Exact adjacent working colors share one output conversion. Compare bits
+    // so HDR positive/negative zeros remain distinct; this is not quantization.
+    let mut encoded_color = frame.clear.map(f32::to_bits);
+    let mut encoded_bytes = clear;
     for column in 0..columns {
         let tile = (band_index - frame.tile_bounds[1]) * columns + column;
         let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
@@ -1544,7 +1548,12 @@ fn render_band<W: PixelWriter>(
                     destination.copy_from_slice(&uniform_bytes[..W::ELEMENTS]);
                 } else {
                     let color = samples.color((y - top) * TILE + x - left);
-                    writer.write(color, destination);
+                    let bits = color.map(f32::to_bits);
+                    if bits != encoded_color {
+                        writer.write(color, &mut encoded_bytes[..W::ELEMENTS]);
+                        encoded_color = bits;
+                    }
+                    destination.copy_from_slice(&encoded_bytes[..W::ELEMENTS]);
                 }
             }
         }
