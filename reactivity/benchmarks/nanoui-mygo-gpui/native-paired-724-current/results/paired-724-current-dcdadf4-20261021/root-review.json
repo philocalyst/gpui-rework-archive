@@ -5,13 +5,13 @@
   "status": "accepted_all_six_cells",
   "checks": [
     "All ten manifest-listed files independently SHA-256 verified.",
-    "Six raw cells each contain exactly100 startup,1000 unique start/click-pair and5 idle rows.",
-    "All window rows are800x600; all idle rows have4 threads.",
+    "Six raw cells each contain exactly 100 startup, 1000 unique start/click-pair and 5 idle rows.",
+    "All window rows are 800x600; all idle rows have 4 threads.",
     "All p50/p95/p99 independently recomputed from full raw sample sets using observer round-to-nearest index.",
     "All idle RSS/PSS medians and observed ranges independently recomputed.",
     "Current full nine preflight PPM files independently match accepted prior preflight byte for byte; root review and hashes preserved in native-current-dcdadf4 preflight."
   ],
-  "scope": "Sequential100-start blocks; descriptive statistics only. Auto observed ReferenceCpu; Xvfb drawable endpoint, no active AT client, hardwareGPU or scanout claim. Earlier competitor capture is separate.",
+  "scope": "Sequential 100-start blocks; descriptive statistics only. Auto observed ReferenceCpu; Xvfb drawable endpoint, no active AT client, hardware GPU or scanout claim. Earlier competitor capture is separate.",
   "raw_sha256": {
     "baseline-eager-0.raw": "25aed53e3706b75a5183826f2c1de31dea3c0f86089317dca59dc1a7bec90634",
     "baseline-eager-1000.raw": "cf08a3687ca26755a237fad3fcf5b6f8c2c47e8a96137522046798936663bdea",

@@ -144,6 +144,3 @@ lane. `10-quality.md` FP1/FP5 require escalation proofs and zero steady-state al
 code implements neither a general resolver nor a gesture DAG; the proposal here only reuses one
 validated hit in the one exact unchanged-point click case. Full resolver work should wait until
 the public input/gesture contracts are implemented and measured.
-
-The stale `rg` process PID 3051321 was already absent when checked (`ps -p 3051321` returned no
-row); no recursive `/tmp` scan was run.
