@@ -14,7 +14,9 @@ use std::{
     },
 };
 
+mod inputs;
 mod linear_mailbox;
+pub use inputs::QuestionInputs;
 pub(crate) mod question;
 mod sync {
     pub(super) use std::sync::{Mutex, TryLockError, atomic};
@@ -118,10 +120,24 @@ pub struct QuestionStats {
 pub struct QuestionInfo {
     pub status: QuestionStatus,
     pub ticket: u64,
+    /// Present only for a single Source input. Use visit_question_inputs for
+    /// the complete diagnostic family of paired or Reader dependencies.
     pub input: Option<InputVersion>,
     pub completion_leased: bool,
     pub stats: QuestionStats,
 }
+/// One member of the complete declared input family, in declaration order.
+/// These records describe the owner's observed cohort, not worker authority.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum QuestionInput {
+    Source(InputVersion),
+    Reader {
+        key: ReaderKey,
+        ticket: u64,
+        status: QuestionStatus,
+    },
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum Failure<'a> {
     Domain(&'a (dyn std::error::Error + 'static)),
@@ -147,6 +163,12 @@ pub struct Outcome<'a> {
 #[doc(hidden)]
 pub trait ReaderValues {
     fn read(&self, key: ReaderKey) -> Option<Outcome<'_>>;
+    fn visit_inputs(&self, _key: ReaderKey, _visit: &mut impl FnMut(QuestionInput)) -> bool
+    where
+        Self: Sized,
+    {
+        false
+    }
 }
 impl ReaderValues for () {
     fn read(&self, _: ReaderKey) -> Option<Outcome<'_>> {
@@ -214,7 +236,6 @@ impl InputVersion {
 }
 pub(crate) struct Message<T, E> {
     pub stamp: RequestStamp,
-    pub version: InputVersion,
     pub value: Result<T, E>,
 }
 
@@ -263,7 +284,6 @@ impl<T, E> Controller<T, E> {
 pub struct Completion<T, E> {
     controller: Option<Arc<Controller<T, E>>>,
     stamp: Option<RequestStamp>,
-    version: InputVersion,
 }
 
 /// Borrowed cancellation hint for one physical completion. This grants no UI
@@ -308,7 +328,6 @@ impl<T, E> Completion<T, E> {
         let controller = self.controller.take().expect("completion is linear");
         let message = Message {
             stamp: self.stamp.take().unwrap(),
-            version: self.version,
             value,
         };
         controller
@@ -403,12 +422,6 @@ mod tests {
         let cap = Completion::<u64, Infallible> {
             controller: Some(controller.clone()),
             stamp: Some(stamp),
-            version: InputVersion {
-                field: crate::FieldId::new(1),
-                revision: crate::Signal::new(0).revision(),
-                coarse: 0,
-                policy: 0,
-            },
         };
         let memory = allocation_counter::measure(|| {
             cap.run_cancellable((), |_, cancellation| {
@@ -441,12 +454,6 @@ mod tests {
         let cap = Completion::<String, Infallible> {
             controller: Some(controller.clone()),
             stamp: Some(stamp),
-            version: InputVersion {
-                field: crate::FieldId::new(1),
-                revision: crate::Signal::new(0).revision(),
-                coarse: 0,
-                policy: 0,
-            },
         };
         controller.current.store(0, Ordering::Release);
         controller.mailbox.close();
@@ -495,6 +502,82 @@ mod tests {
             mailbox.close();
             assert_eq!(drops.load(Ordering::SeqCst), 1);
         }
+    }
+
+    #[test]
+    fn input_family_storage_and_allocation_ledger() {
+        struct Model {
+            a: crate::Signal<u64>,
+            b: crate::Signal<u64>,
+        }
+        const A: crate::Source<Model, u64> =
+            crate::Source::new(crate::FieldId::new(1), "a", |m| &m.a, |m| &mut m.a);
+        const B: crate::Source<Model, u64> =
+            crate::Source::new(crate::FieldId::new(2), "b", |m| &m.b, |m| &mut m.b);
+        fn report<A: QuestionInputs<Model>>(name: &str, inputs: A) {
+            let mut built = None;
+            let allocations = allocation_counter::measure(|| {
+                built = Some(
+                    Questions::new()
+                        .question(
+                            inputs,
+                            |_| 0u64,
+                            |_, cap: Completion<u64, Infallible>| {
+                                drop(cap);
+                                Ok(())
+                            },
+                        )
+                        .unwrap(),
+                );
+            });
+            let (plan, _) = built.unwrap();
+            println!(
+                "family={name},plan={},inputs={},versions={},optional_versions={},allocations={},requested={}",
+                size_of_val(&plan),
+                size_of::<A>(),
+                size_of::<A::Versions>(),
+                size_of::<Option<A::Versions>>(),
+                allocations.count_total,
+                allocations.bytes_total
+            );
+            assert_eq!(allocations.count_total, 2);
+        }
+        report("one_source", A);
+        report("two_sources", (A, B));
+        report("three_nested", ((A, B), A));
+        let (plan, reader) = Questions::new()
+            .question(
+                A,
+                |n| *n,
+                |_, cap: Completion<u64, Infallible>| {
+                    drop(cap);
+                    Ok(())
+                },
+            )
+            .unwrap();
+        let mut dependent = None;
+        let allocations = allocation_counter::measure(|| {
+            dependent = Some(
+                plan.question(
+                    (reader, B),
+                    |(a, b)| *a + *b,
+                    |_, cap: Completion<u64, Infallible>| {
+                        drop(cap);
+                        Ok(())
+                    },
+                )
+                .unwrap(),
+            );
+        });
+        let (plan, _) = dependent.unwrap();
+        println!(
+            "family=reader_and_source,total_plan={},incremental_allocations={},incremental_requested={},reader_versions={}",
+            size_of_val(&plan),
+            allocations.count_total,
+            allocations.bytes_total,
+            size_of::<inputs::ReaderVersion>()
+        );
+        assert_eq!(allocations.count_total, 1);
     }
 
     #[test]

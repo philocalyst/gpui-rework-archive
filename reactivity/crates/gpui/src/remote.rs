@@ -262,6 +262,9 @@ impl<T, F, L: ReaderValues> ReaderValues for Lane<T, F, L> {
     fn read(&self, key: ReaderKey) -> Option<Outcome<'_>> {
         self.tail.read(key)
     }
+    fn visit_inputs(&self, key: ReaderKey, visit: &mut impl FnMut(crate::QuestionInput)) -> bool {
+        self.tail.visit_inputs(key, visit)
+    }
 }
 impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
     const EMPTY: bool = false;

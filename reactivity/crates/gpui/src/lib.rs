@@ -44,7 +44,8 @@ pub use list::{ItemKey, ItemSource, ListError, ListId, ListViewport, uniform_lis
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use reader::{
     Cancellation, CompleteError, Completion, Failure, InputVersion, QuestionFault, QuestionInfo,
-    QuestionStats, QuestionStatus, Questions, Reader, StartError,
+    QuestionInput, QuestionInputs, QuestionStats, QuestionStatus, Questions, Reader, ReaderKey,
+    StartError,
 };
 pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]

@@ -32,8 +32,8 @@ fn open() -> (
     });
     let (questions, results) = Questions::new()
         .question(
-            SearchLibrary::QUERY,
-            |value| search_library::freeze(value, 250_000),
+            (SearchLibrary::QUERY, SearchLibrary::DESCENDING),
+            |(value, descending)| search_library::freeze_ordered(value, *descending, 250_000),
             move |input, completion| {
                 send.try_send((input, completion))
                     .map_err(|error| match error {
@@ -154,8 +154,8 @@ fn a_cancelled_catalogue_scan_releases_credit_at_a_bounded_checkpoint_for_the_la
     let (send, jobs) = mpsc::channel::<Job>();
     let (questions, results) = Questions::new()
         .question(
-            SearchLibrary::QUERY,
-            |query| search_library::freeze(query, 250_000),
+            (SearchLibrary::QUERY, SearchLibrary::DESCENDING),
+            |(query, descending)| search_library::freeze_ordered(query, *descending, 250_000),
             move |input, cap| {
                 send.send((input, cap)).unwrap();
                 Ok(())
@@ -226,8 +226,8 @@ fn paired_real_library_cancellation_cost() {
         let (send, jobs) = mpsc::channel::<Job>();
         let (questions, results) = Questions::new()
             .question(
-                SearchLibrary::QUERY,
-                |query| search_library::freeze(query, 250_000),
+                (SearchLibrary::QUERY, SearchLibrary::DESCENDING),
+                |(query, descending)| search_library::freeze_ordered(query, *descending, 250_000),
                 move |input, cap| {
                     send.send((input, cap)).unwrap();
                     Ok(())
@@ -344,8 +344,8 @@ fn library_domain_restore_remints_readers_and_targets_and_rejects_old_work() {
     let (send, jobs) = mpsc::channel::<Job>();
     let (questions, old_reader) = Questions::new()
         .question(
-            SearchLibrary::QUERY,
-            |value| search_library::freeze(value, 250_000),
+            (SearchLibrary::QUERY, SearchLibrary::DESCENDING),
+            |(value, descending)| search_library::freeze_ordered(value, *descending, 250_000),
             move |input, cap| {
                 send.send((input, cap)).unwrap();
                 Ok(())
@@ -364,6 +364,7 @@ fn library_domain_restore_remints_readers_and_targets_and_rejects_old_work() {
         .set(SearchLibrary::QUERY, "Track 000042".into())
         .unwrap();
     original.set(SearchLibrary::SELECTED, 42).unwrap();
+    original.set(SearchLibrary::DESCENDING, true).unwrap();
     let json = serde_json::to_string(&original.root().unwrap().save()).unwrap();
     assert_eq!(
         serde_json::from_str::<serde_json::Value>(&json)
@@ -371,7 +372,7 @@ fn library_domain_restore_remints_readers_and_targets_and_rejects_old_work() {
             .as_object()
             .unwrap()
             .len(),
-        3
+        4
     );
     drop(original);
     assert!(old_cap.is_cancelled());
@@ -384,8 +385,8 @@ fn library_domain_restore_remints_readers_and_targets_and_rejects_old_work() {
     let (send, jobs) = mpsc::channel::<Job>();
     let (questions, reader) = Questions::new()
         .question(
-            SearchLibrary::QUERY,
-            |value| search_library::freeze(value, 250_000),
+            (SearchLibrary::QUERY, SearchLibrary::DESCENDING),
+            |(value, descending)| search_library::freeze_ordered(value, *descending, 250_000),
             move |input, cap| {
                 send.send((input, cap)).unwrap();
                 Ok(())
@@ -395,6 +396,7 @@ fn library_domain_restore_remints_readers_and_targets_and_rejects_old_work() {
     let model = SearchLibrary::restore(serde_json::from_str(&json).unwrap(), reader);
     let mut restored = Win::with_questions(model, questions, WindowOptions::default()).unwrap();
     assert_eq!(*restored.root().unwrap().selected, 42);
+    assert!(*restored.root().unwrap().descending);
     assert_eq!(
         restored.question_status(old_reader),
         Err(gpui::Error::Question(gpui::QuestionFault::Revoked))
@@ -406,5 +408,56 @@ fn library_domain_restore_remints_readers_and_targets_and_rejects_old_work() {
     assert_eq!(
         restored.with_ready(reader, |page| page.ids[0].0).unwrap(),
         Some(42)
+    );
+}
+
+#[test]
+fn query_and_order_are_one_frozen_library_cohort() {
+    let (mut win, done) = open();
+    finish(&mut win, &done);
+    let reader = win.root().unwrap().results;
+    assert_eq!(
+        win.with_ready(reader, |page| (page.ids[0].0, page.descending))
+            .unwrap(),
+        Some((0, false))
+    );
+    let order = win
+        .role(Role::Button)
+        .name("Reverse result order")
+        .one()
+        .unwrap();
+    win.click(order).unwrap();
+    assert_eq!(win.question_status(reader), Ok(QuestionStatus::Pending));
+    assert!(
+        win.contains_text("ascending").unwrap(),
+        "previous rows retain their frozen order caption"
+    );
+    finish(&mut win, &done);
+    let expected: Vec<_> = (0..250_000).rev().take(PAGE_LIMIT).collect();
+    assert_eq!(
+        win.with_ready(reader, |page| page
+            .ids
+            .iter()
+            .map(|id| id.0 as usize)
+            .collect::<Vec<_>>())
+            .unwrap(),
+        Some(expected)
+    );
+    assert!(win.contains_text("descending").unwrap());
+    let input = win
+        .role(Role::TextInput)
+        .name("Search recordings")
+        .one()
+        .unwrap();
+    win.type_text(input, "Track 000042").unwrap();
+    finish(&mut win, &done);
+    assert_eq!(
+        win.with_ready(reader, |page| (
+            page.query.as_str().to_string(),
+            page.descending,
+            page.ids[0].0
+        ))
+        .unwrap(),
+        Some(("Track 000042".into(), true, 42))
     );
 }

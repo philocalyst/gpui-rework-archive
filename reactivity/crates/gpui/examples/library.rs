@@ -32,8 +32,11 @@ fn main() -> Result<(), gpui::NativeError> {
         search_library::SearchWorker::new().expect("create the explicitly owned search worker");
     let (questions, results) = gpui::Questions::new()
         .question(
-            search_library::SearchLibrary::QUERY,
-            move |query| search_library::freeze(query, count),
+            (
+                search_library::SearchLibrary::QUERY,
+                search_library::SearchLibrary::DESCENDING,
+            ),
+            move |(query, descending)| search_library::freeze_ordered(query, *descending, count),
             move |input, completion| worker.start(input, completion),
         )
         .expect("declare search");

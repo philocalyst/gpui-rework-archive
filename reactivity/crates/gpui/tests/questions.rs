@@ -574,3 +574,35 @@ fn worker_panic_is_a_question_fault_and_does_not_quarantine_the_owner() {
     drain(&mut win);
     assert!(win.contains_text("recovered").unwrap());
 }
+
+#[test]
+fn one_source_diagnostic_convenience_agrees_with_the_complete_visitor() {
+    let (mut win, _jobs, reader) = open();
+    let initial = win.question_info(reader).unwrap().input.unwrap();
+    assert_eq!(initial.source(), Model::QUERY.id());
+    assert_eq!(
+        (initial.coarse_epoch(), initial.policy_generation()),
+        (0, 0)
+    );
+    let mut visited = None;
+    assert_eq!(
+        win.visit_question_inputs(reader, |input| visited = Some(input))
+            .unwrap(),
+        1
+    );
+    assert_eq!(visited, Some(gpui::QuestionInput::Source(initial)));
+    win.retry(reader).unwrap();
+    assert_eq!(
+        win.question_info(reader)
+            .unwrap()
+            .input
+            .unwrap()
+            .policy_generation(),
+        1
+    );
+    win.update(|model| model.query = Signal::new("A".into()))
+        .unwrap();
+    let replaced = win.question_info(reader).unwrap().input.unwrap();
+    assert_eq!(replaced.revision(), initial.revision());
+    assert_eq!(replaced.coarse_epoch(), 1);
+}
