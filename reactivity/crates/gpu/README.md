@@ -49,6 +49,12 @@ GPU buffer bytes, host vector capacity bytes and correction hash entry capacity;
 the last is not an allocator-byte total. Glyph atlas/table overhead and wgpu's
 internal allocations are separate. No low-lane allocation occurs per sample.
 
+After successful scene admission, a scene with no glyph masks releases the
+atlas key map and replaces a populated atlas with a minimal 1×1 texture. Repeated
+text-free scenes reuse that texture. Submitted frames retain their old texture
+leases through wgpu; returning text uploads its masks again. `atlas_keys` and
+`atlas_key_capacity` expose the retained key count and table entry capacity.
+
 Constant sample colors use anchor-plus-delta averaging so adding a draw covering
 zero samples preserves the clear value. Float output stays premultiplied through
 profile conversion and storage, avoiding an unnecessary divide/multiply by
