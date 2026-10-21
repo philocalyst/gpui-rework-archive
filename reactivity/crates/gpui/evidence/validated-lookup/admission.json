@@ -1,0 +1,10 @@
+{
+  "serial-20261021": {
+    "status": "excluded_before_results_review",
+    "reason": "A peer reported a just-started build and immediately paused it, but complete quiet exclusion at first process launch cannot be established. Entire capture retained and excluded; no percentiles inspected."
+  },
+  "serial-quiet-20261021": {
+    "status": "accepted_all_guards_pass",
+    "reason": "All peer heavy jobs explicitly idle or stopped before launch; same frozen source, fixture, binaries and full unchanged campaign."
+  }
+}
