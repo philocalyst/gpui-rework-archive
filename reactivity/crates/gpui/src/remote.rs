@@ -3,25 +3,17 @@ use crate::{Commit, Error};
 #[cfg(feature = "native")]
 use gpui_reactivity_host::native::Wake;
 use std::collections::VecDeque;
-use std::sync::{
-    Arc, OnceLock,
-    atomic::{AtomicBool, Ordering},
-    mpsc::{self, Receiver, SyncSender, TrySendError},
-};
+use std::sync::mpsc::{self, Receiver, SyncSender, TrySendError};
+#[cfg(feature = "native")]
+use std::sync::{Arc, OnceLock};
 
+#[cfg(feature = "native")]
 struct Notification {
-    owner: OnceLock<Arc<AtomicBool>>,
-    #[cfg(feature = "native")]
     wake: OnceLock<Wake>,
 }
+#[cfg(feature = "native")]
 impl Notification {
-    fn revoked(&self) -> bool {
-        self.owner
-            .get()
-            .is_some_and(|owner| owner.load(Ordering::Acquire))
-    }
     fn signal(&self) {
-        #[cfg(feature = "native")]
         if let Some(wake) = self.wake.get() {
             wake.signal();
         }
@@ -75,12 +67,14 @@ impl<T> std::fmt::Debug for SendError<T> {
 /// ```
 pub struct Remote<T> {
     sender: SyncSender<T>,
+    #[cfg(feature = "native")]
     notification: Arc<Notification>,
 }
 impl<T> Clone for Remote<T> {
     fn clone(&self) -> Self {
         Self {
             sender: self.sender.clone(),
+            #[cfg(feature = "native")]
             notification: Arc::clone(&self.notification),
         }
     }
@@ -90,32 +84,32 @@ impl<T> Remote<T> {
     /// Moving its sole Inbox into a window binds that receiver exactly once.
     /// Capacity zero rejects every try_send with Full. Storage is allocated here,
     /// including one staging buffer, rather than for each message or owner turn.
+    /// An attached native event proxy/OS may allocate separately when posting wakes.
     pub fn bounded(capacity: usize) -> (Self, Inbox<T>) {
         let (sender, receiver) = mpsc::sync_channel(capacity);
+        #[cfg(feature = "native")]
         let notification = Arc::new(Notification {
-            owner: OnceLock::new(),
-            #[cfg(feature = "native")]
             wake: OnceLock::new(),
         });
         (
             Self {
                 sender,
+                #[cfg(feature = "native")]
                 notification: Arc::clone(&notification),
             },
             Inbox {
                 receiver: Some(receiver),
                 staging: VecDeque::with_capacity(capacity),
                 capacity,
+                #[cfg(feature = "native")]
                 notification,
             },
         )
     }
     pub fn try_send(&self, value: T) -> Result<(), SendError<T>> {
-        if self.notification.revoked() {
-            return Err(SendError::Closed(value));
-        }
         match self.sender.try_send(value) {
             Ok(()) => {
+                #[cfg(feature = "native")]
                 self.notification.signal();
                 Ok(())
             }
@@ -135,6 +129,7 @@ pub struct Inbox<T> {
     receiver: Option<Receiver<T>>,
     staging: VecDeque<T>,
     capacity: usize,
+    #[cfg(feature = "native")]
     notification: Arc<Notification>,
 }
 impl<T> Inbox<T> {
@@ -174,13 +169,13 @@ mod sealed {
 /// Internal static receiver chain. Applications infer this type through with_inbox.
 #[doc(hidden)]
 pub trait LaneSet<M>: sealed::Sealed {
+    const EMPTY: bool;
     fn count(&self) -> usize;
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
     fn stage(&mut self, index: usize) -> Stage;
     fn apply(&mut self, model: &mut M, applied: &mut usize);
     fn close(&mut self);
-    fn bind(&mut self, owner: &Arc<AtomicBool>);
     #[cfg(feature = "native")]
     fn attach(&mut self, wake: &Wake);
     fn signal(&self);
@@ -193,6 +188,7 @@ pub enum Stage {
 }
 impl sealed::Sealed for () {}
 impl<M> LaneSet<M> for () {
+    const EMPTY: bool = true;
     fn count(&self) -> usize {
         0
     }
@@ -205,7 +201,6 @@ impl<M> LaneSet<M> for () {
     }
     fn apply(&mut self, _: &mut M, _: &mut usize) {}
     fn close(&mut self) {}
-    fn bind(&mut self, _: &Arc<AtomicBool>) {}
     #[cfg(feature = "native")]
     fn attach(&mut self, _: &Wake) {}
     fn signal(&self) {}
@@ -231,6 +226,7 @@ impl<T, F, L> Lane<T, F, L> {
 }
 impl<T, F, L> sealed::Sealed for Lane<T, F, L> {}
 impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
+    const EMPTY: bool = false;
     fn count(&self) -> usize {
         1 + self.tail.count()
     }
@@ -274,13 +270,6 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
         self.inbox.close();
         self.tail.close();
     }
-    fn bind(&mut self, owner: &Arc<AtomicBool>) {
-        assert!(
-            self.inbox.notification.owner.set(Arc::clone(owner)).is_ok(),
-            "an Inbox binds once"
-        );
-        self.tail.bind(owner);
-    }
     #[cfg(feature = "native")]
     fn attach(&mut self, wake: &Wake) {
         // Attach once to this owner's event loop; surface suspend/resume does not
@@ -290,17 +279,9 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
         self.tail.attach(wake);
     }
     fn signal(&self) {
+        #[cfg(feature = "native")]
         self.inbox.notification.signal();
         self.tail.signal();
-    }
-}
-
-impl<T, F, L> Lane<T, F, L> {
-    pub(crate) fn bind_head(&mut self, owner: &Arc<AtomicBool>) {
-        assert!(
-            self.inbox.notification.owner.set(Arc::clone(owner)).is_ok(),
-            "an Inbox binds once"
-        );
     }
 }
 
@@ -327,6 +308,18 @@ mod tests {
         });
         assert_eq!(sum, 8000);
         assert_eq!(measured.count_total, 0);
+    }
+}
+
+#[cfg(test)]
+fn notification_size() -> usize {
+    #[cfg(feature = "native")]
+    {
+        std::mem::size_of::<Notification>()
+    }
+    #[cfg(not(feature = "native"))]
+    {
+        0
     }
 }
 
@@ -360,7 +353,7 @@ mod ledger {
             std::mem::size_of::<Remote<u64>>(),
             std::mem::size_of::<Inbox<u64>>(),
             std::mem::size_of::<Lane<u64, fn(&mut Page, u64), ()>>(),
-            std::mem::size_of::<Notification>(),
+            notification_size(),
             std::mem::size_of::<Delivery>(),
             std::mem::size_of::<DeliveryError>(),
             std::mem::size_of::<Win<Page>>(),

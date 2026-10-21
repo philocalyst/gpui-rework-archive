@@ -372,3 +372,28 @@ fn an_unopened_native_builder_closes_its_inboxes_before_dropping_the_model() {
     drop(window);
     assert!(result.recv().unwrap());
 }
+
+#[test]
+fn outside_owner_fault_releases_queued_payloads_before_returning_to_the_caller() {
+    struct Payload(mpsc::Sender<()>);
+    impl Drop for Payload {
+        fn drop(&mut self) {
+            self.0.send(()).unwrap();
+        }
+    }
+    let (released, observe) = mpsc::channel();
+    let (remote, inbox) = Remote::bounded(4);
+    let mut win = Win::demo(Catalogue::default())
+        .with_inbox(inbox, |_: &mut Catalogue, _: Payload| {})
+        .unwrap();
+    remote.try_send(Payload(released.clone())).unwrap();
+    assert_eq!(
+        win.update(|_| panic!("owner fault")),
+        Err(Error::OwnerPanicked)
+    );
+    assert_eq!(observe.try_recv(), Ok(()));
+    assert!(matches!(
+        remote.try_send(Payload(released)),
+        Err(SendError::Closed(_))
+    ));
+}

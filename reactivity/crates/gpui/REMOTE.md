@@ -66,11 +66,12 @@ observer and keep the owner alive. Its observer currently receives `Error` only;
 default diagnostics include applied count and source/presentation epochs.
 Headless callers receive the complete typed report directly.
 
-A callback/schema panic quarantines the owner and revokes delivery. A fault in a
-delivery turn closes its receivers and drops queued/staged values. Quarantine
-from another owner operation immediately rejects new sends; its bounded queued
-storage is released on the next delivery attempt, close, or drop. There is no
-rollback promise for mutations before a panic. A delivery reaching the last legal
+A callback/schema panic quarantines the owner and revokes delivery. A private
+exclusive runtime-borrow guard closes every receiver before a faulting public
+operation returns, also dropping queued/staged values. This guard contains only
+ordinary mutable references to the runtime and its static lanes; its cleanup
+branch is erased for the empty chain. There is no rollback promise for mutations
+before a panic. A delivery reaching the last legal
 source epoch retires the stream immediately; discovering exhaustion at delivery
 entry consumes zero values and also retires it. Remaining queued values drop,
 new sends return `Closed`, and subsequent delivery reports `EpochExhausted`.
@@ -78,19 +79,21 @@ The owner remains available for reading and closing.
 
 Close, normal drop, unopened-builder drop, and every failed mount close receivers
 before model destruction. Mount preparation owns a field-ordered temporary until
-the complete window exists; description never owns an unguarded model. An optional
-shared atomic revocation token contains transport liveness only. It carries no
-model data or address. Enqueue and revocation are not one atomic transaction: a
-concurrent send can succeed, but no revoked message is applied. Sends begun after
-observing completed close/quarantine return the same payload as `Closed`.
+the complete window exists; description never owns an unguarded model. There is
+no shared owner revocation token or per-message liveness load. A concurrent send
+may succeed before receiver shutdown, but no quarantined message is applied.
+Sends after the faulting operation returns observe `Closed` with the same payload.
 
 ## Costs and limits
 
 A channel admits at most C queued messages and preallocates C staging slots.
 While callbacks run and producers refill the channel, aggregate retention can be
 2C payloads, plus payloads moved into application state. Queue capacity counts
-occurrences, not payload byte lengths. No transport allocation occurs per message;
-application callbacks, descriptions, text and rendering have their own costs.
+occurrences, not payload byte lengths. The measured standard-channel and staging operations allocate nothing per
+message in headless and unattached-native cases. After wake attachment, native
+event-proxy/OS notification may allocate per wake; that allocation was not
+measured. Application callbacks, descriptions, text and rendering have their own
+costs.
 
 The initial static selector scans lanes and recursively descends the chain for an
 indexed receive. Sparse busy patterns can cost O(budget × lanes²), plus an empty
@@ -104,19 +107,22 @@ Measured on x86-64, Rust 1.97.1, for eight `u64` slots:
 | Storage | Bytes |
 | --- | ---: |
 | Empty Win | 8 |
-| Remote handle | 24 |
-| Inbox header | 64 |
-| One lane with a function-pointer callback | 80 |
+| Remote handle, no native feature / native | 16 / 24 |
+| Inbox header, no native feature / native | 56 / 64 |
+| One lane with a function-pointer callback, no native feature / native | 72 / 80 |
 | Delivery / inline DeliveryError | 72 / 128 |
-| Cold channel + staging allocations, no native feature | 864 across 4 allocations |
-| Same with native wake attachment storage enabled | 904 across 4 allocations |
-| First owner revocation lease | 24 across 1 allocation |
+| Cold channel + staging allocations, no native feature | 832 across 3 allocations |
+| Same with native wake attachment storage enabled | 888 across 4 allocations |
+| Binding an inbox | 0 allocations |
 
-The optional revocation pointer adds 8 bytes to retained runtime storage; it is
-allocated only when a lane is bound. Native wake proxies stay leased by remaining
-sender handles until those handles drop. Full delivery includes the existing
+The runtime has no optional revocation pointer or its allocation. Native wake
+proxies and standard-channel backing storage can stay leased by remaining sender
+handles until all those handles drop. Receiver close releases queued payloads;
+it does not promise that every transport allocation is already freed. Full delivery includes the existing
 owner pipeline allocations. Tests separately prove zero allocations for 8,000
-transport/staging messages, enqueue into preallocated storage, and idle turns.
+channel/staging messages with no attached native wake, enqueue into preallocated
+storage, and idle turns. Real native tests prove bounded wake delivery and
+liveness, without claiming zero allocation in the proxy or OS.
 
 This stream is the ingress primitive for finite worker results and event messages.
 It does not implement `Reader`, dependency discovery, automatic frozen-input
@@ -124,3 +130,8 @@ validation, latest-question cancellation, reliable action journaling, or async
 cohort publication. Existing `RequestGate` tickets require explicit input/policy
 invalidation by their owner; applying that primitive does not create a Reader
 graph. Questions, actions and streams retain their distinct policies.
+
+The guard comparison, exact benchmark source and raw pinned-CPU samples are in
+[evidence/remote-guard.md](evidence/remote-guard.md). Timing is neutral; this change
+claims a storage/allocation reduction and immediate receiver cleanup, not a frame
+time improvement.

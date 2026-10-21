@@ -23,7 +23,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         self.runtime_mut()?.focus(target)
     }
     pub fn clear_focus(&mut self) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.focused = None;
         runtime.changed_nodes = 0;
         Ok(runtime.commit())
@@ -36,7 +36,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Use the same keyboard barrier as the native adapter. Tab requires current
     /// presented geometry; focused editing and activation use logical authority.
     pub fn key(&mut self, key: Key<'_>) -> Result<Commit, Error> {
-        let runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.changed_nodes = 0;
         if matches!(key, Key::Tab | Key::ReverseTab) {
