@@ -660,3 +660,163 @@ fn physical_glyph_masks_map_back_to_logical_rectangles() {
         }
     });
 }
+
+#[test]
+fn grouped_and_inline_packets_match_every_pixel_in_mixed_scenes() {
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let mut renderer = renderer(format).await;
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let mut fonts = TextSystem::bundled().unwrap();
+            let layout = fonts.shape("office café jé", 18.0, None).unwrap();
+            let single = fonts.shape("H", 18.0, None).unwrap();
+            let mut canvas = Canvas::recording(160, 88, config).unwrap();
+            let clip = Rect::new(1.125, 0.125, 157.5, 86.75);
+            canvas.clear(Color::linear_srgb(0.2, 0.3, 0.4, 1.0).unwrap());
+            canvas
+                .fill_rect(
+                    Rect::new(4.0, 2.0, 90.0, 50.0),
+                    Affine::IDENTITY,
+                    clip,
+                    Color::rgba(20, 80, 130, 120),
+                )
+                .unwrap();
+            for (row, density) in [1.0, 1.25, 1.5, 2.0].into_iter().enumerate() {
+                canvas
+                    .draw_text_scaled(
+                        &mut fonts,
+                        &layout,
+                        Point {
+                            x: 5.0,
+                            y: row as f32 * 17.0,
+                        },
+                        Affine {
+                            a: 0.95,
+                            b: 0.07,
+                            c: 0.15,
+                            d: 1.0,
+                            tx: 0.025,
+                            ty: 0.1,
+                        },
+                        clip,
+                        Color::linear_srgb(-0.2, 1.5, 0.3, 0.7).unwrap(),
+                        density,
+                    )
+                    .unwrap();
+            }
+            canvas
+                .draw_text(
+                    &mut fonts,
+                    &single,
+                    Point { x: 140.0, y: 10.0 },
+                    Affine::IDENTITY,
+                    clip,
+                    Color::linear_srgb(-1e-40, -0.0, 1.0, 1.0).unwrap(),
+                )
+                .unwrap();
+            for proofs in [false, true] {
+                renderer.set_tile_proofs(proofs);
+                renderer.set_grouped_records(false);
+                let expanded = readback(&mut renderer, &canvas);
+                let old = renderer.stats();
+                assert_eq!(old.shared_groups, 0);
+                assert_eq!(old.draw_record_bytes, old.draws * 96);
+                renderer.set_grouped_records(true);
+                let compact = readback(&mut renderer, &canvas);
+                let new = renderer.stats();
+                assert_eq!(compact, expanded, "{format:?},proofs={proofs}");
+                assert_eq!(new.shared_groups, 4);
+                assert_eq!(new.inline_draws, 2);
+                assert_eq!(new.compact_draws + new.inline_draws, new.draws);
+                assert_eq!(
+                    new.draw_record_bytes,
+                    new.shared_groups * 80 + new.compact_draws * 32 + new.inline_draws * 96
+                );
+                assert!(new.draw_record_bytes < old.draw_record_bytes);
+            }
+            // A final certificate points to a tagged inline word address AFTER
+            // several compact runs. Canonical earlier groups remain retained.
+            canvas
+                .fill_rect(
+                    Rect::new(-2.0, -2.0, 164.0, 92.0),
+                    Affine::IDENTITY,
+                    Rect::new(0.0, 0.0, 160.0, 88.0),
+                    Color::rgb(25, 60, 130),
+                )
+                .unwrap();
+            renderer.set_grouped_records(false);
+            let expanded = readback(&mut renderer, &canvas);
+            renderer.set_grouped_records(true);
+            assert_eq!(readback(&mut renderer, &canvas), expanded);
+            assert_eq!(renderer.stats().uniform_tiles, 60);
+            assert_eq!(renderer.stats().sample_draw_evaluations, 0);
+            assert_eq!(renderer.stats().shared_groups, 4);
+        }
+    });
+}
+
+#[test]
+fn grouped_error_envelopes_match_inline_across_fractional_glyph_samples() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let mut fonts = TextSystem::bundled().unwrap();
+        let clip = Rect::new(0.125, 0.375, 126.5, 62.25);
+        for n in 0..48 {
+            let size = 12.0 + (n % 7) as f32 * 1.125;
+            let density = [1.0, 1.25, 1.3, 2.0][n % 4];
+            let layout = fonts.shape("Héj office", size, None).unwrap();
+            let mut canvas = Canvas::recording(
+                128,
+                64,
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
+            )
+            .unwrap();
+            canvas.clear(Color::linear_srgb(0.125, 0.3, 0.7, 1.0).unwrap());
+            let reflected = n % 2 == 0;
+            let transform = Affine {
+                a: if reflected { -1.0 } else { 1.0 },
+                b: (n % 5) as f32 * 0.03125,
+                c: (n % 3) as f32 * 0.0625 - 0.0625,
+                d: 1.0,
+                tx: if reflected { 120.125 } else { 0.125 },
+                ty: 0.375,
+            };
+            for row in 0..2 {
+                let color = if n % 3 == 0 {
+                    Color::linear_srgb(-1e-40, -0.0, 1.0, 0.7).unwrap()
+                } else {
+                    Color::linear_srgb(1.5, -0.1, 0.25, 0.7).unwrap()
+                };
+                canvas
+                    .draw_text_scaled(
+                        &mut fonts,
+                        &layout,
+                        Point {
+                            x: 2.0 + n as f32 * 0.000_001,
+                            y: row as f32 * 24.0,
+                        },
+                        transform,
+                        clip,
+                        color,
+                        density,
+                    )
+                    .unwrap();
+            }
+            renderer.set_grouped_records(false);
+            let old = readback(&mut renderer, &canvas);
+            renderer.set_grouped_records(true);
+            assert_eq!(
+                readback(&mut renderer, &canvas),
+                old,
+                "fixture{n},density={density}"
+            );
+        }
+    });
+}

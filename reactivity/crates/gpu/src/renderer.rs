@@ -1,6 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use gpui_canvas::{
-    GlyphKey, GlyphMask, OutputProfile, PixelFormat, PreparedDraw, PreparedScene, SdrMapping,
+    GlyphKey, GlyphMask, OutputProfile, PixelFormat, PreparedDraw, PreparedGroup,
+    PreparedPlacement, PreparedScene, SdrMapping,
 };
 use std::{borrow::Cow, collections::HashMap};
 
@@ -67,6 +68,10 @@ pub struct Stats {
     /// Planned sample_draw calls, including calls rejected by clip/geometry.
     pub sample_draw_evaluations: u64,
     pub instance_upload_bytes: usize,
+    pub draw_record_bytes: usize,
+    pub shared_groups: usize,
+    pub compact_draws: usize,
+    pub inline_draws: usize,
     pub mask_upload_bytes: usize,
     pub gpu_buffer_bytes: u64,
     pub atlas_bytes: u64,
@@ -76,6 +81,49 @@ pub struct Stats {
     pub correction_records: usize,
     /// Hash-table entry capacity, excluding its allocator/control-byte overhead.
     pub correction_key_capacity: usize,
+}
+
+// Private word addresses refer only to this validated frame packet. The tag
+// selects an inline 96-byte draw; compact placements are two 16-byte words and
+// point at a five-word shared common record in the same storage buffer.
+const INLINE_RECORD: u32 = 1 << 31;
+const _: () = assert!(MAX_DRAWS * 11 < INLINE_RECORD as usize);
+type Word = [u32; 4];
+fn float_word(value: [f32; 4]) -> Word {
+    value.map(f32::to_bits)
+}
+fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedDraw<'a> {
+    PreparedDraw {
+        local_rect: p.local_rect,
+        inverse: group.inverse,
+        clip: group.clip,
+        bounds: p.bounds,
+        color: group.color,
+        mask: p.mask,
+    }
+}
+fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
+    let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
+    let clip = group.clip;
+    [
+        float_word([a, c, tx, error[0]]),
+        float_word([b, d, ty, error[1]]),
+        float_word([clip.x, clip.y, clip.width, clip.height]),
+        float_word(group.color),
+        [correction, 0, 0, 0],
+    ]
+}
+fn inline_words(draw: PreparedDraw<'_>, error: [f32; 2], correction: u32) -> [Word; 6] {
+    let [a, b, c, d, tx, ty] = draw.inverse.map(|v| v as f32);
+    let (r, clip) = (draw.local_rect, draw.clip);
+    bytemuck::cast(DrawData {
+        local: [r.x, r.y, r.width, r.height],
+        inverse_x: [a, c, tx, error[0]],
+        inverse_y: [b, d, ty, error[1]],
+        clip: [clip.x, clip.y, clip.width, clip.height],
+        color: draw.color,
+        atlas: [0, 0, 0, correction],
+    })
 }
 
 struct Buffer {
@@ -223,13 +271,14 @@ pub struct Renderer {
     indices: Buffer,
     corrections: Buffer,
     atlas: Atlas,
-    records: Vec<DrawData>,
+    records: Vec<Word>,
     ranges: Vec<[u32; 2]>,
     references: Vec<u32>,
     cursors: Vec<u32>,
     residuals: Vec<Correction>,
     residual_keys: HashMap<[u32; 8], u32>,
     tile_proofs: bool,
+    grouped_records: bool,
     stats: Stats,
 }
 impl Renderer {
@@ -297,7 +346,7 @@ impl Renderer {
         }
         let layout = pipeline.get_bind_group_layout(0);
         let globals = Buffer::new(&device, "globals", 48, true);
-        let draws = Buffer::new(&device, "draws", 96, false);
+        let draws = Buffer::new(&device, "draws", 16, false);
         let tiles = Buffer::new(&device, "tiles", 8, false);
         let indices = Buffer::new(&device, "indices", 4, false);
         let corrections = Buffer::new(&device, "inverse residuals", 32, false);
@@ -321,6 +370,7 @@ impl Renderer {
             residuals: Vec::new(),
             residual_keys: HashMap::new(),
             tile_proofs: true,
+            grouped_records: true,
             stats: Stats::default(),
         })
     }
@@ -335,6 +385,10 @@ impl Renderer {
     }
     pub fn stats(&self) -> Stats {
         self.stats
+    }
+    /// Diagnostic schema oracle: keep old inline fields for every draw.
+    pub fn set_grouped_records(&mut self, enabled: bool) {
+        self.grouped_records = enabled;
     }
     /// Disable only the disposable tile proofs for reference comparisons.
     pub fn set_tile_proofs(&mut self, enabled: bool) {
@@ -389,99 +443,147 @@ impl Renderer {
         self.ranges.clear();
         self.ranges.resize(columns * rows, [0, 0]);
         self.records.clear();
+        let word_count = scene.groups().try_fold(0usize, |sum, group| {
+            let n = group.placements().len();
+            let words = if self.grouped_records && n > 1 {
+                5 + 2 * n
+            } else {
+                6 * n
+            };
+            sum.checked_add(words).ok_or(Error::ResourceLimit)
+        })?;
+        self.records
+            .try_reserve_exact(word_count)
+            .map_err(|_| Error::ResourceLimit)?;
+        self.cursors.clear();
+        self.cursors.resize(columns * rows, 0);
+        self.residuals.clear();
+        self.residuals.push(Correction::zeroed());
+        self.residual_keys.clear();
         let mut original_references = 0usize;
         let mut has_masks = false;
-        for (index, draw) in scene.draws().enumerate() {
-            let error = validate_draw(draw, index, scene.width, scene.height)?;
-            has_masks |= draw.mask.is_some();
-            let mut record = DrawData::zeroed();
-            record.inverse_x[3] = error[0];
-            record.inverse_y[3] = error[1];
-            self.records.push(record);
-            visit(draw, columns, |tile| {
-                if self.tile_proofs
-                    && full_tile(draw, error, tile, columns, scene.width, scene.height)
-                {
-                    self.ranges[tile] = [index as u32 + 1, 1];
-                } else {
-                    self.ranges[tile][1] += 1;
+        let mut ordinal = 0;
+        let mut shared_groups = 0;
+        let mut compact_draws = 0;
+        for group in scene.groups() {
+            let compact = self.grouped_records && group.placements().len() > 1;
+            let correction = self.correction(group.inverse, group.clip);
+            if compact {
+                let mut error = [0.0_f32; 2];
+                for (offset, p) in group.placements().enumerate() {
+                    let e = validate_draw(
+                        prepared(group, p),
+                        ordinal + offset,
+                        scene.width,
+                        scene.height,
+                    )?;
+                    error[0] = error[0].max(e[0]);
+                    error[1] = error[1].max(e[1]);
                 }
-            });
-            original_references = original_references
-                .checked_add(tile_count(draw))
-                .ok_or(Error::ResourceLimit)?;
-            if original_references > MAX_REFERENCES {
-                return Err(Error::ResourceLimit);
+                let common = self.records.len() as u32;
+                self.records
+                    .extend_from_slice(&common_words(group, error, correction));
+                shared_groups += 1;
+                compact_draws += group.placements().len();
+                for p in group.placements() {
+                    let draw = prepared(group, p);
+                    has_masks |= draw.mask.is_some();
+                    let r = draw.local_rect;
+                    let address = self.records.len() as u32;
+                    self.records.extend_from_slice(&[
+                        float_word([r.x, r.y, r.width, r.height]),
+                        [0, 0, 0, common],
+                    ]);
+                    original_references = self.bin_draw(
+                        draw,
+                        error,
+                        address,
+                        ordinal,
+                        columns,
+                        scene.width,
+                        scene.height,
+                        original_references,
+                    )?;
+                    ordinal += 1;
+                }
+            } else {
+                for p in group.placements() {
+                    let draw = prepared(group, p);
+                    let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
+                    has_masks |= draw.mask.is_some();
+                    let address = INLINE_RECORD | self.records.len() as u32;
+                    self.records
+                        .extend_from_slice(&inline_words(draw, error, correction));
+                    original_references = self.bin_draw(
+                        draw,
+                        error,
+                        address,
+                        ordinal,
+                        columns,
+                        scene.width,
+                        scene.height,
+                        original_references,
+                    )?;
+                    ordinal += 1;
+                }
             }
         }
         let mask_bytes = self.prepare_atlas(scene, has_masks)?;
+        // Patch only resource coordinates after every draw has passed admission.
+        // Metadata words/correction indices and private common addresses remain.
+        let mut word = 0;
+        for group in scene.groups() {
+            let compact = self.grouped_records && group.placements().len() > 1;
+            if compact {
+                word += 5;
+            }
+            for p in group.placements() {
+                let atlas = p.mask.map_or([0; 3], |mask| {
+                    let t = self.atlas.entries[&mask.key];
+                    [t.x, t.y, t.width | (t.height << 16)]
+                });
+                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
+                word += if compact { 2 } else { 6 };
+            }
+        }
+        debug_assert_eq!(word, self.records.len());
         let mut offset = 0;
-        self.cursors.clear();
-        for range in &mut self.ranges {
-            let cutoff = range[0];
-            self.cursors.push(cutoff);
+        for (tile, range) in self.ranges.iter_mut().enumerate() {
             let count = range[1];
-            if cutoff != 0 && count == 1 {
-                *range = [cutoff - 1, UNIFORM_TILE];
+            if self.cursors[tile] != 0 && count == 1 {
+                range[1] = UNIFORM_TILE;
             } else {
                 offset += count;
-                // Filled backward in painter order. The first word becomes
-                // the start offset; the second stays the exclusive end.
                 *range = [offset, offset];
             }
         }
         let references = offset as usize;
         self.references.clear();
         self.references.resize(references, 0);
-        self.residuals.clear();
-        self.residuals.push(Correction::zeroed());
-        self.residual_keys.clear();
-        for (index, draw) in scene.draws().enumerate() {
-            let [a, b, c, d, tx, ty] = draw.inverse.map(|value| value as f32);
-            let clip = draw.clip;
-            let low = std::array::from_fn::<_, 8, _>(|i| match i {
-                0..6 => (draw.inverse[i] - f64::from(draw.inverse[i] as f32)) as f32,
-                6 => clip_residual(clip.x, clip.width),
-                _ => clip_residual(clip.y, clip.height),
-            });
-            let key = low.map(f32::to_bits);
-            let correction = if low.iter().all(|v| *v == 0.0) {
-                0
-            } else {
-                *self.residual_keys.entry(key).or_insert_with(|| {
-                    let slot = self.residuals.len() as u32;
-                    self.residuals.push(Correction {
-                        x: [low[0], low[2], low[4], low[6]],
-                        y: [low[1], low[3], low[5], low[7]],
-                    });
-                    slot
-                })
-            };
-            let r = draw.local_rect;
-            let atlas = draw.mask.map_or([0; 4], |mask| {
-                let tile = self.atlas.entries[&mask.key];
-                [tile.x, tile.y, tile.width | (tile.height << 16), 0]
-            });
-            let error_x = self.records[index].inverse_x[3];
-            let error_y = self.records[index].inverse_y[3];
-            self.records[index] = DrawData {
-                local: [r.x, r.y, r.width, r.height],
-                inverse_x: [a, c, tx, error_x],
-                inverse_y: [b, d, ty, error_y],
-                clip: [clip.x, clip.y, clip.width, clip.height],
-                color: draw.color,
-                atlas: [atlas[0], atlas[1], atlas[2], correction],
-            };
+        // Reverse group traversal recovers variable-width word addresses without
+        // retaining another per-draw address lane or a duplicate expanded scene.
+        let mut word = self.records.len();
+        let mut reverse_ordinal = ordinal;
+        for group in scene.groups().rev() {
+            let compact = self.grouped_records && group.placements().len() > 1;
+            for p in group.placements().rev() {
+                word -= if compact { 2 } else { 6 };
+                reverse_ordinal -= 1;
+                let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
+                visit(prepared(group, p), columns, |tile| {
+                    let range = &mut self.ranges[tile];
+                    if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
+                    {
+                        range[0] -= 1;
+                        self.references[range[0] as usize] = address;
+                    }
+                });
+            }
+            if compact {
+                word -= 5;
+            }
         }
-        for (index, draw) in scene.draws().enumerate().rev() {
-            visit(draw, columns, |tile| {
-                let range = &mut self.ranges[tile];
-                if range[1] != UNIFORM_TILE && index as u32 + 1 >= self.cursors[tile] {
-                    range[0] -= 1;
-                    self.references[range[0] as usize] = index as u32;
-                }
-            });
-        }
+        debug_assert_eq!((word, reverse_ordinal), (0, 0));
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
@@ -594,14 +696,18 @@ impl Renderer {
         let submitted = self.queue.submit([encoder.finish()]);
         self.stats = Stats {
             submissions: self.stats.submissions.saturating_add(1),
-            draws: self.records.len(),
+            draws: ordinal,
+            draw_record_bytes: self.records.len() * 16,
+            shared_groups,
+            compact_draws,
+            inline_draws: ordinal - compact_draws,
             tile_references: references,
             original_tile_references: original_references,
             skipped_tile_references: original_references - references,
             uniform_tiles,
             sample_evaluations,
             sample_draw_evaluations,
-            instance_upload_bytes: self.records.len() * 96
+            instance_upload_bytes: self.records.len() * 16
                 + self.ranges.len() * 8
                 + references * 4
                 + self.residuals.len() * 32
@@ -617,13 +723,60 @@ impl Renderer {
             atlas_bytes: u64::from(self.atlas.side).pow(2),
             atlas_keys: self.atlas.entries.len(),
             atlas_key_capacity: self.atlas.entries.capacity(),
-            cpu_index_capacity_bytes: self.records.capacity() * 96
+            cpu_index_capacity_bytes: self.records.capacity() * 16
                 + self.ranges.capacity() * 8
                 + self.references.capacity() * 4
                 + self.cursors.capacity() * 4
                 + self.residuals.capacity() * 32,
         };
         Ok(submitted)
+    }
+    fn correction(&mut self, inverse: [f64; 6], clip: gpui_canvas::Rect) -> u32 {
+        let low = std::array::from_fn::<_, 8, _>(|i| match i {
+            0..6 => (inverse[i] - f64::from(inverse[i] as f32)) as f32,
+            6 => clip_residual(clip.x, clip.width),
+            _ => clip_residual(clip.y, clip.height),
+        });
+        if low.iter().all(|v| *v == 0.0) {
+            return 0;
+        }
+        let key = low.map(f32::to_bits);
+        *self.residual_keys.entry(key).or_insert_with(|| {
+            let slot = self.residuals.len() as u32;
+            self.residuals.push(Correction {
+                x: [low[0], low[2], low[4], low[6]],
+                y: [low[1], low[3], low[5], low[7]],
+            });
+            slot
+        })
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn bin_draw(
+        &mut self,
+        draw: PreparedDraw<'_>,
+        error: [f32; 2],
+        address: u32,
+        ordinal: usize,
+        columns: usize,
+        width: u32,
+        height: u32,
+        previous: usize,
+    ) -> Result<usize, Error> {
+        let total = previous
+            .checked_add(tile_count(draw))
+            .ok_or(Error::ResourceLimit)?;
+        if total > MAX_REFERENCES {
+            return Err(Error::ResourceLimit);
+        }
+        visit(draw, columns, |tile| {
+            if self.tile_proofs && full_tile(draw, error, tile, columns, width, height) {
+                self.ranges[tile] = [address, 1];
+                self.cursors[tile] = ordinal as u32 + 1;
+            } else {
+                self.ranges[tile][1] += 1;
+            }
+        });
+        Ok(total)
     }
     fn prepare_atlas(&mut self, scene: PreparedScene<'_>, has_masks: bool) -> Result<usize, Error> {
         if !has_masks {
@@ -635,32 +788,29 @@ impl Renderer {
             return Ok(0);
         }
         let mut uploaded = 0;
-        for draw in scene.draws() {
-            if let Some(mask) = draw.mask {
-                if let Some(bytes) = self.atlas.insert(&self.queue, mask) {
-                    uploaded += bytes;
-                } else {
-                    let mut side = self.atlas.side.max(128);
-                    loop {
-                        side = (side * 2).min(MAX_ATLAS_SIDE);
-                        let mut next = Atlas::new(&self.device, side);
-                        let mut bytes = 0;
-                        let mut fits = true;
-                        for mask in scene.draws().filter_map(|draw| draw.mask) {
-                            if let Some(size) = next.insert(&self.queue, mask) {
-                                bytes += size;
-                            } else {
-                                fits = false;
-                                break;
-                            }
+        for mask in scene.masks() {
+            if let Some(bytes) = self.atlas.insert(&self.queue, mask) {
+                uploaded += bytes;
+            } else {
+                let mut side = self.atlas.side.max(128);
+                loop {
+                    side = (side * 2).min(MAX_ATLAS_SIDE);
+                    let mut next = Atlas::new(&self.device, side);
+                    let mut fits = true;
+                    for mask in scene.masks() {
+                        if let Some(bytes) = next.insert(&self.queue, mask) {
+                            uploaded += bytes;
+                        } else {
+                            fits = false;
+                            break;
                         }
-                        if fits {
-                            self.atlas = next;
-                            return Ok(uploaded + bytes);
-                        }
-                        if side == MAX_ATLAS_SIDE {
-                            return Err(Error::AtlasFull);
-                        }
+                    }
+                    if fits {
+                        self.atlas = next;
+                        return Ok(uploaded);
+                    }
+                    if side == MAX_ATLAS_SIDE {
+                        return Err(Error::AtlasFull);
                     }
                 }
             }
@@ -896,6 +1046,16 @@ mod tests {
             4,
             "remain within the baseline four storage buffers per stage"
         );
+        let (_, word_buffer) = module
+            .global_variables
+            .iter()
+            .find(|(_, v)| v.binding.as_ref().is_some_and(|b| b.binding == 1))
+            .unwrap();
+        assert!(matches!(
+            module.types[word_buffer.ty].inner,
+            wgpu::naga::TypeInner::Array { stride: 16, .. }
+        ));
+        assert_eq!(size_of::<Word>(), 16);
         let mut layout = wgpu::naga::proc::Layouter::default();
         layout.update(module.to_ctx()).unwrap();
         for (name, size, offsets) in [
@@ -924,6 +1084,32 @@ mod tests {
                 offsets
             );
         }
+    }
+
+    #[test]
+    fn word_writers_preserve_float_and_metadata_bits() {
+        let mut canvas = gpui_canvas::Canvas::recording(16, 16, Default::default()).unwrap();
+        canvas
+            .fill_rect(
+                Rect::new(0.0, 0.0, 16.0, 16.0),
+                gpui_canvas::Affine::IDENTITY,
+                Rect::new(0.0, 0.0, 16.0, 16.0),
+                gpui_canvas::Color::linear_srgb(-0.0, -1e-40, 1e19, 1.0).unwrap(),
+            )
+            .unwrap();
+        let scene = canvas.prepared_scene();
+        let group = scene.groups().next().unwrap();
+        let draw = scene.draws().next().unwrap();
+        let error = [0.00001, 0.00002];
+        let inline = inline_words(draw, error, 57);
+        let common = common_words(group, error, 57);
+        assert_eq!(inline[1], common[0]);
+        assert_eq!(inline[2], common[1]);
+        assert_eq!(inline[3], common[2]);
+        assert_eq!(inline[4], common[3]);
+        assert_eq!(inline[5][3], common[4][0]);
+        assert_eq!(inline[4], draw.color.map(f32::to_bits));
+        assert_eq!(inline[1][3], error[0].to_bits());
     }
 
     #[test]

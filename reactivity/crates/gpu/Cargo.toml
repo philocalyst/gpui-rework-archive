@@ -25,3 +25,7 @@ bytemuck = { version = "=1.25.2", features = ["derive"] }
 
 [dev-dependencies]
 pollster = "=0.4.0"
+
+[[example]]
+name = "groups"
+required-features = ["vulkan-tests"]

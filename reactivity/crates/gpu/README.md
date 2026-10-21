@@ -39,7 +39,31 @@ conformance; this command requires an adapter and never silently skips tests.
 
 ## Storage and output
 
-Draw records remain 96 bytes. One 32-byte zero correction is shared by exactly
+The canonical canvas has one grouped scene authority. GPU preparation traverses
+its borrowed groups and unique mask leases directly; it does not rebuild an
+expanded scene or clone a mask handle per placement. Atlas admission/repacking
+also visits unique masks rather than every glyph occurrence.
+
+The draw storage binding is an array of sixteen-byte words. Rectangles and
+singleton groups use a 96-byte inline record. A group with at least two visible
+placements uses one 80-byte common record (inverse, uncertainty envelope, clip,
+paint, correction index) plus 32 bytes per placement (local rectangle and atlas
+coordinates/common address). Two placements therefore cost 144 rather than
+192 bytes. The shader reconstructs its existing local `Draw` value through
+bitcasts and an extra common-record indirection. Bitcasts preserve bits; this is
+not a claim that every backend compiles them to zero instructions.
+
+Private word addresses use a high tag for inline records. They are built only
+after bounded scene traversal; callers cannot supply addresses or offsets.
+Reverse group traversal recovers variable-width addresses while filling the
+CSR, retaining no extra per-draw address lane. Tile cutoffs remain painter
+ordinals, distinct from addresses. All four existing storage-buffer bindings
+are preserved: records, tile headers, reference addresses and corrections.
+Each placement is admitted independently; a compact group's shared per-axis
+uncertainty is the maximum of its placements. This can increase DD work but
+cannot narrow the correction trigger or relax tile certification.
+
+One 32-byte zero correction is shared by exactly
 representable inverses and clip endpoints; other residual tuples are deduplicated by complete bit
 equality in a reused host hash table. Each distinct tuple costs another 32 bytes
 on the host and GPU, plus one host hash entry (32-byte key and 4-byte index,
@@ -69,7 +93,7 @@ does not imply native HDR swapchain negotiation or display support.
 ## Opaque tile proofs
 
 The existing eight-byte tile header has two forms: `[start, end]` indexes the
-sampled CSR, and `[draw_index, 1<<31]` selects one certified final opaque color.
+sampled CSR, and `[record_address, 1<<31]` selects one certified final opaque color.
 Empty ranges select clear. No per-tile allocation was added. The existing
 four-byte-per-tile cursor scratch holds each tile's cutoff while reverse scene
 traversal fills the compact CSR in painter order. All canonical and uploaded
@@ -143,3 +167,49 @@ done
 
 The general path still evaluates sixteen samples per pixel and every retained
 tile reference. Glyph sampling and translucent overlap remain sampled work.
+
+## Grouped upload measurements
+
+[groups-benchmark.csv](groups-benchmark.csv) records three alternating fresh
+process pairs using Mesa 26.1.4 llvmpipe Vulkan, LLVM 21.1.8, release Rust 1.97.1,
+512×256 RGBA8. Each process warms three frames and takes the median of nine
+serialized frames. The table takes the median of the three process medians.
+`set_grouped_records(false)` uses the inline schema with the same shader,
+canonical scene and tile proofs. Wall time includes host preparation, upload,
+submission and completion polling; it is not a GPU timestamp.
+
+| Fixture | Record bytes, inline → grouped | Explicit GPU buffer capacity | Wall time | Host submit time |
+| --- | ---: | ---: | ---: | ---: |
+| One opaque fill | 96 → 96 | 4,308 → 4,308 | 440 → 412 μs | 55.6 → 56.9 μs |
+| 24 labels, 312 glyphs | 29,952 → 11,904 | 41,040 → 24,656 | 14.04 → 14.14 ms | 84.5 → 86.6 μs |
+| 1,000 runs, 32,000 glyphs | 3,072,096 → 1,104,096 | 4,198,484 → 2,101,332 | 4.18 → 4.20 ms | 3.590 → 3.692 ms |
+| 32,000 singleton glyphs | 3,072,096 → 3,072,096 | 4,198,484 → 4,198,484 | 5.434 → 5.400 ms | 4.676 → 4.757 ms |
+
+The 32K fixtures end with one full opaque fill: all canonical records are still
+prepared/uploaded, while tile proofs remove an otherwise artificial massive
+overlap sample loop. They measure packet cost, not visible 32K-glyph throughput.
+The real-label fixture retains 3,948,544 planned sample-draw calls in both modes.
+Singletons take the same inline path in both modes; their differences and the
+flat case illustrate timing noise. Grouped storage improves memory here without
+a measured frame-time win. Extra decoding and a shared wider uncertainty
+envelope can lose on other backends or transforms.
+
+For the 32K-run fixture, retained host vector capacities fall from 3,078,368 to
+1,110,368 bytes and per-frame non-mask uploads from 3,076,272 to 1,108,272 bytes.
+Both modes retain the same 65,536-byte atlas and 524,288-byte target. These are
+logical buffer capacities and texel payloads, not physical driver residency.
+Hash tables, source canvas storage/masks, pipeline allocations and in-flight
+resource leases are additional. Buffers retain peak capacity; switching an
+already-large renderer to compact mode does not shrink past allocations.
+
+Tests validate sixteen-byte storage stride/four-buffer ABI and float-bit
+packing, plus actual Vulkan inline/compact pixel equality for mixed groups,
+HDR signed zeros/subnormals, fractional/reflected DPI glyphs, clip residuals,
+middle opaque cutoffs, background resurrection and atlas reset. These backend
+oracles supplement the finite precision admission policy, not replace it.
+
+```sh
+cargo build -p gpui_gpu --release --features vulkan-tests --example groups
+target/release/examples/groups text false
+target/release/examples/groups text true
+```

@@ -26,11 +26,38 @@ pub mod ui {
         pub y: Vec4f,
     }
     uniform!(group(0), binding(0), GLOBALS: Globals);
-    storage!(group(0), binding(1), DRAWS: RuntimeArray<Draw>);
+    storage!(group(0), binding(1), WORDS: RuntimeArray<Vec4u>);
     storage!(group(0), binding(2), TILES: RuntimeArray<Vec2u>);
     storage!(group(0), binding(3), INDICES: RuntimeArray<u32>);
     texture!(group(0), binding(4), MASKS: Texture2D<f32>);
     storage!(group(0), binding(5), CORRECTIONS: RuntimeArray<Correction>);
+
+    // Typed host writers publish only validated private word addresses. The
+    // inline tag preserves singleton storage; compact records share common state.
+    pub fn load_draw(address: u32) -> Draw {
+        let base = (address & 0x7fffffff) as usize;
+        if (address & 0x80000000) != 0 {
+            return Draw {
+                local: bitcast_vec4f(get!(WORDS)[base]),
+                inverse_x: bitcast_vec4f(get!(WORDS)[base + 1]),
+                inverse_y: bitcast_vec4f(get!(WORDS)[base + 2]),
+                clip: bitcast_vec4f(get!(WORDS)[base + 3]),
+                color: bitcast_vec4f(get!(WORDS)[base + 4]),
+                atlas: get!(WORDS)[base + 5],
+            };
+        }
+        let atlas = get!(WORDS)[base + 1];
+        let state_base = atlas.w as usize;
+        let correction = get!(WORDS)[state_base + 4].x;
+        Draw {
+            local: bitcast_vec4f(get!(WORDS)[base]),
+            inverse_x: bitcast_vec4f(get!(WORDS)[state_base]),
+            inverse_y: bitcast_vec4f(get!(WORDS)[state_base + 1]),
+            clip: bitcast_vec4f(get!(WORDS)[state_base + 2]),
+            color: bitcast_vec4f(get!(WORDS)[state_base + 3]),
+            atlas: vec4u(atlas.x, atlas.y, atlas.z, correction),
+        }
+    }
 
     #[vertex]
     pub fn vertex(#[builtin(vertex_index)] index: u32) -> Vec4f {
@@ -224,7 +251,7 @@ pub mod ui {
         let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
         let range = get!(TILES)[tile as usize];
         if (range.y & 0x80000000) != 0 {
-            return output(get!(DRAWS)[range.x as usize].color);
+            return output(load_draw(range.x).color);
         }
         if range.x == range.y {
             return output(globals.clear);
@@ -240,7 +267,7 @@ pub mod ui {
                 #[wgsl_allow(non_literal_loop_bounds)]
                 for cursor in range.x..range.y {
                     let index = get!(INDICES)[cursor as usize];
-                    let source = sample_draw(get!(DRAWS)[index as usize], point);
+                    let source = sample_draw(load_draw(index), point);
                     color = source + color * (1.0 - source.w);
                 }
                 if x == 0 && y == 0 {
