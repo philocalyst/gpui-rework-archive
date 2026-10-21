@@ -111,61 +111,39 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     .as_ref()
                     .and_then(|metadata| metadata.presented.viewport(identity, &runtime.presented))
                     .ok_or(crate::ScrollError::NotViewport)?;
-                let enabled = match direction {
-                    crate::ScrollDirection::Left | crate::ScrollDirection::Right => {
-                        viewport.axes.x()
-                    }
-                    crate::ScrollDirection::Up | crate::ScrollDirection::Down => viewport.axes.y(),
+                let (axis, sign, enabled) = match direction {
+                    crate::ScrollDirection::Left => (0, -1.0, viewport.axes.x()),
+                    crate::ScrollDirection::Right => (0, 1.0, viewport.axes.x()),
+                    crate::ScrollDirection::Up => (1, -1.0, viewport.axes.y()),
+                    crate::ScrollDirection::Down => (1, 1.0, viewport.axes.y()),
                 };
                 if !enabled {
                     return Err(Error::NotInteractive);
                 }
-                let item = runtime
-                    .metadata
-                    .as_ref()
-                    .and_then(|metadata| metadata.presented.list(identity))
-                    .and_then(|list| {
-                        runtime
-                            .list_by_id(list.id)
-                            .map(|(_, state)| state.viewport.row_height)
-                    })
-                    .unwrap_or(32.0);
-                let (x, y) = match direction {
-                    crate::ScrollDirection::Up => (
-                        0.0,
-                        -if unit == crate::ScrollUnit::Page {
-                            viewport.size[1]
-                        } else {
-                            item
-                        },
-                    ),
-                    crate::ScrollDirection::Down => (
-                        0.0,
-                        if unit == crate::ScrollUnit::Page {
-                            viewport.size[1]
-                        } else {
-                            item
-                        },
-                    ),
-                    crate::ScrollDirection::Left => (
-                        -if unit == crate::ScrollUnit::Page {
-                            viewport.size[0]
-                        } else {
-                            32.0
-                        },
-                        0.0,
-                    ),
-                    crate::ScrollDirection::Right => (
-                        if unit == crate::ScrollUnit::Page {
-                            viewport.size[0]
-                        } else {
-                            32.0
-                        },
-                        0.0,
-                    ),
+                let step = match unit {
+                    crate::ScrollUnit::Page => viewport.size[axis],
+                    crate::ScrollUnit::Item if axis == 1 => runtime
+                        .metadata
+                        .as_ref()
+                        .and_then(|metadata| metadata.presented.list(identity))
+                        .and_then(|list| {
+                            runtime
+                                .list_by_id(list.id)
+                                .map(|(_, state)| state.viewport.row_height)
+                        })
+                        .unwrap_or(32.0),
+                    crate::ScrollUnit::Item => 32.0,
                 };
+                let mut delta = [0.0; 2];
+                delta[axis] = sign * step;
                 drop(runtime);
-                self.scroll_by(target, crate::ScrollDelta { x, y })
+                self.scroll_by(
+                    target,
+                    crate::ScrollDelta {
+                        x: delta[0],
+                        y: delta[1],
+                    },
+                )
             }
             Action::ScrollTo(offset) => {
                 drop(runtime);

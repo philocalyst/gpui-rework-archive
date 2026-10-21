@@ -236,3 +236,54 @@ fn closed_and_quarantined_owners_cannot_serialize_an_old_sheet() {
     win.close();
     assert!(matches!(win.semantics(), Err(Error::Closed)));
 }
+
+#[test]
+fn viewport_serialization_uses_the_same_acknowledged_offset_and_range_as_parts() {
+    struct Pane {
+        wide: bool,
+    }
+    impl View for Pane {
+        fn view(&self) -> El<'_> {
+            column(div().w(if self.wide { 400 } else { 200 }).h(160))
+                .w(80)
+                .h(60)
+                .scroll(Axis::BOTH)
+        }
+    }
+    let mut win = Win::recording(
+        Pane { wide: false },
+        WindowOptions {
+            size: [100, 80],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let read = |win: &Win<Pane>| {
+        serde_json::from_str::<Value>(&win.semantics().unwrap().to_json().unwrap()).unwrap()
+            ["nodes"][0]["viewport"].clone()
+    };
+    let ack = |win: &mut Win<Pane>| {
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+    };
+    ack(&mut win);
+    let target = win.role(Role::ScrollView).one().unwrap();
+    let before = read(&win);
+    assert_eq!(before["axes"], "Both");
+    assert_eq!(before["size"], json!([80.0, 60.0]));
+    assert_eq!(before["max"], json!({"x":120.0,"y":100.0}));
+    win.scroll_by(target, ScrollDelta { x: 12.0, y: 20.0 })
+        .unwrap();
+    assert_eq!(read(&win), before);
+    ack(&mut win);
+    let scrolled = read(&win);
+    assert_eq!(scrolled["offset"], json!({"x":12.0,"y":20.0}));
+    assert_eq!(
+        scrolled,
+        serde_json::to_value(win.viewport(target).unwrap()).unwrap()
+    );
+    win.update(|m| m.wide = true).unwrap();
+    assert_eq!(read(&win), scrolled);
+    ack(&mut win);
+    assert_eq!(read(&win)["max"]["x"], 320.0);
+}

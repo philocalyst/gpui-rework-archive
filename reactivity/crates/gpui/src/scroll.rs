@@ -14,6 +14,16 @@ impl Axis {
         self.0 & 2 != 0
     }
 }
+impl serde::Serialize for Axis {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(match *self {
+            Self::X => "X",
+            Self::Y => "Y",
+            Self::BOTH => "Both",
+            _ => unreachable!("only declared axes are constructible"),
+        })
+    }
+}
 
 /// A displacement in logical units. `scroll_by` uses viewport-local axes;
 /// point-routed scrolling uses the window's logical axes.
@@ -25,7 +35,7 @@ pub struct ScrollDelta {
 
 /// Local content coordinates at a viewport's origin. Negative overflow can
 /// produce negative offsets. Scrolling moves content opposite the offset.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, serde::Serialize)]
 pub struct ScrollOffset {
     pub x: f64,
     pub y: f64,
@@ -33,7 +43,7 @@ pub struct ScrollOffset {
 
 /// Immutable metadata from an acknowledged presentation. It never describes
 /// an unacknowledged candidate or newer, failed layout.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize)]
 pub struct ScrollViewport {
     pub axes: Axis,
     pub offset: ScrollOffset,

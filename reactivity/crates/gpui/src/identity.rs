@@ -10,6 +10,11 @@ static NEXT_WINDOW: AtomicU64 = AtomicU64::new(1);
 /// A process-local site capability. IDs are checked monotonic counters; restore
 /// mints a new window namespace. Inspection serialization cannot restore a live
 /// target. Logical membership, rather than a second slot table, checks liveness.
+///
+/// ```compile_fail,E0277
+/// use gpui::Target;
+/// let target: Target = serde_json::from_str("{}").unwrap();
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize)]
 pub struct Target {
     window: NonZeroU64,
