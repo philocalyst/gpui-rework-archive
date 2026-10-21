@@ -6,6 +6,13 @@ license.workspace = true
 description = "GPU rendering of GPUI's canonical prepared scene"
 publish = false
 
+[features]
+vulkan-tests = []
+
+[[test]]
+name = "render"
+required-features = ["vulkan-tests"]
+
 [dependencies]
 gpui_canvas = { path = "../canvas" }
 wgpu = { version = "=29.0.4", default-features = false, features = ["std", "wgsl", "vulkan", "gles", "metal", "dx12"] }

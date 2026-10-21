@@ -192,3 +192,113 @@ fn linear_float_target_retains_hdr_and_premultiplied_alpha() {
         assert_eq!(canvas.output_bytes(), 0);
     });
 }
+
+#[test]
+fn narrowed_inverse_preserves_the_adversarial_half_open_edge() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let clip = Rect::new(0.0, 0.0, 1.0, 1.0);
+        // The first sample is x=.125. Canonical f64 division puts it inside
+        // f32(1/24), but f32(1/3)*.125 rounds exactly onto the excluded edge.
+        // Check both sides of that rounded boundary and reflected geometry.
+        for bits in [
+            (1.0_f32 / 24.0).to_bits() - 1,
+            (1.0_f32 / 24.0).to_bits(),
+            (1.0_f32 / 24.0).to_bits() + 1,
+        ] {
+            for transform in [
+                Affine::scale(3.0, 1.0),
+                Affine::translation(1.0, 0.0).compose(Affine::scale(-3.0, 1.0)),
+            ] {
+                let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+                canvas.clear(Color::WHITE);
+                canvas
+                    .fill_rect(
+                        Rect::new(0.0, 0.0, f32::from_bits(bits), 1.0),
+                        transform,
+                        clip,
+                        Color::rgb(255, 0, 0),
+                    )
+                    .unwrap();
+                assert_eq!(readback(&mut renderer, &canvas), canvas.pixels());
+            }
+        }
+    });
+}
+
+#[test]
+fn zero_coverage_draw_preserves_threshold_clear_and_hdr_bits() {
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let mut renderer = renderer(format).await;
+            for clear in [
+                Color::linear_srgb(f32::from_bits(0x391f22b4), 0.01, 0.5, 1.0).unwrap(),
+                Color::linear_srgb(0.74975586, 0.00390625, 12.5, 0.3).unwrap(),
+            ] {
+                if format != wgpu::TextureFormat::Rgba16Float && clear.alpha() != 1.0 {
+                    continue;
+                }
+                let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+                canvas.clear(clear);
+                let before = readback(&mut renderer, &canvas);
+                canvas
+                    .fill_rect(
+                        Rect::new(0.0, 0.0, 0.01, 0.01),
+                        Affine::IDENTITY,
+                        Rect::new(0.0, 0.0, 1.0, 1.0),
+                        Color::WHITE,
+                    )
+                    .unwrap();
+                assert_eq!(readback(&mut renderer, &canvas), before);
+            }
+        }
+    });
+}
+
+#[test]
+fn maximum_admitted_tone_mapping_is_finite_and_bright() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let config = ColorConfig {
+            mapping: gpui_canvas::SdrMapping::ReinhardPerChannel { exposure: 1e10 },
+            ..ColorConfig::default()
+        };
+        let mut canvas = Canvas::recording(1, 1, config).unwrap();
+        canvas.clear(Color::linear_srgb(1e19, -1e19, 1.0, 1.0).unwrap());
+        assert_eq!(readback(&mut renderer, &canvas), [255, 0, 255, 255]);
+    });
+}
+
+#[test]
+fn physical_glyph_masks_map_back_to_logical_rectangles() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut fonts = TextSystem::bundled().unwrap();
+        let run = fonts.shape("office café", 16.0, None).unwrap();
+        for scale in [1.0, 1.25, 1.5, 2.0] {
+            let mut canvas = Canvas::recording(240, 80, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            canvas
+                .draw_text_scaled(
+                    &mut fonts,
+                    &run,
+                    Point { x: 2.125, y: 1.375 },
+                    Affine::scale(scale, scale),
+                    Rect::new(0.0, 0.0, 240.0, 80.0),
+                    Color::BLACK,
+                    scale,
+                )
+                .unwrap();
+            let actual = readback(&mut renderer, &canvas);
+            for (index, (&a, &b)) in actual.iter().zip(canvas.pixels()).enumerate() {
+                assert!(
+                    (i16::from(a) - i16::from(b)).abs() <= 1,
+                    "scale{scale} byte{index}: GPU{a} CPU{b}"
+                );
+            }
+        }
+    });
+}

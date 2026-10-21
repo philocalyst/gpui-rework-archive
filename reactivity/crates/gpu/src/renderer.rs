@@ -41,6 +41,12 @@ struct Globals {
     clear: [f32; 4],
     mapping: [f32; 4],
 }
+#[repr(C)]
+#[derive(Clone, Copy, Pod, Zeroable)]
+struct Correction {
+    x: [f32; 4],
+    y: [f32; 4],
+}
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Stats {
@@ -52,6 +58,9 @@ pub struct Stats {
     pub gpu_buffer_bytes: u64,
     pub atlas_bytes: u64,
     pub cpu_index_capacity_bytes: usize,
+    pub correction_records: usize,
+    /// Hash-table entry capacity, excluding its allocator/control-byte overhead.
+    pub correction_key_capacity: usize,
 }
 
 struct Buffer {
@@ -197,11 +206,14 @@ pub struct Renderer {
     draws: Buffer,
     tiles: Buffer,
     indices: Buffer,
+    corrections: Buffer,
     atlas: Atlas,
     records: Vec<DrawData>,
     ranges: Vec<[u32; 2]>,
     references: Vec<u32>,
     cursors: Vec<u32>,
+    residuals: Vec<Correction>,
+    residual_keys: HashMap<[u32; 6], u32>,
     stats: Stats,
 }
 impl Renderer {
@@ -272,6 +284,7 @@ impl Renderer {
         let draws = Buffer::new(&device, "draws", 96, false);
         let tiles = Buffer::new(&device, "tiles", 8, false);
         let indices = Buffer::new(&device, "indices", 4, false);
+        let corrections = Buffer::new(&device, "inverse residuals", 32, false);
         let atlas = Atlas::new(&device, 1);
         Ok(Self {
             device,
@@ -283,11 +296,14 @@ impl Renderer {
             draws,
             tiles,
             indices,
+            corrections,
             atlas,
             records: Vec::new(),
             ranges: Vec::new(),
             references: Vec::new(),
             cursors: Vec::new(),
+            residuals: Vec::new(),
+            residual_keys: HashMap::new(),
             stats: Stats::default(),
         })
     }
@@ -309,11 +325,17 @@ impl Renderer {
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
+        scene
+            .color_config
+            .validate()
+            .map_err(|_| Error::InvalidScene)?;
         let pixels = (scene.width as usize)
             .checked_mul(scene.height as usize)
             .ok_or(Error::ResourceLimit)?;
-        if target.texture().width() != scene.width || target.texture().height() != scene.height
-            || target.texture().format() != self.format {
+        if target.texture().width() != scene.width
+            || target.texture().height() != scene.height
+            || target.texture().format() != self.format
+        {
             return Err(Error::InvalidScene);
         }
         if pixels == 0
@@ -345,7 +367,11 @@ impl Renderer {
         self.records.clear();
         let mut references = 0usize;
         for (index, draw) in scene.draws().enumerate() {
-            validate_draw(draw, index, scene.width, scene.height)?;
+            let error = validate_draw(draw, index, scene.width, scene.height)?;
+            let mut record = DrawData::zeroed();
+            record.inverse_x[3] = error[0];
+            record.inverse_y[3] = error[1];
+            self.records.push(record);
             visit(draw, columns, |tile| self.ranges[tile][1] += 1);
             references = references
                 .checked_add(tile_count(draw))
@@ -366,26 +392,47 @@ impl Renderer {
             .extend(self.ranges.iter().map(|range| range[0]));
         self.references.clear();
         self.references.resize(references, 0);
+        self.residuals.clear();
+        self.residuals.push(Correction::zeroed());
+        self.residual_keys.clear();
         for (index, draw) in scene.draws().enumerate() {
             visit(draw, columns, |tile| {
                 self.references[self.cursors[tile] as usize] = index as u32;
                 self.cursors[tile] += 1;
             });
             let [a, b, c, d, tx, ty] = draw.inverse.map(|value| value as f32);
+            let low = std::array::from_fn::<_, 6, _>(|i| {
+                (draw.inverse[i] - f64::from(draw.inverse[i] as f32)) as f32
+            });
+            let key = low.map(f32::to_bits);
+            let correction = if low.iter().all(|v| *v == 0.0) {
+                0
+            } else {
+                *self.residual_keys.entry(key).or_insert_with(|| {
+                    let slot = self.residuals.len() as u32;
+                    self.residuals.push(Correction {
+                        x: [low[0], low[2], low[4], 0.0],
+                        y: [low[1], low[3], low[5], 0.0],
+                    });
+                    slot
+                })
+            };
             let r = draw.local_rect;
             let clip = draw.clip;
             let atlas = draw.mask.map_or([0; 4], |mask| {
                 let tile = self.atlas.entries[&mask.key];
-                [tile.x, tile.y, tile.width, tile.height]
+                [tile.x, tile.y, tile.width | (tile.height << 16), 0]
             });
-            self.records.push(DrawData {
+            let error_x = self.records[index].inverse_x[3];
+            let error_y = self.records[index].inverse_y[3];
+            self.records[index] = DrawData {
                 local: [r.x, r.y, r.width, r.height],
-                inverse_x: [a, c, tx, 0.0],
-                inverse_y: [b, d, ty, 0.0],
+                inverse_x: [a, c, tx, error_x],
+                inverse_y: [b, d, ty, error_y],
                 clip: [clip.x, clip.y, clip.x + clip.width, clip.y + clip.height],
                 color: draw.color,
-                atlas,
-            });
+                atlas: [atlas[0], atlas[1], atlas[2], correction],
+            };
         }
         let (tone, exposure) = match scene.color_config.mapping {
             SdrMapping::Clip => (0, 1.0),
@@ -421,6 +468,11 @@ impl Renderer {
             &self.queue,
             bytemuck::cast_slice(&self.references),
         );
+        self.corrections.write(
+            &self.device,
+            &self.queue,
+            bytemuck::cast_slice(&self.residuals),
+        );
         let bindings = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("GPUI scene"),
             layout: &self.layout,
@@ -444,6 +496,10 @@ impl Renderer {
                 wgpu::BindGroupEntry {
                     binding: 4,
                     resource: wgpu::BindingResource::TextureView(&self.atlas.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 5,
+                    resource: self.corrections.handle.as_entire_binding(),
                 },
             ],
         });
@@ -481,17 +537,22 @@ impl Renderer {
             instance_upload_bytes: self.records.len() * 96
                 + self.ranges.len() * 8
                 + references * 4
+                + self.residuals.len() * 32
                 + 48,
             mask_upload_bytes: mask_bytes,
+            correction_records: self.residuals.len(),
+            correction_key_capacity: self.residual_keys.capacity(),
             gpu_buffer_bytes: self.globals.size
                 + self.draws.size
                 + self.tiles.size
-                + self.indices.size,
+                + self.indices.size
+                + self.corrections.size,
             atlas_bytes: u64::from(self.atlas.side).pow(2),
             cpu_index_capacity_bytes: self.records.capacity() * 96
                 + self.ranges.capacity() * 8
                 + self.references.capacity() * 4
-                + self.cursors.capacity() * 4,
+                + self.cursors.capacity() * 4
+                + self.residuals.capacity() * 32,
         };
         Ok(submitted)
     }
@@ -549,7 +610,7 @@ fn validate_draw(
     index: usize,
     width: u32,
     height: u32,
-) -> Result<(), Error> {
+) -> Result<[f32; 2], Error> {
     let b = draw.bounds;
     if !b.is_valid()
         || b.is_empty()
@@ -588,11 +649,99 @@ fn validate_draw(
             + m[3].abs() * y
             + m[5].abs()
             + 1.0);
-    let error = (error_x + error_y + arithmetic)
+    let local = draw.local_rect;
+    let magnitude = m[0].abs() * x
+        + m[2].abs() * y
+        + m[4].abs()
+        + m[1].abs() * x
+        + m[3].abs() * y
+        + m[5].abs()
+        + f64::from(local.x).abs()
+        + f64::from(local.y).abs()
+        + f64::from(local.width).abs()
+        + f64::from(local.height).abs();
+    // Leave headroom for the split products, origin subtraction and division
+    // correction. Finite coefficients alone do not imply finite shader math.
+    if !magnitude.is_finite() || magnitude > f64::from(f32::MAX) / 32.0 {
+        return Err(Error::Precision { draw: index });
+    }
+    if let Some(mask) = draw.mask {
+        let scale_x = mask.width as f64 / f64::from(local.width);
+        let scale_y = mask.height as f64 / f64::from(local.height);
+        if !scale_x.is_finite()
+            || !scale_y.is_finite()
+            || scale_x > f64::from(f32::MAX) / 32.0
+            || scale_y > f64::from(f32::MAX) / 32.0
+            || magnitude * mask.width.max(mask.height) as f64 > f64::from(f32::MAX) / 32.0
+        {
+            return Err(Error::Precision { draw: index });
+        }
+    }
+    let origin_error = 4.0
+        * f64::from(f32::EPSILON)
+        * (f64::from(local.x).abs()
+            + f64::from(local.y).abs()
+            + f64::from(local.width).abs()
+            + f64::from(local.height).abs());
+    let error = (error_x + error_y + arithmetic + origin_error)
         * (m[0].abs() + m[1].abs() + m[2].abs() + m[3].abs())
         / det.abs();
     if !error.is_finite() || error > 1.0 / 32.0 {
         return Err(Error::Precision { draw: index });
     }
-    Ok(())
+    // Include subtraction of the local origin and comparison to its extent.
+    // This controls the expensive correction path, not the admission ceiling.
+    Ok([
+        (error_x
+            + arithmetic
+            + 4.0
+                * f64::from(f32::EPSILON)
+                * (f64::from(local.x).abs() + f64::from(local.width).abs())) as f32,
+        (error_y
+            + arithmetic
+            + 4.0
+                * f64::from(f32::EPSILON)
+                * (f64::from(local.y).abs() + f64::from(local.height).abs())) as f32,
+    ])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui_canvas::Rect;
+
+    #[test]
+    fn storage_records_match_shader_stride_and_offsets() {
+        assert_eq!(std::mem::size_of::<DrawData>(), 96);
+        assert_eq!(std::mem::offset_of!(DrawData, inverse_x), 16);
+        assert_eq!(std::mem::offset_of!(DrawData, inverse_y), 32);
+        assert_eq!(std::mem::offset_of!(DrawData, atlas), 80);
+        assert_eq!(std::mem::size_of::<Correction>(), 32);
+        assert_eq!(std::mem::offset_of!(Correction, y), 16);
+        assert_eq!(std::mem::size_of::<Globals>(), 48);
+    }
+
+    #[test]
+    fn precision_admission_rejects_finite_but_overflowing_intermediates() {
+        let mut draw = PreparedDraw {
+            local_rect: Rect::new(0.0, 0.0, 1.0, 1.0),
+            inverse: [1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+            clip: Rect::new(0.0, 0.0, 1.0, 1.0),
+            bounds: Rect::new(0.0, 0.0, 1.0, 1.0),
+            color: [1.0; 4],
+            mask: None,
+        };
+        assert!(validate_draw(draw, 7, 1, 1).is_ok());
+        draw.inverse = [3e38, 0.0, 0.0, 3e38, 3e38, 3e38];
+        assert!(matches!(
+            validate_draw(draw, 7, 1, 1),
+            Err(Error::Precision { draw: 7 })
+        ));
+        draw.inverse = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0];
+        draw.local_rect.x = f32::MAX;
+        assert!(matches!(
+            validate_draw(draw, 7, 1, 1),
+            Err(Error::Precision { draw: 7 })
+        ));
+    }
 }
