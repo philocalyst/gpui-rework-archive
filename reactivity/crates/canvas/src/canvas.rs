@@ -7,6 +7,8 @@ use std::{collections::HashMap, sync::Arc};
 
 mod glyph_axis;
 mod image_axis;
+mod paint;
+pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
 pub use rounded::rounded_rect_contains;
 mod samples;

@@ -1638,6 +1638,15 @@ fn failed_preparation_after_image_upload_discards_the_previous_packet() {
             ImageSampling::Nearest,
         )
         .unwrap();
+        let tracked_start = a.paint_cursor();
+        a.fill_rect(
+            Rect::new(2.0, 2.0, 3.0, 3.0),
+            Affine::IDENTITY,
+            Rect::new(0.0, 0.0, 64.0, 64.0),
+            Color::BLACK,
+        )
+        .unwrap();
+        let tracked_index = a.paint_index(tracked_start).unwrap();
         let first = readback(&mut renderer, &a);
         let mut failing = Canvas::recording(512, 256, ColorConfig::default()).unwrap();
         failing.clear(Color::BLACK);
@@ -1704,6 +1713,34 @@ fn failed_preparation_after_image_upload_discards_the_previous_packet() {
             readback(&mut renderer, &a),
             first,
             "retry rebuilds all old resource coordinates"
+        );
+        let mut paint = gpui_gpu::PaintRenderer::new(renderer);
+        paint
+            .render(
+                a.prepared_scene(),
+                &old_target.create_view(&Default::default()),
+                &[tracked_index],
+            )
+            .unwrap();
+        assert!(paint.binding(tracked_index).is_some());
+        assert!(matches!(
+            paint.render(
+                failing.prepared_scene(),
+                &target.create_view(&Default::default()),
+                &[]
+            ),
+            Err(gpui_gpu::Error::AtlasFull)
+        ));
+        assert_eq!(paint.image_stats().unwrap().uploaded_bytes, 32 * 32 * 4);
+        assert!(
+            paint.binding(tracked_index).is_none(),
+            "resource failure revokes the active map too"
+        );
+        assert!(
+            paint
+                .redraw(&old_target.create_view(&Default::default()))
+                .unwrap()
+                .is_none()
         );
     });
 }
@@ -2028,5 +2065,302 @@ fn rounded_image_material_decodes_exact_hdr_coverage() {
                 );
             }
         }
+    });
+}
+
+fn patch_scene(
+    canvas: &mut Canvas,
+    text: &mut TextSystem,
+    layout: &gpui_canvas::TextLayout,
+    colors: [Color; 3],
+) -> [gpui_canvas::PaintIndex; 3] {
+    canvas.clear(Color::WHITE);
+    let clip = Rect::new(0.0, 0.0, 64.0, 48.0);
+    let start = canvas.paint_cursor();
+    canvas
+        .fill_rect(clip, Affine::IDENTITY, clip, colors[0])
+        .unwrap();
+    let background = canvas.paint_index(start).unwrap();
+    let start = canvas.paint_cursor();
+    canvas
+        .fill_rounded_rect(
+            Rect::new(0.125, 0.375, 31.0, 27.0),
+            6.0,
+            Affine {
+                a: -1.0,
+                c: 0.25,
+                tx: 43.0,
+                ty: 4.0,
+                ..Affine::IDENTITY
+            },
+            clip,
+            colors[1],
+        )
+        .unwrap();
+    let upper = canvas.paint_index(start).unwrap();
+    let start = canvas.paint_cursor();
+    canvas
+        .draw_text(
+            text,
+            layout,
+            Point { x: 1.0, y: 8.0 },
+            Affine::IDENTITY,
+            clip,
+            colors[2],
+        )
+        .unwrap();
+    [background, upper, canvas.paint_index(start).unwrap()]
+}
+
+#[test]
+fn paint_packets_queue_a_patch_b_patch_c_before_readback_and_match_full_rebuilds() {
+    use gpui_canvas::PaintEdit;
+    use gpui_gpu::{GpuPaintEdit, PaintRenderer};
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let mut gpu = PaintRenderer::new(renderer(format).await);
+            let mut text = TextSystem::bundled().unwrap();
+            let layout = text.shape("ABA café", 16.0, None).unwrap();
+            let colors = [
+                [
+                    Color::rgb(40, 50, 60),
+                    Color::rgba(255, 0, 0, 128),
+                    Color::BLACK,
+                ],
+                [
+                    Color::rgb(60, 50, 40),
+                    Color::rgba(0, 0, 255, 128),
+                    Color::rgb(20, 180, 50),
+                ],
+                [
+                    Color::linear_display_p3(-0.2, 1.2, 0.3, 1.0).unwrap(),
+                    Color::rgba(0, 255, 0, 128),
+                    Color::rgb(70, 40, 190),
+                ],
+            ];
+            let mut canvases: Vec<_> = (0..3)
+                .map(|_| Canvas::recording(64, 48, config).unwrap())
+                .collect();
+            let indices = patch_scene(&mut canvases[0], &mut text, &layout, colors[0]);
+            for i in 1..3 {
+                assert_eq!(
+                    indices,
+                    patch_scene(&mut canvases[i], &mut text, &layout, colors[i])
+                );
+            }
+            let ta = output_texture(&gpu, &canvases[0]);
+            let tb = output_texture(&gpu, &canvases[0]);
+            let tc = output_texture(&gpu, &canvases[0]);
+            gpu.render(
+                canvases[0].prepared_scene(),
+                &ta.create_view(&Default::default()),
+                &indices,
+            )
+            .unwrap();
+            assert_eq!(gpu.binding_bytes(), 3 * 12);
+            for (i, target) in [(1, &tb), (2, &tc)] {
+                let edits: Vec<_> = indices
+                    .iter()
+                    .zip(colors[i])
+                    .map(|(&index, color)| {
+                        GpuPaintEdit::new(gpu.binding(index).unwrap(), PaintEdit::new(index, color))
+                    })
+                    .collect();
+                let view = target.create_view(&Default::default());
+                let plan = gpu.prepare_paint(&edits, &view).unwrap();
+                assert_eq!(plan.changed_groups(), 3);
+                assert_eq!(plan.upload_bytes(), 48);
+                plan.commit();
+                let stats = gpu.stats();
+                assert_eq!(
+                    (
+                        stats.validated_draws,
+                        stats.binning_tile_visits,
+                        stats.bind_group_creations
+                    ),
+                    (0, 0, 0)
+                );
+                assert_eq!(
+                    (stats.instance_upload_bytes, stats.mask_upload_bytes),
+                    (48, 0)
+                );
+            }
+            // No poll/readback occurred between baseline and either patch.
+            let actual = [
+                read_texture(&gpu, &ta),
+                read_texture(&gpu, &tb),
+                read_texture(&gpu, &tc),
+            ];
+            let mut plain = gpu.into_inner();
+            for (i, canvas) in canvases.iter().enumerate() {
+                assert_eq!(
+                    actual[i],
+                    readback(&mut plain, canvas),
+                    "hdr={hdr}, frame={i}"
+                );
+            }
+        }
+    });
+}
+
+#[test]
+fn paint_validation_is_atomic_and_hdr_proof_changes_require_full_rebuild() {
+    use gpui_canvas::PaintEdit;
+    use gpui_gpu::{GpuPaintEdit, PaintError, PaintRenderer};
+    pollster::block_on(async {
+        let mut gpu = PaintRenderer::new(renderer(wgpu::TextureFormat::Rgba16Float).await);
+        let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+        let mut canvas = Canvas::recording(64, 64, config).unwrap();
+        let clip = Rect::new(0.0, 0.0, 64.0, 64.0);
+        canvas.clear(Color::WHITE);
+        let start = canvas.paint_cursor();
+        canvas
+            .fill_rect(clip, Affine::IDENTITY, clip, Color::rgb(50, 20, 10))
+            .unwrap();
+        let first = canvas.paint_index(start).unwrap();
+        let start = canvas.paint_cursor();
+        canvas
+            .fill_rect(
+                Rect::new(16.0, 16.0, 32.0, 32.0),
+                Affine::IDENTITY,
+                clip,
+                Color::BLACK,
+            )
+            .unwrap();
+        let second = canvas.paint_index(start).unwrap();
+        let a = output_texture(&gpu, &canvas);
+        gpu.render(
+            canvas.prepared_scene(),
+            &a.create_view(&Default::default()),
+            &[first, second],
+        )
+        .unwrap();
+        assert!(gpu.stats().uniform_tiles > 0);
+        let initial = read_texture(&gpu, &a);
+        let b = output_texture(&gpu, &canvas);
+        let view = b.create_view(&Default::default());
+        for bad in [-0.0, -f32::from_bits(1)] {
+            let edits = [
+                GpuPaintEdit::new(
+                    gpu.binding(first).unwrap(),
+                    PaintEdit::new(first, Color::WHITE),
+                ),
+                GpuPaintEdit::new(
+                    gpu.binding(second).unwrap(),
+                    PaintEdit::new(second, Color::linear_srgb(bad, 0.25, 0.5, 1.0).unwrap()),
+                ),
+            ];
+            assert_eq!(
+                gpu.prepare_paint(&edits, &view).err(),
+                Some(PaintError::ProofColor { edit: 1 })
+            );
+            gpu.redraw(&view).unwrap().unwrap();
+            assert_eq!(
+                read_texture(&gpu, &b),
+                initial,
+                "failed second edit must not write first"
+            );
+        }
+        let edits = [GpuPaintEdit::new(
+            gpu.binding(first).unwrap(),
+            PaintEdit::new(first, Color::WHITE),
+        )];
+        drop(gpu.prepare_paint(&edits, &view).unwrap());
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_eq!(read_texture(&gpu, &b), initial);
+        let edits = [GpuPaintEdit::new(
+            gpu.binding(first).unwrap(),
+            PaintEdit::new(first, Color::rgba(255, 255, 255, 128)),
+        )];
+        assert_eq!(
+            gpu.prepare_paint(&edits, &view).err(),
+            Some(PaintError::AlphaChanged { edit: 0 })
+        );
+        let changed = [PaintEdit::new(
+            second,
+            Color::linear_srgb(-0.0, 0.25, 0.5, 1.0).unwrap(),
+        )];
+        canvas.prepare_paint(&changed).unwrap().commit();
+        gpu.render(canvas.prepared_scene(), &view, &[first, second])
+            .unwrap();
+        let rebuilt = read_texture(&gpu, &b);
+        let mut plain = gpu.into_inner();
+        assert_eq!(rebuilt, readback(&mut plain, &canvas));
+    });
+}
+
+#[test]
+fn paint_modes_foreign_ordinals_and_attempted_full_failures_revoke_mapping() {
+    use gpui_canvas::PaintEdit;
+    use gpui_gpu::{GpuPaintEdit, PaintError, PaintRenderer};
+    pollster::block_on(async {
+        let mut gpu = PaintRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
+        let mut text = TextSystem::bundled().unwrap();
+        let layout = text.shape("AAAA", 16.0, None).unwrap();
+        let mut canvas = Canvas::recording(64, 48, ColorConfig::default()).unwrap();
+        let sites = patch_scene(
+            &mut canvas,
+            &mut text,
+            &layout,
+            [Color::BLACK, Color::rgba(0, 0, 255, 128), Color::BLACK],
+        );
+        let target = output_texture(&gpu, &canvas);
+        let view = target.create_view(&Default::default());
+        gpu.render(canvas.prepared_scene(), &view, &sites).unwrap();
+        let old = gpu.binding(sites[0]).unwrap();
+        let edits = [GpuPaintEdit::new(
+            old,
+            PaintEdit::new(sites[1], Color::rgb(255, 0, 0)),
+        )];
+        assert_eq!(
+            gpu.prepare_paint(&edits, &view).err(),
+            Some(PaintError::InvalidBinding { edit: 0 })
+        );
+        gpu.set_grouped_records(false);
+        assert!(gpu.binding(sites[0]).is_none());
+        assert!(gpu.redraw(&view).unwrap().is_none());
+        gpu.render(canvas.prepared_scene(), &view, &sites).unwrap();
+        let edits = [GpuPaintEdit::new(
+            gpu.binding(sites[2]).unwrap(),
+            PaintEdit::new(sites[2], Color::WHITE),
+        )];
+        assert_eq!(
+            gpu.prepare_paint(&edits, &view).err(),
+            Some(PaintError::UnsupportedGroup { edit: 0 })
+        );
+        gpu.set_tile_proofs(false);
+        assert!(gpu.binding(sites[0]).is_none());
+        gpu.render(canvas.prepared_scene(), &view, &sites).unwrap();
+        let mut invalid = canvas.prepared_scene();
+        invalid.clear[0] = f32::NAN;
+        assert!(gpu.render(invalid, &view, &sites).is_err());
+        assert!(gpu.binding(sites[0]).is_none());
+        assert!(gpu.redraw(&view).unwrap().is_none());
+        // Wrong-target prevalidation is nonmutating and preserves a valid map.
+        gpu.render(canvas.prepared_scene(), &view, &sites).unwrap();
+        let mut tiny = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+        tiny.clear(Color::WHITE);
+        let bad = output_texture(&gpu, &tiny);
+        let wrong = bad.create_view(&Default::default());
+        let edits = [GpuPaintEdit::new(
+            gpu.binding(sites[0]).unwrap(),
+            PaintEdit::new(sites[0], Color::WHITE),
+        )];
+        assert_eq!(
+            gpu.prepare_paint(&edits, &wrong).err(),
+            Some(PaintError::InvalidTarget)
+        );
+        assert!(gpu.binding(sites[0]).is_some());
+        assert!(gpu.redraw(&view).unwrap().is_some());
     });
 }
