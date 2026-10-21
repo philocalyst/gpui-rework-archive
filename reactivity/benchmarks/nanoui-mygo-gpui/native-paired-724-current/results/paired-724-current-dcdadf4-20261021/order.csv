@@ -1,0 +1,12 @@
+RUN,baseline,eager,0,100,10
+DONE,baseline,eager,0
+RUN,current,eager,0,100,10
+DONE,current,eager,0
+RUN,current,eager,1000,100,10
+DONE,current,eager,1000
+RUN,baseline,eager,1000,100,10
+DONE,baseline,eager,1000
+RUN,baseline,virtual,250000,100,10
+DONE,baseline,virtual,250000
+RUN,current,virtual,250000,100,10
+DONE,current,virtual,250000
