@@ -648,3 +648,64 @@ fn a_panicking_semantic_projector_quarantines_the_same_owner_and_focus() {
     assert_eq!(win.query().name("safe").count(), Err(Error::Poisoned));
     assert_eq!(win.snapshot().unwrap().source_epoch, 1);
 }
+
+#[test]
+fn query_dimensions_are_conjunctive_and_order_independent() {
+    struct Commands;
+    impl View for Commands {
+        fn view(&self) -> El<'_> {
+            column((
+                button("Alpha").name("Save").description("Write"),
+                button("Beta").name("Cancel").description("Dismiss"),
+            ))
+        }
+    }
+    let win = Win::demo(Commands);
+    assert_eq!(win.query().name("Save").count().unwrap(), 1);
+    assert_eq!(win.query().description("Dismiss").count().unwrap(), 1);
+    assert_eq!(win.query().text("Alpha").count().unwrap(), 1);
+    let absent = [
+        win.query().name("Save").description("Dismiss"),
+        win.query().description("Dismiss").name("Save"),
+        win.query().text("Beta").name("Save"),
+        win.query().name("Save").text("Beta"),
+        win.query()
+            .containing("Bet")
+            .name("Save")
+            .description("Write"),
+        win.query()
+            .name("Save")
+            .description("Write")
+            .containing("Bet"),
+        win.query()
+            .description("Write")
+            .containing("Bet")
+            .name("Save"),
+    ];
+    for query in absent {
+        assert_eq!(query.count().unwrap(), 0);
+        assert_eq!(query.one(), Err(Error::MissingElement));
+    }
+    let expected = win.role(Role::Button).name("Save").one().unwrap();
+    let present = [
+        win.query().text("Alpha").name("Save").description("Write"),
+        win.query().description("Write").name("Save").text("Alpha"),
+        win.query()
+            .name("Save")
+            .containing("Al")
+            .description("Write"),
+    ];
+    for query in present {
+        assert_eq!(query.one().unwrap(), expected);
+    }
+    // Exact and containing remain alternatives for the same visual dimension.
+    assert_eq!(
+        win.query()
+            .text("missing")
+            .containing("Al")
+            .name("Save")
+            .one()
+            .unwrap(),
+        expected
+    );
+}
