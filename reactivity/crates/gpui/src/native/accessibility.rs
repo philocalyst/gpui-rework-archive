@@ -198,8 +198,9 @@ impl Bridge {
     }
     pub(super) fn sync<M: View + 'static, L: crate::remote::LaneSet<M>>(
         &mut self,
-        owner: &Win<M, L>,
+        owner: &mut Win<M, L>,
     ) -> Result<(), NativeError> {
+        owner.accessibility_observe(self.ingress.0.session.load(Ordering::Acquire) & 1 != 0)?;
         let state = owner.accessibility_state()?;
         if !state.valid {
             return Ok(());
@@ -215,9 +216,17 @@ impl Bridge {
             return Ok(());
         }
         let sheet = owner.accessibility_sheet()?;
+        let delta = (!self.needs_full)
+            .then(|| {
+                self.published
+                    .and_then(|old| owner.accessibility_delta(old, state))
+            })
+            .flatten();
         let mut updated = false;
         self.adapter.update_if_active(|| {
-            let update = if full {
+            let update = if let Some(indices) = delta.filter(|_| full) {
+                project_sparse(&sheet, indices)
+            } else if full {
                 project(&sheet, state, &self.title)
             } else {
                 focus_update(&sheet)
@@ -360,9 +369,9 @@ fn project(sheet: &crate::runtime::SemanticSheet<'_>, state: State, title: &str)
     // Count from the SAME immutable sheet before allocating native node output.
     // This extra read pass avoids geometric Vec overreserve and copies, including
     // a lone input/renamed-label child at the end of a large ordinary tree.
-    let mut count = 1;
+    let mut count = 1 + sheet.len();
     sheet.visit(|part| {
-        count += 1 + usize::from(part.value().is_some() || renamed_text(part));
+        count += usize::from(part.value().is_some() || renamed_text(part));
     });
     let mut nodes = Vec::with_capacity(count);
     nodes.push((ROOT, root));
@@ -382,18 +391,7 @@ fn project(sheet: &crate::runtime::SemanticSheet<'_>, state: State, title: &str)
         }
         ancestors.push((part.target(), nodes.len()));
         let mut node = projected_node(part);
-        let text = if renamed_text(part) {
-            let mut label = Node::new(accesskit::Role::Label);
-            if let Some(text) = part.text() {
-                label.set_value(text);
-            }
-            if let Some(bounds) = node.bounds() {
-                label.set_bounds(bounds);
-            }
-            Some(label)
-        } else {
-            part.value().map(text_run)
-        };
+        let text = projected_text(part, &node);
         let text = text.map(|text| {
             let text_id = NodeId(id.0 + 1);
             node.push_child(text_id);
@@ -413,6 +411,54 @@ fn project(sheet: &crate::runtime::SemanticSheet<'_>, state: State, title: &str)
         tree_id: TreeId::ROOT,
         focus,
     }
+}
+
+fn projected_text(part: Part<'_>, node: &Node) -> Option<Node> {
+    if renamed_text(part) {
+        let mut label = Node::new(accesskit::Role::Label);
+        if let Some(text) = part.text() {
+            label.set_value(text);
+        }
+        if let Some(bounds) = node.bounds() {
+            label.set_bounds(bounds);
+        }
+        Some(label)
+    } else {
+        part.value().map(text_run)
+    }
+}
+
+fn project_sparse(sheet: &crate::runtime::SemanticSheet<'_>, indices: &[u32]) -> TreeUpdate {
+    let count = indices
+        .iter()
+        .map(|&index| {
+            let part = sheet
+                .part_at(index as usize)
+                .expect("exact transition P index");
+            1 + usize::from(part.value().is_some() || renamed_text(part))
+        })
+        .sum();
+    let mut update = focus_update(sheet);
+    update.nodes = Vec::with_capacity(count);
+    for &index in indices {
+        let part = sheet
+            .part_at(index as usize)
+            .expect("exact transition P index");
+        let id = NodeId(part.native_id() * 2);
+        let mut node = projected_node(part);
+        let text = projected_text(part, &node);
+        if text.is_some() {
+            node.push_child(NodeId(id.0 + 1));
+        }
+        for child in sheet.children(index as usize) {
+            node.push_child(NodeId(child.native_id() * 2));
+        }
+        update.nodes.push((id, node));
+        if let Some(text) = text {
+            update.nodes.push((NodeId(id.0 + 1), text));
+        }
+    }
+    update
 }
 
 fn renamed_text(part: Part<'_>) -> bool {
@@ -445,3 +491,6 @@ fn text_run(value: &str) -> Node {
 mod linux_tests;
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod transitions;

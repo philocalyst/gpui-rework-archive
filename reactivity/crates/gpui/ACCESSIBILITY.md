@@ -49,13 +49,40 @@ An accessibility-enabled runtime retains one acknowledged nonzero sequence
 token. Headless and explicit AT-disabled builds omit this field. The bridge no
 longer has to infer the old token from its own previous publication.
 
-This baseline replaces the full native tree on a changed P. Full projection
-counts required native records, then constructs one exactly reserved output
-vector and a temporary ancestor stack. It is O(number of exposed parts), with an
-extra read pass to avoid geometric vector overreserve. Focus-only changes send
-an empty node vector; resolving focus membership still scans P. Neither operation
-calls `view`, layout or paint. Sparse native updates are a future optimization,
-not a claimed property of this implementation.
+An active adapter observes one bounded acknowledged P transition. The existing
+presentation walk compares each output entry with old P; a semantic-only field
+edit checks its existing fanout destinations, while an inspector edit locates its
+one P entry. Logical indices are hints verified against exact P identity; a
+clipped/reordered field hint uses full projection. No
+observer is installed while inactive, so these comparisons and their vector
+allocations are absent. Headless builds omit the observer entirely.
+
+A sparse update is valid only when the adapter's base cursor and current P both
+match the transition's exact acknowledged token, epoch and physical size. The
+collector requires unchanged identity sequence, parents and synthetic-child
+shape. Each changed node is replaced completely, including all its ordered
+children and any native-only text child. Missing acknowledged transitions, topology
+changes, activation, changed window size, all-metadata publications and more than
+4,096 changed entries fall back to the complete tree. Updating a prepared
+candidate's metadata invalidates its sparse descriptor; an unsuccessful newer
+preparation preserves the older coherent candidate but loses sparse trust.
+
+The observer costs an 8-byte optional box pointer per accessibility-enabled
+runtime, in addition to the existing 8-byte acknowledged sequence. Activation
+allocates one 80-byte descriptor; its single reusable `Vec<u32>` grows only when
+needed, up to 16 KiB. Deactivation releases both. There is no per-node addition,
+second P, retained AccessKit node cache, hash or identity map. An unconsumed
+transition can be overwritten; the next adapter update detects the missing base
+and uses a full projection.
+
+Full projection counts required native records, then constructs one exactly
+reserved output vector and a temporary ancestor stack. Sparse projection lowers
+only selected nodes, but still scans P to resolve current focus; replacing a
+container scans its preorder subtree to recover its complete child list. Dense
+and scrolling cases can pay comparison work before falling back. Focus-only
+changes send an empty node vector; membership still scans P. Projection never
+calls `view`, layout or paint. See [sparse measurements](SPARSE_ACCESSIBILITY.md)
+for the bounded benefit and measured losses.
 
 Real nodes use checked even IDs derived from the window's nonreused retained
 identity. Zero names the synthetic window root. An input uses its adjacent odd
@@ -187,3 +214,12 @@ dependencies, using Rust's `build-std` cross-check).
 Native VoiceOver/UIA tests and Orca spoken output have not been run here; Consumer
 tests, an AT-SPI client and cross-checks do not replace those OS provider/threading/
 screen-reader proofs.
+
+The sparse Consumer oracle compares every complete node, full physical bounds,
+ordered children, parent and focus against an independently rebuilt full tree.
+It includes 100,000 P entries, direct field and inspector edits, containers,
+geometry, frozen list reindexing, DPI changes, synthetic shape replacement,
+missing acknowledgements, a failed newer preparation and metadata patched after
+preparation. The renderer still rejects CR control characters and Greek script;
+TextRun schema tests with CRLF/non-BMP data prove encoding only, not renderer
+coverage. The actual AT-SPI Todo proof was rerun with sparse publication enabled.
