@@ -2,6 +2,9 @@ use crate::text::Raster;
 use crate::{Affine, Color, ColorConfig, DamageRegion, Error, Point, Rect, TextLayout, TextSystem};
 use std::{collections::HashMap, sync::Arc};
 
+mod samples;
+use samples::Samples;
+
 const TILE: usize = 16;
 const MAX_PIXELS: usize = 16 * 1024 * 1024;
 const MAX_COMMANDS: usize = 65_536;
@@ -1453,7 +1456,7 @@ fn render_band<W: PixelWriter>(
 ) -> RenderStats {
     let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
-    let mut scratch = [[0.0f32; 4]; TILE * TILE * 16];
+    let mut samples = Samples::new();
     // All admitted writers emit at most eight elements. These fixed local buffers
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [W::Element::default(); 8];
@@ -1506,7 +1509,7 @@ fn render_band<W: PixelWriter>(
             if !full && let Some(value) = uniform.take() {
                 // A uniform prefix needs no tile storage until an edge or
                 // glyph makes its sample colors differ.
-                scratch.fill(value);
+                samples.reset(value, frame.tile_proofs);
             }
             for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
                 for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
@@ -1520,15 +1523,7 @@ fn render_band<W: PixelWriter>(
                         stats.boundary_pixels += 1;
                         sample(&command, x, y, &mut stats)
                     };
-                    for (sample, coverage) in coverages.into_iter().enumerate() {
-                        if coverage > 0.0 {
-                            blend(
-                                &mut scratch[((y - top) * TILE + x - left) * 16 + sample],
-                                command.color,
-                                coverage,
-                            );
-                        }
-                    }
+                    samples.blend((y - top) * TILE + x - left, command.color, coverages);
                 }
             }
         }
@@ -1548,10 +1543,7 @@ fn render_band<W: PixelWriter>(
                 if uniform_color.is_some() {
                     destination.copy_from_slice(&uniform_bytes[..W::ELEMENTS]);
                 } else {
-                    let color = {
-                        let start = ((y - top) * TILE + x - left) * 16;
-                        sample_mean(scratch[start..start + 16].iter().copied())
-                    };
+                    let color = samples.color((y - top) * TILE + x - left);
                     writer.write(color, destination);
                 }
             }
@@ -1858,13 +1850,16 @@ fn blend(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
         dst[i] = src[i] * coverage + dst[i] * (1.0 - alpha);
     }
 }
-fn sample_mean(samples: impl Iterator<Item = [f32; 4]>) -> [f32; 4] {
+fn sample_mean(samples: &[[f32; 4]; 16]) -> [f32; 4] {
     // Sixteen identical f32 values sum exactly in f64 (24+4 significant
     // bits). Narrow once, preserving a uniform tile's exact working color.
     // Otherwise a zero-coverage command could move the clear across an output
     // quantization threshold merely by materializing its sample tile.
-    let mut sum = [0.0f64; 4];
-    for sample in samples {
+    // Seed from the first sample so sixteen negative zeros retain their sign,
+    // just as the uniform-color path does. Starting with +0 would erase it.
+    let [first, rest @ ..] = samples;
+    let mut sum = first.map(f64::from);
+    for sample in rest {
         for i in 0..4 {
             sum[i] += sample[i] as f64;
         }

@@ -189,6 +189,35 @@ fn hdr_support_uses_unquantized_working_colors() {
     }
 }
 
+#[test]
+fn hdr_sample_promotion_matches_the_uncompressed_path() {
+    let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+    let mut canvas = Canvas::with_color_config(33, 17, config).unwrap();
+    let clip = Rect::new(0.0, 0.0, 33.0, 17.0);
+    canvas.clear(Color::linear_srgb(-0.0, 0.0, -0.0, 1.0).unwrap());
+    for (rect, color) in [
+        (
+            Rect::new(0.0, 0.0, 16.0, 17.0),
+            Color::linear_srgb(-0.0, 0.25, 2.0, 1.0).unwrap(),
+        ),
+        (
+            Rect::new(6.25, 2.5, 12.5, 13.0),
+            Color::linear_srgb(3.0, -0.125, 0.0, 0.5).unwrap(),
+        ),
+        (
+            Rect::new(8.0, 3.0, 15.0, 7.0),
+            Color::linear_srgb(0.125, 0.5, 5.0, 0.75).unwrap(),
+        ),
+    ] {
+        canvas
+            .fill_rect(rect, Affine::IDENTITY, clip, color)
+            .unwrap();
+    }
+    let collapsed = canvas.pixels().to_vec();
+    canvas.set_tile_proofs(false);
+    assert_eq!(canvas.pixels(), collapsed);
+}
+
 #[cfg(feature = "parallel")]
 #[test]
 fn disjoint_workers_repair_the_same_tiles_without_touching_other_bands() {
