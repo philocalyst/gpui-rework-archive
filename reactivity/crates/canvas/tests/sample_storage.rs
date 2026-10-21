@@ -3,6 +3,30 @@ use gpui_canvas::{
 };
 
 #[test]
+fn adjacent_hdr_zeros_keep_distinct_output_signs() {
+    let config = ColorConfig::linear_hdr(OutputProfile::Srgb, 203.0).unwrap();
+    let mut canvas = Canvas::recording(2, 1, config).unwrap();
+    canvas.clear(Color::linear_srgb(-0.0, -0.0, -0.0, 1.0).unwrap());
+    canvas
+        .fill_rect(
+            Rect::new(1.0, 0.0, 1.0, 1.0),
+            Affine::IDENTITY,
+            Rect::new(0.0, 0.0, 2.0, 1.0),
+            Color::linear_srgb(0.0, 0.0, 0.0, 1.0).unwrap(),
+        )
+        .unwrap();
+    for proofs in [false, true] {
+        canvas.set_tile_proofs(proofs);
+        let words: Vec<_> = canvas
+            .pixels()
+            .chunks_exact(2)
+            .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+            .collect();
+        assert_eq!(words, [0x8000, 0x8000, 0x8000, 0x3c00, 0, 0, 0, 0x3c00]);
+    }
+}
+
+#[test]
 fn promoted_pixels_match_uncompressed_samples_across_tiles_and_color_formats() {
     fn next(seed: &mut u64) -> u32 {
         *seed = seed
