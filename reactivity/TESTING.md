@@ -94,8 +94,10 @@ caps to choose result timing and check previous controls, failed C repair,
 same-batch supersession, faults, physical credit and restored domain state.
 The model's ephemeral Reader is rebound through a fresh Questions plan after
 domain DTO restoration; it is not serialized as authority. A separate actual
-X11 script requires result/credit progress through WorkReady, and three Loom
-cases check the credit/wake seam. These are not the complete multi-input
+X11 script requires result/credit progress through WorkReady. Nine Loom cases
+compile the production single-completion mailbox through the Loom facade,
+including sealed staging, paused publication, close and late wake registration;
+the three historical question-credit cases remain separate. These are not the complete multi-input
 dependency/cohort graph; see [the Reader contract](docs/reader-question.md). See
 [the delivery contract](crates/gpui/REMOTE.md) for the exact capacity and lifetime
 limits.

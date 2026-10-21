@@ -91,6 +91,13 @@ desktop-adapter Clippy under [aarch64 macOS](evidence/reader-apple-clippy.txt) a
 [Windows MSVC](evidence/reader-windows-clippy.txt) cross-compilation. This is
 typechecking of the actual adapters, not execution on those operating systems.
 
+The subsequent [sealed question integration](evidence/question-integration-checks.json)
+pins source c3ae3584d4: 258 GPUI cases/doctests with X11+Wayland, strict all-target
+native Clippy, nine Loom cases using the production mailbox source, and actual
+X11 Question and 250K Library scripts pass. These five scoped checks supplement
+the full workspace report above. The verifier now includes the production
+mailbox gate; its twenty-gate run has not yet been recorded.
+
 ## Measurements and their boundaries
 
 | Change | Evidence | Limit |
@@ -111,7 +118,7 @@ typechecking of the actual adapters, not execution on those operating systems.
 | Lossless author colors | [Color proof and measurements](crates/canvas/COLOR_PACKING.md): Color 20→16 B, Style 96→88 B, Node 136→128 B, preserving all admitted HDR/author bits | Some conversion/mount/raster phases lose; native first acknowledgement is flat and native RSS/PSS increased in the paired capture; Canvas working colors already occupied 16 B |
 | Measurement routing | [Paired evidence](crates/gpui/evidence/layout-route.md): 10,001-node repeated-color mount removes 913 scratch allocations and 262,472 peak requested bytes | Retained storage is unchanged; individual trace phases lose and dense text searches are not a universal speedup |
 | Sparse native semantics | [Transition evidence](crates/gpui/SPARSE_ACCESSIBILITY.md): 100K leaf projection+Consumer replacement about 77.7 ms→73.6 µs, peak about 34.8 MB→328 B; verified field hints remove the common P scan | Warm repeated replacement, not screen-reader latency; active 10K geometry preparation pays about 14.3% comparison tax; inactive observation skips it |
-| Typed questions | [Implementation and cost ledger](docs/reader-question.md): first declared u64 question requests 5 allocations/880 B; ordinary owners gain no fields | Each projection description pays two boxes/88 B; explicit Library worker reserves 256 KiB stack; complete Reader/cohort graph remains |
+| Typed questions | [Sealed mailbox ledger](docs/question-sealed-staging.md): first declared u64 question requests 2 allocations/152 B headless, 2/200 B native; ordinary owners gain no fields | Each projection description pays two boxes/88 B; explicit Library worker reserves 256 KiB stack; complete Reader/cohort graph remains |
 
 The measurement rows pin their own baselines. Dense text, thin leases, color
 packing and row derivation were measured independently; their percentages are
