@@ -11,9 +11,10 @@ pub fn configure<V: gpui::View>(window: gpui::Window<V>) -> gpui::Window<V> {
     let window = window.renderer(policy());
     if std::env::args().any(|arg| arg == "--startup") {
         let started = std::time::Instant::now();
-        let reported = std::cell::Cell::new(None);
+        let mut reported = None;
         window.on_presented(move |frame| {
-            if reported.replace(Some(frame.renderer)) != Some(frame.renderer) {
+            if reported != Some(frame.renderer) {
+                reported = Some(frame.renderer);
                 eprintln!(
                     "GPUI_PRESENT,{:?},{},{},{}",
                     frame.renderer,

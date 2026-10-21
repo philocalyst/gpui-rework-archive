@@ -48,8 +48,8 @@ impl From<gpui_gpu::Error> for NativeError {
     }
 }
 
-type PresentationError = Box<dyn Fn(&Error)>;
-type PresentationFeedback = Box<dyn Fn(PresentedFrame)>;
+type PresentationError = Box<dyn FnMut(&Error)>;
+type PresentationFeedback = Box<dyn FnMut(PresentedFrame)>;
 /// The renderer that submitted the frame, not a claim about physical hardware.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RendererKind {
@@ -112,14 +112,17 @@ impl<V: View> Window<V> {
     }
     /// Observes successful native presentation and the exact acknowledged sheet.
     /// The first software feedback runs before Auto starts any GPU initialization.
-    pub fn on_presented(mut self, handler: impl Fn(PresentedFrame) + 'static) -> Self {
+    /// The host exclusively invokes this callback, so captured state can mutate
+    /// directly without an interior-mutable wrapper.
+    pub fn on_presented(mut self, handler: impl FnMut(PresentedFrame) + 'static) -> Self {
         self.presentation_feedback = Some(Box::new(handler));
         self
     }
     /// Observes a recoverable source-to-presentation failure. Source edits stay
     /// committed; position-free input can repair the value and publish again.
     /// Without a handler, failures are reported to stderr.
-    pub fn on_presentation_error(mut self, handler: impl Fn(&Error) + 'static) -> Self {
+    /// Captured state uses the callback's ordinary mutable borrow.
+    pub fn on_presentation_error(mut self, handler: impl FnMut(&Error) + 'static) -> Self {
         self.presentation_error = Some(Box::new(handler));
         self
     }
@@ -558,7 +561,7 @@ impl<V: View + 'static> NativeHost<V> {
             }
             self.presented_frames += 1;
         }
-        if let Some(handler) = &self.presentation_feedback {
+        if let Some(handler) = &mut self.presentation_feedback {
             handler(PresentedFrame {
                 renderer,
                 source_epoch: commit.source_epoch,
@@ -661,7 +664,7 @@ impl<V: View + 'static> NativeHost<V> {
             Err(Error::NotInput | Error::NotInteractive) => {}
             Err(Error::StaleTarget | Error::PresentationStale) => {}
             Err(error @ (Error::Canvas(_) | Error::Layout(_) | Error::PresentationPanicked)) => {
-                if let Some(handler) = &self.presentation_error {
+                if let Some(handler) = &mut self.presentation_error {
                     handler(&error);
                 } else {
                     eprintln!("GPUI presentation failed; source edits retained: {error}");
@@ -878,26 +881,37 @@ mod tests {
         Affine,
         property::{Contribution, TRANSFORM},
     };
+    use std::sync::mpsc::{self, Receiver};
     use std::time::{Duration, Instant};
-    use std::{
-        cell::{Cell, RefCell},
-        rc::Rc,
-    };
     use winit::{dpi::PhysicalPosition, event::DeviceId, platform::x11::EventLoopBuilderExtX11};
 
+    enum Observed {
+        Fault,
+        Presented(PresentedFrame),
+    }
     struct Script {
         host: NativeHost<test_todos::Todos>,
         stage: u8,
         started: Instant,
         complete: bool,
-        faults: Rc<Cell<usize>>,
+        feedback: Receiver<Observed>,
+        faults: usize,
         retained_target: Option<Target>,
-        frames: Rc<RefCell<Vec<PresentedFrame>>>,
+        frames: Vec<PresentedFrame>,
         edited_during_upgrade: bool,
         cancelled_generation: bool,
     }
     impl Script {
+        fn collect_feedback(&mut self) {
+            for feedback in self.feedback.try_iter() {
+                match feedback {
+                    Observed::Fault => self.faults += 1,
+                    Observed::Presented(frame) => self.frames.push(frame),
+                }
+            }
+        }
         fn step(&mut self, event_loop: &ActiveEventLoop) {
+            self.collect_feedback();
             assert!(
                 self.started.elapsed() < Duration::from_secs(30),
                 "native script timed out at stage {}",
@@ -913,7 +927,7 @@ mod tests {
             match self.stage {
                 0 => {
                     if self.host.renderer_policy == RendererPolicy::Auto {
-                        assert_eq!(self.frames.borrow()[0].renderer, RendererKind::ReferenceCpu);
+                        assert_eq!(self.frames[0].renderer, RendererKind::ReferenceCpu);
                         if self.host.upgrade_policy.allow_cpu
                             && self.host.upgrade.is_some()
                             && !self.cancelled_generation
@@ -989,7 +1003,8 @@ mod tests {
                         self.host.owner.as_ref().unwrap().focused().unwrap(),
                         Some(input)
                     );
-                    assert_eq!(self.faults.get(), 1);
+                    self.collect_feedback();
+                    assert_eq!(self.faults, 1);
                     self.host
                         .key_input(&NativeKey::Named(NamedKey::Backspace), None)
                         .unwrap();
@@ -1091,9 +1106,9 @@ mod tests {
                         return;
                     }
                     if self.host.renderer_policy == RendererPolicy::Auto {
-                        assert_eq!(self.frames.borrow()[0].renderer, RendererKind::ReferenceCpu);
+                        assert_eq!(self.frames[0].renderer, RendererKind::ReferenceCpu);
                         if self.host.upgrade_policy.allow_cpu {
-                            let last = *self.frames.borrow().last().unwrap();
+                            let last = *self.frames.last().unwrap();
                             assert_eq!(last.renderer, RendererKind::Gpu);
                             assert_eq!(
                                 (last.source_epoch, last.presentation_epoch),
@@ -1164,7 +1179,7 @@ mod tests {
                         owner.find_text("Ship new GPUI").unwrap(),
                         self.retained_target.unwrap()
                     );
-                    assert_eq!(self.faults.get(), 1);
+                    assert_eq!(self.faults, 1);
                     if let Some(Graphics::Gpu(gpu)) = &self.host.graphics {
                         assert!(gpu.renderer.stats().submissions > 0);
                     }
@@ -1209,15 +1224,15 @@ mod tests {
             (RendererPolicy::Auto, false, true),
             (RendererPolicy::Auto, true, true),
         ] {
-            let faults = Rc::new(Cell::new(0));
-            let observer = Rc::clone(&faults);
-            let frames = Rc::new(RefCell::new(Vec::new()));
-            let frame_observer = Rc::clone(&frames);
+            let (observer, feedback) = mpsc::channel();
+            let frame_observer = observer.clone();
             let mut host = NativeHost::new(
                 Window::document(test_todos::Todos::default())
                     .size(540, 620)
-                    .on_presentation_error(move |_| observer.set(observer.get() + 1))
-                    .on_presented(move |frame| frame_observer.borrow_mut().push(frame))
+                    .on_presentation_error(move |_| observer.send(Observed::Fault).unwrap())
+                    .on_presented(move |frame| {
+                        frame_observer.send(Observed::Presented(frame)).unwrap()
+                    })
                     .renderer(policy),
             );
             host.upgrade_policy.allow_cpu = allow_cpu;
@@ -1228,9 +1243,10 @@ mod tests {
                 stage: 0,
                 started: Instant::now(),
                 complete: false,
-                faults,
+                feedback,
+                faults: 0,
                 retained_target: None,
-                frames,
+                frames: Vec::new(),
                 edited_during_upgrade: false,
                 cancelled_generation: false,
             };
