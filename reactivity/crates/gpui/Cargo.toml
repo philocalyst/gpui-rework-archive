@@ -60,3 +60,7 @@ required-features = ["native"]
 [[example]]
 name = "library"
 required-features = ["native"]
+
+[[example]]
+name = "luna_bench"
+required-features = ["native"]
