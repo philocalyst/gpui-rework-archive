@@ -31,6 +31,7 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WindowOptions {
+    /// Physical output dimensions in device pixels.
     pub size: [u32; 2],
     pub colors: ColorConfig,
 }
@@ -51,6 +52,7 @@ pub enum Error {
     PresentationPanicked,
     StaleTarget,
     PresentationStale,
+    InvalidScale,
     NoPreparedScene,
     StalePresentation,
     NotInteractive,
@@ -231,6 +233,9 @@ pub struct Snapshot {
     /// Size of the acknowledged presentation (empty initially for recording).
     pub size: [u32; 2],
     pub requested_size: [u32; 2],
+    /// Device pixels per logical layout unit in the acknowledged sheet.
+    pub scale_factor: f32,
+    pub requested_scale_factor: f32,
     pub poisoned: bool,
     pub nodes: Vec<SnapshotNode>,
 }
@@ -290,6 +295,7 @@ struct Presented {
 }
 struct Prepared {
     size: [u32; 2],
+    scale_factor: f32,
     nodes: Vec<Presented>,
 }
 struct Runtime<M> {
@@ -313,6 +319,8 @@ struct Runtime<M> {
     presentation_valid: bool,
     presentation_size: [u32; 2],
     requested_size: [u32; 2],
+    requested_scale_factor: f32,
+    presentation_scale_factor: f32,
     automatic_presentation: bool,
     next_presentation: u64,
     prepared: Option<Prepared>,
@@ -349,18 +357,37 @@ impl<M: View + 'static> Win<M> {
         )
     }
     pub fn with_options(model: M, options: WindowOptions) -> Result<Self, Error> {
-        Self::mount(model, options, true)
+        Self::with_options_scaled(model, options, 1.0)
+    }
+    /// Headless physical viewport with logical layout and device-resolution text.
+    pub fn with_options_scaled(
+        model: M,
+        options: WindowOptions,
+        scale_factor: f32,
+    ) -> Result<Self, Error> {
+        Self::mount(model, options, true, scale_factor)
     }
     /// Native/backend path: command recording, no CPU framebuffer. Initial S0
     /// has no presented authority until the adapter acknowledges its token.
     pub fn recording(model: M, options: WindowOptions) -> Result<Self, Error> {
-        Self::mount(model, options, false)
+        Self::recording_scaled(model, options, 1.0)
+    }
+    /// Command-only native viewport. Size is physical pixels; component styles,
+    /// shaping and layout remain logical units, transformed once at the root.
+    pub fn recording_scaled(
+        model: M,
+        options: WindowOptions,
+        scale_factor: f32,
+    ) -> Result<Self, Error> {
+        Self::mount(model, options, false, scale_factor)
     }
     fn mount(
         model: M,
         options: WindowOptions,
         automatic_presentation: bool,
+        scale_factor: f32,
     ) -> Result<Self, Error> {
+        validate_scale(options.size, scale_factor)?;
         let sources =
             catch_unwind(AssertUnwindSafe(M::sources)).map_err(|_| Error::OwnerPanicked)?;
         let mut runtime = Runtime {
@@ -384,6 +411,8 @@ impl<M: View + 'static> Win<M> {
             presentation_valid: false,
             presentation_size: [0, 0],
             requested_size: options.size,
+            requested_scale_factor: scale_factor,
+            presentation_scale_factor: 1.0,
             automatic_presentation,
             next_presentation: 1,
             prepared: None,
@@ -495,13 +524,25 @@ impl<M: View + 'static> Win<M> {
     /// Change physical viewport constraints without changing source epoch or
     /// target namespace. Equal size is an idle operation; invalid size is rejected.
     pub fn resize(&self, size: [u32; 2]) -> Result<Commit, Error> {
+        let scale = self
+            .inner
+            .try_borrow()
+            .map_err(|_| Error::Borrowed)?
+            .requested_scale_factor;
+        self.resize_scaled(size, scale)
+    }
+    /// Change physical size or device density. Equal size AND density is idle.
+    /// Scale must be finite, positive, and produce finite f32 logical constraints.
+    pub fn resize_scaled(&self, size: [u32; 2], scale_factor: f32) -> Result<Commit, Error> {
         let mut runtime = self.borrow()?;
         runtime.live()?;
-        if size == runtime.requested_size {
+        if size == runtime.requested_size && scale_factor == runtime.requested_scale_factor {
             return Ok(runtime.commit());
         }
         Canvas::recording(size[0], size[1], runtime.canvas.color_config())?;
+        validate_scale(size, scale_factor)?;
         runtime.requested_size = size;
+        runtime.requested_scale_factor = scale_factor;
         runtime.dirty = true;
         runtime.changed_nodes = 0;
         if let Some(node) = runtime.nodes.first() {
@@ -641,6 +682,8 @@ impl<M: View + 'static> Win<M> {
             prepared_epoch: runtime.prepared_epoch(),
             size: runtime.presentation_size,
             requested_size: runtime.requested_size,
+            scale_factor: runtime.presentation_scale_factor,
+            requested_scale_factor: runtime.requested_scale_factor,
             poisoned: runtime.poisoned,
             nodes,
         })
@@ -792,6 +835,7 @@ impl<M: View + 'static> Runtime<M> {
             && self.prepared.is_none()
             && self.source_epoch == self.presentation_epoch
             && self.requested_size == self.presentation_size
+            && self.requested_scale_factor == self.presentation_scale_factor
         {
             Ok(())
         } else {
@@ -1180,6 +1224,7 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(prepared) = prepared {
             self.presented = prepared.nodes;
             self.presentation_size = prepared.size;
+            self.presentation_scale_factor = prepared.scale_factor;
         }
         // No-op edits may extend complete coverage, but failed preparations do
         // not. Re-acknowledging after loss therefore never covers a failed S.
@@ -1196,6 +1241,7 @@ impl<M: View + 'static> Runtime<M> {
             sequence,
         };
         let size = self.requested_size;
+        let scale_factor = self.requested_scale_factor;
         // A failed resize must retain the old coherent candidate's commands.
         let mut replacement = if size != [self.canvas.width(), self.canvas.height()] {
             Some(if self.automatic_presentation {
@@ -1275,8 +1321,8 @@ impl<M: View + 'static> Runtime<M> {
         self.layout.compute_with(
             self.layout_nodes[0],
             Size {
-                width: AvailableSpace::Definite(size[0] as f32),
-                height: AvailableSpace::Definite(size[1] as f32),
+                width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
+                height: AvailableSpace::Definite(size[1] as f32 / scale_factor),
             },
             &mut measure,
         )?;
@@ -1295,11 +1341,10 @@ impl<M: View + 'static> Runtime<M> {
         for index in 0..self.nodes.len() {
             let layout = self.layout.layout(self.layout_nodes[index])?;
             let node = &mut self.nodes[index];
-            let parent = node
-                .parent
-                .map_or(CoordinateSpace::new(Affine::IDENTITY), |parent| {
-                    spaces[parent]
-                });
+            let parent = node.parent.map_or(
+                CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
+                |parent| spaces[parent],
+            );
             let space = parent
                 .compose(Affine::translation(layout.location.x, layout.location.y))
                 .compose(node.style.transform);
@@ -1335,7 +1380,7 @@ impl<M: View + 'static> Runtime<M> {
                 let fg = node.style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
                 let shape = node.shape(service, Some(layout.content_box_width()))?;
-                scene.draw_text(
+                scene.draw_text_scaled(
                     service,
                     shape,
                     Point {
@@ -1345,6 +1390,7 @@ impl<M: View + 'static> Runtime<M> {
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
                     viewport,
                     fg,
+                    scale_factor,
                 )?;
             }
             presented.push(Presented {
@@ -1370,6 +1416,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         self.prepared = Some(Prepared {
             size,
+            scale_factor,
             nodes: presented,
         });
         self.latest_token = Some(token);
@@ -1418,6 +1465,19 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         None
+    }
+}
+
+fn validate_scale(size: [u32; 2], scale_factor: f32) -> Result<(), Error> {
+    if !scale_factor.is_finite()
+        || scale_factor <= 0.0
+        || size
+            .into_iter()
+            .any(|side| !(side as f32 / scale_factor).is_finite())
+    {
+        Err(Error::InvalidScale)
+    } else {
+        Ok(())
     }
 }
 
