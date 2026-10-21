@@ -10,6 +10,25 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 GSETTINGS_BACKEND=memory "$task_launcher" --launch-immediately --a11y=0 &
 task_launcher_pid=$!
 trap 'kill "$task_launcher_pid" 2>/dev/null || true' EXIT
+# A cached test binary can start before the launcher owns its bus name. Probe
+# readiness instead of relying on compile time or a fixed startup delay.
+for task_attempt in {1..50}; do
+    if dbus-send --session --print-reply --reply-timeout=1000 \
+        --dest=org.a11y.Bus /org/a11y/bus org.freedesktop.DBus.Peer.Ping \
+        >/dev/null 2>&1; then
+        break
+    fi
+    if ! kill -0 "$task_launcher_pid" 2>/dev/null; then
+        wait "$task_launcher_pid" || true
+        echo 'AT-SPI launcher exited before becoming ready.' >&2
+        exit 1
+    fi
+    if (( task_attempt == 50 )); then
+        echo 'AT-SPI launcher did not become ready.' >&2
+        exit 1
+    fi
+    sleep 0.1
+done
 cargo test --locked -p gpui --features x11 --lib \
     native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation \
     -- --ignored --exact --nocapture

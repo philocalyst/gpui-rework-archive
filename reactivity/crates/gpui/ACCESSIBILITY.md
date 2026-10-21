@@ -141,20 +141,17 @@ Run the real proof with an installed AT-SPI launcher and X11 display:
 
 ```sh
 export GPUI_AT_SPI_LAUNCHER=/usr/libexec/at-spi-bus-launcher
-dbus-run-session -- bash -c '
-  GSETTINGS_BACKEND=memory "$GPUI_AT_SPI_LAUNCHER" --launch-immediately --a11y=0 &
-  cargo test -p gpui --features x11 --lib \
-    native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation \
-    -- --ignored --exact --nocapture
-'
+bash tools/test_atspi.sh "$GPUI_AT_SPI_LAUNCHER"
 DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/gpui-no-session-bus \
   cargo test -p gpui --features x11 --lib \
     native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents \
     -- --ignored --exact --nocapture
 ```
 
-The private launcher uses an in-memory settings backend so it does not depend on
-a desktop dconf service or change the user's accessibility setting. Normal
+The helper waits for the private launcher's D-Bus service rather than depending
+on compilation time or a fixed startup delay. It uses an in-memory settings
+backend so it does not depend on a desktop dconf service or change the user's
+accessibility setting. Normal
 applications use the real desktop bus and dynamically detect AT enable/disable.
 
 On the measured inactive native host, thread count rose from 2 before native
