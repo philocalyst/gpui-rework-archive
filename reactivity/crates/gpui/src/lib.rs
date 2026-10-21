@@ -56,7 +56,7 @@ pub use runtime::{
 };
 pub use semantic::SemanticText;
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
-pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
+pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Style, rgb};
 
 /// A component describes ordinary borrowed operands. No mutable runtime or
 /// ambient frame is available in this method.
@@ -76,9 +76,9 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Action, ActionKind, Affine, AlphaMode, Color, Component, El, Element, FieldId, Flex, Flow,
-        Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource, Key, ListId,
-        Point, Rect, Remote, Signal, Source, Sources, Target, View, Win, button, column, div,
-        image, label, oklch, rgb, row, text, text_input, uniform_list,
+        Action, ActionKind, Affine, Align, AlphaMode, Color, Component, El, Element, FieldId, Flex,
+        Flow, Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource, Justify,
+        Key, ListId, Point, Rect, Remote, Signal, Source, Sources, Target, View, Win, button,
+        column, div, image, label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }

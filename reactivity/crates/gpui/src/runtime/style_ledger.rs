@@ -35,7 +35,11 @@ fn style_key(style: Style, transform: bool) -> [u32; 24] {
     key[8..12].copy_from_slice(&style.fg.channels().map(f32::to_bits));
     key[12] = style.bg.space() as u32;
     key[13..17].copy_from_slice(&style.bg.channels().map(f32::to_bits));
-    key[17] = style.flow as u32;
+    // Closed repr(u8) enums and a bool fit the existing distribution-key word.
+    key[17] = style.flow as u32
+        | ((style.align as u32) << 8)
+        | ((style.justify as u32) << 16)
+        | (u32::from(style.wrap) << 24);
     if transform {
         key[18..].copy_from_slice(&affine_key(style.transform));
     }

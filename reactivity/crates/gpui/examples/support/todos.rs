@@ -91,6 +91,7 @@ impl View for Todos {
                     .bg(rgb(0xf1f5f9)),
                 button("Add").p(10).bg(rgb(0xc7d2fe)).on_click(Self::add),
             ))
+            .layout(Flex::row().align(Align::Center))
             .gap(8),
             column(
                 self.todos
@@ -132,12 +133,13 @@ impl View for Todos {
                 self.filter_button("Active", Filter::Active),
                 self.filter_button("Done", Filter::Done),
             ))
-            .gap(6),
+            .layout(Flex::row().wrap(true).gap(6)),
             self.deleted.as_ref().map(|(_, todo)| {
                 row((
                     text(format!("Deleted {}", todo.title)),
                     button("Undo").p(8).bg(rgb(0xfef3c7)).on_click(Self::undo),
                 ))
+                .layout(Flex::row().align(Align::Center).wrap(true))
                 .gap(8)
             }),
         ))

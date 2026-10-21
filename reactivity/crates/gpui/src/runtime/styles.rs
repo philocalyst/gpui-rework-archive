@@ -139,6 +139,9 @@ fn exact_eq(a: &Style, b: &Style) -> bool {
         && a.padding.to_bits() == b.padding.to_bits()
         && a.font_size.to_bits() == b.font_size.to_bits()
         && a.flow == b.flow
+        && a.align == b.align
+        && a.justify == b.justify
+        && a.wrap == b.wrap
         && a.transform.a.to_bits() == b.transform.a.to_bits()
         && a.transform.b.to_bits() == b.transform.b.to_bits()
         && a.transform.c.to_bits() == b.transform.c.to_bits()
@@ -152,7 +155,7 @@ fn exact_eq(a: &Style, b: &Style) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Color, Flow};
+    use crate::{Align, Color, Flow, Justify};
 
     fn build(values: impl IntoIterator<Item = Style>, count: usize) -> Styles {
         let mut builder = Builder::new(count);
@@ -274,7 +277,7 @@ mod tests {
     #[test]
     fn exact_comparison_covers_every_style_field() {
         let base = Style::default();
-        let mut changes = [base; 15];
+        let mut changes = [base; 18];
         changes[0].width = Some(0.0);
         changes[1].height = Some(0.0);
         changes[2].gap = -0.0;
@@ -290,6 +293,9 @@ mod tests {
         changes[12].fg = Color::linear_srgb(0.0, 0.0, 0.0, 1.0).unwrap();
         changes[13].bg = Color::linear_srgb(0.0, 0.0, 0.0, 0.0).unwrap();
         changes[14].bg = Color::rgba(1, 0, 0, 0);
+        changes[15].align = Align::End;
+        changes[16].justify = Justify::End;
+        changes[17].wrap = true;
         assert!(changes.into_iter().all(|value| !exact_eq(&base, &value)));
     }
 
