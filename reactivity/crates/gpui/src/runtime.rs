@@ -332,6 +332,33 @@ mod parent_tests {
     use super::*;
 
     #[test]
+    fn nonzero_identity_keeps_old_node_migration_in_place() {
+        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
+        let nodes = (1..=64)
+            .map(|identity| Node {
+                identity: NonZeroU64::new(identity).unwrap(),
+                parent: Parent::NONE,
+                ordinal: 0,
+                content: Content::new(NodeKind::Div, TextSlot::NONE),
+                component_scope: 0,
+                handler: None,
+            })
+            .collect::<Vec<_>>();
+        let pointer = nodes.as_ptr().cast::<u8>();
+        let mut old = None;
+        let allocation = allocation_counter::measure(|| {
+            old = Some(nodes.into_iter().map(Some).collect::<Vec<_>>());
+        });
+        let old = old.unwrap();
+        assert_eq!(old.as_ptr().cast::<u8>(), pointer);
+        assert_eq!(allocation.count_total, 0);
+        for (index, node) in old.iter().enumerate() {
+            assert_eq!(node.as_ref().unwrap().identity(), index as u64 + 1);
+        }
+    }
+
+    #[test]
     fn compact_parent_covers_the_admitted_index_domain() {
         assert_eq!(size_of::<Parent>(), 4);
         assert_eq!(Parent::new(None).index(), None);
@@ -488,7 +515,7 @@ impl Content {
     }
 }
 struct Node {
-    identity: u64,
+    identity: NonZeroU64,
     parent: Parent,
     ordinal: u32,
     content: Content,
@@ -498,6 +525,10 @@ struct Node {
 #[cfg(test)]
 mod style_ledger;
 impl Node {
+    #[inline]
+    fn identity(&self) -> u64 {
+        self.identity.get()
+    }
     #[inline]
     fn kind(&self) -> NodeKind {
         self.content.kind()
@@ -961,7 +992,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.dirty = true;
         runtime.changed_nodes = 0;
         if let Some(node) = runtime.nodes.first() {
-            let identity = node.identity;
+            let identity = node.identity();
             runtime.layout_dirty.insert(identity);
         }
         if !runtime.logical_valid || !runtime.lists.is_empty() {
@@ -1497,19 +1528,23 @@ impl<M: View + 'static> Runtime<M> {
             let parent = node
                 .parent
                 .index()
-                .map(|parent| old[parent].as_ref().unwrap().identity);
+                .map(|parent| old[parent].as_ref().unwrap().identity());
             *old_counts.entry(parent).or_default() += 1;
             sites.insert((parent, node.ordinal, node.kind()), index);
-            if let Some(row) = self.list_rows.get(&node.identity).filter(|row| row.visible) {
+            if let Some(row) = self
+                .list_rows
+                .get(&node.identity())
+                .filter(|row| row.visible)
+            {
                 keyed_rows.insert((parent, row.key, node.kind()), index);
             }
-            if let Some(&id) = old_list_ids.get(&node.identity) {
+            if let Some(&id) = old_list_ids.get(&node.identity()) {
                 keyed_lists.insert((parent, id, node.kind()), index);
             }
         }
         let old_ids = old
             .iter()
-            .map(|node| node.as_ref().unwrap().identity)
+            .map(|node| node.as_ref().unwrap().identity())
             .collect::<Vec<_>>();
         let mut styles = styles::Builder::new(drafts.len());
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
@@ -1524,7 +1559,7 @@ impl<M: View + 'static> Runtime<M> {
             let ordinal_slot = parent.map_or(0, |parent| parent + 1);
             let ordinal = ordinals[ordinal_slot];
             ordinals[ordinal_slot] += 1;
-            let parent_identity = parent.map(|parent| nodes[parent].identity);
+            let parent_identity = parent.map(|parent| nodes[parent].identity());
             // A shape change invalidates the entire unkeyed run. Equal kinds
             // at shifted ordinals must not silently retarget an old capability.
             let run_survives = reuse_identities
@@ -1559,7 +1594,9 @@ impl<M: View + 'static> Runtime<M> {
                 self.next_identity += 1;
                 self.layout_dirty.insert(identity);
                 Node {
-                    identity,
+                    // IDs start at one, never roll back, and admission above
+                    // reserves the entire checked nonzero interval.
+                    identity: NonZeroU64::new(identity).expect("admitted node identity"),
                     parent: Parent::new(parent),
                     ordinal,
                     content: Content::new(draft.kind, TextSlot::NONE),
@@ -1592,17 +1629,17 @@ impl<M: View + 'static> Runtime<M> {
                         shaped: None,
                     }
                 });
-                self.layout_dirty.insert(node.identity);
+                self.layout_dirty.insert(node.identity());
                 self.dirty = true;
                 node_changed = true;
             }
-            let style = self.overrides.resolve(node.identity, draft.style);
+            let style = self.overrides.resolve(node.identity(), draft.style);
             if previous_style != style {
                 self.dirty = true;
                 node_changed = true;
             }
             if layout_changed(previous_style, style) {
-                self.layout_dirty.insert(node.identity);
+                self.layout_dirty.insert(node.identity());
             }
             if previous_style.font_size != style.font_size
                 && let Some(site) = &mut site
@@ -1636,20 +1673,20 @@ impl<M: View + 'static> Runtime<M> {
             || old_ids
                 .iter()
                 .zip(&nodes)
-                .any(|(old, new)| *old != new.identity);
+                .any(|(old, new)| *old != new.identity());
         self.topology_changed |= topology;
         self.dirty |= topology;
         let mut lists = BTreeMap::new();
         let mut list_rows = BTreeMap::new();
         for draft in list_drafts {
-            let identity = nodes[draft.index].identity;
+            let identity = nodes[draft.index].identity();
             let changed = self
                 .lists
                 .get(&draft.id)
                 .is_none_or(|old| old.viewport != draft.plan.viewport);
             self.dirty |= changed;
             for row in draft.rows {
-                let identity = nodes[row.index].identity;
+                let identity = nodes[row.index].identity();
                 if self
                     .list_rows
                     .get(&identity)
@@ -1685,7 +1722,7 @@ impl<M: View + 'static> Runtime<M> {
                 .get_or_insert_with(|| Box::new(Metadata::default()));
             let mut base = Vec::with_capacity(annotation_drafts.len());
             for (annotation, fields) in annotation_drafts.into_iter().zip(annotation_fields) {
-                let identity = nodes[annotation.node as usize].identity;
+                let identity = nodes[annotation.node as usize].identity();
                 let previous = metadata.base(identity);
                 let mut values = [None, None];
                 for (slot, text) in [annotation.text.name, annotation.text.description]
@@ -1744,7 +1781,7 @@ impl<M: View + 'static> Runtime<M> {
             .nodes
             .iter()
             .enumerate()
-            .map(|(i, node)| (node.identity, i))
+            .map(|(i, node)| (node.identity(), i))
             .collect();
         self.overrides
             .retain(|identity| self.by_identity.contains_key(&identity));
@@ -1781,7 +1818,7 @@ impl<M: View + 'static> Runtime<M> {
                     let base = self
                         .metadata
                         .as_ref()
-                        .and_then(|metadata| metadata.base(node.identity))
+                        .and_then(|metadata| metadata.base(node.identity()))
                         .expect("annotation destination has a logical column");
                     if destination.port() == Port::Name {
                         base.name.as_deref()
@@ -1804,7 +1841,7 @@ impl<M: View + 'static> Runtime<M> {
                             .expect("visual fanout has text");
                         text.value = promoted.as_ref().unwrap().clone();
                         text.shaped = None;
-                        self.layout_dirty.insert(node.identity);
+                        self.layout_dirty.insert(node.identity());
                         self.dirty = true;
                         visual_changed = true;
                     }
@@ -1812,7 +1849,7 @@ impl<M: View + 'static> Runtime<M> {
                         let base = self
                             .metadata
                             .as_mut()
-                            .and_then(|metadata| metadata.base_mut(node.identity))
+                            .and_then(|metadata| metadata.base_mut(node.identity()))
                             .expect("annotation destination has a logical column");
                         if destination.port() == Port::Name {
                             base.name = promoted.clone();
@@ -1950,7 +1987,7 @@ impl<M: View + 'static> Runtime<M> {
                         node.kind(),
                         self.styles.get(index),
                         node.parent.index().map(|index| self.styles.get(index).flow),
-                        self.list_rows.get(&node.identity),
+                        self.list_rows.get(&node.identity()),
                     ),
                 )?;
                 if node.text_slot().0 != u32::MAX {
@@ -1968,11 +2005,9 @@ impl<M: View + 'static> Runtime<M> {
             // including inspector contributions applied before description.
             for list in self.lists.values() {
                 let index = self.by_identity[&list.identity];
-                if self.nodes[index]
-                    .parent
-                    .index()
-                    .is_some_and(|parent| self.layout_dirty.contains(&self.nodes[parent].identity))
-                {
+                if self.nodes[index].parent.index().is_some_and(|parent| {
+                    self.layout_dirty.contains(&self.nodes[parent].identity())
+                }) {
                     self.layout_dirty.insert(list.identity);
                 }
             }
@@ -2179,13 +2214,13 @@ impl<M: View + 'static> Runtime<M> {
                 continue;
             }
             if node.kind() == NodeKind::ListItem {
-                visible_rows.insert(node.identity);
+                visible_rows.insert(node.identity());
             }
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
             presented.push(Presented {
-                identity: node.identity,
+                identity: node.identity(),
                 parent: published_parent,
                 kind: node.kind(),
                 text: node
@@ -2209,8 +2244,8 @@ impl<M: View + 'static> Runtime<M> {
                     self.presented.get(index),
                     &presented[index],
                     self.metadata.as_deref(),
-                    list_metadata.get(&node.identity).copied(),
-                    self.list_rows.get(&node.identity),
+                    list_metadata.get(&node.identity()).copied(),
+                    self.list_rows.get(&node.identity()),
                 );
             }
             if let Some(sheet) = &mut metadata_sheet
@@ -2218,9 +2253,9 @@ impl<M: View + 'static> Runtime<M> {
             {
                 sheet.capture(
                     metadata,
-                    node.identity,
-                    list_metadata.get(&node.identity).copied(),
-                    self.list_rows.get(&node.identity),
+                    node.identity(),
+                    list_metadata.get(&node.identity()).copied(),
+                    self.list_rows.get(&node.identity()),
                 );
             }
         }
