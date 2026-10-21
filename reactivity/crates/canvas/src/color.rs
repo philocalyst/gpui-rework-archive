@@ -38,6 +38,14 @@ impl Default for Color {
     }
 }
 impl Color {
+    /// Exact authored channel bits and color space, including signed zeros.
+    /// This compares the validated canonical authoring value; it does not
+    /// compare converted pixels. Ordinary `PartialEq` keeps numeric equality.
+    #[inline]
+    pub fn same_authoring(self, other: Self) -> bool {
+        self.words == other.words
+    }
+
     #[inline(never)]
     fn equal_components(self, other: Self) -> bool {
         self.space() == other.space() && self.channels() == other.channels()
