@@ -94,6 +94,70 @@ struct Command {
     bounds: [usize; 4],
 }
 
+/// Immutable mask borrowed from a prepared scene. Backends upload while borrowed
+/// or obtain their own explicit backing lease; this borrow cannot outlive Canvas.
+#[derive(Clone, Copy, Debug)]
+pub struct GlyphMask<'a> {
+    pub key: crate::GlyphKey,
+    pub width: usize,
+    pub height: usize,
+    pub coverage: &'a [u8],
+}
+
+/// Canonical ordered draw, with the exact inverse used by the CPU reference.
+/// A backend narrowing f64 to f32 must validate its numeric/coverage contract.
+/// Color is premultiplied extended linear sRGB. Clip is in canvas coordinates;
+/// bounds is a conservative integer device quad, already clipped to the canvas.
+#[derive(Clone, Copy, Debug)]
+pub struct PreparedDraw<'a> {
+    pub local_rect: Rect,
+    pub inverse: [f64; 6],
+    pub clip: Rect,
+    pub bounds: Rect,
+    pub color: [f32; 4],
+    pub mask: Option<GlyphMask<'a>>,
+}
+
+/// Borrowed canonical scene; CPU tile bins are disposable and not part of it.
+/// Clear and draws use the same working-color domain. No rasterization occurs
+/// when obtaining this view or traversing it, and no mask Arc is cloned.
+#[derive(Clone, Copy)]
+pub struct PreparedScene<'a> {
+    pub width: u32,
+    pub height: u32,
+    pub color_config: ColorConfig,
+    pub clear: [f32; 4],
+    commands: &'a [Command],
+}
+impl<'a> PreparedScene<'a> {
+    pub fn draws(self) -> impl ExactSizeIterator<Item = PreparedDraw<'a>> + DoubleEndedIterator {
+        self.commands.iter().map(|command| {
+            let [left, top, right, bottom] = command.bounds;
+            PreparedDraw {
+                local_rect: command.rect,
+                inverse: command.map.inverse,
+                clip: command.clip,
+                bounds: Rect::new(
+                    left as f32,
+                    top as f32,
+                    (right - left) as f32,
+                    (bottom - top) as f32,
+                ),
+                color: command.color,
+                mask: match &command.source {
+                    Source::Rect => None,
+                    Source::Glyph(mask) => Some(GlyphMask {
+                        key: mask.key,
+                        width: mask.metrics.width,
+                        height: mask.metrics.height,
+                        coverage: &mask.pixels,
+                    }),
+                },
+            }
+        })
+    }
+}
+
 /// Retained software display list. Only RGBA8 output is full-frame storage.
 /// Rendering uses one fixed linear-premultiplied tile, then encodes once.
 /// `clear` begins a new scene; appending after `pixels` rerenders the retained scene.
@@ -175,6 +239,15 @@ impl Canvas {
     }
     pub fn stats(&self) -> RenderStats {
         self.stats
+    }
+    pub fn prepared_scene(&self) -> PreparedScene<'_> {
+        PreparedScene {
+            width: self.width as u32,
+            height: self.height as u32,
+            color_config: self.color_config,
+            clear: self.clear,
+            commands: &self.commands,
+        }
     }
     /// Describes the bytes returned by pixels. Display P3 requires a tagged,
     /// negotiated presentation path; treating those bytes as sRGB is incorrect.
