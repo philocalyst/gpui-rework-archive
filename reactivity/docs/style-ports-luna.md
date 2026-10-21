@@ -91,16 +91,22 @@ vector capacity. Style fanouts add one 4-byte destination per bound `(node, prop
 `size_of`/allocation-counter tests for any additional codec/descriptor bytes rather than assuming
 the current `Fanout` size remains unchanged.
 
-Plan destination tags for the known schema growth instead of treating the current four-bit
-space as open-ended. The current style catalog has 12 properties and the three existing text
-sinks (Visual/Name/Description), so four bits use 15 of 16 codes. A radius property makes 13 style
-sinks and consumes the sixteenth code. Reserve five low bits in `Destination(u32)`: 32 codes cover
-those 16 destinations and leave 16 checked codes for later properties, while the node index still
-has 27 bits. Add a compile-time ceiling
-`MAX_NODES <= (u32::MAX >> 5) + 1`, a checked constructor, and a schema-level test that every sink
-has a unique tag below 32. Keep explicit tags decoupled from Rust field offsets and fail the build
-or select a cold extended descriptor if the closed schema ever exceeds 32 sinks; never truncate.
-This retains the 4-byte destination and adds no field to a hot `Node`.
+Keep the 4-byte destination while carrying the actual typed sink ID, rather than spending one
+nibble per property. Lay it out node-major as `[node:17 | property:13 | class:2]` in `u32`:
+bits 31..15 hold the node index, 14..2 the stable property code, and 1..0 the sink class
+(`Visual`, `Name`, `Description`, or `Style`). `MAX_NODES=100,000` fits in 17 node bits. The
+property field admits 8192 codes (0 through 8191), so the current 12 style properties plus the
+planned radius sink consume no new representation and leave a large checked range for the closed
+schema. Non-style classes require property code zero; Style stores its explicit `PropertyId`.
+
+This preserves the current packed sort's important node-major property: all destinations for one
+node remain adjacent, so the existing changed-node deduplication still works. Decode node from
+`packed >> 15`, class from `packed & 3`, and property only on a Style destination. Use a checked
+`PropertyId::from_code` match; never transmute raw bits into an enum. Add compile-time checks that
+`MAX_NODES <= 1 << 17` and every declared style ID is at most 8191, plus round-trip, illegal
+class/property, max-node, max-property, and sorted-adjacency tests. If the closed property schema
+ever exceeds 8191, fail the schema check and add a cold extended descriptor; never truncate.
+The encoding remains 4 bytes and adds no field to a hot `Node`.
 
 The cold binding accumulator must implement builder last-write-wins. For example,
 `.bg(&a).bg(&b)` subscribes only to `b`, and `.bg(&a).bg(Color::BLACK)` removes the source sink
