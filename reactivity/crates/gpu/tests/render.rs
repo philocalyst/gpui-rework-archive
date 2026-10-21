@@ -181,7 +181,8 @@ fn real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks() {
 fn linear_float_target_retains_hdr_and_premultiplied_alpha() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
-        let mut canvas = Canvas::recording(2, 1, ColorConfig::default()).unwrap();
+        let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+        let mut canvas = Canvas::recording(2, 1, config).unwrap();
         canvas.clear(Color::linear_srgb(4.0, 0.5, -0.25, 0.5).unwrap());
         let bytes = readback(&mut renderer, &canvas);
         let pixel: Vec<_> = bytes[..8]
@@ -190,6 +191,36 @@ fn linear_float_target_retains_hdr_and_premultiplied_alpha() {
             .collect();
         assert_eq!(pixel, [0x4000, 0x3400, 0xb000, 0x3800]);
         assert_eq!(canvas.output_bytes(), 0);
+    });
+}
+
+#[test]
+fn float_target_rejects_sdr_scene_metadata_before_submission() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+        let target = renderer.device().create_texture(&wgpu::TextureDescriptor {
+            label: None,
+            size: wgpu::Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: renderer.format(),
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+        assert!(matches!(
+            renderer.render(
+                canvas.prepared_scene(),
+                &target.create_view(&Default::default())
+            ),
+            Err(gpui_gpu::Error::InvalidScene)
+        ));
+        assert_eq!(renderer.stats().submissions, 0);
     });
 }
 
@@ -227,6 +258,46 @@ fn narrowed_inverse_preserves_the_adversarial_half_open_edge() {
 }
 
 #[test]
+fn clip_extent_sum_preserves_half_open_sample_membership() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        for bits in [
+            0.025_f32.to_bits() - 2,
+            0.025_f32.to_bits() - 1,
+            0.025_f32.to_bits(),
+            0.025_f32.to_bits() + 1,
+        ] {
+            let extent = f32::from_bits(bits);
+            for clip in [
+                Rect::new(0.1, 0.0, extent, 1.0),
+                Rect::new(0.0, 0.1, 1.0, extent),
+            ] {
+                for transform in [
+                    Affine::IDENTITY,
+                    Affine::translation(1.0, 1.0).compose(Affine::scale(-1.0, -1.0)),
+                ] {
+                    let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+                    canvas.clear(Color::WHITE);
+                    canvas
+                        .fill_rect(
+                            Rect::new(0.0, 0.0, 1.0, 1.0),
+                            transform,
+                            clip,
+                            Color::rgb(255, 0, 0),
+                        )
+                        .unwrap();
+                    assert_eq!(
+                        readback(&mut renderer, &canvas),
+                        canvas.pixels(),
+                        "clip={clip:?} transform={transform:?}"
+                    );
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn zero_coverage_draw_preserves_threshold_clear_and_hdr_bits() {
     pollster::block_on(async {
         for format in [
@@ -241,7 +312,12 @@ fn zero_coverage_draw_preserves_threshold_clear_and_hdr_bits() {
                 if format != wgpu::TextureFormat::Rgba16Float && clear.alpha() != 1.0 {
                     continue;
                 }
-                let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+                let config = if format == wgpu::TextureFormat::Rgba16Float {
+                    ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+                } else {
+                    ColorConfig::default()
+                };
+                let mut canvas = Canvas::recording(1, 1, config).unwrap();
                 canvas.clear(clear);
                 let before = readback(&mut renderer, &canvas);
                 canvas

@@ -1,5 +1,7 @@
 use bytemuck::{Pod, Zeroable};
-use gpui_canvas::{GlyphKey, GlyphMask, OutputProfile, PreparedDraw, PreparedScene, SdrMapping};
+use gpui_canvas::{
+    GlyphKey, GlyphMask, OutputProfile, PixelFormat, PreparedDraw, PreparedScene, SdrMapping,
+};
 use std::{borrow::Cow, collections::HashMap};
 
 const MAX_DRAWS: usize = 65_536;
@@ -213,7 +215,7 @@ pub struct Renderer {
     references: Vec<u32>,
     cursors: Vec<u32>,
     residuals: Vec<Correction>,
-    residual_keys: HashMap<[u32; 6], u32>,
+    residual_keys: HashMap<[u32; 8], u32>,
     stats: Stats,
 }
 impl Renderer {
@@ -355,6 +357,9 @@ impl Renderer {
             return Err(Error::InvalidScene);
         }
         let hdr = self.format == wgpu::TextureFormat::Rgba16Float;
+        if hdr != (scene.color_config.format == PixelFormat::Rgba16Float) {
+            return Err(Error::InvalidScene);
+        }
         if !hdr && scene.clear[3] != 1.0 {
             return Err(Error::InvalidScene);
         }
@@ -401,8 +406,11 @@ impl Renderer {
                 self.cursors[tile] += 1;
             });
             let [a, b, c, d, tx, ty] = draw.inverse.map(|value| value as f32);
-            let low = std::array::from_fn::<_, 6, _>(|i| {
-                (draw.inverse[i] - f64::from(draw.inverse[i] as f32)) as f32
+            let clip = draw.clip;
+            let low = std::array::from_fn::<_, 8, _>(|i| match i {
+                0..6 => (draw.inverse[i] - f64::from(draw.inverse[i] as f32)) as f32,
+                6 => clip_residual(clip.x, clip.width),
+                _ => clip_residual(clip.y, clip.height),
             });
             let key = low.map(f32::to_bits);
             let correction = if low.iter().all(|v| *v == 0.0) {
@@ -411,14 +419,13 @@ impl Renderer {
                 *self.residual_keys.entry(key).or_insert_with(|| {
                     let slot = self.residuals.len() as u32;
                     self.residuals.push(Correction {
-                        x: [low[0], low[2], low[4], 0.0],
-                        y: [low[1], low[3], low[5], 0.0],
+                        x: [low[0], low[2], low[4], low[6]],
+                        y: [low[1], low[3], low[5], low[7]],
                     });
                     slot
                 })
             };
             let r = draw.local_rect;
-            let clip = draw.clip;
             let atlas = draw.mask.map_or([0; 4], |mask| {
                 let tile = self.atlas.entries[&mask.key];
                 [tile.x, tile.y, tile.width | (tile.height << 16), 0]
@@ -429,7 +436,7 @@ impl Renderer {
                 local: [r.x, r.y, r.width, r.height],
                 inverse_x: [a, c, tx, error_x],
                 inverse_y: [b, d, ty, error_y],
-                clip: [clip.x, clip.y, clip.x + clip.width, clip.y + clip.height],
+                clip: [clip.x, clip.y, clip.width, clip.height],
                 color: draw.color,
                 atlas: [atlas[0], atlas[1], atlas[2], correction],
             };
@@ -597,6 +604,15 @@ fn tile_count(draw: PreparedDraw<'_>) -> usize {
     ((r.x as usize + r.width as usize - 1) / 16 - r.x as usize / 16 + 1)
         * ((r.y as usize + r.height as usize - 1) / 16 - r.y as usize / 16 + 1)
 }
+fn clip_residual(start: f32, extent: f32) -> f32 {
+    let rounded = start + extent;
+    if rounded.is_finite() {
+        (f64::from(start) + f64::from(extent) - f64::from(rounded)) as f32
+    } else {
+        // A finite sample cannot equal an overflowing rounded clip endpoint.
+        0.0
+    }
+}
 fn visit(draw: PreparedDraw<'_>, columns: usize, mut visit: impl FnMut(usize)) {
     let r = draw.bounds;
     for y in r.y as usize / 16..=(r.y as usize + r.height as usize - 1) / 16 {
@@ -719,6 +735,48 @@ mod tests {
         assert_eq!(std::mem::size_of::<Correction>(), 32);
         assert_eq!(std::mem::offset_of!(Correction, y), 16);
         assert_eq!(std::mem::size_of::<Globals>(), 48);
+        let source = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let module = wgpu::naga::front::wgsl::parse_str(&source).unwrap();
+        assert_eq!(
+            module
+                .global_variables
+                .iter()
+                .filter(|(_, variable)| matches!(
+                    variable.space,
+                    wgpu::naga::AddressSpace::Storage { .. }
+                ))
+                .count(),
+            4,
+            "remain within the baseline four storage buffers per stage"
+        );
+        let mut layout = wgpu::naga::proc::Layouter::default();
+        layout.update(module.to_ctx()).unwrap();
+        for (name, size, offsets) in [
+            ("Draw", 96, &[0, 16, 32, 48, 64, 80][..]),
+            ("Globals", 48, &[0, 16, 32][..]),
+            ("Correction", 32, &[0, 16][..]),
+        ] {
+            let (handle, ty) = module
+                .types
+                .iter()
+                .find(|(_, ty)| ty.name.as_deref() == Some(name))
+                .unwrap();
+            assert_eq!(layout[handle].size, size);
+            assert_eq!(
+                layout[handle].alignment,
+                wgpu::naga::proc::Alignment::SIXTEEN
+            );
+            let wgpu::naga::TypeInner::Struct { members, .. } = &ty.inner else {
+                panic!("expected struct")
+            };
+            assert_eq!(
+                members
+                    .iter()
+                    .map(|member| member.offset)
+                    .collect::<Vec<_>>(),
+                offsets
+            );
+        }
     }
 
     #[test]

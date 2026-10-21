@@ -87,11 +87,31 @@ pub mod ui {
         integer
     }
 
+    pub fn outside_clip_max(
+        point: f32,
+        start: f32,
+        extent: f32,
+        index: u32,
+        vertical: bool,
+    ) -> bool {
+        let end = start + extent;
+        if point != end {
+            return point > end;
+        }
+        // Only equality with the rounded endpoint is ambiguous. Preserve the
+        // addition's low lane: a positive residual still includes this sample.
+        let correction = get!(CORRECTIONS)[index as usize];
+        if vertical {
+            return correction.y.w <= 0.0;
+        }
+        correction.x.w <= 0.0
+    }
+
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
         if point.x < draw.clip.x
             || point.y < draw.clip.y
-            || point.x >= draw.clip.z
-            || point.y >= draw.clip.w
+            || outside_clip_max(point.x, draw.clip.x, draw.clip.z, draw.atlas.w, false)
+            || outside_clip_max(point.y, draw.clip.y, draw.clip.w, draw.atlas.w, true)
         {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
@@ -104,8 +124,8 @@ pub mod ui {
         let mapped = position * dimensions / draw.local.zw();
         let fraction = fract(mapped);
         let texels = min(fraction, vec2f(1.0, 1.0) - fraction);
-        let texel_error = error * dimensions / draw.local.zw()
-            + (abs(mapped) + vec2f(1.0, 1.0)) * 3.8146973e-6;
+        let texel_error =
+            error * dimensions / draw.local.zw() + (abs(mapped) + vec2f(1.0, 1.0)) * 3.8146973e-6;
         let correct = edges.x <= error.x
             || edges.y <= error.y
             || (draw.atlas.z > 0 && (texels.x <= texel_error.x || texels.y <= texel_error.y));

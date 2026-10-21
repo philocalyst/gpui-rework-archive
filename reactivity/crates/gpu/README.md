@@ -23,6 +23,11 @@ arithmetic; no portable exact-predicate theorem or all-backend parity claim is
 made. Nonfinite coefficients, excessive intermediate magnitudes and overflowing
 mask-coordinate scales are rejected with `Error::Precision`.
 
+Clips retain their authored start and extent. Only a sample equal to the rounded
+clip endpoint loads the host-computed endpoint residual, preserving the CPU's
+half-open comparison against the f64 sum. These two residuals use the spare
+lanes of the existing correction record; draw and correction strides do not grow.
+
 The Vulkan regressions exercise neighboring representable widths, reflection,
 overlapping alpha edges, physical glyph scales 1/1.25/1.5/2, threshold clear
 colors and premultiplied float output. They run on Mesa llvmpipe Vulkan here;
@@ -35,9 +40,9 @@ conformance; this command requires an adapter and never silently skips tests.
 ## Storage and output
 
 Draw records remain 96 bytes. One 32-byte zero correction is shared by exactly
-representable inverses; other residual tuples are deduplicated by complete bit
+representable inverses and clip endpoints; other residual tuples are deduplicated by complete bit
 equality in a reused host hash table. Each distinct tuple costs another 32 bytes
-on the host and GPU, plus one host hash entry (24-byte key and 4-byte index,
+on the host and GPU, plus one host hash entry (32-byte key and 4-byte index,
 plus table overhead). The worst case is one tuple per draw. Buffer capacities
 grow geometrically and remain retained. `Stats` reports upload bytes, allocated
 GPU buffer bytes, host vector capacity bytes and correction hash entry capacity;
@@ -50,6 +55,8 @@ profile conversion and storage, avoiding an unnecessary divide/multiply by
 alpha. SDR Reinhard evaluation clamps overflow defensively before division;
 the canonical color configuration's exposure admission still applies.
 An HDR float render target is independent of native surface color management.
+Scene `ColorConfig::format` must match the target's SDR or float storage class;
+the renderer rejects mismatches rather than silently overriding scene metadata.
 The current native host presents a tagged SDR surface; this float target API
 does not imply native HDR swapchain negotiation or display support.
 
