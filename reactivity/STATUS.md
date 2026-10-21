@@ -78,6 +78,13 @@ for aarch64 macOS and x86-64 Windows MSVC. Actual AppKit execution, UIA/VoiceOve
 and visible CPU/GPU handoff remain required. Windows and Wayland runtime behavior need their native runners; added
 CI workflows are not reported as completed remote results.
 
+[Subsequent turn checks](evidence/turn-checks.json) pin source 067eebce12:
+the borrowed source/delivery phase refactor passes the complete GPUI suite,
+the real X11 worker script and warnings-denied all-target Clippy on Linux plus
+the actual macOS/Windows desktop adapters under cross-compilation. The native
+test gate is scoped to its Linux X11 caller. These supplemental checks do not
+represent UIA, VoiceOver or other target OS runtime execution.
+
 ## Measurements and their boundaries
 
 | Change | Evidence | Limit |

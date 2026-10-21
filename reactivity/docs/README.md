@@ -23,6 +23,7 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Reader/cohort implementation seam](reader-cohort-implementation-luna.md) | Typed Library question, exact input-version admission, source replacement and bounded completion ownership; Salsa/Bevy/Adapton comparisons |
 | [Field and immutable text ownership](text-ownership-luna.md) | Checked source namespace, thin text leases, exact Triomphe allocation comparison and dependency costs |
 | [Lossless color packing](color-packing-luna.md) | Word-aligned Oklch, bounded Linear sRGB exponent codec and exact 16-byte author colors without narrowing HDR admission |
+| [Style representation](style-core-representation-luna.md) | Actual allocator costs for sparse overrides, exact dimension encoding, authored/derived layout separation and conditional sharing |
 | [Review dispositions](../REVIEW.md) | Links to all six adversarial reports and their final status |
 
 [Input manifest](inputs/manifest.json) hashes the supplied original
