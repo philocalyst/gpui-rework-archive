@@ -282,10 +282,32 @@ fn encoding_has_no_per_tile_allocation_and_parsing_and_decoding_allocate_nothing
         checkpoint = Some(Independent::encode(s, &image, LIMITS).unwrap())
     });
     let checkpoint = checkpoint.unwrap();
-    assert!(encoded.count_total <= 2, "{encoded:?}"); // output Vec plus final shrink
+    assert_eq!(encoded.count_total, 1, "{encoded:?}");
     assert_eq!(encoded.count_current, 1);
     assert_eq!(encoded.bytes_current as usize, checkpoint.as_bytes().len());
-    let delta = checkpoint.delta(s, &image, LIMITS).unwrap();
+    assert_eq!(encoded.bytes_max as usize, checkpoint.as_bytes().len());
+    let mut delta = None;
+    let delta_allocations =
+        allocation_counter::measure(|| delta = Some(checkpoint.delta(s, &image, LIMITS).unwrap()));
+    let delta = delta.unwrap();
+    assert_eq!(delta_allocations.count_total, 1);
+    assert_eq!(
+        delta_allocations.bytes_max as usize,
+        delta.storage().stream_bytes
+    );
+    let mut rejected = None;
+    let rejected_allocations = allocation_counter::measure(|| {
+        rejected = Some(Independent::encode(
+            s,
+            &image,
+            Limits {
+                max_encoded_bytes: checkpoint.as_bytes().len() - 1,
+                ..LIMITS
+            },
+        ))
+    });
+    assert!(matches!(rejected.unwrap(), Err(Error::LimitExceeded)));
+    assert_eq!(rejected_allocations.count_total, 0);
     let mut output = [0; MAX_TILE_BYTES];
     let decoded = allocation_counter::measure(|| {
         for index in (0..checkpoint.tile_count()).rev() {
