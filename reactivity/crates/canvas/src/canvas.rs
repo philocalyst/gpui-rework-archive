@@ -111,6 +111,9 @@ pub struct GlyphMask<'a> {
 /// A backend narrowing f64 to f32 must validate its numeric/coverage contract.
 /// Color is premultiplied extended linear sRGB. Clip is in canvas coordinates;
 /// bounds is a conservative integer device quad, already clipped to the canvas.
+/// Glyph coverage cells span local_rect: mask pixel dimensions may differ from
+/// logical extents under device-density rasterization. Test the half-open local
+/// rectangle before normalizing into mask coordinates.
 #[derive(Clone, Copy, Debug)]
 pub struct PreparedDraw<'a> {
     pub local_rect: Rect,
@@ -306,7 +309,7 @@ impl Canvas {
         Ok(())
     }
     /// Origin and layout positions are local to transform. Layout and glyph masks
-    /// come from the exact same font service. No text is reshaped during painting.
+    /// belong to the same immutable FontFace. No text is reshaped during painting.
     pub fn draw_text(
         &mut self,
         text: &mut TextSystem,
@@ -316,7 +319,35 @@ impl Canvas {
         clip: Rect,
         color: Color,
     ) -> Result<(), Error> {
+        self.draw_text_scaled(text, layout, origin, transform, clip, color, 1.0)
+    }
+    /// Shape positions remain logical; rasterize masks at the supplied device
+    /// density and express their extents back in logical units. This preserves
+    /// device-resolution glyph coverage without changing layout or enlarging a
+    /// low-resolution bitmap. Physical font sizes are bounded to 4096px, and
+    /// each bitmap remains subject to the existing 1MiB raster resource limit.
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
         text.validate(layout)?;
+        if !raster_scale.is_finite() || raster_scale <= 0.0 {
+            return Err(Error::InvalidGeometry);
+        }
+        let physical_font_size = layout.font_size() * raster_scale;
+        if !physical_font_size.is_finite()
+            || !(0.0..=4096.0).contains(&physical_font_size)
+            || physical_font_size == 0.0
+        {
+            return Err(Error::InvalidFontSize);
+        }
         if !origin.x.is_finite() || !origin.y.is_finite() {
             return Err(Error::InvalidGeometry);
         }
@@ -327,13 +358,15 @@ impl Canvas {
         let mut pending_masks = HashSet::new();
         let mut pending_bytes = 0;
         for glyph in layout.glyphs() {
-            let raster = text.raster(glyph.id, layout.font_size())?;
+            let raster = text.raster(glyph.id, physical_font_size)?;
             let m = raster.metrics;
             let rect = Rect::new(
-                origin.x + glyph.x + m.xmin as f32,
-                origin.y + glyph.baseline - m.ymin as f32 - m.height as f32,
-                m.width as f32,
-                m.height as f32,
+                origin.x + glyph.x + m.xmin as f32 / raster_scale,
+                origin.y + glyph.baseline
+                    - m.ymin as f32 / raster_scale
+                    - m.height as f32 / raster_scale,
+                m.width as f32 / raster_scale,
+                m.height as f32 / raster_scale,
             );
             if let Some(command) =
                 self.prepare(rect, transform, clip, color, Source::Glyph(raster))?
@@ -837,6 +870,20 @@ impl CanvasScene<'_> {
         self.pending
             .draw_text(text, layout, origin, transform, clip, color)
     }
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
+        self.pending
+            .draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
+    }
     pub fn commit(self) {
         self.target.clear = self.pending.clear;
         self.target.commands = self.pending.commands;
@@ -922,21 +969,38 @@ fn sample(command: &Command, x: usize, y: usize, stats: &mut RenderStats) -> [f3
                         0.0
                     }
                 }
-                Source::Glyph(mask) => mask_sample(mask, lx - r.x as f64, ly - r.y as f64),
+                Source::Glyph(mask) => mask_sample(
+                    mask,
+                    lx - r.x as f64,
+                    ly - r.y as f64,
+                    r.width as f64,
+                    r.height as f64,
+                ),
             };
         }
     }
     values
 }
-fn mask_sample(mask: &Raster, x: f64, y: f64) -> f32 {
+fn mask_sample(mask: &Raster, x: f64, y: f64, width: f64, height: f64) -> f32 {
     // Fontdue has already integrated outline coverage into each raster cell.
     // Reconstruct it as a piecewise-constant field, preserving that native AA
     // at integer placement. General affine resampling uses the common 4x4 grid;
     // this is bounded sampling, not a scalable outline or exact area renderer.
-    if x < 0.0 || y < 0.0 || x >= mask.metrics.width as f64 || y >= mask.metrics.height as f64 {
+    // The half-open logical rectangle defines coverage. Normalization can round
+    // an exterior edge inward, or the last interior point up to the texel count;
+    // test the local domain first, then clamp only an admitted texel index.
+    if x < 0.0
+        || y < 0.0
+        || x >= width
+        || y >= height
+        || mask.metrics.width == 0
+        || mask.metrics.height == 0
+    {
         return 0.0;
     }
-    mask.pixels[y as usize * mask.metrics.width + x as usize] as f32 / 255.0
+    let column = ((x * (mask.metrics.width as f64 / width)) as usize).min(mask.metrics.width - 1);
+    let row = ((y * (mask.metrics.height as f64 / height)) as usize).min(mask.metrics.height - 1);
+    mask.pixels[row * mask.metrics.width + column] as f32 / 255.0
 }
 fn blend(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
     let alpha = src[3] * coverage;
@@ -956,4 +1020,45 @@ fn sample_mean(samples: impl Iterator<Item = [f32; 4]>) -> [f32; 4] {
         }
     }
     sum.map(|value| (value / 16.0) as f32)
+}
+
+#[cfg(test)]
+mod scaled_mask_tests {
+    use super::*;
+
+    #[test]
+    fn normalized_mask_obeys_half_open_local_edges_before_texel_rounding() {
+        let mut fonts = TextSystem::bundled().unwrap();
+        let layout = fonts.shape("H", 16.0, None).unwrap();
+        let original = fonts.raster(layout.glyphs()[0].id, 20.0).unwrap();
+        // Uniform nonzero coverage makes accidental edge inclusion or an
+        // interior lookup rounded beyond the last texel directly observable.
+        let mask = Raster {
+            key: original.key,
+            metrics: fontdue::Metrics {
+                width: 17,
+                height: 9,
+                ..Default::default()
+            },
+            pixels: vec![255; 17 * 9],
+        };
+        for scale in [1.0_f32, 1.25, 1.3, 1.5, 1.75, 2.25, 3.1] {
+            let width = (17.0 / scale) as f64;
+            let height = (9.0 / scale) as f64;
+            for (x, y, expected) in [
+                (0.0, 0.0, 1.0),
+                (width.next_down(), height.next_down(), 1.0),
+                (width, height * 0.5, 0.0),
+                (width * 0.5, height, 0.0),
+                (width.next_up(), height * 0.5, 0.0),
+                (-f64::MIN_POSITIVE, height * 0.5, 0.0),
+            ] {
+                assert_eq!(
+                    mask_sample(&mask, x, y, width, height),
+                    expected,
+                    "scale={scale},x={x},y={y}"
+                );
+            }
+        }
+    }
 }

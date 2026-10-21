@@ -397,3 +397,27 @@ from 195.5–195.7 µs to 175.2–176.0 µs; 1920×1080 flat scenes decreased fr
 this removes output writes rather than their dominant glyph sampling. Existing
 independent geometry/mask/alpha oracles and both-format parallel byte comparisons
 pass. Retained allocation capacities do not increase.
+
+## Device-resolution text without layout inflation
+
+`draw_text_scaled(..., raster_scale)` keeps shaped positions in logical units,
+requests glyph masks at `layout.font_size() * raster_scale`, and expresses raster
+bearings/extents back in logical units. The window's device transform still maps
+that logical geometry to pixels. This produces real physical-resolution outlines;
+it does not enlarge an existing bitmap. The physical font size must be finite,
+positive and at most 4096 px; the existing 1 MiB per-mask cap still applies.
+Invalid density/product is rejected before Fontdue, including empty runs.
+
+A glyph mask's coverage cells uniformly span its `PreparedDraw::local_rect`.
+Its pixel dimensions can therefore differ from logical dimensions. CPU and GPU
+consumers must test the half-open local rectangle before normalized texel lookup,
+then clamp roundoff of an admitted interior point to the last valid texel. At
+scale one the dimension ratio is exactly one. No scale field or forward matrix
+is added per command, and physical size remains part of the stable glyph key.
+
+Public tests compare 2× logical text byte-for-byte with a direct 32 px physical
+font, verify it differs from magnifying a 16 px mask, preserve 1× pixels, exercise
+fractional-density keys and reject invalid requests atomically. An additional
+private edge oracle covers exact and adjacent floating local edges across seven
+densities. Native DPI integration and GPU precision validation are separate host
+responsibilities; the canvas supplies the same borrowed scene contract.
