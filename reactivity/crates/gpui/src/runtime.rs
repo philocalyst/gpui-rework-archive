@@ -1,12 +1,12 @@
 //! One serial owner turn, a retained logical description, and an admitted sheet.
 //! Layout is private scratch; the canvas stages commands without another output
 //! framebuffer. Callbacks carry ordinary Rust borrows; there is no shared mutable owner cell.
+use crate::shared_text::SharedText;
 use std::{
     collections::{BTreeMap, BTreeSet},
     num::NonZeroU64,
     panic::{AssertUnwindSafe, catch_unwind},
 };
-use triomphe::Arc;
 
 use gpui_canvas::{Canvas, ColorConfig, PreparedScene, TextLayout, TextShaper, TextSystem};
 use gpui_reactivity_core::{
@@ -399,7 +399,7 @@ mod parent_tests {
 /// dense lane. Option permits moving an entry during description without a
 /// placeholder allocation. Every live slot is Some outside reconciliation.
 struct TextSite {
-    value: Arc<str>,
+    value: SharedText,
     field: Option<FieldId>,
     shaped: Option<Shaped>,
 }
@@ -515,7 +515,7 @@ struct Presented {
     identity: u64,
     parent: Parent,
     kind: NodeKind,
-    text: Option<Arc<str>>,
+    text: Option<SharedText>,
     rect: Rect,
     transform: PresentedTransform,
     bounds: Rect,
@@ -1517,7 +1517,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         // Promotion is lazy and shared by all changed ports of a registered
         // field in this description. Unchanged retained operands keep their Arc.
-        let mut promotions: BTreeMap<FieldId, Arc<str>> = BTreeMap::new();
+        let mut promotions: BTreeMap<FieldId, SharedText> = BTreeMap::new();
         for fanout in fanout.values_mut() {
             fanout
                 .destinations
@@ -1619,7 +1619,7 @@ impl<M: View + 'static> Runtime<M> {
                     } else {
                         self.counters.text_promotions += 1;
                         self.counters.text_bytes_copied += text.len() as u64;
-                        let value: Arc<str> = Arc::from(text);
+                        let value: SharedText = SharedText::from(text);
                         if let Some(field) = fields[index] {
                             promotions.insert(field, value.clone());
                         }
@@ -1751,14 +1751,14 @@ impl<M: View + 'static> Runtime<M> {
                                     } else {
                                         self.counters.text_promotions += 1;
                                         self.counters.text_bytes_copied += value.len() as u64;
-                                        let value: Arc<str> = Arc::from(value.as_ref());
+                                        let value: SharedText = SharedText::from(value.as_ref());
                                         promotions.insert(field, value.clone());
                                         value
                                     }
                                 } else {
                                     self.counters.text_promotions += 1;
                                     self.counters.text_bytes_copied += value.len() as u64;
-                                    Arc::from(value.as_ref())
+                                    SharedText::from(value.as_ref())
                                 }
                             });
                     }
@@ -1802,7 +1802,7 @@ impl<M: View + 'static> Runtime<M> {
         };
         self.counters.source_reads += 1;
         let value = self.sources.read_text(&self.model, field, fanout.codec)?;
-        let mut promoted: Option<Arc<str>> = None;
+        let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
         let mut last_changed = None;
@@ -1830,7 +1830,7 @@ impl<M: View + 'static> Runtime<M> {
             };
             if old != Some(value.as_ref()) {
                 if promoted.is_none() {
-                    promoted = Some(Arc::from(value.as_ref()));
+                    promoted = Some(SharedText::from(value.as_ref()));
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += value.len() as u64;
                 }
@@ -2427,7 +2427,7 @@ mod tests {
             }
         }
         let mut win = Win::with_size(Name("unchanged".into()), 160, 40).unwrap();
-        let pointer = Arc::as_ptr(
+        let pointer = SharedText::as_ptr(
             win.runtime().unwrap().texts[0]
                 .as_ref()
                 .map(|text| &text.value)
@@ -2437,7 +2437,7 @@ mod tests {
         win.update(|m| m.0 = m.0.clone()).unwrap();
         assert!(std::ptr::eq(
             pointer,
-            Arc::as_ptr(
+            SharedText::as_ptr(
                 win.runtime().unwrap().texts[0]
                     .as_ref()
                     .map(|text| &text.value)
@@ -2522,12 +2522,12 @@ mod tests {
         .unwrap();
         let runtime = win.runtime().unwrap();
         let first = runtime.texts[0].as_ref().unwrap();
-        let value = Arc::as_ptr(&first.value);
+        let value = SharedText::as_ptr(&first.value);
         let glyphs = first.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
         win.reset_counters().unwrap();
         win.update(|_| {}).unwrap();
         let first = win.runtime().unwrap().texts[0].as_ref().unwrap();
-        assert!(std::ptr::eq(value, Arc::as_ptr(&first.value)));
+        assert!(std::ptr::eq(value, SharedText::as_ptr(&first.value)));
         assert_eq!(
             glyphs,
             first.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
@@ -2561,7 +2561,7 @@ mod tests {
         let system = TextSystem::bundled().unwrap();
         let mut shaper = system.font_face().shaper();
         let mut site = TextSite {
-            value: Arc::from("alpha beta gamma"),
+            value: SharedText::from("alpha beta gamma"),
             field: None,
             shaped: None,
         };
@@ -2582,7 +2582,7 @@ mod tests {
             site.shaped.as_ref().unwrap().width,
             Some(f32::MIN_POSITIVE.to_bits())
         );
-        site.value = Arc::from("अ");
+        site.value = SharedText::from("अ");
         site.shaped = None;
         assert!(site.shape(&mut shaper, 16.0, Some(40.0)).is_err());
         assert!(site.shaped.is_none());
@@ -2664,7 +2664,7 @@ mod semantic_storage_ledger {
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
         assert_eq!(size_of::<Node>(), 136);
-        assert_eq!(size_of::<Presented>(), 88);
+        assert_eq!(size_of::<Presented>(), 80);
         assert_eq!(size_of::<crate::El<'_>>(), 184);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<Destination>(), 4);
@@ -2821,12 +2821,12 @@ mod semantic_storage_ledger {
         let base = &metadata.base[0];
         let published = &metadata.presented.names[0];
         assert!(std::ptr::eq(
-            Arc::as_ptr(base.name.as_ref().unwrap()),
-            Arc::as_ptr(base.description.as_ref().unwrap())
+            SharedText::as_ptr(base.name.as_ref().unwrap()),
+            SharedText::as_ptr(base.description.as_ref().unwrap())
         ));
         assert!(std::ptr::eq(
-            Arc::as_ptr(base.name.as_ref().unwrap()),
-            Arc::as_ptr(published.value.as_ref().unwrap())
+            SharedText::as_ptr(base.name.as_ref().unwrap()),
+            SharedText::as_ptr(published.value.as_ref().unwrap())
         ));
         assert!(
             runtime.text.is_none(),
