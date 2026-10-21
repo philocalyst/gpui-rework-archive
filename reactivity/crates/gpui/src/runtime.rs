@@ -43,6 +43,7 @@ use list::{ListRow, ListState, ScrollRequest};
 mod metadata;
 mod query;
 mod semantics;
+mod spaces;
 mod styles;
 pub use input::Key;
 use metadata::{Declared, Destination, Metadata, Port, Publish};
@@ -310,23 +311,6 @@ impl Parent {
         (self.0 != u32::MAX).then_some(self.0 as usize)
     }
 }
-/// Finite admitted maps cannot contain NaN, so one NaN coefficient represents
-/// an absent map without the extra discriminant of `Option<Affine>`. This is
-/// plain float storage: no invalid Rust values or unchecked reads are involved.
-#[derive(Clone, Copy)]
-struct PresentedTransform(Affine);
-impl PresentedTransform {
-    fn new(transform: Option<Affine>) -> Self {
-        debug_assert!(transform.is_none_or(|map| map.is_finite() && map.is_invertible()));
-        Self(transform.unwrap_or(Affine {
-            a: f32::NAN,
-            ..Affine::IDENTITY
-        }))
-    }
-    fn get(self) -> Option<Affine> {
-        (!self.0.a.is_nan()).then_some(self.0)
-    }
-}
 #[cfg(test)]
 mod parent_tests {
     use super::*;
@@ -368,7 +352,7 @@ mod parent_tests {
         println!(
             "Parent={} Map={} Node={} Presented={}",
             size_of::<Parent>(),
-            size_of::<PresentedTransform>(),
+            size_of::<spaces::Spaces>(),
             size_of::<Node>(),
             size_of::<Presented>()
         );
@@ -410,31 +394,6 @@ mod parent_tests {
     #[should_panic(expected = "text belongs to the admitted description")]
     fn content_rejects_the_first_unadmitted_text_index() {
         Content::new(NodeKind::Text, TextSlot(MAX_NODES as u32));
-    }
-
-    #[test]
-    fn compact_map_preserves_finite_admitted_coefficients() {
-        assert_eq!(size_of::<PresentedTransform>(), size_of::<Affine>());
-        assert_eq!(PresentedTransform::new(None).get(), None);
-        for map in [
-            Affine::IDENTITY,
-            Affine {
-                a: -0.0,
-                b: 1.0,
-                c: -1.0,
-                d: 0.0,
-                tx: -0.0,
-                ty: 0.0,
-            },
-            Affine::scale(-2.0, 0.25),
-            Affine::translation(f32::MAX, -f32::MAX),
-        ] {
-            let actual = PresentedTransform::new(Some(map)).get().unwrap();
-            assert_eq!(
-                [actual.a, actual.b, actual.c, actual.d, actual.tx, actual.ty].map(f32::to_bits),
-                [map.a, map.b, map.c, map.d, map.tx, map.ty].map(f32::to_bits),
-            );
-        }
     }
 }
 /// Text values, their source binding and their width cache share one owned
@@ -523,6 +482,8 @@ struct Node {
     handler: Option<Handler>,
 }
 #[cfg(test)]
+mod space_ledger;
+#[cfg(test)]
 mod style_ledger;
 impl Node {
     #[inline]
@@ -563,11 +524,18 @@ struct Presented {
     parent: Parent,
     kind: NodeKind,
     text: Option<SharedText>,
-    rect: Rect,
-    transform: PresentedTransform,
+    size: [f32; 2],
+    translation: [f32; 2],
+    space: u8,
     bounds: Rect,
     hittable: bool,
     actions: Actions,
+}
+impl Presented {
+    #[inline]
+    fn local_rect(&self) -> Rect {
+        Rect::new(0.0, 0.0, self.size[0], self.size[1])
+    }
 }
 struct Prepared {
     // Successful Canvas admission bounds each axis to 16,384. Packing the
@@ -575,6 +543,7 @@ struct Prepared {
     size: [u16; 2],
     scale_factor: f32,
     nodes: Vec<Presented>,
+    spaces: spaces::Spaces,
     damage: DamageRegion,
 }
 
@@ -643,6 +612,7 @@ struct Runtime<M> {
     latest_token: Option<PresentationToken>,
     complete_epoch: u64,
     presented: Vec<Presented>,
+    presented_spaces: spaces::Spaces,
     canvas: Canvas,
     text: Option<TextSystem>,
     poisoned: bool,
@@ -838,6 +808,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             latest_token: None,
             complete_epoch: 0,
             presented: Vec::new(),
+            presented_spaces: spaces::Spaces::default(),
             canvas,
             text: None,
             poisoned: false,
@@ -1019,15 +990,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let node = runtime
             .presented
             .iter()
-            .find(|node| node.identity == identity)
+            .enumerate()
+            .find(|(_, node)| node.identity == identity)
             .ok_or(Error::StaleTarget)?;
-        let point = node
-            .transform
-            .get()
+        let (index, node) = node;
+        let point = runtime
+            .presented_spaces
+            .transform(index, node)
             .and_then(|map| {
                 map.apply(Point {
-                    x: node.rect.width * 0.5,
-                    y: node.rect.height * 0.5,
+                    x: node.size[0] * 0.5,
+                    y: node.size[1] * 0.5,
                 })
             })
             .filter(|point| node.bounds.contains(*point))
@@ -1124,9 +1097,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     node.bounds.width,
                     node.bounds.height,
                 ],
-                transform: node
-                    .transform
-                    .get()
+                transform: runtime
+                    .presented_spaces
+                    .transform(index, node)
                     .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty]),
                 target: None,
             };
@@ -1918,6 +1891,7 @@ impl<M: View + 'static> Runtime<M> {
         let newly_presented = prepared.is_some() || !self.presentation_valid;
         if let Some(prepared) = prepared {
             self.presented = prepared.nodes;
+            self.presented_spaces = prepared.spaces;
             self.presentation_size = prepared.size.map(u32::from);
             self.presentation_scale_factor = prepared.scale_factor;
         }
@@ -2089,6 +2063,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
+        let mut presented_spaces = spaces::Builder::new(self.nodes.len());
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
         let list_mode = !self.lists.is_empty();
         let list_capacity = if list_mode { self.nodes.len() } else { 0 };
@@ -2219,6 +2194,7 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
+            let space = presented_spaces.push(transform, &presented);
             presented.push(Presented {
                 identity: node.identity(),
                 parent: published_parent,
@@ -2227,8 +2203,9 @@ impl<M: View + 'static> Runtime<M> {
                     .text_slot()
                     .get(&self.texts)
                     .map(|text| text.value.clone()),
-                rect,
-                transform: PresentedTransform::new(transform),
+                size: [rect.width, rect.height],
+                translation: transform.map_or([0.0, 0.0], |map| [map.tx, map.ty]),
+                space,
                 bounds,
                 hittable: node.text_slot().0 != u32::MAX
                     || style.bg.alpha() > 0.0
@@ -2241,8 +2218,10 @@ impl<M: View + 'static> Runtime<M> {
                 let index = presented.len() - 1;
                 observation.compare(
                     index,
-                    self.presented.get(index),
-                    &presented[index],
+                    self.presented
+                        .get(index)
+                        .map(|node| (node, self.presented_spaces.transform(index, node))),
+                    (&presented[index], transform),
                     self.metadata.as_deref(),
                     list_metadata.get(&node.identity()).copied(),
                     self.list_rows.get(&node.identity()),
@@ -2259,6 +2238,7 @@ impl<M: View + 'static> Runtime<M> {
                 );
             }
         }
+        let presented_spaces = presented_spaces.finish();
         // Everything fallible has finished. This transfers commands; native
         // recording retains no CPU image, while same-size headless updates reuse
         // the selected output allocation. No model borrow is published.
@@ -2304,6 +2284,7 @@ impl<M: View + 'static> Runtime<M> {
             size: prepared_size,
             scale_factor,
             nodes: presented,
+            spaces: presented_spaces,
             damage,
         });
         self.latest_token = Some(token);
@@ -2865,8 +2846,8 @@ mod semantic_storage_ledger {
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
         assert_eq!(size_of::<Node>(), 40);
-        assert_eq!(size_of::<Prepared>(), 40);
-        assert_eq!(size_of::<Presented>(), 80);
+        assert_eq!(size_of::<Prepared>(), 64);
+        assert_eq!(size_of::<Presented>(), 56);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<metadata::Row>(), 24);

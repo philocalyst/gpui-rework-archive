@@ -355,10 +355,10 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn sheet_hit(&self, index: usize, point: Point) -> bool {
         let node = &self.presented[index];
         if !node.bounds.contains(point)
-            || !node
-                .transform
-                .get()
-                .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
+            || !self
+                .presented_spaces
+                .transform(index, node)
+                .is_some_and(|map| CoordinateSpace::new(map).hit(node.local_rect(), point))
         {
             return false;
         }
@@ -369,10 +369,10 @@ impl<M: View + 'static> Runtime<M> {
         while let Some(index) = cursor {
             let node = &self.presented[index];
             if matches!(node.kind, NodeKind::List | NodeKind::ListItem)
-                && !node
-                    .transform
-                    .get()
-                    .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
+                && !self
+                    .presented_spaces
+                    .transform(index, node)
+                    .is_some_and(|map| CoordinateSpace::new(map).hit(node.local_rect(), point))
             {
                 return false;
             }

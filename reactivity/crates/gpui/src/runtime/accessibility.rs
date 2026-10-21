@@ -99,8 +99,8 @@ impl Collect<'_> {
     pub(super) fn compare(
         &mut self,
         index: usize,
-        previous: Option<&Presented>,
-        next: &Presented,
+        previous: Option<(&Presented, Option<Affine>)>,
+        next: (&Presented, Option<Affine>),
         metadata: Option<&Metadata>,
         list: Option<ListInfo>,
         row: Option<&ListRow>,
@@ -108,10 +108,11 @@ impl Collect<'_> {
         if !self.exact {
             return;
         }
-        let Some(previous) = previous else {
+        let Some((previous, previous_map)) = previous else {
             self.full();
             return;
         };
+        let (next, next_map) = next;
         if previous.identity != next.identity || previous.parent.index() != next.parent.index() {
             self.full();
             return;
@@ -138,8 +139,8 @@ impl Collect<'_> {
             || previous.text.as_deref() != next.text.as_deref()
             || old_name != new_name
             || old_description != new_description
-            || rect_bits(previous.rect) != rect_bits(next.rect)
-            || map_bits(previous.transform.get()) != map_bits(next.transform.get())
+            || rect_bits(previous.local_rect()) != rect_bits(next.local_rect())
+            || map_bits(previous_map) != map_bits(next_map)
             || frozen
                 .and_then(|m| m.list(previous.identity))
                 .map(|l| l.count)

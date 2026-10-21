@@ -9,6 +9,7 @@ use crate::{Rect, Role, remote::LaneSet};
 struct Context<'a> {
     sites: &'a Sites,
     nodes: &'a [Presented],
+    spaces: &'a super::spaces::Spaces,
     focused: Option<Target>,
     metadata: Option<&'a super::metadata::Sheet>,
 }
@@ -17,6 +18,7 @@ impl<'a> Context<'a> {
         Self {
             sites: &runtime.sites,
             nodes: &runtime.presented,
+            spaces: &runtime.presented_spaces,
             focused: runtime.focused,
             metadata: runtime
                 .metadata
@@ -24,9 +26,9 @@ impl<'a> Context<'a> {
                 .map(|metadata| &metadata.presented),
         }
     }
-    fn part(&self, node: &'a Presented) -> Part<'_> {
+    fn part(&self, index: usize) -> Part<'_> {
         Part {
-            node,
+            index,
             context: self,
         }
     }
@@ -52,20 +54,21 @@ impl SemanticSheet<'_> {
         self.0.nodes.len()
     }
     pub(crate) fn part_at(&self, index: usize) -> Option<Part<'_>> {
-        self.0.nodes.get(index).map(|node| self.0.part(node))
+        self.0.nodes.get(index).map(|_| self.0.part(index))
     }
     pub(crate) fn children(&self, index: usize) -> impl Iterator<Item = Part<'_>> {
         self.0
             .nodes
             .iter()
+            .enumerate()
             .skip(index + 1)
-            .take_while(move |node| node.parent.index().is_some_and(|parent| parent >= index))
-            .filter(move |node| node.parent.index() == Some(index))
-            .map(|node| self.0.part(node))
+            .take_while(move |(_, node)| node.parent.index().is_some_and(|parent| parent >= index))
+            .filter(move |(_, node)| node.parent.index() == Some(index))
+            .map(|(index, _)| self.0.part(index))
     }
     pub(crate) fn visit(&self, mut visitor: impl FnMut(Part<'_>)) {
-        for node in self.0.nodes {
-            visitor(self.0.part(node));
+        for index in 0..self.0.nodes.len() {
+            visitor(self.0.part(index));
         }
     }
 }
@@ -83,21 +86,25 @@ impl SemanticSheet<'_> {
 /// println!("{saved:?}");
 /// ```
 pub struct Part<'a> {
-    node: &'a Presented,
+    index: usize,
     context: &'a Context<'a>,
 }
 impl<'a> Part<'a> {
+    #[inline]
+    fn node(self) -> &'a Presented {
+        &self.context.nodes[self.index]
+    }
     #[cfg(feature = "accessibility")]
     pub(crate) fn native_id(self) -> u64 {
-        self.node.identity
+        self.node().identity
     }
     /// Stable window-qualified identity, also used by input and inspector APIs.
     /// Merely reading a target does not grant it a particular action.
     pub fn target(self) -> Target {
-        self.context.sites.target(self.node.identity)
+        self.context.sites.target(self.node().identity)
     }
     pub fn parent(self) -> Option<Target> {
-        self.node.parent.index().map(|index| {
+        self.node().parent.index().map(|index| {
             self.context
                 .sites
                 .target(self.context.nodes[index].identity)
@@ -110,13 +117,13 @@ impl<'a> Part<'a> {
         self.context.focused == Some(self.target())
     }
     pub fn actions(self) -> Actions {
-        self.node.actions
+        self.node().actions
     }
     pub fn role(self) -> Role {
-        self.node.kind.role()
+        self.node().kind.role()
     }
     pub fn text(self) -> Option<&'a str> {
-        self.node.text.as_deref()
+        self.node().text.as_deref()
     }
     /// An explicit declared/inspector name, or the visual label fallback.
     /// Edited input values never become accessible names.
@@ -124,35 +131,35 @@ impl<'a> Part<'a> {
         if let Some(slot) = self
             .context
             .metadata
-            .and_then(|metadata| metadata.name(self.node.identity))
+            .and_then(|metadata| metadata.name(self.node().identity))
         {
             return slot.value.as_deref();
         }
-        (self.node.kind != super::NodeKind::Input)
+        (self.node().kind != super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
     }
     pub fn description(self) -> Option<&'a str> {
         self.context
             .metadata
-            .and_then(|metadata| metadata.description(self.node.identity))
+            .and_then(|metadata| metadata.description(self.node().identity))
             .and_then(|slot| slot.value.as_deref())
     }
     /// Frozen total source length for this published list container.
     pub fn list(self) -> Option<super::ListInfo> {
         self.context
             .metadata
-            .and_then(|metadata| metadata.list(self.node.identity))
+            .and_then(|metadata| metadata.list(self.node().identity))
     }
     /// Frozen position/key/count for this published row wrapper. Descendants
     /// can walk parent targets; positions are never inferred from keys or y.
     pub fn list_item(self) -> Option<super::ListItemInfo> {
         let metadata = self.context.metadata?;
-        let row = metadata.row(self.node.identity)?;
+        let row = metadata.row(self.node().identity)?;
         // Row wrappers are immediate children of their list in this SAME P.
         // The parent already freezes the count; neither field needs repeating
         // per row, and current logical list state must never supply them.
-        let parent = &self.context.nodes[self.node.parent.index()?];
+        let parent = &self.context.nodes[self.node().parent.index()?];
         let list = metadata.list(parent.identity)?;
         Some(super::ListItemInfo {
             list: self.context.sites.target(parent.identity),
@@ -162,32 +169,31 @@ impl<'a> Part<'a> {
         })
     }
     pub fn value(self) -> Option<&'a str> {
-        (self.node.kind == super::NodeKind::Input)
+        (self.node().kind == super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
     }
     /// Physical viewport-clipped bounds of the acknowledged presentation.
     pub fn bounds(self) -> Rect {
-        self.node.bounds
+        self.node().bounds
     }
     /// The canonical local rectangle before window/viewport clipping.
     pub fn local_bounds(self) -> Rect {
-        self.node.rect
+        self.node().local_rect()
     }
     /// Absolute node-local to window-physical transform, already including
     /// ancestors and DPI. Applying it again as a parent transform is incorrect.
     pub fn transform(self) -> Option<crate::Affine> {
-        self.node.transform.get()
+        self.context.spaces.transform(self.index, self.node())
     }
     /// Conservative full window-physical bounds, derived only when requested.
     /// Native adapters add the window-to-screen mapping. This differs from
     /// `bounds()` for partially clipped elements and must not be used as a hit
     /// predicate. No second full rectangle is retained per semantic node.
     pub fn unclipped_bounds(self) -> Option<Rect> {
-        self.node
-            .transform
-            .get()
-            .and_then(|map| gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node.rect))
+        self.transform().and_then(|map| {
+            gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node().local_rect())
+        })
     }
 }
 
@@ -238,9 +244,9 @@ impl<'a, M: View + 'static> Query<'a, M> {
         self.within = Some(target);
         self
     }
-    fn scope(&self, runtime: &'a Runtime<M>) -> Result<&'a [Presented], Error> {
+    fn scope(&self, runtime: &'a Runtime<M>) -> Result<std::ops::Range<usize>, Error> {
         let Some(target) = self.within else {
-            return Ok(&runtime.presented);
+            return Ok(0..runtime.presented.len());
         };
         let identity = runtime.sites.resolve(target).ok_or(Error::StaleTarget)?;
         let root = runtime
@@ -256,7 +262,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
             .iter()
             .position(|node| node.parent.index().is_none_or(|parent| parent < root))
             .unwrap_or(following.len());
-        Ok(&runtime.presented[root..root + 1 + len])
+        Ok(root..root + 1 + len)
     }
     fn matches(&self, part: Part<'_>) -> bool {
         self.role.is_none_or(|role| part.role() == role)
@@ -280,8 +286,8 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let runtime = self.runtime.ok_or(Error::Closed)?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for node in self.scope(runtime)? {
-            count += usize::from(self.matches(context.part(node)));
+        for index in self.scope(runtime)? {
+            count += usize::from(self.matches(context.part(index)));
         }
         Ok(count)
     }
@@ -294,10 +300,10 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let mut identity = 0;
         let mut count = 0;
         let context = Context::new(runtime);
-        for node in self.scope(runtime)? {
-            if self.matches(context.part(node)) {
+        for index in self.scope(runtime)? {
+            if self.matches(context.part(index)) {
                 count += 1;
-                identity = node.identity;
+                identity = runtime.presented[index].identity;
             }
         }
         match count {
@@ -391,8 +397,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for node in &runtime.presented {
-            visitor(context.part(node));
+        for index in 0..runtime.presented.len() {
+            visitor(context.part(index));
         }
         Ok(())
     }

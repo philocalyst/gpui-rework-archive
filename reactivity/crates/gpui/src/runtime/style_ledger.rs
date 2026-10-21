@@ -7,20 +7,20 @@ mod graphics;
     feature = "accessibility",
     all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))
 ))]
-use crate::native::test_library as library;
+pub(super) use crate::native::test_library as library;
 #[cfg(not(any(
     feature = "accessibility",
     all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))
 )))]
 #[path = "../../examples/support/library.rs"]
-mod library;
+pub(super) mod library;
 #[cfg(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal")))]
-use crate::native::test_todos as todos;
+pub(super) use crate::native::test_todos as todos;
 #[cfg(not(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))))]
 #[path = "../../examples/support/todos.rs"]
-mod todos;
+pub(super) mod todos;
 #[path = "../../examples/support/workspace.rs"]
-mod workspace;
+pub(super) mod workspace;
 
 fn style_key(style: Style, transform: bool) -> [u32; 24] {
     let mut key = [0; 24];
@@ -91,7 +91,8 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
     let maps = runtime
         .presented
         .iter()
-        .filter_map(|node| node.transform.get())
+        .enumerate()
+        .filter_map(|(index, node)| runtime.presented_spaces.transform(index, node))
         .map(affine_key)
         .collect::<BTreeSet<_>>();
     let linear = maps
@@ -101,7 +102,8 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
     let none = runtime
         .presented
         .iter()
-        .filter(|node| node.transform.get().is_none())
+        .enumerate()
+        .filter(|(index, node)| runtime.presented_spaces.transform(*index, node).is_none())
         .count();
     let (mode, style_bytes) = match &runtime.styles {
         styles::Styles::Default => ("default", 0),
@@ -125,6 +127,12 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
         runtime.nodes.capacity() * size_of::<Node>(),
         runtime.presented.capacity() * size_of::<Presented>()
     );
+    let (mode, bytes) = match &runtime.presented_spaces {
+        spaces::Spaces::Common(_) => ("common", 0),
+        spaces::Spaces::Shared(values) => ("shared", size_of_val(values.as_ref())),
+        spaces::Spaces::Dense(values) => ("dense", values.capacity() * size_of::<Affine>()),
+    };
+    println!("space_lane,{name},{mode},{bytes}");
 }
 
 struct Counter {
