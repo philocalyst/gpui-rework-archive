@@ -1,0 +1,11 @@
+[package]
+name = "gpui_canvas"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+gpui_reactivity_core = { path = "../core" }
+rustybuzz = "=0.20.1"
+fontdue = "=0.9.4"
+unicode-script = "=0.5.8"
