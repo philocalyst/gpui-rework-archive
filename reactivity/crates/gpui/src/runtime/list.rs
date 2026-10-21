@@ -8,6 +8,39 @@ const MAX_ROWS: usize = 4096;
 const MAX_EXTENT: f64 = (1_u64 << 40) as f64;
 const MAX_COORDINATE: f32 = 1_000_000.0;
 
+/// No list/scroll protocol allocates or repeats map headers in an ordinary owner.
+#[derive(Default)]
+pub(super) struct Viewports(Option<Box<ViewportState>>);
+
+pub(super) struct ViewportState {
+    pub lists: BTreeMap<ListId, ListState>,
+    pub rows: BTreeMap<u64, ListRow>,
+}
+
+static EMPTY: ViewportState = ViewportState {
+    lists: BTreeMap::new(),
+    rows: BTreeMap::new(),
+};
+
+impl std::ops::Deref for Viewports {
+    type Target = ViewportState;
+    fn deref(&self) -> &Self::Target {
+        self.0.as_deref().unwrap_or(&EMPTY)
+    }
+}
+
+impl Viewports {
+    pub(super) fn new(lists: BTreeMap<ListId, ListState>, rows: BTreeMap<u64, ListRow>) -> Self {
+        Self(
+            (!lists.is_empty() || !rows.is_empty())
+                .then(|| Box::new(ViewportState { lists, rows })),
+        )
+    }
+    pub(super) fn rows_mut(&mut self) -> impl Iterator<Item = (&u64, &mut ListRow)> {
+        self.0.iter_mut().flat_map(|state| &mut state.rows)
+    }
+}
+
 pub(super) struct ListState {
     pub identity: u64,
     pub viewport: ListViewport,
@@ -252,7 +285,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         runtime.current_presentation()?;
-        let state = runtime.lists.get(&id).ok_or(Error::MissingElement)?;
+        let state = runtime
+            .viewports
+            .lists
+            .get(&id)
+            .ok_or(Error::MissingElement)?;
         if !runtime
             .presented
             .iter()
@@ -267,7 +304,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.live()?;
         runtime.current_presentation()?;
         let id = runtime.list_id(target)?;
-        Ok(runtime.lists[&id].viewport.clone())
+        Ok(runtime.viewports.lists[&id].viewport.clone())
     }
     /// Visible keyed row root; scope ordinary role/text queries with `within`.
     pub fn list_item(&self, target: Target, key: ItemKey) -> Result<Target, Error> {
@@ -276,7 +313,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.current_presentation()?;
         let id = runtime.list_id(target)?;
         runtime
-            .list_rows
+            .viewports
+            .rows
             .iter()
             .find(|(_, row)| row.list == id && row.key == key && row.visible)
             .map(|(&identity, _)| runtime.sites.target(identity))
@@ -346,7 +384,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 impl<M: View + 'static> Runtime<M> {
     fn list_id(&self, target: Target) -> Result<ListId, Error> {
         let identity = self.resolve(target)?;
-        self.lists
+        self.viewports
+            .lists
             .iter()
             .find(|(_, state)| state.identity == identity)
             .map(|(&id, _)| id)
@@ -362,7 +401,7 @@ impl<M: View + 'static> Runtime<M> {
         {
             return false;
         }
-        if self.lists.is_empty() {
+        if self.viewports.lists.is_empty() {
             return true;
         }
         let mut cursor = node.parent.index();

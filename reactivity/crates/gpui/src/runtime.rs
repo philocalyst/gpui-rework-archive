@@ -617,8 +617,7 @@ struct Runtime<M> {
     sites: Sites,
     overrides: Overrides,
     metadata: Option<Box<Metadata>>,
-    lists: BTreeMap<ListId, ListState>,
-    list_rows: BTreeMap<u64, ListRow>,
+    viewports: list::Viewports,
     layout: LayoutTree,
     layout_nodes: Vec<NodeId>,
     layout_dirty: BTreeSet<u64>,
@@ -812,8 +811,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             sites,
             overrides: Overrides::default(),
             metadata: None,
-            lists: BTreeMap::new(),
-            list_rows: BTreeMap::new(),
+            viewports: list::Viewports::default(),
             layout,
             layout_nodes: Vec::new(),
             layout_dirty: BTreeSet::new(),
@@ -995,7 +993,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             let identity = node.identity();
             runtime.layout_dirty.insert(identity);
         }
-        if !runtime.logical_valid || !runtime.lists.is_empty() {
+        if !runtime.logical_valid || !runtime.viewports.lists.is_empty() {
             runtime.describe(false)?;
         }
         runtime.present()
@@ -1207,7 +1205,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime.styles.set(index, after, count);
             runtime.dirty = true;
         }
-        if !runtime.lists.is_empty() {
+        if !runtime.viewports.lists.is_empty() {
             runtime.describe(false)?;
         }
         runtime.present()
@@ -1328,7 +1326,7 @@ impl<M: View + 'static> Runtime<M> {
             .filter(|identity| {
                 self.logical_valid
                     && self.by_identity.get(identity).is_some_and(|&index| {
-                        self.lists.is_empty()
+                        self.viewports.lists.is_empty()
                             || !self.in_list(index)
                             || self
                                 .prepared
@@ -1384,7 +1382,7 @@ impl<M: View + 'static> Runtime<M> {
                 if !seen.insert(id) {
                     return Err(ListError::DuplicateList(id));
                 }
-                let previous = self.lists.get(&id);
+                let previous = self.viewports.lists.get(&id);
                 let style =
                     previous.map_or(style, |state| self.overrides.resolve(state.identity, style));
                 list::plan(
@@ -1518,6 +1516,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut keyed_rows = BTreeMap::new();
         let mut keyed_lists = BTreeMap::new();
         let old_list_ids: BTreeMap<_, _> = self
+            .viewports
             .lists
             .iter()
             .map(|(&id, state)| (state.identity, id))
@@ -1532,7 +1531,8 @@ impl<M: View + 'static> Runtime<M> {
             *old_counts.entry(parent).or_default() += 1;
             sites.insert((parent, node.ordinal, node.kind()), index);
             if let Some(row) = self
-                .list_rows
+                .viewports
+                .rows
                 .get(&node.identity())
                 .filter(|row| row.visible)
             {
@@ -1681,6 +1681,7 @@ impl<M: View + 'static> Runtime<M> {
         for draft in list_drafts {
             let identity = nodes[draft.index].identity();
             let changed = self
+                .viewports
                 .lists
                 .get(&draft.id)
                 .is_none_or(|old| old.viewport != draft.plan.viewport);
@@ -1688,7 +1689,8 @@ impl<M: View + 'static> Runtime<M> {
             for row in draft.rows {
                 let identity = nodes[row.index].identity();
                 if self
-                    .list_rows
+                    .viewports
+                    .rows
                     .get(&identity)
                     .is_none_or(|old| old.y != row.y || old.height != row.height)
                 {
@@ -1771,8 +1773,7 @@ impl<M: View + 'static> Runtime<M> {
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
-        self.lists = lists;
-        self.list_rows = list_rows;
+        self.viewports = list::Viewports::new(lists, list_rows);
         self.nodes = nodes;
         self.styles = styles.finish();
         self.texts = texts;
@@ -1987,7 +1988,7 @@ impl<M: View + 'static> Runtime<M> {
                         node.kind(),
                         self.styles.get(index),
                         node.parent.index().map(|index| self.styles.get(index).flow),
-                        self.list_rows.get(&node.identity()),
+                        self.viewports.rows.get(&node.identity()),
                     ),
                 )?;
                 if node.text_slot().0 != u32::MAX {
@@ -2003,7 +2004,7 @@ impl<M: View + 'static> Runtime<M> {
             // Auto-width lists depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
-            for list in self.lists.values() {
+            for list in self.viewports.lists.values() {
                 let index = self.by_identity[&list.identity];
                 if self.nodes[index].parent.index().is_some_and(|parent| {
                     self.layout_dirty.contains(&self.nodes[parent].identity())
@@ -2023,7 +2024,7 @@ impl<M: View + 'static> Runtime<M> {
                             .parent
                             .index()
                             .map(|parent| self.styles.get(parent).flow),
-                        self.list_rows.get(identity),
+                        self.viewports.rows.get(identity),
                     ),
                 )?;
                 self.layout.mark_dirty(id)?;
@@ -2090,7 +2091,7 @@ impl<M: View + 'static> Runtime<M> {
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
-        let list_mode = !self.lists.is_empty();
+        let list_mode = !self.viewports.lists.is_empty();
         let list_capacity = if list_mode { self.nodes.len() } else { 0 };
         let mut clips: Vec<Rect> = Vec::with_capacity(list_capacity);
         let mut hit_clips: Vec<Rect> = Vec::with_capacity(list_capacity);
@@ -2245,7 +2246,7 @@ impl<M: View + 'static> Runtime<M> {
                     &presented[index],
                     self.metadata.as_deref(),
                     list_metadata.get(&node.identity()).copied(),
-                    self.list_rows.get(&node.identity()),
+                    self.viewports.rows.get(&node.identity()),
                 );
             }
             if let Some(sheet) = &mut metadata_sheet
@@ -2255,7 +2256,7 @@ impl<M: View + 'static> Runtime<M> {
                     metadata,
                     node.identity(),
                     list_metadata.get(&node.identity()).copied(),
-                    self.list_rows.get(&node.identity()),
+                    self.viewports.rows.get(&node.identity()),
                 );
             }
         }
@@ -2289,7 +2290,7 @@ impl<M: View + 'static> Runtime<M> {
                     .map_or(DamageRegion::default(), |prepared| prepared.damage),
             )
         };
-        for (&identity, row) in &mut self.list_rows {
+        for (&identity, row) in self.viewports.rows_mut() {
             row.visible = visible_rows.contains(&identity);
         }
         if let Some(canvas) = replacement {

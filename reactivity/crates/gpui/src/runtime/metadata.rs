@@ -260,13 +260,14 @@ impl<M: View + 'static> Runtime<M> {
             Sheet {
                 names: Vec::with_capacity(names.min(self.nodes.len())),
                 descriptions: Vec::with_capacity(descriptions.min(self.nodes.len())),
-                lists: Vec::with_capacity(self.lists.len()),
-                rows: Vec::with_capacity(self.list_rows.len()),
+                lists: Vec::with_capacity(self.viewports.lists.len()),
+                rows: Vec::with_capacity(self.viewports.rows.len()),
             }
         })
     }
     pub(super) fn list_metadata(&self) -> BTreeMap<u64, ListInfo> {
-        self.lists
+        self.viewports
+            .lists
             .iter()
             .map(|(&id, list)| {
                 (
@@ -288,7 +289,7 @@ impl<M: View + 'static> Runtime<M> {
                 metadata,
                 node.identity,
                 lists.get(&node.identity).copied(),
-                self.list_rows.get(&node.identity),
+                self.viewports.rows.get(&node.identity),
             );
         }
         sheet.sort();
