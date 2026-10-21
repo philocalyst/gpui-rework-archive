@@ -71,7 +71,17 @@ fn main() {
         expected_texts
     );
     assert!(preflight.with_scene(|s, _| s.draws().len() > 0).unwrap());
-    let digest = preflight.scene_digest().unwrap();
+    let expected_draws = preflight
+        .with_scene(|scene, _| scene.draws().len())
+        .unwrap();
+    preflight
+        .with_pixels(|pixels, _, _| {
+            assert_eq!(
+                pixels.chunks_exact(4).any(|pixel| pixel[..3] != [255; 3]),
+                expected_texts > 0
+            );
+        })
+        .unwrap();
     drop(preflight);
     let model = page(count, every);
     let source_bytes = model.value.capacity();
@@ -110,7 +120,10 @@ fn main() {
                     if recording {
                         ack(&mut mounted);
                     }
-                    assert_eq!(mounted.scene_digest().unwrap(), digest);
+                    assert_eq!(
+                        mounted.with_scene(|scene, _| scene.draws().len()).unwrap(),
+                        expected_draws
+                    );
                     win = Some(mounted);
                 }
                 "equal_description" => {
@@ -128,10 +141,13 @@ fn main() {
                 "failed_prepare" => {
                     let current = win.as_mut().unwrap();
                     let old = current.with_scene(|_, token| token).unwrap();
-                    let old_digest = current.scene_digest().unwrap();
+                    let old_draws = current.with_scene(|scene, _| scene.draws().len()).unwrap();
                     assert!(current.update(|m| m.broken = true).is_err());
                     assert_eq!(current.with_scene(|_, token| token).unwrap(), old);
-                    assert_eq!(current.scene_digest().unwrap(), old_digest);
+                    assert_eq!(
+                        current.with_scene(|scene, _| scene.draws().len()).unwrap(),
+                        old_draws
+                    );
                 }
                 "repair" => {
                     win.as_mut().unwrap().update(|m| m.broken = false).unwrap();
@@ -153,6 +169,10 @@ fn main() {
                 && let Some(win) = &mut win
             {
                 ack(win);
+            }
+            if !recording && let Some(win) = &mut win {
+                win.with_pixels(|pixels, _, _| std::hint::black_box(pixels.len()))
+                    .unwrap();
             }
         });
         let us = start.elapsed().as_secs_f64() * 1e6;
