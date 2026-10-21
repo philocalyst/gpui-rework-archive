@@ -1,5 +1,6 @@
-//! Owned two-phase hardware initialization. Only native-surface negotiation runs
-//! on the event-loop thread. Dropping this receiver cancels admission; workers
+//! Owned hardware initialization. Native surface creation happens only after
+//! the worker has a compiled renderer, inside the final redraw admission.
+//! Dropping this receiver cancels admission; workers
 //! never own a window, view, source, presentation token, or CPU surface.
 use super::{DeviceErrors, GpuSurface, NativeWindow, Renderer, Wake, wgpu};
 use std::{
@@ -26,9 +27,16 @@ pub(super) struct Policy {
     pub(super) force_probe: bool,
 }
 impl Policy {
-    /// Linux local-device hint only. Unknown/permission failures still probe;
-    /// explicit GPU and the real software-GPU handoff test bypass this hint.
+    /// Auto needs both a usable GPU and a reversible native presentation path.
+    /// Explicit GPU does not use this opportunistic policy.
     pub(super) fn should_probe(self) -> bool {
+        // DXGI flip presentation permanently excludes GDI on the same HWND,
+        // even after swapchain destruction. Softbuffer uses GDI, so admitting
+        // this upgrade would break our checked software fallback. Keep Auto
+        // software until the Windows host has a distinct presentation surface.
+        if cfg!(target_os = "windows") {
+            return false;
+        }
         #[cfg(test)]
         if self.allow_cpu || self.force_probe {
             return true;
@@ -82,22 +90,17 @@ fn linux_device_hint() -> bool {
     }
 }
 
-struct Request {
-    adapter: wgpu::Adapter,
-    format: wgpu::TextureFormat,
-}
+// Auto compiles one common surface format before touching the native view.
+// If that format is unavailable, explicit GPU retains its negotiated path and
+// opportunistic Auto simply keeps the already working CPU presenter.
+const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8UnormSrgb;
 enum Message {
-    Adapter {
+    Renderer {
         instance: wgpu::Instance,
         adapter: wgpu::Adapter,
+        renderer: Box<Renderer>,
     },
-    Renderer(Box<Renderer>),
     Unavailable(String),
-}
-struct Surface {
-    instance: wgpu::Instance,
-    handle: wgpu::Surface<'static>,
-    format: wgpu::TextureFormat,
 }
 pub(super) struct Ready {
     pub(super) instance: wgpu::Instance,
@@ -111,19 +114,16 @@ pub(super) enum Progress {
 
 pub(super) struct Upgrade {
     messages: Receiver<Message>,
-    request: Option<SyncSender<Request>>,
-    surface: Option<Surface>,
+    #[cfg(test)]
+    release: Option<SyncSender<()>>,
     // Dropping a JoinHandle detaches; cancellation never joins on the UI thread.
     _worker: JoinHandle<()>,
-    #[cfg(test)]
-    defer_renderer: bool,
-    #[cfg(test)]
-    deferred: Option<Request>,
 }
 impl Upgrade {
     pub(super) fn start(policy: Policy, wake: Option<Wake>) -> std::io::Result<Self> {
         let (send, messages) = mpsc::sync_channel(1);
-        let (request, receive) = mpsc::sync_channel::<Request>(1);
+        #[cfg(test)]
+        let (release, receive) = mpsc::sync_channel::<()>(1);
         let worker = thread::Builder::new()
             .name("gpui-hardware-init".into())
             .spawn(move || {
@@ -155,14 +155,16 @@ impl Upgrade {
                         );
                         return;
                     }
-                    if !deliver(&send, Message::Adapter { instance, adapter }, &wake) {
+                    #[cfg(test)]
+                    if policy.defer_renderer && receive.recv().is_err() {
                         return;
                     }
-                    let Ok(Request { adapter, format }) = receive.recv() else {
-                        return;
-                    };
-                    let message = match pollster::block_on(Renderer::request(&adapter, format)) {
-                        Ok(renderer) => Message::Renderer(Box::new(renderer)),
+                    let message = match pollster::block_on(Renderer::request(&adapter, FORMAT)) {
+                        Ok(renderer) => Message::Renderer {
+                            instance,
+                            adapter,
+                            renderer: Box::new(renderer),
+                        },
                         Err(error) => Message::Unavailable(error.to_string()),
                     };
                     deliver(&send, message, &wake);
@@ -177,28 +179,22 @@ impl Upgrade {
             })?;
         Ok(Self {
             messages,
-            request: Some(request),
-            surface: None,
             _worker: worker,
             #[cfg(test)]
-            defer_renderer: policy.defer_renderer,
-            #[cfg(test)]
-            deferred: None,
+            release: Some(release),
         })
     }
     // Deterministically mutate a real native owner before allowing real device
     // and pipeline initialization. No renderer or presentation is mocked.
     #[cfg(test)]
     pub(super) fn release_renderer(&mut self) {
-        self.defer_renderer = false;
-        if let Some(value) = self.deferred.take()
-            && let Some(request) = self.request.take()
-        {
-            let _ = request.try_send(value);
+        if let Some(release) = self.release.take() {
+            let _ = release.try_send(());
         }
     }
     /// Called only from Redraw on the event-loop thread. Surface creation and
-    /// capability negotiation happen here; device/pipeline compilation does not.
+    /// capability verification happen here after device/pipeline compilation.
+    /// No CAMetalLayer is attached while worker initialization remains pending.
     pub(super) fn poll(&mut self, window: &Arc<NativeWindow>, wake: Option<Wake>) -> Progress {
         let message = match self.messages.try_recv() {
             Ok(message) => message,
@@ -209,57 +205,33 @@ impl Upgrade {
         };
         match message {
             Message::Unavailable(reason) => Progress::Unavailable(reason),
-            Message::Adapter { instance, adapter } => {
+            Message::Renderer {
+                instance,
+                adapter,
+                renderer,
+            } => {
                 let handle = match instance.create_surface(Arc::clone(window)) {
                     Ok(handle) => handle,
                     Err(error) => return Progress::Unavailable(error.to_string()),
                 };
                 let caps = handle.get_capabilities(&adapter);
-                let Some(format) = [
-                    wgpu::TextureFormat::Bgra8UnormSrgb,
-                    wgpu::TextureFormat::Rgba8UnormSrgb,
-                ]
-                .into_iter()
-                .find(|format| caps.formats.contains(format)) else {
-                    return Progress::Unavailable("no supported sRGB surface".into());
-                };
+                if !caps.formats.contains(&FORMAT) {
+                    return Progress::Unavailable("prepared BGRA sRGB format unsupported".into());
+                }
                 if !caps.alpha_modes.contains(&wgpu::CompositeAlphaMode::Opaque) {
                     return Progress::Unavailable("no opaque surface mode".into());
                 }
-                self.surface = Some(Surface {
-                    instance,
-                    handle,
-                    format,
-                });
-                let value = Request { adapter, format };
-                #[cfg(test)]
-                if self.defer_renderer {
-                    self.deferred = Some(value);
-                    return Progress::Pending;
-                }
-                let Some(request) = self.request.take() else {
-                    return Progress::Unavailable("duplicate adapter result".into());
-                };
-                if request.try_send(value).is_err() {
-                    return Progress::Unavailable("initializer cancelled".into());
-                }
-                Progress::Pending
-            }
-            Message::Renderer(renderer) => {
-                let Some(surface) = self.surface.take() else {
-                    return Progress::Unavailable("renderer without surface negotiation".into());
-                };
                 let errors = DeviceErrors::install(renderer.device(), wake);
                 let size = window.inner_size();
                 Progress::Ready(Ready {
-                    instance: surface.instance,
+                    instance,
                     gpu: Box::new(GpuSurface {
-                        handle: surface.handle,
+                        handle,
                         renderer: *renderer,
                         errors,
                         config: super::surface_config(
                             [size.width.max(1), size.height.max(1)],
-                            surface.format,
+                            FORMAT,
                         ),
                     }),
                 })

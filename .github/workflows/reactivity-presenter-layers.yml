@@ -1,0 +1,32 @@
+name: Reactivity Apple presenter lifecycle
+on:
+  pull_request:
+    paths:
+      - 'reactivity/Cargo.toml'
+      - 'reactivity/Cargo.lock'
+      - 'reactivity/crates/presenter-tests/**'
+      - 'reactivity/vendor/wgpu-hal/**'
+      - 'reactivity/vendor/softbuffer/**'
+      - 'reactivity/crates/gpui/src/native/**'
+      - 'reactivity/crates/gpui/src/native.rs'
+      - 'reactivity/tools/check_apple_presenters.sh'
+      - '.github/workflows/reactivity-presenter-layers.yml'
+  push:
+    paths:
+      - 'reactivity/Cargo.toml'
+      - 'reactivity/Cargo.lock'
+      - 'reactivity/crates/presenter-tests/**'
+      - 'reactivity/vendor/wgpu-hal/**'
+      - 'reactivity/vendor/softbuffer/**'
+      - 'reactivity/crates/gpui/src/native/**'
+      - 'reactivity/crates/gpui/src/native.rs'
+      - 'reactivity/tools/check_apple_presenters.sh'
+      - '.github/workflows/reactivity-presenter-layers.yml'
+jobs:
+  apple-layer-lifetimes:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: reactivity/tools/check_apple_presenters.sh

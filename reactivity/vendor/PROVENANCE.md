@@ -1,6 +1,6 @@
 # Vendored windowing and layout sources
 
-Both directories contain the complete published source archives, including
+The original windowing/layout directories contain the complete published source archives, including
 licenses, upstream examples and manifests. They are excluded from the experiment
 workspace membership. No upstream source changes have been made.
 
@@ -30,3 +30,9 @@ host or layout boundary. Update by replacing the complete archive, reviewing the
 upstream diff, verifying checksums, and rerunning that boundary's conformance
 fixtures. Report first-party, vendor and test line counts separately and report
 the total too; moving code into this folder is not a reduction.
+
+The additional `softbuffer` and `wgpu-hal` directories are complete published
+archives with narrowly recorded Apple presenter ownership patches. Their pinned
+upstream revisions, archive hashes, changes, and platform validation limits are
+in [PRESENTER_PATCHES.md](PRESENTER_PATCHES.md). They are excluded from workspace
+membership and selected by root Cargo `[patch.crates-io]` entries.
