@@ -1,0 +1,210 @@
+use gpui_canvas::{Affine, Canvas, Color, ColorConfig, DamageRegion, Point, Rect, TextSystem};
+
+const WIDTH: usize = 79;
+const HEIGHT: usize = 53;
+
+#[derive(Clone, Copy)]
+struct Draw {
+    rect: Rect,
+    transform: Affine,
+    color: Color,
+}
+fn stage(canvas: &mut Canvas, draws: &[Draw], clear: Color) -> DamageRegion {
+    let mut candidate = canvas.stage();
+    candidate.clear(clear);
+    for draw in draws {
+        candidate
+            .fill_rect(
+                draw.rect,
+                draw.transform,
+                Rect::new(0.3, 0.7, WIDTH as f32 - 1.0, HEIGHT as f32 - 1.0),
+                draw.color,
+            )
+            .unwrap();
+    }
+    candidate.commit_with_damage()
+}
+fn full(canvas: &mut Canvas) -> Vec<u32> {
+    let mut output = vec![0xdeadbeef; WIDTH * HEIGHT];
+    canvas.render_bgrx(&mut output).unwrap();
+    output
+}
+fn assert_support(previous: &[u32], next: &[u32], damage: DamageRegion) {
+    for (index, (old, new)) in previous.iter().zip(next).enumerate() {
+        if old != new {
+            let [left, top, right, bottom] = damage.bounds().expect("changed pixel has support");
+            let (x, y) = ((index % WIDTH) as u32, (index / WIDTH) as u32);
+            assert!(x >= left && x < right && y >= top && y < bottom);
+        }
+    }
+}
+fn repair(canvas: &mut Canvas, output: &mut [u32], damage: DamageRegion) {
+    let expected = full(canvas);
+    assert_support(output, &expected, damage);
+    canvas.render_bgrx_region(output, damage).unwrap();
+    assert_eq!(output, expected);
+    assert_eq!(canvas.output_bytes(), 0, "no second full-frame image");
+}
+fn draw(index: u32) -> Draw {
+    Draw {
+        rect: Rect::new(-1.3, -0.7, 13.7, 9.1),
+        transform: Affine {
+            a: if index.is_multiple_of(2) { -1.0 } else { 1.0 },
+            b: (index % 3) as f32 * 0.13,
+            c: -0.17,
+            d: 1.0,
+            tx: (index * 17 % 65) as f32 + 3.3,
+            ty: (index * 11 % 39) as f32 + 1.7,
+        },
+        color: Color::linear_display_p3(
+            (index % 7) as f32 * 0.4,
+            -0.1,
+            (index % 5) as f32 * 0.3,
+            0.7,
+        )
+        .unwrap(),
+    }
+}
+
+#[test]
+fn insert_remove_reorder_and_transformed_color_edits_repair_every_pixel() {
+    for proofs in [false, true] {
+        let mut canvas =
+            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+        canvas.set_tile_proofs(proofs);
+        stage(&mut canvas, &[draw(1), draw(2)], Color::WHITE);
+        let mut output = full(&mut canvas);
+        for draws in [
+            vec![draw(1)], // The unmatched old tail must not be consumed by zip.
+            vec![],
+            vec![draw(3), draw(4), draw(5)],
+            vec![draw(5), draw(4), draw(3)],
+            vec![draw(5), draw(4), draw(7)],
+        ] {
+            let damage = stage(&mut canvas, &draws, Color::WHITE);
+            repair(&mut canvas, &mut output, damage);
+        }
+        for index in 0..32 {
+            let draws = (0..index % 9).map(|i| draw(index + i)).collect::<Vec<_>>();
+            let damage = stage(&mut canvas, &draws, Color::WHITE);
+            repair(&mut canvas, &mut output, damage);
+        }
+    }
+}
+
+#[test]
+fn a_small_repair_at_a_distant_origin_needs_only_local_bins() {
+    let mut canvas = Canvas::recording(1280, 720, ColorConfig::default()).unwrap();
+    let mut reference = Canvas::recording(1280, 720, ColorConfig::default()).unwrap();
+    let viewport = Rect::new(0.0, 0.0, 1280.0, 720.0);
+    let describe = |canvas: &mut Canvas, x| {
+        let mut candidate = canvas.stage();
+        candidate.clear(Color::WHITE);
+        candidate
+            .fill_rect(
+                Rect::new(x, 650.0, 2.0, 17.0),
+                Affine::IDENTITY,
+                viewport,
+                Color::BLACK,
+            )
+            .unwrap();
+        candidate.commit_with_damage()
+    };
+    describe(&mut canvas, 1100.0);
+    describe(&mut reference, 1100.0);
+    let mut output = vec![0; 1280 * 720];
+    reference.render_bgrx(&mut output).unwrap();
+    let damage = describe(&mut canvas, 1101.0);
+    describe(&mut reference, 1101.0);
+    let mut expected = output.clone();
+    reference.render_bgrx(&mut expected).unwrap();
+    canvas.render_bgrx_region(&mut output, damage).unwrap();
+    assert_eq!(output, expected);
+    assert!(canvas.stats().bin_bytes <= 128);
+    assert!(canvas.stats().tile_references <= 2);
+    assert_eq!(canvas.stats().output_bands, 2);
+    assert_eq!(canvas.output_bytes(), 0);
+}
+
+#[test]
+fn unpresented_edits_union_without_retaining_the_intermediate_scene() {
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+    stage(&mut canvas, &[draw(1)], Color::WHITE);
+    let mut output = full(&mut canvas);
+    let first = stage(&mut canvas, &[draw(2)], Color::WHITE);
+    let second = stage(&mut canvas, &[draw(3)], Color::WHITE);
+    repair(&mut canvas, &mut output, first.union(second));
+    let clear = stage(&mut canvas, &[draw(3)], Color::BLACK);
+    assert_eq!(clear.bounds(), Some([0, 0, WIDTH as u32, HEIGHT as u32]));
+    repair(&mut canvas, &mut output, clear);
+}
+
+#[test]
+fn identical_leased_text_is_empty_and_moved_text_repairs_old_and_new_support() {
+    let mut text = TextSystem::bundled().unwrap();
+    let layout = text.shape("office café", 13.5, None).unwrap();
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+    let mut describe = |canvas: &mut Canvas, x| {
+        let mut candidate = canvas.stage();
+        candidate.clear(Color::WHITE);
+        candidate
+            .draw_text(
+                &mut text,
+                &layout,
+                Point { x, y: 4.3 },
+                Affine::IDENTITY,
+                Rect::new(0.0, 0.0, WIDTH as f32, HEIGHT as f32),
+                Color::BLACK,
+            )
+            .unwrap();
+        candidate.commit_with_damage()
+    };
+    describe(&mut canvas, 0.7);
+    let mut output = full(&mut canvas);
+    let equal = describe(&mut canvas, 0.7);
+    assert!(equal.is_empty());
+    let previous_count = canvas.stats().render_count;
+    canvas.render_bgrx_region(&mut output, equal).unwrap();
+    assert_eq!(canvas.stats().render_count, previous_count);
+    assert_eq!(canvas.stats().sample_tests, 0);
+    let changed = describe(&mut canvas, 15.3);
+    assert!(!changed.is_empty());
+    repair(&mut canvas, &mut output, changed);
+}
+
+#[test]
+fn hdr_support_uses_unquantized_working_colors() {
+    let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.0).unwrap();
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, config).unwrap();
+    stage(&mut canvas, &[draw(1)], Color::WHITE);
+    let before = canvas.pixels().to_vec();
+    let damage = stage(&mut canvas, &[draw(6)], Color::WHITE);
+    let next = canvas.pixels();
+    let [left, top, right, bottom] = damage.bounds().unwrap();
+    for (index, (old, new)) in before.chunks_exact(8).zip(next.chunks_exact(8)).enumerate() {
+        if old != new {
+            let (x, y) = ((index % WIDTH) as u32, (index / WIDTH) as u32);
+            assert!(x >= left && x < right && y >= top && y < bottom);
+        }
+    }
+}
+
+#[cfg(feature = "parallel")]
+#[test]
+fn disjoint_workers_repair_the_same_tiles_without_touching_other_bands() {
+    use gpui_canvas::RenderPool;
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+    stage(&mut canvas, &[draw(1)], Color::WHITE);
+    let before = full(&mut canvas);
+    let damage = stage(&mut canvas, &[draw(2)], Color::WHITE);
+    let expected = full(&mut canvas);
+    for workers in [1, 2, 4] {
+        let pool = RenderPool::new(workers).unwrap().with_min_work(0);
+        let mut output = before.clone();
+        canvas
+            .render_bgrx_region_with(&mut output, damage, &pool)
+            .unwrap();
+        assert_eq!(output, expected);
+        assert!(canvas.stats().parallel);
+    }
+}

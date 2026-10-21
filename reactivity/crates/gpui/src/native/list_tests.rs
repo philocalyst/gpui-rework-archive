@@ -86,7 +86,7 @@ impl Script {
         assert_eq!(self.host.renderer_policy, RendererPolicy::ReferenceCpu);
         assert!(matches!(
             self.host.graphics,
-            Some(Graphics::ReferenceCpu(_))
+            Some(Graphics::ReferenceCpu(..))
         ));
         assert!(
             self.host.instance.is_none(),
@@ -260,7 +260,7 @@ impl Script {
                             .collect::<Vec<_>>()
                     })
                     .unwrap();
-                let Some(Graphics::ReferenceCpu(surface)) = &mut self.host.graphics else {
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
                     unreachable!();
                 };
                 let actual = surface.fetch().unwrap();

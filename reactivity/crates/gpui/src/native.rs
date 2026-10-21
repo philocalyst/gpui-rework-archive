@@ -19,6 +19,7 @@ use winit::{
 use crate::{
     Commit, Error, Key, Point, Target, View, Win, WindowOptions,
     remote::{DeliveryError, Inbox, Lane, LaneSet},
+    runtime::SurfaceDamage,
 };
 
 #[cfg(feature = "accessibility")]
@@ -233,13 +234,13 @@ struct GpuSurface {
 type CpuSurface = softbuffer::Surface<Arc<NativeWindow>, Arc<NativeWindow>>;
 enum Graphics {
     Gpu(Box<GpuSurface>),
-    ReferenceCpu(CpuSurface),
+    ReferenceCpu(CpuSurface, SurfaceDamage),
 }
 impl Graphics {
     fn fault(&self) -> Option<DeviceFault> {
         match self {
             Self::Gpu(gpu) => gpu.errors.take(),
-            Self::ReferenceCpu(_) => None,
+            Self::ReferenceCpu(..) => None,
         }
     }
 }
@@ -456,7 +457,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         let size = window.inner_size();
         let context = softbuffer::Context::new(Arc::clone(window)).map_err(platform)?;
         let surface = CpuSurface::new(&context, Arc::clone(window)).map_err(platform)?;
-        self.graphics = Some(Graphics::ReferenceCpu(surface));
+        self.graphics = Some(Graphics::ReferenceCpu(surface, SurfaceDamage::default()));
         self.resize([size.width, size.height])
     }
     fn resize(&mut self, size: [u32; 2]) -> Result<(), NativeError> {
@@ -485,12 +486,15 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                     gpu.config.height = size[1];
                     gpu.handle.configure(gpu.renderer.device(), &gpu.config);
                 }
-                Graphics::ReferenceCpu(surface) => surface
-                    .resize(
-                        NonZeroU32::new(size[0]).unwrap(),
-                        NonZeroU32::new(size[1]).unwrap(),
-                    )
-                    .map_err(platform)?,
+                Graphics::ReferenceCpu(surface, damage) => {
+                    surface
+                        .resize(
+                            NonZeroU32::new(size[0]).unwrap(),
+                            NonZeroU32::new(size[1]).unwrap(),
+                        )
+                        .map_err(platform)?;
+                    *damage = SurfaceDamage::default();
+                }
             }
         }
         self.request_redraw();
@@ -517,10 +521,10 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         if size.width == 0 || size.height == 0 || self.occluded {
             return Ok(());
         }
-        if matches!(self.graphics, Some(Graphics::ReferenceCpu(_))) && self.try_upgrade()? {
+        if matches!(self.graphics, Some(Graphics::ReferenceCpu(..))) && self.try_upgrade()? {
             return Ok(());
         }
-        if let Some(Graphics::ReferenceCpu(surface)) = &mut self.graphics {
+        if let Some(Graphics::ReferenceCpu(surface, history)) = &mut self.graphics {
             let window = self.window.as_ref().expect("surface has a window");
             let owner = self.owner.as_mut().expect("surface has an owner");
             let solid = owner
@@ -535,18 +539,22 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 window.pre_present_notify();
                 if surface.present_solid(color).map_err(platform)? {
                     let commit = owner.presented(token)?;
+                    // The solid backend may discard its pixel backing entirely.
+                    *history = SurfaceDamage::default();
                     self.did_present(RendererKind::ReferenceCpu, commit);
                     self.start_upgrade();
                     return Ok(());
                 }
             }
             let mut buffer = surface.buffer_mut().map_err(platform)?;
-            let token = owner.render_bgrx(&mut buffer)?;
+            let age = buffer.age();
+            let (token, damage) = owner.render_preserved_bgrx(&mut buffer, history.since(age))?;
             if !notified {
                 window.pre_present_notify();
             }
             buffer.present().map_err(platform)?;
             let commit = owner.presented(token)?;
+            history.presented(damage);
             self.did_present(RendererKind::ReferenceCpu, commit);
             self.start_upgrade();
             return Ok(());
@@ -1277,7 +1285,7 @@ mod tests {
                         if self.host.upgrade_rejection.as_deref() == Some("CPU-only adapter") {
                             assert!(matches!(
                                 self.host.graphics,
-                                Some(Graphics::ReferenceCpu(_))
+                                Some(Graphics::ReferenceCpu(..))
                             ));
                             assert!(self.host.instance.is_none());
                             eprintln!(
@@ -1343,7 +1351,7 @@ mod tests {
                             }
                             eprintln!("native GPU port: {stats:?}");
                         }
-                        Graphics::ReferenceCpu(surface) => {
+                        Graphics::ReferenceCpu(surface, _) => {
                             // Actual X11 window contents, through the library's
                             // ordinary CPU diagnostic oracle. Only this explicit
                             // diagnostic allocates a GPUI output image.

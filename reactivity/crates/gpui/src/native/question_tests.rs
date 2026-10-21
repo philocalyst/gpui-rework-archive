@@ -83,7 +83,7 @@ impl<L: LaneSet<Search> + 'static> Host for Script<L> {
         assert!(self.ready_turns >= 2);
         assert!(matches!(
             self.host.graphics,
-            Some(Graphics::ReferenceCpu(_))
+            Some(Graphics::ReferenceCpu(..))
         ));
         assert!(self.host.instance.is_none());
         self.checked = true;

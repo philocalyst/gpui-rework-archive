@@ -3,6 +3,7 @@
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 mod canvas;
 mod color;
+mod damage;
 mod text;
 pub use canvas::{
     Canvas, CanvasScene, GlyphMask, PreparedDraw, PreparedGroup, PreparedPlacement, PreparedScene,
@@ -12,6 +13,7 @@ pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
 };
+pub use damage::DamageRegion;
 pub use text::{FontFace, Glyph, GlyphKey, TextLayout, TextShaper, TextSystem};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

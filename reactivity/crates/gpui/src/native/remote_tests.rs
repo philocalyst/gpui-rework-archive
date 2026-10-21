@@ -122,7 +122,7 @@ impl Host for Script {
         );
         assert!(matches!(
             self.host.graphics,
-            Some(Graphics::ReferenceCpu(_))
+            Some(Graphics::ReferenceCpu(..))
         ));
         assert!(self.host.instance.is_none());
         // A completion did not steal focus; ordinary normalized native input
