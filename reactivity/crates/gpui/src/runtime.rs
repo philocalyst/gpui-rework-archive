@@ -5,6 +5,10 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     num::NonZeroU64,
     panic::{AssertUnwindSafe, catch_unwind},
+    sync::{
+        Arc as Shared,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 use triomphe::Arc;
 
@@ -20,6 +24,7 @@ use crate::{
     element::{Handler, NodeKind},
     identity::Sites,
     property::{Contribution, Overrides, Property, PropertyError},
+    remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet, Stage},
     source::{BindError, FieldId, Source, Sources, TextCodec, TextEditError},
     style::{Color, Flow, Style},
 };
@@ -28,6 +33,7 @@ const MAX_NODES: usize = 100_000;
 // Cephal's algorithms recurse even though public description disposal does not.
 const MAX_LAYOUT_DEPTH: usize = 128;
 
+mod delivery;
 mod input;
 mod query;
 pub use input::Key;
@@ -337,6 +343,7 @@ struct Runtime<M> {
     canvas: Canvas,
     text: Option<TextSystem>,
     poisoned: bool,
+    remote_revoked: Option<Shared<AtomicBool>>,
     counters: Counters,
     changed_nodes: usize,
 }
@@ -359,7 +366,9 @@ struct Runtime<M> {
 /// let mut win = Win::demo(Page);
 /// win.with_scene(|_, _| win.close()).unwrap();
 /// ```
-pub struct Win<M: View + 'static> {
+pub struct Win<M: View + 'static, L: LaneSet<M> = ()> {
+    // Declaration order closes every receiver before the model is dropped.
+    lanes: L,
     inner: Option<Box<Runtime<M>>>,
 }
 impl<M: View + 'static> Win<M> {
@@ -409,11 +418,44 @@ impl<M: View + 'static> Win<M> {
         automatic_presentation: bool,
         scale_factor: f32,
     ) -> Result<Self, Error> {
+        Self::mount_lanes(model, (), options, automatic_presentation, scale_factor)
+    }
+}
+impl<M: View + 'static> Win<M> {
+    pub fn from_json(input: &str) -> Result<Self, Error>
+    where
+        M: serde::de::DeserializeOwned,
+    {
+        let model =
+            serde_json::from_str(input).map_err(|error| Error::Serialization(error.to_string()))?;
+        Self::new(model)
+    }
+}
+impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    fn mount_lanes(
+        model: M,
+        lanes: L,
+        options: WindowOptions,
+        automatic_presentation: bool,
+        scale_factor: f32,
+    ) -> Result<Self, Error> {
+        // Until the full Win exists, this ordinary field-ordered value closes
+        // every receiver before model destruction on ANY preparation failure.
+        struct PendingMount<M, L> {
+            lanes: L,
+            model: M,
+        }
+        let pending = PendingMount { lanes, model };
         validate_scale(options.size, scale_factor)?;
         let sources =
             catch_unwind(AssertUnwindSafe(M::sources)).map_err(|_| Error::OwnerPanicked)?;
-        let mut runtime = Runtime {
-            model,
+        let canvas = if automatic_presentation {
+            Canvas::with_color_config(options.size[0], options.size[1], options.colors)?
+        } else {
+            Canvas::recording(options.size[0], options.size[1], options.colors)?
+        };
+        let runtime = Runtime {
+            model: pending.model,
             sources,
             nodes: Vec::new(),
             by_identity: BTreeMap::new(),
@@ -442,21 +484,37 @@ impl<M: View + 'static> Win<M> {
             latest_token: None,
             complete_epoch: 0,
             presented: Vec::new(),
-            canvas: if automatic_presentation {
-                Canvas::with_color_config(options.size[0], options.size[1], options.colors)?
-            } else {
-                Canvas::recording(options.size[0], options.size[1], options.colors)?
-            },
+            canvas,
             text: None,
             poisoned: false,
+            remote_revoked: None,
             counters: Counters::default(),
             changed_nodes: 0,
         };
+        let mut window = Self {
+            lanes: pending.lanes,
+            inner: Some(Box::new(runtime)),
+        };
+        if window.lanes.count() != 0 {
+            let runtime = window.inner.as_deref_mut().expect("new owner exists");
+            let revoked = runtime
+                .remote_revoked
+                .get_or_insert_with(|| Shared::new(AtomicBool::new(false)));
+            window.lanes.bind(revoked);
+        }
+        let runtime = window.runtime_mut()?;
         runtime.describe(true)?;
         runtime.present()?;
-        Ok(Self {
-            inner: Some(Box::new(runtime)),
-        })
+        Ok(window)
+    }
+    #[cfg(feature = "native")]
+    pub(crate) fn recording_lanes(
+        model: M,
+        lanes: L,
+        options: WindowOptions,
+        scale_factor: f32,
+    ) -> Result<Self, Error> {
+        Self::mount_lanes(model, lanes, options, false, scale_factor)
     }
     fn runtime_mut(&mut self) -> Result<&mut Runtime<M>, Error> {
         self.inner.as_deref_mut().ok_or(Error::Closed)
@@ -466,6 +524,12 @@ impl<M: View + 'static> Win<M> {
     }
     /// Revoke this owned window and release its model and retained resources.
     pub fn close(&mut self) {
+        if let Some(runtime) = self.inner.as_ref()
+            && let Some(revoked) = &runtime.remote_revoked
+        {
+            revoked.store(true, Ordering::Release);
+        }
+        self.lanes.close();
         self.inner.take();
     }
     pub fn is_closed(&self) -> bool {
@@ -858,14 +922,6 @@ impl<M: View + 'static> Win<M> {
         serde_json::to_string(&runtime.model)
             .map_err(|error| Error::Serialization(error.to_string()))
     }
-    pub fn from_json(input: &str) -> Result<Self, Error>
-    where
-        M: serde::de::DeserializeOwned,
-    {
-        let model =
-            serde_json::from_str(input).map_err(|error| Error::Serialization(error.to_string()))?;
-        Self::new(model)
-    }
 }
 
 impl<M: View + 'static> Runtime<M> {
@@ -896,6 +952,9 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn poison(&mut self) {
+        if let Some(revoked) = &self.remote_revoked {
+            revoked.store(true, Ordering::Release);
+        }
         self.focused = None;
         self.poisoned = true;
         self.logical_valid = false;

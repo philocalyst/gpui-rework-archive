@@ -16,6 +16,7 @@ mod identity;
 #[cfg(feature = "native")]
 mod native;
 pub mod property;
+mod remote;
 mod runtime;
 pub mod source;
 mod style;
@@ -31,6 +32,9 @@ pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
+pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
+#[doc(hidden)]
+pub use remote::{Lane, LaneSet};
 pub use runtime::{
     Commit, Counters, Error, Key, Part, PresentationToken, Query, SetError, Snapshot, SnapshotNode,
     Win, WindowOptions,
@@ -56,8 +60,8 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff, Key, Point, Rect,
-        Signal, Source, Sources, Target, View, Win, button, column, div, label, oklch, rgb, row,
-        text, text_input,
+        Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff, Inbox, Key, Point,
+        Rect, Remote, Signal, Source, Sources, Target, View, Win, button, column, div, label,
+        oklch, rgb, row, text, text_input,
     };
 }

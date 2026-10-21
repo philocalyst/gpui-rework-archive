@@ -1,5 +1,6 @@
 //! Focus and normalized keys belong to the ordinary exclusive window runtime.
 use super::{Commit, Error, NodeKind, Runtime, Target, View, Win};
+use crate::remote::LaneSet;
 
 /// Committed text and a small portable key floor. Text inserts at the end and
 /// backspace removes one Unicode scalar. Selection, IME and shortcuts are not
@@ -15,7 +16,7 @@ pub enum Key<'a> {
     Space,
 }
 
-impl<M: View + 'static> Win<M> {
+impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Focus a live logical control without using displayed coordinates. This
     /// remains available to repair text after a failed presentation.
     pub fn focus(&mut self, target: Target) -> Result<Commit, Error> {

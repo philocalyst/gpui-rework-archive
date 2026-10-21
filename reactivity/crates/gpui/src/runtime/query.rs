@@ -1,7 +1,7 @@
 //! Borrowed semantic queries over the acknowledged sheet, shared by tools and
 //! application users. Queries never construct a diagnostic snapshot or mirror.
 use super::{Error, Presented, Runtime, Target, View, Win};
-use crate::{Rect, Role};
+use crate::{Rect, Role, remote::LaneSet};
 
 #[derive(Clone, Copy)]
 /// Borrowed semantic data cannot outlive a visitor invocation.
@@ -109,7 +109,7 @@ fn sheet<M: View + 'static>(runtime: &Runtime<M>) -> Result<(), Error> {
         Err(Error::PresentationStale)
     }
 }
-impl<M: View + 'static> Win<M> {
+impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn query(&self) -> Query<'_, M> {
         Query {
             runtime: self.inner.as_deref(),
