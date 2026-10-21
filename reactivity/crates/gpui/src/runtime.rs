@@ -495,6 +495,8 @@ struct Node {
     style: Style,
     handler: Option<Handler>,
 }
+#[cfg(test)]
+mod style_ledger;
 impl Node {
     #[inline]
     fn kind(&self) -> NodeKind {
