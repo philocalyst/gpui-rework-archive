@@ -1,7 +1,7 @@
 #![cfg(feature = "parallel")]
 use gpui_canvas::{
-    Affine, Canvas, Color, ColorConfig, OutputProfile, Point, Rect, RenderPool, SdrMapping,
-    TextSystem,
+    Affine, Canvas, Color, ColorConfig, OutputProfile, PixelFormat, Point, Rect, RenderPool,
+    SdrMapping, TextSystem,
 };
 
 fn scene(canvas: &mut Canvas, text: &mut TextSystem) {
@@ -62,12 +62,17 @@ fn scene(canvas: &mut Canvas, text: &mut TextSystem) {
 fn serial_and_scoped_disjoint_bands_are_byte_identical() {
     let mut text = TextSystem::bundled().unwrap();
     for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
-        for mapping in [
-            SdrMapping::Clip,
-            SdrMapping::ReinhardPerChannel { exposure: 1.3 },
+        for (format, mapping) in [
+            (PixelFormat::Rgba8Premultiplied, SdrMapping::Clip),
+            (
+                PixelFormat::Rgba8Premultiplied,
+                SdrMapping::ReinhardPerChannel { exposure: 1.3 },
+            ),
+            (PixelFormat::Rgba16Float, SdrMapping::Clip),
         ] {
             let config = ColorConfig {
                 profile,
+                format,
                 mapping,
                 ..Default::default()
             };
@@ -87,7 +92,7 @@ fn serial_and_scoped_disjoint_bands_are_byte_identical() {
                         assert_eq!(
                             parallel.try_pixels_with(&pool).unwrap(),
                             expected,
-                            "{profile:?} {mapping:?} {width}x{height}, workers={workers},proofs={proofs}"
+                            "{profile:?} {format:?} {mapping:?} {width}x{height}, workers={workers},proofs={proofs}"
                         );
                         let stats = parallel.stats();
                         assert_eq!(

@@ -54,7 +54,7 @@ constructors support encoded/linear sRGB and Display P3; negative and extended
 RGB survive conversion. Alpha is finite in [0,1]. Numeric admission limits the
 converted working channels to ±1e20, with an explicit error beyond that range.
 D65 matrices and mirrored negative transfer functions follow
-[CSS Color 4 conversion formulas](https://www.w3.org/TR/2026/CRD-css-color-4-20261020/#color-conversion-code).
+[CSS Color 4 conversion formulas](https://www.w3.org/TR/2026/CRD-css-color-4-20261009/#color-conversion-code).
 Conversion into extended linear sRGB happens per prepared command. All source-over
 composition and sample averaging occur there before final output mapping.
 
@@ -64,9 +64,12 @@ profiles use the sRGB transfer curve. Output mapping follows composition; no
 source gamut clamp is permitted. P3 bytes require a tagged/negotiated host and
 must not be passed to an sRGB-only display path as if equivalent. Clipping is a
 simple declared SDR policy, not the perceptual CSS gamut mapper. Reinhard is
-scene-relative and per-channel, not a hue-preserving HDR standard. Requested
-RGBA16F is rejected; Rec.2020, PQ/HLG, arbitrary ICC/video conversion and HDR
-surfaces remain unsupported, without silently interpreting them as sRGB.
+scene-relative and per-channel, not a hue-preserving HDR standard.
+RGBA16F is a real linear-light eight-byte output with explicit primaries,
+reference white and finite-saturation conversion policy; see [COLOR.md](COLOR.md).
+It has no SDR transfer, gamut clamp or tone map. Rec.2020, PQ/HLG, arbitrary
+ICC/video conversion and HDR surface negotiation remain unsupported here;
+a host must explicitly negotiate a matching presentation path.
 
 Rectangles and font masks use a fixed 4×4 per-pixel sample grid, retaining each
 sample through ordered composition. Averaging a primitive before composition
@@ -128,7 +131,7 @@ raster/compositor pixel loops allocate nothing; warm CSR buffers are reused.
 Run `cargo test -p gpui_canvas`, the same with `--release`, and
 `cargo clippy -p gpui_canvas --all-targets -- -D warnings`.
 Seventeen integration tests cover color conversions/roundtrips, negative extended
-blending, declared P3 output, HDR rejection, alpha, correlated edges, randomized
+blending, declared P3 output, linear HDR bytes, alpha, correlated edges, randomized
 forward-polygon versus inverse-raster scenes, ligatures and Unicode, native
 fontdue pixel placement, transformed mask-cell sampling, UTF-8 wrapping,
 foreign-font rejection, clipped reflected text, resource caps and candidate
@@ -343,3 +346,25 @@ in a separate target directory. All frame digests matched. The
 above took 14.87/3.17/0.195 ms. These flags affect the whole build, so the timing
 difference is not attributed solely to the blend instructions. There is no new
 unsafe intrinsic implementation, AVX2 claim, or changed sampling quality.
+
+
+`Color::oklch` and the free `oklch` helper preserve perceptual authored
+coordinates; default neutral constants use Oklch. Composition remains in extended
+linear sRGB. RGB byte constructors stay const and compatible. Actual RGBA16Float
+can be selected with `ColorConfig::linear_hdr(profile, reference_white_nits)`.
+Both serial and parallel raster schedules instantiate the same eight-byte writer;
+`pixels`/`try_pixels` return the selected format, and output capacity is 8×width×height
+instead of 4×width×height. There is still one optional image, no full-frame f32
+intermediate, and one 64 KiB sample tile per active worker. Staged commits reuse
+the selected-format output allocation. The supplied metadata describes linear
+premultiplication, D65 primaries, reference white, and final IEEE-binary16 finite
+saturation; those bytes alone do not enable an HDR monitor or OS surface.
+
+The [actual linear16F measurement](evidence-hdr-parallel.csv) uses
+`GPUI_RENDER_HDR=1` with the parallel example: the 640×480 shaped-label scene
+retains a 2,457,600-byte output and took 19.60 ms serial, 10.06/5.36/3.59 ms
+with 2/4/8 workers. The eight-byte converter is more expensive than the exact
+opaque-sRGB byte quantizer; HDR is an explicit format choice with measurable
+cost. Digests agree across all worker counts. This scene contains ordinary SDR
+labels; separate actual-byte tests exercise >1 highlights, negative channels,
+alpha, cancellation before final storage saturation, and real font coverage.
