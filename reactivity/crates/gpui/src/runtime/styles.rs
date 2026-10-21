@@ -132,24 +132,20 @@ fn dense(palette: &[Style], indices: &[u8], capacity: usize) -> Vec<Style> {
 // Numerical equality intentionally treats signed zero as equal. Interning has
 // the stronger obligation to retain the exact authored channels and profile.
 #[inline]
-fn exact_eq(a: &Style, b: &Style) -> bool {
-    a.width.map(f32::to_bits) == b.width.map(f32::to_bits)
-        && a.height.map(f32::to_bits) == b.height.map(f32::to_bits)
-        && a.gap.to_bits() == b.gap.to_bits()
-        && a.padding.to_bits() == b.padding.to_bits()
-        && a.font_size.to_bits() == b.font_size.to_bits()
-        && a.flow == b.flow
-        && a.align == b.align
-        && a.justify == b.justify
-        && a.wrap == b.wrap
-        && a.transform.a.to_bits() == b.transform.a.to_bits()
-        && a.transform.b.to_bits() == b.transform.b.to_bits()
-        && a.transform.c.to_bits() == b.transform.c.to_bits()
-        && a.transform.d.to_bits() == b.transform.d.to_bits()
-        && a.transform.tx.to_bits() == b.transform.tx.to_bits()
-        && a.transform.ty.to_bits() == b.transform.ty.to_bits()
-        && a.fg.same_authoring(b.fg)
-        && a.bg.same_authoring(b.bg)
+pub(super) fn exact_eq(a: &Style, b: &Style) -> bool {
+    use crate::property::ExactValue;
+    Option::<f32>::same(&a.width, &b.width)
+        && Option::<f32>::same(&a.height, &b.height)
+        && f32::same(&a.gap, &b.gap)
+        && f32::same(&a.padding, &b.padding)
+        && f32::same(&a.font_size, &b.font_size)
+        && crate::Flow::same(&a.flow, &b.flow)
+        && crate::Align::same(&a.align, &b.align)
+        && crate::Justify::same(&a.justify, &b.justify)
+        && bool::same(&a.wrap, &b.wrap)
+        && crate::Affine::same(&a.transform, &b.transform)
+        && crate::Color::same(&a.fg, &b.fg)
+        && crate::Color::same(&a.bg, &b.bg)
 }
 
 #[cfg(test)]

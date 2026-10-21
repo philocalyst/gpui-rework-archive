@@ -97,7 +97,7 @@ fn rect(rect: Rect) -> [f32; 4] {
 
 impl Serialize for Part<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let mut node = serializer.serialize_struct("Part", 16)?;
+        let mut node = serializer.serialize_struct("Part", 17)?;
         node.serialize_field("target", &self.target())?;
         node.serialize_field("parent", &self.parent())?;
         node.serialize_field("role", &self.role())?;
@@ -117,6 +117,7 @@ impl Serialize for Part<'_> {
         node.serialize_field("list", &self.list())?;
         node.serialize_field("list_item", &self.list_item())?;
         node.serialize_field("viewport", &self.viewport())?;
+        node.serialize_field("corner_radius", &self.corner_radius())?;
         node.end()
     }
 }

@@ -33,15 +33,30 @@ pub(crate) struct AnnotationDraft<'a> {
     pub text: Annotations<'a>,
 }
 
-// The existing list-extension pointer pays for annotations only when requested.
-// Combined boxes the list payload to keep the common cold enum at 56 bytes.
+// Exceptional description payloads stay in the existing 56-byte cold enum.
+// Scroll's local geometry fits beside its axis byte without another box.
 type Projected<'a> = (
     Box<dyn crate::reader::Projector + 'a>,
     Option<crate::list::RowMap>,
 );
+#[derive(Default)]
+pub(crate) struct ExtraParts<'a> {
+    pub list: Option<crate::list::ListSpec<'a>>,
+    pub annotations: Annotations<'a>,
+    pub projection: Option<Projected<'a>>,
+    pub image: Option<crate::image::ImageSpec<'a>>,
+    pub axes: Option<crate::Axis>,
+    pub geometry: Option<crate::property::GeometryStyle>,
+}
 pub(crate) enum ElementExtra<'a> {
     Scroll {
         axes: crate::Axis,
+        style: crate::property::GeometryStyle,
+        semantic: Option<Box<Annotations<'a>>>,
+    },
+    Geometry {
+        style: crate::property::GeometryStyle,
+        inner: Option<Box<ElementExtra<'a>>>,
         semantic: Option<Box<Annotations<'a>>>,
     },
     Image {
@@ -61,8 +76,77 @@ pub(crate) enum ElementExtra<'a> {
     },
 }
 impl<'a> ElementExtra<'a> {
+    pub fn base_mut(&mut self) -> &mut Self {
+        match self {
+            Self::Geometry {
+                inner: Some(inner), ..
+            } => inner.base_mut(),
+            _ => self,
+        }
+    }
+    pub fn set_geometry(&mut self, value: crate::property::GeometryStyle) {
+        match self {
+            Self::Image { spec, .. } => spec.geometry = value,
+            Self::Geometry { style, .. } | Self::Scroll { style, .. } => *style = value,
+            _ => {
+                let previous = std::mem::replace(
+                    self,
+                    Self::Geometry {
+                        style: value,
+                        inner: None,
+                        semantic: None,
+                    },
+                );
+                if let Self::Semantic(annotations) = previous {
+                    if let Self::Geometry { semantic, .. } = self {
+                        *semantic = Some(Box::new(annotations));
+                    }
+                } else if let Self::Geometry { inner, .. } = self {
+                    *inner = Some(Box::new(previous));
+                }
+            }
+        }
+    }
+    pub fn make_scroll(&mut self, axes: crate::Axis) -> Result<(), crate::ScrollError> {
+        if !matches!(
+            self,
+            Self::Semantic(_) | Self::Scroll { .. } | Self::Geometry { inner: None, .. }
+        ) {
+            return Err(crate::ScrollError::UnsupportedElement);
+        }
+        // Reuse the existing extension allocation in either builder order.
+        let previous = std::mem::replace(
+            self,
+            Self::Scroll {
+                axes,
+                style: Default::default(),
+                semantic: None,
+            },
+        );
+        let (style, annotations) = match previous {
+            Self::Semantic(annotations) => (Default::default(), Some(Box::new(annotations))),
+            Self::Scroll {
+                style, semantic, ..
+            }
+            | Self::Geometry {
+                style, semantic, ..
+            } => (style, semantic),
+            _ => unreachable!("admitted scroll payload"),
+        };
+        if let Self::Scroll {
+            style: current,
+            semantic,
+            ..
+        } = self
+        {
+            *current = style;
+            *semantic = annotations;
+        }
+        Ok(())
+    }
     pub fn list_mut(&mut self) -> Option<&mut crate::list::ListSpec<'a>> {
         match self {
+            Self::Geometry { inner, .. } => inner.as_deref_mut().and_then(Self::list_mut),
             Self::List(list) => Some(list),
             Self::Combined { list, .. } => Some(list),
             Self::Semantic(_) | Self::Reader { .. } | Self::Image { .. } | Self::Scroll { .. } => {
@@ -71,6 +155,16 @@ impl<'a> ElementExtra<'a> {
         }
     }
     pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
+        if let Self::Geometry {
+            inner, semantic, ..
+        } = self
+        {
+            return if let Some(inner) = inner {
+                inner.annotations_mut()
+            } else {
+                semantic.get_or_insert_with(Default::default)
+            };
+        }
         if matches!(self, Self::List(_)) {
             let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
             if let Self::List(list) = previous {
@@ -85,47 +179,61 @@ impl<'a> ElementExtra<'a> {
             | Self::Image { semantic, .. }
             | Self::Scroll { semantic, .. } => semantic.get_or_insert_with(Default::default),
             Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
-            Self::List(_) => unreachable!(),
+            Self::List(_) | Self::Geometry { .. } => unreachable!(),
         }
     }
-    pub fn into_parts(
-        self,
-    ) -> (
-        Option<crate::list::ListSpec<'a>>,
-        Annotations<'a>,
-        Option<Projected<'a>>,
-        Option<crate::image::ImageSpec<'a>>,
-        Option<crate::Axis>,
-    ) {
+    pub fn into_parts(self) -> ExtraParts<'a> {
         match self {
-            Self::Scroll { axes, semantic } => (
-                None,
-                semantic.map(|s| *s).unwrap_or_default(),
-                None,
-                None,
-                Some(axes),
-            ),
+            Self::Geometry {
+                style,
+                inner,
+                semantic,
+            } => {
+                let mut parts = inner.map(|inner| inner.into_parts()).unwrap_or_default();
+                if let Some(semantic) = semantic {
+                    parts.annotations = *semantic;
+                }
+                parts.geometry = Some(style);
+                parts
+            }
+            Self::Scroll {
+                axes,
+                style,
+                semantic,
+            } => ExtraParts {
+                axes: Some(axes),
+                geometry: Some(style),
+                annotations: semantic.map(|s| *s).unwrap_or_default(),
+                ..Default::default()
+            },
             Self::Reader {
                 projector,
                 semantic,
                 map,
-            } => (
-                None,
-                semantic.map(|s| *s).unwrap_or_default(),
-                Some((projector, map)),
-                None,
-                None,
-            ),
-            Self::Image { spec, semantic } => (
-                None,
-                semantic.map(|s| *s).unwrap_or_default(),
-                None,
-                Some(spec),
-                None,
-            ),
-            Self::List(list) => (Some(list), Annotations::default(), None, None, None),
-            Self::Semantic(semantic) => (None, semantic, None, None, None),
-            Self::Combined { list, semantic } => (Some(*list), semantic, None, None, None),
+            } => ExtraParts {
+                projection: Some((projector, map)),
+                annotations: semantic.map(|s| *s).unwrap_or_default(),
+                ..Default::default()
+            },
+            Self::Image { spec, semantic } => ExtraParts {
+                image: Some(spec),
+                geometry: Some(spec.geometry),
+                annotations: semantic.map(|s| *s).unwrap_or_default(),
+                ..Default::default()
+            },
+            Self::List(list) => ExtraParts {
+                list: Some(list),
+                ..Default::default()
+            },
+            Self::Semantic(annotations) => ExtraParts {
+                annotations,
+                ..Default::default()
+            },
+            Self::Combined { list, semantic } => ExtraParts {
+                list: Some(*list),
+                annotations: semantic,
+                ..Default::default()
+            },
         }
     }
 }

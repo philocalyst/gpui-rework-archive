@@ -9,6 +9,8 @@ pub(super) const FILTER_LINEAR: u32 = 1;
 const PREMULTIPLIED: u32 = 2;
 const DISPLAY_P3: u32 = 4;
 const LINEAR_RGBA: u32 = 8;
+pub(super) const ROUNDED: u32 = 16;
+const _: () = assert!(ROUNDED & (FILTER_LINEAR | PREMULTIPLIED | DISPLAY_P3 | LINEAR_RGBA) == 0);
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ImageStats {

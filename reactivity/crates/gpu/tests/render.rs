@@ -1739,3 +1739,294 @@ fn hdr_and_wide_gamut_packets_redraw_exactly_without_reencoding_or_uploads() {
         }
     });
 }
+
+#[test]
+fn analytic_rounded_rectangles_match_cpu_and_never_use_rect_certificates() {
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let mut renderer = renderer(format).await;
+            let hdr = format == wgpu::TextureFormat::Rgba16Float;
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for radius in [0.0, 0.125, 1.0, 5.0, 12.5, 1000.0] {
+                for map in [
+                    Affine::IDENTITY,
+                    Affine {
+                        a: -1.0,
+                        b: 0.0,
+                        c: 0.0,
+                        d: 1.0,
+                        tx: 39.0,
+                        ty: 0.0,
+                    },
+                    Affine {
+                        a: 1.0,
+                        b: 0.25,
+                        c: 0.5,
+                        d: 1.0,
+                        tx: 1.0,
+                        ty: 2.0,
+                    },
+                ] {
+                    let mut canvas = Canvas::recording(48, 40, config).unwrap();
+                    canvas.clear(Color::WHITE);
+                    let rect = Rect::new(0.125, 0.375, 29.0, 25.0);
+                    let clip = Rect::new(0.375, 0.125, 45.5, 38.25);
+                    for color in [Color::rgba(255, 0, 0, 128), Color::rgba(0, 0, 255, 128)] {
+                        canvas
+                            .fill_rounded_rect(rect, radius, map, clip, color)
+                            .unwrap();
+                    }
+                    let actual = readback(&mut renderer, &canvas);
+                    assert_eq!(renderer.stats().draw_record_bytes, 2 * 96);
+                    if radius > 0.0 {
+                        assert_eq!(renderer.stats().uniform_tiles, 0);
+                    }
+                    renderer.set_tile_proofs(false);
+                    assert_eq!(readback(&mut renderer, &canvas), actual);
+                    renderer.set_tile_proofs(true);
+                    let expected = canvas.pixels();
+                    if hdr {
+                        for (i, (a, b)) in actual
+                            .chunks_exact(2)
+                            .zip(expected.chunks_exact(2))
+                            .enumerate()
+                        {
+                            assert!(
+                                u16::from_le_bytes([a[0], a[1]])
+                                    .abs_diff(u16::from_le_bytes([b[0], b[1]]))
+                                    <= 1,
+                                "radius {radius} map {map:?} half {i}"
+                            );
+                        }
+                    } else {
+                        for (i, (&a, &b)) in actual.iter().zip(expected).enumerate() {
+                            assert!(
+                                a.abs_diff(b) <= 1,
+                                "radius {radius} map {map:?} byte {i}: GPU {a} CPU {b}"
+                            );
+                        }
+                    }
+                }
+            }
+            // CPU accepts this radius. Shader FTZ/distance range limits are a
+            // separate typed Precision error, never a silently squared zero.
+            let mut tiny = Canvas::recording(8, 8, config).unwrap();
+            tiny.clear(Color::WHITE);
+            let rect = Rect::new(0.0, 0.0, 8.0, 8.0);
+            tiny.fill_rounded_rect(
+                rect,
+                f32::from_bits(1),
+                Affine::IDENTITY,
+                rect,
+                Color::BLACK,
+            )
+            .unwrap();
+            let output = output_texture(&renderer, &tiny);
+            assert!(matches!(
+                renderer.render(
+                    tiny.prepared_scene(),
+                    &output.create_view(&Default::default())
+                ),
+                Err(gpui_gpu::Error::Precision { draw: 0 })
+            ));
+            assert_eq!(
+                tiny.try_pixels().unwrap().len(),
+                8 * 8 * if hdr { 8 } else { 4 }
+            );
+        }
+    });
+}
+
+#[test]
+fn rounded_images_share_pixels_and_fixed_packet_strides_preserve_queued_order() {
+    use gpui_canvas::{AlphaMode, Image, ImageOptions, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let image = Image::rgba8(
+            2,
+            2,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![
+                255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255,
+            ]
+            .into_boxed_slice(),
+        )
+        .unwrap();
+        let mut a = Canvas::recording(40, 32, ColorConfig::default()).unwrap();
+        a.clear(Color::WHITE);
+        let clip = Rect::new(0.0, 0.0, 40.0, 32.0);
+        for (i, radius) in [0.0, 5.0, 10.0, 1.0].into_iter().enumerate() {
+            a.draw_image_with(
+                &image,
+                Rect::new(i as f32 * 4.0 + 0.125, 0.375, 23.0, 25.0),
+                Affine::IDENTITY,
+                clip,
+                ImageOptions {
+                    sampling: ImageSampling::Linear,
+                    corner_radius: radius,
+                },
+            )
+            .unwrap();
+            a.fill_rounded_rect(
+                Rect::new(2.0 + i as f32, 17.0, 8.0, 9.0),
+                2.0,
+                Affine::IDENTITY,
+                clip,
+                Color::rgba(0, 0, 0, 128),
+            )
+            .unwrap();
+        }
+        assert_eq!(a.prepared_scene().images().count(), 1);
+        let mut b = Canvas::recording(40, 32, ColorConfig::default()).unwrap();
+        b.clear(Color::BLACK);
+        b.draw_image_with(
+            &image,
+            Rect::new(0.0, 0.0, 40.0, 32.0),
+            Affine::IDENTITY,
+            clip,
+            ImageOptions {
+                sampling: ImageSampling::Nearest,
+                corner_radius: 16.0,
+            },
+        )
+        .unwrap();
+        for grouped in [false, true] {
+            renderer.set_grouped_records(grouped);
+            let ta = output_texture(&renderer, &a);
+            let replay = output_texture(&renderer, &a);
+            let tb = output_texture(&renderer, &b);
+            renderer
+                .render(a.prepared_scene(), &ta.create_view(&Default::default()))
+                .unwrap();
+            assert_eq!(renderer.image_stats().unwrap().packed_bytes, 16);
+            // Images and rounded solids retain the ordinary six-word records.
+            // Resource replacement must preserve prior queued submissions.
+            assert_eq!(renderer.stats().draw_record_bytes, 8 * 96);
+            renderer
+                .redraw(&replay.create_view(&Default::default()))
+                .unwrap()
+                .unwrap();
+            renderer
+                .render(b.prepared_scene(), &tb.create_view(&Default::default()))
+                .unwrap();
+            let actual_a = read_texture(&renderer, &ta);
+            assert_eq!(actual_a, read_texture(&renderer, &replay));
+            let actual_b = read_texture(&renderer, &tb);
+            for (actual, expected) in [(&actual_a, a.pixels()), (&actual_b, b.pixels())] {
+                for (i, (&x, &y)) in actual.iter().zip(expected).enumerate() {
+                    assert!(x.abs_diff(y) <= 1, "byte {i}: GPU {x} CPU {y}");
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn rounded_circle_pythagorean_sites_neighbor_radii_and_origin_cancellation() {
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut renderer = renderer(format).await;
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for origin in [0.125, 32.125, -32.125] {
+                for radius in [
+                    f32::from_bits(5.0_f32.to_bits() - 1),
+                    5.0,
+                    f32::from_bits(5.0_f32.to_bits() + 1),
+                ] {
+                    let mut canvas = Canvas::recording(16, 16, config).unwrap();
+                    canvas.clear(if hdr {
+                        Color::TRANSPARENT
+                    } else {
+                        Color::WHITE
+                    });
+                    let clip = Rect::new(0.0, 0.0, 16.0, 16.0);
+                    canvas
+                        .fill_rounded_rect(
+                            Rect::new(origin, origin, 10.0, 10.0),
+                            radius,
+                            Affine {
+                                tx: 0.125 - origin,
+                                ty: 0.125 - origin,
+                                ..Affine::IDENTITY
+                            },
+                            clip,
+                            if hdr { Color::WHITE } else { Color::BLACK },
+                        )
+                        .unwrap();
+                    let gpu = readback(&mut renderer, &canvas);
+                    if hdr {
+                        // Sixteen binary coverage values average to exact
+                        // multiples of 1/16. No transfer/quantizer tolerance
+                        // can hide a different geometric sample decision.
+                        assert_eq!(gpu, canvas.pixels(), "origin {origin}, radius {radius}");
+                    } else {
+                        for (i, (&a, &b)) in gpu.iter().zip(canvas.pixels()).enumerate() {
+                            assert!(
+                                a.abs_diff(b) <= 1,
+                                "SDR transfer byte {i}, origin {origin}, radius {radius}: {a}/{b}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn rounded_image_material_decodes_exact_hdr_coverage() {
+    use gpui_canvas::{AlphaMode, Image, ImageOptions, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let image = Image::linear_srgb(1, 1, AlphaMode::Straight, Box::new([[1.0; 4]])).unwrap();
+        let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+        for sampling in [ImageSampling::Nearest, ImageSampling::Linear] {
+            for radius in [
+                f32::from_bits(5.0_f32.to_bits() - 1),
+                5.0,
+                f32::from_bits(5.0_f32.to_bits() + 1),
+            ] {
+                let mut canvas = Canvas::recording(16, 16, config).unwrap();
+                canvas.clear(Color::TRANSPARENT);
+                canvas
+                    .draw_image_with(
+                        &image,
+                        Rect::new(32.125, 32.125, 10.0, 10.0),
+                        Affine {
+                            tx: -32.0,
+                            ty: -32.0,
+                            ..Affine::IDENTITY
+                        },
+                        Rect::new(0.0, 0.0, 16.0, 16.0),
+                        ImageOptions {
+                            sampling,
+                            corner_radius: radius,
+                        },
+                    )
+                    .unwrap();
+                assert_eq!(
+                    readback(&mut renderer, &canvas),
+                    canvas.pixels(),
+                    "{sampling:?}, radius {radius}"
+                );
+            }
+        }
+    });
+}

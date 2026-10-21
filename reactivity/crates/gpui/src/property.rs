@@ -30,6 +30,7 @@ pub enum PropertyId {
     Align = 10,
     Justify = 11,
     Wrap = 12,
+    CornerRadius = 13,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -46,10 +47,118 @@ pub enum ValueKind {
 
 #[derive(Debug)]
 pub struct PropertyInfo {
+    pub destination: PropertyDestination,
     pub id: PropertyId,
     pub name: &'static str,
     pub kind: ValueKind,
     pub impact: Impact,
+}
+
+/// The destination is part of the static schema, not inferred from ValueKind.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PropertyDestination {
+    Style,
+    Geometry,
+}
+
+/// Cold local geometry, independent from layout and inherited text styling.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct GeometryStyle {
+    pub(crate) corner_radius: f32,
+}
+
+mod sealed {
+    use super::*;
+    pub(crate) trait Domain: Copy {
+        fn get_erased(id: PropertyId, value: &Self) -> Result<PropertyValue, PropertyError>;
+        fn set_erased(
+            id: PropertyId,
+            value: &mut Self,
+            edit: PropertyValue,
+        ) -> Result<bool, PropertyError>;
+    }
+}
+/// Library-owned property destinations. Dispatch is monomorphic; applications
+/// cannot install a setter, choose an impact, or extend the destination schema.
+#[allow(private_bounds)]
+pub trait PropertyDomain: sealed::Domain + Copy + Default + 'static {
+    #[doc(hidden)]
+    fn dispatch<T, C, R>(
+        property: Property<T, Self>,
+        context: C,
+        style: impl FnOnce(C, Property<T, Style>) -> R,
+        geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+    ) -> R;
+}
+impl PropertyDomain for Style {
+    fn dispatch<T, C, R>(
+        property: Property<T, Self>,
+        context: C,
+        style: impl FnOnce(C, Property<T, Style>) -> R,
+        _geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+    ) -> R {
+        style(context, property)
+    }
+}
+impl PropertyDomain for GeometryStyle {
+    fn dispatch<T, C, R>(
+        property: Property<T, Self>,
+        context: C,
+        _style: impl FnOnce(C, Property<T, Style>) -> R,
+        geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+    ) -> R {
+        geometry(context, property)
+    }
+}
+impl sealed::Domain for Style {
+    fn get_erased(id: PropertyId, value: &Self) -> Result<PropertyValue, PropertyError> {
+        id.get_erased(value)
+    }
+    fn set_erased(
+        id: PropertyId,
+        value: &mut Self,
+        edit: PropertyValue,
+    ) -> Result<bool, PropertyError> {
+        id.set_erased(value, edit)
+    }
+}
+impl sealed::Domain for GeometryStyle {
+    fn get_erased(id: PropertyId, value: &Self) -> Result<PropertyValue, PropertyError> {
+        if id == PropertyId::CornerRadius {
+            Ok(PropertyValue::Number(value.corner_radius))
+        } else {
+            Err(wrong_destination(id, PropertyDestination::Geometry))
+        }
+    }
+    fn set_erased(
+        id: PropertyId,
+        value: &mut Self,
+        edit: PropertyValue,
+    ) -> Result<bool, PropertyError> {
+        if id != PropertyId::CornerRadius {
+            return Err(wrong_destination(id, PropertyDestination::Geometry));
+        }
+        if let PropertyValue::Number(number) = edit {
+            CORNER_RADIUS.set(value, number)
+        } else {
+            Err(PropertyError {
+                property: id,
+                reason: PropertyErrorKind::WrongKind {
+                    expected: ValueKind::Number,
+                    actual: edit.kind(),
+                },
+            })
+        }
+    }
+}
+fn wrong_destination(id: PropertyId, actual: PropertyDestination) -> PropertyError {
+    PropertyError {
+        property: id,
+        reason: PropertyErrorKind::WrongDestination {
+            expected: id.info().destination,
+            actual,
+        },
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -69,6 +178,10 @@ pub enum PropertyErrorKind {
     NonFinite,
     Negative,
     NonPositive,
+    WrongDestination {
+        expected: PropertyDestination,
+        actual: PropertyDestination,
+    },
     WrongKind {
         expected: ValueKind,
         actual: ValueKind,
@@ -81,11 +194,67 @@ impl fmt::Display for PropertyError {
 }
 impl std::error::Error for PropertyError {}
 
-struct Declaration<T> {
+// Shared by declarations, retained style interning and future property ports.
+// Numerical PartialEq remains unchanged; this is exact authoring equality.
+pub(crate) trait ExactValue {
+    fn same(a: &Self, b: &Self) -> bool;
+}
+impl ExactValue for f32 {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a.to_bits() == b.to_bits()
+    }
+}
+impl ExactValue for Option<f32> {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a.map(f32::to_bits) == b.map(f32::to_bits)
+    }
+}
+impl ExactValue for Color {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a.same_authoring(*b)
+    }
+}
+impl ExactValue for Affine {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        [a.a, a.b, a.c, a.d, a.tx, a.ty].map(f32::to_bits)
+            == [b.a, b.b, b.c, b.d, b.tx, b.ty].map(f32::to_bits)
+    }
+}
+impl ExactValue for Flow {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a == b
+    }
+}
+impl ExactValue for Align {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a == b
+    }
+}
+impl ExactValue for Justify {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a == b
+    }
+}
+impl ExactValue for bool {
+    #[inline]
+    fn same(a: &Self, b: &Self) -> bool {
+        a == b
+    }
+}
+
+struct Declaration<T, D> {
     info: PropertyInfo,
-    get: fn(&Style) -> T,
-    put: fn(&mut Style, T),
+    get: fn(&D) -> T,
+    put: fn(&mut D, T),
     validate: fn(&T) -> Result<(), PropertyErrorKind>,
+    same: fn(&T, &T) -> bool,
 }
 
 /// A closed typed selector. Get/set share the declaration used by reflection.
@@ -101,31 +270,35 @@ struct Declaration<T> {
 /// let mut style = Default::default();
 /// WIDTH.set(&mut style, FOREGROUND.default_value()).unwrap();
 /// ```
-pub struct Property<T: 'static>(&'static Declaration<T>);
-impl<T> Copy for Property<T> {}
-impl<T> Clone for Property<T> {
+pub struct Property<T: 'static, D: PropertyDomain = Style>(&'static Declaration<T, D>);
+impl<T, D: PropertyDomain> Copy for Property<T, D> {}
+impl<T, D: PropertyDomain> Clone for Property<T, D> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<T> fmt::Debug for Property<T> {
+impl<T, D: PropertyDomain> fmt::Debug for Property<T, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.info().fmt(f)
     }
 }
-impl<T> Property<T> {
+impl<T, D: PropertyDomain> Property<T, D> {
     pub const fn info(self) -> &'static PropertyInfo {
         &self.0.info
     }
     pub const fn id(self) -> PropertyId {
         self.0.info.id
     }
-    pub fn get(self, style: &Style) -> T {
+    pub fn get(self, style: &D) -> T {
         (self.0.get)(style)
     }
     /// Read the existing library default, without a second table of defaults.
     pub fn default_value(self) -> T {
-        self.get(&Style::default())
+        self.get(&D::default())
+    }
+    /// Compare exact declared bits/profile without changing numerical equality.
+    pub fn same_authoring(self, a: &T, b: &T) -> bool {
+        (self.0.same)(a, b)
     }
     pub fn validate(self, value: &T) -> Result<(), PropertyError> {
         (self.0.validate)(value).map_err(|reason| PropertyError {
@@ -143,14 +316,14 @@ impl<T> Property<T> {
         self.validate(&value)?;
         Ok(value)
     }
-    /// Validate before editing. False means the resolved destination is equal;
-    /// it says nothing about contribution presence or provenance.
-    pub fn set(self, style: &mut Style, value: T) -> Result<bool, PropertyError>
+    /// Validate before editing. False means the resolved authoring bits/profile
+    /// are equal; it says nothing about contribution presence or provenance.
+    pub fn set(self, style: &mut D, value: T) -> Result<bool, PropertyError>
     where
         T: PartialEq,
     {
         self.validate(&value)?;
-        if self.get(style) == value {
+        if self.same_authoring(&self.get(style), &value) {
             return Ok(false);
         }
         (self.0.put)(style, value);
@@ -184,23 +357,25 @@ fn font_size(value: &f32) -> Result<(), PropertyErrorKind> {
 // Applications provide neither callbacks nor macros.
 macro_rules! properties {
     ($($name:ident, $decl:ident, $ty:ty, $id:ident, $text:literal, $kind:ident, $impact:ident, $field:ident, $validate:expr);+ $(;)?) => {
-        $(static $decl: Declaration<$ty> = Declaration {
-            info: PropertyInfo { id: PropertyId::$id, name: $text, kind: ValueKind::$kind, impact: Impact::$impact },
+        $(static $decl: Declaration<$ty,Style> = Declaration {
+            info: PropertyInfo { destination: PropertyDestination::Style, id: PropertyId::$id, name: $text, kind: ValueKind::$kind, impact: Impact::$impact },
             get: |style| style.$field,
             put: |style, value| style.$field = value,
             validate: $validate,
+            same: <$ty as ExactValue>::same,
         };
         pub const $name: Property<$ty> = Property(&$decl);)+
         /// References to the same declaration metadata as the typed selectors.
-        pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+];
+        pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, CORNER_RADIUS.info()];
         impl PropertyId {
             pub const fn info(self) -> &'static PropertyInfo {
-                match self { $(Self::$id => $name.info()),+ }
+                match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info() }
             }
-            pub(crate) fn get_erased(self, style: &Style) -> PropertyValue {
-                match self { $(Self::$id => PropertyValue::$kind($name.get(style))),+ }
+            pub(crate) fn get_erased(self, style: &Style) -> Result<PropertyValue,PropertyError> {
+                match self { $(Self::$id => Ok(PropertyValue::$kind($name.get(style)))),+, Self::CornerRadius=>Err(wrong_destination(self,PropertyDestination::Style)) }
             }
             pub(crate) fn set_erased(self, style: &mut Style, value: PropertyValue) -> Result<bool, PropertyError> {
+                if self.info().destination != PropertyDestination::Style { return Err(wrong_destination(self,PropertyDestination::Style)); }
                 match (self, value) {
                     $((Self::$id, PropertyValue::$kind(value)) => $name.set(style, value),)+
                     _ => Err(PropertyError { property: self, reason: PropertyErrorKind::WrongKind { expected: self.info().kind, actual: value.kind() } }),
@@ -233,6 +408,27 @@ properties! {
     WRAP, WRAP_DECL, bool, Wrap, "wrap", Flag, Layout, wrap, |_| Ok(());
 }
 
+static RADIUS_DECL: Declaration<f32, GeometryStyle> = Declaration {
+    info: PropertyInfo {
+        destination: PropertyDestination::Geometry,
+        id: PropertyId::CornerRadius,
+        name: "corner_radius",
+        kind: ValueKind::Number,
+        impact: Impact::Geometry,
+    },
+    get: |geometry| geometry.corner_radius,
+    put: |geometry, value| geometry.corner_radius = value,
+    validate: nonnegative,
+    same: <f32 as ExactValue>::same,
+};
+/// Uniform circular local radius, independent from the layout Style domain.
+///
+/// ```compile_fail,E0308
+/// use gpui::{Style,property::CORNER_RADIUS};
+/// CORNER_RADIUS.set(&mut Style::default(), 8.0).unwrap();
+/// ```
+pub const CORNER_RADIUS: Property<f32, GeometryStyle> = Property(&RADIUS_DECL);
+
 /// Closed inspector seam. No boxed erased values, type IDs or external setters.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum PropertyValue {
@@ -263,15 +459,15 @@ impl PropertyValue {
 /// Ordinary nodes have no entry or duplicate base style. Presence belongs here,
 /// independently of whether the resolved destination changed.
 #[derive(Default)]
-pub(crate) struct Overrides {
-    entries: BTreeMap<u64, Overlay>,
+pub(crate) struct Overrides<D: PropertyDomain = Style> {
+    entries: BTreeMap<u64, Overlay<D>>,
 }
-struct Overlay {
-    base: Style,
+struct Overlay<D> {
+    base: D,
     values: BTreeMap<PropertyId, PropertyValue>,
 }
-impl Overrides {
-    pub(crate) fn get<T>(&self, identity: u64, property: Property<T>) -> Contribution<T> {
+impl<D: PropertyDomain> Overrides<D> {
+    pub(crate) fn get<T>(&self, identity: u64, property: Property<T, D>) -> Contribution<T> {
         let Some(overlay) = self.entries.get(&identity) else {
             return Contribution::Inherit;
         };
@@ -279,20 +475,17 @@ impl Overrides {
             return Contribution::Inherit;
         };
         let mut style = overlay.base;
-        property
-            .id()
-            .set_erased(&mut style, *value)
-            .expect("validated stored contribution");
+        D::set_erased(property.id(), &mut style, *value).expect("validated stored contribution");
         Contribution::Set(property.get(&style))
     }
 
     pub(crate) fn set<T: PartialEq>(
         &mut self,
         identity: u64,
-        current: Style,
-        property: Property<T>,
+        current: D,
+        property: Property<T, D>,
         contribution: Contribution<T>,
-    ) -> Result<Style, PropertyError> {
+    ) -> Result<D, PropertyError> {
         let id = property.id();
         match contribution {
             Contribution::Inherit => {
@@ -313,11 +506,11 @@ impl Overrides {
                 // before touching either map, including the stored base.
                 let mut converted = current;
                 property.set(&mut converted, value)?;
-                let value = id.get_erased(&converted);
+                let value = D::get_erased(id, &converted)?;
                 let mut resolved = self.entries.get(&identity).map_or(current, |overlay| {
                     apply_except(overlay.base, &overlay.values, Some(id))
                 });
-                id.set_erased(&mut resolved, value)?;
+                D::set_erased(id, &mut resolved, value)?;
                 let overlay = self.entries.entry(identity).or_insert_with(|| Overlay {
                     base: current,
                     values: BTreeMap::new(),
@@ -328,7 +521,7 @@ impl Overrides {
         }
     }
 
-    pub(crate) fn resolve(&mut self, identity: u64, declared: Style) -> Style {
+    pub(crate) fn resolve(&mut self, identity: u64, declared: D) -> D {
         let Some(overlay) = self.entries.get_mut(&identity) else {
             return declared;
         };
@@ -342,6 +535,10 @@ impl Overrides {
         self.release_empty();
     }
 
+    pub(crate) fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
     fn release_empty(&mut self) {
         // BTreeMap may retain an empty root allocation after removal. Release
         // it when the window no longer has any overridden nodes.
@@ -351,15 +548,14 @@ impl Overrides {
     }
 }
 
-fn apply_except(
-    mut style: Style,
+fn apply_except<D: PropertyDomain>(
+    mut style: D,
     values: &BTreeMap<PropertyId, PropertyValue>,
     skip: Option<PropertyId>,
-) -> Style {
+) -> D {
     for (id, value) in values {
         if Some(*id) != skip {
-            id.set_erased(&mut style, *value)
-                .expect("validated stored contribution");
+            D::set_erased(*id, &mut style, *value).expect("validated stored contribution");
         }
     }
     style
@@ -444,8 +640,12 @@ mod tests {
 
     #[test]
     fn catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned() {
+        eprintln!(
+            "property_declaration_bytes={}",
+            std::mem::size_of::<Declaration<f32, Style>>()
+        );
         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
-        assert_eq!(PROPERTIES.len(), 12);
+        assert_eq!(PROPERTIES.len(), 13);
         for (index, info) in PROPERTIES.iter().enumerate() {
             assert!(!info.name.is_empty());
             assert!(std::ptr::eq(*info, info.id.info()));
@@ -456,7 +656,7 @@ mod tests {
             );
             let expected = match info.id {
                 PropertyId::Foreground | PropertyId::Background => Impact::Paint,
-                PropertyId::Transform => Impact::Geometry,
+                PropertyId::Transform | PropertyId::CornerRadius => Impact::Geometry,
                 _ => Impact::Layout,
             };
             assert_eq!(info.impact, expected);
@@ -493,7 +693,7 @@ mod tests {
         ];
         for (id, value) in values {
             assert!(id.set_erased(&mut style, value).unwrap());
-            assert_eq!(id.get_erased(&style), value);
+            assert_eq!(id.get_erased(&style), Ok(value));
             assert!(!id.set_erased(&mut style, value).unwrap());
         }
         assert_eq!(WIDTH.get(&style), Some(90.0));

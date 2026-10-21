@@ -352,10 +352,19 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn sheet_hit(&self, index: usize, point: Point) -> bool {
         let node = &self.presented[index];
         if !node.bounds.contains(point)
-            || !node
-                .transform
-                .get()
-                .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
+            || !node.transform.get().is_some_and(|map| {
+                let radius = self
+                    .metadata
+                    .as_ref()
+                    .and_then(|m| m.geometry.as_ref())
+                    .map_or(0.0, |g| g.frozen_radius(node.identity));
+                if radius == 0.0 {
+                    CoordinateSpace::new(map).hit(node.rect, point)
+                } else {
+                    gpui_canvas::rounded_rect_contains(node.rect, radius, map, point)
+                        .unwrap_or(false)
+                }
+            })
         {
             return false;
         }

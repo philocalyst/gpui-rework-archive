@@ -7,6 +7,8 @@ use std::{collections::HashMap, sync::Arc};
 
 mod glyph_axis;
 mod image_axis;
+mod rounded;
+pub use rounded::rounded_rect_contains;
 mod samples;
 use glyph_axis::GlyphAxis;
 use samples::Samples;
@@ -199,15 +201,21 @@ pub fn sampled_rect_clip(
 // the renderer and exported scene resolve the same checked private addresses.
 const INLINE_DRAW: u32 = 1 << 31;
 const RECT_SOURCE: u32 = u32::MAX;
-const IMAGE_SOURCE: u32 = 1 << 31;
-const NEAREST_SOURCE: u32 = 1 << 30;
+const ROUNDED_SOURCE: u32 = 1 << 31;
+const IMAGE_SOURCE: u32 = 1 << 30;
+const NEAREST_SOURCE: u32 = 1 << 29;
 const RESOURCE_INDEX: u32 = NEAREST_SOURCE - 1;
 const _: () = assert!(MAX_COMMANDS < INLINE_DRAW as usize);
+// Each published image/mask resource has at least one admitted placement.
+// Rounded radii keep all 31 positive-f32 bits; the NaN sentinel remains Rect.
+const _: () = assert!(MAX_COMMANDS < NEAREST_SOURCE as usize);
 
 #[derive(Clone, Copy)]
 struct Common {
     clip: Rect,
     map: Mapping,
+    // Solid/glyph: premultiplied color. Image: [local radius,0,0,1].
+    // Source tags choose the meaning; image filters never consume solid paint.
     color: [f32; 4],
 }
 #[derive(Clone, Copy)]
@@ -301,20 +309,30 @@ struct ImageResources {
 #[derive(Clone, Copy)]
 enum BorrowedSource<'a> {
     Rect,
+    Rounded(f32),
     Glyph(&'a Raster),
     ImageNearest(&'a Image),
     ImageLinear(&'a Image),
 }
 impl<'a> BorrowedSource<'a> {
-    fn prepared(self) -> PreparedSource<'a> {
+    fn material_color(self, paint: [f32; 4]) -> [f32; 4] {
+        match self {
+            Self::ImageNearest(_) | Self::ImageLinear(_) => [1.0; 4],
+            _ => paint,
+        }
+    }
+    fn prepared(self, paint: [f32; 4]) -> PreparedSource<'a> {
         match self {
             Self::Rect => PreparedSource::Solid,
+            Self::Rounded(radius) => PreparedSource::RoundedRect(radius),
             Self::Glyph(mask) => PreparedSource::Mask(mask_view(mask)),
             Self::ImageNearest(image) => PreparedSource::Image {
+                radius: paint[0],
                 image: image.view(),
                 sampling: ImageSampling::Nearest,
             },
             Self::ImageLinear(image) => PreparedSource::Image {
+                radius: paint[0],
                 image: image.view(),
                 sampling: ImageSampling::Linear,
             },
@@ -342,6 +360,9 @@ impl BorrowedCommand<'_> {
             && self.color.map(f32::to_bits) == other.color.map(f32::to_bits)
             && match (self.source, other.source) {
                 (BorrowedSource::Rect, BorrowedSource::Rect) => true,
+                (BorrowedSource::Rounded(left), BorrowedSource::Rounded(right)) => {
+                    left.to_bits() == right.to_bits()
+                }
                 (BorrowedSource::Glyph(left), BorrowedSource::Glyph(right)) => {
                     // Both immutable leases are alive during comparison, so
                     // allocation identity cannot undergo reuse here.
@@ -427,6 +448,8 @@ impl DisplayList {
             bounds: geometry.bounds.map(usize::from),
             source: if source == RECT_SOURCE {
                 BorrowedSource::Rect
+            } else if source & ROUNDED_SOURCE != 0 {
+                BorrowedSource::Rounded(f32::from_bits(source & !ROUNDED_SOURCE))
             } else if source & IMAGE_SOURCE != 0 {
                 let image =
                     &self.images.as_ref().unwrap().values[(source & RESOURCE_INDEX) as usize];
@@ -527,16 +550,20 @@ pub struct GlyphMask<'a> {
 #[derive(Clone, Copy, Debug)]
 pub enum PreparedSource<'a> {
     Solid,
+    /// Uniform circular corners in local units, clamped to half each extent.
+    /// This is sampled analytic geometry, not a bitmap or integrated area.
+    RoundedRect(f32),
     Mask(GlyphMask<'a>),
     Image {
         image: ImageView<'a>,
         sampling: ImageSampling,
+        radius: f32,
     },
 }
 impl<'a> PreparedSource<'a> {
     pub fn dimensions(self) -> Option<[usize; 2]> {
         match self {
-            Self::Solid => None,
+            Self::Solid | Self::RoundedRect(_) => None,
             Self::Mask(mask) => Some([mask.width, mask.height]),
             Self::Image { image, .. } => Some([image.width() as usize, image.height() as usize]),
         }
@@ -549,10 +576,20 @@ impl<'a> PreparedSource<'a> {
         }
     }
     pub fn image(self) -> Option<(ImageView<'a>, ImageSampling)> {
-        if let Self::Image { image, sampling } = self {
+        if let Self::Image {
+            image, sampling, ..
+        } = self
+        {
             Some((image, sampling))
         } else {
             None
+        }
+    }
+    pub fn corner_radius(self) -> Option<f32> {
+        match self {
+            Self::RoundedRect(radius) => Some(radius),
+            Self::Image { radius, .. } if radius != 0.0 => Some(radius),
+            _ => None,
         }
     }
     pub fn is_solid(self) -> bool {
@@ -626,11 +663,11 @@ impl<'a> PreparedGroup<'a> {
         self,
     ) -> impl ExactSizeIterator<Item = PreparedPlacement<'a>> + DoubleEndedIterator {
         self.order.iter().map(move |&address| {
-            let (_, geometry, _) = self.commands.parts(address);
+            let (common, geometry, _) = self.commands.parts(address);
             PreparedPlacement {
                 local_rect: geometry.rect,
                 bounds: device_bounds(geometry.bounds),
-                source: self.commands.get(address).source.prepared(),
+                source: self.commands.get(address).source.prepared(common.color),
             }
         })
     }
@@ -643,11 +680,16 @@ struct Groups<'a> {
 }
 impl<'a> Groups<'a> {
     fn view(&self, start: usize, end: usize) -> PreparedGroup<'a> {
-        let (common, _, _) = self.commands.parts(self.commands.order[start]);
+        let address = self.commands.order[start];
+        let (common, _, source) = self.commands.parts(address);
         PreparedGroup {
             inverse: common.map.inverse,
             clip: common.clip,
-            color: common.color,
+            color: if source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
+                [1.0; 4]
+            } else {
+                common.color
+            },
             commands: self.commands,
             order: &self.commands.order[start..end],
         }
@@ -790,8 +832,8 @@ impl<'a> PreparedScene<'a> {
                     (right - left) as f32,
                     (bottom - top) as f32,
                 ),
-                color: command.color,
-                source: command.source.prepared(),
+                color: command.source.material_color(command.color),
+                source: command.source.prepared(command.color),
             }
         })
     }
@@ -964,13 +1006,43 @@ impl Canvas {
         clip: Rect,
         color: Color,
     ) -> Result<(), Error> {
+        self.fill_shape(rect, transform, clip, color, RECT_SOURCE)
+    }
+    /// Sample a rounded rectangle at the same 4×4 lattice as other commands.
+    /// Radius is finite/nonnegative and is clamped against the local extents;
+    /// zero uses the existing rectangular command and proof path exactly.
+    /// This does not install a rounded descendant clip.
+    pub fn fill_rounded_rect(
+        &mut self,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+    ) -> Result<(), Error> {
+        rounded::validate_radius(radius)?;
+        let source = if radius == 0.0 {
+            RECT_SOURCE
+        } else {
+            ROUNDED_SOURCE | radius.to_bits()
+        };
+        self.fill_shape(rect, transform, clip, color, source)
+    }
+    fn fill_shape(
+        &mut self,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+        source: u32,
+    ) -> Result<(), Error> {
         validate_rect(clip)?;
         let common = Common {
             clip,
             map: Mapping::new(transform)?,
             color: color.premultiplied(),
         };
-        let command = self.prepare(rect, transform, common, RECT_SOURCE)?;
+        let command = self.prepare(rect, transform, common, source)?;
         if let Some(command) = command {
             self.admit(std::slice::from_ref(&command), &[], 0)?;
             self.commands
@@ -989,6 +1061,30 @@ impl Canvas {
         clip: Rect,
         sampling: ImageSampling,
     ) -> Result<(), Error> {
+        self.draw_image_with(
+            image,
+            rect,
+            transform,
+            clip,
+            crate::ImageOptions {
+                sampling,
+                corner_radius: 0.0,
+            },
+        )
+    }
+    pub fn draw_image_with(
+        &mut self,
+        image: &Image,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        options: crate::ImageOptions,
+    ) -> Result<(), Error> {
+        let crate::ImageOptions {
+            sampling,
+            corner_radius,
+        } = options;
+        rounded::validate_radius(corner_radius)?;
         validate_rect(clip)?;
         let resources = self.commands.images.as_deref();
         let existing = resources.and_then(|r| r.index.get(&image.key()).copied());
@@ -1003,7 +1099,10 @@ impl Canvas {
         let common = Common {
             clip,
             map: Mapping::new(transform)?,
-            color: [1.0; 4],
+            // Image material is reconstructed from the resource. These private
+            // solid-color lanes are a tagged image shape payload; public views
+            // still expose canonical white rather than an authored tint.
+            color: [corner_radius, 0.0, 0.0, 1.0],
         };
         let Some(command) = self.prepare(rect, transform, common, source)? else {
             return Ok(());
@@ -1755,7 +1854,13 @@ fn render_image_command(
     image: ImageView<'_>,
     sampling: ImageSampling,
 ) {
-    if image.needs_decode_memo() {
+    let radius = match command.source {
+        BorrowedSource::ImageNearest(_) | BorrowedSource::ImageLinear(_) => command.color[0],
+        _ => 0.0,
+    };
+    if radius > 0.0 {
+        render_rounded_image(samples, command, bounds, stats, image, sampling, radius);
+    } else if image.needs_decode_memo() {
         render_cached_image(samples, command, bounds, stats, image, sampling);
     } else if command.map.axis_aligned() {
         image_axis::render(samples, command, bounds, stats, image, sampling, |x, y| {
@@ -1772,6 +1877,58 @@ fn render_image_command(
             )
         });
     }
+}
+
+#[inline(never)]
+fn render_rounded_image(
+    samples: &mut Samples,
+    command: &BorrowedCommand<'_>,
+    bounds: [usize; 4],
+    stats: &mut RenderStats,
+    image: ImageView<'_>,
+    sampling: ImageSampling,
+    radius: f32,
+) {
+    if image.needs_decode_memo() {
+        crate::image::with_decode_memo(image, |sampler| {
+            render_shaped_image(samples, command, bounds, stats, radius, |x, y| {
+                sampler.sample(
+                    x,
+                    y,
+                    command.rect.width as f64,
+                    command.rect.height as f64,
+                    sampling,
+                )
+            });
+        });
+    } else {
+        render_shaped_image(samples, command, bounds, stats, radius, |x, y| {
+            image.sample(
+                x,
+                y,
+                command.rect.width as f64,
+                command.rect.height as f64,
+                sampling,
+            )
+        });
+    }
+}
+fn render_shaped_image(
+    samples: &mut Samples,
+    command: &BorrowedCommand<'_>,
+    bounds: [usize; 4],
+    stats: &mut RenderStats,
+    radius: f32,
+    mut sample: impl FnMut(f64, f64) -> Option<[f32; 4]>,
+) {
+    render_image(samples, command, bounds, stats, |x, y| {
+        let local = Rect::new(0.0, 0.0, command.rect.width, command.rect.height);
+        if rounded::contains(local, radius, x, y) {
+            sample(x, y)
+        } else {
+            None
+        }
+    });
 }
 
 // Keep image-only scratch off image-free raster frames. Direct linear/HDR and
@@ -1864,6 +2021,17 @@ impl CanvasScene<'_> {
     ) -> Result<(), Error> {
         self.pending.fill_rect(rect, transform, clip, color)
     }
+    pub fn fill_rounded_rect(
+        &mut self,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+    ) -> Result<(), Error> {
+        self.pending
+            .fill_rounded_rect(rect, radius, transform, clip, color)
+    }
     pub fn draw_image(
         &mut self,
         image: &Image,
@@ -1874,6 +2042,17 @@ impl CanvasScene<'_> {
     ) -> Result<(), Error> {
         self.pending
             .draw_image(image, rect, transform, clip, sampling)
+    }
+    pub fn draw_image_with(
+        &mut self,
+        image: &Image,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        options: crate::ImageOptions,
+    ) -> Result<(), Error> {
+        self.pending
+            .draw_image_with(image, rect, transform, clip, options)
     }
     pub fn draw_text(
         &mut self,
@@ -2098,6 +2277,13 @@ fn sample(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderS
                         && lx < r.x as f64 + r.width as f64
                         && ly < r.y as f64 + r.height as f64
                     {
+                        1.0
+                    } else {
+                        0.0
+                    }
+                }
+                BorrowedSource::Rounded(radius) => {
+                    if rounded::contains(r, *radius, lx, ly) {
                         1.0
                     } else {
                         0.0

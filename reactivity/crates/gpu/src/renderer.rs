@@ -11,6 +11,8 @@ const MAX_DRAWS: usize = 65_536;
 const MAX_REFERENCES: usize = 4 * 1024 * 1024;
 const MAX_PIXELS: usize = 16 * 1024 * 1024;
 const MAX_ATLAS_SIDE: u32 = 2048;
+const ROUNDED_SOURCE: u32 = 1 << 30;
+const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
 const UNIFORM_TILE: u32 = 1 << 31;
 const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
 const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
@@ -97,7 +99,8 @@ pub struct Stats {
 // selects an inline 96-byte draw; compact placements are two 16-byte words and
 // point at a five-word shared common record in the same storage buffer.
 const INLINE_RECORD: u32 = 1 << 31;
-const _: () = assert!(MAX_DRAWS * 11 < INLINE_RECORD as usize);
+// Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
+const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
 type Word = [u32; 4];
 fn float_word(value: [f32; 4]) -> Word {
     value.map(f32::to_bits)
@@ -131,9 +134,41 @@ fn inline_words(draw: PreparedDraw<'_>, error: [f32; 2], correction: u32) -> [Wo
         inverse_x: [a, c, tx, error[0]],
         inverse_y: [b, d, ty, error[1]],
         clip: [clip.x, clip.y, clip.width, clip.height],
-        color: draw.color,
+        color: packet_color(draw),
         atlas: [0, 0, 0, correction],
     })
+}
+
+// Image material has no tint/opacity port. Its otherwise unused solid-color
+// lanes carry shape parameters under the closed image flag, without extending
+// records or duplicating pixel resources. A future tinted rounded image needs
+// an explicit extended material record, not another interpretation of these.
+fn rounded_image(source: gpui_canvas::PreparedSource<'_>) -> bool {
+    source.image().is_some() && source.corner_radius().is_some()
+}
+fn shape_word(source: gpui_canvas::PreparedSource<'_>, rect: gpui_canvas::Rect) -> Word {
+    let radius = source
+        .corner_radius()
+        .expect("admitted rounded source")
+        .min(rect.width * 0.5)
+        .min(rect.height * 0.5);
+    let scale = f32::from_bits((254 - (radius.to_bits() >> 23)) << 23);
+    [radius.to_bits(), scale.to_bits(), 0, 0]
+}
+fn packet_color(draw: PreparedDraw<'_>) -> [f32; 4] {
+    if rounded_image(draw.source) {
+        shape_word(draw.source, draw.local_rect).map(f32::from_bits)
+    } else {
+        draw.color
+    }
+}
+fn compact_group(group: PreparedGroup<'_>, enabled: bool) -> bool {
+    enabled
+        && group.placements().len() > 1
+        && !group
+            .placements()
+            .next()
+            .is_some_and(|p| rounded_image(p.source))
 }
 
 struct Buffer {
@@ -479,11 +514,8 @@ impl Renderer {
         self.records.clear();
         let word_count = scene.groups().try_fold(0usize, |sum, group| {
             let n = group.placements().len();
-            let words = if self.grouped_records && n > 1 {
-                5 + 2 * n
-            } else {
-                6 * n
-            };
+            let compact = compact_group(group, self.grouped_records);
+            let words = if compact { 5 + 2 * n } else { 6 * n };
             sum.checked_add(words).ok_or(Error::ResourceLimit)
         })?;
         self.records
@@ -500,7 +532,7 @@ impl Renderer {
         let mut shared_groups = 0;
         let mut compact_draws = 0;
         for group in scene.groups() {
-            let compact = self.grouped_records && group.placements().len() > 1;
+            let compact = compact_group(group, self.grouped_records);
             let correction = self.correction(group.inverse, group.clip);
             if compact {
                 let mut error = [0.0_f32; 2];
@@ -575,18 +607,24 @@ impl Renderer {
         // Metadata words/correction indices and private common addresses remain.
         let mut word = 0;
         for group in scene.groups() {
-            let compact = self.grouped_records && group.placements().len() > 1;
+            let compact = compact_group(group, self.grouped_records);
             if compact {
                 word += 5;
             }
             for p in group.placements() {
                 let atlas = if let Some((image, sampling)) = p.source.image() {
-                    let [offset, flags] = self
+                    let [offset, mut flags] = self
                         .images
                         .as_ref()
                         .unwrap()
                         .metadata(image.key(), sampling);
+                    if rounded_image(p.source) {
+                        flags |= images::ROUNDED;
+                    }
                     [offset, flags, image.width() | (image.height() << 16)]
+                } else if p.source.corner_radius().is_some() {
+                    let [radius, scale, _, _] = shape_word(p.source, p.local_rect);
+                    [ROUNDED_SOURCE, radius, scale]
                 } else {
                     p.source.mask().map_or([0; 3], |mask| {
                         let t = self.atlas.entries[&mask.key];
@@ -616,7 +654,7 @@ impl Renderer {
         let mut word = self.records.len();
         let mut reverse_ordinal = ordinal;
         for group in scene.groups().rev() {
-            let compact = self.grouped_records && group.placements().len() > 1;
+            let compact = compact_group(group, self.grouped_records);
             for p in group.placements().rev() {
                 word -= if compact { 2 } else { 6 };
                 reverse_ordinal -= 1;
@@ -1081,6 +1119,27 @@ fn validate_draw(
     if !magnitude.is_finite() || magnitude > f64::from(f32::MAX) / 32.0 {
         return Err(Error::Precision { draw: index });
     }
+    let mut rounded_arithmetic = 0.0;
+    if let Some(radius) = draw.source.corner_radius() {
+        if !radius.is_finite() || radius < 0.0 {
+            return Err(Error::InvalidScene);
+        }
+        let radius = radius.min(local.width * 0.5).min(local.height * 0.5);
+        // CPU admission is broader. GPUs may flush subnormals, and a two-float
+        // distance calculation is not an arbitrary-precision cancellation
+        // oracle. Limit the normalized operands, not merely their final square.
+        // The largest admitted normalized pre-subtraction operand is 2^20;
+        // products in the actual circle comparison are near unity.
+        if radius < f32::MIN_POSITIVE || magnitude / f64::from(radius) > 1_048_576.0 {
+            return Err(Error::Precision { draw: index });
+        }
+        // Reserve a conservative additional two-float arithmetic allowance
+        // through the same local-to-device error ceiling. This bounds distance
+        // reconstruction as well as the coordinate transform; it is not a
+        // theorem that every backend classifies all circle ties like f64.
+        rounded_arithmetic =
+            4096.0 * f64::from(f32::EPSILON).powi(2) * (magnitude + f64::from(radius));
+    }
     if let Some([width, height]) = draw.source.dimensions() {
         let scale_x = width as f64 / f64::from(local.width);
         let scale_y = height as f64 / f64::from(local.height);
@@ -1099,7 +1158,7 @@ fn validate_draw(
             + f64::from(local.y).abs()
             + f64::from(local.width).abs()
             + f64::from(local.height).abs());
-    let error = (error_x + error_y + arithmetic + origin_error)
+    let error = (error_x + error_y + arithmetic + origin_error + rounded_arithmetic)
         * (m[0].abs() + m[1].abs() + m[2].abs() + m[3].abs())
         / det.abs();
     if !error.is_finite() || error > 1.0 / 32.0 {
