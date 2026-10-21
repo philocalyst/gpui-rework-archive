@@ -43,6 +43,7 @@ use list::{ListRow, ListState, ScrollRequest};
 mod metadata;
 mod query;
 mod semantics;
+mod styles;
 pub use input::Key;
 use metadata::{Declared, Destination, Metadata, Port, Publish};
 pub use metadata::{ListInfo, ListItemInfo};
@@ -492,9 +493,10 @@ struct Node {
     ordinal: u32,
     content: Content,
     component_scope: u32,
-    style: Style,
     handler: Option<Handler>,
 }
+#[cfg(test)]
+mod style_ledger;
 impl Node {
     #[inline]
     fn kind(&self) -> NodeKind {
@@ -575,6 +577,7 @@ struct Runtime<M> {
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
+    styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
     by_identity: BTreeMap<u64, usize>,
     fanout: BTreeMap<FieldId, Fanout>,
@@ -769,6 +772,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             model: pending.model,
             sources,
             nodes: Vec::new(),
+            styles: styles::Styles::default(),
             texts: Vec::new(),
             by_identity: BTreeMap::new(),
             fanout: BTreeMap::new(),
@@ -1123,7 +1127,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
-        Ok(property.get(&runtime.nodes[runtime.by_identity[&identity]].style))
+        Ok(property.get(runtime.styles.get(runtime.by_identity[&identity])))
     }
     pub fn contribution<T>(
         &self,
@@ -1151,7 +1155,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         let index = runtime.by_identity[&identity];
-        let before = runtime.nodes[index].style;
+        let before = *runtime.styles.get(index);
         let after = runtime
             .overrides
             .set(identity, before, property, contribution)?;
@@ -1168,7 +1172,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     text.shaped = None;
                 }
             }
-            runtime.nodes[index].style = after;
+            let count = runtime.nodes.len();
+            runtime.styles.set(index, after, count);
             runtime.dirty = true;
         }
         if !runtime.lists.is_empty() {
@@ -1473,6 +1478,7 @@ impl<M: View + 'static> Runtime<M> {
                 .destinations
                 .sort_unstable_by_key(|destination| destination.packed());
         }
+        let old_styles = std::mem::take(&mut self.styles);
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()
             .map(Some)
@@ -1505,6 +1511,7 @@ impl<M: View + 'static> Runtime<M> {
             .iter()
             .map(|node| node.as_ref().unwrap().identity)
             .collect::<Vec<_>>();
+        let mut styles = styles::Builder::new(drafts.len());
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
@@ -1539,6 +1546,11 @@ impl<M: View + 'static> Runtime<M> {
             let previous = previous_index
                 .and_then(|&old_index| old[old_index].take())
                 .filter(|node| node.component_scope == component_scopes[index]);
+            let previous_style = if previous.is_some() {
+                *old_styles.get(*previous_index.unwrap())
+            } else {
+                draft.style
+            };
             let mut node_changed = previous.is_none();
             let mut node = if let Some(node) = previous {
                 node
@@ -1552,7 +1564,6 @@ impl<M: View + 'static> Runtime<M> {
                     ordinal,
                     content: Content::new(draft.kind, TextSlot::NONE),
                     component_scope: component_scopes[index],
-                    style: draft.style,
                     handler: None,
                 }
             };
@@ -1586,14 +1597,14 @@ impl<M: View + 'static> Runtime<M> {
                 node_changed = true;
             }
             let style = self.overrides.resolve(node.identity, draft.style);
-            if node.style != style {
+            if previous_style != style {
                 self.dirty = true;
                 node_changed = true;
             }
-            if layout_changed(node.style, style) {
+            if layout_changed(previous_style, style) {
                 self.layout_dirty.insert(node.identity);
             }
-            if node.style.font_size != style.font_size
+            if previous_style.font_size != style.font_size
                 && let Some(site) = &mut site
             {
                 site.shaped = None;
@@ -1606,7 +1617,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             node.parent = Parent::new(parent);
             node.ordinal = ordinal;
-            node.style = style;
+            styles.push(&style);
             node.handler = draft.on_click;
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
@@ -1726,6 +1737,7 @@ impl<M: View + 'static> Runtime<M> {
         self.lists = lists;
         self.list_rows = list_rows;
         self.nodes = nodes;
+        self.styles = styles.finish();
         self.texts = texts;
         self.fanout = fanout;
         self.by_identity = self
@@ -1929,14 +1941,15 @@ impl<M: View + 'static> Runtime<M> {
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
-            for node in &self.nodes {
+            for (index, node) in self.nodes.iter().enumerate() {
                 let parent = node.parent.index().map(|parent| self.layout_nodes[parent]);
                 let id = self.layout.insert(
                     parent,
                     gpui_reactivity_core::NodeKind::Element,
                     list::row_style(
-                        node,
-                        node.parent.index().map(|index| &self.nodes[index]),
+                        node.kind(),
+                        self.styles.get(index),
+                        node.parent.index().map(|index| self.styles.get(index).flow),
                         self.list_rows.get(&node.identity),
                     ),
                 )?;
@@ -1969,11 +1982,12 @@ impl<M: View + 'static> Runtime<M> {
                 self.layout.set_style(
                     id,
                     list::row_style(
-                        &self.nodes[index],
+                        self.nodes[index].kind(),
+                        self.styles.get(index),
                         self.nodes[index]
                             .parent
                             .index()
-                            .map(|parent| &self.nodes[parent]),
+                            .map(|parent| self.styles.get(parent).flow),
                         self.list_rows.get(identity),
                     ),
                 )?;
@@ -1984,6 +1998,7 @@ impl<M: View + 'static> Runtime<M> {
         let layout_nodes = &self.layout_nodes;
         let mut failure = None;
         let nodes = &self.nodes;
+        let styles = &self.styles;
         let texts = &mut self.texts;
         let service = &mut shaper;
         let mut measure = |id: NodeId, input: MeasureInput| {
@@ -2004,7 +2019,7 @@ impl<M: View + 'static> Runtime<M> {
             let node = &nodes[index];
             match node.text_slot().get_mut(texts).unwrap().shape(
                 service,
-                node.style.font_size,
+                styles.get(index).font_size,
                 width,
             ) {
                 Ok(shape) => MeasureOutput {
@@ -2065,6 +2080,7 @@ impl<M: View + 'static> Runtime<M> {
                 .nodes
                 .get(index + 1)
                 .is_some_and(|child| child.parent.index() == Some(index));
+            let style = self.styles.get(index);
             let node = &mut self.nodes[index];
             let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
@@ -2072,7 +2088,7 @@ impl<M: View + 'static> Runtime<M> {
             );
             let space = parent
                 .compose(Affine::translation(layout.location.x, layout.location.y))
-                .compose(node.style.transform);
+                .compose(style.transform);
             spaces.push(space);
             let [a, b, c, d, tx, ty] = space.coefficients().map(|value| value as f32);
             let candidate = Affine { a, b, c, d, tx, ty };
@@ -2113,12 +2129,12 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 raw_bounds.intersection(viewport)
             };
-            if node.style.bg.alpha() > 0.0 {
+            if style.bg.alpha() > 0.0 {
                 scene.fill_rect(
                     rect,
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
                     clip,
-                    node.style.bg,
+                    style.bg,
                 )?;
             } else if node.handler.is_some() || node.kind() == NodeKind::Input {
                 // An invisible input region still obeys the renderer's exact
@@ -2131,11 +2147,11 @@ impl<M: View + 'static> Runtime<M> {
                 )?;
             }
             if let Some(text) = node.text_slot().get_mut(&mut self.texts) {
-                let fg = node.style.fg;
+                let fg = style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
                 let shape = text.shape(
                     shaper.as_mut().expect("text initialized before layout"),
-                    node.style.font_size,
+                    style.font_size,
                     Some(layout.content_box_width()),
                 )?;
                 scene.draw_text_scaled(
@@ -2180,7 +2196,7 @@ impl<M: View + 'static> Runtime<M> {
                 transform: PresentedTransform::new(transform),
                 bounds,
                 hittable: node.text_slot().0 != u32::MAX
-                    || node.style.bg.alpha() > 0.0
+                    || style.bg.alpha() > 0.0
                     || node.handler.is_some()
                     || node.kind() == NodeKind::Input,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()),
@@ -2324,7 +2340,7 @@ fn layout_changed(a: Style, b: Style) -> bool {
         || a.font_size != b.font_size
         || a.flow != b.flow
 }
-fn layout_style(style: Style) -> cephal::Style {
+fn layout_style(style: &Style) -> cephal::Style {
     use cephal::style::{Dimension, Display, FlexDirection, LengthPercentage};
     cephal::Style {
         display: Display::Flex,
@@ -2813,7 +2829,7 @@ mod semantic_storage_ledger {
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
-        assert_eq!(size_of::<Node>(), 128);
+        assert_eq!(size_of::<Node>(), 40);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<Presented>(), 80);
         assert_eq!(size_of::<crate::El<'_>>(), 176);

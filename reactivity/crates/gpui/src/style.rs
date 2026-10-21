@@ -25,19 +25,22 @@ pub struct Style {
     pub(crate) transform: Affine,
 }
 
+impl Style {
+    pub(crate) const DEFAULT: Self = Self {
+        width: None,
+        height: None,
+        gap: 0.0,
+        padding: 0.0,
+        font_size: 16.0,
+        fg: Color::rgb(0, 0, 0),
+        bg: Color::rgba(0, 0, 0, 0),
+        flow: Flow::Column,
+        transform: Affine::IDENTITY,
+    };
+}
 impl Default for Style {
     fn default() -> Self {
-        Self {
-            width: None,
-            height: None,
-            gap: 0.0,
-            padding: 0.0,
-            font_size: 16.0,
-            fg: Color::rgb(0, 0, 0),
-            bg: Color::rgba(0, 0, 0, 0),
-            flow: Flow::Column,
-            transform: Affine::IDENTITY,
-        }
+        Self::DEFAULT
     }
 }
 
