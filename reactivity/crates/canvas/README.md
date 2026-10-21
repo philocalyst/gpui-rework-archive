@@ -247,3 +247,20 @@ Small boundary-heavy scenes and geometry sampling remain costs. Assembly
 inspection confirmed table loads/comparisons on the opaque path; power/round
 library calls remain in initialization and the general converter. This changes
 conversion work, not sampling quality, color profiles or the output byte contract.
+
+## Borrowed canonical scene
+
+`Canvas::prepared_scene()` exposes painter-ordered draws without rasterizing,
+allocating, or cloning mask handles. Each draw carries the same local rectangle,
+f64 inverse mapping, world clip, conservative clipped device bounds, and
+premultiplied extended-linear-sRGB color used by the CPU. Glyph masks borrow
+immutable coverage bytes and carry a process-local `GlyphKey`; a key remains
+stable across cache eviction and services sharing one `FontFace`. Distinct font
+faces have distinct keys, including independently parsed equal font bytes.
+
+A backend must upload while the scene is borrowed or explicitly retain its own
+resource lease. The view does not provide a GPU fence or extend a mask lifetime.
+Narrowing the inverse to f32 requires backend-specific precision validation;
+the CPU's f64 coverage certificates do not certify a different shader domain.
+The retained command remains 136 bytes on x86_64; this export adds no forward
+matrix or resource clone per glyph. CPU tile bins are disposable derived data.

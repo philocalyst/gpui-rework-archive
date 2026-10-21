@@ -4,9 +4,9 @@ pub use gpui_reactivity_core::{Affine, Point, Rect};
 mod canvas;
 mod color;
 mod text;
-pub use canvas::{Canvas, CanvasScene, RenderStats};
+pub use canvas::{Canvas, CanvasScene, RenderStats,PreparedScene,PreparedDraw,GlyphMask};
 pub use color::{Color, ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping, rgb};
-pub use text::{FontFace, Glyph, TextLayout, TextSystem};
+pub use text::{FontFace, Glyph, GlyphKey, TextLayout, TextSystem};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {

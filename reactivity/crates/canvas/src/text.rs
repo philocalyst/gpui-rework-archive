@@ -87,6 +87,15 @@ pub struct Glyph {
     pub baseline: f32,
 }
 
+/// Process-local immutable raster identity. Equal keys identify the same font
+/// face, glyph and scale, including across cache eviction or separate services.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct GlyphKey {
+    face: u64,
+    glyph: u16,
+    size: u32,
+}
+
 /// Owned positions from one FontFace, accepted by any service sharing that face.
 /// A layout does not keep parsed font data alive. Advance bounds and ink differ.
 #[derive(Clone, Debug)]
@@ -108,6 +117,7 @@ impl TextLayout {
 }
 
 pub(crate) struct Raster {
+    pub key: GlyphKey,
     pub metrics: Metrics,
     pub pixels: Vec<u8>,
 }
@@ -360,7 +370,18 @@ impl TextSystem {
             }
             let (metrics, pixels) = self.face.0.font.rasterize_indexed(id, size);
             self.cache_bytes += pixels.len();
-            self.cache.insert(key, Arc::new(Raster { metrics, pixels }));
+            self.cache.insert(
+                key,
+                Arc::new(Raster {
+                    key: GlyphKey {
+                        face: self.face.0.id,
+                        glyph: id,
+                        size: size.to_bits(),
+                    },
+                    metrics,
+                    pixels,
+                }),
+            );
         }
         Ok(Arc::clone(&self.cache[&key]))
     }
