@@ -86,8 +86,17 @@ Tests send ordinary owned values, choose the batch budget and inspect the same
 source/commit results as applications. They cover FIFO, bounded staging, sparse
 lane fairness, arrivals during callbacks, callback faults, failed presentation
 repair and receiver-before-model teardown. A real X11 script verifies wake-driven
-delivery without polling. Full Reader/input-version/cohort admission remains a
-separate requirement; queue delivery alone does not implement that graph. See
+delivery without polling. Typed one-source questions now add registered source,
+revision, coarse replacement, retry and consume-once ticket admission. Their
+ordinary `Completion`, `deliver_ready`, status/ready-borrow and retry APIs serve
+tests and applications. The real Library search tests hold normal completion
+caps to choose result timing and check previous controls, failed C repair,
+same-batch supersession, faults, physical credit and restored domain state.
+The model's ephemeral Reader is rebound through a fresh Questions plan after
+domain DTO restoration; it is not serialized as authority. A separate actual
+X11 script requires result/credit progress through WorkReady, and three Loom
+cases check the credit/wake seam. These are not the complete multi-input
+dependency/cohort graph; see [the Reader contract](docs/reader-question.md). See
 [the delivery contract](crates/gpui/REMOTE.md) for the exact capacity and lifetime
 limits.
 
@@ -107,6 +116,11 @@ after initial P, reads renamed text and its actual content, edits input, invokes
 an action and reactivates without forcing a frame. The absent-session-bus case
 still presents real CPU content. These prove separate boundaries from UIA and
 VoiceOver runtime behavior; see [the native contract](crates/gpui/ACCESSIBILITY.md).
+Sparse publication additionally compares its complete Consumer result against
+fresh full projection, including 100K entries, clipped logical/P index mismatch,
+ordered container children, pending metadata, missed acknowledgements, failed
+preparations and synthetic text children. The verifier includes both schema and
+transition modules; a schema-only filter cannot substitute for these oracles.
 
 From the repository root, the complete local verifier is:
 

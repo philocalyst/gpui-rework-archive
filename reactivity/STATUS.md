@@ -6,11 +6,11 @@ describe the intended complete system; this page records what is connected now.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
-| Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, conservative and explicit direct updates, contained component projections | One serial root owner; complete Reader/dependency/cohort graph remains |
+| Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and typed one-source Reader questions | One serial root owner; complete dependency/cohort graph remains |
 | Public testing | Application::demo, borrowed semantic queries/visits, conjunctive name/description filters, actions, focus/keyboard, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time and replay remain |
-| Accessibility | Native AccessKit in ordinary desktop profiles, acknowledged names/descriptions/list positions, lazy active projection, bounded revalidated actions; actual Linux AT-SPI client execution | Full projection on changed P; selection/IME, relationships, native virtual-item realization, UIA/VoiceOver runtime coverage remain |
+| Accessibility | Native AccessKit in ordinary desktop profiles, bounded exact acknowledged transitions, lazy active projection, revalidated actions; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; selection/IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
-| Worker delivery | Static typed bounded inbox chains, frozen fair batches, one owner barrier, native wakes, receiver-before-model cleanup through exclusive borrow guards | Complete Reader, input-version and cohort graph remains; queue capacity is not a byte bound |
+| Worker delivery | Static typed inbox/question chains, frozen batches, versioned one-source admission, one physical completion credit, native wakes and exclusive cleanup | Multi-input Reader/cohort graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal, borrowed Rustybuzz shaping sessions, lazy Swash masks, logical layout with physical-density rasterization | Selection, IME, grapheme editing and complete font/script fallback remain |
@@ -18,7 +18,7 @@ describe the intended complete system; this page records what is connected now.
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
-| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library; shared native/headless models | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
+| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library, including explicit worker search and restored domain inputs | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
@@ -49,18 +49,19 @@ layout/font/scene storage and native services remain separately owned.
 
 ## Current verification
 
-[checks.json](evidence/checks.json) records seventeen successful gates with exact commands,
-exit status and elapsed time, run against source commit b20a627b08:
+[checks.json](evidence/checks.json) records nineteen successful gates with exact commands,
+exit status and elapsed time, run against source commit 5b7d8833f9:
 
-- Debug and release workspace suites: **370 passing cases/doctests each**.
+- Debug and release workspace suites: **400 passing cases/doctests each**.
 - Strict workspace Clippy and first-party formatting: pass.
 - Explicit parallel Canvas suite: **66 passing cases**, overlapping the workspace suite.
-- Optimized Loom protocol suite: **6 passing cases**; finite proof scope in [TESTING](TESTING.md).
+- Optimized Loom protocol suites: **6 existing cases plus 3 question-credit cases**; finite proof scope in [TESTING](TESTING.md).
 - Actual Vulkan conformance: **18 passing readback cases**, including all five author color layouts through SDR/HDR and 24 signed/fractional inverse-lattice clipping fixtures with tile proofs enabled and disabled.
 - Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
 - Actual X11 worker delivery: **one script** checking real wakes, committed-error repair and shutdown without a polling timer.
+- Actual X11 Reader delivery: **one script** checking obsolete-credit retirement and latest-result acknowledgement without polling or unrelated input.
 - Actual X11 250K Library: **one script** checking wheel/pointer routing, source/presentation separation, row target lifetimes, resize, suspend/resume and full server-pixel equality.
-- Accessibility schema/action suite: **12 passing cases** using the actual pinned Consumer, overlapping the accessible native tests rather than the headless workspace count.
+- Accessibility schema/action/transition suite: **20 passing cases** using the actual pinned Consumer, overlapping the accessible native tests rather than the headless workspace count.
 - Actual Linux AT-SPI client: **one script** reading native names/content, focusing, editing, invoking and reactivating; activation and semantic-only name changes require no new frame.
 - Actual absent-session-bus native presentation: **one script**.
 - Combined X11+Wayland accessible and explicit minimal compilation, strict accessible all-target Clippy, and retained-layout example: pass.
@@ -85,6 +86,11 @@ the actual macOS/Windows desktop adapters under cross-compilation. The native
 test gate is scoped to its Linux X11 caller. These supplemental checks do not
 represent UIA, VoiceOver or other target OS runtime execution.
 
+The combined Reader/accessibility source also passes warnings-denied all-target
+desktop-adapter Clippy under [aarch64 macOS](evidence/reader-apple-clippy.txt) and
+[Windows MSVC](evidence/reader-windows-clippy.txt) cross-compilation. This is
+typechecking of the actual adapters, not execution on those operating systems.
+
 ## Measurements and their boundaries
 
 | Change | Evidence | Limit |
@@ -102,6 +108,9 @@ represent UIA, VoiceOver or other target OS runtime execution.
 | Native semantic projection | [Projection evidence](crates/gpui/ACCESSIBILITY.md): exactly reserved 10K-button output removes about 0.87 MB retained and 1.62 MB peak requested B versus geometric growth | Extra read pass; excludes adapter-owned tree, D-Bus and OS providers; changed P still projects the full tree |
 | Thin text leases | [Paired evidence](crates/gpui/evidence/thin-text.md): P 88→80 B and text-site 80→72 B; 100K no-text fixture saves 800,000 requested retained B | Each unique nonempty payload requests 1–8 B more; no-text preparation loses about 10% and sparse edits about 6%; rejected flag packing did not fix it |
 | Lossless author colors | [Color proof and measurements](crates/canvas/COLOR_PACKING.md): Color 20→16 B, Style 96→88 B, Node 136→128 B, preserving all admitted HDR/author bits | Some conversion/mount/raster phases lose; native first acknowledgement is flat and native RSS/PSS increased in the paired capture; Canvas working colors already occupied 16 B |
+| Measurement routing | [Paired evidence](crates/gpui/evidence/layout-route.md): 10,001-node repeated-color mount removes 913 scratch allocations and 262,472 peak requested bytes | Retained storage is unchanged; individual trace phases lose and dense text searches are not a universal speedup |
+| Sparse native semantics | [Transition evidence](crates/gpui/SPARSE_ACCESSIBILITY.md): 100K leaf projection+Consumer replacement about 77.7 ms→73.6 µs, peak about 34.8 MB→328 B; verified field hints remove the common P scan | Warm repeated replacement, not screen-reader latency; active 10K geometry preparation pays about 14.3% comparison tax; inactive observation skips it |
+| Typed questions | [Implementation and cost ledger](docs/reader-question.md): first declared u64 question requests 5 allocations/880 B; ordinary owners gain no fields | Each projection description pays two boxes/88 B; explicit Library worker reserves 256 KiB stack; complete Reader/cohort graph remains |
 
 The measurement rows pin their own baselines. Dense text, thin leases, color
 packing and row derivation were measured independently; their percentages are
@@ -113,13 +122,15 @@ Reports retain losing cases. The full Hummingbird source audit is
 [pinned separately](docs/hummingbird-source-audit-luna.md). The keyed-list and
 worker-delivery foundations are integrated; images, complete async admission,
 media and richer input remain prerequisites for that port.
+The [packed-dimension experiment](crates/gpui/evidence/dimensions.md) remains out
+of production: its exact 8-byte node saving did not justify unresolved phase costs.
 
 ## Scope and line accounting
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. This snapshot contains **24,054 first-party src lines** and
-**17,758 external test/example lines** across production and experimental crates.
+are separate. The source 5b7d8833f9 snapshot contains **26,934 first-party src lines** and
+**19,005 external test/example lines** across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
 Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
 their tests/examples. Vendoring has not made those dependencies disappear.

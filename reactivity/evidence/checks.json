@@ -12,7 +12,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 48.531,
+    "elapsed_seconds": 66.312,
     "log": "workspace-debug.txt"
   },
   {
@@ -32,7 +32,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 9.536,
+    "elapsed_seconds": 23.008,
     "log": "workspace-clippy.txt"
   },
   {
@@ -49,7 +49,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 66.444,
+    "elapsed_seconds": 63.167,
     "log": "workspace-release.txt"
   },
   {
@@ -69,8 +69,29 @@
       "loom_protocol"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 6.523,
+    "elapsed_seconds": 7.004,
     "log": "loom.txt"
+  },
+  {
+    "check": "question-credit",
+    "argv": [
+      "cargo",
+      "test",
+      "--release",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui_reactivity_ownership_lab",
+      "--features",
+      "loom",
+      "--test",
+      "question_credit"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 3.348,
+    "log": "question-credit.txt",
+    "passed_tests": 3
   },
   {
     "check": "native-check",
@@ -87,7 +108,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 3.789,
+    "elapsed_seconds": 11.744,
     "log": "native-check.txt"
   },
   {
@@ -105,7 +126,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 2.075,
+    "elapsed_seconds": 6.317,
     "log": "native-minimal-check.txt"
   },
   {
@@ -126,7 +147,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 3.933,
+    "elapsed_seconds": 6.695,
     "log": "native-clippy.txt"
   },
   {
@@ -142,12 +163,12 @@
       "--features",
       "x11,wayland",
       "--lib",
-      "native::accessibility::tests"
+      "native::accessibility::"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 14.957,
+    "elapsed_seconds": 51.895,
     "log": "accessibility-schema.txt",
-    "passed_tests": 12
+    "passed_tests": 20
   },
   {
     "check": "parallel-canvas",
@@ -163,7 +184,7 @@
       "parallel"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 16.168,
+    "elapsed_seconds": 17.821,
     "log": "parallel-canvas.txt"
   },
   {
@@ -182,7 +203,7 @@
       "retained_layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.132,
+    "elapsed_seconds": 0.098,
     "log": "layout-example.txt"
   },
   {
@@ -221,7 +242,7 @@
       "--check"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.624,
+    "elapsed_seconds": 0.713,
     "log": "format.txt"
   },
   {
@@ -240,7 +261,7 @@
       "render"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 9.389,
+    "elapsed_seconds": 14.691,
     "log": "gpu-vulkan.txt",
     "passed_tests": 18
   },
@@ -263,7 +284,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 34.725,
+    "elapsed_seconds": 42.263,
     "log": "native-x11.txt",
     "passed_tests": 1
   },
@@ -286,8 +307,32 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.739,
+    "elapsed_seconds": 1.93,
     "log": "native-remote.txt",
+    "passed_tests": 1
+  },
+  {
+    "check": "native-question",
+    "argv": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "x11",
+      "--lib",
+      "native_question_result_and_credit_wake_without_unrelated_input",
+      "--",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.245,
+    "log": "native-question.txt",
     "passed_tests": 1
   },
   {
@@ -309,7 +354,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 10.698,
+    "elapsed_seconds": 10.461,
     "log": "native-library.txt",
     "passed_tests": 1
   },
@@ -321,7 +366,7 @@
       "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 4.115,
+    "elapsed_seconds": 1.499,
     "log": "native-atspi.txt",
     "passed_tests": 1
   },
@@ -347,7 +392,7 @@
       "--nocapture"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.442,
+    "elapsed_seconds": 0.378,
     "log": "native-no-bus.txt",
     "passed_tests": 1
   }
