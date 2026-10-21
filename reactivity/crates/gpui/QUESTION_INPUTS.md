@@ -68,6 +68,11 @@ existing one-cap mailbox, borrowed cancellation, bounded latest frozen input,
 atomic close and shutdown protocol are unchanged. A running canceled worker
 continues to occupy its one physical credit until it terminates.
 
+The frozen batch settles without intermediate publication. Across turns,
+independently projected Readers remain progressive current/previous state; this
+is not atomic multi-output cohort reveal. Keep answer-dependent labels inside
+the same frozen answer, as Library does for query and order.
+
 This is a static earlier-only dependency DAG, not dynamic tracking, memoization,
 output equality cutoff, arbitrary cross-owner dependencies, or a complete cohort
 reader graph. Admission checks scan declared family members. Resolving Reader

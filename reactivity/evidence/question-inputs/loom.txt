@@ -1,0 +1,46 @@
+   Compiling rustversion v1.0.23
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling log v0.4.34
+   Compiling regex-syntax v0.8.11
+   Compiling lazy_static v1.5.1
+   Compiling nu-ansi-term v0.50.3
+   Compiling scoped-tls v1.0.1
+   Compiling rtrb v0.4.0
+   Compiling tracing-core v0.1.36
+   Compiling thread_local v1.1.10
+   Compiling sharded-slab v0.1.7
+   Compiling cc v1.9.0
+   Compiling tracing-log v0.2.0
+   Compiling tracing v0.1.44
+   Compiling generator v0.8.11
+   Compiling regex-automata v0.4.18
+   Compiling matchers v0.2.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling loom v0.7.2
+   Compiling gpui_reactivity_ownership_lab v0.1.0 (/root/gpui-question-inputs/reactivity/crates/ownership-lab)
+    Finished `release` profile [optimized] target(s) in 9.25s
+     Running tests/question_credit.rs (/tmp/gpui-question-inputs-target/release/deps/question_credit-ab3230a95e8c88a2)
+
+running 3 tests
+test omitting_the_post_terminal_wake_has_a_lost_credit_counterexample - should panic ... ok
+test acquired_terminal_pairs_with_its_unchanged_launched_ticket ... ok
+test terminal_after_first_wake_never_strands_latest_input_credit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/question_mailbox.rs (/tmp/gpui-question-inputs-target/release/deps/question_mailbox-d585ae37b4f4b9a4)
+
+running 9 tests
+test abandonment_releases_credit_without_a_payload_and_stays_bounded ... ok
+test callback_close_discards_a_staged_response_without_taking_it ... ok
+test a_late_old_notification_cannot_overwrite_a_reused_physical_lease ... ok
+test a_worker_lease_defers_reclamation_after_close_but_cannot_admit_it ... ok
+test notification_and_payload_drop_run_outside_the_mutex ... ok
+test staged_readiness_keeps_the_payload_sealed_across_owner_refresh ... ok
+test close_never_waits_for_a_descheduled_producer_holding_the_response_mutex ... ok
+test close_racing_publication_releases_exactly_one_owned_payload ... ok
+test a_single_wake_after_terminal_cannot_strand_a_published_response ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
