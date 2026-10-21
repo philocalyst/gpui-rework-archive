@@ -89,6 +89,7 @@ pub enum Error {
     Property(PropertyError),
     Serialization(String),
     List(ListError),
+    Question(crate::QuestionFault),
 }
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -96,6 +97,11 @@ impl std::fmt::Display for Error {
     }
 }
 impl std::error::Error for Error {}
+impl From<crate::QuestionFault> for Error {
+    fn from(error: crate::QuestionFault) -> Self {
+        Self::Question(error)
+    }
+}
 impl From<BindError> for Error {
     fn from(error: BindError) -> Self {
         Self::Binding(error)
@@ -623,6 +629,20 @@ impl<M: View + 'static, L: LaneSet<M>> Drop for RuntimeMut<'_, M, L> {
     }
 }
 impl<M: View + 'static> Win<M> {
+    pub fn with_questions<Q: LaneSet<M>>(
+        model: M,
+        questions: crate::Questions<M, Q>,
+        options: WindowOptions,
+    ) -> Result<Win<M, crate::reader::QuestionSet<Q, ()>>, Error> {
+        Win::mount_lanes(model, questions.bind(()), options, true, 1.0)
+    }
+    pub fn recording_questions<Q: LaneSet<M>>(
+        model: M,
+        questions: crate::Questions<M, Q>,
+        options: WindowOptions,
+    ) -> Result<Win<M, crate::reader::QuestionSet<Q, ()>>, Error> {
+        Win::mount_lanes(model, questions.bind(()), options, false, 1.0)
+    }
     pub fn new(model: M) -> Result<Self, Error> {
         Self::with_options(model, WindowOptions::default())
     }
@@ -758,6 +778,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut runtime = window.runtime_mut()?;
         runtime.describe(true)?;
         runtime.present()?;
+        if runtime.lanes.start_questions() {
+            runtime.describe(false)?;
+            runtime.present()?;
+        }
         drop(runtime);
         Ok(window)
     }
@@ -1238,31 +1262,13 @@ impl<M: View + 'static> Runtime<M> {
         self.prepared = None;
         self.latest_token = None;
     }
-    fn describe(&mut self, mount: bool) -> Result<(), Error> {
-        self.describe_with(mount, None)
-    }
-    fn describe_with(&mut self, mount: bool, scroll: Option<ScrollRequest>) -> Result<(), Error> {
-        let was_valid = self.logical_valid;
-        match catch_unwind(AssertUnwindSafe(|| self.describe_inner(mount, scroll))) {
-            Ok(Ok(())) => Ok(()),
-            Ok(Err(error)) => {
-                // A rejected presentation-only scroll has not edited the model
-                // or reached reconciliation; its acknowledged cohort stays live.
-                self.logical_valid = scroll.is_some() && was_valid;
-                if !self.logical_valid {
-                    self.focused = None;
-                }
-                Err(error)
-            }
-            Err(_) => {
-                self.poison();
-                Err(Error::OwnerPanicked)
-            }
-        }
-    }
-    fn describe_inner(&mut self, mount: bool, scroll: Option<ScrollRequest>) -> Result<(), Error> {
+    fn describe_inner(
+        &mut self,
+        mount: bool,
+        scroll: Option<ScrollRequest>,
+        readers: &dyn crate::reader::ReaderValues,
+    ) -> Result<(), Error> {
         let reuse_identities = self.logical_valid;
-        self.sources.validate(&mut self.model)?;
         self.counters.descriptions += 1;
         if !mount {
             self.counters.owner_reruns += 1;
@@ -1272,10 +1278,10 @@ impl<M: View + 'static> Runtime<M> {
             nodes: drafts,
             lists: list_drafts,
             annotations: annotation_drafts,
-        } = self
-            .model
-            .view()
-            .flatten_lists(MAX_NODES, |id, style, source, row_height| {
+        } = self.model.view().flatten_lists(
+            MAX_NODES,
+            readers,
+            |id, style, source, row_height| {
                 if !seen.insert(id) {
                     return Err(ListError::DuplicateList(id));
                 }
@@ -1291,7 +1297,8 @@ impl<M: View + 'static> Runtime<M> {
                         .filter(|request| request.id == id)
                         .map(|request| request.position),
                 )
-            })?;
+            },
+        )?;
         let list_indices: BTreeMap<_, _> = list_drafts
             .iter()
             .map(|list| (list.index, list.id))

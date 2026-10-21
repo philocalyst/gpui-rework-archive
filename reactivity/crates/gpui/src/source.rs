@@ -117,8 +117,16 @@ impl<M, T: 'static> Source<M, T> {
         model: &M,
         sources: &Sources<M>,
     ) -> Result<(), BindError> {
-        if sources.signal(model, self.id)?.same((self.read)(model)) {
-            Ok(())
+        self.borrow_registered(model, sources).map(|_| ())
+    }
+    pub(crate) fn borrow_registered<'a>(
+        &self,
+        model: &'a M,
+        sources: &Sources<M>,
+    ) -> Result<&'a Signal<T>, BindError> {
+        let signal = (self.read)(model);
+        if sources.signal(model, self.id)?.same(signal) {
+            Ok(signal)
         } else {
             Err(BindError::ProjectionMismatch(self.id))
         }

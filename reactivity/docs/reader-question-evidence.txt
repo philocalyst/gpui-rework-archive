@@ -1,0 +1,109 @@
+Typed question / Reader first slice, x86_64, 2026-10-21
+
+Source ancestry: b20a627b08 + a14997eeeb + 3293b147d4, followed by the
+question implementation in this commit. Parent integrated the phase-only
+commits independently. No Cargo dependency or lock changes in this slice.
+rustc 1.97.1 (8bab26f4f 2026-07-14), AMD Ryzen 7 3700X, Linux x86_64.
+
+Allocation/size command (debug, allocation-counter existing dev dependency):
+ CARGO_TARGET_DIR=/tmp/gpui-reader-target cargo test -p gpui --lib \
+   reader::tests::absent_plan_and_static_producer_projection_allocation_ledger -- --nocapture
+ question_plan,allocations=5,requested=880,projection_allocations=2,projection_requested=88,Reader=16,Completion=72,Version=32,Controller=32,El=176
+ plan_bytes=440
+ bound_lane_bytes=432
+
+The first declared u64/Infallible question allocates one owner scope,
+Remote's bounded channel/notification/staging and one shared controller.
+The complete plan is inline static storage; 880B is allocator request bytes,
+not RSS or allocator usable-size. Questions::new itself makes zero allocations.
+Ordinary Win remains its existing one-pointer 8B owner; Runtime/Node/Presented
+gain no fields. El remains176B, its existing cold ElementExtra remains56B.
+Per projection: projector32B + ElementExtra56B = two allocations/88B on every
+description, even when the render closure is a zero-sized method/function item.
+Optional annotation/component mapping closures can add their existing cold
+allocations. Each projection also adds a fixed status/content region to the
+real description; this is not free graph plumbing.
+
+Each logical request clones a RequestStamp owner-scope lease. Each physical
+dispatch separately clones the controller lease. Both are reference-count
+operations; no per-job allocation is made for either lease. The channel and
+staging reuse reserved storage. Generic frozen input/result allocation is an
+application cost, not hidden by these figures. Native EventLoopProxy/OS wake
+allocation is unmeasured; no zero-native-allocation claim is made.
+
+Library allocation command:
+ CARGO_TARGET_DIR=/tmp/gpui-reader-target cargo test -p gpui --test search_library \
+   bounded_library_snapshot_and_page_allocation_ledger -- --nocapture
+ library_query=258,input=272,page=304,result_capacity=1024,worker_stack_reserved=262144,freeze_allocations=0,search_allocations=1,search_requested=1024
+
+At most one physical Library work lease exists, including canceled work.
+One latest pending SearchInput272B may overlap it. State retains one previous
+SearchPage304B + ID allocation1024B while pending/faulted. A newly computed
+page can overlap that previous result until admission/replacement. Catalogue
+storage remains app-owned (two250K arrays ~4MB); it is not copied to the worker.
+The explicit worker adds std channel/thread/stack costs. The declared256KiB
+stack is a reservation, not a measured resident commitment. No UI thread joins.
+
+Paired owner-turn fixture source: crates/gpui/tests/question_cost.rs
+SHA256: 39aa3f736c401bcda4e4d7d1e742347e6d02761cc41b0f14fe9e2bc44085ad0b
+Build: CARGO_TARGET_DIR=/tmp/gpui-reader-target cargo test --release -p gpui \
+       --test question_cost --no-run
+Run: taskset -c 2 /tmp/gpui-reader-target/release/deps/question_cost-2c5ee674f5638ef1 \
+     --ignored --nocapture --test-threads=1
+Captured executable SHA256:
+ 3f9c81009589748249a59e5248fa6a55b6765e01c69b8b968f07ae4b0b6b38c3
+7 alternating within-process pairs,200 edit+delivery turns per pair member,
+separate warmup10turns. CPU2 pinned, other agent heavy jobs paused. Wall1.04s
+reported by harness. Raw observations: reader-question-cost.csv.
+Remote median398645ns (363121..405333); Question median337674ns (316561..366473).
+
+These paths do DIFFERENT work. Remote uses a direct input text port plus a
+conservative result callback, whereas Question describes Pending/Ready and
+additional status/content nodes and formats a projected owned numeric text.
+Both use real command-only Win layout/preparation, not CPU pixel raster or OS
+presentation. The question fixture moves owned work through an explicit
+application queue but does no expensive compute. This is an observed owner-turn
+cost, not evidence of an async/executor speedup, frame-time win, or a general
+comparison against an equivalent synchronous query implementation. The clear
+losing allocation case is two projection boxes each re-description; the worker
+and static slot costs are also paid only for declared questions. No optimization
+claim is used to justify this functional first slice.
+
+New implementation source: reader.rs and reader/question.rs, plus borrowed
+turn/delivery/ElementExtra integration. Existing production forbid(unsafe_code)
+is retained; no new dependencies. Existing std Arc/channel and RequestGate
+trust boundaries remain explicit. No local Miri or platform-portability result
+is claimed by these Linux tests.
+
+Protocol command:
+ cargo test -p gpui_reactivity_ownership_lab --features loom --test question_credit
+ 3 passed, including expected negative missing-terminal-wake counterexample.
+This models single-credit publication + Ready wake, not std channel internals.
+
+Actual native command:
+ source /tmp/gpui-native-env.sh; DISPLAY=:94 CARGO_TARGET_DIR=/tmp/gpui-reader-target \
+ cargo test -p gpui --features native,x11,wayland --lib \
+ native_question_result_and_credit_wake_without_unrelated_input \
+ -- --ignored --nocapture --test-threads=1
+ 1 passed in0.07s; final rerun0.14s, Xvfb21.1.24 isolated1280x800x24, ReferenceCpu.
+Old DISPLAY=:93 no longer existed; initial XOpenDisplayFailed is environmental,
+then the identical test passed on the explicitly started display. The watchdog
+never polls delivery. This proves real callback liveness and source/P admission,
+not native allocator-zero or hardware GPU performance.
+
+Final gates:228 gpui cases/doctests passed, then the added linear-cap
+compile-fail case passed in the full18-doctest rerun (229 combined cases).
+Strict native X11+Wayland all-target Clippy
+passed.15 public question cases +4 actual Library cases include same-batch
+model replacement, frozen candidate/P metadata, child-owned deferred handlers,
+domain restore/remint, abandonment/panic/retry and caller-owned payload returns.
+Private lifecycle fixtures include version exhaustion, checked binding terminal
+retirement, and a discovered revision mismatch which must fault rather than
+leave an impossible Pending. No failures are concealed as skipped native tests.
+
+Line ledger (including unit tests/docs inside Rust modules): reader.rs472,
+reader/question.rs759, Library service/model271, public questions478,
+public Library245, manual paired fixture114, native wake fixture146,
+new Loom protocol113. The integration also changes existing phase/delivery,
+element extension/source validation code. This is a bounded functional slice,
+not a tiny API shim; it adds no dependencies and no general Reader graph.

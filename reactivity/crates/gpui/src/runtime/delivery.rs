@@ -2,6 +2,90 @@
 use super::*;
 
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    /// Inspect current logical readiness. A stale retained value is not Ready;
+    /// the displayed semantic tree remains governed by presentation admission.
+    pub fn question_status<T>(
+        &self,
+        reader: crate::Reader<T>,
+    ) -> Result<crate::QuestionStatus, Error> {
+        self.runtime()?.live()?;
+        self.lanes
+            .read(reader.key)
+            .map(|outcome| outcome.info.status)
+            .ok_or(crate::QuestionFault::Revoked.into())
+    }
+    pub fn question_info<T>(&self, reader: crate::Reader<T>) -> Result<crate::QuestionInfo, Error> {
+        self.runtime()?.live()?;
+        self.lanes
+            .read(reader.key)
+            .map(|outcome| outcome.info)
+            .ok_or(crate::QuestionFault::Revoked.into())
+    }
+    /// A scoped borrow only when the current answer is Ready. The callback
+    /// cannot keep that borrow while replacing/closing this exclusive owner.
+    ///
+    /// ```compile_fail
+    /// use gpui::{Reader,View,Win,LaneSet};
+    /// fn escape<M:View+'static,L:LaneSet<M>>(win:&Win<M,L>,reader:Reader<String>)->&str {
+    ///     win.with_ready(reader,|value|value.as_str()).unwrap().unwrap()
+    /// }
+    /// ```
+    /// ```compile_fail
+    /// use gpui::{Reader,View,Win,LaneSet};
+    /// fn reenter<M:View+'static,L:LaneSet<M>>(win:&mut Win<M,L>,reader:Reader<String>) {
+    ///     win.with_ready(reader,|_|win.update(|_|{})).unwrap();
+    /// }
+    /// ```
+    pub fn with_ready<T: 'static, R>(
+        &self,
+        reader: crate::Reader<T>,
+        read: impl FnOnce(&T) -> R,
+    ) -> Result<Option<R>, Error> {
+        self.runtime()?.live()?;
+        let outcome = self
+            .lanes
+            .read(reader.key)
+            .ok_or(crate::QuestionFault::Revoked)?;
+        if outcome.info.status != crate::QuestionStatus::Ready {
+            return Ok(None);
+        }
+        Ok(outcome
+            .value
+            .and_then(|value| value.downcast_ref::<T>())
+            .map(read))
+    }
+    pub fn retry<T>(&mut self, reader: crate::Reader<T>) -> Result<Commit, Error> {
+        let mut turn = self.runtime_mut()?;
+        turn.live()?;
+        if turn.lanes.read(reader.key).is_none() {
+            return Err(crate::QuestionFault::Revoked.into());
+        }
+        let epoch = turn
+            .source_epoch
+            .checked_add(1)
+            .ok_or(Error::EpochExhausted)?;
+        turn.source_epoch = epoch;
+        turn.counters.source_operations += 1;
+        match catch_unwind(AssertUnwindSafe(|| {
+            turn.lanes.refresh(
+                &turn.runtime.model,
+                &turn.runtime.sources,
+                crate::reader::question::Change::Retry(reader.key),
+            )
+        })) {
+            Ok(Ok(_)) => {}
+            Ok(Err(error)) => {
+                turn.logical_valid = false;
+                turn.focused = None;
+                return Err(error);
+            }
+            Err(_) => {
+                turn.poison();
+                return Err(Error::OwnerPanicked);
+            }
+        }
+        turn.after_admission(None, true)
+    }
     /// Bind a unique receiver to this owned window. Sends made before binding
     /// remain queued. Each callback consumes one owned payload; a batch uses one
     /// conservative source/description/presentation barrier.
@@ -91,10 +175,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             });
         }
         let mut applied = 0;
-        let result = RuntimeMut { runtime, lanes }.operation_with(None, |model, _, lanes| {
-            lanes.apply(model, &mut applied);
-            Ok(())
-        });
+        let result = RuntimeMut { runtime, lanes }.deliver(&mut applied);
         let revoked = runtime.poisoned || runtime.source_epoch == u64::MAX;
         // The borrowed turn already retired its lanes before returning.
         if !revoked && more {
