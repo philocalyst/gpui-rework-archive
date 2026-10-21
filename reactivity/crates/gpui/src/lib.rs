@@ -9,6 +9,7 @@
 #[cfg(test)]
 extern crate self as gpui;
 
+mod component;
 mod element;
 mod identity;
 #[cfg(feature = "native")]
@@ -18,6 +19,7 @@ mod runtime;
 pub mod source;
 mod style;
 
+pub use component::Component;
 pub use element::{
     ChildSeq, El, Element, IntoHandler, button, column, div, label, row, text, text_input,
 };
@@ -52,7 +54,8 @@ pub trait View {
 
 pub mod prelude {
     pub use crate::{
-        Affine, Color, El, Element, FieldId, Flex, Flow, Handoff, Point, Rect, Signal, Source,
-        Sources, Target, View, Win, button, column, div, label, oklch, rgb, row, text, text_input,
+        Affine, Color, Component, El, Element, FieldId, Flex, Flow, Handoff, Point, Rect, Signal,
+        Source, Sources, Target, View, Win, button, column, div, label, oklch, rgb, row, text,
+        text_input,
     };
 }
