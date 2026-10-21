@@ -35,6 +35,7 @@ pub struct Query<'a, M: View + 'static> {
     window: &'a Win<M>,
     role: Option<Role>,
     text: Option<(&'a str, bool)>,
+    within: Option<Target>,
 }
 impl<'a, M: View + 'static> Query<'a, M> {
     pub fn text<'b>(self, text: &'b str) -> Query<'b, M>
@@ -45,6 +46,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
             window: self.window,
             role: self.role,
             text: Some((text, false)),
+            within: self.within,
         }
     }
     pub fn containing<'b>(self, text: &'b str) -> Query<'b, M>
@@ -55,6 +57,38 @@ impl<'a, M: View + 'static> Query<'a, M> {
             window: self.window,
             role: self.role,
             text: Some((text, true)),
+            within: self.within,
+        }
+    }
+    /// Restrict this query to one presented subtree, including its root.
+    pub fn within(mut self, target: Target) -> Self {
+        self.within = Some(target);
+        self
+    }
+    fn scope(&self, runtime: &Runtime<M>) -> Result<Option<usize>, Error> {
+        self.within
+            .map(|target| {
+                let identity = runtime.sites.resolve(target).ok_or(Error::StaleTarget)?;
+                runtime
+                    .presented
+                    .iter()
+                    .position(|node| node.identity == identity)
+                    .ok_or(Error::StaleTarget)
+            })
+            .transpose()
+    }
+    fn in_scope(runtime: &Runtime<M>, mut index: usize, root: Option<usize>) -> bool {
+        let Some(root) = root else {
+            return true;
+        };
+        loop {
+            if index == root {
+                return true;
+            }
+            match runtime.presented[index].parent {
+                Some(parent) => index = parent,
+                None => return false,
+            }
         }
     }
     fn matches(&self, part: Part<'_>) -> bool {
@@ -71,10 +105,17 @@ impl<'a, M: View + 'static> Query<'a, M> {
     }
     /// Count the presented matches without minting target records.
     pub fn count(&self) -> Result<usize, Error> {
-        let mut count = 0;
-        self.window
-            .visit(|part| count += usize::from(self.matches(part)))?;
-        Ok(count)
+        let runtime = self.window.runtime()?;
+        sheet(runtime)?;
+        let root = self.scope(runtime)?;
+        Ok(runtime
+            .presented
+            .iter()
+            .enumerate()
+            .filter(|(index, node)| {
+                Self::in_scope(runtime, *index, root) && self.matches(Part { node })
+            })
+            .count())
     }
     /// Resolve one unique live match. Ambiguity is an error, not first-match
     /// dispatch to a possibly different instance of a reusable component.
@@ -82,10 +123,11 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let runtime = self.window.runtime()?;
         runtime.live()?;
         runtime.current_presentation()?;
+        let root = self.scope(runtime)?;
         let mut identity = 0;
         let mut count = 0;
-        for node in &runtime.presented {
-            if self.matches(Part { node }) {
+        for (index, node) in runtime.presented.iter().enumerate() {
+            if Self::in_scope(runtime, index, root) && self.matches(Part { node }) {
                 count += 1;
                 identity = node.identity;
             }
@@ -112,6 +154,7 @@ impl<M: View + 'static> Win<M> {
             window: self,
             role: None,
             text: None,
+            within: None,
         }
     }
     pub fn role(&self, role: Role) -> Query<'_, M> {
@@ -119,6 +162,7 @@ impl<M: View + 'static> Win<M> {
             window: self,
             role: Some(role),
             text: None,
+            within: None,
         }
     }
     pub fn contains_text(&self, text: &str) -> Result<bool, Error> {

@@ -43,3 +43,7 @@ required-features = ["native"]
 [[example]]
 name = "workspace"
 required-features = ["native"]
+
+[[example]]
+name = "library"
+required-features = ["native"]

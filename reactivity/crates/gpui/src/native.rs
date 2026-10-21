@@ -10,7 +10,7 @@ use gpui_gpu::{Renderer, wgpu};
 use gpui_reactivity_host::native::{Callback, Driver, Host, Wake, winit};
 use winit::{
     dpi::LogicalSize,
-    event::{ElementState, MouseButton, WindowEvent},
+    event::{ElementState, MouseButton, MouseScrollDelta, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop},
     keyboard::{Key, ModifiersState, NamedKey},
     window::Window as NativeWindow,
@@ -711,6 +711,29 @@ impl<V: View + 'static> NativeHost<V> {
                 self.modifiers = ModifiersState::empty();
             }
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
+            WindowEvent::MouseWheel { delta, .. } => {
+                let (Some(point), Some(owner)) = (self.pointer, &mut self.owner) else {
+                    return Ok(());
+                };
+                let scale = self
+                    .window
+                    .as_ref()
+                    .map_or(1.0, |window| window.scale_factor());
+                let dy = match delta {
+                    MouseScrollDelta::LineDelta(_, y) => -f64::from(*y) * 32.0,
+                    MouseScrollDelta::PixelDelta(position) => -position.y / scale,
+                };
+                if !dy.is_finite() {
+                    return Ok(());
+                }
+                // A scroll changes the hit cohort, cancelling an in-progress press.
+                self.pressed = None;
+                let result = owner.scroll_at(point, dy);
+                match result {
+                    Err(Error::NotHittable | Error::PresentationStale) => {}
+                    result => self.input_result(result)?,
+                }
+            }
             WindowEvent::MouseInput {
                 state,
                 button: MouseButton::Left,

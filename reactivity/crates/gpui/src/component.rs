@@ -77,7 +77,7 @@ impl<P: 'static, C: View + 'static> Component<P, C> {
     /// ```
     pub fn view<'a>(self, parent: &'a P) -> El<'a> {
         let mut element = (self.read)(parent).view();
-        element.map_handlers(&mut |handler| handler.in_component(self));
+        element.map_handlers(move |handler| handler.in_component(self));
         element.component(self)
     }
     pub(crate) fn handler_scope(
