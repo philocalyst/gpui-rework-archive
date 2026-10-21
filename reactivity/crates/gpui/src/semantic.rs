@@ -1,0 +1,76 @@
+//! Closed text metadata selectors. Names, descriptions and edited values are
+//! separate ports; metadata does not participate in glyph shaping or layout.
+use crate::source::Text;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SemanticText {
+    Name,
+    Description,
+}
+impl SemanticText {
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::Name => "name",
+            Self::Description => "description",
+        }
+    }
+}
+pub const NAME: SemanticText = SemanticText::Name;
+pub const DESCRIPTION: SemanticText = SemanticText::Description;
+
+#[derive(Default)]
+pub(crate) struct Annotations<'a> {
+    pub name: Option<Text<'a>>,
+    pub description: Option<Text<'a>>,
+}
+impl Annotations<'_> {
+    pub(crate) fn is_empty(&self) -> bool {
+        self.name.is_none() && self.description.is_none()
+    }
+}
+pub(crate) struct AnnotationDraft<'a> {
+    pub node: u32,
+    pub text: Annotations<'a>,
+}
+
+// The existing list-extension pointer pays for annotations only when requested.
+// Combined boxes the list payload to keep the common cold enum at 64 bytes.
+pub(crate) enum ElementExtra<'a> {
+    List(crate::list::ListSpec<'a>),
+    Semantic(Annotations<'a>),
+    Combined {
+        list: Box<crate::list::ListSpec<'a>>,
+        semantic: Annotations<'a>,
+    },
+}
+impl<'a> ElementExtra<'a> {
+    pub fn list_mut(&mut self) -> Option<&mut crate::list::ListSpec<'a>> {
+        match self {
+            Self::List(list) => Some(list),
+            Self::Combined { list, .. } => Some(list),
+            Self::Semantic(_) => None,
+        }
+    }
+    pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
+        if matches!(self, Self::List(_)) {
+            let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
+            if let Self::List(list) = previous {
+                *self = Self::Combined {
+                    list: Box::new(list),
+                    semantic: Annotations::default(),
+                };
+            }
+        }
+        match self {
+            Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
+            Self::List(_) => unreachable!(),
+        }
+    }
+    pub fn into_parts(self) -> (Option<crate::list::ListSpec<'a>>, Annotations<'a>) {
+        match self {
+            Self::List(list) => (Some(list), Annotations::default()),
+            Self::Semantic(semantic) => (None, semantic),
+            Self::Combined { list, semantic } => (Some(*list), semantic),
+        }
+    }
+}

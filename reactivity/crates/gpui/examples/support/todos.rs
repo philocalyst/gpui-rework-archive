@@ -83,7 +83,12 @@ impl View for Todos {
         column((
             text("Todos").font_size(28).fg(rgb(0x172554)),
             row((
-                text_input(&self.draft).w(280).p(10).bg(rgb(0xf1f5f9)),
+                text_input(&self.draft)
+                    .name("New task")
+                    .description("Type a task, then choose Add")
+                    .w(280)
+                    .p(10)
+                    .bg(rgb(0xf1f5f9)),
                 button("Add").p(10).bg(rgb(0xc7d2fe)).on_click(Self::add),
             ))
             .gap(8),

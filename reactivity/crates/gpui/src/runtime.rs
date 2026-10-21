@@ -35,9 +35,12 @@ mod delivery;
 mod input;
 mod list;
 use list::{ListRow, ListState, ScrollRequest};
+mod metadata;
 mod query;
 mod semantics;
 pub use input::Key;
+use metadata::{Declared, Destination, Metadata, Port, Publish};
+pub use metadata::{ListInfo, ListItemInfo};
 pub use query::{Part, Query};
 pub use semantics::{Action, ActionKind, Actions};
 
@@ -384,7 +387,7 @@ impl Node {
 }
 struct Fanout {
     codec: TextCodec,
-    destinations: Vec<usize>,
+    destinations: Vec<Destination>,
 }
 struct Presented {
     identity: u64,
@@ -412,6 +415,7 @@ struct Runtime<M> {
     focused: Option<Target>,
     sites: Sites,
     overrides: Overrides,
+    metadata: Option<Box<Metadata>>,
     lists: BTreeMap<ListId, ListState>,
     list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
@@ -586,6 +590,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             focused: None,
             sites,
             overrides: Overrides::default(),
+            metadata: None,
             lists: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
@@ -1140,13 +1145,16 @@ impl<M: View + 'static> Runtime<M> {
             }
             None => {
                 self.counters.coarse_updates += 1;
-                self.describe(false)
+                self.describe(false).map(|()| false)
             }
         };
         if let Err(error) = result {
             self.logical_valid = false;
             self.focused = None;
             return Err(error);
+        }
+        if result == Ok(true) {
+            return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
         }
         self.present()
     }
@@ -1249,26 +1257,30 @@ impl<M: View + 'static> Runtime<M> {
             self.counters.owner_reruns += 1;
         }
         let mut seen = BTreeSet::new();
-        let (drafts, list_drafts) =
-            self.model
-                .view()
-                .flatten_lists(MAX_NODES, |id, style, source, row_height| {
-                    if !seen.insert(id) {
-                        return Err(ListError::DuplicateList(id));
-                    }
-                    let previous = self.lists.get(&id);
-                    let style = previous
-                        .map_or(style, |state| self.overrides.resolve(state.identity, style));
-                    list::plan(
-                        previous,
-                        style,
-                        source,
-                        row_height,
-                        scroll
-                            .filter(|request| request.id == id)
-                            .map(|request| request.position),
-                    )
-                })?;
+        let crate::element::Description {
+            nodes: drafts,
+            lists: list_drafts,
+            annotations: annotation_drafts,
+        } = self
+            .model
+            .view()
+            .flatten_lists(MAX_NODES, |id, style, source, row_height| {
+                if !seen.insert(id) {
+                    return Err(ListError::DuplicateList(id));
+                }
+                let previous = self.lists.get(&id);
+                let style =
+                    previous.map_or(style, |state| self.overrides.resolve(state.identity, style));
+                list::plan(
+                    previous,
+                    style,
+                    source,
+                    row_height,
+                    scroll
+                        .filter(|request| request.id == id)
+                        .map(|request| request.position),
+                )
+            })?;
         let list_indices: BTreeMap<_, _> = list_drafts
             .iter()
             .map(|list| (list.index, list.id))
@@ -1331,9 +1343,54 @@ impl<M: View + 'static> Runtime<M> {
                         destinations: Vec::new(),
                     })
                     .destinations
-                    .push(index);
+                    .push(Destination::new(index, Port::Visual));
             }
             fields.push(field);
+        }
+        let mut annotation_fields = Vec::with_capacity(annotation_drafts.len());
+        for annotation in &annotation_drafts {
+            let mut slots = [None; 2];
+            for (slot, text) in [
+                annotation.text.name.as_ref(),
+                annotation.text.description.as_ref(),
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                if let Some(text) = text
+                    && let Some(signal) = text.signal()
+                    && let Some(field) = self.sources.resolve(&self.model, signal)?
+                {
+                    let codec = text
+                        .codec()
+                        .ok_or(Error::Binding(BindError::TypeMismatch(field)))?;
+                    fanout
+                        .entry(field)
+                        .or_insert_with(|| Fanout {
+                            codec,
+                            destinations: Vec::new(),
+                        })
+                        .destinations
+                        .push(Destination::new(
+                            annotation.node as usize,
+                            if slot == 0 {
+                                Port::Name
+                            } else {
+                                Port::Description
+                            },
+                        ));
+                    slots[slot] = Some(field);
+                }
+            }
+            annotation_fields.push(slots);
+        }
+        // Promotion is lazy and shared by all changed ports of a registered
+        // field in this description. Unchanged retained operands keep their Arc.
+        let mut promotions: BTreeMap<FieldId, Arc<str>> = BTreeMap::new();
+        for fanout in fanout.values_mut() {
+            fanout
+                .destinations
+                .sort_unstable_by_key(|destination| destination.packed());
         }
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()
@@ -1421,9 +1478,16 @@ impl<M: View + 'static> Runtime<M> {
             self.counters.destination_compares += 1;
             if node.text.as_deref() != text.as_deref() {
                 node.text = text.as_deref().map(|text| {
+                    if let Some(value) = fields[index].and_then(|field| promotions.get(&field)) {
+                        return value.clone();
+                    }
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += text.len() as u64;
-                    Arc::from(text)
+                    let value: Arc<str> = Arc::from(text);
+                    if let Some(field) = fields[index] {
+                        promotions.insert(field, value.clone());
+                    }
+                    value
                 });
                 node.shaped = None;
                 self.layout_dirty.insert(node.identity);
@@ -1487,6 +1551,7 @@ impl<M: View + 'static> Runtime<M> {
                     ListRow {
                         list: draft.id,
                         key: row.key,
+                        index: row.item_index,
                         y: row.y,
                         height: row.height,
                         visible: true,
@@ -1502,6 +1567,61 @@ impl<M: View + 'static> Runtime<M> {
                 },
             );
         }
+        if !annotation_drafts.is_empty() || !lists.is_empty() || self.metadata.is_some() {
+            let metadata = self
+                .metadata
+                .get_or_insert_with(|| Box::new(Metadata::default()));
+            let mut base = Vec::with_capacity(annotation_drafts.len());
+            for (annotation, fields) in annotation_drafts.into_iter().zip(annotation_fields) {
+                let identity = nodes[annotation.node as usize].identity;
+                let previous = metadata.base(identity);
+                let mut values = [None, None];
+                for (slot, text) in [annotation.text.name, annotation.text.description]
+                    .into_iter()
+                    .enumerate()
+                {
+                    if let Some(text) = text {
+                        let value = text.borrowed_value();
+                        let old = previous.and_then(|previous| {
+                            if slot == 0 {
+                                previous.name.as_ref()
+                            } else {
+                                previous.description.as_ref()
+                            }
+                        });
+                        self.counters.destination_compares += 1;
+                        values[slot] =
+                            Some(if old.is_some_and(|old| old.as_ref() == value.as_ref()) {
+                                old.unwrap().clone()
+                            } else {
+                                if let Some(field) = fields[slot] {
+                                    if let Some(value) = promotions.get(&field) {
+                                        value.clone()
+                                    } else {
+                                        self.counters.text_promotions += 1;
+                                        self.counters.text_bytes_copied += value.len() as u64;
+                                        let value: Arc<str> = Arc::from(value.as_ref());
+                                        promotions.insert(field, value.clone());
+                                        value
+                                    }
+                                } else {
+                                    self.counters.text_promotions += 1;
+                                    self.counters.text_bytes_copied += value.len() as u64;
+                                    Arc::from(value.as_ref())
+                                }
+                            });
+                    }
+                }
+                let [name, description] = values;
+                base.push(Declared {
+                    identity,
+                    name,
+                    description,
+                });
+            }
+            base.sort_unstable_by_key(|entry| entry.identity);
+            metadata.base = base;
+        }
         self.lists = lists;
         self.list_rows = list_rows;
         self.nodes = nodes;
@@ -1514,35 +1634,65 @@ impl<M: View + 'static> Runtime<M> {
             .collect();
         self.overrides
             .retain(|identity| self.by_identity.contains_key(&identity));
+        if let Some(metadata) = &mut self.metadata {
+            metadata
+                .overrides
+                .retain(|identity, _| self.by_identity.contains_key(identity));
+        }
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
         Ok(())
     }
-    fn patch(&mut self, field: FieldId) -> Result<(), Error> {
+    fn patch(&mut self, field: FieldId) -> Result<bool, Error> {
         let Some(fanout) = self.fanout.get(&field) else {
-            return Ok(());
+            return Ok(false);
         };
         self.counters.source_reads += 1;
         let value = self.sources.read_text(&self.model, field, fanout.codec)?;
         let mut promoted: Option<Arc<str>> = None;
-        for &index in &fanout.destinations {
+        let mut semantic = false;
+        let mut visual_changed = false;
+        let mut last_changed = None;
+        for &destination in &fanout.destinations {
             self.counters.destination_compares += 1;
-            let node = &mut self.nodes[index];
-            if node.text.as_deref() != Some(value.as_ref()) {
+            let node = &mut self.nodes[destination.node()];
+            let old = match destination.port() {
+                Port::Visual => &mut node.text,
+                Port::Name | Port::Description => {
+                    semantic = true;
+                    let base = self
+                        .metadata
+                        .as_mut()
+                        .and_then(|metadata| metadata.base_mut(node.identity))
+                        .expect("annotation destination has a logical column");
+                    if destination.port() == Port::Name {
+                        &mut base.name
+                    } else {
+                        &mut base.description
+                    }
+                }
+            };
+            if old.as_deref() != Some(value.as_ref()) {
                 if promoted.is_none() {
                     promoted = Some(Arc::from(value.as_ref()));
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += value.len() as u64;
                 }
-                node.text = promoted.clone();
-                node.shaped = None;
-                self.layout_dirty.insert(node.identity);
-                self.dirty = true;
-                self.changed_nodes += 1;
+                *old = promoted.clone();
+                if destination.port() == Port::Visual {
+                    node.shaped = None;
+                    self.layout_dirty.insert(node.identity);
+                    self.dirty = true;
+                    visual_changed = true;
+                }
+                if last_changed != Some(destination.node()) {
+                    self.changed_nodes += 1;
+                    last_changed = Some(destination.node());
+                }
             }
         }
-        Ok(())
+        Ok(semantic && !visual_changed)
     }
     fn commit(&self) -> Commit {
         Commit {
@@ -1559,6 +1709,9 @@ impl<M: View + 'static> Runtime<M> {
     }
     fn present(&mut self) -> Result<Commit, Error> {
         if !self.dirty {
+            if self.source_epoch > 0 && self.metadata.is_some() {
+                return Ok(self.publish_metadata(Publish::All));
+            }
             // Equal logical output extends the complete scene's coverage, even
             // during surface loss. It cannot advance displayed coverage past an
             // outstanding visual candidate or restore a lost surface's authority.
@@ -1594,6 +1747,14 @@ impl<M: View + 'static> Runtime<M> {
             self.presented = prepared.nodes;
             self.presentation_size = prepared.size;
             self.presentation_scale_factor = prepared.scale_factor;
+        }
+        if let Some(metadata) = &mut self.metadata
+            && let Some(sheet) = metadata.candidate.take()
+        {
+            metadata.presented = sheet;
+        }
+        if self.metadata.as_deref().is_some_and(Metadata::unused) {
+            self.metadata = None;
         }
         // No-op edits may extend complete coverage, but failed preparations do
         // not. Re-acknowledging after loss therefore never covers a failed S.
@@ -1742,6 +1903,8 @@ impl<M: View + 'static> Runtime<M> {
         let mut inside_list: Vec<bool> = Vec::with_capacity(list_capacity);
         let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
+        let mut metadata_sheet = self.metadata_sheet();
+        let list_metadata = self.list_metadata();
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
@@ -1867,16 +2030,36 @@ impl<M: View + 'static> Runtime<M> {
                     || node.kind == NodeKind::Input,
                 actions: Actions::for_node(node.kind, node.handler.is_some()),
             });
+            if let Some(sheet) = &mut metadata_sheet
+                && let Some(metadata) = &self.metadata
+            {
+                sheet.capture(
+                    metadata,
+                    node.identity,
+                    list_metadata.get(&node.identity).copied(),
+                    self.list_rows
+                        .get(&node.identity)
+                        .map(|row| (row, &self.lists[&row.list])),
+                );
+            }
         }
         // Everything fallible has finished. This transfers commands; native
         // recording retains no CPU image, while same-size headless updates reuse
         // the selected output allocation. No model borrow is published.
+        if let Some(sheet) = &mut metadata_sheet {
+            sheet.sort();
+        }
         scene.commit();
         for (&identity, row) in &mut self.list_rows {
             row.visible = visible_rows.contains(&identity);
         }
         if let Some(canvas) = replacement {
             self.canvas = canvas;
+        }
+        if let Some(sheet) = metadata_sheet
+            && let Some(metadata) = &mut self.metadata
+        {
+            metadata.candidate = Some(sheet);
         }
         self.prepared = Some(Prepared {
             size,
@@ -2116,5 +2299,249 @@ mod tests {
         assert!(win.runtime().unwrap().text.is_none());
         win.update(|m| m.text = true).unwrap();
         assert!(win.runtime().unwrap().text.is_some());
+    }
+}
+
+#[cfg(test)]
+mod semantic_storage_ledger {
+    use super::*;
+    use crate::Signal;
+    use std::mem::size_of;
+    struct Empty;
+    impl View for Empty {
+        fn view(&self) -> crate::El<'_> {
+            crate::div()
+        }
+    }
+    impl crate::ItemSource for Empty {
+        fn len(&self) -> usize {
+            0
+        }
+        fn key(&self, _: usize) -> crate::ItemKey {
+            unreachable!()
+        }
+        fn index_of(&self, _: crate::ItemKey) -> Option<usize> {
+            None
+        }
+        fn row(&self, _: usize) -> crate::El<'_> {
+            unreachable!()
+        }
+    }
+    struct Owner {
+        child: Empty,
+    }
+    impl Owner {
+        const CHILD: crate::Component<Self, Empty> =
+            crate::Component::new(FieldId::new(1), "child", |m| &m.child, |m| &mut m.child);
+    }
+    fn allocation(label: &str, build: impl FnOnce() -> crate::El<'static>) -> (u64, u64) {
+        let mut element = None;
+        let measured = allocation_counter::measure(|| element = Some(build()));
+        println!(
+            "element,{label},allocations={},bytes={}",
+            measured.count_total, measured.bytes_total
+        );
+        drop(element);
+        (measured.count_total, measured.bytes_total)
+    }
+    #[test]
+    fn sparse_metadata_storage_and_cold_allocation_ledger() {
+        let mut destinations = Vec::with_capacity(4);
+        destinations.push(Destination::new(0, Port::Name));
+        println!(
+            "Node={} Presented={} El={} Draft={} Text={} ListRow={} Fanout={} Dest={} destination_capacity={} destination_capacity_bytes={} Metadata={} Declared={} TextSlot={} Sheet={} Row={} ListInfo={}",
+            size_of::<Node>(),
+            size_of::<Presented>(),
+            size_of::<crate::El<'_>>(),
+            size_of::<crate::element::DraftNode<'_>>(),
+            size_of::<crate::source::Text<'_>>(),
+            size_of::<ListRow>(),
+            size_of::<Fanout>(),
+            size_of::<Destination>(),
+            destinations.capacity(),
+            destinations.capacity() * size_of::<Destination>(),
+            size_of::<Metadata>(),
+            size_of::<Declared>(),
+            size_of::<metadata::TextSlot>(),
+            size_of::<metadata::Sheet>(),
+            size_of::<metadata::Row>(),
+            size_of::<ListInfo>()
+        );
+        println!(
+            "Extra={} Annotations={} ListSpec={} AnnotationDraft={}",
+            size_of::<crate::semantic::ElementExtra<'_>>(),
+            size_of::<crate::semantic::Annotations<'_>>(),
+            size_of::<crate::list::ListSpec<'_>>(),
+            size_of::<crate::semantic::AnnotationDraft<'_>>()
+        );
+        assert_eq!(size_of::<Node>(), 232);
+        assert_eq!(size_of::<Presented>(), 104);
+        assert_eq!(size_of::<crate::El<'_>>(), 184);
+        assert_eq!(size_of::<ListRow>(), 32);
+        assert_eq!(size_of::<Destination>(), 4);
+        assert_eq!(allocation("absent", crate::div), (0, 0));
+        assert_eq!(
+            allocation("semantic", || crate::div()
+                .name("label")
+                .description("description")),
+            (1, 56)
+        );
+        static EMPTY: Empty = Empty;
+        assert_eq!(
+            allocation("list", || crate::uniform_list(ListId::new(1), &EMPTY, 24)),
+            (1, 56)
+        );
+        assert_eq!(
+            allocation("combined", || crate::uniform_list(
+                ListId::new(1),
+                &EMPTY,
+                24
+            )
+            .name("label")),
+            (2, 104)
+        );
+        // Component boundaries retain the prior independent cold extension.
+        let owner = Owner { child: Empty };
+        for named in [false, true] {
+            let mut element = None;
+            let counted = allocation_counter::measure(|| {
+                let child = Owner::CHILD.view(&owner);
+                element = Some(if named { child.name("child") } else { child });
+            });
+            println!(
+                "element,component_named={named},allocations={},bytes={}",
+                counted.count_total, counted.bytes_total
+            );
+            drop(element);
+        }
+        let win = Win::with_size(Empty, 4, 4).unwrap();
+        assert!(win.runtime().unwrap().metadata.is_none());
+    }
+    #[test]
+    #[ignore = "manual dense storage evidence; includes 30,003 layout nodes"]
+    fn dense_annotation_capacity_evidence() {
+        struct Dense {
+            count: usize,
+            ports: u8,
+            label: Signal<String>,
+        }
+        impl Dense {
+            const LABEL: Source<Self, String> =
+                Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
+        }
+        impl View for Dense {
+            fn sources() -> Sources<Self> {
+                Sources::new().direct(Self::LABEL)
+            }
+            fn view(&self) -> crate::El<'_> {
+                crate::column((0..self.count).map(|_| {
+                    let site = crate::div().size(1);
+                    match self.ports {
+                        0 => site,
+                        1 => site.name(&self.label),
+                        _ => site.name(&self.label).description(&self.label),
+                    }
+                }))
+            }
+        }
+        // Cephal caches scratch vectors in dependency TLS. Warm that independent
+        // pool before measuring new owned-window allocations, consistently for
+        // all three cases; this is not an OS RSS/total-process measurement.
+        drop(
+            Win::recording(
+                Dense {
+                    count: 10_000,
+                    ports: 0,
+                    label: Signal::new("shared".into()),
+                },
+                WindowOptions {
+                    size: [4, 4],
+                    ..Default::default()
+                },
+            )
+            .unwrap(),
+        );
+        for ports in 0..=2 {
+            let model = Dense {
+                count: 10_000,
+                ports,
+                label: Signal::new("shared".into()),
+            };
+            let mut held = None;
+            let allocation = allocation_counter::measure(|| {
+                let mut win = Win::recording(
+                    model,
+                    WindowOptions {
+                        size: [4, 4],
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+                let token = win.with_scene(|_, token| token).unwrap();
+                win.presented(token).unwrap();
+                held = Some(win);
+            });
+            let runtime = held.as_ref().unwrap().runtime().unwrap();
+            let (base, names, descriptions) =
+                runtime.metadata.as_deref().map_or((0, 0, 0), |metadata| {
+                    (
+                        metadata.base.capacity() * size_of::<Declared>(),
+                        metadata.presented.names.capacity() * size_of::<metadata::TextSlot>(),
+                        metadata.presented.descriptions.capacity()
+                            * size_of::<metadata::TextSlot>(),
+                    )
+                });
+            let destinations = runtime
+                .fanout
+                .values()
+                .map(|fanout| fanout.destinations.capacity() * size_of::<Destination>())
+                .sum::<usize>();
+            println!(
+                "dense,ports={ports},nodes={},allocations={},retained={},peak={},base_capacity_bytes={base},name_capacity_bytes={names},description_capacity_bytes={descriptions},fanout_capacity_bytes={destinations},promotions={}",
+                runtime.nodes.len(),
+                allocation.count_total,
+                allocation.bytes_current,
+                allocation.bytes_max,
+                runtime.counters.text_promotions
+            );
+            assert_eq!(runtime.metadata.is_none(), ports == 0);
+            if ports > 0 {
+                assert_eq!(runtime.counters.text_promotions, 1);
+            }
+        }
+    }
+    #[test]
+    fn shared_ports_retain_one_payload_and_do_not_create_text_service() {
+        struct Page(Signal<String>);
+        impl Page {
+            const LABEL: Source<Self, String> =
+                Source::new(FieldId::new(1), "label", |m| &m.0, |m| &mut m.0);
+        }
+        impl View for Page {
+            fn sources() -> Sources<Self> {
+                Sources::new().direct(Self::LABEL)
+            }
+            fn view(&self) -> crate::El<'_> {
+                crate::div().name(&self.0).description(&self.0)
+            }
+        }
+        let mut win = Win::with_size(Page(Signal::new("label".into())), 4, 4).unwrap();
+        win.set(Page::LABEL, "changed".into()).unwrap();
+        let runtime = win.runtime().unwrap();
+        let metadata = runtime.metadata.as_ref().unwrap();
+        let base = &metadata.base[0];
+        let published = &metadata.presented.names[0];
+        assert!(std::ptr::eq(
+            Arc::as_ptr(base.name.as_ref().unwrap()),
+            Arc::as_ptr(base.description.as_ref().unwrap())
+        ));
+        assert!(std::ptr::eq(
+            Arc::as_ptr(base.name.as_ref().unwrap()),
+            Arc::as_ptr(published.value.as_ref().unwrap())
+        ));
+        assert!(
+            runtime.text.is_none(),
+            "semantic strings never initialize the shaper/rasterizer"
+        );
     }
 }
