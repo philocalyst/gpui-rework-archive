@@ -820,3 +820,46 @@ fn grouped_error_envelopes_match_inline_across_fractional_glyph_samples() {
         }
     });
 }
+
+#[test]
+fn inverse_lattice_clips_preserve_actual_vulkan_pixels() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let viewport = [33, 17];
+        let window = Rect::new(0., 0., 33., 17.);
+        let local = Rect::new(0., 0., 1.25, 3.75);
+        for sx in [-2., -1.25, -0.1, 0.1, 1.25, 2.] {
+            for sy in [-1.3, -0.1, 0.1, 1.3] {
+                let transform = Affine {
+                    a: sx,
+                    d: sy,
+                    tx: 0.125,
+                    ty: 0.375,
+                    ..Affine::IDENTITY
+                };
+                let clip =
+                    gpui_canvas::sampled_rect_clip(transform, local, window, viewport).unwrap();
+                let mut original = Canvas::new(viewport[0], viewport[1]).unwrap();
+                original.clear(Color::WHITE);
+                original
+                    .fill_rect(local, transform, window, Color::BLACK)
+                    .unwrap();
+                let mut lowered = Canvas::new(viewport[0], viewport[1]).unwrap();
+                lowered.clear(Color::WHITE);
+                lowered
+                    .fill_rect(window, Affine::IDENTITY, clip, Color::BLACK)
+                    .unwrap();
+                assert_eq!(lowered.pixels(), original.pixels(), "CPU {sx}/{sy}");
+                let expected = readback(&mut renderer, &original);
+                for proofs in [false, true] {
+                    renderer.set_tile_proofs(proofs);
+                    assert_eq!(
+                        readback(&mut renderer, &lowered),
+                        expected,
+                        "GPU {sx}/{sy}, proofs={proofs}"
+                    );
+                }
+            }
+        }
+    });
+}
