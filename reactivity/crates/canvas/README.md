@@ -560,3 +560,11 @@ exact pixels on24 fixtures covering four DPI scales, mixed order, rotations,
 clips, eviction, abandoned stages, serial and two-worker output. Public tests
 check whole group counts/order in both directions, full-key multi-face identity,
 one leased resource across cache clears/services, and failed-stage isolation.
+
+`scene.solid_bgrx()` certifies only zero-command, opaque, sRGB/RGBA8 scenes and
+returns exactly the packed0x00RRGGBB result of the normal encoder. It allocates
+no image/bins and runs no raster work; unsupported scenes return None. Public
+scene metadata edits still pass finite/range/configuration validation. This is
+an optional native solid-fill content certificate, not an OS submission or a
+presentation acknowledgment. Native hosts must submit successfully before
+advancing their presentation token, and use ordinary rendering otherwise.
