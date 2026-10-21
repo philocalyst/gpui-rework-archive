@@ -3,26 +3,41 @@
 
 use crate::{View, component::Component};
 use gpui_reactivity_state::{Revision, Signal};
-use std::{any::Any, borrow::Cow, fmt};
+use std::{any::Any, borrow::Cow, fmt, num::NonZeroU64};
 
 /// Explicit local field identity. The runtime qualifies contained fields with
 /// checked schema-relative scope ordinals; these are not durable capabilities.
 /// `get()` returns the local declaration ID, not a globally unique identifier.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct FieldId {
-    local: u32,
-    scope: u32,
-}
+/// Declarations use `new`; resolved scoped IDs cannot be redeclared as sources.
+/// Both this type and its Option occupy eight bytes, including local ID zero.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FieldId(NonZeroU64);
 
 impl FieldId {
     pub const fn new(value: u32) -> Self {
-        Self {
-            local: value,
-            scope: 0,
-        }
+        Self::scoped(value, 0)
     }
     pub const fn get(self) -> u32 {
-        self.local
+        ((self.0.get() - 1) >> 32) as u32
+    }
+    const fn scope(self) -> u32 {
+        (self.0.get() - 1) as u32
+    }
+    const fn scoped(local: u32, scope: u32) -> Self {
+        // Sources allocates half-open scope ranges with checked addition.
+        // Their exclusive end may be MAX, but an assigned scope never is.
+        // Reserving it makes the entire public local-ID domain niche-friendly.
+        assert!(scope < u32::MAX, "scope ordinal is reserved");
+        let pair = ((local as u64) << 32) | scope as u64;
+        Self(NonZeroU64::new(pair + 1).unwrap())
+    }
+}
+impl fmt::Debug for FieldId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FieldId")
+            .field("local", &self.get())
+            .field("scope", &self.scope())
+            .finish()
     }
 }
 
@@ -340,6 +355,8 @@ impl<'a, T: TextValue> IntoText<'a> for &'a Signal<T> {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BindError {
+    /// A resolved component field cannot be reused as a local declaration ID.
+    NonLocalDeclaration(FieldId),
     ReceiverMismatch,
     DuplicateComponent(FieldId),
     UnknownComponent(FieldId),
@@ -348,7 +365,10 @@ pub enum BindError {
     ComponentDepthLimit,
     DuplicateId(FieldId),
     DuplicateName(&'static str),
-    AliasedFields { first: FieldId, second: FieldId },
+    AliasedFields {
+        first: FieldId,
+        second: FieldId,
+    },
     ProjectionMismatch(FieldId),
     UnknownField(FieldId),
     TypeMismatch(FieldId),
@@ -471,16 +491,10 @@ impl<M, C> ComponentEntry<M, C> {
         self.start + scope
     }
     pub(crate) fn qualify(&self, field: FieldId) -> FieldId {
-        FieldId {
-            local: field.local,
-            scope: self.start + field.scope,
-        }
+        FieldId::scoped(field.get(), self.start + field.scope())
     }
     fn local(&self, field: FieldId) -> FieldId {
-        FieldId {
-            local: field.local,
-            scope: field.scope - self.start,
-        }
+        FieldId::scoped(field.get(), field.scope() - self.start)
     }
 }
 impl<M: 'static, C: 'static> ComponentSchema<M> for ComponentEntry<M, C> {
@@ -494,7 +508,7 @@ impl<M: 'static, C: 'static> ComponentSchema<M> for ComponentEntry<M, C> {
         self.component.name
     }
     fn contains(&self, id: FieldId) -> bool {
-        id.scope >= self.start && id.scope < self.end
+        id.scope() >= self.start && id.scope() < self.end
     }
     fn len(&self) -> usize {
         self.sources.len()
@@ -604,6 +618,9 @@ impl<M> Sources<M> {
     where
         M: 'static,
     {
+        if self.schema_error.is_none() && source.id.scope() != 0 {
+            self.schema_error = Some(BindError::NonLocalDeclaration(source.id));
+        }
         if self.schema_error.is_none() {
             for other in &self.fields {
                 if other.id() == source.id {
@@ -731,7 +748,7 @@ impl<M> Sources<M> {
     }
     pub(crate) fn invalidates_owner(&self, id: FieldId) -> Result<bool, BindError> {
         self.check_schema()?;
-        if id.scope != 0 {
+        if id.scope() != 0 {
             return self.component_for(id)?.invalidates_owner(id);
         }
         self.get(id)?;
@@ -778,7 +795,7 @@ impl<M> Sources<M> {
         }
     }
     fn signal<'a>(&self, model: &'a M, id: FieldId) -> Result<&'a dyn ErasedSignal, BindError> {
-        if id.scope == 0 {
+        if id.scope() == 0 {
             Ok(self.get(id)?.signal(model))
         } else {
             self.component_for(id)?.signal(model, id)
@@ -820,7 +837,7 @@ impl<M> Sources<M> {
             .ok_or(BindError::UnknownField(id))
     }
     pub fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError> {
-        if id.scope == 0 {
+        if id.scope() == 0 {
             Ok(self.get(id)?.revision(model))
         } else {
             self.component_for(id)?.revision(model, id)
@@ -848,7 +865,7 @@ impl<M> Sources<M> {
                 reason: TextEditErrorKind::Binding(error),
             });
         }
-        if id.scope != 0 {
+        if id.scope() != 0 {
             return match self.component_for(id) {
                 Ok(component) => component.write_text(model, id, input, codec),
                 Err(error) => Err(TextEditError {
@@ -894,6 +911,30 @@ impl<M> Sources<M> {
 mod tests {
     use super::sealed::TextValue as _;
     use super::*;
+
+    #[test]
+    fn field_ids_preserve_the_full_local_domain_and_pair_order() {
+        assert_eq!(size_of::<FieldId>(), 8);
+        assert_eq!(size_of::<Option<FieldId>>(), 8);
+        let mut pairs = Vec::new();
+        for local in [0, 1, 0x7fff_ffff, u32::MAX] {
+            assert_eq!(FieldId::new(local).get(), local);
+            assert_eq!(FieldId::new(local).scope(), 0);
+            for scope in [0, 1, 0x7fff_ffff, u32::MAX - 1] {
+                let id = FieldId::scoped(local, scope);
+                assert_eq!((id.get(), id.scope()), (local, scope));
+                pairs.push(((local, scope), id));
+            }
+        }
+        pairs.reverse();
+        pairs.sort_unstable_by_key(|(_, id)| *id);
+        assert!(pairs.windows(2).all(|pair| pair[0].0 < pair[1].0));
+        assert_eq!(FieldId::scoped(u32::MAX, u32::MAX - 1).0.get(), u64::MAX);
+        assert_eq!(
+            format!("{:?}", FieldId::new(u32::MAX)),
+            "FieldId { local: 4294967295, scope: 0 }"
+        );
+    }
 
     struct Model {
         first: Signal<String>,
@@ -1421,6 +1462,45 @@ mod component_tests {
         assert_eq!(
             sources.validate(&mut model()),
             Err(BindError::ScopeExhausted)
+        );
+    }
+
+    #[test]
+    fn the_last_component_namespace_routes_edits_before_exhaustion() {
+        let mut sources = Sources::<Parent>::new();
+        sources.next_scope = u32::MAX - 1;
+        let sources = sources.component(LEFT);
+        let mut model = model();
+        sources.validate(&mut model).unwrap();
+        assert_eq!(sources.next_scope, u32::MAX);
+        let id = sources.resolve(&model, &model.left.value).unwrap().unwrap();
+        assert_eq!((id.get(), id.scope()), (1, u32::MAX - 1));
+        let codec = (&model.left.value).into_text().codec().unwrap();
+        sources
+            .write_text(&mut model, id, "42".to_owned(), codec)
+            .unwrap();
+        assert_eq!(*model.left.value, 42);
+        assert_eq!(sources.revision(&model, id).unwrap().get(), 1);
+        let sources = sources.component(RIGHT);
+        assert_eq!(sources.components.len(), 1);
+        assert_eq!(sources.validate(&mut model), Err(BindError::ScopeExhausted));
+    }
+
+    #[test]
+    fn resolved_component_ids_are_rejected_as_local_source_declarations() {
+        let mut model = model();
+        let sources = Sources::new().component(LEFT);
+        sources.validate(&mut model).unwrap();
+        let id = sources.resolve(&model, &model.left.value).unwrap().unwrap();
+        let misplaced = Source::new(
+            id,
+            "misplaced",
+            |m: &Parent| &m.right.value,
+            |m| &mut m.right.value,
+        );
+        assert_eq!(
+            Sources::new().direct(misplaced).validate(&mut model),
+            Err(BindError::NonLocalDeclaration(id))
         );
     }
 }
