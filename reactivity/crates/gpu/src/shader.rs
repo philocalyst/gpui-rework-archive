@@ -223,6 +223,9 @@ pub mod ui {
         let globals = get!(GLOBALS);
         let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
         let range = get!(TILES)[tile as usize];
+        if (range.y & 0x80000000) != 0 {
+            return output(get!(DRAWS)[range.x as usize].color);
+        }
         if range.x == range.y {
             return output(globals.clear);
         }

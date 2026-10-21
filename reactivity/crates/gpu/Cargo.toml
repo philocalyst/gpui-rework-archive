@@ -13,6 +13,10 @@ vulkan-tests = []
 name = "render"
 required-features = ["vulkan-tests"]
 
+[[example]]
+name = "tiles"
+required-features = ["vulkan-tests"]
+
 [dependencies]
 gpui_canvas = { path = "../canvas" }
 wgpu = { version = "=29.0.4", default-features = false, features = ["std", "wgsl", "vulkan", "gles", "metal", "dx12"] }
