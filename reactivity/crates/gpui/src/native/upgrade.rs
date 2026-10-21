@@ -21,7 +21,11 @@ pub(super) struct Policy {
     // Only the real native integration test may exercise handoff on llvmpipe.
     #[cfg(test)]
     pub(super) allow_cpu: bool,
-    #[cfg(test)]
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
     pub(super) defer_renderer: bool,
     #[cfg(test)]
     pub(super) force_probe: bool,
@@ -114,7 +118,11 @@ pub(super) enum Progress {
 
 pub(super) struct Upgrade {
     messages: Receiver<Message>,
-    #[cfg(test)]
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
     release: Option<SyncSender<()>>,
     // Dropping a JoinHandle detaches; cancellation never joins on the UI thread.
     _worker: JoinHandle<()>,
@@ -122,7 +130,11 @@ pub(super) struct Upgrade {
 impl Upgrade {
     pub(super) fn start(policy: Policy, wake: Option<Wake>) -> std::io::Result<Self> {
         let (send, messages) = mpsc::sync_channel(1);
-        #[cfg(test)]
+        #[cfg(all(
+            test,
+            target_os = "linux",
+            any(feature = "x11", feature = "x11-minimal")
+        ))]
         let (release, receive) = mpsc::sync_channel::<()>(1);
         let worker = thread::Builder::new()
             .name("gpui-hardware-init".into())
@@ -155,7 +167,11 @@ impl Upgrade {
                         );
                         return;
                     }
-                    #[cfg(test)]
+                    #[cfg(all(
+                        test,
+                        target_os = "linux",
+                        any(feature = "x11", feature = "x11-minimal")
+                    ))]
                     if policy.defer_renderer && receive.recv().is_err() {
                         return;
                     }
@@ -180,13 +196,21 @@ impl Upgrade {
         Ok(Self {
             messages,
             _worker: worker,
-            #[cfg(test)]
+            #[cfg(all(
+                test,
+                target_os = "linux",
+                any(feature = "x11", feature = "x11-minimal")
+            ))]
             release: Some(release),
         })
     }
     // Deterministically mutate a real native owner before allowing real device
     // and pipeline initialization. No renderer or presentation is mocked.
-    #[cfg(test)]
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
     pub(super) fn release_renderer(&mut self) {
         if let Some(release) = self.release.take() {
             let _ = release.try_send(());
