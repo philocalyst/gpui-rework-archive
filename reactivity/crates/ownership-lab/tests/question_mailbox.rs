@@ -43,7 +43,8 @@ fn a_single_wake_after_terminal_cannot_strand_a_published_response() {
                 if events.load(Ordering::Acquire) > 0 {
                     events.fetch_sub(1, Ordering::Relaxed);
                     gate.acknowledge_before_drain();
-                    if let Some((terminal, value)) = slot.freeze() {
+                    if let Some(terminal) = slot.freeze() {
+                        let value = slot.take();
                         assert_eq!((terminal, value), (2, Some(7)));
                         slot.retire();
                         consumed.store(true, Ordering::Release);
@@ -55,7 +56,8 @@ fn a_single_wake_after_terminal_cannot_strand_a_published_response() {
         owner.join().unwrap();
         assert!(consumed.load(Ordering::Acquire) || events.load(Ordering::Acquire) > 0);
         if !consumed.load(Ordering::Acquire) {
-            assert_eq!(slot.freeze(), Some((2, Some(7))));
+            assert_eq!(slot.freeze(), Some(2));
+            assert_eq!(slot.take(), Some(7));
             slot.retire();
         }
         assert!(slot.idle());
@@ -112,13 +114,15 @@ fn a_late_old_notification_cannot_overwrite_a_reused_physical_lease() {
             })
         };
         ready.recv().unwrap();
-        assert_eq!(slot.freeze(), Some((2, Some(11))));
+        assert_eq!(slot.freeze(), Some(2));
+        assert_eq!(slot.take(), Some(11));
         slot.retire();
         slot.begin();
         slot.complete(22, || {}).unwrap();
         resume.send(()).unwrap();
         worker.join().unwrap();
-        assert_eq!(slot.freeze(), Some((2, Some(22))));
+        assert_eq!(slot.freeze(), Some(2));
+        assert_eq!(slot.take(), Some(22));
         slot.retire();
         slot.close();
     });
@@ -134,12 +138,14 @@ fn abandonment_releases_credit_without_a_payload_and_stays_bounded() {
             thread::spawn(move || slot.finish(3, || {}))
         };
         worker.join().unwrap();
-        assert_eq!(slot.freeze(), Some((3, None)));
+        assert_eq!(slot.freeze(), Some(3));
+        assert_eq!(slot.take(), None);
         slot.retire();
         assert!(slot.idle());
         slot.begin();
         slot.complete(9, || {}).unwrap();
-        assert_eq!(slot.freeze(), Some((2, Some(9))));
+        assert_eq!(slot.freeze(), Some(2));
+        assert_eq!(slot.take(), Some(9));
         slot.close();
     });
 }
@@ -165,7 +171,8 @@ fn notification_and_payload_drop_run_outside_the_mutex() {
             drops: drops.clone(),
         };
         assert!(slot.complete(probe, || assert!(slot.unlocked())).is_ok());
-        let (_, value) = slot.freeze().unwrap();
+        slot.freeze().unwrap();
+        let value = slot.take();
         slot.retire();
         drop(value);
         slot.close();
@@ -223,6 +230,69 @@ fn a_worker_lease_defers_reclamation_after_close_but_cannot_admit_it() {
         drop(slot);
         assert_eq!(drops.load(Ordering::SeqCst), 0);
         drop(worker_lease);
+        assert_eq!(drops.load(Ordering::SeqCst), 1);
+    });
+}
+
+#[test]
+fn staged_readiness_keeps_the_payload_sealed_across_owner_refresh() {
+    loom::model(|| {
+        let slot = Arc::new(Mailbox::new());
+        slot.begin();
+        let (published, ready) = mpsc::channel();
+        let (resume, wait) = mpsc::channel();
+        let worker = {
+            let slot = slot.clone();
+            thread::spawn(move || {
+                slot.complete(11, || {
+                    published.send(()).unwrap();
+                    wait.recv().unwrap();
+                })
+                .unwrap();
+            })
+        };
+        ready.recv().unwrap();
+        assert_eq!(slot.freeze(), Some(2));
+        // A coarse callback can supersede the logical ticket and pending input.
+        // Its attempt to launch newer work must still see occupied credit.
+        assert!(!slot.idle());
+        thread::yield_now();
+        assert_eq!(slot.freeze(), Some(2));
+        assert!(!slot.idle());
+        assert_eq!(slot.take(), Some(11));
+        slot.retire();
+        slot.begin();
+        slot.complete(22, || {}).unwrap();
+        resume.send(()).unwrap();
+        worker.join().unwrap();
+        assert_eq!(slot.freeze(), Some(2));
+        assert_eq!(slot.take(), Some(22));
+        slot.retire();
+        slot.close();
+    });
+}
+
+#[test]
+fn callback_close_discards_a_staged_response_without_taking_it() {
+    loom::model(|| {
+        let slot = Arc::new(Mailbox::new());
+        slot.begin();
+        let drops = Arc::new(AtomicUsize::new(0));
+        let worker = {
+            let slot = slot.clone();
+            let drops = drops.clone();
+            thread::spawn(move || {
+                assert!(slot.complete(Payload { drops }, || {}).is_ok());
+            })
+        };
+        worker.join().unwrap();
+        assert_eq!(slot.freeze(), Some(2));
+        assert_eq!(drops.load(Ordering::SeqCst), 0);
+        // Runtime quarantine/close drops its controller lease before any apply.
+        // The terminal-sealed response stays owned, and final Arc drop cleans it.
+        slot.close();
+        assert_eq!(slot.freeze(), None);
+        drop(slot);
         assert_eq!(drops.load(Ordering::SeqCst), 1);
     });
 }

@@ -393,7 +393,8 @@ mod tests {
                     .complete(probe, || assert!(mailbox.unlocked()))
                     .is_ok()
             );
-            let (_, value) = mailbox.freeze().unwrap();
+            mailbox.freeze().unwrap();
+            let value = mailbox.take();
             mailbox.retire();
             mailbox.close();
             let result = catch_unwind(AssertUnwindSafe(|| drop(value)));

@@ -40,7 +40,7 @@ impl<P> Mailbox<P> {
             return Err(value);
         }
         // Only the single linear completion can write this physical
-        // lease. The owner cannot begin another until freeze+retire.
+        // lease. The owner cannot begin another until take+retire.
         assert!(slot.is_none(), "one response per physical lease");
         *slot = Some(value);
         drop(slot);
@@ -54,7 +54,9 @@ impl<P> Mailbox<P> {
         // Wake is after publication, including abandonment and panic.
         notify();
     }
-    pub(super) fn freeze(&self) -> Option<(u8, Option<P>)> {
+    // Freeze readiness only. Terminal publication seals the response until the
+    // owner takes it during apply; callbacks cannot create another physical cap.
+    pub(super) fn freeze(&self) -> Option<u8> {
         if self.closed.load(Ordering::Acquire) {
             return None;
         }
@@ -62,8 +64,13 @@ impl<P> Mailbox<P> {
         if terminal <= 1 {
             return None;
         }
-        // Acquire-terminal proves the sole producer already unlocked. No new
-        // cap exists until retire. Never wait even on an invariant violation.
+        Some(terminal)
+    }
+    pub(super) fn take(&self) -> Option<P> {
+        // The owner previously acquired terminal during staging. No new cap
+        // exists until retire, so intervening callbacks cannot change the slot.
+        // Never wait even on an invariant violation.
+        debug_assert!(self.state.load(Ordering::Relaxed) > 1);
         let mut slot = match self.slot.try_lock() {
             Ok(slot) => slot,
             Err(TryLockError::Poisoned(poison)) => poison.into_inner(),
@@ -71,7 +78,7 @@ impl<P> Mailbox<P> {
         };
         let value = slot.take();
         drop(slot);
-        Some((terminal, value))
+        value
     }
     pub(super) fn retire(&self) {
         self.state.store(0, Ordering::Release);

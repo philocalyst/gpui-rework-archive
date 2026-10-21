@@ -102,3 +102,44 @@ fn close_releases_ready_state_and_a_late_physical_cap_returns_its_owned_resource
     drop(win);
     assert_eq!(drops.load(Ordering::SeqCst), 2);
 }
+
+#[test]
+fn a_staged_response_stays_owned_until_callbacks_supersede_it_and_apply_retires_it() {
+    let (win, jobs) = open();
+    let drops = Arc::new(AtomicUsize::new(0));
+    let during_callback = drops.clone();
+    let (remote, inbox) = Remote::bounded(1);
+    let mut win = win
+        .with_inbox(inbox, move |model: &mut Model, (): ()| {
+            // Staging has frozen readiness, and the old result is still owned.
+            assert_eq!(during_callback.load(Ordering::SeqCst), 0);
+            model.input = Signal::new(2);
+        })
+        .unwrap();
+    jobs.recv()
+        .unwrap()
+        .complete(Ok(Resource(drops.clone())))
+        .unwrap();
+    remote.try_send(()).unwrap();
+    let delivery = win.deliver_ready(8).unwrap();
+    assert_eq!(
+        delivery.applied, 1,
+        "only the normal model edit was admitted"
+    );
+    assert_eq!(
+        drops.load(Ordering::SeqCst),
+        1,
+        "obsolete response retired once"
+    );
+    assert!(!win.contains_text("ready resource").unwrap());
+    let current = jobs
+        .try_recv()
+        .expect("newest input starts in this same turn");
+    assert!(!current.is_cancelled());
+    current.complete(Ok(Resource(drops.clone()))).unwrap();
+    assert_eq!(win.deliver_ready(8).unwrap().applied, 1);
+    assert!(win.contains_text("ready resource").unwrap());
+    assert_eq!(drops.load(Ordering::SeqCst), 1);
+    win.close();
+    assert_eq!(drops.load(Ordering::SeqCst), 2);
+}

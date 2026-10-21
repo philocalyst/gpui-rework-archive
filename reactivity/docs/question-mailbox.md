@@ -1,5 +1,10 @@
 # Safe linear response mailbox
 
+Historical initial safe-mailbox implementation at e8017da488. The follow-up in
+[question-sealed-staging.md](question-sealed-staging.md) removes its duplicate
+inline staging reservation while preserving this publication protocol. Sizes
+and timings below describe the initial implementation, not the follow-up.
+
 This replaces only the one-response question transport from c6ac1481d1.
 General Remote remains a bounded multi-producer stream. The question already
 has one linear physical completion; allocating a general channel and a deque

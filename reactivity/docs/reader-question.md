@@ -79,19 +79,20 @@ physical dispatch; this slice supplies no forced thread termination or timeout.
 
 The response slot is a safe Mutex<Option<Message>> inside one controller Arc.
 The producer unlocks, Release-publishes its terminal, then posts one wake. Owner
-staging acquires the terminal before try-locking the response: the sole writer
-has already unlocked, and another cap cannot exist until owner retirement.
+staging acquires only the terminal byte. The response stays sealed in its
+controller slot across ordinary callbacks; another cap cannot exist until
+owner retirement. Apply then takes it with try_lock: the sole writer has already
+unlocked and can no longer access that slot.
 Close only sets an atomic closed flag and drops the owner Arc lease; it never
 locks or waits for a descheduled producer. The last Arc uniquely reclaims any
 unconsumed response. A physical cap can defer that reclamation, but cannot admit
 work after owner revocation. No user payload destructor runs inside the mutex.
 
-Close also revokes scope, cancels current work, releases UI-owned staged/ready/
-pending values and executor closures before model destruction. A send racing
+Close also revokes scope, cancels current work, releases ready/pending values and executor closures before model destruction. A send racing
 close can return success but is never admitted afterward. Retained physical caps
 can retain controller backing and one response until dropped. Native proxy/OS
 event posting allocation is not measured by owner-thread allocation counters.
-Seven same-source Loom cases check publication, close races, exact drops,
+Nine same-source Loom cases check publication, close races, exact drops,
 physical reuse and a producer paused inside the mutex while close must return.
 
 ## Concrete bounds and costs
@@ -99,8 +100,9 @@ physical reuse and a producer paused inside the mutex while close must return.
 The framework bounds the number of physical work snapshots, not arbitrary
 generic payload bytes. At most one running/queued result, one latest pending
 input, and one previous ready result exist per question. During replacement a
-new owned result may overlap the previous ready allocation. Only one physical response can exist in the mailbox OR frozen staging: its
-credit is returned after admission, not while staging. Per-lane
+new owned result may overlap the previous ready allocation. There is one
+physical response reservation, inside the mailbox, and no inline staging copy.
+Its credit is returned after admission, not while staging. Per-lane
 FIFO applies; there is no cross-lane ordering or atomic cohort guarantee.
 The static chain is intended for a small declared set: staging can scan
 O(lanes × budget), lookup traverses the typed chain, and monomorphized code grows
@@ -118,15 +120,17 @@ Library remains available; `library --search` selects this proof.
 The first u64/Infallible question allocates a cold scope and one controller
 (2 allocations/152 requested bytes headlessly; 200 bytes with native wake).
 Additional questions share the scope and allocate one controller each.
-The response and staging storage scale with concrete result size; see the
-storage matrix for the corresponding growth of the inline window type. A Completion clones that controller lease once per physical job;
+The response slot and retained answer scale with concrete result size. The
+inline window contains only its retained answer; staging adds one terminal byte,
+not a second result reservation. See the storage matrix for exact sizes. A Completion clones that controller lease once per physical job;
 it is not a per-node/per-message result allocation. Each projected description
 currently allocates TWO boxes: the typed-erased projector plus existing cold
 ElementExtra. It also contributes a fixed status/content region. Folding these
 boxes would require changing ordinary El storage, its concrete public type, or
 introducing lower-level erased ownership machinery; this slice keeps the clear
 safe boundary. No zero-description-allocation or frame-time improvement claim
-is made. See `question-mailbox.md` for current byte requests and evidence;
+is made. See `question-sealed-staging.md` for current storage and evidence;
+`question-mailbox.md` preserves the initial safe-mailbox comparison;
 `reader-question-evidence.txt` preserves the earlier channel baseline.
 
 ## Validation

@@ -110,7 +110,6 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             key,
             gate,
             controller: Some(Arc::new(Controller::new())),
-            staged: None,
             state: State::Empty,
             version: None,
             ticket: 0,
@@ -180,7 +179,6 @@ pub struct QuestionLane<M, V, I, T, E, F, S, L> {
     start: Option<S>,
     key: ReaderKey,
     gate: RequestGate,
-    staged: Option<Message<T, E>>,
     controller: Option<Arc<Controller<T, E>>>,
     state: State<T, E>,
     version: Option<InputVersion>,
@@ -300,6 +298,49 @@ where
             }
         }
     }
+    fn apply_response(
+        &mut self,
+        message: Message<T, E>,
+        model: &M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+    ) -> Result<(), crate::Error> {
+        let current = match self.source.borrow_registered(model, sources) {
+            Ok(signal) => signal,
+            Err(error) => {
+                self.fault(QuestionFault::InputUnavailable);
+                *applied += 1;
+                return Err(error.into());
+            }
+        };
+        if Some(message.version) == self.version && message.version.revision != current.revision() {
+            // A nested/externally changed source may be discovered here
+            // even when a different exact edit did not refresh this slot.
+            // Its current ticket cannot become Ready or remain Pending
+            // after its only physical completion has already terminated.
+            self.fault(QuestionFault::InputUnavailable);
+            self.stats.stale_results = self.stats.stale_results.saturating_add(1);
+            *applied += 1;
+            return Ok(());
+        }
+        if Some(message.version) == self.version
+            && message.version.revision == current.revision()
+            && self.gate.accept(&message.stamp).is_ok()
+        {
+            self.state = match message.value {
+                Ok(value) => State::Ready(value),
+                Err(error) => {
+                    let previous = self.state.take_previous();
+                    State::Fault(StoredFault::Domain(error), previous)
+                }
+            };
+            *applied += 1;
+            self.stats.accepted = self.stats.accepted.saturating_add(1);
+        } else {
+            self.stats.stale_results = self.stats.stale_results.saturating_add(1);
+        }
+        Ok(())
+    }
     fn refresh_self(
         &mut self,
         model: &M,
@@ -401,8 +442,7 @@ where
         if self.staged_terminal.is_some() {
             return Stage::Empty;
         }
-        if let Some((terminal, message)) = self.control().mailbox.freeze() {
-            self.staged = message;
+        if let Some(terminal) = self.control().mailbox.freeze() {
             self.staged_terminal = Some(terminal);
             Stage::Ready
         } else {
@@ -429,46 +469,12 @@ where
         applied: &mut usize,
     ) -> Result<(), crate::Error> {
         let mut binding_error = None;
-        while let Some(message) = self.staged.take() {
-            let current = match self.source.borrow_registered(model, sources) {
-                Ok(signal) => signal,
-                Err(error) => {
-                    self.fault(QuestionFault::InputUnavailable);
-                    *applied += 1;
-                    binding_error = Some(crate::Error::from(error));
-                    continue;
-                }
-            };
-            if Some(message.version) == self.version
-                && message.version.revision != current.revision()
-            {
-                // A nested/externally changed source may be discovered here
-                // even when a different exact edit did not refresh this slot.
-                // Its current ticket cannot become Ready or remain Pending
-                // after its only physical completion has already terminated.
-                self.fault(QuestionFault::InputUnavailable);
-                self.stats.stale_results = self.stats.stale_results.saturating_add(1);
-                *applied += 1;
-                continue;
-            }
-            if Some(message.version) == self.version
-                && message.version.revision == current.revision()
-                && self.gate.accept(&message.stamp).is_ok()
-            {
-                self.state = match message.value {
-                    Ok(value) => State::Ready(value),
-                    Err(error) => {
-                        let previous = self.state.take_previous();
-                        State::Fault(StoredFault::Domain(error), previous)
-                    }
-                };
-                *applied += 1;
-                self.stats.accepted = self.stats.accepted.saturating_add(1);
-            } else {
-                self.stats.stale_results = self.stats.stale_results.saturating_add(1);
-            }
-        }
         if let Some(terminal) = self.staged_terminal.take() {
+            // The staged terminal seals this response across ordinary callbacks.
+            // Take only now, before retiring the physical credit.
+            if let Some(message) = self.control().mailbox.take() {
+                binding_error = self.apply_response(message, model, sources, applied).err();
+            }
             let ticket = self
                 .running_ticket
                 .take()
@@ -503,7 +509,6 @@ where
             controller.current.store(0, Ordering::Release);
             controller.mailbox.close();
         }
-        self.staged = None;
         self.staged_terminal = None;
         self.pending = None;
         self.state = State::Empty;

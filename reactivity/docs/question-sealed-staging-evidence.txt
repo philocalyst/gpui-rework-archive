@@ -1,0 +1,84 @@
+Terminal-only staging refinement, 2026-10-21
+Baseline: e8017da4882def9422b730c5e7c6020c808cfc80.
+Candidate: this commit, /root/gpui-production-question-sealed.
+Rust1.97.1 (8bab26f4f2026-07-14), AMD Ryzen7 3700X, Linux x86_64.
+Candidate Cargo artifacts isolated in /tmp/gpui-sealed-target; no shared
+package artifact directory with the e801 baseline.
+
+Exact storage fixture unchanged: crates/gpui/tests/question_storage.rs.
+Result,requested heap before/after,Win before,Win after:
+ u64,152/152,456,384
+ String,168/168,480,392
+ [u8;304],448/448,1032,664
+ [u8;4096],4240/4240,8616,4456
+ align64 [u8;4096],4456/4456,8896,4736
+All retain two cold allocations including the initial owner scope.
+Headless Controller96B; native Controller144B; Reader16B; Completion72B;
+InputVersion32B; El176B, all unchanged. Native first declaration stays2alloc200B.
+u64 plan456->384B; bound lane448->376B (headless and native).
+
+Authoritative candidate gates:
+ cargo test -p gpui --features native,x11,wayland
+   248 passed cases/doctests, ignored actual-native fixtures separately below.
+ cargo clippy -p gpui --features native,x11,wayland --all-targets -- -D warnings
+   pass, standard native profile includes AccessKit.
+ cargo test -p gpui_reactivity_ownership_lab --features loom --test question_mailbox
+   9 passed; the production private transport source is included directly.
+ cargo test -p gpui --test question_storage -- --nocapture
+   exact table above; allocation fixture remains unchanged from e801.
+ cargo test -p gpui --lib reader::tests::absent_plan_and_static_producer_projection_allocation_ledger -- --nocapture
+   headless2alloc152B, native2alloc200B; projection2alloc88B unchanged.
+ DISPLAY=:94 cargo test -p gpui --features native,x11,wayland --lib native_question_result_and_credit_wake_without_unrelated_input -- --ignored --nocapture --test-threads=1
+   actual WorkReady pass0.10s; obsolete result/current successor needs no input poll.
+ DISPLAY=:94 cargo test -p gpui --features native,x11,wayland --lib native_library_250k -- --ignored --nocapture --test-threads=1
+   actual250K Library wheel/pointer/resize/resume pass10.24s.
+Xvfb21.1.24,1280x800x24, /tmp/gpui-native-env.sh loader environment.
+No macOS/Windows execution claim; root owns combined cross-target checks.
+
+The two added Loom cases freeze terminal-only readiness, delay taking across a
+logical refresh, verify credit stays occupied, and close without taking the
+sealed response. Existing delayed-old-notify and preempted-writer tests use the
+same production implementation. Public resource tests verify a coarse callback
+sees the old response still alive, supersedes it, drops it once during apply,
+and starts the newest physical cap in the same turn. Another real owner test
+panics before question apply and proves exactly-once cleanup under quarantine.
+
+Release fixture: unchanged crates/gpui/tests/question_cost.rs,
+SHA25639aa3f736c401bcda4e4d7d1e742347e6d02761cc41b0f14fe9e2bc44085ad0b.
+Build: cargo test --release -p gpui --test question_cost --no-run.
+Preserved baseline /tmp/gpui-question-mutex-final SHA256:
+ d10ab25c54b99376b8f7c41641cfaf96a0d8e7537567fddc54dd389eb6e916ca
+Preserved candidate /tmp/gpui-question-sealed-final SHA256:
+ 2549ac674db810bba80bb17acf7dee7ce0151ae090c28bbc230d4076dc29dffc
+
+Actual GNU binutils2.46 nm-S-C/objdump-d-C u64 release codegen:
+ Completion.complete394B and outlined Mailbox.complete457B unchanged.
+ start_pending1280B unchanged.
+ QuestionSet.stage690B baseline -> inlined terminal-byte checks in deliver_ready.
+ Baseline stage takes mutex and moves its72B Message through stack into the lane.
+ Candidate stage has closed/state byte reads and two terminal Option-byte stores;
+ it has no lock operation or payload move. No outlined apply_response exists.
+ apply_questions1972->2276B, now including try_lock/take before checked admission.
+ close292->232B; deliver_ready1888->1924B including the now-inlined staging.
+Do not count disappearance of the stage symbol alone as total code reduction:
+inlining moves instructions into callers. The mutex CAS/unlock still happen,
+only at apply. Admission still moves the response into local/Ready ownership.
+
+Quiet capture: taskset -c2 <preserved executable> --ignored --nocapture
+--test-threads=1. Five fresh-process pairs, baseline/candidate order alternated;
+each executable warms both paths10turns then emits7 internal alternating rounds
+of200 edit+delivery turns per case.140 rows captured in6.95seconds. Parent
+verifier was paused after its Clippy child exited; source peer independently
+confirmed no build/test/benchmark process. No overlapping own jobs.
+Raw: question-sealed-staging-cost.csv, LF rows unchanged after capture.
+Pooled row medians (rows within a process are not independent process samples):
+ question223333->221119ns (-0.99%)
+ Remote control260103->253653ns (-2.48%)
+Per-pair median question ratios: -1.54%,-0.08%,-1.38%,-1.09%,-1.70%.
+Per-pair Remote ratios: -2.58%,-2.56%,-2.05%,-2.09%,-2.98%.
+No application or frame-time win is claimed: the unchanged control shifts more
+than the changed path. These are command-only owner admission/layout/preparation
+costs, excluding native pixels, wake posting, worker execution and scanout.
+Production diff adds13 net lines across reader.rs, question.rs and the private
+mailbox; most question.rs movement names its existing checked admission block
+so all error paths still retire the staged physical credit.
