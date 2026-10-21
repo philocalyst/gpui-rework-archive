@@ -61,6 +61,7 @@ pub struct SharedState {
     pub base_size: Option<Size>,
     pub visibility: Visibility,
     pub has_focus: bool,
+    pub(crate) redraw_invalidated: bool,
     // Use `Option` to not apply hittest logic when it was never requested.
     pub cursor_hittest: Option<bool>,
 }
@@ -100,6 +101,7 @@ impl SharedState {
             resize_increments: None,
             base_size: None,
             has_focus: false,
+            redraw_invalidated: true,
             cursor_hittest: None,
         })
     }
@@ -1843,6 +1845,19 @@ impl UnownedWindow {
     #[inline]
     pub fn request_redraw(&self) {
         self.redraw_sender.send(WindowId(self.xwindow as _)).unwrap();
+    }
+
+    pub(crate) fn invalidate_redraw(&self) {
+        self.shared_state.lock().unwrap().redraw_invalidated = true;
+    }
+
+    pub fn take_redraw_invalidation(&self) -> crate::window::RedrawInvalidation {
+        let invalidated = std::mem::take(&mut self.shared_state.lock().unwrap().redraw_invalidated);
+        if invalidated {
+            crate::window::RedrawInvalidation::Invalidated
+        } else {
+            crate::window::RedrawInvalidation::KnownClear
+        }
     }
 
     #[inline]

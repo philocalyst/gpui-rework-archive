@@ -24,6 +24,7 @@ use crate::{
 
 #[cfg(feature = "accessibility")]
 mod accessibility;
+mod destination;
 mod upgrade;
 
 #[cfg(all(
@@ -36,6 +37,12 @@ mod upgrade;
 #[path = "../examples/support/library.rs"]
 pub(crate) mod test_library;
 
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod destination_tests;
 #[cfg(all(
     test,
     any(feature = "x11", feature = "x11-minimal"),
@@ -302,6 +309,7 @@ struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
     pointer: Option<Point>,
     pressed: Option<Target>,
     occluded: bool,
+    destination: destination::Destination,
     error: Option<NativeError>,
     wake: Option<Wake>,
     recoveries: u8,
@@ -315,6 +323,8 @@ struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
     upgrade_policy: upgrade::Policy,
     #[cfg(test)]
     presented_frames: u64,
+    #[cfg(test)]
+    fail_next_cpu_present: bool,
     #[cfg(test)]
     upgrade_rejection: Option<String>,
 }
@@ -333,6 +343,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             pointer: None,
             pressed: None,
             occluded: false,
+            destination: destination::Destination::default(),
             error: None,
             wake: None,
             recoveries: 0,
@@ -346,6 +357,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             upgrade_policy: upgrade::Policy::default(),
             #[cfg(test)]
             presented_frames: 0,
+            #[cfg(test)]
+            fail_next_cpu_present: false,
             #[cfg(test)]
             upgrade_rejection: None,
         }
@@ -461,6 +474,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         self.resize([size.width, size.height])
     }
     fn resize(&mut self, size: [u32; 2]) -> Result<(), NativeError> {
+        self.destination.invalidate();
         self.pressed = None;
         if size.contains(&0) {
             return Ok(());
@@ -508,6 +522,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         }
     }
     fn redraw(&mut self) -> Result<(), NativeError> {
+        if let Some(window) = &self.window {
+            self.destination.observe(window.take_redraw_invalidation());
+        }
         if self
             .retry_at
             .is_some_and(|deadline| deadline > Instant::now())
@@ -518,46 +535,33 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         let Some(size) = self.window.as_ref().map(|window| window.inner_size()) else {
             return Ok(());
         };
-        if size.width == 0 || size.height == 0 || self.occluded {
+        if size.width == 0
+            || size.height == 0
+            || self.occluded
+            || self
+                .window
+                .as_ref()
+                .is_some_and(|window| window.is_visible() == Some(false))
+        {
+            self.destination.invalidate();
             return Ok(());
         }
         if matches!(self.graphics, Some(Graphics::ReferenceCpu(..))) && self.try_upgrade()? {
             return Ok(());
         }
-        if let Some(Graphics::ReferenceCpu(surface, history)) = &mut self.graphics {
-            let window = self.window.as_ref().expect("surface has a window");
-            let owner = self.owner.as_mut().expect("surface has an owner");
-            let solid = owner
-                .with_scene(|scene, token| {
-                    scene
-                        .solid_bgrx()
-                        .map(|color| color.map(|color| (color, token)))
-                })?
-                .map_err(Error::from)?;
-            let notified = solid.is_some();
-            if let Some((color, token)) = solid {
-                window.pre_present_notify();
-                if surface.present_solid(color).map_err(platform)? {
-                    let commit = owner.presented(token)?;
-                    // The solid backend may discard its pixel backing entirely.
-                    *history = SurfaceDamage::default();
+        if matches!(self.graphics, Some(Graphics::ReferenceCpu(..))) {
+            return match self.present_cpu() {
+                Ok((commit, full)) => {
+                    self.destination.accepted(full);
                     self.did_present(RendererKind::ReferenceCpu, commit);
                     self.start_upgrade();
-                    return Ok(());
+                    Ok(())
                 }
-            }
-            let mut buffer = surface.buffer_mut().map_err(platform)?;
-            let age = buffer.age();
-            let (token, damage) = owner.render_preserved_bgrx(&mut buffer, history.since(age))?;
-            if !notified {
-                window.pre_present_notify();
-            }
-            buffer.present().map_err(platform)?;
-            let commit = owner.presented(token)?;
-            history.presented(damage);
-            self.did_present(RendererKind::ReferenceCpu, commit);
-            self.start_upgrade();
-            return Ok(());
+                Err(error) => {
+                    self.destination.invalidate();
+                    Err(error)
+                }
+            };
         }
         // One bounded reconfiguration/recreation. Repeated failure exits with a
         // typed fault instead of spinning an idle event loop or publishing P.
@@ -704,6 +708,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         };
         self.upgrade = None;
         let upgrade::Ready { instance, mut gpu } = ready;
+        // Configuration/acquisition can disturb the native destination even
+        // when this handoff fails and software presents again in this turn.
+        self.destination.invalidate();
         let size = window.inner_size();
         gpu.config.width = size.width.max(1);
         gpu.config.height = size.height.max(1);
@@ -746,6 +753,70 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 Ok(false)
             }
         }
+    }
+    fn present_cpu(&mut self) -> Result<(Commit, bool), NativeError> {
+        let full = self.destination.requires_full();
+        let Some(Graphics::ReferenceCpu(surface, history)) = &mut self.graphics else {
+            unreachable!("CPU presentation requires an admitted CPU surface");
+        };
+        let window = self.window.as_ref().expect("surface has a window");
+        let owner = self.owner.as_mut().expect("surface has an owner");
+        let solid = owner
+            .with_scene(|scene, token| {
+                scene
+                    .solid_bgrx()
+                    .map(|color| color.map(|color| (color, token)))
+            })?
+            .map_err(Error::from)?;
+        let notified = solid.is_some();
+        if let Some((color, token)) = solid {
+            window.pre_present_notify();
+            if surface.present_solid(color).map_err(platform)? {
+                let commit = owner.presented(token)?;
+                // The solid backend may discard its pixel backing entirely.
+                *history = SurfaceDamage::default();
+                return Ok((commit, true));
+            }
+        }
+        let mut buffer = surface.buffer_mut().map_err(platform)?;
+        let age = buffer.age();
+        let (token, damage) = owner.render_preserved_bgrx(&mut buffer, history.since(age))?;
+        if !notified {
+            window.pre_present_notify();
+        }
+        #[cfg(test)]
+        if std::mem::take(&mut self.fail_next_cpu_present) {
+            // Exercise a real backend rejection before acknowledgment. The
+            // explicit X11 proof requires SHM; Wire ignores damage rectangles.
+            buffer
+                .present_with_damage(&[softbuffer::Rect {
+                    x: u32::MAX,
+                    y: 0,
+                    width: NonZeroU32::new(1).unwrap(),
+                    height: NonZeroU32::new(1).unwrap(),
+                }])
+                .map_err(platform)?;
+            panic!("native failure proof requires XShm damage validation");
+        }
+        if full {
+            buffer.present().map_err(platform)?;
+        } else if let Some([left, top, right, bottom]) = damage.bounds() {
+            buffer
+                .present_with_damage(&[softbuffer::Rect {
+                    x: left,
+                    y: top,
+                    width: NonZeroU32::new(right - left).expect("nonempty damage"),
+                    height: NonZeroU32::new(bottom - top).expect("nonempty damage"),
+                }])
+                .map_err(platform)?;
+        } else {
+            // XShm sends no image rectangle but retains its completion
+            // barrier and coherent client-buffer age. Wire may copy full.
+            buffer.present_with_damage(&[]).map_err(platform)?;
+        }
+        let commit = owner.presented(token)?;
+        history.presented(damage);
+        Ok((commit, full))
     }
     fn input_result(&mut self, result: Result<Commit, Error>) -> Result<(), NativeError> {
         match result {
@@ -814,6 +885,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             }
             WindowEvent::RedrawRequested => self.redraw()?,
             WindowEvent::Occluded(value) => {
+                self.destination.invalidate();
                 self.occluded = *value;
                 if !value {
                     self.request_redraw();
@@ -1016,6 +1088,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             }
             Callback::Resumed => self.resumed(event_loop),
             Callback::Suspended => {
+                self.destination.invalidate();
                 self.pressed = None;
                 // Dropping both bounded channel endpoints cancels this admission
                 // generation; a late worker can only drop its owned resources.
