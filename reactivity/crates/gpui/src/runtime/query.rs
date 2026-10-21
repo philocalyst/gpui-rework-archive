@@ -4,6 +4,9 @@ use super::{Actions, Error, Presented, Runtime, Target, View, Win};
 use crate::identity::Sites;
 use crate::{Rect, Role, remote::LaneSet};
 
+mod serialize;
+pub use serialize::SemanticSnapshot;
+
 // One borrowed context on the visitor stack, not a context pointer or semantic
 // mirror retained per node. Every part borrows this same acknowledged sheet.
 struct Context<'a> {

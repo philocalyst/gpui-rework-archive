@@ -102,6 +102,12 @@ preceding sheet. Focused backspace can repair a shaping failure.
 `Window::on_presentation_error` observes these failures (default: stderr).
 GPU admission/device/platform faults currently return `NativeError`.
 
+`win.semantics()?.write_json(writer)?` streams the acknowledged semantic sheet
+without cloning nodes or strings. The same borrowed `Part` values exposed by
+`visit` implement Serde `Serialize`. Source/presentation epochs distinguish pending
+edits from displayed content; retained target IDs are process-local diagnostics.
+Use `source_json` for source persistence. See [the testing interface](../../TESTING.md).
+
 `Sources::field` conservatively invalidates the owner, including ordinary Rust
 branches and formatting. `direct` explicitly declares that edits only affect
 installed direct operands. Shared Signal reads have no hidden dependency

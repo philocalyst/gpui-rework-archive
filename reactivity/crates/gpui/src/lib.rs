@@ -52,7 +52,8 @@ pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 pub use remote::{Lane, LaneSet};
 pub use runtime::{
     Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
-    PresentationToken, Query, SetError, Snapshot, SnapshotNode, Win, WindowOptions,
+    PresentationToken, Query, SemanticSnapshot, SetError, Snapshot, SnapshotNode, Win,
+    WindowOptions,
 };
 pub use semantic::SemanticText;
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
