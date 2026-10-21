@@ -291,3 +291,35 @@ fn reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source() {
         Err(Error::PresentationStale)
     );
 }
+
+#[test]
+fn software_surface_rendering_returns_the_exact_unacknowledged_scene_token() {
+    let win = recording();
+    let mut words = vec![0xffffffff; 64 * 64];
+    let initial = win.render_bgrx(&mut words).unwrap();
+    assert_eq!(initial, token(&win));
+    assert!(words.iter().all(|word| *word == 0));
+    assert!(!win.snapshot().unwrap().presentation_valid);
+    assert_eq!(
+        win.hit_target(Point { x: 8.0, y: 8.0 }),
+        Err(Error::PresentationStale)
+    );
+    let mut wrong_length = [0x12345678];
+    assert_eq!(
+        win.render_bgrx(&mut wrong_length),
+        Err(Error::Canvas(gpui_canvas::Error::InvalidDimensions))
+    );
+    assert_eq!(wrong_length, [0x12345678]);
+    win.presented(initial).unwrap();
+    win.update(|model| model.bright = true).unwrap();
+    let pending = win.render_bgrx(&mut words).unwrap();
+    assert_eq!(pending, token(&win));
+    assert_ne!(pending, initial);
+    assert!(words.iter().all(|word| *word == 0x00ffffff));
+    assert_eq!(win.snapshot().unwrap().presentation_epoch, 0);
+    assert_eq!(
+        win.hit_target(Point { x: 8.0, y: 8.0 }),
+        Err(Error::PresentationStale)
+    );
+    assert_eq!(win.presented(pending).unwrap().presentation_epoch, 1);
+}
