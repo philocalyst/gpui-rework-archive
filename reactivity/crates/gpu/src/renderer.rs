@@ -5,7 +5,9 @@ use gpui_canvas::{
 };
 use std::{borrow::Cow, collections::HashMap};
 mod images;
+mod paint;
 pub use images::ImageStats;
+pub use paint::{GpuPaintCommit, GpuPaintEdit, PaintBinding, PaintError, PaintRenderer};
 
 const MAX_DRAWS: usize = 65_536;
 const MAX_REFERENCES: usize = 4 * 1024 * 1024;
@@ -61,13 +63,14 @@ struct Correction {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Stats {
     pub submissions: u64,
-    /// Last successful submission reused the already admitted packet.
+    /// Last successful submission reused admitted topology/resources. A paint
+    /// patch may have uploaded color words; instance_upload_bytes distinguishes it.
     pub packet_reused: bool,
     /// CPU validate_draw calls for the last successful submission, not GPU work.
     pub validated_draws: usize,
     /// Forward and reverse CSR draw-bound tile visits, before proof filtering.
     pub binning_tile_visits: usize,
-    /// Bind groups created for the last successful submission (zero on redraw).
+    /// Bind groups created for the last successful submission (zero on replay/patch).
     pub bind_group_creations: usize,
     pub draws: usize,
     pub tile_references: usize,
@@ -468,6 +471,14 @@ impl Renderer {
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
+        self.render_observed(scene, target, |_, _, _, _| {})
+    }
+    fn render_observed(
+        &mut self,
+        scene: PreparedScene<'_>,
+        target: &wgpu::TextureView,
+        mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
+    ) -> Result<wgpu::SubmissionIndex, Error> {
         self.packet = None;
         scene
             .color_config
@@ -534,6 +545,10 @@ impl Renderer {
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
             let correction = self.correction(group.inverse, group.clip);
+            // The optional paint owner captures only requested groups here.
+            // Ordinary render's empty observer specializes away. Inline
+            // multi-placement diagnostic groups decline color-only patching.
+            group_ready(ordinal, group, self.records.len(), compact);
             if compact {
                 let mut error = [0.0_f32; 2];
                 for (offset, p) in group.placements().enumerate() {
