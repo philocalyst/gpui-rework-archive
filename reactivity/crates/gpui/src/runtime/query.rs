@@ -26,11 +26,24 @@ impl<'a> Context<'a> {
                 .map(|metadata| &metadata.presented),
         }
     }
-    fn part(&self, index: usize) -> Part<'_> {
+    fn part(&self, node: &'a Presented) -> Part<'_> {
+        // Every caller iterates or selects from self.nodes (possibly a scoped
+        // subslice). Check the private cohort invariant in debug builds too.
+        debug_assert!(self.index(node) < self.nodes.len());
         Part {
-            index,
+            node,
             context: self,
         }
+    }
+    #[inline]
+    fn index(&self, node: &Presented) -> usize {
+        // part() receives this reference from self.nodes. The immutable borrow
+        // keeps that allocation alive and fixed. Only Dense needs this offset.
+        let offset = std::ptr::from_ref(node).addr() - self.nodes.as_ptr().addr();
+        debug_assert!(offset.is_multiple_of(std::mem::size_of::<Presented>()));
+        let index = offset / std::mem::size_of::<Presented>();
+        debug_assert!(index < self.nodes.len());
+        index
     }
 }
 
@@ -54,21 +67,20 @@ impl SemanticSheet<'_> {
         self.0.nodes.len()
     }
     pub(crate) fn part_at(&self, index: usize) -> Option<Part<'_>> {
-        self.0.nodes.get(index).map(|_| self.0.part(index))
+        self.0.nodes.get(index).map(|node| self.0.part(node))
     }
     pub(crate) fn children(&self, index: usize) -> impl Iterator<Item = Part<'_>> {
         self.0
             .nodes
             .iter()
-            .enumerate()
             .skip(index + 1)
-            .take_while(move |(_, node)| node.parent.index().is_some_and(|parent| parent >= index))
-            .filter(move |(_, node)| node.parent.index() == Some(index))
-            .map(|(index, _)| self.0.part(index))
+            .take_while(move |node| node.parent.index().is_some_and(|parent| parent >= index))
+            .filter(move |node| node.parent.index() == Some(index))
+            .map(|node| self.0.part(node))
     }
     pub(crate) fn visit(&self, mut visitor: impl FnMut(Part<'_>)) {
-        for index in 0..self.0.nodes.len() {
-            visitor(self.0.part(index));
+        for node in self.0.nodes {
+            visitor(self.0.part(node));
         }
     }
 }
@@ -86,25 +98,21 @@ impl SemanticSheet<'_> {
 /// println!("{saved:?}");
 /// ```
 pub struct Part<'a> {
-    index: usize,
+    node: &'a Presented,
     context: &'a Context<'a>,
 }
 impl<'a> Part<'a> {
-    #[inline]
-    fn node(self) -> &'a Presented {
-        &self.context.nodes[self.index]
-    }
     #[cfg(feature = "accessibility")]
     pub(crate) fn native_id(self) -> u64 {
-        self.node().identity
+        self.node.identity
     }
     /// Stable window-qualified identity, also used by input and inspector APIs.
     /// Merely reading a target does not grant it a particular action.
     pub fn target(self) -> Target {
-        self.context.sites.target(self.node().identity)
+        self.context.sites.target(self.node.identity)
     }
     pub fn parent(self) -> Option<Target> {
-        self.node().parent.index().map(|index| {
+        self.node.parent.index().map(|index| {
             self.context
                 .sites
                 .target(self.context.nodes[index].identity)
@@ -117,13 +125,13 @@ impl<'a> Part<'a> {
         self.context.focused == Some(self.target())
     }
     pub fn actions(self) -> Actions {
-        self.node().actions
+        self.node.actions
     }
     pub fn role(self) -> Role {
-        self.node().kind.role()
+        self.node.kind.role()
     }
     pub fn text(self) -> Option<&'a str> {
-        self.node().text.as_deref()
+        self.node.text.as_deref()
     }
     /// An explicit declared/inspector name, or the visual label fallback.
     /// Edited input values never become accessible names.
@@ -131,35 +139,35 @@ impl<'a> Part<'a> {
         if let Some(slot) = self
             .context
             .metadata
-            .and_then(|metadata| metadata.name(self.node().identity))
+            .and_then(|metadata| metadata.name(self.node.identity))
         {
             return slot.value.as_deref();
         }
-        (self.node().kind != super::NodeKind::Input)
+        (self.node.kind != super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
     }
     pub fn description(self) -> Option<&'a str> {
         self.context
             .metadata
-            .and_then(|metadata| metadata.description(self.node().identity))
+            .and_then(|metadata| metadata.description(self.node.identity))
             .and_then(|slot| slot.value.as_deref())
     }
     /// Frozen total source length for this published list container.
     pub fn list(self) -> Option<super::ListInfo> {
         self.context
             .metadata
-            .and_then(|metadata| metadata.list(self.node().identity))
+            .and_then(|metadata| metadata.list(self.node.identity))
     }
     /// Frozen position/key/count for this published row wrapper. Descendants
     /// can walk parent targets; positions are never inferred from keys or y.
     pub fn list_item(self) -> Option<super::ListItemInfo> {
         let metadata = self.context.metadata?;
-        let row = metadata.row(self.node().identity)?;
+        let row = metadata.row(self.node.identity)?;
         // Row wrappers are immediate children of their list in this SAME P.
         // The parent already freezes the count; neither field needs repeating
         // per row, and current logical list state must never supply them.
-        let parent = &self.context.nodes[self.node().parent.index()?];
+        let parent = &self.context.nodes[self.node.parent.index()?];
         let list = metadata.list(parent.identity)?;
         Some(super::ListItemInfo {
             list: self.context.sites.target(parent.identity),
@@ -169,23 +177,25 @@ impl<'a> Part<'a> {
         })
     }
     pub fn value(self) -> Option<&'a str> {
-        (self.node().kind == super::NodeKind::Input)
+        (self.node.kind == super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
     }
     /// Physical viewport-clipped bounds of the acknowledged presentation.
     pub fn bounds(self) -> Rect {
-        self.node().bounds
+        self.node.bounds
     }
     /// The canonical local rectangle before window/viewport clipping.
     pub fn local_bounds(self) -> Rect {
-        self.node().local_rect()
+        self.node.local_rect()
     }
     /// Absolute node-local to window-physical transform, already including
     /// ancestors and DPI. Applying it again as a parent transform is incorrect.
     #[inline]
     pub fn transform(self) -> Option<crate::Affine> {
-        self.context.spaces.transform(self.index, self.node())
+        self.context
+            .spaces
+            .transform_with(self.node, || self.context.index(self.node))
     }
     /// Conservative full window-physical bounds, derived only when requested.
     /// Native adapters add the window-to-screen mapping. This differs from
@@ -196,7 +206,7 @@ impl<'a> Part<'a> {
     #[inline(always)]
     pub fn unclipped_bounds(self) -> Option<Rect> {
         self.transform().and_then(|map| {
-            gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node().local_rect())
+            gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node.local_rect())
         })
     }
 }
@@ -248,9 +258,9 @@ impl<'a, M: View + 'static> Query<'a, M> {
         self.within = Some(target);
         self
     }
-    fn scope(&self, runtime: &'a Runtime<M>) -> Result<std::ops::Range<usize>, Error> {
+    fn scope(&self, runtime: &'a Runtime<M>) -> Result<&'a [Presented], Error> {
         let Some(target) = self.within else {
-            return Ok(0..runtime.presented.len());
+            return Ok(&runtime.presented);
         };
         let identity = runtime.sites.resolve(target).ok_or(Error::StaleTarget)?;
         let root = runtime
@@ -266,7 +276,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
             .iter()
             .position(|node| node.parent.index().is_none_or(|parent| parent < root))
             .unwrap_or(following.len());
-        Ok(root..root + 1 + len)
+        Ok(&runtime.presented[root..root + 1 + len])
     }
     fn matches(&self, part: Part<'_>) -> bool {
         self.role.is_none_or(|role| part.role() == role)
@@ -290,8 +300,8 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let runtime = self.runtime.ok_or(Error::Closed)?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for index in self.scope(runtime)? {
-            count += usize::from(self.matches(context.part(index)));
+        for node in self.scope(runtime)? {
+            count += usize::from(self.matches(context.part(node)));
         }
         Ok(count)
     }
@@ -304,10 +314,10 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let mut identity = 0;
         let mut count = 0;
         let context = Context::new(runtime);
-        for index in self.scope(runtime)? {
-            if self.matches(context.part(index)) {
+        for node in self.scope(runtime)? {
+            if self.matches(context.part(node)) {
                 count += 1;
-                identity = runtime.presented[index].identity;
+                identity = node.identity;
             }
         }
         match count {
@@ -401,8 +411,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for index in 0..runtime.presented.len() {
-            visitor(context.part(index));
+        for node in &runtime.presented {
+            visitor(context.part(node));
         }
         Ok(())
     }
@@ -424,5 +434,68 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut count = 0;
         self.visit(|part| count += usize::from(predicate(part)))?;
         Ok(count)
+    }
+}
+
+#[cfg(test)]
+mod geometry_tests {
+    use super::*;
+    use crate::{Affine, Color, El, WindowOptions, column, div};
+
+    struct Panels(u8);
+    impl View for Panels {
+        fn view(&self) -> El<'_> {
+            column((0..128).map(|index| {
+                let scale = match self.0 {
+                    0 => 1.0,
+                    1 => 1.0 + (index % 2) as f32,
+                    _ => 1.0 + index as f32,
+                };
+                div()
+                    .size(1)
+                    .bg(Color::BLACK)
+                    .transform(Affine::scale(scale, 1.0))
+            }))
+        }
+    }
+    fn check(window: &Win<Panels>) {
+        let runtime = window.runtime().unwrap();
+        let context = Context::new(runtime);
+        assert_eq!(std::mem::size_of::<Part<'_>>(), 16);
+        for (index, expected) in runtime.presented.iter().enumerate() {
+            let part = context.part(expected);
+            // Every private constructor selects from this exact allocation.
+            assert!(std::ptr::eq(part.node, expected));
+            assert!(std::ptr::eq(
+                part.context.nodes.as_ptr(),
+                runtime.presented.as_ptr()
+            ));
+            assert_eq!(context.index(part.node), index);
+            assert_eq!(
+                part.transform(),
+                runtime.presented_spaces.transform(index, expected)
+            );
+        }
+    }
+    #[test]
+    fn borrowed_parts_and_dense_indices_belong_to_their_complete_cohort() {
+        let mut window = Win::recording(
+            Panels(0),
+            WindowOptions {
+                size: [64, 64],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let token = window.with_scene(|_, token| token).unwrap();
+        window.presented(token).unwrap();
+        check(&window);
+        for mode in [1, 2, 0, 2] {
+            window.update(|model| model.0 = mode).unwrap();
+            check(&window); // Old P still owns the older allocation/lane.
+            let token = window.with_scene(|_, token| token).unwrap();
+            window.presented(token).unwrap();
+            check(&window);
+        }
     }
 }

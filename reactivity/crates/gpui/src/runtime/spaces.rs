@@ -20,13 +20,23 @@ impl Default for Spaces {
 impl Spaces {
     #[inline]
     pub(super) fn transform(&self, index: usize, node: &Presented) -> Option<Affine> {
+        self.transform_with(node, || index)
+    }
+    // Common and palette maps only need the borrowed node. Semantic Parts
+    // recover a dense index lazily; indexed internal loops already have it.
+    #[inline]
+    pub(super) fn transform_with(
+        &self,
+        node: &Presented,
+        index: impl FnOnce() -> usize,
+    ) -> Option<Affine> {
         if node.space == ABSENT {
             return None;
         }
         Some(match self {
             Self::Common(linear) => assemble(*linear, node.translation),
             Self::Shared(palette) => assemble(palette[usize::from(node.space)], node.translation),
-            Self::Dense(values) => values[index],
+            Self::Dense(values) => values[index()],
         })
     }
 }
@@ -276,6 +286,31 @@ mod tests {
                 allocation.bytes_max
             );
             std::hint::black_box(result);
+        }
+    }
+    #[test]
+    fn lazy_index_is_used_only_for_present_dense_maps() {
+        for distinct in [1, 2, 33] {
+            let maps = (0..128)
+                .map(|index| {
+                    if index % 5 == 0 {
+                        None
+                    } else {
+                        Some(Affine::scale((index % distinct) as f32 + 1.0, 1.0))
+                    }
+                })
+                .collect::<Vec<_>>();
+            let (nodes, spaces) = build(&maps);
+            let dense = matches!(spaces, Spaces::Dense(_));
+            for (index, node) in nodes.iter().enumerate() {
+                let mut calls = 0;
+                let actual = spaces.transform_with(node, || {
+                    calls += 1;
+                    index
+                });
+                assert_eq!(bits(actual), bits(maps[index]));
+                assert_eq!(calls, usize::from(dense && maps[index].is_some()));
+            }
         }
     }
 }
