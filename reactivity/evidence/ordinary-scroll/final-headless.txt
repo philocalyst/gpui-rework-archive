@@ -1,0 +1,164 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-production-scroll/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.22s
+     Running unittests src/lib.rs (/tmp/gpui-scroll-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 90 tests
+test component::tests::component_storage_ledger_has_no_owning_model_pointer ... ok
+test element::tests::size_ledger_counts_inline_route_and_style_costs ... ok
+test element::tests::method_items_keep_zero_sized_callback_and_receiver_check ... ok
+test element::tests::input_role_and_literal_style_reach_the_same_draft ... ok
+test element::tests::concrete_branches_opaque_leaves_and_constructor_children_lower ... ok
+test element::tests::typed_field_routes_validate_projection_before_exact_admission ... ok
+test element::tests::unlowered_handler_payloads_drop_once_in_preorder ... ok
+test identity::tests::target_stamps_are_pure_and_window_qualified ... ok
+test property::tests::all_typed_selectors_and_the_erased_seam_edit_the_same_style ... ok
+test property::tests::catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned ... ok
+test property::tests::contribution_presence_survives_destination_equality_and_auto_is_explicit ... ok
+test property::tests::invalid_typed_and_erased_edits_leave_all_fields_unchanged ... ok
+test property::tests::rejected_override_changes_neither_existing_bases_nor_any_contribution ... ok
+test property::tests::independent_overrides_survive_base_changes_and_lifecycle_purge ... ok
+test property::tests::sparse_overrides_preserve_explicit_auto_and_reveal_updated_base_on_reset ... ok
+test reader::inputs::tests::earlier_key_validation_rejects_foreign_equal_and_later_sites ... ok
+test reader::question::tests::input_family_owner_record_ledger ... ok
+test reader::question::tests::version_exhaustion_faults_instead_of_leaving_unstartable_pending_work ... ok
+test reader::question::tests::a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever ... ok
+test reader::question::tests::binding_rejection_retires_the_staged_terminal_before_returning_error ... ok
+test reader::tests::absent_plan_and_static_producer_projection_allocation_ledger ... ok
+test reader::tests::cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it ... ok
+test reader::tests::closed_completion_returns_the_same_owned_result ... ok
+test reader::tests::input_family_storage_and_allocation_ledger ... ok
+test reader::tests::close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic ... ok
+test runtime::parent_tests::compact_map_preserves_finite_admitted_coefficients ... ok
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... ignored, explicit cold and warm whole-operation allocation ledger
+test runtime::semantic_storage_ledger::dense_annotation_capacity_evidence ... ignored, manual dense storage evidence; includes 30,003 layout nodes
+test runtime::parent_tests::content_rejects_the_first_unadmitted_text_index - should panic ... ok
+test runtime::parent_tests::nonzero_identity_keeps_old_node_migration_in_place ... ok
+test runtime::style_ledger::real_application_and_adversarial_distribution ... ignored, explicit retained style/map distribution; no timing claim
+test runtime::style_ledger::retained_style_cost ... ignored, explicit paired release fixture; coordinate a quiet CPU window
+test runtime::style_ledger::retained_style_owner_memory ... ignored, explicit whole-owner allocation and peak ledger, including layout/canvas
+test runtime::styles::tests::exact_comparison_covers_every_style_field ... ok
+test runtime::semantic_storage_ledger::shared_ports_retain_one_payload_and_do_not_create_text_service ... ok
+test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... ok
+test runtime::styles::tests::inspector_edits_densify_once_and_do_not_mutate_shared_peers ... ok
+test runtime::scroll::tests::wheel_plan_is_repeatable_without_allocation ... ok
+test runtime::scroll::tests::frozen_viewport_index_cannot_alias_a_different_p_node ... ok
+test runtime::delivery::tests::mount_preparation_and_description_faults_close_lanes_before_the_model ... ok
+test runtime::image::tests::exact_image_cohort_leases_survive_failed_newer_candidate_loss_and_removal ... ok
+test remote::tests::preallocated_static_transport_and_staging_have_no_per_message_allocations ... ok
+test runtime::styles::tests::shared_values_preserve_author_channels_profiles_and_signed_zero ... ok
+test runtime::tests::native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels ... ok
+test runtime::tests::rectangle_windows_do_not_initialize_font_services ... ok
+test runtime::parent_tests::compact_parent_covers_the_admitted_index_domain ... ok
+test runtime::image::tests::image_only_owner_does_not_initialize_text_services ... ok
+test runtime::tests::software_surface_rendering_keeps_the_native_runtime_free_of_cpu_image_storage ... ok
+test runtime::styles::tests::style_lane_allocation_ledger ... ok
+test runtime::styles::tests::rebuilt_lanes_keep_no_historical_style_palette ... ok
+test runtime::styles::tests::late_palette_overflow_and_late_nondefault_prefix_preserve_all_values ... ok
+test source::component_tests::component_schemas_reject_duplicate_names_ids_and_cross_scope_source_aliases ... ok
+test source::component_tests::namespace_exhaustion_is_checked_before_a_component_is_registered ... ok
+test source::component_tests::resolved_component_ids_are_rejected_as_local_source_declarations ... ok
+test source::component_tests::scoped_scan_and_revision_preserve_local_ids_without_namespace_collision ... ok
+test runtime::tests::text_width_cache_preserves_keys_and_replaces_only_after_success ... ok
+test shared_text::tests::one_word_utf8_lease_preserves_owned_unicode_and_thread_transfer ... ok
+test runtime::style_ledger::inspector_dense_lane_is_reclaimed_after_inherit_and_redescription ... ok
+test runtime::tests::an_unchanged_borrowed_string_keeps_its_retained_allocation ... ok
+test shared_text::tests::exact_allocation_requests_include_header_growth_and_static_empty ... ok
+test runtime::tests::preserved_surface_repairs_coalesced_candidates_and_keeps_failed_edits_out ... ok
+test source::component_tests::the_last_component_namespace_routes_edits_before_exhaustion ... ok
+test source::tests::a_text_operand_supplies_the_codec_and_wrong_codecs_cannot_edit ... ok
+test source::tests::aliased_fields_are_ambiguous_even_when_keys_differ ... ok
+test source::tests::binding_and_scanning_read_each_field_once_exact_edits_read_only_the_target ... ok
+test source::tests::bound_key_survives_moving_the_entire_model ... ok
+test source::tests::domain_sources_register_resolve_and_edit_without_text_support ... ok
+test source::tests::duplicate_names_and_ids_are_rejected ... ok
+test source::tests::every_supported_scalar_formats_and_floats_validate ... ok
+test source::tests::exact_action_edits_only_its_value_and_requires_registered_projection ... ok
+test source::tests::field_ids_preserve_the_full_local_domain_and_pair_order ... ok
+test source::tests::mismatched_read_write_paths_fail_before_a_value_mutates ... ok
+test source::tests::owner_dependency_is_the_default_and_direct_ports_are_explicit ... ok
+test source::tests::parse_failure_returns_payload_and_preserves_value_and_revision ... ok
+test source::tests::replacement_revision_equality_requires_owner_boundary_value_comparison ... ok
+test source::tests::same_typed_fields_bind_by_projection_not_equal_value ... ok
+test source::tests::scan_reports_all_registered_field_revisions ... ok
+test source::tests::string_edits_transfer_the_owned_input_allocation ... ok
+test source::tests::unchanged_borrowed_strings_are_zero_copy ... ok
+test source::tests::unknown_key_returns_unchanged_payload ... ok
+test style::tests::literals_validate_after_conversion ... ok
+test remote::ledger::requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer ... ok
+test runtime::delivery::tests::epoch_exhaustion_retires_delivery_without_consuming_or_retaining_the_remaining_queue ... ok
+test runtime::tests::the_last_text_service_is_released_after_a_text_free_sheet_commits ... ok
+test element::tests::wide_description_preserves_order ... ok
+test runtime::parent_tests::content_preserves_every_kind_and_admitted_text_index ... ok
+test runtime::styles::tests::storage_modes_and_overflow_preserve_every_admitted_style ... ok
+test runtime::tests::text_lane_moves_one_cache_per_site_and_releases_removed_capacity ... ok
+test runtime::tests::surface_damage_repairs_aged_buffers_and_falls_back_when_history_expires ... ok
+test element::tests::adversarial_depth_drop_and_lowering_fit_a_small_stack ... ok
+
+test result: ok. 85 passed; 0 failed; 5 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/lists.rs (/tmp/gpui-scroll-target/debug/deps/lists-cc647d6bc26af848)
+
+running 19 tests
+test collapsed_forward_span_keeps_inverse_sample_semantics_and_point_authority ... ok
+test reflected_half_open_viewport_matches_ordinary_paint ... ok
+test wheel_obeys_painter_order_and_nested_viewports ... ok
+test wheel_rejects_the_physical_window_edge_even_with_an_outward_envelope ... ok
+test zero_raster_samples_do_not_erase_a_continuous_pointer_action_ancestor ... ok
+test malformed_source_metrics_and_duplicate_list_ids_fail_admission ... ok
+test parent_flow_updates_list_layout_like_a_cold_mount_including_property_overrides ... ok
+test zero_width_is_an_empty_viewport_and_flex_can_exhaust_available_width ... ok
+test row_slots_clip_overflow_and_keep_empty_structural_ancestors ... ok
+test raster_clip_matches_finite_canvas_edges_and_keeps_off_lattice_pointer_hits ... ok
+test invalid_requests_leave_the_current_cohort_usable ... ok
+test fractional_scroll_clips_fixed_slots_and_does_not_hit_header_or_footer ... ok
+test root_auto_width_and_flex_row_available_width_are_real_viewports ... ok
+test recording_scroll_publishes_semantics_only_after_exact_acknowledgement ... ok
+test overlap_survives_scroll_reorder_and_prepend_but_offscreen_target_never_revives ... ok
+test quarter_million_rows_have_bounded_realization_and_wide_local_scroll ... ok
+test empty_shrink_and_invalid_scroll_admission_are_checked ... ok
+test window_clip_removes_authority_and_resize_return_mints_a_fresh_capability ... ok
+test ordinary_fractional_device_scales_admit_list_and_row_clips ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/scroll.rs (/tmp/gpui-scroll-target/debug/deps/scroll-a4692c8abf09eb88)
+
+running 27 tests
+test nested_aperture_contains_both_cephal_and_transformed_overflow ... ok
+test later_overlay_blocks_background_wheel ... ok
+test nested_scaled_wheel_converts_displacement_and_residual_exactly_once ... ok
+test nested_wheel_consumes_once_then_passes_only_residual ... ok
+test ordinary_scroll_is_two_dimensional_retained_and_keeps_offscreen_semantics ... ok
+test auto_viewport_resize_clamps_from_actual_layout ... ok
+test published_metadata_and_targets_do_not_advance_before_ack ... ok
+test scroll_builder_rejects_role_replacement_and_preserves_container_annotations ... ok
+test changing_axes_clamps_disabled_offsets_and_removed_targets_stay_stale ... ok
+test invalid_offsets_and_foreign_targets_leave_epochs_and_scene_token_unchanged ... ok
+test ordinary_resize_and_paint_geometry_overrides_never_redescribe_the_owner ... ok
+test scroll_into_view_uses_retained_offscreen_bounds ... ok
+test semantic_scroll_actions_use_the_public_mutation_path_and_frozen_support ... ok
+test deep_residual_routing_has_no_fixed_ancestry_limit_or_repeated_application ... ok
+test transformed_negative_overflow_is_reachable_without_relayout ... ok
+test reflected_dpi_wheel_routes_displacements_instead_of_points ... ok
+test parent_flow_changes_match_cold_scroll_layout_for_source_and_property ... ok
+test unsupported_viewport_transform_keeps_old_p_geometry_and_metadata ... ok
+test metadata_only_publication_preserves_cohort_indexed_viewport_dimensions ... ok
+test semantic_cardinal_action_rechecks_the_frozen_enabled_axis ... ok
+test tab_reveals_offscreen_controls_but_explicit_focus_remains_logical ... ok
+test virtual_focus_retires_with_candidate_authority_and_never_returns ... ok
+test virtual_rows_hidden_by_an_ordinary_ancestor_never_revive_old_targets ... ok
+test virtual_list_and_ordinary_ancestor_share_one_scroll_cohort ... ok
+test wide_overflow_endpoints_match_continuous_reference_after_p_narrowing ... ok
+test reveal_propagates_the_visible_fragment_through_nested_apertures ... ok
+test reflected_fractional_and_collapsed_viewport_clips_match_ordinary_raster_membership ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s

@@ -1,0 +1,23 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src/lib.rs (/tmp/gpui-scroll-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 1 test
+scroll_sizes,Node=40,Presented=80,Prepared=40,Runtime=2384,El=176,Draft=152,Extra=56,Sheet=96,ListState=112,ViewportKey=16,ViewportState=112,ViewportInfo=96,ViewportColumn=24,ListFrozen=40,ScrollFrozen=64,ScrollViewport=72,Plan=48
+scroll_alloc,ordinary_recording,count=34,total=6824,retained=5580,peak=5740
+scroll_alloc,first_list_recording,count=47,total=9693,retained=7372,peak=7569
+scroll_alloc,scroll_recording,count=60,total=14935,retained=10980,peak=11363
+scroll_alloc,warm_scroll_0,count=7,total=583,retained=0,peak=583
+scroll_alloc,warm_scroll_1,count=7,total=583,retained=0,peak=583
+scroll_alloc,warm_scroll_2,count=7,total=583,retained=0,peak=583
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 89 filtered out; finished in 0.00s

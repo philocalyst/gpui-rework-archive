@@ -1,0 +1,35 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 1d154bd5c7..6e18b0826f 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3121,3 +3121,30 @@ mod semantic_storage_ledger {
+         );
+     }
+ }
++
++#[cfg(test)]
++mod scroll_baseline_probe {
++    use super::*;
++    use crate::prelude::*;
++    use std::mem::size_of;
++    struct Empty;
++    impl View for Empty { fn view(&self)->El<'_>{div()} }
++    struct List;
++    impl ItemSource for List {
++        fn len(&self)->usize {0}
++        fn key(&self,_:usize)->ItemKey {unreachable!()}
++        fn index_of(&self,_:ItemKey)->Option<usize>{None}
++        fn row(&self,_:usize)->El<'_>{unreachable!()}
++    }
++    impl View for List {fn view(&self)->El<'_>{uniform_list(ListId::new(1),self,20).size(40)}}
++    #[test]
++    fn baseline_ledger(){
++        println!("baseline_sizes,Node={},Presented={},Prepared={},Runtime={},El={},Draft={},Extra={},Sheet={},ListState={},ListKey={},ListEntry={}",size_of::<Node>(),size_of::<Presented>(),size_of::<Prepared>(),size_of::<Runtime<()>>(),size_of::<El<'_>>(),size_of::<crate::element::DraftNode<'_>>(),size_of::<crate::semantic::ElementExtra<'_>>(),size_of::<metadata::Sheet>(),size_of::<ListState>(),size_of::<ListId>(),size_of::<(u64,ListInfo)>());
++        let mut empty=None;
++        let a=allocation_counter::measure(||empty=Some(Win::recording(Empty,WindowOptions{size:[80,80],..Default::default()}).unwrap()));
++        println!("baseline_alloc,ordinary_recording,count={},total={},retained={},peak={}",a.count_total,a.bytes_total,a.bytes_current,a.bytes_max);
++        let mut list=None;
++        let a=allocation_counter::measure(||list=Some(Win::recording(List,WindowOptions{size:[80,80],..Default::default()}).unwrap()));
++        println!("baseline_alloc,first_list_recording,count={},total={},retained={},peak={}",a.count_total,a.bytes_total,a.bytes_current,a.bytes_max);
++    }
++}
