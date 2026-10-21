@@ -58,6 +58,13 @@ The Library uses the same public interface over 250,000 app-owned identifiers;
 its [keyed viewport](VIRTUAL_LIST.md) retains only realized rows. It is a
 catalogue/play-request surface, with no audio decoder or database integration.
 
+[Typed questions](QUESTION_INPUTS.md) freeze declared Sources or earlier Ready
+Reader answers for application-owned workers. Source pairs borrow their values
+together; earlier Reader dependencies settle at the same owner barrier. Library
+uses this API for cancellable query/order search. Tests drive the same delivery
+and query interfaces. Cross-turn results remain progressive; this is not a
+general atomic cohort graph.
+
 The GPU backend uses `wgsl-rs` shaders and Wgpu over the vendored Winit callback
 adapter. Native surfaces are currently opaque sRGB8; offscreen linear
 RGBA16Float does not imply OS HDR negotiation. Components retain no GPU/Winit

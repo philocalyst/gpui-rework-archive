@@ -1,5 +1,11 @@
 # One-source typed questions
 
+This document preserves the initial one-source slice and its measurements.
+The current API also accepts Source pairs and earlier Reader dependencies; see
+[declared input families](../crates/gpui/QUESTION_INPUTS.md) and their
+[source-pinned evidence](../evidence/question-inputs/README.md). The historical
+storage figures below are not current input-family costs.
+
 This implementation adds one explicit source per question. It is not a Reader
 DAG, dependency capture, demand parking, a transactional multi-reader cohort, or
 a framework executor. Ordinary windows retain their existing `Win<M, ()>`

@@ -6,11 +6,11 @@ describe the intended complete system; this page records what is connected now.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
-| Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and typed one-source Reader questions | One serial root owner; complete dependency/cohort graph remains |
+| Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
 | Public testing | Application::demo, borrowed semantic queries/visits, conjunctive name/description filters, actions, focus/keyboard, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time and replay remain |
 | Accessibility | Native AccessKit in ordinary desktop profiles, bounded exact acknowledged transitions, lazy active projection, revalidated actions; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; selection/IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
-| Worker delivery | Static typed inbox/question chains, frozen batches, versioned one-source admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Multi-input Reader/cohort graph and demand parking remain; queue capacity is not a byte bound |
+| Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal, scoped Parley/HarfRust Unicode paragraphs, immutable bounded bundled fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
@@ -84,6 +84,13 @@ at `71ce05bb92` passes 116 parallel Canvas cases/doctests, all 23 Vulkan
 readbacks, the real X11 image/pointer/resize/recovery script, and strict native
 all-target Clippy. These scoped checks supplement the complete campaign above.
 
+The [combined input-family checks](evidence/question-inputs/integration/checks.json)
+at `e10c2226d5` pass 499 workspace cases/doctests, strict accessible native
+all-target Clippy, and the real X11 Question dependency chain and 250K Library
+scripts. Their isolated transport evidence also includes 3 credit and 9
+exact-source mailbox Loom cases; those models do not prove the sequential
+input-family settlement logic.
+
 Earlier source-pinned reports remain intact: the
 [21-gate baseline](evidence/checks.json) at `5b0a38b222`,
 [cached-cmap checks](evidence/cmap-integration-checks.json) at `76f5be8493` and
@@ -121,7 +128,7 @@ mount/traversal regressions.
 | Lossless author colors | [Color proof and measurements](crates/canvas/COLOR_PACKING.md): Color 20→16 B, Style 96→88 B, Node 136→128 B, preserving all admitted HDR/author bits | Some conversion/mount/raster phases lose; native first acknowledgement is flat and native RSS/PSS increased in the paired capture; Canvas working colors already occupied 16 B |
 | Measurement routing | [Paired evidence](crates/gpui/evidence/layout-route.md): 10,001-node repeated-color mount removes 913 scratch allocations and 262,472 peak requested bytes | Retained storage is unchanged; individual trace phases lose and dense text searches are not a universal speedup |
 | Sparse native semantics | [Transition evidence](crates/gpui/SPARSE_ACCESSIBILITY.md): 100K leaf projection+Consumer replacement about 77.7 ms→73.6 µs, peak about 34.8 MB→328 B; verified field hints remove the common P scan | Warm repeated replacement, not screen-reader latency; active 10K geometry preparation pays about 14.3% comparison tax; inactive observation skips it |
-| Typed questions | [Sealed mailbox ledger](docs/question-sealed-staging.md): first declared u64 question requests 2 allocations/152 B headless, 2/200 B native; ordinary owners gain no fields | Each projection description pays two boxes/88 B; explicit Library worker reserves 256 KiB stack; complete Reader/cohort graph remains |
+| Typed questions | [Input-family ledger](evidence/question-inputs/README.md): first declared u64 question requests 2 allocations/120 B headless, plan 384→328 B, Completion 72→40 B; ordinary owners gain no fields | Source coalescing loses 0.59% in paired controls; projection description pays two boxes/88 B; Library worker reserves 256 KiB stack; earlier-tail scans and progressive cross-turn results remain |
 | Cooperative Library work | [Cancellation evidence](docs/question-cancellation.md): obsolete worker retirement/latest dispatch 8.434 ms→29.611 µs, stopping after 128 of 250K tracks | Current remaining scan loses 0.94%; source edit, first 128 tracks, latest execution and presentation excluded |
 
 The measurement rows pin their own baselines. Dense text, thin leases, color
