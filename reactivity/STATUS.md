@@ -159,6 +159,16 @@ click-to-changed-pixel on Xvfb. Geometry/pixel preflights and the rejected
 NanoUI binary mismatch are preserved. This is a scoped software/X11 comparison,
 not compositor/scanout timing or an all-application result.
 
+The [separate 724/current native comparison](benchmarks/nanoui-mygo-gpui/native-paired-724-current/results/paired-724-current-dcdadf4-20261021/README.md)
+uses the identical fixture and accepted pixel preflights at source `dcdadf4d52`.
+Median click-to-changed-pixel is 194→147 µs for eager zero, 1.973→1.876 ms for
+eager 1,000 and 263→209 µs for virtual 250K. Startup medians are respectively
+16.09→16.16, 31.76→31.50 and 17.22→17.31 ms; idle PSS changes are below 0.3%
+in five samples per cell. All six 100-start/1,000-click cells remain intact.
+These sequential source blocks are descriptive, not per-event paired confidence
+intervals. Auto selects ReferenceCpu and no AT client is active; this does not
+measure GPU packet replay or update the earlier competitor campaign.
+
 The [matched memory-floor diagnostic](docs/memory-floor-attribution-luna.md)
 separates truly blank windows from zero-row text fixtures. The default blank
 window measures 11,515 KiB median PSS in three samples. The optional-feature
