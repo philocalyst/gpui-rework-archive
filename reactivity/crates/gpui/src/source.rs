@@ -360,6 +360,7 @@ impl<M, T: TextValue> Field<M> for Source<M, T> {
 /// mounted owner. Signals themselves carry no registry, allocation or address.
 pub struct Sources<M> {
     fields: Vec<Box<dyn Field<M>>>,
+    schema_error: Option<BindError>,
 }
 impl<M> Default for Sources<M> {
     fn default() -> Self {
@@ -368,12 +369,27 @@ impl<M> Default for Sources<M> {
 }
 impl<M> Sources<M> {
     pub const fn new() -> Self {
-        Self { fields: Vec::new() }
+        Self {
+            fields: Vec::new(),
+            schema_error: None,
+        }
     }
     pub fn field<T: TextValue>(mut self, source: Source<M, T>) -> Self
     where
         M: 'static,
     {
+        if self.schema_error.is_none() {
+            for other in &self.fields {
+                if other.id() == source.id {
+                    self.schema_error = Some(BindError::DuplicateId(source.id));
+                    break;
+                }
+                if other.name() == source.name {
+                    self.schema_error = Some(BindError::DuplicateName(source.name));
+                    break;
+                }
+            }
+        }
         self.fields.push(Box::new(source));
         self
     }
@@ -384,25 +400,20 @@ impl<M> Sources<M> {
         self.fields.is_empty()
     }
     fn check_schema(&self) -> Result<(), BindError> {
-        for (index, field) in self.fields.iter().enumerate() {
-            for other in &self.fields[..index] {
-                if other.id() == field.id() {
-                    return Err(BindError::DuplicateId(field.id()));
-                }
-                if other.name() == field.name() {
-                    return Err(BindError::DuplicateName(field.name()));
-                }
-            }
-        }
-        Ok(())
+        self.schema_error.clone().map_or(Ok(()), Err)
     }
     fn check_aliases(&self, model: &M) -> Result<(), BindError> {
-        for (index, field) in self.fields.iter().enumerate() {
-            for other in &self.fields[..index] {
-                if field.signal(model).same(other.signal(model)) {
+        let projected: Vec<_> = self
+            .fields
+            .iter()
+            .map(|field| (field.id(), field.signal(model)))
+            .collect();
+        for (index, (id, signal)) in projected.iter().enumerate() {
+            for (other_id, other_signal) in &projected[..index] {
+                if signal.same(*other_signal) {
                     return Err(BindError::AliasedFields {
-                        first: other.id(),
-                        second: field.id(),
+                        first: *other_id,
+                        second: *id,
                     });
                 }
             }
@@ -424,12 +435,19 @@ impl<M> Sources<M> {
         signal: &dyn ErasedSignal,
     ) -> Result<Option<FieldId>, BindError> {
         self.check_schema()?;
-        self.check_aliases(model)?;
-        Ok(self
-            .fields
-            .iter()
-            .find(|field| field.signal(model).same(signal))
-            .map(|field| field.id()))
+        let mut found = None;
+        for field in &self.fields {
+            if field.signal(model).same(signal) {
+                if let Some(first) = found {
+                    return Err(BindError::AliasedFields {
+                        first,
+                        second: field.id(),
+                    });
+                }
+                found = Some(field.id());
+            }
+        }
+        Ok(found)
     }
     fn get(&self, id: FieldId) -> Result<&dyn Field<M>, BindError> {
         self.fields
@@ -726,5 +744,50 @@ mod tests {
             error.reason,
             TextEditErrorKind::Binding(BindError::UnknownField(unknown))
         );
+    }
+
+    #[test]
+    fn binding_and_scanning_read_each_field_once_exact_edits_read_only_the_target() {
+        use std::cell::Cell;
+        struct Counted {
+            first: Signal<u32>,
+            second: Signal<u32>,
+            reads: [Cell<usize>; 2],
+        }
+        // Instrumentation counts projector discovery without changing values.
+        let first = Source::new(
+            FieldId::new(1),
+            "first",
+            |m: &Counted| {
+                m.reads[0].set(m.reads[0].get() + 1);
+                &m.first
+            },
+            |m| &mut m.first,
+        );
+        let second = Source::new(
+            FieldId::new(2),
+            "second",
+            |m: &Counted| {
+                m.reads[1].set(m.reads[1].get() + 1);
+                &m.second
+            },
+            |m| &mut m.second,
+        );
+        let sources = Sources::new().field(first).field(second);
+        let mut model = Counted {
+            first: Signal::new(1),
+            second: Signal::new(2),
+            reads: [Cell::new(0), Cell::new(0)],
+        };
+        assert_eq!(sources.resolve(&model, &model.first), Ok(Some(first.id())));
+        assert_eq!([model.reads[0].get(), model.reads[1].get()], [1, 1]);
+        assert_eq!(sources.scan(&model).count(), 2);
+        assert_eq!([model.reads[0].get(), model.reads[1].get()], [2, 2]);
+        sources
+            .write_text(&mut model, first.id(), "5".into())
+            .unwrap();
+        assert_eq!([model.reads[0].get(), model.reads[1].get()], [3, 2]);
+        assert_eq!(*model.first, 5);
+        assert_eq!(*model.second, 2);
     }
 }
