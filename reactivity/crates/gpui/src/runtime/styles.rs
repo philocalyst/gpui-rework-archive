@@ -142,10 +142,8 @@ fn exact_eq(a: &Style, b: &Style) -> bool {
         && a.transform.d.to_bits() == b.transform.d.to_bits()
         && a.transform.tx.to_bits() == b.transform.tx.to_bits()
         && a.transform.ty.to_bits() == b.transform.ty.to_bits()
-        && a.fg.space() == b.fg.space()
-        && a.fg.channels().map(f32::to_bits) == b.fg.channels().map(f32::to_bits)
-        && a.bg.space() == b.bg.space()
-        && a.bg.channels().map(f32::to_bits) == b.bg.channels().map(f32::to_bits)
+        && a.fg.same_authoring(b.fg)
+        && a.bg.same_authoring(b.bg)
 }
 
 #[cfg(test)]
