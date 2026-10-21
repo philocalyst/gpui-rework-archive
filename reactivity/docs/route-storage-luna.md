@@ -2,6 +2,12 @@
 
 Read-only source audit of `/root/gpui-bench-luna/reactivity` at `c23b376d2b` (2026-10-21). No production changes or timing claims. The candidate below is a storage-layout proposal; its byte ledger follows the actual x86-64 Rust layouts and needs a paired release measurement before adoption.
 
+That audit predates integrated style sharing: its 128→112 B prediction describes
+the earlier node. The isolated root prototype removes the same 16-byte field
+from the subsequent 40-byte node, producing 24 B. Its current measured HOLD
+disposition and capture-allocation limits are recorded in the follow-up below;
+none of these prototype layouts describe main's current 40-byte node.
+
 ## Current lifetime and authority
 
 `runtime.rs` defines `Node { identity, parent, ordinal, content, component_scope, style, handler }` at lines 489–497. `Handler` is `Box<dyn Route>` (`element.rs:50–71`); `Option<Handler>` occupies 16 bytes on the current 64-bit target. The `Node` size test asserts 128 bytes (`runtime.rs:2789–2820`). `Content(u32)` holds the kind in three low bits and an encoded text-lane index above it (`runtime.rs:447–483`); six kind values are assigned, leaving 6 and 7 unused for the reserved Image/Scroll kinds.
@@ -16,7 +22,7 @@ Keep route payloads in one `Vec<Handler>` containing only nodes that currently h
 
 Change the existing `by_identity` value from `usize` to a private `NodeLocator { node: u32, route: u32 }`, where `u32::MAX` means no route. On x86-64 this remains exactly 8 bytes, matching the existing `usize` value. Build `Vec<Handler>` in node preorder as drafts are lowered. In the existing final `by_identity` rebuild, scan `nodes` once: map each identity to its node index and, when the `Content` route bit is set, the next route-vector index. Assert the route count matches the vector length. `MAX_NODES` is already capped at 100,000 and fits both `u32` indices.
 
-The existing identity B-tree lookup then supplies both the logical node index and the direct route slot. Activation performs no second route search or map operation. The stored slot is only in the freshly rebuilt current logical map; `Presented` and native IDs remain identity-only. On 32-bit targets `NodeLocator` is 8 bytes while `usize` is 4, so this form adds 4 bytes per map value there; confirm 32-bit support policy or use the portable sorted-route fallback below for those targets.
+The existing identity B-tree entry supplies both the logical node index and the direct route slot, avoiding a separate route search. Complete activation still consults that map during target resolution and again in its caller; this storage cut does not eliminate the pre-existing repeated lookup. The stored slot is only in the freshly rebuilt current logical map; `Presented` and native IDs remain identity-only. On 32-bit targets `NodeLocator` is 8 bytes while `usize` is 4, so this form adds 4 bytes per map value there; confirm 32-bit support policy or use the portable sorted-route fallback below for those targets.
 
 Count click handlers during the existing draft-validation traversal, before reconciliation starts. After all recoverable validation has succeeded, clear the old route vector (dropping the old captures), call `reserve_exact(handler_count)` if its retained capacity is too small, and fill it while lowering. This reuses the allocation on ordinary updates and avoids a second old+candidate handler buffer. Each handler is moved once from its draft into the vector. `Handler` is not cloned, and method-item routes remain ZST boxes as documented in `element.rs:44–48`.
 
@@ -40,7 +46,7 @@ Alternatives:
 | Sparse `Vec<(u32, Handler)>` sorted by node index | about 24K plus 24-byte Vec header | Existing identity lookup, then binary search on activation | Portable/simple baseline; 24-byte entries include 4-byte index plus alignment. No per-node route index. |
 | Sparse identity/handler pairs | about 24K plus header | Binary search by identity after current map lookup, or bypass that lookup with an independent search | Duplicates identity keys and keeps two lookup paths; no advantage over packed locator. |
 | Dense `Vec<Option<Handler>>` | 16N plus header | Direct by node index | Same payload tax as the current field, so no per-node memory win. |
-| `by_identity: BTreeMap<u64, NodeLocator>` + dense `Vec<Handler>` | 16K plus 24-byte header; existing map value stays 8 bytes on x64 | One existing B-tree lookup, then direct vector access | Best fit if the transaction/lifecycle invariant is kept. |
+| `by_identity: BTreeMap<u64, NodeLocator>` + dense `Vec<Handler>` | 16K plus 24-byte header; existing map value stays 8 bytes on x64 | Existing resolution/map checks, then direct vector access; no separate route lookup | Best fit if the transaction/lifecycle invariant is kept. |
 
 The packed locator is not a stale-target table: every description reconstructs `by_identity` from current nodes, while IDs are never reused. For list reorder, a stable row identity gets a newly assigned current node/route slot; an old P node still names that identity and therefore reaches the current route. For removal, the identity disappears from the map. For an owner-scope change, reconciliation mints a new identity before the new route slot is assigned. These three cases need explicit tests.
 
@@ -56,11 +62,11 @@ Bevy ECS explicitly distinguishes table storage (cache-friendly dense iteration)
 
 ## Release gates before adoption
 
-1. Assert `size_of::<Node>() == 112`, `size_of::<NodeLocator>() == size_of::<usize>()` on 64-bit, and verify `Content` size remains 4. Keep a portable 32-bit compilation or deliberately document that target's extra locator bytes.
+1. Assert `size_of::<Node>() == 24` on the current style-shared prototype (the original source predicted 112), `size_of::<NodeLocator>() == size_of::<usize>()` on 64-bit, and verify `Content` size remains 4. Keep a portable 32-bit compilation or deliberately document that target's extra locator bytes.
 2. Exhaustively round-trip all `0..MAX_NODES` text slots with each current kind, route bit on/off, no text, and route-bit masking. Assert future kind codes 6 and 7 cannot overlap the route flag.
 3. Exercise no handlers, one handler among many, all handlers, adding/removing handlers while identity survives, reorder of keyed rows, removal/reinsertion, and component-owner replacement. Assert route counts and every `NodeLocator` resolve to the handler installed by the current description.
 4. Preserve the existing old-P/current-S action test. Add an old P action after a surviving site's handler is replaced and verify it invokes the replacement; then remove the handler and verify dispatch returns `NotInteractive`; remove the site and verify `StaleTarget`.
-5. Test rejected description before reconciliation leaves old routes callable, and a caught panic in the destructive phase poisons the owner so no partially rebuilt route vector can be used.
+5. Test rejected description before reconciliation leaves route payload storage intact but revokes logical target authority until recovery, and a caught panic in the destructive phase poisons the owner so no partially rebuilt route vector can be used. A rejected presentation-only scroll retains the prior valid logical authority.
 6. Compare identical release binaries with: 100k blank nodes, 100k nodes/1 route, 50k routes, and 100k routes; plus repeated route-count grow/shrink. Capture `Node` bytes, `by_identity` allocation, handler-vector `len/capacity`, requested allocation/live bytes, description cost, hit/focus scan, and activate latency. Do not claim a win from `size_of::<Node>()` alone.
 
 ## Follow-up: erased capture arena is a separate, HOLD experiment

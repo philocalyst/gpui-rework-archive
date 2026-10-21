@@ -109,6 +109,14 @@ all-target Clippy for the actual macOS and Windows adapters at the same source.
 Those two checks compile target code; they do not execute either operating system.
 The full twenty-one-gate report above retains its earlier source pin.
 
+The [callback-retirement regression](evidence/snapshot-retirement-checks.json)
+pins the diagnostic fix to f8f318fb8a. Its public test reproduces an out-of-bounds
+snapshot on the parent after a captured callback's destructor panics during
+reconciliation. After the fix, all 239 default GPUI cases and strict all-target
+X11+Wayland Clippy pass; old presented content/geometry remains inspectable with
+every target revoked. The separate Node24 and P56 storage prototypes remain
+isolated while their measured traversal/mount regressions are investigated.
+
 The earlier [output-conversion checks](evidence/output-cache-checks.json) pin source
 b4598cb303: 79 release parallel Canvas cases/doctests, strict all-target accessible
 native Clippy, all 19 Vulkan readbacks and the real Todo multi-renderer script

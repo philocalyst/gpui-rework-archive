@@ -1,0 +1,34 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.23s
+     Running tests/routes.rs (target/debug/deps/routes-3a98b05057027a5b)
+
+running 1 test
+test a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once ... FAILED
+
+failures:
+
+---- a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once stdout ----
+
+thread 'a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once' (2627001) panicked at crates/gpui/tests/routes.rs:133:9:
+route destructor failed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once' (2627001) panicked at crates/gpui/src/runtime.rs:1113:30:
+index out of bounds: the len is 0 but the index is 0
+
+
+failures:
+    a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p gpui --test routes`
