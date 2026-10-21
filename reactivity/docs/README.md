@@ -17,6 +17,7 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Hummingbird source audit](hummingbird-source-audit-luna.md) | Pinned real application requirements and reusable domain boundaries |
 | [Virtual-list review](virtual-list-api-review-luna.md) | Bounded row realization, keyed lifetime, local coordinates and semantic authority |
 | [Accessibility frontier](accessibility-frontier-luna.md) | Native activation, sparse semantic updates, virtual-item protocols, geometry contracts and primary framework/paper review |
+| [Accessibility deltas](accessibility-incremental-luna.md) | Exact sparse projection without a second semantic tree, structural fallbacks, label/value schema and native proof boundaries |
 | [Review dispositions](../REVIEW.md) | Links to all six adversarial reports and their final status |
 
 [Input manifest](inputs/manifest.json) hashes the supplied original
