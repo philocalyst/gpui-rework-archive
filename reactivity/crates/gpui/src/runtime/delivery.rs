@@ -91,7 +91,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             });
         }
         let mut applied = 0;
-        let result = runtime.operation(None, |model, _| {
+        let result = RuntimeMut { runtime, lanes }.operation_with(None, |model, _, lanes| {
             lanes.apply(model, &mut applied);
             Ok(())
         });
