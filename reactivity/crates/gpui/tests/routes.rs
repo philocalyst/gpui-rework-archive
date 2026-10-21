@@ -197,13 +197,13 @@ fn a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once() 
     for node in &mut old_nodes {
         node.target = None;
     }
-    assert_eq!(win.update(|m| m.count = 0), Err(Error::OwnerPanicked));
-    assert_eq!(drops.load(Ordering::SeqCst), 4);
+    assert_eq!(win.update(|m| m.panic = false), Err(Error::OwnerPanicked));
+    assert_eq!(drops.load(Ordering::SeqCst), 8); // Old and rejected new captures.
     assert_eq!(win.activate(target), Err(Error::Poisoned));
     let snapshot = win.snapshot().unwrap();
     assert!(snapshot.poisoned);
     assert_eq!(snapshot.nodes, old_nodes);
     assert_eq!(win.inspect().unwrap().nodes, old_nodes);
     win.close();
-    assert_eq!(drops.load(Ordering::SeqCst), 4);
+    assert_eq!(drops.load(Ordering::SeqCst), 8);
 }
