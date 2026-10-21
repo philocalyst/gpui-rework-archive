@@ -85,7 +85,7 @@ impl<M, T> Source<M, T> {
     }
 }
 
-impl<M, T: TextValue> Source<M, T> {
+impl<M, T: 'static> Source<M, T> {
     /// Check an operation's declaration against the mounted registry. Equal
     /// IDs alone do not authorize a different projection to claim exact impact.
     pub(crate) fn validate_registered(
@@ -106,10 +106,7 @@ pub struct FieldAction<M, T, F> {
     source: Source<M, T>,
     update: F,
 }
-impl<M, T: TextValue, F: Fn(&mut T)> FieldAction<M, T, F> {
-    pub(crate) fn source(&self) -> Source<M, T> {
-        self.source
-    }
+impl<M, T: 'static, F: Fn(&mut T)> FieldAction<M, T, F> {
     pub(crate) fn field_id(&self) -> FieldId {
         self.source.id
     }
@@ -128,32 +125,30 @@ impl<M, T: TextValue, F: Fn(&mut T)> FieldAction<M, T, F> {
 }
 
 mod sealed {
-    pub trait TextValue {}
-}
-
-/// Values supported by text sources. This trait is sealed so formatting and
-/// parsing remain a library-owned declaration rather than arbitrary callbacks.
-pub trait TextValue: sealed::TextValue + 'static {
-    #[doc(hidden)]
-    fn text(&self) -> Cow<'_, str>;
-    #[doc(hidden)]
-    fn parse_text(text: &str) -> Result<Self, &'static str>
-    where
-        Self: Sized;
-    #[doc(hidden)]
-    fn from_text(input: String) -> Result<Self, (String, &'static str)>
-    where
-        Self: Sized,
-    {
-        match Self::parse_text(&input) {
-            Ok(value) => Ok(value),
-            Err(reason) => Err((input, reason)),
+    use std::borrow::Cow;
+    pub trait TextValue: 'static {
+        fn text(&self) -> Cow<'_, str>;
+        fn parse_text(text: &str) -> Result<Self, &'static str>
+        where
+            Self: Sized;
+        fn from_text(input: String) -> Result<Self, (String, &'static str)>
+        where
+            Self: Sized,
+        {
+            match Self::parse_text(&input) {
+                Ok(value) => Ok(value),
+                Err(reason) => Err((input, reason)),
+            }
         }
     }
 }
 
-impl sealed::TextValue for String {}
-impl TextValue for String {
+/// The library-owned text adapters; generic source registration does not need
+/// this trait. Formatting and parsing implementation details remain private.
+pub trait TextValue: sealed::TextValue {}
+impl<T: sealed::TextValue> TextValue for T {}
+
+impl sealed::TextValue for String {
     fn text(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
@@ -167,8 +162,7 @@ impl TextValue for String {
 
 macro_rules! scalar {
     ($($ty:ty),* $(,)?) => {$ (
-        impl sealed::TextValue for $ty {}
-        impl TextValue for $ty {
+        impl sealed::TextValue for $ty {
             fn text(&self) -> Cow<'_, str> { Cow::Owned(self.to_string()) }
             fn parse_text(text: &str) -> Result<Self, &'static str> {
                 text.parse().map_err(|_| concat!("invalid ", stringify!($ty)))
@@ -177,8 +171,7 @@ macro_rules! scalar {
     )* };
 }
 scalar!(u32, u64, i32, bool);
-impl sealed::TextValue for f64 {}
-impl TextValue for f64 {
+impl sealed::TextValue for f64 {
     fn text(&self) -> Cow<'_, str> {
         Cow::Owned(self.to_string())
     }
@@ -195,9 +188,8 @@ impl TextValue for f64 {
 pub(crate) trait ErasedSignal {
     fn as_any(&self) -> &dyn Any;
     fn same(&self, other: &dyn ErasedSignal) -> bool;
-    fn text(&self) -> Cow<'_, str>;
 }
-impl<T: TextValue> ErasedSignal for Signal<T> {
+impl<T: 'static> ErasedSignal for Signal<T> {
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -207,14 +199,68 @@ impl<T: TextValue> ErasedSignal for Signal<T> {
             .downcast_ref::<Signal<T>>()
             .is_some_and(|other| std::ptr::eq(self, other))
     }
+}
+
+/// A typed text adapter supplied by the borrowed text operand, separate from
+/// the generic source registry. Stored once per subscribed source fanout.
+#[derive(Clone, Copy)]
+pub(crate) struct TextCodec {
+    read: for<'a> fn(&'a dyn Any, FieldId) -> Result<Cow<'a, str>, BindError>,
+    write: fn(&mut dyn Any, FieldId, String) -> Result<Revision, TextEditError>,
+}
+impl TextCodec {
+    fn for_value<T: TextValue>() -> Self {
+        Self {
+            read: |value, id| {
+                value
+                    .downcast_ref::<Signal<T>>()
+                    .map(|signal| (**signal).text())
+                    .ok_or(BindError::TypeMismatch(id))
+            },
+            write: |value, id, input| {
+                let signal = match value.downcast_mut::<Signal<T>>() {
+                    Some(signal) => signal,
+                    None => {
+                        return Err(TextEditError {
+                            field: id,
+                            input,
+                            reason: TextEditErrorKind::Binding(BindError::TypeMismatch(id)),
+                        });
+                    }
+                };
+                let value = match T::from_text(input) {
+                    Ok(value) => value,
+                    Err((input, reason)) => {
+                        return Err(TextEditError {
+                            field: id,
+                            input,
+                            reason: TextEditErrorKind::InvalidValue(reason),
+                        });
+                    }
+                };
+                **signal = value;
+                Ok(signal.revision())
+            },
+        }
+    }
+}
+
+trait TextSignal: ErasedSignal {
+    fn text(&self) -> Cow<'_, str>;
+    fn codec(&self) -> TextCodec;
+}
+impl<T: TextValue> TextSignal for Signal<T> {
     fn text(&self) -> Cow<'_, str> {
         (**self).text()
+    }
+    fn codec(&self) -> TextCodec {
+        TextCodec::for_value::<T>()
     }
 }
 
 /// An opaque borrowed signal operand, consumed while the owner is borrowed.
 #[derive(Clone, Copy)]
-pub struct SignalText<'a>(&'a dyn ErasedSignal);
+pub struct SignalText<'a>(&'a dyn TextSignal);
 impl fmt::Debug for SignalText<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("SignalText").field(&self.0.text()).finish()
@@ -243,6 +289,12 @@ impl<'a> Text<'a> {
     pub(crate) fn signal(&self) -> Option<&dyn ErasedSignal> {
         match self {
             Self::Signal(value) => Some(value.0),
+            _ => None,
+        }
+    }
+    pub(crate) fn codec(&self) -> Option<TextCodec> {
+        match self {
+            Self::Signal(value) => Some(value.0.codec()),
             _ => None,
         }
     }
@@ -279,11 +331,13 @@ impl<'a, T: TextValue> IntoText<'a> for &'a Signal<T> {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BindError {
+    ReceiverMismatch,
     DuplicateId(FieldId),
     DuplicateName(&'static str),
     AliasedFields { first: FieldId, second: FieldId },
     ProjectionMismatch(FieldId),
     UnknownField(FieldId),
+    TypeMismatch(FieldId),
 }
 impl fmt::Display for BindError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -318,9 +372,14 @@ trait Field<M> {
     fn signal<'a>(&self, model: &'a M) -> &'a dyn ErasedSignal;
     fn revision(&self, model: &M) -> Revision;
     fn validate(&self, model: &mut M) -> Result<(), BindError>;
-    fn write_text(&self, model: &mut M, input: String) -> Result<Revision, TextEditError>;
+    fn write_text(
+        &self,
+        model: &mut M,
+        input: String,
+        codec: TextCodec,
+    ) -> Result<Revision, TextEditError>;
 }
-impl<M, T: TextValue> Field<M> for Source<M, T> {
+impl<M, T: 'static> Field<M> for Source<M, T> {
     fn id(&self) -> FieldId {
         self.id
     }
@@ -344,7 +403,12 @@ impl<M, T: TextValue> Field<M> for Source<M, T> {
             Err(BindError::ProjectionMismatch(self.id))
         }
     }
-    fn write_text(&self, model: &mut M, input: String) -> Result<Revision, TextEditError> {
+    fn write_text(
+        &self,
+        model: &mut M,
+        input: String,
+        codec: TextCodec,
+    ) -> Result<Revision, TextEditError> {
         let read = (self.read)(model) as *const Signal<T>;
         let signal = (self.write)(model);
         if !std::ptr::eq(read, signal as *const Signal<T>) {
@@ -354,20 +418,7 @@ impl<M, T: TextValue> Field<M> for Source<M, T> {
                 reason: TextEditErrorKind::Binding(BindError::ProjectionMismatch(self.id)),
             });
         }
-        // Holding &mut Signal does not mark the value. Parse completely before
-        // dereferencing it mutably; String edits can move their input directly.
-        let value = match T::from_text(input) {
-            Ok(value) => value,
-            Err((input, reason)) => {
-                return Err(TextEditError {
-                    field: self.id,
-                    input,
-                    reason: TextEditErrorKind::InvalidValue(reason),
-                });
-            }
-        };
-        **signal = value;
-        Ok(signal.revision())
+        (codec.write)(signal, self.id, input)
     }
 }
 
@@ -389,7 +440,7 @@ impl<M> Sources<M> {
             schema_error: None,
         }
     }
-    pub fn field<T: TextValue>(mut self, source: Source<M, T>) -> Self
+    pub fn field<T: 'static>(mut self, source: Source<M, T>) -> Self
     where
         M: 'static,
     {
@@ -474,14 +525,20 @@ impl<M> Sources<M> {
     pub fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError> {
         Ok(self.get(id)?.revision(model))
     }
-    pub fn read_text<'a>(&self, model: &'a M, id: FieldId) -> Result<Cow<'a, str>, BindError> {
-        Ok(self.get(id)?.signal(model).text())
+    pub(crate) fn read_text<'a>(
+        &self,
+        model: &'a M,
+        id: FieldId,
+        codec: TextCodec,
+    ) -> Result<Cow<'a, str>, BindError> {
+        (codec.read)(self.get(id)?.signal(model).as_any(), id)
     }
-    pub fn write_text(
+    pub(crate) fn write_text(
         &self,
         model: &mut M,
         id: FieldId,
         input: String,
+        codec: TextCodec,
     ) -> Result<Revision, TextEditError> {
         if let Err(error) = self.check_schema() {
             return Err(TextEditError {
@@ -491,7 +548,7 @@ impl<M> Sources<M> {
             });
         }
         match self.get(id) {
-            Ok(field) => field.write_text(model, input),
+            Ok(field) => field.write_text(model, input, codec),
             Err(error) => Err(TextEditError {
                 field: id,
                 input,
@@ -514,6 +571,7 @@ impl<M> Sources<M> {
 
 #[cfg(test)]
 mod tests {
+    use super::sealed::TextValue as _;
     use super::*;
 
     struct Model {
@@ -568,7 +626,12 @@ mod tests {
             .unwrap();
         let mut moved = Box::new(original);
         sources
-            .write_text(&mut moved, key, "after move".into())
+            .write_text(
+                &mut moved,
+                key,
+                "after move".into(),
+                TextCodec::for_value::<String>(),
+            )
             .unwrap();
         assert_eq!(&*moved.first, "same");
         assert_eq!(&*moved.second, "after move");
@@ -590,7 +653,12 @@ mod tests {
         );
         let before = model.second.revision();
         let error = sources
-            .write_text(&mut model, bad.id(), "edit".into())
+            .write_text(
+                &mut model,
+                bad.id(),
+                "edit".into(),
+                TextCodec::for_value::<String>(),
+            )
             .unwrap_err();
         assert_eq!(error.input, "edit");
         assert_eq!(
@@ -655,14 +723,19 @@ mod tests {
         let input = "not a number".to_owned();
         let pointer = input.as_ptr();
         let error = sources
-            .write_text(&mut model, COUNT.id(), input)
+            .write_text(&mut model, COUNT.id(), input, TextCodec::for_value::<u32>())
             .unwrap_err();
         assert_eq!(error.input.as_ptr(), pointer);
         assert_eq!(error.reason, TextEditErrorKind::InvalidValue("invalid u32"));
         assert_eq!(*model.count, 4);
         assert_eq!(model.count.revision(), revision);
         let revision = sources
-            .write_text(&mut model, COUNT.id(), "42".into())
+            .write_text(
+                &mut model,
+                COUNT.id(),
+                "42".into(),
+                TextCodec::for_value::<u32>(),
+            )
             .unwrap();
         assert_eq!(*model.count, 42);
         assert_eq!(revision.get(), 1);
@@ -689,7 +762,14 @@ mod tests {
         let mut model = model();
         let input = "input moved into the signal".to_owned();
         let pointer = input.as_ptr();
-        sources.write_text(&mut model, FIRST.id(), input).unwrap();
+        sources
+            .write_text(
+                &mut model,
+                FIRST.id(),
+                input,
+                TextCodec::for_value::<String>(),
+            )
+            .unwrap();
         assert_eq!(model.first.as_ptr(), pointer);
     }
 
@@ -717,7 +797,9 @@ mod tests {
         model.first = Signal::new("replacement".into());
         assert_eq!(sources.revision(&model, FIRST.id()).unwrap(), before);
         assert_eq!(
-            sources.read_text(&model, FIRST.id()).unwrap(),
+            sources
+                .read_text(&model, FIRST.id(), TextCodec::for_value::<String>())
+                .unwrap(),
             "replacement"
         );
         assert_eq!(sources.resolve(&model, &model.first), Ok(Some(FIRST.id())));
@@ -762,7 +844,12 @@ mod tests {
         let mut model = model();
         let unknown = FieldId::new(500);
         let error = sources
-            .write_text(&mut model, unknown, "retained".into())
+            .write_text(
+                &mut model,
+                unknown,
+                "retained".into(),
+                TextCodec::for_value::<String>(),
+            )
             .unwrap_err();
         assert_eq!(error.input, "retained");
         assert_eq!(
@@ -809,10 +896,84 @@ mod tests {
         assert_eq!(sources.scan(&model).count(), 2);
         assert_eq!([model.reads[0].get(), model.reads[1].get()], [2, 2]);
         sources
-            .write_text(&mut model, first.id(), "5".into())
+            .write_text(
+                &mut model,
+                first.id(),
+                "5".into(),
+                TextCodec::for_value::<u32>(),
+            )
             .unwrap();
         assert_eq!([model.reads[0].get(), model.reads[1].get()], [3, 2]);
         assert_eq!(*model.first, 5);
         assert_eq!(*model.second, 2);
+    }
+
+    #[test]
+    fn domain_sources_register_resolve_and_edit_without_text_support() {
+        #[derive(Debug, PartialEq, Eq)]
+        struct Domain {
+            enabled: bool,
+            entries: Vec<u8>,
+        }
+        struct Owner {
+            domain: Signal<Domain>,
+        }
+        const DOMAIN: Source<Owner, Domain> =
+            Source::new(FieldId::new(7), "domain", |m| &m.domain, |m| &mut m.domain);
+        let sources = Sources::new().field(DOMAIN);
+        let mut owner = Owner {
+            domain: Signal::new(Domain {
+                enabled: false,
+                entries: vec![1, 2],
+            }),
+        };
+        sources.validate(&mut owner).unwrap();
+        assert_eq!(
+            sources.resolve(&owner, &owner.domain),
+            Ok(Some(DOMAIN.id()))
+        );
+        let action = DOMAIN.update(|value| {
+            value.enabled = true;
+            value.entries.push(3);
+        });
+        action.validate_registered(&owner, &sources).unwrap();
+        action.invoke(&mut owner);
+        assert_eq!(
+            *owner.domain,
+            Domain {
+                enabled: true,
+                entries: vec![1, 2, 3]
+            }
+        );
+        assert_eq!(sources.revision(&owner, DOMAIN.id()).unwrap().get(), 1);
+    }
+
+    #[test]
+    fn a_text_operand_supplies_the_codec_and_wrong_codecs_cannot_edit() {
+        let mut model = model();
+        let sources = sources();
+        let codec = (&model.first).into_text().codec().unwrap();
+        assert_eq!(
+            sources.read_text(&model, FIRST.id(), codec).unwrap(),
+            "same"
+        );
+        let before = model.count.revision();
+        assert_eq!(
+            sources.read_text(&model, COUNT.id(), codec),
+            Err(BindError::TypeMismatch(COUNT.id()))
+        );
+        let input = "100".to_owned();
+        let pointer = input.as_ptr();
+        let error = sources
+            .write_text(&mut model, COUNT.id(), input, codec)
+            .unwrap_err();
+        assert_eq!(error.input.as_ptr(), pointer);
+        assert_eq!(
+            error.reason,
+            TextEditErrorKind::Binding(BindError::TypeMismatch(COUNT.id()))
+        );
+        assert_eq!(*model.count, 4);
+        assert_eq!(model.count.revision(), before);
+        assert!(Text::literal("literal").codec().is_none());
     }
 }
