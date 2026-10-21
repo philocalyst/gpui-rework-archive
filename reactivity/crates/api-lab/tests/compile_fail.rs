@@ -3,6 +3,10 @@
 use std::{fs, path::PathBuf, process::Command};
 
 #[test]
+#[allow(
+    clippy::disallowed_methods,
+    reason = "synchronous rustc consumer fixtures run outside the UI runtime"
+)]
 fn rejected_programs_fail_for_the_intended_reason() {
     let dependencies = std::env::current_exe()
         .unwrap()

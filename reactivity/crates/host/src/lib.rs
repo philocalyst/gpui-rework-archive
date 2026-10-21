@@ -34,9 +34,11 @@ impl WakeGate {
         // The owner's acquiring acknowledgement observes this RMW chain before
         // checking the queues. An Acquire-only failed CAS leaves a lost-wake
         // execution possible when that check observes an older empty cursor.
-        match self.0.fetch_update(Ordering::AcqRel, Ordering::Acquire, |state| {
-            (state != CLOSED).then_some(PENDING)
-        }) {
+        match self
+            .0
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |state| {
+                (state != CLOSED).then_some(PENDING)
+            }) {
             Ok(IDLE) => {
                 if send() {
                     true
