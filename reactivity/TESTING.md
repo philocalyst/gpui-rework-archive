@@ -4,7 +4,7 @@ Tests configure the production host rather than instantiate a second application
 engine. The same owner dispatcher, source barriers, schema setters, sheet
 publication, input routing and visitors serve native apps, `Application::demo`,
 `Win::demo`, the inspector and tests. The synchronous production surface exists
-in `gpui`; complete accessibility, virtual time and ready-worker delivery remain
+in `gpui`; complete accessibility, virtual time and the full asynchronous graph remain
 separate implementation gates.
 The supplied `final/10-quality.md` supplies the broader feature corpus, subject
 to [CONTRACT.md](CONTRACT.md)'s explicit semantic amendments.
@@ -22,7 +22,8 @@ assert!(search.contains_text("banana")?);
 assert_eq!(search.root()?.hits.len(), 3);
 ```
 
-Each `Win<V>` owns its actual production runtime. Demo application configuration
+Each `Win<V, L>` owns its actual production runtime and static inbox chain
+(`L = ()` by default). Demo application configuration
 opens windows of different model types without an index, shared owner, shadow
 dispatcher or registry. The returned windows own their lifetimes; closing a
 window drops its model and resources. Queries borrow `&Win`; edits, input and
@@ -73,6 +74,24 @@ The 1,000-cycle navigation test allocates nothing and performs no source, layout
 or paint work. Virtual time, completion control and replay remain implementation
 gates through production facilities. There are no dummy test-only timers or a
 second event loop.
+
+Typed `Remote<T>`/`Inbox<T>` queues and `deliver_ready(budget)` now provide the
+production delivery primitive for native and deterministic headless callers.
+Tests send ordinary owned values, choose the batch budget and inspect the same
+source/commit results as applications. They cover FIFO, bounded staging, sparse
+lane fairness, arrivals during callbacks, callback faults, failed presentation
+repair and receiver-before-model teardown. A real X11 script verifies wake-driven
+delivery without polling. Full Reader/input-version/cohort admission remains a
+separate requirement; queue delivery alone does not implement that graph. See
+[the delivery contract](crates/gpui/REMOTE.md) for the exact capacity and lifetime
+limits.
+
+Keyed lists also use the ordinary public testing interface. The 250K Library
+model is shared by native and headless tests. Native execution verifies actual
+acknowledgements, line/pixel wheel routing, target survival/revocation, pointer
+activation, resize, suspend/resume and full server-pixel equality. The separate
+[list benchmark](crates/gpui/VIRTUAL_LIST.md) first compares every pixel with
+independently materialized eager rows; timing never substitutes for that oracle.
 
 Choose time, worker delivery and native/resource adapters at application creation.
 The native adapter supplies real events/time/completion; demo adapters supply

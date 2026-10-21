@@ -4,9 +4,9 @@ The production `Win` owns keyboard focus. Native callbacks and headless callers
 use the same exclusive `focus`, `clear_focus`, and `key` operations:
 
 ```rust
-use gpui::{Error, Key, Role, View, Win};
+use gpui::{Error, Key, LaneSet, Role, View, Win};
 
-fn edit_title<M: View + 'static>(win: &mut Win<M>) -> Result<(), Error> {
+fn edit_title<M: View + 'static, L: LaneSet<M>>(win: &mut Win<M, L>) -> Result<(), Error> {
     let input = win.role(Role::TextInput).one()?;
     win.focus(input)?;
     win.key(Key::Text("Café"))?;

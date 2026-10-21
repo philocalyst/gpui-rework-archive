@@ -2,9 +2,12 @@
 
 The independent [gpui crate](crates/gpui/README.md) now runs real views, typed
 state, Cephal layout, text, transformed input and live inspector properties.
-Counter, Todo, the color/transform gallery and their composed Workspace use the
+Counter, Todo, the color/transform gallery, their composed Workspace and a
+250,000-recording Library use the
 same engine in native windows and public headless tests. The window owns its model
 exclusively; queries borrow it and edits require an ordinary mutable borrow.
+Borrowed keyed lists realize only the viewport, while typed bounded inboxes
+deliver worker results through the same owner turn as ordinary input.
 [Canvas](crates/canvas/README.md) supplies the reference renderer;
 [GPU](crates/gpu/README.md) consumes its borrowed canonical scene with `wgsl-rs`.
 

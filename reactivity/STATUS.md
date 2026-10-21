@@ -7,15 +7,17 @@ describe the intended complete system; this page records what is connected now.
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, conservative and explicit direct updates, contained component projections | One serial root owner; complete Reader/dependency/cohort graph remains |
-| Public testing | Application::demo, borrowed role/text/bounds queries, unique target resolution, root reads, input, focus, keyboard, source JSON and explicit scene/pixel diagnostics | Virtual time, worker delivery, replay and native accessibility bridges remain |
-| Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; no target allocation table | Keyed virtual collections are a separate integration gate |
+| Public testing | Application::demo, borrowed semantic queries/visits, actions, focus/keyboard, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay and native accessibility bridges remain |
+| Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
+| Worker delivery | Static typed bounded inbox chains, frozen fair batches, one owner barrier, native wakes, receiver-before-model cleanup through exclusive borrow guards | Complete Reader, input-version and cohort graph remains; queue capacity is not a byte bound |
+| Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal, borrowed Rustybuzz shaping sessions, lazy Swash masks, logical layout with physical-density rasterization | Selection, IME, grapheme editing and complete font/script fallback remain |
 | Canvas | Canonical grouped display list, linear-light 4×4 sampling, conservative tile proofs, optional CPU image, direct native BGRX output, explicit disjoint parallel bands | Complete effect/path/media library and persistent damage replay remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
-| Applications | Counter, Todo, Oklch/transform gallery, and Workspace containing the unmodified Todo and gallery views; shared native/headless models | Limited real ports, not a feature-complete GPUI replacement or a Hummingbird port |
+| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library; shared native/headless models | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
@@ -24,7 +26,9 @@ source and presented epochs; fonts, masks and in-flight backend resources have
 explicit immutable resource leases. Some test-only read/drop counters still use
 interior mutability; dependencies and OS callbacks have their own contracts.
 
-Queries and tests read the acknowledged semantic sheet. Focus and normalized
+Queries and tests read the acknowledged semantic sheet. A borrowed Part shares
+target, parent, role, name/value, supported actions and canonical geometry;
+semantic execution revalidates current owner authority. Focus and normalized
 keyboard operations use the production dispatcher, including stale-sheet and
 owner-quarantine rules. Accessibility must share those identities, focus,
 geometry and action authority. Native assistive-technology exposure remains
@@ -32,15 +36,17 @@ an implementation gate.
 
 ## Current verification
 
-[checks.json](evidence/checks.json) records ten successful gates with exact commands,
-exit status and elapsed time, run against source commit c4dec85223:
+[checks.json](evidence/checks.json) records twelve successful gates with exact commands,
+exit status and elapsed time, run against source commit be6e3e30c6:
 
-- Debug and release workspace suites: **283 passing cases/doctests each**.
+- Debug and release workspace suites: **333 passing cases/doctests each**.
 - Strict workspace Clippy and first-party formatting: pass.
-- Explicit parallel Canvas suite: **59 passing cases**, overlapping the workspace suite.
+- Explicit parallel Canvas suite: **61 passing cases**, overlapping the workspace suite.
 - Optimized Loom protocol suite: **6 passing cases**; finite proof scope in [TESTING](TESTING.md).
-- Actual Vulkan conformance: **16 passing readback cases**.
+- Actual Vulkan conformance: **17 passing readback cases**, including 24 signed/fractional inverse-lattice clipping fixtures with tile proofs enabled and disabled.
 - Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
+- Actual X11 worker delivery: **one script** checking real wakes, committed-error repair and shutdown without a polling timer.
+- Actual X11 250K Library: **one script** checking wheel/pointer routing, source/presentation separation, row target lifetimes, resize, suspend/resume and full server-pixel equality.
 - Combined X11+Wayland compilation and retained-layout example: pass.
 
 The renderer is Mesa 26.1.4 llvmpipe/LLVM 21.1.8 on Linux/NixOS. It proves
@@ -65,19 +71,22 @@ CI workflows are not reported as completed remote results.
 | Grouped GPU packets | [GPU](crates/gpu/README.md): 32K fixture record bytes 3,072,096→1,104,096; explicit GPU buffer capacity 4,198,484→2,101,332 B | Frame time is neutral/slightly slower; fixture retains records hidden by a final opaque fill |
 | Tile certificates | [GPU results](crates/gpu/tile-benchmark.csv): 32 opaque overlaps 182.17→1.18 ms on llvmpipe | Boundary-heavy case 23.44→26.12 ms loses; not a hardware-GPU comparison |
 | Blank solid transport | [Mapping results](crates/gpui/evidence-native-solid.csv): normal buffer retains 2 MiB mapping; initial/returned solid retains zero | Client transport only, not whole application/server/compositor memory |
+| Static delivery cleanup | [Borrow-guard evidence](crates/gpui/evidence/remote-guard.md): channel/staging 4→3 allocations and binding 1→0; headless Remote 24→16 B, Inbox 64→56 B | End-to-end timing is neutral; attached OS/wake allocations are not claimed zero |
+| Keyed viewport | [List evidence](crates/gpui/VIRTUAL_LIST.md): 27 retained semantic nodes and 59,979 requested framework bytes at 100 through 250K identifiers; mount median 375–495 µs | Warm code/allocator, fresh owner caches, fixed-text fixture, no native submission; app IDs and reverse index are separate |
 
 No competitor victory, near-zero native memory floor, universal byte parity or
 order-of-magnitude feature-equivalent simplification has been established.
 Reports retain losing cases. The full Hummingbird source audit is
-[pinned separately](docs/hummingbird-source-audit-luna.md); virtualization, background
-results, images and richer input remain prerequisites for that port.
+[pinned separately](docs/hummingbird-source-audit-luna.md). The keyed-list and
+worker-delivery foundations are integrated; images, complete async admission,
+media and richer input remain prerequisites for that port.
 
 ## Scope and line accounting
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. This snapshot contains **17,864 first-party src lines** and
-**12,943 external test/example lines** across production and experimental crates.
+are separate. This snapshot contains **20,383 first-party src lines** and
+**15,160 external test/example lines** across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
 Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
 their tests/examples. Vendoring has not made those dependencies disappear.

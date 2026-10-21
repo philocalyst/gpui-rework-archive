@@ -55,6 +55,12 @@ if args.native_x11:
     checks.append(("native-x11", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
                                  "--features", "x11", "native_todo_port", "--", "--ignored",
                                  "--nocapture", "--test-threads=1"]))
+    checks.append(("native-remote", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                    "--features", "x11", "native_remote_results", "--", "--ignored",
+                                    "--nocapture", "--test-threads=1"]))
+    checks.append(("native-library", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                     "--features", "x11", "native_library_250k", "--", "--ignored",
+                                     "--nocapture", "--test-threads=1"]))
 
 EVIDENCE.mkdir(exist_ok=True)
 report = []
@@ -68,7 +74,7 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
-    if name in ("gpu-vulkan", "native-x11"):
+    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-library"):
         entry["passed_tests"] = sum(int(count) for count in re.findall(
             r"test result: ok\. (\d+) passed;", log))
         if result.returncode == 0 and entry["passed_tests"] == 0:

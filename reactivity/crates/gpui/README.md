@@ -31,6 +31,7 @@ From this workspace, run the native application ports with:
 cargo run -p gpui --features x11 --example counter
 cargo run -p gpui --features x11 --example workbench -- --gpu
 cargo run -p gpui --features x11 --example graphics
+cargo run -p gpui --features x11 --example library -- --cpu
 ```
 
 Linux can instead enable `wayland`; macOS/Windows use `native`.
@@ -48,6 +49,9 @@ policies in the examples.
 The Todo model is shared unchanged by the native example and
 `tests/ports.rs`: add, complete, filter, delete, undo and serialization use the
 ordinary library operations. `counter` without native features runs headlessly.
+The Library uses the same public interface over 250,000 app-owned identifiers;
+its [keyed viewport](VIRTUAL_LIST.md) retains only realized rows. It is a
+catalogue/play-request surface, with no audio decoder or database integration.
 
 The GPU backend uses `wgsl-rs` shaders and Wgpu over the vendored Winit callback
 adapter. Native surfaces are currently opaque sRGB8; offscreen linear
@@ -97,11 +101,21 @@ Paint/transform edits skip owner description and Cephal. No duplicate base style
 is retained for nodes without overrides. These public operations are the testing
 interface too; no private test scheduler is involved.
 
+[Typed bounded inboxes](REMOTE.md) move worker-owned values to this same owner
+barrier. A static lane chain retains concrete message/callback types; it does
+not box each lane or message. Delivery freezes a fair bounded batch before
+application code and applies it in one source operation. Native wake delivery
+uses the event loop rather than periodic polling. Closing or quarantining the
+owner closes receivers before model destruction. The private exclusive borrow
+guard enforces this lifecycle without a shared revocation allocation or a
+per-send revocation atomic. This is a delivery primitive; the complete Reader,
+input-version and cohort graph remains outstanding.
+
 Current boundaries are explicit: one root owner; full scene preparation on a
 visual/hit change; layout topology rebuilds after structural changes; Cephal
 depth bounded to 128; viewport clipping; the canvas's documented text/script
 limits; append and Unicode-scalar backspace rather than selection/IME; no
-integrated async graph, virtualized collections, embedded native/web content,
+complete async graph, embedded native/web content,
 or compatibility facade yet. GPU completion is distinct from presentation
 acknowledgement; Wgpu retains submitted resource leases. Multiwindow device
 sharing, native HDR and the remaining primitives remain porting gates.
@@ -118,12 +132,18 @@ and Mesa llvmpipe are sufficient):
 
 ```sh
 cargo test -p gpui --features x11 native_todo_port -- --ignored --nocapture --test-threads=1
+cargo test -p gpui --features x11 native_remote_results -- --ignored --nocapture --test-threads=1
+cargo test -p gpui --features x11 native_library_250k -- --ignored --nocapture --test-threads=1
 ```
 
 It submits actual surface frames, exercises the keyboard/pointer adapter,
 resizes, edits a typed inspector property and suspends/recreates the surface.
 The model and targets survive; unsupported shaping repairs through backspace.
 The GPU crate has separate actual readback conformance tests.
+The remote script verifies real worker wakes and committed-error repair without
+a polling timer. The Library script exercises actual surface acknowledgements,
+line/pixel wheel routing, stable and revoked row targets, pointer activation,
+resize, suspend/resume and complete server-pixel equality against the CPU oracle.
 
 The CPU host first queries the canonical zero-command solid-color certificate.
 On X11 it can present that opaque sRGB SDR color using a checked server fill,
