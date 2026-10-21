@@ -179,3 +179,50 @@ fn presented_space_owner_memory() {
         }
     }
 }
+
+#[test]
+#[ignore = "exact baseline/candidate public geometry and rendered-byte comparison"]
+fn presented_space_public_oracle() {
+    use std::hash::{Hash, Hasher};
+    for count in [0, 2, 128] {
+        for mode in 0..5 {
+            let mut win = open(
+                Panels {
+                    count,
+                    mode,
+                    frame: 0,
+                },
+                [64, 64],
+            );
+            for frame in 0..3 {
+                win.update(|model| model.frame = frame).unwrap();
+                ack(&mut win);
+                let mut hash = std::hash::DefaultHasher::new();
+                win.visit(|part| {
+                    part.transform()
+                        .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty].map(f32::to_bits))
+                        .hash(&mut hash);
+                    for rect in [part.local_bounds(), part.bounds()] {
+                        [rect.x, rect.y, rect.width, rect.height]
+                            .map(f32::to_bits)
+                            .hash(&mut hash);
+                    }
+                    part.unclipped_bounds()
+                        .map(|rect| [rect.x, rect.y, rect.width, rect.height].map(f32::to_bits))
+                        .hash(&mut hash);
+                })
+                .unwrap();
+                win.with_pixels(|bytes, width, height| {
+                    width.hash(&mut hash);
+                    height.hash(&mut hash);
+                    bytes.hash(&mut hash);
+                })
+                .unwrap();
+                println!(
+                    "public_oracle,{count},{mode},{frame},{:016x}",
+                    hash.finish()
+                );
+            }
+        }
+    }
+}
