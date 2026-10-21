@@ -431,6 +431,7 @@ fn measurement_panic_poisoning_prevents_reusing_partial_layout() {
         .is_err()
     );
     assert!(tree.is_poisoned());
+    assert_eq!(tree.layout(root), Err(LayoutError::Poisoned));
     assert_eq!(
         tree.compute(root, viewport(100.0)),
         Err(LayoutError::Poisoned)

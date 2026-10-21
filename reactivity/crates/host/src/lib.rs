@@ -30,21 +30,28 @@ impl WakeGate {
     /// Once a send fails, later signals remain closed, including after an ack.
     /// The sending operation must not panic or reenter this gate.
     pub fn signal(&self, send: impl FnOnce() -> bool) -> bool {
-        match self
-            .0
-            .compare_exchange(IDLE, PENDING, Ordering::AcqRel, Ordering::Acquire)
-        {
-            Ok(_) if send() => true,
-            Ok(_) => {
-                self.0.store(CLOSED, Ordering::Release);
-                false
+        // A coalesced signal must also release its preceding queue writes.
+        // The owner's acquiring acknowledgement observes this RMW chain before
+        // checking the queues. An Acquire-only failed CAS leaves a lost-wake
+        // execution possible when that check observes an older empty cursor.
+        match self.0.fetch_update(Ordering::AcqRel, Ordering::Acquire, |state| {
+            (state != CLOSED).then_some(PENDING)
+        }) {
+            Ok(IDLE) => {
+                if send() {
+                    true
+                } else {
+                    self.0.store(CLOSED, Ordering::Release);
+                    false
+                }
             }
-            Err(PENDING) => true,
+            Ok(_) => true,
             Err(_) => false,
         }
     }
 
     /// Starts a drain; a subsequent request must signal the loop again.
+    /// The acquiring RMW also observes coalesced producers before queue reads.
     pub fn acknowledge(&self) {
         let _ = self
             .0

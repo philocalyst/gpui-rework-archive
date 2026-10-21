@@ -153,6 +153,9 @@ impl LayoutTree {
     }
     /// Last computed unrounded layout; mutations retain it until compute succeeds.
     pub fn layout(&self, node: NodeId) -> Result<Layout, LayoutError> {
+        if self.poisoned {
+            return Err(LayoutError::Poisoned);
+        }
         Ok(self.layouts[self.tree.index(node)? as usize])
     }
     pub fn insert(
