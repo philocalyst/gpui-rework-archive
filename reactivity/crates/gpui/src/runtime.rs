@@ -26,6 +26,8 @@ use crate::{
 };
 
 const MAX_NODES: usize = 100_000;
+// The compact parent sentinel must stay outside the admitted index domain.
+const _: () = assert!(MAX_NODES <= u32::MAX as usize);
 // Cephal's algorithms recurse even though public description disposal does not.
 const MAX_LAYOUT_DEPTH: usize = 128;
 
@@ -267,9 +269,91 @@ struct Shaped {
     width: Option<u32>,
     layout: TextLayout,
 }
+/// A compact preorder index, never an externally actionable identity. The
+/// description's MAX_NODES admission bounds every index before retention.
+#[derive(Clone, Copy)]
+struct Parent(u32);
+impl Parent {
+    const NONE: Self = Self(u32::MAX);
+
+    fn new(index: Option<usize>) -> Self {
+        Self(index.map_or(u32::MAX, |index| {
+            assert!(
+                index < MAX_NODES,
+                "parent belongs to the admitted description"
+            );
+            index as u32
+        }))
+    }
+    fn index(self) -> Option<usize> {
+        (self.0 != u32::MAX).then_some(self.0 as usize)
+    }
+}
+/// Finite admitted maps cannot contain NaN, so one NaN coefficient represents
+/// an absent map without the extra discriminant of `Option<Affine>`. This is
+/// plain float storage: no invalid Rust values or unchecked reads are involved.
+#[derive(Clone, Copy)]
+struct PresentedTransform(Affine);
+impl PresentedTransform {
+    fn new(transform: Option<Affine>) -> Self {
+        debug_assert!(transform.is_none_or(|map| map.is_finite() && map.is_invertible()));
+        Self(transform.unwrap_or(Affine {
+            a: f32::NAN,
+            ..Affine::IDENTITY
+        }))
+    }
+    fn get(self) -> Option<Affine> {
+        (!self.0.a.is_nan()).then_some(self.0)
+    }
+}
+#[cfg(test)]
+mod parent_tests {
+    use super::*;
+
+    #[test]
+    fn compact_parent_covers_the_admitted_index_domain() {
+        assert_eq!(size_of::<Parent>(), 4);
+        assert_eq!(Parent::new(None).index(), None);
+        for index in 0..MAX_NODES {
+            assert_eq!(Parent::new(Some(index)).index(), Some(index));
+        }
+        println!(
+            "Parent={} Map={} Node={} Presented={}",
+            size_of::<Parent>(),
+            size_of::<PresentedTransform>(),
+            size_of::<Node>(),
+            size_of::<Presented>()
+        );
+    }
+
+    #[test]
+    fn compact_map_preserves_finite_admitted_coefficients() {
+        assert_eq!(size_of::<PresentedTransform>(), size_of::<Affine>());
+        assert_eq!(PresentedTransform::new(None).get(), None);
+        for map in [
+            Affine::IDENTITY,
+            Affine {
+                a: -0.0,
+                b: 1.0,
+                c: -1.0,
+                d: 0.0,
+                tx: -0.0,
+                ty: 0.0,
+            },
+            Affine::scale(-2.0, 0.25),
+            Affine::translation(f32::MAX, -f32::MAX),
+        ] {
+            let actual = PresentedTransform::new(Some(map)).get().unwrap();
+            assert_eq!(
+                [actual.a, actual.b, actual.c, actual.d, actual.tx, actual.ty].map(f32::to_bits),
+                [map.a, map.b, map.c, map.d, map.tx, map.ty].map(f32::to_bits),
+            );
+        }
+    }
+}
 struct Node {
     identity: u64,
-    parent: Option<usize>,
+    parent: Parent,
     ordinal: u32,
     kind: NodeKind,
     text: Option<Arc<str>>,
@@ -304,11 +388,11 @@ struct Fanout {
 }
 struct Presented {
     identity: u64,
-    parent: Option<usize>,
+    parent: Parent,
     kind: NodeKind,
     text: Option<Arc<str>>,
     rect: Rect,
-    transform: Option<Affine>,
+    transform: PresentedTransform,
     bounds: Rect,
     hittable: bool,
     actions: Actions,
@@ -705,6 +789,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .ok_or(Error::StaleTarget)?;
         let point = node
             .transform
+            .get()
             .and_then(|map| {
                 map.apply(Point {
                     x: node.rect.width * 0.5,
@@ -796,7 +881,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             let identity = node.identity;
             let mut snapshot = SnapshotNode {
                 identity,
-                parent: node.parent,
+                parent: node.parent.index(),
                 role: format!("{:?}", node.kind.role()),
                 text: node.text.as_deref().map(str::to_owned),
                 bounds: [
@@ -807,6 +892,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 ],
                 transform: node
                     .transform
+                    .get()
                     .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty]),
                 target: None,
             };
@@ -1266,6 +1352,7 @@ impl<M: View + 'static> Runtime<M> {
             let node = node.as_ref().unwrap();
             let parent = node
                 .parent
+                .index()
                 .map(|parent| old[parent].as_ref().unwrap().identity);
             *old_counts.entry(parent).or_default() += 1;
             sites.insert((parent, node.ordinal, node.kind), index);
@@ -1319,7 +1406,7 @@ impl<M: View + 'static> Runtime<M> {
                 self.layout_dirty.insert(identity);
                 Node {
                     identity,
-                    parent,
+                    parent: Parent::new(parent),
                     ordinal,
                     kind: draft.kind,
                     text: None,
@@ -1360,7 +1447,7 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
                 node_changed = true;
             }
-            node.parent = parent;
+            node.parent = Parent::new(parent);
             node.ordinal = ordinal;
             node.style = style;
             node.field = fields[index];
@@ -1546,13 +1633,13 @@ impl<M: View + 'static> Runtime<M> {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
             for node in &self.nodes {
-                let parent = node.parent.map(|parent| self.layout_nodes[parent]);
+                let parent = node.parent.index().map(|parent| self.layout_nodes[parent]);
                 let id = self.layout.insert(
                     parent,
                     gpui_reactivity_core::NodeKind::Element,
                     list::row_style(
                         node,
-                        node.parent.map(|index| &self.nodes[index]),
+                        node.parent.index().map(|index| &self.nodes[index]),
                         self.list_rows.get(&node.identity),
                     ),
                 )?;
@@ -1569,6 +1656,7 @@ impl<M: View + 'static> Runtime<M> {
                 let index = self.by_identity[&list.identity];
                 if self.nodes[index]
                     .parent
+                    .index()
                     .is_some_and(|parent| self.layout_dirty.contains(&self.nodes[parent].identity))
                 {
                     self.layout_dirty.insert(list.identity);
@@ -1581,7 +1669,10 @@ impl<M: View + 'static> Runtime<M> {
                     id,
                     list::row_style(
                         &self.nodes[index],
-                        self.nodes[index].parent.map(|parent| &self.nodes[parent]),
+                        self.nodes[index]
+                            .parent
+                            .index()
+                            .map(|parent| &self.nodes[parent]),
                         self.list_rows.get(identity),
                     ),
                 )?;
@@ -1649,7 +1740,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut clips: Vec<Rect> = Vec::with_capacity(list_capacity);
         let mut hit_clips: Vec<Rect> = Vec::with_capacity(list_capacity);
         let mut inside_list: Vec<bool> = Vec::with_capacity(list_capacity);
-        let mut published: Vec<Option<usize>> = Vec::with_capacity(list_capacity);
+        let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
@@ -1659,9 +1750,9 @@ impl<M: View + 'static> Runtime<M> {
             let has_children = self
                 .nodes
                 .get(index + 1)
-                .is_some_and(|child| child.parent == Some(index));
+                .is_some_and(|child| child.parent.index() == Some(index));
             let node = &mut self.nodes[index];
-            let parent = node.parent.map_or(
+            let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
                 |parent| spaces[parent],
             );
@@ -1677,10 +1768,15 @@ impl<M: View + 'static> Runtime<M> {
             let rect = Rect::new(0.0, 0.0, layout.size.width, layout.size.height);
             let (mut clip, mut hit_clip, in_list) = if list_mode {
                 (
-                    node.parent.map_or(viewport, |parent| clips[parent]),
-                    node.parent.map_or(viewport, |parent| hit_clips[parent]),
+                    node.parent.index().map_or(viewport, |parent| clips[parent]),
+                    node.parent
+                        .index()
+                        .map_or(viewport, |parent| hit_clips[parent]),
                     node.kind == NodeKind::ListItem
-                        || node.parent.is_some_and(|parent| inside_list[parent]),
+                        || node
+                            .parent
+                            .index()
+                            .is_some_and(|parent| inside_list[parent]),
                 )
             } else {
                 (viewport, viewport, false)
@@ -1740,27 +1836,30 @@ impl<M: View + 'static> Runtime<M> {
                     scale_factor,
                 )?;
             }
+            let published_parent = if list_mode {
+                node.parent
+                    .index()
+                    .map_or(Parent::NONE, |parent| published[parent])
+            } else {
+                node.parent
+            };
             if in_list && bounds.is_empty() && (!has_children || hit_clip.is_empty()) {
-                published.push(node.parent.and_then(|parent| published[parent]));
+                published.push(published_parent);
                 continue;
             }
             if node.kind == NodeKind::ListItem {
                 visible_rows.insert(node.identity);
             }
             if list_mode {
-                published.push(Some(presented.len()));
+                published.push(Parent::new(Some(presented.len())));
             }
             presented.push(Presented {
                 identity: node.identity,
-                parent: if list_mode {
-                    node.parent.and_then(|parent| published[parent])
-                } else {
-                    node.parent
-                },
+                parent: published_parent,
                 kind: node.kind,
                 text: node.text.clone(),
                 rect,
-                transform,
+                transform: PresentedTransform::new(transform),
                 bounds,
                 hittable: node.text.is_some()
                     || node.style.bg.alpha() > 0.0
@@ -1820,7 +1919,7 @@ impl<M: View + 'static> Runtime<M> {
                     {
                         return Some(node.identity);
                     }
-                    cursor = node.parent;
+                    cursor = node.parent.index();
                 }
                 return None;
             }
