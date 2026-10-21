@@ -265,6 +265,9 @@ impl Snapshot {
     }
 }
 
+/// One current-width layout per text-bearing site, owned by the runtime's dense
+/// lane. A description moves cache entries with surviving identities; removed
+/// sites drop their glyph buffers when the preceding lane is dropped.
 struct Shaped {
     width: Option<u32>,
     layout: TextLayout,
@@ -324,6 +327,15 @@ mod parent_tests {
             size_of::<Node>(),
             size_of::<Presented>()
         );
+        println!(
+            "TextLayout={} Shaped={} OptionShaped={} RuntimeHeader={} TextSite={} OptionTextSite={}",
+            size_of::<TextLayout>(),
+            size_of::<Shaped>(),
+            size_of::<Option<Shaped>>(),
+            size_of::<Runtime<()>>(),
+            size_of::<TextSite>(),
+            size_of::<Option<TextSite>>()
+        );
     }
 
     #[test]
@@ -351,32 +363,56 @@ mod parent_tests {
         }
     }
 }
+/// Text values, their source binding and their width cache share one owned
+/// dense lane. Option permits moving an entry during description without a
+/// placeholder allocation. Every live slot is Some outside reconciliation.
+struct TextSite {
+    value: Arc<str>,
+    field: Option<FieldId>,
+    shaped: Option<Shaped>,
+}
+/// Internal dense-lane offset, bounded by the admitted node count. Containers
+/// carry only NONE, with no inline text, source binding or layout cache.
+#[derive(Clone, Copy)]
+struct TextSlot(u32);
+impl TextSlot {
+    const NONE: Self = Self(u32::MAX);
+
+    fn get(self, texts: &[Option<TextSite>]) -> Option<&TextSite> {
+        (self.0 != u32::MAX).then(|| texts[self.0 as usize].as_ref().unwrap())
+    }
+    fn get_mut(self, texts: &mut [Option<TextSite>]) -> Option<&mut TextSite> {
+        (self.0 != u32::MAX).then(|| texts[self.0 as usize].as_mut().unwrap())
+    }
+    fn take(self, texts: &mut [Option<TextSite>]) -> Option<TextSite> {
+        if self.0 == u32::MAX {
+            None
+        } else {
+            texts[self.0 as usize].take()
+        }
+    }
+}
 struct Node {
     identity: u64,
     parent: Parent,
     ordinal: u32,
     kind: NodeKind,
-    text: Option<Arc<str>>,
-    field: Option<FieldId>,
+    text_slot: TextSlot,
     component_scope: u32,
     style: Style,
     handler: Option<Handler>,
-    shaped: Option<Shaped>,
 }
-impl Node {
+impl TextSite {
     fn shape<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
+        font_size: f32,
         width: Option<f32>,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         let key = width.map(f32::to_bits);
         if self.shaped.as_ref().is_none_or(|shape| shape.width != key) {
-            let layout = service.shape(
-                self.text.as_deref().unwrap_or(""),
-                self.style.font_size,
-                width,
-            )?;
+            let layout = service.shape(&self.value, font_size, width)?;
             self.shaped = Some(Shaped { width: key, layout });
         }
         Ok(&self.shaped.as_ref().unwrap().layout)
@@ -406,6 +442,7 @@ struct Runtime<M> {
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
+    texts: Vec<Option<TextSite>>,
     by_identity: BTreeMap<u64, usize>,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
@@ -580,6 +617,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             model: pending.model,
             sources,
             nodes: Vec::new(),
+            texts: Vec::new(),
             by_identity: BTreeMap::new(),
             fanout: BTreeMap::new(),
             next_identity: 1,
@@ -964,7 +1002,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 runtime.layout_dirty.insert(identity);
             }
             if before.font_size != after.font_size {
-                runtime.nodes[index].shaped = None;
+                let slot = runtime.nodes[index].text_slot;
+                if let Some(text) = slot.get_mut(&mut runtime.texts) {
+                    text.shaped = None;
+                }
             }
             runtime.nodes[index].style = after;
             runtime.dirty = true;
@@ -1198,9 +1239,13 @@ impl<M: View + 'static> Runtime<M> {
         if node.kind != NodeKind::Input {
             return Err(Error::NotInput);
         }
-        let field = node.field.ok_or(Error::UnregisteredInput {
-            node: self.by_identity[&identity],
-        })?;
+        let field = node
+            .text_slot
+            .get(&self.texts)
+            .and_then(|text| text.field)
+            .ok_or(Error::UnregisteredInput {
+                node: self.by_identity[&identity],
+            })?;
         let codec = self.fanout[&field].codec;
         let mut input = match catch_unwind(AssertUnwindSafe(|| {
             self.sources
@@ -1368,6 +1413,10 @@ impl<M: View + 'static> Runtime<M> {
             .map(|node| node.as_ref().unwrap().identity)
             .collect::<Vec<_>>();
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
+        // Retain no holes or visited-site history. Moving TextSite transfers
+        // its text lease and glyph Vec header without cloning either.
+        let mut texts =
+            Vec::with_capacity(drafts.iter().filter(|draft| draft.text.is_some()).count());
         let mut ordinals = vec![0u32; drafts.len() + 1];
         let mut changed = 0;
         for (index, draft) in drafts.into_iter().enumerate() {
@@ -1409,23 +1458,28 @@ impl<M: View + 'static> Runtime<M> {
                     parent: Parent::new(parent),
                     ordinal,
                     kind: draft.kind,
-                    text: None,
-                    field: None,
+                    text_slot: TextSlot::NONE,
                     component_scope: component_scopes[index],
                     style: draft.style,
                     handler: None,
-                    shaped: None,
                 }
             };
+            let mut site = node.text_slot.take(&mut self.texts);
             let text = draft.text.as_ref().map(|text| text.borrowed_value());
             self.counters.destination_compares += 1;
-            if node.text.as_deref() != text.as_deref() {
-                node.text = text.as_deref().map(|text| {
+            if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
+                // The public constructors currently fix text presence by kind;
+                // retain correct measure-marker ownership if that evolves.
+                self.rebuild_layout |= site.is_some() != text.is_some();
+                site = text.as_deref().map(|text| {
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += text.len() as u64;
-                    Arc::from(text)
+                    TextSite {
+                        value: Arc::from(text),
+                        field: fields[index],
+                        shaped: None,
+                    }
                 });
-                node.shaped = None;
                 self.layout_dirty.insert(node.identity);
                 self.dirty = true;
                 node_changed = true;
@@ -1438,8 +1492,10 @@ impl<M: View + 'static> Runtime<M> {
             if layout_changed(node.style, style) {
                 self.layout_dirty.insert(node.identity);
             }
-            if node.style.font_size != style.font_size {
-                node.shaped = None;
+            if node.style.font_size != style.font_size
+                && let Some(site) = &mut site
+            {
+                site.shaped = None;
             }
             if node.handler.is_some() != draft.on_click.is_some() {
                 // Eligibility is part of the published hit sheet even when
@@ -1450,8 +1506,15 @@ impl<M: View + 'static> Runtime<M> {
             node.parent = Parent::new(parent);
             node.ordinal = ordinal;
             node.style = style;
-            node.field = fields[index];
             node.handler = draft.on_click;
+            node.text_slot = if let Some(mut site) = site {
+                site.field = fields[index];
+                let slot = TextSlot(texts.len() as u32);
+                texts.push(Some(site));
+                slot
+            } else {
+                TextSlot::NONE
+            };
             changed += usize::from(node_changed);
             nodes.push(node);
         }
@@ -1505,6 +1568,7 @@ impl<M: View + 'static> Runtime<M> {
         self.lists = lists;
         self.list_rows = list_rows;
         self.nodes = nodes;
+        self.texts = texts;
         self.fanout = fanout;
         self.by_identity = self
             .nodes
@@ -1528,15 +1592,19 @@ impl<M: View + 'static> Runtime<M> {
         let mut promoted: Option<Arc<str>> = None;
         for &index in &fanout.destinations {
             self.counters.destination_compares += 1;
-            let node = &mut self.nodes[index];
-            if node.text.as_deref() != Some(value.as_ref()) {
+            let node = &self.nodes[index];
+            let text = node
+                .text_slot
+                .get_mut(&mut self.texts)
+                .expect("visual fanout has text");
+            if text.value.as_ref() != value.as_ref() {
                 if promoted.is_none() {
                     promoted = Some(Arc::from(value.as_ref()));
                     self.counters.text_promotions += 1;
                     self.counters.text_bytes_copied += value.len() as u64;
                 }
-                node.text = promoted.clone();
-                node.shaped = None;
+                text.value = promoted.as_ref().unwrap().clone();
+                text.shaped = None;
                 self.layout_dirty.insert(node.identity);
                 self.dirty = true;
                 self.changed_nodes += 1;
@@ -1577,9 +1645,10 @@ impl<M: View + 'static> Runtime<M> {
             Err(_) => {
                 self.rebuild_layout = true;
                 self.text = None;
-                for node in &mut self.nodes {
-                    node.shaped = None;
-                }
+                self.texts
+                    .iter_mut()
+                    .flatten()
+                    .for_each(|text| text.shaped = None);
                 Err(Error::PresentationPanicked)
             }
         }
@@ -1621,7 +1690,7 @@ impl<M: View + 'static> Runtime<M> {
         } else {
             None
         };
-        if self.text.is_none() && self.nodes.iter().any(|node| node.text.is_some()) {
+        if self.text.is_none() && !self.texts.is_empty() {
             self.text = Some(TextSystem::bundled()?);
         }
         // One immutable parser for every measurement and final line layout in
@@ -1643,7 +1712,7 @@ impl<M: View + 'static> Runtime<M> {
                         self.list_rows.get(&node.identity),
                     ),
                 )?;
-                if node.text.is_some() {
+                if node.text_slot.0 != u32::MAX {
                     self.layout.set_measure(id, Some(measure_marker))?;
                 }
                 self.layout_nodes.push(id);
@@ -1687,7 +1756,8 @@ impl<M: View + 'static> Runtime<M> {
             .map(|(index, id)| (*id, index))
             .collect::<BTreeMap<_, _>>();
         let mut failure = None;
-        let nodes = &mut self.nodes;
+        let nodes = &self.nodes;
+        let texts = &mut self.texts;
         let service = &mut shaper;
         let mut measure = |id: NodeId, input: MeasureInput| {
             let width = input
@@ -1701,7 +1771,13 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            match nodes[lookup[&id]].shape(service, width) {
+            let node = &nodes[lookup[&id]];
+            match node
+                .text_slot
+                .get_mut(texts)
+                .unwrap()
+                .shape(service, node.style.font_size, width)
+            {
                 Ok(shape) => MeasureOutput {
                     size: Size {
                         width: input.known_dimensions.width.unwrap_or(shape.width),
@@ -1816,11 +1892,12 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
-            if node.text.is_some() {
+            if let Some(text) = node.text_slot.get_mut(&mut self.texts) {
                 let fg = node.style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
-                let shape = node.shape(
+                let shape = text.shape(
                     shaper.as_mut().expect("text initialized before layout"),
+                    node.style.font_size,
                     Some(layout.content_box_width()),
                 )?;
                 scene.draw_text_scaled(
@@ -1857,11 +1934,14 @@ impl<M: View + 'static> Runtime<M> {
                 identity: node.identity,
                 parent: published_parent,
                 kind: node.kind,
-                text: node.text.clone(),
+                text: node
+                    .text_slot
+                    .get(&self.texts)
+                    .map(|text| text.value.clone()),
                 rect,
                 transform: PresentedTransform::new(transform),
                 bounds,
-                hittable: node.text.is_some()
+                hittable: node.text_slot.0 != u32::MAX
                     || node.style.bg.alpha() > 0.0
                     || node.handler.is_some()
                     || node.kind == NodeKind::Input,
@@ -1886,7 +1966,7 @@ impl<M: View + 'static> Runtime<M> {
         self.latest_token = Some(token);
         self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;
-        if self.nodes.iter().all(|node| node.text.is_none()) {
+        if self.texts.is_empty() {
             self.text = None;
         }
         self.dirty = false;
@@ -2060,12 +2140,22 @@ mod tests {
             }
         }
         let mut win = Win::with_size(Name("unchanged".into()), 160, 40).unwrap();
-        let pointer = Arc::as_ptr(win.runtime().unwrap().nodes[0].text.as_ref().unwrap());
+        let pointer = Arc::as_ptr(
+            win.runtime().unwrap().texts[0]
+                .as_ref()
+                .map(|text| &text.value)
+                .unwrap(),
+        );
         win.reset_counters().unwrap();
         win.update(|m| m.0 = m.0.clone()).unwrap();
         assert!(std::ptr::eq(
             pointer,
-            Arc::as_ptr(win.runtime().unwrap().nodes[0].text.as_ref().unwrap())
+            Arc::as_ptr(
+                win.runtime().unwrap().texts[0]
+                    .as_ref()
+                    .map(|text| &text.value)
+                    .unwrap()
+            )
         ));
         assert_eq!(win.counters().text_promotions, 0);
         assert_eq!(win.counters().layout_runs, 0);
@@ -2116,5 +2206,98 @@ mod tests {
         assert!(win.runtime().unwrap().text.is_none());
         win.update(|m| m.text = true).unwrap();
         assert!(win.runtime().unwrap().text.is_some());
+    }
+    #[test]
+    fn text_lane_moves_one_cache_per_site_and_releases_removed_capacity() {
+        struct Page {
+            count: usize,
+            every: usize,
+        }
+        impl View for Page {
+            fn view(&self) -> crate::El<'_> {
+                crate::column((0..self.count).map(|index| {
+                    if self.every != 0 && index % self.every == 0 {
+                        text("stable").w(80).h(1)
+                    } else {
+                        div().w(80).h(1)
+                    }
+                }))
+            }
+        }
+        let mut win = Win::with_size(
+            Page {
+                count: 32,
+                every: 2,
+            },
+            100,
+            40,
+        )
+        .unwrap();
+        let runtime = win.runtime().unwrap();
+        let first = runtime.texts[0].as_ref().unwrap();
+        let value = Arc::as_ptr(&first.value);
+        let glyphs = first.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+        win.reset_counters().unwrap();
+        win.update(|_| {}).unwrap();
+        let first = win.runtime().unwrap().texts[0].as_ref().unwrap();
+        assert!(std::ptr::eq(value, Arc::as_ptr(&first.value)));
+        assert_eq!(
+            glyphs,
+            first.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
+        );
+        assert_eq!(win.counters().paint_passes, 0);
+        assert_eq!(win.counters().measure_calls, 0);
+        for (count, every) in [(128, 1), (64, 8), (0, 0), (32, 2), (128, 0)] {
+            win.update(|m| {
+                m.count = count;
+                m.every = every;
+            })
+            .unwrap();
+            let runtime = win.runtime().unwrap();
+            let expected = if every == 0 { 0 } else { count.div_ceil(every) };
+            assert_eq!(runtime.texts.len(), expected);
+            assert_eq!(runtime.texts.capacity(), expected);
+            assert!(runtime.texts.iter().all(Option::is_some));
+            let mut slots: Vec<_> = runtime
+                .nodes
+                .iter()
+                .filter_map(|node| (node.text_slot.0 != u32::MAX).then_some(node.text_slot.0))
+                .collect();
+            slots.sort_unstable();
+            assert_eq!(slots, (0..expected as u32).collect::<Vec<_>>());
+            assert_eq!(runtime.text.is_none(), expected == 0);
+        }
+    }
+
+    #[test]
+    fn text_width_cache_preserves_keys_and_replaces_only_after_success() {
+        let system = TextSystem::bundled().unwrap();
+        let mut shaper = system.font_face().shaper();
+        let mut site = TextSite {
+            value: Arc::from("alpha beta gamma"),
+            field: None,
+            shaped: None,
+        };
+        let wide = site.shape(&mut shaper, 16.0, Some(140.0)).unwrap().height;
+        let narrow = site.shape(&mut shaper, 16.0, Some(40.0)).unwrap().height;
+        assert!(narrow > wide);
+        let pointer = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+        site.shape(&mut shaper, 16.0, Some(40.0)).unwrap();
+        assert_eq!(
+            pointer,
+            site.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
+        );
+        assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
+        site.shape(&mut shaper, 16.0, None).unwrap();
+        assert_eq!(site.shaped.as_ref().unwrap().width, None);
+        site.shape(&mut shaper, 16.0, Some(-0.0)).unwrap();
+        assert_eq!(
+            site.shaped.as_ref().unwrap().width,
+            Some(f32::MIN_POSITIVE.to_bits())
+        );
+        site.value = Arc::from("अ");
+        site.shaped = None;
+        assert!(site.shape(&mut shaper, 16.0, Some(40.0)).is_err());
+        assert!(site.shaped.is_none());
     }
 }
