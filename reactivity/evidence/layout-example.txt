@@ -1,0 +1,4 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running `reactivity/target/debug/examples/retained_layout`
+unrounded layout Layout { order: 1, location: Point { x: 225.0, y: 0.0 }, size: Size { width: 75.0, height: 40.0 }, scrollable_overflow_rect: Rect { left: 0.0, right: 0.0, top: 0.0, bottom: 0.0 }, scrollbar_size: Size { width: 0.0, height: 0.0 }, border: Rect { left: 0.0, right: 0.0, top: 0.0, bottom: 0.0 }, padding: Rect { left: 0.0, right: 0.0, top: 0.0, bottom: 0.0 }, margin: Rect { left: 0.0, right: 0.0, top: 0.0, bottom: 0.0 } }; storage LayoutStorage { slots: 3, active_styles: 3, allocated_caches: 1, lane_capacity_bytes: 456, cache_inline_bytes: 464 }; stats LayoutStats { computes: 2, computed_answers: 2, cached_answers: 1, cheap_answers: 12, measure_calls: 0, changed_layout_writes: 5 }
+Style=288 Layout=92 NodeCache=464

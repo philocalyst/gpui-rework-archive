@@ -1,0 +1,2 @@
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-ce3/reactivity/crates/host)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.15s

@@ -1,0 +1,140 @@
+[
+  {
+    "check": "workspace-debug",
+    "argv": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "--workspace",
+      "--features",
+      "gpui_reactivity_core/layout"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 4.416,
+    "log": "workspace-debug.txt"
+  },
+  {
+    "check": "workspace-clippy",
+    "argv": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "--workspace",
+      "--all-targets",
+      "--features",
+      "gpui_reactivity_core/layout",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.225,
+    "log": "workspace-clippy.txt"
+  },
+  {
+    "check": "workspace-release",
+    "argv": [
+      "cargo",
+      "test",
+      "--release",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "--workspace",
+      "--features",
+      "gpui_reactivity_core/layout"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 1.579,
+    "log": "workspace-release.txt"
+  },
+  {
+    "check": "loom",
+    "argv": [
+      "cargo",
+      "test",
+      "--release",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui_reactivity_ownership_lab",
+      "--features",
+      "loom",
+      "--test",
+      "loom_protocol"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 5.859,
+    "log": "loom.txt"
+  },
+  {
+    "check": "native-check",
+    "argv": [
+      "cargo",
+      "check",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui_reactivity_host",
+      "--features",
+      "x11,wayland"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.169,
+    "log": "native-check.txt"
+  },
+  {
+    "check": "layout-example",
+    "argv": [
+      "cargo",
+      "run",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui_reactivity_core",
+      "--features",
+      "layout",
+      "--example",
+      "retained_layout"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.064,
+    "log": "layout-example.txt"
+  },
+  {
+    "check": "format",
+    "argv": [
+      "cargo",
+      "fmt",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui_reactivity_core",
+      "-p",
+      "gpui_reactivity_state",
+      "-p",
+      "gpui_reactivity_host",
+      "-p",
+      "gpui_reactivity_algebra_lab",
+      "-p",
+      "gpui_reactivity_template_lab",
+      "-p",
+      "gpui_reactivity_coverage_lab",
+      "-p",
+      "gpui_reactivity_ownership_lab",
+      "-p",
+      "reactivity-api-lab",
+      "--check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.144,
+    "log": "format.txt"
+  }
+]

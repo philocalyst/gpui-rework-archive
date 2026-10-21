@@ -1,0 +1,274 @@
+   Compiling gpui_reactivity_host v0.1.0 (/root/gpui-ce3/reactivity/crates/host)
+   Compiling reactivity-api-lab v0.1.0 (/root/gpui-ce3/reactivity/crates/api-lab)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_algebra_lab-19c14d9c128bc440)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/exact_translation.rs (reactivity/target/debug/deps/exact_translation-0d299a2507593b68)
+
+running 5 tests
+test catastrophic_float_cancellation_is_exact_and_query_history_independent_here ... ok
+test narrowing_rejects_lost_subpixels_and_origins_cannot_cross_components_or_forests ... ok
+test viewport_rebasing_preserves_one_subpixel_at_giant_virtual_offsets ... ok
+test extreme_signed_sources_accumulate_beyond_i64_without_saturation_or_path_allocations ... ok
+test randomized_structural_edits_and_query_permutations_match_exact_parent_sums ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/oracle.rs (reactivity/target/debug/deps/oracle-341d8dcaec9c45c6)
+
+running 7 tests
+test cache_range_tag_uses_no_additional_per_node_word ... ok
+test cancellation_can_change_a_query_without_a_model_mutation ... ok
+test foreign_arenas_fail_before_any_represented_edge_or_value_changes ... ok
+test numeric_range_is_diagnosed_instead_of_aliasing_singular_or_identity ... ok
+test ordered_products_collapse_and_recover_without_matrix_inversion ... ok
+test hundred_thousand_deep_first_access_and_drop_use_no_recursive_stack ... ok
+test randomized_local_edit_cut_link_reparent_and_query_match_independent_parentwalk ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_core-0ae37a8afdec6acc)
+
+running 2 tests
+test tree::tests::exhausted_generation_retires_slot_without_aba ... ok
+test layout::tests::generation_rollover_clears_old_cache_stamps ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/layout.rs (reactivity/target/debug/deps/layout-a1255c1bee5db6be)
+
+running 10 tests
+test calc_program_validation_and_parent_viewport_dependencies ... ok
+test measurement_panic_poisoning_prevents_reusing_partial_layout ... ok
+test explicit_measure_invalidation_and_removal_keep_cache_correct ... ok
+test idle_identical_styles_and_bad_capabilities_do_no_compute ... ok
+test remove_queued_nodes_reuse_slots_reparent_depth_and_switch_roots ... ok
+test retained_queries_reuse_clean_sibling_caches ... ok
+test hidden_subtrees_clear_old_caches_before_becoming_visible_again ... ok
+test real_flex_block_and_grid_layout_match_cold ... ok
+test cheap_leaf_forest_has_no_cache_boxes_and_styles_are_released ... ok
+test randomized_lifecycle_and_viewport_edits_match_fresh_cephal_trees ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/spatial.rs (reactivity/target/debug/deps/spatial-fe446bc5109b4083)
+
+running 12 tests
+test coordinate_model_handles_reflection_shear_nonfinite_and_overflow ... ok
+test invalid_foreign_and_noop_mutations_do_zero_work ... ok
+test rotated_hit_uses_inverse_and_transformed_ancestor_clips ... ok
+test sub_ulp_extents_at_tile_boundaries_remain_damaged_and_hittable ... ok
+test sparse_record_swap_remove_and_slot_reuse_preserve_survivors ... ok
+test unrepresentable_forward_bounds_damage_viewport_and_tiny_inverse_stays_hittable ... ok
+test wide_ancestor_composition_does_not_erase_recoverable_geometry ... ok
+test nested_geometry_reparent_damage_clip_and_singular_transition ... ok
+test deep_spatial_refresh_and_removal_do_not_recurse ... ok
+test sparse_damage_is_bounded_and_covers_fractional_edges ... ok
+test deep_hit_queries_are_linear_and_rejected_clips_prune_descendants ... ok
+test randomized_spatial_mutations_match_from_scratch_coordinates_and_damage ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+     Running tests/tree_oracle.rs (reactivity/target/debug/deps/tree_oracle-090a28bbf51a8da4)
+
+running 3 tests
+test arena_identity_stale_ids_and_failure_atomicity ... ok
+test deep_tree_streaming_removal_and_drop ... ok
+test randomized_edits_match_independent_adjacency_oracle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_coverage_lab-e70d51c40f745e68)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/proofs.rs (reactivity/target/debug/deps/proofs-4fa0ce28ce7c3ec1)
+
+running 6 tests
+test singular_unadmitted_and_fractional_touching_edges_never_certify ... ok
+test only_proven_opaque_coverage_culls_and_backdrops_are_barriers ... ok
+test hierarchy_removes_repeated_classification_and_samples_are_not_area_aa ... ok
+test randomized_shear_nonuniform_reflection_and_fractional_tiles ... ok
+test exhaustive_dyadic_certificates_have_no_false_inside_or_outside ... ok
+test independent_exhaustive_subpixel_compositing_matches_both_planners ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.61s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_host-668f77cbc6e1dad8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/dispatch.rs (reactivity/target/debug/deps/dispatch-525de7680c22e7a7)
+
+running 3 tests
+test idle_and_repeated_requests_do_not_schedule_extra_redraws ... ok
+test failed_send_closes_the_gate_permanently ... ok
+test concurrent_producers_signal_once_and_can_rearm_during_drain ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_ownership_lab-102a2709f940a988)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/loom_protocol.rs (reactivity/target/debug/deps/loom_protocol-a39b93ef36cac1f9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/public.rs (reactivity/target/debug/deps/public-03e32bd8e4806337)
+
+running 6 tests
+test endpoint_shutdown_or_live_read_lease_drops_each_payload_exactly_once ... ok
+test invalid_drain_budget_never_overwrites_an_outstanding_read_lease ... ok
+test full_and_partial_drains_preserve_owned_payload_fifo_and_rearm ... ok
+test observed_receiver_shutdown_returns_the_owned_page_instead_of_admitting_it ... ok
+test serial_and_scoped_pages_match_exactly_including_extreme_coordinates_and_damage ... ok
+test real_cross_thread_roundtrip_reuses_one_box_for_all_frames ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_state-72435ae97d28abf8)
+
+running 2 tests
+test request::tests::exhausted_tickets_retire_instead_of_revalidating_old_work ... ok
+test signal::tests::exhaustion_never_exposes_an_unmarked_mutable_borrow ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/protocol.rs (reactivity/target/debug/deps/protocol-c6df54d7d39a2ba6)
+
+running 13 tests
+test a_b_a_completions_match_exact_tickets_and_are_accepted_once ... ok
+test handoff_is_fifo_bounded_and_retries_preserve_owned_payloads ... ok
+test manual_field_descriptor_provides_typed_reads_overrides_and_impact_metadata ... ok
+test logical_and_presentation_failures_preserve_their_respective_committed_epochs ... ok
+test draft_panics_before_publication_leave_owned_snapshots_unchanged ... ok
+test ordinary_application_fields_are_inline_and_shared_reads_do_not_mark ... ok
+test owner_revocation_drop_and_remount_reject_old_work ... ok
+test payloads_move_once_and_effects_only_run_when_the_application_drains ... ok
+test registry_and_producer_collisions_cannot_alias_delivery ... ok
+test signal_mutation_stamp_has_four_byte_cost_without_a_hidden_wire_slot ... ok
+test spurious_mutable_access_marks_but_destination_comparison_cuts_off_work ... ok
+test unwinding_during_a_mutable_edit_still_leaves_a_visible_hint ... ok
+test worker_completion_carries_owned_stamp_without_a_borrow_into_ui_storage ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_template_lab-a78e39912c36374a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/model.rs (reactivity/target/debug/deps/model-aa7d9415953ee626)
+
+running 7 tests
+test explicit_dynamic_region_runs_validate_ownership_and_cycles_atomically ... ok
+test first_patch_does_not_clone_defaults_and_byte_ledger_balances ... ok
+test foreign_stale_and_distinct_equal_template_targets_are_checked ... ok
+test independent_typed_fields_share_defaults_and_isolate_instances ... ok
+test immutable_deep_topology_uses_no_recursive_ownership ... ok
+test randomized_all_storage_strategies_match_dense_value_oracle ... ok
+test succinct_navigation_matches_independent_explicit_trees ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/reactivity_api_lab-2ee0e033c50d67b9)
+
+running 2 tests
+test ledger::representation_and_group_capacity_ledger ... ok
+test scope::tests::independent_nested_frames_keep_their_own_storage ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/api.rs (reactivity/target/debug/deps/api-d2be7bea04b1a546)
+
+running 6 tests
+test actual_constructor_syntax_lowers_to_owned_preorder ... ok
+test equal_text_keeps_its_owned_buffer_and_changed_text_copies_once ... ok
+test independent_nested_descriptions_are_safe_to_combine ... ok
+test plain_scalar_changes_and_branch_shape_shrinks ... ok
+test static_elements_shorten_and_descriptions_can_outlive_an_unrelated_turn ... ok
+test bounded_deep_and_wide_shapes_lower_in_preorder ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/compile_fail.rs (reactivity/target/debug/deps/compile_fail-b61b25cff64c1205)
+
+running 1 test
+test rejected_programs_fail_for_the_intended_reason ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+   Doc-tests gpui_reactivity_algebra_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests gpui_reactivity_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests gpui_reactivity_coverage_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests gpui_reactivity_host
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests gpui_reactivity_ownership_lab
+
+running 1 test
+test crates/ownership-lab/src/pages.rs - pages::ReadLease (line 62) - compile fail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests gpui_reactivity_state
+
+running 2 tests
+test crates/state/src/signal.rs - signal::Signal (line 27) ... ok
+test crates/state/src/handoff.rs - handoff::Handoff (line 21) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test crates/state/src/signal.rs - signal::Signal (line 36) - compile fail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.22s; merged doctests compilation took 0.19s
+   Doc-tests gpui_reactivity_template_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests reactivity_api_lab
+
+running 1 test
+test crates/api-lab/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.19s; merged doctests compilation took 0.19s

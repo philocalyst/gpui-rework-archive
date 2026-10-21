@@ -1,0 +1,53 @@
+{
+  "method": "Physical Rust lines including comments, blanks and embedded tests. Library means src/, not production acceptance. Counts on-disk first-party crates/ and vendor/; excludes target/ and archived original design examples under docs/inputs/.",
+  "source_code_head": "b34be006161df5c086d374b4e00781bff11510c2",
+  "crates": {
+    "algebra-lab": {
+      "examples": 826,
+      "library": 648,
+      "tests": 487
+    },
+    "api-lab": {
+      "library": 379,
+      "tests": 323
+    },
+    "core": {
+      "examples": 117,
+      "library": 1775,
+      "tests": 1105
+    },
+    "coverage-lab": {
+      "examples": 186,
+      "library": 854,
+      "tests": 416
+    },
+    "host": {
+      "library": 210,
+      "tests": 53
+    },
+    "ownership-lab": {
+      "examples": 205,
+      "library": 396,
+      "tests": 509
+    },
+    "state": {
+      "library": 602,
+      "tests": 325
+    },
+    "template-lab": {
+      "examples": 263,
+      "library": 715,
+      "tests": 369
+    }
+  },
+  "vendor": {
+    "winit": {
+      "rust_files": 174,
+      "physical_lines": 59252
+    },
+    "cephal": {
+      "rust_files": 78,
+      "physical_lines": 15317
+    }
+  }
+}

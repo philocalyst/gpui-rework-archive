@@ -1,0 +1,139 @@
+# One runtime, ordinary users, independent oracles
+
+Tests configure the production host rather than instantiate a second application
+engine. The same owner dispatcher, source barriers, schema setters, sheet
+publication, input routing and visitors serve native apps, `Application::demo`,
+`Win::demo`, the inspector, accessibility and tests. Those application APIs remain
+implementation gates; the current labs are not an existing demo runtime.
+The supplied `final/10-quality.md` supplies the broader feature corpus, subject
+to [CONTRACT.md](CONTRACT.md)'s explicit semantic amendments.
+
+## The public testing cut
+
+Choose time, worker delivery and native/resource adapters at application creation.
+The native adapter supplies real events/time/completion; demo adapters supply
+deterministic equivalents. A virtual-clock advance and admitted user input run
+the normal turn barrier and return its Ready/Pending/Fault status. No arbitrary
+sleep or hidden force-flush is needed to make synchronous user input observable.
+Async tests choose the declared worker/result delivery, rather than replace
+handlers with callbacks that bypass admission.
+
+Queries select either source/logical state or the presented semantic sheet.
+They resolve typed target/part capabilities and committed role/text/focus/bounds;
+a presented query never silently reads private ahead-of-frame layout caches.
+Tests can use the same stable part/schema identifiers that a component library
+publishes to users. Strings used by a tool protocol resolve to validated typed
+descriptors at that boundary, not dynamic mutation in the kernel. Private state
+stays private; testing it does not confer a special public inspector capability.
+
+Input simulation goes through production normalization and dispatch. Typed
+semantic activation uses the same allowed operation as accessibility; coordinate
+input uses the actual presented hit path. Test both where they prove different
+things. A test that directly invokes `increment()` proves model behavior, not
+click hit testing. No macro is needed for either ordinary model testing or the
+production component path.
+
+The compiled [API oracle](crates/api-lab/README.md) demonstrates the current
+View/El borrowing and retention surface. State/tree/layout/ownership labs test
+their actual public interfaces. They intentionally do not invent a fake
+Application facade to make unconnected experiments appear integrated.
+
+## Failure artifacts use existing visitors
+
+On request/failure, stream source data and bounded semantic/scene diagnostics
+through production visitors. Include source/logical/presentation versions,
+virtual time, admitted input, worker delivery order, origin/gesture tags,
+schema/dependency IDs, backend numeric/quality profile and resource readiness.
+Trace/provenance storage is optional, cold and byte-bounded. Normal clean frames
+do not traverse a snapshot mirror or serialize state.
+
+Persist source state through explicit serde-compatible schemas and an alias graph
+for shared entities. Restore remints live capabilities and reconstructs producers
+through the same mount/admission path as a cold launch. Serialize a replay trace
+of typed accepted operations and environmental inputs; unknown schema/plugin
+bytes round-trip under quotas. Non-UTF8 paths, NaNs, opaque bytes, redaction,
+font/content versions and migration have declared codecs. JSON is an inspector
+format, not proof of universal lossless state serialization.
+
+Source snapshots, deterministic replay, undo and durable occurrence delivery are
+different services. Replay requires recorded nondeterminism; undo requires an
+inverse/declared domain operation; crash delivery requires journal/ack semantics.
+An arbitrary callback that performs I/O cannot acquire these guarantees from a
+serialized function address. Save minimized failing traces and their seeds.
+
+## Adversarial correctness gates
+
+| Boundary | Required comparison/adversary |
+| --- | --- |
+| Source/graph | Full pure recompute; dynamic branch reads, cycle recovery, spurious revisions, exact versus coarse discovery, A→B→A and equality faults |
+| Identity | Foreign namespaces, slot/generation exhaustion, remove/reuse, template insertion inside A shifting held sibling B, queued operations and failed remap |
+| Sequence/style | List moves across owners/windows with focus; failed adoption; explicit Set(default) versus Reset; later theme changes; override capability/validation |
+| Publication | Fault after every source/result/candidate boundary; completion accepted once but preserved for retry; owner panic and Handoff fault/durable policy |
+| Input/epochs | Persistent layout fault while field is removed, key/IME continues, capture cancels, pointer/wheel wait, a11y bounds remain coherent; hover geometry feedback |
+| Layout | Retained versus cold Cephal, upstream fixtures and old behavior cases; measure dependency changes, child solution revisions, cache eviction, unrounded placement/snapping |
+| Coordinates | Independent wide/high-precision reference; deep cancellation, singular/near-singular, tiny support, giant viewport origins, local replacement and tagged region edits |
+| Graphics | Full scene/reference repaint; opaque↔translucent/invisible↔visible, clip/filter/backdrop dependencies, area AA, LCD filter noncommutation, CPU/GPU precision envelopes |
+| Presentation | Target ages/generations, accumulated damage after skipped packets, exposure/resize/device loss, capacity overflow and full fallback |
+| Parallel | Serial equivalence, disjoint output coverage, reordered completions, exact reductions, cancellation and UI latency under saturation |
+| Ownership | Full/closed returns same payload, exact-once drops, stalled CPU/GPU/OS releases, no reuse before actual fence, shutdown at each transition |
+| Embedding | Negotiated transforms/z-order, guest/webview focus and IME, pointer capture, popup/a11y merge, slow guest, import copy/fence and remount |
+
+Reference paths stay independent and simple: adjacency topology, parent-order
+coordinates, cold layout, full graph recomputation, scalar interpolation,
+high-precision geometric/coverage integration and full repaint. Randomized traces
+exercise real APIs; oracle code does not become an unreported normal-path scan.
+Sampled geometry tests supplement interval/math proofs and do not prove a
+continuous domain by themselves.
+
+## Compiler and memory-model gates
+
+Compile passing examples and intended-diagnostic failures: borrowed operand
+escape, owner mutation while a description is used, internal cursor escape and
+both nested frame directions, wrong field/target/value, reader mutation,
+cross-thread non-Send state, and page completion while a shared read is live.
+Public El has ordinary lifetimes; do not test a nonexistent public frame brand.
+Optional derives/macros must preserve visible state, pixels, input/effect/drop
+order and declared delta precision with instrumentation disabled.
+
+Loom explores the small new queue/ready/wake composition with weak-memory
+payload/cursor ordering. Keep positive models and counterexamples for clear-after,
+release-only acknowledgement, acquire-only failed coalescing and hint-after-wake.
+Extend to producer hint registration/recycling, terminal close and shutdown before
+claiming those properties. The existing finite models do not prove native event
+fairness, all queue internals or device synchronization.
+
+Every new production unsafe block needs its local invariant, provenance/alias/
+initialization/drop proof, an optimized safe comparison, and Miri/sanitizer/fuzz
+fixtures appropriate to the operation. The current first-party library experiments
+forbid unsafe; the allocation-counter example has isolated System-forwarding
+instrumentation and is not an accepted production allocator. Unavailable unsafe
+validation is a failed adoption gate, not an implied waiver.
+
+## Performance and deletion gates
+
+Benchmark complete operations: construction, warm/cold query, marking plus visit,
+plan build plus render, command/upload plus GPU/OS completion, and reclaim. Report
+payload/capacity/allocator, process RSS/PSS, CPU images and GPU/compositor/guest
+bytes separately. Include startup/thread/service allocation, stacks, idle work,
+compile time/code size and p50/p95/p99 input-to-present. A steady zero-allocation
+queue benchmark does not include the windowing system's memory floor.
+
+Use optimized simple baselines. The coverage spike replaced unnecessary distance
+square roots in its point baseline with implicit containment before publishing
+results. Record losing regimes: tiny scoped jobs, dense path queries, customized
+small templates and boundary-dense certificates. Never select a threshold from
+the old M3 lab's embedded verdict text; the committed x86 rerun shows different
+crossovers when marking cost is included.
+
+Before claiming an order-of-magnitude simplification, port equivalent features
+and count first-party production, dependencies/vendor, tests/examples, generated
+code and compatibility islands separately. Before claiming a competitor win,
+port equal workloads/features and verify output/quality on at least two hardware
+classes. Native GUI, driver and compositor tests require actual target hardware.
+Headless compile success does not satisfy those gates.
+
+Delete each old system only after its replacement passes the corresponding
+public behavior/platform gates and has no required first-party legacy caller.
+Then remove the compatibility island, obsolete types and dependency edges in the
+same reviewed slice. These are the tests that make deletion safe; retaining the
+entire old implementation as the hidden normal path would defeat the design.
