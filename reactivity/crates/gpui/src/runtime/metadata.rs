@@ -404,8 +404,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     return Ok(base.name.as_deref());
                 }
                 let node = &runtime.nodes[runtime.by_identity[&identity]];
-                Ok((node.kind != NodeKind::Input)
-                    .then_some(node.text.as_deref())
+                Ok((node.kind() != NodeKind::Input)
+                    .then(|| {
+                        node.text_slot()
+                            .get(&runtime.texts)
+                            .map(|text| text.value.as_ref())
+                    })
                     .flatten())
             }
         }
