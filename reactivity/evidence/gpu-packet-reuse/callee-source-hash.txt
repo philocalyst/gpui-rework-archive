@@ -1,0 +1,2 @@
+The release build used the production sources recorded in manifest.json.
+The subsequent edits added only the queued integration test; no production source changed.

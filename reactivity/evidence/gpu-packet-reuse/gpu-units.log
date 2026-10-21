@@ -1,0 +1,24 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_gpu v0.1.0 (/root/gpui-gpu-packet-reuse/reactivity/crates/gpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.07s
+     Running unittests src/lib.rs (/tmp/gpui-gpu-packet-target/debug/deps/gpui_gpu-12baec636b0b3f1a)
+
+running 7 tests
+test renderer::tests::packet_storage_ledger ... ok
+test renderer::tests::precision_admission_rejects_finite_but_overflowing_intermediates ... ok
+test renderer::tests::word_writers_preserve_float_and_metadata_bits ... ok
+test renderer::tests::storage_records_match_shader_stride_and_offsets ... ok
+test shader::tests::generated_shader_validates ... ok
+test shader::ui::__validate_wgsl ... ok
+test renderer::tests::certificates_imply_sample_membership_in_both_numeric_domains ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
