@@ -451,6 +451,7 @@ impl Content {
         };
         Self((text << 3) | kind)
     }
+    #[inline]
     fn kind(self) -> NodeKind {
         match self.0 & 7 {
             0 => NodeKind::Div,
@@ -462,6 +463,7 @@ impl Content {
             _ => unreachable!("Content constructs only declared kinds"),
         }
     }
+    #[inline]
     fn text_slot(self) -> TextSlot {
         let text = self.0 >> 3;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
@@ -477,9 +479,11 @@ struct Node {
     handler: Option<Handler>,
 }
 impl Node {
+    #[inline]
     fn kind(&self) -> NodeKind {
         self.content.kind()
     }
+    #[inline]
     fn text_slot(&self) -> TextSlot {
         self.content.text_slot()
     }
