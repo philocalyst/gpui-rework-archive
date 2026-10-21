@@ -53,7 +53,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             }),
             Key::Enter => runtime.activate(target),
             Key::Space => {
-                let (_, index) = runtime.locate(target)?;
+                let index = runtime.locate(target).ok_or(Error::StaleTarget)?;
                 if runtime.nodes[index].kind() == NodeKind::Input {
                     runtime.edit_text(target, |value| value.push(' '))
                 } else {
@@ -73,7 +73,7 @@ impl<M: View + 'static> Runtime<M> {
     }
     pub(super) fn focus(&mut self, target: Target) -> Result<Commit, Error> {
         self.live()?;
-        let (_, index) = self.locate(target)?;
+        let index = self.locate(target).ok_or(Error::StaleTarget)?;
         if !self.nodes[index].focusable() {
             return Err(Error::NotInteractive);
         }
@@ -84,15 +84,14 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn prune_focus(&mut self) {
         if self.focused.is_some_and(|target| {
             self.locate(target)
-                .ok()
-                .is_none_or(|(_, index)| !self.nodes[index].focusable())
+                .is_none_or(|index| !self.nodes[index].focusable())
         }) {
             self.focused = None;
         }
     }
     fn tab(&mut self, reverse: bool) -> Result<Commit, Error> {
         self.current_presentation()?;
-        let current = self.focused.and_then(|target| self.resolve(target).ok());
+        let current = self.focused.and_then(|target| self.resolve(target));
         // Iterate the acknowledged sheet directly; no alternate focus registry
         // or allocation is needed, including when wrapping at either end.
         let mut first = None;

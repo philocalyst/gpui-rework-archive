@@ -497,7 +497,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Option<&str>, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let (identity, index) = runtime.locate(target)?;
+        let index = runtime.locate(target).ok_or(Error::StaleTarget)?;
+        let identity = runtime.nodes[index].identity();
         let metadata = runtime.metadata.as_deref();
         if let Some(Contribution::Set(value)) = metadata
             .and_then(|m| m.overrides.get(&identity))
@@ -530,7 +531,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Contribution<Option<&str>>, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let identity = runtime.resolve(target).ok_or(Error::StaleTarget)?;
         Ok(
             match runtime
                 .metadata
@@ -564,7 +565,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut runtime = runtime;
         let admission = (|| {
             runtime.live()?;
-            let identity = runtime.resolve(target)?;
+            let identity = runtime.resolve(target).ok_or(Error::StaleTarget)?;
             let epoch = runtime
                 .source_epoch
                 .checked_add(1)

@@ -345,7 +345,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 }
 impl<M: View + 'static> Runtime<M> {
     fn list_id(&self, target: Target) -> Result<ListId, Error> {
-        let identity = self.resolve(target)?;
+        let identity = self.resolve(target).ok_or(Error::StaleTarget)?;
         self.lists
             .iter()
             .find(|(_, state)| state.identity == identity)

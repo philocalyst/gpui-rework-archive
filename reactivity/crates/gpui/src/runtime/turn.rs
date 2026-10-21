@@ -193,7 +193,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     }
     pub(super) fn activate(&mut self, target: Target) -> Result<Commit, Error> {
         self.live()?;
-        let (_, index) = self.locate(target)?;
+        let index = self.locate(target).ok_or(Error::StaleTarget)?;
         if self.runtime.nodes[index].kind() == NodeKind::Input {
             self.runtime.changed_nodes = 0;
             return Ok(self.commit());
@@ -233,7 +233,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         edit: impl FnOnce(&mut String),
     ) -> Result<Commit, Error> {
         self.live()?;
-        let (_, index) = self.locate(target)?;
+        let index = self.locate(target).ok_or(Error::StaleTarget)?;
         let node = &self.runtime.nodes[index];
         if node.kind() != NodeKind::Input {
             return Err(Error::NotInput);

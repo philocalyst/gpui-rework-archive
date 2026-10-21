@@ -358,7 +358,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let target = runtime.sites.target(id);
-        runtime.resolve(target)?;
+        runtime.locate(target).ok_or(Error::StaleTarget)?;
         Ok(target)
     }
     pub fn query(&self) -> Query<'_, M> {

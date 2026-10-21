@@ -1045,7 +1045,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn click(&mut self, target: Target) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let identity = runtime.resolve(target).ok_or(Error::StaleTarget)?;
         runtime.current_presentation()?;
         let node = runtime
             .presented
@@ -1191,7 +1191,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let (_, index) = runtime.locate(target)?;
+        let index = runtime.locate(target).ok_or(Error::StaleTarget)?;
         Ok(property.get(runtime.styles.get(index)))
     }
     pub fn contribution<T>(
@@ -1201,7 +1201,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Contribution<T>, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let identity = runtime.resolve(target).ok_or(Error::StaleTarget)?;
         Ok(runtime.overrides.get(identity, property))
     }
     /// A typed inspector contribution. Validation precedes editing; inheritance
@@ -1214,7 +1214,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
-        let (identity, index) = runtime.locate(target)?;
+        let index = runtime.locate(target).ok_or(Error::StaleTarget)?;
+        let identity = runtime.nodes[index].identity();
         let epoch = runtime
             .source_epoch
             .checked_add(1)
@@ -1355,17 +1356,20 @@ impl<M: View + 'static> Runtime<M> {
             Ok(())
         }
     }
-    fn resolve(&self, target: Target) -> Result<u64, Error> {
-        self.locate(target).map(|(identity, _)| identity)
+    fn resolve(&self, target: Target) -> Option<u64> {
+        self.locate(target)
+            .map(|index| self.nodes[index].identity())
     }
     // The index belongs to this logical tree, not the acknowledged sheet. Use
     // it within the current owner borrow, before any description can rebuild it.
-    fn locate(&self, target: Target) -> Result<(u64, usize), Error> {
-        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
+    // All rejection paths mean stale authority; keep Error construction at the
+    // caller's boundary instead of returning its full public error enum here.
+    fn locate(&self, target: Target) -> Option<usize> {
+        let identity = self.sites.resolve(target)?;
         if !self.logical_valid {
-            return Err(Error::StaleTarget);
+            return None;
         }
-        let &index = self.by_identity.get(&identity).ok_or(Error::StaleTarget)?;
+        let &index = self.by_identity.get(&identity)?;
         if !self.lists.is_empty()
             && self.in_list(index)
             && !self
@@ -1375,9 +1379,9 @@ impl<M: View + 'static> Runtime<M> {
                 .iter()
                 .any(|node| node.identity == identity)
         {
-            return Err(Error::StaleTarget);
+            return None;
         }
-        Ok((identity, index))
+        Some(index)
     }
     fn current_presentation(&self) -> Result<(), Error> {
         if self.logical_valid
@@ -2493,6 +2497,20 @@ fn layout_style(style: &Style) -> cephal::Style {
 mod tests {
     use super::*;
     use crate::{div, text};
+
+    #[test]
+    fn target_lookup_return_layouts() {
+        eprintln!(
+            "lookup_abi,Error={},ResultIndex={},ResultIdentityIndex={},OptionIndex={},OptionIdentity={},Node={},Presented={}",
+            size_of::<Error>(),
+            size_of::<Result<usize, Error>>(),
+            size_of::<Result<(u64, usize), Error>>(),
+            size_of::<Option<usize>>(),
+            size_of::<Option<u64>>(),
+            size_of::<Node>(),
+            size_of::<Presented>()
+        );
+    }
 
     #[test]
     fn native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels() {

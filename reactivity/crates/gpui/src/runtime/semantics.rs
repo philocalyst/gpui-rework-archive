@@ -67,7 +67,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn perform(&mut self, target: Target, action: Action<'_>) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let identity = runtime.resolve(target).ok_or(Error::StaleTarget)?;
         if !runtime.presentation_valid {
             return Err(Error::PresentationStale);
         }
