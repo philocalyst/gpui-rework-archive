@@ -4,8 +4,17 @@ version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 
+[features]
+default = []
+parallel = ["dep:rayon"]
+
 [dependencies]
 gpui_reactivity_core = { path = "../core" }
 rustybuzz = "=0.20.1"
 fontdue = "=0.9.4"
 unicode-script = "=0.5.8"
+rayon = { version = "=1.12.0", optional = true }
+
+[[example]]
+name = "parallel"
+required-features = ["parallel"]

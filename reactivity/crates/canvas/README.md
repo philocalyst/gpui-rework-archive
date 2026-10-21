@@ -271,3 +271,75 @@ sole output image and reports allocation failure; later scene commits reuse it.
 `output_bytes()` exposes retained image capacity. `new` and `with_color_config`
 keep their eager allocation behavior. The infallible `pixels()` convenience
 panics on allocation failure; fallible hosts should use `try_pixels()`.
+
+## Optional disjoint-band CPU rendering
+
+Enable `parallel` and construct an owned `RenderPool::new(workers)` (1–64).
+`try_pixels_with(&pool)` has the same fallible image-allocation contract as
+`try_pixels`; `pixels_with` is the convenience wrapper. The default feature set
+has no active Rayon dependency, worker thread, or pool allocation. No global
+pool is initialized. A pool can serve successive canvases; a frame returns only
+after its borrowed output work completes.
+
+The same generic raster kernel serves serial rendering and parallel 16-row
+bands. Each job borrows the immutable commands, CSR bins, and immutable mask
+pointees, and owns a disjoint mutable output slice. No scene/resource cloning,
+mutable font service, per-pixel atomics, or dynamic pixel callback enters that
+kernel. Band counters reduce after completion. Output format dispatch is outside
+the kernel. The pool uses pinned [Rayon 1.12.0](https://docs.rs/rayon/1.12.0/rayon/struct.ThreadPoolBuilder.html)
+and its [nonoverlapping mutable slice chunks](https://docs.rs/rayon/1.12.0/rayon/slice/trait.ParallelSliceMut.html).
+This does not prove Rayon's executor lock-free or allocation-free.
+
+The default scheduling threshold is 65,536 estimated units: one per output pixel
+plus conservative 16-sample command-bound area; a rectangle certified to fill
+the complete viewport contributes only its tile area. This estimate affects
+scheduling only. Heights up to 16 remain serial. `with_min_work(0)` forces the
+parallel comparison for taller images. Small work should remain serial: in the
+[measured run](evidence-parallel.csv), a 4×32 boundary scene took 17.3 µs serial
+and 23.8 µs with eight workers. Pools with one worker likewise add overhead.
+On the same shared Ryzen 7 3700X, a 640×480 scene of 48 shaped labels took
+14.87 ms serial, 7.59 ms with two workers, 4.15 ms with four, and 2.80 ms with
+eight. A 1920×1080 flat panel took 1.66 ms serial and 0.40 ms with eight.
+These medians include command preparation, bin construction, and rasterization,
+but exclude font/pool creation and presentation. Seven warm batches were used;
+CSV rows retain exact equal frame digests and allocation-capacity ledgers.
+Shared-host CPU timings are evidence for this workload, not latency guarantees.
+
+Reproduce with `cargo run --release -p gpui_canvas --features parallel --example
+parallel`. Public tests compare every byte of serial/parallel output with
+1/2/4/8 workers, both profiles, both SDR mappings, alpha, fractional clipping,
+shear/reflection, text, partial bands, width one, and both proof paths. Existing
+independent exhaustive geometry and glyph-mask oracles also pass after the
+kernel refactor. Clean output access remains zero raster work.
+
+Each active band uses one 64 KiB stack sample tile; at most one such tile is
+active per pool worker. This replaces the serial tile rather than retaining a
+second image. The pool requests 512 KiB stack reservation per worker, including
+that tile. Pool metadata, TLS, allocator arenas and OS guard/rounding costs are
+additional. The ignored `pool_memory_measurement` test prints process RSS/VMS
+and thread counts in separate processes (`GPUI_RENDER_WORKERS=1,2,4,8`). On this
+host, initialization was 41/60/190/317 µs, with RSS increments 80/156/152/240 KiB.
+After a 640×480 frame, total RSS increments were 1712/1800/1916/2276 KiB,
+including the sole 1200 KiB image and touched worker scratch. Linux/glibc arenas
+reserved roughly 65 MiB virtual address space per worker in addition to the
+requested stacks. Dropping the pool signals shutdown; measurements show threads
+and mappings can still exist immediately after drop. RSS/VMS are not exact heap
+attribution, and allocator retention prevents immediate OS-reclamation claims.
+
+## Safe compiler SIMD evidence
+
+The release `render_band<OutputEncoder>` assembly contains packed four-channel
+SSE `mulps`/`addps` for source-over and sample averaging. Rust/LLVM emits this
+from ordinary safe array loops; baseline x86_64 SSE requires no runtime feature
+probe or unsafe vector loads. This is four color channels, not four independent
+coverage tests. The fixed scalar sample positions and arithmetic order remain
+the reference contract.
+
+A paired whole-build experiment disabled LLVM SLP and loop vectorizers with
+`RUSTFLAGS='-Cllvm-args=-vectorize-slp=false -Cllvm-args=-vectorize-loops=false'`
+in a separate target directory. All frame digests matched. The
+[non-vectorized run](evidence-no-vectorize.csv) took 19.44 ms for serial labels,
+4.75 ms for serial shear, and 0.280 ms for the flat scene; the ordinary build
+above took 14.87/3.17/0.195 ms. These flags affect the whole build, so the timing
+difference is not attributed solely to the blend instructions. There is no new
+unsafe intrinsic implementation, AVX2 claim, or changed sampling quality.
