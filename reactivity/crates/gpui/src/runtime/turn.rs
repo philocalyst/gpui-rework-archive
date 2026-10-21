@@ -194,15 +194,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     pub(super) fn activate(&mut self, target: Target) -> Result<Commit, Error> {
         self.live()?;
         let identity = self.resolve(target)?;
-        let index = self.runtime.by_identity[&identity];
+        let location = self.runtime.by_identity[&identity];
+        let index = location.node();
         if self.runtime.nodes[index].kind() == NodeKind::Input {
             self.runtime.changed_nodes = 0;
             return Ok(self.commit());
         }
-        let handler = self.runtime.nodes[index]
-            .handler
-            .as_ref()
-            .ok_or(Error::NotInteractive)?;
+        let handler = &self.runtime.routes[location.route().ok_or(Error::NotInteractive)?];
         let exact = match catch_unwind(AssertUnwindSafe(|| {
             handler.validate(&self.runtime.model, &self.runtime.sources)
         })) {
@@ -235,7 +233,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     ) -> Result<Commit, Error> {
         self.live()?;
         let identity = self.resolve(target)?;
-        let node = &self.runtime.nodes[self.runtime.by_identity[&identity]];
+        let node = &self.runtime.nodes[self.runtime.by_identity[&identity].node()];
         if node.kind() != NodeKind::Input {
             return Err(Error::NotInput);
         }
@@ -244,7 +242,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .get(&self.runtime.texts)
             .and_then(|text| text.field)
             .ok_or(Error::UnregisteredInput {
-                node: self.runtime.by_identity[&identity],
+                node: self.runtime.by_identity[&identity].node(),
             })?;
         let codec = self.runtime.fanout[&field].codec;
         let mut input = match catch_unwind(AssertUnwindSafe(|| {

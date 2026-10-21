@@ -4,7 +4,7 @@
 use crate::shared_text::SharedText;
 use std::{
     collections::{BTreeMap, BTreeSet},
-    num::NonZeroU64,
+    num::{NonZeroU32, NonZeroU64},
     panic::{AssertUnwindSafe, catch_unwind},
 };
 
@@ -333,7 +333,8 @@ mod parent_tests {
 
     #[test]
     fn nonzero_identity_keeps_old_node_migration_in_place() {
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
+        assert_eq!(size_of::<NodeLocator>(), 8);
         assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
         let nodes = (1..=64)
             .map(|identity| Node {
@@ -342,7 +343,6 @@ mod parent_tests {
                 ordinal: 0,
                 content: Content::new(NodeKind::Div, TextSlot::NONE),
                 component_scope: 0,
-                handler: None,
             })
             .collect::<Vec<_>>();
         let pointer = nodes.as_ptr().cast::<u8>();
@@ -397,11 +397,17 @@ mod parent_tests {
             let empty = Content::new(kind, TextSlot::NONE);
             assert_eq!(empty.kind(), kind);
             assert_eq!(empty.text_slot().0, u32::MAX);
+            assert_eq!(empty.with_handler(true).text_slot().0, u32::MAX);
             for index in 0..MAX_NODES {
                 let content = Content::new(kind, TextSlot(index as u32));
-                assert_eq!(content.kind(), kind);
-                assert_eq!(content.text_slot().0, index as u32);
-                assert_ne!(content.0, empty.0);
+                for present in [false, true] {
+                    let content = content.with_handler(present);
+                    assert_eq!(content.kind(), kind);
+                    assert_eq!(content.text_slot().0, index as u32);
+                    assert_eq!(content.has_handler(), present);
+                    assert!(!content.with_handler(false).has_handler());
+                    assert_ne!(content.0, empty.0);
+                }
             }
         }
     }
@@ -468,12 +474,12 @@ impl TextSlot {
         }
     }
 }
-/// A closed kind and an optional admitted text-lane index fit in one word.
-/// Zero in the upper bits means no text; the lower three bits hold one of the
-/// six explicitly encoded kinds. No Rust enum representation is reinterpreted.
+/// Kind, optional text slot and route presence share one checked private word.
+/// The top bit never participates in the text address. No enum is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES <= (u32::MAX >> 3) as usize);
+const HAS_HANDLER: u32 = 1 << 31;
+const _: () = assert!(MAX_NODES <= ((HAS_HANDLER - 1) >> 3) as usize);
 impl Content {
     #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
@@ -510,17 +516,43 @@ impl Content {
     }
     #[inline]
     fn text_slot(self) -> TextSlot {
-        let text = self.0 >> 3;
+        let text = (self.0 & !HAS_HANDLER) >> 3;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
+    #[inline]
+    fn with_handler(self, present: bool) -> Self {
+        Self((self.0 & !HAS_HANDLER) | (u32::from(present) * HAS_HANDLER))
+    }
+    #[inline]
+    fn has_handler(self) -> bool {
+        self.0 & HAS_HANDLER != 0
+    }
 }
+
+/// Current-owner addresses only; presented sheets retain identities, never slots.
+/// This keeps the existing identity-map value at eight bytes on 64-bit targets.
+#[derive(Clone, Copy)]
+struct NodeLocator {
+    node: u32,
+    route: Option<NonZeroU32>,
+}
+impl NodeLocator {
+    #[inline]
+    fn node(self) -> usize {
+        self.node as usize
+    }
+    #[inline]
+    fn route(self) -> Option<usize> {
+        self.route.map(|slot| (slot.get() - 1) as usize)
+    }
+}
+
 struct Node {
     identity: NonZeroU64,
     parent: Parent,
     ordinal: u32,
     content: Content,
     component_scope: u32,
-    handler: Option<Handler>,
 }
 #[cfg(test)]
 mod style_ledger;
@@ -536,6 +568,10 @@ impl Node {
     #[inline]
     fn text_slot(&self) -> TextSlot {
         self.content.text_slot()
+    }
+    #[inline]
+    fn has_handler(&self) -> bool {
+        self.content.has_handler()
     }
 }
 impl TextSite {
@@ -610,7 +646,8 @@ struct Runtime<M> {
     nodes: Vec<Node>,
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
-    by_identity: BTreeMap<u64, usize>,
+    by_identity: BTreeMap<u64, NodeLocator>,
+    routes: Vec<Handler>,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
     focused: Option<Target>,
@@ -805,6 +842,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             styles: styles::Styles::default(),
             texts: Vec::new(),
             by_identity: BTreeMap::new(),
+            routes: Vec::new(),
             fanout: BTreeMap::new(),
             next_identity: 1,
             focused: None,
@@ -1107,11 +1145,21 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut nodes = Vec::with_capacity(runtime.presented.len());
         for index in 0..runtime.presented.len() {
             let node = &runtime.presented[index];
-            let actionable = runtime.by_identity.get(&node.identity).is_some_and(|&i| {
-                runtime.nodes[i].handler.is_some() || runtime.nodes[i].kind() == NodeKind::Input
-            });
             let identity = node.identity;
-            let mut snapshot = SnapshotNode {
+            // A destructor panic may interrupt destructive reconciliation.
+            // The old sheet remains diagnostic; current addresses do not.
+            let target = if runtime.logical_valid
+                && !runtime.poisoned
+                && let Some(location) = runtime.by_identity.get(&identity)
+                && (all_targets
+                    || runtime.nodes[location.node()].has_handler()
+                    || runtime.nodes[location.node()].kind() == NodeKind::Input)
+            {
+                Some(runtime.sites.target(identity))
+            } else {
+                None
+            };
+            let snapshot = SnapshotNode {
                 identity,
                 parent: node.parent.index(),
                 role: format!("{:?}", node.kind.role()),
@@ -1126,15 +1174,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     .transform
                     .get()
                     .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty]),
-                target: None,
+                target,
             };
-            if (all_targets || actionable)
-                && runtime.by_identity.contains_key(&identity)
-                && runtime.logical_valid
-                && !runtime.poisoned
-            {
-                snapshot.target = Some(runtime.sites.target(identity));
-            }
             nodes.push(snapshot);
         }
         Ok(Snapshot {
@@ -1156,7 +1197,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
-        Ok(property.get(runtime.styles.get(runtime.by_identity[&identity])))
+        Ok(property.get(runtime.styles.get(runtime.by_identity[&identity].node())))
     }
     pub fn contribution<T>(
         &self,
@@ -1183,7 +1224,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let index = runtime.by_identity[&identity];
+        let index = runtime.by_identity[&identity].node();
         let before = *runtime.styles.get(index);
         let after = runtime
             .overrides
@@ -1326,6 +1367,7 @@ impl<M: View + 'static> Runtime<M> {
             .filter(|identity| {
                 self.logical_valid
                     && self.by_identity.get(identity).is_some_and(|&index| {
+                        let index = index.node();
                         self.viewports.lists.is_empty()
                             || !self.in_list(index)
                             || self
@@ -1415,6 +1457,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut component_scopes = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0usize; drafts.len() + 1];
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
+        let mut route_count = 0;
         for (index, node) in drafts.iter().enumerate() {
             new_counts[node.parent.map_or(0, |parent| parent as usize + 1)] += 1;
             let depth = node.parent.map_or(0, |parent| depths[parent as usize] + 1);
@@ -1437,6 +1480,7 @@ impl<M: View + 'static> Runtime<M> {
             component_scopes.push(component_scope);
             if let Some(handler) = &node.on_click {
                 handler.validate(&self.model, &self.sources)?;
+                route_count += 1;
             }
             let field = match node.text.as_ref().and_then(|text| text.signal()) {
                 Some(signal) => self.sources.resolve(&self.model, signal)?,
@@ -1548,6 +1592,14 @@ impl<M: View + 'static> Runtime<M> {
             .collect::<Vec<_>>();
         let mut styles = styles::Builder::new(drafts.len());
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
+        // Validation has finished. No old sheet borrows handlers; replace the
+        // current cohort in place and keep no retired route or capacity history.
+        let mut routes = std::mem::take(&mut self.routes);
+        routes.clear();
+        routes.reserve_exact(route_count);
+        // Preserve the map's bulk-build path; incremental inserts would add
+        // a tree search for every node during an otherwise linear description.
+        let mut locations = Vec::with_capacity(drafts.len());
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
         let mut texts =
@@ -1601,7 +1653,6 @@ impl<M: View + 'static> Runtime<M> {
                     ordinal,
                     content: Content::new(draft.kind, TextSlot::NONE),
                     component_scope: component_scopes[index],
-                    handler: None,
                 }
             };
             let mut site = node.text_slot().take(&mut self.texts);
@@ -1646,7 +1697,7 @@ impl<M: View + 'static> Runtime<M> {
             {
                 site.shaped = None;
             }
-            if node.handler.is_some() != draft.on_click.is_some() {
+            if node.has_handler() != draft.on_click.is_some() {
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
@@ -1655,7 +1706,12 @@ impl<M: View + 'static> Runtime<M> {
             node.parent = Parent::new(parent);
             node.ordinal = ordinal;
             styles.push(&style);
-            node.handler = draft.on_click;
+            let route = draft.on_click.map(|handler| {
+                // At most MAX_NODES routes are admitted, strictly below u32::MAX.
+                let slot = NonZeroU32::new(routes.len() as u32 + 1).unwrap();
+                routes.push(handler);
+                slot
+            });
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
@@ -1664,7 +1720,14 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 TextSlot::NONE
             };
-            node.content = Content::new(node.kind(), text_slot);
+            node.content = Content::new(node.kind(), text_slot).with_handler(route.is_some());
+            locations.push((
+                node.identity(),
+                NodeLocator {
+                    node: index as u32,
+                    route,
+                },
+            ));
             changed += usize::from(node_changed);
             nodes.push(node);
         }
@@ -1773,17 +1836,14 @@ impl<M: View + 'static> Runtime<M> {
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
-        self.viewports = list::Viewports::new(lists, list_rows);
+        self.viewports.replace(lists, list_rows);
         self.nodes = nodes;
         self.styles = styles.finish();
         self.texts = texts;
         self.fanout = fanout;
-        self.by_identity = self
-            .nodes
-            .iter()
-            .enumerate()
-            .map(|(i, node)| (node.identity(), i))
-            .collect();
+        routes.shrink_to_fit();
+        self.routes = routes;
+        self.by_identity = locations.into_iter().collect();
         self.overrides
             .retain(|identity| self.by_identity.contains_key(&identity));
         if let Some(metadata) = &mut self.metadata {
@@ -2005,7 +2065,7 @@ impl<M: View + 'static> Runtime<M> {
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
             for list in self.viewports.lists.values() {
-                let index = self.by_identity[&list.identity];
+                let index = self.by_identity[&list.identity].node();
                 if self.nodes[index].parent.index().is_some_and(|parent| {
                     self.layout_dirty.contains(&self.nodes[parent].identity())
                 }) {
@@ -2013,7 +2073,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
             for identity in &self.layout_dirty {
-                let index = self.by_identity[identity];
+                let index = self.by_identity[identity].node();
                 let id = self.layout_nodes[index];
                 self.layout.set_style(
                     id,
@@ -2172,7 +2232,7 @@ impl<M: View + 'static> Runtime<M> {
                     clip,
                     style.bg,
                 )?;
-            } else if node.handler.is_some() || node.kind() == NodeKind::Input {
+            } else if node.has_handler() || node.kind() == NodeKind::Input {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
                 scene.fill_rect(
@@ -2233,9 +2293,9 @@ impl<M: View + 'static> Runtime<M> {
                 bounds,
                 hittable: node.text_slot().0 != u32::MAX
                     || style.bg.alpha() > 0.0
-                    || node.handler.is_some()
+                    || node.has_handler()
                     || node.kind() == NodeKind::Input,
-                actions: Actions::for_node(node.kind(), node.handler.is_some()),
+                actions: Actions::for_node(node.kind(), node.has_handler()),
             });
             #[cfg(feature = "accessibility")]
             if let Some(observation) = &mut observation {
@@ -2339,7 +2399,8 @@ impl<M: View + 'static> Runtime<M> {
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
                     if let Some(&logical) = self.by_identity.get(&node.identity)
-                        && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
+                        && (self.nodes[logical.node()].has_handler()
+                            || node.kind == NodeKind::Input)
                     {
                         return Some(node.identity);
                     }
@@ -2865,7 +2926,7 @@ mod semantic_storage_ledger {
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<Presented>(), 80);
         assert_eq!(size_of::<crate::El<'_>>(), 176);

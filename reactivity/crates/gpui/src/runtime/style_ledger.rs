@@ -62,6 +62,14 @@ fn open<M: View + 'static>(model: M, size: [u32; 2]) -> Win<M> {
 }
 fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
     let runtime = win.runtime().unwrap();
+    println!(
+        "route_storage,{name},len={},capacity={},route_bytes={},node_bytes={},locator_bytes={}",
+        runtime.routes.len(),
+        runtime.routes.capacity(),
+        runtime.routes.capacity() * size_of::<Handler>(),
+        runtime.nodes.capacity() * size_of::<Node>(),
+        size_of::<NodeLocator>()
+    );
     let styles = runtime
         .nodes
         .iter()

@@ -30,11 +30,19 @@ impl std::ops::Deref for Viewports {
 }
 
 impl Viewports {
-    pub(super) fn new(lists: BTreeMap<ListId, ListState>, rows: BTreeMap<u64, ListRow>) -> Self {
-        Self(
-            (!lists.is_empty() || !rows.is_empty())
-                .then(|| Box::new(ViewportState { lists, rows })),
-        )
+    pub(super) fn replace(
+        &mut self,
+        lists: BTreeMap<ListId, ListState>,
+        rows: BTreeMap<u64, ListRow>,
+    ) {
+        if lists.is_empty() && rows.is_empty() {
+            self.0 = None;
+        } else if let Some(state) = self.0.as_deref_mut() {
+            state.lists = lists;
+            state.rows = rows;
+        } else {
+            self.0 = Some(Box::new(ViewportState { lists, rows }));
+        }
     }
     pub(super) fn rows_mut(&mut self) -> impl Iterator<Item = (&u64, &mut ListRow)> {
         self.0.iter_mut().flat_map(|state| &mut state.rows)
