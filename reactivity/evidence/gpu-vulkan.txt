@@ -1,23 +1,26 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+   Compiling gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.01s
      Running tests/render.rs (reactivity/target/debug/deps/render-285cf837845262b3)
 
-running 17 tests
-test narrowed_inverse_preserves_the_adversarial_half_open_edge ... ok
+running 18 tests
+test float_target_rejects_sdr_scene_metadata_before_submission ... ok
 test real_vulkan_pixels_match_cpu_sampling_and_preserve_correlated_edges ... ok
-test opaque_proof_changes_do_not_discard_background_records ... ok
-test maximum_admitted_tone_mapping_is_finite_and_bright ... ok
-test physical_glyph_masks_map_back_to_logical_rectangles ... ok
-test opaque_tile_proofs_skip_overlap_and_preserve_later_edges ... ok
 test linear_float_target_retains_hdr_and_premultiplied_alpha ... ok
 test real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks ... ok
-test uniform_float_tiles_preserve_reference_output_bits ... ok
+test maximum_admitted_tone_mapping_is_finite_and_bright ... ok
+test opaque_tile_proofs_skip_overlap_and_preserve_later_edges ... ok
+test opaque_proof_changes_do_not_discard_background_records ... ok
 test clip_extent_sum_preserves_half_open_sample_membership ... ok
-test float_target_rejects_sdr_scene_metadata_before_submission ... ok
-test inverse_lattice_clips_preserve_actual_vulkan_pixels ... ok
+test physical_glyph_masks_map_back_to_logical_rectangles ... ok
 test text_free_reset_releases_keys_without_invalidating_in_flight_text ... ok
+test uniform_float_tiles_preserve_reference_output_bits ... ok
+test inverse_lattice_clips_preserve_actual_vulkan_pixels ... ok
+test narrowed_inverse_preserves_the_adversarial_half_open_edge ... ok
+test grouped_and_inline_packets_match_every_pixel_in_mixed_scenes ... ok
+test all_authored_color_layouts_reach_real_sdr_and_hdr_targets ... ok
 test tile_certificates_fall_back_for_clip_alpha_shear_and_ambiguous_edges ... ok
 test zero_coverage_draw_preserves_threshold_clear_and_hdr_bits ... ok
-test grouped_and_inline_packets_match_every_pixel_in_mixed_scenes ... ok
 test grouped_error_envelopes_match_inline_across_fractional_glyph_samples ... ok
 
-test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.31s

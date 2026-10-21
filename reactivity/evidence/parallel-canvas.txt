@@ -1,31 +1,43 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+   Compiling gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.57s
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_canvas-0c1a0e59460e95cc)
 
-running 10 tests
-test color::half_tests::authored_color_keeps_twenty_byte_provenance_header ... ok
+running 12 tests
 test canvas::scaled_mask_tests::normalized_mask_obeys_half_open_local_edges_before_texel_rounding ... ok
+test color::half_tests::authored_color_keeps_sixteen_byte_provenance_header ... ok
+test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
+test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
 test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release
 test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture
-test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
-test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
 test color::quantizer_tests::quantizer_matches_reference_at_all_thresholds_and_bucket_edges ... ok
 test color::half_tests::every_finite_half_roundtrips_including_signed_zero ... ok
 test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... ok
 test color::half_tests::every_adjacent_half_midpoint_rounds_ties_even_on_both_sides ... ok
+test color::packing_tests::raw_rgb_and_oklch_layouts_preserve_every_lane ... ok
+test color::packing_tests::every_base199_exponent_triple_round_trips ... ok
 
-test result: ok. 8 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 10 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 2.95s
 
      Running tests/color.rs (reactivity/target/debug/deps/color-0b10a6f1342fe2ae)
 
 running 6 tests
-test invalid_color_values_and_configuration_are_rejected ... ok
 test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
+test invalid_color_values_and_configuration_are_rejected ... ok
 test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
 test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
 test final_mapping_occurs_after_extended_linear_composition ... ok
 test tone_mapping_is_selected_not_implicit ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/color_packing.rs (reactivity/target/debug/deps/color_packing-1651dc1150fbfb49)
+
+running 3 tests
+test const_palette_alpha_and_float_equality_keep_their_contracts ... ok
+test legacy_working_colors_produce_identical_cpu_pixels ... ok
+test legacy_admission_channels_and_conversion_are_bit_exact ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
 
      Running tests/dpi.rs (reactivity/target/debug/deps/dpi-736887f4ccdd59b4)
 
@@ -43,7 +55,7 @@ test invalid_external_targets_leave_buffer_and_scene_untouched ... ok
 test external_parallel_word_bands_are_exact_and_allocate_no_internal_image ... ok
 test external_native_words_match_rgba_and_preserve_lazy_image_coherence ... ok
 
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
 
      Running tests/font_quality.rs (reactivity/target/debug/deps/font_quality-a7017806bc7befae)
 
@@ -75,8 +87,8 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 running 6 tests
 test byte_counts_and_checked_configuration_are_format_specific ... ok
-test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
 test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
+test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
 test extended_values_compose_before_finite_storage_saturation ... ok
 test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
 test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
@@ -86,9 +98,9 @@ test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
      Running tests/oklch.rs (reactivity/target/debug/deps/oklch-7ace7ab1bf815abc)
 
 running 5 tests
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
 test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
 test invalid_ranges_and_out_of_working_range_are_rejected ... ok
-test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
 test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
 test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
 
@@ -101,7 +113,7 @@ test pool_memory_measurement ... ignored, process RSS/thread measurement; run se
 test threshold_and_invalid_worker_counts_are_explicit ... ok
 test serial_and_scoped_disjoint_bands_are_byte_identical ... ok
 
-test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 4.96s
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 5.39s
 
      Running tests/prepared_scene.rs (reactivity/target/debug/deps/prepared_scene-f8836829524cecd8)
 
@@ -116,17 +128,17 @@ test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 running 10 tests
 test correlated_edges_are_composited_before_sample_average ... ok
-test linear_light_alpha_and_premultiplied_output ... ok
 test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
+test linear_light_alpha_and_premultiplied_output ... ok
 test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
-test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
 test wrapped_runs_keep_utf8_clusters_and_reshape_lines ... ok
+test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
 test real_shaping_ligatures_unicode_measure_and_paint_are_stable ... ok
 test swash_native_pixels_and_transformed_cells_match_independent_oracles ... ok
 test invalid_inputs_and_caps_do_not_corrupt_scene ... ok
 test transformed_rectangles_match_exhaustive_sample_oracle ... ok
 
-test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.27s
 
      Running tests/sample_clip.rs (reactivity/target/debug/deps/sample_clip-f806142d25b7e9be)
 
@@ -134,7 +146,7 @@ running 2 tests
 test nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing ... ok
 test sampled_clips_match_independent_ordinary_canvas_for_signs_ties_and_extreme_inverse ... ok
 
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
 
      Running tests/shaping.rs (reactivity/target/debug/deps/shaping-abd15565a474adca)
 
@@ -158,4 +170,4 @@ test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 1 test
 test crates/canvas/src/canvas.rs - canvas::CanvasScene (line 1425) - compile fail ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s

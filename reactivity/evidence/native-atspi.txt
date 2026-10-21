@@ -1,13 +1,13 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s
-     Running unittests src/lib.rs (target/debug/deps/gpui-f66c679123c90ef3)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running unittests src/lib.rs (target/debug/deps/gpui-f69bae5e87ace9bf)
 
 running 1 test
 GPUI_ACCESSKIT_IDLE threads_before=2 threads_after=5 conversions=0
-dbus-daemon[1544267]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=1544283 comm="/root/gpui-ce3/reactivity/target/debug/deps/gpui-f")
+dbus-daemon[1618594]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=1618634 comm="/root/gpui-ce3/reactivity/target/debug/deps/gpui-f")
 AT-SPI client enabled; waiting for native window
-dbus-daemon[1544267]: Successfully activated service 'org.a11y.atspi.Registry'
+dbus-daemon[1618594]: Successfully activated service 'org.a11y.atspi.Registry'
 SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
 AT-SPI found window (":1.0", OwnedObjectPath(ObjectPath("/org/a11y/atspi/accessible/0/0")))
 test native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 77 filtered out; finished in 0.92s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 79 filtered out; finished in 1.55s

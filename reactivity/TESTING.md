@@ -29,8 +29,10 @@ dispatcher or registry. The returned windows own their lifetimes; closing a
 window drops its model and resources. Queries borrow `&Win`; edits, input and
 presentation acknowledgement require `&mut Win`. Rust rejects mutation during a
 source/scene read. There is no production `Rc`, `RefCell` or `Cell` in this window
-engine. Immutable text uses Triomphe leases between source and presented epochs;
+engine. Immutable text uses one-word ArcStr leases between source and presented epochs;
 fonts/masks/backend resources have their separate immutable resource leases.
+The [ownership evidence](crates/gpui/evidence/thin-text.md) charges larger distinct
+nonempty string headers, dependency unsafe internals and measured CPU losses.
 
 `visit` also exposes each part's target, parent, focus, supported semantic actions,
 name/description/value, frozen list metadata and canonical local geometry.

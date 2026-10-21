@@ -22,8 +22,8 @@ describe the intended complete system; this page records what is connected now.
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
-FnMut, allowing plain captured state. Immutable text uses Triomphe leases between
-source and presented epochs; fonts, masks and in-flight backend resources have
+FnMut, allowing plain captured state. Immutable text uses one-word ArcStr leases
+between source and presented epochs; fonts, masks and in-flight backend resources have
 explicit immutable resource leases. Some test-only read/drop counters still use
 interior mutability; dependencies and OS callbacks have their own contracts.
 
@@ -42,16 +42,21 @@ AccessKit tree mirror or historical ID map; the native adapter retains its own
 required tree. Stock Linux adapter construction starts background work even
 before activation, so lazy conversion is not a zero-cost native AT claim.
 
+On the current 64-bit build, Node is 128 B, an actual text-site entry is 72 B,
+Presented is 80 B and a frozen list-row entry is 24 B. Author Color is 16 B and
+Style is 88 B. These are exact retained layouts, not whole-window memory figures;
+layout/font/scene storage and native services remain separately owned.
+
 ## Current verification
 
 [checks.json](evidence/checks.json) records seventeen successful gates with exact commands,
-exit status and elapsed time, run against source commit 73bd525c9f:
+exit status and elapsed time, run against source commit b20a627b08:
 
-- Debug and release workspace suites: **359 passing cases/doctests each**.
+- Debug and release workspace suites: **370 passing cases/doctests each**.
 - Strict workspace Clippy and first-party formatting: pass.
-- Explicit parallel Canvas suite: **61 passing cases**, overlapping the workspace suite.
+- Explicit parallel Canvas suite: **66 passing cases**, overlapping the workspace suite.
 - Optimized Loom protocol suite: **6 passing cases**; finite proof scope in [TESTING](TESTING.md).
-- Actual Vulkan conformance: **17 passing readback cases**, including 24 signed/fractional inverse-lattice clipping fixtures with tile proofs enabled and disabled.
+- Actual Vulkan conformance: **18 passing readback cases**, including all five author color layouts through SDR/HDR and 24 signed/fractional inverse-lattice clipping fixtures with tile proofs enabled and disabled.
 - Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
 - Actual X11 worker delivery: **one script** checking real wakes, committed-error repair and shutdown without a polling timer.
 - Actual X11 250K Library: **one script** checking wheel/pointer routing, source/presentation separation, row target lifetimes, resize, suspend/resume and full server-pixel equality.
@@ -88,6 +93,12 @@ CI workflows are not reported as completed remote results.
 | Packed identities and geometry | [Sheet packing](crates/gpui/evidence/sheet-packing.md): bounded parent index and finite affine sentinel reduce Node 232→224 B and P 104→88 B; FieldId's checked nonzero encoding subsequently shrinks its option to 8 B | Exact admitted-domain representation; no coordinate quantization or new unsafe |
 | Dense text storage | [Text-lane evidence](crates/gpui/evidence/text-lane.md): Node 216→136 B, plus 80 B per actual text site; 4,097-node sparse fixture saves 307,256 requested retained B | Adds one Vec header and one nonempty lane allocation; dense text headers are neutral; measured timing losses are retained |
 | Native semantic projection | [Projection evidence](crates/gpui/ACCESSIBILITY.md): exactly reserved 10K-button output removes about 0.87 MB retained and 1.62 MB peak requested B versus geometric growth | Extra read pass; excludes adapter-owned tree, D-Bus and OS providers; changed P still projects the full tree |
+| Thin text leases | [Paired evidence](crates/gpui/evidence/thin-text.md): P 88→80 B and text-site 80→72 B; 100K no-text fixture saves 800,000 requested retained B | Each unique nonempty payload requests 1–8 B more; no-text preparation loses about 10% and sparse edits about 6%; rejected flag packing did not fix it |
+| Lossless author colors | [Color proof and measurements](crates/canvas/COLOR_PACKING.md): Color 20→16 B, Style 96→88 B, Node 136→128 B, preserving all admitted HDR/author bits | Some conversion/mount/raster phases lose; native first acknowledgement is flat and native RSS/PSS increased in the paired capture; Canvas working colors already occupied 16 B |
+
+The measurement rows pin their own baselines. Dense text, thin leases, color
+packing and row derivation were measured independently; their percentages are
+not additive, and a combined native memory/performance improvement is not inferred.
 
 No competitor victory, near-zero native memory floor, universal byte parity or
 order-of-magnitude feature-equivalent simplification has been established.
@@ -100,8 +111,8 @@ media and richer input remain prerequisites for that port.
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. This snapshot contains **23,707 first-party src lines** and
-**16,400 external test/example lines** across production and experimental crates.
+are separate. This snapshot contains **24,054 first-party src lines** and
+**17,758 external test/example lines** across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
 Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
 their tests/examples. Vendoring has not made those dependencies disappear.

@@ -12,7 +12,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 23.876,
+    "elapsed_seconds": 48.531,
     "log": "workspace-debug.txt"
   },
   {
@@ -32,7 +32,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.842,
+    "elapsed_seconds": 9.536,
     "log": "workspace-clippy.txt"
   },
   {
@@ -49,7 +49,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 4.858,
+    "elapsed_seconds": 66.444,
     "log": "workspace-release.txt"
   },
   {
@@ -69,7 +69,7 @@
       "loom_protocol"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 6.486,
+    "elapsed_seconds": 6.523,
     "log": "loom.txt"
   },
   {
@@ -87,7 +87,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.252,
+    "elapsed_seconds": 3.789,
     "log": "native-check.txt"
   },
   {
@@ -105,7 +105,7 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.219,
+    "elapsed_seconds": 2.075,
     "log": "native-minimal-check.txt"
   },
   {
@@ -126,7 +126,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.327,
+    "elapsed_seconds": 3.933,
     "log": "native-clippy.txt"
   },
   {
@@ -145,7 +145,7 @@
       "native::accessibility::tests"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 3.62,
+    "elapsed_seconds": 14.957,
     "log": "accessibility-schema.txt",
     "passed_tests": 12
   },
@@ -163,7 +163,7 @@
       "parallel"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 7.178,
+    "elapsed_seconds": 16.168,
     "log": "parallel-canvas.txt"
   },
   {
@@ -182,7 +182,7 @@
       "retained_layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.096,
+    "elapsed_seconds": 0.132,
     "log": "layout-example.txt"
   },
   {
@@ -221,7 +221,7 @@
       "--check"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.456,
+    "elapsed_seconds": 0.624,
     "log": "format.txt"
   },
   {
@@ -240,9 +240,9 @@
       "render"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 1.069,
+    "elapsed_seconds": 9.389,
     "log": "gpu-vulkan.txt",
-    "passed_tests": 17
+    "passed_tests": 18
   },
   {
     "check": "native-x11",
@@ -263,7 +263,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 6.774,
+    "elapsed_seconds": 34.725,
     "log": "native-x11.txt",
     "passed_tests": 1
   },
@@ -286,7 +286,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.521,
+    "elapsed_seconds": 0.739,
     "log": "native-remote.txt",
     "passed_tests": 1
   },
@@ -309,7 +309,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 11.209,
+    "elapsed_seconds": 10.698,
     "log": "native-library.txt",
     "passed_tests": 1
   },
@@ -321,7 +321,7 @@
       "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 1.213,
+    "elapsed_seconds": 4.115,
     "log": "native-atspi.txt",
     "passed_tests": 1
   },
@@ -347,7 +347,7 @@
       "--nocapture"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.386,
+    "elapsed_seconds": 0.442,
     "log": "native-no-bus.txt",
     "passed_tests": 1
   }

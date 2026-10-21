@@ -1,6 +1,6 @@
 {
   "method": "Physical Rust lines including comments, blanks and embedded tests. Library means src/, not production acceptance. Counts on-disk first-party crates/ and vendor/; excludes target/ and archived original design examples under docs/inputs/.",
-  "source_code_head": "73bd525c9f53dadfeed21a5966e46c820ba8291c",
+  "source_code_head": "b20a627b0879ff5c2faf7a0c47cb8f71b2821ce3",
   "crates": {
     "algebra-lab": {
       "examples": 826,
@@ -13,8 +13,8 @@
     },
     "canvas": {
       "examples": 557,
-      "library": 3250,
-      "tests": 2455
+      "library": 3471,
+      "tests": 2945
     },
     "core": {
       "examples": 117,
@@ -29,12 +29,12 @@
     "gpu": {
       "examples": 300,
       "library": 1477,
-      "tests": 865
+      "tests": 918
     },
     "gpui": {
-      "examples": 1183,
-      "library": 12804,
-      "tests": 5263
+      "examples": 1675,
+      "library": 12930,
+      "tests": 5586
     },
     "host": {
       "library": 210,

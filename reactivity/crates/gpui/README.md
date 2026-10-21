@@ -81,7 +81,9 @@ branches and formatting. `direct` explicitly declares that edits only affect
 installed direct operands. Shared Signal reads have no hidden dependency
 collector. Arbitrary owner callbacks always refresh the owner. Signals retain
 inline values; bindings retain field keys rather than movable application
-addresses. Same-field fanout shares one promoted immutable text allocation.
+addresses. Same-field fanout shares one immutable text promotion. Private retained
+text uses one-word ArcStr leases; empty text allocates nothing, while nonempty
+headers and measured CPU costs are charged in [the ownership ledger](evidence/thin-text.md).
 
 `Win::set` returns `SetError::Rejected` with the original value when admission
 fails. `Committed` reports the source/presentation epochs after a successful
