@@ -689,6 +689,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpui_presenter_tests"
+version = "0.1.0"
+dependencies = [
+ "objc2 0.6.5",
+ "objc2-core-foundation",
+ "objc2-foundation 0.3.2",
+ "objc2-quartz-core 0.3.2",
+ "raw-window-handle",
+ "softbuffer",
+ "static_assertions",
+ "wgpu-hal",
+]
+
+[[package]]
 name = "gpui_reactivity_algebra_lab"
 version = "0.1.0"
 
@@ -1972,11 +1986,10 @@ dependencies = [
 [[package]]
 name = "softbuffer"
 version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aac18da81ebbf05109ab275b157c22a653bb3c12cf884450179942f81bcbf6c3"
 dependencies = [
  "as-raw-xcb-connection",
  "bytemuck",
+ "dispatch2",
  "fastrand",
  "js-sys",
  "memmap2",
@@ -2562,8 +2575,6 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "29.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97ace1c17727311c22a46e4e3faf56ea6de81af99dcc839bdfb54857b94d448d"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -2574,6 +2585,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "cfg_aliases",
+ "dispatch2",
  "glow",
  "glutin_wgl_sys",
  "gpu-allocator",
