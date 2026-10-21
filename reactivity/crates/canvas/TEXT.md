@@ -94,7 +94,7 @@ paragraph, mark, ZWJ and isolate combinations validate source ranges, glyph
 coverage and both byte affinities. The fixture-specific glyph conservation
 oracle is not a universal contract that all fonts/line shapers preserve glyph
 IDs after wrapping. Scoped CPU pools of 1/2/4 workers produce exact pixels.
-All 19 actual Vulkan tests pass, including mixed Unicode fallback at fractional
+All 20 actual Vulkan tests pass, including mixed Unicode fallback at fractional
 raster density and reflected transforms, exact optimized/reference GPU pixels
 and the existing bounded CPU/GPU rounding oracle.
 
@@ -129,12 +129,14 @@ text change; they do not price the separate stock Linux AT threads/D-Bus costs.
 
 ## Paired common-label measurements
 
-Baseline is source `146cd9912d`; candidate is this patch. Both use the same
+Baseline is source `146cd9912d`; candidate is the original Unicode integration. Both use the same
 benchmark operations, label strings and rendering sizes, and borrow one parser
-for the entire 1/1000-label pass. The current Unicode coverage check still
-parses a borrowed primary ttf-parser Face view per string; planner reuse does
-not claim to eliminate that measured cost. A lifetime-borrowed cached Face can
-be evaluated separately without a self-reference. Release binaries were built with Rust 1.97.1 on
+for the entire 1/1000-label pass. That measured Unicode coverage check parsed a
+borrowed primary ttf-parser Face view per string. The subsequent
+[cached-cmap integration](evidence/cached-cmap.md) retains only borrowed coverage
+table descriptors in the scoped planner, with an exhaustive independent oracle
+and separate paired measurements; its results are not added to these timings.
+Release binaries were built with Rust 1.97.1 on
 Linux x86_64, Ryzen 7 3700X. Eleven fresh-process pairs alternate order, pinned
 to CPU2 after stopping other owned build/capture work. OS caches are warm;
 there is no claim of a cold-cache or hard latency guarantee. Before capture,

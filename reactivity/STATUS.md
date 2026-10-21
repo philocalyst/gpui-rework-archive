@@ -101,6 +101,14 @@ includes the subsequent cancellation, style storage, Unicode and glyph-axis inte
 The workspace-release gate was paused during a separate quiet benchmark capture;
 its elapsed wall time includes that pause and is not a suite-speed measurement.
 
+The subsequent [cached-cmap integration checks](evidence/cmap-integration-checks.json)
+pin source 76f5be8493: 101 parallel Canvas cases, 235 GPUI cases, all 20 Vulkan
+readbacks, the real X11 Unicode and AT-SPI scripts, and combined strict all-target
+Clippy pass. [Desktop cross-checks](evidence/cmap-platform-checks.json) pass strict
+all-target Clippy for the actual macOS and Windows adapters at the same source.
+Those two checks compile target code; they do not execute either operating system.
+The full twenty-one-gate report above retains its earlier source pin.
+
 The earlier [output-conversion checks](evidence/output-cache-checks.json) pin source
 b4598cb303: 79 release parallel Canvas cases/doctests, strict all-target accessible
 native Clippy, all 19 Vulkan readbacks and the real Todo multi-renderer script
@@ -118,6 +126,7 @@ not execution on those operating systems.
 | Exact glyph addresses | [500-row controls](crates/canvas/evidence/glyph-axis/README.md): 48-label SDR preparation+raster 13.80→5.73 ms, HDR 14.70→6.68 ms | Adds 1,032 B transient address tables per worker; several non-text serial controls lose 2–3%; excludes native upload and predates Unicode integration |
 | Current-owner style sharing | [Style evidence](crates/gpui/evidence/retained-styles.md): Node 128→40 B; repeated whole owners save about 16% requested retained bytes | Adds 40 B owner header; unique payload neutral; two-style coarse descriptions lose about 10%, first inspector densification 10–20% |
 | One Unicode layout | [Text evidence](crates/canvas/TEXT.md): 1000-label owner mount 14.79→12.85 ms, requested peak 2.11→1.93 MB | Retains 8,304 B more, prepare loses 4.6%, empty native PSS adds 194 KiB; Linux text-only cut, no native IME/selection claim |
+| Borrowed coverage descriptors | [Cached-cmap evidence](crates/canvas/evidence/cached-cmap.md): reused 1000-label pass 8.93→8.50 ms, owner edit 12.21→11.62 ms | Adds 104 B scoped planner storage, unchanged retained layout and allocation counts; single-label edit loses about 1%; no native latency claim |
 | Lazy fonts and scoped shaping | [Startup](crates/gpui/STARTUP.md): Gallery median 80.038→40.525 ms on default-reset Xvfb; 23.302 ms with -noreset | Display reset is an environmental cost; warm filesystem, fresh processes, present acknowledgement rather than scanout |
 | CPU-first blank | [Memory CSV](crates/gpui/evidence-native-memory-auto-swash.csv): roughly 8.5 MiB PSS, one idle thread, no GPU probe on this device-less Linux host | Predates representation/solid changes; driver/compositor bytes are separate |
 | Canonical retained runs | [Canvas](crates/canvas/README.md): 32K-glyph grouped fixture retained heap 4,456,500→1,269,876 B; peak 6,689,076→1,795,060 B | Unique-mask heap is neutral; Canvas header grows 208 B; flat traversal can lose |
