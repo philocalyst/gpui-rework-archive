@@ -24,6 +24,10 @@ impl Revision {
 /// Like ordinary Rust data, `T` may itself offer interior mutation. Such mutation
 /// cannot be detected here; tracked values must be edited through `&mut Signal`.
 ///
+/// With the optional `serde` feature, only the value is serialized, using `T`'s
+/// representation. Deserialization creates a fresh signal at revision zero;
+/// local mutation stamps and owner capabilities are never restored from data.
+///
 /// ```
 /// use gpui_reactivity_state::Signal;
 /// let mut count = Signal::new(1);
@@ -66,6 +70,20 @@ impl<T> Signal<T> {
 impl<T: Default> Default for Signal<T> {
     fn default() -> Self {
         Self::new(T::default())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<T: serde::Serialize> serde::Serialize for Signal<T> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.value.serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de, T: serde::Deserialize<'de>> serde::Deserialize<'de> for Signal<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        T::deserialize(deserializer).map(Self::new)
     }
 }
 
