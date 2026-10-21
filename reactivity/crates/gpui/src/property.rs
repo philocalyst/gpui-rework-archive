@@ -3,7 +3,7 @@
 //! Contributions retain presence separately from resolved destination equality.
 
 use crate::style::{Affine, Color, Flow, Style};
-use std::fmt;
+use std::{collections::BTreeMap, fmt};
 
 /// Inclusive ceilings: Geometry includes hit/bounds/damage/paint; Layout also
 /// includes geometry and paint. Destination equality may cut off concrete work.
@@ -244,6 +244,112 @@ impl PropertyValue {
         }
     }
 }
+/// Cold per-window state, keyed by a runtime-validated logical node identity.
+/// Ordinary nodes have no entry or duplicate base style. Presence belongs here,
+/// independently of whether the resolved destination changed.
+#[derive(Default)]
+pub(crate) struct Overrides {
+    entries: BTreeMap<u64, Overlay>,
+}
+struct Overlay {
+    base: Style,
+    values: BTreeMap<PropertyId, PropertyValue>,
+}
+impl Overrides {
+    pub(crate) fn get<T>(&self, identity: u64, property: Property<T>) -> Contribution<T> {
+        let Some(overlay) = self.entries.get(&identity) else {
+            return Contribution::Inherit;
+        };
+        let Some(value) = overlay.values.get(&property.id()) else {
+            return Contribution::Inherit;
+        };
+        let mut style = overlay.base;
+        property
+            .id()
+            .set_erased(&mut style, *value)
+            .expect("validated stored contribution");
+        Contribution::Set(property.get(&style))
+    }
+
+    pub(crate) fn set<T: PartialEq>(
+        &mut self,
+        identity: u64,
+        current: Style,
+        property: Property<T>,
+        contribution: Contribution<T>,
+    ) -> Result<Style, PropertyError> {
+        let id = property.id();
+        match contribution {
+            Contribution::Inherit => {
+                let Some(overlay) = self.entries.get(&identity) else {
+                    return Ok(current);
+                };
+                let resolved = apply_except(overlay.base, &overlay.values, Some(id));
+                let overlay = self.entries.get_mut(&identity).unwrap();
+                overlay.values.remove(&id);
+                if overlay.values.is_empty() {
+                    self.entries.remove(&identity);
+                }
+                self.release_empty();
+                Ok(resolved)
+            }
+            Contribution::Set(value) => {
+                // Stage typed validation/conversion and complete resolution
+                // before touching either map, including the stored base.
+                let mut converted = current;
+                property.set(&mut converted, value)?;
+                let value = id.get_erased(&converted);
+                let mut resolved = self.entries.get(&identity).map_or(current, |overlay| {
+                    apply_except(overlay.base, &overlay.values, Some(id))
+                });
+                id.set_erased(&mut resolved, value)?;
+                let overlay = self.entries.entry(identity).or_insert_with(|| Overlay {
+                    base: current,
+                    values: BTreeMap::new(),
+                });
+                overlay.values.insert(id, value);
+                Ok(resolved)
+            }
+        }
+    }
+
+    pub(crate) fn resolve(&mut self, identity: u64, declared: Style) -> Style {
+        let Some(overlay) = self.entries.get_mut(&identity) else {
+            return declared;
+        };
+        let resolved = apply_except(declared, &overlay.values, None);
+        overlay.base = declared;
+        resolved
+    }
+
+    pub(crate) fn retain(&mut self, mut live: impl FnMut(u64) -> bool) {
+        self.entries.retain(|identity, _| live(*identity));
+        self.release_empty();
+    }
+
+    fn release_empty(&mut self) {
+        // BTreeMap may retain an empty root allocation after removal. Release
+        // it when the window no longer has any overridden nodes.
+        if self.entries.is_empty() {
+            self.entries = BTreeMap::new();
+        }
+    }
+}
+
+fn apply_except(
+    mut style: Style,
+    values: &BTreeMap<PropertyId, PropertyValue>,
+    skip: Option<PropertyId>,
+) -> Style {
+    for (id, value) in values {
+        if Some(*id) != skip {
+            id.set_erased(&mut style, *value)
+                .expect("validated stored contribution");
+        }
+    }
+    style
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -376,5 +482,101 @@ mod tests {
         assert_eq!(TRANSFORM.get(&style), Affine::translation(4.0, 8.0));
         assert_eq!(WIDTH.default_value(), None);
         assert_eq!(FONT_SIZE.default_value(), 16.0);
+    }
+
+    #[test]
+    fn sparse_overrides_preserve_explicit_auto_and_reveal_updated_base_on_reset() {
+        let mut overrides = Overrides::default();
+        let base = Style::default();
+        assert_eq!(overrides.get(1, WIDTH), Contribution::Inherit);
+        assert!(overrides.entries.is_empty());
+        let equal = overrides
+            .set(1, base, WIDTH, Contribution::Set(None))
+            .unwrap();
+        assert_eq!(equal, base);
+        assert_eq!(overrides.get(1, WIDTH), Contribution::Set(None));
+        let mut declared = base;
+        WIDTH.set(&mut declared, Some(40.0)).unwrap();
+        PADDING.set(&mut declared, 8.0).unwrap();
+        let resolved = overrides.resolve(1, declared);
+        assert_eq!(WIDTH.get(&resolved), None);
+        assert_eq!(PADDING.get(&resolved), 8.0);
+        assert_eq!(overrides.get(1, WIDTH), Contribution::Set(None));
+        let restored = overrides
+            .set(1, resolved, WIDTH, Contribution::Inherit)
+            .unwrap();
+        assert_eq!(restored, declared);
+        assert_eq!(overrides.get(1, WIDTH), Contribution::Inherit);
+        assert!(overrides.entries.is_empty());
+    }
+
+    #[test]
+    fn independent_overrides_survive_base_changes_and_lifecycle_purge() {
+        let mut overrides = Overrides::default();
+        let base = Style::default();
+        let width = overrides
+            .set(1, base, WIDTH, Contribution::Set(Some(20.0)))
+            .unwrap();
+        let both = overrides
+            .set(1, width, HEIGHT, Contribution::Set(Some(30.0)))
+            .unwrap();
+        assert_eq!(
+            (WIDTH.get(&both), HEIGHT.get(&both)),
+            (Some(20.0), Some(30.0))
+        );
+        overrides.set(2, base, GAP, Contribution::Set(7.0)).unwrap();
+        let mut declared = base;
+        WIDTH.set(&mut declared, Some(100.0)).unwrap();
+        HEIGHT.set(&mut declared, Some(200.0)).unwrap();
+        let both = overrides.resolve(1, declared);
+        assert_eq!(
+            (WIDTH.get(&both), HEIGHT.get(&both)),
+            (Some(20.0), Some(30.0))
+        );
+        let height = overrides
+            .set(1, both, WIDTH, Contribution::Inherit)
+            .unwrap();
+        assert_eq!(
+            (WIDTH.get(&height), HEIGHT.get(&height)),
+            (Some(100.0), Some(30.0))
+        );
+        assert_eq!(overrides.get(1, HEIGHT), Contribution::Set(Some(30.0)));
+        assert_eq!(overrides.get(2, GAP), Contribution::Set(7.0));
+        overrides.retain(|identity| identity == 2);
+        assert_eq!(overrides.get(1, HEIGHT), Contribution::Inherit);
+        assert_eq!(overrides.get(2, GAP), Contribution::Set(7.0));
+        overrides.retain(|_| false);
+        assert!(overrides.entries.is_empty());
+        // A recycled caller identity has no retained values or lower base.
+        assert_eq!(overrides.resolve(1, declared), declared);
+    }
+
+    #[test]
+    fn rejected_override_changes_neither_existing_bases_nor_any_contribution() {
+        let mut overrides = Overrides::default();
+        let base = Style::default();
+        let current = overrides.set(1, base, GAP, Contribution::Set(3.0)).unwrap();
+        overrides
+            .set(2, base, WIDTH, Contribution::Set(Some(8.0)))
+            .unwrap();
+        let old_values = overrides.entries[&1].values.clone();
+        let old_base = overrides.entries[&1].base;
+        let other_values = overrides.entries[&2].values.clone();
+        let mut different_base = current;
+        PADDING.set(&mut different_base, 91.0).unwrap();
+        for id in [1, 3] {
+            assert!(
+                overrides
+                    .set(id, different_base, GAP, Contribution::Set(f32::NAN))
+                    .is_err()
+            );
+        }
+        assert_eq!(overrides.entries.len(), 2);
+        assert_eq!(overrides.entries[&1].base, old_base);
+        assert_eq!(overrides.entries[&1].values, old_values);
+        assert_eq!(overrides.entries[&2].base, base);
+        assert_eq!(overrides.entries[&2].values, other_values);
+        assert_eq!(GAP.get(&current), 3.0);
+        assert_eq!(PADDING.get(&current), 0.0);
     }
 }
