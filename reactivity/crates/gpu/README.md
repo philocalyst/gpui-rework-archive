@@ -71,7 +71,8 @@ draw records remain retained; each frame rebuilds the disposable proof, so
 changing alpha, clip or material restores any newly visible background.
 
 A certificate requires a rectangle, alpha exactly one, and no negative-zero
-channels (source-over can change a zero's sign according to the backdrop).
+or negative-subnormal channels (source-over can change a zero's sign according
+to the backdrop, including a zero produced by flushing a subnormal).
 The continuous tile must fit in the clip. Four corners of the actual sample
 hull, offset 1/8 pixel inside the tile, must independently satisfy:
 
