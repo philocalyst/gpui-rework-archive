@@ -14,6 +14,18 @@ pub use cursor_icon::{CursorIcon, ParseError as CursorIconParseError};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+/// Observed destination invalidation since the last query. This supplements
+/// redraw scheduling; it does not replace presenter/lifecycle ownership.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RedrawInvalidation {
+    /// This backend supplies no complete negative invalidation evidence.
+    Unknown,
+    /// The qualified backend observed no invalidation since the previous take.
+    KnownClear,
+    /// Observed contents may be missing; repair the full destination.
+    Invalidated,
+}
+
 /// Represents a window.
 ///
 /// The window is closed when dropped.
@@ -598,6 +610,26 @@ impl Window {
         let _span = tracing::debug_span!("winit::Window::request_redraw",).entered();
 
         self.window.maybe_queue_on_main(|w| w.request_redraw())
+    }
+
+    /// Takes observed destination invalidation without changing redraw delivery.
+    ///
+    /// Only X11 currently supplies known results. The initial result is
+    /// `Invalidated`; Expose and map/unmap observations latch it again. There
+    /// must be one logical consumer, which retains a full-repair obligation
+    /// until successful submission. Resize, surface recreation, failed submits
+    /// and other presenter lifecycle changes still require explicit invalidation.
+    /// Events generated asynchronously after this take are observed later; this
+    /// is not an atomic guarantee against window-manager changes or scanout.
+    pub fn take_redraw_invalidation(&self) -> RedrawInvalidation {
+        #[cfg(any(x11_platform, wayland_platform))]
+        {
+            self.window.maybe_wait_on_main(|w| w.take_redraw_invalidation())
+        }
+        #[cfg(not(any(x11_platform, wayland_platform)))]
+        {
+            RedrawInvalidation::Unknown
+        }
     }
 
     /// Notify the windowing system before presenting to the window.

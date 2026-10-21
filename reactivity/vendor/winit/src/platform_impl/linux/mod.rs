@@ -546,6 +546,15 @@ impl Window {
         x11_or_wayland!(match self; Window(w) => w.request_redraw())
     }
 
+    pub fn take_redraw_invalidation(&self) -> crate::window::RedrawInvalidation {
+        match self {
+            #[cfg(x11_platform)]
+            Self::X(window) => window.take_redraw_invalidation(),
+            #[cfg(wayland_platform)]
+            Self::Wayland(_) => crate::window::RedrawInvalidation::Unknown,
+        }
+    }
+
     #[inline]
     pub fn pre_present_notify(&self) {
         x11_or_wayland!(match self; Window(w) => w.pre_present_notify())

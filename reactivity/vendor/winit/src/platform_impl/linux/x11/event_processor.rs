@@ -190,6 +190,10 @@ impl EventProcessor {
             xlib::ConfigureNotify => self.configure_notify(xev.as_ref(), &mut callback),
             xlib::ReparentNotify => self.reparent_notify(xev.as_ref()),
             xlib::MapNotify => self.map_notify(xev.as_ref(), &mut callback),
+            xlib::UnmapNotify => {
+                let event: &xlib::XUnmapEvent = xev.as_ref();
+                self.with_window(event.window as xproto::Window, |window| window.invalidate_redraw());
+            },
             xlib::DestroyNotify => self.destroy_notify(xev.as_ref(), &mut callback),
             xlib::PropertyNotify => self.property_notify(xev.as_ref(), &mut callback),
             xlib::VisibilityNotify => self.visibility_notify(xev.as_ref(), &mut callback),
@@ -809,6 +813,7 @@ impl EventProcessor {
     {
         let window = xev.window as xproto::Window;
         let window_id = mkwid(window);
+        self.with_window(window, |window| window.invalidate_redraw());
 
         // NOTE: Re-issue the focus state when mapping the window.
         //
@@ -881,6 +886,9 @@ impl EventProcessor {
     where
         F: FnMut(&RootAEL, Event<T>),
     {
+        // Latch every rectangle: an app redraw can arrive before the final
+        // rectangle of a series. Scheduling remains coalesced at count == 0.
+        self.with_window(xev.window as xproto::Window, |window| window.invalidate_redraw());
         // Multiple Expose events may be received for subareas of a window.
         // We issue `RedrawRequested` only for the last event of such a series.
         if xev.count == 0 {
