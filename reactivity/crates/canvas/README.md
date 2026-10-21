@@ -298,11 +298,11 @@ plus conservative 16-sample command-bound area; a rectangle certified to fill
 the complete viewport contributes only its tile area. This estimate affects
 scheduling only. Heights up to 16 remain serial. `with_min_work(0)` forces the
 parallel comparison for taller images. Small work should remain serial: in the
-[measured run](evidence-parallel.csv), a 4×32 boundary scene took 17.3 µs serial
-and 23.8 µs with eight workers. Pools with one worker likewise add overhead.
+[measured run](evidence-parallel.csv), a 4×32 boundary scene took 18.0 µs serial
+and 22.2 µs with eight workers. Pools with one worker likewise add overhead.
 On the same shared Ryzen 7 3700X, a 640×480 scene of 48 shaped labels took
-14.87 ms serial, 7.59 ms with two workers, 4.15 ms with four, and 2.80 ms with
-eight. A 1920×1080 flat panel took 1.66 ms serial and 0.40 ms with eight.
+15.87 ms serial, 8.13 ms with two workers, 4.31 ms with four, and 2.52 ms with
+eight. A 1920×1080 flat panel took 1.69 ms serial and 0.36 ms with eight.
 These medians include command preparation, bin construction, and rasterization,
 but exclude font/pool creation and presentation. Seven warm batches were used;
 CSV rows retain exact equal frame digests and allocation-capacity ledgers.
@@ -332,7 +332,8 @@ attribution, and allocator retention prevents immediate OS-reclamation claims.
 ## Safe compiler SIMD evidence
 
 The release `render_band<OutputEncoder>` assembly contains packed four-channel
-SSE `mulps`/`addps` for source-over and sample averaging. Rust/LLVM emits this
+SSE `mulps`/`addps` for source-over. Sample means accumulate in f64 and narrow
+once, preserving identical clear samples exactly. Rust/LLVM emits this
 from ordinary safe array loops; baseline x86_64 SSE requires no runtime feature
 probe or unsafe vector loads. This is four color channels, not four independent
 coverage tests. The fixed scalar sample positions and arithmetic order remain
@@ -341,9 +342,9 @@ the reference contract.
 A paired whole-build experiment disabled LLVM SLP and loop vectorizers with
 `RUSTFLAGS='-Cllvm-args=-vectorize-slp=false -Cllvm-args=-vectorize-loops=false'`
 in a separate target directory. All frame digests matched. The
-[non-vectorized run](evidence-no-vectorize.csv) took 19.44 ms for serial labels,
-4.75 ms for serial shear, and 0.280 ms for the flat scene; the ordinary build
-above took 14.87/3.17/0.195 ms. These flags affect the whole build, so the timing
+[non-vectorized run](evidence-no-vectorize.csv) took 20.64 ms for serial labels,
+4.75 ms for serial shear, and 0.272 ms for the flat scene; the ordinary build
+above took 15.87/3.22/0.197 ms. These flags affect the whole build, so the timing
 difference is not attributed solely to the blend instructions. There is no new
 unsafe intrinsic implementation, AVX2 claim, or changed sampling quality.
 
@@ -362,9 +363,19 @@ saturation; those bytes alone do not enable an HDR monitor or OS surface.
 
 The [actual linear16F measurement](evidence-hdr-parallel.csv) uses
 `GPUI_RENDER_HDR=1` with the parallel example: the 640×480 shaped-label scene
-retains a 2,457,600-byte output and took 19.60 ms serial, 10.06/5.36/3.59 ms
+retains a 2,457,600-byte output and took 19.93 ms serial, 10.15/5.47/3.41 ms
 with 2/4/8 workers. The eight-byte converter is more expensive than the exact
 opaque-sRGB byte quantizer; HDR is an explicit format choice with measurable
 cost. Digests agree across all worker counts. This scene contains ordinary SDR
 labels; separate actual-byte tests exercise >1 highlights, negative channels,
 alpha, cancellation before final storage saturation, and real font coverage.
+
+
+A zero-coverage command must preserve the image. Sample means therefore sum
+sixteen f32 working colors in f64 and narrow once; sixteen identical f32 values
+fit exactly within f64's significand. The former repeated f32 accumulation could
+shift a constant tile by one ulp and cross an exact RGBA8 quantization threshold,
+while an untouched tile encoded the original clear. A public regression uses
+that threshold with both output formats, proof modes and opaque/translucent
+clear colors. Per-sample source-over and the coverage sample positions are
+unchanged. The paired vectorization CSVs above were rerun after this correction.
