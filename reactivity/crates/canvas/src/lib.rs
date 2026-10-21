@@ -4,7 +4,10 @@ pub use gpui_reactivity_core::{Affine, Point, Rect};
 mod canvas;
 mod color;
 mod text;
-pub use canvas::{Canvas, CanvasScene, GlyphMask, PreparedDraw, PreparedScene, RenderStats};
+pub use canvas::{
+    Canvas, CanvasScene, GlyphMask, PreparedDraw, PreparedGroup, PreparedPlacement, PreparedScene,
+    RenderStats, SceneStorage,
+};
 pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,

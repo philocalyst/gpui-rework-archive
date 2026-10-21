@@ -125,6 +125,15 @@ pub struct GlyphKey {
     size: u32,
 }
 
+impl GlyphKey {
+    pub(crate) fn index_parts(self) -> (u64, u64) {
+        (
+            self.face,
+            (u64::from(self.size) << 16) | u64::from(self.glyph),
+        )
+    }
+}
+
 #[cfg(test)]
 impl GlyphKey {
     pub(crate) fn fixture() -> Self {
@@ -406,6 +415,13 @@ impl TextSystem {
             Err(Error::ForeignLayout)
         } else {
             Ok(())
+        }
+    }
+    pub(crate) fn raster_key(&self, id: u16, size: f32) -> GlyphKey {
+        GlyphKey {
+            face: self.face.0.id,
+            glyph: id,
+            size: size.to_bits(),
         }
     }
     pub(crate) fn raster(&mut self, id: u16, size: f32) -> Result<Arc<Raster>, Error> {

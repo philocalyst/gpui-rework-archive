@@ -115,16 +115,14 @@ old/new leases plus cache have a conservative 72 MiB mask-payload bound. Actual
 shared masks usually overlap. The cache cap is independent from live command
 leases: eviction cannot free a mask still in use.
 
-On the measured x86_64 target, a prepared command is 136 bytes before Vec slack.
-CSR offsets and reusable fill cursors use two usize arrays per tile; references
-use u32. Stats report actual command/bin Vec capacities, unique retained mask
-payload, sample tests and skipped predecessor tiles. Glyph cache table/control,
-Arc headers, mask-set buckets, bounded Swash scaler scratch, font source
+The retained display list uses typed geometry/resource lanes; see the measured
+run representation below. CSR offsets and reusable fill cursors use two usize
+arrays per tile; references use u32. Stats report exact draw/resource Vec and
+bin capacities, unique retained mask payload, sample tests and skipped tile
+predecessors. Hash-table/control bytes, Arc bodies, bounded Swash scratch, source
 bytes, allocator slack and process/native-service overhead are separate costs;
-payload counts are not RSS. Preparing glyph runs allocates bounded command and
-mask-dedup scratch, and stores mask Arc leases per glyph command. There is no
-claim of zero per-glyph overhead or zero allocation in text preparation. The
-raster/compositor pixel loops allocate nothing; warm CSR buffers are reused.
+payload counters are not RSS. The raster/compositor pixel loops allocate nothing;
+warm CSR buffers are reused.
 
 ## Validation and measured baseline
 
@@ -469,3 +467,93 @@ new destinations, internal cache reuse, rejected output immutability, and exact
 1/2/4/8-worker word rendering with zero internal output capacity. This seam lets a
 native software presenter avoid loading a GPU backend and avoid a second canvas
 image; actual process/driver memory savings require host measurements.
+
+## Production retained text runs
+
+The Canvas now owns one typed display list, consumed directly by both CPU raster
+and PreparedScene. It does not freeze or copy another packet on each paint.
+Each admitted text call with two or more visible glyphs stores its inverse,
+clip and premultiplied paint once (80 bytes), plus an 8-byte painter range.
+Each placement is 32 bytes: local Rect16, four checked u16 device bounds8,
+common index4 and mask index4. The u16 bounds cover the admitted 16,384-pixel
+canvas dimensions. The painter lane stores one private u32 address per draw.
+Rectangles and visible singleton glyphs use an inline form: 104-byte
+common+geometry record plus a separate 4-byte source lane, avoiding a separate
+run descriptor. These widths are measured x86_64 layouts, not serialized ABI.
+
+Masks have one Arc lease per complete stable GlyphKey in the scene. Preparation
+looks up that key before requesting a font-cache raster: repeated placements
+perform no Arc increments/decrements. The primary face is factored out of its
+resource index, leaving a lossless 48-bit glyph+physical-size key in u64. Other
+faces use complete keys. There is no truncated hash identity, pointer address,
+or approximate equality; final font owner release/remint remains foreign-safe.
+Preparation stages only 28-byte geometry+source entries, not expanded 136-byte
+commands, and computes the common inverse/color conversion once per run.
+
+All limits and fallible lane reservations precede publication. Failure may
+grow capacity or populate the independent bounded text cache; it cannot append
+partial draws/resources. Once admitted, appending touches primitive indices
+and moved Arc leases with no user callbacks. Private address tags stay below
+the checked draw limit; borrowed views cannot outlive/mutate the Canvas.
+`clear` retains lane capacity for warm use; replacing a staged scene drops the
+old lanes and leases. A rejected/dropped stage preserves the old scene/image.
+
+The existing `scene.draws()` remains an exact-size double-ended flattened view.
+`scene.groups()` adds an exact-size double-ended common-state view, whose
+`placements()` exposes only local geometry, device bounds and mask borrow.
+`scene.masks()` traverses unique leases. A backend can upload common state once
+per group, rather than reconstructing per-glyph matrix/paint records. Existing
+GPU code still consumes the flat view; GPU record/upload reduction is a separate
+integration, not a result claimed here. The `scene.storage()` ledger reports
+exact Vec capacity bytes and resource-index entry/capacity counts, deliberately
+not an invented byte size for opaque HashMap bucket/control allocation.
+
+Three fresh-process alternating release pairs, same source and font/cache warm
+fixture compiled against pre-change `99b788db26` and this implementation:
+
+| Scene | Expanded / retained requested heap B | Expanded / retained preparation | Expanded / retained flat traversal |
+| --- | --- | --- | --- |
+| 48 labels, 672 visible glyphs | 122,016 / 38,264 | 173.8 / 62.9 µs | 0.678 / 1.016 µs |
+| 1,000×32 glyph runs | 4,456,500 / 1,269,876 | 9.234 / 3.056 ms | 45.8 / 50.5 µs |
+| 32,000 singleton runs, one mask | 4,456,500 / 3,670,132 | 11.248 / 8.018 ms | 44.9 / 60.9 µs |
+| 32,000 distinct physical mask sizes | 12,477,848 / 12,477,848 | 92.267 / 90.136 ms | 71.7 / 88.4 µs |
+
+These counters charge all newly retained lanes/hash tables, new mask/raster/cache
+allocations and allocator-requested control blocks. They exclude preexisting
+shared font bytes, the layout and warm masks, and no output image is allocated.
+Add the Canvas header: 336 bytes before, 544 after. Thus the unique-mask case is
+heap-neutral but loses 208 bytes in full ownership, and more allocations are
+performed in these fixtures. Full totals for the first two cases including that
+header are 122,352→38,808 and 4,456,836→1,270,420 bytes. Shared bundle bytes are
+2,049,096 once, not per scene; TextSystem72, FontFace8 and FontData40 plus Arc
+counts are unchanged. Unique-size preparation retains roughly 1 MB in the text
+cache after dropping the scene, equally in both implementations; the negative
+drop column records this ownership split. See [all raw pairs](evidence-retained-runs.csv).
+Peak new requested heap for the 32-glyph-run case falls 6,689,076→1,795,060 B.
+
+For that case the exact typed-lane capacities are painter131,072 +
+common/range90,112 + placements1,048,576 + resource handles32 = 1,269,792 B.
+The remaining84 B is the measured standard HashMap allocation in this build;
+it is not a stable library ABI. Display-list header280 is already inside
+Canvas544, not an additional allocation. `group_views` compares flat/grouped
+iteration over the same data; one run took47.5/63.0 µs for32k draws. Grouping
+therefore does not promise faster CPU traversal. Its backend advantage is the
+shared common state and fewer retained resource leases, pending actual upload
+integration and end-to-end measurement.
+
+The complete CPU compositor was also tested in three alternating process pairs
+([frame CSV](evidence-retained-frames.csv)). Text remains essentially neutral:
+48-label warm frame median16.45→16.34 ms. Flat167→173 µs and boundary-dense
+4.93→5.27 µs lose modestly. Full640×480 label PPM output matches byte-for-byte
+(SHA256 `cae70aa4df17d20ff27eae66a81bddf8cf987762383c302cf0cb7fe4242ecd07`).
+This is a memory/preparation improvement with measured traversal losses, not a
+universal rendering speedup. No process-RSS or native-startup saving is inferred.
+
+Reproduce with `--example retained_runs -- labels|groups|singletons|unique`,
+`--example group_views`, and the existing `--example cpu`. Allocation counters
+measure the owner thread, not driver allocation or Rayon workers. Independent
+review additionally compared old/new prepared snapshots, reverse traversal and
+exact pixels on24 fixtures covering four DPI scales, mixed order, rotations,
+clips, eviction, abandoned stages, serial and two-worker output. Public tests
+check whole group counts/order in both directions, full-key multi-face identity,
+one leased resource across cache clears/services, and failed-stage isolation.
