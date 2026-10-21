@@ -6,6 +6,13 @@ same IDs with pinned fontdue 0.9.4. Full Noto Sans 2.015 and its OFL license are
 bundled; `TextSystem::new` also accepts caller-supplied font bytes. Nothing reads
 an absolute asset path. [Font provenance](assets/README.md).
 
+`FontFace` shares immutable source bytes and parsed font geometry. Cloning a
+face and passing it to `TextSystem::from_font` creates independent mutable glyph
+caches over that same font. `TextSystem::bundled/new` remain convenient constructors;
+`font_face()` borrows the handle and `same_face()` compares process-local identity.
+Bundled services share through a weak registry. Supplied bytes are copied once
+per explicitly created FontFace; equal bytes are not implicitly interned.
+
 ```rust
 use gpui_canvas::{Canvas,Color,TextSystem,Point,Rect,Affine};
 let mut fonts=TextSystem::bundled()?;
@@ -21,7 +28,10 @@ let rgba=canvas.pixels();
 ```
 
 `TextLayout` owns glyph positions, UTF-8 clusters, advance width, line height,
-first baseline and font identity. Painting does not reshape. Wrapping prefers
+first baseline and font-face identity. A layout can paint through any service
+sharing that face; independently constructed faces reject it. Positions do not
+keep a face alive: retain a FontFace or TextSystem while its layout needs fresh
+rasterization. Painting does not reshape. Wrapping prefers
 whitespace, then whole shaping clusters, and reshapes each resulting line. An
 indivisible cluster may exceed the requested width. The ink bound describes
 conservative source-raster support; device sampling must also be included when
@@ -117,12 +127,16 @@ raster/compositor pixel loops allocate nothing; warm CSR buffers are reused.
 
 Run `cargo test -p gpui_canvas`, the same with `--release`, and
 `cargo clippy -p gpui_canvas --all-targets -- -D warnings`.
-Fifteen integration tests cover color conversions/roundtrips, negative extended
+Seventeen integration tests cover color conversions/roundtrips, negative extended
 blending, declared P3 output, HDR rejection, alpha, correlated edges, randomized
 forward-polygon versus inverse-raster scenes, ligatures and Unicode, native
 fontdue pixel placement, transformed mask-cell sampling, UTF-8 wrapping,
 foreign-font rejection, clipped reflected text, resource caps and candidate
 failure/commit. A compile-fail doctest prevents candidate rasterization.
+The font registry unit test verifies Send+Sync, one parse across eight concurrent
+cold acquisitions, final strong release, fresh identity on reinitialization and
+recovery from a simulated initialization panic. Public tests verify cross-service
+layout admission, independent caches and ownership of caller-supplied font bytes.
 
 `cargo run --release -p gpui_canvas --example cpu -- /tmp/labels.ppm` renders
 actual complete labels and emits counters and median timings. The optional PPM
@@ -146,12 +160,57 @@ Verified primary library APIs: [rustybuzz 0.20.1](https://docs.rs/rustybuzz/0.20
 [fontdue 0.9.4 indexed raster/metrics](https://docs.rs/fontdue/0.9.4/fontdue/struct.Font.html),
 [Unicode script 0.5.8](https://docs.rs/unicode-script/0.5.8/unicode_script/).
 
-The final one-font process measurement read Linux VmRSS at 2,876 KiB before
-initialization and 18,036 KiB after it: a 15,160 KiB delta including font/code
-page faults, compiled outline storage and allocator retention, not an exact heap
-allocation attribution. Bundled source bytes borrow shared read-only static
-backing through Cow; caller-supplied bytes are owned. Fontdue's compiled geometry
-is still per TextSystem and is not shared across windows in this first crate.
-Demand font initialization and cross-window immutable font-data sharing are
-necessary floor-cost follow-ups; the current service is not called floor optimized.
-Public header sizes here are Color 20, Glyph 16 and TextLayout 48 bytes.
+## Shared parsed-font measurements and lifetime
+
+Each FontFace is one Arc to immutable `{bytes, fontdue Font, checked ID}`.
+The global bundled registry is a directly initialized `Mutex<Weak<FontData>>`;
+there is no permanent strong font, global glyph cache or TLS. Cold parsing is
+serialized so simultaneous initial callers share exactly one result. Shaping,
+measurement and rasterization read the immutable face without taking this lock.
+Only a fully parsed face is published. If initialization panics, the slot still
+contains a valid Weak, so the next acquisition recovers the poisoned cache lock
+and either upgrades or constructs a complete replacement.
+
+On this x86_64 build, FontFace is 8 bytes and TextSystem is 64, versus the prior
+280-byte per-service header. FontData's header is 224 bytes (including Fontdue's
+192-byte header); its outline buffers are separate allocations. The registry
+static is 16 bytes, plus the 8-byte ID counter. Before first use it has no heap
+backing. After final strong release, only one expired weak allocation remains:
+the 224-byte data header plus two usize atomic reference counts in the same
+allocation (240 bytes in this standard-library layout, before allocator slack).
+The source bytes are shared read-only static backing for the bundle; supplied
+font bytes are owned by their face. The last face/service drop releases parsed
+buffers and any owned source bytes. A later bundled acquisition reparses and
+mints a fresh ID; an old unleased layout cannot accidentally rebind to it.
+
+Fresh-process observations, Linux x86_64 / Ryzen 7 3700X / rustc 1.97.1 release,
+no drawing or glyph-cache population, one run per count:
+
+| Simultaneous services | Prior per-service font: before/live/after-drop RSS KiB | Shared face: before/live/after-drop RSS KiB | Shared initialization |
+| --- | --- | --- | --- |
+| 1 | 2924 / 17608 / 17196 | 3464 / 18552 / 18232 | 28.177 ms |
+| 2 | 2988 / 30332 / 27116 | 3456 / 18468 / 18148 | 28.318 ms + 200 ns |
+| 8 | 2892 / 106200 / 79120 | 3444 / 18524 / 18080 | 27.927 ms + seven acquisitions of 40–220 ns |
+
+The baseline is the actual text.rs at `968af6cb88`, using the same borrowed static
+font bytes and Fontdue settings, separately compiled with the same dependency
+versions. Its individual parses cost 27.9–29.5 ms. Eight service drops cost
+9.332 ms there versus 0.544 ms for the shared face. These are single observations,
+not latency distributions. Nanosecond warm-call timings include clock overhead.
+Different test binaries have different initial code/data residency; compare the
+growth with service count, not their small one-font RSS difference.
+
+Reproduce the shared measurement with a fresh process for each count:
+`GPUI_FONT_SERVICES=8 cargo test --release -p gpui_canvas --test font_sharing live_services_measurement -- --ignored --exact --nocapture`.
+Repeat with 1 and 2. Tests were run through a temporary isolated manifest over
+the actual crate sources while the in-progress runtime workspace member lacked
+its manifest; no production dependency or parent manifest was replaced.
+
+Weak-expiry tests establish actual ownership release, while RSS remains high
+after drop because the allocator retains freed pages and mapped font/code pages
+remain resident. These measurements are not exact Fontdue heap attribution or
+evidence that all memory returns to the OS. One font still has roughly a 15 MiB
+cold RSS increment; sharing removes repeated parsed copies rather than solving
+that initial cost. Demand initialization remains necessary. Per-service mutable
+raster caches, retained command masks and their existing caps remain independent.
+Public header sizes remain Color 20, Glyph 16 and TextLayout 48 bytes.

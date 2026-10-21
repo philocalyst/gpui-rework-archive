@@ -4,7 +4,7 @@ use std::{
     borrow::Cow,
     collections::HashMap,
     sync::{
-        Arc,
+        Arc, Mutex, Weak,
         atomic::{AtomicU64, Ordering},
     },
 };
@@ -14,6 +14,69 @@ const MAX_TEXT: usize = 32 * 1024;
 const MAX_GLYPHS: usize = 32 * 1024;
 const CACHE_BYTES: usize = 8 * 1024 * 1024;
 static NEXT_FONT: AtomicU64 = AtomicU64::new(1);
+static BUNDLED_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
+
+struct FontData {
+    bytes: Cow<'static, [u8]>,
+    font: Font,
+    id: u64,
+}
+
+/// Shared immutable parsed font. Clone this handle to share geometry and font
+/// identity; independently supplied equal bytes deliberately create a new face.
+/// The bundled registry holds only a Weak, so the last owner releases the font.
+#[derive(Clone)]
+pub struct FontFace(Arc<FontData>);
+impl FontFace {
+    /// Noto Sans 2.015, upstream provenance and OFL in assets/README.md.
+    /// Cold initialization is serialized; shaping and rasterization never lock.
+    pub fn bundled() -> Result<Self, Error> {
+        // The slot always contains a valid Weak. Parsing publishes nothing until
+        // complete; recovering poison after a parser panic cannot expose partial
+        // FontData or corrupt the previous immutable face.
+        let mut slot = match BUNDLED_FONT.lock() {
+            Ok(slot) => slot,
+            Err(poison) => {
+                BUNDLED_FONT.clear_poison();
+                poison.into_inner()
+            }
+        };
+        if let Some(data) = slot.upgrade() {
+            return Ok(Self(data));
+        }
+        let face = Self::from_data(Cow::Borrowed(include_bytes!("../assets/NotoSans.ttf")))?;
+        *slot = Arc::downgrade(&face.0);
+        Ok(face)
+    }
+    /// Copies caller bytes once into this face's immutable backing.
+    pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
+        let bytes = bytes.as_ref();
+        if bytes.is_empty() || bytes.len() > 16 * 1024 * 1024 {
+            return Err(Error::ResourceLimit);
+        }
+        Self::from_data(Cow::Owned(bytes.to_vec()))
+    }
+    fn from_data(bytes: Cow<'static, [u8]>) -> Result<Self, Error> {
+        rustybuzz::Face::from_slice(&bytes, 0).ok_or(Error::InvalidFont)?;
+        let font = Font::from_bytes(bytes.as_ref(), FontSettings::default())
+            .map_err(|_| Error::InvalidFont)?;
+        let id = NEXT_FONT
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
+            .map_err(|_| Error::ResourceLimit)?;
+        Ok(Self(Arc::new(FontData { bytes, font, id })))
+    }
+    /// Process-local identity, not byte equality or a persistent font ID.
+    pub fn same_face(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+impl std::fmt::Debug for FontFace {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FontFace")
+            .field("id", &self.0.id)
+            .finish_non_exhaustive()
+    }
+}
 
 /// A shaped glyph; positions are relative to the top-left layout origin, y down.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -24,7 +87,8 @@ pub struct Glyph {
     pub baseline: f32,
 }
 
-/// Owned positions from one specific TextSystem. Advance bounds and ink differ.
+/// Owned positions from one FontFace, accepted by any service sharing that face.
+/// A layout does not keep parsed font data alive. Advance bounds and ink differ.
 #[derive(Clone, Debug)]
 pub struct TextLayout {
     pub width: f32,
@@ -52,38 +116,28 @@ pub(crate) struct Raster {
 /// Latin/Greek/Cyrillic plus common/inherited characters, bounded grayscale cache.
 /// No system font discovery, fallback, bidi paragraph resolution or editing model.
 pub struct TextSystem {
-    bytes: Cow<'static, [u8]>,
-    font: Font,
-    id: u64,
+    face: FontFace,
     cache: HashMap<(u16, u32), Arc<Raster>>,
     cache_bytes: usize,
 }
 impl TextSystem {
     /// Noto Sans 2.015, upstream commit and OFL attribution in assets/README.md.
     pub fn bundled() -> Result<Self, Error> {
-        Self::from_data(Cow::Borrowed(include_bytes!("../assets/NotoSans.ttf")))
+        Ok(Self::from_font(FontFace::bundled()?))
     }
     pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
-        let bytes = bytes.as_ref();
-        if bytes.is_empty() || bytes.len() > 16 * 1024 * 1024 {
-            return Err(Error::ResourceLimit);
-        }
-        Self::from_data(Cow::Owned(bytes.to_vec()))
+        Ok(Self::from_font(FontFace::new(bytes)?))
     }
-    fn from_data(bytes: Cow<'static, [u8]>) -> Result<Self, Error> {
-        rustybuzz::Face::from_slice(&bytes, 0).ok_or(Error::InvalidFont)?;
-        let font = Font::from_bytes(bytes.as_ref(), FontSettings::default())
-            .map_err(|_| Error::InvalidFont)?;
-        let id = NEXT_FONT
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
-            .map_err(|_| Error::ResourceLimit)?;
-        Ok(Self {
-            bytes,
-            font,
-            id,
+    /// Creates a private mutable raster cache over shared immutable font data.
+    pub fn from_font(face: FontFace) -> Self {
+        Self {
+            face,
             cache: HashMap::new(),
             cache_bytes: 0,
-        })
+        }
+    }
+    pub fn font_face(&self) -> &FontFace {
+        &self.face
     }
     pub fn cache_bytes(&self) -> usize {
         self.cache_bytes
@@ -118,7 +172,7 @@ impl TextSystem {
             {
                 return Err(Error::UnsupportedControl(c));
             }
-            if !self.font.has_glyph(c) {
+            if !self.face.0.font.has_glyph(c) {
                 return Err(Error::MissingGlyph(c));
             }
             let script = c.script();
@@ -133,6 +187,8 @@ impl TextSystem {
             paragraph_script = Some(script);
         }
         let metrics = self
+            .face
+            .0
             .font
             .horizontal_line_metrics(font_size)
             .ok_or(Error::InvalidFont)?;
@@ -143,7 +199,7 @@ impl TextSystem {
             baseline: metrics.ascent,
             font_size,
             glyphs: Vec::new(),
-            font_id: self.id,
+            font_id: self.face.0.id,
         };
         let mut line = 0usize;
         let mut paragraph_offset = 0;
@@ -255,7 +311,7 @@ impl TextSystem {
         budget: &mut usize,
     ) -> Result<(Vec<Glyph>, f32), Error> {
         *budget = budget.checked_sub(text.len()).ok_or(Error::ResourceLimit)?;
-        let face = rustybuzz::Face::from_slice(&self.bytes, 0).ok_or(Error::InvalidFont)?;
+        let face = rustybuzz::Face::from_slice(&self.face.0.bytes, 0).ok_or(Error::InvalidFont)?;
         let mut buffer = rustybuzz::UnicodeBuffer::new();
         buffer.push_str(text);
         buffer.guess_segment_properties();
@@ -281,7 +337,7 @@ impl TextSystem {
         Ok((glyphs, x))
     }
     pub(crate) fn validate(&self, layout: &TextLayout) -> Result<(), Error> {
-        if layout.font_id != self.id {
+        if layout.font_id != self.face.0.id {
             Err(Error::ForeignLayout)
         } else {
             Ok(())
@@ -290,7 +346,7 @@ impl TextSystem {
     pub(crate) fn raster(&mut self, id: u16, size: f32) -> Result<Arc<Raster>, Error> {
         let key = (id, size.to_bits());
         if !self.cache.contains_key(&key) {
-            let metrics = self.font.metrics_indexed(id, size);
+            let metrics = self.face.0.font.metrics_indexed(id, size);
             let bytes = metrics
                 .width
                 .checked_mul(metrics.height)
@@ -302,7 +358,7 @@ impl TextSystem {
             if self.cache_bytes + bytes > CACHE_BYTES || self.cache.len() >= 4096 {
                 self.clear_cache();
             }
-            let (metrics, pixels) = self.font.rasterize_indexed(id, size);
+            let (metrics, pixels) = self.face.0.font.rasterize_indexed(id, size);
             self.cache_bytes += pixels.len();
             self.cache.insert(key, Arc::new(Raster { metrics, pixels }));
         }
@@ -314,7 +370,7 @@ impl TextSystem {
         let mut min = [f32::INFINITY; 2];
         let mut max = [f32::NEG_INFINITY; 2];
         for g in &layout.glyphs {
-            let m = self.font.metrics_indexed(g.id, layout.font_size);
+            let m = self.face.0.font.metrics_indexed(g.id, layout.font_size);
             if m.width == 0 || m.height == 0 {
                 continue;
             }
@@ -330,5 +386,83 @@ impl TextSystem {
         } else {
             Rect::default()
         })
+    }
+}
+
+#[cfg(test)]
+mod font_tests {
+    use super::*;
+    use std::sync::Barrier;
+
+    // This is the only unit test using the process-global bundled registry.
+    // Integration tests run in separate binaries with independent statics.
+    #[test]
+    fn bundled_concurrency_release_remint_and_poison_recovery() {
+        fn send_sync<T: Send + Sync>() {}
+        send_sync::<Font>();
+        send_sync::<FontFace>();
+        send_sync::<TextSystem>();
+        let before = NEXT_FONT.load(Ordering::Relaxed);
+        let barrier = Arc::new(Barrier::new(9));
+        let jobs: Vec<_> = (0..8)
+            .map(|_| {
+                let barrier = Arc::clone(&barrier);
+                std::thread::spawn(move || {
+                    barrier.wait();
+                    FontFace::bundled().unwrap()
+                })
+            })
+            .collect();
+        barrier.wait();
+        let faces: Vec<_> = jobs.into_iter().map(|job| job.join().unwrap()).collect();
+        assert!(faces.iter().all(|face| face.same_face(&faces[0])));
+        // Every successful parse mints exactly one ID, so this checks that the
+        // concurrent cold calls did not speculatively parse and discard copies.
+        assert_eq!(NEXT_FONT.load(Ordering::Relaxed), before + 1);
+        assert!(matches!(faces[0].0.bytes, Cow::Borrowed(_)));
+        let weak = Arc::downgrade(&faces[0].0);
+        let old_id = faces[0].0.id;
+        let service = TextSystem::from_font(faces[0].clone());
+        let layout = service.shape("office", 18.0, None).unwrap();
+        drop(service);
+        drop(faces);
+        assert!(weak.upgrade().is_none());
+        assert!(BUNDLED_FONT.lock().unwrap().upgrade().is_none());
+        // Positions alone do not pin the large parsed outline store.
+        assert_eq!(layout.font_id, old_id);
+        let renewed = FontFace::bundled().unwrap();
+        assert!(renewed.0.id > old_id);
+        assert_eq!(
+            TextSystem::from_font(renewed.clone()).validate(&layout),
+            Err(Error::ForeignLayout)
+        );
+        let renewed_weak = Arc::downgrade(&renewed.0);
+        drop(renewed);
+        assert!(renewed_weak.upgrade().is_none());
+
+        // Simulate a parser panic before publication. The Weak remains valid;
+        // the next cold call recovers and constructs complete immutable data.
+        assert!(
+            std::thread::spawn(|| {
+                let _slot = BUNDLED_FONT.lock().unwrap();
+                panic!("simulated unpublished-font initialization panic");
+            })
+            .join()
+            .is_err()
+        );
+        assert!(BUNDLED_FONT.is_poisoned());
+        let recovered = FontFace::bundled().unwrap();
+        assert!(!BUNDLED_FONT.is_poisoned());
+        let recovered_weak = Arc::downgrade(&recovered.0);
+        drop(recovered);
+        assert!(recovered_weak.upgrade().is_none());
+        eprintln!(
+            "font_face_bytes={},text_system_bytes={},font_data_header_bytes={},registry_static_bytes={},fontdue_header_bytes={}",
+            std::mem::size_of::<FontFace>(),
+            std::mem::size_of::<TextSystem>(),
+            std::mem::size_of::<FontData>(),
+            std::mem::size_of::<Mutex<Weak<FontData>>>(),
+            std::mem::size_of::<Font>()
+        );
     }
 }
