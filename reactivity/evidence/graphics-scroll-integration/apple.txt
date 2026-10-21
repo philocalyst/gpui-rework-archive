@@ -1,0 +1,14 @@
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-ce3/reactivity/crates/core)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+    Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 44.38s

@@ -11,10 +11,10 @@ describe the intended complete system; this page records what is connected now.
 | Accessibility | Native AccessKit in ordinary desktop profiles, bounded exact acknowledged transitions, lazy active projection, revalidated actions; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; selection/IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
-| Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
-| Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
+| Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
+| Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style, geometry and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal with literal typed flex alignment/distribution/wrapping, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Reactive style/recipe inputs, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
-| Canvas | Canonical grouped display list, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
+| Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets and explicit admitted-packet replay | Replay still draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI, suspend/recreate and observed X11 destination invalidation | Unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
@@ -44,7 +44,7 @@ required tree. Stock Linux adapter construction starts background work even
 before activation, so lazy conversion is not a zero-cost native AT claim.
 
 On the current 64-bit build, Node is 40 B, an actual text-site entry is 80 B,
-Presented is 80 B and a frozen list-row entry is 24 B. Author Color is 16 B and
+Presented is 80 B and a frozen list-viewport entry is 40 B. Author Color is 16 B and
 Style is 88 B. Resolved styles use an owner-owned default/dense/shared lane with
 bounded exact discovery and an unrestricted dense fallback; its header adds 40 B
 per owner. Unicode TextLayout is 56 B, eight bytes larger than its predecessor.
@@ -52,6 +52,25 @@ These are exact retained layouts, not whole-window memory figures; layout/font/s
 storage and native services remain separately owned.
 
 ## Current verification
+
+The [combined graphics/scroll checks](evidence/graphics-scroll-integration/checks.json)
+pin implementation `f01947e679`: **568 workspace cases/doctests**, 115 accessible
+native unit cases, 123 parallel Canvas cases/doctests, seven GPU unit cases and
+33 actual Vulkan readbacks pass. Strict accessible X11/Wayland/parallel/Vulkan
+all-target Clippy, formatting and native header checks pass, along with actual
+X11 Todo and ordinary-scroll pixel oracles. Strict desktop Clippy passes for
+the actual Apple aarch64 and Windows MSVC adapters. Counts overlap; cross-checks
+do not establish native OS execution, and llvmpipe/Xvfb do not establish hardware
+performance or scanout latency.
+
+Ordinary scroll panes retain offscreen controls for reveal/accessibility;
+virtual rows leaving the admitted cohort retire their targets and focus.
+Rounded solid/image paint and own-shape hit testing share the radius property;
+descendant clipping stays rectangular. CPU-valid radii outside the admitted GPU
+precision class use the existing CPU fallback. Scroll adds no hot node/runtime
+field but charges 104 retained bytes to the first virtual-list cohort; rounded
+geometry adds eight bytes only to existing Metadata owners. Detailed cold costs
+and numerical limitations remain in the isolated evidence.
 
 The [complete image integration report](evidence/images-integration/checks.json)
 records **22 successful gates** at source `724ece73cb`. Its

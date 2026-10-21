@@ -1,0 +1,207 @@
+{
+  "source_commit": "f01947e679d9dd2ca7ef149b70dccff92dad67dc",
+  "checkout_head": "1d2a5de24bc17977514e5136284bfc877ce69f6e",
+  "captured_at": "2026-10-21T23:52:14.509059+00:00",
+  "checks": [
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "-p",
+        "gpui_canvas",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "gpui/x11,gpui/wayland,gpui_canvas/parallel,gpui_gpu/vulkan-tests",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "clippy.txt",
+      "sha256": "7233685039eff565c1b1aed447c2e4d571aae7ccd6b0bb179b512f1ead652468"
+    },
+    {
+      "name": "canvas",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui_canvas",
+        "--features",
+        "parallel"
+      ],
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 123,
+      "log": "canvas.txt",
+      "sha256": "a903c4b6fc2b4176ef62f955e8adf4abe71aaa3fb993e95979826dfaf7601b9d"
+    },
+    {
+      "name": "vulkan",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "vulkan-tests"
+      ],
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 40,
+      "log": "vulkan.txt",
+      "sha256": "649842f337f056cf3133997ea13338bcbc0d151aefc4ca95923f05c767fbafd8"
+    },
+    {
+      "name": "native-todo",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11,wayland",
+        "--lib",
+        "native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native-todo.txt",
+      "sha256": "ae5822585ebdac0e51d54d506425cf9e545cdfb663928122efd0db1b22f11d25"
+    },
+    {
+      "name": "native-scroll",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--features",
+        "x11,wayland",
+        "--lib",
+        "native_ordinary_scroll_wheel_reveal_pointer_resize_resume",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "native-scroll.txt",
+      "sha256": "c9936420f74825068cb79544bcad7c94fda741236e75cc910b392893b865ad24"
+    },
+    {
+      "name": "format",
+      "command": [
+        "cargo",
+        "fmt",
+        "-p",
+        "gpui",
+        "-p",
+        "gpui_canvas",
+        "-p",
+        "gpui_gpu",
+        "--check"
+      ],
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "format.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "workspace",
+      "command": "cargo test --locked --offline --workspace",
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 568,
+      "log": "workspace.txt",
+      "sha256": "b276fccc2b883c70233adeb5b8ce61e53ab728cb1fdc9625b2538a279ae3aa08"
+    },
+    {
+      "name": "native-lib",
+      "command": "cargo test --locked --offline -p gpui --features x11,wayland --lib",
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 115,
+      "log": "native-lib.txt",
+      "sha256": "b69ec21f1574d8a17275392999b83fbd4f66ed2a7a59ef40ae1ead1e0def42bf"
+    },
+    {
+      "name": "apple",
+      "command": "cargo clippy --locked --offline -Zbuild-std=std,panic_abort --target aarch64-apple-darwin -p gpui --features desktop --all-targets -- -D warnings",
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "apple.txt",
+      "sha256": "d10e8383e71fc50d1b41415acc5fbd13a67f969d04de52abfb4e38cee8b7c124"
+    },
+    {
+      "name": "windows",
+      "command": "cargo clippy --locked --offline -Zbuild-std=std,panic_abort --target x86_64-pc-windows-msvc -p gpui --features desktop --all-targets -- -D warnings",
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 0,
+      "log": "windows.txt",
+      "sha256": "4cf59c5b855f469d2bee05a7f6102bf712487313fe27d756b8d452f910523623"
+    },
+    {
+      "name": "layout-final",
+      "command": "cargo test --locked --offline -p gpui --features x11,wayland --lib native::tests::packet_gpu_header_ledger -- --exact --nocapture",
+      "cwd": "/root/gpui-ce3/reactivity",
+      "exit_code": 0,
+      "passed_cases_and_doctests": 1,
+      "log": "layout-final.txt",
+      "sha256": "b39e7cffe5d3913c6e6f097821f9f020c908dbf2dc15286e7dc99a73768b328b"
+    }
+  ],
+  "scope": "Combined literal Flex, borrowed semantic serialization, ordinary scroll viewports and rounded geometry. Counts overlap and are not additive. Vulkan uses software llvmpipe; actual X11 is Xvfb drawable/server-pixel correctness, not scanout or timing. Apple/Windows are actual desktop adapter cross-compilation, not native runtime.",
+  "environment": {
+    "CARGO_BUILD_JOBS": "2",
+    "DISPLAY": ":94",
+    "native": "Linux x86_64 X11+Wayland features; native scripts select X11",
+    "cross": "RUSTC_BOOTSTRAP=1, separate Apple/Windows target directories; Windows CC=clang-cl"
+  },
+  "layouts_bytes": {
+    "Style": 88,
+    "El": 176,
+    "Node": 40,
+    "Presented": 80,
+    "Runtime": 2384,
+    "Renderer": 872,
+    "Stats": 200,
+    "GpuSurface": 1056,
+    "NativeHost_test_x11_wayland": 688,
+    "Canvas": 552,
+    "PreparedScene": 48
+  },
+  "excluded_attempts": [
+    {
+      "command": "cargo test ... packet_gpu_header_ledger -- --exact --nocapture",
+      "reason": "Unqualified exact filter ran zero cases. Replaced by fully qualified layout-final gate."
+    }
+  ]
+}
