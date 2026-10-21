@@ -1,0 +1,3 @@
+    Finished `release` profile [optimized] target(s) in 0.04s
+     Running `reactivity/target/release/examples/workloads`
+layout Color=32 Operation=224 Primitive=192 Space=168; repeats=3; center point coverage, not area AA
