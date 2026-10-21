@@ -1,65 +1,65 @@
 {
   "method": "Physical Rust lines including comments, blanks and embedded tests. Library means src/, not production acceptance. Counts on-disk first-party crates/ and vendor/; excludes target/ and archived original design examples under docs/inputs/.",
-  "source_code_head": "dcdadf4d527cb669c13d9e99271bb1f956f95a1f",
+  "source_code_head": "f2c33080ef642cecd29c87d856e773ed2a9104dc",
   "crates": {
     "algebra-lab": {
-      "tests": 487,
       "examples": 826,
-      "library": 648
+      "library": 648,
+      "tests": 487
     },
     "api-lab": {
-      "tests": 323,
-      "library": 379
+      "library": 379,
+      "tests": 323
     },
     "canvas": {
-      "other": 10,
-      "tests": 4342,
       "examples": 1250,
-      "library": 6789
+      "library": 6789,
+      "other": 10,
+      "tests": 4342
     },
     "core": {
-      "tests": 1178,
       "examples": 117,
-      "library": 1805
+      "library": 1805,
+      "tests": 1178
     },
     "coverage-lab": {
-      "tests": 416,
       "examples": 186,
-      "library": 854
+      "library": 854,
+      "tests": 416
     },
     "gpu": {
-      "tests": 1741,
       "examples": 387,
-      "library": 1873
+      "library": 1873,
+      "tests": 1741
     },
     "gpui": {
+      "examples": 2419,
+      "library": 19435,
       "other": 43,
-      "tests": 8131,
-      "examples": 2417,
-      "library": 19317
+      "tests": 8499
     },
     "host": {
-      "tests": 53,
-      "library": 210
+      "library": 210,
+      "tests": 53
     },
     "ownership-lab": {
-      "tests": 920,
       "examples": 205,
-      "library": 396
+      "library": 396,
+      "tests": 920
     },
     "retained": {
-      "tests": 325,
       "examples": 120,
-      "library": 549
+      "library": 549,
+      "tests": 325
     },
     "state": {
-      "tests": 400,
-      "library": 620
+      "library": 620,
+      "tests": 400
     },
     "template-lab": {
-      "tests": 369,
       "examples": 263,
-      "library": 715
+      "library": 715,
+      "tests": 369
     }
   },
   "vendor": {

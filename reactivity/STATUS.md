@@ -13,7 +13,7 @@ describe the intended complete system; this page records what is connected now.
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal, scoped Parley/HarfRust Unicode paragraphs, immutable bounded bundled fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal with literal typed flex alignment/distribution/wrapping, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Reactive style/recipe inputs, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets and explicit admitted-packet replay | Replay still draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
@@ -100,6 +100,16 @@ presentation without a session bus. Strict all-target desktop Clippy passes for
 the actual Apple aarch64 and Windows MSVC adapters. These counts overlap the
 earlier campaigns; the desktop checks are cross-compilation, and Vulkan uses
 llvmpipe. This is correctness evidence, not hardware timing or memory evidence.
+
+The [flex integration checks](evidence/flex-integration/checks.json) at source
+`f2c33080ef` pass **510 workspace cases/doctests**. The isolated GPUI suite
+passes 291, including ten public flex tests and Todo's shared application model.
+Strict native Clippy, formatting, exact header checks and the actual X11 Todo
+script across renderer policies pass. Apple aarch64 and Windows MSVC desktop
+all-target Clippy also passes; those checks remain cross-compilation only.
+The three new style fields fit existing padding: Style remains 88 B, El 176 B,
+Node 40 B, Presented 80 B and Runtime 2,384 B on the measured 64-bit build.
+This is a literal layout surface; direct reactive style ports are still pending.
 
 Earlier source-pinned reports remain intact: the
 [21-gate baseline](evidence/checks.json) at `5b0a38b222`,
@@ -195,8 +205,8 @@ of production: its exact 8-byte node saving did not justify unresolved phase cos
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. The source dcdadf4d52 snapshot contains **34,155 crate src lines** and
-**24,509 external test/example/other lines**, or **58,664 first-party crate lines**,
+are separate. The source f2c33080ef snapshot contains **34,273 crate src lines** and
+**24,879 external test/example/other lines**, or **59,152 first-party crate lines**,
 across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Standalone comparison
 harnesses outside crates are excluded. Complete Winit, Cephal, Softbuffer, Wgpu-HAL
