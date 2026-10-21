@@ -21,6 +21,8 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Accessibility transition descriptor](accessibility-transition-descriptor-luna.md) | Acknowledged sequence/epoch authority, active-only bounded deltas, metadata publication and full-tree fallbacks |
 | [Accessibility text and virtualization](accessibility-text-virtualization-luna.md) | Chromium/Compose/Qt comparisons, frozen row derivation, text offset contracts and focus across lost surfaces |
 | [Reader/cohort implementation seam](reader-cohort-implementation-luna.md) | Typed Library question, exact input-version admission, source replacement and bounded completion ownership; Salsa/Bevy/Adapton comparisons |
+| [Direct reactive style ports](style-ports-luna.md) | Proposed typed sink/fanout integration, numeric promotion, sparse override bases, packed destinations and exact publication/impact gates |
+| [Pointer/gesture authority](pointer-gesture-authority-luna.md) | Proposed shared native/test reducer, source and presentation stamps, origin/cancellation contracts and repeated hit work |
 | [Field and immutable text ownership](text-ownership-luna.md) | Checked source namespace, thin text leases, exact Triomphe allocation comparison and dependency costs |
 | [Lossless color packing](color-packing-luna.md) | Word-aligned Oklch, bounded Linear sRGB exponent codec and exact 16-byte author colors without narrowing HDR admission |
 | [Style representation](style-core-representation-luna.md) | Actual allocator costs for sparse overrides, exact dimension encoding, authored/derived layout separation and conditional sharing |

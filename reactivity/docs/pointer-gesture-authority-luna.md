@@ -33,8 +33,8 @@ source/presentation epochs, and matching requested/acknowledged size and scale
 window namespace plus sequence. A newly acknowledged presentation consumes the prepared sheet and
 sets `presented_sequence` to that token sequence (`runtime.rs:1969-2000`).
 
-The native reuse key should therefore be the pair **(source epoch, acknowledged presentation
-sequence)**, captured and compared only while `current_presentation()` succeeds. Each half closes a
+The native reuse key should therefore be the pair **(source epoch, presentation
+token)**, captured and compared only while `current_presentation()` succeeds. Each half closes a
 different gap:
 
 * A semantic-only publication can change current source authority while reusing the same visual
@@ -53,6 +53,14 @@ source epoch. If a future press-session cache needs this proof, add a small owne
 use `snapshot()` to obtain it: snapshots are diagnostic, owned data, not an input-lane API. The
 query needs no stored per-node or per-window cache field; sequence is already minted by the
 presentation protocol.
+
+In particular, headless input needs no additional acknowledged-sequence field.
+`presented_sequence` is compiled only with accessibility. The existing
+`latest_token` is sufficient after the current-presentation gate succeeds: that
+gate proves there is no pending candidate, so its token identifies the current P.
+Pair it with `source_epoch` as above. Do not use the latest candidate token as
+an acknowledged token when the gate fails, or extend this proof to diagnostics
+that deliberately inspect old P during a pending candidate.
 
 This is an optimization-validity key, not a universal gesture-cancellation key. If the pair
 changes during a press, discard the cached hit. Whether the gesture itself continues depends on

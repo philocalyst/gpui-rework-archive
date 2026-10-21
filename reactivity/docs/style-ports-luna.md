@@ -1,7 +1,11 @@
 # Direct reactive style ports: typed sink over the existing source fanout
 
-Research snapshot: 2026-10-21. Local source audited at cleanroom commit
-`f4aa4968b1ef3bb7955a711725a622318d533a0f` in `/root/gpui-ce3/reactivity`.
+Research snapshot: 2026-10-21. The design audit used cleanroom commit
+`f4aa4968b1ef3bb7955a711725a622318d533a0f` in `/root/gpui-ce3/reactivity`,
+whose closed style schema had nine properties. A follow-up source check at
+`f2c33080ef642cecd29c87d856e773ed2a9104dc` includes literal Flex Align,
+Justify and Wrap: twelve properties, IDs 1 through 12. The packed destination
+proposal below includes these additions; radius is still a future property.
 This is a design note only; no production files, builds, or timings were changed/run.
 
 ## Recommendation
