@@ -568,3 +568,12 @@ scene metadata edits still pass finite/range/configuration validation. This is
 an optional native solid-fill content certificate, not an OS submission or a
 presentation acknowledgment. Native hosts must submit successfully before
 advancing their presentation token, and use ordinary rendering otherwise.
+
+`CanvasScene::commit_with_damage` compares exact old/new command support before
+retiring immutable resource leases. `render_bgrx_region` repairs only intersecting
+tiles in a caller-certified preserved image; the explicit pool has the same
+region API. Empty damage skips binning and rasterization, and sparse repairs use
+local CSR offsets. These APIs add no Canvas fields or retained image. The native
+owner accumulates skipped candidates and validates bounded buffer history before
+using this path. [Preserved-surface repair](../gpui/RETAINED_DAMAGE.md) records
+the ownership proof, pixel tests, measured phases and current limits.

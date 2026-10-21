@@ -212,6 +212,15 @@ continuous domain by themselves.
 
 ## Compiler and memory-model gates
 
+The integrated software damage tests use the public Canvas interface to compare
+1,680 deterministic repairs against complete output across partial tile and
+viewport edges, in addition to transformed/text/HDR fixtures. Runtime tests cover
+coalesced candidates, failed newer preparation, empty re-exposure and five aged
+surface buffers. Actual Todo and 250K Library scripts compare X11 server pixels
+after production presentation, resize and suspend/resume. The repair path keeps
+full native upload; client damage alone does not prove server preservation.
+See [the exact proof and measurements](crates/gpui/RETAINED_DAMAGE.md).
+
 Compile passing examples and intended-diagnostic failures: borrowed operand
 escape, owner mutation while a description is used, internal cursor escape and
 both nested frame directions, wrong field/target/value, reader mutation,

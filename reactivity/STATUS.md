@@ -14,7 +14,7 @@ describe the intended complete system; this page records what is connected now.
 | Collections | Borrowed keyed uniform lists, f64 rebased offsets, viewport-only rows, native wheel routing and public query/scroll operations | Explicit uniform-height finite viewports; variable-height and nested measured viewports remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal, borrowed Rustybuzz shaping sessions, lazy Swash masks, logical layout with physical-density rasterization | Selection, IME, grapheme editing and complete font/script fallback remain |
-| Canvas | Canonical grouped display list, linear-light 4×4 sampling, conservative tile proofs, optional CPU image, direct native BGRX output, explicit disjoint parallel bands | Complete effect/path/media library and persistent damage replay remain |
+| Canvas | Canonical grouped display list, linear-light 4×4 sampling, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
@@ -50,11 +50,11 @@ layout/font/scene storage and native services remain separately owned.
 ## Current verification
 
 [checks.json](evidence/checks.json) records nineteen successful gates with exact commands,
-exit status and elapsed time, run against source commit 5b7d8833f9:
+exit status and elapsed time, run against source commit b0a85781ea:
 
-- Debug and release workspace suites: **400 passing cases/doctests each**.
+- Debug and release workspace suites: **408 passing cases/doctests each**.
 - Strict workspace Clippy and first-party formatting: pass.
-- Explicit parallel Canvas suite: **66 passing cases**, overlapping the workspace suite.
+- Explicit parallel Canvas suite: **73 passing cases**, overlapping the workspace suite.
 - Optimized Loom protocol suites: **6 existing cases plus 3 question-credit cases**; finite proof scope in [TESTING](TESTING.md).
 - Actual Vulkan conformance: **18 passing readback cases**, including all five author color layouts through SDR/HDR and 24 signed/fractional inverse-lattice clipping fixtures with tile proofs enabled and disabled.
 - Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
@@ -95,6 +95,7 @@ typechecking of the actual adapters, not execution on those operating systems.
 
 | Change | Evidence | Limit |
 | --- | --- | --- |
+| Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Full native upload remains; excludes event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
 | Lazy fonts and scoped shaping | [Startup](crates/gpui/STARTUP.md): Gallery median 80.038→40.525 ms on default-reset Xvfb; 23.302 ms with -noreset | Display reset is an environmental cost; warm filesystem, fresh processes, present acknowledgement rather than scanout |
 | CPU-first blank | [Memory CSV](crates/gpui/evidence-native-memory-auto-swash.csv): roughly 8.5 MiB PSS, one idle thread, no GPU probe on this device-less Linux host | Predates representation/solid changes; driver/compositor bytes are separate |
 | Canonical retained runs | [Canvas](crates/canvas/README.md): 32K-glyph grouped fixture retained heap 4,456,500→1,269,876 B; peak 6,689,076→1,795,060 B | Unique-mask heap is neutral; Canvas header grows 208 B; flat traversal can lose |
@@ -129,8 +130,8 @@ of production: its exact 8-byte node saving did not justify unresolved phase cos
 
 [line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
 comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. The source 5b7d8833f9 snapshot contains **26,934 first-party src lines** and
-**19,005 external test/example lines** across production and experimental crates.
+are separate. The source b0a85781ea snapshot contains **27,333 first-party src lines** and
+**19,402 external test/example lines** across production and experimental crates.
 Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
 Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
 their tests/examples. Vendoring has not made those dependencies disappear.

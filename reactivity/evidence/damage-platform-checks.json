@@ -1,0 +1,20 @@
+{
+  "source_commit": "b0a85781ea",
+  "checks": [
+    {
+      "target": "aarch64-apple-darwin",
+      "feature": "desktop",
+      "kind": "all-target Clippy with warnings denied, build-std cross compilation",
+      "exit_code": 0,
+      "log": "damage-apple-clippy.txt"
+    },
+    {
+      "target": "x86_64-pc-windows-msvc",
+      "feature": "desktop",
+      "kind": "all-target Clippy with warnings denied, build-std cross compilation",
+      "exit_code": 0,
+      "log": "damage-windows-clippy.txt"
+    }
+  ],
+  "limit": "No macOS/Windows runtime, GPU or assistive technology execution is asserted."
+}

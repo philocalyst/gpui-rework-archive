@@ -1,3 +1,4 @@
+    Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
     Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
     Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.58s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.32s

@@ -58,6 +58,12 @@ native HDR output negotiation.
 
 ## Evidence and limits
 
+Source `b0a85781ea` passes all 19 integration gates: 408 debug and 408 release
+workspace cases/doctests, 73 parallel Canvas cases, strict Clippy/format,
+18 actual Vulkan readbacks and the six native application/accessibility scripts.
+The parallel suite overlaps the workspace tests. Linux execution does not stand
+in for Windows, macOS or Wayland runtime coverage.
+
 Canvas reference tests compare every pixel after insertion/removal, reordering,
 reflections, shear, fractional clips, text movement, unpresented intermediate
 edits and HDR working-color changes, with tile proofs enabled and disabled.
@@ -78,6 +84,21 @@ order, uses separate retained canvases/buffers and checks every pixel outside th
 timed interval. Allocator instrumentation is present in both raster timings.
 This fixture excludes native upload, event delivery, scanout, font shaping and
 whole-application startup. Its ratios are not click-to-photon measurements.
+
+Five fresh processes provide 55 paired steady rows per workload on an AMD Ryzen
+7 3700X, x86-64 Linux/NixOS, Rust 1.97.1. Source and executable identity, all raw
+rows and phase medians are in [the evidence](../canvas/evidence/damage/measurements.json).
+
+| Stable commands plus caret | Full prepare + raster, median | Compare + repair, median |
+| --- | ---: | ---: |
+| 1 | 482.6 µs | 14.8 µs |
+| 65 | 1,766.2 µs | 27.6 µs |
+| 1,001 | 21,639.8 µs | 206.7 µs |
+
+Warm repair rasterization creates no allocations in this fixture; preparation
+still allocates its transactional command storage. Both canvases retain the
+bin capacities established by their initial full rendering. The separate local
+bin oracle, rather than these warm capacities, establishes the 128-byte bound.
 
 This first representation uses one conservative bounding rectangle. Widely
 separated edits can repaint their intervening area. Comparison and binning still

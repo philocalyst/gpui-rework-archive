@@ -1,5 +1,4 @@
-   Compiling gpui_reactivity_ownership_lab v0.1.0 (/root/gpui-ce3/reactivity/crates/ownership-lab)
-    Finished `release` profile [optimized] target(s) in 3.31s
+    Finished `release` profile [optimized] target(s) in 0.11s
      Running tests/question_credit.rs (reactivity/target/release/deps/question_credit-ab3230a95e8c88a2)
 
 running 3 tests
