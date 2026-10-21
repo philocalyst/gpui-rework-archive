@@ -1,0 +1,189 @@
+{
+  "baseline": {
+    "size": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n 486495\t  19728\t   5803\t 512026\t  7d01a\t/tmp/gpui-image-axis-baseline\n",
+    "asm_sha256": "6244dc270564e75ca10755d846e1f18fdb9ec735ad858dabd2317932412c8e7d",
+    "linked_symbols": [
+      {
+        "symbol": "0000000000023300 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>>:",
+        "prologue": [
+          "   23300:\t55                   \tpush   %rbp",
+          "   23301:\t41 57                \tpush   %r15",
+          "   23303:\t41 56                \tpush   %r14",
+          "   23305:\t41 55                \tpush   %r13",
+          "   23307:\t41 54                \tpush   %r12",
+          "   23309:\t53                   \tpush   %rbx",
+          "   2330a:\t49 89 e3             \tmov    %rsp,%r11",
+          "   2330d:\t49 81 eb 00 10 01 00 \tsub    $0x11000,%r11",
+          "   23314:\t48 81 ec 00 10 00 00 \tsub    $0x1000,%rsp",
+          "   2331b:\t48 c7 04 24 00 00 00 \tmovq   $0x0,(%rsp)",
+          "   23322:\t00 ",
+          "   23323:\t4c 39 dc             \tcmp    %r11,%rsp",
+          "   23326:\t75 ec                \tjne    23314 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x14>",
+          "   23328:\t48 81 ec f8 0d 00 00 \tsub    $0xdf8,%rsp",
+          "   2332f:\t48 89 94 24 58 02 00 \tmov    %rdx,0x258(%rsp)",
+          "   23336:\t00 ",
+          "   23337:\t48 89 74 24 68       \tmov    %rsi,0x68(%rsp)",
+          "   2333c:\t48 89 fd             \tmov    %rdi,%rbp"
+        ],
+        "sha256": "0a9f4ee85b48f31efb598e59f2004bc83fe26b5c4ecf1ef95cba836957febe98",
+        "packed_multiply_add_instruction_count": 6
+      },
+      {
+        "symbol": "000000000002d6f0 <gpui_canvas::canvas::render_cached_image>:",
+        "prologue": [
+          "   2d6f0:\t48 81 ec 00 10 00 00 \tsub    $0x1000,%rsp",
+          "   2d6f7:\t48 c7 04 24 00 00 00 \tmovq   $0x0,(%rsp)",
+          "   2d6fe:\t00 ",
+          "   2d6ff:\t48 81 ec 58 08 00 00 \tsub    $0x858,%rsp",
+          "   2d706:\t44 88 4c 24 07       \tmov    %r9b,0x7(%rsp)",
+          "   2d70b:\tb8 58 00 00 00       \tmov    $0x58,%eax",
+          "   2d710:\t0f 57 c0             \txorps  %xmm0,%xmm0",
+          "   2d713:\t66 66 66 66 2e 0f 1f \tdata16 data16 data16 cs nopw 0x0(%rax,%rax,1)",
+          "   2d71a:\t84 00 00 00 00 00 ",
+          "   2d720:\t0f 11 04 04          \tmovups %xmm0,(%rsp,%rax,1)",
+          "   2d724:\t48 c7 44 04 10 ff ff \tmovq   $0xffffffffffffffff,0x10(%rsp,%rax,1)",
+          "   2d72b:\tff ff ",
+          "   2d72d:\t0f 11 44 04 18       \tmovups %xmm0,0x18(%rsp,%rax,1)",
+          "   2d732:\t48 c7 44 04 28 ff ff \tmovq   $0xffffffffffffffff,0x28(%rsp,%rax,1)",
+          "   2d739:\tff ff ",
+          "   2d73b:\t0f 11 44 04 30       \tmovups %xmm0,0x30(%rsp,%rax,1)",
+          "   2d740:\t48 c7 44 04 40 ff ff \tmovq   $0xffffffffffffffff,0x40(%rsp,%rax,1)",
+          "   2d747:\tff ff "
+        ],
+        "sha256": "6d9bac5ba917d98f40a276d247f6a856a3822d7acdf24501eb857c3a3d06c351",
+        "packed_multiply_add_instruction_count": 0
+      }
+    ]
+  },
+  "candidate": {
+    "size": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n 498655\t  19840\t   5803\t 524298\t  8000a\t/tmp/gpui-image-axis-candidate\n",
+    "asm_sha256": "d57cbbafebb2ef5020e793338ef6b7ce5edc99c6ad7aad7cdea354dbdceae7d5",
+    "linked_symbols": [
+      {
+        "symbol": "0000000000023570 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>>:",
+        "prologue": [
+          "   23570:\t55                   \tpush   %rbp",
+          "   23571:\t41 57                \tpush   %r15",
+          "   23573:\t41 56                \tpush   %r14",
+          "   23575:\t41 55                \tpush   %r13",
+          "   23577:\t41 54                \tpush   %r12",
+          "   23579:\t53                   \tpush   %rbx",
+          "   2357a:\t49 89 e3             \tmov    %rsp,%r11",
+          "   2357d:\t49 81 eb 00 10 01 00 \tsub    $0x11000,%r11",
+          "   23584:\t48 81 ec 00 10 00 00 \tsub    $0x1000,%rsp",
+          "   2358b:\t48 c7 04 24 00 00 00 \tmovq   $0x0,(%rsp)",
+          "   23592:\t00 ",
+          "   23593:\t4c 39 dc             \tcmp    %r11,%rsp",
+          "   23596:\t75 ec                \tjne    23584 <<gpui_canvas::canvas::Canvas>::render_output::<gpui_canvas::canvas::Serial>+0x14>",
+          "   23598:\t48 81 ec e8 0d 00 00 \tsub    $0xde8,%rsp",
+          "   2359f:\t48 89 94 24 48 01 00 \tmov    %rdx,0x148(%rsp)",
+          "   235a6:\t00 ",
+          "   235a7:\t48 89 74 24 68       \tmov    %rsi,0x68(%rsp)",
+          "   235ac:\t48 89 fd             \tmov    %rdi,%rbp"
+        ],
+        "sha256": "d5fbcfc492c6410c344e7f0324562b3fa43dad8e11ca773ce59f55ab3569ec84",
+        "packed_multiply_add_instruction_count": 6
+      },
+      {
+        "symbol": "000000000002dc30 <gpui_canvas::canvas::render_cached_image>:",
+        "prologue": [
+          "   2dc30:\t48 81 ec 00 10 00 00 \tsub    $0x1000,%rsp",
+          "   2dc37:\t48 c7 04 24 00 00 00 \tmovq   $0x0,(%rsp)",
+          "   2dc3e:\t00 ",
+          "   2dc3f:\t48 81 ec 78 08 00 00 \tsub    $0x878,%rsp",
+          "   2dc46:\t44 88 4c 24 0f       \tmov    %r9b,0xf(%rsp)",
+          "   2dc4b:\tb8 58 00 00 00       \tmov    $0x58,%eax",
+          "   2dc50:\t0f 57 c0             \txorps  %xmm0,%xmm0",
+          "   2dc53:\t66 66 66 66 2e 0f 1f \tdata16 data16 data16 cs nopw 0x0(%rax,%rax,1)",
+          "   2dc5a:\t84 00 00 00 00 00 ",
+          "   2dc60:\t0f 11 44 04 20       \tmovups %xmm0,0x20(%rsp,%rax,1)",
+          "   2dc65:\t48 c7 44 04 30 ff ff \tmovq   $0xffffffffffffffff,0x30(%rsp,%rax,1)",
+          "   2dc6c:\tff ff ",
+          "   2dc6e:\t0f 11 44 04 38       \tmovups %xmm0,0x38(%rsp,%rax,1)",
+          "   2dc73:\t48 c7 44 04 48 ff ff \tmovq   $0xffffffffffffffff,0x48(%rsp,%rax,1)",
+          "   2dc7a:\tff ff ",
+          "   2dc7c:\t0f 11 44 04 50       \tmovups %xmm0,0x50(%rsp,%rax,1)",
+          "   2dc81:\t48 c7 44 04 60 ff ff \tmovq   $0xffffffffffffffff,0x60(%rsp,%rax,1)",
+          "   2dc88:\tff ff "
+        ],
+        "sha256": "076686d545a851e2de45bd9d6ee96e281e654ef1bca009135120ac90ba9146a9",
+        "packed_multiply_add_instruction_count": 0
+      },
+      {
+        "symbol": "000000000002fb30 <gpui_canvas::canvas::image_axis::render::<gpui_canvas::canvas::render_band<gpui_canvas::canvas::BgrxEncoder>::{closure#1}>>:",
+        "prologue": [
+          "   2fb30:\t55                   \tpush   %rbp",
+          "   2fb31:\t41 57                \tpush   %r15",
+          "   2fb33:\t41 56                \tpush   %r14",
+          "   2fb35:\t41 55                \tpush   %r13",
+          "   2fb37:\t41 54                \tpush   %r12",
+          "   2fb39:\t53                   \tpush   %rbx",
+          "   2fb3a:\t48 81 ec d8 08 00 00 \tsub    $0x8d8,%rsp",
+          "   2fb41:\t44 89 cb             \tmov    %r9d,%ebx",
+          "   2fb44:\t4d 89 c4             \tmov    %r8,%r12",
+          "   2fb47:\t48 89 cd             \tmov    %rcx,%rbp",
+          "   2fb4a:\t49 89 d7             \tmov    %rdx,%r15",
+          "   2fb4d:\t49 89 f6             \tmov    %rsi,%r14",
+          "   2fb50:\t48 89 bc 24 80 00 00 \tmov    %rdi,0x80(%rsp)",
+          "   2fb57:\t00 ",
+          "   2fb58:\t4c 8d ac 24 d8 02 00 \tlea    0x2d8(%rsp),%r13",
+          "   2fb5f:\t00 ",
+          "   2fb60:\tba 00 06 00 00       \tmov    $0x600,%edx",
+          "   2fb65:\t4c 89 ef             \tmov    %r13,%rdi"
+        ],
+        "sha256": "73964c33e2dc9c26a3334a383153067587e584d0f54006382424a365f6e1f200",
+        "packed_multiply_add_instruction_count": 12
+      },
+      {
+        "symbol": "00000000000303e0 <gpui_canvas::canvas::image_axis::render::<gpui_canvas::canvas::render_cached_image::{closure#0}::{closure#0}>>:",
+        "prologue": [
+          "   303e0:\t55                   \tpush   %rbp",
+          "   303e1:\t41 57                \tpush   %r15",
+          "   303e3:\t41 56                \tpush   %r14",
+          "   303e5:\t41 55                \tpush   %r13",
+          "   303e7:\t41 54                \tpush   %r12",
+          "   303e9:\t53                   \tpush   %rbx",
+          "   303ea:\t48 81 ec 18 09 00 00 \tsub    $0x918,%rsp",
+          "   303f1:\t44 89 cb             \tmov    %r9d,%ebx",
+          "   303f4:\t4d 89 c4             \tmov    %r8,%r12",
+          "   303f7:\t48 89 cd             \tmov    %rcx,%rbp",
+          "   303fa:\t49 89 d7             \tmov    %rdx,%r15",
+          "   303fd:\t49 89 f6             \tmov    %rsi,%r14",
+          "   30400:\t48 89 bc 24 98 00 00 \tmov    %rdi,0x98(%rsp)",
+          "   30407:\t00 ",
+          "   30408:\t4c 8d ac 24 18 03 00 \tlea    0x318(%rsp),%r13",
+          "   3040f:\t00 ",
+          "   30410:\tba 00 06 00 00       \tmov    $0x600,%edx",
+          "   30415:\t4c 89 ef             \tmov    %r13,%rdi"
+        ],
+        "sha256": "e45414e91d930aff0ba73e6ff5514a965cc4d36c54a9d6705c6af81937e11650",
+        "packed_multiply_add_instruction_count": 12
+      },
+      {
+        "symbol": "00000000000314d0 <<gpui_canvas::canvas::image_axis::Axes>::fill>:",
+        "prologue": [
+          "   314d0:\t55                   \tpush   %rbp",
+          "   314d1:\t41 57                \tpush   %r15",
+          "   314d3:\t41 56                \tpush   %r14",
+          "   314d5:\t41 55                \tpush   %r13",
+          "   314d7:\t41 54                \tpush   %r12",
+          "   314d9:\t53                   \tpush   %rbx",
+          "   314da:\t48 81 ec f8 00 00 00 \tsub    $0xf8,%rsp",
+          "   314e1:\t4c 89 cb             \tmov    %r9,%rbx",
+          "   314e4:\t49 89 d3             \tmov    %rdx,%r11",
+          "   314e7:\t48 8d 87 00 03 00 00 \tlea    0x300(%rdi),%rax",
+          "   314ee:\t48 89 bc 24 e0 00 00 \tmov    %rdi,0xe0(%rsp)",
+          "   314f5:\t00 ",
+          "   314f6:\t48 89 84 24 e8 00 00 \tmov    %rax,0xe8(%rsp)",
+          "   314fd:\t00 ",
+          "   314fe:\t4d 8b 69 30          \tmov    0x30(%r9),%r13",
+          "   31502:\t8b 41 20             \tmov    0x20(%rcx),%eax",
+          "   31505:\t89 44 24 44          \tmov    %eax,0x44(%rsp)",
+          "   31509:\t8b 41 24             \tmov    0x24(%rcx),%eax"
+        ],
+        "sha256": "209256a84e066d75f34830d4a35c7c69976e032a320fa2de9eb3ebb645e231e4",
+        "packed_multiply_add_instruction_count": 0
+      }
+    ]
+  }
+}
