@@ -30,11 +30,11 @@ fn canonical_scene_is_ordered_borrowed_and_does_not_rasterize() {
     assert_eq!(scene.clear, [0.0, 0.0, 0.0, 1.0]);
     let mut draws = scene.draws();
     let rect = draws.next().unwrap();
-    assert!(rect.mask.is_none());
+    assert!(rect.source.mask().is_none());
     assert_eq!(rect.inverse, [1.0, -0.0, -0.0, 1.0, -4.0, -6.0]);
-    assert!(draws.all(|draw| draw.mask.is_some()));
+    assert!(draws.all(|draw| draw.source.mask().is_some()));
     assert_eq!(canvas.stats().render_count, 0);
-    let masks: Vec<_> = scene.draws().filter_map(|d| d.mask).collect();
+    let masks: Vec<_> = scene.draws().filter_map(|d| d.source.mask()).collect();
     assert!(
         masks
             .iter()
@@ -53,7 +53,7 @@ fn raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces
         canvas
             .prepared_scene()
             .draws()
-            .filter_map(|d| d.mask.map(|m| m.key))
+            .filter_map(|d| d.source.mask().map(|m| m.key))
             .collect::<Vec<_>>()
     };
     let mut canvas = Canvas::new(40, 40).unwrap();

@@ -20,6 +20,7 @@ pub(crate) enum NodeKind {
     Button,
     List,
     ListItem,
+    Image,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
@@ -30,6 +31,7 @@ pub enum Role {
     Button,
     List,
     ListItem,
+    Image,
 }
 
 impl NodeKind {
@@ -41,6 +43,7 @@ impl NodeKind {
             Self::Button => Role::Button,
             Self::List => Role::List,
             Self::ListItem => Role::ListItem,
+            Self::Image => Role::Image,
         }
     }
 }
@@ -224,6 +227,25 @@ impl Drop for El<'_> {
 }
 
 impl<'a> El<'a> {
+    pub(crate) fn image(resource: &'a crate::Image) -> Self {
+        let mut element = Self::new(NodeKind::Image, None);
+        element.extra = Some(Box::new(crate::semantic::ElementExtra::Image {
+            spec: crate::image::ImageSpec {
+                resource,
+                sampling: crate::ImageSampling::Linear,
+            },
+            semantic: None,
+        }));
+        element
+    }
+    /// Selects nearest or bilinear reconstruction for an image declaration.
+    pub fn sampling(mut self, sampling: crate::ImageSampling) -> Self {
+        match self.extra.as_deref_mut() {
+            Some(crate::semantic::ElementExtra::Image { spec, .. }) => spec.sampling = sampling,
+            _ => panic!("sampling belongs to an image declaration"),
+        }
+        self
+    }
     pub(crate) fn reader(projector: Box<dyn crate::reader::Projector + 'a>) -> Self {
         let mut element = Self::new(NodeKind::Div, None);
         element.extra = Some(Box::new(crate::semantic::ElementExtra::Reader {
@@ -454,6 +476,7 @@ impl<'a> El<'a> {
         let mut output = Vec::new();
         let mut lists: Vec<ListDraft> = Vec::new();
         let mut annotations = Vec::new();
+        let mut images = Vec::new();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
@@ -469,11 +492,14 @@ impl<'a> El<'a> {
                     height,
                 });
             }
-            let (spec, annotation, projector) = element
+            let (spec, annotation, projector, image) = element
                 .extra
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            if let Some(spec) = image {
+                images.push(crate::image::ImageDraft { node: index, spec });
+            }
             if let Some((projector, map)) = projector {
                 let mut child = projector.render(readers);
                 if let Some(map) = map {
@@ -551,6 +577,7 @@ impl<'a> El<'a> {
             nodes: output,
             lists,
             annotations,
+            images,
         })
     }
 }
@@ -581,6 +608,7 @@ pub(crate) struct Description<'a> {
     pub nodes: Vec<DraftNode<'a>>,
     pub lists: Vec<crate::list::ListDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,
+    pub images: Vec<crate::image::ImageDraft<'a>>,
 }
 pub(crate) struct DraftNode<'a> {
     pub(crate) parent: Option<u32>,

@@ -36,6 +36,7 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 #[cfg(feature = "accessibility")]
 mod accessibility;
 mod delivery;
+mod image;
 mod input;
 mod list;
 mod turn;
@@ -484,6 +485,7 @@ impl Content {
             NodeKind::Button => 3,
             NodeKind::List => 4,
             NodeKind::ListItem => 5,
+            NodeKind::Image => 6,
         };
         let text = if text.0 == u32::MAX {
             0
@@ -505,13 +507,37 @@ impl Content {
             3 => NodeKind::Button,
             4 => NodeKind::List,
             5 => NodeKind::ListItem,
+            6 => NodeKind::Image,
             _ => unreachable!("Content constructs only declared kinds"),
         }
     }
     #[inline]
     fn text_slot(self) -> TextSlot {
+        if self.kind() == NodeKind::Image {
+            return TextSlot::NONE;
+        }
         let text = self.0 >> 3;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
+    }
+    fn image(image: image::ImageUse) -> Self {
+        assert!((image.resource as usize) < MAX_NODES);
+        let value = image.resource * 2 + u32::from(image.sampling == crate::ImageSampling::Nearest);
+        Self(((value + 1) << 3) | 6)
+    }
+    fn image_use(self) -> Option<image::ImageUse> {
+        let value = self.0 >> 3;
+        if self.kind() != NodeKind::Image || value == 0 {
+            return None;
+        }
+        let value = value - 1;
+        Some(image::ImageUse {
+            resource: value / 2,
+            sampling: if value & 1 == 0 {
+                crate::ImageSampling::Linear
+            } else {
+                crate::ImageSampling::Nearest
+            },
+        })
     }
 }
 struct Node {
@@ -610,6 +636,7 @@ struct Runtime<M> {
     nodes: Vec<Node>,
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
+    images: Option<Box<image::Images>>,
     by_identity: BTreeMap<u64, usize>,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
@@ -805,6 +832,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             nodes: Vec::new(),
             styles: styles::Styles::default(),
             texts: Vec::new(),
+            images: None,
             by_identity: BTreeMap::new(),
             fanout: BTreeMap::new(),
             next_identity: 1,
@@ -1380,6 +1408,7 @@ impl<M: View + 'static> Runtime<M> {
             nodes: drafts,
             lists: list_drafts,
             annotations: annotation_drafts,
+            images: image_drafts,
         } = self.model.view().flatten_lists(
             MAX_NODES,
             readers,
@@ -1415,6 +1444,7 @@ impl<M: View + 'static> Runtime<M> {
         self.next_identity
             .checked_add(drafts.len() as u64)
             .ok_or(Error::EpochExhausted)?;
+        let (image_resources, image_nodes) = image::describe(image_drafts)?;
         let mut depths = Vec::with_capacity(drafts.len());
         let mut fields = Vec::with_capacity(drafts.len());
         let mut component_scopes = Vec::with_capacity(drafts.len());
@@ -1608,6 +1638,24 @@ impl<M: View + 'static> Runtime<M> {
                 }
             };
             let mut site = node.text_slot().take(&mut self.texts);
+            let previous_image = node.content.image_use().map(|image| {
+                (
+                    self.images.as_ref().unwrap().get(image).key(),
+                    image.sampling,
+                )
+            });
+            let next_image = image_nodes.get(&index).copied();
+            let next_key = next_image.map(|image| {
+                (
+                    image_resources[image.resource as usize].key(),
+                    image.sampling,
+                )
+            });
+            if previous_image != next_key {
+                self.layout_dirty.insert(node.identity());
+                self.dirty = true;
+                node_changed = true;
+            }
             let text = draft.text.as_ref().map(|text| text.borrowed_value());
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
@@ -1667,10 +1715,15 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 TextSlot::NONE
             };
-            node.content = Content::new(node.kind(), text_slot);
+            node.content = if let Some(image) = next_image {
+                Content::image(image)
+            } else {
+                Content::new(node.kind(), text_slot)
+            };
             changed += usize::from(node_changed);
             nodes.push(node);
         }
+        image::reconcile(&mut self.images, image_resources);
         changed += old.iter().filter(|node| node.is_some()).count();
         let topology = old_ids.len() != nodes.len()
             || old_ids
@@ -1917,6 +1970,7 @@ impl<M: View + 'static> Runtime<M> {
         if self.latest_token != Some(token) {
             return Err(Error::StalePresentation);
         }
+        image::acknowledge(&mut self.images, token.sequence);
         let prepared = self.prepared.take();
         let newly_presented = prepared.is_some() || !self.presentation_valid;
         if let Some(prepared) = prepared {
@@ -1993,7 +2047,7 @@ impl<M: View + 'static> Runtime<M> {
                         self.list_rows.get(&node.identity()),
                     ),
                 )?;
-                if node.text_slot().0 != u32::MAX {
+                if node.text_slot().0 != u32::MAX || node.kind() == NodeKind::Image {
                     self.layout.set_measure(id, Some(measure_marker))?;
                 }
                 self.layout_nodes.push(id);
@@ -2038,6 +2092,7 @@ impl<M: View + 'static> Runtime<M> {
         let nodes = &self.nodes;
         let styles = &self.styles;
         let texts = &mut self.texts;
+        let images = &self.images;
         let service = &mut shaper;
         let mut measure = |id: NodeId, input: MeasureInput| {
             let width = input
@@ -2048,13 +2103,16 @@ impl<M: View + 'static> Runtime<M> {
                     AvailableSpace::MinContent => Some(f32::MIN_POSITIVE),
                     AvailableSpace::MaxContent => None,
                 });
-            let service = service
-                .as_mut()
-                .expect("measured text has an initialized service");
             let index = layout_nodes
                 .binary_search(&id)
                 .expect("measurement names a node in the current layout arena");
             let node = &nodes[index];
+            if let Some(image) = node.content.image_use() {
+                return image::measure(images.as_ref().unwrap().get(image), input);
+            }
+            let service = service
+                .as_mut()
+                .expect("measured text has an initialized service");
             match node.text_slot().get_mut(texts).unwrap().shape(
                 service,
                 styles.get(index).font_size,
@@ -2101,6 +2159,11 @@ impl<M: View + 'static> Runtime<M> {
         let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
         let mut metadata_sheet = self.metadata_sheet();
+        let image_leases = self
+            .images
+            .as_ref()
+            .map(|images| images.candidate())
+            .transpose()?;
         let list_metadata = self.list_metadata();
         #[cfg(feature = "accessibility")]
         let base_stamp = self.semantic_stamp();
@@ -2205,6 +2268,21 @@ impl<M: View + 'static> Runtime<M> {
                     scale_factor,
                 )?;
             }
+            if let Some(image) = node.content.image_use() {
+                let resource = self.images.as_ref().unwrap().get(image);
+                scene.draw_image(
+                    resource,
+                    Rect::new(
+                        layout.content_box_x(),
+                        layout.content_box_y(),
+                        layout.content_box_width(),
+                        layout.content_box_height(),
+                    ),
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
+                    clip,
+                    image.sampling,
+                )?;
+            }
             let published_parent = if list_mode {
                 node.parent
                     .index()
@@ -2236,7 +2314,7 @@ impl<M: View + 'static> Runtime<M> {
                 hittable: node.text_slot().0 != u32::MAX
                     || style.bg.alpha() > 0.0
                     || node.handler.is_some()
-                    || node.kind() == NodeKind::Input,
+                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image),
                 actions: Actions::for_node(node.kind(), node.handler.is_some()),
             });
             #[cfg(feature = "accessibility")]
@@ -2302,6 +2380,9 @@ impl<M: View + 'static> Runtime<M> {
             && let Some(metadata) = &mut self.metadata
         {
             metadata.candidate = Some(sheet);
+        }
+        if let Some(leases) = image_leases {
+            self.images.as_mut().unwrap().prepare(sequence, leases);
         }
         self.prepared = Some(Prepared {
             size: prepared_size,

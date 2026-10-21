@@ -19,7 +19,8 @@ fn snapshot(draw: PreparedDraw<'_>) -> Snapshot {
         bounds: draw.bounds,
         color: draw.color,
         mask: draw
-            .mask
+            .source
+            .mask()
             .map(|m| (m.key, m.width, m.height, m.coverage.to_vec())),
     }
 }
@@ -74,7 +75,7 @@ fn groups_are_the_same_canonical_painter_sequence_in_both_directions() {
                     clip: group.clip,
                     bounds: p.bounds,
                     color: group.color,
-                    mask: p.mask,
+                    source: p.source,
                 })
             })
         })

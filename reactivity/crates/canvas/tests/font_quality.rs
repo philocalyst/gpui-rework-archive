@@ -57,7 +57,7 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
                 "{content:?}, density={density}"
             );
             for (draw, glyph) in scene.draws().zip(glyphs) {
-                let mask = draw.mask.unwrap();
+                let mask = draw.source.mask().unwrap();
                 let (metrics, prior) = old.rasterize_indexed(glyph.id, 16.0 * density);
                 assert_eq!((mask.width, mask.height), (metrics.width, metrics.height));
                 let expected_x = 4.0 + glyph.x + metrics.xmin as f32 / density;

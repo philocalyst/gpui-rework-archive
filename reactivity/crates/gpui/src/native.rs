@@ -1482,3 +1482,10 @@ mod remote_tests;
     any(feature = "x11", feature = "x11-minimal")
 ))]
 mod unicode_tests;
+
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod image_tests;

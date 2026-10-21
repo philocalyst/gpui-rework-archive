@@ -134,6 +134,82 @@ pub mod ui {
         correction.x.w <= 0.0
     }
 
+    pub fn decode_image_channel(value: f32) -> f32 {
+        if value <= 0.04045 {
+            return value / 12.92;
+        }
+        pow((value + 0.055) / 1.055, 2.4)
+    }
+    pub fn image_texel(draw: Draw, cell: Vec2f, dimensions: Vec2f) -> Vec4f {
+        let cell = clamp(cell, vec2f(0.0, 0.0), dimensions - vec2f(1.0, 1.0));
+        let index = cell.y as u32 * dimensions.x as u32 + cell.x as u32;
+        let base = draw.atlas.x & 0x7fffffff;
+        if (draw.atlas.y & 8) != 0 {
+            return bitcast_vec4f(get!(WORDS)[(base + index) as usize]);
+        }
+        let word = get!(WORDS)[(base + index / 4) as usize];
+        let packed = word[(index & 3) as usize];
+        let value = vec4f(
+            (packed & 255) as f32,
+            ((packed >> 8) & 255) as f32,
+            ((packed >> 16) & 255) as f32,
+            (packed >> 24) as f32,
+        ) / 255.0;
+        if value.w == 0.0 {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
+        }
+        let mut rgb = value.xyz();
+        if (draw.atlas.y & 2) != 0 {
+            rgb /= value.w;
+        }
+        rgb = vec3f(
+            decode_image_channel(rgb.x),
+            decode_image_channel(rgb.y),
+            decode_image_channel(rgb.z),
+        );
+        if (draw.atlas.y & 4) != 0 {
+            let xyz = vec3f(
+                dot(
+                    vec3f(
+                        608311.0 / 1250200.0,
+                        189793.0 / 714400.0,
+                        198249.0 / 1000160.0,
+                    ),
+                    rgb,
+                ),
+                dot(
+                    vec3f(
+                        35783.0 / 156275.0,
+                        247089.0 / 357200.0,
+                        198249.0 / 2500400.0,
+                    ),
+                    rgb,
+                ),
+                dot(vec3f(0.0, 32229.0 / 714400.0, 5220557.0 / 5000800.0), rgb),
+            );
+            rgb = vec3f(
+                dot(
+                    vec3f(12831.0 / 3959.0, -329.0 / 214.0, -1974.0 / 3959.0),
+                    xyz,
+                ),
+                dot(
+                    vec3f(
+                        -851781.0 / 878810.0,
+                        1648619.0 / 878810.0,
+                        36519.0 / 878810.0,
+                    ),
+                    xyz,
+                ),
+                dot(
+                    vec3f(705.0 / 12673.0, -2585.0 / 12673.0, 705.0 / 667.0),
+                    xyz,
+                ),
+            );
+        }
+        rgb *= value.w;
+        vec4f(rgb.x, rgb.y, rgb.z, value.w)
+    }
+
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
         if point.x < draw.clip.x
             || point.y < draw.clip.y
@@ -148,8 +224,13 @@ pub mod ui {
         let error = vec2f(draw.inverse_x.w, draw.inverse_y.w);
         let edges = min(abs(position), abs(position - draw.local.zw()));
         let dimensions = vec2f((draw.atlas.z & 65535) as f32, (draw.atlas.z >> 16) as f32);
-        let mapped = position * dimensions / draw.local.zw();
-        let fraction = fract(mapped);
+        let is_image = (draw.atlas.x & 0x80000000) != 0;
+        let linear = is_image && (draw.atlas.y & 1) != 0;
+        let mut mapped = position * dimensions / draw.local.zw();
+        if linear {
+            mapped -= vec2f(0.5, 0.5);
+        }
+        let mut fraction = fract(mapped);
         let texels = min(fraction, vec2f(1.0, 1.0) - fraction);
         let texel_error =
             error * dimensions / draw.local.zw() + (abs(mapped) + vec2f(1.0, 1.0)) * 3.8146973e-6;
@@ -175,9 +256,17 @@ pub mod ui {
                 return vec4f(0.0, 0.0, 0.0, 0.0);
             }
             if draw.atlas.z > 0 {
-                cell = vec2f(
-                    pair_floor(pair_divide(pair_scale(x, dimensions.x), draw.local.z)),
-                    pair_floor(pair_divide(pair_scale(y, dimensions.y), draw.local.w)),
+                let mut nx = pair_divide(pair_scale(x, dimensions.x), draw.local.z);
+                let mut ny = pair_divide(pair_scale(y, dimensions.y), draw.local.w);
+                if linear {
+                    nx = pair_add(nx, vec2f(-0.5, 0.0));
+                    ny = pair_add(ny, vec2f(-0.5, 0.0));
+                }
+                cell = vec2f(pair_floor(nx), pair_floor(ny));
+                fraction = clamp(
+                    vec2f((nx.x - cell.x) + nx.y, (ny.x - cell.y) + ny.y),
+                    vec2f(0.0, 0.0),
+                    vec2f(1.0, 1.0),
                 );
             }
         } else if position.x < 0.0
@@ -186,6 +275,18 @@ pub mod ui {
             || position.y >= draw.local.w
         {
             return vec4f(0.0, 0.0, 0.0, 0.0);
+        }
+        if is_image {
+            if linear {
+                let a = image_texel(draw, cell, dimensions);
+                let b = image_texel(draw, cell + vec2f(1.0, 0.0), dimensions);
+                let c = image_texel(draw, cell + vec2f(0.0, 1.0), dimensions);
+                let d = image_texel(draw, cell + vec2f(1.0, 1.0), dimensions);
+                let upper = a * (1.0 - fraction.x) + b * fraction.x;
+                let lower = c * (1.0 - fraction.x) + d * fraction.x;
+                return upper * (1.0 - fraction.y) + lower * fraction.y;
+            }
+            return image_texel(draw, cell, dimensions);
         }
         if draw.atlas.z > 0 {
             // Domain membership was checked in local coordinates. A rounded

@@ -1,6 +1,122 @@
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
 use gpui_gpu::{Renderer, Stats, wgpu};
 
+#[test]
+fn packed_images_profiles_alpha_filters_and_cache_match_cpu() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let clip = Rect::new(1.125, 0.375, 29.5, 22.25);
+        for profile in [ImageProfile::Srgb, ImageProfile::DisplayP3] {
+            for alpha in [AlphaMode::Straight, AlphaMode::Premultiplied] {
+                let bytes = (0..35)
+                    .flat_map(|i| {
+                        let a = [0, 63, 127, 255][i % 4];
+                        let rgb = [(i * 31) as u8, (i * 57) as u8, (i * 13) as u8];
+                        let rgb = rgb.map(|v| {
+                            if alpha == AlphaMode::Premultiplied {
+                                (u16::from(v) * u16::from(a) / 255) as u8
+                            } else {
+                                v
+                            }
+                        });
+                        [rgb[0], rgb[1], rgb[2], a]
+                    })
+                    .collect::<Vec<_>>();
+                let image = Image::rgba8(7, 5, profile, alpha, bytes.into_boxed_slice()).unwrap();
+                for sampling in [ImageSampling::Nearest, ImageSampling::Linear] {
+                    for map in [
+                        Affine::IDENTITY,
+                        Affine {
+                            a: -0.9,
+                            b: 0.,
+                            c: 0.,
+                            d: 1.25,
+                            tx: 29.125,
+                            ty: 0.375,
+                        },
+                        Affine {
+                            a: 0.9,
+                            b: 0.13,
+                            c: -0.17,
+                            d: 0.75,
+                            tx: 5.125,
+                            ty: 0.125,
+                        },
+                    ] {
+                        let mut canvas = Canvas::recording(32, 24, ColorConfig::default()).unwrap();
+                        canvas.clear(Color::WHITE);
+                        canvas
+                            .draw_image(
+                                &image,
+                                Rect::new(0.125, 0.375, 25.5, 19.25),
+                                map,
+                                clip,
+                                sampling,
+                            )
+                            .unwrap();
+                        let first = readback(&mut renderer, &canvas);
+                        let stats = renderer.image_stats().unwrap();
+                        assert_eq!(stats.packed_bytes, 7 * 5 * 4);
+                        let second = readback(&mut renderer, &canvas);
+                        assert_eq!(first, second);
+                        assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+                        let cpu = canvas.pixels();
+                        for (index, (&gpu, &cpu)) in first.iter().zip(cpu).enumerate() {
+                            assert!(
+                                (i16::from(gpu) - i16::from(cpu)).abs() <= 1,
+                                "{profile:?} {alpha:?} {sampling:?} {map:?} byte{index}: GPU{gpu} CPU{cpu}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        // Prefix growth must relocate/reupload image words. Removing the final
+        // image drops its key map and restores ordinary draw-buffer residency.
+        let image = Image::rgba8(
+            1,
+            1,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![255, 17, 29, 255].into_boxed_slice(),
+        )
+        .unwrap();
+        let mut canvas = Canvas::recording(32, 24, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        canvas
+            .draw_image(
+                &image,
+                Rect::new(0., 0., 32., 24.),
+                Affine::IDENTITY,
+                Rect::new(0., 0., 32., 24.),
+                ImageSampling::Linear,
+            )
+            .unwrap();
+        let before = readback(&mut renderer, &canvas);
+        for _ in 0..100 {
+            canvas
+                .fill_rect(
+                    Rect::new(0., 0., 0.01, 0.01),
+                    Affine::IDENTITY,
+                    Rect::new(0., 0., 32., 24.),
+                    Color::BLACK,
+                )
+                .unwrap();
+        }
+        assert_eq!(canvas.prepared_scene().draws().len(), 101);
+        assert_eq!(readback(&mut renderer, &canvas), before);
+        assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 4);
+        canvas.clear(Color::WHITE);
+        assert!(
+            readback(&mut renderer, &canvas)
+                .iter()
+                .all(|&byte| byte == 255)
+        );
+        assert!(renderer.image_stats().is_none());
+    });
+}
+
 async fn renderer(format: wgpu::TextureFormat) -> Renderer {
     let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
     descriptor.backends = wgpu::Backends::VULKAN;
@@ -996,6 +1112,162 @@ fn unicode_paragraphs_fallback_and_fractional_density_match_cpu() {
                     .unwrap();
                 compare_tile_modes(&mut renderer, &mut canvas);
             }
+        }
+    });
+}
+
+#[test]
+fn images_reach_linear_hdr_and_display_p3_output_without_a_linear_gpu_mirror() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling, OutputProfile};
+    fn half(bytes: &[u8]) -> f32 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let exponent = ((bits >> 10) & 31) as i32;
+        let mantissa = (bits & 1023) as f32;
+        sign * if exponent == 0 {
+            mantissa * 2f32.powi(-24)
+        } else {
+            (1. + mantissa / 1024.) * 2f32.powi(exponent - 15)
+        }
+    }
+    pollster::block_on(async {
+        let straight = [
+            [4., -0.25, 0.5, 1.],
+            [0.5, 2., -0.1, 0.5],
+            [9., 1., 0., 0.],
+            [0.1, 0.4, 3., 0.75],
+        ];
+        let premultiplied = straight.map(|mut p| {
+            for c in 0..3 {
+                p[c] *= p[3];
+            }
+            p
+        });
+        let images = [
+            Image::linear_srgb(2, 2, AlphaMode::Straight, Box::new(straight)).unwrap(),
+            Image::linear_srgb(2, 2, AlphaMode::Premultiplied, Box::new(premultiplied)).unwrap(),
+            Image::rgba8(
+                2,
+                2,
+                ImageProfile::DisplayP3,
+                AlphaMode::Straight,
+                vec![
+                    255, 0, 0, 255, 0, 255, 0, 127, 0, 0, 255, 63, 255, 0, 255, 0,
+                ]
+                .into_boxed_slice(),
+            )
+            .unwrap(),
+        ];
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let mut worst = 0f32;
+        for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
+            for image in &images {
+                for sampling in [ImageSampling::Nearest, ImageSampling::Linear] {
+                    let config = ColorConfig::linear_hdr(profile, 203.).unwrap();
+                    let mut canvas = Canvas::recording(13, 9, config).unwrap();
+                    canvas.clear(Color::linear_srgb(0.2, 0.3, 0.5, 0.7).unwrap());
+                    canvas
+                        .draw_image(
+                            image,
+                            Rect::new(0.125, 0.375, 9.25, 7.5),
+                            Affine {
+                                a: -0.9,
+                                d: 0.9,
+                                tx: 11.125,
+                                ty: 0.125,
+                                ..Affine::IDENTITY
+                            },
+                            Rect::new(1.125, 0.375, 10.1, 7.5),
+                            sampling,
+                        )
+                        .unwrap();
+                    let gpu = readback(&mut renderer, &canvas);
+                    let cpu = canvas.pixels();
+                    for (index, (a, b)) in gpu.chunks_exact(2).zip(cpu.chunks_exact(2)).enumerate()
+                    {
+                        let (a, b) = (half(a), half(b));
+                        worst = worst.max((a - b).abs());
+                        assert!(
+                            (a - b).abs() <= 0.000002f32.max(b.abs() * 0.0015),
+                            "{profile:?} {sampling:?} value{index}: GPU{a} CPU{b}"
+                        );
+                    }
+                    let stats = renderer.image_stats().unwrap();
+                    assert_eq!(stats.packed_bytes, image.pixel_bytes());
+                }
+            }
+        }
+        eprintln!("HDR image maximum observed absolute error: {worst}");
+    });
+}
+
+#[test]
+fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
+    let images = [
+        Image::rgba8(
+            3,
+            1,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![255, 0, 0, 255, 0, 255, 0, 127, 0, 0, 255, 0].into_boxed_slice(),
+        )
+        .unwrap(),
+        Image::rgba8(
+            2,
+            2,
+            ImageProfile::DisplayP3,
+            AlphaMode::Premultiplied,
+            vec![
+                63, 0, 31, 63, 0, 127, 63, 127, 127, 31, 255, 255, 0, 0, 0, 0,
+            ]
+            .into_boxed_slice(),
+        )
+        .unwrap(),
+        Image::linear_srgb(
+            1,
+            2,
+            AlphaMode::Straight,
+            Box::new([[4., -0.2, 0.5, 1.], [0.5, 0.75, 3., 0.5]]),
+        )
+        .unwrap(),
+    ];
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let payload: usize = images.iter().map(Image::pixel_bytes).sum();
+        for order in [[0, 1, 2], [2, 0, 1], [1, 2, 0]] {
+            let mut canvas = Canvas::recording(33, 17, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            let clip = Rect::new(0., 0., 33., 17.);
+            for (position, index) in order.into_iter().enumerate() {
+                canvas
+                    .draw_image(
+                        &images[index],
+                        Rect::new(position as f32 * 8., 0., 17., 17.),
+                        Affine::IDENTITY,
+                        clip,
+                        ImageSampling::Linear,
+                    )
+                    .unwrap();
+            }
+            canvas
+                .draw_image(
+                    &images[order[0]],
+                    Rect::new(0.125, 13.375, 9.25, 3.),
+                    Affine::IDENTITY,
+                    clip,
+                    ImageSampling::Nearest,
+                )
+                .unwrap();
+            let gpu = readback(&mut renderer, &canvas);
+            assert_eq!(renderer.image_stats().unwrap().resources, 3);
+            assert_eq!(renderer.image_stats().unwrap().packed_bytes, payload);
+            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, payload);
+            for (i, (&a, &b)) in gpu.iter().zip(canvas.pixels()).enumerate() {
+                assert!(a.abs_diff(b) <= 1, "order{order:?} byte{i}: GPU{a} CPU{b}");
+            }
+            assert_eq!(readback(&mut renderer, &canvas), gpu);
+            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
         }
     });
 }
