@@ -7,6 +7,7 @@ use std::{any::Any, marker::PhantomData};
 
 use crate::{
     View,
+    component::Component,
     source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
     style::{Affine, Color, Flex, IntoLength, Style, nonnegative},
 };
@@ -46,6 +47,9 @@ trait Route {
     fn validate(&self, receiver: &dyn Any, sources: &dyn Any)
     -> Result<Option<FieldId>, BindError>;
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
+    fn owner_scope(&self, _receiver: &dyn Any, _sources: &dyn Any) -> Result<u32, BindError> {
+        Ok(0)
+    }
 }
 
 impl Handler {
@@ -59,6 +63,72 @@ impl Handler {
 
     pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
         self.0.invoke(receiver)
+    }
+
+    pub(crate) fn owner_scope(
+        &self,
+        receiver: &dyn Any,
+        sources: &dyn Any,
+    ) -> Result<u32, BindError> {
+        self.0.owner_scope(receiver, sources)
+    }
+
+    pub(crate) fn component_check<P: 'static, C: View + 'static>(
+        component: Component<P, C>,
+    ) -> Self {
+        Self(Box::new(MethodRoute {
+            callback: |_: &mut C| {},
+            model: PhantomData::<fn(C)>,
+        }))
+        .in_component(component)
+    }
+
+    pub(crate) fn in_component<P: 'static, C: View + 'static>(
+        self,
+        component: Component<P, C>,
+    ) -> Self {
+        Self(Box::new(ComponentRoute {
+            component,
+            handler: self,
+        }))
+    }
+}
+
+// One cold adapter per installed child route; no model pointer or per-node
+// shared owner. Nested adapters follow the explicit parent projection chain.
+struct ComponentRoute<P, C> {
+    component: Component<P, C>,
+    handler: Handler,
+}
+impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
+    fn validate(
+        &self,
+        receiver: &dyn Any,
+        sources: &dyn Any,
+    ) -> Result<Option<FieldId>, BindError> {
+        let parent = receiver
+            .downcast_ref::<P>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        let sources = sources
+            .downcast_ref::<Sources<P>>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        self.component
+            .validate_handler(parent, sources, &self.handler)
+    }
+    fn owner_scope(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<u32, BindError> {
+        let parent = receiver
+            .downcast_ref::<P>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        let sources = sources
+            .downcast_ref::<Sources<P>>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        self.component.handler_scope(parent, sources, &self.handler)
+    }
+    fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
+        let parent = receiver
+            .downcast_mut::<P>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        self.handler.invoke(self.component.project_mut(parent)?)
     }
 }
 
@@ -125,6 +195,7 @@ pub struct El<'a> {
     children: Vec<El<'a>>,
     style: Style,
     on_click: Option<Handler>,
+    components: ComponentBoundaries,
 }
 
 // The declaration payload order is explicitly preorder: local text/route first,
@@ -152,6 +223,7 @@ impl<'a> El<'a> {
             children: Vec::new(),
             style: Style::default(),
             on_click: None,
+            components: ComponentBoundaries::default(),
         }
     }
 
@@ -235,6 +307,34 @@ impl<'a> El<'a> {
         f(self)
     }
 
+    pub(crate) fn map_handlers(&mut self, map: &mut impl FnMut(Handler) -> Handler) {
+        let mut pending = vec![self];
+        while let Some(element) = pending.pop() {
+            if let Some(handler) = element.on_click.take() {
+                element.on_click = Some(map(handler));
+            }
+            let mut boundary = element.components.0.as_deref_mut();
+            while let Some(item) = boundary {
+                let check = item.check.take().expect("boundary check is installed");
+                item.check = Some(map(check));
+                boundary = item.next.0.as_deref_mut();
+            }
+            pending.extend(element.children.iter_mut());
+        }
+    }
+
+    pub(crate) fn component<P: 'static, C: View + 'static>(
+        mut self,
+        component: Component<P, C>,
+    ) -> Self {
+        let next = std::mem::take(&mut self.components);
+        self.components.0 = Some(Box::new(ComponentBoundary {
+            check: Some(Handler::component_check(component)),
+            next,
+        }));
+        self
+    }
+
     /// Consumes each header once, transferring routes/owned operands and copying
     /// borrowed operands only when the runtime promotes a changed destination.
     pub(crate) fn flatten(self) -> Vec<DraftNode<'a>> {
@@ -249,10 +349,33 @@ impl<'a> El<'a> {
                 text: element.text.take(),
                 style: element.style,
                 on_click: element.on_click.take(),
+                components: std::mem::take(&mut element.components),
             });
             pending.extend(children.into_iter().rev().map(|child| (Some(index), child)));
         }
         output
+    }
+}
+
+// Sparse boundary metadata has one pointer in ordinary leaf descriptions.
+// Component roots prepend outer boundaries; disposal is iterative even for an
+// unlowered element containing many nested boundaries on the same visual root.
+#[derive(Default)]
+pub(crate) struct ComponentBoundaries(Option<Box<ComponentBoundary>>);
+pub(crate) struct ComponentBoundary {
+    pub(crate) check: Option<Handler>,
+    next: ComponentBoundaries,
+}
+impl ComponentBoundaries {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = &ComponentBoundary> {
+        std::iter::successors(self.0.as_deref(), |item| item.next.0.as_deref())
+    }
+}
+impl Drop for ComponentBoundaries {
+    fn drop(&mut self) {
+        while let Some(mut boundary) = self.0.take() {
+            self.0 = boundary.next.0.take();
+        }
     }
 }
 
@@ -262,6 +385,7 @@ pub(crate) struct DraftNode<'a> {
     pub(crate) text: Option<Text<'a>>,
     pub(crate) style: Style,
     pub(crate) on_click: Option<Handler>,
+    pub(crate) components: ComponentBoundaries,
 }
 
 pub fn div<'a>() -> El<'a> {
@@ -680,11 +804,12 @@ mod tests {
     #[test]
     fn size_ledger_counts_inline_route_and_style_costs() {
         eprintln!(
-            "El={} Style={} DraftNode={} Handler={}",
+            "El={} Style={} DraftNode={} Handler={} ComponentRoute={}",
             size_of::<El<'_>>(),
             size_of::<Style>(),
             size_of::<DraftNode<'_>>(),
-            size_of::<Handler>()
+            size_of::<Handler>(),
+            size_of::<ComponentRoute<(), ()>>()
         );
         let el = text("borrowed");
         assert_eq!(el.children.capacity(), 0);

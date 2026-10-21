@@ -256,6 +256,7 @@ struct Node {
     kind: NodeKind,
     text: Option<Rc<str>>,
     field: Option<FieldId>,
+    component_scope: u32,
     style: Style,
     handler: Option<Handler>,
     shaped: Option<Shaped>,
@@ -1010,6 +1011,7 @@ impl<M: View + 'static> Runtime<M> {
             .ok_or(Error::EpochExhausted)?;
         let mut depths = Vec::with_capacity(drafts.len());
         let mut fields = Vec::with_capacity(drafts.len());
+        let mut component_scopes = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0usize; drafts.len() + 1];
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
         for (index, node) in drafts.iter().enumerate() {
@@ -1019,6 +1021,19 @@ impl<M: View + 'static> Runtime<M> {
                 return Err(Error::DepthLimit { node: index });
             }
             depths.push(depth);
+            let mut component_scope = node
+                .parent
+                .map_or(0, |parent| component_scopes[parent as usize]);
+            for boundary in node.components.iter() {
+                let check = boundary
+                    .check
+                    .as_ref()
+                    .expect("boundary check is installed");
+                check.validate(&self.model, &self.sources)?;
+                // Owning model ancestry is independent of visual parentage.
+                component_scope = check.owner_scope(&self.model, &self.sources)?;
+            }
+            component_scopes.push(component_scope);
             if let Some(handler) = &node.on_click {
                 handler.validate(&self.model, &self.sources)?;
             }
@@ -1080,7 +1095,8 @@ impl<M: View + 'static> Runtime<M> {
             let previous = run_survives
                 .then(|| sites.get(&(parent_identity, ordinal, draft.kind)))
                 .flatten()
-                .and_then(|&old_index| old[old_index].take());
+                .and_then(|&old_index| old[old_index].take())
+                .filter(|node| node.component_scope == component_scopes[index]);
             let mut node_changed = previous.is_none();
             let mut node = if let Some(node) = previous {
                 node
@@ -1095,6 +1111,7 @@ impl<M: View + 'static> Runtime<M> {
                     kind: draft.kind,
                     text: None,
                     field: None,
+                    component_scope: component_scopes[index],
                     style: draft.style,
                     handler: None,
                     shaped: None,

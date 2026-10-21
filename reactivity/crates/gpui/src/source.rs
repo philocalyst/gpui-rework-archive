@@ -1,19 +1,28 @@
 //! Typed owner-relative sources. Borrowed addresses are compared only while the
 //! owner is borrowed; installed bindings retain a field key, never an address.
 
+use crate::{View, component::Component};
 use gpui_reactivity_state::{Revision, Signal};
 use std::{any::Any, borrow::Cow, fmt};
 
-/// Explicit field identity within a view's source schema.
+/// Explicit local field identity. The runtime qualifies contained fields with
+/// checked schema-relative scope ordinals; these are not durable capabilities.
+/// `get()` returns the local declaration ID, not a globally unique identifier.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct FieldId(u32);
+pub struct FieldId {
+    local: u32,
+    scope: u32,
+}
 
 impl FieldId {
     pub const fn new(value: u32) -> Self {
-        Self(value)
+        Self {
+            local: value,
+            scope: 0,
+        }
     }
     pub const fn get(self) -> u32 {
-        self.0
+        self.local
     }
 }
 
@@ -93,7 +102,7 @@ impl<M, T: 'static> Source<M, T> {
         model: &M,
         sources: &Sources<M>,
     ) -> Result<(), BindError> {
-        if sources.get(self.id)?.signal(model).same((self.read)(model)) {
+        if sources.signal(model, self.id)?.same((self.read)(model)) {
             Ok(())
         } else {
             Err(BindError::ProjectionMismatch(self.id))
@@ -332,6 +341,11 @@ impl<'a, T: TextValue> IntoText<'a> for &'a Signal<T> {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum BindError {
     ReceiverMismatch,
+    DuplicateComponent(FieldId),
+    UnknownComponent(FieldId),
+    ComponentProjectionMismatch(FieldId),
+    ScopeExhausted,
+    ComponentDepthLimit,
     DuplicateId(FieldId),
     DuplicateName(&'static str),
     AliasedFields { first: FieldId, second: FieldId },
@@ -422,12 +436,139 @@ impl<M, T: 'static> Field<M> for Source<M, T> {
     }
 }
 
+// A component owns one child schema. Field and method routing recurse through
+// typed projection tables, never through retained child addresses or refcounts.
+trait ComponentSchema<M> {
+    fn as_any(&self) -> &dyn Any;
+    fn id(&self) -> FieldId;
+    fn name(&self) -> &'static str;
+    fn contains(&self, id: FieldId) -> bool;
+    fn len(&self) -> usize;
+    fn validate(&self, model: &mut M) -> Result<(), BindError>;
+    fn collect_signals<'a>(&self, model: &'a M, output: &mut Vec<(FieldId, &'a dyn ErasedSignal)>);
+    fn resolve(&self, model: &M, signal: &dyn ErasedSignal) -> Result<Option<FieldId>, BindError>;
+    fn signal<'a>(&self, model: &'a M, id: FieldId) -> Result<&'a dyn ErasedSignal, BindError>;
+    fn invalidates_owner(&self, id: FieldId) -> Result<bool, BindError>;
+    fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError>;
+    fn write_text(
+        &self,
+        model: &mut M,
+        id: FieldId,
+        input: String,
+        codec: TextCodec,
+    ) -> Result<Revision, TextEditError>;
+    fn scan(&self, model: &M, output: &mut Vec<(FieldId, Revision)>);
+}
+pub(crate) struct ComponentEntry<M, C> {
+    pub(crate) component: Component<M, C>,
+    pub(crate) sources: Sources<C>,
+    start: u32,
+    end: u32,
+    parent_dependency: bool,
+}
+impl<M, C> ComponentEntry<M, C> {
+    pub(crate) fn qualify_scope(&self, scope: u32) -> u32 {
+        self.start + scope
+    }
+    pub(crate) fn qualify(&self, field: FieldId) -> FieldId {
+        FieldId {
+            local: field.local,
+            scope: self.start + field.scope,
+        }
+    }
+    fn local(&self, field: FieldId) -> FieldId {
+        FieldId {
+            local: field.local,
+            scope: field.scope - self.start,
+        }
+    }
+}
+impl<M: 'static, C: 'static> ComponentSchema<M> for ComponentEntry<M, C> {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn id(&self) -> FieldId {
+        self.component.id
+    }
+    fn name(&self) -> &'static str {
+        self.component.name
+    }
+    fn contains(&self, id: FieldId) -> bool {
+        id.scope >= self.start && id.scope < self.end
+    }
+    fn len(&self) -> usize {
+        self.sources.len()
+    }
+    fn validate(&self, model: &mut M) -> Result<(), BindError> {
+        self.sources.validate(self.component.project_mut(model)?)
+    }
+    fn collect_signals<'a>(&self, model: &'a M, output: &mut Vec<(FieldId, &'a dyn ErasedSignal)>) {
+        let begin = output.len();
+        self.sources
+            .collect_signals((self.component.read)(model), output);
+        for (id, _) in &mut output[begin..] {
+            *id = self.qualify(*id);
+        }
+    }
+    fn resolve(&self, model: &M, signal: &dyn ErasedSignal) -> Result<Option<FieldId>, BindError> {
+        self.sources
+            .resolve((self.component.read)(model), signal)
+            .map(|id| id.map(|id| self.qualify(id)))
+    }
+    fn signal<'a>(&self, model: &'a M, id: FieldId) -> Result<&'a dyn ErasedSignal, BindError> {
+        self.sources
+            .signal((self.component.read)(model), self.local(id))
+    }
+    fn invalidates_owner(&self, id: FieldId) -> Result<bool, BindError> {
+        let child = self.sources.invalidates_owner(self.local(id))?;
+        Ok(self.parent_dependency || child)
+    }
+    fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError> {
+        self.sources
+            .revision((self.component.read)(model), self.local(id))
+    }
+    fn write_text(
+        &self,
+        model: &mut M,
+        id: FieldId,
+        input: String,
+        codec: TextCodec,
+    ) -> Result<Revision, TextEditError> {
+        let child = match self.component.project_mut(model) {
+            Ok(child) => child,
+            Err(error) => {
+                return Err(TextEditError {
+                    field: id,
+                    input,
+                    reason: TextEditErrorKind::Binding(error),
+                });
+            }
+        };
+        self.sources
+            .write_text(child, self.local(id), input, codec)
+            .map_err(|mut error| {
+                error.field = id;
+                error
+            })
+    }
+    fn scan(&self, model: &M, output: &mut Vec<(FieldId, Revision)>) {
+        let begin = output.len();
+        self.sources.scan_into((self.component.read)(model), output);
+        for (id, _) in &mut output[begin..] {
+            *id = self.qualify(*id);
+        }
+    }
+}
+
 /// A model's explicit macro-free source schema. Descriptors allocate once per
 /// mounted owner. Signals themselves carry no registry, allocation or address.
 pub struct Sources<M> {
     fields: Vec<Box<dyn Field<M>>>,
     schema_error: Option<BindError>,
     owner_fields: Vec<FieldId>,
+    components: Vec<Box<dyn ComponentSchema<M>>>,
+    next_scope: u32,
+    component_depth: u32,
 }
 impl<M> Default for Sources<M> {
     fn default() -> Self {
@@ -440,6 +581,9 @@ impl<M> Sources<M> {
             fields: Vec::new(),
             schema_error: None,
             owner_fields: Vec::new(),
+            components: Vec::new(),
+            next_scope: 1,
+            component_depth: 0,
         }
     }
     /// Register an owner dependency. Typed edits also re-describe the owner, so
@@ -472,17 +616,124 @@ impl<M> Sources<M> {
                 }
             }
         }
+        if self.schema_error.is_none()
+            && self
+                .components
+                .iter()
+                .any(|component| component.name() == source.name)
+        {
+            self.schema_error = Some(BindError::DuplicateName(source.name));
+        }
         self.fields.push(Box::new(source));
         self
     }
+    /// Register contained state with conservative parent dependencies. Child
+    /// methods and every child edit may affect ordinary parent snapshot reads.
+    pub fn component<C: View + 'static>(self, component: Component<M, C>) -> Self
+    where
+        M: 'static,
+    {
+        self.register_component(component, true)
+    }
+    /// Declare that the parent does not snapshot child state outside the child
+    /// description/direct operands. Child `field` declarations still invalidate
+    /// the owner; child `direct` declarations can patch without running any View.
+    /// This explicit contract does not observe ordinary Rust Deref reads.
+    pub fn direct_component<C: View + 'static>(self, component: Component<M, C>) -> Self
+    where
+        M: 'static,
+    {
+        self.register_component(component, false)
+    }
+    fn register_component<C: View + 'static>(
+        mut self,
+        component: Component<M, C>,
+        parent_dependency: bool,
+    ) -> Self
+    where
+        M: 'static,
+    {
+        if self
+            .components
+            .iter()
+            .any(|other| other.id() == component.id)
+        {
+            self.schema_error = Some(BindError::DuplicateComponent(component.id));
+        }
+        if self.schema_error.is_none()
+            && (self
+                .components
+                .iter()
+                .any(|other| other.name() == component.name)
+                || self
+                    .fields
+                    .iter()
+                    .any(|field| field.name() == component.name))
+        {
+            self.schema_error = Some(BindError::DuplicateName(component.name));
+        }
+        let sources = C::sources();
+        // Static schemas must be finite and acyclic; bound the admitted route
+        // and schema call/drop stacks independently from visual layout depth.
+        if sources.component_depth >= 128 {
+            self.schema_error = Some(BindError::ComponentDepthLimit);
+            return self;
+        }
+        self.component_depth = self.component_depth.max(sources.component_depth + 1);
+        let Some(end) = self.next_scope.checked_add(sources.next_scope) else {
+            self.schema_error = Some(BindError::ScopeExhausted);
+            return self;
+        };
+        let start = self.next_scope;
+        self.next_scope = end;
+        self.components.push(Box::new(ComponentEntry {
+            component,
+            sources,
+            start,
+            end,
+            parent_dependency,
+        }));
+        self
+    }
+    pub(crate) fn component_entry<C: 'static>(
+        &self,
+        id: FieldId,
+    ) -> Result<&ComponentEntry<M, C>, BindError>
+    where
+        M: 'static,
+    {
+        self.check_schema()?;
+        self.components
+            .iter()
+            .find(|entry| entry.id() == id)
+            .ok_or(BindError::UnknownComponent(id))?
+            .as_any()
+            .downcast_ref()
+            .ok_or(BindError::ReceiverMismatch)
+    }
     pub fn len(&self) -> usize {
         self.fields.len()
+            + self
+                .components
+                .iter()
+                .map(|entry| entry.len())
+                .sum::<usize>()
     }
     pub fn is_empty(&self) -> bool {
-        self.fields.is_empty()
+        self.len() == 0
+    }
+    fn component_for(&self, id: FieldId) -> Result<&dyn ComponentSchema<M>, BindError> {
+        self.components
+            .iter()
+            .find(|entry| entry.contains(id))
+            .map(|entry| entry.as_ref())
+            .ok_or(BindError::UnknownField(id))
     }
     pub(crate) fn invalidates_owner(&self, id: FieldId) -> Result<bool, BindError> {
         self.check_schema()?;
+        if id.scope != 0 {
+            return self.component_for(id)?.invalidates_owner(id);
+        }
         self.get(id)?;
         Ok(self.owner_fields.contains(&id))
     }
@@ -490,11 +741,8 @@ impl<M> Sources<M> {
         self.schema_error.clone().map_or(Ok(()), Err)
     }
     fn check_aliases(&self, model: &M) -> Result<(), BindError> {
-        let projected: Vec<_> = self
-            .fields
-            .iter()
-            .map(|field| (field.id(), field.signal(model)))
-            .collect();
+        let mut projected = Vec::with_capacity(self.len());
+        self.collect_signals(model, &mut projected);
         for (index, (id, signal)) in projected.iter().enumerate() {
             for (other_id, other_signal) in &projected[..index] {
                 if signal.same(*other_signal) {
@@ -514,7 +762,27 @@ impl<M> Sources<M> {
         for field in &self.fields {
             field.validate(model)?;
         }
+        for component in &self.components {
+            component.validate(model)?;
+        }
         self.check_aliases(model)
+    }
+    fn collect_signals<'a>(&self, model: &'a M, output: &mut Vec<(FieldId, &'a dyn ErasedSignal)>) {
+        output.extend(
+            self.fields
+                .iter()
+                .map(|field| (field.id(), field.signal(model))),
+        );
+        for component in &self.components {
+            component.collect_signals(model, output);
+        }
+    }
+    fn signal<'a>(&self, model: &'a M, id: FieldId) -> Result<&'a dyn ErasedSignal, BindError> {
+        if id.scope == 0 {
+            Ok(self.get(id)?.signal(model))
+        } else {
+            self.component_for(id)?.signal(model, id)
+        }
     }
     pub(crate) fn resolve(
         &self,
@@ -534,6 +802,14 @@ impl<M> Sources<M> {
                 found = Some(field.id());
             }
         }
+        for component in &self.components {
+            if let Some(id) = component.resolve(model, signal)? {
+                if let Some(first) = found {
+                    return Err(BindError::AliasedFields { first, second: id });
+                }
+                found = Some(id);
+            }
+        }
         Ok(found)
     }
     fn get(&self, id: FieldId) -> Result<&dyn Field<M>, BindError> {
@@ -544,7 +820,11 @@ impl<M> Sources<M> {
             .ok_or(BindError::UnknownField(id))
     }
     pub fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError> {
-        Ok(self.get(id)?.revision(model))
+        if id.scope == 0 {
+            Ok(self.get(id)?.revision(model))
+        } else {
+            self.component_for(id)?.revision(model, id)
+        }
     }
     pub(crate) fn read_text<'a>(
         &self,
@@ -552,7 +832,7 @@ impl<M> Sources<M> {
         id: FieldId,
         codec: TextCodec,
     ) -> Result<Cow<'a, str>, BindError> {
-        (codec.read)(self.get(id)?.signal(model).as_any(), id)
+        (codec.read)(self.signal(model, id)?.as_any(), id)
     }
     pub(crate) fn write_text(
         &self,
@@ -568,6 +848,16 @@ impl<M> Sources<M> {
                 reason: TextEditErrorKind::Binding(error),
             });
         }
+        if id.scope != 0 {
+            return match self.component_for(id) {
+                Ok(component) => component.write_text(model, id, input, codec),
+                Err(error) => Err(TextEditError {
+                    field: id,
+                    input,
+                    reason: TextEditErrorKind::Binding(error),
+                }),
+            };
+        }
         match self.get(id) {
             Ok(field) => field.write_text(model, input, codec),
             Err(error) => Err(TextEditError {
@@ -577,6 +867,16 @@ impl<M> Sources<M> {
             }),
         }
     }
+    fn scan_into(&self, model: &M, output: &mut Vec<(FieldId, Revision)>) {
+        output.extend(
+            self.fields
+                .iter()
+                .map(|field| (field.id(), field.revision(model))),
+        );
+        for component in &self.components {
+            component.scan(model, output);
+        }
+    }
     /// Scan registered fields after arbitrary owner mutation. Revision equality
     /// alone cannot detect replacement by `Signal::new`; callers must compare
     /// destination values at that conservative owner boundary as well.
@@ -584,9 +884,9 @@ impl<M> Sources<M> {
         &'a self,
         model: &'a M,
     ) -> impl ExactSizeIterator<Item = (FieldId, Revision)> + 'a {
-        self.fields
-            .iter()
-            .map(move |field| (field.id(), field.revision(model)))
+        let mut output = Vec::with_capacity(self.len());
+        self.scan_into(model, &mut output);
+        output.into_iter()
     }
 }
 
@@ -1007,6 +1307,120 @@ mod tests {
         assert_eq!(
             direct.invalidates_owner(COUNT.id()),
             Err(BindError::UnknownField(COUNT.id()))
+        );
+    }
+}
+
+#[cfg(test)]
+mod component_tests {
+    use super::*;
+    use crate::{El, text};
+    struct Child {
+        value: Signal<u32>,
+    }
+    impl Child {
+        const VALUE: Source<Self, u32> =
+            Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    }
+    impl View for Child {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::VALUE)
+        }
+        fn view(&self) -> El<'_> {
+            text(&self.value)
+        }
+    }
+    struct Parent {
+        left: Child,
+        right: Child,
+    }
+    const LEFT: Component<Parent, Child> =
+        Component::new(FieldId::new(1), "left", |m| &m.left, |m| &mut m.left);
+    const RIGHT: Component<Parent, Child> =
+        Component::new(FieldId::new(2), "right", |m| &m.right, |m| &mut m.right);
+    fn model() -> Parent {
+        Parent {
+            left: Child {
+                value: Signal::new(1),
+            },
+            right: Child {
+                value: Signal::new(2),
+            },
+        }
+    }
+    #[test]
+    fn component_schemas_reject_duplicate_names_ids_and_cross_scope_source_aliases() {
+        let mut model = model();
+        assert_eq!(
+            Sources::new()
+                .component(LEFT)
+                .component(LEFT)
+                .validate(&mut model),
+            Err(BindError::DuplicateComponent(LEFT.id()))
+        );
+        let duplicate_id =
+            Component::new(LEFT.id(), "other", |m: &Parent| &m.right, |m| &mut m.right);
+        assert_eq!(
+            Sources::new()
+                .component(LEFT)
+                .component(duplicate_id)
+                .validate(&mut model),
+            Err(BindError::DuplicateComponent(LEFT.id()))
+        );
+        let alias = Component::new(RIGHT.id(), "right", |m: &Parent| &m.left, |m| &mut m.left);
+        assert!(matches!(
+            Sources::new()
+                .component(LEFT)
+                .component(alias)
+                .validate(&mut model),
+            Err(BindError::AliasedFields { .. })
+        ));
+        let field = Source::new(
+            FieldId::new(1),
+            "left",
+            |m: &Parent| &m.right.value,
+            |m| &mut m.right.value,
+        );
+        assert_eq!(
+            Sources::new()
+                .field(field)
+                .component(LEFT)
+                .validate(&mut model),
+            Err(BindError::DuplicateName("left"))
+        );
+        assert_eq!(
+            Sources::new()
+                .component(LEFT)
+                .field(field)
+                .validate(&mut model),
+            Err(BindError::DuplicateName("left"))
+        );
+    }
+    #[test]
+    fn scoped_scan_and_revision_preserve_local_ids_without_namespace_collision() {
+        let mut model = model();
+        let sources = Sources::new()
+            .direct_component(LEFT)
+            .direct_component(RIGHT);
+        sources.validate(&mut model).unwrap();
+        *model.right.value += 1;
+        let values: Vec<_> = sources.scan(&model).collect();
+        assert_eq!(values.len(), 2);
+        assert_eq!(values[0].0.get(), 1);
+        assert_eq!(values[1].0.get(), 1);
+        assert_ne!(values[0].0, values[1].0);
+        assert_eq!(values[1].1.get(), 1);
+        assert_eq!(sources.revision(&model, values[1].0).unwrap().get(), 1);
+        assert!(!sources.invalidates_owner(values[0].0).unwrap());
+    }
+    #[test]
+    fn namespace_exhaustion_is_checked_before_a_component_is_registered() {
+        let mut sources = Sources::<Parent>::new();
+        sources.next_scope = u32::MAX;
+        let sources = sources.component(LEFT);
+        assert_eq!(
+            sources.validate(&mut model()),
+            Err(BindError::ScopeExhausted)
         );
     }
 }
