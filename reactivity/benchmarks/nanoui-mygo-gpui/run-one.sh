@@ -6,7 +6,7 @@ DIR=$(cd "$(dirname "$0")" && pwd)
 : "${MODE:=eager}"
 : "${PROFILE:=cpu-matched}"
 source /tmp/gpui-native-env.sh
-export DISPLAY=:94 LUNA_ROWS="$ROWS" LUNA_MODE="$MODE"
+export DISPLAY=${LUNA_DISPLAY:-:94} LUNA_ROWS="$ROWS" LUNA_MODE="$MODE"
 export LUNA_APP="$APP"
 : "${LUNA_STARTS:=20}"; : "${LUNA_CLICKS_PER_START:=10}"; : "${LUNA_MEMORY_STARTS:=5}"; : "${LUNA_IDLE_MS:=750}"
 export LUNA_STARTS LUNA_CLICKS_PER_START LUNA_MEMORY_STARTS LUNA_IDLE_MS
@@ -14,7 +14,10 @@ export LD_LIBRARY_PATH=/nix/store/1fl4qsghsryd5f764m5v64vlxdz9d8qx-gtk+3-3.24.52
 case "$APP" in
   gpui)
     unset LUNA_INTERPRETER LUNA_LIBRARY_PATH || true
-    if [[ "$PROFILE" == "cpu-matched" ]]; then export LUNA_RENDERER=cpu; BIN=/tmp/gpui-bench-gpui-cpu;
+    if [[ -n "${LUNA_GPUI_BINARY:-}" ]]; then
+      BIN=$LUNA_GPUI_BINARY
+      if [[ "$PROFILE" == "cpu-matched" ]]; then export LUNA_RENDERER=cpu; else export LUNA_RENDERER=auto; fi
+    elif [[ "$PROFILE" == "cpu-matched" ]]; then export LUNA_RENDERER=cpu; BIN=/tmp/gpui-bench-gpui-cpu;
     else export LUNA_RENDERER=auto; BIN=/tmp/gpui-bench-gpui-x11; fi
     ;;
   mygo)
