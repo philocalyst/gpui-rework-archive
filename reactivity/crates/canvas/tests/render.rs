@@ -526,3 +526,44 @@ fn staged_scene_keeps_old_pixels_and_reuses_the_output_allocation() {
     assert_eq!(canvas.pixels().as_ptr(), address);
     assert!(canvas.pixels().chunks_exact(4).all(|p| p == [0, 0, 0, 255]));
 }
+
+#[test]
+fn no_sample_draw_preserves_the_entire_background_at_quantization_thresholds() {
+    use gpui_canvas::{ColorConfig, PixelFormat};
+    // Just above the exact opaque sRGB byte0/1 transition. Repeated f32
+    // accumulation of sixteen identical clear samples used to move it below
+    // that transition, so adding a zero-coverage draw darkened its whole tile.
+    let threshold = f32::from_bits(0x391f22b4);
+    for format in [PixelFormat::Rgba8Premultiplied, PixelFormat::Rgba16Float] {
+        for proofs in [false, true] {
+            for alpha in [1.0, 0.5] {
+                let mut canvas = Canvas::with_color_config(
+                    32,
+                    17,
+                    ColorConfig {
+                        format,
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+                canvas.set_tile_proofs(proofs);
+                // Keep premultiplied red on the same threshold for both alphas.
+                canvas.clear(Color::linear_srgb(threshold / alpha, 0.0, 0.0, alpha).unwrap());
+                let before = canvas.pixels().to_vec();
+                canvas
+                    .fill_rect(
+                        Rect::new(0.0, 0.0, 0.01, 0.01),
+                        Affine::IDENTITY,
+                        Rect::new(0.0, 0.0, 32.0, 17.0),
+                        Color::WHITE,
+                    )
+                    .unwrap();
+                assert_eq!(
+                    canvas.pixels(),
+                    before,
+                    "zero-coverage draw changed background: {format:?}, proofs={proofs}, alpha={alpha}"
+                );
+            }
+        }
+    }
+}

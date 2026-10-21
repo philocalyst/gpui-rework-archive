@@ -947,11 +947,15 @@ fn blend(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
     }
 }
 fn sample_mean(samples: impl Iterator<Item = [f32; 4]>) -> [f32; 4] {
-    let mut average = [0.0; 4];
+    // Sixteen identical f32 values sum exactly in f64 (24+4 significant
+    // bits). Narrow once, preserving a uniform tile's exact working color.
+    // Otherwise a zero-coverage command could move the clear across an output
+    // quantization threshold merely by materializing its sample tile.
+    let mut sum = [0.0f64; 4];
     for sample in samples {
         for i in 0..4 {
-            average[i] += sample[i] / 16.0;
+            sum[i] += sample[i] as f64;
         }
     }
-    average
+    sum.map(|value| (value / 16.0) as f32)
 }
