@@ -412,9 +412,11 @@ struct TextSlot(u32);
 impl TextSlot {
     const NONE: Self = Self(u32::MAX);
 
+    #[inline]
     fn get(self, texts: &[Option<TextSite>]) -> Option<&TextSite> {
         (self.0 != u32::MAX).then(|| texts[self.0 as usize].as_ref().unwrap())
     }
+    #[inline]
     fn get_mut(self, texts: &mut [Option<TextSite>]) -> Option<&mut TextSite> {
         (self.0 != u32::MAX).then(|| texts[self.0 as usize].as_mut().unwrap())
     }
@@ -433,6 +435,7 @@ impl TextSlot {
 struct Content(u32);
 const _: () = assert!(MAX_NODES <= (u32::MAX >> 3) as usize);
 impl Content {
+    #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
         let kind = match kind {
             NodeKind::Div => 0,
