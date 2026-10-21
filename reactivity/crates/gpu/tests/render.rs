@@ -1271,3 +1271,471 @@ fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
         }
     });
 }
+
+fn assert_packet_replay(before: Stats, after: Stats) {
+    assert!(after.packet_reused);
+    assert_eq!(after.submissions, before.submissions + 1);
+    assert_eq!(
+        (
+            after.validated_draws,
+            after.binning_tile_visits,
+            after.bind_group_creations
+        ),
+        (0, 0, 0)
+    );
+    assert_eq!(
+        (after.instance_upload_bytes, after.mask_upload_bytes),
+        (0, 0)
+    );
+    assert_eq!(
+        (
+            after.draws,
+            after.tile_references,
+            after.sample_draw_evaluations
+        ),
+        (
+            before.draws,
+            before.tile_references,
+            before.sample_draw_evaluations
+        )
+    );
+    assert_eq!(
+        (
+            after.gpu_buffer_bytes,
+            after.atlas_bytes,
+            after.cpu_index_capacity_bytes
+        ),
+        (
+            before.gpu_buffer_bytes,
+            before.atlas_bytes,
+            before.cpu_index_capacity_bytes
+        )
+    );
+}
+
+#[test]
+fn explicit_packet_redraw_submits_complete_pixels_to_fresh_targets_after_scene_drop() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut canvas = Canvas::recording(96, 64, ColorConfig::default()).unwrap();
+        let clip = Rect::new(0., 0., 96., 64.);
+        canvas.clear(Color::rgb(19, 29, 47));
+        canvas
+            .fill_rect(
+                Rect::new(0.125, 1.375, 71., 38.),
+                Affine::IDENTITY,
+                clip,
+                Color::rgba(200, 20, 90, 150),
+            )
+            .unwrap();
+        let image = Image::rgba8(
+            2,
+            2,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![
+                255, 0, 0, 255, 0, 255, 0, 127, 0, 0, 255, 63, 255, 255, 255, 255,
+            ]
+            .into_boxed_slice(),
+        )
+        .unwrap();
+        canvas
+            .draw_image(
+                &image,
+                Rect::new(40.125, 2.375, 35., 23.),
+                Affine::IDENTITY,
+                clip,
+                ImageSampling::Linear,
+            )
+            .unwrap();
+        let mut text = TextSystem::bundled().unwrap();
+        let layout = text.shape("Reuse café", 16., None).unwrap();
+        canvas
+            .draw_text(
+                &mut text,
+                &layout,
+                Point {
+                    x: 2.125,
+                    y: 36.375,
+                },
+                Affine::IDENTITY,
+                clip,
+                Color::WHITE,
+            )
+            .unwrap();
+        let first = readback(&mut renderer, &canvas);
+        let before = renderer.stats();
+        assert_eq!(
+            before.validated_draws,
+            canvas.prepared_scene().draws().len()
+        );
+        assert_eq!(
+            before.binning_tile_visits,
+            2 * before.original_tile_references
+        );
+        assert_eq!(before.bind_group_creations, 1);
+        assert!(!before.packet_reused);
+        assert!(before.instance_upload_bytes > 0 && before.mask_upload_bytes > 0);
+        assert!(renderer.image_stats().unwrap().uploaded_bytes > 0);
+        // Prepared GPU resources outlive every borrowed CPU command/resource.
+        let texture = output_texture(&renderer, &canvas);
+        drop(canvas);
+        drop(image);
+        drop(layout);
+        drop(text);
+        for iteration in 0..3 {
+            let before = renderer.stats();
+            assert!(
+                renderer
+                    .redraw(&texture.create_view(&Default::default()))
+                    .unwrap()
+                    .is_some()
+            );
+            assert_packet_replay(before, renderer.stats());
+            if iteration == 0 {
+                eprintln!(
+                    "packet_prepare={before:?}\npacket_redraw={:?}",
+                    renderer.stats()
+                );
+            }
+            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+            assert_eq!(read_texture(&renderer, &texture), first);
+        }
+    });
+}
+
+#[test]
+fn queued_redraw_keeps_its_packet_before_later_uploads_and_buffer_replacement() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let images = [(2, [231, 19, 43, 255]), (8, [29, 71, 211, 255])].map(|(side, rgba)| {
+            Image::rgba8(
+                side,
+                side,
+                ImageProfile::Srgb,
+                AlphaMode::Straight,
+                rgba.repeat(side as usize * side as usize)
+                    .into_boxed_slice(),
+            )
+            .unwrap()
+        });
+        let mut scenes = images.each_ref().map(|image| {
+            let mut canvas = Canvas::recording(32, 24, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            let rect = Rect::new(0., 0., 32., 24.);
+            canvas
+                .draw_image(image, rect, Affine::IDENTITY, rect, ImageSampling::Nearest)
+                .unwrap();
+            canvas
+        });
+        let targets = std::array::from_fn::<_, 3, _>(|_| output_texture(&renderer, &scenes[0]));
+        renderer
+            .render(
+                scenes[0].prepared_scene(),
+                &targets[0].create_view(&Default::default()),
+            )
+            .unwrap();
+        let first = renderer.stats();
+        renderer
+            .redraw(&targets[1].create_view(&Default::default()))
+            .unwrap()
+            .unwrap();
+        assert_packet_replay(first, renderer.stats());
+        renderer
+            .render(
+                scenes[1].prepared_scene(),
+                &targets[2].create_view(&Default::default()),
+            )
+            .unwrap();
+        assert!(!renderer.stats().packet_reused);
+        // No polling, readback, or CPU wait occurred between these submissions.
+        // Replacement drops our old binding; the queued commands retain its leases.
+        assert!(renderer.image_stats().unwrap().uploaded_bytes > 0);
+        drop(images);
+        let actual = targets
+            .each_ref()
+            .map(|target| read_texture(&renderer, target));
+        assert_eq!(actual[0], actual[1]);
+        assert_ne!(actual[0], actual[2]);
+        for (index, scene) in scenes.iter_mut().enumerate() {
+            for (&gpu, &cpu) in actual[index * 2].iter().zip(scene.pixels()) {
+                assert!(gpu.abs_diff(cpu) <= 1);
+            }
+        }
+    });
+}
+
+#[test]
+fn unkeyed_calls_revalidate_mutable_headers_and_distinct_scenes_and_modes() {
+    use gpui_canvas::OutputProfile;
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut a = Canvas::recording(32, 24, ColorConfig::default()).unwrap();
+        a.clear(Color::WHITE);
+        let mut b = Canvas::recording(32, 24, ColorConfig::default()).unwrap();
+        b.clear(Color::rgb(70, 120, 190));
+        let white = readback(&mut renderer, &a);
+        let colored = readback(&mut renderer, &b);
+        assert_ne!(colored, white);
+        assert!(!renderer.stats().packet_reused);
+        assert_eq!(readback(&mut renderer, &a), white);
+        let target = output_texture(&renderer, &a);
+        let mut scene = a.prepared_scene();
+        scene.clear = b.prepared_scene().clear;
+        renderer
+            .render(scene, &target.create_view(&Default::default()))
+            .unwrap();
+        assert_eq!(read_texture(&renderer, &target), colored);
+        assert!(!renderer.stats().packet_reused);
+        scene.color_config.profile = OutputProfile::DisplayP3;
+        renderer
+            .render(scene, &target.create_view(&Default::default()))
+            .unwrap();
+        let p3 = read_texture(&renderer, &target);
+        assert_ne!(p3, colored);
+        let p3_cpu = Canvas::with_color_config(32, 24, scene.color_config).unwrap();
+        let mut p3_cpu = p3_cpu;
+        p3_cpu.clear(Color::rgb(70, 120, 190));
+        for (&x, &y) in p3.iter().zip(p3_cpu.pixels()) {
+            assert!((i16::from(x) - i16::from(y)).abs() <= 1);
+        }
+        assert!(
+            renderer
+                .redraw(&target.create_view(&Default::default()))
+                .unwrap()
+                .is_some()
+        );
+        let before = renderer.stats();
+        renderer.set_grouped_records(true);
+        renderer.set_tile_proofs(true);
+        assert!(
+            renderer
+                .redraw(&target.create_view(&Default::default()))
+                .unwrap()
+                .is_some()
+        );
+        assert_packet_replay(before, renderer.stats());
+        for (groups, proofs) in [(false, true), (false, false), (true, false), (true, true)] {
+            renderer.set_grouped_records(groups);
+            renderer.set_tile_proofs(proofs);
+            assert!(
+                renderer
+                    .redraw(&target.create_view(&Default::default()))
+                    .unwrap()
+                    .is_none()
+            );
+            renderer
+                .render(scene, &target.create_view(&Default::default()))
+                .unwrap();
+            assert_eq!(read_texture(&renderer, &target), p3);
+        }
+        // Even a caller-mutated header uses the ordinary full admission path.
+        scene.width = 33;
+        assert!(
+            renderer
+                .render(scene, &target.create_view(&Default::default()))
+                .is_err()
+        );
+        assert!(
+            renderer
+                .redraw(&target.create_view(&Default::default()))
+                .unwrap()
+                .is_none()
+        );
+    });
+}
+
+#[test]
+fn redraw_rejects_wrong_targets_without_discarding_the_valid_packet() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut canvas = Canvas::recording(16, 16, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        let good = output_texture(&renderer, &canvas);
+        assert!(
+            renderer
+                .redraw(&good.create_view(&Default::default()))
+                .unwrap()
+                .is_none()
+        );
+        renderer
+            .render(
+                canvas.prepared_scene(),
+                &good.create_view(&Default::default()),
+            )
+            .unwrap();
+        let first = read_texture(&renderer, &good);
+        for (size, format) in [
+            ([17, 16], renderer.format()),
+            ([16, 16], wgpu::TextureFormat::Rgba16Float),
+        ] {
+            let bad = renderer.device().create_texture(&wgpu::TextureDescriptor {
+                label: None,
+                size: wgpu::Extent3d {
+                    width: size[0],
+                    height: size[1],
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            });
+            let count = renderer.stats().submissions;
+            assert!(matches!(
+                renderer.redraw(&bad.create_view(&Default::default())),
+                Err(gpui_gpu::Error::InvalidScene)
+            ));
+            assert_eq!(renderer.stats().submissions, count);
+            assert!(
+                renderer
+                    .redraw(&good.create_view(&Default::default()))
+                    .unwrap()
+                    .is_some()
+            );
+            assert_eq!(read_texture(&renderer, &good), first);
+        }
+        let mut replacement = Renderer::new(
+            renderer.device().clone(),
+            renderer.queue().clone(),
+            renderer.format(),
+        )
+        .await
+        .unwrap();
+        assert!(
+            replacement
+                .redraw(&good.create_view(&Default::default()))
+                .unwrap()
+                .is_none()
+        );
+    });
+}
+
+#[test]
+fn failed_preparation_after_image_upload_discards_the_previous_packet() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut a = Canvas::recording(64, 64, ColorConfig::default()).unwrap();
+        a.clear(Color::WHITE);
+        let small = Image::rgba8(
+            1,
+            1,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![230, 19, 7, 255].into_boxed_slice(),
+        )
+        .unwrap();
+        a.draw_image(
+            &small,
+            Rect::new(0., 0., 64., 64.),
+            Affine::IDENTITY,
+            Rect::new(0., 0., 64., 64.),
+            ImageSampling::Nearest,
+        )
+        .unwrap();
+        let first = readback(&mut renderer, &a);
+        let mut failing = Canvas::recording(512, 256, ColorConfig::default()).unwrap();
+        failing.clear(Color::BLACK);
+        let large = Image::rgba8(
+            32,
+            32,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![33; 32 * 32 * 4].into_boxed_slice(),
+        )
+        .unwrap();
+        let clip = Rect::new(0., 0., 512., 256.);
+        failing
+            .draw_image(
+                &large,
+                Rect::new(0., 0., 32., 32.),
+                Affine::IDENTITY,
+                clip,
+                ImageSampling::Nearest,
+            )
+            .unwrap();
+        let mut text = TextSystem::bundled().unwrap();
+        for value in ["W", "M", "N", "H", "Q", "O", "A", "B", "C", "D", "E", "F"] {
+            let layout = text.shape(value, 128., None).unwrap();
+            failing
+                .draw_text_scaled(
+                    &mut text,
+                    &layout,
+                    Point { x: 0., y: 0. },
+                    Affine::IDENTITY,
+                    clip,
+                    Color::WHITE,
+                    8.,
+                )
+                .unwrap();
+        }
+        let area: usize = failing
+            .prepared_scene()
+            .masks()
+            .map(|m| m.width * m.height)
+            .sum();
+        assert!(area > 2048 * 2048, "fixture must exceed atlas area");
+        let target = output_texture(&renderer, &failing);
+        assert!(matches!(
+            renderer.render(
+                failing.prepared_scene(),
+                &target.create_view(&Default::default())
+            ),
+            Err(gpui_gpu::Error::AtlasFull)
+        ));
+        assert_eq!(
+            renderer.image_stats().unwrap().uploaded_bytes,
+            32 * 32 * 4,
+            "image buffer changed before the atlas rejection"
+        );
+        let old_target = output_texture(&renderer, &a);
+        assert!(
+            renderer
+                .redraw(&old_target.create_view(&Default::default()))
+                .unwrap()
+                .is_none()
+        );
+        assert_eq!(
+            readback(&mut renderer, &a),
+            first,
+            "retry rebuilds all old resource coordinates"
+        );
+    });
+}
+
+#[test]
+fn hdr_and_wide_gamut_packets_redraw_exactly_without_reencoding_or_uploads() {
+    use gpui_canvas::OutputProfile;
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
+            let mut canvas =
+                Canvas::recording(23, 19, ColorConfig::linear_hdr(profile, 203.).unwrap()).unwrap();
+            canvas.clear(Color::linear_srgb(-0.25, 2., 0.5, 0.7).unwrap());
+            canvas
+                .fill_rect(
+                    Rect::new(0.125, 0.375, 19., 17.),
+                    Affine::IDENTITY,
+                    Rect::new(0., 0., 23., 19.),
+                    Color::linear_display_p3(3., 0.1, -0.2, 0.5).unwrap(),
+                )
+                .unwrap();
+            let first = readback(&mut renderer, &canvas);
+            let target = output_texture(&renderer, &canvas);
+            let before = renderer.stats();
+            assert!(
+                renderer
+                    .redraw(&target.create_view(&Default::default()))
+                    .unwrap()
+                    .is_some()
+            );
+            assert_packet_replay(before, renderer.stats());
+            assert_eq!(read_texture(&renderer, &target), first);
+        }
+    });
+}

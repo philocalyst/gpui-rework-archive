@@ -253,6 +253,7 @@ impl Upgrade {
                         handle,
                         renderer: *renderer,
                         errors,
+                        packet_token: None,
                         config: super::surface_config(
                             [size.width.max(1), size.height.max(1)],
                             FORMAT,

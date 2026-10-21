@@ -59,6 +59,14 @@ struct Correction {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Stats {
     pub submissions: u64,
+    /// Last successful submission reused the already admitted packet.
+    pub packet_reused: bool,
+    /// CPU validate_draw calls for the last successful submission, not GPU work.
+    pub validated_draws: usize,
+    /// Forward and reverse CSR draw-bound tile visits, before proof filtering.
+    pub binning_tile_visits: usize,
+    /// Bind groups created for the last successful submission (zero on redraw).
+    pub bind_group_creations: usize,
     pub draws: usize,
     pub tile_references: usize,
     pub original_tile_references: usize,
@@ -259,6 +267,13 @@ impl Atlas {
     }
 }
 
+// A binding to this renderer's current buffers and atlas, not a second scene.
+// Invalidate before any preparation can replace or overwrite those resources.
+struct Packet {
+    bindings: wgpu::BindGroup,
+    size: [u32; 2],
+}
+
 /// GPU-owned caches and one fullscreen tile compositor. It consumes canonical
 /// scene records directly; no CPU image, MSAA image or float intermediate exists.
 pub struct Renderer {
@@ -283,6 +298,7 @@ pub struct Renderer {
     tile_proofs: bool,
     grouped_records: bool,
     stats: Stats,
+    packet: Option<Packet>,
 }
 impl Renderer {
     pub async fn request(
@@ -376,6 +392,7 @@ impl Renderer {
             tile_proofs: true,
             grouped_records: true,
             stats: Stats::default(),
+            packet: None,
         })
     }
     pub fn device(&self) -> &wgpu::Device {
@@ -395,18 +412,28 @@ impl Renderer {
     }
     /// Diagnostic schema oracle: keep old inline fields for every draw.
     pub fn set_grouped_records(&mut self, enabled: bool) {
-        self.grouped_records = enabled;
+        if self.grouped_records != enabled {
+            self.packet = None;
+            self.grouped_records = enabled;
+        }
     }
     /// Disable only the disposable tile proofs for reference comparisons.
     pub fn set_tile_proofs(&mut self, enabled: bool) {
-        self.tile_proofs = enabled;
+        if self.tile_proofs != enabled {
+            self.packet = None;
+            self.tile_proofs = enabled;
+        }
     }
 
+    /// Validate and prepare this borrowed scene on every call. Public scene
+    /// headers are mutable, so no identity or repeated borrow implies reuse.
+    /// A new attempt discards redraw eligibility even if admission fails.
     pub fn render(
         &mut self,
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
+        self.packet = None;
         scene
             .color_config
             .validate()
@@ -691,35 +718,17 @@ impl Renderer {
                 },
             ],
         });
-        let mut encoder = self
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("GPUI frame"),
-            });
-        {
-            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("GPUI frame"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: target,
-                    resolve_target: None,
-                    depth_slice: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
-                        store: wgpu::StoreOp::Store,
-                    },
-                })],
-                depth_stencil_attachment: None,
-                timestamp_writes: None,
-                occlusion_query_set: None,
-                multiview_mask: None,
-            });
-            pass.set_pipeline(&self.pipeline);
-            pass.set_bind_group(0, &bindings, &[]);
-            pass.draw(0..3, 0..1);
-        }
-        let submitted = self.queue.submit([encoder.finish()]);
+        let submitted = self.submit(target, &bindings);
+        self.packet = Some(Packet {
+            bindings,
+            size: [scene.width, scene.height],
+        });
         self.stats = Stats {
             submissions: self.stats.submissions.saturating_add(1),
+            packet_reused: false,
+            validated_draws: ordinal,
+            binning_tile_visits: original_references * 2,
+            bind_group_creations: 1,
             draws: ordinal,
             draw_record_bytes: self.records.len() * 16,
             shared_groups,
@@ -754,6 +763,76 @@ impl Renderer {
                 + self.residuals.capacity() * 32,
         };
         Ok(submitted)
+    }
+    /// Submit the last successfully prepared packet to a fresh target.
+    ///
+    /// This is explicit replay, not a cache keyed by a caller's scene or number.
+    /// It skips all command/resource validation, binning, uploads and binding
+    /// creation, but still clears and draws the complete target before submitting.
+    /// It does not acknowledge OS presentation or preserve swapchain pixels.
+    ///
+    /// None means no eligible packet (new renderer, attempted render failure, or
+    /// a changed diagnostic mode). A wrong-size/format target returns an error
+    /// without mutating the valid packet; retrying with a valid target is allowed.
+    /// As with render, the target must be an admissible view on this device.
+    pub fn redraw(
+        &mut self,
+        target: &wgpu::TextureView,
+    ) -> Result<Option<wgpu::SubmissionIndex>, Error> {
+        let Some(packet) = &self.packet else {
+            return Ok(None);
+        };
+        if [target.texture().width(), target.texture().height()] != packet.size
+            || target.texture().format() != self.format
+        {
+            return Err(Error::InvalidScene);
+        }
+        let submitted = self.submit(target, &packet.bindings);
+        self.stats.submissions = self.stats.submissions.saturating_add(1);
+        self.stats.packet_reused = true;
+        self.stats.validated_draws = 0;
+        self.stats.binning_tile_visits = 0;
+        self.stats.bind_group_creations = 0;
+        self.stats.instance_upload_bytes = 0;
+        self.stats.mask_upload_bytes = 0;
+        if let Some(images) = &mut self.images {
+            images.redrawn();
+        }
+        Ok(Some(submitted))
+    }
+
+    fn submit(
+        &self,
+        target: &wgpu::TextureView,
+        bindings: &wgpu::BindGroup,
+    ) -> wgpu::SubmissionIndex {
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("GPUI frame"),
+            });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("GPUI frame"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: target,
+                    resolve_target: None,
+                    depth_slice: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&self.pipeline);
+            pass.set_bind_group(0, bindings, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        self.queue.submit([encoder.finish()])
     }
     fn correction(&mut self, inverse: [f64; 6], clip: gpui_canvas::Rect) -> u32 {
         let low = std::array::from_fn::<_, 8, _>(|i| match i {
@@ -1046,6 +1125,20 @@ fn validate_draw(
 mod tests {
     use super::*;
     use gpui_canvas::Rect;
+
+    #[test]
+    fn packet_storage_ledger() {
+        eprintln!(
+            "packet_storage,Renderer={},Stats={},Packet={},OptionPacket={},BindGroup={},Canvas={},PreparedScene={}",
+            size_of::<Renderer>(),
+            size_of::<Stats>(),
+            size_of::<Packet>(),
+            size_of::<Option<Packet>>(),
+            size_of::<wgpu::BindGroup>(),
+            size_of::<gpui_canvas::Canvas>(),
+            size_of::<PreparedScene<'_>>()
+        );
+    }
 
     #[test]
     fn storage_records_match_shader_stride_and_offsets() {
