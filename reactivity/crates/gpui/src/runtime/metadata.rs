@@ -497,7 +497,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Option<&str>, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let (identity, index) = runtime.locate(target)?;
         let metadata = runtime.metadata.as_deref();
         if let Some(Contribution::Set(value)) = metadata
             .and_then(|m| m.overrides.get(&identity))
@@ -512,7 +512,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 if let Some(base) = base.filter(|base| base.name.is_some()) {
                     return Ok(base.name.as_deref());
                 }
-                let node = &runtime.nodes[runtime.by_identity[&identity]];
+                let node = &runtime.nodes[index];
                 Ok((node.kind() != NodeKind::Input)
                     .then(|| {
                         node.text_slot()
