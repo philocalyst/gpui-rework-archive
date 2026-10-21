@@ -379,3 +379,21 @@ while an untouched tile encoded the original clear. A public regression uses
 that threshold with both output formats, proof modes and opaque/translucent
 clear colors. Per-sample source-over and the coverage sample positions are
 unchanged. The paired vectorization CSVs above were rerun after this correction.
+
+## Write each output pixel once
+
+The band kernel now writes empty tiles directly from a cached clear pixel,
+uniform tiles from one encoded summary, and boundary tiles from their sample
+mean. This removes the preceding whole-band clear pass and its redundant writes
+under all nonempty tiles. A uniform summary is already its exact sample mean,
+so it also needs no sixteen-value reduction. The single fixed sample array
+remains; no branch-heavy optional-array representation is required.
+
+[Paired runs](evidence-single-write.csv) compare binaries from the preceding
+`ed876fe8e0` implementation and this kernel, alternating twice on the same host.
+All digests and sample/work counts agree. Serial 640×360 flat scenes decreased
+from 195.5–195.7 µs to 175.2–176.0 µs; 1920×1080 flat scenes decreased from
+1.687–1.695 ms to 1.485–1.487 ms. Label scenes remained approximately 15.6–15.8 ms;
+this removes output writes rather than their dominant glyph sampling. Existing
+independent geometry/mask/alpha oracles and both-format parallel byte comparisons
+pass. Retained allocation capacities do not increase.

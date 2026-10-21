@@ -709,14 +709,8 @@ fn render_band<W: PixelWriter>(
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [0u8; 8];
     writer.write(frame.clear, &mut clear[..W::BYTES]);
-    for pixel in pixels.chunks_exact_mut(W::BYTES) {
-        pixel.copy_from_slice(&clear[..W::BYTES]);
-    }
     for tile in band_index * columns..(band_index + 1) * columns {
         let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
-        if ordered.is_empty() {
-            continue;
-        }
         let left = tile % columns * TILE;
         let top = band_index * TILE;
         let right = (left + TILE).min(frame.width);
@@ -772,9 +766,13 @@ fn render_band<W: PixelWriter>(
                 }
             }
         }
-        let uniform_color = uniform.map(|color| sample_mean(std::iter::repeat_n(color, 16)));
-        let mut uniform_bytes = [0u8; 8];
-        if let Some(color) = uniform_color {
+        // Each output pixel is written exactly once: empty tiles write the
+        // cached clear, uniform tiles encode once, and sampled tiles reduce.
+        let uniform_color = uniform;
+        let mut uniform_bytes = clear;
+        if !ordered.is_empty()
+            && let Some(color) = uniform_color
+        {
             writer.write(color, &mut uniform_bytes[..W::BYTES]);
         }
         for y in top..bottom {
