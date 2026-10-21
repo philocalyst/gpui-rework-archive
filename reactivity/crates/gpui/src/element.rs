@@ -7,7 +7,7 @@ use std::{any::Any, marker::PhantomData};
 
 use crate::{
     View,
-    source::{BindError, FieldAction, FieldId, IntoText, Sources, Text, TextValue},
+    source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
     style::{Affine, Color, Flex, IntoLength, Style, nonnegative},
 };
 
@@ -90,7 +90,7 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
 // Validation and invocation share the one source descriptor and update capture.
 // An exact action has one box allocation, rather than separately boxed callbacks
 // that duplicate Source. The runtime must validate before exact-source admission.
-impl<M: 'static, T: TextValue, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
+impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
     fn validate(
         &self,
         receiver: &dyn Any,
@@ -332,7 +332,7 @@ impl<M: 'static, F: Fn(&mut M) + 'static> IntoHandler<M, shape::Method> for F {
 }
 
 impl<M, T, F> sealed::Handler<M, shape::Field> for FieldAction<M, T, F> {}
-impl<M: 'static, T: TextValue, F: Fn(&mut T) + 'static> IntoHandler<M, shape::Field>
+impl<M: 'static, T: 'static, F: Fn(&mut T) + 'static> IntoHandler<M, shape::Field>
     for FieldAction<M, T, F>
 {
     fn install(self, mut element: El<'_>) -> El<'_> {

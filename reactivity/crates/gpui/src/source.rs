@@ -427,6 +427,7 @@ impl<M, T: 'static> Field<M> for Source<M, T> {
 pub struct Sources<M> {
     fields: Vec<Box<dyn Field<M>>>,
     schema_error: Option<BindError>,
+    owner_fields: Vec<FieldId>,
 }
 impl<M> Default for Sources<M> {
     fn default() -> Self {
@@ -438,9 +439,22 @@ impl<M> Sources<M> {
         Self {
             fields: Vec::new(),
             schema_error: None,
+            owner_fields: Vec::new(),
         }
     }
-    pub fn field<T: 'static>(mut self, source: Source<M, T>) -> Self
+    /// Register an owner dependency. Typed edits also re-describe the owner, so
+    /// ordinary branches, formatting and other snapshot reads remain current.
+    pub fn field<T: 'static>(self, source: Source<M, T>) -> Self
+    where M: 'static {
+        let mut schema = self.direct(source);
+        schema.owner_fields.push(source.id());
+        schema
+    }
+    /// Register a direct-port-only source. Edits update already mounted direct
+    /// operands without invoking View. This does not observe ordinary Deref
+    /// reads: use `field` for branches, formatting or structural dependencies.
+    /// Selecting this form explicitly declares that those dependencies are absent.
+    pub fn direct<T: 'static>(mut self, source: Source<M, T>) -> Self
     where
         M: 'static,
     {
@@ -464,6 +478,11 @@ impl<M> Sources<M> {
     }
     pub fn is_empty(&self) -> bool {
         self.fields.is_empty()
+    }
+    pub(crate) fn invalidates_owner(&self, id: FieldId) -> Result<bool, BindError> {
+        self.check_schema()?;
+        self.get(id)?;
+        Ok(self.owner_fields.contains(&id))
     }
     fn check_schema(&self) -> Result<(), BindError> {
         self.schema_error.clone().map_or(Ok(()), Err)
@@ -975,5 +994,14 @@ mod tests {
         assert_eq!(*model.count, 4);
         assert_eq!(model.count.revision(), before);
         assert!(Text::literal("literal").codec().is_none());
+    }
+
+    #[test]
+    fn owner_dependency_is_the_default_and_direct_ports_are_explicit() {
+        let ordinary = Sources::new().field(FIRST);
+        let direct = Sources::new().direct(FIRST);
+        assert_eq!(ordinary.invalidates_owner(FIRST.id()),Ok(true));
+        assert_eq!(direct.invalidates_owner(FIRST.id()),Ok(false));
+        assert_eq!(direct.invalidates_owner(COUNT.id()),Err(BindError::UnknownField(COUNT.id())));
     }
 }
