@@ -289,7 +289,6 @@ struct Presented {
     hittable: bool,
 }
 struct Prepared {
-    source_epoch: u64,
     size: [u32; 2],
     nodes: Vec<Presented>,
 }
@@ -318,6 +317,7 @@ struct Runtime<M> {
     next_presentation: u64,
     prepared: Option<Prepared>,
     latest_token: Option<PresentationToken>,
+    complete_epoch: u64,
     presented: Vec<Presented>,
     canvas: Canvas,
     text: Option<TextSystem>,
@@ -388,6 +388,7 @@ impl<M: View + 'static> Win<M> {
             next_presentation: 1,
             prepared: None,
             latest_token: None,
+            complete_epoch: 0,
             presented: Vec::new(),
             canvas: if automatic_presentation {
                 Canvas::with_color_config(options.size[0], options.size[1], options.colors)?
@@ -481,6 +482,15 @@ impl<M: View + 'static> Win<M> {
         let mut runtime = self.borrow()?;
         runtime.live()?;
         runtime.acknowledge(token)
+    }
+    /// Revoke coordinate authority when a backend loses/detaches its surface.
+    /// Commands, diagnostic geometry and current token stay available for redraw;
+    /// only a subsequent actual presentation acknowledgement restores authority.
+    pub fn presentation_lost(&self) -> Result<(), Error> {
+        let mut runtime = self.borrow()?;
+        runtime.live()?;
+        runtime.presentation_valid = false;
+        Ok(())
     }
     /// Change physical viewport constraints without changing source epoch or
     /// target namespace. Equal size is an idle operation; invalid size is rejected.
@@ -628,7 +638,7 @@ impl<M: View + 'static> Win<M> {
             source_epoch: runtime.source_epoch,
             presentation_epoch: runtime.presentation_epoch,
             presentation_valid: runtime.presentation_valid,
-            prepared_epoch: runtime.prepared.as_ref().map(|sheet| sheet.source_epoch),
+            prepared_epoch: runtime.prepared_epoch(),
             size: runtime.presentation_size,
             requested_size: runtime.requested_size,
             poisoned: runtime.poisoned,
@@ -1126,17 +1136,21 @@ impl<M: View + 'static> Runtime<M> {
             source_epoch: self.source_epoch,
             presentation_epoch: self.presentation_epoch,
             presentation_valid: self.presentation_valid,
-            prepared_epoch: self.prepared.as_ref().map(|sheet| sheet.source_epoch),
+            prepared_epoch: self.prepared_epoch(),
             changed_nodes: self.changed_nodes,
         }
     }
+    fn prepared_epoch(&self) -> Option<u64> {
+        (self.latest_token.is_some() && (!self.presentation_valid || self.prepared.is_some()))
+            .then_some(self.complete_epoch)
+    }
     fn present(&mut self) -> Result<Commit, Error> {
         if !self.dirty {
-            if let Some(prepared) = &mut self.prepared {
-                // Equal logical output extends this candidate's coverage, but
-                // cannot promote the old displayed sheet past an unseen visual.
-                prepared.source_epoch = self.source_epoch;
-            } else if self.presentation_valid {
+            // Equal logical output extends the complete scene's coverage, even
+            // during surface loss. It cannot advance displayed coverage past an
+            // outstanding visual candidate or restore a lost surface's authority.
+            self.complete_epoch = self.source_epoch;
+            if self.prepared.is_none() && self.presentation_valid {
                 self.presentation_epoch = self.source_epoch;
             }
             return Ok(self.commit());
@@ -1161,16 +1175,17 @@ impl<M: View + 'static> Runtime<M> {
         if self.latest_token != Some(token) {
             return Err(Error::StalePresentation);
         }
-        let Some(prepared) = self.prepared.take() else {
-            // Re-presenting the same complete sheet on OS exposure is harmless.
-            // It cannot claim coverage for any failed newer source/resize turn.
-            return Ok(self.commit());
-        };
-        self.presented = prepared.nodes;
-        self.presentation_epoch = prepared.source_epoch;
-        self.presentation_size = prepared.size;
+        let prepared = self.prepared.take();
+        let newly_presented = prepared.is_some() || !self.presentation_valid;
+        if let Some(prepared) = prepared {
+            self.presented = prepared.nodes;
+            self.presentation_size = prepared.size;
+        }
+        // No-op edits may extend complete coverage, but failed preparations do
+        // not. Re-acknowledging after loss therefore never covers a failed S.
+        self.presentation_epoch = self.complete_epoch;
         self.presentation_valid = true;
-        self.counters.presentations += 1;
+        self.counters.presentations += u64::from(newly_presented);
         Ok(self.commit())
     }
     fn present_inner(&mut self) -> Result<(), Error> {
@@ -1354,11 +1369,11 @@ impl<M: View + 'static> Runtime<M> {
             self.canvas = canvas;
         }
         self.prepared = Some(Prepared {
-            source_epoch: self.source_epoch,
             size,
             nodes: presented,
         });
         self.latest_token = Some(token);
+        self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;
         if self.nodes.iter().all(|node| node.text.is_none()) {
             self.text = None;
