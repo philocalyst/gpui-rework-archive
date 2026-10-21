@@ -114,6 +114,66 @@ mod tests {
     use crate::{Affine, GlyphKey, Rect};
 
     #[test]
+    fn clipped_command_bounds_and_signed_zero_axes_match_scalar_samples() {
+        let mask = Raster {
+            key: GlyphKey::fixture(),
+            metrics: RasterMetrics {
+                width: 7,
+                height: 11,
+                ..Default::default()
+            },
+            pixels: (0..77).map(|i| (i * 113 + 17) as u8).collect(),
+        };
+        for b in [0.0, -0.0] {
+            for c in [0.0, -0.0] {
+                let command = BorrowedCommand {
+                    rect: Rect::new(0.125, 0.375, 22.7, 19.3),
+                    clip: Rect::new(0.375, 0.125, 21.5, 25.0),
+                    map: Mapping::new(Affine {
+                        b,
+                        c,
+                        ..Affine::IDENTITY
+                    })
+                    .unwrap(),
+                    source: BorrowedSource::Glyph(&mask),
+                    color: [0.0; 4],
+                    bounds: [0; 4],
+                };
+                for bounds in [
+                    [0, 0, 32, 32],
+                    [3, 5, 9, 13],
+                    [17, 1, 23, 3],
+                    [31, 31, 32, 32],
+                    [0, 0, 0, 0],
+                ] {
+                    let command = BorrowedCommand { bounds, ..command };
+                    for tile in [[0, 0, 16, 16], [16, 0, 29, 15], [0, 16, 1, 29]] {
+                        let axis = GlyphAxis::new(&command, tile, &mut RenderStats::default());
+                        for y in tile[1].max(bounds[1])..tile[3].min(bounds[3]) {
+                            for x in tile[0].max(bounds[0])..tile[2].min(bounds[2]) {
+                                let actual = axis.as_ref().map_or([0.0; 16], |axis| {
+                                    axis.coverage(x - tile[0], y - tile[1])
+                                });
+                                let expected = sample(&command, x, y, &mut RenderStats::default());
+                                assert_eq!(
+                                    actual.map(f32::to_bits),
+                                    expected.map(f32::to_bits),
+                                    "bounds={bounds:?} tile={tile:?} b={b:?} c={c:?}"
+                                );
+                            }
+                        }
+                        if tile[0].max(bounds[0]) >= tile[2].min(bounds[2])
+                            || tile[1].max(bounds[1]) >= tile[3].min(bounds[3])
+                        {
+                            assert!(axis.is_none());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn shared_mask_addresses_match_every_original_scalar_sample() {
         for (width, height) in [(1, 1), (7, 11), (19, 17)] {
             let mask = Raster {
