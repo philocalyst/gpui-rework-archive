@@ -8,6 +8,8 @@ same engine in native windows and public headless tests. The window owns its mod
 exclusively; queries borrow it and edits require an ordinary mutable borrow.
 Borrowed keyed lists realize only the viewport, while typed bounded inboxes
 deliver worker results through the same owner turn as ordinary input.
+Ordinary desktop profiles include [native accessibility](crates/gpui/ACCESSIBILITY.md)
+over the acknowledged semantic sheet and the same revalidated action dispatcher.
 [Canvas](crates/canvas/README.md) supplies the reference renderer;
 [GPU](crates/gpu/README.md) consumes its borrowed canonical scene with `wgsl-rs`.
 

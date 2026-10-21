@@ -1,4 +1,4 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_canvas-0c1a0e59460e95cc)
 
 running 10 tests
@@ -18,12 +18,12 @@ test result: ok. 8 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; fini
      Running tests/color.rs (reactivity/target/debug/deps/color-0b10a6f1342fe2ae)
 
 running 6 tests
-test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
 test invalid_color_values_and_configuration_are_rejected ... ok
+test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
 test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
 test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
-test tone_mapping_is_selected_not_implicit ... ok
 test final_mapping_occurs_after_extended_linear_composition ... ok
+test tone_mapping_is_selected_not_implicit ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
@@ -75,8 +75,8 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 running 6 tests
 test byte_counts_and_checked_configuration_are_format_specific ... ok
-test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
 test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
+test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
 test extended_values_compose_before_finite_storage_saturation ... ok
 test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
 test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
@@ -87,8 +87,8 @@ test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 running 5 tests
 test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
-test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
 test invalid_ranges_and_out_of_working_range_are_rejected ... ok
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
 test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
 test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
 
@@ -101,7 +101,7 @@ test pool_memory_measurement ... ignored, process RSS/thread measurement; run se
 test threshold_and_invalid_worker_counts_are_explicit ... ok
 test serial_and_scoped_disjoint_bands_are_byte_identical ... ok
 
-test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 4.99s
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 4.96s
 
      Running tests/prepared_scene.rs (reactivity/target/debug/deps/prepared_scene-f8836829524cecd8)
 
@@ -115,8 +115,8 @@ test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
      Running tests/render.rs (reactivity/target/debug/deps/render-948c284132d9344e)
 
 running 10 tests
-test linear_light_alpha_and_premultiplied_output ... ok
 test correlated_edges_are_composited_before_sample_average ... ok
+test linear_light_alpha_and_premultiplied_output ... ok
 test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
 test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
 test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok

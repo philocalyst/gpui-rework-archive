@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui-3ed46ce1b8fb1547)
+
+running 13 tests
+test native::accessibility::tests::projection_ledger ... ignored, explicit projection allocation/timing ledger; run alone in release mode
+test native::accessibility::tests::native_text_boundaries_keep_crlf_together_and_cover_every_utf8_byte ... ok
+test native::accessibility::tests::scalar_text_run_has_exact_utf8_lengths_and_no_fabricated_selection ... ok
+test native::accessibility::tests::unsupported_foreign_tree_and_utf8_byte_limit ... ok
+test native::accessibility::tests::native_callbacks_are_inert_bounded_and_activation_bypasses_saturation ... ok
+test native::accessibility::tests::projection_uses_old_p_during_pending_edit_and_failed_preparation ... ok
+test native::accessibility::tests::semantic_only_change_advances_p_epoch_at_the_same_scene_token ... ok
+test native::accessibility::tests::root_and_synthetic_ids_cannot_invoke_real_sites ... ok
+test native::accessibility::tests::consumer_validates_topology_names_values_full_geometry_and_live_focus ... ok
+test native::accessibility::tests::idle_state_and_focus_transport_do_not_allocate ... ok
+test native::accessibility::tests::renamed_static_text_preserves_content_and_explicit_none_then_inherits ... ok
+test native::accessibility::tests::owner_budget_fifo_old_live_targets_and_revocation ... ok
+test native::accessibility::tests::library_projects_bounded_frozen_count_positions_and_never_resurrects_ids ... ok
+
+test result: ok. 12 passed; 0 failed; 1 ignored; 0 measured; 65 filtered out; finished in 3.38s

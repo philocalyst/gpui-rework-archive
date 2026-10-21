@@ -4,8 +4,8 @@ Tests configure the production host rather than instantiate a second application
 engine. The same owner dispatcher, source barriers, schema setters, sheet
 publication, input routing and visitors serve native apps, `Application::demo`,
 `Win::demo`, the inspector and tests. The synchronous production surface exists
-in `gpui`; complete accessibility, virtual time and the full asynchronous graph remain
-separate implementation gates.
+in `gpui`; native accessibility uses that same sheet and action dispatcher.
+Virtual time and the full asynchronous graph remain separate implementation gates.
 The supplied `final/10-quality.md` supplies the broader feature corpus, subject
 to [CONTRACT.md](CONTRACT.md)'s explicit semantic amendments.
 
@@ -33,14 +33,17 @@ engine. Immutable text uses Triomphe leases between source and presented epochs;
 fonts/masks/backend resources have their separate immutable resource leases.
 
 `visit` also exposes each part's target, parent, focus, supported semantic actions,
-name/value and canonical local geometry. `perform(target, Action::...)` uses the
+name/description/value, frozen list metadata and canonical local geometry.
+`perform(target, Action::...)` uses the
 ordinary activation/focus/text-edit barrier. Supported actions are frozen with
 the acknowledged sheet; execution revalidates current logical authority. A
 screen-reader request cannot keep a removed site alive or route to a replacement.
 Semantic activation of the real Todo port matches ordinary input source JSON and
 rendered output. A 1,000-pass visitor test allocates nothing and performs no
-source/layout/paint work. Input values are not misreported as accessible names;
-explicit labels, richer text protocols and native AT bridges remain gates.
+source/layout/paint work. Input values are not misreported as accessible names.
+Explicit names/descriptions and typed semantic Set/Inherit overrides use sparse
+publication columns; queries combine those predicates with visual text filters.
+Richer text protocols and semantic relationships remain gates.
 Focus is current interaction state over the acknowledged parts: it can change
 without a source edit or frame, and logical removal revokes it immediately even
 when an older sheet remains displayed. Position-free actions deliberately invoke
@@ -92,6 +95,29 @@ acknowledgements, line/pixel wheel routing, target survival/revocation, pointer
 activation, resize, suspend/resume and full server-pixel equality. The separate
 [list benchmark](crates/gpui/VIRTUAL_LIST.md) first compares every pixel with
 independently materialized eager rows; timing never substitutes for that oracle.
+
+Native accessibility tests use the pinned AccessKit Consumer to check tree
+replacement/removal, names distinct from edited values, full physical geometry,
+live focus, frozen list positions, session cancellation and bounded action
+admission. Text-unit tests include multibyte scalars and CRLF; no selection or
+glyph-position capability is invented. The actual Linux AT-SPI client activates
+after initial P, reads renamed text and its actual content, edits input, invokes
+an action and reactivates without forcing a frame. The absent-session-bus case
+still presents real CPU content. These prove separate boundaries from UIA and
+VoiceOver runtime behavior; see [the native contract](crates/gpui/ACCESSIBILITY.md).
+
+From the repository root, the complete local verifier is:
+
+```sh
+python3 reactivity/tools/verify.py --native-x11 --vulkan --native-atspi \
+  --atspi-launcher /usr/libexec/at-spi-bus-launcher
+```
+
+It requires the actual display, driver and launcher. Every execution gate rejects
+a successful filter that ran zero tests. The private AT-SPI helper probes service
+readiness; it never changes desktop settings. CI's ordinary native profiles also
+compile and test the accessibility schema on Linux, Windows and macOS; scheduled
+CI configuration is not evidence that those remote runners have executed.
 
 Choose time, worker delivery and native/resource adapters at application creation.
 The native adapter supplies real events/time/completion; demo adapters supply

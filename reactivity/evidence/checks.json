@@ -12,7 +12,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 42.731,
+    "elapsed_seconds": 23.876,
     "log": "workspace-debug.txt"
   },
   {
@@ -32,7 +32,7 @@
       "warnings"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 10.933,
+    "elapsed_seconds": 0.842,
     "log": "workspace-clippy.txt"
   },
   {
@@ -49,7 +49,7 @@
       "gpui_reactivity_core/layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 42.054,
+    "elapsed_seconds": 4.858,
     "log": "workspace-release.txt"
   },
   {
@@ -69,7 +69,7 @@
       "loom_protocol"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 5.911,
+    "elapsed_seconds": 6.486,
     "log": "loom.txt"
   },
   {
@@ -87,8 +87,67 @@
       "--all-targets"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 10.391,
+    "elapsed_seconds": 0.252,
     "log": "native-check.txt"
+  },
+  {
+    "check": "native-minimal-check",
+    "argv": [
+      "cargo",
+      "check",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "x11-minimal,wayland-minimal",
+      "--all-targets"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.219,
+    "log": "native-minimal-check.txt"
+  },
+  {
+    "check": "native-clippy",
+    "argv": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "x11,wayland",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.327,
+    "log": "native-clippy.txt"
+  },
+  {
+    "check": "accessibility-schema",
+    "argv": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "x11,wayland",
+      "--lib",
+      "native::accessibility::tests"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 3.62,
+    "log": "accessibility-schema.txt",
+    "passed_tests": 12
   },
   {
     "check": "parallel-canvas",
@@ -104,7 +163,7 @@
       "parallel"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 6.955,
+    "elapsed_seconds": 7.178,
     "log": "parallel-canvas.txt"
   },
   {
@@ -123,7 +182,7 @@
       "retained_layout"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.104,
+    "elapsed_seconds": 0.096,
     "log": "layout-example.txt"
   },
   {
@@ -162,7 +221,7 @@
       "--check"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.405,
+    "elapsed_seconds": 0.456,
     "log": "format.txt"
   },
   {
@@ -181,7 +240,7 @@
       "render"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 1.293,
+    "elapsed_seconds": 1.069,
     "log": "gpu-vulkan.txt",
     "passed_tests": 17
   },
@@ -204,7 +263,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 14.846,
+    "elapsed_seconds": 6.774,
     "log": "native-x11.txt",
     "passed_tests": 1
   },
@@ -227,7 +286,7 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 0.48,
+    "elapsed_seconds": 0.521,
     "log": "native-remote.txt",
     "passed_tests": 1
   },
@@ -250,8 +309,46 @@
       "--test-threads=1"
     ],
     "exit_code": 0,
-    "elapsed_seconds": 10.069,
+    "elapsed_seconds": 11.209,
     "log": "native-library.txt",
+    "passed_tests": 1
+  },
+  {
+    "check": "native-atspi",
+    "argv": [
+      "bash",
+      "reactivity/tools/test_atspi.sh",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 1.213,
+    "log": "native-atspi.txt",
+    "passed_tests": 1
+  },
+  {
+    "check": "native-no-bus",
+    "argv": [
+      "env",
+      "DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/gpui-no-session-bus",
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "x11",
+      "--lib",
+      "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
+      "--",
+      "--ignored",
+      "--exact",
+      "--nocapture"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.386,
+    "log": "native-no-bus.txt",
     "passed_tests": 1
   }
 ]
