@@ -15,6 +15,7 @@ describe the intended complete system; this page records what is connected now.
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal, scoped Parley/HarfRust Unicode paragraphs, immutable bounded bundled fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
+| Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
@@ -52,82 +53,46 @@ storage and native services remain separately owned.
 
 ## Current verification
 
-[checks.json](evidence/checks.json) records twenty-one successful gates with exact commands,
-exit status and elapsed time, run against source commit 5b0a38b222:
+The [complete image integration report](evidence/images-integration/checks.json)
+records **22 successful gates** at source `724ece73cb`. Its
+[source/log hashes](evidence/images-integration/checks-source.json) preserve the
+exact checkout and separate desktop cross-checks.
 
-- Debug and release workspace suites: **458 passing cases/doctests each**.
-- Strict workspace Clippy and first-party formatting: pass.
-- Explicit parallel Canvas suite: **100 passing cases**, overlapping the workspace suite.
-- Optimized Loom protocol suites: **6 existing cases, 3 historical question-credit cases and 9 production-mailbox cases**; finite proof scope in [TESTING](TESTING.md).
-- Actual Vulkan conformance: **20 passing readback cases**, including mixed Unicode fallback at fractional density/reflection, all five author color layouts through SDR/HDR, 24 signed/fractional inverse-lattice clipping fixtures and numeric signed-zero preservation with tile proofs enabled and disabled.
-- Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
-- Actual X11 worker delivery: **one script** checking real wakes, committed-error repair and shutdown without a polling timer.
-- Actual X11 Reader delivery: **one script** checking obsolete-credit retirement and latest-result acknowledgement without polling or unrelated input.
-- Actual X11 250K Library: **one script** checking wheel/pointer routing, source/presentation separation, row target lifetimes, resize, suspend/resume and full server-pixel equality.
-- Actual X11 Unicode: **one script** checking mixed-script keyboard delivery, retained Input identity, acknowledged epochs and complete native-surface/CPU pixel equality.
-- Accessibility schema/action/transition suite: **20 passing cases** using the actual pinned Consumer, overlapping the accessible native tests rather than the headless workspace count.
-- Actual Linux AT-SPI client: **one script** reading native names/content, focusing, editing, invoking and reactivating; activation and semantic-only name changes require no new frame.
-- Actual absent-session-bus native presentation: **one script**.
-- Combined X11+Wayland accessible and explicit minimal compilation, strict accessible all-target Clippy, and retained-layout example: pass.
+- Debug and release workspace suites: **479 passing cases/doctests each**;
+  strict workspace/native Clippy and first-party formatting pass.
+- Parallel Canvas: **113 cases**. Optimized Loom: **6 protocol, 3 historical
+  credit and 9 production-mailbox cases**; proof limits remain in [TESTING](TESTING.md).
+- Actual Vulkan: **23 readback cases**, including packed images, linear HDR/P3,
+  mixed resource offsets, Unicode, transforms and all author color layouts.
+- Actual X11 scripts: Todo across renderer policies, worker delivery, Reader
+  credit retirement, the 250K Library, Unicode and clickable images. They check
+  acknowledged input, resize/suspend/recovery and complete server pixels.
+- Actual AccessKit Consumer: **20 cases**. The Linux AT-SPI client and presentation
+  without a session bus also execute successfully. Native scripts overlap the
+  accessible unit suites; these counts are not added into a new total.
 
-The renderer is Mesa 26.1.4 llvmpipe/LLVM 21.1.8 on Linux/NixOS. It proves
-backend execution and output, not discrete-GPU performance. The native test's
-GPUI_SOLID_MEMORY records verify zero client SHM mappings for certified solid
-frames and a 2,097,152-byte mapping for the normal 800×600 buffer. The solid helper
-runs inside that native script; a filter matching zero tests is not accepted as
-execution evidence.
+Strict all-target Clippy also passes for the actual aarch64 macOS and x86-64
+Windows MSVC desktop adapters. Those are cross-compilation results. AppKit,
+VoiceOver, UIA, Windows and Wayland execution still need their native runners.
+Vulkan runs on Mesa 26.1.4 llvmpipe/LLVM 21.1.8, proving software-backend execution,
+not discrete-GPU performance. The X11 solid-window script confirms zero client
+SHM mappings for certified solid frames and a 2,097,152-byte mapping for its
+normal 800×600 buffer; server/compositor storage remains separate.
 
-Apple presenter sources and main-thread/worker-drop tests were cross-typechecked
-for aarch64 macOS. The actual AccessKit/native integration was also cross-typechecked
-for aarch64 macOS and x86-64 Windows MSVC. Actual AppKit execution, UIA/VoiceOver,
-and visible CPU/GPU handoff remain required. Windows and Wayland runtime behavior need their native runners; added
-CI workflows are not reported as completed remote results.
-
-[Subsequent turn checks](evidence/turn-checks.json) pin source 067eebce12:
-the borrowed source/delivery phase refactor passes the complete GPUI suite,
-the real X11 worker script and warnings-denied all-target Clippy on Linux plus
-the actual macOS/Windows desktop adapters under cross-compilation. The native
-test gate is scoped to its Linux X11 caller. These supplemental checks do not
-represent UIA, VoiceOver or other target OS runtime execution.
-
-The combined Reader/accessibility source also passes warnings-denied all-target
-desktop-adapter Clippy under [aarch64 macOS](evidence/reader-apple-clippy.txt) and
-[Windows MSVC](evidence/reader-windows-clippy.txt) cross-compilation. This is
-typechecking of the actual adapters, not execution on those operating systems.
-
-The earlier [sealed question integration](evidence/question-integration-checks.json)
-pins its five scoped checks to source c3ae3584d4; the complete report above also
-includes the subsequent cancellation, style storage, Unicode and glyph-axis integration.
-The workspace-release gate was paused during a separate quiet benchmark capture;
-its elapsed wall time includes that pause and is not a suite-speed measurement.
-
-The subsequent [cached-cmap integration checks](evidence/cmap-integration-checks.json)
-pin source 76f5be8493: 101 parallel Canvas cases, 235 GPUI cases, all 20 Vulkan
-readbacks, the real X11 Unicode and AT-SPI scripts, and combined strict all-target
-Clippy pass. [Desktop cross-checks](evidence/cmap-platform-checks.json) pass strict
-all-target Clippy for the actual macOS and Windows adapters at the same source.
-Those two checks compile target code; they do not execute either operating system.
-The full twenty-one-gate report above retains its earlier source pin.
-
-The [callback-retirement regression](evidence/snapshot-retirement-checks.json)
-pins the diagnostic fix to f8f318fb8a. Its public test reproduces an out-of-bounds
-snapshot on the parent after a captured callback's destructor panics during
-reconciliation. After the fix, all 239 default GPUI cases and strict all-target
-X11+Wayland Clippy pass; old presented content/geometry remains inspectable with
-every target revoked. The separate Node24 and P56 storage prototypes remain
-isolated while their measured traversal/mount regressions are investigated.
-
-The earlier [output-conversion checks](evidence/output-cache-checks.json) pin source
-b4598cb303: 79 release parallel Canvas cases/doctests, strict all-target accessible
-native Clippy, all 19 Vulkan readbacks and the real Todo multi-renderer script
-pass. [Warnings-denied desktop cross-checks](evidence/output-cache-platform-checks.json)
-also pass for aarch64 macOS and Windows MSVC. These are actual adapter compilation,
-not execution on those operating systems.
+Earlier source-pinned reports remain intact: the
+[21-gate baseline](evidence/checks.json) at `5b0a38b222`,
+[cached-cmap checks](evidence/cmap-integration-checks.json) at `76f5be8493` and
+[callback-destructor regression](evidence/snapshot-retirement-checks.json)
+at `f8f318fb8a`. A callback panic can interrupt destructive reconciliation; old
+presented content/geometry stays inspectable while every target is revoked.
+The Node24 and P56 storage prototypes remain isolated because of their measured
+mount/traversal regressions.
 
 ## Measurements and their boundaries
 
 | Change | Evidence | Limit |
 | --- | --- | --- |
+| Immutable packed images | [Image evidence](crates/gpui/evidence/images.md): 48 covers share one 65,536-byte source; stable GPU pixel uploads and warm raster allocations are zero | Image-free owner adds 16 requested B and no allocations; serial CPU image fixtures cost 47–70 ms; per-scene 64 MiB cap does not cap overlapping cohorts/process memory |
 | Preserved software repair | [Damage evidence](crates/gpui/RETAINED_DAMAGE.md): moving caret over 1,001 stable commands reduces median prepare+raster 21.64 ms→206.7 µs; no warm repair raster allocations | Full native upload remains; excludes event delivery/scanout. One conservative rectangle, O(commands) comparison, no GPU repair or competitor claim |
 | Exact sample promotion | [Sample storage](crates/canvas/SAMPLE_STORAGE.md): moving-caret fixture full raster 21.53→6.06 ms; 48-label SDR preparation+raster 16.90→13.87 ms | Adds 4 KiB+32 B initialized worker scratch; no retained reduction; native upload/latency excluded |
 | Exact output reuse | [General controls](crates/canvas/SAMPLE_STORAGE.md): the one-pixel cache further lowers 48-label HDR preparation+raster 17.30→14.64 ms and sheared translucent boxes 2.78→1.94 ms | SDR flat serial panels lose 1.65–1.77%; small stack-only cache, no retained reduction or native latency claim |

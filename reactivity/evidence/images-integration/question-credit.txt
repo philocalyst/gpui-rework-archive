@@ -1,0 +1,9 @@
+    Finished `release` profile [optimized] target(s) in 0.32s
+     Running tests/question_credit.rs (reactivity/target/release/deps/question_credit-ab3230a95e8c88a2)
+
+running 3 tests
+test omitting_the_post_terminal_wake_has_a_lost_credit_counterexample - should panic ... ok
+test acquired_terminal_pairs_with_its_unchanged_launched_ticket ... ok
+test terminal_after_first_wake_never_strands_latest_input_credit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
