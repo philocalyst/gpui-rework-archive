@@ -2,7 +2,9 @@ use crate::text::Raster;
 use crate::{Affine, Color, ColorConfig, DamageRegion, Error, Point, Rect, TextLayout, TextSystem};
 use std::{collections::HashMap, sync::Arc};
 
+mod glyph_axis;
 mod samples;
+use glyph_axis::GlyphAxis;
 use samples::Samples;
 
 const TILE: usize = 16;
@@ -20,8 +22,8 @@ pub struct RenderStats {
     pub full_rect_tiles: usize,
     pub skipped_command_tiles: usize,
     pub boundary_pixels: usize,
-    /// Geometric membership queries. Separable rectangle axes share queries
-    /// across tile rows and columns instead of testing every 2D sample.
+    /// Geometric membership/address queries. Separable axes share queries
+    /// across tile rows and columns instead of mapping every 2D sample.
     pub sample_tests: usize,
     pub retained_mask_bytes: usize,
     /// Exact capacities of typed draw/resource Vec lanes; excludes opaque
@@ -1510,6 +1512,16 @@ fn render_band<W: PixelWriter>(
             } else {
                 None
             };
+            let glyph_axis = if matches!(command.source, BorrowedSource::Glyph(_))
+                && command.map.axis_aligned()
+            {
+                match GlyphAxis::new(&command, [left, top, right, bottom], &mut stats) {
+                    Some(axis) => Some(axis),
+                    None => continue,
+                }
+            } else {
+                None
+            };
             if !full && let Some(value) = uniform.take() {
                 // A uniform prefix needs no tile storage until an edge or
                 // glyph makes its sample colors differ.
@@ -1523,6 +1535,9 @@ fn render_band<W: PixelWriter>(
                         stats.boundary_pixels += 1;
                         let mask = (axis.x[x - left] * 0x1111) & axis.y[y - top];
                         std::array::from_fn(|i| ((mask >> i) & 1) as f32)
+                    } else if let Some(axis) = &glyph_axis {
+                        stats.boundary_pixels += 1;
+                        axis.coverage(x - left, y - top)
                     } else {
                         stats.boundary_pixels += 1;
                         sample(&command, x, y, &mut stats)
