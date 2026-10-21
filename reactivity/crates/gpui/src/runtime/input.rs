@@ -40,7 +40,33 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.live()?;
         runtime.changed_nodes = 0;
         if matches!(key, Key::Tab | Key::ReverseTab) {
-            return runtime.tab(matches!(key, Key::ReverseTab));
+            let previous = runtime.focused;
+            let commit = runtime.tab(matches!(key, Key::ReverseTab))?;
+            let focused = runtime.focused;
+            let identity = focused.and_then(|target| runtime.resolve(target).ok());
+            let reveal = identity.is_some_and(|identity| {
+                runtime.presented.iter().any(|node| {
+                    identity == node.identity
+                        && node.actions.contains(super::ActionKind::ScrollIntoView)
+                })
+            });
+            drop(runtime);
+            if !reveal {
+                return Ok(commit);
+            }
+            let Some(target) = focused else {
+                return Ok(commit);
+            };
+            // Keyboard traversal reveals retained offscreen controls in the
+            // same exclusive owner operation. Explicit focus remains a logical
+            // repair capability; accessibility has a separate ScrollIntoView.
+            let revealed = self.scroll_into_view(target);
+            if revealed.is_err()
+                && let Ok(mut runtime) = self.runtime_mut()
+            {
+                runtime.focused = previous.filter(|target| runtime.resolve(*target).is_ok());
+            }
+            return revealed;
         }
         let Some(target) = runtime.focused else {
             return Ok(runtime.commit());

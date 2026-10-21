@@ -619,3 +619,82 @@ fn clipped_logical_index_hint_is_verified_before_sparse_use() {
     .unwrap();
     apply(&win, base, &mut tree, Some(1));
 }
+
+struct VirtualFocusRows;
+impl crate::ItemSource for VirtualFocusRows {
+    fn len(&self) -> usize {
+        100
+    }
+    fn key(&self, index: usize) -> crate::ItemKey {
+        crate::ItemKey::new(index as u64)
+    }
+    fn index_of(&self, key: crate::ItemKey) -> Option<usize> {
+        (key.get() < 100).then_some(key.get() as usize)
+    }
+    fn row(&self, index: usize) -> El<'_> {
+        button(format!("virtual{index}")).w(80).h(20)
+    }
+}
+impl View for VirtualFocusRows {
+    fn view(&self) -> El<'_> {
+        column((
+            crate::uniform_list(crate::ListId::new(91), self, 20)
+                .w(80)
+                .h(40),
+            div().w(80).h(100),
+        ))
+        .scroll(crate::Axis::Y)
+        .w(80)
+        .h(60)
+    }
+}
+#[test]
+fn virtual_focus_revocation_and_reappearance_match_full_consumer() {
+    let mut win = Win::recording(
+        VirtualFocusRows,
+        WindowOptions {
+            size: [100, 100],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    acknowledge(&mut win);
+    let viewport = win.role(Role::ScrollView).one().unwrap();
+    let departed = win.button("virtual0");
+    let mut departed_id = None;
+    win.visit(|part| {
+        if part.target() == departed {
+            departed_id = Some(NodeId(part.native_id() * 2));
+        }
+    })
+    .unwrap();
+    win.focus(departed).unwrap();
+    win.accessibility_observe(true).unwrap();
+    let mut tree = Tree::new(full(&win), true);
+    let base = win.accessibility_state().unwrap();
+    assert_eq!(base.focus, Some(departed));
+    win.scroll(viewport, 80.0).unwrap();
+    assert_eq!(win.focused().unwrap(), None);
+    assert_eq!(win.activate(departed), Err(Error::StaleTarget));
+    let pending = apply(&win, base, &mut tree, None);
+    assert_eq!(pending.token, base.token, "P geometry still old");
+    assert_eq!(pending.focus, None);
+    acknowledge(&mut win);
+    let hidden = apply(&win, pending, &mut tree, None);
+    assert!(
+        tree.state()
+            .node_by_tree_local_id(departed_id.unwrap(), TreeId::ROOT)
+            .is_none()
+    );
+    win.scroll_to(viewport, crate::ScrollOffset::default())
+        .unwrap();
+    acknowledge(&mut win);
+    let returned = apply(&win, hidden, &mut tree, None);
+    assert_eq!(returned.focus, None);
+    assert_ne!(win.button("virtual0"), departed);
+    assert!(
+        tree.state()
+            .node_by_tree_local_id(departed_id.unwrap(), TreeId::ROOT)
+            .is_none()
+    );
+}

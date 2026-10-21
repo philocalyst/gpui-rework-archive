@@ -40,6 +40,10 @@ type Projected<'a> = (
     Option<crate::list::RowMap>,
 );
 pub(crate) enum ElementExtra<'a> {
+    Scroll {
+        axes: crate::Axis,
+        semantic: Option<Box<Annotations<'a>>>,
+    },
     Image {
         spec: crate::image::ImageSpec<'a>,
         semantic: Option<Box<Annotations<'a>>>,
@@ -61,7 +65,9 @@ impl<'a> ElementExtra<'a> {
         match self {
             Self::List(list) => Some(list),
             Self::Combined { list, .. } => Some(list),
-            Self::Semantic(_) | Self::Reader { .. } | Self::Image { .. } => None,
+            Self::Semantic(_) | Self::Reader { .. } | Self::Image { .. } | Self::Scroll { .. } => {
+                None
+            }
         }
     }
     pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
@@ -75,9 +81,9 @@ impl<'a> ElementExtra<'a> {
             }
         }
         match self {
-            Self::Reader { semantic, .. } | Self::Image { semantic, .. } => {
-                semantic.get_or_insert_with(Default::default)
-            }
+            Self::Reader { semantic, .. }
+            | Self::Image { semantic, .. }
+            | Self::Scroll { semantic, .. } => semantic.get_or_insert_with(Default::default),
             Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
             Self::List(_) => unreachable!(),
         }
@@ -89,8 +95,16 @@ impl<'a> ElementExtra<'a> {
         Annotations<'a>,
         Option<Projected<'a>>,
         Option<crate::image::ImageSpec<'a>>,
+        Option<crate::Axis>,
     ) {
         match self {
+            Self::Scroll { axes, semantic } => (
+                None,
+                semantic.map(|s| *s).unwrap_or_default(),
+                None,
+                None,
+                Some(axes),
+            ),
             Self::Reader {
                 projector,
                 semantic,
@@ -100,16 +114,18 @@ impl<'a> ElementExtra<'a> {
                 semantic.map(|s| *s).unwrap_or_default(),
                 Some((projector, map)),
                 None,
+                None,
             ),
             Self::Image { spec, semantic } => (
                 None,
                 semantic.map(|s| *s).unwrap_or_default(),
                 None,
                 Some(spec),
+                None,
             ),
-            Self::List(list) => (Some(list), Annotations::default(), None, None),
-            Self::Semantic(semantic) => (None, semantic, None, None),
-            Self::Combined { list, semantic } => (Some(*list), semantic, None, None),
+            Self::List(list) => (Some(list), Annotations::default(), None, None, None),
+            Self::Semantic(semantic) => (None, semantic, None, None, None),
+            Self::Combined { list, semantic } => (Some(*list), semantic, None, None, None),
         }
     }
 }

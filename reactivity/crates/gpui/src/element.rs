@@ -21,6 +21,7 @@ pub(crate) enum NodeKind {
     List,
     ListItem,
     Image,
+    Scroll,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
@@ -32,6 +33,7 @@ pub enum Role {
     List,
     ListItem,
     Image,
+    ScrollView,
 }
 
 impl NodeKind {
@@ -44,6 +46,7 @@ impl NodeKind {
             Self::List => Role::List,
             Self::ListItem => Role::ListItem,
             Self::Image => Role::Image,
+            Self::Scroll => Role::ScrollView,
         }
     }
 }
@@ -227,6 +230,40 @@ impl Drop for El<'_> {
 }
 
 impl<'a> El<'a> {
+    /// Clip a container and retain independent scrolling on the selected local
+    /// axes. The viewport participates in ordinary layout; children keep their
+    /// intrinsic extent. Rotated/sheared viewport clips are rejected at prepare.
+    /// Invalid element kinds are builder errors; use `try_scroll` to handle them.
+    pub fn scroll(self, axes: crate::Axis) -> Self {
+        self.try_scroll(axes)
+            .expect("scroll belongs to an ordinary container")
+    }
+    pub fn try_scroll(mut self, axes: crate::Axis) -> Result<Self, crate::ScrollError> {
+        if !matches!(self.kind, NodeKind::Div | NodeKind::Scroll)
+            || self.extra.as_deref().is_some_and(|extra| {
+                !matches!(
+                    extra,
+                    crate::semantic::ElementExtra::Semantic(_)
+                        | crate::semantic::ElementExtra::Scroll { .. }
+                )
+            })
+        {
+            return Err(crate::ScrollError::UnsupportedElement);
+        }
+        let semantic = match self.extra.take().map(|extra| *extra) {
+            Some(crate::semantic::ElementExtra::Semantic(semantic)) => Some(Box::new(semantic)),
+            Some(crate::semantic::ElementExtra::Scroll { semantic, .. }) => semantic,
+            None => None,
+            _ => unreachable!("admitted container extra"),
+        };
+        self.kind = NodeKind::Scroll;
+        self.extra = Some(Box::new(crate::semantic::ElementExtra::Scroll {
+            axes,
+            semantic,
+        }));
+        Ok(self)
+    }
+
     pub(crate) fn image(resource: &'a crate::Image) -> Self {
         let mut element = Self::new(NodeKind::Image, None);
         element.extra = Some(Box::new(crate::semantic::ElementExtra::Image {
@@ -326,7 +363,10 @@ impl<'a> El<'a> {
         C: ChildSeq<'a, S>,
     {
         assert!(
-            matches!(self.kind, NodeKind::Div | NodeKind::Button),
+            matches!(
+                self.kind,
+                NodeKind::Div | NodeKind::Button | NodeKind::Scroll
+            ),
             "this element does not accept children"
         );
         children.append(&mut self.children);
@@ -483,7 +523,7 @@ impl<'a> El<'a> {
     ) -> Result<Description<'a>, crate::ListError> {
         use crate::list::{ListDraft, RowDraft};
         let mut output = Vec::new();
-        let mut lists: Vec<ListDraft> = Vec::new();
+        let mut viewports: Vec<crate::list::ViewportDraft> = Vec::new();
         let mut annotations = Vec::new();
         let mut images = Vec::new();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
@@ -493,7 +533,10 @@ impl<'a> El<'a> {
             }
             let index = output.len() as u32;
             if let Some((list, key, item_index, y, height)) = slot {
-                lists[list].rows.push(RowDraft {
+                let crate::list::ViewportDraft::List(draft) = &mut viewports[list] else {
+                    unreachable!("row belongs to list")
+                };
+                draft.rows.push(RowDraft {
                     index: index as usize,
                     key,
                     item_index,
@@ -501,11 +544,19 @@ impl<'a> El<'a> {
                     height,
                 });
             }
-            let (spec, annotation, projector, image) = element
+            let (spec, annotation, projector, image, axes) = element
                 .extra
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            if let Some(axes) = axes {
+                viewports.push(crate::list::ViewportDraft::Scroll(
+                    crate::scroll::ScrollDraft {
+                        index: index as usize,
+                        axes,
+                    },
+                ));
+            }
             if let Some(spec) = image {
                 images.push(crate::image::ImageDraft { node: index, spec });
             }
@@ -524,7 +575,7 @@ impl<'a> El<'a> {
             }
             if let Some(spec) = spec {
                 let mut list_plan = plan(spec.id, element.style, spec.source, spec.row_height)?;
-                let list = lists.len();
+                let list = viewports.len();
                 let start = list_plan.viewport.visible_range.start;
                 let row_height = list_plan.viewport.row_height;
                 let intra = list_plan.viewport.offset - start as f64 * row_height;
@@ -557,12 +608,12 @@ impl<'a> El<'a> {
                 }
                 // Keys have served their admission purpose. Retain only row metadata.
                 list_plan.keys.clear();
-                lists.push(ListDraft {
+                viewports.push(crate::list::ViewportDraft::List(ListDraft {
                     index: index as usize,
                     id: spec.id,
                     plan: list_plan,
                     rows: Vec::with_capacity(rows.len()),
-                });
+                }));
                 pending.extend(rows.into_iter().rev());
             } else {
                 let children = std::mem::take(&mut element.children);
@@ -584,7 +635,7 @@ impl<'a> El<'a> {
         }
         Ok(Description {
             nodes: output,
-            lists,
+            viewports,
             annotations,
             images,
         })
@@ -615,7 +666,7 @@ impl Drop for ComponentBoundaries {
 
 pub(crate) struct Description<'a> {
     pub nodes: Vec<DraftNode<'a>>,
-    pub lists: Vec<crate::list::ListDraft>,
+    pub viewports: Vec<crate::list::ViewportDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,
     pub images: Vec<crate::image::ImageDraft<'a>>,
 }

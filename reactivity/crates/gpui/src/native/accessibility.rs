@@ -22,6 +22,9 @@ enum Command {
     Focus(NodeId),
     Blur(NodeId),
     SetValue(NodeId, Box<str>),
+    Scroll(NodeId, crate::ScrollDirection, crate::ScrollUnit),
+    ScrollTo(NodeId, crate::ScrollOffset),
+    ScrollIntoView(NodeId),
 }
 struct Queued {
     session: u64,
@@ -34,6 +37,15 @@ impl Command {
             Self::Focus(id) => (*id, Action::Focus),
             Self::Blur(id) => (*id, Action::Blur),
             Self::SetValue(id, value) => (*id, Action::SetValue(value)),
+            Self::Scroll(id, direction, unit) => (
+                *id,
+                Action::Scroll {
+                    direction: *direction,
+                    unit: *unit,
+                },
+            ),
+            Self::ScrollTo(id, offset) => (*id, Action::ScrollTo(*offset)),
+            Self::ScrollIntoView(id) => (*id, Action::ScrollIntoView),
         }
     }
 }
@@ -130,6 +142,46 @@ impl accesskit::ActionHandler for Ingress {
                     return;
                 }
                 Command::SetValue(id, value)
+            }
+            (accesskit::Action::ScrollIntoView, None | Some(ActionData::ScrollHint(_))) => {
+                Command::ScrollIntoView(id)
+            }
+            (accesskit::Action::SetScrollOffset, Some(ActionData::SetScrollOffset(point))) => {
+                if !point.x.is_finite() || !point.y.is_finite() {
+                    return;
+                }
+                Command::ScrollTo(
+                    id,
+                    crate::ScrollOffset {
+                        x: point.x,
+                        y: point.y,
+                    },
+                )
+            }
+            (
+                action @ (accesskit::Action::ScrollUp
+                | accesskit::Action::ScrollDown
+                | accesskit::Action::ScrollLeft
+                | accesskit::Action::ScrollRight),
+                data,
+            ) => {
+                let unit = match data {
+                    None | Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Page)) => {
+                        crate::ScrollUnit::Page
+                    }
+                    Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Item)) => {
+                        crate::ScrollUnit::Item
+                    }
+                    _ => return,
+                };
+                let direction = match action {
+                    accesskit::Action::ScrollUp => crate::ScrollDirection::Up,
+                    accesskit::Action::ScrollDown => crate::ScrollDirection::Down,
+                    accesskit::Action::ScrollLeft => crate::ScrollDirection::Left,
+                    accesskit::Action::ScrollRight => crate::ScrollDirection::Right,
+                    _ => unreachable!(),
+                };
+                Command::Scroll(id, direction, unit)
             }
             // Unadvertised operations have no effect. Selection/IME and native
             // virtual-item realization need additional runtime authority.
@@ -268,13 +320,52 @@ fn drain_actions<M: View + 'static, L: crate::remote::LaneSet<M>>(
         *result = Some(if id.0 == 0 || id.0 & 1 != 0 {
             Err(Error::StaleTarget)
         } else {
-            owner
-                .accessibility_target(id.0 / 2)
-                .and_then(|target| owner.perform(target, action))
+            owner.accessibility_target(id.0 / 2).and_then(|target| {
+                let action = local_scroll_action(owner, target, action)?;
+                owner.perform(target, action)
+            })
         });
     }
     ingress.0.signal();
     Ok(results)
+}
+
+// AccessKit nodes have flat window-physical bounds and no transform. Offset
+// properties and native offset actions therefore use signed physical
+// displacements; translation cancels. The public Win ports stay local logical.
+fn scroll_basis(part: Part<'_>) -> Option<[f64; 2]> {
+    let map = part.transform()?;
+    (map.b == 0.0 && map.c == 0.0 && map.a != 0.0 && map.d != 0.0)
+        .then_some([f64::from(map.a), f64::from(map.d)])
+}
+fn local_scroll_action<'a, M: View + 'static, L: crate::remote::LaneSet<M>>(
+    owner: &Win<M, L>,
+    target: Target,
+    action: Action<'a>,
+) -> Result<Action<'a>, Error> {
+    if !matches!(action, Action::Scroll { .. } | Action::ScrollTo(_)) {
+        return Ok(action);
+    }
+    let map = owner.accessibility_viewport_transform(target)?;
+    // Admission rejects non-diagonal viewports before P publication.
+    let [x, y] = [f64::from(map.a), f64::from(map.d)];
+    Ok(match action {
+        Action::ScrollTo(offset) => Action::ScrollTo(crate::ScrollOffset {
+            x: offset.x / x,
+            y: offset.y / y,
+        }),
+        Action::Scroll { direction, unit } => Action::Scroll {
+            direction: match direction {
+                crate::ScrollDirection::Up if y < 0.0 => crate::ScrollDirection::Down,
+                crate::ScrollDirection::Down if y < 0.0 => crate::ScrollDirection::Up,
+                crate::ScrollDirection::Left if x < 0.0 => crate::ScrollDirection::Right,
+                crate::ScrollDirection::Right if x < 0.0 => crate::ScrollDirection::Left,
+                direction => direction,
+            },
+            unit,
+        },
+        _ => unreachable!("scroll-only conversion"),
+    })
 }
 
 fn projected_node(part: Part<'_>) -> Node {
@@ -291,6 +382,7 @@ fn projected_node(part: Part<'_>) -> Node {
         Role::List => accesskit::Role::List,
         Role::ListItem => accesskit::Role::ListItem,
         Role::Image => accesskit::Role::Image,
+        Role::ScrollView => accesskit::Role::ScrollView,
     };
     let mut node = Node::new(role);
     if role == accesskit::Role::Label {
@@ -328,11 +420,32 @@ fn projected_node(part: Part<'_>) -> Node {
             y1: f64::from(bounds.y) + f64::from(bounds.height),
         });
     }
-    if matches!(part.role(), Role::List | Role::ListItem) {
+    if matches!(part.role(), Role::List | Role::ListItem | Role::ScrollView) {
         node.set_clips_children();
+    }
+    if let (Some(viewport), Some([x, y])) = (part.viewport(), scroll_basis(part)) {
+        node.set_scroll_x(viewport.offset.x * x);
+        node.set_scroll_y(viewport.offset.y * y);
+        let xr = [viewport.min.x * x, viewport.max.x * x];
+        let yr = [viewport.min.y * y, viewport.max.y * y];
+        node.set_scroll_x_min(xr[0].min(xr[1]));
+        node.set_scroll_x_max(xr[0].max(xr[1]));
+        node.set_scroll_y_min(yr[0].min(yr[1]));
+        node.set_scroll_y_max(yr[0].max(yr[1]));
+        node.add_action(accesskit::Action::SetScrollOffset);
+        if viewport.axes.x() {
+            node.add_action(accesskit::Action::ScrollLeft);
+            node.add_action(accesskit::Action::ScrollRight);
+        }
+        if viewport.axes.y() {
+            node.add_action(accesskit::Action::ScrollUp);
+            node.add_action(accesskit::Action::ScrollDown);
+        }
     }
     for action in part.actions().iter() {
         node.add_action(match action {
+            ActionKind::Scroll => continue,
+            ActionKind::ScrollIntoView => accesskit::Action::ScrollIntoView,
             ActionKind::Activate => accesskit::Action::Click,
             ActionKind::Focus => accesskit::Action::Focus,
             ActionKind::Blur => accesskit::Action::Blur,

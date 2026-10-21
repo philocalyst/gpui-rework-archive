@@ -24,6 +24,7 @@ pub(super) struct ListRow {
 #[derive(Clone, Copy)]
 pub(super) enum ScrollPosition {
     Delta(f64),
+    Offset(f64),
     Index(usize),
     Key(ItemKey),
 }
@@ -74,6 +75,7 @@ pub(super) fn plan(
     let previous_offset = previous.map_or(0.0, |state| state.viewport.offset);
     let mut offset = match request {
         Some(ScrollPosition::Delta(delta)) => previous_offset + delta,
+        Some(ScrollPosition::Offset(offset)) => offset,
         Some(ScrollPosition::Index(index)) => {
             if index >= len {
                 return Err(ListError::IndexOutOfRange);
@@ -136,13 +138,28 @@ pub(super) fn row_style(
     slot: Option<&ListRow>,
 ) -> cephal::Style {
     let mut style = layout_style(declared);
-    if kind == NodeKind::List && declared.width.is_none() {
+    if matches!(kind, NodeKind::List | NodeKind::Scroll) && declared.width.is_none() {
         use cephal::style::Dimension;
         if parent.is_none() {
             style.size.width = Dimension::percent(1.0);
         } else if parent == Some(Flow::Row) {
             style.flex_grow = 1.0;
             style.flex_basis = Dimension::length(0.0);
+        }
+    }
+    if kind == NodeKind::Scroll {
+        use cephal::style::{Dimension, Overflow};
+        style.overflow = cephal::Point {
+            x: Overflow::Scroll,
+            y: Overflow::Scroll,
+        };
+        if declared.height.is_none() {
+            if parent.is_none() {
+                style.size.height = Dimension::percent(1.0);
+            } else if parent == Some(Flow::Column) {
+                style.flex_grow = 1.0;
+                style.flex_basis = Dimension::length(0.0);
+            }
         }
     }
     if let Some(slot) = slot {
@@ -252,22 +269,22 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         runtime.current_presentation()?;
-        let state = runtime.lists.get(&id).ok_or(Error::MissingElement)?;
+        let (identity, _) = runtime.list_by_id(id).ok_or(Error::MissingElement)?;
         if !runtime
             .presented
             .iter()
-            .any(|node| node.identity == state.identity)
+            .any(|node| node.identity == identity)
         {
             return Err(Error::MissingElement);
         }
-        Ok(runtime.sites.target(state.identity))
+        Ok(runtime.sites.target(identity))
     }
     pub fn list_state(&self, target: Target) -> Result<ListViewport, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
         runtime.current_presentation()?;
         let id = runtime.list_id(target)?;
-        Ok(runtime.lists[&id].viewport.clone())
+        Ok(runtime.list_by_id(id).unwrap().1.viewport.clone())
     }
     /// Visible keyed row root; scope ordinary role/text queries with `within`.
     pub fn list_item(&self, target: Target, key: ItemKey) -> Result<Target, Error> {
@@ -286,7 +303,19 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         if !delta.is_finite() || delta.abs() > MAX_EXTENT {
             return Err(ListError::InvalidDelta.into());
         }
-        self.scroll_list(target, ScrollPosition::Delta(delta))
+        let ordinary = {
+            let runtime = self.runtime()?;
+            let identity = runtime.resolve(target)?;
+            runtime
+                .viewports
+                .get(&ViewportKey::Scroll(identity))
+                .is_some_and(|state| state.scroll().is_some())
+        };
+        if ordinary {
+            self.scroll_by(target, crate::ScrollDelta { x: 0.0, y: delta })
+        } else {
+            self.scroll_list(target, ScrollPosition::Delta(delta))
+        }
     }
     pub fn scroll_to_index(&mut self, target: Target, index: usize) -> Result<Commit, Error> {
         self.scroll_list(target, ScrollPosition::Index(index))
@@ -303,53 +332,21 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             return Ok(runtime.commit());
         }
         runtime.changed_nodes = 0;
-        runtime.describe_with(false, Some(ScrollRequest { id, position }))?;
+        runtime.describe_with(false, &[ScrollRequest { id, position }])?;
         runtime.present()
     }
     /// Physical window point; delta is in logical layout units.
     pub fn scroll_at(&mut self, point: Point, delta: f64) -> Result<Commit, Error> {
-        let runtime = self.runtime()?;
-        runtime.live()?;
-        runtime.current_presentation()?;
-        if !Rect::new(
-            0.0,
-            0.0,
-            runtime.presentation_size[0] as f32,
-            runtime.presentation_size[1] as f32,
-        )
-        .contains(point)
-        {
-            return Err(Error::NotHittable);
-        }
-        // Use the same painter-order occlusion as pointer input. A later
-        // painted/interactive overlay outside a list blocks the wheel too.
-        let mut cursor = runtime
-            .presented
-            .iter()
-            .enumerate()
-            .rev()
-            .find(|(index, node)| {
-                (node.hittable || node.kind == NodeKind::List) && runtime.sheet_hit(*index, point)
-            })
-            .map(|(index, _)| index)
-            .ok_or(Error::NotHittable)?;
-        let target = loop {
-            let node = &runtime.presented[cursor];
-            if node.kind == NodeKind::List {
-                break runtime.sites.target(node.identity);
-            }
-            cursor = node.parent.index().ok_or(Error::NotHittable)?;
-        };
-        self.scroll(target, delta)
+        self.scroll_at_2d(point, crate::ScrollDelta { x: 0.0, y: delta })
     }
 }
 impl<M: View + 'static> Runtime<M> {
     fn list_id(&self, target: Target) -> Result<ListId, Error> {
         let identity = self.resolve(target)?;
-        self.lists
-            .iter()
-            .find(|(_, state)| state.identity == identity)
-            .map(|(&id, _)| id)
+        self.metadata
+            .as_ref()
+            .and_then(|metadata| metadata.presented.list(identity))
+            .map(|state| state.id)
             .ok_or(ListError::NotList.into())
     }
     pub(super) fn sheet_hit(&self, index: usize, point: Point) -> bool {
@@ -362,17 +359,19 @@ impl<M: View + 'static> Runtime<M> {
         {
             return false;
         }
-        if self.lists.is_empty() {
+        if self.viewports.is_empty() {
             return true;
         }
         let mut cursor = node.parent.index();
         while let Some(index) = cursor {
             let node = &self.presented[index];
-            if matches!(node.kind, NodeKind::List | NodeKind::ListItem)
-                && !node
-                    .transform
-                    .get()
-                    .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
+            if matches!(
+                node.kind,
+                NodeKind::List | NodeKind::ListItem | NodeKind::Scroll
+            ) && !node
+                .transform
+                .get()
+                .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
             {
                 return false;
             }

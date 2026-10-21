@@ -10,17 +10,25 @@ pub enum ActionKind {
     Focus = 2,
     Blur = 4,
     SetValue = 8,
+    Scroll = 16,
+    ScrollIntoView = 32,
 }
 
 /// Owned routing identity and borrowed data; no platform callback can retain a
 /// borrow of the model. A platform bridge must move an owned message to the UI
 /// owner before invoking this operation.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Action<'a> {
     Activate,
     Focus,
     Blur,
     SetValue(&'a str),
+    Scroll {
+        direction: crate::ScrollDirection,
+        unit: crate::ScrollUnit,
+    },
+    ScrollTo(crate::ScrollOffset),
+    ScrollIntoView,
 }
 impl Action<'_> {
     pub const fn kind(self) -> ActionKind {
@@ -29,6 +37,8 @@ impl Action<'_> {
             Self::Focus => ActionKind::Focus,
             Self::Blur => ActionKind::Blur,
             Self::SetValue(_) => ActionKind::SetValue,
+            Self::Scroll { .. } | Self::ScrollTo(_) => ActionKind::Scroll,
+            Self::ScrollIntoView => ActionKind::ScrollIntoView,
         }
     }
 }
@@ -47,16 +57,30 @@ impl Actions {
             ActionKind::Focus,
             ActionKind::Blur,
             ActionKind::SetValue,
+            ActionKind::Scroll,
+            ActionKind::ScrollIntoView,
         ]
         .into_iter()
         .filter(move |&kind| self.contains(kind))
+    }
+    pub(super) fn scroll_into_view(mut self, enabled: bool) -> Self {
+        if enabled {
+            self.0 |= ActionKind::ScrollIntoView as u8;
+        }
+        self
     }
     pub(super) fn for_node(kind: NodeKind, handler: bool) -> Self {
         let focus = matches!(kind, NodeKind::Input | NodeKind::Button) || handler;
         let activation = u8::from(handler && kind != NodeKind::Input) * ActionKind::Activate as u8;
         let navigation = u8::from(focus) * (ActionKind::Focus as u8 | ActionKind::Blur as u8);
         let value = u8::from(kind == NodeKind::Input) * ActionKind::SetValue as u8;
-        Self(activation | navigation | value)
+        Self(
+            activation
+                | navigation
+                | value
+                | (u8::from(matches!(kind, NodeKind::List | NodeKind::Scroll))
+                    * ActionKind::Scroll as u8),
+        )
     }
 }
 
@@ -80,6 +104,77 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             return Err(Error::NotInteractive);
         }
         match action {
+            Action::Scroll { direction, unit } => {
+                runtime.current_presentation()?;
+                let viewport = runtime
+                    .metadata
+                    .as_ref()
+                    .and_then(|metadata| metadata.presented.viewport(identity, &runtime.presented))
+                    .ok_or(crate::ScrollError::NotViewport)?;
+                let enabled = match direction {
+                    crate::ScrollDirection::Left | crate::ScrollDirection::Right => {
+                        viewport.axes.x()
+                    }
+                    crate::ScrollDirection::Up | crate::ScrollDirection::Down => viewport.axes.y(),
+                };
+                if !enabled {
+                    return Err(Error::NotInteractive);
+                }
+                let item = runtime
+                    .metadata
+                    .as_ref()
+                    .and_then(|metadata| metadata.presented.list(identity))
+                    .and_then(|list| {
+                        runtime
+                            .list_by_id(list.id)
+                            .map(|(_, state)| state.viewport.row_height)
+                    })
+                    .unwrap_or(32.0);
+                let (x, y) = match direction {
+                    crate::ScrollDirection::Up => (
+                        0.0,
+                        -if unit == crate::ScrollUnit::Page {
+                            viewport.size[1]
+                        } else {
+                            item
+                        },
+                    ),
+                    crate::ScrollDirection::Down => (
+                        0.0,
+                        if unit == crate::ScrollUnit::Page {
+                            viewport.size[1]
+                        } else {
+                            item
+                        },
+                    ),
+                    crate::ScrollDirection::Left => (
+                        -if unit == crate::ScrollUnit::Page {
+                            viewport.size[0]
+                        } else {
+                            32.0
+                        },
+                        0.0,
+                    ),
+                    crate::ScrollDirection::Right => (
+                        if unit == crate::ScrollUnit::Page {
+                            viewport.size[0]
+                        } else {
+                            32.0
+                        },
+                        0.0,
+                    ),
+                };
+                drop(runtime);
+                self.scroll_by(target, crate::ScrollDelta { x, y })
+            }
+            Action::ScrollTo(offset) => {
+                drop(runtime);
+                self.scroll_to(target, offset)
+            }
+            Action::ScrollIntoView => {
+                drop(runtime);
+                self.scroll_into_view(target)
+            }
             Action::Activate => runtime.activate(target),
             Action::Focus => runtime.focus(target),
             Action::Blur => {

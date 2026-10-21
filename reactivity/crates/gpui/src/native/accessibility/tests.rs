@@ -732,3 +732,239 @@ fn projection_ledger() {
         );
     }
 }
+
+struct ScrollPage;
+impl View for ScrollPage {
+    fn view(&self) -> El<'_> {
+        column((0..5).map(|index| button(format!("row{index}")).w(160).h(32)))
+            .scroll(crate::Axis::BOTH)
+            .w(80)
+            .h(64)
+            .name("viewport")
+    }
+}
+#[test]
+fn scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions() {
+    let mut win = Win::recording(
+        ScrollPage,
+        WindowOptions {
+            size: [100, 100],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let viewport = win.role(Role::ScrollView).one().unwrap();
+    let child = win.button("row4");
+    let viewport_id = id(&win, viewport);
+    let child_id = id(&win, child);
+    let mut tree = Tree::new(projection(&win), true);
+    let state = tree.state();
+    let scroll = state
+        .node_by_tree_local_id(viewport_id, TreeId::ROOT)
+        .unwrap();
+    assert_eq!(scroll.role(), accesskit::Role::ScrollView);
+    assert!(scroll.clips_children());
+    assert_eq!(
+        (
+            scroll.data().scroll_x_min(),
+            scroll.data().scroll_x_max(),
+            scroll.data().scroll_y_max()
+        ),
+        (Some(0.0), Some(80.0), Some(96.0))
+    );
+    assert!(scroll.data().supports_action(accesskit::Action::ScrollDown));
+    assert!(
+        scroll
+            .data()
+            .supports_action(accesskit::Action::SetScrollOffset)
+    );
+    let child_node = state.node_by_tree_local_id(child_id, TreeId::ROOT).unwrap();
+    assert!(child_node.data().bounds().unwrap().y0 > 100.0);
+    assert!(
+        child_node
+            .data()
+            .supports_action(accesskit::Action::ScrollIntoView)
+    );
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    ingress.do_action(request(
+        accesskit::Action::ScrollDown,
+        viewport_id,
+        Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Page)),
+    ));
+    assert!(matches!(
+        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        Some(Ok(_))
+    ));
+    assert_eq!(
+        win.viewport(viewport).unwrap().offset.y,
+        0.0,
+        "pending C cannot change native P metadata"
+    );
+    assert!(matches!(
+        win.perform(viewport, Action::ScrollIntoView),
+        Err(Error::NotInteractive)
+    ));
+    let pending = projection(&win);
+    assert_eq!(
+        pending
+            .nodes
+            .iter()
+            .find(|(id, _)| *id == viewport_id)
+            .unwrap()
+            .1
+            .scroll_y(),
+        Some(0.0)
+    );
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    tree.update_and_process_changes(projection(&win), &mut Changes::default());
+    assert_eq!(
+        tree.state()
+            .node_by_tree_local_id(viewport_id, TreeId::ROOT)
+            .unwrap()
+            .data()
+            .scroll_y(),
+        Some(64.0)
+    );
+    ingress.do_action(request(accesskit::Action::ScrollIntoView, child_id, None));
+    assert!(matches!(
+        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        Some(Ok(_))
+    ));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(win.viewport(viewport).unwrap().offset.y, 96.0);
+    ingress.do_action(request(
+        accesskit::Action::SetScrollOffset,
+        viewport_id,
+        Some(ActionData::SetScrollOffset(accesskit::Point {
+            x: 10.0,
+            y: 20.0,
+        })),
+    ));
+    assert!(matches!(
+        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        Some(Ok(_))
+    ));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(
+        win.viewport(viewport).unwrap().offset,
+        crate::ScrollOffset { x: 10.0, y: 20.0 }
+    );
+    assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+}
+
+struct ReflectedScrollPage;
+impl View for ReflectedScrollPage {
+    fn view(&self) -> El<'_> {
+        ScrollPage.view().transform(Affine {
+            a: -1.5,
+            d: -2.0,
+            tx: 160.0,
+            ty: 150.0,
+            ..Affine::IDENTITY
+        })
+    }
+}
+#[test]
+fn native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi() {
+    let mut win = Win::recording_scaled(
+        ReflectedScrollPage,
+        WindowOptions {
+            size: [360, 320],
+            ..Default::default()
+        },
+        2.0,
+    )
+    .unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let target = win.role(Role::ScrollView).one().unwrap();
+    let node_id = id(&win, target);
+    let projected = projection(&win);
+    let node = &projected
+        .nodes
+        .iter()
+        .find(|(id, _)| *id == node_id)
+        .unwrap()
+        .1;
+    assert_eq!(
+        (
+            node.scroll_x_min(),
+            node.scroll_x_max(),
+            node.scroll_y_min(),
+            node.scroll_y_max()
+        ),
+        (Some(-240.0), Some(0.0), Some(-384.0), Some(0.0))
+    );
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    ingress.do_action(request(
+        accesskit::Action::SetScrollOffset,
+        node_id,
+        Some(ActionData::SetScrollOffset(accesskit::Point {
+            x: -90.0,
+            y: -200.0,
+        })),
+    ));
+    assert!(matches!(
+        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        Some(Ok(_))
+    ));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(
+        win.viewport(target).unwrap().offset,
+        crate::ScrollOffset { x: 30.0, y: 50.0 }
+    );
+    let projected = projection(&win);
+    let node = &projected
+        .nodes
+        .iter()
+        .find(|(id, _)| *id == node_id)
+        .unwrap()
+        .1;
+    assert_eq!(
+        (node.scroll_x(), node.scroll_y()),
+        (Some(-90.0), Some(-200.0))
+    );
+    ingress.do_action(request(
+        accesskit::Action::ScrollDown,
+        node_id,
+        Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Page)),
+    ));
+    assert!(matches!(
+        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        Some(Ok(_))
+    ));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(win.viewport(target).unwrap().offset.y, 0.0);
+    ingress.do_action(request(
+        accesskit::Action::ScrollLeft,
+        node_id,
+        Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Item)),
+    ));
+    assert!(matches!(
+        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        Some(Ok(_))
+    ));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(win.viewport(target).unwrap().offset.x, 62.0);
+    // Malformed native floating-point payloads never enter the owner queue.
+    ingress.do_action(request(
+        accesskit::Action::SetScrollOffset,
+        node_id,
+        Some(ActionData::SetScrollOffset(accesskit::Point {
+            x: f64::NAN,
+            y: 0.0,
+        })),
+    ));
+    assert!(receiver.try_recv().is_err());
+    assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+}

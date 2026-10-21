@@ -164,6 +164,12 @@ impl<'a> Part<'a> {
             count: list.count,
         })
     }
+    /// Frozen local scroll range and offset, independent of newer candidates.
+    pub fn viewport(self) -> Option<crate::ScrollViewport> {
+        self.context
+            .metadata
+            .and_then(|metadata| metadata.viewport(self.node.identity, self.context.nodes))
+    }
     pub fn value(self) -> Option<&'a str> {
         (self.node.kind == super::NodeKind::Input)
             .then(|| self.text())
@@ -363,6 +369,26 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let target = runtime.sites.target(id);
         runtime.resolve(target)?;
         Ok(target)
+    }
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn accessibility_viewport_transform(
+        &self,
+        target: Target,
+    ) -> Result<crate::Affine, Error> {
+        let runtime = self.runtime()?;
+        sheet(runtime)?;
+        let identity = runtime.resolve(target)?;
+        let index = runtime
+            .metadata
+            .as_ref()
+            .and_then(|metadata| metadata.presented.viewports.index(identity))
+            .ok_or(Error::NotInteractive)?;
+        runtime
+            .presented
+            .get(index)
+            .filter(|node| node.identity == identity)
+            .and_then(|node| node.transform.get())
+            .ok_or(Error::StaleTarget)
     }
     pub fn query(&self) -> Query<'_, M> {
         Query {

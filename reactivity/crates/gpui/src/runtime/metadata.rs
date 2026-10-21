@@ -69,7 +69,7 @@ pub(super) struct Names {
 pub(super) struct Sheet {
     pub names: Vec<TextSlot>,
     pub descriptions: Vec<TextSlot>,
-    pub lists: Vec<(u64, ListInfo)>,
+    pub viewports: scroll::ViewportColumn,
     pub rows: Vec<Row>,
 }
 #[derive(Clone)]
@@ -111,10 +111,22 @@ impl Sheet {
         slot(&self.descriptions, identity)
     }
     pub fn list(&self, identity: u64) -> Option<ListInfo> {
-        self.lists
-            .binary_search_by_key(&identity, |entry| entry.0)
-            .ok()
-            .map(|i| self.lists[i].1)
+        self.viewports.list(identity)
+    }
+    pub(super) fn viewport_info(
+        &self,
+        identity: u64,
+        nodes: &[Presented],
+    ) -> Option<scroll::ViewportInfo> {
+        self.viewports.info(identity, nodes)
+    }
+    pub(super) fn viewport(
+        &self,
+        identity: u64,
+        nodes: &[Presented],
+    ) -> Option<crate::ScrollViewport> {
+        self.viewport_info(identity, nodes)
+            .map(scroll::ViewportInfo::scroll)
     }
     pub fn row(&self, identity: u64) -> Option<&Row> {
         self.rows
@@ -134,13 +146,7 @@ impl Sheet {
             value.description.map(Some),
         );
     }
-    pub fn capture(
-        &mut self,
-        metadata: &Metadata,
-        identity: u64,
-        list: Option<ListInfo>,
-        row: Option<&ListRow>,
-    ) {
+    pub fn capture(&mut self, metadata: &Metadata, identity: u64, row: Option<&ListRow>) {
         let names = metadata.effective(identity);
         if names.explicit_name {
             self.names.push(TextSlot {
@@ -154,9 +160,6 @@ impl Sheet {
                 value: Some(description),
             });
         }
-        if let Some(info) = list {
-            self.lists.push((identity, info));
-        }
         if let Some(row) = row {
             self.rows.push(Row {
                 identity,
@@ -169,13 +172,12 @@ impl Sheet {
         self.names.sort_unstable_by_key(|entry| entry.identity);
         self.descriptions
             .sort_unstable_by_key(|entry| entry.identity);
-        self.lists.sort_unstable_by_key(|entry| entry.0);
         self.rows.sort_unstable_by_key(|entry| entry.identity);
     }
     fn is_empty(&self) -> bool {
         self.names.is_empty()
             && self.descriptions.is_empty()
-            && self.lists.is_empty()
+            && self.viewports.is_empty()
             && self.rows.is_empty()
     }
 }
@@ -260,36 +262,22 @@ impl<M: View + 'static> Runtime<M> {
             Sheet {
                 names: Vec::with_capacity(names.min(self.nodes.len())),
                 descriptions: Vec::with_capacity(descriptions.min(self.nodes.len())),
-                lists: Vec::with_capacity(self.lists.len()),
+                viewports: scroll::ViewportColumn::default(),
                 rows: Vec::with_capacity(self.list_rows.len()),
             }
         })
     }
-    pub(super) fn list_metadata(&self) -> BTreeMap<u64, ListInfo> {
-        self.lists
-            .iter()
-            .map(|(&id, list)| {
-                (
-                    list.identity,
-                    ListInfo {
-                        id,
-                        count: list.viewport.len as u32,
-                    },
-                )
-            })
-            .collect()
-    }
     pub(super) fn freeze_metadata(&self, nodes: &[Presented]) -> Option<Sheet> {
         let mut sheet = self.metadata_sheet()?;
         let metadata = self.metadata.as_ref()?;
-        let lists = self.list_metadata();
+        sheet.viewports = metadata
+            .candidate
+            .as_ref()
+            .unwrap_or(&metadata.presented)
+            .viewports
+            .clone();
         for node in nodes {
-            sheet.capture(
-                metadata,
-                node.identity,
-                lists.get(&node.identity).copied(),
-                self.list_rows.get(&node.identity),
-            );
+            sheet.capture(metadata, node.identity, self.list_rows.get(&node.identity));
         }
         sheet.sort();
         Some(sheet)

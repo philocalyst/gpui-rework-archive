@@ -73,3 +73,7 @@ required-features = ["native"]
 [[example]]
 name = "covers"
 required-features = ["native"]
+
+[[example]]
+name = "panes"
+required-features = ["native"]
