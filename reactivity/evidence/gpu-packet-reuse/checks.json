@@ -1,0 +1,41 @@
+{
+  "source_commit": "fd68c69331497052c7283baaac77bc6873ab8dbd",
+  "commands": [
+    {
+      "command": "cargo test --locked -p gpui_gpu --features vulkan-tests --test render -- --nocapture",
+      "passed": 29,
+      "failed": 0,
+      "log": "vulkan.log"
+    },
+    {
+      "command": "cargo test --locked -p gpui_gpu --lib",
+      "passed": 7,
+      "failed": 0,
+      "log": "gpu-units.log"
+    },
+    {
+      "command": "cargo test --locked -p gpui",
+      "passed_including_doctests": 264,
+      "ignored": 6,
+      "failed": 0,
+      "log": "gpui-tests.log"
+    },
+    {
+      "command": "DISPLAY=:94 cargo test --locked -p gpui --features x11 --lib native_todo_port_presents_edits_pointer_actions_resize_and_inspection -- --ignored --nocapture --test-threads=1",
+      "passed": 1,
+      "policies": 5,
+      "failed": 0,
+      "log": "native-exposure.log"
+    },
+    {
+      "command": "cargo clippy --locked -p gpui --features x11,wayland --all-targets -- -D warnings",
+      "exit_code": 0,
+      "log": "native-clippy.log"
+    },
+    {
+      "command": "cargo clippy --locked -p gpui_gpu --features vulkan-tests --all-targets -- -D warnings",
+      "exit_code": 0,
+      "log": "gpu-clippy.log"
+    }
+  ]
+}
