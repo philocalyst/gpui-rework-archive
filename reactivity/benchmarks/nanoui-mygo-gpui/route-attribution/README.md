@@ -16,6 +16,11 @@ triple, and `rustc -Vv` in each build record. The executable output is copied
 to an immutable SHA-named file; do not overwrite it when building the
 candidate.
 
+Each build script requires its source to be a detached Git worktree and
+refuses to build from a branch checkout or the authoritative working tree.
+`CARGO_BUILD_JOBS` is configurable by the caller and defaults to 4; each
+source still gets a unique target directory and immutable executable artifact.
+
 ## Campaigns that must remain separate
 
 1. **Attribution:** parent `b60af3a4f9` versus the frozen integrated route

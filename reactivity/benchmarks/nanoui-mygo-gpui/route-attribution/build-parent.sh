@@ -10,12 +10,16 @@ PIN=b60af3a4f97d67a35b4eab5a4ef672a17d9de6f6
 FIXTURE="$DIR/../fixtures/gpui-luna_bench.rs"
 
 source /tmp/gpui-native-env.sh
-export CARGO_BUILD_JOBS=1
+export CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-4}
 export CARGO_TARGET_DIR="$TARGET"
 
 actual=$(git -C "$ROOT" rev-parse HEAD)
 if [[ "$actual" != "$PIN" ]]; then
   echo "wrong source checkout: expected $PIN, got $actual" >&2
+  exit 1
+fi
+if [[ ! -f "$ROOT/.git" ]] || git -C "$ROOT" symbolic-ref -q HEAD >/dev/null; then
+  echo "parent source must be a detached worktree at the pinned commit" >&2
   exit 1
 fi
 if [[ -n $(git -C "$ROOT" status --porcelain --untracked-files=no) ]]; then

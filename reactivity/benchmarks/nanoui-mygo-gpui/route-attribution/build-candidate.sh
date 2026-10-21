@@ -13,12 +13,16 @@ MANIFEST_DIR="$DIR/../results"
 FIXTURE="$DIR/../fixtures/gpui-luna_bench.rs"
 
 source /tmp/gpui-native-env.sh
-export CARGO_BUILD_JOBS=1
+export CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-4}
 export CARGO_TARGET_DIR="$TARGET"
 
 actual=$(git -C "$ROOT" rev-parse HEAD)
 if [[ "$actual" != "$PIN" ]]; then
   echo "wrong source checkout: expected $PIN, got $actual" >&2
+  exit 1
+fi
+if [[ ! -f "$ROOT/.git" ]] || git -C "$ROOT" symbolic-ref -q HEAD >/dev/null; then
+  echo "candidate source must be a detached integration worktree (not the authoritative checkout)" >&2
   exit 1
 fi
 if [[ ! "$PIN" =~ ^[[:xdigit:]]{40}$ ]]; then
