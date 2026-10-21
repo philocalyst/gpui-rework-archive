@@ -46,6 +46,10 @@ impl Sites {
         }
     }
 
+    pub(crate) fn namespace(&self) -> NonZeroU64 {
+        self.window
+    }
+
     pub(crate) fn target(&mut self, identity: u64) -> Target {
         let slot = *self.by_identity.entry(identity).or_insert_with(|| {
             if let Some(slot) = self.free.pop() {

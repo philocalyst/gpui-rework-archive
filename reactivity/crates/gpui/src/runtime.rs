@@ -4,11 +4,12 @@
 use std::{
     cell::{RefCell, RefMut},
     collections::{BTreeMap, BTreeSet},
+    num::NonZeroU64,
     panic::{AssertUnwindSafe, catch_unwind},
     rc::Rc,
 };
 
-use gpui_canvas::{Canvas, ColorConfig, TextLayout, TextSystem};
+use gpui_canvas::{Canvas, ColorConfig, PreparedScene, TextLayout, TextSystem};
 use gpui_reactivity_core::{
     Affine, CoordinateSpace, NodeId, Point, Rect,
     layout::{AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size},
@@ -50,6 +51,8 @@ pub enum Error {
     PresentationPanicked,
     StaleTarget,
     PresentationStale,
+    NoPreparedScene,
+    StalePresentation,
     NotInteractive,
     NotInput,
     NotHittable,
@@ -114,11 +117,32 @@ pub struct Counters {
     pub coarse_updates: u64,
 }
 
+/// Capability for one complete prepared sheet in one window namespace.
+/// Only an adapter that submitted/presented this scene should acknowledge it.
+/// Private fields and the absence of Deserialize prevent restoration/forgery.
+/// ```compile_fail
+/// let token = gpui::PresentationToken {
+///     window: std::num::NonZeroU64::new(1).unwrap(), sequence: 1,
+/// };
+/// ```
+/// ```compile_fail
+/// let token: gpui::PresentationToken = serde_json::from_str("{}").unwrap();
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct PresentationToken {
+    window: NonZeroU64,
+    sequence: u64,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 pub struct Commit {
     pub source_epoch: u64,
     /// Source epoch described by the complete displayed sheet.
     pub presentation_epoch: u64,
+    /// False until the first actual presentation acknowledgement, even at S0.
+    pub presentation_valid: bool,
+    /// Epoch covered by the outstanding complete sheet awaiting acknowledgement.
+    pub prepared_epoch: Option<u64>,
     pub changed_nodes: usize,
 }
 
@@ -202,7 +226,11 @@ impl SnapshotNode {
 pub struct Snapshot {
     pub source_epoch: u64,
     pub presentation_epoch: u64,
+    pub presentation_valid: bool,
+    pub prepared_epoch: Option<u64>,
+    /// Size of the acknowledged presentation (empty initially for recording).
     pub size: [u32; 2],
+    pub requested_size: [u32; 2],
     pub poisoned: bool,
     pub nodes: Vec<SnapshotNode>,
 }
@@ -260,6 +288,11 @@ struct Presented {
     bounds: Rect,
     hittable: bool,
 }
+struct Prepared {
+    source_epoch: u64,
+    size: [u32; 2],
+    nodes: Vec<Presented>,
+}
 struct Runtime<M> {
     model: M,
     sources: Sources<M>,
@@ -278,6 +311,13 @@ struct Runtime<M> {
     dirty: bool,
     source_epoch: u64,
     presentation_epoch: u64,
+    presentation_valid: bool,
+    presentation_size: [u32; 2],
+    requested_size: [u32; 2],
+    automatic_presentation: bool,
+    next_presentation: u64,
+    prepared: Option<Prepared>,
+    latest_token: Option<PresentationToken>,
     presented: Vec<Presented>,
     canvas: Canvas,
     text: Option<TextSystem>,
@@ -309,6 +349,18 @@ impl<M: View + 'static> Win<M> {
         )
     }
     pub fn with_options(model: M, options: WindowOptions) -> Result<Self, Error> {
+        Self::mount(model, options, true)
+    }
+    /// Native/backend path: command recording, no CPU framebuffer. Initial S0
+    /// has no presented authority until the adapter acknowledges its token.
+    pub fn recording(model: M, options: WindowOptions) -> Result<Self, Error> {
+        Self::mount(model, options, false)
+    }
+    fn mount(
+        model: M,
+        options: WindowOptions,
+        automatic_presentation: bool,
+    ) -> Result<Self, Error> {
         let sources =
             catch_unwind(AssertUnwindSafe(M::sources)).map_err(|_| Error::OwnerPanicked)?;
         let mut runtime = Runtime {
@@ -329,8 +381,19 @@ impl<M: View + 'static> Win<M> {
             dirty: true,
             source_epoch: 0,
             presentation_epoch: 0,
+            presentation_valid: false,
+            presentation_size: [0, 0],
+            requested_size: options.size,
+            automatic_presentation,
+            next_presentation: 1,
+            prepared: None,
+            latest_token: None,
             presented: Vec::new(),
-            canvas: Canvas::with_color_config(options.size[0], options.size[1], options.colors)?,
+            canvas: if automatic_presentation {
+                Canvas::with_color_config(options.size[0], options.size[1], options.colors)?
+            } else {
+                Canvas::recording(options.size[0], options.size[1], options.colors)?
+            },
             text: None,
             poisoned: false,
             counters: Counters::default(),
@@ -397,6 +460,57 @@ impl<M: View + 'static> Win<M> {
     /// Position-free semantic activation validates the current logical target.
     pub fn activate(&self, target: Target) -> Result<Commit, Error> {
         self.borrow()?.activate(target)
+    }
+
+    /// Borrow the latest complete command sheet and its acknowledgement token.
+    /// The current token remains valid for OS exposure/surface recovery redraws.
+    /// Callback mutation of this window is rejected as Borrowed. Reading commands
+    /// neither allocates a CPU framebuffer nor acknowledges presentation.
+    pub fn with_scene<R>(
+        &self,
+        read: impl FnOnce(PreparedScene<'_>, PresentationToken) -> R,
+    ) -> Result<R, Error> {
+        let runtime = self.inner.try_borrow().map_err(|_| Error::Borrowed)?;
+        runtime.live()?;
+        let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
+        Ok(read(runtime.canvas.prepared_scene(), token))
+    }
+    /// Acknowledge only after the backend's actual submit/present succeeded.
+    /// An older coherent candidate remains eligible if a newer preparation failed.
+    pub fn presented(&self, token: PresentationToken) -> Result<Commit, Error> {
+        let mut runtime = self.borrow()?;
+        runtime.live()?;
+        runtime.acknowledge(token)
+    }
+    /// Change physical viewport constraints without changing source epoch or
+    /// target namespace. Equal size is an idle operation; invalid size is rejected.
+    pub fn resize(&self, size: [u32; 2]) -> Result<Commit, Error> {
+        let mut runtime = self.borrow()?;
+        runtime.live()?;
+        if size == runtime.requested_size {
+            return Ok(runtime.commit());
+        }
+        Canvas::recording(size[0], size[1], runtime.canvas.color_config())?;
+        runtime.requested_size = size;
+        runtime.dirty = true;
+        runtime.changed_nodes = 0;
+        if let Some(node) = runtime.nodes.first() {
+            let identity = node.identity;
+            runtime.layout_dirty.insert(identity);
+        }
+        if !runtime.logical_valid {
+            runtime.describe(false)?;
+        }
+        runtime.present()
+    }
+    /// The same acknowledged-sheet hit kernel used by click_at and click.
+    pub fn hit_target(&self, point: Point) -> Result<Option<Target>, Error> {
+        let mut runtime = self.borrow()?;
+        runtime.live()?;
+        runtime.current_presentation()?;
+        Ok(runtime
+            .hit(point)
+            .map(|identity| runtime.sites.target(identity)))
     }
 
     /// Test input still goes through admitted geometry and the ordinary hit path.
@@ -513,7 +627,10 @@ impl<M: View + 'static> Win<M> {
         Ok(Snapshot {
             source_epoch: runtime.source_epoch,
             presentation_epoch: runtime.presentation_epoch,
-            size: [runtime.canvas.width(), runtime.canvas.height()],
+            presentation_valid: runtime.presentation_valid,
+            prepared_epoch: runtime.prepared.as_ref().map(|sheet| sheet.source_epoch),
+            size: runtime.presentation_size,
+            requested_size: runtime.requested_size,
             poisoned: runtime.poisoned,
             nodes,
         })
@@ -612,10 +729,13 @@ impl<M: View + 'static> Win<M> {
             .ok_or(Error::MissingElement)?;
         Ok(runtime.sites.target(identity))
     }
+    /// CPU diagnostic rendering of the latest coherent commands. In recording
+    /// mode this explicitly allocates the optional image, but never acknowledges
+    /// native presentation. Optional image allocation failures return Canvas errors.
     pub fn with_pixels<R>(&self, read: impl FnOnce(&[u8], u32, u32) -> R) -> Result<R, Error> {
         let mut runtime = self.borrow()?;
         let (width, height) = (runtime.canvas.width(), runtime.canvas.height());
-        Ok(read(runtime.canvas.pixels(), width, height))
+        Ok(read(runtime.canvas.try_pixels()?, width, height))
     }
     pub fn scene_digest(&self) -> Result<u64, Error> {
         self.with_pixels(|pixels, _, _| {
@@ -657,7 +777,12 @@ impl<M: View + 'static> Runtime<M> {
             .ok_or(Error::StaleTarget)
     }
     fn current_presentation(&self) -> Result<(), Error> {
-        if self.logical_valid && self.source_epoch == self.presentation_epoch {
+        if self.logical_valid
+            && self.presentation_valid
+            && self.prepared.is_none()
+            && self.source_epoch == self.presentation_epoch
+            && self.requested_size == self.presentation_size
+        {
             Ok(())
         } else {
             Err(Error::PresentationStale)
@@ -667,6 +792,8 @@ impl<M: View + 'static> Runtime<M> {
         self.poisoned = true;
         self.logical_valid = false;
         self.sites.revoke();
+        self.prepared = None;
+        self.latest_token = None;
     }
     fn operation(
         &mut self,
@@ -998,12 +1125,20 @@ impl<M: View + 'static> Runtime<M> {
         Commit {
             source_epoch: self.source_epoch,
             presentation_epoch: self.presentation_epoch,
+            presentation_valid: self.presentation_valid,
+            prepared_epoch: self.prepared.as_ref().map(|sheet| sheet.source_epoch),
             changed_nodes: self.changed_nodes,
         }
     }
     fn present(&mut self) -> Result<Commit, Error> {
         if !self.dirty {
-            self.presentation_epoch = self.source_epoch;
+            if let Some(prepared) = &mut self.prepared {
+                // Equal logical output extends this candidate's coverage, but
+                // cannot promote the old displayed sheet past an unseen visual.
+                prepared.source_epoch = self.source_epoch;
+            } else if self.presentation_valid {
+                self.presentation_epoch = self.source_epoch;
+            }
             return Ok(self.commit());
         }
         match catch_unwind(AssertUnwindSafe(|| self.present_inner())) {
@@ -1022,7 +1157,40 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
     }
+    fn acknowledge(&mut self, token: PresentationToken) -> Result<Commit, Error> {
+        if self.latest_token != Some(token) {
+            return Err(Error::StalePresentation);
+        }
+        let Some(prepared) = self.prepared.take() else {
+            // Re-presenting the same complete sheet on OS exposure is harmless.
+            // It cannot claim coverage for any failed newer source/resize turn.
+            return Ok(self.commit());
+        };
+        self.presented = prepared.nodes;
+        self.presentation_epoch = prepared.source_epoch;
+        self.presentation_size = prepared.size;
+        self.presentation_valid = true;
+        self.counters.presentations += 1;
+        Ok(self.commit())
+    }
     fn present_inner(&mut self) -> Result<(), Error> {
+        let sequence = self.next_presentation;
+        let next_sequence = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
+        let token = PresentationToken {
+            window: self.sites.namespace(),
+            sequence,
+        };
+        let size = self.requested_size;
+        // A failed resize must retain the old coherent candidate's commands.
+        let mut replacement = if size != [self.canvas.width(), self.canvas.height()] {
+            Some(if self.automatic_presentation {
+                Canvas::with_color_config(size[0], size[1], self.canvas.color_config())?
+            } else {
+                Canvas::recording(size[0], size[1], self.canvas.color_config())?
+            })
+        } else {
+            None
+        };
         if self.text.is_none() && self.nodes.iter().any(|node| node.text.is_some()) {
             self.text = Some(TextSystem::bundled()?);
         }
@@ -1092,8 +1260,8 @@ impl<M: View + 'static> Runtime<M> {
         self.layout.compute_with(
             self.layout_nodes[0],
             Size {
-                width: AvailableSpace::Definite(self.canvas.width() as f32),
-                height: AvailableSpace::Definite(self.canvas.height() as f32),
+                width: AvailableSpace::Definite(size[0] as f32),
+                height: AvailableSpace::Definite(size[1] as f32),
             },
             &mut measure,
         )?;
@@ -1103,15 +1271,10 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
-        let viewport = Rect::new(
-            0.0,
-            0.0,
-            self.canvas.width() as f32,
-            self.canvas.height() as f32,
-        );
+        let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
-        let mut scene = self.canvas.stage();
+        let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
@@ -1183,27 +1346,38 @@ impl<M: View + 'static> Runtime<M> {
                     || node.kind == NodeKind::Input,
             });
         }
-        // Everything fallible has finished. This transfers commands, retaining
-        // the one existing RGBA8 output allocation; no model borrow is published.
+        // Everything fallible has finished. This transfers commands; native
+        // recording retains no CPU image, while same-size headless updates reuse
+        // the selected output allocation. No model borrow is published.
         scene.commit();
-        self.presented = presented;
+        if let Some(canvas) = replacement {
+            self.canvas = canvas;
+        }
+        self.prepared = Some(Prepared {
+            source_epoch: self.source_epoch,
+            size,
+            nodes: presented,
+        });
+        self.latest_token = Some(token);
+        self.next_presentation = next_sequence;
         if self.nodes.iter().all(|node| node.text.is_none()) {
             self.text = None;
         }
-        self.presentation_epoch = self.source_epoch;
         self.dirty = false;
         self.rebuild_layout = false;
         self.topology_changed = false;
         self.layout_dirty.clear();
-        self.counters.presentations += 1;
+        if self.automatic_presentation {
+            self.acknowledge(token)?;
+        }
         Ok(())
     }
     fn hit(&self, point: Point) -> Option<u64> {
         if !Rect::new(
             0.0,
             0.0,
-            self.canvas.width() as f32,
-            self.canvas.height() as f32,
+            self.presentation_size[0] as f32,
+            self.presentation_size[1] as f32,
         )
         .contains(point)
         {
@@ -1270,6 +1444,39 @@ mod tests {
     use super::*;
     use crate::{div, text};
 
+    #[test]
+    fn native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels() {
+        struct Rectangle;
+        impl View for Rectangle {
+            fn view(&self) -> crate::El<'_> {
+                div().size(8).bg(Color::BLACK)
+            }
+        }
+        let win = Win::recording(
+            Rectangle,
+            WindowOptions {
+                size: [32, 24],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
+        assert_eq!(win.inner.borrow().canvas.stats().render_count, 0);
+        let token = win
+            .with_scene(|scene, token| {
+                assert_eq!(scene.draws().count(), 1);
+                token
+            })
+            .unwrap();
+        win.presented(token).unwrap();
+        win.resize([40, 30]).unwrap();
+        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        assert_eq!(win.inner.borrow().canvas.output_bytes(), 0);
+        assert_eq!(win.inner.borrow().canvas.stats().render_count, 0);
+        assert!(win.inner.borrow().text.is_none());
+    }
     #[test]
     fn rectangle_windows_do_not_initialize_font_services() {
         struct Rectangle;
