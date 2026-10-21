@@ -1,0 +1,326 @@
+diff --git a/reactivity/crates/gpui/src/element.rs b/reactivity/crates/gpui/src/element.rs
+index 3e31d79fa1..0d69917251 100644
+--- a/reactivity/crates/gpui/src/element.rs
++++ b/reactivity/crates/gpui/src/element.rs
+@@ -9,7 +9,7 @@ use crate::{
+     View,
+     component::Component,
+     source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
+-    style::{Affine, Color, Flex, IntoLength, Style, nonnegative},
++    style::{Affine, Color, Flex, IntoLength, OptionalLength, Style, nonnegative},
+ };
+ 
+ #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+@@ -287,17 +287,17 @@ impl<'a> El<'a> {
+     }
+ 
+     pub fn w(mut self, width: impl IntoLength) -> Self {
+-        self.style.width = Some(nonnegative(width, "width"));
++        self.style.width = OptionalLength::from_validated(Some(nonnegative(width, "width")));
+         self
+     }
+     pub fn h(mut self, height: impl IntoLength) -> Self {
+-        self.style.height = Some(nonnegative(height, "height"));
++        self.style.height = OptionalLength::from_validated(Some(nonnegative(height, "height")));
+         self
+     }
+     pub fn size(mut self, size: impl IntoLength) -> Self {
+         let size = nonnegative(size, "size");
+-        self.style.width = Some(size);
+-        self.style.height = Some(size);
++        self.style.width = OptionalLength::from_validated(Some(size));
++        self.style.height = OptionalLength::from_validated(Some(size));
+         self
+     }
+     pub fn gap(mut self, gap: impl IntoLength) -> Self {
+@@ -454,7 +454,7 @@ impl<'a> El<'a> {
+                     }
+                     let mut wrapper = Self::new(NodeKind::ListItem, None);
+                     wrapper.children.push(row);
+-                    wrapper.style.height = Some(row_height as f32);
++                    wrapper.style.height = OptionalLength::from_validated(Some(row_height as f32));
+                     rows.push((
+                         Some(index),
+                         wrapper,
+@@ -950,8 +950,8 @@ mod tests {
+             .flatten();
+         assert_eq!(nodes[0].kind.role(), Role::TextInput);
+         assert!(nodes[0].text.as_ref().unwrap().signal().is_some());
+-        assert_eq!(nodes[0].style.width, Some(320.0));
+-        assert_eq!(nodes[0].style.height, Some(24.0));
++        assert_eq!(nodes[0].style.width.get(), Some(320.0));
++        assert_eq!(nodes[0].style.height.get(), Some(24.0));
+         assert_eq!(nodes[0].style.fg, Color::rgb(1, 2, 3));
+     }
+ 
+diff --git a/reactivity/crates/gpui/src/property.rs b/reactivity/crates/gpui/src/property.rs
+index 62510f4d36..afbb95e5ae 100644
+--- a/reactivity/crates/gpui/src/property.rs
++++ b/reactivity/crates/gpui/src/property.rs
+@@ -2,7 +2,7 @@
+ //! reference; callers cannot supply a setter, validator or impact claim.
+ //! Contributions retain presence separately from resolved destination equality.
+ 
+-use crate::style::{Affine, Color, Flow, Style};
++use crate::style::{Affine, Color, Flow, OptionalLength, Style};
+ use std::{collections::BTreeMap, fmt};
+ 
+ /// Inclusive ceilings: Geometry includes hit/bounds/damage/paint; Layout also
+@@ -177,11 +177,11 @@ fn font_size(value: &f32) -> Result<(), PropertyErrorKind> {
+ // This closed declaration list also generates the catalog and erased dispatch.
+ // Applications provide neither callbacks nor macros.
+ macro_rules! properties {
+-    ($($name:ident, $decl:ident, $ty:ty, $id:ident, $text:literal, $kind:ident, $impact:ident, $field:ident, $validate:expr);+ $(;)?) => {
++    ($($name:ident, $decl:ident, $ty:ty, $id:ident, $text:literal, $kind:ident, $impact:ident, $get:expr, $put:expr, $validate:expr);+ $(;)?) => {
+         $(static $decl: Declaration<$ty> = Declaration {
+             info: PropertyInfo { id: PropertyId::$id, name: $text, kind: ValueKind::$kind, impact: Impact::$impact },
+-            get: |style| style.$field,
+-            put: |style, value| style.$field = value,
++            get: $get,
++            put: $put,
+             validate: $validate,
+         };
+         pub const $name: Property<$ty> = Property(&$decl);)+
+@@ -213,15 +213,15 @@ fn finite_transform(value: &Affine) -> Result<(), PropertyErrorKind> {
+ // Color's private fields and checked constructors already guarantee finite,
+ // valid tagged color values, including extended RGB; do not clip them here.
+ properties! {
+-    WIDTH, WIDTH_DECL, Option<f32>, Width, "width", Dimension, Layout, width, dimension;
+-    HEIGHT, HEIGHT_DECL, Option<f32>, Height, "height", Dimension, Layout, height, dimension;
+-    GAP, GAP_DECL, f32, Gap, "gap", Number, Layout, gap, nonnegative;
+-    PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, padding, nonnegative;
+-    FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, font_size, font_size;
+-    FOREGROUND, FOREGROUND_DECL, Color, Foreground, "foreground", Color, Paint, fg, |_| Ok(());
+-    BACKGROUND, BACKGROUND_DECL, Color, Background, "background", Color, Paint, bg, |_| Ok(());
+-    FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, flow, |_| Ok(());
+-    TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, transform, finite_transform;
++    WIDTH, WIDTH_DECL, Option<f32>, Width, "width", Dimension, Layout, |style| style.width.get(), |style, value| style.width = OptionalLength::from_validated(value), dimension;
++    HEIGHT, HEIGHT_DECL, Option<f32>, Height, "height", Dimension, Layout, |style| style.height.get(), |style, value| style.height = OptionalLength::from_validated(value), dimension;
++    GAP, GAP_DECL, f32, Gap, "gap", Number, Layout, |style| style.gap, |style, value| style.gap = value, nonnegative;
++    PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, |style| style.padding, |style, value| style.padding = value, nonnegative;
++    FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, |style| style.font_size, |style, value| style.font_size = value, font_size;
++    FOREGROUND, FOREGROUND_DECL, Color, Foreground, "foreground", Color, Paint, |style| style.fg, |style, value| style.fg = value, |_| Ok(());
++    BACKGROUND, BACKGROUND_DECL, Color, Background, "background", Color, Paint, |style| style.bg, |style, value| style.bg = value, |_| Ok(());
++    FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, |style| style.flow, |style, value| style.flow = value, |_| Ok(());
++    TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, |style| style.transform, |style, value| style.transform = value, finite_transform;
+ }
+ 
+ /// Closed inspector seam. No boxed erased values, type IDs or external setters.
+@@ -384,9 +384,10 @@ mod tests {
+     #[test]
+     fn invalid_typed_and_erased_edits_leave_all_fields_unchanged() {
+         let mut style = Style::default();
+-        for invalid in [f32::NAN, f32::INFINITY, -1.0] {
++        for invalid in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY, -1.0] {
+             let before = style;
+             assert!(WIDTH.set(&mut style, Some(invalid)).is_err());
++            assert!(HEIGHT.set(&mut style, Some(invalid)).is_err());
+             assert!(GAP.set(&mut style, invalid).is_err());
+             assert!(PADDING.set(&mut style, invalid).is_err());
+             assert!(
+@@ -427,6 +428,28 @@ mod tests {
+         assert_eq!(style, before);
+     }
+ 
++    #[test]
++    fn dimension_selectors_round_trip_extremes_and_preserve_equality_semantics() {
++        for property in [WIDTH, HEIGHT] {
++            let mut style = Style::default();
++            for value in [-0.0, f32::from_bits(1), f32::MIN_POSITIVE, f32::MAX] {
++                assert!(property.set(&mut style, Some(value)).unwrap());
++                assert_eq!(property.get(&style).unwrap().to_bits(), value.to_bits());
++                assert!(!property.set(&mut style, Some(value)).unwrap());
++            }
++            assert!(property.set(&mut style, Some(-0.0)).unwrap());
++            // A destination equal to the current one does not overwrite it.
++            assert!(!property.set(&mut style, Some(0.0)).unwrap());
++            assert_eq!(
++                property.get(&style).unwrap().to_bits(),
++                (-0.0_f32).to_bits()
++            );
++            assert!(property.set(&mut style, None).unwrap());
++            assert!(!property.set(&mut style, None).unwrap());
++            assert_eq!(property.get(&style), None);
++        }
++    }
++
+     #[test]
+     fn catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned() {
+         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 9a88517353..29d48cb1fa 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -2206,8 +2206,11 @@ fn layout_style(style: Style) -> cephal::Style {
+     cephal::Style {
+         display: Display::Flex,
+         size: Size {
+-            width: style.width.map_or(Dimension::AUTO, Dimension::length),
+-            height: style.height.map_or(Dimension::AUTO, Dimension::length),
++            width: style.width.get().map_or(Dimension::AUTO, Dimension::length),
++            height: style
++                .height
++                .get()
++                .map_or(Dimension::AUTO, Dimension::length),
+         },
+         padding: cephal::Rect::splat(LengthPercentage::length(style.padding)),
+         gap: Size {
+@@ -2545,9 +2548,9 @@ mod semantic_storage_ledger {
+         );
+         // Parent/transform packing and the source namespace niche are shared
+         // baseline improvements; semantic columns add no hot-node fields.
+-        assert_eq!(size_of::<Node>(), 128);
++        assert_eq!(size_of::<Node>(), 120);
+         assert_eq!(size_of::<Presented>(), 80);
+-        assert_eq!(size_of::<crate::El<'_>>(), 176);
++        assert_eq!(size_of::<crate::El<'_>>(), 168);
+         assert_eq!(size_of::<ListRow>(), 32);
+         assert_eq!(size_of::<metadata::Row>(), 24);
+         assert_eq!(size_of::<Destination>(), 4);
+diff --git a/reactivity/crates/gpui/src/runtime/list.rs b/reactivity/crates/gpui/src/runtime/list.rs
+index 032467dfaf..ab30dff651 100644
+--- a/reactivity/crates/gpui/src/runtime/list.rs
++++ b/reactivity/crates/gpui/src/runtime/list.rs
+@@ -52,7 +52,7 @@ pub(super) fn plan(
+     row_height: f64,
+     request: Option<ScrollPosition>,
+ ) -> Result<ListPlan, ListError> {
+-    let viewport = f64::from(style.height.ok_or(ListError::MissingViewport)?);
++    let viewport = f64::from(style.height.get().ok_or(ListError::MissingViewport)?);
+     if !row_height.is_finite()
+         || !(1.0 / 64.0..f64::from(MAX_COORDINATE)).contains(&row_height)
+         || !viewport.is_finite()
+@@ -135,7 +135,7 @@ pub(super) fn row_style(
+     slot: Option<&ListRow>,
+ ) -> cephal::Style {
+     let mut style = layout_style(node.style);
+-    if node.kind() == NodeKind::List && node.style.width.is_none() {
++    if node.kind() == NodeKind::List && node.style.width.get().is_none() {
+         use cephal::style::Dimension;
+         if parent.is_none() {
+             style.size.width = Dimension::percent(1.0);
+diff --git a/reactivity/crates/gpui/src/style.rs b/reactivity/crates/gpui/src/style.rs
+index 910936ca75..d443186342 100644
+--- a/reactivity/crates/gpui/src/style.rs
++++ b/reactivity/crates/gpui/src/style.rs
+@@ -12,10 +12,41 @@ pub enum Flow {
+     Column,
+ }
+ 
++/// A dimension after the builder/property boundary has admitted its value.
++/// Finite lengths retain their exact bits; NaN denotes automatic sizing.
++/// Public selectors continue to accept and return `Option<f32>`.
++#[derive(Clone, Copy)]
++pub(crate) struct OptionalLength(f32);
++impl OptionalLength {
++    pub const AUTO: Self = Self(f32::NAN);
++
++    #[inline]
++    pub fn from_validated(value: Option<f32>) -> Self {
++        debug_assert!(value.is_none_or(|value| value.is_finite() && value >= 0.0));
++        Self(value.unwrap_or(f32::NAN))
++    }
++
++    #[inline]
++    pub fn get(self) -> Option<f32> {
++        (!self.0.is_nan()).then_some(self.0)
++    }
++}
++impl PartialEq for OptionalLength {
++    #[inline]
++    fn eq(&self, other: &Self) -> bool {
++        (self.0 == other.0) | (self.0.is_nan() & other.0.is_nan())
++    }
++}
++impl std::fmt::Debug for OptionalLength {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
++        self.get().fmt(f)
++    }
++}
++
+ #[derive(Clone, Copy, Debug, PartialEq)]
+ pub struct Style {
+-    pub(crate) width: Option<f32>,
+-    pub(crate) height: Option<f32>,
++    pub(crate) width: OptionalLength,
++    pub(crate) height: OptionalLength,
+     pub(crate) gap: f32,
+     pub(crate) padding: f32,
+     pub(crate) font_size: f32,
+@@ -28,8 +59,8 @@ pub struct Style {
+ impl Default for Style {
+     fn default() -> Self {
+         Self {
+-            width: None,
+-            height: None,
++            width: OptionalLength::AUTO,
++            height: OptionalLength::AUTO,
+             gap: 0.0,
+             padding: 0.0,
+             font_size: 16.0,
+@@ -109,4 +140,25 @@ mod tests {
+             assert!(std::panic::catch_unwind(|| nonnegative(invalid, "width")).is_err());
+         }
+     }
++
++    #[test]
++    fn optional_lengths_preserve_the_admitted_float_domain() {
++        assert_eq!(size_of::<OptionalLength>(), size_of::<f32>());
++        assert_eq!(OptionalLength::AUTO.get(), None);
++        assert_eq!(OptionalLength::AUTO, OptionalLength::AUTO);
++        assert_eq!(format!("{:?}", OptionalLength::AUTO), "None");
++        for value in [0.0, -0.0, f32::from_bits(1), f32::MIN_POSITIVE, f32::MAX] {
++            let length = OptionalLength::from_validated(Some(value));
++            assert_eq!(length.get().unwrap().to_bits(), value.to_bits());
++            assert_eq!(format!("{length:?}"), format!("{:?}", Some(value)));
++        }
++        assert_eq!(
++            OptionalLength::from_validated(Some(0.0)),
++            OptionalLength::from_validated(Some(-0.0))
++        );
++        assert_ne!(
++            OptionalLength::AUTO,
++            OptionalLength::from_validated(Some(0.0))
++        );
++    }
+ }
+diff --git a/reactivity/crates/gpui/tests/inspector.rs b/reactivity/crates/gpui/tests/inspector.rs
+index 7787f733cf..8b5aca91c4 100644
+--- a/reactivity/crates/gpui/tests/inspector.rs
++++ b/reactivity/crates/gpui/tests/inspector.rs
+@@ -72,10 +72,18 @@ fn paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output() {
+ fn invalid_and_foreign_inspector_edits_fail_before_source_admission() {
+     let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
+     let panel = window.inspect().unwrap().nodes[0].target.unwrap();
+-    assert!(matches!(
+-        window.set_property(panel, WIDTH, Contribution::Set(Some(f32::NAN))),
+-        Err(Error::Property(_))
+-    ));
++    for property in [WIDTH, HEIGHT] {
++        for invalid in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY, -1.0] {
++            assert!(matches!(
++                window.set_property(panel, property, Contribution::Set(Some(invalid))),
++                Err(Error::Property(_))
++            ));
++            assert_eq!(
++                window.contribution(panel, property).unwrap(),
++                Contribution::Inherit
++            );
++        }
++    }
+     assert_eq!(window.snapshot().unwrap().source_epoch, 0);
+     assert_eq!(window.property(panel, WIDTH).unwrap(), Some(20.0));
+     assert_eq!(
+@@ -89,3 +97,12 @@ fn invalid_and_foreign_inspector_edits_fail_before_source_admission() {
+     );
+     assert_eq!(other.snapshot().unwrap().source_epoch, 0);
+ }
++
++#[test]
++fn dimension_builders_reject_invalid_values_at_the_authoring_boundary() {
++    for invalid in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY, f64::MAX, -1.0] {
++        assert!(std::panic::catch_unwind(|| div().w(invalid)).is_err());
++        assert!(std::panic::catch_unwind(|| div().h(invalid)).is_err());
++        assert!(std::panic::catch_unwind(|| div().size(invalid)).is_err());
++    }
++}
