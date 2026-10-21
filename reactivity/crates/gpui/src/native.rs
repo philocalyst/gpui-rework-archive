@@ -437,9 +437,28 @@ impl<V: View + 'static> NativeHost<V> {
         if let Some(Graphics::ReferenceCpu(surface)) = &mut self.graphics {
             let window = self.window.as_ref().expect("surface has a window");
             let owner = self.owner.as_mut().expect("surface has an owner");
+            let solid = owner
+                .with_scene(|scene, token| {
+                    scene
+                        .solid_bgrx()
+                        .map(|color| color.map(|color| (color, token)))
+                })?
+                .map_err(Error::from)?;
+            let notified = solid.is_some();
+            if let Some((color, token)) = solid {
+                window.pre_present_notify();
+                if surface.present_solid(color).map_err(platform)? {
+                    let commit = owner.presented(token)?;
+                    self.did_present(RendererKind::ReferenceCpu, commit);
+                    self.start_upgrade();
+                    return Ok(());
+                }
+            }
             let mut buffer = surface.buffer_mut().map_err(platform)?;
             let token = owner.render_bgrx(&mut buffer)?;
-            window.pre_present_notify();
+            if !notified {
+                window.pre_present_notify();
+            }
             buffer.present().map_err(platform)?;
             let commit = owner.presented(token)?;
             self.did_present(RendererKind::ReferenceCpu, commit);
@@ -843,6 +862,9 @@ impl<V: View + 'static> Host for NativeHost<V> {
 mod test_todos;
 
 #[cfg(all(test, feature = "x11", target_os = "linux"))]
+mod solid_tests;
+
+#[cfg(all(test, feature = "x11", target_os = "linux"))]
 mod tests {
     use super::*;
     use crate::{
@@ -1121,6 +1143,7 @@ mod tests {
             .with_any_thread(true)
             .build()
             .unwrap();
+        solid_tests::run(&mut event_loop);
         for (policy, allow_cpu, force_probe) in [
             (RendererPolicy::Auto, false, false),
             (RendererPolicy::Gpu, false, false),

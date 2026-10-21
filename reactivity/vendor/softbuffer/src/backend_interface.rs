@@ -26,6 +26,11 @@ pub(crate) trait SurfaceInterface<D: HasDisplayHandle + ?Sized, W: HasWindowHand
     fn window(&self) -> &W;
     /// Resize the internal buffer to the given width and height.
     fn resize(&mut self, width: NonZeroU32, height: NonZeroU32) -> Result<(), SoftBufferError>;
+    /// Present a uniform 0x00RRGGBB image without acquiring a client buffer.
+    /// False leaves presentation and buffer history unchanged.
+    fn present_solid(&mut self, _color: u32) -> Result<bool, SoftBufferError> {
+        Ok(false)
+    }
     /// Get a mutable reference to the buffer.
     fn buffer_mut(&mut self) -> Result<Self::Buffer<'_>, SoftBufferError>;
     /// Fetch the buffer from the window.
