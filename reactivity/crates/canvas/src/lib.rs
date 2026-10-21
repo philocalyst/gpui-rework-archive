@@ -31,3 +31,6 @@ impl std::fmt::Display for Error {
     }
 }
 impl std::error::Error for Error {}
+
+#[cfg(feature = "parallel")]
+pub use canvas::{ParallelError, RenderPool};
