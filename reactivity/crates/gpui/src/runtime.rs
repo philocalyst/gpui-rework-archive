@@ -524,6 +524,8 @@ struct Node {
 }
 #[cfg(test)]
 mod style_ledger;
+#[cfg(test)]
+mod space_ledger;
 impl Node {
     #[inline]
     fn identity(&self) -> u64 {

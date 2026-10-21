@@ -7,20 +7,20 @@ mod graphics;
     feature = "accessibility",
     all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))
 ))]
-use crate::native::test_library as library;
+pub(super) use crate::native::test_library as library;
 #[cfg(not(any(
     feature = "accessibility",
     all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))
 )))]
 #[path = "../../examples/support/library.rs"]
-mod library;
+pub(super) mod library;
 #[cfg(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal")))]
-use crate::native::test_todos as todos;
+pub(super) use crate::native::test_todos as todos;
 #[cfg(not(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))))]
 #[path = "../../examples/support/todos.rs"]
-mod todos;
+pub(super) mod todos;
 #[path = "../../examples/support/workspace.rs"]
-mod workspace;
+pub(super) mod workspace;
 
 fn style_key(style: Style, transform: bool) -> [u32; 24] {
     let mut key = [0; 24];
