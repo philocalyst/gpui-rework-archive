@@ -1,6 +1,350 @@
-   Compiling gpui_reactivity_host v0.1.0 (/root/gpui-ce3/reactivity/crates/host)
-   Compiling reactivity-api-lab v0.1.0 (/root/gpui-ce3/reactivity/crates/api-lab)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+   Compiling wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+   Compiling gpui_presenter_tests v0.1.0 (/root/gpui-ce3/reactivity/crates/presenter-tests)
+   Compiling wgpu-core-deps-windows-linux-android v29.0.4
+   Compiling wgpu-core v29.0.4
+   Compiling wgpu v29.0.4
+   Compiling gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.86s
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui-5a5ef06864d0e53f)
+
+running 43 tests
+test component::tests::component_storage_ledger_has_no_owning_model_pointer ... ok
+test element::tests::concrete_branches_opaque_leaves_and_constructor_children_lower ... ok
+test element::tests::method_items_keep_zero_sized_callback_and_receiver_check ... ok
+test element::tests::size_ledger_counts_inline_route_and_style_costs ... ok
+test element::tests::input_role_and_literal_style_reach_the_same_draft ... ok
+test element::tests::typed_field_routes_validate_projection_before_exact_admission ... ok
+test element::tests::unlowered_handler_payloads_drop_once_in_preorder ... ok
+test identity::tests::target_stamps_are_pure_and_window_qualified ... ok
+test property::tests::catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned ... ok
+test property::tests::all_typed_selectors_and_the_erased_seam_edit_the_same_style ... ok
+test property::tests::contribution_presence_survives_destination_equality_and_auto_is_explicit ... ok
+test property::tests::independent_overrides_survive_base_changes_and_lifecycle_purge ... ok
+test property::tests::invalid_typed_and_erased_edits_leave_all_fields_unchanged ... ok
+test property::tests::sparse_overrides_preserve_explicit_auto_and_reveal_updated_base_on_reset ... ok
+test property::tests::rejected_override_changes_neither_existing_bases_nor_any_contribution ... ok
+test source::component_tests::namespace_exhaustion_is_checked_before_a_component_is_registered ... ok
+test source::component_tests::component_schemas_reject_duplicate_names_ids_and_cross_scope_source_aliases ... ok
+test runtime::tests::rectangle_windows_do_not_initialize_font_services ... ok
+test runtime::tests::native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels ... ok
+test source::tests::bound_key_survives_moving_the_entire_model ... ok
+test source::tests::domain_sources_register_resolve_and_edit_without_text_support ... ok
+test source::tests::duplicate_names_and_ids_are_rejected ... ok
+test source::tests::every_supported_scalar_formats_and_floats_validate ... ok
+test source::tests::exact_action_edits_only_its_value_and_requires_registered_projection ... ok
+test source::tests::mismatched_read_write_paths_fail_before_a_value_mutates ... ok
+test source::tests::owner_dependency_is_the_default_and_direct_ports_are_explicit ... ok
+test source::tests::parse_failure_returns_payload_and_preserves_value_and_revision ... ok
+test source::tests::replacement_revision_equality_requires_owner_boundary_value_comparison ... ok
+test source::tests::string_edits_transfer_the_owned_input_allocation ... ok
+test source::tests::same_typed_fields_bind_by_projection_not_equal_value ... ok
+test source::tests::unchanged_borrowed_strings_are_zero_copy ... ok
+test source::tests::unknown_key_returns_unchanged_payload ... ok
+test source::tests::binding_and_scanning_read_each_field_once_exact_edits_read_only_the_target ... ok
+test source::tests::aliased_fields_are_ambiguous_even_when_keys_differ ... ok
+test style::tests::literals_validate_after_conversion ... ok
+test source::tests::a_text_operand_supplies_the_codec_and_wrong_codecs_cannot_edit ... ok
+test source::component_tests::scoped_scan_and_revision_preserve_local_ids_without_namespace_collision ... ok
+test source::tests::scan_reports_all_registered_field_revisions ... ok
+test runtime::tests::software_surface_rendering_keeps_the_native_runtime_free_of_cpu_image_storage ... ok
+test runtime::tests::an_unchanged_borrowed_string_keeps_its_retained_allocation ... ok
+test runtime::tests::the_last_text_service_is_released_after_a_text_free_sheet_commits ... ok
+test element::tests::wide_description_preserves_order ... ok
+test element::tests::adversarial_depth_drop_and_lowering_fit_a_small_stack ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/acceptance.rs (reactivity/target/debug/deps/acceptance-5502fc2465baf341)
+
+running 6 tests
+test output_color_configuration_reaches_the_real_pixel_surface ... ok
+test ordinary_rust_branches_react_with_the_default_source_registration ... ok
+test unkeyed_child_run_changes_revoke_targets_instead_of_retargeting_them ... ok
+test presentation_failure_preserves_source_edits_and_the_previous_complete_image ... ok
+test typed_actions_use_real_input_and_pixels_without_redescribing_the_owner ... ok
+test restoration_preserves_source_values_and_remints_dispatch_authority ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/application.rs (reactivity/target/debug/deps/application-e89154b562a8d490)
+
+running 2 tests
+test callback_panics_quarantine_the_owner_and_explicit_close_releases_it_once ... ok
+test typed_windows_use_exclusive_production_owners_and_the_same_input_barrier ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/components.rs (reactivity/target/debug/deps/components-d0479f1a7403021c)
+
+running 10 tests
+test registration_checks_exclusive_projection_before_describing_the_owner ... ok
+test read_only_boundaries_also_check_the_registered_projector_not_only_the_id ... ok
+test panicking_component_projectors_follow_the_owner_quarantine_boundary ... ok
+test default_registration_refreshes_parent_snapshots_even_when_the_child_field_is_direct ... ok
+test visual_parentage_does_not_infer_model_ownership_or_exclusive_access ... ok
+test an_action_with_a_bad_component_writer_is_checked_before_mutation_or_epoch_admission ... ok
+test nested_component_roots_qualify_reused_ids_and_compose_typed_route_authority ... ok
+test identical_component_types_dispatch_methods_actions_and_editable_ports_to_their_own_state ... ok
+test changing_component_owners_at_equal_ordinals_revokes_old_targets ... ok
+test moving_and_restoring_models_preserves_state_and_remints_target_authority ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests/dpi.rs (reactivity/target/debug/deps/dpi-82f9fe1c3e149bf6)
+
+running 6 tests
+test invalid_density_is_rejected_before_requested_geometry_or_authority_changes ... ok
+test changing_density_at_equal_size_requires_ack_without_rerunning_view_or_changing_targets ... ok
+test layout_units_transform_once_into_matching_physical_pixels_and_hits ... ok
+test failed_physical_font_admission_keeps_the_old_sheet_and_recovers_at_old_density ... ok
+test runtime_uses_physical_font_masks_while_layout_and_shaping_stay_logical ... ok
+test physical_viewport_constraints_are_divided_by_density_before_text_wrapping ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/focus.rs (reactivity/target/debug/deps/focus-cd87456fa756e4ee)
+
+running 9 tests
+test logical_description_failure_revokes_focus_and_recovery_does_not_revive_the_old_target ... ok
+test keyboard_checked_route_rejection_keeps_owner_and_focus_without_advancing_source ... ok
+test focus_navigation_has_no_allocations_or_render_work ... ok
+test tab_waits_for_acknowledged_sheet_and_position_free_editing_repairs_failed_text ... ok
+test focus_revokes_on_removal_ineligibility_fault_and_close ... ok
+test focus_changes_are_idle_and_invalid_targets_do_not_replace_focus ... ok
+test click_focus_uses_geometry_while_explicit_focus_and_activation_are_position_free ... ok
+test reusable_components_share_keyboard_barriers_and_keep_independent_state ... ok
+test todos_keyboard_navigation_edits_unicode_and_activates_real_actions ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+
+     Running tests/identity_recovery.rs (reactivity/target/debug/deps/identity_recovery-b752b459c1a4c675)
+
+running 1 test
+test checked_description_failure_permanently_retires_pre_failure_target_stamps ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/inspector.rs (reactivity/target/debug/deps/inspector-d1283ef5aa15b508)
+
+running 3 tests
+test typed_inspection_preserves_presence_and_reveals_updated_component_defaults ... ok
+test invalid_and_foreign_inspector_edits_fail_before_source_admission ... ok
+test paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/ports.rs (reactivity/target/debug/deps/ports-62d2b44add840398)
+
+running 3 tests
+test component_graphics_port_reuses_layout_for_geometry_and_color_updates ... ok
+test tutorial_port_uses_the_ordinary_input_and_serialization_interface ... ok
+test complete_application_views_compose_without_rewriting_their_state_or_routes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s
+
+     Running tests/presentation.rs (reactivity/target/debug/deps/presentation-8d4c025981cff04a)
+
+running 9 tests
+test reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source ... ok
+test surface_loss_revokes_coordinates_until_current_scene_is_presented_again ... ok
+test resize_keeps_targets_and_source_epoch_but_requires_new_geometry_ack ... ok
+test tokens_reject_foreign_namespaces_and_replaced_candidates ... ok
+test pending_coherent_sheet_survives_newer_preparation_failure_and_can_be_acknowledged ... ok
+test unseen_visual_candidates_block_coordinate_routing_even_after_noop_edits ... ok
+test headless_keeps_automatic_presentation_and_resize_behavior ... ok
+test initial_recording_has_no_input_authority_until_actual_acknowledgement ... ok
+test software_surface_rendering_returns_the_exact_unacknowledged_scene_token ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/queries.rs (reactivity/target/debug/deps/queries-86b4a0d45f41b0af)
+
+running 2 tests
+test query_reads_the_acknowledged_sheet_while_source_edits_wait_for_repair ... ok
+test semantic_queries_use_presented_roles_and_bounds_without_diagnostic_snapshots ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/runtime.rs (reactivity/target/debug/deps/runtime-7c704a7d670c7fe0)
+
+running 15 tests
+test an_old_values_destructor_panic_reports_consumed_ownership_without_rollback ... ok
+test rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry ... ok
+test poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads ... ok
+test wide_ancestor_products_recover_before_admitting_a_visible_primitive ... ok
+test a_transparent_sites_handler_presence_publishes_new_hit_eligibility ... ok
+test input_edits_use_the_registered_string_source_and_share_the_fanout ... ok
+test rotated_button_hit_uses_the_exact_painted_matrix_not_its_aabb ... ok
+test handler_panics_poison_and_revoke_without_claiming_rollback ... ok
+test a_non_text_non_clone_domain_action_uses_the_production_dispatcher ... ok
+test direct_fanout_reads_once_and_promotes_one_shared_text_payload ... ok
+test a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning ... ok
+test arbitrary_methods_refresh_plain_fields_and_equal_revision_signal_replacement ... ok
+test targets_survive_preorder_shifts_in_an_unrelated_sibling_subtree ... ok
+test committed_sets_report_the_actual_epochs_without_returning_a_consumed_value ... ok
+test a_rejected_partial_scene_keeps_the_same_output_buffer_and_complete_sheet ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_canvas-07de7ab6fa36dec2)
+
+running 10 tests
+test canvas::scaled_mask_tests::normalized_mask_obeys_half_open_local_edges_before_texel_rounding ... ok
+test color::half_tests::authored_color_keeps_twenty_byte_provenance_header ... ok
+test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release
+test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture
+test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
+test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
+test color::quantizer_tests::quantizer_matches_reference_at_all_thresholds_and_bucket_edges ... ok
+test color::half_tests::every_finite_half_roundtrips_including_signed_zero ... ok
+test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... ok
+test color::half_tests::every_adjacent_half_midpoint_rounds_ties_even_on_both_sides ... ok
+
+test result: ok. 8 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/color.rs (reactivity/target/debug/deps/color-f1486ef872f7c1a8)
+
+running 6 tests
+test invalid_color_values_and_configuration_are_rejected ... ok
+test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
+test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
+test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
+test final_mapping_occurs_after_extended_linear_composition ... ok
+test tone_mapping_is_selected_not_implicit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/dpi.rs (reactivity/target/debug/deps/dpi-e78fd81721975be5)
+
+running 3 tests
+test invalid_density_and_physical_font_size_reject_even_empty_layouts_atomically ... ok
+test density_one_preserves_existing_pixels_and_fractional_density_uses_physical_raster_keys ... ok
+test two_x_density_uses_real_physical_masks_and_matches_physical_font_rendering ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/external.rs (reactivity/target/debug/deps/external-bfd76ccd51c0810c)
+
+running 2 tests
+test invalid_external_targets_leave_buffer_and_scene_untouched ... ok
+test external_native_words_match_rgba_and_preserve_lazy_image_coherence ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/font_quality.rs (reactivity/target/debug/deps/font_quality-a0b69918c94ef14b)
+
+running 3 tests
+test immutable_font_admission_has_no_eager_outline_heap ... ok
+test empty_glyphs_do_not_create_masks_and_clearing_cache_preserves_scene_leases ... ok
+test requested_outline_masks_have_real_coverage_and_preserve_placement ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/font_sharing.rs (reactivity/target/debug/deps/font_sharing-90110151d42fb679)
+
+running 3 tests
+test live_services_measurement ... ignored, RSS/timing measurement; GPUI_FONT_SERVICES=1,2,8 in separate processes
+test supplied_font_bytes_are_owned_once_by_the_shared_face ... ok
+test shared_face_accepts_cross_service_layouts_but_caches_are_independent ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/grouped.rs (reactivity/target/debug/deps/grouped-fdc13d57230d1025)
+
+running 2 tests
+test groups_are_the_same_canonical_painter_sequence_in_both_directions ... ok
+test masks_are_leased_once_per_stable_key_across_runs_cache_eviction_and_services ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/hdr.rs (reactivity/target/debug/deps/hdr-363b4d56bdc4df76)
+
+running 6 tests
+test byte_counts_and_checked_configuration_are_format_specific ... ok
+test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
+test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
+test extended_values_compose_before_finite_storage_saturation ... ok
+test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
+test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/oklch.rs (reactivity/target/debug/deps/oklch-d1590f822910fb6a)
+
+running 5 tests
+test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
+test invalid_ranges_and_out_of_working_range_are_rejected ... ok
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
+test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
+test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/parallel.rs (reactivity/target/debug/deps/parallel-66146f9c9c95fd43)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/prepared_scene.rs (reactivity/target/debug/deps/prepared_scene-fa04af55ebdaecd7)
+
+running 3 tests
+test recording_canvas_allocates_sole_cpu_image_only_on_request ... ok
+test canonical_scene_is_ordered_borrowed_and_does_not_rasterize ... ok
+test raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/render.rs (reactivity/target/debug/deps/render-e5a7cff24a0103cc)
+
+running 10 tests
+test correlated_edges_are_composited_before_sample_average ... ok
+test linear_light_alpha_and_premultiplied_output ... ok
+test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
+test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
+test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
+test wrapped_runs_keep_utf8_clusters_and_reshape_lines ... ok
+test real_shaping_ligatures_unicode_measure_and_paint_are_stable ... ok
+test swash_native_pixels_and_transformed_cells_match_independent_oracles ... ok
+test invalid_inputs_and_caps_do_not_corrupt_scene ... ok
+test transformed_rectangles_match_exhaustive_sample_oracle ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.08s
+
+     Running tests/shaping.rs (reactivity/target/debug/deps/shaping-3a3d4b5fe591d0b9)
+
+running 2 tests
+test batch_parses_once_and_releases_tables_without_an_idle_cache ... ok
+test borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/solid.rs (reactivity/target/debug/deps/solid-99afd2671d2cf69c)
+
+running 3 tests
+test public_scene_metadata_edits_cannot_certify_invalid_content ... ok
+test unsupported_and_nonempty_scenes_use_normal_renderer ... ok
+test solid_certificate_uses_exact_output_quantizer_without_rendering_or_allocating ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_gpu-132061169bb358a5)
+
+running 6 tests
+test renderer::tests::precision_admission_rejects_finite_but_overflowing_intermediates ... ok
+test renderer::tests::word_writers_preserve_float_and_metadata_bits ... ok
+test shader::ui::__validate_wgsl ... ok
+test renderer::tests::storage_records_match_shader_stride_and_offsets ... ok
+test shader::tests::generated_shader_validates ... ok
+test renderer::tests::certificates_imply_sample_membership_in_both_numeric_domains ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running ../../vendor/wgpu-hal/tests/apple_layers.rs (reactivity/target/debug/deps/apple_metal_layers-36ce6326588f6add)
+apple_layers requires macOS; no platform assertion ran
+     Running ../../vendor/softbuffer/tests/apple_layers.rs (reactivity/target/debug/deps/apple_software_layers-0eff3af13f97d483)
+apple_layers requires macOS; no platform assertion ran
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_algebra_lab-19c14d9c128bc440)
 
 running 0 tests
@@ -23,13 +367,13 @@ test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 7 tests
 test cache_range_tag_uses_no_additional_per_node_word ... ok
 test cancellation_can_change_a_query_without_a_model_mutation ... ok
-test foreign_arenas_fail_before_any_represented_edge_or_value_changes ... ok
 test numeric_range_is_diagnosed_instead_of_aliasing_singular_or_identity ... ok
+test foreign_arenas_fail_before_any_represented_edge_or_value_changes ... ok
 test ordered_products_collapse_and_recover_without_matrix_inversion ... ok
 test hundred_thousand_deep_first_access_and_drop_use_no_recursive_stack ... ok
 test randomized_local_edit_cut_link_reparent_and_query_match_independent_parentwalk ... ok
 
-test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
 
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_core-0ae37a8afdec6acc)
 
@@ -41,10 +385,12 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
      Running tests/layout.rs (reactivity/target/debug/deps/layout-a1255c1bee5db6be)
 
-running 10 tests
+running 12 tests
 test calc_program_validation_and_parent_viewport_dependencies ... ok
+test borrowed_measurement_panic_poisoning_ends_the_service_borrow ... ok
 test measurement_panic_poisoning_prevents_reusing_partial_layout ... ok
 test explicit_measure_invalidation_and_removal_keep_cache_correct ... ok
+test measured_content_service_is_borrowed_per_compute_and_invalidates_explicitly ... ok
 test idle_identical_styles_and_bad_capabilities_do_no_compute ... ok
 test remove_queued_nodes_reuse_slots_reparent_depth_and_switch_roots ... ok
 test retained_queries_reuse_clean_sibling_caches ... ok
@@ -53,7 +399,7 @@ test real_flex_block_and_grid_layout_match_cold ... ok
 test cheap_leaf_forest_has_no_cache_boxes_and_styles_are_released ... ok
 test randomized_lifecycle_and_viewport_edits_match_fresh_cephal_trees ... ok
 
-test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
 
      Running tests/spatial.rs (reactivity/target/debug/deps/spatial-fe446bc5109b4083)
 
@@ -61,8 +407,8 @@ running 12 tests
 test coordinate_model_handles_reflection_shear_nonfinite_and_overflow ... ok
 test invalid_foreign_and_noop_mutations_do_zero_work ... ok
 test rotated_hit_uses_inverse_and_transformed_ancestor_clips ... ok
-test sub_ulp_extents_at_tile_boundaries_remain_damaged_and_hittable ... ok
 test sparse_record_swap_remove_and_slot_reuse_preserve_survivors ... ok
+test sub_ulp_extents_at_tile_boundaries_remain_damaged_and_hittable ... ok
 test unrepresentable_forward_bounds_damage_viewport_and_tiny_inverse_stays_hittable ... ok
 test wide_ancestor_composition_does_not_erase_recoverable_geometry ... ok
 test nested_geometry_reparent_damage_clip_and_singular_transition ... ok
@@ -71,7 +417,7 @@ test sparse_damage_is_bounded_and_covers_fractional_edges ... ok
 test deep_hit_queries_are_linear_and_rejected_clips_prune_descendants ... ok
 test randomized_spatial_mutations_match_from_scratch_coordinates_and_damage ... ok
 
-test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
 
      Running tests/tree_oracle.rs (reactivity/target/debug/deps/tree_oracle-090a28bbf51a8da4)
 
@@ -80,7 +426,7 @@ test arena_identity_stale_ids_and_failure_atomicity ... ok
 test deep_tree_streaming_removal_and_drop ... ok
 test randomized_edits_match_independent_adjacency_oracle ... ok
 
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
 
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_coverage_lab-e70d51c40f745e68)
 
@@ -98,7 +444,7 @@ test randomized_shear_nonuniform_reflection_and_fractional_tiles ... ok
 test exhaustive_dyadic_certificates_have_no_false_inside_or_outside ... ok
 test independent_exhaustive_subpixel_compositing_matches_both_planners ... ok
 
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.61s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.71s
 
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_host-668f77cbc6e1dad8)
 
@@ -115,31 +461,31 @@ test concurrent_producers_signal_once_and_can_rearm_during_drain ... ok
 
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_ownership_lab-102a2709f940a988)
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_ownership_lab-be63580a6aefa390)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/loom_protocol.rs (reactivity/target/debug/deps/loom_protocol-a39b93ef36cac1f9)
+     Running tests/loom_protocol.rs (reactivity/target/debug/deps/loom_protocol-2e2ebe374308d3ac)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/public.rs (reactivity/target/debug/deps/public-03e32bd8e4806337)
+     Running tests/public.rs (reactivity/target/debug/deps/public-1c2d48f7e150f255)
 
 running 6 tests
 test endpoint_shutdown_or_live_read_lease_drops_each_payload_exactly_once ... ok
-test invalid_drain_budget_never_overwrites_an_outstanding_read_lease ... ok
 test full_and_partial_drains_preserve_owned_payload_fifo_and_rearm ... ok
+test invalid_drain_budget_never_overwrites_an_outstanding_read_lease ... ok
 test observed_receiver_shutdown_returns_the_owned_page_instead_of_admitting_it ... ok
 test serial_and_scoped_pages_match_exactly_including_extreme_coordinates_and_damage ... ok
 test real_cross_thread_roundtrip_reuses_one_box_for_all_frames ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_state-72435ae97d28abf8)
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_state-2788290e3bdb30c5)
 
 running 2 tests
 test request::tests::exhausted_tickets_retire_instead_of_revalidating_old_work ... ok
@@ -147,14 +493,14 @@ test signal::tests::exhaustion_never_exposes_an_unmarked_mutable_borrow ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/protocol.rs (reactivity/target/debug/deps/protocol-c6df54d7d39a2ba6)
+     Running tests/protocol.rs (reactivity/target/debug/deps/protocol-fb3349aefe2c133a)
 
 running 13 tests
 test a_b_a_completions_match_exact_tickets_and_are_accepted_once ... ok
+test draft_panics_before_publication_leave_owned_snapshots_unchanged ... ok
+test logical_and_presentation_failures_preserve_their_respective_committed_epochs ... ok
 test handoff_is_fifo_bounded_and_retries_preserve_owned_payloads ... ok
 test manual_field_descriptor_provides_typed_reads_overrides_and_impact_metadata ... ok
-test logical_and_presentation_failures_preserve_their_respective_committed_epochs ... ok
-test draft_panics_before_publication_leave_owned_snapshots_unchanged ... ok
 test ordinary_application_fields_are_inline_and_shared_reads_do_not_mark ... ok
 test owner_revocation_drop_and_remount_reject_old_work ... ok
 test payloads_move_once_and_effects_only_run_when_the_application_drains ... ok
@@ -165,6 +511,16 @@ test unwinding_during_a_mutable_edit_still_leaves_a_visible_hint ... ok
 test worker_completion_carries_owned_stamp_without_a_borrow_into_ui_storage ... ok
 
 test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/serde.rs (reactivity/target/debug/deps/serde-0aa078a2628470c2)
+
+running 4 tests
+test deserialization_accepts_inner_values_borrowing_the_input ... ok
+test invalid_values_preserve_the_inner_deserializers_error ... ok
+test owned_strings_and_nonclone_values_roundtrip_without_runtime_stamps ... ok
+test persistence_keeps_only_the_value_and_restores_a_fresh_revision ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
      Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_reactivity_template_lab-a78e39912c36374a)
 
@@ -183,7 +539,25 @@ test immutable_deep_topology_uses_no_recursive_ownership ... ok
 test randomized_all_storage_strategies_match_dense_value_oracle ... ok
 test succinct_navigation_matches_independent_explicit_trees ... ok
 
-test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui_retained-ce7118d386210595)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/checkpoint.rs (reactivity/target/debug/deps/checkpoint-812a58ed323cd0dd)
+
+running 6 tests
+test direct_copy_uses_exact_bytes_and_charges_the_complete_immutable_base ... ok
+test output_and_input_admission_errors_do_not_partially_publish ... ok
+test malformed_directories_runs_headers_and_external_copy_are_rejected ... ok
+test modes_and_partial_edges_match_raw_oracle_with_hidden_transparent_rgb ... ok
+test encoding_has_no_per_tile_allocation_and_parsing_and_decoding_allocate_nothing ... ok
+test mutated_untrusted_streams_never_panic_or_write_outside_exact_output ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
 
      Running unittests src/lib.rs (reactivity/target/debug/deps/reactivity_api_lab-2ee0e033c50d67b9)
 
@@ -199,8 +573,8 @@ running 6 tests
 test actual_constructor_syntax_lowers_to_owned_preorder ... ok
 test equal_text_keeps_its_owned_buffer_and_changed_text_copies_once ... ok
 test independent_nested_descriptions_are_safe_to_combine ... ok
-test plain_scalar_changes_and_branch_shape_shrinks ... ok
 test static_elements_shorten_and_descriptions_can_outlive_an_unrelated_turn ... ok
+test plain_scalar_changes_and_branch_shape_shrinks ... ok
 test bounded_deep_and_wide_shapes_lower_in_preorder ... ok
 
 test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
@@ -210,7 +584,36 @@ test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 running 1 test
 test rejected_programs_fail_for_the_intended_reason ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+   Doc-tests gpui
+
+running 10 tests
+test crates/gpui/src/runtime.rs - runtime::Win (line 347) - compile fail ... ok
+test crates/gpui/src/component.rs - component::Component<P,C>::view (line 63) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::Win (line 355) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::PresentationToken (line 130) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::PresentationToken (line 135) - compile fail ... ok
+test crates/gpui/src/runtime/query.rs - runtime::query::Part (line 9) - compile fail ... ok
+test crates/gpui/src/element.rs - element::text_input (line 406) - compile fail ... ok
+test crates/gpui/src/element.rs - element::text_input (line 411) - compile fail ... ok
+test crates/gpui/src/property.rs - property::Property (line 88) - compile fail ... ok
+test crates/gpui/src/property.rs - property::Property (line 93) - compile fail ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests gpui_canvas
+
+running 1 test
+test crates/canvas/src/canvas.rs - canvas::CanvasScene (line 1328) - compile fail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Doc-tests gpui_gpu
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests gpui_reactivity_algebra_lab
 
@@ -246,19 +649,25 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    Doc-tests gpui_reactivity_state
 
 running 2 tests
-test crates/state/src/signal.rs - signal::Signal (line 27) ... ok
 test crates/state/src/handoff.rs - handoff::Handoff (line 21) ... ok
+test crates/state/src/signal.rs - signal::Signal (line 31) ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
 
 running 1 test
-test crates/state/src/signal.rs - signal::Signal (line 36) - compile fail ... ok
+test crates/state/src/signal.rs - signal::Signal (line 40) - compile fail ... ok
 
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
 
 all doctests ran in 0.22s; merged doctests compilation took 0.19s
    Doc-tests gpui_reactivity_template_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests gpui_retained
 
 running 0 tests
 

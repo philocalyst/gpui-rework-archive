@@ -506,8 +506,8 @@ The existing `scene.draws()` remains an exact-size double-ended flattened view.
 `placements()` exposes only local geometry, device bounds and mask borrow.
 `scene.masks()` traverses unique leases. A backend can upload common state once
 per group, rather than reconstructing per-glyph matrix/paint records. Existing
-GPU code still consumes the flat view; GPU record/upload reduction is a separate
-integration, not a result claimed here. The `scene.storage()` ledger reports
+The GPU now consumes grouped views directly; its packet/storage measurements are
+reported in [the GPU crate](../gpu/README.md). The `scene.storage()` ledger reports
 exact Vec capacity bytes and resource-index entry/capacity counts, deliberately
 not an invented byte size for opaque HashMap bucket/control allocation.
 
@@ -541,8 +541,8 @@ it is not a stable library ABI. Display-list header280 is already inside
 Canvas544, not an additional allocation. `group_views` compares flat/grouped
 iteration over the same data; one run took47.5/63.0 µs for32k draws. Grouping
 therefore does not promise faster CPU traversal. Its backend advantage is the
-shared common state and fewer retained resource leases, pending actual upload
-integration and end-to-end measurement.
+shared common state and fewer retained resource leases. The GPU integration
+reduces packet bytes with neutral/slightly slower measured frame times.
 
 The complete CPU compositor was also tested in three alternating process pairs
 ([frame CSV](evidence-retained-frames.csv)). Text remains essentially neutral:

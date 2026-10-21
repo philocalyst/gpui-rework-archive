@@ -1,6 +1,6 @@
 {
   "method": "Physical Rust lines including comments, blanks and embedded tests. Library means src/, not production acceptance. Counts on-disk first-party crates/ and vendor/; excludes target/ and archived original design examples under docs/inputs/.",
-  "source_code_head": "b34be006161df5c086d374b4e00781bff11510c2",
+  "source_code_head": "c4dec852239bec4f6e7dcf404f756cb5d1f49662",
   "crates": {
     "algebra-lab": {
       "examples": 826,
@@ -11,15 +11,30 @@
       "library": 379,
       "tests": 323
     },
+    "canvas": {
+      "examples": 557,
+      "library": 3153,
+      "tests": 2364
+    },
     "core": {
       "examples": 117,
-      "library": 1775,
-      "tests": 1105
+      "library": 1805,
+      "tests": 1178
     },
     "coverage-lab": {
       "examples": 186,
       "library": 854,
       "tests": 416
+    },
+    "gpu": {
+      "examples": 300,
+      "library": 1477,
+      "tests": 822
+    },
+    "gpui": {
+      "examples": 454,
+      "library": 7058,
+      "tests": 2669
     },
     "host": {
       "library": 210,
@@ -30,9 +45,14 @@
       "library": 396,
       "tests": 509
     },
-    "state": {
-      "library": 602,
+    "retained": {
+      "examples": 120,
+      "library": 549,
       "tests": 325
+    },
+    "state": {
+      "library": 620,
+      "tests": 400
     },
     "template-lab": {
       "examples": 263,
@@ -41,13 +61,21 @@
     }
   },
   "vendor": {
-    "winit": {
-      "rust_files": 174,
-      "physical_lines": 59252
-    },
     "cephal": {
       "rust_files": 78,
       "physical_lines": 15317
+    },
+    "softbuffer": {
+      "rust_files": 17,
+      "physical_lines": 5155
+    },
+    "wgpu-hal": {
+      "rust_files": 71,
+      "physical_lines": 51555
+    },
+    "winit": {
+      "rust_files": 174,
+      "physical_lines": 59252
     }
   }
 }

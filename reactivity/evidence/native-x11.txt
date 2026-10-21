@@ -1,0 +1,88 @@
+   Compiling wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+   Compiling wgpu-core-deps-windows-linux-android v29.0.4
+   Compiling wgpu-core v29.0.4
+   Compiling wgpu v29.0.4
+   Compiling gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.08s
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui-7f32eb0985a300c7)
+
+running 1 test
+test native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection ... GPUI_SOLID_MEMORY,initial_solid,0,0,0
+GPUI_SOLID_MEMORY,normal_buffer,2097152,1876,938
+GPUI_SOLID_MEMORY,solid_after_buffer,0,0,0
+GPUI_SOLID_MEMORY,native_redraw,0,0,0
+GPUI_SOLID_MEMORY,resized,0,0,0
+GPUI_SOLID_MEMORY,resumed,0,0,0
+native GPU port: Stats { submissions: 6, draws: 58, tile_references: 319, original_tile_references: 353, skipped_tile_references: 34, uniform_tiles: 34, sample_evaluations: 700416, sample_draw_evaluations: 1306624, instance_upload_bytes: 13980, draw_record_bytes: 3024, shared_groups: 9, compact_draws: 51, inline_draws: 7, mask_upload_bytes: 0, gpu_buffer_bytes: 22608, atlas_bytes: 65536, atlas_keys: 31, atlas_key_capacity: 56, cpu_index_capacity_bytes: 20600, correction_records: 1, correction_key_capacity: 0 }
+Auto rejected actual CPU adapter before requesting a device/pipeline
+native GPU port: Stats { submissions: 1, draws: 72, tile_references: 381, original_tile_references: 399, skipped_tile_references: 18, uniform_tiles: 18, sample_evaluations: 765952, sample_draw_evaluations: 1560576, instance_upload_bytes: 14756, draw_record_bytes: 3552, shared_groups: 10, compact_draws: 65, inline_draws: 7, mask_upload_bytes: 3638, gpu_buffer_bytes: 22608, atlas_bytes: 65536, atlas_keys: 33, atlas_key_capacity: 56, cpu_index_capacity_bytes: 19604, correction_records: 1, correction_key_capacity: 0 }
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 44 filtered out; finished in 6.21s
+
+     Running tests/acceptance.rs (reactivity/target/debug/deps/acceptance-052c77e2abf9eb1e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/application.rs (reactivity/target/debug/deps/application-a981dde85b6290a1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/components.rs (reactivity/target/debug/deps/components-3e63e3281b9006a3)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+     Running tests/dpi.rs (reactivity/target/debug/deps/dpi-9266926ee6ecd3fa)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/focus.rs (reactivity/target/debug/deps/focus-96d538ab8f8fe701)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/identity_recovery.rs (reactivity/target/debug/deps/identity_recovery-f138bfc60c1a2ad1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/inspector.rs (reactivity/target/debug/deps/inspector-2da3d576bbd17a1e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/ports.rs (reactivity/target/debug/deps/ports-bc15681568b92e3a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/presentation.rs (reactivity/target/debug/deps/presentation-4e3ed137967c18ca)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/queries.rs (reactivity/target/debug/deps/queries-e10be06ddb12df55)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/runtime.rs (reactivity/target/debug/deps/runtime-d6a25fbc2dafa09d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s

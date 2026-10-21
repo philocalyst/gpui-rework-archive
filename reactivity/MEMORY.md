@@ -11,6 +11,22 @@ The [platform research](docs/research-platform.md) pins source/contracts;
 This is the selected accounting and experiment policy, not a measured claim of
 near-zero native-window memory.
 
+The current production cut implements software-first native startup, lazy font
+rasterization and scoped borrowed shaping tables. It never loads a GPU driver in
+explicit CPU mode; Auto also avoids probing on a device-less Linux host. The
+canonical display list factors transform, clip and paint out of text placements,
+and its GPU consumer uploads that grouped form directly. Each scene leases a
+unique mask once, looking up its complete resource key before raster-cache access;
+repeated placements perform no resource refcount operations. Mutable window state
+has one exclusive owner, with no Rc/RefCell/Cell wrapper or target allocation table.
+
+Certified zero-command solid frames on X11 go further: a checked server fill
+needs no client transport pixels. Returning from a normal frame waits for actual
+server completion before detaching/releasing its mapping. This removes a client
+allocation, not the server's window or compositor backing. Other platforms retain
+their normal CPU fallback. [Current scope and evidence](STATUS.md) distinguishes
+these implemented savings from the more general policies below.
+
 ## Four ledgers and one lifetime graph
 
 | Ledger | Required quantities | Common hidden term |

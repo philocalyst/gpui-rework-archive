@@ -2,7 +2,7 @@
 //! letting Rust's test harness put NSView creation on arbitrary worker threads.
 #[cfg(target_os = "macos")]
 fn main() {
-    use objc2::{class, msg_send, rc::Retained, runtime::Bool, MainThreadMarker};
+    use objc2::{MainThreadMarker, class, msg_send, rc::Retained, runtime::Bool};
     use objc2_foundation::NSObject;
     use objc2_quartz_core::CALayer;
     use raw_window_handle::{

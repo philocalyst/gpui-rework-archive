@@ -54,9 +54,12 @@ def working_counts():
         entry = crates.setdefault(parts[0], {})
         entry[group] = entry.get(group, 0) + len(path.read_text().splitlines())
     vendors = {}
-    for name in ("winit", "cephal"):
-        paths = list((root / "vendor" / name).rglob("*.rs"))
-        vendors[name] = {"rust_files": len(paths), "physical_lines": sum(
+    for directory in sorted((root / "vendor").iterdir()):
+        if not directory.is_dir():
+            continue
+        paths = [path for path in directory.rglob("*.rs")
+                 if "target" not in path.relative_to(directory).parts]
+        vendors[directory.name] = {"rust_files": len(paths), "physical_lines": sum(
             len(path.read_text().splitlines()) for path in paths)}
     return {
         "method": "Physical Rust lines including comments, blanks and embedded tests. Library means src/, not production acceptance. Counts on-disk first-party crates/ and vendor/; excludes target/ and archived original design examples under docs/inputs/.",

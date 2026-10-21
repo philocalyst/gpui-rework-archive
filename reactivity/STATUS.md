@@ -1,172 +1,94 @@
 # Implementation and evidence
 
-The clean-room workspace now includes a connected application implementation.
-Start at [crates/gpui/README.md](crates/gpui/README.md), rather than treating the
-initial design-only snapshot below as its current executable scope.
+The clean-room workspace runs real applications through one exclusively owned
+runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
+describe the intended complete system; this page records what is connected now.
 
-| Integrated boundary | Executable behavior | Remaining limit |
+| Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
-| `gpui` | Borrowed `View`, inline `Signal`, typed owner-relative sources/actions, exact text fanout, public input/serialization, generational Targets | One serial root owner; conservative ordinary-Rust re-description; no integrated complete async graph |
-| properties/inspector | Typed sealed selectors, common reflection catalog, sparse Set/Inherit overrides, transformed hit/paint through one geometry kernel | Full native inspector UI, theme cascade and keyed collection policies remain |
-| layout/text | Borrowed content measurement with Cephal, real Rustybuzz shaping, logical layout and physical-density glyph masks | Existing script/text-editing limits; no complete selection/IME/fallback stack |
-| `gpui_canvas` | Real ordered linear-light composition, 4×4 correlated samples, conservative tile proofs, one optional CPU image, safe external native BGRX output, optional disjoint parallel bands | Retained command representation is still being reduced; no complete effect/path library |
-| `gpui_gpu` | Actual `wgsl-rs` shader, ordered tile compositor, lazy R8 glyph atlas, inverse/clip boundary corrections, SDR and linear HDR target output | Spatial admission is bounded, not universal CPU byte parity; native HDR negotiation and remaining primitives are gates |
-| native application | Real vendored-Winit windows with GPU or direct software presentation, keyboard/pointer adapter, resizing/DPI, source/prepared/presented separation, surface-loss input revocation | Software-first background GPU upgrade is being integrated; multiwindow/shared-device/native guest composition remain |
-| application ports | Counter and tutorial Todo add/complete/filter/delete/undo, persistence; the exact same Todo model runs in native and headless tests | The tutorial's full selection/IME, appearance animation and timeout effects are not claimed ported |
+| Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, conservative and explicit direct updates, contained component projections | One serial root owner; complete Reader/dependency/cohort graph remains |
+| Public testing | Application::demo, borrowed role/text/bounds queries, unique target resolution, root reads, input, focus, keyboard, source JSON and explicit scene/pixel diagnostics | Virtual time, worker delivery, replay and native accessibility bridges remain |
+| Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; no target allocation table | Keyed virtual collections are a separate integration gate |
+| Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
+| Layout and text | Cephal, borrowed Rustybuzz shaping sessions, lazy Swash masks, logical layout with physical-density rasterization | Selection, IME, grapheme editing and complete font/script fallback remain |
+| Canvas | Canonical grouped display list, linear-light 4×4 sampling, conservative tile proofs, optional CPU image, direct native BGRX output, explicit disjoint parallel bands | Complete effect/path/media library and persistent damage replay remain |
+| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR and linear HDR targets | Native HDR negotiation, other primitives and hardware/backend conformance remain |
+| Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI and suspend/recreate | Windows Auto deliberately stays software; shared-device multiwindow and guest/webview composition remain |
+| Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
+| Applications | Counter, Todo, Oklch/transform gallery, and Workspace containing the unmodified Todo and gallery views; shared native/headless models | Limited real ports, not a feature-complete GPUI replacement or a Hummingbird port |
 
-Current gates include 252 passing workspace/all-feature cases (including six
-Loom cases), four portable GPU checks and nine actual Vulkan readback cases.
-The separately enabled native X11 test has run both GPU and direct-software
-frontends: ordinary keyboard/pointer routes, recoverable shaping failure,
-resize, inspector transform, actual X11 pixel readback, suspend/recreate and
-target survival. The GPU suite runs on Mesa 26.1.4 llvmpipe here, which proves
-execution and output, not discrete-GPU performance or other-platform behavior.
-These results precede the ongoing startup/font changes; those must pass their
-own integration gates before replacing this evidence.
+Mutable model/window state uses ordinary exclusive Rust borrows. The production
+window engine contains no Rc, RefCell or Cell. Native observation callbacks use
+FnMut, allowing plain captured state. Immutable text uses Triomphe leases between
+source and presented epochs; fonts, masks and in-flight backend resources have
+explicit immutable resource leases. Some test-only read/drop counters still use
+interior mutability; dependencies and OS callbacks have their own contracts.
 
-Already-built release native measurements on Xvfb/Linux/NixOS show the driver
-floor matters far more than scene bytes: forcing software rendering reduces
-blank-window PSS from about 106 MiB with llvmpipe Vulkan to roughly 7 MiB, with
-one thread. The initial Todo software window is roughly 22 MiB PSS, exposing a
-large text floor. CPU ticks remain unchanged at one/three/five-second samples.
-See [native memory data](crates/gpui/evidence-native-memory-cpu.csv) and
-[the sampling tool](tools/native_memory.py). First-present timing is measured
-separately; no sub-50 ms or monitor-scanout claim follows from these samples.
+Queries and tests read the acknowledged semantic sheet. Focus and normalized
+keyboard operations use the production dispatcher, including stale-sheet and
+owner-quarantine rules. Accessibility must share those identities, focus,
+geometry and action authority. Native assistive-technology exposure remains
+an implementation gate.
 
-No legacy implementation has been deleted under a false feature-equivalence
-claim. The old source is still the behavior/plumbing reference; legacy device
-error generation, swapchain-image release before reconfigure, resource lease
-and whole-scene atlas lifetime rules inform the new integration. The following
-original design evidence remains useful history, not the current production
-coverage table.
+## Current verification
 
-## Initial design-only snapshot
+[checks.json](evidence/checks.json) records ten successful gates with exact commands,
+exit status and elapsed time, run against source commit c4dec85223:
 
-Snapshot: 2026-10-20, branch `codex/reactivity-cleanroom` in `/root/gpui-ce3`.
-The complete design is indexed by [README.md](README.md). Its versioned contract
-has received independent Sol and Luna adversarial review. The executable work is
-a standalone workspace of correctness oracles and competing experiments. A full
-application/renderer replacement remains the implementation roadmap.
+- Debug and release workspace suites: **283 passing cases/doctests each**.
+- Strict workspace Clippy and first-party formatting: pass.
+- Explicit parallel Canvas suite: **59 passing cases**, overlapping the workspace suite.
+- Optimized Loom protocol suite: **6 passing cases**; finite proof scope in [TESTING](TESTING.md).
+- Actual Vulkan conformance: **16 passing readback cases**.
+- Actual X11 integration: **one script** covering five renderer policies, focus/keyboard/pointer input, presentation recovery, transforms, resize, suspend/recreate and solid/normal backing transitions.
+- Combined X11+Wayland compilation and retained-layout example: pass.
 
-## What is implemented
+The renderer is Mesa 26.1.4 llvmpipe/LLVM 21.1.8 on Linux/NixOS. It proves
+backend execution and output, not discrete-GPU performance. The native test's
+GPUI_SOLID_MEMORY records verify zero client SHM mappings for certified solid
+frames and a 2,097,152-byte mapping for the normal 800×600 buffer. The solid helper
+runs inside that native script; a filter matching zero tests is not accepted as
+execution evidence.
 
-| Crate/boundary | Executable scope | Limit |
+Apple presenter sources and main-thread/worker-drop tests were cross-typechecked
+for aarch64 macOS. Actual AppKit execution and visible CPU/GPU handoff remain
+required. Windows and Wayland runtime behavior need their native runners; added
+CI workflows are not reported as completed remote results.
+
+## Measurements and their boundaries
+
+| Change | Evidence | Limit |
 | --- | --- | --- |
-| core | Safe mutable generational topology, sparse geometry, wide transform oracle, linear/pruned hit traversal and bounded tile damage | Per-node mutable oracle; no shared-template production tree or rendering |
-| core `layout` | Optional Cephal over that same topology; interned styles, lazy caches, serial unrounded output, retained/cold checks, panic poisoning | Private mutable correctness adapter; no shared layout sheet/cache integration |
-| state | Inline checked Signal, bounded owned Handoff, owner/request authority, owned candidate TwoEpoch, typed projector utility | No complete reactive graph, source carrier, typed schema enforcement or turn engine |
-| host | Optional native Winit callback boundary, redraw coalescing, terminal closed wake gate with acquiring RMW chain | Compiled X11/Wayland; native display/IME/lifecycle behavior requires hardware testing |
-| api-lab | Concrete borrowed El, constructor children/branches, owned retention, internal generative lowering and diagnostic compile failures | Rebuild/allocation/drop costs explicit; no permanent source wiring or keyed identity |
-| template-lab | Shared immutable succinct topology, typed sparse/dense scalar overlays and dynamic instance runs | Append-only lab identities; fixed-default scalar semantics; stable addressed sites/layered style remain gates |
-| algebra-lab | Safe rooted link-cut comparison; exact i64/i128 subpixel translation specialization and viewport-relative narrowing | Affine regrouping rejected; sparse-space experiment, no layout/damage/backend integration |
-| coverage-lab | Interval/Lipschitz tile certificates, ordered opaque pruning, scalar point-compositing oracle | Boxes/circles within admitted domain; point samples, no area-AA/font/GPU proof |
-| ownership-lab | Scoped borrowed pages, moved preallocated SPSC pages, full/closed/drop semantics, allocation evidence and weak-memory models | CPU completion only; no persistent pool, actual GPU fence or native wake integration |
+| Lazy fonts and scoped shaping | [Startup](crates/gpui/STARTUP.md): Gallery median 80.038→40.525 ms on default-reset Xvfb; 23.302 ms with -noreset | Display reset is an environmental cost; warm filesystem, fresh processes, present acknowledgement rather than scanout |
+| CPU-first blank | [Memory CSV](crates/gpui/evidence-native-memory-auto-swash.csv): roughly 8.5 MiB PSS, one idle thread, no GPU probe on this device-less Linux host | Predates representation/solid changes; driver/compositor bytes are separate |
+| Canonical retained runs | [Canvas](crates/canvas/README.md): 32K-glyph grouped fixture retained heap 4,456,500→1,269,876 B; peak 6,689,076→1,795,060 B | Unique-mask heap is neutral; Canvas header grows 208 B; flat traversal can lose |
+| Grouped GPU packets | [GPU](crates/gpu/README.md): 32K fixture record bytes 3,072,096→1,104,096; explicit GPU buffer capacity 4,198,484→2,101,332 B | Frame time is neutral/slightly slower; fixture retains records hidden by a final opaque fill |
+| Tile certificates | [GPU results](crates/gpu/tile-benchmark.csv): 32 opaque overlaps 182.17→1.18 ms on llvmpipe | Boundary-heavy case 23.44→26.12 ms loses; not a hardware-GPU comparison |
+| Blank solid transport | [Mapping results](crates/gpui/evidence-native-solid.csv): normal buffer retains 2 MiB mapping; initial/returned solid retains zero | Client transport only, not whole application/server/compositor memory |
 
-Pinned complete Winit 0.30.13 and Cephal 0.1.1 archives, licenses, source commits
-and archive hashes are recorded in [vendor/PROVENANCE.md](vendor/PROVENANCE.md).
-Their source is unchanged. Native hosting and Cephal layout are optional; default
-core/state have zero third-party dependencies. The legacy workspace excludes the
-new workspace/vendor roots and retains its original behavior.
+No competitor victory, near-zero native memory floor, universal byte parity or
+order-of-magnitude feature-equivalent simplification has been established.
+Reports retain losing cases. The full Hummingbird source audit is
+[pinned separately](docs/hummingbird-source-audit-luna.md); virtualization, background
+results, images and richer input remain prerequisites for that port.
 
-First-party libraries forbid unsafe. The allocation measurement example has
-isolated unsafe forwarding to System; it is instrumentation, with no Miri claim.
-No custom unsafe ownership/reclamation scheme was admitted to production.
+## Scope and line accounting
 
-## Verification on the combined checkout
+[line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
+comments/blanks and embedded tests. Examples/external tests and every vendor tree
+are separate. This snapshot contains **17,864 first-party src lines** and
+**12,943 external test/example lines** across production and experimental crates.
+Src includes embedded tests; it is not a production SLOC claim. Complete Winit,
+Cephal, Softbuffer and Wgpu-HAL sources total **131,279 Rust lines**, including
+their tests/examples. Vendoring has not made those dependencies disappear.
 
-[checks.json](evidence/checks.json) records exact commands, exit status and elapsed
-time; neighboring text files contain complete output:
+[Baseline](evidence/baseline.json) pins the original 260,010 physical Rust lines
+and inspector/transforms/testing branch deltas. Legacy remains a plumbing and
+behavior reference; nothing was deleted under a false feature-equivalence claim.
+[Provenance](vendor/PROVENANCE.md) records Winit/Cephal; [presenter patches](vendor/PRESENTER_PATCHES.md)
+documents the additional complete archives and bounded platform ownership fixes.
 
-Stored text logs normalize trailing whitespace. `python3 tools/verify.py` from
-this workspace recreates the combined gates and evidence (Cargo/Rust on PATH).
-
-- Debug and release workspace tests with optional Cephal layout: **90 passing
-  cases each**, including the consumer compile-failure harness and doctests.
-  That harness checks six programs for the intended compiler diagnostics.
-- Strict Clippy across first-party workspace/all targets with layout: passes.
-- Optimized Loom protocol suite: **6 passing tests**. Two check the corrected
-  finite protocols; four prove counterexamples in deliberately broken variants.
-- X11+Wayland native-host compile check and retained-layout example: pass.
-- First-party formatting and whitespace checks: pass at final integration.
-
-Environment: AMD Ryzen 7 3700X, x86_64 Linux/NixOS, Rust/Cargo 1.97.1, LLVM 22.1.6.
-No attached display/GPU benchmark, platform visual validation, Miri or second
-hardware class is claimed. Native compilation is narrower evidence than a
-working interactive host. [environment.json](evidence/environment.json) records
-the reproducible toolchain/OS context without credentials.
-
-## Useful measured frontiers
-
-These are local microbenchmarks with complete methods/caveats in each crate.
-They guide selection and carry no whole-application comparison claim.
-
-| Experiment | Useful case | Recorded losing case |
-| --- | --- | --- |
-| Shared scalar templates | 10k instances × 1,024 nodes: 244,952 B known retained payload versus 41,200,736 B eager scalar fields/shared topology | Fully customized 1,024-node case uses about 6.1% more than eager fields; lookup slower; small templates lose sooner |
-| Exact translation paths | Warm 100k-deep root edit + one query about 88 ns; 64 B per sparse space record | Balanced all-50k queries about 4.45 ms versus 0.481 ms eager; cold/deep and memory costs still count |
-| Coverage/worklist proof | 64 opaque overlaps, 256²: complete scalar plan+point-render 11.22 ms → 0.489 ms; bins 16,384 → 256 | 4×4 boundary-dense case 2.76 us → 10.90 us; plan adds memory |
-| Borrowed phase | 262,144 primitives: serial 1.370 ms → scoped-four 0.397 ms | 1,024 primitives: serial 5.20 us versus scoped-four 81.9 us; fresh threads allocate every phase |
-| Page transfer | 100k warm same-thread roundtrips allocate zero; 8,192-byte payload stays at same address | Setup seven allocations/9,312 requested bytes; cross-thread run about 603 ns includes startup/polling, no OS/GPU latency |
-
-Figures include each lab's declared capacities and comparators, with exclusions
-for allocator/driver/system costs explicitly stated there. The template figure
-is a scalar structural case, not a rendered widget bill. The coverage baseline
-uses implicit containment rather than unnecessary distance square roots.
-
-The historical DS lab was also rerun locally; raw output is
-[nodes2-x86_64.txt](evidence/nodes2-x86_64.txt). Its embedded verdict prose describes
-older M3 observations and is not authoritative for this run. For example, the
-local 0.1%-dirty marking-plus-visit cost already exceeds a simple dense sweep in
-that synthetic case. Include discovery/marking when choosing a crossover.
-
-## Review changed the design and code
-
-The original primitive review found sub-ULP missing damage, premature f32 transform
-underflow, quadratic hit clip checks, request-admission retry loss, unsound carrier
-assumptions and reflection overclaims. Code fixes preserve tiny damage/wide
-composition, prune clips once and reject poisoned layout reads. Contract revision
-2 resolves carrier, source commit, result retention and property trust boundaries.
-
-Loom then found release-only acknowledgement, acquire-only failed coalescing,
-clear-after-drain and hint-after-wake losses. The host's producer performs a
-successful AcqRel RMW even when coalesced; its acknowledgement acquires that
-chain before queue inspection. The broken forms remain counterexample tests.
-
-The final cross-layer review closed seven additional gaps: stable targets across
-template address changes; opacity-dependent background resurrection; per-instance
-snapping; backend-specific numerical certificates; explicit Set versus Inherit;
-hover geometry feedback; and LCD/filter noncommutation. See
-[review-final-sol.md](docs/review-final-sol.md) and
-[review-close-luna.md](docs/review-close-luna.md), with earlier reports preserved
-as dated evidence. [REVIEW.md](REVIEW.md) records dispositions and remaining gates.
-
-## Implementation comes next in explicit slices
-
-The first production slice connects one owner-dispatched counter/settings screen,
-typed operations and source binding, template sites, immutable presentation sheet,
-inspector edits and public demo input in one engine. It must retain an accepted
-worker result across candidate failure and pass focus/key/IME revocation tests.
-The next slice shares unrounded Cephal solutions and local hit indexes, then
-retains primitive/group/paint slots through a selected backend numerical profile.
-The full dependency order and deletion gates are in [PLAN.md](PLAN.md).
-
-Permanent source binding, atomic fault-recovery edge swaps, recycling stable
-instance/sites, layout solution sharing, a complete text/IME/a11y stack, native
-guest/webview composition, area-AA/effect rendering and real presentation fences
-are still implementation gates. Analytic shadows/filter fusion and other
-derivations in FORMULATIONS are proposals with reference tests specified.
-
-## Line count is accounted for, not claimed as a win
-
-[baseline.json](evidence/baseline.json) pins the original 260,010 physical Rust
-lines and branch deltas. [line-counts.json](evidence/line-counts.json) counts each
-new crate's src/tests/examples and both vendor trees, including comments/blanks
-and embedded tests. Vendor Rust alone is 74,569 lines. The original implementation
-still exists; coexistence makes the checkout larger. A scope-equivalent major
-deletion or competitor memory/frame-time win has not been demonstrated.
-
-The 8k/20k/35k first-party design budgets are review triggers for the eventual
-feature-complete replacement. Dependencies, code generation, tests and platform
-glue remain visible in the total. PanGui's subsystem rewrite is an example of
-shared formulation reducing code, not evidence that this whole framework has
-already met its budget.
+Topology/layout, template, exact-translation, coverage and ownership labs remain
+independent correctness/comparison tools. Their measurements are not automatically
+production results. [PLAN](PLAN.md), [REVIEW](REVIEW.md) and [EXPERIMENTS](EXPERIMENTS.md)
+retain the admission and deletion gates.

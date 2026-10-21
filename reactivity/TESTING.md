@@ -43,9 +43,12 @@ for position-free editing repair. Query tests assert zero allocations across
 
 Source persistence uses `source_json`/`from_json`; restoration remints targets.
 Snapshots/inspection and explicit pixel diagnostics remain available when those
-artifacts are needed. Keyboard/focus unification, virtual time, completion control
-and replay will be implemented through production facilities, not dummy test-only
-timers or a second event loop. The contracts below specify those next gates.
+artifacts are needed. Focus and normalized keyboard input now share the production
+operations; [the keyboard contract](crates/gpui/FOCUS.md) records their exact scope.
+The 1,000-cycle navigation test allocates nothing and performs no source, layout
+or paint work. Virtual time, completion control and replay remain implementation
+gates through production facilities. There are no dummy test-only timers or a
+second event loop.
 
 Choose time, worker delivery and native/resource adapters at application creation.
 The native adapter supplies real events/time/completion; demo adapters supply

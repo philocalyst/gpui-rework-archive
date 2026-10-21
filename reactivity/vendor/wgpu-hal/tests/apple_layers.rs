@@ -2,7 +2,7 @@
 //! not Rust's normal test-worker threads. No Metal device/GPU is required.
 #[cfg(target_os = "macos")]
 fn main() {
-    use objc2::{class, msg_send, rc::Retained, runtime::Bool, MainThreadMarker};
+    use objc2::{MainThreadMarker, class, msg_send, rc::Retained, runtime::Bool};
     use objc2_foundation::NSObject;
     use objc2_quartz_core::{CALayer, CAMetalLayer};
     use raw_window_handle::{

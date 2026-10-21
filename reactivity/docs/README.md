@@ -12,6 +12,10 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Semantics](semantic-review.md) | Source/outcome/presentation transaction cuts and rollback limits |
 | [Graphics](graphics-research.md) | Primary analytic/vector/field research, damage and native presentation |
 | [Concurrency](concurrency-research.md) | Audited queues, borrows, weak-memory wake proof and reclamation |
+| [Native startup and platform floor](cross-platform-startup-floor-luna.md) | Platform contracts, lazy resources and startup measurement |
+| [Linux blank-window attribution](linux-blank-floor-luna.md) | Actual mapping/profile attribution and candidate experiments |
+| [Hummingbird source audit](hummingbird-source-audit-luna.md) | Pinned real application requirements and reusable domain boundaries |
+| [Virtual-list review](virtual-list-api-review-luna.md) | Bounded row realization, keyed lifetime, local coordinates and semantic authority |
 | [Review dispositions](../REVIEW.md) | Links to all six adversarial reports and their final status |
 
 [Input manifest](inputs/manifest.json) hashes the supplied original

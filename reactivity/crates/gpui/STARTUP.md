@@ -58,7 +58,11 @@ still selects DX12. A child presentation HWND or a permanent DXGI presenter
 needs Windows lifecycle tests before enabling opportunistic promotion there.
 Microsoft documents this in
 [DXGI_SWAP_EFFECT](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ne-dxgi-dxgi_swap_effect).
-macOS layer ownership and software/GPU coexistence are under separate review.
+macOS injected layer ownership is now patched in vendored Softbuffer/Wgpu-HAL;
+Auto creates no native GPU layer until worker renderer preparation finishes.
+The Apple sources and main-thread/worker-drop tests were cross-typechecked;
+actual AppKit execution and visible handoff remain required. See
+[the precise patches and validation scope](../../vendor/PRESENTER_PATCHES.md).
 The cleanroom CI matrix builds native ports and checks real software/Auto first
 presentation on Linux, macOS and Windows; adding a workflow is not evidence
 that those remote runners have already passed.

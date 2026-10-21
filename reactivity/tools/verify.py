@@ -8,6 +8,7 @@ drivers/display. Their absence never produces a passing graphics result.
 import argparse
 import json
 import pathlib
+import re
 import subprocess
 import time
 
@@ -19,7 +20,7 @@ PACKAGES = (
     "gpui_reactivity_algebra_lab", "gpui_reactivity_template_lab",
     "gpui_reactivity_coverage_lab", "gpui_reactivity_ownership_lab",
     "reactivity-api-lab",
-    "gpui", "gpui_gpu", "gpui_canvas", "gpui_retained",
+    "gpui", "gpui_gpu", "gpui_canvas", "gpui_retained", "gpui_presenter_tests",
 )
 format_packages = [arg for package in PACKAGES for arg in ("-p", package)]
 checks = [
@@ -35,6 +36,8 @@ checks = [
               "--test", "loom_protocol"]),
     ("native-check", ["cargo", "check", *MANIFEST, "--locked", "-p",
                       "gpui", "--features", "x11,wayland", "--all-targets"]),
+    ("parallel-canvas", ["cargo", "test", *MANIFEST, "--locked", "-p",
+                         "gpui_canvas", "--features", "parallel"]),
     ("layout-example", ["cargo", "run", *MANIFEST, "--locked", "-p",
                         "gpui_reactivity_core", "--features", "layout",
                         "--example", "retained_layout"]),
@@ -65,9 +68,15 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
+    if name in ("gpu-vulkan", "native-x11"):
+        entry["passed_tests"] = sum(int(count) for count in re.findall(
+            r"test result: ok\. (\d+) passed;", log))
+        if result.returncode == 0 and entry["passed_tests"] == 0:
+            entry["exit_code"] = 1
+            entry["failure"] = "The requested execution gate ran no tests."
     report.append(entry)
     (EVIDENCE / "checks.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(entry), flush=True)
-    if result.returncode:
+    if entry["exit_code"]:
         print(result.stdout[-7000:], flush=True)
-        raise SystemExit(result.returncode)
+        raise SystemExit(entry["exit_code"])

@@ -2,8 +2,10 @@
 
 The independent [gpui crate](crates/gpui/README.md) now runs real views, typed
 state, Cephal layout, text, transformed input and live inspector properties.
-The Counter and Todo ports use the same engine in native windows and public
-headless tests. [Canvas](crates/canvas/README.md) supplies the reference renderer;
+Counter, Todo, the color/transform gallery and their composed Workspace use the
+same engine in native windows and public headless tests. The window owns its model
+exclusively; queries borrow it and edits require an ordinary mutable borrow.
+[Canvas](crates/canvas/README.md) supplies the reference renderer;
 [GPU](crates/gpu/README.md) consumes its borrowed canonical scene with `wgsl-rs`.
 
 ```sh
@@ -36,7 +38,9 @@ structure, sparse typed instance differences and coherent leased presentation.
 
 [Research and source inputs](docs/README.md) include pinned primary references,
 academic alternatives, dated reviews and the supplied original statutes.
-[Vendor provenance](vendor/PROVENANCE.md) records complete Winit/Cephal archives.
+[Vendor provenance](vendor/PROVENANCE.md) records complete Winit/Cephal archives;
+[presenter patches](vendor/PRESENTER_PATCHES.md) records complete Softbuffer/HAL
+archives and the local native ownership changes.
 The same design packet is mirrored at `/root/designs/reactivity/rework`.
 
 This standalone workspace is excluded from legacy GPUI. From the repository root:
