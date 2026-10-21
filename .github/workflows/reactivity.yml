@@ -62,7 +62,8 @@ jobs:
             "${runner[@]}" python tools/native_startup.py --renderer "$policy" --runs 3 \
               "target/release/examples/empty${suffix}" \
               "target/release/examples/workbench${suffix}" \
-              "target/release/examples/graphics${suffix}" > "native-${policy}.csv"
+              "target/release/examples/graphics${suffix}" \
+              "target/release/examples/workspace${suffix}" > "native-${policy}.csv"
           done
       - uses: actions/upload-artifact@v4
         if: always()

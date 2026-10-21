@@ -2,6 +2,8 @@
 mod graphics;
 #[path = "../examples/support/todos.rs"]
 mod todos;
+#[path = "../examples/support/workspace.rs"]
+mod workspace;
 use gpui::{Error, Win};
 
 #[test]
@@ -44,4 +46,42 @@ fn component_graphics_port_reuses_layout_for_geometry_and_color_updates() {
     win.click(win.button("Toggle chroma")).unwrap();
     assert_eq!(win.counters().layout_runs, 0);
     assert_ne!(win.scene_digest().unwrap(), original);
+}
+
+#[test]
+fn complete_application_views_compose_without_rewriting_their_state_or_routes() {
+    let win = Win::recording(
+        workspace::Workspace::default(),
+        gpui::WindowOptions {
+            size: [1100, 720],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let acknowledge = || {
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+    };
+    acknowledge();
+    let rotate = win.button("Rotate");
+    win.reset_counters().unwrap();
+    win.type_text(win.input(), "Independent child application")
+        .unwrap();
+    assert_eq!(win.counters().owner_reruns, 0);
+    acknowledge();
+    win.click(win.button("Add")).unwrap();
+    acknowledge();
+    assert!(win.find_text("Independent child application").is_ok());
+    assert_eq!(
+        win.button("Rotate"),
+        rotate,
+        "sibling ownership survives child topology edits"
+    );
+    let before = win.scene_digest().unwrap();
+    win.reset_counters().unwrap();
+    win.click(rotate).unwrap();
+    acknowledge();
+    assert_eq!(win.counters().layout_runs, 0);
+    assert_ne!(win.scene_digest().unwrap(), before);
+    assert!(win.find_text("1 left").is_ok());
 }
