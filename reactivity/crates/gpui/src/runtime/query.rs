@@ -10,6 +10,7 @@ struct Context<'a> {
     sites: &'a Sites,
     nodes: &'a [Presented],
     focused: Option<Target>,
+    metadata: Option<&'a super::metadata::Sheet>,
 }
 impl<'a> Context<'a> {
     fn new<M>(runtime: &'a Runtime<M>) -> Self {
@@ -17,6 +18,10 @@ impl<'a> Context<'a> {
             sites: &runtime.sites,
             nodes: &runtime.presented,
             focused: runtime.focused,
+            metadata: runtime
+                .metadata
+                .as_ref()
+                .map(|metadata| &metadata.presented),
         }
     }
     fn part(&self, node: &'a Presented) -> Part<'_> {
@@ -71,13 +76,42 @@ impl<'a> Part<'a> {
     pub fn text(self) -> Option<&'a str> {
         self.node.text.as_deref()
     }
-    /// Accessible name for text-labelled controls. An input's edited value is
-    /// deliberately not used as its name. Explicit input labels and described-by
-    /// relationships require the separate semantic metadata integration.
+    /// An explicit declared/inspector name, or the visual label fallback.
+    /// Edited input values never become accessible names.
     pub fn name(self) -> Option<&'a str> {
+        if let Some(slot) = self
+            .context
+            .metadata
+            .and_then(|metadata| metadata.name(self.node.identity))
+        {
+            return slot.value.as_deref();
+        }
         (self.node.kind != super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
+    }
+    pub fn description(self) -> Option<&'a str> {
+        self.context
+            .metadata
+            .and_then(|metadata| metadata.description(self.node.identity))
+            .and_then(|slot| slot.value.as_deref())
+    }
+    /// Frozen total source length for this published list container.
+    pub fn list(self) -> Option<super::ListInfo> {
+        self.context
+            .metadata
+            .and_then(|metadata| metadata.list(self.node.identity))
+    }
+    /// Frozen position/key/count for this published row wrapper. Descendants
+    /// can walk parent targets; positions are never inferred from keys or y.
+    pub fn list_item(self) -> Option<super::ListItemInfo> {
+        let row = self.context.metadata?.row(self.node.identity)?;
+        Some(super::ListItemInfo {
+            list: self.context.sites.target(row.list_identity),
+            key: row.key,
+            index: row.index,
+            count: row.count,
+        })
     }
     pub fn value(self) -> Option<&'a str> {
         (self.node.kind == super::NodeKind::Input)
@@ -108,10 +142,18 @@ impl<'a> Part<'a> {
     }
 }
 
+#[derive(Clone, Copy)]
+enum MatchText {
+    Exact,
+    Contains,
+    Name,
+    Description,
+}
+
 pub struct Query<'a, M: View + 'static> {
     runtime: Option<&'a Runtime<M>>,
     role: Option<Role>,
-    text: Option<(&'a str, bool)>,
+    text: Option<(&'a str, MatchText)>,
     within: Option<Target>,
 }
 impl<'a, M: View + 'static> Query<'a, M> {
@@ -122,7 +164,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
         Query {
             runtime: self.runtime,
             role: self.role,
-            text: Some((text, false)),
+            text: Some((text, MatchText::Exact)),
             within: self.within,
         }
     }
@@ -133,7 +175,30 @@ impl<'a, M: View + 'static> Query<'a, M> {
         Query {
             runtime: self.runtime,
             role: self.role,
-            text: Some((text, true)),
+            text: Some((text, MatchText::Contains)),
+            within: self.within,
+        }
+    }
+    /// Match the accessible name, independently of edited value/visual text.
+    pub fn name<'b>(self, name: &'b str) -> Query<'b, M>
+    where
+        'a: 'b,
+    {
+        Query {
+            runtime: self.runtime,
+            role: self.role,
+            text: Some((name, MatchText::Name)),
+            within: self.within,
+        }
+    }
+    pub fn description<'b>(self, description: &'b str) -> Query<'b, M>
+    where
+        'a: 'b,
+    {
+        Query {
+            runtime: self.runtime,
+            role: self.role,
+            text: Some((description, MatchText::Description)),
             within: self.within,
         }
     }
@@ -164,9 +229,14 @@ impl<'a, M: View + 'static> Query<'a, M> {
     }
     fn matches(&self, part: Part<'_>) -> bool {
         self.role.is_none_or(|role| part.role() == role)
-            && self.text.is_none_or(|(text, contains)| {
-                part.text().is_some_and(|actual| {
-                    if contains {
+            && self.text.is_none_or(|(text, kind)| {
+                let actual = match kind {
+                    MatchText::Exact | MatchText::Contains => part.text(),
+                    MatchText::Name => part.name(),
+                    MatchText::Description => part.description(),
+                };
+                actual.is_some_and(|actual| {
+                    if matches!(kind, MatchText::Contains) {
                         actual.contains(text)
                     } else {
                         actual == text

@@ -16,6 +16,7 @@ pub(super) struct ListState {
 pub(super) struct ListRow {
     pub list: ListId,
     pub key: ItemKey,
+    pub index: u32,
     pub y: f32,
     pub height: f32,
     pub visible: bool,
