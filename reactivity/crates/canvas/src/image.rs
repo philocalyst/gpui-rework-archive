@@ -40,6 +40,23 @@ pub enum ImageSampling {
     Linear,
 }
 
+/// Material reconstruction and optional local analytic shape. A zero radius
+/// retains the ordinary rectangle path; a positive radius rounds only this
+/// image placement, without changing or duplicating its immutable pixels.
+#[derive(Clone, Copy, Debug)]
+pub struct ImageOptions {
+    pub sampling: ImageSampling,
+    pub corner_radius: f32,
+}
+impl Default for ImageOptions {
+    fn default() -> Self {
+        Self {
+            sampling: ImageSampling::Linear,
+            corner_radius: 0.0,
+        }
+    }
+}
+
 /// Exact immutable allocation identity, never a content hash or external key.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ImageKey(u64);

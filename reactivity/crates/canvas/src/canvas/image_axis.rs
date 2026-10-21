@@ -286,7 +286,7 @@ mod tests {
                                     24.,
                                 ),
                                 map,
-                                source: BorrowedSource::ImageLinear(&image),
+                                source: BorrowedSource::ImageLinear(&image, 0.0),
                                 color: [0.; 4],
                                 bounds: [1, 2, 29, 31],
                             };
@@ -364,7 +364,7 @@ mod tests {
                             ..Affine::IDENTITY
                         })
                         .unwrap(),
-                        source: BorrowedSource::ImageLinear(image),
+                        source: BorrowedSource::ImageLinear(image, 0.0),
                         color: [0.; 4],
                         bounds: [1, 2, 30, 31],
                     };
@@ -425,7 +425,7 @@ mod work_tests {
             rect: Rect::new(0., 0., 32., 32.),
             clip: Rect::new(0., 0., 32., 32.),
             map: Mapping::new(Affine::IDENTITY).unwrap(),
-            source: BorrowedSource::ImageLinear(&image),
+            source: BorrowedSource::ImageLinear(&image, 0.0),
             color: [0.; 4],
             bounds: [0, 0, 32, 32],
         };

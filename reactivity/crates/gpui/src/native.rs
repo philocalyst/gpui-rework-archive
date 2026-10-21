@@ -1600,6 +1600,50 @@ mod tests {
                             assert_eq!(surface.fetch().unwrap(), expected);
                         }
                     }
+                    if self.host.renderer_policy == RendererPolicy::Auto
+                        && self.host.upgrade_policy.allow_cpu
+                    {
+                        // The CPU admits a subnormal radius. GPU FTZ/distance
+                        // admission must fall back by actually presenting this
+                        // same canonical candidate through softbuffer.
+                        let owner = self.host.owner.as_mut().unwrap();
+                        owner
+                            .set_property(
+                                target,
+                                crate::property::BACKGROUND,
+                                Contribution::Set(crate::Color::BLACK),
+                            )
+                            .unwrap();
+                        owner
+                            .set_property(
+                                target,
+                                crate::property::CORNER_RADIUS,
+                                Contribution::Set(f32::from_bits(1)),
+                            )
+                            .unwrap();
+                        self.host.redraw().unwrap();
+                        let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics
+                        else {
+                            panic!("rounded Precision must execute CPU fallback");
+                        };
+                        let owner = self.host.owner.as_mut().unwrap();
+                        let sheet = owner.snapshot().unwrap();
+                        assert!(sheet.presentation_valid);
+                        assert_eq!(sheet.source_epoch, sheet.presentation_epoch);
+                        let expected = owner
+                            .with_pixels(|pixels, _, _| {
+                                pixels
+                                    .chunks_exact(4)
+                                    .map(|p| {
+                                        (u32::from(p[0]) << 16)
+                                            | (u32::from(p[1]) << 8)
+                                            | u32::from(p[2])
+                                    })
+                                    .collect::<Vec<_>>()
+                            })
+                            .unwrap();
+                        assert_eq!(surface.fetch().unwrap(), expected);
+                    }
                     self.retained_target = Some(target);
                     self.host.dispatch(event_loop, Callback::Suspended);
                     assert_eq!(

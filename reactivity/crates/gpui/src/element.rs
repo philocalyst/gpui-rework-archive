@@ -231,6 +231,7 @@ impl<'a> El<'a> {
         let mut element = Self::new(NodeKind::Image, None);
         element.extra = Some(Box::new(crate::semantic::ElementExtra::Image {
             spec: crate::image::ImageSpec {
+                geometry: Default::default(),
                 resource,
                 sampling: crate::ImageSampling::Linear,
             },
@@ -240,7 +241,7 @@ impl<'a> El<'a> {
     }
     /// Selects nearest or bilinear reconstruction for an image declaration.
     pub fn sampling(mut self, sampling: crate::ImageSampling) -> Self {
-        match self.extra.as_deref_mut() {
+        match self.extra.as_deref_mut().map(|extra| extra.base_mut()) {
             Some(crate::semantic::ElementExtra::Image { spec, .. }) => spec.sampling = sampling,
             _ => panic!("sampling belongs to an image declaration"),
         }
@@ -258,7 +259,7 @@ impl<'a> El<'a> {
     /// First-read fallback for a Reader projection. Refreshing retains its
     /// preceding ready child; failures remain a distinct visible verdict.
     pub fn loading(mut self, render: fn() -> El<'static>) -> Self {
-        match self.extra.as_deref_mut() {
+        match self.extra.as_deref_mut().map(|extra| extra.base_mut()) {
             Some(crate::semantic::ElementExtra::Reader { projector, .. }) => {
                 projector.loading(render)
             }
@@ -267,7 +268,7 @@ impl<'a> El<'a> {
         self
     }
     pub fn failed(mut self, render: for<'v> fn(crate::Failure<'v>) -> El<'v>) -> Self {
-        match self.extra.as_deref_mut() {
+        match self.extra.as_deref_mut().map(|extra| extra.base_mut()) {
             Some(crate::semantic::ElementExtra::Reader { projector, .. }) => {
                 projector.failed(render)
             }
@@ -304,6 +305,26 @@ impl<'a> El<'a> {
         element
     }
 
+    /// Uniform circular corners for this element's background, own image and
+    /// hit region. Descendants are not clipped. Invalid radii fail admission.
+    pub fn rounded(mut self, radius: f32) -> Self {
+        let style = crate::property::GeometryStyle {
+            corner_radius: radius,
+        };
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Geometry {
+                    style,
+                    inner: None,
+                    semantic: None,
+                })
+            })
+            .set_geometry(style);
+        self
+    }
+    pub fn rounded_md(self) -> Self {
+        self.rounded(6.0)
+    }
     /// An explicit accessible name, separate from an input's edited value.
     pub fn name(mut self, name: impl IntoText<'a>) -> Self {
         self.annotations_mut().name = Some(name.into_text());
@@ -425,7 +446,7 @@ impl<'a> El<'a> {
             pending.extend(element.children.iter_mut());
             if let Some(crate::semantic::ElementExtra::Reader {
                 map: pending_map, ..
-            }) = element.extra.as_deref_mut()
+            }) = element.extra.as_deref_mut().map(|extra| extra.base_mut())
             {
                 let previous = pending_map.take();
                 *pending_map = Some(Box::new(move |child: &mut El<'_>| {
@@ -477,6 +498,7 @@ impl<'a> El<'a> {
         let mut lists: Vec<ListDraft> = Vec::new();
         let mut annotations = Vec::new();
         let mut images = Vec::new();
+        let mut geometry = Vec::new();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
@@ -492,11 +514,16 @@ impl<'a> El<'a> {
                     height,
                 });
             }
-            let (spec, annotation, projector, image) = element
+            let (spec, annotation, projector, image, shape) = element
                 .extra
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            if let Some(shape) = shape
+                && shape.corner_radius.to_bits() != 0
+            {
+                geometry.push((index as usize, shape));
+            }
             if let Some(spec) = image {
                 images.push(crate::image::ImageDraft { node: index, spec });
             }
@@ -578,6 +605,7 @@ impl<'a> El<'a> {
             lists,
             annotations,
             images,
+            geometry,
         })
     }
 }
@@ -605,6 +633,7 @@ impl Drop for ComponentBoundaries {
 }
 
 pub(crate) struct Description<'a> {
+    pub geometry: Vec<(usize, crate::property::GeometryStyle)>,
     pub nodes: Vec<DraftNode<'a>>,
     pub lists: Vec<crate::list::ListDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,

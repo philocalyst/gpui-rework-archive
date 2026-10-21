@@ -39,11 +39,24 @@ impl View for Gallery {
             image(&self.covers[self.selected])
                 .w(256)
                 .h(256)
+                .rounded(16.0)
                 .name("Selected cover art"),
             row((
-                image(&self.covers[0]).w(64).h(64).name("First cover"),
-                image(&self.covers[1]).w(64).h(64).name("Second cover"),
-                image(&self.covers[2]).w(64).h(64).name("Third cover"),
+                image(&self.covers[0])
+                    .w(64)
+                    .h(64)
+                    .rounded_md()
+                    .name("First cover"),
+                image(&self.covers[1])
+                    .w(64)
+                    .h(64)
+                    .rounded_md()
+                    .name("Second cover"),
+                image(&self.covers[2])
+                    .w(64)
+                    .h(64)
+                    .rounded_md()
+                    .name("Third cover"),
             ))
             .gap(12),
             button("Next cover").on_click(Self::next),

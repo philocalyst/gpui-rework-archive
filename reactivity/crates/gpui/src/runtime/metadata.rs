@@ -185,6 +185,7 @@ pub(super) struct Metadata {
     pub overrides: BTreeMap<u64, [Contribution<Option<SharedText>>; 2]>,
     pub presented: Sheet,
     pub candidate: Option<Sheet>,
+    pub geometry: Option<Box<super::geometry::Geometry>>,
 }
 impl Metadata {
     pub fn base(&self, identity: u64) -> Option<&Declared> {
@@ -200,7 +201,8 @@ impl Metadata {
             .map(|i| &mut self.base[i])
     }
     pub fn unused(&self) -> bool {
-        self.base.is_empty()
+        self.geometry.is_none()
+            && self.base.is_empty()
             && self.overrides.is_empty()
             && self.candidate.is_none()
             && self.presented.is_empty()

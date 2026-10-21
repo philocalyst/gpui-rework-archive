@@ -41,6 +41,7 @@ mod input;
 mod list;
 mod turn;
 use list::{ListRow, ListState, ScrollRequest};
+mod geometry;
 mod metadata;
 mod query;
 mod semantics;
@@ -93,6 +94,7 @@ pub enum Error {
     Layout(LayoutError),
     Canvas(gpui_canvas::Error),
     Property(PropertyError),
+    GeometryProperty { node: usize, error: PropertyError },
     Serialization(String),
     List(ListError),
     Question(crate::QuestionFault),
@@ -1185,13 +1187,54 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     }
     /// Current logical property; the complete displayed sheet may lag after a
     /// presentation error. Inspect its epoch before using displayed geometry.
-    pub fn property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
+    pub fn property<T, D: crate::property::PropertyDomain>(
+        &self,
+        target: Target,
+        property: Property<T, D>,
+    ) -> Result<T, Error> {
+        D::dispatch(
+            property,
+            (self, target),
+            |(win, target), property| win.style_property(target, property),
+            |(win, target), property| win.geometry_property(target, property),
+        )
+    }
+    pub fn contribution<T, D: crate::property::PropertyDomain>(
+        &self,
+        target: Target,
+        property: Property<T, D>,
+    ) -> Result<Contribution<T>, Error> {
+        D::dispatch(
+            property,
+            (self, target),
+            |(win, target), property| win.style_contribution(target, property),
+            |(win, target), property| win.geometry_contribution(target, property),
+        )
+    }
+    pub fn set_property<T: PartialEq, D: crate::property::PropertyDomain>(
+        &mut self,
+        target: Target,
+        property: Property<T, D>,
+        contribution: Contribution<T>,
+    ) -> Result<Commit, Error> {
+        D::dispatch(
+            property,
+            (self, target, contribution),
+            |(win, target, contribution), property| {
+                win.set_style_property(target, property, contribution)
+            },
+            |(win, target, contribution), property| {
+                win.set_geometry_property(target, property, contribution)
+            },
+        )
+    }
+    fn style_property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         Ok(property.get(runtime.styles.get(runtime.by_identity[&identity])))
     }
-    pub fn contribution<T>(
+    fn style_contribution<T>(
         &self,
         target: Target,
         property: Property<T>,
@@ -1203,7 +1246,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     }
     /// A typed inspector contribution. Validation precedes editing; inheritance
     /// removes the contribution and reveals the latest component declaration.
-    pub fn set_property<T: PartialEq>(
+    fn set_style_property<T: PartialEq>(
         &mut self,
         target: Target,
         property: Property<T>,
@@ -1409,6 +1452,7 @@ impl<M: View + 'static> Runtime<M> {
             lists: list_drafts,
             annotations: annotation_drafts,
             images: image_drafts,
+            geometry: geometry_drafts,
         } = self.model.view().flatten_lists(
             MAX_NODES,
             readers,
@@ -1496,6 +1540,11 @@ impl<M: View + 'static> Runtime<M> {
                     .push(Destination::new(index, Port::Visual));
             }
             fields.push(field);
+        }
+        for &(node, geometry) in &geometry_drafts {
+            crate::property::CORNER_RADIUS
+                .validate(&geometry.corner_radius)
+                .map_err(|error| Error::GeometryProperty { node, error })?;
         }
         let mut annotation_fields = Vec::with_capacity(annotation_drafts.len());
         for annotation in &annotation_drafts {
@@ -1776,7 +1825,12 @@ impl<M: View + 'static> Runtime<M> {
             let metadata = self
                 .metadata
                 .get_or_insert_with(|| Box::new(Metadata::default()));
-            let mut base = Vec::with_capacity(annotation_drafts.len());
+            let mut base = Vec::with_capacity(
+                annotation_drafts
+                    .iter()
+                    .filter(|a| a.text.name.is_some() || a.text.description.is_some())
+                    .count(),
+            );
             for (annotation, fields) in annotation_drafts.into_iter().zip(annotation_fields) {
                 let identity = nodes[annotation.node as usize].identity();
                 let previous = metadata.base(identity);
@@ -1818,15 +1872,18 @@ impl<M: View + 'static> Runtime<M> {
                     }
                 }
                 let [name, description] = values;
-                base.push(Declared {
-                    identity,
-                    name,
-                    description,
-                });
+                if name.is_some() || description.is_some() {
+                    base.push(Declared {
+                        identity,
+                        name,
+                        description,
+                    });
+                }
             }
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
+        self.reconcile_geometry(&nodes, geometry_drafts);
         self.lists = lists;
         self.list_rows = list_rows;
         self.nodes = nodes;
@@ -1845,6 +1902,12 @@ impl<M: View + 'static> Runtime<M> {
             metadata
                 .overrides
                 .retain(|identity, _| self.by_identity.contains_key(identity));
+            if let Some(geometry) = metadata.geometry.as_mut() {
+                geometry.retain(|identity| self.by_identity.contains_key(&identity));
+                if geometry.unused() {
+                    metadata.geometry = None;
+                }
+            }
         }
         self.logical_valid = true;
         self.prune_focus();
@@ -1982,6 +2045,14 @@ impl<M: View + 'static> Runtime<M> {
             && let Some(sheet) = metadata.candidate.take()
         {
             metadata.presented = sheet;
+        }
+        if let Some(metadata) = &mut self.metadata
+            && let Some(geometry) = &mut metadata.geometry
+        {
+            geometry.acknowledge();
+            if geometry.unused() {
+                metadata.geometry = None;
+            }
         }
         if self.metadata.as_deref().is_some_and(Metadata::unused) {
             self.metadata = None;
@@ -2182,6 +2253,11 @@ impl<M: View + 'static> Runtime<M> {
                 .get(index + 1)
                 .is_some_and(|child| child.parent.index() == Some(index));
             let style = self.styles.get(index);
+            let radius = self
+                .metadata
+                .as_ref()
+                .and_then(|m| m.geometry.as_ref())
+                .map_or(0.0, |g| g.get(self.nodes[index].identity()).corner_radius);
             let node = &mut self.nodes[index];
             let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
@@ -2231,8 +2307,9 @@ impl<M: View + 'static> Runtime<M> {
                 raw_bounds.intersection(viewport)
             };
             if style.bg.alpha() > 0.0 {
-                scene.fill_rect(
+                scene.fill_rounded_rect(
                     rect,
+                    radius,
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
                     clip,
                     style.bg,
@@ -2240,8 +2317,9 @@ impl<M: View + 'static> Runtime<M> {
             } else if node.handler.is_some() || node.kind() == NodeKind::Input {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
-                scene.fill_rect(
+                scene.fill_rounded_rect(
                     rect,
+                    radius,
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
                     clip,
                     Color::TRANSPARENT,
@@ -2270,7 +2348,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             if let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
-                scene.draw_image(
+                scene.draw_image_with(
                     resource,
                     Rect::new(
                         layout.content_box_x(),
@@ -2280,7 +2358,10 @@ impl<M: View + 'static> Runtime<M> {
                     ),
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
                     clip,
-                    image.sampling,
+                    gpui_canvas::ImageOptions {
+                        sampling: image.sampling,
+                        corner_radius: radius,
+                    },
                 )?;
             }
             let published_parent = if list_mode {
@@ -2358,6 +2439,11 @@ impl<M: View + 'static> Runtime<M> {
                 presented.len(),
             );
         }
+        let geometry_sheet = self
+            .metadata
+            .as_ref()
+            .and_then(|m| m.geometry.as_ref())
+            .map(|g| g.freeze(&presented));
         let damage = if self.automatic_presentation {
             // Automatic headless acknowledgement retains no external surface
             // to repair. Do not compare commands for an unused capability.
@@ -2380,6 +2466,15 @@ impl<M: View + 'static> Runtime<M> {
             && let Some(metadata) = &mut self.metadata
         {
             metadata.candidate = Some(sheet);
+        }
+        if let Some(column) = geometry_sheet {
+            self.metadata
+                .as_mut()
+                .unwrap()
+                .geometry
+                .as_mut()
+                .unwrap()
+                .prepare(column);
         }
         if let Some(leases) = image_leases {
             self.images.as_mut().unwrap().prepare(sequence, leases);

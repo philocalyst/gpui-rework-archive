@@ -10,7 +10,9 @@ pub fn image(resource: &Image) -> El<'_> {
     El::image(resource)
 }
 
+#[derive(Clone, Copy)]
 pub(crate) struct ImageSpec<'a> {
+    pub geometry: crate::property::GeometryStyle,
     pub resource: &'a Image,
     pub sampling: ImageSampling,
 }
