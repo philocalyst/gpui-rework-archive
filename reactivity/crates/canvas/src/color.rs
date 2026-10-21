@@ -7,6 +7,8 @@ pub enum ColorSpace {
     LinearSrgb,
     DisplayP3,
     LinearDisplayP3,
+    /// Perceptual lightness, chroma and hue in degrees, relative to D65.
+    Oklch,
 }
 
 /// Finite, straight-alpha tagged color. Construction validates representability
@@ -22,9 +24,19 @@ impl Default for Color {
     }
 }
 impl Color {
-    pub const BLACK: Self = Self::rgb(0, 0, 0);
-    pub const WHITE: Self = Self::rgb(255, 255, 255);
-    pub const TRANSPARENT: Self = Self::rgba(0, 0, 0, 0);
+    // The default neutral palette uses the same authoring space as `oklch`.
+    pub const BLACK: Self = Self {
+        channels: [0.0, 0.0, 0.0, 1.0],
+        space: ColorSpace::Oklch,
+    };
+    pub const WHITE: Self = Self {
+        channels: [1.0, 0.0, 0.0, 1.0],
+        space: ColorSpace::Oklch,
+    };
+    pub const TRANSPARENT: Self = Self {
+        channels: [0.0; 4],
+        space: ColorSpace::Oklch,
+    };
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self {
             channels: [
@@ -51,9 +63,22 @@ impl Color {
     pub fn linear_display_p3(r: f32, g: f32, b: f32, a: f32) -> Result<Self, Error> {
         Self::new([r, g, b, a], ColorSpace::LinearDisplayP3)
     }
-    fn new(channels: [f32; 4], space: ColorSpace) -> Result<Self, Error> {
+    /// Perceptual authoring color: L in [0,1], C >= 0, finite hue in degrees.
+    /// Hue wraps into [0,360). Alpha is in [0,1]. Invalid ranges are rejected,
+    /// rather than CSS parsing's clamping. Out-of-gamut RGB remains extended;
+    /// use `linear_srgb` or `linear_display_p3` for HDR scene highlights.
+    pub fn oklch(lightness: f32, chroma: f32, hue: f32, alpha: f32) -> Result<Self, Error> {
+        Self::new([lightness, chroma, hue, alpha], ColorSpace::Oklch)
+    }
+    fn new(mut channels: [f32; 4], space: ColorSpace) -> Result<Self, Error> {
         if !channels.iter().all(|v| v.is_finite()) || !(0.0..=1.0).contains(&channels[3]) {
             return Err(Error::InvalidColor);
+        }
+        if space == ColorSpace::Oklch {
+            if !(0.0..=1.0).contains(&channels[0]) || channels[1] < 0.0 {
+                return Err(Error::InvalidColor);
+            }
+            channels[2] = wrap_hue(channels[2] as f64);
         }
         let color = Self { channels, space };
         // Explicit numerical admission, far beyond SDR. Keeping working values
@@ -67,6 +92,7 @@ impl Color {
         }
         Ok(color)
     }
+    /// Authored components and alpha. For Oklch these are [L,C,h_degrees,a].
     pub const fn channels(self) -> [f32; 4] {
         self.channels
     }
@@ -91,6 +117,23 @@ impl Color {
             return Ok(self);
         }
         let mut rgb = self.linear_rgb();
+        if space == ColorSpace::Oklch {
+            let lab = linear_to_oklab(rgb);
+            let chroma = lab[1].hypot(lab[2]);
+            return Self::new(
+                [
+                    lab[0] as f32,
+                    chroma as f32,
+                    if chroma <= 1e-12 {
+                        0.0
+                    } else {
+                        wrap_hue(lab[2].atan2(lab[1]).to_degrees())
+                    },
+                    self.alpha(),
+                ],
+                space,
+            );
+        }
         if matches!(space, ColorSpace::DisplayP3 | ColorSpace::LinearDisplayP3) {
             rgb = matrix(XYZ_TO_P3, matrix(SRGB_TO_XYZ, rgb));
         }
@@ -103,6 +146,16 @@ impl Color {
         )
     }
     fn linear_rgb(self) -> [f64; 3] {
+        if self.space == ColorSpace::Oklch {
+            let [lightness, chroma, hue, _] = self.channels;
+            if chroma == 0.0 {
+                return [(lightness as f64).powi(3); 3];
+            }
+            let (sin, cos) = (hue as f64).to_radians().sin_cos();
+            let lab = [lightness as f64, chroma as f64 * cos, chroma as f64 * sin];
+            let lms = matrix(OKLAB_TO_LMS, lab).map(|v| v.powi(3));
+            return matrix(XYZ_TO_SRGB, matrix(LMS_TO_XYZ, lms));
+        }
         let mut rgb = [
             self.channels[0] as f64,
             self.channels[1] as f64,
@@ -127,6 +180,10 @@ impl Color {
         v
     }
 }
+/// Opaque perceptual authoring color. For transparency use `Color::oklch`.
+pub fn oklch(lightness: f32, chroma: f32, hue: f32) -> Result<Color, Error> {
+    Color::oklch(lightness, chroma, hue, 1.0)
+}
 pub const fn rgb(hex: u32) -> Color {
     Color::rgb((hex >> 16) as u8, (hex >> 8) as u8, hex as u8)
 }
@@ -141,6 +198,9 @@ pub enum OutputProfile {
 pub enum PixelFormat {
     #[default]
     Rgba8Premultiplied,
+    /// Eight bytes/pixel: R,G,B,A little-endian IEEE binary16, premultiplied
+    /// linear light in `OutputProfile` primaries. Final numeric overflow uses
+    /// `FloatRangePolicy::FiniteSaturate`; no SDR transfer or tone map applies.
     Rgba16Float,
 }
 /// Mapping happens once, on final straight output-profile linear RGB.
@@ -153,16 +213,75 @@ pub enum SdrMapping {
     /// Deliberately named per-channel because it need not preserve hue.
     ReinhardPerChannel { exposure: f32 },
 }
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+/// Conversion at the finite binary16 storage boundary, distinct from a display
+/// gamut mapper or tone mapper. Extended negative and >1 channels are preserved.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FloatRangePolicy {
+    /// Round to nearest, ties to even; saturate magnitudes >65504 to signed
+    /// 65504. No infinities/NaNs are emitted. Input NaN is an internal invariant
+    /// violation (validated author colors and bounded composition cannot yield it).
+    FiniteSaturate,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutputTransfer {
+    Srgb,
+    Linear,
+}
+/// Required interpretation of the byte buffer; this does not negotiate a host
+/// display mode. A consumer must honor primaries, transfer and reference white.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct OutputMetadata {
+    pub profile: OutputProfile,
+    pub format: PixelFormat,
+    pub primaries_xy: [[f32; 2]; 3],
+    pub white_point_xy: [f32; 2],
+    pub transfer: OutputTransfer,
+    /// Luminance represented by scene-relative neutral linear 1, in cd/m².
+    pub reference_white_nits: f32,
+    pub premultiplied_alpha: bool,
+    pub float_range: Option<FloatRangePolicy>,
+    pub sdr_mapping: Option<SdrMapping>,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ColorConfig {
     pub profile: OutputProfile,
     pub format: PixelFormat,
+    /// Used only by RGBA8. RGBA16Float requires `Clip`, which selects no SDR
+    /// mapper there; an explicitly requested Reinhard mapper is rejected.
     pub mapping: SdrMapping,
+    /// Scene-relative neutral linear 1's luminance; default 203 cd/m², following
+    /// the HDR diffuse-white convention. Metadata only: never rescales samples.
+    pub reference_white_nits: f32,
+}
+impl Default for ColorConfig {
+    fn default() -> Self {
+        Self {
+            profile: OutputProfile::Srgb,
+            format: PixelFormat::Rgba8Premultiplied,
+            mapping: SdrMapping::Clip,
+            reference_white_nits: 203.0,
+        }
+    }
 }
 impl ColorConfig {
+    /// Linear HDR interchange buffer. Neutral linear 1 represents the supplied
+    /// reference-white luminance; this scale is metadata, not a sample multiplier.
+    pub fn linear_hdr(profile: OutputProfile, reference_white_nits: f32) -> Result<Self, Error> {
+        let config = Self {
+            profile,
+            format: PixelFormat::Rgba16Float,
+            reference_white_nits,
+            ..Self::default()
+        };
+        config.validate()?;
+        Ok(config)
+    }
     pub fn validate(self) -> Result<(), Error> {
-        if self.format != PixelFormat::Rgba8Premultiplied {
-            return Err(Error::UnsupportedPixelFormat);
+        if !self.reference_white_nits.is_finite() || self.reference_white_nits <= 0.0 {
+            return Err(Error::InvalidColor);
+        }
+        if self.format == PixelFormat::Rgba16Float && self.mapping != SdrMapping::Clip {
+            return Err(Error::InvalidColor);
         }
         if let SdrMapping::ReinhardPerChannel { exposure } = self.mapping
             && (!exposure.is_finite() || exposure <= 0.0 || exposure > 1e10)
@@ -170,6 +289,38 @@ impl ColorConfig {
             return Err(Error::InvalidColor);
         }
         Ok(())
+    }
+    pub const fn bytes_per_pixel(self) -> usize {
+        match self.format {
+            PixelFormat::Rgba8Premultiplied => 4,
+            PixelFormat::Rgba16Float => 8,
+        }
+    }
+    pub fn metadata(self) -> OutputMetadata {
+        let half = self.format == PixelFormat::Rgba16Float;
+        OutputMetadata {
+            profile: self.profile,
+            format: self.format,
+            primaries_xy: match self.profile {
+                OutputProfile::Srgb => [[0.64, 0.33], [0.30, 0.60], [0.15, 0.06]],
+                OutputProfile::DisplayP3 => [[0.68, 0.32], [0.265, 0.69], [0.15, 0.06]],
+            },
+            white_point_xy: [0.3127, 0.3290],
+            transfer: if half {
+                OutputTransfer::Linear
+            } else {
+                OutputTransfer::Srgb
+            },
+            reference_white_nits: self.reference_white_nits,
+            premultiplied_alpha: true,
+            float_range: half.then_some(FloatRangePolicy::FiniteSaturate),
+            sdr_mapping: (!half).then_some(self.mapping),
+        }
+    }
+    pub(crate) fn half_encoder(self) -> HalfFloatEncoder {
+        HalfFloatEncoder {
+            profile: self.profile,
+        }
     }
     pub(crate) fn encoder(self) -> OutputEncoder {
         OutputEncoder {
@@ -231,6 +382,107 @@ impl OutputEncoder {
             self.config.encode_general(color)
         }
     }
+}
+
+/// IEEE binary16 output, without a nonlinear transfer or display gamut mapping.
+#[derive(Clone, Copy)]
+pub(crate) struct HalfFloatEncoder {
+    profile: OutputProfile,
+}
+impl HalfFloatEncoder {
+    #[inline]
+    pub(crate) fn encode(self, color: [f32; 4]) -> [u8; 8] {
+        let mut rgb = [color[0] as f64, color[1] as f64, color[2] as f64];
+        if self.profile == OutputProfile::DisplayP3 {
+            rgb = matrix(XYZ_TO_P3, matrix(SRGB_TO_XYZ, rgb));
+        }
+        let mut bytes = [0; 8];
+        for (index, value) in rgb.into_iter().chain([color[3] as f64]).enumerate() {
+            let half = finite_binary16(value);
+            bytes[index * 2..index * 2 + 2].copy_from_slice(&half.to_le_bytes());
+        }
+        bytes
+    }
+}
+impl crate::canvas::PixelWriter for HalfFloatEncoder {
+    const BYTES: usize = 8;
+    #[inline]
+    fn write(self, color: [f32; 4], destination: &mut [u8]) {
+        destination.copy_from_slice(&self.encode(color));
+    }
+}
+
+// Direct f64 -> binary16 avoids double rounding after the output-profile matrix.
+// All finite half values are integer multiples of 2^-24 below the normal range;
+// normal values have an implicit leading bit and ten explicit fraction bits.
+// Round the integer significand with a guard/remainder and ties-to-even. The
+// saturation check removes overflow before rounding; all other casts are exact.
+fn finite_binary16(value: f64) -> u16 {
+    assert!(!value.is_nan(), "non-finite compositor invariant");
+    let sign = ((value.to_bits() >> 48) as u16) & 0x8000;
+    let value = value.abs().min(65504.0);
+    let bits = value.to_bits();
+    let exponent = ((bits >> 52) & 0x7ff) as i32 - 1023;
+    if exponent < -25 {
+        return sign;
+    }
+    let significand = (bits & ((1_u64 << 52) - 1)) | (1_u64 << 52);
+    let shift = if exponent < -14 {
+        (28 - exponent) as u32
+    } else {
+        42
+    };
+    let integer = significand >> shift;
+    let remainder = significand & ((1_u64 << shift) - 1);
+    let halfway = 1_u64 << (shift - 1);
+    let rounded =
+        integer + u64::from(remainder > halfway || (remainder == halfway && integer & 1 != 0));
+    let magnitude = if exponent < -14 {
+        rounded as u16
+    } else {
+        (((exponent + 14) as u16) << 10) + rounded as u16
+    };
+    sign | magnitude
+}
+
+fn wrap_hue(hue: f64) -> f32 {
+    let wrapped = hue.rem_euclid(360.0) as f32;
+    // Narrowing an angle just below 360 can round to 360.
+    if wrapped >= 360.0 || wrapped == 0.0 {
+        0.0
+    } else {
+        wrapped
+    }
+}
+// CSS Color 4, 9 October 2026, sample conversion matrices (§18).
+const OKLAB_TO_LMS: [[f64; 3]; 3] = [
+    [1.0, 0.3963377773761749, 0.2158037573099136],
+    [1.0, -0.1055613458156586, -0.0638541728258133],
+    [1.0, -0.0894841775298119, -1.2914855480194092],
+];
+const LMS_TO_XYZ: [[f64; 3]; 3] = [
+    [1.2268798758459243, -0.5578149944602171, 0.2813910456659647],
+    [-0.0405757452148008, 1.1122868032803170, -0.0717110580655164],
+    [-0.0763729366746601, -0.4214933324022432, 1.5869240198367816],
+];
+const XYZ_TO_LMS: [[f64; 3]; 3] = [
+    [0.8190224379967030, 0.3619062600528904, -0.1288737815209879],
+    [0.0329836539323885, 0.9292868615863434, 0.0361446663506424],
+    [0.0481771893596242, 0.2642395317527308, 0.6335478284694309],
+];
+const LMS_TO_OKLAB: [[f64; 3]; 3] = [
+    [0.2104542683093140, 0.7936177747023054, -0.0040720430116193],
+    [1.9779985324311684, -2.4285922420485799, 0.4505937096174110],
+    [0.0259040424655478, 0.7827717124575296, -0.8086757549230774],
+];
+fn linear_to_oklab(rgb: [f64; 3]) -> [f64; 3] {
+    if rgb[0] == rgb[1] && rgb[1] == rgb[2] {
+        return [rgb[0].cbrt(), 0.0, 0.0];
+    }
+    matrix(
+        LMS_TO_OKLAB,
+        matrix(XYZ_TO_LMS, matrix(SRGB_TO_XYZ, rgb)).map(f64::cbrt),
+    )
 }
 
 // D65 matrices and sign-preserving extended sRGB transfer, CSS Color 4 §18.
@@ -437,5 +689,101 @@ mod quantizer_tests {
             exact.0,
             std::mem::size_of::<OpaqueSrgb>()
         );
+    }
+}
+
+#[cfg(test)]
+mod half_tests {
+    use super::*;
+    // Independent mathematical decoder: not the encoder's bit-shift algorithm.
+    fn decode(bits: u16) -> f64 {
+        let exponent = ((bits >> 10) & 31) as i32;
+        let fraction = (bits & 1023) as f64;
+        let magnitude = if exponent == 0 {
+            fraction * 2_f64.powi(-24)
+        } else {
+            (1.0 + fraction / 1024.0) * 2_f64.powi(exponent - 15)
+        };
+        if bits & 0x8000 != 0 {
+            -magnitude
+        } else {
+            magnitude
+        }
+    }
+    #[test]
+    fn every_finite_half_roundtrips_including_signed_zero() {
+        for bits in 0..=u16::MAX {
+            if bits & 0x7c00 != 0x7c00 {
+                assert_eq!(finite_binary16(decode(bits)), bits, "{bits:04x}");
+            }
+        }
+    }
+    #[test]
+    fn every_adjacent_half_midpoint_rounds_ties_even_on_both_sides() {
+        for lower in 0..0x7bff_u16 {
+            let upper = lower + 1;
+            let midpoint = (decode(lower) + decode(upper)) / 2.0;
+            let below = f64::from_bits(midpoint.to_bits() - 1);
+            let above = f64::from_bits(midpoint.to_bits() + 1);
+            let tie = if lower & 1 == 0 { lower } else { upper };
+            for (input, expected) in [(below, lower), (midpoint, tie), (above, upper)] {
+                assert_eq!(finite_binary16(input), expected, "{lower:04x}: {input}");
+                assert_eq!(finite_binary16(-input), expected | 0x8000);
+            }
+        }
+    }
+    #[test]
+    fn known_values_finite_saturation_and_little_endian_channels() {
+        for (value, bits) in [
+            (1.0, 0x3c00),
+            (0.5, 0x3800),
+            (-2.0, 0xc000),
+            (65504.0, 0x7bff),
+            (2_f64.powi(-14), 0x0400),
+            (2_f64.powi(-24), 1),
+            (2_f64.powi(-25), 0),
+            (1e20, 0x7bff),
+            (-1e20, 0xfbff),
+            (f64::INFINITY, 0x7bff),
+            (f64::NEG_INFINITY, 0xfbff),
+        ] {
+            assert_eq!(finite_binary16(value), bits);
+        }
+        let config = ColorConfig {
+            format: PixelFormat::Rgba16Float,
+            ..ColorConfig::default()
+        };
+        assert_eq!(
+            config
+                .half_encoder()
+                .encode([-1e20, 1e20, 2_f32.powi(-24), 0.5]),
+            [0xff, 0xfb, 0xff, 0x7b, 1, 0, 0, 0x38]
+        );
+        assert_eq!(
+            config.half_encoder().encode([-0.0, 0.0, 4.0, 1.0]),
+            [0, 0x80, 0, 0, 0, 0x44, 0, 0x3c]
+        );
+    }
+    #[test]
+    fn p3_matrix_applies_to_premultiplied_linear_channels() {
+        let config = ColorConfig {
+            profile: OutputProfile::DisplayP3,
+            format: PixelFormat::Rgba16Float,
+            ..ColorConfig::default()
+        };
+        let input = Color::linear_display_p3(4.0, -0.5, 2.0, 0.25)
+            .unwrap()
+            .premultiplied();
+        let bytes = config.half_encoder().encode(input);
+        for (i, expected) in [1.0, -0.125, 0.5, 0.25].into_iter().enumerate() {
+            assert_eq!(
+                decode(u16::from_le_bytes([bytes[i * 2], bytes[i * 2 + 1]])),
+                expected
+            );
+        }
+    }
+    #[test]
+    fn authored_color_keeps_twenty_byte_provenance_header() {
+        assert_eq!(std::mem::size_of::<Color>(), 20);
     }
 }

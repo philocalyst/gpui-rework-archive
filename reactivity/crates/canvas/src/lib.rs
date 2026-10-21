@@ -1,11 +1,14 @@
-//! CPU canvas with extended-linear source-over and profiled premultiplied RGBA8.
+//! CPU canvas with extended-linear source-over and profiled premultiplied output.
 #![forbid(unsafe_code)]
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 mod canvas;
 mod color;
 mod text;
 pub use canvas::{Canvas, CanvasScene, RenderStats};
-pub use color::{Color, ColorConfig, ColorSpace, OutputProfile, PixelFormat, SdrMapping, rgb};
+pub use color::{
+    Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
+    OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
+};
 pub use text::{FontFace, Glyph, TextLayout, TextSystem};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
