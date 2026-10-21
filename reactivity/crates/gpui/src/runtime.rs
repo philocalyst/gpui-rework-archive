@@ -34,6 +34,7 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 mod delivery;
 mod input;
 mod list;
+mod turn;
 use list::{ListRow, ListState, ScrollRequest};
 mod metadata;
 mod query;
@@ -1236,134 +1237,6 @@ impl<M: View + 'static> Runtime<M> {
         self.logical_valid = false;
         self.prepared = None;
         self.latest_token = None;
-    }
-    fn operation(
-        &mut self,
-        exact: Option<FieldId>,
-        edit: impl FnOnce(&mut M, &Sources<M>) -> Result<(), Error>,
-    ) -> Result<Commit, Error> {
-        self.live()?;
-        let epoch = self
-            .source_epoch
-            .checked_add(1)
-            .ok_or(Error::EpochExhausted)?;
-        match catch_unwind(AssertUnwindSafe(|| edit(&mut self.model, &self.sources))) {
-            Ok(result) => result?,
-            Err(_) => {
-                self.poison();
-                return Err(Error::OwnerPanicked);
-            }
-        }
-        self.source_epoch = epoch;
-        self.counters.source_operations += 1;
-        self.changed_nodes = 0;
-        self.after_source(exact)
-    }
-    fn after_source(&mut self, exact: Option<FieldId>) -> Result<Commit, Error> {
-        let exact = match exact {
-            Some(field) if self.logical_valid && !self.sources.invalidates_owner(field)? => {
-                Some(field)
-            }
-            _ => None,
-        };
-        let result = match exact {
-            Some(field) => {
-                self.counters.exact_updates += 1;
-                match catch_unwind(AssertUnwindSafe(|| self.patch(field))) {
-                    Ok(result) => result,
-                    Err(_) => {
-                        self.poison();
-                        Err(Error::OwnerPanicked)
-                    }
-                }
-            }
-            None => {
-                self.counters.coarse_updates += 1;
-                self.describe(false).map(|()| false)
-            }
-        };
-        if let Err(error) = result {
-            self.logical_valid = false;
-            self.focused = None;
-            return Err(error);
-        }
-        if result == Ok(true) {
-            return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
-        }
-        self.present()
-    }
-    fn activate(&mut self, target: Target) -> Result<Commit, Error> {
-        self.live()?;
-        let identity = self.resolve(target)?;
-        let index = self.by_identity[&identity];
-        if self.nodes[index].kind() == NodeKind::Input {
-            self.changed_nodes = 0;
-            return Ok(self.commit());
-        }
-        let handler = self.nodes[index]
-            .handler
-            .as_ref()
-            .ok_or(Error::NotInteractive)?;
-        let exact = match catch_unwind(AssertUnwindSafe(|| {
-            handler.validate(&self.model, &self.sources)
-        })) {
-            Ok(result) => result?,
-            Err(_) => {
-                self.poison();
-                return Err(Error::OwnerPanicked);
-            }
-        };
-        let epoch = self
-            .source_epoch
-            .checked_add(1)
-            .ok_or(Error::EpochExhausted)?;
-        match catch_unwind(AssertUnwindSafe(|| handler.invoke(&mut self.model))) {
-            Ok(result) => result?,
-            Err(_) => {
-                self.poison();
-                return Err(Error::OwnerPanicked);
-            }
-        }
-        self.source_epoch = epoch;
-        self.counters.source_operations += 1;
-        self.changed_nodes = 0;
-        self.after_source(exact)
-    }
-    fn edit_text(
-        &mut self,
-        target: Target,
-        edit: impl FnOnce(&mut String),
-    ) -> Result<Commit, Error> {
-        self.live()?;
-        let identity = self.resolve(target)?;
-        let node = &self.nodes[self.by_identity[&identity]];
-        if node.kind() != NodeKind::Input {
-            return Err(Error::NotInput);
-        }
-        let field = node
-            .text_slot()
-            .get(&self.texts)
-            .and_then(|text| text.field)
-            .ok_or(Error::UnregisteredInput {
-                node: self.by_identity[&identity],
-            })?;
-        let codec = self.fanout[&field].codec;
-        let mut input = match catch_unwind(AssertUnwindSafe(|| {
-            self.sources
-                .read_text(&self.model, field, codec)
-                .map(|text| text.into_owned())
-        })) {
-            Ok(result) => result?,
-            Err(_) => {
-                self.poison();
-                return Err(Error::OwnerPanicked);
-            }
-        };
-        edit(&mut input);
-        self.operation(Some(field), move |model, sources| {
-            sources.write_text(model, field, input, codec)?;
-            Ok(())
-        })
     }
     fn describe(&mut self, mount: bool) -> Result<(), Error> {
         self.describe_with(mount, None)
