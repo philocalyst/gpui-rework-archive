@@ -52,7 +52,8 @@ python3 crates/gpui/examples/support/thin_text_compare.py --clone 9 \
 Raw captures are `thin-text-paired.csv` (1,020 rows, 17 fixtures, five pairs),
 `thin-text-sparse-repeat.csv` (360 rows, 15 pairs of the first two fixtures),
 `thin-text-clone.csv` (288 rows, nine alternating runs), and
-`thin-text-guard.csv` (384 rows, eight four-variant repeats; experiment below).
+`thin-text-guard.csv` (384 rows, eight four-variant repeats), and
+`thin-text-packed.csv` (288 rows, eight three-variant repeats; experiments below).
 The driver's fixture table is the authoritative workload definition.
 
 ## Storage, including the larger allocation header
@@ -134,8 +135,8 @@ costs for storage; it does not claim a throughput win.
 
 Actual application assembly (`cargo rustc --release --example
 immutable_text_measure -- --emit=asm,link`) has no missing SharedText inline
-helpers. `Runtime<Page>::present` has 3,343 baseline versus 3,337 candidate
-instructions, 176 versus 175 calls, and the same 7,320-byte stack frame.
+helpers. `Runtime<Page>::present` has 4,100 baseline versus 4,091 candidate
+assembly lines, 176 versus 175 calls, and the same 7,320-byte stack frame.
 The no-text path skips **all** ArcStr flag tests and refcount instructions.
 Instead, LLVM changes row construction: baseline copies the 88-byte Presented
 with five 16-byte stores plus one 8-byte store; candidate scalarizes the 80-byte
@@ -145,7 +146,7 @@ causes the entire timing difference.
 
 A bounded, separately reviewable experiment states the already-reserved output
 capacity before `push`, returning ResourceLimit if the impossible bound fails.
-It removes the candidate's `grow_one` call (3,322 instructions / 173 calls),
+It removes the candidate's `grow_one` call (173 remaining calls),
 although mixed stores remain. Eight four-variant pairs give:
 
 | Phase | Original baseline | Original thin | Guarded baseline | Guarded thin |
@@ -156,7 +157,35 @@ although mixed stores remain. Eight four-variant pairs give:
 Guarded thin improves 3.37% / 1.58% against original thin, but the guard also
 slows baseline. It does **not** erase the loss: guarded thin remains 6.27% /
 4.40% slower than original baseline. This small capacity-proof change is kept
-separate from the representation patch for independent acceptance.
+separate from the representation patch for independent acceptance. No production
+capacity guard is included in the thin lease commits.
+
+A second bounded experiment combines frozen parent, closed kind, hit flag and
+four actions into a single u32 header. The exact rejected source is
+`thin-text-packed.patch`, applicable on `8c13a2801f`; it includes exhaustive
+parent/kind/action/hit roundtrip checks. Low 24 bits hold parent+1 (zero=None),
+the upper byte kind3/hit1/actions4, under the checked 100K-node bound. No unsafe
+code or new public API is used. All header/Presented getters inline in actual
+application assembly. The three byte stores disappear, leaving eight row
+stores; the frame falls 7,320 -> 7,288 bytes and calls 175 -> 173. Presented
+still occupies 80 bytes.
+
+That codegen change **does not improve the measured paths**. Eight alternating
+triples give:
+
+| Phase | Original baseline | Original thin | Packed thin |
+| --- | ---: | ---: | ---: |
+| No-text prepare (ms) | 58.140 | 64.015 | 64.326 |
+| Sparse edit (ms) | 4.003 | 4.247 | 4.275 |
+| No-text mount (ms) | 143.362 | 145.720 | 145.322 |
+| Sparse mount (ms) | 9.185 | 9.396 | 9.400 |
+
+The packed candidate adds decoding/more code with no storage benefit or timing
+gain, so it is **not adopted**. Reducing row stores alone does not explain or
+repair the whole regression. The exact cause beyond demonstrated broader
+compiler-layout sensitivity remains unresolved; no stronger causal or speed
+claim is made. Packed fixture SHA-256 is
+`de592e1b63af49e5cbf4c08e35fa0f576f7c93da7053348a0323c2656e9d1bb8`.
 
 Raw clone/read/drop loops (two million iterations, includes indexing and
 borrowed reads) have medians around 9.2 ns Triomphe versus 8.95 ns ArcStr for
