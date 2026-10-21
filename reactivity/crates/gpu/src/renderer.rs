@@ -70,6 +70,8 @@ pub struct Stats {
     pub mask_upload_bytes: usize,
     pub gpu_buffer_bytes: u64,
     pub atlas_bytes: u64,
+    pub atlas_keys: usize,
+    pub atlas_key_capacity: usize,
     pub cpu_index_capacity_bytes: usize,
     pub correction_records: usize,
     /// Hash-table entry capacity, excluding its allocator/control-byte overhead.
@@ -388,8 +390,10 @@ impl Renderer {
         self.ranges.resize(columns * rows, [0, 0]);
         self.records.clear();
         let mut original_references = 0usize;
+        let mut has_masks = false;
         for (index, draw) in scene.draws().enumerate() {
             let error = validate_draw(draw, index, scene.width, scene.height)?;
+            has_masks |= draw.mask.is_some();
             let mut record = DrawData::zeroed();
             record.inverse_x[3] = error[0];
             record.inverse_y[3] = error[1];
@@ -410,7 +414,7 @@ impl Renderer {
                 return Err(Error::ResourceLimit);
             }
         }
-        let mask_bytes = self.prepare_atlas(scene)?;
+        let mask_bytes = self.prepare_atlas(scene, has_masks)?;
         let mut offset = 0;
         self.cursors.clear();
         for range in &mut self.ranges {
@@ -611,6 +615,8 @@ impl Renderer {
                 + self.indices.size
                 + self.corrections.size,
             atlas_bytes: u64::from(self.atlas.side).pow(2),
+            atlas_keys: self.atlas.entries.len(),
+            atlas_key_capacity: self.atlas.entries.capacity(),
             cpu_index_capacity_bytes: self.records.capacity() * 96
                 + self.ranges.capacity() * 8
                 + self.references.capacity() * 4
@@ -619,7 +625,15 @@ impl Renderer {
         };
         Ok(submitted)
     }
-    fn prepare_atlas(&mut self, scene: PreparedScene<'_>) -> Result<usize, Error> {
+    fn prepare_atlas(&mut self, scene: PreparedScene<'_>, has_masks: bool) -> Result<usize, Error> {
+        if !has_masks {
+            if self.atlas.side != 1 || self.atlas.entries.capacity() != 0 {
+                // Submitted bind groups retain their texture leases in wgpu;
+                // replacing our cache cannot invalidate an in-flight frame.
+                self.atlas = Atlas::new(&self.device, 1);
+            }
+            return Ok(0);
+        }
         let mut uploaded = 0;
         for draw in scene.draws() {
             if let Some(mask) = draw.mask {

@@ -16,11 +16,20 @@ async fn renderer(format: wgpu::TextureFormat) -> Renderer {
     Renderer::request(&adapter, format).await.unwrap()
 }
 fn readback(renderer: &mut Renderer, canvas: &Canvas) -> Vec<u8> {
+    let texture = output_texture(renderer, canvas);
+    renderer
+        .render(
+            canvas.prepared_scene(),
+            &texture.create_view(&Default::default()),
+        )
+        .unwrap();
+    read_texture(renderer, &texture)
+}
+
+fn output_texture(renderer: &Renderer, canvas: &Canvas) -> wgpu::Texture {
     let (width, height) = (canvas.width(), canvas.height());
-    let bytes = renderer.format().block_copy_size(None).unwrap();
-    let stride = (width * bytes).next_multiple_of(256);
     let device = renderer.device();
-    let texture = device.create_texture(&wgpu::TextureDescriptor {
+    device.create_texture(&wgpu::TextureDescriptor {
         label: Some("test output"),
         size: wgpu::Extent3d {
             width,
@@ -33,25 +42,26 @@ fn readback(renderer: &mut Renderer, canvas: &Canvas) -> Vec<u8> {
         format: renderer.format(),
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
         view_formats: &[],
-    });
+    })
+}
+
+fn read_texture(renderer: &Renderer, texture: &wgpu::Texture) -> Vec<u8> {
+    let (width, height) = (texture.width(), texture.height());
+    let bytes = renderer.format().block_copy_size(None).unwrap();
+    let stride = (width * bytes).next_multiple_of(256);
+    let device = renderer.device();
     let buffer = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("readback"),
         size: u64::from(stride) * u64::from(height),
         usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
-    renderer
-        .render(
-            canvas.prepared_scene(),
-            &texture.create_view(&Default::default()),
-        )
-        .unwrap();
     let mut encoder = renderer
         .device()
         .create_command_encoder(&Default::default());
     encoder.copy_texture_to_buffer(
         wgpu::TexelCopyTextureInfo {
-            texture: &texture,
+            texture,
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
@@ -368,6 +378,84 @@ fn real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks() {
             );
         }
         assert!(actual.chunks_exact(4).any(|pixel| pixel[0] < 50));
+    });
+}
+
+#[test]
+fn text_free_reset_releases_keys_without_invalidating_in_flight_text() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut fonts = TextSystem::bundled().unwrap();
+        let run = fonts.shape("office café", 18.0, None).unwrap();
+        let clip = Rect::new(0.0, 0.0, 160.0, 42.0);
+        let mut text = Canvas::recording(160, 42, ColorConfig::default()).unwrap();
+        text.clear(Color::WHITE);
+        text.draw_text(
+            &mut fonts,
+            &run,
+            Point { x: 4.0, y: 2.0 },
+            Affine::IDENTITY,
+            clip,
+            Color::BLACK,
+        )
+        .unwrap();
+        let target = output_texture(&renderer, &text);
+        renderer
+            .render(
+                text.prepared_scene(),
+                &target.create_view(&Default::default()),
+            )
+            .unwrap();
+        let populated = renderer.stats();
+        assert!(populated.mask_upload_bytes > 0 && populated.atlas_bytes > 1);
+        assert!(populated.atlas_keys > 0 && populated.atlas_key_capacity > 0);
+        let mut empty = Canvas::recording(160, 42, ColorConfig::default()).unwrap();
+        empty.clear(Color::rgb(20, 40, 80));
+        let empty_target = output_texture(&renderer, &empty);
+        let mut invalid = empty.prepared_scene();
+        invalid.color_config.mapping = gpui_canvas::SdrMapping::ReinhardPerChannel {
+            exposure: f32::INFINITY,
+        };
+        assert!(matches!(
+            renderer.render(invalid, &empty_target.create_view(&Default::default())),
+            Err(gpui_gpu::Error::InvalidScene)
+        ));
+        // Rejection did not discard the admitted cache.
+        renderer
+            .render(
+                text.prepared_scene(),
+                &target.create_view(&Default::default()),
+            )
+            .unwrap();
+        assert_eq!(renderer.stats().mask_upload_bytes, 0);
+        // No poll has occurred: both text submissions may still use the old atlas.
+        renderer
+            .render(
+                empty.prepared_scene(),
+                &empty_target.create_view(&Default::default()),
+            )
+            .unwrap();
+        assert_eq!(renderer.stats().atlas_bytes, 1);
+        assert_eq!(renderer.stats().atlas_keys, 0);
+        assert_eq!(renderer.stats().atlas_key_capacity, 0);
+        let previous = read_texture(&renderer, &target);
+        for (&actual, &expected) in previous.iter().zip(text.pixels()) {
+            assert!((i16::from(actual) - i16::from(expected)).abs() <= 1);
+        }
+        assert!(
+            read_texture(&renderer, &empty_target)
+                .chunks_exact(4)
+                .all(|pixel| pixel == [20, 40, 80, 255])
+        );
+        assert_eq!(readback(&mut renderer, &text), previous);
+        assert!(
+            renderer.stats().mask_upload_bytes > 0,
+            "returning text reuploads masks"
+        );
+        readback(&mut renderer, &empty);
+        readback(&mut renderer, &empty);
+        assert_eq!(renderer.stats().atlas_bytes, 1);
+        assert_eq!(renderer.stats().atlas_key_capacity, 0);
     });
 }
 
