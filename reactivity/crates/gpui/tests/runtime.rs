@@ -552,3 +552,261 @@ fn a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning() 
     assert_eq!((commit.source_epoch, commit.presentation_epoch), (1, 1));
     assert_eq!(win.with_model(|m| (*m.first, *m.second)).unwrap(), (2, 7));
 }
+
+// Deliberately neither Clone nor Debug: a rejected edit must return this owned
+// resource, and even generic error diagnostics must not impose those bounds.
+struct Resource {
+    bytes: Vec<u8>,
+    drops: Rc<std::cell::Cell<usize>>,
+}
+impl Resource {
+    fn new(drops: &Rc<std::cell::Cell<usize>>) -> Self {
+        Self {
+            bytes: vec![1, 2, 3],
+            drops: drops.clone(),
+        }
+    }
+}
+impl Drop for Resource {
+    fn drop(&mut self) {
+        self.drops.set(self.drops.get() + 1);
+    }
+}
+struct Resources {
+    first: Signal<Resource>,
+    second: Signal<Resource>,
+}
+impl Resources {
+    const FIRST: Source<Self, Resource> =
+        Source::new(FieldId::new(1), "first", |m| &m.first, |m| &mut m.first);
+    const UNKNOWN: Source<Self, Resource> =
+        Source::new(FieldId::new(999), "unknown", |m| &m.first, |m| &mut m.first);
+    const BAD_READ: Source<Self, Resource> = Source::new(
+        FieldId::new(1),
+        "bad read",
+        |m| &m.second,
+        |m| &mut m.second,
+    );
+    const BAD_WRITE: Source<Self, Resource> = Source::new(
+        FieldId::new(1),
+        "bad write",
+        |m| &m.first,
+        |m| &mut m.second,
+    );
+}
+impl View for Resources {
+    fn sources() -> Sources<Self> {
+        Sources::new().field(Self::FIRST)
+    }
+    fn view(&self) -> El<'_> {
+        div().size(8).bg(Color::BLACK)
+    }
+}
+fn resources() -> Win<Resources> {
+    let old_drops = Rc::new(std::cell::Cell::new(0));
+    Win::with_size(
+        Resources {
+            first: Signal::new(Resource::new(&old_drops)),
+            second: Signal::new(Resource::new(&old_drops)),
+        },
+        8,
+        8,
+    )
+    .unwrap()
+}
+fn rejected_resource(
+    error: gpui::SetError<Resource>,
+    expected: Error,
+    pointer: *const u8,
+) -> Resource {
+    assert!(!format!("{error:?}").is_empty());
+    match error {
+        gpui::SetError::Rejected { error, value } => {
+            assert_eq!(error, expected);
+            assert_eq!(value.bytes.as_ptr(), pointer);
+            assert_eq!(value.drops.get(), 0);
+            value
+        }
+        _ => panic!("a pre-admission error consumed the resource"),
+    }
+}
+
+#[test]
+fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
+    let win = resources();
+    let drops = Rc::new(std::cell::Cell::new(0));
+    let value = Resource::new(&drops);
+    let pointer = value.bytes.as_ptr();
+    let borrowed = win
+        .with_model(|_| win.set(Resources::FIRST, value))
+        .unwrap()
+        .unwrap_err();
+    let value = rejected_resource(borrowed, Error::Borrowed, pointer);
+    let unknown = win.set(Resources::UNKNOWN, value).unwrap_err();
+    let value = rejected_resource(
+        unknown,
+        Error::Binding(gpui::BindError::UnknownField(Resources::UNKNOWN.id())),
+        pointer,
+    );
+    let bad_read = win.set(Resources::BAD_READ, value).unwrap_err();
+    let value = rejected_resource(
+        bad_read,
+        Error::Binding(gpui::BindError::ProjectionMismatch(Resources::FIRST.id())),
+        pointer,
+    );
+    let bad_write = win.set(Resources::BAD_WRITE, value).unwrap_err();
+    let value = rejected_resource(
+        bad_write,
+        Error::Binding(gpui::BindError::ProjectionMismatch(Resources::FIRST.id())),
+        pointer,
+    );
+    assert_eq!(
+        win.with_model(|m| (m.first.revision().get(), m.second.revision().get()))
+            .unwrap(),
+        (0, 0)
+    );
+    assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+    let commit = win.set(Resources::FIRST, value).unwrap();
+    assert_eq!(commit.source_epoch, 1);
+    assert_eq!(win.with_model(|m| m.first.bytes.as_ptr()).unwrap(), pointer);
+    assert_eq!(drops.get(), 0);
+    drop(win);
+    assert_eq!(drops.get(), 1);
+}
+
+#[test]
+fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
+    let win = resources();
+    let drops = Rc::new(std::cell::Cell::new(0));
+    let value = Resource::new(&drops);
+    let pointer = value.bytes.as_ptr();
+    let bad_getter = Source::new(
+        Resources::FIRST.id(),
+        "panic getter",
+        |_: &Resources| -> &Signal<Resource> { panic!("projection panic") },
+        |m| &mut m.first,
+    );
+    let value = rejected_resource(
+        win.set(bad_getter, value).unwrap_err(),
+        Error::OwnerPanicked,
+        pointer,
+    );
+    assert!(win.snapshot().unwrap().poisoned);
+    let value = rejected_resource(
+        win.set(Resources::FIRST, value).unwrap_err(),
+        Error::Poisoned,
+        pointer,
+    );
+    drop(value);
+    assert_eq!(drops.get(), 1);
+
+    let win = resources();
+    let drops = Rc::new(std::cell::Cell::new(0));
+    let value = Resource::new(&drops);
+    let pointer = value.bytes.as_ptr();
+    let bad_writer = Source::new(
+        Resources::FIRST.id(),
+        "panic writer",
+        |m: &Resources| &m.first,
+        |_| -> &mut Signal<Resource> { panic!("writer panic") },
+    );
+    let value = rejected_resource(
+        win.set(bad_writer, value).unwrap_err(),
+        Error::OwnerPanicked,
+        pointer,
+    );
+    assert!(win.snapshot().unwrap().poisoned);
+    assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+    drop(value);
+    assert_eq!(drops.get(), 1);
+}
+
+#[test]
+fn committed_sets_report_the_actual_epochs_without_returning_a_consumed_value() {
+    let win = Win::with_size(
+        Input {
+            content: Signal::new("ok".into()),
+        },
+        200,
+        80,
+    )
+    .unwrap();
+    let old = win.scene_digest().unwrap();
+    match win.set(Input::CONTENT, "ok\t".into()).unwrap_err() {
+        gpui::SetError::Committed { error, commit } => {
+            assert!(matches!(error, Error::Canvas(_)));
+            assert_eq!((commit.source_epoch, commit.presentation_epoch), (1, 0));
+        }
+        _ => panic!("a successful source mutation was reported as rejected"),
+    }
+    assert_eq!(win.with_model(|m| m.content.to_string()).unwrap(), "ok\t");
+    assert_eq!(win.scene_digest().unwrap(), old);
+    win.backspace(win.input()).unwrap();
+    assert_eq!(win.scene_digest().unwrap(), old);
+}
+
+#[test]
+fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() {
+    struct Owned {
+        id: u8,
+        panic: bool,
+        drops: Rc<RefCell<Vec<u8>>>,
+    }
+    impl Drop for Owned {
+        fn drop(&mut self) {
+            self.drops.borrow_mut().push(self.id);
+            if self.panic {
+                self.panic = false;
+                panic!("old value destructor panic");
+            }
+        }
+    }
+    struct Owner {
+        value: Signal<Owned>,
+    }
+    const VALUE: Source<Owner, Owned> =
+        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    impl View for Owner {
+        fn sources() -> Sources<Self> {
+            Sources::new().field(VALUE)
+        }
+        fn view(&self) -> El<'_> {
+            div().size(8).bg(Color::BLACK)
+        }
+    }
+    let drops = Rc::new(RefCell::new(Vec::new()));
+    let win = Win::with_size(
+        Owner {
+            value: Signal::new(Owned {
+                id: 1,
+                panic: true,
+                drops: drops.clone(),
+            }),
+        },
+        8,
+        8,
+    )
+    .unwrap();
+    let error = win
+        .set(
+            VALUE,
+            Owned {
+                id: 2,
+                panic: false,
+                drops: drops.clone(),
+            },
+        )
+        .unwrap_err();
+    assert!(matches!(
+        error,
+        gpui::SetError::OwnerFault {
+            error: Error::OwnerPanicked
+        }
+    ));
+    assert!(win.snapshot().unwrap().poisoned);
+    assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+    drop(win);
+    let dropped = drops.borrow();
+    assert_eq!(dropped.iter().filter(|&&id| id == 1).count(), 1);
+    assert_eq!(dropped.iter().filter(|&&id| id == 2).count(), 1);
+}
