@@ -9,9 +9,10 @@ and driver configuration; page-cache/cold-start conditions must be reported.
 import argparse
 import csv
 import pathlib
-import selectors
+import queue
 import subprocess
 import sys
+import threading
 import time
 
 
@@ -19,21 +20,33 @@ def run(binary, policy, timeout):
     started = time.perf_counter_ns()
     child = subprocess.Popen([str(binary), f"--{policy}", "--startup"],
                              stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    # Windows selectors cannot wait on anonymous subprocess pipes. A reader
+    # works on all native platforms; timestamp detection before queue delivery.
+    lines = queue.SimpleQueue()
+
+    def read():
+        for line in child.stderr:
+            lines.put((time.perf_counter_ns(), line))
+        lines.put((time.perf_counter_ns(), None))
+
+    reader = threading.Thread(target=read, daemon=True)
+    reader.start()
     try:
         deadline = time.monotonic() + timeout
-        with selectors.DefaultSelector() as selector:
-            selector.register(child.stderr, selectors.EVENT_READ)
-            while True:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0 or not selector.select(remaining):
-                    raise TimeoutError(f"{binary}: no first-present marker")
-                line = child.stderr.readline()
-                if not line:
-                    raise RuntimeError(f"{binary}: exited before first present ({child.poll()})")
-                if line.startswith("GPUI_PRESENT,"):
-                    elapsed_us = (time.perf_counter_ns() - started) // 1000
-                    _, renderer, source, presented, main_us = line.strip().split(",")
-                    return [renderer, source, presented, int(main_us), elapsed_us]
+        while True:
+            try:
+                detected, line = lines.get(timeout=max(0, deadline - time.monotonic()))
+            except queue.Empty:
+                raise TimeoutError(f"{binary}: no first-present marker") from None
+            if line is None:
+                raise RuntimeError(f"{binary}: exited before first present ({child.poll()})")
+            if line.startswith("GPUI_PRESENT,"):
+                _, renderer, source, presented, main_us = line.strip().split(",")
+                if source != presented:
+                    raise RuntimeError(f"{binary}: first presentation is stale")
+                if policy in ("auto", "cpu") and renderer != "ReferenceCpu":
+                    raise RuntimeError(f"{binary}: expected software-first presentation")
+                return [renderer, source, presented, int(main_us), (detected - started) // 1000]
     finally:
         child.terminate()
         try:
@@ -41,6 +54,7 @@ def run(binary, policy, timeout):
         except subprocess.TimeoutExpired:
             child.kill()
             child.wait()
+        reader.join(timeout=5)
         child.stderr.close()
 
 

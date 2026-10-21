@@ -69,6 +69,8 @@ pub struct PresentedFrame {
 pub enum RendererPolicy {
     /// Present software first, then prepare hardware on an owned worker and
     /// upgrade only after a complete GPU frame can be presented successfully.
+    /// Windows currently retains software: its GDI surface cannot be restored
+    /// after DXGI flip presentation. Select `Gpu` for native DX12 rendering.
     #[default]
     Auto,
     Gpu,

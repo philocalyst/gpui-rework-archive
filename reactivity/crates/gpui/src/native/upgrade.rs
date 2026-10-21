@@ -26,9 +26,16 @@ pub(super) struct Policy {
     pub(super) force_probe: bool,
 }
 impl Policy {
-    /// Linux local-device hint only. Unknown/permission failures still probe;
-    /// explicit GPU and the real software-GPU handoff test bypass this hint.
+    /// Auto needs both a usable GPU and a reversible native presentation path.
+    /// Explicit GPU does not use this opportunistic policy.
     pub(super) fn should_probe(self) -> bool {
+        // DXGI flip presentation permanently excludes GDI on the same HWND,
+        // even after swapchain destruction. Softbuffer uses GDI, so admitting
+        // this upgrade would break our checked software fallback. Keep Auto
+        // software until the Windows host has a distinct presentation surface.
+        if cfg!(target_os = "windows") {
+            return false;
+        }
         #[cfg(test)]
         if self.allow_cpu || self.force_probe {
             return true;
