@@ -200,16 +200,12 @@ impl Bridge {
         &mut self,
         owner: &Win<M, L>,
     ) -> Result<(), NativeError> {
-        let mut state = owner.accessibility_state()?;
+        let state = owner.accessibility_state()?;
         if !state.valid {
             return Ok(());
         }
         if self.ingress.0.initial.swap(false, Ordering::AcqRel) {
             self.needs_full = true;
-        }
-        // Pending candidate geometry must not replace the cursor for old P.
-        if state.token.is_none() {
-            state.token = self.published.and_then(|old| old.token);
         }
         let full = self.needs_full
             || self.published.is_none_or(|old| {

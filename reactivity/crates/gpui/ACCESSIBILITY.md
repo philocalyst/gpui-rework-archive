@@ -44,6 +44,10 @@ ID map, hash lane, or second semantic cache. A compact per-window cursor tracks
 the scene token, acknowledged P epoch, physical size and live focus. Both token
 and epoch matter: list scrolling can change the token without S, while a
 semantic-only name edit can advance P with the same scene token and no paint.
+An accessibility-enabled runtime retains one acknowledged nonzero sequence
+(an 8-byte option), so a new pending candidate cannot replace or hide P's actual
+token. Headless and explicit AT-disabled builds omit this field. The bridge no
+longer has to infer the old token from its own previous publication.
 
 This baseline replaces the full native tree on a changed P. Full projection
 counts required native records, then constructs one exactly reserved output

@@ -247,21 +247,25 @@ fn projection_uses_old_p_during_pending_edit_and_failed_preparation() {
         },
     )
     .unwrap();
+    assert_eq!(win.accessibility_state().unwrap().token, None);
     let first = win.with_scene(|_, token| token).unwrap();
     win.presented(first).unwrap();
+    assert_eq!(win.accessibility_state().unwrap().token, Some(first));
     let old = projection(&win);
     win.set(Page::VALUE, "next".to_owned()).unwrap();
     assert_eq!(projection(&win), old);
     let second = win.with_scene(|_, token| token).unwrap();
     assert_ne!(first, second);
-    assert!(win.accessibility_state().unwrap().token.is_none());
+    assert_eq!(win.accessibility_state().unwrap().token, Some(first));
     win.presented(second).unwrap();
+    assert_eq!(win.accessibility_state().unwrap().token, Some(second));
     let expected = projection(&win);
     assert_ne!(expected, old);
     // The unsupported scalar commits S; neither failed candidate text nor its
     // geometry may appear in AccessKit's coherent preceding sheet.
     assert!(win.set(Page::VALUE, "next\u{1f680}".to_owned()).is_err());
     assert_eq!(projection(&win), expected);
+    assert_eq!(win.accessibility_state().unwrap().token, Some(second));
 }
 
 #[test]

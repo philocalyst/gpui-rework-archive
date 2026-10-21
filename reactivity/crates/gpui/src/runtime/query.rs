@@ -321,12 +321,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             return Err(Error::ResourceLimit);
         }
         Ok(SemanticState {
-            // A candidate token is not the token of the still-displayed sheet.
+            // New candidates do not change the acknowledged sheet's identity.
+            // The window namespace is constant; only one sequence is retained.
             token: runtime
-                .prepared
-                .is_none()
-                .then_some(runtime.latest_token)
-                .flatten(),
+                .presented_sequence
+                .map(|sequence| crate::PresentationToken {
+                    window: runtime.sites.namespace(),
+                    sequence,
+                }),
             epoch: runtime.presentation_epoch,
             valid: runtime.presentation_valid,
             focus: runtime.focused,

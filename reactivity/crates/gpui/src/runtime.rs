@@ -149,7 +149,8 @@ pub struct Counters {
 /// Private fields and the absence of Deserialize prevent restoration/forgery.
 /// ```compile_fail
 /// let token = gpui::PresentationToken {
-///     window: std::num::NonZeroU64::new(1).unwrap(), sequence: 1,
+///     window: std::num::NonZeroU64::new(1).unwrap(),
+///     sequence: std::num::NonZeroU64::new(1).unwrap(),
 /// };
 /// ```
 /// ```compile_fail
@@ -158,7 +159,7 @@ pub struct Counters {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct PresentationToken {
     window: NonZeroU64,
-    sequence: u64,
+    sequence: NonZeroU64,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -552,13 +553,15 @@ struct Runtime<M> {
     dirty: bool,
     source_epoch: u64,
     presentation_epoch: u64,
+    #[cfg(feature = "accessibility")]
+    presented_sequence: Option<NonZeroU64>,
     presentation_valid: bool,
     presentation_size: [u32; 2],
     requested_size: [u32; 2],
     requested_scale_factor: f32,
     presentation_scale_factor: f32,
     automatic_presentation: bool,
-    next_presentation: u64,
+    next_presentation: NonZeroU64,
     prepared: Option<Prepared>,
     latest_token: Option<PresentationToken>,
     complete_epoch: u64,
@@ -728,13 +731,15 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             dirty: true,
             source_epoch: 0,
             presentation_epoch: 0,
+            #[cfg(feature = "accessibility")]
+            presented_sequence: None,
             presentation_valid: false,
             presentation_size: [0, 0],
             requested_size: options.size,
             requested_scale_factor: scale_factor,
             presentation_scale_factor: 1.0,
             automatic_presentation,
-            next_presentation: 1,
+            next_presentation: NonZeroU64::new(1).unwrap(),
             prepared: None,
             latest_token: None,
             complete_epoch: 0,
@@ -1935,6 +1940,10 @@ impl<M: View + 'static> Runtime<M> {
         // No-op edits may extend complete coverage, but failed preparations do
         // not. Re-acknowledging after loss therefore never covers a failed S.
         self.presentation_epoch = self.complete_epoch;
+        #[cfg(feature = "accessibility")]
+        {
+            self.presented_sequence = Some(token.sequence);
+        }
         self.presentation_valid = true;
         self.counters.presentations += u64::from(newly_presented);
         Ok(self.commit())
