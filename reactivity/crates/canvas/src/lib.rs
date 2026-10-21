@@ -9,7 +9,7 @@ pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
 };
-pub use text::{FontFace, Glyph, GlyphKey, TextLayout, TextSystem};
+pub use text::{FontFace, Glyph, GlyphKey, TextLayout, TextShaper, TextSystem};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Error {

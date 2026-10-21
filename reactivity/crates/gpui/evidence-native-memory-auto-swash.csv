@@ -1,0 +1,7 @@
+program,renderer,delay_ms,rss_kib,pss_kib,private_clean_kib,private_dirty_kib,shared_clean_kib,anonymous_kib,threads,virtual_kib,cpu_ticks
+empty,auto,1000,10824,8716,5304,1588,2056,1588,1,24436,1
+empty,auto,3000,10824,8716,5304,1588,2056,1588,1,24436,1
+empty,auto,5000,10824,8716,5304,1588,2056,1588,1,24436,1
+workbench,auto,1000,12592,10764,7392,1828,2064,1828,1,24576,1
+workbench,auto,3000,12592,10764,7392,1828,2064,1828,1,24576,1
+workbench,auto,5000,12592,10764,7392,1828,2064,1828,1,24576,1

@@ -8,7 +8,7 @@ use std::{
     borrow::Cow,
     collections::HashMap,
     sync::{
-        Arc, Mutex, Weak,
+        Arc, Mutex, OnceLock, Weak,
         atomic::{AtomicU64, Ordering},
     },
 };
@@ -94,6 +94,14 @@ impl FontFace {
             id,
         })))
     }
+    /// Borrows a shaping session. Tables are parsed on the first shape only;
+    /// reuse the session across a pass, then drop it to release the tables.
+    pub fn shaper(&self) -> TextShaper<'_> {
+        TextShaper {
+            font: &self.0,
+            face: OnceLock::new(),
+        }
+    }
     /// Process-local identity, not byte equality or a persistent font ID.
     pub fn same_face(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.0, &other.0)
@@ -169,45 +177,17 @@ pub(crate) struct Raster {
     pub pixels: Vec<u8>,
 }
 
-/// One explicitly supplied font, horizontal single-script LTR paragraphs,
-/// Latin/Greek/Cyrillic plus common/inherited characters, bounded grayscale cache.
-/// No system font discovery, fallback, bidi paragraph resolution or editing model.
-pub struct TextSystem {
-    face: FontFace,
-    cache: HashMap<(u16, u32), Arc<Raster>>,
-    cache_bytes: usize,
-    // No scaler or outline storage until the first requested glyph. A boxed
-    // owner keeps every unused service's header small; no shared raster lock.
-    scaler: Option<Box<ScaleContext>>,
+/// A scoped parser over immutable font bytes, reusable across measurement and
+/// painting. It owns parsed shaping tables, borrows the backing, and releases all
+/// table allocations on drop. Returned layouts do not borrow this parser.
+///
+/// This separates read-only shaping from a service's mutable glyph cache without
+/// a self reference, permanent table cache, lock, or per-string reference count.
+pub struct TextShaper<'font> {
+    font: &'font FontData,
+    face: OnceLock<Option<rustybuzz::Face<'font>>>,
 }
-impl TextSystem {
-    /// Noto Sans 2.015, upstream commit and OFL attribution in assets/README.md.
-    pub fn bundled() -> Result<Self, Error> {
-        Ok(Self::from_font(FontFace::bundled()?))
-    }
-    pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
-        Ok(Self::from_font(FontFace::new(bytes)?))
-    }
-    /// Creates a private mutable raster cache over shared immutable font data.
-    pub fn from_font(face: FontFace) -> Self {
-        Self {
-            face,
-            cache: HashMap::new(),
-            cache_bytes: 0,
-            scaler: None,
-        }
-    }
-    pub fn font_face(&self) -> &FontFace {
-        &self.face
-    }
-    pub fn cache_bytes(&self) -> usize {
-        self.cache_bytes
-    }
-    pub fn clear_cache(&mut self) {
-        self.cache.clear();
-        self.cache_bytes = 0;
-        self.scaler = None;
-    }
+impl TextShaper<'_> {
     pub fn shape(
         &self,
         text: &str,
@@ -223,8 +203,11 @@ impl TextSystem {
         if text.len() > MAX_TEXT {
             return Err(Error::ResourceLimit);
         }
-        let face = rustybuzz::ttf_parser::Face::parse(&self.face.0.bytes, 0)
-            .map_err(|_| Error::InvalidFont)?;
+        let face = self
+            .face
+            .get_or_init(|| rustybuzz::Face::from_slice(&self.font.bytes, 0))
+            .as_ref()
+            .ok_or(Error::InvalidFont)?;
         let mut paragraph_script = None;
         for c in text.chars() {
             if c == '\n' {
@@ -264,7 +247,7 @@ impl TextSystem {
             baseline: ascent,
             font_size,
             glyphs: Vec::new(),
-            font_id: self.face.0.id,
+            font_id: self.font.id,
         };
         let mut line = 0usize;
         let mut paragraph_offset = 0;
@@ -275,7 +258,8 @@ impl TextSystem {
                 paragraph_offset += 1;
                 continue;
             }
-            let (positions, width) = self.shape_line(paragraph, font_size, &mut shaping_budget)?;
+            let (positions, width) =
+                Self::shape_line(face, paragraph, font_size, &mut shaping_budget)?;
             if max_width.is_none_or(|w| width <= w) {
                 Self::append(&mut result, positions, paragraph_offset, line, line_height)?;
                 line += 1;
@@ -285,8 +269,12 @@ impl TextSystem {
                 let limit = max_width.unwrap();
                 let mut start = 0;
                 while start < paragraph.len() {
-                    let (all, _) =
-                        self.shape_line(&paragraph[start..], font_size, &mut shaping_budget)?;
+                    let (all, _) = Self::shape_line(
+                        face,
+                        &paragraph[start..],
+                        font_size,
+                        &mut shaping_budget,
+                    )?;
                     let mut end = paragraph.len();
                     let mut preferred = None;
                     let mut last_cluster = start;
@@ -311,8 +299,12 @@ impl TextSystem {
                     }
                     // The last cluster's advance may cross the limit, so select
                     // an earlier complete cluster if no overflow origin existed.
-                    let mut shaped =
-                        self.shape_line(&paragraph[start..end], font_size, &mut shaping_budget)?;
+                    let mut shaped = Self::shape_line(
+                        face,
+                        &paragraph[start..end],
+                        font_size,
+                        &mut shaping_budget,
+                    )?;
                     while shaped.1 > limit {
                         let previous = shaped
                             .0
@@ -324,7 +316,8 @@ impl TextSystem {
                             break;
                         }; // indivisible cluster may overflow
                         end = start + previous;
-                        shaped = self.shape_line(
+                        shaped = Self::shape_line(
+                            face,
                             &paragraph[start..end],
                             font_size,
                             &mut shaping_budget,
@@ -370,20 +363,19 @@ impl TextSystem {
         Ok(())
     }
     fn shape_line(
-        &self,
+        face: &rustybuzz::Face<'_>,
         text: &str,
         size: f32,
         budget: &mut usize,
     ) -> Result<(Vec<Glyph>, f32), Error> {
         *budget = budget.checked_sub(text.len()).ok_or(Error::ResourceLimit)?;
-        let face = rustybuzz::Face::from_slice(&self.face.0.bytes, 0).ok_or(Error::InvalidFont)?;
         let mut buffer = rustybuzz::UnicodeBuffer::new();
         buffer.push_str(text);
         buffer.guess_segment_properties();
         if buffer.direction() != rustybuzz::Direction::LeftToRight {
             return Err(Error::UnsupportedDirection);
         }
-        let shaped = rustybuzz::shape(&face, &[], buffer);
+        let shaped = rustybuzz::shape(face, &[], buffer);
         let scale = size / face.units_per_em() as f32;
         let mut x = 0.0;
         let mut glyphs = Vec::with_capacity(shaped.len());
@@ -400,6 +392,57 @@ impl TextSystem {
             x += pos.x_advance as f32 * scale;
         }
         Ok((glyphs, x))
+    }
+}
+
+/// One explicitly supplied font, horizontal single-script LTR paragraphs,
+/// Latin/Greek/Cyrillic plus common/inherited characters, bounded grayscale cache.
+/// No system font discovery, fallback, bidi paragraph resolution or editing model.
+pub struct TextSystem {
+    face: FontFace,
+    cache: HashMap<(u16, u32), Arc<Raster>>,
+    cache_bytes: usize,
+    // No scaler or outline storage until the first requested glyph. A boxed
+    // owner keeps every unused service's header small; no shared raster lock.
+    scaler: Option<Box<ScaleContext>>,
+}
+impl TextSystem {
+    /// Noto Sans 2.015, upstream commit and OFL attribution in assets/README.md.
+    pub fn bundled() -> Result<Self, Error> {
+        Ok(Self::from_font(FontFace::bundled()?))
+    }
+    pub fn new(bytes: impl AsRef<[u8]>) -> Result<Self, Error> {
+        Ok(Self::from_font(FontFace::new(bytes)?))
+    }
+    /// Creates a private mutable raster cache over shared immutable font data.
+    pub fn from_font(face: FontFace) -> Self {
+        Self {
+            face,
+            cache: HashMap::new(),
+            cache_bytes: 0,
+            scaler: None,
+        }
+    }
+    pub fn font_face(&self) -> &FontFace {
+        &self.face
+    }
+    pub fn cache_bytes(&self) -> usize {
+        self.cache_bytes
+    }
+    pub fn clear_cache(&mut self) {
+        self.cache.clear();
+        self.cache_bytes = 0;
+        self.scaler = None;
+    }
+    /// Shapes one string. For a batch, borrow a [`TextShaper`] from
+    /// [`FontFace::shaper`] to parse the immutable shaping tables only once.
+    pub fn shape(
+        &self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<TextLayout, Error> {
+        self.face.shaper().shape(text, font_size, max_width)
     }
     pub(crate) fn validate(&self, layout: &TextLayout) -> Result<(), Error> {
         if layout.font_id != self.face.0.id {

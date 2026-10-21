@@ -9,7 +9,7 @@ use std::{
     rc::Rc,
 };
 
-use gpui_canvas::{Canvas, ColorConfig, PreparedScene, TextLayout, TextSystem};
+use gpui_canvas::{Canvas, ColorConfig, PreparedScene, TextLayout, TextShaper, TextSystem};
 use gpui_reactivity_core::{
     Affine, CoordinateSpace, NodeId, Point, Rect,
     layout::{AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size},
@@ -263,7 +263,7 @@ struct Node {
 impl Node {
     fn shape<'n>(
         &'n mut self,
-        service: &TextSystem,
+        service: &TextShaper<'_>,
         width: Option<f32>,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
@@ -1266,6 +1266,11 @@ impl<M: View + 'static> Runtime<M> {
         if self.text.is_none() && self.nodes.iter().any(|node| node.text.is_some()) {
             self.text = Some(TextSystem::bundled()?);
         }
+        // One immutable parser for every measurement and final line layout in
+        // this pass. A single face lease lets the raster cache remain mutable;
+        // neither a string nor a glyph increments its reference count.
+        let font = self.text.as_ref().map(|text| text.font_face().clone());
+        let shaper = font.as_ref().map(|font| font.shaper());
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -1299,7 +1304,7 @@ impl<M: View + 'static> Runtime<M> {
             .collect::<BTreeMap<_, _>>();
         let mut failure = None;
         let nodes = &mut self.nodes;
-        let service = &self.text;
+        let service = &shaper;
         let mut measure = |id: NodeId, input: MeasureInput| {
             let width = input
                 .known_dimensions
@@ -1390,7 +1395,10 @@ impl<M: View + 'static> Runtime<M> {
             if node.text.is_some() {
                 let fg = node.style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
-                let shape = node.shape(service, Some(layout.content_box_width()))?;
+                let shape = node.shape(
+                    shaper.as_ref().expect("text initialized before layout"),
+                    Some(layout.content_box_width()),
+                )?;
                 scene.draw_text_scaled(
                     service,
                     shape,
