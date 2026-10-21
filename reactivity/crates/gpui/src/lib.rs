@@ -38,8 +38,8 @@ pub use list::{ItemKey, ItemSource, ListError, ListId, ListViewport, uniform_lis
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use reader::{
-    CompleteError, Completion, Failure, InputVersion, QuestionFault, QuestionInfo, QuestionStats,
-    QuestionStatus, Questions, Reader, StartError,
+    Cancellation, CompleteError, Completion, Failure, InputVersion, QuestionFault, QuestionInfo,
+    QuestionStats, QuestionStatus, Questions, Reader, StartError,
 };
 pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]

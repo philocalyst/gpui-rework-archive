@@ -77,6 +77,11 @@ but keeps the physical credit occupied if the executor retained the cap. A
 hung executor or intentionally forgotten cap therefore prevents another
 physical dispatch; this slice supplies no forced thread termination or timeout.
 
+For work that can stop cooperatively, `run_cancellable` lends a scoped
+`Cancellation` hint during compute. The Library checks it every 128 tracks and
+abandons obsolete scans instead of delaying the newest input behind a complete
+250,000-track scan. See `question-cancellation.md` for lifecycle and evidence.
+
 The response slot is a safe Mutex<Option<Message>> inside one controller Arc.
 The producer unlocks, Release-publishes its terminal, then posts one wake. Owner
 staging acquires only the terminal byte. The response stays sealed in its
