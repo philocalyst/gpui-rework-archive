@@ -1,5 +1,5 @@
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
-use gpui_gpu::{Renderer, wgpu};
+use gpui_gpu::{Renderer, Stats, wgpu};
 
 async fn renderer(format: wgpu::TextureFormat) -> Renderer {
     let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
@@ -90,6 +90,202 @@ fn readback(renderer: &mut Renderer, canvas: &Canvas) -> Vec<u8> {
     output
 }
 
+fn compare_tile_modes(renderer: &mut Renderer, canvas: &mut Canvas) -> Stats {
+    renderer.set_tile_proofs(false);
+    let reference = readback(renderer, canvas);
+    let reference_stats = renderer.stats();
+    renderer.set_tile_proofs(true);
+    let optimized = readback(renderer, canvas);
+    assert_eq!(optimized, reference, "tile proof changed GPU output");
+    let stats = renderer.stats();
+    assert_eq!(
+        stats.original_tile_references,
+        reference_stats.tile_references
+    );
+    assert_eq!(
+        stats.skipped_tile_references,
+        reference_stats.tile_references - stats.tile_references
+    );
+    assert!(stats.sample_draw_evaluations <= reference_stats.sample_draw_evaluations);
+    canvas.set_tile_proofs(false);
+    for (index, (&a, &b)) in optimized.iter().zip(canvas.pixels()).enumerate() {
+        assert!(
+            (i16::from(a) - i16::from(b)).abs() <= 1,
+            "byte{index}: GPU{a} CPU{b}"
+        );
+    }
+    stats
+}
+
+#[test]
+fn opaque_tile_proofs_skip_overlap_and_preserve_later_edges() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let clip = Rect::new(0.0, 0.0, 35.0, 19.0);
+        let mut canvas = Canvas::recording(35, 19, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        for n in 0..32 {
+            canvas
+                .fill_rect(
+                    clip,
+                    Affine::IDENTITY,
+                    clip,
+                    Color::rgb(n * 7, n * 5, n * 3),
+                )
+                .unwrap();
+        }
+        let stats = compare_tile_modes(&mut renderer, &mut canvas);
+        assert_eq!(stats.draws, 32, "canonical records remain retained");
+        assert_eq!(stats.uniform_tiles, 6, "includes partial edge tiles");
+        assert_eq!(stats.original_tile_references, 192);
+        assert_eq!(stats.tile_references, 0);
+        assert_eq!(stats.sample_evaluations, 0);
+        assert_eq!(stats.sample_draw_evaluations, 0);
+        canvas
+            .fill_rect(
+                Rect::new(18.5, 0.0, 16.5, 19.0),
+                Affine::IDENTITY,
+                clip,
+                Color::rgba(255, 10, 5, 120),
+            )
+            .unwrap();
+        let stats = compare_tile_modes(&mut renderer, &mut canvas);
+        assert!(stats.uniform_tiles > 0 && stats.uniform_tiles < 6);
+        assert!(stats.sample_evaluations > 0);
+        assert!(stats.skipped_tile_references > 180);
+        assert_eq!(stats.draws, 33);
+    });
+}
+
+#[test]
+fn tile_certificates_fall_back_for_clip_alpha_shear_and_ambiguous_edges() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let viewport = Rect::new(0.0, 0.0, 48.0, 32.0);
+        for (transform, clip, alpha) in [
+            (Affine::IDENTITY, viewport, 255),
+            (Affine::IDENTITY, viewport, 254),
+            (Affine::IDENTITY, Rect::new(0.1, 0.0, 16.025, 32.0), 255),
+            (
+                Affine {
+                    c: 0.3,
+                    ..Affine::IDENTITY
+                },
+                viewport,
+                255,
+            ),
+        ] {
+            let mut canvas = Canvas::recording(48, 32, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            for n in 0..5 {
+                canvas
+                    .fill_rect(
+                        viewport,
+                        Affine::IDENTITY,
+                        viewport,
+                        Color::rgb(20 * n, 100, 140),
+                    )
+                    .unwrap();
+            }
+            canvas
+                .fill_rect(viewport, transform, clip, Color::rgba(210, 10, 50, alpha))
+                .unwrap();
+            // Later translucent geometry must survive an earlier occluder.
+            canvas
+                .fill_rect(
+                    Rect::new(2.1, 3.2, 39.5, 21.0),
+                    Affine::rotation(0.03),
+                    viewport,
+                    Color::rgba(5, 230, 60, 80),
+                )
+                .unwrap();
+            compare_tile_modes(&mut renderer, &mut canvas);
+        }
+        for width in [
+            f32::from_bits((1.0_f32 / 24.0).to_bits() - 1),
+            1.0_f32 / 24.0,
+        ] {
+            let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            canvas
+                .fill_rect(
+                    Rect::new(0.0, 0.0, width, 1.0),
+                    Affine::scale(3.0, 1.0),
+                    viewport,
+                    Color::rgb(255, 0, 0),
+                )
+                .unwrap();
+            assert_eq!(
+                compare_tile_modes(&mut renderer, &mut canvas).uniform_tiles,
+                0
+            );
+        }
+    });
+}
+
+#[test]
+fn opaque_proof_changes_do_not_discard_background_records() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let viewport = Rect::new(0.0, 0.0, 32.0, 16.0);
+        for (alpha, clip) in [
+            (255, viewport),
+            (100, viewport),
+            (255, Rect::new(1.0, 0.0, 15.0, 16.0)),
+            (255, viewport),
+        ] {
+            let mut canvas = Canvas::recording(32, 16, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            canvas
+                .fill_rect(viewport, Affine::IDENTITY, viewport, Color::rgb(255, 0, 0))
+                .unwrap();
+            canvas
+                .fill_rect(
+                    viewport,
+                    Affine::IDENTITY,
+                    clip,
+                    Color::rgba(0, 0, 255, alpha),
+                )
+                .unwrap();
+            let stats = compare_tile_modes(&mut renderer, &mut canvas);
+            assert_eq!(stats.draws, 2);
+        }
+    });
+}
+
+#[test]
+fn uniform_float_tiles_preserve_reference_output_bits() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+        let viewport = Rect::new(0.0, 0.0, 32.0, 16.0);
+        for color in [
+            Color::linear_srgb(-0.0, 0.0, -2.0, 1.0).unwrap(),
+            Color::linear_srgb(1e19, -1e19, 0.00001, 1.0).unwrap(),
+        ] {
+            let mut canvas = Canvas::recording(32, 16, config).unwrap();
+            canvas.clear(Color::linear_srgb(-1.0, 1.0, -1.0, 0.25).unwrap());
+            canvas
+                .fill_rect(viewport, Affine::IDENTITY, viewport, color)
+                .unwrap();
+            renderer.set_tile_proofs(false);
+            let reference = readback(&mut renderer, &canvas);
+            renderer.set_tile_proofs(true);
+            let optimized = readback(&mut renderer, &canvas);
+            assert_eq!(&optimized[..8], &reference[..8]);
+            assert_eq!(optimized, reference);
+            assert_eq!(
+                renderer.stats().uniform_tiles,
+                if color.channels()[0].is_sign_negative() {
+                    0
+                } else {
+                    2
+                }
+            );
+        }
+    });
+}
+
 #[test]
 fn real_vulkan_pixels_match_cpu_sampling_and_preserve_correlated_edges() {
     pollster::block_on(async {
@@ -163,6 +359,9 @@ fn real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks() {
             .unwrap();
         let actual = readback(&mut renderer, &canvas);
         assert!(renderer.stats().mask_upload_bytes > 0);
+        renderer.set_tile_proofs(false);
+        assert_eq!(readback(&mut renderer, &canvas), actual);
+        renderer.set_tile_proofs(true);
         let second = readback(&mut renderer, &canvas);
         assert_eq!(actual, second);
         assert_eq!(renderer.stats().mask_upload_bytes, 0);

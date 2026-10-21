@@ -8,6 +8,9 @@ const MAX_DRAWS: usize = 65_536;
 const MAX_REFERENCES: usize = 4 * 1024 * 1024;
 const MAX_PIXELS: usize = 16 * 1024 * 1024;
 const MAX_ATLAS_SIDE: u32 = 2048;
+const UNIFORM_TILE: u32 = 1 << 31;
+const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
+const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
 
 #[derive(Debug)]
 pub enum Error {
@@ -55,6 +58,14 @@ pub struct Stats {
     pub submissions: u64,
     pub draws: usize,
     pub tile_references: usize,
+    pub original_tile_references: usize,
+    /// References omitted from the sampled CSR, including uniform tiles.
+    pub skipped_tile_references: usize,
+    pub uniform_tiles: usize,
+    /// Planned lattice samples, excluding clear and certified uniform pixels.
+    pub sample_evaluations: u64,
+    /// Planned sample_draw calls, including calls rejected by clip/geometry.
+    pub sample_draw_evaluations: u64,
     pub instance_upload_bytes: usize,
     pub mask_upload_bytes: usize,
     pub gpu_buffer_bytes: u64,
@@ -216,6 +227,7 @@ pub struct Renderer {
     cursors: Vec<u32>,
     residuals: Vec<Correction>,
     residual_keys: HashMap<[u32; 8], u32>,
+    tile_proofs: bool,
     stats: Stats,
 }
 impl Renderer {
@@ -306,6 +318,7 @@ impl Renderer {
             cursors: Vec::new(),
             residuals: Vec::new(),
             residual_keys: HashMap::new(),
+            tile_proofs: true,
             stats: Stats::default(),
         })
     }
@@ -320,6 +333,10 @@ impl Renderer {
     }
     pub fn stats(&self) -> Stats {
         self.stats
+    }
+    /// Disable only the disposable tile proofs for reference comparisons.
+    pub fn set_tile_proofs(&mut self, enabled: bool) {
+        self.tile_proofs = enabled;
     }
 
     pub fn render(
@@ -370,41 +387,52 @@ impl Renderer {
         self.ranges.clear();
         self.ranges.resize(columns * rows, [0, 0]);
         self.records.clear();
-        let mut references = 0usize;
+        let mut original_references = 0usize;
         for (index, draw) in scene.draws().enumerate() {
             let error = validate_draw(draw, index, scene.width, scene.height)?;
             let mut record = DrawData::zeroed();
             record.inverse_x[3] = error[0];
             record.inverse_y[3] = error[1];
             self.records.push(record);
-            visit(draw, columns, |tile| self.ranges[tile][1] += 1);
-            references = references
+            visit(draw, columns, |tile| {
+                if self.tile_proofs
+                    && full_tile(draw, error, tile, columns, scene.width, scene.height)
+                {
+                    self.ranges[tile] = [index as u32 + 1, 1];
+                } else {
+                    self.ranges[tile][1] += 1;
+                }
+            });
+            original_references = original_references
                 .checked_add(tile_count(draw))
                 .ok_or(Error::ResourceLimit)?;
-            if references > MAX_REFERENCES {
+            if original_references > MAX_REFERENCES {
                 return Err(Error::ResourceLimit);
             }
         }
         let mask_bytes = self.prepare_atlas(scene)?;
         let mut offset = 0;
-        for range in &mut self.ranges {
-            let count = range[1];
-            *range = [offset, offset + count];
-            offset += count;
-        }
         self.cursors.clear();
-        self.cursors
-            .extend(self.ranges.iter().map(|range| range[0]));
+        for range in &mut self.ranges {
+            let cutoff = range[0];
+            self.cursors.push(cutoff);
+            let count = range[1];
+            if cutoff != 0 && count == 1 {
+                *range = [cutoff - 1, UNIFORM_TILE];
+            } else {
+                offset += count;
+                // Filled backward in painter order. The first word becomes
+                // the start offset; the second stays the exclusive end.
+                *range = [offset, offset];
+            }
+        }
+        let references = offset as usize;
         self.references.clear();
         self.references.resize(references, 0);
         self.residuals.clear();
         self.residuals.push(Correction::zeroed());
         self.residual_keys.clear();
         for (index, draw) in scene.draws().enumerate() {
-            visit(draw, columns, |tile| {
-                self.references[self.cursors[tile] as usize] = index as u32;
-                self.cursors[tile] += 1;
-            });
             let [a, b, c, d, tx, ty] = draw.inverse.map(|value| value as f32);
             let clip = draw.clip;
             let low = std::array::from_fn::<_, 8, _>(|i| match i {
@@ -440,6 +468,29 @@ impl Renderer {
                 color: draw.color,
                 atlas: [atlas[0], atlas[1], atlas[2], correction],
             };
+        }
+        for (index, draw) in scene.draws().enumerate().rev() {
+            visit(draw, columns, |tile| {
+                let range = &mut self.ranges[tile];
+                if range[1] != UNIFORM_TILE && index as u32 + 1 >= self.cursors[tile] {
+                    range[0] -= 1;
+                    self.references[range[0] as usize] = index as u32;
+                }
+            });
+        }
+        let mut uniform_tiles = 0;
+        let mut sample_evaluations = 0;
+        let mut sample_draw_evaluations = 0;
+        for (tile, range) in self.ranges.iter().enumerate() {
+            if range[1] == UNIFORM_TILE {
+                uniform_tiles += 1;
+            } else if range[0] != range[1] {
+                let [left, top, right, bottom] =
+                    tile_bounds(tile, columns, scene.width, scene.height);
+                let samples = u64::from((right - left) * (bottom - top)) * 16;
+                sample_evaluations += samples;
+                sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
+            }
         }
         let (tone, exposure) = match scene.color_config.mapping {
             SdrMapping::Clip => (0, 1.0),
@@ -541,6 +592,11 @@ impl Renderer {
             submissions: self.stats.submissions.saturating_add(1),
             draws: self.records.len(),
             tile_references: references,
+            original_tile_references: original_references,
+            skipped_tile_references: original_references - references,
+            uniform_tiles,
+            sample_evaluations,
+            sample_draw_evaluations,
             instance_upload_bytes: self.records.len() * 96
                 + self.ranges.len() * 8
                 + references * 4
@@ -612,6 +668,82 @@ fn clip_residual(start: f32, extent: f32) -> f32 {
         // A finite sample cannot equal an overflowing rounded clip endpoint.
         0.0
     }
+}
+fn tile_bounds(tile: usize, columns: usize, width: u32, height: u32) -> [u32; 4] {
+    let left = (tile % columns) as u32 * 16;
+    let top = (tile / columns) as u32 * 16;
+    [left, top, (left + 16).min(width), (top + 16).min(height)]
+}
+
+// A certificate covers every lattice sample, independently in canonical f64
+// and in the packed-high f32 shader path. It never assumes DD/f64 equivalence.
+fn full_tile(
+    draw: PreparedDraw<'_>,
+    error: [f32; 2],
+    tile: usize,
+    columns: usize,
+    width: u32,
+    height: u32,
+) -> bool {
+    if draw.mask.is_some()
+        || draw.color[3] != 1.0
+        // Source-over can change -0 to +0 according to the backdrop's sign.
+        // Such a draw is not a backdrop-independent byte value on float targets.
+        || draw.color.iter().any(|v| v.to_bits() == (-0.0_f32).to_bits())
+    {
+        return false;
+    }
+    let [left, top, right, bottom] = tile_bounds(tile, columns, width, height);
+    let clip = draw.clip;
+    // The continuous tile is contained. Actual samples stay 1/8 pixel inside
+    // its max edges, so the clip's rounded endpoint is never ambiguous here.
+    if f64::from(clip.x) > f64::from(left)
+        || f64::from(clip.y) > f64::from(top)
+        || f64::from(clip.x) + f64::from(clip.width) < f64::from(right)
+        || f64::from(clip.y) + f64::from(clip.height) < f64::from(bottom)
+    {
+        return false;
+    }
+    let m = draw.inverse;
+    let high = m.map(|v| f64::from(v as f32));
+    let r = draw.local_rect;
+    for y in [f64::from(top) + 0.125, f64::from(bottom) - 0.125] {
+        for x in [f64::from(left) + 0.125, f64::from(right) - 0.125] {
+            for (axis, origin, extent) in [(0, r.x, r.width), (1, r.y, r.height)] {
+                let origin = f64::from(origin);
+                let extent = f64::from(extent);
+                let packed = high[axis] * x + high[axis + 2] * y + high[axis + 4] - origin;
+                // Covers raw dot, origin subtraction and extent subtraction,
+                // with headroom for fusing/reordering. The additional shader
+                // envelope keeps edges > error, excluding its DD branch.
+                let rounding = 16.0
+                    * f64::from(f32::EPSILON)
+                    * (high[axis].abs() * x
+                        + high[axis + 2].abs() * y
+                        + high[axis + 4].abs()
+                        + origin.abs()
+                        + extent.abs()
+                        + 1.0);
+                let margin = rounding + f64::from(error[axis]);
+                if packed <= margin || extent - packed <= margin {
+                    return false;
+                }
+                let canonical = m[axis] * x + m[axis + 2] * y + m[axis + 4] - origin;
+                let guard = 32.0
+                    * f64::EPSILON
+                    * (m[axis].abs() * x
+                        + m[axis + 2].abs() * y
+                        + m[axis + 4].abs()
+                        + origin.abs()
+                        + extent.abs()
+                        + 1.0);
+                if canonical <= guard || extent - canonical <= guard {
+                    return false;
+                }
+            }
+        }
+    }
+    true
 }
 fn visit(draw: PreparedDraw<'_>, columns: usize, mut visit: impl FnMut(usize)) {
     let r = draw.bounds;
@@ -801,5 +933,49 @@ mod tests {
             validate_draw(draw, 7, 1, 1),
             Err(Error::Precision { draw: 7 })
         ));
+    }
+
+    #[test]
+    fn certificates_imply_sample_membership_in_both_numeric_domains() {
+        let mut accepted = 0;
+        for n in 0..64 {
+            let draw = PreparedDraw {
+                local_rect: Rect::new(-8.0, -8.0, 16.0 + n as f32, 40.0),
+                inverse: [1.0, n as f64 / 256.0, -0.3, 1.0, n as f64 / 8.0, 0.0],
+                clip: Rect::new(0.0, 0.0, 16.0, 16.0),
+                bounds: Rect::new(0.0, 0.0, 16.0, 16.0),
+                color: [1.0; 4],
+                mask: None,
+            };
+            let error = validate_draw(draw, 0, 16, 16).unwrap();
+            if !full_tile(draw, error, 0, 1, 16, 16) {
+                continue;
+            }
+            accepted += 1;
+            for y in 0..64 {
+                for x in 0..64 {
+                    let (x, y) = (x as f32 * 0.25 + 0.125, y as f32 * 0.25 + 0.125);
+                    for (axis, origin, extent) in
+                        [(0, -8.0, draw.local_rect.width), (1, -8.0, 40.0)]
+                    {
+                        let m = draw.inverse;
+                        let exact =
+                            m[axis] * f64::from(x) + m[axis + 2] * f64::from(y) + m[axis + 4]
+                                - f64::from(origin);
+                        assert!(exact >= 0.0 && exact < f64::from(extent));
+                        let high = m.map(|v| v as f32);
+                        let separate =
+                            high[axis] * x + high[axis + 2] * y + high[axis + 4] - origin;
+                        let fused = high[axis]
+                            .mul_add(x, high[axis + 2].mul_add(y, high[axis + 4]))
+                            - origin;
+                        for value in [separate, fused] {
+                            assert!(value > error[axis] && extent - value > error[axis]);
+                        }
+                    }
+                }
+            }
+        }
+        assert!(accepted > 20, "exercise nontrivial successful certificates");
     }
 }
