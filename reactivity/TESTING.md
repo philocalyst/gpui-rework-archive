@@ -31,6 +31,30 @@ source/scene read. There is no production `Rc`, `RefCell` or `Cell` in this wind
 engine. Immutable text uses Triomphe leases between source and presented epochs;
 fonts/masks/backend resources have their separate immutable resource leases.
 
+`visit` also exposes each part's target, parent, focus, supported semantic actions,
+name/value and canonical local geometry. `perform(target, Action::...)` uses the
+ordinary activation/focus/text-edit barrier. Supported actions are frozen with
+the acknowledged sheet; execution revalidates current logical authority. A
+screen-reader request cannot keep a removed site alive or route to a replacement.
+Semantic activation of the real Todo port matches ordinary input source JSON and
+rendered output. A 1,000-pass visitor test allocates nothing and performs no
+source/layout/paint work. Input values are not misreported as accessible names;
+explicit labels, richer text protocols and native AT bridges remain gates.
+Focus is current interaction state over the acknowledged parts: it can change
+without a source edit or frame, and logical removal revokes it immediately even
+when an older sheet remains displayed. Position-free actions deliberately invoke
+the current logical operation at the surviving site; old advertised support is
+not permission to bypass current handler/type/lifetime validation.
+
+`bounds()` is viewport-clipped query geometry. `local_bounds()` plus `transform()`
+is the retained canonical geometry basis; the latter is already absolute to the
+window in physical pixels, including ancestor transforms and DPI. Native bridges
+derive full bounds when needed rather than retaining another rectangle per node.
+`unclipped_bounds()` is a conservative on-demand convenience, with no screen-origin
+offset or exact hit-membership promise. UIA's full bounds and offscreen state must
+remain distinct. An AccessKit hierarchy must not compose these already-absolute
+transforms again at every ancestor.
+
 `role`, `contains_text`, `bounds`, `filter_count`, `root` and borrowed `visit`
 avoid diagnostic snapshots. Unique queries reject ambiguity rather than select
 an arbitrary component instance. Counts/visitors observe the acknowledged sheet

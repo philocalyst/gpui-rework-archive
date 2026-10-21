@@ -30,8 +30,10 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 
 mod input;
 mod query;
+mod semantics;
 pub use input::Key;
 pub use query::{Part, Query};
+pub use semantics::{Action, ActionKind, Actions};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WindowOptions {
@@ -298,6 +300,7 @@ struct Presented {
     transform: Option<Affine>,
     bounds: Rect,
     hittable: bool,
+    actions: Actions,
 }
 struct Prepared {
     size: [u32; 2],
@@ -1484,6 +1487,7 @@ impl<M: View + 'static> Runtime<M> {
                     || node.style.bg.alpha() > 0.0
                     || node.handler.is_some()
                     || node.kind == NodeKind::Input,
+                actions: Actions::for_node(node.kind, node.handler.is_some()),
             });
         }
         // Everything fallible has finished. This transfers commands; native

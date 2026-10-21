@@ -1,7 +1,31 @@
 //! Borrowed semantic queries over the acknowledged sheet, shared by tools and
 //! application users. Queries never construct a diagnostic snapshot or mirror.
-use super::{Error, Presented, Runtime, Target, View, Win};
+use super::{Actions, Error, Presented, Runtime, Target, View, Win};
+use crate::identity::Sites;
 use crate::{Rect, Role};
+
+// One borrowed context on the visitor stack, not a context pointer or semantic
+// mirror retained per node. Every part borrows this same acknowledged sheet.
+struct Context<'a> {
+    sites: &'a Sites,
+    nodes: &'a [Presented],
+    focused: Option<Target>,
+}
+impl<'a> Context<'a> {
+    fn new<M>(runtime: &'a Runtime<M>) -> Self {
+        Self {
+            sites: &runtime.sites,
+            nodes: &runtime.presented,
+            focused: runtime.focused,
+        }
+    }
+    fn part(&self, node: &'a Presented) -> Part<'_> {
+        Part {
+            node,
+            context: self,
+        }
+    }
+}
 
 #[derive(Clone, Copy)]
 /// Borrowed semantic data cannot outlive a visitor invocation.
@@ -17,17 +41,70 @@ use crate::{Rect, Role};
 /// ```
 pub struct Part<'a> {
     node: &'a Presented,
+    context: &'a Context<'a>,
 }
 impl<'a> Part<'a> {
+    /// Stable window-qualified identity, also used by input and inspector APIs.
+    /// Merely reading a target does not grant it a particular action.
+    pub fn target(self) -> Target {
+        self.context.sites.target(self.node.identity)
+    }
+    pub fn parent(self) -> Option<Target> {
+        self.node.parent.map(|index| {
+            self.context
+                .sites
+                .target(self.context.nodes[index].identity)
+        })
+    }
+    /// Current interaction focus on this presented part. Structural/value and
+    /// geometry data come from the acknowledged sheet; focus can change without
+    /// a frame or source edit, and is revoked immediately on logical removal.
+    pub fn focused(self) -> bool {
+        self.context.focused == Some(self.target())
+    }
+    pub fn actions(self) -> Actions {
+        self.node.actions
+    }
     pub fn role(self) -> Role {
         self.node.kind.role()
     }
     pub fn text(self) -> Option<&'a str> {
         self.node.text.as_deref()
     }
+    /// Accessible name for text-labelled controls. An input's edited value is
+    /// deliberately not used as its name. Explicit input labels and described-by
+    /// relationships require the separate semantic metadata integration.
+    pub fn name(self) -> Option<&'a str> {
+        (self.node.kind != super::NodeKind::Input)
+            .then(|| self.text())
+            .flatten()
+    }
+    pub fn value(self) -> Option<&'a str> {
+        (self.node.kind == super::NodeKind::Input)
+            .then(|| self.text())
+            .flatten()
+    }
     /// Physical viewport-clipped bounds of the acknowledged presentation.
     pub fn bounds(self) -> Rect {
         self.node.bounds
+    }
+    /// The canonical local rectangle before window/viewport clipping.
+    pub fn local_bounds(self) -> Rect {
+        self.node.rect
+    }
+    /// Absolute node-local to window-physical transform, already including
+    /// ancestors and DPI. Applying it again as a parent transform is incorrect.
+    pub fn transform(self) -> Option<crate::Affine> {
+        self.node.transform
+    }
+    /// Conservative full window-physical bounds, derived only when requested.
+    /// Native adapters add the window-to-screen mapping. This differs from
+    /// `bounds()` for partially clipped elements and must not be used as a hit
+    /// predicate. No second full rectangle is retained per semantic node.
+    pub fn unclipped_bounds(self) -> Option<Rect> {
+        self.node
+            .transform
+            .and_then(|map| gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node.rect))
     }
 }
 
@@ -74,8 +151,9 @@ impl<'a, M: View + 'static> Query<'a, M> {
         let mut count = 0;
         let runtime = self.runtime.ok_or(Error::Closed)?;
         sheet(runtime)?;
+        let context = Context::new(runtime);
         for node in &runtime.presented {
-            count += usize::from(self.matches(Part { node }));
+            count += usize::from(self.matches(context.part(node)));
         }
         Ok(count)
     }
@@ -87,8 +165,9 @@ impl<'a, M: View + 'static> Query<'a, M> {
         runtime.current_presentation()?;
         let mut identity = 0;
         let mut count = 0;
+        let context = Context::new(runtime);
         for node in &runtime.presented {
-            if self.matches(Part { node }) {
+            if self.matches(context.part(node)) {
                 count += 1;
                 identity = node.identity;
             }
@@ -133,8 +212,9 @@ impl<M: View + 'static> Win<M> {
     pub fn visit(&self, mut visitor: impl FnMut(Part<'_>)) -> Result<(), Error> {
         let runtime = self.runtime()?;
         sheet(runtime)?;
+        let context = Context::new(runtime);
         for node in &runtime.presented {
-            visitor(Part { node });
+            visitor(context.part(node));
         }
         Ok(())
     }

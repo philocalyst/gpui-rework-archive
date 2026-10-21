@@ -32,8 +32,8 @@ pub use identity::Target;
 #[cfg(feature = "native")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use runtime::{
-    Commit, Counters, Error, Key, Part, PresentationToken, Query, SetError, Snapshot, SnapshotNode,
-    Win, WindowOptions,
+    Action, ActionKind, Actions, Commit, Counters, Error, Key, Part, PresentationToken, Query,
+    SetError, Snapshot, SnapshotNode, Win, WindowOptions,
 };
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
 pub use style::{Color, Flex, Flow, IntoLength, Style, rgb};
