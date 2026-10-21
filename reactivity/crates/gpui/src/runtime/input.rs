@@ -67,9 +67,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 
 impl<M: View + 'static> Runtime<M> {
     fn focusable(&self, identity: u64) -> bool {
-        self.by_identity
-            .get(&identity)
-            .is_some_and(|&index| self.nodes[index].focusable())
+        self.nodes
+            .locate(identity)
+            .is_some_and(|index| self.nodes[index].focusable())
     }
     pub(super) fn focus(&mut self, target: Target) -> Result<Commit, Error> {
         self.live()?;

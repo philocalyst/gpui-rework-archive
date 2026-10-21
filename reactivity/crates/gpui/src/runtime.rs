@@ -39,8 +39,10 @@ mod delivery;
 mod image;
 mod input;
 mod list;
+mod nodes;
 mod turn;
 use list::{ListRow, ListState, ScrollRequest};
+use nodes::Nodes;
 mod metadata;
 mod query;
 mod semantics;
@@ -471,7 +473,7 @@ impl TextSlot {
 }
 /// A closed kind and an optional admitted text-lane index fit in one word.
 /// Zero in the upper bits means no text; the lower three bits hold one of the
-/// six explicitly encoded kinds. No Rust enum representation is reinterpreted.
+/// seven explicitly encoded kinds. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
 const _: () = assert!(MAX_NODES <= (u32::MAX >> 3) as usize);
@@ -636,11 +638,10 @@ impl SurfaceDamage {
 struct Runtime<M> {
     model: M,
     sources: Sources<M>,
-    nodes: Vec<Node>,
+    nodes: Nodes,
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
     images: Option<Box<image::Images>>,
-    by_identity: BTreeMap<u64, usize>,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
     focused: Option<Target>,
@@ -832,11 +833,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = Runtime {
             model: pending.model,
             sources,
-            nodes: Vec::new(),
+            nodes: Nodes::default(),
             styles: styles::Styles::default(),
             texts: Vec::new(),
             images: None,
-            by_identity: BTreeMap::new(),
             fanout: BTreeMap::new(),
             next_identity: 1,
             focused: None,
@@ -1145,7 +1145,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             // The old sheet remains diagnostic; current addresses do not.
             let target = if runtime.logical_valid
                 && !runtime.poisoned
-                && let Some(&index) = runtime.by_identity.get(&identity)
+                && let Some(index) = runtime.nodes.locate(identity)
                 && (all_targets
                     || runtime.nodes[index].handler.is_some()
                     || runtime.nodes[index].kind() == NodeKind::Input)
@@ -1280,7 +1280,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .find(|node| {
                 node.kind == kind
                     && label.is_none_or(|text| node.text.as_deref() == Some(text))
-                    && runtime.by_identity.contains_key(&node.identity)
+                    && runtime.nodes.locate(node.identity).is_some()
             })
             .map(|node| node.identity)
             .ok_or(Error::MissingElement)?;
@@ -1365,7 +1365,7 @@ impl<M: View + 'static> Runtime<M> {
         if !self.logical_valid {
             return Err(Error::StaleTarget);
         }
-        let &index = self.by_identity.get(&identity).ok_or(Error::StaleTarget)?;
+        let index = self.nodes.locate(identity).ok_or(Error::StaleTarget)?;
         if !self.lists.is_empty()
             && self.in_list(index)
             && !self
@@ -1551,10 +1551,7 @@ impl<M: View + 'static> Runtime<M> {
                 .sort_unstable_by_key(|destination| destination.packed());
         }
         let old_styles = std::mem::take(&mut self.styles);
-        let mut old = std::mem::take(&mut self.nodes)
-            .into_iter()
-            .map(Some)
-            .collect::<Vec<_>>();
+        let mut old = self.nodes.take().into_iter().map(Some).collect::<Vec<_>>();
         let mut sites = BTreeMap::new();
         let mut keyed_rows = BTreeMap::new();
         let mut keyed_lists = BTreeMap::new();
@@ -1837,22 +1834,16 @@ impl<M: View + 'static> Runtime<M> {
         }
         self.lists = lists;
         self.list_rows = list_rows;
-        self.nodes = nodes;
+        self.nodes.replace(nodes);
         self.styles = styles.finish();
         self.texts = texts;
         self.fanout = fanout;
-        self.by_identity = self
-            .nodes
-            .iter()
-            .enumerate()
-            .map(|(i, node)| (node.identity(), i))
-            .collect();
         self.overrides
-            .retain(|identity| self.by_identity.contains_key(&identity));
+            .retain(|identity| self.nodes.locate(identity).is_some());
         if let Some(metadata) = &mut self.metadata {
             metadata
                 .overrides
-                .retain(|identity, _| self.by_identity.contains_key(identity));
+                .retain(|identity, _| self.nodes.locate(*identity).is_some());
         }
         self.logical_valid = true;
         self.prune_focus();
@@ -2069,7 +2060,10 @@ impl<M: View + 'static> Runtime<M> {
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
             for list in self.lists.values() {
-                let index = self.by_identity[&list.identity];
+                let index = self
+                    .nodes
+                    .locate(list.identity)
+                    .expect("current list identity");
                 if self.nodes[index].parent.index().is_some_and(|parent| {
                     self.layout_dirty.contains(&self.nodes[parent].identity())
                 }) {
@@ -2077,7 +2071,10 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
             for identity in &self.layout_dirty {
-                let index = self.by_identity[identity];
+                let index = self
+                    .nodes
+                    .locate(*identity)
+                    .expect("current logical identity");
                 let id = self.layout_nodes[index];
                 self.layout.set_style(
                     id,
@@ -2190,7 +2187,7 @@ impl<M: View + 'static> Runtime<M> {
                 .get(index + 1)
                 .is_some_and(|child| child.parent.index() == Some(index));
             let style = self.styles.get(index);
-            let node = &mut self.nodes[index];
+            let node = &self.nodes[index];
             let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
                 |parent| spaces[parent],
@@ -2429,7 +2426,7 @@ impl<M: View + 'static> Runtime<M> {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
-                    if let Some(&logical) = self.by_identity.get(&node.identity)
+                    if let Some(logical) = self.nodes.locate(node.identity)
                         && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
                     {
                         return Some(node.identity);

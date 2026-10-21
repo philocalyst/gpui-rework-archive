@@ -330,9 +330,9 @@ impl<M: View + 'static> Runtime<M> {
                     // Logical indices are hints only: clipped list entries can
                     // shift P. Verify identity before using the cheap path.
                     let part = self
-                        .by_identity
-                        .get(&identity)
-                        .and_then(|&index| {
+                        .nodes
+                        .locate(identity)
+                        .and_then(|index| {
                             self.presented
                                 .get(index)
                                 .filter(|node| node.identity == identity)
