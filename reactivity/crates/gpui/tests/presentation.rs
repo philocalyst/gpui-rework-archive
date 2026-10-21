@@ -240,3 +240,54 @@ fn headless_keeps_automatic_presentation_and_resize_behavior() {
     win.with_pixels(|bytes, w, h| assert_eq!(bytes.len(), w as usize * h as usize * 4))
         .unwrap();
 }
+
+#[test]
+fn surface_loss_revokes_coordinates_until_current_scene_is_presented_again() {
+    let win = recording();
+    let current = token(&win);
+    win.presented(current).unwrap();
+    let addressed = target(&win);
+    let before = win.counters();
+    win.presentation_lost().unwrap();
+    assert!(!win.snapshot().unwrap().presentation_valid);
+    assert_eq!(win.snapshot().unwrap().prepared_epoch, Some(0));
+    assert_eq!(
+        win.hit_target(Point { x: 8.0, y: 8.0 }),
+        Err(Error::PresentationStale)
+    );
+    assert_eq!(
+        win.click_at(Point { x: 8.0, y: 8.0 }),
+        Err(Error::PresentationStale)
+    );
+    assert_eq!(token(&win), current);
+    assert_eq!(win.counters(), before);
+    let noop = win.update(|_| {}).unwrap();
+    assert_eq!((noop.source_epoch, noop.presentation_epoch), (1, 0));
+    assert_eq!(noop.prepared_epoch, Some(1));
+    let after = win.presented(current).unwrap();
+    assert_eq!((after.source_epoch, after.presentation_epoch), (1, 1));
+    assert!(after.presentation_valid);
+    assert_eq!(
+        win.hit_target(Point { x: 8.0, y: 8.0 }).unwrap(),
+        Some(addressed)
+    );
+    assert_eq!(win.counters().paint_passes, before.paint_passes);
+    assert_eq!(win.counters().layout_runs, before.layout_runs);
+    assert_eq!(win.counters().presentations, before.presentations + 1);
+}
+
+#[test]
+fn reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source() {
+    let win = recording();
+    let current = token(&win);
+    win.presented(current).unwrap();
+    win.presentation_lost().unwrap();
+    assert!(win.update(|m| m.broken = true).is_err());
+    let commit = win.presented(current).unwrap();
+    assert_eq!((commit.source_epoch, commit.presentation_epoch), (1, 0));
+    assert!(commit.presentation_valid);
+    assert_eq!(
+        win.hit_target(Point { x: 8.0, y: 8.0 }),
+        Err(Error::PresentationStale)
+    );
+}
