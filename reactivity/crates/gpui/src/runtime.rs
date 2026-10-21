@@ -563,6 +563,9 @@ impl Node {
     fn text_slot(&self) -> TextSlot {
         self.content.text_slot()
     }
+    fn focusable(&self) -> bool {
+        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.handler.is_some()
+    }
 }
 impl TextSite {
     fn shape<'n>(
@@ -1188,8 +1191,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub fn property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
-        Ok(property.get(runtime.styles.get(runtime.by_identity[&identity])))
+        let (_, index) = runtime.locate(target)?;
+        Ok(property.get(runtime.styles.get(index)))
     }
     pub fn contribution<T>(
         &self,
@@ -1211,12 +1214,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let (identity, index) = runtime.locate(target)?;
         let epoch = runtime
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let index = runtime.by_identity[&identity];
         let before = *runtime.styles.get(index);
         let after = runtime
             .overrides
@@ -1354,22 +1356,28 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn resolve(&self, target: Target) -> Result<u64, Error> {
-        self.sites
-            .resolve(target)
-            .filter(|identity| {
-                self.logical_valid
-                    && self.by_identity.get(identity).is_some_and(|&index| {
-                        self.lists.is_empty()
-                            || !self.in_list(index)
-                            || self
-                                .prepared
-                                .as_ref()
-                                .map_or(self.presented.as_slice(), |p| &p.nodes)
-                                .iter()
-                                .any(|node| node.identity == *identity)
-                    })
-            })
-            .ok_or(Error::StaleTarget)
+        self.locate(target).map(|(identity, _)| identity)
+    }
+    // The index belongs to this logical tree, not the acknowledged sheet. Use
+    // it within the current owner borrow, before any description can rebuild it.
+    fn locate(&self, target: Target) -> Result<(u64, usize), Error> {
+        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
+        if !self.logical_valid {
+            return Err(Error::StaleTarget);
+        }
+        let &index = self.by_identity.get(&identity).ok_or(Error::StaleTarget)?;
+        if !self.lists.is_empty()
+            && self.in_list(index)
+            && !self
+                .prepared
+                .as_ref()
+                .map_or(self.presented.as_slice(), |p| &p.nodes)
+                .iter()
+                .any(|node| node.identity == identity)
+        {
+            return Err(Error::StaleTarget);
+        }
+        Ok((identity, index))
     }
     fn current_presentation(&self) -> Result<(), Error> {
         if self.logical_valid
