@@ -247,7 +247,6 @@ struct Geometry {
     tiles: usize,
     raw_bytes: usize,
     start: usize,
-    raw_bound: usize,
 }
 fn geometry(surface: Surface, limits: Limits) -> Result<Geometry, Error> {
     let w = surface.width as usize;
@@ -284,7 +283,6 @@ fn geometry(surface: Surface, limits: Limits) -> Result<Geometry, Error> {
         tiles,
         raw_bytes,
         start,
-        raw_bound,
     })
 }
 
@@ -298,9 +296,22 @@ fn encode(
     if rgba.len() != geometry.raw_bytes {
         return Err(Error::PixelLength);
     }
+    let mut scratch = Scratch::default();
+    let mut encoded_len = geometry.start;
+    for index in 0..geometry.tiles {
+        let record = select_record(surface, &geometry, rgba, base, index, &mut scratch)?;
+        encoded_len = encoded_len
+            .checked_add(record.len())
+            .ok_or(Error::SizeOverflow)?;
+        if encoded_len > limits.max_encoded_bytes {
+            return Err(Error::LimitExceeded);
+        }
+    }
+    // Both passes read the same immutable input and independent base. The
+    // selector has no side effects or external callbacks, so its sizes agree.
     let mut bytes = Vec::new();
     bytes
-        .try_reserve_exact(geometry.raw_bound.min(limits.max_encoded_bytes))
+        .try_reserve_exact(encoded_len)
         .map_err(|_| Error::Allocation)?;
     bytes.resize(geometry.start, 0);
     bytes[..8].copy_from_slice(MAGIC);
@@ -308,61 +319,91 @@ fn encode(
     bytes[12..16].copy_from_slice(&surface.height.to_le_bytes());
     bytes[16..32].copy_from_slice(&surface.format.0);
     bytes[32..36].copy_from_slice(&(geometry.tiles as u32).to_le_bytes());
-    let mut tile = [0u8; MAX_TILE_BYTES];
-    let mut old = [0u8; MAX_TILE_BYTES];
-    let mut candidate = [0u8; 2 + 16 * 4 + 256 * 2];
     for index in 0..geometry.tiles {
         set_offset(&mut bytes, index);
-        let x = index % geometry.columns * TILE_SIDE;
-        let y = index / geometry.columns * TILE_SIDE;
-        let w = (surface.width as usize - x).min(TILE_SIDE);
-        let h = (surface.height as usize - y).min(TILE_SIDE);
-        let length = w * h * 4;
-        for row in 0..h {
-            let start = ((y + row) * surface.width as usize + x) * 4;
-            tile[row * w * 4..(row + 1) * w * 4].copy_from_slice(&rgba[start..start + w * 4]);
-        }
-        let tile = &tile[..length];
-        let same = if let Some(base) = base {
-            base.decode_tile(index, &mut old[..length])?;
-            &old[..length] == tile
-        } else {
-            false
-        };
-        let record: &[u8] = if same {
-            &[COPY]
-        } else if tile.chunks_exact(4).all(|pixel| pixel == &tile[..4]) && 5 < length + 1 {
-            candidate[0] = SOLID;
-            candidate[1..5].copy_from_slice(&tile[..4]);
-            &candidate[..5]
-        } else if let Some(count) = palette_runs(tile, &mut candidate) {
-            if count < length + 1 {
-                &candidate[..count]
-            } else {
-                &[]
-            }
-        } else {
-            &[]
-        };
-        let needed = if record.is_empty() {
-            1 + length
-        } else {
-            record.len()
-        };
-        if bytes.len().checked_add(needed).ok_or(Error::SizeOverflow)? > limits.max_encoded_bytes {
-            return Err(Error::LimitExceeded);
-        }
-        if record.is_empty() {
-            bytes.push(RAW);
-            bytes.extend_from_slice(tile);
-        } else {
-            bytes.extend_from_slice(record);
-        }
+        select_record(surface, &geometry, rgba, base, index, &mut scratch)?.append_to(&mut bytes);
     }
     set_offset(&mut bytes, geometry.tiles);
+    debug_assert_eq!(bytes.len(), encoded_len);
     Ok(Records {
         bytes: bytes.into_boxed_slice(),
     })
+}
+
+struct Scratch {
+    tile: [u8; MAX_TILE_BYTES],
+    old: [u8; MAX_TILE_BYTES],
+    candidate: [u8; 2 + 16 * 4 + 256 * 2],
+}
+impl Default for Scratch {
+    fn default() -> Self {
+        Self {
+            tile: [0; MAX_TILE_BYTES],
+            old: [0; MAX_TILE_BYTES],
+            candidate: [0; 2 + 16 * 4 + 256 * 2],
+        }
+    }
+}
+enum Selected<'a> {
+    Raw(&'a [u8]),
+    Encoded(&'a [u8]),
+}
+impl Selected<'_> {
+    fn len(&self) -> usize {
+        match self {
+            Self::Raw(tile) => 1 + tile.len(),
+            Self::Encoded(record) => record.len(),
+        }
+    }
+    fn append_to(self, bytes: &mut Vec<u8>) {
+        match self {
+            Self::Raw(tile) => {
+                bytes.push(RAW);
+                bytes.extend_from_slice(tile);
+            }
+            Self::Encoded(record) => bytes.extend_from_slice(record),
+        }
+    }
+}
+
+fn select_record<'a>(
+    surface: Surface,
+    geometry: &Geometry,
+    rgba: &[u8],
+    base: Option<&Independent>,
+    index: usize,
+    scratch: &'a mut Scratch,
+) -> Result<Selected<'a>, Error> {
+    let x = index % geometry.columns * TILE_SIDE;
+    let y = index / geometry.columns * TILE_SIDE;
+    let w = (surface.width as usize - x).min(TILE_SIDE);
+    let h = (surface.height as usize - y).min(TILE_SIDE);
+    let length = w * h * 4;
+    for row in 0..h {
+        let start = ((y + row) * surface.width as usize + x) * 4;
+        scratch.tile[row * w * 4..(row + 1) * w * 4].copy_from_slice(&rgba[start..start + w * 4]);
+    }
+    let tile = &scratch.tile[..length];
+    if let Some(base) = base {
+        base.decode_tile(index, &mut scratch.old[..length])?;
+        if &scratch.old[..length] == tile {
+            return Ok(Selected::Encoded(&[COPY]));
+        }
+    }
+    if length == 4 {
+        return Ok(Selected::Raw(tile));
+    }
+    if tile.chunks_exact(4).all(|pixel| pixel == &tile[..4]) {
+        scratch.candidate[0] = SOLID;
+        scratch.candidate[1..5].copy_from_slice(&tile[..4]);
+        return Ok(Selected::Encoded(&scratch.candidate[..5]));
+    }
+    if let Some(count) = palette_runs(tile, &mut scratch.candidate)
+        && count < length + 1
+    {
+        return Ok(Selected::Encoded(&scratch.candidate[..count]));
+    }
+    Ok(Selected::Raw(tile))
 }
 
 fn set_offset(bytes: &mut [u8], index: usize) {
