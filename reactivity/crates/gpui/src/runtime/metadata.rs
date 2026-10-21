@@ -54,14 +54,14 @@ pub struct ListItemInfo {
 #[derive(Default)]
 pub(super) struct Declared {
     pub identity: u64,
-    pub name: Option<Arc<str>>,
-    pub description: Option<Arc<str>>,
+    pub name: Option<SharedText>,
+    pub description: Option<SharedText>,
 }
 #[derive(Clone, Default, PartialEq)]
 pub(super) struct Names {
     pub identity: u64,
-    pub name: Option<Arc<str>>,
-    pub description: Option<Arc<str>>,
+    pub name: Option<SharedText>,
+    pub description: Option<SharedText>,
     // Explicit Set(None) suppresses the visual text fallback too.
     pub explicit_name: bool,
 }
@@ -82,7 +82,7 @@ pub(super) struct Row {
 pub(super) struct TextSlot {
     pub identity: u64,
     // The name column's entry presence distinguishes a fallback from Set(None).
-    pub value: Option<Arc<str>>,
+    pub value: Option<SharedText>,
 }
 fn slot(column: &[TextSlot], identity: u64) -> Option<&TextSlot> {
     column
@@ -90,7 +90,7 @@ fn slot(column: &[TextSlot], identity: u64) -> Option<&TextSlot> {
         .ok()
         .map(|i| &column[i])
 }
-fn set_slot(column: &mut Vec<TextSlot>, identity: u64, value: Option<Option<Arc<str>>>) {
+fn set_slot(column: &mut Vec<TextSlot>, identity: u64, value: Option<Option<SharedText>>) {
     match (
         column.binary_search_by_key(&identity, |entry| entry.identity),
         value,
@@ -182,7 +182,7 @@ impl Sheet {
 #[derive(Default)]
 pub(super) struct Metadata {
     pub base: Vec<Declared>,
-    pub overrides: BTreeMap<u64, [Contribution<Option<Arc<str>>>; 2]>,
+    pub overrides: BTreeMap<u64, [Contribution<Option<SharedText>>; 2]>,
     pub presented: Sheet,
     pub candidate: Option<Sheet>,
 }
@@ -470,7 +470,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .get_or_insert_with(|| Box::new(Metadata::default()));
         let value = match contribution {
             Contribution::Inherit => Contribution::Inherit,
-            Contribution::Set(value) => Contribution::Set(value.map(Arc::from)),
+            Contribution::Set(value) => Contribution::Set(value.map(SharedText::from)),
         };
         let values = metadata.overrides.entry(identity).or_default();
         let changed = values[property.slot()] != value;

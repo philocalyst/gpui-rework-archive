@@ -20,6 +20,7 @@ pub mod property;
 mod remote;
 mod runtime;
 pub mod semantic;
+mod shared_text;
 pub mod source;
 mod style;
 
