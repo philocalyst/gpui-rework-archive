@@ -4,7 +4,7 @@
 use super::{Commit, Error, NodeKind, View, Win};
 use crate::{Target, remote::LaneSet};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
 pub enum ActionKind {
     Activate = 1,
     Focus = 2,

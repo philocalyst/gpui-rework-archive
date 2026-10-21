@@ -3,7 +3,7 @@ use crate::{El, IntoLength};
 use std::ops::Range;
 
 /// Exact application data identity, independent of an actionable `Target`.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize)]
 pub struct ItemKey(u64);
 impl ItemKey {
     pub const fn new(value: u64) -> Self {
@@ -16,7 +16,7 @@ impl ItemKey {
 /// Unique among the lists mounted in one window's description, including
 /// contained components. It also names the key domain: replacing a source with
 /// unrelated items that reuse keys requires a new ListId.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize)]
 pub struct ListId(u64);
 impl ListId {
     pub const fn new(value: u64) -> Self {

@@ -80,6 +80,19 @@ or paint work. Virtual time, completion control and replay remain implementation
 gates through production facilities. There are no dummy test-only timers or a
 second event loop.
 
+`win.semantics()?.write_json(writer)?` streams a borrowed semantic presentation
+through the same `Part` getters as `visit` and accessibility. `Part` also implements
+Serde `Serialize`, so applications can use their own serializers. The snapshot
+includes source/presentation/prepared epochs, acknowledged/requested viewport
+settings, current focus and frozen node data. While a candidate is pending or
+fails, the nodes still describe the previous acknowledged presentation. A borrowed
+snapshot prevents owner mutation or close; serialization retains no second tree.
+Successful streaming to an allocation-free writer allocates no framework memory
+(32 complete passes are checked). `to_json()` allocates the output string.
+Writer failure may leave a partial document, but never changes the window.
+Serialized targets are process-local diagnostic identities, not restorable
+capabilities; this format does not replace source persistence or a replay trace.
+
 Typed `Remote<T>`/`Inbox<T>` queues and `deliver_ready(budget)` now provide the
 production delivery primitive for native and deterministic headless callers.
 Tests send ordinary owned values, choose the batch budget and inspect the same

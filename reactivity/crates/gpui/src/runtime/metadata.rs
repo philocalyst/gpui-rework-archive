@@ -37,12 +37,12 @@ impl Destination {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
 pub struct ListInfo {
     pub id: ListId,
     pub count: u32,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
 pub struct ListItemInfo {
     pub list: Target,
     pub key: ItemKey,
