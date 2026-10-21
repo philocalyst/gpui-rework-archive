@@ -1,0 +1,328 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 0f0c60855b..76f1a6e235 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -513,14 +513,120 @@ struct Fanout {
+ }
+ struct Presented {
+     identity: u64,
+-    parent: Parent,
+-    kind: NodeKind,
++    header: PresentedHeader,
+     text: Option<SharedText>,
+     rect: Rect,
+     transform: PresentedTransform,
+     bounds: Rect,
+-    hittable: bool,
+-    actions: Actions,
++}
++/// Frozen routing metadata in one word. The low 24 bits encode parent+1;
++/// the high byte holds the closed kind, hit flag, and four advertised actions.
++#[derive(Clone, Copy)]
++struct PresentedHeader(u32);
++impl PresentedHeader {
++    #[inline]
++    fn new(parent: Parent, kind: NodeKind, hittable: bool, actions: Actions) -> Self {
++        const { assert!(MAX_NODES < 1 << 24) };
++        let kind = match kind {
++            NodeKind::Div => 0,
++            NodeKind::Text => 1,
++            NodeKind::Input => 2,
++            NodeKind::Button => 3,
++            NodeKind::List => 4,
++            NodeKind::ListItem => 5,
++        };
++        Self(
++            parent.0.wrapping_add(1)
++                | (kind << 24)
++                | (u32::from(hittable) << 27)
++                | (u32::from(actions.bits()) << 28),
++        )
++    }
++    #[inline]
++    fn parent(self) -> Parent {
++        Parent((self.0 & 0x00ff_ffff).wrapping_sub(1))
++    }
++    #[inline]
++    fn kind(self) -> NodeKind {
++        match (self.0 >> 24) & 7 {
++            0 => NodeKind::Div,
++            1 => NodeKind::Text,
++            2 => NodeKind::Input,
++            3 => NodeKind::Button,
++            4 => NodeKind::List,
++            5 => NodeKind::ListItem,
++            _ => unreachable!("only closed admitted kinds are encoded"),
++        }
++    }
++    #[inline]
++    fn hittable(self) -> bool {
++        self.0 & (1 << 27) != 0
++    }
++    #[inline]
++    fn actions(self) -> Actions {
++        Actions::from_bits((self.0 >> 28) as u8)
++    }
++}
++#[cfg(test)]
++mod presented_header_tests {
++    use super::*;
++
++    #[test]
++    fn packed_frozen_metadata_preserves_all_parents_kinds_and_action_sets() {
++        assert_eq!(size_of::<PresentedHeader>(), 4);
++        assert_eq!(size_of::<Presented>(), 80);
++        let kinds = [
++            NodeKind::Div,
++            NodeKind::Text,
++            NodeKind::Input,
++            NodeKind::Button,
++            NodeKind::List,
++            NodeKind::ListItem,
++        ];
++        for kind in kinds {
++            for index in 0..MAX_NODES {
++                let actions = Actions::from_bits((index & 15) as u8);
++                let hittable = index & 16 != 0;
++                let header =
++                    PresentedHeader::new(Parent::new(Some(index)), kind, hittable, actions);
++                assert_eq!(header.parent().index(), Some(index));
++                assert_eq!(header.kind(), kind);
++                assert_eq!(header.hittable(), hittable);
++                assert_eq!(header.actions(), actions);
++            }
++            for parent in [None, Some(0), Some(MAX_NODES - 1)] {
++                for bits in 0..16 {
++                    for hittable in [false, true] {
++                        let actions = Actions::from_bits(bits);
++                        let header =
++                            PresentedHeader::new(Parent::new(parent), kind, hittable, actions);
++                        assert_eq!(header.parent().index(), parent);
++                        assert_eq!(header.kind(), kind);
++                        assert_eq!(header.hittable(), hittable);
++                        assert_eq!(header.actions(), actions);
++                    }
++                }
++            }
++        }
++    }
++}
++impl Presented {
++    #[inline]
++    fn parent(&self) -> Parent {
++        self.header.parent()
++    }
++    #[inline]
++    fn kind(&self) -> NodeKind {
++        self.header.kind()
++    }
++    #[inline]
++    fn hittable(&self) -> bool {
++        self.header.hittable()
++    }
++    #[inline]
++    fn actions(&self) -> Actions {
++        self.header.actions()
++    }
+ }
+ struct Prepared {
+     size: [u32; 2],
+@@ -1010,8 +1116,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             let identity = node.identity;
+             let mut snapshot = SnapshotNode {
+                 identity,
+-                parent: node.parent.index(),
+-                role: format!("{:?}", node.kind.role()),
++                parent: node.parent().index(),
++                role: format!("{:?}", node.kind().role()),
+                 text: node.text.as_deref().map(str::to_owned),
+                 bounds: [
+                     node.bounds.x,
+@@ -1139,7 +1245,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             .presented
+             .iter()
+             .find(|node| {
+-                node.kind == kind
++                node.kind() == kind
+                     && label.is_none_or(|text| node.text.as_deref() == Some(text))
+                     && runtime.by_identity.contains_key(&node.identity)
+             })
+@@ -2199,8 +2305,15 @@ impl<M: View + 'static> Runtime<M> {
+             }
+             presented.push(Presented {
+                 identity: node.identity,
+-                parent: published_parent,
+-                kind: node.kind(),
++                header: PresentedHeader::new(
++                    published_parent,
++                    node.kind(),
++                    node.text_slot().0 != u32::MAX
++                        || node.style.bg.alpha() > 0.0
++                        || node.handler.is_some()
++                        || node.kind() == NodeKind::Input,
++                    Actions::for_node(node.kind(), node.handler.is_some()),
++                ),
+                 text: node
+                     .text_slot()
+                     .get(&self.texts)
+@@ -2208,11 +2321,6 @@ impl<M: View + 'static> Runtime<M> {
+                 rect,
+                 transform: PresentedTransform::new(transform),
+                 bounds,
+-                hittable: node.text_slot().0 != u32::MAX
+-                    || node.style.bg.alpha() > 0.0
+-                    || node.handler.is_some()
+-                    || node.kind() == NodeKind::Input,
+-                actions: Actions::for_node(node.kind(), node.handler.is_some()),
+             });
+             if let Some(sheet) = &mut metadata_sheet
+                 && let Some(metadata) = &self.metadata
+@@ -2277,16 +2385,16 @@ impl<M: View + 'static> Runtime<M> {
+             return None;
+         }
+         for (index, node) in self.presented.iter().enumerate().rev() {
+-            if node.hittable && self.sheet_hit(index, point) {
++            if node.hittable() && self.sheet_hit(index, point) {
+                 let mut cursor = Some(index);
+                 while let Some(index) = cursor {
+                     let node = &self.presented[index];
+                     if let Some(&logical) = self.by_identity.get(&node.identity)
+-                        && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
++                        && (self.nodes[logical].handler.is_some() || node.kind() == NodeKind::Input)
+                     {
+                         return Some(node.identity);
+                     }
+-                    cursor = node.parent.index();
++                    cursor = node.parent().index();
+                 }
+                 return None;
+             }
+diff --git a/reactivity/crates/gpui/src/runtime/list.rs b/reactivity/crates/gpui/src/runtime/list.rs
+index 032467dfaf..cb20719c72 100644
+--- a/reactivity/crates/gpui/src/runtime/list.rs
++++ b/reactivity/crates/gpui/src/runtime/list.rs
+@@ -328,16 +328,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             .enumerate()
+             .rev()
+             .find(|(index, node)| {
+-                (node.hittable || node.kind == NodeKind::List) && runtime.sheet_hit(*index, point)
++                (node.hittable() || node.kind() == NodeKind::List)
++                    && runtime.sheet_hit(*index, point)
+             })
+             .map(|(index, _)| index)
+             .ok_or(Error::NotHittable)?;
+         let target = loop {
+             let node = &runtime.presented[cursor];
+-            if node.kind == NodeKind::List {
++            if node.kind() == NodeKind::List {
+                 break runtime.sites.target(node.identity);
+             }
+-            cursor = node.parent.index().ok_or(Error::NotHittable)?;
++            cursor = node.parent().index().ok_or(Error::NotHittable)?;
+         };
+         self.scroll(target, delta)
+     }
+@@ -364,10 +365,10 @@ impl<M: View + 'static> Runtime<M> {
+         if self.lists.is_empty() {
+             return true;
+         }
+-        let mut cursor = node.parent.index();
++        let mut cursor = node.parent().index();
+         while let Some(index) = cursor {
+             let node = &self.presented[index];
+-            if matches!(node.kind, NodeKind::List | NodeKind::ListItem)
++            if matches!(node.kind(), NodeKind::List | NodeKind::ListItem)
+                 && !node
+                     .transform
+                     .get()
+@@ -375,7 +376,7 @@ impl<M: View + 'static> Runtime<M> {
+             {
+                 return false;
+             }
+-            cursor = node.parent.index();
++            cursor = node.parent().index();
+         }
+         true
+     }
+diff --git a/reactivity/crates/gpui/src/runtime/query.rs b/reactivity/crates/gpui/src/runtime/query.rs
+index 36abfe9d33..f74e2324ea 100644
+--- a/reactivity/crates/gpui/src/runtime/query.rs
++++ b/reactivity/crates/gpui/src/runtime/query.rs
+@@ -55,7 +55,7 @@ impl<'a> Part<'a> {
+         self.context.sites.target(self.node.identity)
+     }
+     pub fn parent(self) -> Option<Target> {
+-        self.node.parent.index().map(|index| {
++        self.node.parent().index().map(|index| {
+             self.context
+                 .sites
+                 .target(self.context.nodes[index].identity)
+@@ -68,10 +68,10 @@ impl<'a> Part<'a> {
+         self.context.focused == Some(self.target())
+     }
+     pub fn actions(self) -> Actions {
+-        self.node.actions
++        self.node.actions()
+     }
+     pub fn role(self) -> Role {
+-        self.node.kind.role()
++        self.node.kind().role()
+     }
+     pub fn text(self) -> Option<&'a str> {
+         self.node.text.as_deref()
+@@ -86,7 +86,7 @@ impl<'a> Part<'a> {
+         {
+             return slot.value.as_deref();
+         }
+-        (self.node.kind != super::NodeKind::Input)
++        (self.node.kind() != super::NodeKind::Input)
+             .then(|| self.text())
+             .flatten()
+     }
+@@ -114,7 +114,7 @@ impl<'a> Part<'a> {
+         })
+     }
+     pub fn value(self) -> Option<&'a str> {
+-        (self.node.kind == super::NodeKind::Input)
++        (self.node.kind() == super::NodeKind::Input)
+             .then(|| self.text())
+             .flatten()
+     }
+@@ -206,7 +206,7 @@ impl<'a, M: View + 'static> Query<'a, M> {
+         let following = &runtime.presented[root + 1..];
+         let len = following
+             .iter()
+-            .position(|node| node.parent.index().is_none_or(|parent| parent < root))
++            .position(|node| node.parent().index().is_none_or(|parent| parent < root))
+             .unwrap_or(following.len());
+         Ok(&runtime.presented[root..root + 1 + len])
+     }
+diff --git a/reactivity/crates/gpui/src/runtime/semantics.rs b/reactivity/crates/gpui/src/runtime/semantics.rs
+index 716b35d67e..145ab3ff1c 100644
+--- a/reactivity/crates/gpui/src/runtime/semantics.rs
++++ b/reactivity/crates/gpui/src/runtime/semantics.rs
+@@ -38,6 +38,15 @@ impl Action<'_> {
+ #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+ pub struct Actions(u8);
+ impl Actions {
++    #[inline]
++    pub(super) const fn bits(self) -> u8 {
++        self.0
++    }
++    #[inline]
++    pub(super) const fn from_bits(bits: u8) -> Self {
++        assert!(bits < 16);
++        Self(bits)
++    }
+     pub const fn contains(self, kind: ActionKind) -> bool {
+         self.0 & kind as u8 != 0
+     }
+@@ -76,7 +85,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             .iter()
+             .find(|node| node.identity == identity)
+             .ok_or(Error::StaleTarget)?;
+-        if !node.actions.contains(action.kind()) {
++        if !node.actions().contains(action.kind()) {
+             return Err(Error::NotInteractive);
+         }
+         match action {
