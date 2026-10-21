@@ -11,6 +11,7 @@ fn borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity() {
         ("office café AVATAR", Some(28.0)),
         ("Ελλάδα\nКириллица", Some(40.0)),
         ("a\u{301}\n\n", Some(1.0)),
+        ("अ नमस्ते", None),
     ] {
         let actual = batch.shape(text, 16.0, width).unwrap();
         let expected = service.shape(text, 16.0, width).unwrap();
@@ -21,8 +22,8 @@ fn borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity() {
         assert_eq!(service.ink_bounds(&actual), service.ink_bounds(&expected));
     }
     assert_eq!(
-        batch.shape("अ", 16.0, None).unwrap_err(),
-        service.shape("अ", 16.0, None).unwrap_err()
+        batch.shape("漢", 16.0, None).unwrap_err(),
+        service.shape("漢", 16.0, None).unwrap_err()
     );
     assert_eq!(
         batch.shape("\u{10ffff}", 16.0, None).unwrap_err(),

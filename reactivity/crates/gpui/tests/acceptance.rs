@@ -183,12 +183,12 @@ fn presentation_failure_preserves_source_edits_and_the_previous_complete_image()
     .unwrap();
     let input = window.input();
     let original = window.scene_digest().unwrap();
-    assert!(window.set(Editor::CONTENT, "okअ".into()).is_err());
+    assert!(window.set(Editor::CONTENT, "ok漢".into()).is_err());
     assert_eq!(
         window
             .with_model(|model| model.content.to_string())
             .unwrap(),
-        "okअ"
+        "ok漢"
     );
     let snapshot = window.snapshot().unwrap();
     assert_eq!((snapshot.source_epoch, snapshot.presentation_epoch), (1, 0));

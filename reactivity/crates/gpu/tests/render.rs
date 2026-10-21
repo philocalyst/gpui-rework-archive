@@ -916,3 +916,49 @@ fn all_authored_color_layouts_reach_real_sdr_and_hdr_targets() {
         }
     });
 }
+
+#[test]
+fn unicode_paragraphs_fallback_and_fractional_density_match_cpu() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut text = TextSystem::bundled().unwrap();
+        let font = text.font_face().clone();
+        let mut shaper = font.shaper();
+        let layout = shaper
+            .shape(
+                "office Ελληνικά नमस्ते\r\nabc العربية אבג 123",
+                16.,
+                Some(215.),
+            )
+            .unwrap();
+        assert!(
+            layout
+                .runs()
+                .any(|run| run.direction() == gpui_canvas::TextDirection::RightToLeft)
+        );
+        for density in [1., 1.25, 2.] {
+            for reflected in [false, true] {
+                let mut canvas = Canvas::recording(320, 192, ColorConfig::default()).unwrap();
+                canvas.clear(Color::WHITE);
+                canvas
+                    .draw_text_scaled(
+                        &mut text,
+                        &layout,
+                        Point { x: 1.25, y: 2.5 },
+                        Affine {
+                            a: if reflected { -density } else { density },
+                            d: density,
+                            tx: if reflected { 319.5 } else { 0.25 },
+                            ty: 0.125,
+                            ..Affine::IDENTITY
+                        },
+                        Rect::new(0.1, 0.3, 319.2, 190.1),
+                        Color::BLACK,
+                        density,
+                    )
+                    .unwrap();
+                compare_tile_modes(&mut renderer, &mut canvas);
+            }
+        }
+    });
+}

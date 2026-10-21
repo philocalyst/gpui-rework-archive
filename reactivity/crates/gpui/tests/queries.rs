@@ -83,7 +83,7 @@ fn semantic_queries_use_presented_roles_and_bounds_without_diagnostic_snapshots(
 fn query_reads_the_acknowledged_sheet_while_source_edits_wait_for_repair() {
     let mut win = Win::demo(page());
     let input = win.role(Role::TextInput).one().unwrap();
-    assert!(win.type_text(input, "अ").is_err());
+    assert!(win.type_text(input, "漢").is_err());
     assert_eq!(win.query().within(input).count().unwrap(), 1);
     assert_eq!(win.role(Role::Text).text("ready").count().unwrap(), 1);
     assert_eq!(

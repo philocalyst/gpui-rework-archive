@@ -18,7 +18,7 @@ use zbus::{
 };
 
 const TITLE: &str = "GPUI native AT-SPI Todo proof";
-const CONTENT: &str = "Read through AT-SPI";
+const CONTENT: &str = "Read Ω א ع through AT-SPI";
 const HEADING: &str = "Task collection";
 type Address = (String, OwnedObjectPath);
 

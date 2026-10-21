@@ -141,8 +141,8 @@ fn failed_shaping_retains_old_pixels_and_recovers_without_owner_description() {
     win.presented(old).unwrap();
     let before = pixels(&mut win);
     win.reset_counters().unwrap();
-    assert!(win.set(Page::WORDS, "अ".into()).is_err());
-    assert_eq!(win.with_model(|m| m.words.to_string()).unwrap(), "अ");
+    assert!(win.set(Page::WORDS, "漢".into()).is_err());
+    assert_eq!(win.with_model(|m| m.words.to_string()).unwrap(), "漢");
     assert_eq!(win.with_scene(|_, token| token).unwrap(), old);
     assert_eq!(pixels(&mut win), before);
     assert_eq!(

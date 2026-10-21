@@ -404,7 +404,7 @@ impl ItemSource for Rows {
     }
     fn row(&self, i: usize) -> El<'_> {
         button(if self.broken {
-            "\u{05d0}".to_owned()
+            "漢".to_owned()
         } else {
             format!("row {}", self.key(i).get())
         })

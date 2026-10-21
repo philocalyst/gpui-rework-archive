@@ -2514,7 +2514,7 @@ mod tests {
             site.shaped.as_ref().unwrap().width,
             Some(f32::MIN_POSITIVE.to_bits())
         );
-        site.value = SharedText::from("अ");
+        site.value = SharedText::from("漢");
         site.shaped = None;
         assert!(site.shape(&mut shaper, 16.0, Some(40.0)).is_err());
         assert!(site.shaped.is_none());

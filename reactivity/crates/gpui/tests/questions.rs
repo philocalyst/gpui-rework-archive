@@ -39,7 +39,7 @@ impl View for Model {
     }
     fn view(&self) -> El<'_> {
         column((
-            text(if *self.broken { "א" } else { &self.caption }),
+            text(if *self.broken { "漢" } else { &self.caption }),
             text_input(&self.query).name("Search"),
             text(&self.theme),
             pane(self.answer),

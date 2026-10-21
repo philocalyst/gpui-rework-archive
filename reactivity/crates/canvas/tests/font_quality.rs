@@ -15,8 +15,23 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
         for density in [1.0, 1.25, 2.0] {
             let layout = text.shape(content, 16.0, None).unwrap();
             let old_line = old.horizontal_line_metrics(16.0).unwrap();
-            assert_eq!(layout.baseline, old_line.ascent);
-            assert_eq!(layout.height, old_line.new_line_size.max(16.0));
+            // Parley/Skrifa compute line metrics with a different f32 operation
+            // order from Fontdue. Keep the independent metric check within four
+            // ULPs; mask dimensions and placement below remain exact/tight.
+            assert!(
+                layout
+                    .baseline
+                    .to_bits()
+                    .abs_diff(old_line.ascent.to_bits())
+                    <= 4
+            );
+            assert!(
+                layout
+                    .height
+                    .to_bits()
+                    .abs_diff(old_line.new_line_size.max(16.0).to_bits())
+                    <= 4
+            );
             let mut canvas = Canvas::recording(512, 96, ColorConfig::default()).unwrap();
             canvas
                 .draw_text_scaled(

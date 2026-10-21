@@ -130,7 +130,7 @@ fn tab_waits_for_acknowledged_sheet_and_position_free_editing_repairs_failed_tex
     let token = win.with_scene(|_, token| token).unwrap();
     win.presented(token).unwrap();
     let old = win.snapshot().unwrap();
-    assert!(matches!(win.key(Key::Text("क")), Err(Error::Canvas(_))));
+    assert!(matches!(win.key(Key::Text("漢")), Err(Error::Canvas(_))));
     assert_eq!(win.focused().unwrap(), Some(input));
     assert_eq!(win.key(Key::Tab), Err(Error::PresentationStale));
     assert_eq!(

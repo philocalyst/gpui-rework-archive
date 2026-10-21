@@ -1192,7 +1192,7 @@ mod tests {
                     // Unsupported shaping retains the accepted source edit and
                     // old sheet; ordinary backspace repairs it without exit.
                     self.host
-                        .key_input(&NativeKey::Character("अ".into()), Some("अ"))
+                        .key_input(&NativeKey::Character("漢".into()), Some("漢"))
                         .unwrap();
                     let failed = self.host.owner.as_ref().unwrap().snapshot().unwrap();
                     assert!(failed.source_epoch > failed.presentation_epoch);
@@ -1467,3 +1467,10 @@ mod question_tests;
 ))]
 #[path = "native/remote_tests.rs"]
 mod remote_tests;
+
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod unicode_tests;

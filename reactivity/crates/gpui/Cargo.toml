@@ -60,3 +60,7 @@ required-features = ["native"]
 [[example]]
 name = "library"
 required-features = ["native"]
+
+[[example]]
+name = "unicode"
+required-features = ["native"]
