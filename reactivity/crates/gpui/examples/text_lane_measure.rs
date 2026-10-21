@@ -59,6 +59,11 @@ fn main() {
     let count: usize = args[0].parse().unwrap();
     let every: usize = args[1].parse().unwrap();
     let recording = args.get(2).is_none_or(|mode| mode == "recording");
+    let hold_ack = args.get(3).is_some_and(|mode| mode == "pending");
+    assert!(
+        !hold_ack || recording,
+        "pending candidates need recording mode"
+    );
     assert!(count <= 16_384);
     // Independent fresh reference guards against a zero-work fixture. It also
     // warms code and allocator pages before the timed fresh owner.
@@ -92,17 +97,23 @@ fn main() {
     );
     // Keep the model move outside the operation closure's match borrow.
     let mut model = Some(model);
-    for stage in [
-        "mount",
-        "equal_description",
-        "direct_edit",
-        "resize",
-        "failed_prepare",
-        "repair",
-        "remove_text",
-        "restore_text",
-        "drop",
-    ] {
+    let stages: &[&str] = if hold_ack {
+        &["mount", "prepare_pending", "ack_pending", "drop"]
+    } else {
+        &[
+            "mount",
+            "equal_description",
+            "direct_edit",
+            "resize",
+            "failed_prepare",
+            "repair",
+            "remove_text",
+            "restore_text",
+            "drop",
+        ]
+    };
+    let mut old_visible_height = None;
+    for &stage in stages {
         if let Some(win) = &mut win {
             Win::<Page>::reset_counters(win).unwrap();
         }
@@ -125,6 +136,38 @@ fn main() {
                         expected_draws
                     );
                     win = Some(mounted);
+                }
+                "prepare_pending" => {
+                    let current = win.as_mut().unwrap();
+                    let old_token = current.with_scene(|_, token| token).unwrap();
+                    let mut height = 0.0;
+                    current
+                        .visit(|part| height += part.bounds().height)
+                        .unwrap();
+                    old_visible_height = Some(height);
+                    current.resize([96, 32]).unwrap();
+                    assert_ne!(current.with_scene(|_, token| token).unwrap(), old_token);
+                    let mut still_presented = 0.0;
+                    current
+                        .visit(|part| still_presented += part.bounds().height)
+                        .unwrap();
+                    assert_eq!(
+                        height, still_presented,
+                        "queries retain acknowledged geometry"
+                    );
+                    assert_eq!(current.counters().presentations, 0);
+                }
+                "ack_pending" => {
+                    let current = win.as_mut().unwrap();
+                    ack(current);
+                    let mut height = 0.0;
+                    current
+                        .visit(|part| height += part.bounds().height)
+                        .unwrap();
+                    if count > 24 {
+                        assert!(height > old_visible_height.unwrap());
+                    }
+                    assert_eq!(current.counters().presentations, 1);
                 }
                 "equal_description" => {
                     win.as_mut().unwrap().update(|_| {}).unwrap();
@@ -163,7 +206,8 @@ fn main() {
                 }
                 _ => unreachable!(),
             }
-            if stage != "mount"
+            if !hold_ack
+                && stage != "mount"
                 && stage != "failed_prepare"
                 && recording
                 && let Some(win) = &mut win
