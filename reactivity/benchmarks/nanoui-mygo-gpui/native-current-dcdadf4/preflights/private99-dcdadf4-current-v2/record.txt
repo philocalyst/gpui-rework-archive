@@ -1,4 +1,4 @@
-status=awaiting-manual-review
+status=pass
 display=:99 (private Xvfb; no shared :94 input)
 workloads=eager-0,eager-1000,virtual-250000
 profile=native-default; renderer policy Auto; selected backend recorded by backend-probe.log
@@ -16,3 +16,5 @@ row_id_check=source-derived viewport expectation; no OCR or app-internal row ins
 preflight_click=one diagnostic click per app/workload; latency excluded from timed results
 inequalities=GPUI Auto vs GTK/Cairo; GPUI Noto vs peer DejaVu; AccessKit compiled vs MyGo ATK vs NanoUI absent
 screenshots_and_logs=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-current-dcdadf4/preflights/private99-dcdadf4-current-v2
+reviewer=root
+review=all9 complete PPM files byte-identical to prior accepted preflight; fresh diagnostics passed; see root-review.json

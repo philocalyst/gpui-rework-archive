@@ -22,8 +22,9 @@ with SHA-256
 pin and tracked source cleanliness, compares the fixture bytes, and checks the
 two peer source pins and binary hashes before launching. It drives all three
 apps for eager 0, eager 1,000, and virtual 250,000 on a private Xvfb display.
-The accepted run is `preflights/private99-dcdadf4-current-v2/`; its status is
-still `awaiting-manual-review`. The observer verified the 800×600 client,
+The accepted run is `preflights/private99-dcdadf4-current-v2/`; root reviewed
+the nine complete pixel outputs and diagnostics, and its status is `pass`. The
+observer verified the 800×600 client,
 marker/button pixels, expected first-row text for populated cases, and the
 one-click marker transition. It reports visible row IDs 0–22 for the populated
 viewport; realized virtual rows are source-derived (GPUI 23, MyGo 25, NanoUI

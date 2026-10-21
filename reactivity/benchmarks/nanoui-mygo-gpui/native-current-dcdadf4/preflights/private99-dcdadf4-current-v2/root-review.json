@@ -1,0 +1,71 @@
+{
+  "reviewer": "root",
+  "source_commit": "dcdadf4d527cb669c13d9e99271bb1f956f95a1f",
+  "scope": "All9 complete screenshot files exactly match prior root-acceptedpreflight; fresh geometry/text/row/marker transition diagnostics passed. This is pixel/geometry equivalence, not latency evidence or activeAT.",
+  "checks": [
+    {
+      "app": "gpui",
+      "mode": "eager",
+      "rows": 0,
+      "ppm_sha256": "e4f4cae64857819ec881c3490ce8f56e69e78e9ed3d4f45a5e202cfdfa63e8d0",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "gpui",
+      "mode": "eager",
+      "rows": 1000,
+      "ppm_sha256": "08baa5f6eb06e536a22e4c34eff38059954ccb6e4a2d6a10ea0d7075cc6736d3",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "gpui",
+      "mode": "virtual",
+      "rows": 250000,
+      "ppm_sha256": "4ec94466983ee7d4073e2b12d6947891a84af6d170c18d1bfd874033f426d860",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "mygo",
+      "mode": "eager",
+      "rows": 0,
+      "ppm_sha256": "4cdf8b88cdc0ebac1374c578660a08b46cce6cefe7b9c56c8c32e06b8b437139",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "mygo",
+      "mode": "eager",
+      "rows": 1000,
+      "ppm_sha256": "c038132763640a805478874aceb4fc3af08bdf556b7824caf30a24d52546efd2",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "mygo",
+      "mode": "virtual",
+      "rows": 250000,
+      "ppm_sha256": "647474743f604068c3216982075a49bfaa4dba25315aa281ffbe05b32b225945",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "nanoui",
+      "mode": "eager",
+      "rows": 0,
+      "ppm_sha256": "cd13426d06a94978a914ba58957f2a0d0763e2946bd2b1ac9f23f855f5015783",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "nanoui",
+      "mode": "eager",
+      "rows": 1000,
+      "ppm_sha256": "ad0ab2e42fd74ce5b8b1cbbf1463b3a26b18030c7620b044844ea626c8330e81",
+      "equals_accepted_724_preflight": true
+    },
+    {
+      "app": "nanoui",
+      "mode": "virtual",
+      "rows": 250000,
+      "ppm_sha256": "804f2ddd985cb39bf75e7c1f23934916a28c3e31ffc603918352404ef24135fd",
+      "equals_accepted_724_preflight": true
+    }
+  ],
+  "combined_integration": "500 workspace,29 actual Vulkan,108 native-profile units,7 actual X11 scripts,actual AT-SPI/no-bus/Wire,strict native andmacOS/Windows cross-Clippy passed at same implementation."
+}

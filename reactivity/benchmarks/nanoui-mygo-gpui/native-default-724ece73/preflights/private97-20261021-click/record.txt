@@ -1,4 +1,4 @@
-status=passed-observer-gates-awaiting-root-review
+status=pass
 display=:97 (private Xvfb; no shared :94 input)
 workloads=eager-0,eager-1000,virtual-250000
 profile=native-default settings; observed runtime backend is detailed in backend-probe.txt
@@ -16,3 +16,5 @@ row_id_check=source-derived viewport expectation only; no OCR or app-internal ro
 preflight_click=one diagnostic click per app/workload; latency output is excluded from timed results
 renderer-font-AT-inequalities=GPUI Auto vs GTK vs Cairo; GPUI bundled Noto vs peers DejaVu; GPUI AccessKit compiled vs MyGo ATK vs NanoUI absent
 screenshots_and_logs=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-default-724ece73/preflights/private97-20261021-click
+reviewer=root
+review=approved prior accepted 724 native-default preflight for paired current-source comparison

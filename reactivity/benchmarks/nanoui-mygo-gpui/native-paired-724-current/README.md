@@ -5,6 +5,12 @@ It runs only after root changes both reviewed preflight records to the exact
 line `status=pass` and issues a quiet-window START. Do not run it during builds,
 AT/native tests, or another capture.
 
+Before capture, set all required path and SHA variables and run the script with
+`LUNA_GUARD_ONLY=1`. That mode validates both sources, manifests, binaries,
+observer identity, display socket, fixture, and all six workload/source cells,
+then exits without creating a results directory or launching an observer. Root
+must inspect that output before a timed run.
+
 The baseline is the published cleanroom build at GPUI
 `724ece73cb665a1f6d83e97ae7d431eee11a887a`; the candidate is the cleanroom
 build at `dcdadf4d527cb669c13d9e99271bb1f956f95a1f`. Both use the same
