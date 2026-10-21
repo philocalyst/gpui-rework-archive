@@ -1,0 +1,35 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking gpui_canvas v0.1.0 (/root/gpui-rounded-rectangles/reactivity/crates/canvas)
+    Checking gpui_gpu v0.1.0 (/root/gpui-rounded-rectangles/reactivity/crates/gpu)
+error: this `if` statement can be collapsed
+   --> crates/gpu/src/shader.rs:344:13
+    |
+344 | /             if (draw.atlas.y & 16) != 0 {
+345 | |                 if !rounded_contains(draw, point, draw.color.x, draw.color.y) {
+346 | |                     return vec4f(0.0, 0.0, 0.0, 0.0);
+347 | |                 }
+348 | |             }
+    | |_____________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+344 ~             if (draw.atlas.y & 16) != 0
+345 ~                 && !rounded_contains(draw, point, draw.color.x, draw.color.y) {
+346 |                     return vec4f(0.0, 0.0, 0.0, 0.0);
+347 ~                 }
+    |
+
+error: could not compile `gpui_gpu` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `gpui_gpu` (lib test) due to 1 previous error

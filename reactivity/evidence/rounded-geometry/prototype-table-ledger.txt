@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-rounded-rectangles/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 29s
+     Running unittests src/lib.rs (/tmp/gpui-rounded-target/debug/deps/gpui_canvas-029ec7ac3a6d0647)
+
+running 1 test
+rounded_canvas,Canvas=552,DisplayList=288,Inline=104,Placement=32,Common=80,BorrowedSource=16,PreparedSource=56,PreparedDraw=168,ImageResources=88,RoundedEntry=8
+rounded_command_alloc,plain=3,448;rounded=3,448
+rounded_image_first_table,allocations=2,bytes=56,header_before=88,header_after=112,handles_before=32,handles_after=64
+test canvas::rounded::storage::rounded_sources_keep_retained_command_strides_and_charge_only_image_extensions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.00s
+
