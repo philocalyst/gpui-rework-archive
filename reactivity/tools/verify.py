@@ -58,12 +58,15 @@ checks = [
 ]
 
 parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--evidence-dir", type=pathlib.Path, default=EVIDENCE,
+                    help="output directory; use a new directory to preserve earlier source-pinned runs")
 parser.add_argument("--vulkan", action="store_true", help="require actual Vulkan readback conformance")
 parser.add_argument("--native-x11", action="store_true", help="require actual X11 native port/lifecycle execution")
 parser.add_argument("--native-atspi", action="store_true", help="require actual AT-SPI client and absent-bus native execution")
 parser.add_argument("--atspi-launcher", default=os.environ.get("GPUI_AT_SPI_LAUNCHER"),
                     help="executable at-spi-bus-launcher path for --native-atspi")
 args = parser.parse_args()
+EVIDENCE = args.evidence_dir.resolve()
 if args.vulkan:
     checks.append(("gpu-vulkan", ["cargo", "test", *MANIFEST, "--locked", "-p",
                                  "gpui_gpu", "--features", "vulkan-tests", "--test", "render"]))
@@ -85,6 +88,10 @@ if args.native_x11:
                                      "--features", "x11", "--lib",
                                      "native_unicode_keyboard_and_surface_match_complete_cpu_pixels",
                                      "--", "--ignored", "--nocapture", "--test-threads=1"]))
+    checks.append(("native-image", ["cargo", "test", *MANIFEST, "--locked", "-p", "gpui",
+                                   "--features", "x11", "--lib",
+                                   "native_image_pointer_resize_resume_matches_complete_surface",
+                                   "--", "--ignored", "--nocapture", "--test-threads=1"]))
 if args.native_atspi:
     if not args.atspi_launcher or not os.access(args.atspi_launcher, os.X_OK):
         parser.error("--native-atspi requires an executable --atspi-launcher or GPUI_AT_SPI_LAUNCHER")
@@ -96,7 +103,7 @@ if args.native_atspi:
                                      "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
                                      "--", "--ignored", "--exact", "--nocapture"]))
 
-EVIDENCE.mkdir(exist_ok=True)
+EVIDENCE.mkdir(parents=True, exist_ok=True)
 report = []
 for name, command in checks:
     print(f"Checking {name}", flush=True)
@@ -108,7 +115,7 @@ for name, command in checks:
     entry = {"check": name, "argv": command, "exit_code": result.returncode,
              "elapsed_seconds": round(time.monotonic() - start, 3),
              "log": f"{name}.txt"}
-    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "native-unicode", "question-credit", "question-mailbox",
+    if name in ("gpu-vulkan", "native-x11", "native-remote", "native-question", "native-library", "native-unicode", "native-image", "question-credit", "question-mailbox",
                 "native-atspi", "native-no-bus", "accessibility-schema"):
         entry["passed_tests"] = sum(int(count) for count in re.findall(
             r"test result: ok\. (\d+) passed;", log))
