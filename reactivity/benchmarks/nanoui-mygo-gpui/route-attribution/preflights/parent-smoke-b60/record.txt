@@ -1,0 +1,14 @@
+status=partial-parent-only-smoke
+purpose=validate-zero-click-observer-guard-and-frozen-parent-fixture;not-comparative-or-timed
+display=:94
+xvfb=1280x800x24;warm-server
+source_commit=b60af3a4f97d67a35b4eab5a4ef672a17d9de6f6
+source_binary_sha256=da0423c6ac40462b2a8c676491b6c3a40b5d6129c5755843d8d51709d03826e7
+fixture_sha256=a2c7b0a4992efa06719127cba59978aff62536d8d61994ca8c4c7dceb4f67c29
+observer_source_commit=93adab419443cb788308bc48adb308ba90575564
+observer_binary_sha256=b4f84c80caa854d974643a2c20823537601a04745a7bcf320be356732b42f88b
+cargo_lock_sha256=f0148b526eae0290304168cafd179df647b3e0dda0942c6a666db1a5a795cea8
+commands=run-one.sh, one startup, zero clicks, no memory sampling
+eager_0=geometry 800x600;button_dark_pixels 344;first_row expected none
+eager_1000=geometry 800x600;button_dark_pixels 344;first_row_dark_pixels 82;visible_ids 0..22;materialized 1000
+virtual_250000=geometry 800x600;button_dark_pixels 344;first_row_dark_pixels 82;visible_ids 0..22;materialized 23
