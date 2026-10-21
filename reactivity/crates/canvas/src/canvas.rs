@@ -187,20 +187,36 @@ impl Canvas {
         height: u32,
         color_config: ColorConfig,
     ) -> Result<Self, Error> {
+        let mut canvas = Self::recording(width, height, color_config)?;
+        canvas.allocate_pixels()?;
+        Ok(canvas)
+    }
+    /// Record a canonical scene without allocating a CPU image. Native backends
+    /// can borrow prepared_scene(); CPU diagnostics allocate on first try_pixels.
+    pub fn recording(width: u32, height: u32, color_config: ColorConfig) -> Result<Self, Error> {
         color_config.validate()?;
         let (width, height) = (width as usize, height as usize);
         let count = width.checked_mul(height).ok_or(Error::InvalidDimensions)?;
         if count == 0 || count > MAX_PIXELS || width > 16_384 || height > 16_384 {
             return Err(Error::InvalidDimensions);
         }
-        let mut pixels = Vec::new();
-        pixels
-            .try_reserve_exact(count * 4)
-            .map_err(|_| Error::ResourceLimit)?;
-        pixels.resize(count * 4, 0);
         let mut canvas = Self::empty(width, height, color_config);
-        canvas.pixels = pixels;
+        canvas.dirty = true;
         Ok(canvas)
+    }
+    fn allocate_pixels(&mut self) -> Result<(), Error> {
+        let length = self.width * self.height * 4;
+        if self.pixels.len() != length {
+            self.pixels
+                .try_reserve_exact(length - self.pixels.len())
+                .map_err(|_| Error::ResourceLimit)?;
+            self.pixels.resize(length, 0);
+        }
+        Ok(())
+    }
+    /// Bytes retained by the optional CPU output image, including spare capacity.
+    pub fn output_bytes(&self) -> usize {
+        self.pixels.capacity()
     }
     fn empty(width: usize, height: usize, color_config: ColorConfig) -> Self {
         Self {
@@ -444,11 +460,18 @@ impl Canvas {
     /// Both supported profiles use the sRGB transfer curve; see color_config().
     /// Linear composition precedes a single tile encoding. A clean call does no work.
     pub fn pixels(&mut self) -> &[u8] {
+        self.try_pixels()
+            .expect("CPU output allocation failed; use try_pixels for fallible access")
+    }
+    /// Allocate the optional CPU image and render if dirty. Allocation failure
+    /// leaves the canonical scene intact and does not publish a partial image.
+    pub fn try_pixels(&mut self) -> Result<&[u8], Error> {
+        self.allocate_pixels()?;
         if self.dirty {
             self.render();
             self.dirty = false;
         }
-        &self.pixels
+        Ok(&self.pixels)
     }
     fn render(&mut self) {
         let columns = self.width.div_ceil(TILE);
