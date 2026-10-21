@@ -1,0 +1,17 @@
+{
+  "source": {
+    "baseline": "724ece73cb665a1f6d83e97ae7d431eee11a887a",
+    "candidate": "d4d9293f58f6f980d448996faaf254884b6c081e"
+  },
+  "binary_sha256": {
+    "baseline": "25a8ea798afb772d67d5399ba3fa017985f9f723f3fa0dce83d39596ac3d0c89",
+    "candidate": "9dda99a1616e6da0d0b879671aebdc78c253ec2bf1ff503e156cde672ecb1872"
+  },
+  "example_sha256": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+  "prior_data": "../image-axis",
+  "runner": "../image-axis/capture.py",
+  "production_sha256": {
+    "canvas.rs": "c5a2e4e475070660c43dc068bc3f180a8bf30dd8d8e9d982fd7cac69ea3260c7"
+  },
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+}

@@ -1,0 +1,37 @@
+{
+  "source": "d4d9293f58f6f980d448996faaf254884b6c081e",
+  "environment": "same pinned Rust/Vulkan/X11 environment as ../image-axis/checks.json",
+  "cargo_target_dir": "/tmp/gpui-unicode-target",
+  "checks": [
+    {
+      "name": "canvas",
+      "argv": "cargo test -p gpui_canvas --release --features parallel --lib --test images --offline",
+      "log": "checks/canvas.log",
+      "sha256": "05ac9357ca71a6c65e42a85b90db0af097ee43522cbdc86dbdea92cc69df5db6"
+    },
+    {
+      "name": "vulkan",
+      "argv": "cargo test -p gpui_gpu --features vulkan-tests --test render --offline",
+      "log": "checks/vulkan.log",
+      "sha256": "bfa8f56e6a5ff823ce83b9e718adb4bac742b8b675e276d4744bf6747ed2d71b"
+    },
+    {
+      "name": "clippy",
+      "argv": "cargo clippy -p gpui_canvas --all-targets --features parallel --offline -- -D warnings",
+      "log": "checks/clippy.log",
+      "sha256": "624666927b19ddc42c6a4cec8da3797b84c2279d342e59a35e50c7b50ce6c0fd"
+    },
+    {
+      "name": "owner",
+      "argv": "cargo test -p gpui --test images --offline",
+      "log": "checks/owner.log",
+      "sha256": "87b23c2e2c7bd8e783cdd157de3a651bdd15b57a2b6cc3da41a3acd78e9e4d8e"
+    },
+    {
+      "name": "native",
+      "argv": "DISPLAY=:99 cargo test -p gpui --features x11 --lib native::image_tests::native_image_pointer_resize_resume_matches_complete_surface --offline -- --ignored --exact --nocapture",
+      "log": "checks/native.log",
+      "sha256": "226b3e8bafb7ab6da45dded32ec3fc140d5ea8d40c162850ed4e1a1c8873abc1"
+    }
+  ]
+}
