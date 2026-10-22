@@ -68,16 +68,16 @@ trait Route {
     fn owner_scope(&self, _receiver: &dyn Any, _sources: &dyn Any) -> Result<u32, BindError> {
         Ok(0)
     }
-    fn proposal(&self, _receiver: &dyn Any) -> Result<Option<PropertyChange>, BindError> {
-        unreachable!("only an admitted property route produces a proposal")
+    fn property(&self, _phase: PropertyPhase<'_>) -> Result<(), BindError> {
+        unreachable!("only an admitted property route performs a property exchange")
     }
-    fn applied_logically(
-        &self,
-        _receiver: &mut dyn Any,
-        _result: Result<(), &crate::Error>,
-    ) -> Result<(), BindError> {
-        unreachable!("only an admitted property route receives a result")
-    }
+}
+
+// Borrowed only for this opt-in vtable call. Ordinary invoke keeps its original
+// ABI; neither this phase nor its output is retained in a route or runtime.
+enum PropertyPhase<'a> {
+    Propose(&'a dyn Any, &'a mut Option<PropertyChange>),
+    Reply(&'a mut dyn Any, Result<(), &'a crate::Error>),
 }
 
 /// One owned contribution interpreted against the current logical target.
@@ -126,21 +126,21 @@ where
     fn invoke(&self, _: &mut dyn Any) -> Result<(), BindError> {
         unreachable!("property routes use their distinct logical transaction")
     }
-    fn proposal(&self, receiver: &dyn Any) -> Result<Option<PropertyChange>, BindError> {
-        let receiver = receiver
-            .downcast_ref::<M>()
-            .ok_or(BindError::ReceiverMismatch)?;
-        Ok((self.proposal)(receiver))
-    }
-    fn applied_logically(
-        &self,
-        receiver: &mut dyn Any,
-        result: Result<(), &crate::Error>,
-    ) -> Result<(), BindError> {
-        let receiver = receiver
-            .downcast_mut::<M>()
-            .ok_or(BindError::ReceiverMismatch)?;
-        (self.applied_logically)(receiver, result);
+    fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
+        match phase {
+            PropertyPhase::Propose(receiver, output) => {
+                let receiver = receiver
+                    .downcast_ref::<M>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                *output = (self.proposal)(receiver);
+            }
+            PropertyPhase::Reply(receiver, result) => {
+                let receiver = receiver
+                    .downcast_mut::<M>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                (self.applied_logically)(receiver, result);
+            }
+        }
         Ok(())
     }
 }
@@ -173,14 +173,17 @@ impl Handler {
     }
 
     pub(crate) fn proposal(&self, receiver: &dyn Any) -> Result<Option<PropertyChange>, BindError> {
-        self.0.proposal(receiver)
+        let mut output = None;
+        self.0
+            .property(PropertyPhase::Propose(receiver, &mut output))?;
+        Ok(output)
     }
     pub(crate) fn applied_logically(
         &self,
         receiver: &mut dyn Any,
         result: Result<(), &crate::Error>,
     ) -> Result<(), BindError> {
-        self.0.applied_logically(receiver, result)
+        self.0.property(PropertyPhase::Reply(receiver, result))
     }
 
     pub(crate) fn owner_scope(
@@ -243,22 +246,27 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
             .ok_or(BindError::ReceiverMismatch)?;
         self.handler.invoke(self.component.project_mut(parent)?)
     }
-    fn proposal(&self, receiver: &dyn Any) -> Result<Option<PropertyChange>, BindError> {
-        let parent = receiver
-            .downcast_ref::<P>()
-            .ok_or(BindError::ReceiverMismatch)?;
-        self.handler.proposal((self.component.read)(parent))
-    }
-    fn applied_logically(
-        &self,
-        receiver: &mut dyn Any,
-        result: Result<(), &crate::Error>,
-    ) -> Result<(), BindError> {
-        let parent = receiver
-            .downcast_mut::<P>()
-            .ok_or(BindError::ReceiverMismatch)?;
-        self.handler
-            .applied_logically(self.component.project_mut(parent)?, result)
+    fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
+        match phase {
+            PropertyPhase::Propose(receiver, output) => {
+                let parent = receiver
+                    .downcast_ref::<P>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                self.handler.0.property(PropertyPhase::Propose(
+                    (self.component.read)(parent),
+                    output,
+                ))
+            }
+            PropertyPhase::Reply(receiver, result) => {
+                let parent = receiver
+                    .downcast_mut::<P>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                self.handler.0.property(PropertyPhase::Reply(
+                    self.component.project_mut(parent)?,
+                    result,
+                ))
+            }
+        }
     }
 }
 
