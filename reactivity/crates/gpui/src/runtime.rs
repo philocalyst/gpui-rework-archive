@@ -42,6 +42,7 @@ use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
 mod identity_index;
 mod image;
+mod siblings;
 use identity_index::IdentityIndex;
 mod input;
 pub(crate) mod inspector;
@@ -1848,11 +1849,11 @@ impl<M: View + 'static> Runtime<M> {
             *entry = Fanout::Color(slot);
         }
         let old_styles = std::mem::take(&mut self.styles);
+        let siblings = siblings::Siblings::new(&self.nodes);
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()
             .map(Some)
             .collect::<Vec<_>>();
-        let mut sites = BTreeMap::new();
         let mut keyed_rows = BTreeMap::new();
         let mut keyed_lists = BTreeMap::new();
         let old_list_ids: BTreeMap<_, _> = self
@@ -1863,15 +1864,12 @@ impl<M: View + 'static> Runtime<M> {
                 _ => None,
             })
             .collect();
-        let mut old_counts: BTreeMap<Option<u64>, usize> = BTreeMap::new();
         for (index, node) in old.iter().enumerate() {
             let node = node.as_ref().unwrap();
             let parent = node
                 .parent
                 .index()
                 .map(|parent| old[parent].as_ref().unwrap().identity());
-            *old_counts.entry(parent).or_default() += 1;
-            sites.insert((parent, node.ordinal, node.kind().site_kind()), index);
             if let Some(row) = self
                 .list_rows
                 .get(&node.identity())
@@ -1901,34 +1899,46 @@ impl<M: View + 'static> Runtime<M> {
             let ordinal = ordinals[ordinal_slot];
             ordinals[ordinal_slot] += 1;
             let parent_identity = parent.map(|parent| nodes[parent].identity());
+            let old_siblings = match parent_identity {
+                Some(identity) => self.by_identity.get(identity).map_or(&[][..], |parent| {
+                    siblings.children(Parent::new(Some(parent)))
+                }),
+                None => siblings.children(Parent::new(None)),
+            };
             // A shape change invalidates the entire unkeyed run. Equal kinds
             // at shifted ordinals must not silently retarget an old capability.
-            let run_survives = reuse_identities
-                && old_counts.get(&parent_identity).copied().unwrap_or(0)
-                    == new_counts[ordinal_slot];
+            let run_survives = reuse_identities && old_siblings.len() == new_counts[ordinal_slot];
             let previous_index = if let Some((_, row)) = row_indices.get(&index) {
                 reuse_identities
                     .then(|| keyed_rows.get(&(parent_identity, row.key, draft.kind.site_kind())))
                     .flatten()
+                    .copied()
             } else if let Some(&id) = list_indices.get(&index) {
                 reuse_identities
                     .then(|| keyed_lists.get(&(parent_identity, id, draft.kind.site_kind())))
                     .flatten()
+                    .copied()
             } else {
                 run_survives
-                    .then(|| sites.get(&(parent_identity, ordinal, draft.kind.site_kind())))
+                    .then(|| old_siblings.get(ordinal as usize))
                     .flatten()
+                    .map(|&index| index as usize)
+                    .filter(|&index| {
+                        old[index]
+                            .as_ref()
+                            .is_some_and(|node| node.kind().site_kind() == draft.kind.site_kind())
+                    })
             };
             let previous = previous_index
-                .and_then(|&old_index| old[old_index].take())
+                .and_then(|old_index| old[old_index].take())
                 .filter(|node| node.component_scope == component_scopes[index]);
             let previous_style = if previous.is_some() {
-                old_styles.get(*previous_index.unwrap())
+                old_styles.get(previous_index.unwrap())
             } else {
                 draft.style
             };
             if previous.is_some()
-                && old_styles.binding_fields(*previous_index.unwrap())
+                && old_styles.binding_fields(previous_index.unwrap())
                     != styles.binding_fields(index)
             {
                 // Equal current colors do not make two source relationships
