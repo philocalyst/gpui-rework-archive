@@ -36,18 +36,36 @@ work includes early Metal/Wayland target proof, accessible text geometry and
 the complete editor/lifecycle contracts. Preserve software-first startup and
 acknowledged semantic/scene authority. SIMD uses one
 fearless_simd formulation and fallback, with assembly and measured controls.
-The active isolated slices separate immutable device/pipeline work from mutable
-per-window GPU state, expose the existing closed property catalog through shared
-validated transactions, and derive SIMD-shaped gamut limits. Qualify single-window
-costs as well as multiwindow savings before adoption. Typed reflection must feed
-real inspector controls and component override composition. Designer color needs
-shared batch operations, explicit gamut/mix
-contracts and accessibility contrast, beyond tagged HDR storage.
+The [combined source 6d77 checks](evidence/core-catalog-integration/README.md)
+now cover immutable device/pipeline ownership with independent renderer states,
+the shared typed property catalog and all 13 native inspector controls, and
+SIMD-shaped fixed-lightness/hue gamut limits. Preserve the measured single-window
+header/layout-lease costs alongside multiwindow savings. Native Application
+multiwindow sharing still needs integration. The active graphics slice generates
+and proves per-entry shader artifacts behind vendor-owned admission; its optional
+unsafe path must preserve exact enabled guards and driver workarounds before any
+adoption. No hardware performance gate is inferred from llvmpipe.
+
+The [acknowledged geometry slice](docs/acknowledged-text-geometry-luna.md) must retain
+exact old P/C text maps for public queries and native wrapped/directional runs,
+including late accessibility activation after failed newer shaping. Measure its
+stop-map payload and transient/old-epoch costs before choosing Arc or arena
+handles; shared immutable geometry must not retain obsolete glyph buffers.
+Leaf semantic text nodes should carry placement without another native node;
+structural exceptions, clipping and all character offsets need explicit tests.
+
+Typed reflection must also support arbitrary inspector value entry and contained
+component/tool owners without mirroring application membership or bypassing
+source admission. Designer color still needs shared batch/palette operations,
+explicit mix contracts and accessibility contrast, beyond the integrated gamut
+primitive and tagged HDR storage.
 
 The [Solid/Ripple review](docs/async-graph-luna.md) identifies compositional
 Future/stream/optimistic adapters as the remaining async ergonomics work; retain
 the existing frozen inputs, cancellation hints, stale-result admission and
-previous-value projections. The [portable presenter review](docs/portable-presenter-luna.md)
+previous-value projections. A Future adapter must wake or retire an obsolete
+Pending task before reusing its physical completion credit; poll-only cancellation
+cannot satisfy that lifecycle. The [portable presenter review](docs/portable-presenter-luna.md)
 and [color derivation](docs/color-formulation-luna.md) are proposals with explicit
 source-review corrections, not implemented performance results.
 
