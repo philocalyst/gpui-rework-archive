@@ -1,16 +1,21 @@
 //! One authoritative CPU scratch owner, allocated only when rasterizing.
 use super::{DisplayList, TILE};
 
+// Admission bounds the sum of full-viewport references before recording.
+// A regional CSR is a subset. Offsets/cursors never require pointer width.
+const _: () = assert!(super::MAX_REFERENCES < u32::MAX as usize);
+const _: () = assert!(super::MAX_COMMANDS < u32::MAX as usize);
+
 #[derive(Default)]
 pub(super) struct RasterScratch {
     membership: Membership,
     // Construction cursors become lazy opaque-prefix certificates once the
     // immutable CSR is complete. MAX means this physical tile is unexamined.
-    cursor: Vec<usize>,
+    cursor: Vec<u32>,
 }
 #[derive(Default)]
 pub(super) struct Membership {
-    offsets: Vec<usize>,
+    offsets: Vec<u32>,
     indices: Vec<u32>,
     // Canvas axes are at most 16384px: tile endpoints fit in 0..=1024.
     // All-zero bounds cannot describe a nonempty render, so also mean invalid.
@@ -30,7 +35,7 @@ impl Membership {
         let [left, top, right, bottom] = self.bounds.map(usize::from);
         debug_assert!(x >= left && x < right && y >= top && y < bottom);
         let tile = (y - top) * (right - left) + x - left;
-        &self.indices[self.offsets[tile]..self.offsets[tile + 1]]
+        &self.indices[self.offsets[tile] as usize..self.offsets[tile + 1] as usize]
     }
 }
 impl RasterScratch {
@@ -38,13 +43,13 @@ impl RasterScratch {
         self.membership.bounds = [0; 4];
     }
     pub(super) fn bytes(&self) -> usize {
-        self.membership.offsets.capacity() * size_of::<usize>()
-            + self.cursor.capacity() * size_of::<usize>()
+        self.membership.offsets.capacity() * size_of::<u32>()
+            + self.cursor.capacity() * size_of::<u32>()
             + self.membership.indices.capacity() * size_of::<u32>()
     }
     /// Split immutable geometry from writable proof rows. A worker receives
     /// only its own rows; no lock, atomics, aliasing or additional owner exists.
-    pub(super) fn rows(&mut self, bounds: [usize; 4]) -> (&Membership, &mut [usize]) {
+    pub(super) fn rows(&mut self, bounds: [usize; 4]) -> (&Membership, &mut [u32]) {
         let stride = self.membership.columns();
         let first = (bounds[1] - usize::from(self.membership.bounds[1])) * stride;
         let count = (bounds[3] - bounds[1]) * stride;
@@ -79,16 +84,17 @@ impl RasterScratch {
             bins.offsets[i] += bins.offsets[i - 1];
         }
         bins.indices.clear();
-        bins.indices.resize(*bins.offsets.last().unwrap(), 0);
+        bins.indices
+            .resize(*bins.offsets.last().unwrap() as usize, 0);
         cursor.clear();
         cursor.extend_from_slice(&bins.offsets[..tiles]);
         for (index, command_bounds) in commands.ordered_bounds().enumerate() {
             visit_tiles(command_bounds, bounds, |tile| {
-                bins.indices[cursor[tile]] = index as u32;
+                bins.indices[cursor[tile] as usize] = index as u32;
                 cursor[tile] += 1;
             });
         }
-        cursor.fill(usize::MAX);
+        cursor.fill(u32::MAX);
         bins.bounds = key;
         false
     }
@@ -199,8 +205,8 @@ mod tests {
                         .collect();
                     let tile = (ty - bounds[1]) * columns + tx - bounds[0];
                     assert_eq!(
-                        &scratch.membership.indices[scratch.membership.offsets[tile]
-                            ..scratch.membership.offsets[tile + 1]],
+                        &scratch.membership.indices[scratch.membership.offsets[tile] as usize
+                            ..scratch.membership.offsets[tile + 1] as usize],
                         members
                     );
                 }
@@ -237,14 +243,14 @@ mod tests {
                 .unwrap()
                 .cursor
                 .iter()
-                .all(|&cut| cut == usize::MAX)
+                .all(|&cut| cut == u32::MAX)
         );
         canvas.set_tile_proofs(true);
         let damage = DamageRegion::checked_canvas_bounds([16, 16, 32, 32]);
         canvas.render_bgrx_region(&mut words, damage).unwrap();
         let cuts = &canvas.raster.as_ref().unwrap().cursor;
         for (tile, &cut) in cuts.iter().enumerate() {
-            assert_eq!(cut, if tile == 5 { 2 } else { usize::MAX });
+            assert_eq!(cut, if tile == 5 { 2 } else { u32::MAX });
         }
         let edits = [PaintEdit::new(index, Color::rgb(30, 70, 140))];
         canvas.prepare_paint(&edits).unwrap().commit();
@@ -277,6 +283,41 @@ mod tests {
                 .iter()
                 .all(|&cut| cut == 0)
         );
+    }
+
+    #[test]
+    fn admitted_reference_and_command_limits_fit_narrow_membership_and_cuts() {
+        use crate::{Affine, Color, PaintEdit, Rect};
+        let clip = Rect::new(0.0, 0.0, 128.0, 128.0);
+        let mut canvas = Canvas::recording(128, 128, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        // 65,536 commands x64 physical tiles reaches the admitted 4M limit.
+        for _ in 0..super::super::MAX_COMMANDS {
+            canvas
+                .fill_rect(clip, Affine::IDENTITY, clip, Color::BLACK)
+                .unwrap();
+        }
+        let mut words = [0; 128 * 128];
+        canvas.render_bgrx(&mut words).unwrap();
+        let scratch = canvas.raster.as_ref().unwrap();
+        assert_eq!(
+            scratch.membership.offsets.last().copied(),
+            Some(super::super::MAX_REFERENCES as u32)
+        );
+        assert!(
+            scratch
+                .cursor
+                .iter()
+                .all(|&cut| cut == (super::super::MAX_COMMANDS - 1) as u32)
+        );
+        let index = canvas
+            .paint_index((super::super::MAX_COMMANDS - 1) as u32)
+            .unwrap();
+        let edits = [PaintEdit::new(index, Color::WHITE)];
+        canvas.prepare_paint(&edits).unwrap().commit();
+        canvas.render_bgrx(&mut words).unwrap();
+        assert!(words.iter().all(|&word| word == 0x00ff_ffff));
+        assert!(canvas.stats().bins_reused);
     }
 
     #[test]

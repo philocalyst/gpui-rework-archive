@@ -1587,7 +1587,7 @@ trait RenderSchedule {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
-        cuts: &mut [usize],
+        cuts: &mut [u32],
     ) -> RenderStats;
 }
 struct Serial;
@@ -1597,7 +1597,7 @@ impl RenderSchedule for Serial {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
-        cuts: &mut [usize],
+        cuts: &mut [u32],
     ) -> RenderStats {
         pixels
             .chunks_mut(TILE * frame.width * W::ELEMENTS)
@@ -1676,7 +1676,7 @@ impl RenderSchedule for RenderPool {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
-        cuts: &mut [usize],
+        cuts: &mut [u32],
     ) -> RenderStats {
         use rayon::prelude::*;
         // Estimate distinguishes a proven uniform viewport fill from sampled
@@ -1726,7 +1726,7 @@ fn render_band<W: PixelWriter>(
     writer: W,
     band_index: usize,
     pixels: &mut [W::Element],
-    cuts: &mut [usize],
+    cuts: &mut [u32],
 ) -> RenderStats {
     let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
@@ -1748,7 +1748,7 @@ fn render_band<W: PixelWriter>(
         let right = (left + TILE).min(frame.width);
         let bottom = (top + TILE).min(frame.height);
         let start = if frame.tile_proofs {
-            if *cut == usize::MAX {
+            if *cut == u32::MAX {
                 *cut = ordered
                     .iter()
                     .rposition(|index| {
@@ -1757,9 +1757,9 @@ fn render_band<W: PixelWriter>(
                             && matches!(command.source, BorrowedSource::Rect)
                             && full_tile(&command, left, top, right, bottom)
                     })
-                    .unwrap_or(0);
+                    .unwrap_or(0) as u32;
             }
-            *cut
+            *cut as usize
         } else {
             0
         };
