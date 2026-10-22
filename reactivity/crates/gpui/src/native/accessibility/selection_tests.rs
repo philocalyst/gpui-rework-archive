@@ -475,3 +475,71 @@ fn equal_text_field_rebind_survives_failed_prepare_and_older_ack() {
     );
     assert_eq!(native_id(&win, &cohort, input), id);
 }
+
+#[test]
+fn cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair() {
+    let mut win = Win::recording(Inputs::new("same"), WindowOptions::default()).unwrap();
+    ack(&mut win);
+    let input = target(&win, 1);
+    let root = win.inspect().unwrap().nodes[0].target.unwrap();
+    let map = crate::Affine::translation(1., 0.);
+    win.set_property(
+        root,
+        crate::property::TRANSFORM,
+        crate::property::Contribution::Set(map),
+    )
+    .unwrap();
+    let old = win.with_scene(|_, token| token).unwrap();
+    assert!(
+        win.set_property(
+            root,
+            crate::property::TRANSFORM,
+            crate::property::Contribution::Set(crate::Affine::scale(0., 1.))
+        )
+        .is_err()
+    );
+    win.presented(old).unwrap();
+    win.accessibility_observe(true).unwrap();
+    let cold = win.accessibility_state().unwrap();
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    assert!(!cohort.qualified());
+    let policy = Refresh::published(cohort.qualified());
+    assert!(policy == Refresh::AfterTransition && policy != Refresh::Immediate);
+    let stale = native_id(&win, &cohort, input);
+    assert!(cohort.target(&win, stale).is_err());
+    win.set_property(
+        root,
+        crate::property::TRANSFORM,
+        crate::property::Contribution::Set(map),
+    )
+    .unwrap();
+    ack(&mut win);
+    let repaired = win.accessibility_state().unwrap();
+    assert!(win.accessibility_delta(cold, repaired).unwrap().is_empty());
+    // Production policy rejects that otherwise-exact empty frontier. Refresh
+    // once on this transition, rather than scanning on each unchanged idle.
+    assert!(policy != Refresh::Sparse);
+    cohort.refresh(&win).unwrap();
+    assert!(cohort.qualified());
+    let policy = Refresh::published(cohort.qualified());
+    assert!(policy == Refresh::Sparse);
+    let fresh = native_id(&win, &cohort, input);
+    assert_ne!(fresh, stale);
+    assert!(cohort.target(&win, stale).is_err());
+    assert!(cohort.target(&win, fresh).is_ok());
+    let visits = cohort.full_visits;
+    let clones = cohort.source_clones;
+    win.set_property(
+        root,
+        crate::property::BACKGROUND,
+        crate::property::Contribution::Set(crate::Color::WHITE),
+    )
+    .unwrap();
+    ack(&mut win);
+    let paint = win.accessibility_state().unwrap();
+    let delta = win.accessibility_delta(repaired, paint).unwrap();
+    assert!(delta.is_empty());
+    assert!(cohort.update_delta(&win, delta).unwrap().qualified);
+    assert_eq!((cohort.full_visits, cohort.source_clones), (visits, clones));
+}
