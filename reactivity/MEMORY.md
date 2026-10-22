@@ -27,6 +27,14 @@ allocation, not the server's window or compositor backing. Other platforms retai
 their normal CPU fallback. [Current scope and evidence](STATUS.md) distinguishes
 these implemented savings from the more general policies below.
 
+CPU membership has one lazy scratch owner. Recording-only Canvas is 488 B,
+64 B below the earlier inline-scratch layout, with no scratch allocation. The
+first CPU raster allocates an 80 B header plus its CSR bodies; active headers
+therefore cost 16 B more. Bounds-only construction and containing-cache reuse
+remove command reconstruction and repeated membership construction without a
+second retained index. [Paired controls and losses](benchmarks/bin-miss/README.md)
+separate this allocation ledger from native RSS and first-visible-window time.
+
 ## Four ledgers and one lifetime graph
 
 | Ledger | Required quantities | Common hidden term |

@@ -1,0 +1,104 @@
+[
+  {
+    "variant": "parent",
+    "round": 1,
+    "started": "2026-10-22T00:48:25.682399+00:00",
+    "finished": "2026-10-22T00:48:25.991086+00:00",
+    "command": [
+      "/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "bin_phase_probe",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "log": "parent-1.log",
+    "log_sha256": "e3c88b0714bddb42e7e3d16298a94dde9a93b3dfb03ae06cec3949172d67388c",
+    "exit_code": 0
+  },
+  {
+    "variant": "candidate",
+    "round": 1,
+    "started": "2026-10-22T00:48:25.992018+00:00",
+    "finished": "2026-10-22T00:48:26.252022+00:00",
+    "command": [
+      "/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "bin_phase_probe",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "log": "candidate-1.log",
+    "log_sha256": "49c60d79e5d28171848a0dcdb78b4f35aa8457de23e3bc0e15abb127ec9f64bc",
+    "exit_code": 0
+  },
+  {
+    "variant": "candidate",
+    "round": 2,
+    "started": "2026-10-22T00:48:26.252980+00:00",
+    "finished": "2026-10-22T00:48:26.514263+00:00",
+    "command": [
+      "/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "bin_phase_probe",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "log": "candidate-2.log",
+    "log_sha256": "96954aaefc98b9db570279333dd70225fe3c3f4b48dc1e5080eaaf0b331b9543",
+    "exit_code": 0
+  },
+  {
+    "variant": "parent",
+    "round": 2,
+    "started": "2026-10-22T00:48:26.515290+00:00",
+    "finished": "2026-10-22T00:48:26.824526+00:00",
+    "command": [
+      "/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "bin_phase_probe",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "log": "parent-2.log",
+    "log_sha256": "d66b7dca0467e4513407a90129170c5d8b087cfd315ed2b9c3ada71992af86f9",
+    "exit_code": 0
+  },
+  {
+    "variant": "parent",
+    "round": 3,
+    "started": "2026-10-22T00:48:26.825467+00:00",
+    "finished": "2026-10-22T00:48:27.134388+00:00",
+    "command": [
+      "/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "bin_phase_probe",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "log": "parent-3.log",
+    "log_sha256": "04bbb8826c5d8c80e9d31dca20b6c8ad14b3dabded4f436b3d6787cf61638602",
+    "exit_code": 0
+  },
+  {
+    "variant": "candidate",
+    "round": 3,
+    "started": "2026-10-22T00:48:27.135336+00:00",
+    "finished": "2026-10-22T00:48:27.395944+00:00",
+    "command": [
+      "/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "bin_phase_probe",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "log": "candidate-3.log",
+    "log_sha256": "8c002546c4cd6733bd17c2797d121c2409d2db9825455ad3b1767a7c9accedf8",
+    "exit_code": 0
+  }
+]

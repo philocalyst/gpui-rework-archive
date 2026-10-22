@@ -1,0 +1,29 @@
+[
+  {
+    "name": "apple",
+    "command": [
+      "cargo",
+      "clippy",
+      "--locked",
+      "--offline",
+      "-Zbuild-std=std,panic_abort",
+      "-p",
+      "gpui",
+      "--features",
+      "desktop",
+      "--all-targets",
+      "--target",
+      "aarch64-apple-darwin",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "log": "/tmp/gpui-coupling-combined-apple.log",
+    "exit_code": 101,
+    "environment": {
+      "RUSTC_BOOTSTRAP": "1",
+      "CARGO_BUILD_JOBS": "2",
+      "CARGO_TARGET_DIR": "/tmp/gpui-accesskit-apple-target"
+    }
+  }
+]

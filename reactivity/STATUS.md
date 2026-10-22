@@ -14,9 +14,9 @@ describe the intended complete system; this page records what is connected now.
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style, geometry and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal with typed literal/direct-Signal dimensions and flex recipes, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | General Reader/Motion recipe algebra, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
-| Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
+| Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
-| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, admitted-packet replay and opt-in transactional color patches | Source-to-packet color coupling remains; replay/patch draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
+| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, admitted-packet replay and registered-source transactional color patches | Coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI, suspend/recreate and observed X11 destination invalidation | Unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
 | Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library, including explicit worker search and restored domain inputs | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
@@ -53,13 +53,23 @@ storage and native services remain separately owned.
 
 ## Current verification
 
-The [combined style checks](evidence/reactive-style-ports/integration/checks.json)
-pin implementation `b1fc101435`: **609 workspace cases/doctests**, 126 native
-unit cases, strict accessible X11/Wayland/parallel/Vulkan all-target Clippy,
-formatting and exact headers pass. Actual X11 reactive-style, Todo and scroll
-scripts pass complete server-pixel oracles. Strict desktop all-target Clippy
-also passes for Apple aarch64 and Windows MSVC; those are cross-compilation
-checks. These counts overlap other campaigns.
+The [combined core/paint checks](evidence/core-paint-integration/README.md)
+pin implementation `de18f040c9`: **622 workspace cases/doctests**, 130 accessible
+native unit cases, 138 parallel Canvas cases/docs, eight GPU units, 37 actual
+Vulkan readbacks and a GPU borrow compile-fail doc pass. All eleven gates pass,
+including strict accessible X11/Wayland/parallel/Vulkan all-target Clippy,
+formatting, exact headers, and actual X11 reactive-style and five-policy Todo
+scripts with independent complete server/GPU pixel oracles. Strict desktop
+all-target Clippy also passes for Apple aarch64 and Windows MSVC through the
+actual adapters. These counts overlap other campaigns; cross-compilation and
+llvmpipe/Xvfb do not establish native OS runtime or hardware performance.
+
+The earlier [combined style checks](evidence/reactive-style-ports/integration/checks.json)
+preserve the direct-style checkpoint and actual ordinary-scroll oracle at
+`b1fc101435`. Subsequent literal-builder controls found substantial codegen and
+mount-time regressions despite the corrected 12-byte Flex size. A separate
+literal-dispatch implementation is under review; storage parity alone is not
+an ergonomic or performance acceptance result.
 
 Registered direct signals bind dimensions, colors, transforms, radius and flex
 fields through the existing typed source registry. One source freeze admits all
@@ -78,14 +88,31 @@ strict Linux Clippy and actual Apple/Windows desktop cross-checks pass. The
 32-byte caller-owned session replaces the native host's existing fields;
 Runtime/Node/Presented and the same-feature NativeHost size do not grow.
 
-The [paint substrate](evidence/paint-patch/README.md) at `ab51133c84` (integrated
-as `d4d63170ba`) passes 129 Canvas cases/docs, eight GPU units, 36 actual Vulkan
-readbacks and a GPU borrow compile-fail doc. Canvas and ordinary Renderer remain
-552/872 bytes. An opt-in wrapper adds 24 bytes and 12 bytes per active site;
-three changed groups upload 48 color bytes while reusing admitted bins/resources.
-It still draws the full target, and CPU raster still rebuilds CSR bins. This
-establishes the public transactional primitives; automatic GPUI source coupling
-is a separate implementation gate.
+The [paint coupling](evidence/paint-coupling/README.md) connects registered
+background/foreground sources to canonical Canvas edits and native GPU patches.
+Same-alpha changes skip View, layout, shaping and the paint walk. They preserve
+acknowledged geometry and exact pending observer authority, including no-op
+updates and late accessibility activation. The path still updates k destinations
+and may rebuild a GPU packet across coalesced-token gaps. A first paint-only
+owner pays the complete Metadata/PaintState/field/sink/edit storage; the report
+charges those costs and GPU map ownership explicitly. GPU patches reuse admitted
+bins/resources but draw the complete target.
+
+The [CPU cache controls](benchmarks/bin-miss/README.md) separately replace full
+material reconstruction with ordered integer bounds and reuse any containing
+membership cache. Distant-repair median is 42.561→2.740 µs in the pinned five-way
+software microbenchmark. The rejected first candidate's +104.6% miss regression
+is retained. Canvas is now 488 B instead of 552 B; its first CPU raster allocates
+an 80 B scratch owner, so active header storage grows 16 B. Recording-only
+canvases allocate no scratch. Full-color raster loses 2.05% versus the first-lazy
+control while remaining 8.32% below the parent. The renderer pool still performs
+its separate full-command scheduling estimate; cached membership is not zero
+raster work or a whole-window memory/startup result.
+
+The [public paint substrate](evidence/paint-patch/README.md) remains the checked
+borrowed-guard interface. Ordinary GPU Renderer is 872 B; native PaintRenderer
+adds a 24 B map header and 12 B per reserved site. GpuSurface is 1080 B and
+NativeHost is 688 B with both X11/Wayland (680 B with X11 alone).
 
 The [combined graphics/scroll checks](evidence/graphics-scroll-integration/checks.json)
 pin implementation `f01947e679`: **568 workspace cases/doctests**, 115 accessible
