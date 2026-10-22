@@ -101,6 +101,8 @@ matching the actual `build.zig`. The peer build manifest pins both peer binary
 paths and hashes, both source and fixture pins, and the reviewed NanoUI patch
 digest, toolchain versions, and build command. The guard also checks the peer
 DejaVu font file path and SHA so the runtime font cannot silently change.
+The four fixture SHAs are fixed in the runner; changing a benchmark input
+requires an explicit reviewed runner update as well as a new binary build.
 Each GPUI build manifest carries `source_commit`, `source_tree`, exact
 `fixture_path`/`fixture_sha256`, binary path/hash, `profile=release`, the exact
 `cargo_features`, `workspace=reactivity/Cargo.toml`, and `locked=true`. Record

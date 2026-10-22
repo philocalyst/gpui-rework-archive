@@ -37,6 +37,10 @@ BASE=$(cd "$DIR/.." && pwd)
 MYGO_COMMIT=ea23ad2975a87db9b20efe6690ffedf88f4fe4f3
 NANOUI_COMMIT=dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
 NANOUI_PATCH_SHA=c698367086a8d17feeceae6f99d0abda2fce273f35c3e4f8f0e0a32fab586224
+CONTROL_FIXTURE_PIN=a414736810a4fc89320f6964226d938a2f3a868164afd6125ac5f121d102ff1c
+DIRECT_FIXTURE_PIN=a8c994a4a5e2f83770fd24e135ab457e924d6e544ed4c68ce5a4b4bb28324354
+MYGO_FIXTURE_PIN=d05239655152b3354bacededa984d4f2ad8c4e1519ef30940e7f19cc55d7150b
+NANOUI_FIXTURE_PIN=46061d578913885f42ca2e38bce6ad6714f47de70a36608bbeb673d9e822df1c
 PEER_FONT=/root/.local/share/fonts/luna-bench/DejaVuSans.ttf
 PEER_FONT_SHA=58568c88a01b80dfc056daca3eeafd434a0380df1a48dda53f0de0d716109bbd
 CONTROL_FIXTURE="$DIR/fixtures/gpui-paint-control.rs"
@@ -175,6 +179,9 @@ verify_pins() {
   local mygo_fixture_sha nanoui_fixture_sha nanoui_build_config_sha
   mygo_fixture_sha=$(sha256sum "$BASE/fixtures/mygo-main.go" | cut -d' ' -f1)
   nanoui_fixture_sha=$(sha256sum "$BASE/fixtures/nanoui-main.zig" | cut -d' ' -f1)
+  [[ "$mygo_fixture_sha" == "$MYGO_FIXTURE_PIN" && "$nanoui_fixture_sha" == "$NANOUI_FIXTURE_PIN" ]] || {
+    echo 'peer fixture files differ from their reviewed pins' >&2; return 1;
+  }
   nanoui_build_config_sha=$(awk -F= '$1=="build_config_sha256"{print $2}' "$LUNA_NANOUI_RECORD")
   [[ -n "$nanoui_build_config_sha" ]] || { echo 'NanoUI preflight record lacks build_config_sha256' >&2; return 1; }
   sha_is "$LUNA_GPUI_CONTROL_BINARY" "$LUNA_GPUI_CONTROL_SHA"
@@ -217,6 +224,9 @@ verify_pins() {
 
 [[ "$LUNA_GPUI_EXPECTED_COMMIT" == "$LUNA_GPUI_SOURCE_COMMIT" ]] || {
   echo 'GPUI build source commit differs from reviewed expected commit' >&2; exit 2;
+}
+[[ "$CONTROL_FIXTURE_SHA" == "$CONTROL_FIXTURE_PIN" && "$DIRECT_FIXTURE_SHA" == "$DIRECT_FIXTURE_PIN" ]] || {
+  echo 'GPUI fixture hashes differ from the reviewed paint-only fixtures' >&2; exit 2;
 }
 
 # Guard every planned cell before making output or launching a process.
