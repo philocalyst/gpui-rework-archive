@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--repo", type=pathlib.Path, required=True)
 parser.add_argument("--ref", required=True)
 parser.add_argument("--output", type=pathlib.Path, required=True)
+parser.add_argument("--stream", action="store_true", help="include the batch admission tests")
 args = parser.parse_args()
 git = ["git", "-c", f"safe.directory={args.repo}", "-C", str(args.repo)]
 pin = subprocess.check_output(git + ["rev-parse", args.ref], text=True).strip()
@@ -32,6 +33,9 @@ for path in paths:
 # Replace only the test module root; production modules remain byte-identical.
 (args.output / "src/tests/mod.rs").write_text("mod span_tests;\n")
 shutil.copy2(pathlib.Path(__file__).with_name("span_tests.rs"), args.output / "src/tests/span_tests.rs")
+if args.stream:
+    (args.output / "src/tests/mod.rs").write_text("mod span_tests;\nmod stream_tests;\n")
+    shutil.copy2(pathlib.Path(__file__).with_name("stream_tests.rs"), args.output / "src/tests/stream_tests.rs")
 manifest = args.output / "Cargo.toml"
 sections = re.split(r"(?=^\[)", manifest.read_text(), flags=re.MULTILINE)
 manifest.write_text("".join(s for s in sections if not re.match(

@@ -5,7 +5,7 @@ use crate::{
 use alloc::{collections::BTreeMap, sync::Arc, vec, vec::Vec};
 use fontique::{Blob, Collection, CollectionOptions, FontInfoOverride, SourceCache};
 
-fn fonts() -> FontContext {
+pub(super) fn fonts() -> FontContext {
     let mut fonts = FontContext {
         collection: Collection::new(CollectionOptions {
             shared: false,
