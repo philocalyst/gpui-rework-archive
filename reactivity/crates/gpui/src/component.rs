@@ -4,7 +4,7 @@ use std::any::Any;
 
 use crate::{
     El, View,
-    element::Handler,
+    element::{Admission, Handler},
     source::{BindError, FieldId, Sources},
 };
 
@@ -95,20 +95,24 @@ impl<P: 'static, C: View + 'static> Component<P, C> {
             .owner_scope(child as &dyn Any, &registration.sources)
             .map(|scope| registration.qualify_scope(scope))
     }
-    pub(crate) fn validate_handler(
+    pub(crate) fn admit_handler(
         &self,
         parent: &P,
         sources: &Sources<P>,
         handler: &Handler,
-    ) -> Result<Option<FieldId>, BindError> {
+    ) -> Result<Admission, BindError> {
         let registration = sources.component_entry::<C>(self.id)?;
         let child = (self.read)(parent);
         if !std::ptr::eq(child, (registration.component.read)(parent)) {
             return Err(BindError::ComponentProjectionMismatch(self.id));
         }
-        handler
-            .validate(child as &dyn Any, &registration.sources)
-            .map(|field| field.map(|field| registration.qualify(field)))
+        match handler.admit(child as &dyn Any, &registration.sources)? {
+            Admission::Model { exact } => Ok(Admission::Model {
+                exact: exact.map(|field| registration.qualify(field)),
+            }),
+            Admission::Property => Ok(Admission::Property),
+            Admission::Window(_) => Err(BindError::ReceiverMismatch),
+        }
     }
 }
 

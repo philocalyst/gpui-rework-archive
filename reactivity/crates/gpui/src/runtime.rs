@@ -3268,6 +3268,24 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         id: crate::property::PropertyId,
         contribution: Contribution<crate::property::PropertyValue>,
     ) -> Result<Commit, Error> {
+        self.apply_property_value_at(index, id, contribution)?;
+        self.source_epoch = epoch;
+        self.counters.source_operations += 1;
+        if id.info().destination == crate::property::PropertyDestination::Style && self.has_lists()
+        {
+            self.describe(false)?;
+        }
+        self.present()
+    }
+    // Shared logical mutation, without source admission or presentation. A
+    // property action combines this with its ordinary owner result method
+    // before the one source reconciliation/preparation barrier.
+    fn apply_property_value_at(
+        &mut self,
+        index: usize,
+        id: crate::property::PropertyId,
+        contribution: Contribution<crate::property::PropertyValue>,
+    ) -> Result<(), Error> {
         use crate::property::PropertyDestination;
         if let Contribution::Set(value) = contribution {
             id.validate_erased(value)?;
@@ -3276,12 +3294,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             PropertyDestination::Style => self.set_style_value(index, id, contribution)?,
             PropertyDestination::Geometry => self.set_geometry_value(index, id, contribution)?,
         }
-        self.source_epoch = epoch;
-        self.counters.source_operations += 1;
-        if id.info().destination == PropertyDestination::Style && self.has_lists() {
-            self.describe(false)?;
-        }
-        self.present()
+        Ok(())
     }
     fn set_style_value(
         &mut self,

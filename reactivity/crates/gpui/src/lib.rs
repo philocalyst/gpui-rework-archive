@@ -31,7 +31,8 @@ mod style_port;
 pub use application::{Application, DemoApplication};
 pub use component::Component;
 pub use element::{
-    ChildSeq, El, Element, IntoHandler, Role, button, column, div, label, row, text, text_input,
+    ChildSeq, El, Element, IntoHandler, PropertyChange, Role, button, column, div, label,
+    property_action, row, text, text_input,
 };
 pub use gpui_canvas::{
     AlphaMode, CaretAffinity, ColorConfig, ColorSpace, Image, ImageKey, ImagePixels, ImageProfile,

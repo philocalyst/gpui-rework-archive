@@ -262,9 +262,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             EditingIntent::None
         };
         match self.activate_with_editing(target, intent) {
-            // Only the closed Window actions can return without consuming the
-            // intent. Their setters prepare a full scene or no scene; unlike
-            // model source patches, they never publish a bank-only candidate.
+            // Closed Window actions and an empty Property proposal can return
+            // without consuming the intent. They prepare a full scene or none;
+            // unlike model source patches, neither can publish a bank-only
+            // candidate that omitted changed caret visibility.
             Ok(_) if focus_changed && self.latest_token == prepared => {
                 self.publish_focus_change(previous)
             }
@@ -305,6 +306,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let exact = match admission {
             crate::element::Admission::Model { exact } => exact,
             crate::element::Admission::Window(action) => return self.window_action(action),
+            crate::element::Admission::Property => return self.activate_property(index, editing),
         };
         let epoch = self
             .source_epoch
@@ -321,5 +323,50 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.runtime.counters.source_operations += 1;
         self.runtime.changed_nodes = 0;
         self.after_source_with_editing(exact, editing)
+    }
+
+    fn activate_property(&mut self, index: usize, editing: EditingIntent) -> Result<Commit, Error> {
+        // The request and reply cannot change retained nodes: they borrow only
+        // M, and the shared property mutation touches only style/geometry.
+        // Own this existing route on the stack so no handler/node borrow spans
+        // logical mutation. Restore it before the sole reconciliation barrier.
+        let handler = self.runtime.nodes[index]
+            .handler
+            .take()
+            .expect("admitted route");
+        let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
+            let Some((target, id, contribution)) = handler.proposal(&self.runtime.model)? else {
+                return Ok(false);
+            };
+            let epoch = self
+                .source_epoch
+                .checked_add(1)
+                .ok_or(Error::EpochExhausted)?;
+            let result = self
+                .resolve_index(target)
+                .and_then(|index| self.apply_property_value_at(index, id, contribution));
+            if let Err(error) = &result
+                && !matches!(error, Error::StaleTarget | Error::Property(_))
+            {
+                return result.map(|()| true);
+            }
+            // Accepted contributions and the ordinary reply method are one
+            // source operation. Rejection changes no contribution; its reply
+            // may still change the tool's ordinary model error/status state.
+            self.runtime.source_epoch = epoch;
+            self.runtime.counters.source_operations += 1;
+            handler.applied_logically(&mut self.runtime.model, result.as_ref().map(|()| ()))?;
+            Ok(true)
+        }));
+        self.runtime.nodes[index].handler = Some(handler);
+        match result {
+            Ok(Ok(false)) => Ok(self.commit()),
+            Ok(Ok(true)) => self.after_source_with_editing(None, editing),
+            Ok(Err(error)) => Err(error),
+            Err(_) => {
+                self.poison();
+                Err(Error::OwnerPanicked)
+            }
+        }
     }
 }
