@@ -65,7 +65,11 @@ fn empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit() {
     let input = win.find_input().unwrap();
     let end = win.root().unwrap().editor.draft.len();
     let preceding = win
-        .replace(input, TextSelection::from_bytes(0, end).unwrap(), "bad syntax")
+        .replace(
+            input,
+            TextSelection::from_bytes(0, end).unwrap(),
+            "bad syntax",
+        )
         .unwrap();
     assert!(preceding.changed_nodes > 0);
     let status = win.root().unwrap().editor.status.clone();
