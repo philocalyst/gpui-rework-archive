@@ -12,7 +12,7 @@ describe the intended complete system; this page records what is connected now.
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
-| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components can propose property edits through ordinary typed click methods; edit counts join description changes by exact identity | Public mounted-target selection/current-value refresh, arbitrary built-in entry, complete theme cascade and user-defined component schemas remain |
+| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
@@ -68,8 +68,9 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Latest integrated source `1d5bc3061c` combines cached-edge caret lowering,
-compact presentation rows, contained property actions and their exact count fix. The
+Latest integrated shipping source `c717df64a9` combines cached-edge caret lowering,
+compact presentation rows, contained property actions, their exact count fix and
+[public selection/state replies](docs/property-state-routes.md). The
 [four-way text controls](benchmarks/caret-pair-controls/cached-edge/README.md)
 qualify their isolated pins: final versus original medians are about 40% lower
 for long Latin shaping, 17% for RTL and 23% for mixed text, with identical heap
@@ -86,8 +87,26 @@ undercount for property actions with no-op replies. The combined main campaign
 was interrupted rather than certified. The
 [identity-union correction](evidence/property-change-union/README.md) is now
 integrated; all 11 public regression cases also pass on main `1d5bc3061c`.
-The full 524-case producer result retains its earlier source pin. Combined
-native/desktop qualification remains pending; no broad main success is claimed.
+The full 524-case producer result retains its earlier source pin. The later
+[combined main campaign](evidence/property-selection-main/README.md) now passes
+651 GPUI/GPU cases and doctests (29 ignored), including 46 actual Vulkan readbacks,
+strict checks, formatting and Apple/MSVC desktop compilation. Hummingbird's nine
+tests, five external catalog cases, shared headless transcript and actual GPU
+transcript pass. Native Registry geometry/edit/lifecycle, contained property
+pointer/server-pixel editing, checkbox events, exact Future wake and blank handoff
+also pass. The independent unchanged public editor passes actual Registry
+selection, EditableText, Apply, Inherit and Refresh with acknowledged extents.
+All 2,029 source guards, executable hashes and owned-process cleanup checks hold.
+Vulkan uses llvmpipe; these are functional checks, not latency/RSS measurements.
+
+The [selection producer](evidence/property-selection/final/README.md) charges its
+80-byte snapshot and private 40-byte borrowed phase, with no retained header
+change. Its matched optimized ordinary caller gains 208 bytes of frame and
+864 bytes of linked text; an outlined successor remains under review. Canonical
+value and exact stored contribution can differ on the inspector shell, so a
+compact representation cannot silently conflate them. Current core source is
+[30,467 non-test code lines](evidence/core-lines/README.md), including build scripts;
+this does not establish full feature parity or forecast final size.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),

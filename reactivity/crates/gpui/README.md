@@ -33,6 +33,7 @@ cargo run -p gpui --features x11 --example reactive_styles -- --cpu
 cargo run -p gpui --features x11 --example workbench -- --gpu
 cargo run -p gpui --features x11 --example graphics
 cargo run -p gpui --features x11 --example library -- --cpu
+cargo run -p gpui --features x11 --example property_editor -- --cpu
 ```
 
 Direct typed style sources and borrowed Flex fields use the same public ports;
@@ -149,6 +150,13 @@ An explicit automatic width is `WIDTH` with `Set(None)`, distinct from inheritan
 Paint/transform edits skip owner description and Cephal. No duplicate base style
 is retained for nodes without overrides. These public operations are the testing
 interface too; no private test scheduler is involved.
+
+Contained tools use [property selection and state replies](../../docs/property-state-routes.md)
+through ordinary typed click methods. `property_selection` supplies the mounted
+activation Target on the stack; `property_action` edits through the same kernel.
+Both reply with canonical logical value and exact stored contribution before
+normal source reconciliation. The public `property_editor` composes selection,
+editable values, Apply, Inherit and Refresh without storing a Win in its model.
 
 [Typed bounded inboxes](REMOTE.md) move worker-owned values to this same owner
 barrier. A static lane chain retains concrete message/callback types; it does

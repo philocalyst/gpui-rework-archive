@@ -100,8 +100,10 @@ experiment targets the per-byte owner map and entry array using
 [ordered bulk emission](docs/monotonic-caret-stream-luna.md). The later
 [preflight audit](docs/monotonic-caret-preflight-luna.md) replaces comparator
 sorting with a bounded per-line run-identity scatter and preserves range/overlap
-validation before callbacks. It still needs the adversarial empty-edge bidi
-fixture, an implementation and measured controls. Preserve exact RTL f32
+validation before callbacks. An isolated producer span census and streaming
+implementation now exercise that formulation; integration still needs the full
+admission/oracle, allocation, assembly and timing controls. Preserve the empty-edge
+fixture coverage limits and exact RTL f32
 recurrence; do not reverse-subtract advances or assume wrapped u32 source
 offsets remain monotonic above 4 GiB. Canvas already admits at most 32 KiB.
 Parallel planners duplicate font and paragraph scratch; scheduling
@@ -115,10 +117,17 @@ are integrated, with one canonical logical kernel and a typed result method
 before the normal source barrier. The merged-source edit-count gap is corrected
 by an [exact turn-local identity union](evidence/property-change-union/README.md),
 including overlap, retirement and scope-rejected replacement; main's public
-11-case regression passes. Combined native/desktop qualification remains pending.
-Public mounted-target selection and canonical current-value refresh are being
-implemented through the existing route exchange, without adopting a Win or
-adding initializer storage. Designer color still needs shared
+11-case regression passes. Public mounted-target selection and canonical
+current-value refresh are now [integrated](docs/property-state-routes.md) through
+the existing route exchange, without adopting a Win or adding initializer storage.
+The [combined source campaign](evidence/property-selection-main/README.md) passes
+desktop/native, actual public Window/Registry and Hummingbird gates. Preserve the
+matched ordinary caller stack/code regression while evaluating an outlined
+activation. Do not derive stored contribution from resolved value: the inspector
+shell supplies a public counterexample. The [thin-handler audit](docs/thin-route-handle-luna.md)
+targets every optional route slot, but capture headers, lifecycle safety and
+dispatch cost require a measured owner census before a shipping prototype.
+Designer color still needs shared
 batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut
 primitive and tagged HDR storage.

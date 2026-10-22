@@ -87,6 +87,15 @@ or paint work. Virtual time, completion control and replay remain implementation
 gates through production facilities. There are no dummy test-only timers or a
 second event loop.
 
+The [contained property editor](docs/property-state-routes.md) exercises this same
+surface through public mounted selection, canonical state replies, editable
+drafts, Apply, Inherit and Refresh. Its headless cases use ordinary `Win` actions;
+the independent native client launches the unchanged public example and drives
+real Registry/AT-SPI actions and text edits. Both observe the normal source and
+presentation barriers. There is no private Target initializer or test-only edit
+queue. [Merged-source evidence](evidence/property-selection-main/README.md)
+records acknowledged text extents, width changes and server-pixel checks.
+
 `PointerSession` and `Win::pointer_event` expose the native host's normalized
 mouse reducer to ordinary applications and tests. Move uses physical window
 coordinates; wheel uses a window-logical `ScrollDelta`. Press focuses the current

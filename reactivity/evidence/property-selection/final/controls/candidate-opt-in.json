@@ -1,0 +1,72 @@
+{
+  "binary": "/tmp/gpui-property-candidate-opt-in-frozen",
+  "bytes": 15286632,
+  "sha256": "3bc1032c92b433bf67e9d3f395b906a9ea2becc7a1a5061b8150094e3b5d6f89",
+  "sections": {
+    ".rodata": 6500096,
+    ".eh_frame": 212208,
+    ".text": 3404791,
+    ".data.rel.ro": 127336,
+    ".stack_sizes": 3802
+  },
+  "selected_frames": [
+    {
+      "address": 7126112,
+      "code_bytes": 10196,
+      "mangled": "_RNvCshQ1cYj2Ro8i_23property_linked_control4main",
+      "name": "property_linked_control[cfc83aebae6c777c]::main",
+      "normalized_name": "property_linked_control::main",
+      "stack_bytes": 3816
+    },
+    {
+      "address": 7136320,
+      "code_bytes": 9351,
+      "mangled": "_RNvMNtNtCs2TuqtmIKTvI_4gpui7runtime4turnINtB4_10RuntimeMutNtCshQ1cYj2Ro8i_23property_linked_control5ModeluE20after_source_changedBW_",
+      "name": "<gpui[21b851c98667445c]::runtime::RuntimeMut<property_linked_control[cfc83aebae6c777c]::Model, ()>>::after_source_changed",
+      "normalized_name": "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed",
+      "stack_bytes": 1128
+    },
+    {
+      "address": 7310704,
+      "code_bytes": 77,
+      "mangled": "_RNvXs2_NtCs2TuqtmIKTvI_4gpui7elementINtB5_11MethodRouteNtCshQ1cYj2Ro8i_23property_linked_control5ModelNvMBT_BR_8ordinaryENtB5_5Route6invokeBT_",
+      "name": "<gpui[21b851c98667445c]::element::MethodRoute<property_linked_control[cfc83aebae6c777c]::Model, <property_linked_control[cfc83aebae6c777c]::Model>::ordinary> as gpui[21b851c98667445c]::element::Route>::invoke",
+      "normalized_name": "<gpui::element::MethodRoute<property_linked_control::Model, <property_linked_control::Model>::ordinary> as gpui::element::Route>::invoke",
+      "stack_bytes": 40
+    },
+    {
+      "address": 7312096,
+      "code_bytes": 72,
+      "mangled": "_RNvXs_NtCs2TuqtmIKTvI_4gpui7elementINtB4_13PropertyRouteNtCshQ1cYj2Ro8i_23property_linked_control5ModelNCINvB4_15property_actionBS_NvMBU_BS_7proposeINvB27_5replyNtB4_13PropertyStateEE0B2m_ENtB4_5Route5admitBU_",
+      "name": "<gpui[21b851c98667445c]::element::PropertyRoute<property_linked_control[cfc83aebae6c777c]::Model, gpui[21b851c98667445c]::element::property_action<property_linked_control[cfc83aebae6c777c]::Model, <property_linked_control[cfc83aebae6c777c]::Model>::propose, <property_linked_control[cfc83aebae6c777c]::Model>::reply<gpui[21b851c98667445c]::element::PropertyState>>::{closure#0}, <property_linked_control[cfc83aebae6c777c]::Model>::reply<gpui[21b851c98667445c]::element::PropertyState>> as gpui[21b851c98667445c]::element::Route>::admit",
+      "normalized_name": "<gpui::element::PropertyRoute<property_linked_control::Model, gpui::element::property_action<property_linked_control::Model, <property_linked_control::Model>::propose, <property_linked_control::Model>::reply<gpui::element::PropertyState>>::{closure#0}, <property_linked_control::Model>::reply<gpui::element::PropertyState>> as gpui::element::Route>::admit",
+      "stack_bytes": 24
+    },
+    {
+      "address": 7312176,
+      "code_bytes": 26,
+      "mangled": "_RNvXs_NtCs2TuqtmIKTvI_4gpui7elementINtB4_13PropertyRouteNtCshQ1cYj2Ro8i_23property_linked_control5ModelNCINvB4_15property_actionBS_NvMBU_BS_7proposeINvB27_5replyNtB4_13PropertyStateEE0B2m_ENtB4_5Route6invokeBU_",
+      "name": "<gpui[21b851c98667445c]::element::PropertyRoute<property_linked_control[cfc83aebae6c777c]::Model, gpui[21b851c98667445c]::element::property_action<property_linked_control[cfc83aebae6c777c]::Model, <property_linked_control[cfc83aebae6c777c]::Model>::propose, <property_linked_control[cfc83aebae6c777c]::Model>::reply<gpui[21b851c98667445c]::element::PropertyState>>::{closure#0}, <property_linked_control[cfc83aebae6c777c]::Model>::reply<gpui[21b851c98667445c]::element::PropertyState>> as gpui[21b851c98667445c]::element::Route>::invoke",
+      "normalized_name": "<gpui::element::PropertyRoute<property_linked_control::Model, gpui::element::property_action<property_linked_control::Model, <property_linked_control::Model>::propose, <property_linked_control::Model>::reply<gpui::element::PropertyState>>::{closure#0}, <property_linked_control::Model>::reply<gpui::element::PropertyState>> as gpui::element::Route>::invoke",
+      "stack_bytes": 8
+    },
+    {
+      "address": 7312208,
+      "code_bytes": 261,
+      "mangled": "_RNvXs_NtCs2TuqtmIKTvI_4gpui7elementINtB4_13PropertyRouteNtCshQ1cYj2Ro8i_23property_linked_control5ModelNCINvB4_15property_actionBS_NvMBU_BS_7proposeINvB27_5replyNtB4_13PropertyStateEE0B2m_ENtB4_5Route8propertyBU_",
+      "name": "<gpui[21b851c98667445c]::element::PropertyRoute<property_linked_control[cfc83aebae6c777c]::Model, gpui[21b851c98667445c]::element::property_action<property_linked_control[cfc83aebae6c777c]::Model, <property_linked_control[cfc83aebae6c777c]::Model>::propose, <property_linked_control[cfc83aebae6c777c]::Model>::reply<gpui[21b851c98667445c]::element::PropertyState>>::{closure#0}, <property_linked_control[cfc83aebae6c777c]::Model>::reply<gpui[21b851c98667445c]::element::PropertyState>> as gpui[21b851c98667445c]::element::Route>::property",
+      "normalized_name": "<gpui::element::PropertyRoute<property_linked_control::Model, gpui::element::property_action<property_linked_control::Model, <property_linked_control::Model>::propose, <property_linked_control::Model>::reply<gpui::element::PropertyState>>::{closure#0}, <property_linked_control::Model>::reply<gpui::element::PropertyState>> as gpui::element::Route>::property",
+      "stack_bytes": 72
+    },
+    {
+      "address": 7315280,
+      "code_bytes": 26,
+      "mangled": "_RNvYINtNtCs2TuqtmIKTvI_4gpui7element11MethodRouteNtCshQ1cYj2Ro8i_23property_linked_control5ModelNvMBN_BL_8ordinaryENtB5_5Route8propertyBN_",
+      "name": "<gpui[21b851c98667445c]::element::MethodRoute<property_linked_control[cfc83aebae6c777c]::Model, <property_linked_control[cfc83aebae6c777c]::Model>::ordinary> as gpui[21b851c98667445c]::element::Route>::property",
+      "normalized_name": "<gpui::element::MethodRoute<property_linked_control::Model, <property_linked_control::Model>::ordinary> as gpui::element::Route>::property",
+      "stack_bytes": 8
+    }
+  ],
+  "metadata_functions": 414,
+  "limits": "Compiler stack-size metadata for code generated by the control crate only; not summed call depth, dynamic stack or dependency frames. Selected linked functions/sections, no timings."
+}

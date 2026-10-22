@@ -1,9 +1,9 @@
 # Shipping core code ledger
 
-Latest measured source `f0bd5335aeb831523f5c52777911b6052c7cabac`:
-**30,390** non-test code lines, including 18 build-script lines. Original GPUI
+Latest measured source `c717df64a9b492b445fa97647deb880fb21b9ef6`:
+**30,467** non-test code lines, including 18 build-script lines. Original GPUI
 `41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,922**, including 28 build-script
-lines. [The exact source snapshot](f0bd5335ae.json) records every counted file.
+lines. [The exact source snapshot](c717df64a9.json) records every counted file.
 Comments, tests, blanks, examples, vendors and support tools are excluded; host
 shader proof/generator source inside the shipping library remains charged.
 
@@ -13,8 +13,11 @@ controlled checkbox adds 38, giving the [30,007-line source](f490974fdc.json).
 Cached-edge text adds six, basis factoring adds 209 and contained property
 actions add 168 in the integrated formatting. The property producer separately
 measures 169 against its earlier base; export wrapping accounts for the one-line
-difference. These are measured source bills. A property action counter defect
-is under repair, so this latest count is not a combined correctness certificate.
+difference. The exact property/description identity union adds 30 and public
+mounted selection with canonical state replies adds 47. These are measured
+source bills; the counter correction passes its 11 public regressions and the
+[combined desktop/native campaign](../property-selection-main/README.md) qualifies
+the later merged source separately.
 These measured source deltas do not establish
 feature equivalence, future final size, or permission to compress readable code.
 All imported vendor code, patches, static shader words and helpers retain their
