@@ -28,3 +28,32 @@ The standalone main GPUI checkout did not contain source for the new migration u
 ## Integration disposition, 2026-10-22
 
 The Hummingbird Library port now supplies the real SQLite/Nucleo/public-owner fixture described above. It uses existing typed Questions and Inbox; a general Future/stream/optimistic adapter remains proposed. Reader projection already has typed loading/failure builders, so reuse those rather than adding another status model. Root retried all three official article URLs: the browser still returned no body. The official solid-site main tree at `0028cfd588cdd3796b68066a173526bb8d065037` also lacks those three article source files; the accessible RC discussion and pinned runtime remain the evidence, not a claim to have read the series.
+
+
+## Composition follow-up, 2026-10-22
+
+The three official article pages still return no readable body. A separate
+[answered Solid composition discussion](https://github.com/solidjs/solid/discussions/3085)
+is accessible. Carniato recommends rendering membership directly from the
+user-owned collection while joining library-owned interaction state by stable
+row ID. Mirroring the collection introduces synchronization and can hide
+optimistic membership until settlement. The discussion also reports an engine
+bug involving reads through derived stores; the proposed pattern needs actual
+transaction tests, not just API similarity. This is the discussion's evidence,
+not a claim to have read the linked blog article.
+
+For GPUI, use that outcome as a composability gate: component selection, drag,
+measurement and inspector state must remain owner-local, joined to application
+rows by typed stable identity. A contained-owner adapter must preserve the
+application's source registry and writer admission rather than copying its
+collection into a tooling model. Optimistic application membership and local
+interaction state need distinct lifetimes. This is a design inference; a general
+optimistic adapter is still unimplemented.
+
+A Future convenience wrapper that checks `Completion::is_cancelled()` only when
+polled is insufficient: an obsolete, indefinitely Pending future may never wake,
+so it can hold the single physical completion credit forever. An executor
+adapter must have a cancellation path that wakes or drops that exact task, and
+reclaim credit only after physical task retirement. Preserve typed owned input,
+stale-result admission, previous-value projection, panic/failure distinction and
+ordinary-question header costs. No model or reader borrow may cross await.
