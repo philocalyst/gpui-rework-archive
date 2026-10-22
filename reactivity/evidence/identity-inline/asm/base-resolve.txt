@@ -1,0 +1,139 @@
+
+/tmp/gpui-idnorm-base-target/release/examples/identity_inline_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004e30b0 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve>:
+  4e30b0:	53                   	push   %rbx
+  4e30b1:	48 3b 96 58 07 00 00 	cmp    0x758(%rsi),%rdx
+  4e30b8:	0f 85 80 00 00 00    	jne    4e313e <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x8e>
+  4e30be:	80 be 1a 09 00 00 01 	cmpb   $0x1,0x91a(%rsi)
+  4e30c5:	0f 85 fc 01 00 00    	jne    4e32c7 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x217>
+  4e30cb:	48 8b 86 70 07 00 00 	mov    0x770(%rsi),%rax
+  4e30d2:	48 85 c0             	test   %rax,%rax
+  4e30d5:	0f 84 ec 01 00 00    	je     4e32c7 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x217>
+  4e30db:	4c 8b 8e 78 07 00 00 	mov    0x778(%rsi),%r9
+  4e30e2:	31 d2                	xor    %edx,%edx
+  4e30e4:	44 0f b7 90 ba 00 00 	movzwl 0xba(%rax),%r10d
+  4e30eb:	00
+  4e30ec:	45 89 d3             	mov    %r10d,%r11d
+  4e30ef:	41 c1 e3 03          	shl    $0x3,%r11d
+  4e30f3:	49 c7 c0 ff ff ff ff 	mov    $0xffffffffffffffff,%r8
+  4e30fa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  4e3100:	4d 85 db             	test   %r11,%r11
+  4e3103:	74 22                	je     4e3127 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x77>
+  4e3105:	4a 3b 4c c0 10       	cmp    0x10(%rax,%r8,8),%rcx
+  4e310a:	0f 97 c3             	seta   %bl
+  4e310d:	80 db 00             	sbb    $0x0,%bl
+  4e3110:	49 ff c0             	inc    %r8
+  4e3113:	49 83 c3 f8          	add    $0xfffffffffffffff8,%r11
+  4e3117:	80 fb 01             	cmp    $0x1,%bl
+  4e311a:	74 e4                	je     4e3100 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x50>
+  4e311c:	44 0f b6 d3          	movzbl %bl,%r10d
+  4e3120:	45 85 d2             	test   %r10d,%r10d
+  4e3123:	75 05                	jne    4e312a <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x7a>
+  4e3125:	eb 1e                	jmp    4e3145 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x95>
+  4e3127:	4d 89 d0             	mov    %r10,%r8
+  4e312a:	49 83 e9 01          	sub    $0x1,%r9
+  4e312e:	0f 82 95 01 00 00    	jb     4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e3134:	4a 8b 84 c0 c0 00 00 	mov    0xc0(%rax,%r8,8),%rax
+  4e313b:	00
+  4e313c:	eb a6                	jmp    4e30e4 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x34>
+  4e313e:	31 d2                	xor    %edx,%edx
+  4e3140:	e9 84 01 00 00       	jmp    4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e3145:	4c 8b 8e d8 07 00 00 	mov    0x7d8(%rsi),%r9
+  4e314c:	ba 01 00 00 00       	mov    $0x1,%edx
+  4e3151:	4d 85 c9             	test   %r9,%r9
+  4e3154:	0f 84 6f 01 00 00    	je     4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e315a:	4c 8b 96 e0 07 00 00 	mov    0x7e0(%rsi),%r10
+  4e3161:	4d 85 d2             	test   %r10,%r10
+  4e3164:	74 78                	je     4e31de <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x12e>
+  4e3166:	4d 89 d3             	mov    %r10,%r11
+  4e3169:	49 83 e3 07          	and    $0x7,%r11
+  4e316d:	0f 84 e9 00 00 00    	je     4e325c <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x1ac>
+  4e3173:	31 db                	xor    %ebx,%ebx
+  4e3175:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  4e317c:	00 00 00 00
+  4e3180:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e3187:	48 ff c3             	inc    %rbx
+  4e318a:	49 39 db             	cmp    %rbx,%r11
+  4e318d:	75 f1                	jne    4e3180 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0xd0>
+  4e318f:	4d 89 d3             	mov    %r10,%r11
+  4e3192:	49 29 db             	sub    %rbx,%r11
+  4e3195:	49 83 fa 08          	cmp    $0x8,%r10
+  4e3199:	72 43                	jb     4e31de <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x12e>
+  4e319b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  4e31a0:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31a7:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31ae:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31b5:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31bc:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31c3:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31ca:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31d1:	4d 8b 89 90 05 00 00 	mov    0x590(%r9),%r9
+  4e31d8:	49 83 c3 f8          	add    $0xfffffffffffffff8,%r11
+  4e31dc:	75 c2                	jne    4e31a0 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0xf0>
+  4e31de:	66 41 83 b9 8a 05 00 	cmpw   $0x0,0x58a(%r9)
+  4e31e5:	00 00
+  4e31e7:	0f 84 dc 00 00 00    	je     4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e31ed:	41 80 39 00          	cmpb   $0x0,(%r9)
+  4e31f1:	0f 85 d2 00 00 00    	jne    4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e31f7:	4e 8b 44 c0 60       	mov    0x60(%rax,%r8,8),%r8
+  4e31fc:	48 8b 86 88 02 00 00 	mov    0x288(%rsi),%rax
+  4e3203:	49 39 c0             	cmp    %rax,%r8
+  4e3206:	73 41                	jae    4e3249 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x199>
+  4e3208:	4c 8b 8e 80 02 00 00 	mov    0x280(%rsi),%r9
+  4e320f:	41 ba ff ff ff ff    	mov    $0xffffffff,%r10d
+  4e3215:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  4e321c:	00 00 00 00
+  4e3220:	4f 8d 04 80          	lea    (%r8,%r8,4),%r8
+  4e3224:	47 8b 5c c1 20       	mov    0x20(%r9,%r8,8),%r11d
+  4e3229:	41 83 e3 07          	and    $0x7,%r11d
+  4e322d:	41 83 fb 05          	cmp    $0x5,%r11d
+  4e3231:	74 3b                	je     4e326e <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x1be>
+  4e3233:	4f 8d 04 c1          	lea    (%r9,%r8,8),%r8
+  4e3237:	45 8b 40 18          	mov    0x18(%r8),%r8d
+  4e323b:	4d 39 d0             	cmp    %r10,%r8
+  4e323e:	0f 84 85 00 00 00    	je     4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e3244:	4c 39 c0             	cmp    %r8,%rax
+  4e3247:	77 d7                	ja     4e3220 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x170>
+  4e3249:	48 8d 15 a0 d8 2c 00 	lea    0x2cd8a0(%rip),%rdx        # 7b0af0 <anon.0cbba7d9b8434cbd395345040b43fa42.55.llvm.1019154430158549041+0x18>
+  4e3250:	4c 89 c7             	mov    %r8,%rdi
+  4e3253:	48 89 c6             	mov    %rax,%rsi
+  4e3256:	ff 15 14 f7 2e 00    	call   *0x2ef714(%rip)        # 7d2970 <_DYNAMIC+0x2c0>
+  4e325c:	4d 89 d3             	mov    %r10,%r11
+  4e325f:	49 83 fa 08          	cmp    $0x8,%r10
+  4e3263:	0f 83 37 ff ff ff    	jae    4e31a0 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0xf0>
+  4e3269:	e9 70 ff ff ff       	jmp    4e31de <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x12e>
+  4e326e:	48 8d 86 10 07 00 00 	lea    0x710(%rsi),%rax
+  4e3275:	4c 8d 86 18 07 00 00 	lea    0x718(%rsi),%r8
+  4e327c:	48 83 be 20 07 00 00 	cmpq   $0xffffffffffffffff,0x720(%rsi)
+  4e3283:	ff
+  4e3284:	74 1e                	je     4e32a4 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x1f4>
+  4e3286:	4c 8d 8e 28 07 00 00 	lea    0x728(%rsi),%r9
+  4e328d:	4c 8d 96 30 07 00 00 	lea    0x730(%rsi),%r10
+  4e3294:	66 83 be 40 07 00 00 	cmpw   $0x0,0x740(%rsi)
+  4e329b:	00
+  4e329c:	4d 0f 49 c2          	cmovns %r10,%r8
+  4e32a0:	49 0f 49 c1          	cmovns %r9,%rax
+  4e32a4:	49 8b 30             	mov    (%r8),%rsi
+  4e32a7:	48 8b 00             	mov    (%rax),%rax
+  4e32aa:	48 c1 e6 04          	shl    $0x4,%rsi
+  4e32ae:	48 8d 34 b6          	lea    (%rsi,%rsi,4),%rsi
+  4e32b2:	48 85 f6             	test   %rsi,%rsi
+  4e32b5:	74 10                	je     4e32c7 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x217>
+  4e32b7:	48 83 c6 b0          	add    $0xffffffffffffffb0,%rsi
+  4e32bb:	48 39 48 20          	cmp    %rcx,0x20(%rax)
+  4e32bf:	48 8d 40 50          	lea    0x50(%rax),%rax
+  4e32c3:	75 ed                	jne    4e32b2 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x202>
+  4e32c5:	eb 02                	jmp    4e32c9 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x219>
+  4e32c7:	31 d2                	xor    %edx,%edx
+  4e32c9:	b8 11 00 00 00       	mov    $0x11,%eax
+  4e32ce:	48 83 fa 01          	cmp    $0x1,%rdx
+  4e32d2:	75 0b                	jne    4e32df <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve+0x22f>
+  4e32d4:	48 89 4f 08          	mov    %rcx,0x8(%rdi)
+  4e32d8:	48 c7 c0 fe ff ff ff 	mov    $0xfffffffffffffffe,%rax
+  4e32df:	48 89 07             	mov    %rax,(%rdi)
+  4e32e2:	5b                   	pop    %rbx
+  4e32e3:	c3                   	ret

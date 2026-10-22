@@ -1,0 +1,82 @@
+[
+  {
+    "round": 1,
+    "variant": "baseline",
+    "wall_seconds": 1.1163520889822394
+  },
+  {
+    "round": 1,
+    "variant": "packed",
+    "wall_seconds": 0.6152926529757679
+  },
+  {
+    "round": 1,
+    "variant": "runs",
+    "wall_seconds": 0.46557880396721885
+  },
+  {
+    "round": 1,
+    "variant": "inline",
+    "wall_seconds": 0.46576933696633205
+  },
+  {
+    "round": 2,
+    "variant": "packed",
+    "wall_seconds": 0.6154785569524392
+  },
+  {
+    "round": 2,
+    "variant": "runs",
+    "wall_seconds": 0.4676560499938205
+  },
+  {
+    "round": 2,
+    "variant": "inline",
+    "wall_seconds": 0.4657900980091654
+  },
+  {
+    "round": 2,
+    "variant": "baseline",
+    "wall_seconds": 1.0666615280206315
+  },
+  {
+    "round": 3,
+    "variant": "runs",
+    "wall_seconds": 0.46578225801931694
+  },
+  {
+    "round": 3,
+    "variant": "inline",
+    "wall_seconds": 0.4660925850039348
+  },
+  {
+    "round": 3,
+    "variant": "baseline",
+    "wall_seconds": 1.067170859023463
+  },
+  {
+    "round": 3,
+    "variant": "packed",
+    "wall_seconds": 0.6174807700444944
+  },
+  {
+    "round": 4,
+    "variant": "inline",
+    "wall_seconds": 0.4655036029871553
+  },
+  {
+    "round": 4,
+    "variant": "baseline",
+    "wall_seconds": 1.0667346489499323
+  },
+  {
+    "round": 4,
+    "variant": "packed",
+    "wall_seconds": 0.6155364380101673
+  },
+  {
+    "round": 4,
+    "variant": "runs",
+    "wall_seconds": 0.4660798439872451
+  }
+]

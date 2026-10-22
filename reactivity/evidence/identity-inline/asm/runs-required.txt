@@ -1,0 +1,18 @@
+
+/tmp/gpui-idnorm-runs-target/release/examples/identity_inline_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000050d130 <<gpui::runtime::identity_index::IdentityIndex>::required>:
+  50d130:	50                   	push   %rax
+  50d131:	ff 15 49 6e 2c 00    	call   *0x2c6e49(%rip)        # 7d3f80 <_DYNAMIC+0x378>
+  50d137:	48 83 f8 01          	cmp    $0x1,%rax
+  50d13b:	75 05                	jne    50d142 <<gpui::runtime::identity_index::IdentityIndex>::required+0x12>
+  50d13d:	48 89 d0             	mov    %rdx,%rax
+  50d140:	59                   	pop    %rcx
+  50d141:	c3                   	ret
+  50d142:	48 8d 3d db c7 b3 ff 	lea    -0x4c3825(%rip),%rdi        # 49924 <anon.bfbf47f8ded0eddc13ed829f81e0b0cc.22.llvm.10476012810013395139+0x18>
+  50d149:	48 8d 15 d8 63 2a 00 	lea    0x2a63d8(%rip),%rdx        # 7b3528 <anon.bfbf47f8ded0eddc13ed829f81e0b0cc.23.llvm.10476012810013395139+0x18>
+  50d150:	be 15 00 00 00       	mov    $0x15,%esi
+  50d155:	ff 15 05 6e 2c 00    	call   *0x2c6e05(%rip)        # 7d3f60 <_DYNAMIC+0x358>

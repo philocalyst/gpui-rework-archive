@@ -1,0 +1,7 @@
+   Compiling cephal v0.1.1 (/root/gpui-identity-inline/reactivity/vendor/cephal)
+   Compiling parley v0.11.1 (/root/gpui-identity-inline/reactivity/vendor/parley)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-identity-inline/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-identity-inline/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-identity-inline/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-identity-inline/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 15.60s

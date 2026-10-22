@@ -1,0 +1,148 @@
+
+/tmp/gpui-idnorm-inline-target/release/examples/identity_inline_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000500290 <identity_inline_control::read_properties>:
+  500290:	55                   	push   %rbp
+  500291:	41 57                	push   %r15
+  500293:	41 56                	push   %r14
+  500295:	41 55                	push   %r13
+  500297:	41 54                	push   %r12
+  500299:	53                   	push   %rbx
+  50029a:	48 81 ec 88 00 00 00 	sub    $0x88,%rsp
+  5002a1:	4c 89 44 24 08       	mov    %r8,0x8(%rsp)
+  5002a6:	4d 85 c0             	test   %r8,%r8
+  5002a9:	0f 84 c2 00 00 00    	je     500371 <identity_inline_control::read_properties+0xe1>
+  5002af:	48 89 d3             	mov    %rdx,%rbx
+  5002b2:	48 85 d2             	test   %rdx,%rdx
+  5002b5:	0f 84 b6 00 00 00    	je     500371 <identity_inline_control::read_properties+0xe1>
+  5002bb:	49 89 f7             	mov    %rsi,%r15
+  5002be:	49 89 fc             	mov    %rdi,%r12
+  5002c1:	84 c9                	test   %cl,%cl
+  5002c3:	0f 84 c0 00 00 00    	je     500389 <identity_inline_control::read_properties+0xf9>
+  5002c9:	45 31 ed             	xor    %r13d,%r13d
+  5002cc:	31 ed                	xor    %ebp,%ebp
+  5002ce:	66 90                	xchg   %ax,%ax
+  5002d0:	48 8d 45 01          	lea    0x1(%rbp),%rax
+  5002d4:	48 89 04 24          	mov    %rax,(%rsp)
+  5002d8:	49 89 de             	mov    %rbx,%r14
+  5002db:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  5002e0:	48 89 e8             	mov    %rbp,%rax
+  5002e3:	48 09 d8             	or     %rbx,%rax
+  5002e6:	48 c1 e8 20          	shr    $0x20,%rax
+  5002ea:	74 14                	je     500300 <identity_inline_control::read_properties+0x70>
+  5002ec:	48 89 e8             	mov    %rbp,%rax
+  5002ef:	31 d2                	xor    %edx,%edx
+  5002f1:	48 f7 f3             	div    %rbx
+  5002f4:	eb 10                	jmp    500306 <identity_inline_control::read_properties+0x76>
+  5002f6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  5002fd:	00 00 00
+  500300:	89 e8                	mov    %ebp,%eax
+  500302:	31 d2                	xor    %edx,%edx
+  500304:	f7 f3                	div    %ebx
+  500306:	48 c1 e2 04          	shl    $0x4,%rdx
+  50030a:	41 0f 10 04 17       	movups (%r15,%rdx,1),%xmm0
+  50030f:	0f 29 44 24 10       	movaps %xmm0,0x10(%rsp)
+  500314:	48 8d 44 24 10       	lea    0x10(%rsp),%rax
+  500319:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  50031e:	48 8b 4c 24 18       	mov    0x18(%rsp),%rcx
+  500323:	48 8d 7c 24 50       	lea    0x50(%rsp),%rdi
+  500328:	4c 89 e6             	mov    %r12,%rsi
+  50032b:	4c 8b 05 6e 45 2d 00 	mov    0x2d456e(%rip),%r8        # 7d48a0 <_DYNAMIC+0x6b8>
+  500332:	e8 59 e7 fc ff       	call   4cea90 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>>
+  500337:	83 7c 24 50 fe       	cmpl   $0xfffffffe,0x50(%rsp)
+  50033c:	0f 85 c7 00 00 00    	jne    500409 <identity_inline_control::read_properties+0x179>
+  500342:	80 7c 24 58 00       	cmpb   $0x0,0x58(%rsp)
+  500347:	0f 84 18 01 00 00    	je     500465 <identity_inline_control::read_properties+0x1d5>
+  50034d:	8b 44 24 5c          	mov    0x5c(%rsp),%eax
+  500351:	49 01 c5             	add    %rax,%r13
+  500354:	48 81 c5 c1 00 00 00 	add    $0xc1,%rbp
+  50035b:	49 ff ce             	dec    %r14
+  50035e:	75 80                	jne    5002e0 <identity_inline_control::read_properties+0x50>
+  500360:	48 8b 2c 24          	mov    (%rsp),%rbp
+  500364:	48 3b 6c 24 08       	cmp    0x8(%rsp),%rbp
+  500369:	0f 85 61 ff ff ff    	jne    5002d0 <identity_inline_control::read_properties+0x40>
+  50036f:	eb 03                	jmp    500374 <identity_inline_control::read_properties+0xe4>
+  500371:	45 31 ed             	xor    %r13d,%r13d
+  500374:	4c 89 e8             	mov    %r13,%rax
+  500377:	48 81 c4 88 00 00 00 	add    $0x88,%rsp
+  50037e:	5b                   	pop    %rbx
+  50037f:	41 5c                	pop    %r12
+  500381:	41 5d                	pop    %r13
+  500383:	41 5e                	pop    %r14
+  500385:	41 5f                	pop    %r15
+  500387:	5d                   	pop    %rbp
+  500388:	c3                   	ret
+  500389:	48 c1 e3 04          	shl    $0x4,%rbx
+  50038d:	45 31 ed             	xor    %r13d,%r13d
+  500390:	48 8d 6c 24 50       	lea    0x50(%rsp),%rbp
+  500395:	31 c0                	xor    %eax,%eax
+  500397:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  50039e:	00 00
+  5003a0:	48 ff c0             	inc    %rax
+  5003a3:	48 89 04 24          	mov    %rax,(%rsp)
+  5003a7:	45 31 f6             	xor    %r14d,%r14d
+  5003aa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  5003b0:	43 0f 10 04 37       	movups (%r15,%r14,1),%xmm0
+  5003b5:	0f 29 44 24 10       	movaps %xmm0,0x10(%rsp)
+  5003ba:	48 8d 44 24 10       	lea    0x10(%rsp),%rax
+  5003bf:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  5003c4:	48 8b 4c 24 18       	mov    0x18(%rsp),%rcx
+  5003c9:	48 89 ef             	mov    %rbp,%rdi
+  5003cc:	4c 89 e6             	mov    %r12,%rsi
+  5003cf:	4c 8b 05 ca 44 2d 00 	mov    0x2d44ca(%rip),%r8        # 7d48a0 <_DYNAMIC+0x6b8>
+  5003d6:	e8 b5 e6 fc ff       	call   4cea90 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>>
+  5003db:	83 7c 24 50 fe       	cmpl   $0xfffffffe,0x50(%rsp)
+  5003e0:	75 27                	jne    500409 <identity_inline_control::read_properties+0x179>
+  5003e2:	80 7c 24 58 00       	cmpb   $0x0,0x58(%rsp)
+  5003e7:	74 7c                	je     500465 <identity_inline_control::read_properties+0x1d5>
+  5003e9:	8b 44 24 5c          	mov    0x5c(%rsp),%eax
+  5003ed:	49 01 c5             	add    %rax,%r13
+  5003f0:	49 83 c6 10          	add    $0x10,%r14
+  5003f4:	4c 39 f3             	cmp    %r14,%rbx
+  5003f7:	75 b7                	jne    5003b0 <identity_inline_control::read_properties+0x120>
+  5003f9:	48 8b 04 24          	mov    (%rsp),%rax
+  5003fd:	48 3b 44 24 08       	cmp    0x8(%rsp),%rax
+  500402:	75 9c                	jne    5003a0 <identity_inline_control::read_properties+0x110>
+  500404:	e9 6b ff ff ff       	jmp    500374 <identity_inline_control::read_properties+0xe4>
+  500409:	48 8d 5c 24 18       	lea    0x18(%rsp),%rbx
+  50040e:	4c 8d 74 24 28       	lea    0x28(%rsp),%r14
+  500413:	48 8b 84 24 80 00 00 	mov    0x80(%rsp),%rax
+  50041a:	00
+  50041b:	48 89 44 24 40       	mov    %rax,0x40(%rsp)
+  500420:	0f 10 44 24 50       	movups 0x50(%rsp),%xmm0
+  500425:	0f 10 4c 24 60       	movups 0x60(%rsp),%xmm1
+  50042a:	0f 10 54 24 70       	movups 0x70(%rsp),%xmm2
+  50042f:	0f 29 54 24 30       	movaps %xmm2,0x30(%rsp)
+  500434:	0f 29 4c 24 20       	movaps %xmm1,0x20(%rsp)
+  500439:	0f 29 44 24 10       	movaps %xmm0,0x10(%rsp)
+  50043e:	48 8d 3d 9a 8d b4 ff 	lea    -0x4b7266(%rip),%rdi        # 491df <anon.04047225c0137cb42d919b22fac9ddae.45.llvm.2440879539957033293>
+  500445:	48 8d 0d 84 2f 2b 00 	lea    0x2b2f84(%rip),%rcx        # 7b33d0 <anon.04047225c0137cb42d919b22fac9ddae.44.llvm.2440879539957033293>
+  50044c:	4c 8d 05 75 2d 2b 00 	lea    0x2b2d75(%rip),%r8        # 7b31c8 <anon.04047225c0137cb42d919b22fac9ddae.2.llvm.2440879539957033293+0x18>
+  500453:	48 8d 54 24 10       	lea    0x10(%rsp),%rdx
+  500458:	be 2b 00 00 00       	mov    $0x2b,%esi
+  50045d:	ff 15 dd 40 2d 00    	call   *0x2d40dd(%rip)        # 7d4540 <_DYNAMIC+0x358>
+  500463:	0f 0b                	ud2
+  500465:	48 8d 3d 74 2d 2b 00 	lea    0x2b2d74(%rip),%rdi        # 7b31e0 <anon.04047225c0137cb42d919b22fac9ddae.2.llvm.2440879539957033293+0x30>
+  50046c:	ff 15 fe 3f 2d 00    	call   *0x2d3ffe(%rip)        # 7d4470 <_DYNAMIC+0x288>
+  500472:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  500477:	48 83 ea 0d          	sub    $0xd,%rdx
+  50047b:	b9 13 00 00 00       	mov    $0x13,%ecx
+  500480:	48 0f 4d ca          	cmovge %rdx,%rcx
+  500484:	48 83 f9 18          	cmp    $0x18,%rcx
+  500488:	74 09                	je     500493 <identity_inline_control::read_properties+0x203>
+  50048a:	4c 89 f3             	mov    %r14,%rbx
+  50048d:	48 83 f9 13          	cmp    $0x13,%rcx
+  500491:	75 1d                	jne    5004b0 <identity_inline_control::read_properties+0x220>
+  500493:	48 8b 33             	mov    (%rbx),%rsi
+  500496:	48 85 f6             	test   %rsi,%rsi
+  500499:	74 15                	je     5004b0 <identity_inline_control::read_properties+0x220>
+  50049b:	48 8b 7b 08          	mov    0x8(%rbx),%rdi
+  50049f:	ba 01 00 00 00       	mov    $0x1,%edx
+  5004a4:	48 89 c3             	mov    %rax,%rbx
+  5004a7:	ff 15 83 3f 2d 00    	call   *0x2d3f83(%rip)        # 7d4430 <_DYNAMIC+0x248>
+  5004ad:	48 89 d8             	mov    %rbx,%rax
+  5004b0:	48 89 c7             	mov    %rax,%rdi
+  5004b3:	e8 18 09 2b 00       	call   7b0dd0 <_Unwind_Resume@plt>

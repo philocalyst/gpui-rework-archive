@@ -1,0 +1,90 @@
+{
+  "base": {
+    "property": {
+      "bytes": 448,
+      "address": "00000000004ce7b0",
+      "symbol": "<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>"
+    },
+    "read": {
+      "bytes": 1491,
+      "address": "00000000004f3660",
+      "symbol": "identity_inline_control::read_properties"
+    },
+    "resolve": {
+      "bytes": 564,
+      "address": "00000000004e30b0",
+      "symbol": "<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve"
+    }
+  },
+  "packed": {
+    "property": {
+      "bytes": 315,
+      "address": "00000000004ce700",
+      "symbol": "<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>"
+    },
+    "read": {
+      "bytes": 552,
+      "address": "00000000005000b0",
+      "symbol": "identity_inline_control::read_properties"
+    },
+    "get": {
+      "bytes": 123,
+      "address": "000000000050be80",
+      "symbol": "<gpui::runtime::identity_index::IdentityIndex>::get"
+    },
+    "required": {
+      "bytes": 142,
+      "address": "000000000050bf80",
+      "symbol": "<gpui::runtime::identity_index::IdentityIndex>::required"
+    },
+    "resolve": {
+      "bytes": 482,
+      "address": "00000000004e2ef0",
+      "symbol": "<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve"
+    }
+  },
+  "runs": {
+    "property": {
+      "bytes": 319,
+      "address": "00000000004ceb20",
+      "symbol": "<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>"
+    },
+    "read": {
+      "bytes": 1220,
+      "address": "0000000000507350",
+      "symbol": "identity_inline_control::read_properties"
+    },
+    "get": {
+      "bytes": 283,
+      "address": "000000000050d000",
+      "symbol": "<gpui::runtime::identity_index::IdentityIndex>::get"
+    },
+    "required": {
+      "bytes": 43,
+      "address": "000000000050d130",
+      "symbol": "<gpui::runtime::identity_index::IdentityIndex>::required"
+    },
+    "resolve": {
+      "bytes": 482,
+      "address": "00000000004e33b0",
+      "symbol": "<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve"
+    }
+  },
+  "inline": {
+    "property": {
+      "bytes": 664,
+      "address": "00000000004cea90",
+      "symbol": "<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>"
+    },
+    "read": {
+      "bytes": 552,
+      "address": "0000000000500290",
+      "symbol": "identity_inline_control::read_properties"
+    },
+    "resolve": {
+      "bytes": 717,
+      "address": "00000000004e39e0",
+      "symbol": "<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve"
+    }
+  }
+}

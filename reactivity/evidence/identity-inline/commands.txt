@@ -1,0 +1,33 @@
+# Native dependency/target loader setup (also used for headless commands):
+source /tmp/gpui-native-env.sh
+
+# Production source gates, cwd /root/gpui-identity-inline:
+CARGO_TARGET_DIR=/tmp/gpui-literal-dispatch-target cargo test --manifest-path reactivity/Cargo.toml -p gpui --lib runtime::identity_index
+IDENTITY_INDEX_VARIANT=inline IDENTITY_INDEX_SOURCE=f251f4be7bc215644859df8ee2f70a0f104f8d36 CARGO_TARGET_DIR=/tmp/gpui-literal-dispatch-target cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --all-targets -- -D warnings
+CARGO_TARGET_DIR=/tmp/gpui-literal-native-target cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --lib --features x11 -- -D warnings
+
+# Build new matched normalized caller at the corresponding worktree:
+# baseline: /root/gpui-identity-index-base, /tmp/gpui-idnorm-base-target, 59467a4136d92822e90dfcff329383c75f9c3c33
+# packed: /root/gpui-identity-index, /tmp/gpui-idnorm-packed-target, 8da013d5f81d2687d9fdc7321f91109713e1e6c1
+# runs: /root/gpui-identity-runs, /tmp/gpui-idnorm-runs-target, 75544537f7596a7e0929306ab27b48f9942b7062
+# inline: /root/gpui-identity-inline, /tmp/gpui-idnorm-inline-target, f251f4be7bc215644859df8ee2f70a0f104f8d36
+# Explicit corresponding CARGO_TARGET_DIR, IDENTITY_INDEX_VARIANT and SOURCE:
+cargo build --release --manifest-path reactivity/Cargo.toml -p gpui --example identity_inline_control --message-format=json -j2
+
+# All four newly linked binaries, untimed large correctness qualification:
+/tmp/gpui-idnorm-base-target/release/examples/identity_inline_control guard-large
+/tmp/gpui-idnorm-packed-target/release/examples/identity_inline_control guard-large
+/tmp/gpui-idnorm-runs-target/release/examples/identity_inline_control guard-large
+/tmp/gpui-idnorm-inline-target/release/examples/identity_inline_control guard-large
+
+# Exact linked symbol addresses/sizes and bounded actual disassembly:
+/nix/store/31gnwsgag5qa14hfblqi5hyn71pyx7py-binutils-2.46/bin/nm -S -C <each executable>
+/nix/store/31gnwsgag5qa14hfblqi5hyn71pyx7py-binutils-2.46/bin/objdump -d -C --start-address=<symbol address> --stop-address=<address+size> <executable>
+# Only trailing whitespace in displayed assembly is normalized.
+
+# Frozen guards; no compiler invoked by these commands:
+python3 reactivity/evidence/identity-inline/run.py freeze
+python3 reactivity/evidence/identity-inline/run.py guard
+# Requires root's coordinated quiet START:
+IDENTITY_INDEX_QUIET=approved python3 reactivity/evidence/identity-inline/run.py capture --output reactivity/evidence/identity-inline/capture
+python3 reactivity/evidence/identity-inline/summarize.py
