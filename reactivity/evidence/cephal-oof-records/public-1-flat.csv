@@ -1,0 +1,6 @@
+stage,retained,total,peak,calls,measured,layouts,sources
+mount,61218,269805,112148,656,26,1,0
+scroll,4345,254079,63356,585,26,1,0
+text,3218,191416,65569,375,2,1,1
+style,2696,192398,65175,375,2,1,1
+return,834,252388,60841,592,26,1,0

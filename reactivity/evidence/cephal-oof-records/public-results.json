@@ -1,0 +1,621 @@
+{
+  "sources": {
+    "/root/gpui-cephal-flat-oof/reactivity/crates/core/src/layout.rs": "e7f54524d8659c99553de7992af88c5b11e4c9c82c2f09a9d470b90fa70f267f",
+    "/root/gpui-cephal-flat-oof/reactivity/crates/core/tests/layout/oof.rs": "5b14412c8333a5800522fc77cade6d87aaea013d5bcd8923ec1bdc4157f8321a",
+    "/tmp/gpui-cephal-oof-public/src/main.rs": "13016da47a7ee1cf9b55b534dc35fb95ad148e4c0e44cd9ef5b5ec91cc046e56",
+    "/tmp/gpui-cephal-oof-public/Cargo.toml": "67d9bcad68244c03243c174056a850a29d949ac4dc9a2aa07b80f8421b6a1074",
+    "/tmp/gpui-cephal-oof-public/Cargo.lock": "5bf75afb3348c198db1210d3121e68ac253e68d1d3c439ce9f556fa22dc7e63c"
+  },
+  "executables": {
+    "flat": "4f1c353e61cc70add6a904e739c7d3e576f84e50c8ec3bfb12f0a0d158415df6",
+    "oof": "e050d4e4ac5d31e154a2302f85565f2103515470bb7e21918995650120196f5f"
+  },
+  "rows": [
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "mount",
+      "retained": 61218,
+      "total": 269805,
+      "peak": 112148,
+      "calls": 656,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "scroll",
+      "retained": 4345,
+      "total": 254079,
+      "peak": 63356,
+      "calls": 585,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "text",
+      "retained": 3218,
+      "total": 191416,
+      "peak": 65569,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "style",
+      "retained": 2696,
+      "total": 192398,
+      "peak": 65175,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "return",
+      "retained": 834,
+      "total": 252388,
+      "peak": 60841,
+      "calls": 592,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "mount",
+      "retained": 63138,
+      "total": 271085,
+      "peak": 114068,
+      "calls": 658,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "scroll",
+      "retained": 4345,
+      "total": 255351,
+      "peak": 63356,
+      "calls": 587,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "text",
+      "retained": 3218,
+      "total": 191416,
+      "peak": 65569,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "style",
+      "retained": 2696,
+      "total": 191278,
+      "peak": 65175,
+      "calls": 372,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "return",
+      "retained": 834,
+      "total": 253660,
+      "peak": 60841,
+      "calls": 594,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "mount",
+      "retained": 63138,
+      "total": 271085,
+      "peak": 114068,
+      "calls": 658,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "scroll",
+      "retained": 4345,
+      "total": 255351,
+      "peak": 63356,
+      "calls": 587,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "text",
+      "retained": 3218,
+      "total": 191416,
+      "peak": 65569,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "style",
+      "retained": 2696,
+      "total": 191278,
+      "peak": 65175,
+      "calls": 372,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "return",
+      "retained": 834,
+      "total": 253660,
+      "peak": 60841,
+      "calls": 594,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "mount",
+      "retained": 61218,
+      "total": 269805,
+      "peak": 112148,
+      "calls": 656,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "scroll",
+      "retained": 4345,
+      "total": 254079,
+      "peak": 63356,
+      "calls": 585,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "text",
+      "retained": 3218,
+      "total": 191416,
+      "peak": 65569,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "style",
+      "retained": 2696,
+      "total": 192398,
+      "peak": 65175,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "return",
+      "retained": 834,
+      "total": 252388,
+      "peak": 60841,
+      "calls": 592,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "mount",
+      "retained": 61218,
+      "total": 269805,
+      "peak": 112148,
+      "calls": 656,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "scroll",
+      "retained": 4345,
+      "total": 254079,
+      "peak": 63356,
+      "calls": 585,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "text",
+      "retained": 3218,
+      "total": 191416,
+      "peak": 65569,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "style",
+      "retained": 2696,
+      "total": 192398,
+      "peak": 65175,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "return",
+      "retained": 834,
+      "total": 252388,
+      "peak": 60841,
+      "calls": 592,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "mount",
+      "retained": 63138,
+      "total": 271085,
+      "peak": 114068,
+      "calls": 658,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "scroll",
+      "retained": 4345,
+      "total": 255351,
+      "peak": 63356,
+      "calls": 587,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "text",
+      "retained": 3218,
+      "total": 191416,
+      "peak": 65569,
+      "calls": 375,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "style",
+      "retained": 2696,
+      "total": 191278,
+      "peak": 65175,
+      "calls": 372,
+      "measured": 2,
+      "layouts": 1,
+      "sources": 1
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "return",
+      "retained": 834,
+      "total": 253660,
+      "peak": 60841,
+      "calls": 594,
+      "measured": 26,
+      "layouts": 1,
+      "sources": 0
+    }
+  ],
+  "pixels": [
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "mount",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-flat.mount.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "scroll",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-flat.scroll.bgrx",
+      "bytes": 320000,
+      "sha256": "5cd4b4e6802b5d1f9fb91ad6858fbd3dd0b36fd05f5bb62c49f6567c090c750e"
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "text",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-flat.text.bgrx",
+      "bytes": 320000,
+      "sha256": "20bcd2eea2654051f2665fa291d7fa4e4ad4bfa0f942cd80339ad14a02395bdd"
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "style",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-flat.style.bgrx",
+      "bytes": 320000,
+      "sha256": "8d0b9ea924decae869318c3a0bfe6a58a389bfbbb3841cf8aaf5853fce311cdd"
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "stage": "return",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-flat.return.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "mount",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-oof.mount.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "scroll",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-oof.scroll.bgrx",
+      "bytes": 320000,
+      "sha256": "5cd4b4e6802b5d1f9fb91ad6858fbd3dd0b36fd05f5bb62c49f6567c090c750e"
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "text",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-oof.text.bgrx",
+      "bytes": 320000,
+      "sha256": "20bcd2eea2654051f2665fa291d7fa4e4ad4bfa0f942cd80339ad14a02395bdd"
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "style",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-oof.style.bgrx",
+      "bytes": 320000,
+      "sha256": "8d0b9ea924decae869318c3a0bfe6a58a389bfbbb3841cf8aaf5853fce311cdd"
+    },
+    {
+      "rep": 0,
+      "variant": "oof",
+      "stage": "return",
+      "path": "/tmp/gpui-cephal-oof-captures/public-0-oof.return.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "mount",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-oof.mount.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "scroll",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-oof.scroll.bgrx",
+      "bytes": 320000,
+      "sha256": "5cd4b4e6802b5d1f9fb91ad6858fbd3dd0b36fd05f5bb62c49f6567c090c750e"
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "text",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-oof.text.bgrx",
+      "bytes": 320000,
+      "sha256": "20bcd2eea2654051f2665fa291d7fa4e4ad4bfa0f942cd80339ad14a02395bdd"
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "style",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-oof.style.bgrx",
+      "bytes": 320000,
+      "sha256": "8d0b9ea924decae869318c3a0bfe6a58a389bfbbb3841cf8aaf5853fce311cdd"
+    },
+    {
+      "rep": 1,
+      "variant": "oof",
+      "stage": "return",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-oof.return.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "mount",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-flat.mount.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "scroll",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-flat.scroll.bgrx",
+      "bytes": 320000,
+      "sha256": "5cd4b4e6802b5d1f9fb91ad6858fbd3dd0b36fd05f5bb62c49f6567c090c750e"
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "text",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-flat.text.bgrx",
+      "bytes": 320000,
+      "sha256": "20bcd2eea2654051f2665fa291d7fa4e4ad4bfa0f942cd80339ad14a02395bdd"
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "style",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-flat.style.bgrx",
+      "bytes": 320000,
+      "sha256": "8d0b9ea924decae869318c3a0bfe6a58a389bfbbb3841cf8aaf5853fce311cdd"
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "stage": "return",
+      "path": "/tmp/gpui-cephal-oof-captures/public-1-flat.return.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "mount",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-flat.mount.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "scroll",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-flat.scroll.bgrx",
+      "bytes": 320000,
+      "sha256": "5cd4b4e6802b5d1f9fb91ad6858fbd3dd0b36fd05f5bb62c49f6567c090c750e"
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "text",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-flat.text.bgrx",
+      "bytes": 320000,
+      "sha256": "20bcd2eea2654051f2665fa291d7fa4e4ad4bfa0f942cd80339ad14a02395bdd"
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "style",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-flat.style.bgrx",
+      "bytes": 320000,
+      "sha256": "8d0b9ea924decae869318c3a0bfe6a58a389bfbbb3841cf8aaf5853fce311cdd"
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "stage": "return",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-flat.return.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "mount",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-oof.mount.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "scroll",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-oof.scroll.bgrx",
+      "bytes": 320000,
+      "sha256": "5cd4b4e6802b5d1f9fb91ad6858fbd3dd0b36fd05f5bb62c49f6567c090c750e"
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "text",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-oof.text.bgrx",
+      "bytes": 320000,
+      "sha256": "20bcd2eea2654051f2665fa291d7fa4e4ad4bfa0f942cd80339ad14a02395bdd"
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "style",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-oof.style.bgrx",
+      "bytes": 320000,
+      "sha256": "8d0b9ea924decae869318c3a0bfe6a58a389bfbbb3841cf8aaf5853fce311cdd"
+    },
+    {
+      "rep": 2,
+      "variant": "oof",
+      "stage": "return",
+      "path": "/tmp/gpui-cephal-oof-captures/public-2-oof.return.bgrx",
+      "bytes": 320000,
+      "sha256": "5ed5ecf05b84333654040755d2f296e2263dc6625644e9f171b59d2be4dba926"
+    }
+  ],
+  "all_guards_passed": true,
+  "all_pixels_match_independent_eager_oracle": true,
+  "all_paired_variant_pixels_identical": true,
+  "scope": "Ordinary GPUI uniform_list with1000 source rows/13realized, real text. Scroll to490, edit only row500 text, change its width/background, return to0. Three fresh processes each. Source31 flat production vsd8 complete OOF. Allocation/work counts only; no timing claim."
+}
