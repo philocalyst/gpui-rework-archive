@@ -100,6 +100,7 @@ impl IdentityIndex {
         Self::Indexed(entries.into_boxed_slice())
     }
 
+    #[inline]
     pub(super) fn get(&self, identity: u64) -> Option<usize> {
         match self {
             Self::Contiguous { first, len } => {
@@ -126,6 +127,7 @@ impl IdentityIndex {
     }
 
     /// Only for call sites that have already admitted a live logical target.
+    #[inline]
     pub(super) fn required(&self, identity: u64) -> usize {
         self.get(identity).expect("live logical identity")
     }
