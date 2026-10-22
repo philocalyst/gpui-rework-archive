@@ -24,7 +24,11 @@ struct RunSlot {
 // Source shaping appends one item for every shaped run. A line commits a
 // contiguous item interval and can omit only its edge runs. Bidi permutes that
 // interval without changing stored identities; boxes use a separate domain.
-fn source_runs<B: Brush>(line: &Line<'_, B>, slots: &mut Vec<RunSlot>) -> Option<usize> {
+fn source_runs<'s, B: Brush>(
+    line: &Line<'_, B>,
+    inline: &'s mut [RunSlot; 1],
+    spill: &'s mut Vec<RunSlot>,
+) -> Option<(usize, &'s mut [RunSlot])> {
     use crate::layout::data::LayoutItemKind;
     let items = &line.layout.data.line_items[line.data.item_range.clone()];
     // This is a visual item position, not a shaped/source run identity. Keep
@@ -47,21 +51,25 @@ fn source_runs<B: Brush>(line: &Line<'_, B>, slots: &mut Vec<RunSlot>) -> Option
             count += 1;
         }
     }
-    slots.clear();
     if min == usize::MAX {
-        return Some(0);
+        return Some((0, &mut inline[..0]));
     }
     let span = max.checked_sub(min)?.checked_add(1)?;
     if span != count {
         return None;
     }
-    slots.resize(
-        span,
-        RunSlot {
-            item: u32::MAX,
-            origin: 0.,
-        },
-    );
+    let empty = RunSlot {
+        item: u32::MAX,
+        origin: 0.,
+    };
+    let slots = if span == 1 {
+        inline[0] = empty;
+        &mut inline[..]
+    } else {
+        spill.clear();
+        spill.resize(span, empty);
+        spill.as_mut_slice()
+    };
     for (position, item) in items.iter().enumerate() {
         if item.kind == LayoutItemKind::TextRun {
             if slots[item.index - min].item != u32::MAX {
@@ -70,7 +78,7 @@ fn source_runs<B: Brush>(line: &Line<'_, B>, slots: &mut Vec<RunSlot>) -> Option
             slots[item.index - min].item = u32::try_from(position).ok()?;
         }
     }
-    Some(min)
+    Some((min, slots))
 }
 
 /// Transient lookup over one immutably borrowed, fully line-broken layout.
@@ -99,6 +107,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
     ///
     /// Scratch is one reusable source-run slot table per line and one reusable
     /// RTL visual-offset buffer. Neither survives this immutable layout borrow.
+    /// Single-run lines use a stack slot; multiple runs spill into the table.
     /// Source lengths above `u32::MAX` retain the exact indexed implementation,
     /// because the engine's stored byte offsets can wrap in that domain.
     pub fn try_for_each_pair<E>(
@@ -115,17 +124,21 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         {
             return None;
         }
-        let mut slots = Vec::new();
+        let mut inline = [RunSlot {
+            item: u32::MAX,
+            origin: 0.,
+        }];
+        let mut spill = Vec::new();
         let mut count = 0_usize;
         let mut previous_end = 0;
         let mut rtl_capacity = 0;
         for line in layout.lines() {
-            if source_runs(&line, &mut slots).is_none() {
+            let Some((_, slots)) = source_runs(&line, &mut inline, &mut spill) else {
                 // Preserve exact old admission for duplicate/fragmented run
                 // identities, including empty ranges the old map can accept.
                 return visit_indexed(layout, offsets, width, &mut visit);
-            }
-            for slot in &slots {
+            };
+            for slot in slots {
                 if slot.item == u32::MAX {
                     continue;
                 }
@@ -166,7 +179,8 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
             offsets.into_iter(),
             width,
             &mut visit,
-            &mut slots,
+            &mut inline,
+            &mut spill,
             &mut rtl,
         ))
     }
@@ -367,13 +381,15 @@ fn visit_source_pairs<B: Brush, E>(
     offsets: impl Iterator<Item = usize>,
     width: f32,
     visit: &mut impl FnMut(usize, Option<[BoundingBox; 2]>) -> ControlFlow<E>,
-    slots: &mut Vec<RunSlot>,
+    inline: &mut [RunSlot; 1],
+    spill: &mut Vec<RunSlot>,
     rtl: &mut Vec<f32>,
 ) -> ControlFlow<E> {
     let mut offsets = offsets.peekable();
     let mut last_request = None;
     for line in layout.lines() {
-        let min = source_runs(&line, slots).expect("preflight verified run identities");
+        let (min, slots) =
+            source_runs(&line, inline, spill).expect("preflight verified run identities");
         let mut origin = line.metrics().offset;
         for (position, item) in line.items_nonpositioned().enumerate() {
             match item {
