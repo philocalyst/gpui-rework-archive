@@ -62,8 +62,10 @@ pub use scroll::{
 };
 pub use semantic::SemanticText;
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
-pub use style_port::{IntoProp, PropInput};
+#[doc(hidden)]
+pub use style::FlexRecipe;
 pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Style, rgb};
+pub use style_port::{IntoProp, PropInput};
 
 /// A component describes ordinary borrowed operands. No mutable runtime or
 /// ambient frame is available in this method.
