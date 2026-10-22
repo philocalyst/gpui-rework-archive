@@ -1,0 +1,41 @@
+{
+  "baseline": "1d5bc3061cce3beb3c4857102ed651da501b5cfd",
+  "production_and_canvas_test_source": "62ef2508c2346fcd71d4616a85000da530313e1e",
+  "support_source": "7477100129caa610704ef97ea14ca6ff266f4427",
+  "patches": {
+    "source.patch.gz": {
+      "decoded_sha256": "16efd98a138b1825cb268b16f50ed7c7ef8f1d03238e0ab40dd882ea457cef45",
+      "bytes": 17670,
+      "paths": [
+        "reactivity/crates/canvas/src/text/cursor_pair_tests.rs",
+        "reactivity/crates/canvas/src/text/planner.rs",
+        "reactivity/vendor/parley/src/editing/geometry.rs"
+      ]
+    },
+    "support.patch.gz": {
+      "decoded_sha256": "db4d4c44c854d353a37cd7952b82b07c0078889dd8a5d829cffd948b9d88d80c",
+      "bytes": 116794,
+      "paths": [
+        "reactivity/evidence/monotonic-caret-span/README.md",
+        "reactivity/evidence/monotonic-caret-span/cost.lock",
+        "reactivity/evidence/monotonic-caret-span/cost_tests.rs",
+        "reactivity/evidence/monotonic-caret-span/dependencies.log",
+        "reactivity/evidence/monotonic-caret-span/fixture-manifest.toml",
+        "reactivity/evidence/monotonic-caret-span/fixture.lock",
+        "reactivity/evidence/monotonic-caret-span/initial-census.log",
+        "reactivity/evidence/monotonic-caret-span/initial-overlay-provenance.json",
+        "reactivity/evidence/monotonic-caret-span/lines-before-format.json",
+        "reactivity/evidence/monotonic-caret-span/lines.json",
+        "reactivity/evidence/monotonic-caret-span/owner.rs",
+        "reactivity/evidence/monotonic-caret-span/prepare.py",
+        "reactivity/evidence/monotonic-caret-span/qualified.json",
+        "reactivity/evidence/monotonic-caret-span/qualified.log",
+        "reactivity/evidence/monotonic-caret-span/rejected-manifest.log",
+        "reactivity/evidence/monotonic-caret-span/rejected-workspace-lock.log",
+        "reactivity/evidence/monotonic-caret-span/run_pair.py",
+        "reactivity/evidence/monotonic-caret-span/span_tests.rs",
+        "reactivity/evidence/monotonic-caret-span/stream_tests.rs"
+      ]
+    }
+  }
+}

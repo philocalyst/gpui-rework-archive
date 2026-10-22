@@ -1,0 +1,148 @@
+[
+  {
+    "variant": "base",
+    "mode": "ordinary",
+    "sha256": "bde445ff3bdf30243052470b751be20c68c9846f2319c412eadcc01c329dbd74",
+    "binary_bytes": 15283792,
+    "sections": {
+      ".rodata": 6500208,
+      ".eh_frame": 212024,
+      ".text": 3403527,
+      ".data.rel.ro": 127184,
+      ".stack_sizes": 3757
+    },
+    "frames": {
+      "property_linked_control::main": {
+        "code_bytes": 9579,
+        "stack_bytes": 3608
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed": {
+        "code_bytes": 9351,
+        "stack_bytes": 1128
+      }
+    }
+  },
+  {
+    "variant": "base",
+    "mode": "opt-in",
+    "sha256": "a0d8cbf8193ab4e6564b9051770e590f5d1d859a1bb41fe344f48611e3dccb11",
+    "binary_bytes": 15285256,
+    "sections": {
+      ".rodata": 6500336,
+      ".eh_frame": 212144,
+      ".text": 3403895,
+      ".data.rel.ro": 127288,
+      ".stack_sizes": 3784
+    },
+    "frames": {
+      "property_linked_control::main": {
+        "code_bytes": 9579,
+        "stack_bytes": 3608
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed": {
+        "code_bytes": 9351,
+        "stack_bytes": 1128
+      }
+    }
+  },
+  {
+    "variant": "candidate",
+    "mode": "ordinary",
+    "sha256": "a2b8fb010c543a782938b0e9a87179f7d96c8bac39e2038d0785d4d86a920557",
+    "binary_bytes": 15284952,
+    "sections": {
+      ".rodata": 6499968,
+      ".eh_frame": 212080,
+      ".text": 3404391,
+      ".data.rel.ro": 127232,
+      ".stack_sizes": 3775
+    },
+    "frames": {
+      "property_linked_control::main": {
+        "code_bytes": 10196,
+        "stack_bytes": 3816
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed": {
+        "code_bytes": 9351,
+        "stack_bytes": 1128
+      }
+    }
+  },
+  {
+    "variant": "candidate",
+    "mode": "opt-in",
+    "sha256": "3bc1032c92b433bf67e9d3f395b906a9ea2becc7a1a5061b8150094e3b5d6f89",
+    "binary_bytes": 15286632,
+    "sections": {
+      ".rodata": 6500096,
+      ".eh_frame": 212208,
+      ".text": 3404791,
+      ".data.rel.ro": 127336,
+      ".stack_sizes": 3802
+    },
+    "frames": {
+      "property_linked_control::main": {
+        "code_bytes": 10196,
+        "stack_bytes": 3816
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed": {
+        "code_bytes": 9351,
+        "stack_bytes": 1128
+      }
+    }
+  },
+  {
+    "variant": "outline",
+    "mode": "ordinary",
+    "sha256": "c83a7f52eb4c22d3683f3c74f275ad3838627954e771135433d824316f27b2d3",
+    "binary_bytes": 15285376,
+    "sections": {
+      ".rodata": 6499968,
+      ".eh_frame": 212168,
+      ".text": 3404487,
+      ".data.rel.ro": 127232,
+      ".stack_sizes": 3785
+    },
+    "frames": {
+      "property_linked_control::main": {
+        "code_bytes": 7809,
+        "stack_bytes": 3416
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::activate_property": {
+        "code_bytes": 2472,
+        "stack_bytes": 488
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed": {
+        "code_bytes": 9351,
+        "stack_bytes": 1128
+      }
+    }
+  },
+  {
+    "variant": "outline",
+    "mode": "opt-in",
+    "sha256": "92aeea5e73bcbe7dfdab11d1903116569a9a44593550ba081e69d022e9a456ae",
+    "binary_bytes": 15287048,
+    "sections": {
+      ".rodata": 6500096,
+      ".eh_frame": 212296,
+      ".text": 3404887,
+      ".data.rel.ro": 127336,
+      ".stack_sizes": 3812
+    },
+    "frames": {
+      "property_linked_control::main": {
+        "code_bytes": 7809,
+        "stack_bytes": 3416
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::activate_property": {
+        "code_bytes": 2472,
+        "stack_bytes": 488
+      },
+      "<gpui::runtime::RuntimeMut<property_linked_control::Model, ()>>::after_source_changed": {
+        "code_bytes": 9351,
+        "stack_bytes": 1128
+      }
+    }
+  }
+]

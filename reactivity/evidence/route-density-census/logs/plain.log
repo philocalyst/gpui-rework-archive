@@ -1,0 +1,172 @@
+   Compiling unicode-ident v1.0.27
+   Compiling stable_deref_trait v1.2.1
+   Compiling writeable v0.6.4
+   Compiling proc-macro2 v1.0.107
+   Compiling serde_core v1.0.229
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling once_cell v1.21.4
+   Compiling litemap v0.8.3
+   Compiling smallvec v1.16.3
+   Compiling bitflags v2.13.2
+   Compiling libc v0.2.191
+   Compiling utf8_iter v1.0.4
+   Compiling synstructure v0.14.0
+   Compiling foldhash v0.2.0
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_locale_fallback_data v2.3.0
+   Compiling hashbrown v0.17.1
+   Compiling icu_segmenter_data v2.3.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerovec v0.11.8
+   Compiling tinystr v0.8.4
+   Compiling bytemuck v1.25.2
+   Compiling icu_locale_core v2.3.0
+   Compiling font-types v0.12.7
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling icu_provider v2.3.1
+   Compiling icu_collections v2.3.0
+   Compiling read-fonts v0.41.0
+   Compiling serde_derive v1.0.229
+   Compiling serde v1.0.229
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling memmap2 v0.9.12
+   Compiling parlance v0.1.1
+   Compiling linebender_resource_handle v0.1.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling rustix v1.1.5
+   Compiling skrifa v0.49.0
+   Compiling fontique v0.12.0
+   Compiling icu_normalizer v2.3.0
+   Compiling harfrust v0.12.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling parley_emoji v0.12.0
+   Compiling winnow v1.0.4
+   Compiling parley_engine v0.12.0 (/tmp/gpui-route-census-c717/reactivity/vendor/parley_engine)
+   Compiling skrifa v0.44.0
+   Compiling uuid v1.28.0
+   Compiling cephal v0.1.1 (/tmp/gpui-route-census-c717/reactivity/vendor/cephal)
+   Compiling zeno v0.3.3
+   Compiling yazi v0.2.1
+   Compiling futures-core v0.3.34
+   Compiling pin-project-lite v0.2.17
+   Compiling swash v0.2.10
+   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-route-census-c717/reactivity/crates/core)
+   Compiling parley v0.12.0 (/tmp/gpui-route-census-c717/reactivity/vendor/parley)
+   Compiling zmij v1.0.23
+   Compiling zbus_utils v6.0.0
+   Compiling fearless_simd_macros v0.1.0
+   Compiling socket2 v0.6.5
+   Compiling itoa v1.0.18
+   Compiling fearless_simd v1.1.0
+   Compiling memchr v2.8.3
+   Compiling futures-io v0.3.34
+   Compiling ttf-parser v0.25.1
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-route-census-c717/reactivity/crates/canvas)
+   Compiling zruntime v0.2.0
+   Compiling serde_json v1.0.154
+   Compiling zbus_macros v6.0.0
+   Compiling ordered-stream v0.2.0
+   Compiling accesskit v0.25.1 (/tmp/gpui-route-census-c717/reactivity/vendor/accesskit)
+   Compiling gethostname v1.1.0
+   Compiling zcheapstr v1.1.0
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-route-census-c717/reactivity/crates/state)
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling x11rb-protocol v0.14.0
+   Compiling arcstr v1.2.0
+   Compiling endi v1.1.1
+   Compiling hex v0.4.3
+   Compiling zbus v6.0.0
+   Compiling x11rb v0.14.0
+   Compiling gpui v0.1.0 (/tmp/gpui-route-census-c717/reactivity/crates/gpui)
+warning: fields `component` and `handler` are never read
+   --> crates/gpui/src/element.rs:317:5
+    |
+316 | struct ThinComponentRouteLayout<P, C> {
+    |        ------------------------ fields in this struct
+317 |     component: Component<P, C>,
+    |     ^^^^^^^^^
+318 |     handler: ThinHandlerLayout,
+    |     ^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: multiple fields are never read
+    --> crates/gpui/src/element.rs:1074:5
+     |
+1073 | struct ThinElLayout<'a> {
+     |        ------------ fields in this struct
+1074 |     kind: NodeKind,
+     |     ^^^^
+1075 |     text: Option<Text<'a>>,
+     |     ^^^^
+1076 |     children: Vec<El<'a>>,
+     |     ^^^^^^^^
+1077 |     style: Style,
+     |     ^^^^^
+1078 |     on_click: Option<ThinHandlerLayout>,
+     |     ^^^^^^^^
+1079 |     components: ComponentBoundaries,
+     |     ^^^^^^^^^^
+1080 |     extra: Option<Box<crate::semantic::ElementExtra<'a>>>,
+     |     ^^^^^
+
+warning: fields `parent`, `kind`, `text`, `style`, `on_click`, and `components` are never read
+    --> crates/gpui/src/element.rs:1083:5
+     |
+1082 | struct ThinDraftNodeLayout<'a> {
+     |        ------------------- fields in this struct
+1083 |     parent: Option<u32>,
+     |     ^^^^^^
+1084 |     kind: NodeKind,
+     |     ^^^^
+1085 |     text: Option<Text<'a>>,
+     |     ^^^^
+1086 |     style: Style,
+     |     ^^^^^
+1087 |     on_click: Option<ThinHandlerLayout>,
+     |     ^^^^^^^^
+1088 |     components: ComponentBoundaries,
+     |     ^^^^^^^^^^
+
+warning: fields `identity`, `parent`, `ordinal`, `content`, `component_scope`, and `handler` are never read
+   --> crates/gpui/src/runtime.rs:632:5
+    |
+631 | struct ThinNodeLayout {
+    |        -------------- fields in this struct
+632 |     identity: NonZeroU64,
+    |     ^^^^^^^^
+633 |     parent: Parent,
+    |     ^^^^^^
+634 |     ordinal: u32,
+    |     ^^^^^^^
+635 |     content: Content,
+    |     ^^^^^^^
+636 |     component_scope: u32,
+    |     ^^^^^^^^^^^^^^^
+637 |     handler: Option<ThinHandlerLayout>,
+    |     ^^^^^^^
+
+warning: `gpui` (lib) generated 4 warnings
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-route-census-c717/reactivity/vendor/accesskit_consumer)
+   Compiling triomphe v0.1.17
+   Compiling allocation-counter v0.8.1
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 56.90s
+     Running `/tmp/gpui-route-census-target/debug/examples/route_census_controls plain`
+ROUTE_OVERLAP old_nodes=0 old_slots=0 draft_nodes=129 draft_capacity=256 draft_slots=0 draft_component_checks=0 el_live=0 el_peak=129
+ROUTE_SUMMARY label=old-during-description objects=0 zst=0 base_allocs=0 thin_allocs=0 base_requested=0 thin_requested=0 request_delta=0
+ROUTE_SUMMARY label=draft-before-publication objects=0 zst=0 base_allocs=0 thin_allocs=0 base_requested=0 thin_requested=0 request_delta=0
+ROUTE_OWNERS label=plain_128 nodes=129 node_capacity=129 none=129 some=0 node_size=40 thin_node_size=32 option_handler_size=16 thin_option_handler_size=8 handler_size=16 thin_handler_size=8 el_size=176 thin_el_size=168 draft_size=152 thin_draft_size=144 el_live=0 el_peak=129
+ROUTE_SUMMARY label=plain_128 objects=0 zst=0 base_allocs=0 thin_allocs=0 base_requested=0 thin_requested=0 request_delta=0

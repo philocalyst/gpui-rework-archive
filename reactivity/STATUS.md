@@ -68,7 +68,11 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Latest integrated shipping source `c717df64a9` combines cached-edge caret lowering,
+Current shipping source `06b15c1835` adds an
+[outlined property activation](evidence/property-successor/ADOPTION.md). Its
+32 public merged-source cases, strict all-target checks and formatting pass;
+exact producer `49707a4a4a` retains its native and Apple/MSVC qualification.
+The full combined parent campaign remains at `c717df64a9`, which combines cached-edge caret lowering,
 compact presentation rows, contained property actions, their exact count fix and
 [public selection/state replies](docs/property-state-routes.md). The
 [four-way text controls](benchmarks/caret-pair-controls/cached-edge/README.md)
@@ -102,11 +106,24 @@ Vulkan uses llvmpipe; these are functional checks, not latency/RSS measurements.
 The [selection producer](evidence/property-selection/final/README.md) charges its
 80-byte snapshot and private 40-byte borrowed phase, with no retained header
 change. Its matched optimized ordinary caller gains 208 bytes of frame and
-864 bytes of linked text; an outlined successor remains under review. Canonical
+864 bytes of linked text. The integrated outline then reduces that caller frame
+from 3,816 to 3,416 bytes, with 96 additional linked text bytes and an opt-in call;
+allocation rows are unchanged. Canonical
 value and exact stored contribution can differ on the inspector shell, so a
 compact representation cannot silently conflate them. Current core source is
-[30,467 non-test code lines](evidence/core-lines/README.md), including build scripts;
+[30,468 non-test code lines](evidence/core-lines/README.md), including build scripts;
 this does not establish full feature parity or forecast final size.
+
+The unmerged [monotonic caret control](evidence/monotonic-caret-stream/control16/README.md)
+passes bitwise geometry, admission and unchanged public-transcript gates. It
+saves 655,296 transient requested bytes on the 32 KiB owner, with unchanged
+retention, but loses 10–29% on warm long-text timing medians. Main keeps its
+cached index while separate slot, boundary-cache and iterator controls develop.
+The [route census](docs/route-density-census-luna.md) and
+[thin-handle feasibility experiment](evidence/thin-route-feasibility/README.md)
+likewise remain evidence, not adopted unsafe storage. A new
+[portable Core initialization spike](docs/lazy-indirect-validation-luna.md)
+targets unused indirect-validation pipelines; it has no measured result yet.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),

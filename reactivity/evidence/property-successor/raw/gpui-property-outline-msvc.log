@@ -1,0 +1,20 @@
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-property-successor-sol/reactivity/vendor/wgpu-hal)
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-property-successor-sol/reactivity/vendor/wgpu-core)
+    Checking parley_engine v0.12.0 (/tmp/gpui-property-successor-sol/reactivity/vendor/parley_engine)
+    Checking accesskit v0.25.1 (/tmp/gpui-property-successor-sol/reactivity/vendor/accesskit)
+   Compiling winit v0.30.13 (/tmp/gpui-property-successor-sol/reactivity/vendor/winit)
+    Checking cephal v0.1.1 (/tmp/gpui-property-successor-sol/reactivity/vendor/cephal)
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-property-successor-sol/reactivity/crates/core)
+   Compiling wgpu v30.0.1 (/tmp/gpui-property-successor-sol/reactivity/vendor/wgpu)
+    Checking accesskit_consumer v0.39.1 (/tmp/gpui-property-successor-sol/reactivity/vendor/accesskit_consumer)
+    Checking parley v0.12.0 (/tmp/gpui-property-successor-sol/reactivity/vendor/parley)
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-property-successor-sol/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-property-successor-sol/reactivity/crates/gpu)
+    Checking accesskit_windows v0.35.1
+    Checking softbuffer v0.4.8 (/tmp/gpui-property-successor-sol/reactivity/vendor/softbuffer)
+    Checking accesskit_winit v0.34.1
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-property-successor-sol/reactivity/crates/state)
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-property-successor-sol/reactivity/crates/host)
+    Checking gpui v0.1.0 (/tmp/gpui-property-successor-sol/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 46.13s

@@ -1,9 +1,9 @@
 # Shipping core code ledger
 
-Latest measured source `c717df64a9b492b445fa97647deb880fb21b9ef6`:
-**30,467** non-test code lines, including 18 build-script lines. Original GPUI
+Latest measured source `06b15c1835291b40b6bbc426b8a5eee72cc2a35a`:
+**30,468** non-test code lines, including 18 build-script lines. Original GPUI
 `41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,922**, including 28 build-script
-lines. [The exact source snapshot](c717df64a9.json) records every counted file.
+lines. [The exact source snapshot](06b15c1835.json) records every counted file.
 Comments, tests, blanks, examples, vendors and support tools are excluded; host
 shader proof/generator source inside the shipping library remains charged.
 
@@ -14,7 +14,8 @@ Cached-edge text adds six, basis factoring adds 209 and contained property
 actions add 168 in the integrated formatting. The property producer separately
 measures 169 against its earlier base; export wrapping accounts for the one-line
 difference. The exact property/description identity union adds 30 and public
-mounted selection with canonical state replies adds 47. These are measured
+mounted selection with canonical state replies adds 47. Outlining its opt-in
+activation adds one attribute line, giving the current 30,468. These are measured
 source bills; the counter correction passes its 11 public regressions and the
 [combined desktop/native campaign](../property-selection-main/README.md) qualifies
 the later merged source separately.

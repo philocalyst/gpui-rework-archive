@@ -58,6 +58,15 @@ authored/vendor/binary bill remain qualified at the frozen producer source. Main
 stages require separate queried/enabled state and pointer-lifetime proof; the
 first static recipe does not depend on that extension.
 
+The next portable graphics slice targets entire unused initialization stacks.
+The [Core lifecycle audit](docs/lazy-indirect-validation-luna.md) finds two
+indirect-validation shader/pipeline stacks built during device creation even
+for direct-only applications. An isolated implementation will defer them to the
+first INDIRECT buffer, preserving enabled policy on earlier pipeline layouts.
+Transactional HAL cleanup, sticky initialization errors and imported-buffer
+ownership are prerequisites. This is a work-elimination hypothesis, with no
+startup, memory or backend-runtime result yet.
+
 The [acknowledged geometry baseline](benchmarks/acknowledged-text-geometry/README.md)
 now preserves exact old P/C maps for ordinary queries and native wrapped/bidi
 runs, including late activation after failed newer shaping. Continue with
@@ -100,9 +109,14 @@ experiment targets the per-byte owner map and entry array using
 [ordered bulk emission](docs/monotonic-caret-stream-luna.md). The later
 [preflight audit](docs/monotonic-caret-preflight-luna.md) replaces comparator
 sorting with a bounded per-line run-identity scatter and preserves range/overlap
-validation before callbacks. An isolated producer span census and streaming
-implementation now exercise that formulation; integration still needs the full
-admission/oracle, allocation, assembly and timing controls. Preserve the empty-edge
+validation before callbacks. The [frozen 16-byte control](evidence/monotonic-caret-stream/control16/README.md)
+passes admission, bitwise geometry, owner and public-transcript controls, but
+loses the paired timing comparison: long-text warm medians regress 10–29%.
+Its 32 KiB owner saves 655,296 requested transient bytes with unchanged retention;
+that does not justify adopting slower code. Later controls separately reduce the
+run slot to eight bytes, inline the single-run case, preserve boundary-neighbour
+prefixes and remove iterator staging copies. The [assembly audit](docs/monotonic-iterator-copy-luna.md)
+identifies those copies; it does not establish a later win. Preserve the empty-edge
 fixture coverage limits and exact RTL f32
 recurrence; do not reverse-subtract advances or assume wrapped u32 source
 offsets remain monotonic above 4 GiB. Canvas already admits at most 32 KiB.
@@ -121,12 +135,17 @@ including overlap, retirement and scope-rejected replacement; main's public
 current-value refresh are now [integrated](docs/property-state-routes.md) through
 the existing route exchange, without adopting a Win or adding initializer storage.
 The [combined source campaign](evidence/property-selection-main/README.md) passes
-desktop/native, actual public Window/Registry and Hummingbird gates. Preserve the
-matched ordinary caller stack/code regression while evaluating an outlined
-activation. Do not derive stored contribution from resolved value: the inspector
+desktop/native, actual public Window/Registry and Hummingbird gates. The
+[outlined successor](evidence/property-successor/ADOPTION.md) removes the measured
+ordinary caller-frame regression; preserve its extra call and 96 linked text
+bytes alongside the unchanged allocations. Do not derive stored contribution from resolved value: the inspector
 shell supplies a public counterexample. The [thin-handler audit](docs/thin-route-handle-luna.md)
-targets every optional route slot, but capture headers, lifecycle safety and
-dispatch cost require a measured owner census before a shipping prototype.
+targets every optional route slot. The [actual owner census](docs/route-density-census-luna.md)
+finds both ZST-heavy savings and capture-header costs: the Workspace fixture's
+modeled route payload grows 40 bytes. The [standalone feasibility controls](evidence/thin-route-feasibility/README.md)
+preserve an initial unsound lifetime-erasure candidate and its corrected version.
+They are neither a shipping implementation nor a soundness proof; allocator-class,
+dispatch and full lifecycle costs remain before adoption.
 Designer color still needs shared
 batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut
