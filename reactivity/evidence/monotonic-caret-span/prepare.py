@@ -75,8 +75,14 @@ for source, name in [
 (args.output / "provenance.json").write_text(json.dumps({
     "source": pin,
     "copied_source_sha256": hashes,
-    "test_module": "src/tests/mod.rs replaced; src/tests/span_tests.rs added",
+    "test_overlay_sha256": {
+        str(path.relative_to(args.output)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (args.output / "src/tests").glob("*.rs")
+        if path.name in {"mod.rs", "span_tests.rs", "stream_tests.rs", "cost_tests.rs"}
+    },
     "manifest": "unused dev-dependencies and their peniko feature references removed; existing vendored Engine selected",
+    "manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+    "prepare_sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
     "production_source_mutated": False,
     "test_sha256": hashlib.sha256((args.output / "src/tests/span_tests.rs").read_bytes()).hexdigest(),
 }, indent=2) + "\n")

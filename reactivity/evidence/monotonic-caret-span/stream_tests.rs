@@ -41,6 +41,11 @@ fn admitted_like_index(layout: &Layout<()>) {
     assert_eq!(received, requested);
 }
 
+#[test]
+fn producer_bidi_split_empty_edge_and_inline_box_pairs_match_index() {
+    super::span_tests::census_layouts(|layout, _| admitted_like_index(layout));
+}
+
 fn rejected_before_geometry_callback(layout: &Layout<()>) {
     assert!(CursorGeometry::new(layout).is_none());
     let mut callbacks = 0;

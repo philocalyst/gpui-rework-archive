@@ -121,6 +121,10 @@ fn check(layout: &Layout<()>, source: &str, census: &mut Census) {
 
 #[test]
 fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
+    census_layouts(|_, _| {});
+}
+
+pub(super) fn census_layouts(mut validate: impl FnMut(&Layout<()>, &str)) {
     let mut fonts = fonts();
     let mut context = LayoutContext::<()>::new();
     let families = ["primary", "Arabic", "Hebrew"].map(|s| FontFamilyName::Named(s.into()));
@@ -173,6 +177,7 @@ fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
                     let mut layout = builder.build(source);
                     layout.break_all_lines(width);
                     check(&layout, source, &mut census);
+                    validate(&layout, source);
                 }
             }
         }
