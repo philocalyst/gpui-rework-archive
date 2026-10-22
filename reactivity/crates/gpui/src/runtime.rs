@@ -1444,16 +1444,22 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn resolve(&self, target: Target) -> Result<u64, Error> {
-        self.resolve_index(target)
-            .map(|index| self.nodes[index].identity())
+        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
+        self.resolve_identity(identity)?;
+        Ok(identity)
     }
     /// Return the lookup already required for target admission. The index stays
     /// inside the current owner borrow; it cannot outlive a description rebuild.
     fn resolve_index(&self, target: Target) -> Result<usize, Error> {
+        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
+        self.resolve_identity(identity)
+    }
+    // Namespace has been checked by the two Target wrappers. Identity-only
+    // callers keep that known value instead of loading it again from Node.
+    fn resolve_identity(&self, identity: u64) -> Result<usize, Error> {
         if !self.logical_valid {
             return Err(Error::StaleTarget);
         }
-        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
         let index = self.by_identity.get(identity).ok_or(Error::StaleTarget)?;
         if self.has_lists()
             && self.in_list(index)

@@ -85,16 +85,22 @@ impl PaintCommit<'_, '_> {
         self.changed
     }
     pub fn commit(self) -> DamageRegion {
+        let mut revoke = false;
         for edit in self.edits {
             let address = self.canvas.commands.order[edit.index.0 as usize];
-            if address & INLINE_DRAW != 0 {
-                self.canvas.commands.inline[(address & !INLINE_DRAW) as usize]
+            let color = if address & INLINE_DRAW != 0 {
+                &mut self.canvas.commands.inline[(address & !INLINE_DRAW) as usize]
                     .common
-                    .color = edit.color;
+                    .color
             } else {
                 let common = self.canvas.commands.placements[address as usize].common;
-                self.canvas.commands.commons[common as usize].color = edit.color;
-            }
+                &mut self.canvas.commands.commons[common as usize].color
+            };
+            revoke |= can_discard_backdrop(*color) != can_discard_backdrop(edit.color);
+            *color = edit.color;
+        }
+        if revoke && let Some(raster) = &mut self.canvas.raster {
+            raster.revoke_cuts();
         }
         self.canvas.dirty |= self.changed != 0;
         self.damage
@@ -145,7 +151,8 @@ impl Canvas {
     /// material, clear/configuration and command order remain unchanged.
     ///
     /// The diagnostic image becomes dirty on a changed value. Existing CPU
-    /// rasterization can reuse geometry bins and exact-alpha opaque cuts.
+    /// rasterization reuses geometry bins; exceptional working colors revoke
+    /// opaque cuts lazily, without scanning tiles during this commit.
     /// External buffer age remains the host's
     /// responsibility.
     pub fn prepare_paint<'canvas, 'edits>(

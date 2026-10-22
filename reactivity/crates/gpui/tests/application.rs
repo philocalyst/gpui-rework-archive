@@ -1,4 +1,4 @@
-use gpui::{Application, Error, WindowOptions, prelude::*};
+use gpui::{Application, ColorConfig, Error, OutputProfile, WindowOptions, prelude::*};
 use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
@@ -72,4 +72,61 @@ fn callback_panics_quarantine_the_owner_and_explicit_close_releases_it_once() {
     win.close();
     assert_eq!(dropped.load(Ordering::Relaxed), 1);
     assert_eq!(win.settle(), Err(Error::Closed));
+}
+
+#[test]
+fn reactive_hdr_colors_use_the_ordinary_application_and_property_interface() {
+    struct Surface(Signal<Color>);
+    const COLOR: Source<Surface, Color> =
+        Source::new(FieldId::new(1), "color", |m| &m.0, |m| &mut m.0);
+    impl View for Surface {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(COLOR)
+        }
+        fn view(&self) -> El<'_> {
+            column((
+                div()
+                    .size(16)
+                    .bg(Color::linear_srgb(-1.0, 0.0, 0.0, 1.0).unwrap()),
+                div()
+                    .name("surface")
+                    .size(16)
+                    .bg(&self.0)
+                    .transform(Affine::translation(0.0, -16.0)),
+            ))
+            .w(16)
+            .h(32)
+        }
+    }
+    let app = Application::demo().options(WindowOptions {
+        size: [16, 16],
+        colors: ColorConfig::linear_hdr(OutputProfile::Srgb, 203.0).unwrap(),
+    });
+    let color = |red| Color::linear_srgb(red, 0.0, 0.0, 1.0).unwrap();
+    let mut window = app.open(Surface(Signal::new(color(1.0)))).unwrap();
+    let surface = window.query().name("surface").one().unwrap();
+    window.update(|_| {}).unwrap();
+    window.reset_counters().unwrap();
+    for red in [-0.0, -f32::from_bits(1), 1.0, -0.0] {
+        window.set(COLOR, color(red)).unwrap();
+        assert_eq!(
+            window
+                .property(surface, gpui::property::BACKGROUND)
+                .unwrap(),
+            color(red)
+        );
+        let actual = window.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        let mut fresh = app.open(Surface(Signal::new(color(red)))).unwrap();
+        assert_eq!(
+            actual,
+            fresh.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap()
+        );
+        let expected_red = if red == 1.0 { 0x3c00 } else { 0x8000 };
+        assert_eq!(
+            u16::from_le_bytes(actual[..2].try_into().unwrap()),
+            expected_red
+        );
+    }
+    assert_eq!(window.counters().paint_passes, 0);
+    assert_eq!(window.counters().owner_reruns, 0);
 }

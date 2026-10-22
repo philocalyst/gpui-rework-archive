@@ -45,7 +45,7 @@ pub struct RenderStats {
     /// Number of disjoint 16-row output bands rendered in this frame.
     pub output_bands: usize,
     pub parallel: bool,
-    /// This raster reused geometry bins; same-alpha opaque cuts remain valid.
+    /// This raster reused geometry bins; color changes can revoke opaque cuts.
     pub bins_reused: bool,
 }
 
@@ -1844,7 +1844,7 @@ fn render_band<W: PixelWriter>(
                         let command = frame
                             .commands
                             .get(frame.commands.order[bins::ordinal(word)]);
-                        command.color[3] == 1.0
+                        can_discard_backdrop(command.color)
                             && matches!(command.source, BorrowedSource::Rect)
                             && full_tile(&command, left, top, right, bottom)
                     })
@@ -2432,6 +2432,16 @@ fn blend(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
     for i in 0..4 {
         dst[i] = src[i] * coverage + dst[i] * (1.0 - alpha);
     }
+}
+// Opaque source-over still adds backdrop * +0. Negative zero can retain the
+// backdrop's sign; negative subnormals may flush to it on some targets. Color
+// admission bounds all other intermediates, so ordinary opaque values discard
+// the backdrop without changing the scalar result.
+fn can_discard_backdrop(color: [f32; 4]) -> bool {
+    color[3] == 1.0
+        && !color[..3]
+            .iter()
+            .any(|value| value.is_sign_negative() && !value.is_normal())
 }
 fn sample_mean(samples: &[[f32; 4]; 16]) -> [f32; 4] {
     // Sixteen identical f32 values sum exactly in f64 (24+4 significant

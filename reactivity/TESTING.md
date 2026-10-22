@@ -269,6 +269,13 @@ The actual Vulkan suite includes a no-sample HDR draw that preserves numeric zer
 while allowing the GPU to erase its sign. CPU uniform and expanded paths preserve
 identical clear bits. See [the storage proof](crates/canvas/SAMPLE_STORAGE.md).
 
+The ordinary `Application::demo` HDR regression updates a registered color Signal,
+reads the typed background property and compares complete output with a fresh
+window. Its opaque negative-zero and negative-subnormal transitions exercise
+cached cut retirement without a paint walk or view rerun. The failing old-library
+control and actual integration gates are retained in
+[opaque-cut evidence](evidence/opaque-cuts/README.md).
+
 Compile passing examples and intended-diagnostic failures: borrowed operand
 escape, owner mutation while a description is used, internal cursor escape and
 both nested frame directions, wrong field/target/value, reader mutation,

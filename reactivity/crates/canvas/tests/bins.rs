@@ -22,6 +22,76 @@ fn render(canvas: &mut Canvas) -> Vec<u32> {
     words
 }
 
+fn hdr_opaque_scene(proofs: bool, red: f32) -> Canvas {
+    let rect = Rect::new(0.0, 0.0, 16.0, 16.0);
+    let mut canvas = Canvas::recording(
+        16,
+        16,
+        ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
+    )
+    .unwrap();
+    canvas.set_tile_proofs(proofs);
+    canvas.clear(Color::linear_srgb(0.0, 0.0, 0.0, 1.0).unwrap());
+    for red in [-1.0, red] {
+        canvas
+            .fill_rect(
+                rect,
+                Affine::IDENTITY,
+                rect,
+                Color::linear_srgb(red, 0.0, 0.0, 1.0).unwrap(),
+            )
+            .unwrap();
+    }
+    canvas
+}
+
+fn hdr_red(canvas: &mut Canvas) -> u16 {
+    u16::from_le_bytes(canvas.pixels()[..2].try_into().unwrap())
+}
+
+#[test]
+fn fresh_negative_zero_opaque_cut_matches_scalar_hdr() {
+    let mut scalar = hdr_opaque_scene(false, -0.0);
+    let mut optimized = hdr_opaque_scene(true, -0.0);
+    assert_eq!(hdr_red(&mut scalar), 0x8000);
+    assert_eq!(hdr_red(&mut optimized), hdr_red(&mut scalar));
+    assert_eq!(optimized.pixels(), scalar.pixels());
+}
+
+#[test]
+fn exceptional_paint_retires_cached_cuts_only_after_commit_and_reuses_geometry() {
+    let mut canvas = hdr_opaque_scene(true, 1.0);
+    canvas.pixels();
+    assert_eq!(canvas.stats().skipped_command_tiles, 1);
+    let bins = canvas.stats().bin_bytes;
+    let index = canvas.paint_index(1).unwrap();
+    for value in [-0.0, -f32::from_bits(1), 1.0, -0.0] {
+        let edits = [PaintEdit::new(
+            index,
+            Color::linear_srgb(value, 0.0, 0.0, 1.0).unwrap(),
+        )];
+        let old = canvas.pixels().to_vec();
+        drop(canvas.prepare_paint(&edits).unwrap());
+        assert_eq!(canvas.pixels(), old);
+        let bad = [edits[0], edits[0]];
+        assert!(canvas.prepare_paint(&bad).is_err());
+        assert_eq!(canvas.pixels(), old);
+        let allocation = allocation_counter::measure(|| {
+            canvas.prepare_paint(&edits).unwrap().commit();
+        });
+        assert_eq!((allocation.count_total, allocation.bytes_total), (0, 0));
+        let mut scalar = hdr_opaque_scene(false, value);
+        assert_eq!(hdr_red(&mut canvas), hdr_red(&mut scalar));
+        assert_eq!(canvas.pixels(), scalar.pixels());
+        assert!(canvas.stats().bins_reused);
+        assert_eq!(canvas.stats().bin_bytes, bins);
+        assert_eq!(
+            canvas.stats().skipped_command_tiles,
+            usize::from(value == 1.0)
+        );
+    }
+}
+
 struct Fixture {
     text: TextSystem,
     layout: TextLayout,
