@@ -270,8 +270,8 @@ async fn run_client(
         assert!(named(&bus, vec![after.clone()], CONTENT).await.is_some());
         eprintln!("GPUI_NATIVE_LIFECYCLE full tree restored; stale old-owner properties ignored");
     }
-    notify(Evidence::Reactivated);
     if lifecycle {
+        notify(Evidence::Reactivated);
         gate.recv().await?;
         wait_for(runtime, deadline, async || {
             let mut found = false;
@@ -288,13 +288,19 @@ async fn run_client(
         })
         .await;
         eprintln!("GPUI_NATIVE_LIFECYCLE NativeAdapter destroy removed provider window");
-        notify(Evidence::Destroyed);
     }
     bus.close().await?;
     if let Some(fixture) = fixture {
         fixture.close().await?;
     }
     session.close().await?;
+    // Terminal evidence also acknowledges teardown. An asynchronous close error
+    // must reach the UI while it is still reading the evidence channel.
+    notify(if lifecycle {
+        Evidence::Destroyed
+    } else {
+        Evidence::Reactivated
+    });
     Ok(())
 }
 
