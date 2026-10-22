@@ -4,7 +4,6 @@ use super::*;
 use gpui_reactivity_host::native::{Callback, Driver, Host, winit};
 use std::{
     collections::VecDeque,
-    sync::mpsc,
     thread,
     time::{Duration, Instant},
 };
@@ -12,10 +11,8 @@ use winit::{
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
     platform::x11::EventLoopBuilderExtX11,
 };
-use zbus::{
-    blocking::{Connection, Proxy},
-    zvariant::OwnedObjectPath,
-};
+use zbus::{Connection, OwnedObjectPath, Proxy, connection::Builder};
+use zruntime::{SharedRuntime, mpmc};
 
 mod lifecycle;
 
@@ -24,41 +21,50 @@ const CONTENT: &str = "Read Ω א ع through AT-SPI";
 const HEADING: &str = "Task collection";
 type Address = (String, OwnedObjectPath);
 
-fn proxy<'a>(
+async fn proxy<'a>(
     bus: &Connection,
     address: &'a Address,
     interface: &'a str,
 ) -> zbus::Result<Proxy<'a>> {
-    Proxy::new(bus, address.0.as_str(), address.1.as_str(), interface)
+    Proxy::new(bus, address.0.as_str(), address.1.as_str(), interface).await
 }
-fn descendants(bus: &Connection, root: Address) -> zbus::Result<Vec<Address>> {
+async fn descendants(bus: &Connection, root: Address) -> zbus::Result<Vec<Address>> {
     let mut queue = VecDeque::from([root]);
     let mut result = Vec::new();
     while let Some(address) = queue.pop_front() {
         assert!(result.len() < 5000, "unexpected unbounded AT tree");
-        let children: Vec<Address> =
-            proxy(bus, &address, "org.a11y.atspi.Accessible")?.call("GetChildren", &())?;
+        let children: Vec<Address> = proxy(bus, &address, "org.a11y.atspi.Accessible")
+            .await?
+            .call("GetChildren", &())
+            .await?;
         queue.extend(children);
         result.push(address);
     }
     Ok(result)
 }
-fn wait_for<T>(deadline: Instant, mut predicate: impl FnMut() -> Option<T>) -> T {
+async fn wait_for<T>(
+    runtime: &SharedRuntime,
+    deadline: Instant,
+    mut predicate: impl AsyncFnMut() -> Option<T>,
+) -> T {
     loop {
-        if let Some(value) = predicate() {
+        if let Some(value) = predicate().await {
             return value;
         }
         assert!(Instant::now() < deadline, "AT-SPI client deadline");
-        // Test-client discovery only; production has no polling/redraw timer.
-        thread::sleep(Duration::from_millis(10));
+        // Discovery yields on the same runtime that serves the fixture's bus
+        // objects. Production has no polling/redraw timer.
+        runtime.sleep(Duration::from_millis(10)).await;
     }
 }
-fn named(bus: &Connection, roots: Vec<Address>, name: &str) -> Option<Address> {
+async fn named(bus: &Connection, roots: Vec<Address>, name: &str) -> Option<Address> {
     for root in roots {
-        for address in descendants(bus, root).ok()? {
+        for address in descendants(bus, root).await.ok()? {
             let current: String = proxy(bus, &address, "org.a11y.atspi.Accessible")
+                .await
                 .ok()?
                 .get_property("Name")
+                .await
                 .ok()?;
             if current == name {
                 return Some(address);
@@ -78,157 +84,227 @@ enum Evidence {
 }
 fn client(
     deadline: Instant,
-    evidence: mpsc::SyncSender<Result<Evidence, String>>,
-    gate: mpsc::Receiver<()>,
+    evidence: mpmc::Sender<Result<Evidence, String>>,
+    gate: mpmc::Receiver<()>,
     wake: Wake,
     lifecycle: bool,
 ) {
-    let run = || -> Result<(), Box<dyn std::error::Error>> {
-        let session = zbus::blocking::connection::Builder::session()?
-            .method_timeout(Duration::from_secs(3))
-            .build()?;
-        let mut fixture = if lifecycle {
-            Some(lifecycle::Fixture::start(&session)?)
-        } else {
-            None
-        };
-        let status = Proxy::new(&session, "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Status")?;
-        status.set_property("IsEnabled", true)?;
-        assert!(status.get_property::<bool>("IsEnabled")?);
-        let address: String =
-            Proxy::new(&session, "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Bus")?
-                .call("GetAddress", &())?;
-        let bus = zbus::blocking::connection::Builder::address(address.as_str())?
-            .method_timeout(Duration::from_secs(3))
-            .build()?;
-        let desktop = (
-            "org.a11y.atspi.Registry".to_owned(),
-            "/org/a11y/atspi/accessible/root".try_into()?,
-        );
-        let roots = || -> Option<Vec<Address>> {
-            proxy(&bus, &desktop, "org.a11y.atspi.Accessible")
-                .ok()?
-                .call("GetChildren", &())
-                .ok()
-        };
-        eprintln!("AT-SPI client enabled; waiting for native window");
-        let window = wait_for(deadline, || named(&bus, roots()?, TITLE));
-        eprintln!("AT-SPI found window {window:?}");
-        let all = descendants(&bus, window.clone())?;
-        let input = all
-            .into_iter()
-            .find(|node| {
-                let interfaces: zbus::Result<Vec<String>> =
-                    proxy(&bus, node, "org.a11y.atspi.Accessible")
-                        .and_then(|p| p.call("GetInterfaces", &()));
-                interfaces.is_ok_and(|names| {
-                    names
-                        .iter()
-                        .any(|name| name == "org.a11y.atspi.EditableText")
-                })
-            })
-            .ok_or("no native EditableText interface")?;
-        let notify = |item| {
-            evidence.send(Ok(item)).unwrap();
-            wake.signal();
-        };
-        notify(Evidence::Activated);
-        gate.recv_timeout(deadline.saturating_duration_since(Instant::now()))?;
-        let heading = wait_for(deadline, || named(&bus, vec![window.clone()], HEADING));
-        let children: Vec<Address> =
-            proxy(&bus, &heading, "org.a11y.atspi.Accessible")?.call("GetChildren", &())?;
-        assert!(
-            named(&bus, children, "Todos").is_some(),
-            "native name override must preserve actual text in a separate child"
-        );
-        notify(Evidence::Renamed);
-        gate.recv_timeout(deadline.saturating_duration_since(Instant::now()))?;
-        assert!(
-            proxy(&bus, &input, "org.a11y.atspi.Component")?
-                .call::<_, _, bool>("GrabFocus", &())?
-        );
-        assert!(
-            proxy(&bus, &input, "org.a11y.atspi.EditableText")?
-                .call::<_, _, bool>("SetTextContents", &(CONTENT,))?
-        );
-        wait_for(deadline, || {
-            let value: String = proxy(&bus, &input, "org.a11y.atspi.Text")
-                .ok()?
-                .call("GetText", &(0i32, -1i32))
-                .ok()?;
-            (value == CONTENT).then_some(())
-        });
-        notify(Evidence::Edited);
-        gate.recv_timeout(deadline.saturating_duration_since(Instant::now()))?;
-        let add = named(&bus, vec![window.clone()], "Add").ok_or("missing native Add button")?;
-        assert!(
-            proxy(&bus, &add, "org.a11y.atspi.Action")?.call::<_, _, bool>("DoAction", &(0i32,))?
-        );
-        wait_for(deadline, || named(&bus, vec![window.clone()], CONTENT));
-        notify(Evidence::Invoked);
-        gate.recv_timeout(deadline.saturating_duration_since(Instant::now()))?;
-        status.set_property("IsEnabled", false)?;
-        wait_for(deadline, || {
-            named(&bus, roots()?, TITLE).is_none().then_some(())
-        });
-        status.set_property("IsEnabled", true)?;
-        wait_for(deadline, || named(&bus, roots()?, CONTENT));
-        if let Some(fixture) = fixture.as_mut() {
-            let before = wait_for(deadline, || named(&bus, roots()?, TITLE));
-            fixture.replace()?;
-            let after = wait_for(deadline, || {
-                let window = named(&bus, roots()?, TITLE)?;
-                (window.0 != before.0).then_some(window)
-            });
-            wait_for(deadline, || named(&bus, vec![after.clone()], CONTENT));
-            fixture.stale_old_properties(&session)?;
-            // Keep querying the new actual provider while old-owner signals are
-            // processed; a transient stale-owner retirement loses this address.
-            for _ in 0..20 {
-                assert_eq!(
-                    proxy(&bus, &after, "org.a11y.atspi.Accessible")?
-                        .get_property::<String>("Name")?,
-                    TITLE
-                );
-                thread::sleep(Duration::from_millis(5));
-            }
-            assert!(named(&bus, vec![after.clone()], CONTENT).is_some());
-            eprintln!(
-                "GPUI_NATIVE_LIFECYCLE full tree restored; stale old-owner properties ignored"
-            );
-        }
-        notify(Evidence::Reactivated);
-        if lifecycle {
-            gate.recv_timeout(deadline.saturating_duration_since(Instant::now()))?;
-            wait_for(deadline, || {
-                let mut found = false;
-                for root in roots()? {
-                    let children: Vec<Address> = proxy(&bus, &root, "org.a11y.atspi.Accessible")
-                        .ok()?
-                        .call("GetChildren", &())
-                        .ok()?;
-                    found |= !children.is_empty();
-                }
-                (!found).then_some(())
-            });
-            eprintln!("GPUI_NATIVE_LIFECYCLE NativeAdapter destroy removed provider window");
-            notify(Evidence::Destroyed);
-        }
-        Ok(())
-    };
-    if let Err(error) = run() {
-        let _ = evidence.send(Err(error.to_string()));
+    // One client thread drives every connection, fixture task, timer and UI
+    // gate for the entire scenario. A synchronous wait here would stop zbus6.
+    let run = zbus::block_on(async {
+        let runtime = SharedRuntime::current()?;
+        runtime
+            .timeout_at(
+                deadline,
+                run_client(&runtime, deadline, &evidence, &gate, &wake, lifecycle),
+            )
+            .await?
+    });
+    if let Err(error) = run {
+        let _ = evidence.try_send(Err(error.to_string()));
         wake.signal();
     }
+}
+
+async fn run_client(
+    runtime: &SharedRuntime,
+    deadline: Instant,
+    evidence: &mpmc::Sender<Result<Evidence, String>>,
+    gate: &mpmc::Receiver<()>,
+    wake: &Wake,
+    lifecycle: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let session = Builder::session()
+        .method_timeout(Duration::from_secs(3))
+        .build()
+        .await?;
+    let mut fixture = if lifecycle {
+        Some(lifecycle::Fixture::start(&session).await?)
+    } else {
+        None
+    };
+    let status = Proxy::new(&session, "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Status").await?;
+    status.set_property("IsEnabled", true).await?;
+    assert!(status.get_property::<bool>("IsEnabled").await?);
+    let address: String = Proxy::new(&session, "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Bus")
+        .await?
+        .call("GetAddress", &())
+        .await?;
+    let bus = Builder::address(address.as_str())
+        .method_timeout(Duration::from_secs(3))
+        .build()
+        .await?;
+    let desktop = (
+        "org.a11y.atspi.Registry".to_owned(),
+        "/org/a11y/atspi/accessible/root".try_into()?,
+    );
+    let roots = async || -> Option<Vec<Address>> {
+        proxy(&bus, &desktop, "org.a11y.atspi.Accessible")
+            .await
+            .ok()?
+            .call("GetChildren", &())
+            .await
+            .ok()
+    };
+    eprintln!("AT-SPI client enabled; waiting for native window");
+    let window = wait_for(runtime, deadline, async || {
+        named(&bus, roots().await?, TITLE).await
+    })
+    .await;
+    eprintln!("AT-SPI found window {window:?}");
+    let mut input = None;
+    for node in descendants(&bus, window.clone()).await? {
+        let interfaces: Vec<String> = proxy(&bus, &node, "org.a11y.atspi.Accessible")
+            .await?
+            .call("GetInterfaces", &())
+            .await?;
+        if interfaces
+            .iter()
+            .any(|name| name == "org.a11y.atspi.EditableText")
+        {
+            input = Some(node);
+            break;
+        }
+    }
+    let input = input.ok_or("no native EditableText interface")?;
+    let notify = |item| {
+        evidence.try_send(Ok(item)).unwrap();
+        wake.signal();
+    };
+    notify(Evidence::Activated);
+    gate.recv().await?;
+    let heading = wait_for(runtime, deadline, async || {
+        named(&bus, vec![window.clone()], HEADING).await
+    })
+    .await;
+    let children: Vec<Address> = proxy(&bus, &heading, "org.a11y.atspi.Accessible")
+        .await?
+        .call("GetChildren", &())
+        .await?;
+    assert!(
+        named(&bus, children, "Todos").await.is_some(),
+        "native name override must preserve actual text in a separate child"
+    );
+    notify(Evidence::Renamed);
+    gate.recv().await?;
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.Component")
+            .await?
+            .call::<_, _, bool>("GrabFocus", &())
+            .await?
+    );
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.EditableText")
+            .await?
+            .call::<_, _, bool>("SetTextContents", &(CONTENT,))
+            .await?
+    );
+    wait_for(runtime, deadline, async || {
+        let value: String = proxy(&bus, &input, "org.a11y.atspi.Text")
+            .await
+            .ok()?
+            .call("GetText", &(0i32, -1i32))
+            .await
+            .ok()?;
+        (value == CONTENT).then_some(())
+    })
+    .await;
+    notify(Evidence::Edited);
+    gate.recv().await?;
+    let add = named(&bus, vec![window.clone()], "Add")
+        .await
+        .ok_or("missing native Add button")?;
+    assert!(
+        proxy(&bus, &add, "org.a11y.atspi.Action")
+            .await?
+            .call::<_, _, bool>("DoAction", &(0i32,))
+            .await?
+    );
+    wait_for(runtime, deadline, async || {
+        named(&bus, vec![window.clone()], CONTENT).await
+    })
+    .await;
+    notify(Evidence::Invoked);
+    gate.recv().await?;
+    status.set_property("IsEnabled", false).await?;
+    wait_for(runtime, deadline, async || {
+        named(&bus, roots().await?, TITLE)
+            .await
+            .is_none()
+            .then_some(())
+    })
+    .await;
+    status.set_property("IsEnabled", true).await?;
+    wait_for(runtime, deadline, async || {
+        named(&bus, roots().await?, CONTENT).await
+    })
+    .await;
+    if let Some(fixture) = fixture.as_mut() {
+        let before = wait_for(runtime, deadline, async || {
+            named(&bus, roots().await?, TITLE).await
+        })
+        .await;
+        fixture.replace().await?;
+        let after = wait_for(runtime, deadline, async || {
+            let window = named(&bus, roots().await?, TITLE).await?;
+            (window.0 != before.0).then_some(window)
+        })
+        .await;
+        wait_for(runtime, deadline, async || {
+            named(&bus, vec![after.clone()], CONTENT).await
+        })
+        .await;
+        fixture.stale_old_properties(&session).await?;
+        // Keep querying the new actual provider while old-owner signals
+        // are processed; stale-owner retirement loses this address.
+        for _ in 0..20 {
+            assert_eq!(
+                proxy(&bus, &after, "org.a11y.atspi.Accessible")
+                    .await?
+                    .get_property::<String>("Name")
+                    .await?,
+                TITLE
+            );
+            runtime.sleep(Duration::from_millis(5)).await;
+        }
+        assert!(named(&bus, vec![after.clone()], CONTENT).await.is_some());
+        eprintln!("GPUI_NATIVE_LIFECYCLE full tree restored; stale old-owner properties ignored");
+    }
+    notify(Evidence::Reactivated);
+    if lifecycle {
+        gate.recv().await?;
+        wait_for(runtime, deadline, async || {
+            let mut found = false;
+            for root in roots().await? {
+                let children: Vec<Address> = proxy(&bus, &root, "org.a11y.atspi.Accessible")
+                    .await
+                    .ok()?
+                    .call("GetChildren", &())
+                    .await
+                    .ok()?;
+                found |= !children.is_empty();
+            }
+            (!found).then_some(())
+        })
+        .await;
+        eprintln!("GPUI_NATIVE_LIFECYCLE NativeAdapter destroy removed provider window");
+        notify(Evidence::Destroyed);
+    }
+    bus.close().await?;
+    if let Some(fixture) = fixture {
+        fixture.close().await?;
+    }
+    session.close().await?;
+    Ok(())
 }
 
 struct Script {
     host: NativeHost<Todos>,
     deadline: Instant,
-    receiver: mpsc::Receiver<Result<Evidence, String>>,
-    sender: Option<mpsc::SyncSender<Result<Evidence, String>>>,
-    gate: mpsc::SyncSender<()>,
-    gate_receiver: Option<mpsc::Receiver<()>>,
+    receiver: mpmc::Receiver<Result<Evidence, String>>,
+    sender: Option<mpmc::Sender<Result<Evidence, String>>>,
+    gate: mpmc::Sender<()>,
+    gate_receiver: Option<mpmc::Receiver<()>>,
     client: Option<thread::JoinHandle<()>>,
     baseline: Option<(crate::Counters, u64)>,
     after_invoke_frames: u64,
@@ -270,7 +346,7 @@ impl Script {
                 client(deadline, sender, gate, wake, lifecycle)
             }));
         }
-        for event in self.receiver.try_iter() {
+        while let Ok(event) = self.receiver.try_recv() {
             let evidence = event.expect("actual AT-SPI client failed");
             match evidence {
                 Evidence::Activated => {
@@ -293,7 +369,7 @@ impl Script {
                     // A semantic-only public operation has no redraw. Its
                     // normal owner wake must still publish the changed P epoch.
                     self.host.wake.as_ref().unwrap().signal();
-                    self.gate.send(()).unwrap();
+                    self.gate.try_send(()).unwrap();
                 }
                 Evidence::Renamed => {
                     let (before, frames) = self.baseline.unwrap();
@@ -302,7 +378,7 @@ impl Script {
                     assert_eq!(owner.counters().paint_passes, before.paint_passes);
                     assert_eq!(self.host.presented_frames, frames);
                     assert_eq!(owner.accessibility_state().unwrap().epoch, 1);
-                    self.gate.send(()).unwrap();
+                    self.gate.try_send(()).unwrap();
                 }
                 Evidence::Edited => {
                     assert_eq!(owner.focused().unwrap(), Some(owner.input()));
@@ -311,7 +387,7 @@ impl Script {
                     assert_eq!(data["draft"], CONTENT);
                     assert!(owner.accessibility_state().unwrap().token.is_some());
                     assert_eq!(owner.accessibility_state().unwrap().epoch, 2);
-                    self.gate.send(()).unwrap();
+                    self.gate.try_send(()).unwrap();
                 }
                 Evidence::Invoked => {
                     let data: serde_json::Value =
@@ -323,7 +399,7 @@ impl Script {
                     assert_eq!(owner.accessibility_state().unwrap().epoch, 3);
                     assert_eq!(owner.counters().source_operations, 3);
                     self.after_invoke_frames = self.host.presented_frames;
-                    self.gate.send(()).unwrap();
+                    self.gate.try_send(()).unwrap();
                 }
                 Evidence::Reactivated => {
                     assert_eq!(owner.accessibility_state().unwrap().epoch, 3);
@@ -332,7 +408,7 @@ impl Script {
                     assert!(owner.contains_text(CONTENT).unwrap());
                     if self.lifecycle {
                         self.host.accessibility.take();
-                        self.gate.send(()).unwrap();
+                        self.gate.try_send(()).unwrap();
                     } else {
                         self.complete = true;
                         event_loop.exit();
@@ -380,8 +456,8 @@ fn run_native_script(lifecycle: bool) {
         .with_any_thread(true)
         .build()
         .unwrap();
-    let (sender, receiver) = mpsc::sync_channel(4);
-    let (gate, gate_receiver) = mpsc::sync_channel(1);
+    let (sender, receiver) = mpmc::bounded(4.try_into().unwrap());
+    let (gate, gate_receiver) = mpmc::bounded(1.try_into().unwrap());
     let host = Script {
         host: NativeHost::new(
             Window::document(Todos::default())
@@ -405,6 +481,8 @@ fn run_native_script(lifecycle: bool) {
     driver.host_mut().host.wake = Some(wake);
     event_loop.run_app(&mut driver).unwrap();
     driver.host_mut().client.take().unwrap().join().unwrap();
+    assert!(driver.host().receiver.is_closed());
+    assert!(driver.host().gate.is_closed());
     assert!(driver.host().complete);
 }
 
