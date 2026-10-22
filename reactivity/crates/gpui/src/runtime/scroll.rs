@@ -753,7 +753,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .enumerate()
             .rev()
             .find(|(index, node)| {
-                (node.hit.eligible() || matches!(node.kind, NodeKind::List | NodeKind::Scroll))
+                (node.hittable || matches!(node.kind, NodeKind::List | NodeKind::Scroll))
                     && runtime.sheet_hit(*index, point)
             })
             .map(|(index, _)| index)

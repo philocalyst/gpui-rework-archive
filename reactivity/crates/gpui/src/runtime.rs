@@ -601,35 +601,42 @@ struct Fanout {
     codec: TextCodec,
     destinations: Vec<Destination>,
 }
-/// Original hit eligibility plus a saturated run of impossible hits ending
-/// here. The byte replaces a bool; an empty bound never contains a point.
+/// A presented parent uses 17 bits; the remaining 15 store a conservative
+/// run of impossible hits ending at this row. Neither part changes identity.
 #[derive(Clone, Copy)]
-struct Hit(u8);
-impl Hit {
-    fn new(eligible: bool, bounds: Rect, previous: Option<&Presented>) -> Self {
-        let run = if !eligible || bounds.is_empty() {
-            previous.map_or(1, |node| ((node.hit.0 >> 1) + 1).min(127))
+struct PresentedLink(u32);
+impl PresentedLink {
+    const PARENT_BITS: u32 = 17;
+    const PARENT_MASK: u32 = (1 << Self::PARENT_BITS) - 1;
+    const MAX_SKIP: usize = (u32::MAX >> Self::PARENT_BITS) as usize;
+    fn new(parent: Parent, impossible: bool, previous: Option<Self>) -> Self {
+        let run = if impossible {
+            previous
+                .map_or(1, |link| link.skip() + 1)
+                .min(Self::MAX_SKIP)
         } else {
             0
         };
-        Self((run << 1) | u8::from(eligible))
+        Self((parent.0 & Self::PARENT_MASK) | ((run as u32) << Self::PARENT_BITS))
     }
-    fn eligible(self) -> bool {
-        self.0 & 1 != 0
+    fn index(self) -> Option<usize> {
+        let parent = self.0 & Self::PARENT_MASK;
+        (parent != Self::PARENT_MASK).then_some(parent as usize)
     }
     fn skip(self) -> usize {
-        usize::from(self.0 >> 1)
+        (self.0 >> Self::PARENT_BITS) as usize
     }
 }
+const _: () = assert!(MAX_NODES < (1 << PresentedLink::PARENT_BITS));
 struct Presented {
     identity: u64,
-    parent: Parent,
+    parent: PresentedLink,
     kind: NodeKind,
     text: Option<SharedText>,
     rect: Rect,
     transform: PresentedTransform,
     bounds: Rect,
-    hit: Hit,
+    hittable: bool,
     actions: Actions,
 }
 struct Prepared {
@@ -2630,17 +2637,18 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
-            let hit = Hit::new(
-                node.text_slot().0 != u32::MAX
-                    || style.bg.alpha() > 0.0
-                    || node.handler.is_some()
-                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image),
-                bounds,
-                presented.last(),
+            let hittable = node.text_slot().0 != u32::MAX
+                || style.bg.alpha() > 0.0
+                || node.handler.is_some()
+                || matches!(node.kind(), NodeKind::Input | NodeKind::Image);
+            let link = PresentedLink::new(
+                published_parent,
+                !hittable || bounds.is_empty(),
+                presented.last().map(|node: &Presented| node.parent),
             );
             presented.push(Presented {
                 identity: node.identity(),
-                parent: published_parent,
+                parent: link,
                 kind: node.kind(),
                 text: node
                     .text_slot()
@@ -2649,7 +2657,7 @@ impl<M: View + 'static> Runtime<M> {
                 rect,
                 transform: PresentedTransform::new(transform),
                 bounds,
-                hit,
+                hittable,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
                     node.parent.index().is_some_and(|parent| {
                         clip_membership.get(parent).is_some_and(|flags| *flags != 0)
@@ -2812,8 +2820,8 @@ impl<M: View + 'static> Runtime<M> {
         while remaining != 0 {
             let index = remaining - 1;
             let node = &self.presented[index];
-            if node.hit.skip() != 0 {
-                remaining -= node.hit.skip();
+            if node.parent.skip() != 0 {
+                remaining -= node.parent.skip();
                 continue;
             }
             remaining = index;
