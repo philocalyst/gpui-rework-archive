@@ -510,3 +510,30 @@ fn borrowed_measurement_panic_poisoning_ends_the_service_borrow() {
         Err(LayoutError::Poisoned)
     );
 }
+
+#[test]
+fn new_hidden_siblings_do_not_share_subtree_zeroing_marks() {
+    let mut tree = LayoutTree::new();
+    let root = tree
+        .insert(None, NodeKind::Element, sized(200.0, 100.0))
+        .unwrap();
+    let moved = tree
+        .insert(Some(root), NodeKind::Element, sized(20.0, 10.0))
+        .unwrap();
+    tree.compute(root, viewport(200.0)).unwrap();
+    assert_eq!(tree.layout(moved).unwrap().size.width, 20.0);
+    let hidden = Style {
+        display: Display::None,
+        ..Style::DEFAULT
+    };
+    let first = tree
+        .insert(Some(root), NodeKind::Element, hidden.clone())
+        .unwrap();
+    tree.insert(Some(first), NodeKind::Element, sized(7.0, 9.0))
+        .unwrap();
+    let second = tree.insert(Some(root), NodeKind::Element, hidden).unwrap();
+    tree.reparent(moved, Some(second)).unwrap();
+    tree.compute(root, viewport(200.0)).unwrap();
+    assert_cold(&tree, root, viewport(200.0));
+    assert_eq!(tree.layout(moved).unwrap().size, cephal::Size::ZERO);
+}
