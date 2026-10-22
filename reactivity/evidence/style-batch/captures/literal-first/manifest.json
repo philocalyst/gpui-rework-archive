@@ -1,0 +1,130 @@
+{
+  "runner_sha256": "8d5473444392ef368cc85ff3da4ef2cff66b4bed709e41b785a9a063eae6968e",
+  "sources": {
+    "f019": {
+      "styles": {
+        "path": "/root/gpui-style-startup-base/reactivity/crates/gpui/src/runtime/styles.rs",
+        "sha256": "1a61ee1ff6cba470d45aef14db07b5e2045134026d4ba38fb56a3edc4124aa19"
+      },
+      "property": {
+        "path": "/root/gpui-style-startup-base/reactivity/crates/gpui/src/property.rs",
+        "sha256": "e2305092295e0aa7485b159fce686898ea741c6d6cca41e6b857b6d36f32bc53"
+      },
+      "runtime": {
+        "path": "/root/gpui-style-startup-base/reactivity/crates/gpui/src/runtime.rs",
+        "sha256": "4a5a04813f668a0ba06f5f1c04bac03a2d76a57353c9d9b31721b0bc2dc73faf"
+      },
+      "lock": {
+        "path": "/root/gpui-style-startup-base/reactivity/Cargo.lock",
+        "sha256": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a"
+      },
+      "literal_caller": {
+        "path": "/root/gpui-style-startup-base/reactivity/crates/gpui/examples/literal_startup.rs",
+        "sha256": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056"
+      }
+    },
+    "compact": {
+      "styles": {
+        "path": "/root/gpui-style-startup-current/reactivity/crates/gpui/src/runtime/styles.rs",
+        "sha256": "1a61ee1ff6cba470d45aef14db07b5e2045134026d4ba38fb56a3edc4124aa19"
+      },
+      "property": {
+        "path": "/root/gpui-style-startup-current/reactivity/crates/gpui/src/property.rs",
+        "sha256": "4bba965ed7149950d5eed8118bd7c23652806fd34da44b0ebb8ce65b6a5b0cc8"
+      },
+      "runtime": {
+        "path": "/root/gpui-style-startup-current/reactivity/crates/gpui/src/runtime.rs",
+        "sha256": "b58df5270186e216ebee5cae5e6ea343ef3c648b70db3cea668e8b89d37f1bec"
+      },
+      "lock": {
+        "path": "/root/gpui-style-startup-current/reactivity/Cargo.lock",
+        "sha256": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a"
+      },
+      "literal_caller": {
+        "path": "/root/gpui-style-startup-current/reactivity/crates/gpui/examples/literal_startup.rs",
+        "sha256": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056"
+      },
+      "phase_caller": {
+        "path": "/root/gpui-style-startup-current/reactivity/evidence/style-batch/fixtures/phase.rs",
+        "sha256": "572dbad09f42f904848f9187df878649ca6bbe66ed596452d1b30201e6ab120b"
+      }
+    },
+    "counted": {
+      "styles": {
+        "path": "/root/gpui-style-batch-counted/reactivity/crates/gpui/src/runtime/styles.rs",
+        "sha256": "2e535b39a2a0ec699fcdee3465b84c1e61d378585606f83296592e5362e3b479"
+      },
+      "property": {
+        "path": "/root/gpui-style-batch-counted/reactivity/crates/gpui/src/property.rs",
+        "sha256": "4bba965ed7149950d5eed8118bd7c23652806fd34da44b0ebb8ce65b6a5b0cc8"
+      },
+      "runtime": {
+        "path": "/root/gpui-style-batch-counted/reactivity/crates/gpui/src/runtime.rs",
+        "sha256": "b58df5270186e216ebee5cae5e6ea343ef3c648b70db3cea668e8b89d37f1bec"
+      },
+      "lock": {
+        "path": "/root/gpui-style-batch-counted/reactivity/Cargo.lock",
+        "sha256": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a"
+      },
+      "phase_caller": {
+        "path": "/root/gpui-style-batch-counted/reactivity/evidence/style-batch/fixtures/phase.rs",
+        "sha256": "572dbad09f42f904848f9187df878649ca6bbe66ed596452d1b30201e6ab120b"
+      }
+    },
+    "batch": {
+      "styles": {
+        "path": "/root/gpui-style-batch/reactivity/crates/gpui/src/runtime/styles.rs",
+        "sha256": "c51eaf6c321a46192cfccbe0326b5665d2b37343666ea1d2f0d7c4d500de2c98"
+      },
+      "property": {
+        "path": "/root/gpui-style-batch/reactivity/crates/gpui/src/property.rs",
+        "sha256": "ad91907d46b695e098425fe31e1019b914906bb23c9fd5020144c22dfd124aff"
+      },
+      "runtime": {
+        "path": "/root/gpui-style-batch/reactivity/crates/gpui/src/runtime.rs",
+        "sha256": "a7583b417ff6cc8d0c1022f30548b1a70c1576ec34b49eda27e0b4e39541b659"
+      },
+      "lock": {
+        "path": "/root/gpui-style-batch/reactivity/Cargo.lock",
+        "sha256": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a"
+      },
+      "phase_caller": {
+        "path": "/root/gpui-style-batch/reactivity/evidence/style-batch/fixtures/phase.rs",
+        "sha256": "572dbad09f42f904848f9187df878649ca6bbe66ed596452d1b30201e6ab120b"
+      }
+    }
+  },
+  "executables": {
+    "literal-f019": {
+      "path": "/tmp/gpui-style-startup-base-target/release/examples/literal_startup",
+      "sha256": "f9ff59e1ad050a4a68ae8e87173a889d7fcf31f9ebcd452cb4e5a52109ce533a"
+    },
+    "literal-compact": {
+      "path": "/tmp/gpui-style-startup-current-target/release/examples/literal_startup",
+      "sha256": "3c18f5fdea397953dc715e1a9833c7e038ac981ea0339891db5bf6f5ee131983"
+    },
+    "phase-compact": {
+      "path": "/tmp/gpui-style-compact-release-target/release/deps/gpui-559efaa5b4b411d5",
+      "sha256": "bed6b6d3c97f836916fd78dce24ca2d6d30138154cbd802e4bef9768920d7a72"
+    },
+    "phase-counted": {
+      "path": "/tmp/gpui-style-counted-release-target/release/deps/gpui-559efaa5b4b411d5",
+      "sha256": "a29242ad8f87811a2f2e4352463a8ac8c0095bbfb6a934abf039f82383c73737"
+    },
+    "phase-batch": {
+      "path": "/tmp/gpui-style-batch-release-target/release/deps/gpui-559efaa5b4b411d5",
+      "sha256": "f7d887dbc2a0d0cbd2d34a806bb132e1cf83369b3b6d64b70c3e74c6f1f6cdbe"
+    }
+  },
+  "build_logs": {
+    "/tmp/gpui-style-startup-base-build.jsonl": "6b026eadd2fbd901a67f77cdea3e395546705b57c4cf9836d72ab34da4b7d7b4",
+    "/tmp/gpui-style-startup-current-build.jsonl": "4d92d5b121cef132491860f10b3342fe4f8e95a7db1ad81141e126a50b0bda49",
+    "/tmp/gpui-style-compact-release-build.jsonl": "14de2b12b270949b49a3218e2519d3e7611324818f14c4dde6dc83c0b652de29",
+    "/tmp/gpui-style-counted-release-build.jsonl": "3e854bf35998e162a7831c48ae3059ac8a4948e7afb65e6bcf93bd2acb50a0e6",
+    "/tmp/gpui-style-batch-release-build.jsonl": "6fbc6dc68c074fb5182b8dadab1316d97c47dbc268edcdf93a4dc75c2902f2ab"
+  },
+  "fixtures": {
+    "literal_startup.rs": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056",
+    "phase.rs": "572dbad09f42f904848f9187df878649ca6bbe66ed596452d1b30201e6ab120b"
+  }
+}

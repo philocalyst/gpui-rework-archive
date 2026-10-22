@@ -1,0 +1,46 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling cephal v0.1.1 (/root/gpui-style-batch/reactivity/vendor/cephal)
+   Compiling parley v0.11.1 (/root/gpui-style-batch/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-style-batch/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-style-batch/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-style-batch/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-style-batch/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.34s
+     Running unittests src/lib.rs (/tmp/gpui-style-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 14 tests
+test runtime::styles::tests::changing_an_entire_shared_cohort_reuses_vacated_patterns_without_allocating ... ok
+test runtime::styles::tests::coalescing_full_class_keeps_unselected_peers_and_partial_arrivals ... ok
+test runtime::styles::tests::converging_property_masks_merge_and_reuse_slots_across_turns ... ok
+test runtime::styles::tests::exact_comparison_covers_every_style_field ... ok
+test runtime::styles::tests::independent_edits_keep_shared_peers_and_reuse_their_unique_slot ... ok
+test runtime::styles::tests::late_palette_overflow_and_late_nondefault_prefix_preserve_all_values ... ok
+test runtime::styles::tests::mixed_masks_and_dense_overflow_match_independent_per_node_edits ... ok
+test runtime::styles::tests::mutable_palette_matches_a_dense_oracle_through_split_merge_and_slot_reuse ... ok
+test runtime::styles::tests::only_live_pattern_diversity_overflows_to_dense_storage ... ok
+test runtime::styles::tests::rebuilt_lanes_keep_no_historical_style_palette ... ok
+test runtime::styles::tests::shared_values_preserve_author_channels_profiles_and_signed_zero ... ok
+test runtime::styles::tests::storage_modes_and_overflow_preserve_every_admitted_style ... ok
+test runtime::styles::tests::style_lane_allocation_ledger ... style_entry,bytes=92
+style_lane,default,nodes=4096,allocations=0,requested_bytes=0,live_bytes=0,peak_bytes=0
+style_lane,small,nodes=3,allocations=1,requested_bytes=264,live_bytes=264,peak_bytes=264
+style_lane,shared,nodes=4096,allocations=3,requested_bytes=7776,live_bytes=4832,peak_bytes=7776
+style_lane,unique,nodes=4096,allocations=3,requested_bytes=367488,live_bytes=360448,peak_bytes=367488
+style_mutation,default,nodes=4096,allocations=2,requested_bytes=4280,live_bytes=4280,peak_bytes=4280
+style_mutation,shared,nodes=4096,allocations=1,requested_bytes=828,live_bytes=4924,peak_bytes=828
+ok
+test runtime::styles::tests::whole_patterns_transform_once_without_selector_writes_or_allocations ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 96 filtered out; finished in 0.29s
+

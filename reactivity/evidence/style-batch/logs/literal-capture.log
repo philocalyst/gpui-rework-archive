@@ -1,0 +1,13 @@
+START literal 1 f019
+FINISHED literal 1 f019 wall_seconds=0.064
+START literal 1 compact
+FINISHED literal 1 compact wall_seconds=0.264
+START literal 2 compact
+FINISHED literal 2 compact wall_seconds=0.264
+START literal 2 f019
+FINISHED literal 2 f019 wall_seconds=0.064
+START literal 3 f019
+FINISHED literal 3 f019 wall_seconds=0.064
+START literal 3 compact
+FINISHED literal 3 compact wall_seconds=0.264
+ALL_POSTGUARDS_PASS

@@ -1,0 +1,10 @@
+{
+  "counted_and_batch_equal_through_first_ret": true,
+  "normalized_lines": 1047,
+  "sha256": "ca53c25c51265e6994bad3ce996cc7e94186f287a8d6bab639fc13e4190577ea",
+  "counted_start_address": "0x86dc70",
+  "batch_start_address": "0x90d7c0",
+  "same_function_bytes": 4096,
+  "remaining_differences": "cold panic/diagnostic addresses, identified separately in complete disassembly",
+  "measurement_causality": "No extra accessor instruction was identified; the measured timing difference remains unattributed. Layout/alignment/cache effects were not isolated."
+}

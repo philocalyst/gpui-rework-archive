@@ -1,0 +1,69 @@
+push   %r14
+push   %rbx
+sub    $0x78,%rsp
+mov    %rsi,%rax
+mov    (%rdi),%rsi
+test   %rsi,%rsi
+je     @+e9
+mov    0x7a0(%rsi),%ecx
+cmp    $0xffffffff,%ecx
+je     @+68
+inc    %ecx
+mov    %ecx,0x7a0(%rsi)
+movups (%rax),%xmm0
+movups %xmm0,0x790(%rsi)
+movq   $0x0,0x958(%rsi)
+00 
+lea    0x40(%rsp),%rdi
+movabs $0x100000001,%rdx
+00 
+call   <<gpui::runtime::Runtime<gpui::runtime::style_ledger::batch_phase::Theme>>::patch>
+cmpl   $0xfffffffe,0x40(%rsp)
+jne    @+81
+cmpb   $0x0,0x48(%rsp)
+jne    @+d0
+add    $0x78,%rsp
+pop    %rbx
+pop    %r14
+ret
+lea    -0x88318b(%rip),%rdi        # <anon.1f5e156c2d71b9adadf1e4004d4673e2.82.llvm.7631762764491337279>
+lea    0x35aa7a(%rip),%rdx        # <anon.1f5e156c2d71b9adadf1e4004d4673e2.84.llvm.7631762764491337279>
+mov    $0x19,%esi
+call   *0x38dfc7(%rip)        # <_DYNAMIC+0x290>
+mov    0x70(%rsp),%rax
+mov    %rax,0x30(%rsp)
+movups 0x40(%rsp),%xmm0
+movups 0x50(%rsp),%xmm1
+movups 0x60(%rsp),%xmm2
+movaps %xmm2,0x20(%rsp)
+movaps %xmm1,0x10(%rsp)
+movaps %xmm0,(%rsp)
+lea    -0x87d72d(%rip),%rdi        # <anon.1b72a5b8b5110b04d021962373711302.333.llvm.10952795245580062517>
+lea    0x36519a(%rip),%rcx        # <anon.1b72a5b8b5110b04d021962373711302.334.llvm.10952795245580062517>
+lea    0x365c8b(%rip),%r8        # <anon.1b72a5b8b5110b04d021962373711302.458.llvm.10952795245580062517+0x500>
+mov    %rsp,%rbx
+mov    $0x2b,%esi
+mov    %rbx,%rdx
+call   *0x38e02a(%rip)        # <_DYNAMIC+0x340>
+jmp    @+120
+lea    -0x87d0fb(%rip),%rdi        # <anon.1b72a5b8b5110b04d021962373711302.411.llvm.10952795245580062517+0x502>
+lea    0x365c82(%rip),%rdx        # <anon.1b72a5b8b5110b04d021962373711302.458.llvm.10952795245580062517+0x518>
+mov    $0x3a,%esi
+call   *0x38e12f(%rip)        # <_DYNAMIC+0x460>
+movq   $0xd,(%rsp)
+movq   $0x0,0x8(%rsp)
+00 
+lea    -0x87d77f(%rip),%rdi        # <anon.1b72a5b8b5110b04d021962373711302.333.llvm.10952795245580062517>
+lea    0x365148(%rip),%rcx        # <anon.1b72a5b8b5110b04d021962373711302.334.llvm.10952795245580062517>
+lea    0x365c21(%rip),%r8        # <anon.1b72a5b8b5110b04d021962373711302.458.llvm.10952795245580062517+0x4e8>
+mov    %rsp,%rbx
+mov    $0x2b,%esi
+mov    %rbx,%rdx
+call   *0x38dfd8(%rip)        # <_DYNAMIC+0x340>
+ud2
+jmp    @+124
+mov    %rax,%r14
+mov    %rbx,%rdi
+call   <core::ptr::drop_glue::<gpui::runtime::Error>>
+mov    %r14,%rdi
+call   <_Unwind_Resume@plt>

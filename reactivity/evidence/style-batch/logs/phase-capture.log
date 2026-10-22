@@ -1,0 +1,19 @@
+START phase 1 compact
+FINISHED phase 1 compact wall_seconds=2.169
+START phase 1 counted
+FINISHED phase 1 counted wall_seconds=2.220
+START phase 1 batch
+FINISHED phase 1 batch wall_seconds=2.019
+START phase 2 counted
+FINISHED phase 2 counted wall_seconds=2.270
+START phase 2 batch
+FINISHED phase 2 batch wall_seconds=2.018
+START phase 2 compact
+FINISHED phase 2 compact wall_seconds=2.169
+START phase 3 batch
+FINISHED phase 3 batch wall_seconds=2.073
+START phase 3 compact
+FINISHED phase 3 compact wall_seconds=2.169
+START phase 3 counted
+FINISHED phase 3 counted wall_seconds=2.220
+ALL_POSTGUARDS_PASS
