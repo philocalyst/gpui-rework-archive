@@ -53,6 +53,36 @@ impl Samples {
         }
     }
 
+    /// Keep binary membership compact through promotion. Uncovered samples
+    /// retain their original bits; covered sites use the original component loop.
+    #[inline]
+    pub(super) fn blend_mask(&mut self, pixel: usize, color: [f32; 4], mut mask: u16) {
+        if mask == 0 {
+            return;
+        }
+        let bit = 1 << (pixel % 64);
+        if self.mixed[pixel / 64] & bit == 0 {
+            if mask == u16::MAX {
+                blend(&mut self.uniform[pixel], color, 1.0);
+                return;
+            }
+            self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
+            self.mixed[pixel / 64] |= bit;
+        }
+        let dst = &mut self.samples[pixel * 16..pixel * 16 + 16];
+        if mask == u16::MAX {
+            for sample in dst {
+                blend(sample, color, 1.0);
+            }
+        } else {
+            while mask != 0 {
+                let sample = mask.trailing_zeros() as usize;
+                blend(&mut dst[sample], color, 1.0);
+                mask &= mask - 1;
+            }
+        }
+    }
+
     pub(super) fn blend_sources(&mut self, pixel: usize, sources: [Option<[f32; 4]>; 16]) {
         let bit = 1 << (pixel % 64);
         if self.mixed[pixel / 64] & bit == 0 {
@@ -120,6 +150,40 @@ mod tests {
             );
             assert_eq!(tile.color(0).map(f32::to_bits), color.map(f32::to_bits));
         }
+    }
+
+    #[test]
+    fn binary_masks_preserve_absent_bits_in_both_promotion_modes() {
+        let mut tile = Samples::new();
+        let clear = [-0.0, f32::from_bits(1), -2.5, 0.0];
+        let source = [0.0, -0.0, f32::from_bits(1), 0.0];
+        for collapse in [false, true] {
+            for mask in 0..=u16::MAX {
+                tile.reset(clear, collapse);
+                tile.blend_mask(255, source, mask);
+                let expected: [[f32; 4]; 16] = std::array::from_fn(|index| {
+                    if mask & (1 << index) == 0 {
+                        clear
+                    } else {
+                        std::array::from_fn(|c| {
+                            source[c] * 1.0 + clear[c] * (1.0 - source[3] * 1.0)
+                        })
+                    }
+                });
+                assert_eq!(
+                    tile.color(255).map(f32::to_bits),
+                    sample_mean(&expected).map(f32::to_bits),
+                    "mask={mask:#06x}, collapse={collapse}"
+                );
+                if tile.mixed[255 / 64] & (1 << (255 % 64)) != 0 {
+                    for (actual, expected) in tile.samples[255 * 16..256 * 16].iter().zip(expected)
+                    {
+                        assert_eq!(actual.map(f32::to_bits), expected.map(f32::to_bits));
+                    }
+                }
+            }
+        }
+        assert_eq!(std::mem::size_of::<Samples>(), 69_664);
     }
 
     #[test]
