@@ -176,6 +176,7 @@ pub struct PropertyError {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PropertyErrorKind {
     NonFinite,
+    OutOfRange,
     Negative,
     NonPositive,
     WrongDestination {
@@ -367,7 +368,22 @@ macro_rules! properties {
         pub const $name: Property<$ty> = Property(&$decl);)+
         /// References to the same declaration metadata as the typed selectors.
         pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, CORNER_RADIUS.info()];
+        const _: () = { $(assert!(PropertyId::$id as u16 <= 8191);)+ assert!(PropertyId::CornerRadius as u16 <= 8191); };
         impl PropertyId {
+            pub(crate) const fn from_code(code: u16) -> Option<Self> {
+                match code {
+                    $(value if value == Self::$id as u16 => Some(Self::$id),)+
+                    value if value == Self::CornerRadius as u16 => Some(Self::CornerRadius),
+                    _ => None,
+                }
+            }
+            pub(crate) fn validate_erased(self, value: PropertyValue) -> Result<(), PropertyError> {
+                match (self, value) {
+                    $((Self::$id, PropertyValue::$kind(value)) => $name.validate(&value),)+
+                    (Self::CornerRadius, PropertyValue::Number(value)) => CORNER_RADIUS.validate(&value),
+                    _ => Err(PropertyError { property: self, reason: PropertyErrorKind::WrongKind { expected: self.info().kind, actual: value.kind() } }),
+                }
+            }
             pub const fn info(self) -> &'static PropertyInfo {
                 match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info() }
             }
@@ -519,6 +535,28 @@ impl<D: PropertyDomain> Overrides<D> {
                 Ok(resolved)
             }
         }
+    }
+
+    /// A source publication changes the lower declaration even while an
+    /// inspector masks this property. Admission occurs before either base edits.
+    pub(crate) fn update_base(
+        &mut self,
+        identity: u64,
+        mut current: D,
+        id: PropertyId,
+        value: PropertyValue,
+    ) -> Result<D, PropertyError> {
+        let Some(overlay) = self.entries.get_mut(&identity) else {
+            D::set_erased(id, &mut current, value)?;
+            return Ok(current);
+        };
+        let mut base = overlay.base;
+        D::set_erased(id, &mut base, value)?;
+        if !overlay.values.contains_key(&id) {
+            D::set_erased(id, &mut current, value)?;
+        }
+        overlay.base = base;
+        Ok(current)
     }
 
     pub(crate) fn resolve(&mut self, identity: u64, declared: D) -> D {

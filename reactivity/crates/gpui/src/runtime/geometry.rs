@@ -66,6 +66,41 @@ impl Geometry {
             && self.candidate.is_none()
     }
 }
+/// Patch the canonical lower geometry without borrowing the owner/model.
+pub(super) fn patch(
+    metadata: &mut Option<Box<Metadata>>,
+    identity: u64,
+    id: crate::property::PropertyId,
+    value: crate::property::PropertyValue,
+) -> Result<bool, Error> {
+    let before = metadata
+        .as_deref()
+        .and_then(|m| m.geometry.as_ref())
+        .map_or_else(Default::default, |g| g.get(identity));
+    let crate::property::PropertyValue::Number(radius) = value else {
+        unreachable!("validated geometry value")
+    };
+    let after = if let Some(geometry) = metadata.as_deref_mut().and_then(|m| m.geometry.as_mut()) {
+        geometry
+            .overrides
+            .update_base(identity, before, id, value)?
+    } else {
+        GeometryStyle {
+            corner_radius: radius,
+        }
+    };
+    let changed =
+        !crate::property::CORNER_RADIUS.same_authoring(&before.corner_radius, &after.corner_radius);
+    if changed {
+        metadata
+            .get_or_insert_with(Default::default)
+            .geometry
+            .get_or_insert_with(Default::default)
+            .store(identity, after);
+    }
+    Ok(changed)
+}
+
 impl<M: View + 'static> Runtime<M> {
     pub(super) fn reconcile_geometry(
         &mut self,

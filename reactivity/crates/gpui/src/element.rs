@@ -9,7 +9,8 @@ use crate::{
     View,
     component::Component,
     source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
-    style::{Affine, Color, Flex, IntoLength, Style, nonnegative},
+    style::{Affine, Align, Color, Flex, Flow, Justify, Style},
+    style_port::{IntoProp, PropInput, Value},
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -242,16 +243,13 @@ impl<'a> El<'a> {
         if !matches!(self.kind, NodeKind::Div | NodeKind::Scroll) {
             return Err(crate::ScrollError::UnsupportedElement);
         }
-        match &mut self.extra {
-            Some(extra) => extra.make_scroll(axes)?,
-            None => {
-                self.extra = Some(Box::new(crate::semantic::ElementExtra::Scroll {
-                    axes,
-                    style: Default::default(),
-                    semantic: None,
-                }))
-            }
-        }
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Decorations(
+                    Default::default(),
+                ))
+            })
+            .make_scroll(axes)?;
         self.kind = NodeKind::Scroll;
         Ok(self)
     }
@@ -270,8 +268,12 @@ impl<'a> El<'a> {
     }
     /// Selects nearest or bilinear reconstruction for an image declaration.
     pub fn sampling(mut self, sampling: crate::ImageSampling) -> Self {
-        match self.extra.as_deref_mut().map(|extra| extra.base_mut()) {
-            Some(crate::semantic::ElementExtra::Image { spec, .. }) => spec.sampling = sampling,
+        match self
+            .extra
+            .as_deref_mut()
+            .and_then(|extra| extra.image_mut())
+        {
+            Some(spec) => spec.sampling = sampling,
             _ => panic!("sampling belongs to an image declaration"),
         }
         self
@@ -288,19 +290,23 @@ impl<'a> El<'a> {
     /// First-read fallback for a Reader projection. Refreshing retains its
     /// preceding ready child; failures remain a distinct visible verdict.
     pub fn loading(mut self, render: fn() -> El<'static>) -> Self {
-        match self.extra.as_deref_mut().map(|extra| extra.base_mut()) {
-            Some(crate::semantic::ElementExtra::Reader { projector, .. }) => {
-                projector.loading(render)
-            }
+        match self
+            .extra
+            .as_deref_mut()
+            .and_then(|extra| extra.projection_mut())
+        {
+            Some((projector, _)) => projector.loading(render),
             _ => panic!("loading belongs to a Reader projection"),
         }
         self
     }
     pub fn failed(mut self, render: for<'v> fn(crate::Failure<'v>) -> El<'v>) -> Self {
-        match self.extra.as_deref_mut().map(|extra| extra.base_mut()) {
-            Some(crate::semantic::ElementExtra::Reader { projector, .. }) => {
-                projector.failed(render)
-            }
+        match self
+            .extra
+            .as_deref_mut()
+            .and_then(|extra| extra.projection_mut())
+        {
+            Some((projector, _)) => projector.failed(render),
             _ => panic!("failed belongs to a Reader projection"),
         }
         self
@@ -336,20 +342,26 @@ impl<'a> El<'a> {
 
     /// Uniform circular corners for this element's background, own image and
     /// hit region. Descendants are not clipped. Invalid radii fail admission.
-    pub fn rounded(mut self, radius: f32) -> Self {
-        let style = crate::property::GeometryStyle {
-            corner_radius: radius,
-        };
-        self.extra
-            .get_or_insert_with(|| {
-                Box::new(crate::semantic::ElementExtra::Geometry {
-                    style,
-                    inner: None,
-                    semantic: None,
+    pub fn rounded(mut self, radius: impl IntoProp<'a, f32>) -> Self {
+        let radius = radius.into_prop();
+        if let Some(value) = radius.literal() {
+            if let Some(extra) = self.extra.as_deref_mut() {
+                extra.unbind(crate::property::PropertyId::CornerRadius);
+            }
+            // Preserve the original radius builder's deferred, typed admission.
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Decorations(
+                        Default::default(),
+                    ))
                 })
-            })
-            .set_geometry(style);
-        self
+                .set_geometry(crate::property::GeometryStyle {
+                    corner_radius: value,
+                });
+            self
+        } else {
+            self.property_operand(crate::property::PropertyId::CornerRadius, radius)
+        }
     }
     pub fn rounded_md(self) -> Self {
         self.rounded(6.0)
@@ -390,33 +402,72 @@ impl<'a> El<'a> {
         handler.install(self)
     }
 
-    pub fn w(mut self, width: impl IntoLength) -> Self {
-        self.style.width = Some(nonnegative(width, "width"));
+    fn property_operand<T: Value>(
+        mut self,
+        id: crate::property::PropertyId,
+        input: PropInput<'a, T>,
+    ) -> Self {
+        if let Some(signal) = input.signal() {
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Decorations(
+                        Default::default(),
+                    ))
+                })
+                .bind(id, signal);
+        } else {
+            let value = input
+                .scalar()
+                .admit(id)
+                .expect("invalid literal style property");
+            if let Some(extra) = self.extra.as_deref_mut() {
+                extra.unbind(id);
+            }
+            match id.info().destination {
+                crate::property::PropertyDestination::Style => {
+                    id.set_erased(&mut self.style, value)
+                        .expect("validated literal property");
+                }
+                crate::property::PropertyDestination::Geometry => {
+                    let crate::property::PropertyValue::Number(radius) = value else {
+                        unreachable!()
+                    };
+                    self.extra
+                        .get_or_insert_with(|| {
+                            Box::new(crate::semantic::ElementExtra::Decorations(
+                                Default::default(),
+                            ))
+                        })
+                        .set_geometry(crate::property::GeometryStyle {
+                            corner_radius: radius,
+                        });
+                }
+            }
+            if self.extra.as_deref().is_some_and(|extra| extra.empty()) {
+                self.extra = None;
+            }
+        }
         self
     }
-    pub fn h(mut self, height: impl IntoLength) -> Self {
-        self.style.height = Some(nonnegative(height, "height"));
-        self
+    pub fn w(self, width: impl IntoProp<'a, f64>) -> Self {
+        self.property_operand(crate::property::PropertyId::Width, width.into_prop())
     }
-    pub fn size(mut self, size: impl IntoLength) -> Self {
-        let size = nonnegative(size, "size");
-        self.style.width = Some(size);
-        self.style.height = Some(size);
-        self
+    pub fn h(self, height: impl IntoProp<'a, f64>) -> Self {
+        self.property_operand(crate::property::PropertyId::Height, height.into_prop())
     }
-    pub fn gap(mut self, gap: impl IntoLength) -> Self {
-        self.style.gap = nonnegative(gap, "gap");
-        self
+    pub fn size(self, size: impl IntoProp<'a, f64>) -> Self {
+        let input = size.into_prop();
+        self.property_operand(crate::property::PropertyId::Width, input)
+            .property_operand(crate::property::PropertyId::Height, input)
     }
-    pub fn p(mut self, padding: impl IntoLength) -> Self {
-        self.style.padding = nonnegative(padding, "padding");
-        self
+    pub fn gap(self, gap: impl IntoProp<'a, f64>) -> Self {
+        self.property_operand(crate::property::PropertyId::Gap, gap.into_prop())
     }
-    pub fn font_size(mut self, size: impl IntoLength) -> Self {
-        let size = nonnegative(size, "font size");
-        assert!(size > 0.0, "font size must be positive");
-        self.style.font_size = size;
-        self
+    pub fn p(self, padding: impl IntoProp<'a, f64>) -> Self {
+        self.property_operand(crate::property::PropertyId::Padding, padding.into_prop())
+    }
+    pub fn font_size(self, size: impl IntoProp<'a, f64>) -> Self {
+        self.property_operand(crate::property::PropertyId::FontSize, size.into_prop())
     }
     pub fn text_xs(self) -> Self {
         self.font_size(12)
@@ -427,32 +478,44 @@ impl<'a> El<'a> {
     pub fn text_lg(self) -> Self {
         self.font_size(18)
     }
-    pub fn fg(mut self, color: Color) -> Self {
-        self.style.fg = color;
-        self
+    pub fn fg(self, color: impl IntoProp<'a, Color>) -> Self {
+        self.property_operand(crate::property::PropertyId::Foreground, color.into_prop())
     }
-    pub fn bg(mut self, color: Color) -> Self {
-        self.style.bg = color;
-        self
+    pub fn bg(self, color: impl IntoProp<'a, Color>) -> Self {
+        self.property_operand(crate::property::PropertyId::Background, color.into_prop())
     }
-    pub fn transform(mut self, transform: Affine) -> Self {
-        assert!(transform.is_finite(), "transform must be finite");
-        self.style.transform = transform;
-        self
+    pub fn transform(self, transform: impl IntoProp<'a, Affine>) -> Self {
+        self.property_operand(
+            crate::property::PropertyId::Transform,
+            transform.into_prop(),
+        )
     }
-    pub fn layout(mut self, recipe: Flex) -> Self {
-        self.style.flow = recipe.flow;
+    pub fn flow(self, flow: impl IntoProp<'a, Flow>) -> Self {
+        self.property_operand(crate::property::PropertyId::Flow, flow.into_prop())
+    }
+    pub fn align(self, align: impl IntoProp<'a, Align>) -> Self {
+        self.property_operand(crate::property::PropertyId::Align, align.into_prop())
+    }
+    pub fn justify(self, justify: impl IntoProp<'a, Justify>) -> Self {
+        self.property_operand(crate::property::PropertyId::Justify, justify.into_prop())
+    }
+    pub fn wrap(self, wrap: impl IntoProp<'a, bool>) -> Self {
+        self.property_operand(crate::property::PropertyId::Wrap, wrap.into_prop())
+    }
+    pub fn layout(mut self, recipe: impl std::borrow::Borrow<Flex<'a>>) -> Self {
+        let recipe = recipe.borrow();
+        self = self.flow(recipe.flow);
         if let Some(gap) = recipe.gap {
-            self.style.gap = gap;
+            self = self.gap(gap);
         }
         if let Some(align) = recipe.align {
-            self.style.align = align;
+            self = self.align(align);
         }
         if let Some(justify) = recipe.justify {
-            self.style.justify = justify;
+            self = self.justify(justify);
         }
         if let Some(wrap) = recipe.wrap {
-            self.style.wrap = wrap;
+            self = self.wrap(wrap);
         }
         self
     }
@@ -485,9 +548,10 @@ impl<'a> El<'a> {
                 }));
             }
             pending.extend(element.children.iter_mut());
-            if let Some(crate::semantic::ElementExtra::Reader {
-                map: pending_map, ..
-            }) = element.extra.as_deref_mut().map(|extra| extra.base_mut())
+            if let Some((_, pending_map)) = element
+                .extra
+                .as_deref_mut()
+                .and_then(|extra| extra.projection_mut())
             {
                 let previous = pending_map.take();
                 *pending_map = Some(Box::new(move |child: &mut El<'_>| {
@@ -533,17 +597,18 @@ impl<'a> El<'a> {
             &dyn crate::ItemSource,
             f64,
         ) -> Result<crate::list::ListPlan, crate::ListError>,
-    ) -> Result<Description<'a>, crate::ListError> {
+    ) -> Result<Description<'a>, crate::Error> {
         use crate::list::{ListDraft, RowDraft};
         let mut output = Vec::new();
         let mut viewports: Vec<crate::list::ViewportDraft> = Vec::new();
         let mut annotations = Vec::new();
         let mut images = Vec::new();
         let mut geometry = Vec::new();
+        let mut style_ports = Vec::new();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
-                return Err(crate::ListError::ResourceLimit);
+                return Err(crate::ListError::ResourceLimit.into());
             }
             let index = output.len() as u32;
             if let Some((list, key, item_index, y, height)) = slot {
@@ -565,11 +630,32 @@ impl<'a> El<'a> {
                 image,
                 axes,
                 geometry: shape,
+                bindings,
             } = element
                 .extra
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            let mut shape = shape.unwrap_or_default();
+            for binding in bindings {
+                let value = binding.signal.scalar().admit(binding.property)?;
+                match binding.property.info().destination {
+                    crate::property::PropertyDestination::Style => {
+                        binding.property.set_erased(&mut element.style, value)?;
+                    }
+                    crate::property::PropertyDestination::Geometry => {
+                        let crate::property::PropertyValue::Number(radius) = value else {
+                            unreachable!()
+                        };
+                        shape.corner_radius = radius;
+                    }
+                }
+                style_ports.push(crate::style_port::Draft {
+                    node: index,
+                    property: binding.property,
+                    signal: binding.signal,
+                });
+            }
             if let Some(axes) = axes {
                 viewports.push(crate::list::ViewportDraft::Scroll(
                     crate::scroll::ScrollDraft {
@@ -578,12 +664,11 @@ impl<'a> El<'a> {
                     },
                 ));
             }
-            if let Some(shape) = shape
-                && shape.corner_radius.to_bits() != 0
-            {
+            if shape.corner_radius.to_bits() != 0 {
                 geometry.push((index as usize, shape));
             }
-            if let Some(spec) = image {
+            if let Some(mut spec) = image {
+                spec.geometry = shape;
                 images.push(crate::image::ImageDraft { node: index, spec });
             }
             if let Some((projector, map)) = projector {
@@ -630,7 +715,7 @@ impl<'a> El<'a> {
                     ));
                 }
                 if spec.source.len() != list_plan.viewport.len {
-                    return Err(crate::ListError::ChangedSource);
+                    return Err(crate::ListError::ChangedSource.into());
                 }
                 // Keys have served their admission purpose. Retain only row metadata.
                 list_plan.keys.clear();
@@ -665,6 +750,7 @@ impl<'a> El<'a> {
             annotations,
             images,
             geometry,
+            style_ports,
         })
     }
 }
@@ -693,6 +779,7 @@ impl Drop for ComponentBoundaries {
 
 pub(crate) struct Description<'a> {
     pub geometry: Vec<(usize, crate::property::GeometryStyle)>,
+    pub style_ports: Vec<crate::style_port::Draft<'a>>,
     pub nodes: Vec<DraftNode<'a>>,
     pub viewports: Vec<crate::list::ViewportDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,

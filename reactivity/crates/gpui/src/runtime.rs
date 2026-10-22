@@ -1464,6 +1464,7 @@ impl<M: View + 'static> Runtime<M> {
             annotations: annotation_drafts,
             images: image_drafts,
             geometry: geometry_drafts,
+            style_ports,
         } = self.model.view().flatten_lists(
             MAX_NODES,
             readers,
@@ -1574,6 +1575,18 @@ impl<M: View + 'static> Runtime<M> {
             crate::property::CORNER_RADIUS
                 .validate(&geometry.corner_radius)
                 .map_err(|error| Error::GeometryProperty { node, error })?;
+        }
+        for draft in style_ports {
+            if let Some(field) = self.sources.resolve(&self.model, draft.signal)? {
+                fanout
+                    .entry(field)
+                    .or_insert_with(|| Fanout {
+                        codec: draft.signal.codec(),
+                        destinations: Vec::new(),
+                    })
+                    .destinations
+                    .push(Destination::style(draft.node as usize, draft.property));
+            }
         }
         let mut annotation_fields = Vec::with_capacity(annotation_drafts.len());
         for annotation in &annotation_drafts {
@@ -1974,69 +1987,127 @@ impl<M: View + 'static> Runtime<M> {
         let Some(fanout) = self.fanout.get(&field) else {
             return Ok(false);
         };
+        let mut needs = crate::source::Needs {
+            text: false,
+            style: false,
+        };
+        for destination in &fanout.destinations {
+            if destination.port() == Port::Style {
+                needs.style = true;
+            } else {
+                needs.text = true;
+            }
+        }
         self.counters.source_reads += 1;
-        let value = self.sources.read_text(&self.model, field, fanout.codec)?;
+        let frozen = self
+            .sources
+            .freeze(&self.model, field, fanout.codec, needs)?;
+        // A numeric source may feed width, font size AND text. Reject every bad
+        // sink before the first logical destination or inspector base is edited.
+        for destination in &fanout.destinations {
+            if let Some(id) = destination.property() {
+                frozen.style.expect("style codec requested").admit(id)?;
+            }
+        }
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
         let mut last_changed = None;
         for &destination in &fanout.destinations {
             self.counters.destination_compares += 1;
-            let node = &self.nodes[destination.node()];
-            let old = match destination.port() {
-                Port::Visual => node
-                    .text_slot()
-                    .get(&self.texts)
-                    .map(|text| text.value.as_ref()),
-                Port::Name | Port::Description => {
-                    semantic = true;
-                    let base = self
-                        .metadata
-                        .as_ref()
-                        .and_then(|metadata| metadata.base(node.identity()))
-                        .expect("annotation destination has a logical column");
-                    if destination.port() == Port::Name {
-                        base.name.as_deref()
-                    } else {
-                        base.description.as_deref()
+            let index = destination.node();
+            let node = &self.nodes[index];
+            let identity = node.identity();
+            let changed = if let Some(id) = destination.property() {
+                let value = frozen.style.expect("style codec requested").admit(id)?;
+                let changed = match id.info().destination {
+                    crate::property::PropertyDestination::Style => {
+                        let before = *self.styles.get(index);
+                        let after = self.overrides.update_base(identity, before, id, value)?;
+                        let changed = !styles::exact_eq(&before, &after);
+                        if changed {
+                            if id.info().impact == crate::property::Impact::Layout {
+                                self.layout_dirty.insert(identity);
+                            }
+                            if id == crate::property::PropertyId::FontSize
+                                && let Some(text) = node.text_slot().get_mut(&mut self.texts)
+                            {
+                                text.shaped = None;
+                            }
+                            self.styles.set(index, after, self.nodes.len());
+                        }
+                        changed
                     }
-                }
-            };
-            if old != Some(value.as_ref()) {
-                if promoted.is_none() {
-                    promoted = Some(SharedText::from(value.as_ref()));
-                    self.counters.text_promotions += 1;
-                    self.counters.text_bytes_copied += value.len() as u64;
-                }
-                match destination.port() {
-                    Port::Visual => {
-                        let text = node
-                            .text_slot()
-                            .get_mut(&mut self.texts)
-                            .expect("visual fanout has text");
-                        text.value = promoted.as_ref().unwrap().clone();
-                        text.shaped = None;
-                        self.layout_dirty.insert(node.identity());
-                        self.dirty = true;
-                        visual_changed = true;
+                    crate::property::PropertyDestination::Geometry => {
+                        geometry::patch(&mut self.metadata, identity, id, value)?
                     }
+                };
+                if changed {
+                    self.dirty = true;
+                    visual_changed = true;
+                }
+                changed
+            } else {
+                let value = frozen.text.as_deref().expect("text codec requested");
+                let old = match destination.port() {
+                    Port::Visual => node
+                        .text_slot()
+                        .get(&self.texts)
+                        .map(|text| text.value.as_ref()),
                     Port::Name | Port::Description => {
+                        semantic = true;
                         let base = self
                             .metadata
-                            .as_mut()
-                            .and_then(|metadata| metadata.base_mut(node.identity()))
+                            .as_ref()
+                            .and_then(|metadata| metadata.base(identity))
                             .expect("annotation destination has a logical column");
                         if destination.port() == Port::Name {
-                            base.name = promoted.clone();
+                            base.name.as_deref()
                         } else {
-                            base.description = promoted.clone();
+                            base.description.as_deref()
                         }
                     }
+                    Port::Style => unreachable!("style destination decoded above"),
+                };
+                let changed = old != Some(value);
+                if changed {
+                    if promoted.is_none() {
+                        promoted = Some(SharedText::from(value));
+                        self.counters.text_promotions += 1;
+                        self.counters.text_bytes_copied += value.len() as u64;
+                    }
+                    match destination.port() {
+                        Port::Visual => {
+                            let text = node
+                                .text_slot()
+                                .get_mut(&mut self.texts)
+                                .expect("visual fanout has text");
+                            text.value = promoted.as_ref().unwrap().clone();
+                            text.shaped = None;
+                            self.layout_dirty.insert(identity);
+                            self.dirty = true;
+                            visual_changed = true;
+                        }
+                        Port::Name | Port::Description => {
+                            let base = self
+                                .metadata
+                                .as_mut()
+                                .and_then(|metadata| metadata.base_mut(identity))
+                                .expect("annotation destination has a logical column");
+                            if destination.port() == Port::Name {
+                                base.name = promoted.clone();
+                            } else {
+                                base.description = promoted.clone();
+                            }
+                        }
+                        Port::Style => unreachable!(),
+                    }
                 }
-                if last_changed != Some(destination.node()) {
-                    self.changed_nodes += 1;
-                    last_changed = Some(destination.node());
-                }
+                changed
+            };
+            if changed && last_changed != Some(index) {
+                self.changed_nodes += 1;
+                last_changed = Some(index);
             }
         }
         Ok(semantic && !visual_changed)
@@ -3377,5 +3448,225 @@ mod semantic_storage_ledger {
             runtime.text.is_none(),
             "semantic strings never initialize the shaper/rasterizer"
         );
+    }
+}
+
+#[cfg(test)]
+mod style_port_tests {
+    use super::*;
+    use crate::Signal;
+    struct Panel {
+        number: Signal<f64>,
+        color: Signal<Color>,
+        text_first: bool,
+    }
+    impl Panel {
+        const NUMBER: crate::Source<Self, f64> =
+            crate::Source::new(FieldId::new(1), "number", |m| &m.number, |m| &mut m.number);
+        const COLOR: crate::Source<Self, Color> =
+            crate::Source::new(FieldId::new(2), "color", |m| &m.color, |m| &mut m.color);
+    }
+    impl View for Panel {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::NUMBER).direct(Self::COLOR)
+        }
+        fn view(&self) -> crate::El<'_> {
+            let style = crate::div()
+                .w(&self.number)
+                .font_size(&self.number)
+                .bg(&self.color);
+            if self.text_first {
+                crate::column((crate::text(&self.number), style))
+            } else {
+                style.child(crate::text(&self.number))
+            }
+        }
+    }
+    #[test]
+    fn invalid_shared_scalar_cannot_patch_text_style_or_masked_base_in_either_order() {
+        for text_first in [false, true] {
+            let mut win = Win::with_size(
+                Panel {
+                    number: Signal::new(24.0),
+                    color: Signal::new(Color::BLACK),
+                    text_first,
+                },
+                80,
+                80,
+            )
+            .unwrap();
+            let index = usize::from(text_first) * 2;
+            let target = {
+                let runtime = win.runtime().unwrap();
+                runtime.sites.target(runtime.nodes[index].identity())
+            };
+            win.set_property(
+                target,
+                crate::property::WIDTH,
+                Contribution::Set(Some(30.0)),
+            )
+            .unwrap();
+            let before = win.runtime().unwrap().styles.get(index).to_owned();
+            assert!(win.set(Panel::NUMBER, 0.0).is_err());
+            let runtime = win.runtime().unwrap();
+            assert!(styles::exact_eq(runtime.styles.get(index), &before));
+            assert!(
+                runtime
+                    .texts
+                    .iter()
+                    .flatten()
+                    .all(|text| text.value.as_ref() == "24")
+            );
+            assert!(!runtime.logical_valid);
+            // Removing a mask uses the lower base directly. It must still be24,
+            // not the valid width0 from the rejected mixed-sink publication.
+            let mut runtime = win.runtime_mut().unwrap();
+            let identity = runtime.nodes[index].identity();
+            let lower = runtime
+                .overrides
+                .set(
+                    identity,
+                    before,
+                    crate::property::WIDTH,
+                    Contribution::Inherit,
+                )
+                .unwrap();
+            assert_eq!(lower.width, Some(24.0));
+        }
+    }
+    #[test]
+    fn fresh_cold_binding_owner_ledger() {
+        struct Bound {
+            ports: usize,
+            number: Signal<f64>,
+            color: Signal<Color>,
+            transform: Signal<Affine>,
+        }
+        impl Bound {
+            const NUMBER: crate::Source<Self, f64> =
+                crate::Source::new(FieldId::new(1), "number", |m| &m.number, |m| &mut m.number);
+            const COLOR: crate::Source<Self, Color> =
+                crate::Source::new(FieldId::new(2), "color", |m| &m.color, |m| &mut m.color);
+            const TRANSFORM: crate::Source<Self, Affine> = crate::Source::new(
+                FieldId::new(3),
+                "transform",
+                |m| &m.transform,
+                |m| &mut m.transform,
+            );
+        }
+        impl View for Bound {
+            fn sources() -> Sources<Self> {
+                Sources::new()
+                    .direct(Self::NUMBER)
+                    .direct(Self::COLOR)
+                    .direct(Self::TRANSFORM)
+            }
+            fn view(&self) -> crate::El<'_> {
+                let mut el = crate::div()
+                    .size(12)
+                    .p(12)
+                    .gap(12)
+                    .font_size(12)
+                    .fg(Color::BLACK)
+                    .bg(Color::BLACK);
+                if self.ports >= 1 {
+                    el = el.w(&self.number);
+                }
+                if self.ports >= 2 {
+                    el = el.h(&self.number);
+                }
+                if self.ports >= 8 {
+                    el = el
+                        .p(&self.number)
+                        .gap(&self.number)
+                        .font_size(&self.number)
+                        .fg(&self.color)
+                        .bg(&self.color)
+                        .transform(&self.transform);
+                }
+                el
+            }
+        }
+        for ports in [0, 1, 2, 8] {
+            let mut win = None;
+            let count = allocation_counter::measure(|| {
+                win = Some(
+                    Win::recording(
+                        Bound {
+                            ports,
+                            number: Signal::new(12.0),
+                            color: Signal::new(Color::BLACK),
+                            transform: Signal::new(Affine::IDENTITY),
+                        },
+                        WindowOptions {
+                            size: [32, 32],
+                            ..Default::default()
+                        },
+                    )
+                    .unwrap(),
+                );
+            });
+            let runtime = win.as_ref().unwrap().runtime().unwrap();
+            eprintln!(
+                "style_owner,ports={ports},requests={},requested={},retained={},peak={},fanouts={},destination_capacity_bytes={}",
+                count.count_total,
+                count.bytes_total,
+                count.bytes_current,
+                count.bytes_max,
+                runtime.fanout.len(),
+                runtime
+                    .fanout
+                    .values()
+                    .map(|fanout| fanout.destinations.capacity() * size_of::<Destination>())
+                    .sum::<usize>()
+            );
+            assert_eq!(
+                runtime
+                    .fanout
+                    .values()
+                    .map(|fanout| fanout.destinations.len())
+                    .sum::<usize>(),
+                ports
+            );
+            drop(win);
+        }
+        struct Plain;
+        impl View for Plain {
+            fn view(&self) -> crate::El<'_> {
+                crate::div()
+            }
+        }
+        let mut win = None;
+        let count = allocation_counter::measure(|| {
+            win = Some(Win::recording(Plain, WindowOptions::default()).unwrap())
+        });
+        eprintln!(
+            "style_plain_owner,requests={},requested={},retained={},peak={}",
+            count.count_total, count.bytes_total, count.bytes_current, count.bytes_max
+        );
+        drop(win);
+    }
+
+    #[test]
+    fn ordinary_headers_and_literal_owner_allocation_floor_remain_unchanged() {
+        eprintln!(
+            "style_headers,Style={},El={},Draft={},Node={},P={},Runtime={},Fanout={},Destination={},Flex={}",
+            size_of::<Style>(),
+            size_of::<crate::El<'_>>(),
+            size_of::<crate::element::DraftNode<'_>>(),
+            size_of::<Node>(),
+            size_of::<Presented>(),
+            size_of::<Runtime<()>>(),
+            size_of::<Fanout>(),
+            size_of::<Destination>(),
+            size_of::<crate::Flex<'_>>()
+        );
+        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Presented>(), 80);
+        assert_eq!(size_of::<crate::El<'_>>(), 176);
+        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
+        assert_eq!(size_of::<Style>(), 88);
+        assert_eq!(size_of::<Fanout>(), 32);
+        assert_eq!(size_of::<Destination>(), 4);
     }
 }

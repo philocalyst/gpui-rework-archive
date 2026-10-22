@@ -26,6 +26,7 @@ pub mod semantic;
 mod shared_text;
 pub mod source;
 mod style;
+mod style_port;
 
 pub use application::{Application, DemoApplication};
 pub use component::Component;
@@ -61,6 +62,7 @@ pub use scroll::{
 };
 pub use semantic::SemanticText;
 pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
+pub use style_port::{IntoProp, PropInput};
 pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Style, rgb};
 
 /// A component describes ordinary borrowed operands. No mutable runtime or

@@ -29,10 +29,15 @@ From this workspace, run the native application ports with:
 
 ```sh
 cargo run -p gpui --features x11 --example counter
+cargo run -p gpui --features x11 --example reactive_styles -- --cpu
 cargo run -p gpui --features x11 --example workbench -- --gpu
 cargo run -p gpui --features x11 --example graphics
 cargo run -p gpui --features x11 --example library -- --cpu
 ```
+
+Direct typed style sources and borrowed Flex fields use the same public ports;
+see [style inputs and limits](STYLE_PORTS.md). The `reactive_styles` example also
+runs headlessly with no native feature.
 
 Linux can instead enable `wayland`; macOS/Windows use `desktop`.
 These normal desktop profiles include the real native AccessKit adapter.

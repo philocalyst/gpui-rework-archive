@@ -97,26 +97,17 @@ macro_rules! lengths {
 }
 lengths!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 
-pub(crate) fn nonnegative(value: impl IntoLength, field: &str) -> f32 {
-    let value = value.into_length();
-    assert!(
-        value.is_finite() && value >= 0.0 && value <= f32::MAX as f64,
-        "{field} must be finite, nonnegative and representable as f32"
-    );
-    value as f32
-}
-
 /// A typed flow recipe; it finishes on the same concrete element currency.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Flex {
+pub struct Flex<'a> {
     pub(crate) flow: Flow,
-    pub(crate) gap: Option<f32>,
-    pub(crate) align: Option<Align>,
-    pub(crate) justify: Option<Justify>,
-    pub(crate) wrap: Option<bool>,
+    pub(crate) gap: Option<crate::style_port::PropInput<'a, f64>>,
+    pub(crate) align: Option<crate::style_port::PropInput<'a, Align>>,
+    pub(crate) justify: Option<crate::style_port::PropInput<'a, Justify>>,
+    pub(crate) wrap: Option<crate::style_port::PropInput<'a, bool>>,
 }
 
-impl Flex {
+impl<'a> Flex<'a> {
     pub const fn row() -> Self {
         Self {
             flow: Flow::Row,
@@ -135,34 +126,20 @@ impl Flex {
             wrap: None,
         }
     }
-    pub fn gap(mut self, gap: impl IntoLength) -> Self {
-        self.gap = Some(nonnegative(gap, "gap"));
+    pub fn gap(mut self, gap: impl crate::style_port::IntoProp<'a, f64>) -> Self {
+        self.gap = Some(gap.into_prop());
         self
     }
-    pub const fn align(mut self, align: Align) -> Self {
-        self.align = Some(align);
+    pub fn align(mut self, align: impl crate::style_port::IntoProp<'a, Align>) -> Self {
+        self.align = Some(align.into_prop());
         self
     }
-    pub const fn justify(mut self, justify: Justify) -> Self {
-        self.justify = Some(justify);
+    pub fn justify(mut self, justify: impl crate::style_port::IntoProp<'a, Justify>) -> Self {
+        self.justify = Some(justify.into_prop());
         self
     }
-    pub const fn wrap(mut self, wrap: bool) -> Self {
-        self.wrap = Some(wrap);
+    pub fn wrap(mut self, wrap: impl crate::style_port::IntoProp<'a, bool>) -> Self {
+        self.wrap = Some(wrap.into_prop());
         self
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn literals_validate_after_conversion() {
-        assert_eq!(nonnegative(8, "gap"), 8.0);
-        assert_eq!(nonnegative(2.5_f64, "padding"), 2.5);
-        for invalid in [f64::NAN, f64::INFINITY, f64::MAX, -1.0, -f64::MIN_POSITIVE] {
-            assert!(std::panic::catch_unwind(|| nonnegative(invalid, "width")).is_err());
-        }
     }
 }

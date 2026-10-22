@@ -158,7 +158,10 @@ impl<M, T: 'static, F: Fn(&mut T)> FieldAction<M, T, F> {
 
 mod sealed {
     use std::borrow::Cow;
-    pub trait TextValue: 'static {
+    pub(crate) trait TextValue: 'static {
+        // Only library implementations can supply a property adapter. Custom
+        // text adapters keep the default text-only capability.
+        const STYLE: Option<fn(&Self) -> crate::style_port::Scalar> = None;
         fn text(&self) -> Cow<'_, str>;
         fn parse_text(text: &str) -> Result<Self, &'static str>
         where
@@ -177,6 +180,7 @@ mod sealed {
 
 /// The library-owned text adapters; generic source registration does not need
 /// this trait. Formatting and parsing implementation details remain private.
+#[allow(private_bounds)]
 pub trait TextValue: sealed::TextValue {}
 impl<T: sealed::TextValue> TextValue for T {}
 
@@ -195,6 +199,7 @@ impl sealed::TextValue for String {
 macro_rules! scalar {
     ($($ty:ty),* $(,)?) => {$ (
         impl sealed::TextValue for $ty {
+            const STYLE: Option<fn(&Self) -> crate::style_port::Scalar> = Some(|value| crate::style_port::Scalar::Number(*value as f64));
             fn text(&self) -> Cow<'_, str> { Cow::Owned(self.to_string()) }
             fn parse_text(text: &str) -> Result<Self, &'static str> {
                 text.parse().map_err(|_| concat!("invalid ", stringify!($ty)))
@@ -202,8 +207,21 @@ macro_rules! scalar {
         }
     )* };
 }
-scalar!(u32, u64, i32, bool);
+scalar!(u32, u64, i32);
+impl sealed::TextValue for bool {
+    const STYLE: Option<fn(&Self) -> crate::style_port::Scalar> = Some(|value| {
+        crate::style_port::Scalar::Value(crate::property::PropertyValue::Flag(*value))
+    });
+    fn text(&self) -> Cow<'_, str> {
+        Cow::Owned(self.to_string())
+    }
+    fn parse_text(text: &str) -> Result<Self, &'static str> {
+        text.parse().map_err(|_| "invalid bool")
+    }
+}
 impl sealed::TextValue for f64 {
+    const STYLE: Option<fn(&Self) -> crate::style_port::Scalar> =
+        Some(|value| crate::style_port::Scalar::Number(*value));
     fn text(&self) -> Cow<'_, str> {
         Cow::Owned(self.to_string())
     }
@@ -233,46 +251,128 @@ impl<T: 'static> ErasedSignal for Signal<T> {
     }
 }
 
-/// A typed text adapter supplied by the borrowed text operand, separate from
-/// the generic source registry. Stored once per subscribed source fanout.
+/// One immutable descriptor per concrete source scalar, shared by every fanout.
+/// A numeric descriptor freezes both text and style when both are requested;
+/// installation order cannot discard a capability.
 #[derive(Clone, Copy)]
-pub(crate) struct TextCodec {
-    read: for<'a> fn(&'a dyn Any, FieldId) -> Result<Cow<'a, str>, BindError>,
-    write: fn(&mut dyn Any, FieldId, String) -> Result<Revision, TextEditError>,
+pub(crate) struct SourceCodec(&'static CodecDeclaration);
+pub(crate) type TextCodec = SourceCodec;
+type WriteText = fn(&mut dyn Any, FieldId, String) -> Result<Revision, TextEditError>;
+struct CodecDeclaration {
+    freeze: for<'a> fn(&'a dyn Any, FieldId, Needs) -> Result<Frozen<'a>, BindError>,
+    write: Option<WriteText>,
 }
-impl TextCodec {
-    fn for_value<T: TextValue>() -> Self {
-        Self {
-            read: |value, id| {
-                value
-                    .downcast_ref::<Signal<T>>()
-                    .map(|signal| (**signal).text())
-                    .ok_or(BindError::TypeMismatch(id))
+#[derive(Clone, Copy)]
+pub(crate) struct Needs {
+    pub text: bool,
+    pub style: bool,
+}
+pub(crate) struct Frozen<'a> {
+    pub text: Option<Cow<'a, str>>,
+    pub style: Option<crate::style_port::Scalar>,
+}
+struct TextAdapter<T>(std::marker::PhantomData<T>);
+impl<T: TextValue> TextAdapter<T> {
+    const DECLARATION: CodecDeclaration = CodecDeclaration {
+        freeze: |signal, id, needs| {
+            let signal = signal
+                .downcast_ref::<Signal<T>>()
+                .ok_or(BindError::TypeMismatch(id))?;
+            let value = &**signal;
+            let text = needs.text.then(|| value.text());
+            let style = if needs.style {
+                Some(T::STYLE.ok_or(BindError::TypeMismatch(id))?(value))
+            } else {
+                None
+            };
+            Ok(Frozen { text, style })
+        },
+        write: Some(|value, id, input| {
+            let signal = match value.downcast_mut::<Signal<T>>() {
+                Some(signal) => signal,
+                None => {
+                    return Err(TextEditError {
+                        field: id,
+                        input,
+                        reason: TextEditErrorKind::Binding(BindError::TypeMismatch(id)),
+                    });
+                }
+            };
+            let value = match T::from_text(input) {
+                Ok(value) => value,
+                Err((input, reason)) => {
+                    return Err(TextEditError {
+                        field: id,
+                        input,
+                        reason: TextEditErrorKind::InvalidValue(reason),
+                    });
+                }
+            };
+            **signal = value;
+            Ok(signal.revision())
+        }),
+    };
+}
+struct StyleAdapter<T>(std::marker::PhantomData<T>);
+impl<T: crate::style_port::Value> StyleAdapter<T> {
+    const DECLARATION: CodecDeclaration = CodecDeclaration {
+        freeze: |signal, id, needs| {
+            if needs.text {
+                return Err(BindError::TypeMismatch(id));
+            }
+            let signal = signal
+                .downcast_ref::<Signal<T>>()
+                .ok_or(BindError::TypeMismatch(id))?;
+            Ok(Frozen {
+                text: None,
+                style: needs
+                    .style
+                    .then(|| crate::style_port::Value::scalar(**signal)),
+            })
+        },
+        write: None,
+    };
+}
+impl SourceCodec {
+    pub(crate) const fn for_style<T: crate::style_port::Value>() -> Self {
+        Self(&StyleAdapter::<T>::DECLARATION)
+    }
+    pub(crate) const fn for_value<T: TextValue>() -> Self {
+        Self(&TextAdapter::<T>::DECLARATION)
+    }
+    pub(crate) fn freeze<'a>(
+        self,
+        signal: &'a dyn Any,
+        id: FieldId,
+        needs: Needs,
+    ) -> Result<Frozen<'a>, BindError> {
+        (self.0.freeze)(signal, id, needs)
+    }
+    fn read<'a>(self, signal: &'a dyn Any, id: FieldId) -> Result<Cow<'a, str>, BindError> {
+        self.freeze(
+            signal,
+            id,
+            Needs {
+                text: true,
+                style: false,
             },
-            write: |value, id, input| {
-                let signal = match value.downcast_mut::<Signal<T>>() {
-                    Some(signal) => signal,
-                    None => {
-                        return Err(TextEditError {
-                            field: id,
-                            input,
-                            reason: TextEditErrorKind::Binding(BindError::TypeMismatch(id)),
-                        });
-                    }
-                };
-                let value = match T::from_text(input) {
-                    Ok(value) => value,
-                    Err((input, reason)) => {
-                        return Err(TextEditError {
-                            field: id,
-                            input,
-                            reason: TextEditErrorKind::InvalidValue(reason),
-                        });
-                    }
-                };
-                **signal = value;
-                Ok(signal.revision())
-            },
+        )?
+        .text
+        .ok_or(BindError::TypeMismatch(id))
+    }
+    fn write(
+        self,
+        signal: &mut dyn Any,
+        id: FieldId,
+        input: String,
+    ) -> Result<Revision, TextEditError> {
+        match self.0.write {
+            Some(write) => write(signal, id, input),
+            None => Err(TextEditError {
+                field: id,
+                input,
+                reason: TextEditErrorKind::Binding(BindError::TypeMismatch(id)),
+            }),
         }
     }
 }
@@ -460,7 +560,7 @@ impl<M, T: 'static> Field<M> for Source<M, T> {
                 reason: TextEditErrorKind::Binding(BindError::ProjectionMismatch(self.id)),
             });
         }
-        (codec.write)(signal, self.id, input)
+        codec.write(signal, self.id, input)
     }
 }
 
@@ -855,13 +955,22 @@ impl<M> Sources<M> {
             self.component_for(id)?.revision(model, id)
         }
     }
+    pub(crate) fn freeze<'a>(
+        &self,
+        model: &'a M,
+        id: FieldId,
+        codec: SourceCodec,
+        needs: Needs,
+    ) -> Result<Frozen<'a>, BindError> {
+        codec.freeze(self.signal(model, id)?.as_any(), id, needs)
+    }
     pub(crate) fn read_text<'a>(
         &self,
         model: &'a M,
         id: FieldId,
         codec: TextCodec,
     ) -> Result<Cow<'a, str>, BindError> {
-        (codec.read)(self.signal(model, id)?.as_any(), id)
+        codec.read(self.signal(model, id)?.as_any(), id)
     }
     pub(crate) fn write_text(
         &self,

@@ -1774,3 +1774,10 @@ mod unicode_tests;
     any(feature = "x11", feature = "x11-minimal")
 ))]
 mod image_tests;
+
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod style_tests;
