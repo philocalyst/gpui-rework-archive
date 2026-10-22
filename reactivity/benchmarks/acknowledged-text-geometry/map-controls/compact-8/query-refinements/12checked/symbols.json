@@ -1,0 +1,128 @@
+[
+  {
+    "address": "0000000000660230",
+    "bytes": 1205,
+    "kind": "t",
+    "name": "<gpui_canvas::text::TextLayout>::selection_rects::<selection_queries::selected::{closure#0}>"
+  },
+  {
+    "address": "0000000000661460",
+    "bytes": 681,
+    "kind": "t",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}"
+  },
+  {
+    "address": "000000000065f210",
+    "bytes": 27,
+    "kind": "t",
+    "name": "selection_queries::hit"
+  },
+  {
+    "address": "000000000065ff50",
+    "bytes": 27,
+    "kind": "t",
+    "name": "selection_queries::motion"
+  },
+  {
+    "address": "000000000065ff70",
+    "bytes": 52,
+    "kind": "t",
+    "name": "selection_queries::selected"
+  },
+  {
+    "address": "0000000000661710",
+    "bytes": 1403,
+    "kind": "t",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::move_visual"
+  },
+  {
+    "address": "0000000000661c90",
+    "bytes": 1784,
+    "kind": "t",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::position_on_line"
+  },
+  {
+    "address": "00000000006797e0",
+    "bytes": 168,
+    "kind": "T",
+    "name": "<gpui_canvas::text::TextLayout>::position_at"
+  },
+  {
+    "address": "0000000000679890",
+    "bytes": 32,
+    "kind": "T",
+    "name": "<gpui_canvas::text::TextLayout>::previous_visual"
+  },
+  {
+    "address": "00000000006798b0",
+    "bytes": 133,
+    "kind": "T",
+    "name": "<gpui_canvas::text::TextLayout>::lines"
+  },
+  {
+    "address": "0000000000685610",
+    "bytes": 100,
+    "kind": "T",
+    "name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Run>>::grow_one"
+  },
+  {
+    "address": "0000000000685610",
+    "bytes": 100,
+    "kind": "T",
+    "name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Line>>::grow_one"
+  },
+  {
+    "address": "0000000000685680",
+    "bytes": 100,
+    "kind": "T",
+    "name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Stop>>::grow_one"
+  },
+  {
+    "address": "0000000000662390",
+    "bytes": 267,
+    "kind": "T",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::stop_bounds"
+  },
+  {
+    "address": "00000000006624a0",
+    "bytes": 290,
+    "kind": "T",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::validates_selection"
+  },
+  {
+    "address": "00000000006625d0",
+    "bytes": 183,
+    "kind": "T",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::source_line"
+  },
+  {
+    "address": "0000000000662690",
+    "bytes": 213,
+    "kind": "T",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::stops"
+  },
+  {
+    "address": "0000000000662770",
+    "bytes": 43,
+    "kind": "T",
+    "name": "<gpui_canvas::text::layout::TextGeometry>::intervals"
+  },
+  {
+    "address": "0000000000685a10",
+    "bytes": 135,
+    "kind": "T",
+    "name": "<alloc::sync::Arc<gpui_canvas::text::layout::TextGeometry>>::drop_slow"
+  },
+  {
+    "address": "0000000000660c30",
+    "bytes": 621,
+    "kind": "t",
+    "name": "<&mut <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1} as core::ops::function::FnMut<((&[gpui_canvas::text::layout::Stop], &[gpui_canvas::text::layout::Stop]),)>>::call_mut"
+  },
+  {
+    "address": "0000000000660ea0",
+    "bytes": 126,
+    "kind": "t",
+    "name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator::advance_by::SpecAdvanceBy>::spec_advance_by"
+  }
+]

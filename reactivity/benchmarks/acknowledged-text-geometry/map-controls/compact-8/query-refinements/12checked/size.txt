@@ -1,0 +1,35 @@
+/tmp/gpui-text-map-query-refinements/12checked/selection_queries  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1704       856
+.gnu.version            142      2560
+.gnu.version_r          304      2704
+.gnu.hash                28      3008
+.dynstr                1098      3036
+.rela.dyn             69624      4136
+.rela.plt                48     73760
+.gcc_except_table     46080     73808
+.rodata             6424904    119888
+.eh_frame_hdr         17084   6544792
+.eh_frame            104512   6561880
+.text               1174360   6670496
+.init                    27   7844856
+.fini                    13   7844884
+.plt                     48   7844912
+.tdata                   32   7849056
+.tbss                    48   7849088
+.fini_array               8   7849088
+.init_array              16   7849096
+.data.rel.ro          44168   7849112
+.dynamic                464   7893280
+.got                   8304   7893744
+.got.plt                 40   7902048
+.relro_padding         3192   7902088
+.tm_clone_table           0   7906184
+.data                  2576   7906184
+.bss                    282   7908760
+.comment                157         0
+Total               7899378
+
+
