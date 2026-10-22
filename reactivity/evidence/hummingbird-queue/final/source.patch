@@ -1,0 +1,2760 @@
+diff --git a/reactivity/ports/hummingbird/Cargo.lock b/reactivity/ports/hummingbird/Cargo.lock
+index da2081b6a4..3f220afc6e 100644
+--- a/reactivity/ports/hummingbird/Cargo.lock
++++ b/reactivity/ports/hummingbird/Cargo.lock
+@@ -100,6 +100,12 @@ dependencies = [
+  "winit",
+ ]
+ 
++[[package]]
++name = "allocation-counter"
++version = "0.8.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "beb9e990c0a33699f1984d85a6abead615ccc72dd8130bf3e15dcabe2ca149c9"
++
+ [[package]]
+ name = "allocator-api2"
+ version = "0.2.21"
+@@ -1059,9 +1065,12 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+ name = "hummingbird-gpui-port"
+ version = "0.1.0"
+ dependencies = [
++ "allocation-counter",
++ "fastrand",
+  "gpui",
+  "nucleo-matcher",
+  "rusqlite",
++ "triomphe",
+ ]
+ 
+ [[package]]
+@@ -2699,6 +2708,12 @@ dependencies = [
+  "once_cell",
+ ]
+ 
++[[package]]
++name = "triomphe"
++version = "0.1.17"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0d15f4f5898bcfc5d8a8e45ed30b2f108d710c1a2e5489dbf80e078f707181bc"
++
+ [[package]]
+ name = "ttf-parser"
+ version = "0.25.1"
+diff --git a/reactivity/ports/hummingbird/Cargo.toml b/reactivity/ports/hummingbird/Cargo.toml
+index ec067df7e3..d41dc54ab2 100644
+--- a/reactivity/ports/hummingbird/Cargo.toml
++++ b/reactivity/ports/hummingbird/Cargo.toml
+@@ -16,6 +16,11 @@ native = ["gpui/x11"]
+ gpui = { path = "../../crates/gpui" }
+ rusqlite = { version = "=0.40.2", default-features = false, features = ["bundled"] }
+ nucleo-matcher = "=0.3.1"
++triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
++fastrand = "=2.5.0"
++
++[dev-dependencies]
++allocation-counter = "=0.8.1"
+ 
+ [patch.crates-io]
+ parley = { path = "../../vendor/parley" }
+diff --git a/reactivity/ports/hummingbird/src/app.rs b/reactivity/ports/hummingbird/src/app.rs
+index 4c7864e640..6e6240688c 100644
+--- a/reactivity/ports/hummingbird/src/app.rs
++++ b/reactivity/ports/hummingbird/src/app.rs
+@@ -1,5 +1,7 @@
+ //! One public GPUI View, shared by the ordinary native and headless owners.
+ use crate::{
++    queue::TrackRef,
++    queue_view::QueueScreen,
+     search::{SearchInput, SearchPage, Sort, Version},
+     worker::{LibraryEvent, PlaybackRequest, Selection, WorkerHandle},
+ };
+@@ -12,9 +14,16 @@ pub struct Library {
+     pub selected: Signal<Selection>,
+     pub results: Reader<SearchPage>,
+     pub playback: Reader<PlaybackRequest>,
++    pub queue: QueueScreen,
+     notice: String,
+ }
+ impl Library {
++    pub const QUEUE: Component<Self, QueueScreen> = Component::new(
++        FieldId::new(5),
++        "playback queue",
++        |model| &model.queue,
++        |model| &mut model.queue,
++    );
+     pub const QUERY: Source<Self, String> =
+         Source::new(FieldId::new(1), "search", |m| &m.query, |m| &mut m.query);
+     pub const SORT: Source<Self, Sort> =
+@@ -66,6 +75,13 @@ impl Library {
+             self.notice = "This recording belongs to the previous library source".into();
+         }
+     }
++    fn enqueue(&mut self, track: TrackRef, generation: u64) {
++        if generation == self.version.generation {
++            self.queue.enqueue(track);
++        } else {
++            self.notice = "This prepared recording belongs to the previous library source".into();
++        }
++    }
+ }
+ 
+ pub fn connect(
+@@ -98,6 +114,9 @@ pub fn connect(
+             selected: Signal::new(Selection::default()),
+             results,
+             playback,
++            // Search generations use generation+1; this one stable queue owns
++            // the reserved zero domain and survives database replacement.
++            queue: QueueScreen::new(ListId::new(0)).map_err(|_| QuestionFault::Exhausted)?,
+             notice: String::new(),
+         },
+         questions,
+@@ -152,6 +171,7 @@ impl View for Library {
+             .field(Self::SORT)
+             .field(Self::VERSION)
+             .field(Self::SELECTED)
++            .direct_component(Self::QUEUE)
+     }
+     fn view(&self) -> El<'_> {
+         column((
+@@ -193,19 +213,32 @@ impl View for Library {
+                 .failed(|failure| text(format!("Library unavailable: {failure}"))),
+             self.playback
+                 .project(|request| {
+-                    text(match &request.track {
+-                        Some(track) => format!(
+-                            "Play request {}: recording {} — {}",
+-                            request.selection.sequence,
+-                            track.id,
+-                            track.location.display()
+-                        ),
+-                        None => "No recording selected".into(),
+-                    })
++                    if let Some(track) = &request.track {
++                        let leased = track.clone();
++                        let generation = request.selection.generation;
++                        column((
++                            text(format!(
++                                "Play request {}: recording {} — {}",
++                                request.selection.sequence,
++                                track.track_id.unwrap(),
++                                track.path.display()
++                            )),
++                            button(format!(
++                                "Add prepared recording {} to queue",
++                                track.track_id.unwrap()
++                            ))
++                            .on_click(move |model: &mut Library| {
++                                model.enqueue(leased.clone(), generation)
++                            }),
++                        ))
++                    } else {
++                        text("No recording selected")
++                    }
+                 })
+                 .loading(|| text("Preparing playback request…"))
+                 .failed(|failure| text(format!("Recording unavailable: {failure}"))),
+             text(self.notice.as_str()),
++            Self::QUEUE.view(self),
+         ))
+         .p(12)
+         .gap(10)
+diff --git a/reactivity/ports/hummingbird/src/lib.rs b/reactivity/ports/hummingbird/src/lib.rs
+index 4aab592517..d2dc4281b2 100644
+--- a/reactivity/ports/hummingbird/src/lib.rs
++++ b/reactivity/ports/hummingbird/src/lib.rs
+@@ -2,6 +2,9 @@ pub mod app;
+ pub mod database;
+ mod migrations;
+ pub mod query;
++pub mod queue;
++pub mod queue_playback;
++pub mod queue_view;
+ pub mod search;
+ pub mod transcript;
+ pub mod worker;
+diff --git a/reactivity/ports/hummingbird/src/main.rs b/reactivity/ports/hummingbird/src/main.rs
+index 93140078df..4ecb36d6be 100644
+--- a/reactivity/ports/hummingbird/src/main.rs
++++ b/reactivity/ports/hummingbird/src/main.rs
+@@ -67,7 +67,7 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
+             .questions(questions)
+             .with_inbox(inbox, Library::receive)
+             .title("Hummingbird — Library port")
+-            .size(720, 520)
++            .size(720, 900)
+             .renderer(match renderer {
+                 Renderer::Auto => gpui::RendererPolicy::Auto,
+                 Renderer::Cpu => gpui::RendererPolicy::ReferenceCpu,
+diff --git a/reactivity/ports/hummingbird/src/query.rs b/reactivity/ports/hummingbird/src/query.rs
+index 9f03e80c1e..94772cbd93 100644
+--- a/reactivity/ports/hummingbird/src/query.rs
++++ b/reactivity/ports/hummingbird/src/query.rs
+@@ -63,6 +63,10 @@ pub struct TrackQueryForSearch {
+ pub struct TrackQueryForPlayback {
+     query: TrackQuery,
+ }
++#[derive(Clone, Debug)]
++pub struct TrackQueryForQueue {
++    query: TrackQuery,
++}
+ #[derive(Clone, Debug, PartialEq, Eq)]
+ pub struct TrackSearchRow {
+     pub id: i64,
+@@ -76,12 +80,20 @@ pub struct TrackPlaybackRow {
+     pub album_id: Option<i64>,
+     pub location: PathBuf,
+ }
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct TrackQueueRow {
++    pub id: i64,
++    pub album_id: Option<i64>,
++    pub location: PathBuf,
++    pub title: String,
++}
+ 
+ #[derive(Clone, Copy)]
+ enum TrackProjection {
+     Id,
+     Search,
+     Playback,
++    Queue,
+ }
+ 
+ pub fn tracks() -> TrackQuery {
+@@ -153,6 +165,11 @@ impl TrackQuery {
+     pub fn for_playback(self) -> TrackQueryForPlayback {
+         TrackQueryForPlayback { query: self }
+     }
++    /// Queue metadata comes from the same filtered statement, including its
++    /// actual title. The original three-column playback projection stays intact.
++    pub fn for_queue(self) -> TrackQueryForQueue {
++        TrackQueryForQueue { query: self }
++    }
+     pub fn fetch_ids(self, connection: &Connection) -> Result<Vec<i64>> {
+         let query = self.build(TrackProjection::Id);
+         connection
+@@ -176,6 +193,7 @@ impl TrackQuery {
+             TrackProjection::Id => "track.id",
+             TrackProjection::Search => "track.id, track.title, track.artist_names, track.album_id",
+             TrackProjection::Playback => "track.id, track.album_id, track.location",
++            TrackProjection::Queue => "track.id, track.album_id, track.location, track.title",
+         });
+         query.push(" FROM track");
+         if needs_album {
+@@ -285,6 +303,22 @@ impl TrackQueryForPlayback {
+             .collect()
+     }
+ }
++impl TrackQueryForQueue {
++    pub fn fetch_rows(self, connection: &Connection) -> Result<Vec<TrackQueueRow>> {
++        let query = self.query.build(TrackProjection::Queue);
++        connection
++            .prepare(&query.sql)?
++            .query_map(params_from_iter(query.bindings), |row| {
++                Ok(TrackQueueRow {
++                    id: row.get(0)?,
++                    album_id: row.get(1)?,
++                    location: PathBuf::from(row.get::<_, String>(2)?),
++                    title: row.get(3)?,
++                })
++            })?
++            .collect()
++    }
++}
+ 
+ // Parameter binding only; all SQL fragments above/below are application source.
+ struct Statement {
+diff --git a/reactivity/ports/hummingbird/src/queue.rs b/reactivity/ports/hummingbird/src/queue.rs
+new file mode 100644
+index 0000000000..877bc66dff
+--- /dev/null
++++ b/reactivity/ports/hummingbird/src/queue.rs
+@@ -0,0 +1,741 @@
++//! Exclusive queue state. Track data may cross a service boundary; the mutable
++//! queue, order and history never do. Availability is supplied by the caller,
++//! so rendering and pure queue operations perform no filesystem I/O.
++use std::{collections::VecDeque, num::NonZeroU64, path::PathBuf};
++use triomphe::Arc;
++
++pub const UNDO_LIMIT: usize = 30;
++pub const LARGE_CHANGE: usize = 4096;
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
++/// Data identity within one queue. Cross-service authority additionally needs
++/// its controller's session/occurrence PlanStamp.
++pub struct EntryKey(NonZeroU64);
++impl EntryKey {
++    pub fn get(self) -> u64 {
++        self.0.get()
++    }
++}
++
++#[derive(Debug, PartialEq, Eq)]
++pub struct Track {
++    pub path: PathBuf,
++    pub track_id: Option<i64>,
++    pub album_id: Option<i64>,
++    pub title: String,
++    /// Worker-observed snapshot, not proof that a future decoder open succeeds.
++    pub available_when_prepared: bool,
++}
++pub type TrackRef = Arc<Track>;
++
++#[derive(Clone, Debug)]
++pub struct Entry {
++    pub key: EntryKey,
++    pub track: TrackRef,
++}
++
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub enum Repeat {
++    #[default]
++    Off,
++    All,
++    One,
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum QueueError {
++    KeyExhausted,
++    StaleEntry,
++    SessionExhausted,
++    PlanExhausted,
++    Unavailable,
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum Navigation {
++    Changed(EntryKey),
++    Repeat(EntryKey),
++    End,
++}
++pub(crate) struct Removal {
++    pub next_index: Option<usize>,
++}
++
++#[derive(Default)]
++struct Sheet {
++    // Monotonic keys keep this sorted independently of either permutation.
++    entries: Vec<Entry>,
++    order: Vec<EntryKey>,
++    original: Vec<EntryKey>,
++}
++impl Sheet {
++    fn entry(&self, key: EntryKey) -> Option<&Entry> {
++        self.entries
++            .binary_search_by_key(&key, |entry| entry.key)
++            .ok()
++            .map(|index| &self.entries[index])
++    }
++    fn index(&self, key: EntryKey) -> Option<usize> {
++        self.order.iter().position(|candidate| *candidate == key)
++    }
++}
++
++#[derive(Clone, Copy)]
++struct Before {
++    current: Option<EntryKey>,
++    shuffled: bool,
++}
++#[derive(Clone, Copy)]
++struct InsertedKeys {
++    first: EntryKey,
++    count: usize,
++}
++impl InsertedKeys {
++    fn iter(self) -> impl ExactSizeIterator<Item = EntryKey> + DoubleEndedIterator {
++        (0..self.count).map(move |offset| {
++            EntryKey(
++                NonZeroU64::new(self.first.get() + offset as u64)
++                    .expect("the allocated contiguous key range is checked and nonzero"),
++            )
++        })
++    }
++    fn contains(self, key: EntryKey) -> bool {
++        key.get()
++            .checked_sub(self.first.get())
++            .is_some_and(|offset| offset < self.count as u64)
++    }
++}
++enum Undo {
++    Inserted {
++        keys: InsertedKeys,
++        before: Before,
++    },
++    Removed {
++        entries: Vec<(usize, Entry)>,
++        original: Vec<(usize, EntryKey)>,
++        before: Before,
++    },
++    Moved {
++        positions: Vec<(usize, EntryKey)>,
++        before: Before,
++    },
++    Shuffled {
++        before: Before,
++    },
++    Unshuffled {
++        order: Vec<EntryKey>,
++        before: Before,
++    },
++    Replaced {
++        sheet: Sheet,
++        before: Before,
++    },
++}
++impl Undo {
++    fn items(&self) -> usize {
++        match self {
++            Self::Inserted { keys, .. } => keys.count,
++            Self::Removed { entries, .. } => entries.len(),
++            Self::Moved { positions, .. } => positions.len(),
++            Self::Shuffled { .. } => 0,
++            Self::Unshuffled { order, .. } => order.len(),
++            Self::Replaced { sheet, .. } => sheet.order.len(),
++        }
++    }
++    fn large(&self) -> bool {
++        self.items() > LARGE_CHANGE
++    }
++}
++
++#[derive(Default)]
++pub struct Queue {
++    sheet: Sheet,
++    current: Option<EntryKey>,
++    shuffled: bool,
++    repeat: Repeat,
++    always_repeat: bool,
++    next_key: u64,
++    undo: VecDeque<Undo>,
++}
++impl Queue {
++    pub fn len(&self) -> usize {
++        self.sheet.order.len()
++    }
++    pub fn is_empty(&self) -> bool {
++        self.sheet.order.is_empty()
++    }
++    pub fn at(&self, index: usize) -> Option<&Entry> {
++        self.sheet.entry(*self.sheet.order.get(index)?)
++    }
++    pub fn entry(&self, key: EntryKey) -> Option<&Entry> {
++        self.sheet.entry(key)
++    }
++    pub fn key(&self, value: u64) -> Option<EntryKey> {
++        self.sheet
++            .entries
++            .binary_search_by_key(&value, |entry| entry.key.get())
++            .ok()
++            .map(|index| self.sheet.entries[index].key)
++    }
++    pub fn index_of(&self, key: EntryKey) -> Option<usize> {
++        self.sheet.index(key)
++    }
++    pub fn current(&self) -> Option<EntryKey> {
++        self.current
++    }
++    pub fn current_position(&self) -> Option<usize> {
++        self.current.and_then(|key| self.sheet.index(key))
++    }
++    pub fn shuffled(&self) -> bool {
++        self.shuffled
++    }
++    pub fn repeat(&self) -> Repeat {
++        self.repeat
++    }
++    pub fn history_len(&self) -> usize {
++        self.undo.len()
++    }
++    pub fn set_repeat(&mut self, repeat: Repeat) -> bool {
++        let repeat = if repeat == Repeat::Off && self.always_repeat {
++            Repeat::All
++        } else {
++            repeat
++        };
++        let changed = self.repeat != repeat;
++        self.repeat = repeat;
++        changed
++    }
++    pub fn set_always_repeat(&mut self, enabled: bool) -> bool {
++        let changed = self.always_repeat != enabled;
++        self.always_repeat = enabled;
++        if enabled && self.repeat == Repeat::Off {
++            self.repeat = Repeat::All;
++        }
++        changed
++    }
++    pub fn same_album(&self) -> bool {
++        let Some(album) = self.at(0).and_then(|entry| entry.track.album_id) else {
++            return false;
++        };
++        self.sheet
++            .entries
++            .iter()
++            .all(|entry| entry.track.album_id == Some(album))
++    }
++    fn before(&self) -> Before {
++        Before {
++            current: self.current,
++            shuffled: self.shuffled,
++        }
++    }
++    fn remember(&mut self, action: Undo) {
++        if action.large()
++            && let Some(index) = self.undo.iter().rposition(Undo::large)
++        {
++            self.undo.drain(..=index);
++        }
++        if self.undo.len() == UNDO_LIMIT {
++            self.undo.pop_front();
++        }
++        self.undo.push_back(action);
++    }
++    fn allocate(&mut self, tracks: Vec<TrackRef>) -> Result<Option<InsertedKeys>, QueueError> {
++        let count = u64::try_from(tracks.len()).map_err(|_| QueueError::KeyExhausted)?;
++        let end = self
++            .next_key
++            .checked_add(count)
++            .ok_or(QueueError::KeyExhausted)?;
++        if tracks.is_empty() {
++            return Ok(None);
++        }
++        let keys = InsertedKeys {
++            first: EntryKey(
++                NonZeroU64::new(self.next_key + 1).expect("nonempty checked key range"),
++            ),
++            count: tracks.len(),
++        };
++        self.sheet.entries.reserve(tracks.len());
++        for (index, track) in tracks.into_iter().enumerate() {
++            let key = EntryKey(
++                NonZeroU64::new(self.next_key + index as u64 + 1)
++                    .expect("the checked key range starts above zero"),
++            );
++            self.sheet.entries.push(Entry { key, track });
++        }
++        self.next_key = end;
++        Ok(Some(keys))
++    }
++    /// Inserts before this playback-order position, clamped to the end.
++    /// While shuffled, inserted tracks append to the original permutation.
++    pub fn insert(
++        &mut self,
++        position: usize,
++        tracks: Vec<TrackRef>,
++    ) -> Result<Option<EntryKey>, QueueError> {
++        if tracks.is_empty() {
++            return Ok(None);
++        }
++        let before = self.before();
++        let keys = self
++            .allocate(tracks)?
++            .expect("a nonempty insert allocates a key range");
++        let first = keys.first;
++        let position = position.min(self.len());
++        self.sheet.order.splice(position..position, keys.iter());
++        if self.shuffled {
++            self.sheet.original.extend(keys.iter());
++        }
++        self.remember(Undo::Inserted { keys, before });
++        Ok(Some(first))
++    }
++    /// Batch append shuffles only the added suffix, as in the original player.
++    /// The draw callback supplies an index below its positive argument; modulo
++    /// also keeps malformed callback output from violating permutation safety.
++    pub fn append(
++        &mut self,
++        tracks: Vec<TrackRef>,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<Option<EntryKey>, QueueError> {
++        let start = self.len();
++        let first = self.insert(start, tracks)?;
++        if self.shuffled {
++            shuffle(&mut self.sheet.order[start..], draw);
++        }
++        Ok(first)
++    }
++    pub fn replace(
++        &mut self,
++        tracks: Vec<TrackRef>,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<(), QueueError> {
++        // Check exhaustion before moving the old authoritative sheet.
++        self.next_key
++            .checked_add(u64::try_from(tracks.len()).map_err(|_| QueueError::KeyExhausted)?)
++            .ok_or(QueueError::KeyExhausted)?;
++        let before = self.before();
++        let sheet = std::mem::take(&mut self.sheet);
++        self.sheet.order = self
++            .allocate(tracks)?
++            .map(|keys| keys.iter().collect())
++            .unwrap_or_default();
++        if self.shuffled {
++            self.sheet.original.clone_from(&self.sheet.order);
++            shuffle(&mut self.sheet.order, draw);
++        }
++        self.current = None;
++        self.remember(Undo::Replaced { sheet, before });
++        Ok(())
++    }
++    pub fn clear(&mut self, keep_current: bool) {
++        let before = self.before();
++        let retained = keep_current
++            .then(|| self.current.and_then(|key| self.entry(key).cloned()))
++            .flatten();
++        let sheet = std::mem::take(&mut self.sheet);
++        if let Some(entry) = retained {
++            self.current = Some(entry.key);
++            self.sheet.order.push(entry.key);
++            if self.shuffled {
++                self.sheet.original.push(entry.key);
++            }
++            self.sheet.entries.push(entry);
++        } else {
++            self.current = None;
++        }
++        self.remember(Undo::Replaced { sheet, before });
++    }
++    /// Remove explicit live entries. Duplicates/stale keys are ignored; removing
++    /// a selected row with no current track never starts playback.
++    pub fn remove(&mut self, keys: &[EntryKey]) -> bool {
++        self.remove_with_position(keys).is_some()
++    }
++    pub(crate) fn remove_with_position(&mut self, keys: &[EntryKey]) -> Option<Removal> {
++        let mut keys = keys.to_vec();
++        keys.sort_unstable();
++        keys.dedup();
++        keys.retain(|key| self.entry(*key).is_some());
++        if keys.is_empty() {
++            return None;
++        }
++        let before = self.before();
++        let current = self.current_position();
++        let mut removed_before = 0;
++        let mut original = Vec::new();
++        for (index, key) in self.sheet.original.iter().copied().enumerate() {
++            if keys.binary_search(&key).is_ok() {
++                original.push((index, key));
++            }
++        }
++        self.sheet
++            .original
++            .retain(|key| keys.binary_search(key).is_err());
++        let mut positions = Vec::with_capacity(keys.len());
++        for (index, key) in self.sheet.order.iter().copied().enumerate() {
++            if keys.binary_search(&key).is_ok() {
++                positions.push((key, index));
++                if current.is_some_and(|current| index < current) {
++                    removed_before += 1;
++                }
++            }
++        }
++        positions.sort_unstable_by_key(|(key, _)| *key);
++        let mut entries: Vec<_> = self
++            .sheet
++            .entries
++            .extract_if(.., |entry| keys.binary_search(&entry.key).is_ok())
++            .map(|entry| {
++                let position = positions
++                    .binary_search_by_key(&entry.key, |(key, _)| *key)
++                    .expect("every removed entry has a playback-order position");
++                (positions[position].1, entry)
++            })
++            .collect();
++        entries.sort_unstable_by_key(|(index, _)| *index);
++        self.sheet
++            .order
++            .retain(|key| keys.binary_search(key).is_err());
++        if self
++            .current
++            .is_some_and(|key| keys.binary_search(&key).is_ok())
++        {
++            self.current = None;
++        }
++        self.remember(Undo::Removed {
++            entries,
++            original,
++            before,
++        });
++        Some(Removal {
++            next_index: current.map(|index| index - removed_before),
++        })
++    }
++    /// Destination is a position in the order AFTER removal. Source order is
++    /// retained regardless of the caller's selection ordering.
++    pub fn move_entries(&mut self, keys: &[EntryKey], destination: usize) -> bool {
++        let mut keys = keys.to_vec();
++        keys.sort_unstable();
++        keys.dedup();
++        let positions: Vec<_> = self
++            .sheet
++            .order
++            .iter()
++            .copied()
++            .enumerate()
++            .filter(|(_, key)| keys.binary_search(key).is_ok())
++            .collect();
++        if positions.is_empty() {
++            return false;
++        }
++        let destination = destination.min(self.len() - positions.len());
++        if positions
++            .iter()
++            .enumerate()
++            .all(|(offset, (index, _))| *index == destination + offset)
++        {
++            return false;
++        }
++        let before = self.before();
++        self.sheet
++            .order
++            .retain(|key| keys.binary_search(key).is_err());
++        self.sheet.order.splice(
++            destination..destination,
++            positions.iter().map(|(_, key)| *key),
++        );
++        self.remember(Undo::Moved { positions, before });
++        true
++    }
++    pub fn toggle_shuffle(&mut self, draw: &mut impl FnMut(usize) -> usize) {
++        let before = self.before();
++        self.shuffled = !self.shuffled;
++        if self.shuffled {
++            self.sheet.original.clone_from(&self.sheet.order);
++            let start = self.current_position().map_or(0, |index| index + 1);
++            shuffle(&mut self.sheet.order[start..], draw);
++            self.remember(Undo::Shuffled { before });
++        } else {
++            let order = std::mem::replace(
++                &mut self.sheet.order,
++                std::mem::take(&mut self.sheet.original),
++            );
++            self.remember(Undo::Unshuffled { order, before });
++        }
++    }
++    pub fn undo(&mut self) -> bool {
++        let Some(action) = self.undo.pop_back() else {
++            return false;
++        };
++        let before = match action {
++            Undo::Inserted { keys, before } => {
++                self.sheet.order.retain(|key| !keys.contains(*key));
++                self.sheet.original.retain(|key| !keys.contains(*key));
++                self.sheet.entries.retain(|entry| !keys.contains(entry.key));
++                before
++            }
++            Undo::Removed {
++                entries,
++                original,
++                before,
++            } => {
++                restore_keys(&mut self.sheet.order, &entries, |entry| entry.key);
++                restore_keys(&mut self.sheet.original, &original, |key| *key);
++                self.sheet
++                    .entries
++                    .extend(entries.into_iter().map(|(_, entry)| entry));
++                self.sheet.entries.sort_unstable_by_key(|entry| entry.key);
++                before
++            }
++            Undo::Moved { positions, before } => {
++                let mut keys: Vec<_> = positions.iter().map(|(_, key)| *key).collect();
++                keys.sort_unstable();
++                self.sheet
++                    .order
++                    .retain(|key| keys.binary_search(key).is_err());
++                restore_keys(&mut self.sheet.order, &positions, |key| *key);
++                before
++            }
++            Undo::Shuffled { before } => {
++                self.sheet.order = std::mem::take(&mut self.sheet.original);
++                before
++            }
++            Undo::Unshuffled { order, before } => {
++                self.sheet.original = std::mem::replace(&mut self.sheet.order, order);
++                before
++            }
++            Undo::Replaced { sheet, before } => {
++                self.sheet = sheet;
++                before
++            }
++        };
++        self.current = before.current;
++        self.shuffled = before.shuffled;
++        true
++    }
++    pub fn jump(
++        &mut self,
++        key: EntryKey,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<Navigation, QueueError> {
++        let entry = self.entry(key).ok_or(QueueError::StaleEntry)?;
++        if !available(&entry.track) {
++            return Ok(Navigation::End);
++        }
++        self.current = Some(key);
++        Ok(Navigation::Changed(key))
++    }
++    pub fn original_key(&self, index: usize) -> Option<EntryKey> {
++        if self.shuffled {
++            self.sheet.original.get(index).copied()
++        } else {
++            self.sheet.order.get(index).copied()
++        }
++    }
++    pub fn first_available(&self, available: &impl Fn(&Track) -> bool) -> Option<EntryKey> {
++        self.available_from(0, available)
++    }
++    pub fn available_from(
++        &self,
++        index: usize,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Option<EntryKey> {
++        self.sheet
++            .order
++            .get(index..)?
++            .iter()
++            .copied()
++            .find(|key| available(&self.entry(*key).unwrap().track))
++    }
++    /// A resolved automatic successor. A shuffled wrap is chosen at navigation,
++    /// so it has no speculative lookahead before that permutation is committed.
++    pub fn lookahead(&self, available: &impl Fn(&Track) -> bool) -> Option<EntryKey> {
++        if self.repeat == Repeat::One {
++            return self
++                .current
++                .filter(|key| available(&self.entry(*key).unwrap().track));
++        }
++        let next = self.available_from(
++            self.current_position().map_or(0, |index| index + 1),
++            available,
++        );
++        next.or_else(|| {
++            (self.repeat == Repeat::All && !self.shuffled)
++                .then(|| self.first_available(available))
++                .flatten()
++        })
++    }
++    pub fn next(
++        &mut self,
++        manual: bool,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Navigation {
++        if self.repeat == Repeat::One
++            && !manual
++            && let Some(key) = self.current
++            && available(&self.entry(key).unwrap().track)
++        {
++            return Navigation::Repeat(key);
++        }
++        let start = self.current_position().map_or(0, |index| index + 1);
++        let next = self.sheet.order[start..]
++            .iter()
++            .copied()
++            .find(|key| available(&self.entry(*key).unwrap().track));
++        let next = next.or_else(|| {
++            if self.repeat != Repeat::All {
++                return None;
++            }
++            if self.shuffled {
++                shuffle(&mut self.sheet.order, draw);
++            }
++            self.first_available(available)
++        });
++        self.admit_navigation(next)
++    }
++    pub fn previous(
++        &mut self,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Navigation {
++        let end = self.current_position().unwrap_or(0);
++        let previous = self.sheet.order[..end]
++            .iter()
++            .rev()
++            .copied()
++            .find(|key| available(&self.entry(*key).unwrap().track));
++        let previous = previous.or_else(|| {
++            if self.repeat != Repeat::All {
++                return None;
++            }
++            if self.shuffled {
++                shuffle(&mut self.sheet.order, draw);
++            }
++            self.sheet
++                .order
++                .iter()
++                .rev()
++                .copied()
++                .find(|key| available(&self.entry(*key).unwrap().track))
++        });
++        self.admit_navigation(previous)
++    }
++    fn admit_navigation(&mut self, key: Option<EntryKey>) -> Navigation {
++        if let Some(key) = key {
++            self.current = Some(key);
++            Navigation::Changed(key)
++        } else {
++            Navigation::End
++        }
++    }
++}
++
++fn shuffle(keys: &mut [EntryKey], draw: &mut impl FnMut(usize) -> usize) {
++    for index in (1..keys.len()).rev() {
++        let other = draw(index + 1) % (index + 1);
++        keys.swap(index, other);
++    }
++}
++
++/// Restore removed positions in one backwards pass. Entry keys are Copy, and
++/// every destination is at or above its unread source: growing the vector does
++/// not overwrite a key still needed by this merge. The temporary fill key never
++/// escapes this exclusively borrowed sheet. Payload owners stay coupled to
++/// their keys in the history; this helper borrows them without cloning leases.
++fn restore_keys<T>(
++    order: &mut Vec<EntryKey>,
++    positions: &[(usize, T)],
++    key: impl Fn(&T) -> EntryKey,
++) {
++    let Some((_, first)) = positions.first() else {
++        return;
++    };
++    let mut source = order.len();
++    order.resize(source + positions.len(), key(first));
++    let mut removed = positions.iter().rev().peekable();
++    for destination in (0..order.len()).rev() {
++        if removed
++            .peek()
++            .is_some_and(|(index, _)| *index == destination)
++        {
++            let (_, value) = removed.next().unwrap();
++            order[destination] = key(value);
++        } else {
++            source -= 1;
++            order[destination] = order[source];
++        }
++    }
++    debug_assert_eq!(source, 0);
++    debug_assert!(removed.next().is_none());
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn contiguous_inserted_range_includes_maximum_key_and_never_recycles() {
++        let track = TrackRef::new(Track {
++            path: "/prepared.flac".into(),
++            track_id: None,
++            album_id: None,
++            title: String::new(),
++            available_when_prepared: true,
++        });
++        let mut queue = Queue {
++            next_key: u64::MAX - 1,
++            ..Default::default()
++        };
++        let key = queue.insert(0, vec![track.clone()]).unwrap().unwrap();
++        assert_eq!(key.get(), u64::MAX);
++        assert_eq!(
++            queue.insert(0, vec![track.clone()]),
++            Err(QueueError::KeyExhausted)
++        );
++        assert_eq!(queue.len(), 1);
++        queue.replace(Vec::new(), &mut |_| 0).unwrap();
++        assert!(queue.is_empty());
++        assert!(queue.undo());
++        assert_eq!(queue.at(0).unwrap().key, key);
++        assert!(queue.undo());
++        assert!(queue.is_empty());
++        assert_eq!(queue.insert(0, vec![track]), Err(QueueError::KeyExhausted));
++    }
++    #[test]
++    fn inverse_key_merge_restores_every_small_removal_subset_without_reordering() {
++        for count in 1..11 {
++            let tracks = (0..count)
++                .map(|id| {
++                    TrackRef::new(Track {
++                        path: format!("/{id}").into(),
++                        track_id: None,
++                        album_id: None,
++                        title: String::new(),
++                        available_when_prepared: true,
++                    })
++                })
++                .collect::<Vec<_>>();
++            for mask in 1..(1usize << count) {
++                let mut queue = Queue::default();
++                queue.append(tracks.clone(), &mut |_| 0).unwrap();
++                let original = queue.sheet.order.clone();
++                let selected = original
++                    .iter()
++                    .enumerate()
++                    .filter(|(index, _)| mask & (1 << index) != 0)
++                    .map(|(_, key)| *key)
++                    .collect::<Vec<_>>();
++                assert!(queue.remove(&selected));
++                assert!(queue.undo());
++                assert_eq!(queue.sheet.order, original);
++                assert_eq!(
++                    queue
++                        .sheet
++                        .entries
++                        .iter()
++                        .map(|entry| entry.key)
++                        .collect::<Vec<_>>(),
++                    original
++                );
++            }
++        }
++    }
++}
+diff --git a/reactivity/ports/hummingbird/src/queue_playback.rs b/reactivity/ports/hummingbird/src/queue_playback.rs
+new file mode 100644
+index 0000000000..748540c66f
+--- /dev/null
++++ b/reactivity/ports/hummingbird/src/queue_playback.rs
+@@ -0,0 +1,362 @@
++//! Decoder-facing plans, not a shared queue or a read-question side effect.
++//! A real decoder installs an owned Plan and returns its opaque EOS stamp.
++//! Audio decoding/device output are outside this queue contract.
++use crate::queue::{Entry, EntryKey, Navigation, Queue, QueueError, Repeat, Track, TrackRef};
++use std::{
++    num::NonZeroU64,
++    sync::atomic::{AtomicU64, Ordering},
++};
++
++static NEXT_SESSION: AtomicU64 = AtomicU64::new(0);
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct PlanStamp {
++    session: NonZeroU64,
++    serial: NonZeroU64,
++    entry: EntryKey,
++}
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct EndOfStream(PlanStamp);
++
++#[derive(Clone, Debug)]
++pub struct Plan {
++    stamp: PlanStamp,
++    pub current: Entry,
++    pub lookahead: Option<Entry>,
++}
++impl Plan {
++    /// A fresh stamp retires EOS authority. It does not alone request reopening
++    /// or seeking this path: edits reconcile lookahead while explicit play is a
++    /// restart intent. A future real decoder adapter must distinguish those
++    /// accepted intents instead of restarting the current file on every edit.
++    pub fn stamp(&self) -> PlanStamp {
++        self.stamp
++    }
++    pub fn end_of_stream(&self) -> EndOfStream {
++        EndOfStream(self.stamp)
++    }
++}
++
++/// Exclusive application controller. It is deliberately non-Clone; restoration
++/// creates a new session. The relaxed counter supplies identity only: a service
++/// channel/wake, not this counter, publishes a Plan to another thread.
++pub struct PlaybackQueue {
++    queue: Queue,
++    session: NonZeroU64,
++    serial: u64,
++    plan: Option<Plan>,
++}
++impl PlaybackQueue {
++    pub fn new() -> Result<Self, QueueError> {
++        let previous = NEXT_SESSION
++            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
++                value.checked_add(1)
++            })
++            .map_err(|_| QueueError::SessionExhausted)?;
++        Ok(Self {
++            queue: Queue::default(),
++            session: NonZeroU64::new(previous + 1)
++                .expect("the checked session counter starts above zero"),
++            serial: 0,
++            plan: None,
++        })
++    }
++    pub fn queue(&self) -> &Queue {
++        &self.queue
++    }
++    pub fn plan(&self) -> Option<&Plan> {
++        self.plan.as_ref()
++    }
++    fn next_serial(&self) -> Result<NonZeroU64, QueueError> {
++        self.serial
++            .checked_add(1)
++            .and_then(NonZeroU64::new)
++            .ok_or(QueueError::PlanExhausted)
++    }
++    fn install(&mut self, serial: NonZeroU64, available: &impl Fn(&Track) -> bool) {
++        self.serial = serial.get();
++        self.plan = self.queue.current().map(|key| {
++            let current = self
++                .queue
++                .entry(key)
++                .expect("the controller retains a live current key")
++                .clone();
++            let lookahead = self
++                .queue
++                .lookahead(available)
++                .map(|key| self.queue.entry(key).unwrap().clone());
++            Plan {
++                stamp: PlanStamp {
++                    session: self.session,
++                    serial,
++                    entry: key,
++                },
++                current,
++                lookahead,
++            }
++        });
++    }
++    fn refresh(&mut self, serial: NonZeroU64, available: &impl Fn(&Track) -> bool) {
++        if self.plan.is_some() {
++            self.install(serial, available);
++        } else {
++            // Even a stopped edit invalidates an older in-flight occurrence.
++            self.serial = serial.get();
++        }
++    }
++    fn navigate(
++        &mut self,
++        navigation: Navigation,
++        serial: NonZeroU64,
++        available: &impl Fn(&Track) -> bool,
++    ) {
++        match navigation {
++            Navigation::Changed(_) | Navigation::Repeat(_) => self.install(serial, available),
++            Navigation::End => {
++                self.serial = serial.get();
++                self.plan = None;
++            }
++        }
++    }
++    /// Explicit play/restart is an occurrence even for the same entry.
++    pub fn play(
++        &mut self,
++        key: EntryKey,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<bool, QueueError> {
++        let serial = self.next_serial()?;
++        match self.queue.jump(key, available)? {
++            Navigation::Changed(_) => {
++                self.install(serial, available);
++                Ok(true)
++            }
++            Navigation::End => Ok(false),
++            Navigation::Repeat(_) => {
++                unreachable!("jump returns only a changed target or unavailable")
++            }
++        }
++    }
++    pub fn next(
++        &mut self,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<(), QueueError> {
++        let serial = self.next_serial()?;
++        let navigation = self.queue.next(true, available, draw);
++        self.navigate(navigation, serial, available);
++        Ok(())
++    }
++    pub fn previous(
++        &mut self,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<(), QueueError> {
++        let serial = self.next_serial()?;
++        let navigation = self.queue.previous(available, draw);
++        // At the start, Previous does nothing rather than stopping the plan.
++        if navigation != Navigation::End {
++            self.navigate(navigation, serial, available);
++        }
++        Ok(())
++    }
++    /// Duplicate/late EOS is inert, including after replacement of the whole
++    /// controller. RepeatOne creates a new occurrence before accepting EOS again.
++    pub fn end_of_stream(
++        &mut self,
++        event: EndOfStream,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<bool, QueueError> {
++        if self.plan.as_ref().map(|plan| plan.stamp) != Some(event.0) {
++            return Ok(false);
++        }
++        let serial = self.next_serial()?;
++        let navigation = self.queue.next(false, available, draw);
++        self.navigate(navigation, serial, available);
++        Ok(true)
++    }
++    /// Revocation requires no fresh stamp and remains available at exhaustion.
++    pub fn stop(&mut self) {
++        self.plan = None;
++    }
++    pub fn append(
++        &mut self,
++        tracks: Vec<TrackRef>,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<Option<EntryKey>, QueueError> {
++        let serial = self.next_serial()?;
++        let start = self.queue.len();
++        let first = self.queue.append(tracks, draw)?;
++        if first.is_some() {
++            if self.plan.is_none()
++                && let Some(key) = self.queue.available_from(start, available)
++            {
++                self.queue.jump(key, available)?;
++                self.install(serial, available);
++            } else {
++                self.refresh(serial, available);
++            }
++        }
++        Ok(first)
++    }
++    pub fn insert(
++        &mut self,
++        index: usize,
++        tracks: Vec<TrackRef>,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<Option<EntryKey>, QueueError> {
++        let serial = self.next_serial()?;
++        let start = index.min(self.queue.len());
++        let count = tracks.len();
++        let first = self.queue.insert(index, tracks)?;
++        if first.is_some() {
++            let playable = (start..start + count)
++                .filter_map(|index| self.queue.at(index))
++                .find(|entry| available(&entry.track))
++                .map(|entry| entry.key);
++            if self.plan.is_none()
++                && let Some(key) = playable
++            {
++                self.queue.jump(key, available)?;
++                self.install(serial, available);
++            } else {
++                self.refresh(serial, available);
++            }
++        }
++        Ok(first)
++    }
++    pub fn remove(
++        &mut self,
++        keys: &[EntryKey],
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<bool, QueueError> {
++        let serial = self.next_serial()?;
++        let Some(removal) = self.queue.remove_with_position(keys) else {
++            return Ok(false);
++        };
++        if self.plan.is_some()
++            && self.queue.current().is_none()
++            && let Some(key) = removal
++                .next_index
++                .and_then(|index| self.queue.available_from(index, available))
++        {
++            self.queue.jump(key, available)?;
++        }
++        self.refresh(serial, available);
++        Ok(true)
++    }
++    pub fn move_entries(
++        &mut self,
++        keys: &[EntryKey],
++        destination: usize,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<bool, QueueError> {
++        let serial = self.next_serial()?;
++        let changed = self.queue.move_entries(keys, destination);
++        if changed {
++            self.refresh(serial, available);
++        }
++        Ok(changed)
++    }
++    pub fn replace(
++        &mut self,
++        tracks: Vec<TrackRef>,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<(), QueueError> {
++        let serial = self.next_serial()?;
++        self.queue.replace(tracks, draw)?;
++        if let Some(key) = self.queue.first_available(available) {
++            self.queue.jump(key, available)?;
++        }
++        self.install(serial, available);
++        Ok(())
++    }
++    pub fn clear(
++        &mut self,
++        keep_current: bool,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<(), QueueError> {
++        let serial = self.next_serial()?;
++        self.queue.clear(keep_current && self.plan.is_some());
++        self.refresh(serial, available);
++        Ok(())
++    }
++    pub fn undo(&mut self, available: &impl Fn(&Track) -> bool) -> Result<bool, QueueError> {
++        let serial = self.next_serial()?;
++        let changed = self.queue.undo();
++        if changed {
++            self.refresh(serial, available);
++        }
++        Ok(changed)
++    }
++    pub fn toggle_shuffle(
++        &mut self,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<(), QueueError> {
++        let serial = self.next_serial()?;
++        self.queue.toggle_shuffle(draw);
++        self.refresh(serial, available);
++        Ok(())
++    }
++    pub fn set_repeat(
++        &mut self,
++        repeat: Repeat,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<bool, QueueError> {
++        let serial = self.next_serial()?;
++        let changed = self.queue.set_repeat(repeat);
++        if changed {
++            self.refresh(serial, available);
++        }
++        Ok(changed)
++    }
++    /// Call after accepted availability changes even if the current key stays
++    /// equal: the resolved lookahead and EOS policy belong to a new plan.
++    pub fn availability_changed(
++        &mut self,
++        available: &impl Fn(&Track) -> bool,
++    ) -> Result<(), QueueError> {
++        let serial = self.next_serial()?;
++        self.refresh(serial, available);
++        Ok(())
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn exhausted_plan_sequence_rejects_mutation_but_stop_still_revokes_eos() {
++        let track = TrackRef::new(Track {
++            path: "/prepared.flac".into(),
++            track_id: None,
++            album_id: None,
++            title: String::new(),
++            available_when_prepared: true,
++        });
++        let mut player = PlaybackQueue::new().unwrap();
++        player
++            .append(vec![track.clone()], &|_| true, &mut |_| 0)
++            .unwrap();
++        let key = player.queue.at(0).unwrap().key;
++        let event = player.plan().unwrap().end_of_stream();
++        player.serial = u64::MAX;
++        assert_eq!(player.play(key, &|_| true), Err(QueueError::PlanExhausted));
++        assert_eq!(
++            player.remove(&[key], &|_| true),
++            Err(QueueError::PlanExhausted)
++        );
++        assert_eq!(
++            player.replace(vec![track], &|_| true, &mut |_| 0),
++            Err(QueueError::PlanExhausted)
++        );
++        assert_eq!(player.queue.len(), 1);
++        assert_eq!(player.plan().unwrap().end_of_stream(), event);
++        player.stop();
++        assert!(player.plan().is_none());
++        assert!(!player.end_of_stream(event, &|_| true, &mut |_| 0).unwrap());
++    }
++}
+diff --git a/reactivity/ports/hummingbird/src/queue_view.rs b/reactivity/ports/hummingbird/src/queue_view.rs
+new file mode 100644
+index 0000000000..683bd2022b
+--- /dev/null
++++ b/reactivity/ports/hummingbird/src/queue_view.rs
+@@ -0,0 +1,247 @@
++//! Ordinary public queue consumer. Explicit controls expose selection and range
++//! operations until modified-click/drag metadata has a portable public route.
++use crate::{
++    queue::{EntryKey, QueueError, Repeat, Track, TrackRef},
++    queue_playback::{EndOfStream, PlaybackQueue},
++};
++use gpui::prelude::*;
++
++pub struct QueueScreen {
++    playback: PlaybackQueue,
++    selected: Vec<EntryKey>,
++    anchor: Option<EntryKey>,
++    list: ListId,
++    notice: String,
++}
++fn available(track: &Track) -> bool {
++    track.available_when_prepared
++}
++fn draw(upper: usize) -> usize {
++    fastrand::usize(..upper)
++}
++impl QueueScreen {
++    /// `list` names this queue's key domain. Reconstructing a screen in the same
++    /// window requires a fresh ListId; ordinary edits keep monotonically fresh
++    /// entry keys and preserve this domain. One Library owns one screen.
++    pub fn new(list: ListId) -> Result<Self, QueueError> {
++        Ok(Self {
++            playback: PlaybackQueue::new()?,
++            selected: Vec::new(),
++            anchor: None,
++            list,
++            notice: String::new(),
++        })
++    }
++    pub fn list_id(&self) -> ListId {
++        self.list
++    }
++    pub fn playback(&self) -> &PlaybackQueue {
++        &self.playback
++    }
++    pub fn selected(&self) -> &[EntryKey] {
++        &self.selected
++    }
++    pub fn enqueue(&mut self, track: TrackRef) {
++        self.enqueue_many(vec![track]);
++    }
++    pub fn enqueue_many(&mut self, tracks: Vec<TrackRef>) {
++        let result = self.playback.append(tracks, &available, &mut draw);
++        self.changed(result.map(|_| ()));
++    }
++    /// The application may bind this to its real decoder's typed Inbox. The
++    /// queue UI itself never fabricates EOS or installs an audio side effect.
++    pub fn receive_end_of_stream(&mut self, event: EndOfStream) {
++        match self.playback.end_of_stream(event, &available, &mut draw) {
++            Ok(true) => self.changed(Ok(())),
++            Ok(false) => {}
++            Err(error) => self.changed(Err(error)),
++        }
++    }
++    fn changed(&mut self, result: Result<(), QueueError>) {
++        match result {
++            Ok(()) => {
++                // Original queue-update notification clears selection too.
++                self.selected.clear();
++                self.anchor = None;
++                self.notice.clear();
++            }
++            Err(error) => self.notice = format!("Queue rejected: {error:?}"),
++        }
++    }
++    pub fn select(&mut self, key: EntryKey) {
++        if self.playback.queue().entry(key).is_some() {
++            self.selected.clear();
++            self.selected.push(key);
++            self.anchor = Some(key);
++        }
++    }
++    pub fn toggle(&mut self, key: EntryKey) {
++        if self.playback.queue().entry(key).is_none() {
++            return;
++        }
++        match self.selected.binary_search(&key) {
++            Ok(index) => {
++                self.selected.remove(index);
++                if self.anchor == Some(key) {
++                    self.anchor = self.selected.first().copied();
++                }
++            }
++            Err(index) => {
++                self.selected.insert(index, key);
++                self.anchor = Some(key);
++            }
++        }
++    }
++    pub fn range(&mut self, key: EntryKey) {
++        let queue = self.playback.queue();
++        let Some(index) = queue.index_of(key) else {
++            return;
++        };
++        let anchor = self.anchor.or(queue.current()).unwrap_or(key);
++        let Some(start) = queue.index_of(anchor) else {
++            return;
++        };
++        self.anchor = Some(anchor);
++        self.selected = (start.min(index)..=start.max(index))
++            .map(|index| queue.at(index).unwrap().key)
++            .collect();
++        self.selected.sort_unstable();
++    }
++    fn play(&mut self, key: EntryKey) {
++        let result = self.playback.play(key, &available);
++        self.changed(result.and_then(|accepted| {
++            if accepted {
++                Ok(())
++            } else {
++                Err(QueueError::Unavailable)
++            }
++        }));
++    }
++    fn next(&mut self) {
++        let result = self.playback.next(&available, &mut draw);
++        self.changed(result);
++    }
++    fn previous(&mut self) {
++        let result = self.playback.previous(&available, &mut draw);
++        self.changed(result);
++    }
++    fn remove(&mut self) {
++        let result = self.playback.remove(&self.selected, &available);
++        self.changed(result.map(|_| ()));
++    }
++    fn move_to(&mut self, destination: usize) {
++        let result = self
++            .playback
++            .move_entries(&self.selected, destination, &available);
++        self.changed(result.map(|_| ()));
++    }
++    fn shuffle(&mut self) {
++        let result = self.playback.toggle_shuffle(&available, &mut draw);
++        self.changed(result);
++    }
++    fn repeat(&mut self) {
++        let next = match self.playback.queue().repeat() {
++            Repeat::Off => Repeat::All,
++            Repeat::All => Repeat::One,
++            Repeat::One => Repeat::Off,
++        };
++        let result = self.playback.set_repeat(next, &available);
++        self.changed(result.map(|_| ()));
++    }
++    fn undo(&mut self) {
++        let result = self.playback.undo(&available);
++        self.changed(result.map(|_| ()));
++    }
++    fn clear(&mut self) {
++        let result = self.playback.clear(true, &available);
++        self.changed(result);
++    }
++}
++impl ItemSource for QueueScreen {
++    fn len(&self) -> usize {
++        self.playback.queue().len()
++    }
++    fn key(&self, index: usize) -> ItemKey {
++        ItemKey::new(self.playback.queue().at(index).unwrap().key.get())
++    }
++    fn index_of(&self, key: ItemKey) -> Option<usize> {
++        let queue = self.playback.queue();
++        queue.index_of(queue.key(key.get())?)
++    }
++    fn row(&self, index: usize) -> El<'_> {
++        let entry = self.playback.queue().at(index).unwrap();
++        let key = entry.key;
++        let play = button("Prepare")
++            .name(format!("Prepare {}", entry.track.title))
++            .w(80);
++        row((
++            checkbox(
++                entry.track.title.as_str(),
++                self.selected.binary_search(&key).is_ok(),
++            )
++            .description("Select or unselect this queued recording")
++            .w(240)
++            .on_click(move |model: &mut Self| model.toggle(key)),
++            button("Only")
++                .name(format!("Select only {}", entry.track.title))
++                .w(55)
++                .on_click(move |model: &mut Self| model.select(key)),
++            button("Range")
++                .name(format!("Select range to {}", entry.track.title))
++                .w(70)
++                .on_click(move |model: &mut Self| model.range(key)),
++            if available(&entry.track) {
++                play.on_click(move |model: &mut Self| model.play(key))
++            } else {
++                play.description("Path was unavailable when prepared by the library worker")
++            },
++        ))
++        .h(40)
++        .bg(if self.playback.queue().current() == Some(key) {
++            rgb(0xe0f2fe)
++        } else {
++            Color::WHITE
++        })
++    }
++}
++impl View for QueueScreen {
++    fn view(&self) -> El<'_> {
++        let last = self.playback.queue().len();
++        column((
++            text(format!("Queue — {} entries", last)).font_size(20),
++            text("Decoder plans only; audio output is not attached"),
++            row((
++                button("Previous").on_click(Self::previous),
++                button("Next").on_click(Self::next),
++                checkbox("Shuffle queue", self.playback.queue().shuffled()).on_click(Self::shuffle),
++                button(format!("Repeat: {:?}", self.playback.queue().repeat()))
++                    .on_click(Self::repeat),
++                button("Undo queue edit").on_click(Self::undo),
++                button("Clear upcoming").on_click(Self::clear),
++            ))
++            .gap(8),
++            row((
++                button("Remove selected").on_click(Self::remove),
++                button("Move selected first").on_click(|model: &mut Self| model.move_to(0)),
++                button("Move selected last").on_click(move |model: &mut Self| model.move_to(last)),
++            ))
++            .gap(8),
++            uniform_list(self.list, self, 40)
++                .name("Playback queue")
++                .w(650)
++                .h(160),
++            text(self.playback.plan().map_or_else(
++                || "No decoder plan".into(),
++                |plan| {
++                    format!(
++                        "Prepared {} — {}",
++                        plan.current.track.title,
++                        plan.current.track.path.display()
++                    )
++                },
++            )),
++            text(self.notice.as_str()),
++        ))
++        .gap(6)
++    }
++}
+diff --git a/reactivity/ports/hummingbird/src/transcript.rs b/reactivity/ports/hummingbird/src/transcript.rs
+index 8c26ad8424..e5f8369d40 100644
+--- a/reactivity/ports/hummingbird/src/transcript.rs
++++ b/reactivity/ports/hummingbird/src/transcript.rs
+@@ -82,7 +82,9 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
+     win.click(original_play)?;
+     settle(&mut win, &worker)?;
+     let played_id = win
+-        .with_ready(playback, |request| request.track.as_ref().unwrap().id)?
++        .with_ready(playback, |request| {
++            request.track.as_ref().unwrap().track_id.unwrap()
++        })?
+         .unwrap();
+     assert_eq!(played_id, 44);
+     assert!(win.contains_text("Play request 1: recording 44 — /music/44.flac")?);
+@@ -100,7 +102,12 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
+     assert_eq!(ids(&win), [13, 11, 21, 5000, 90, 44, 1001, 1, 3, 2]);
+     assert_eq!(play_target(&win, 44), original_play);
+     assert_eq!(
+-        win.with_ready(playback, |request| request.track.as_ref().unwrap().id)?,
++        win.with_ready(playback, |request| request
++            .track
++            .as_ref()
++            .unwrap()
++            .track_id
++            .unwrap())?,
+         Some(44)
+     );
+ 
+diff --git a/reactivity/ports/hummingbird/src/worker.rs b/reactivity/ports/hummingbird/src/worker.rs
+index 965b84b09d..4d16a09085 100644
+--- a/reactivity/ports/hummingbird/src/worker.rs
++++ b/reactivity/ports/hummingbird/src/worker.rs
+@@ -1,7 +1,8 @@
+ //! One explicit, bounded application service; no UI/runtime/entity executor.
+ use crate::{
+     database::Database,
+-    query::{TrackPlaybackRow, tracks},
++    query::tracks,
++    queue::{Track, TrackRef},
+     search::{SearchInput, SearchPage, Searcher, SourceError, Version},
+ };
+ use gpui::{Completion, Inbox, Remote, StartError};
+@@ -27,7 +28,7 @@ pub struct Selection {
+ }
+ pub struct PlaybackRequest {
+     pub selection: Selection,
+-    pub track: Option<TrackPlaybackRow>,
++    pub track: Option<TrackRef>,
+ }
+ #[derive(Debug)]
+ pub enum LibraryEvent {
+@@ -109,7 +110,7 @@ impl Worker {
+                                         None => Ok(None),
+                                         Some(id) => tracks()
+                                             .by_id(id)
+-                                            .for_playback()
++                                            .for_queue()
+                                             .fetch_rows(database.connection())
+                                             .map_err(SourceError::from)
+                                             .and_then(|mut rows| {
+@@ -121,9 +122,19 @@ impl Worker {
+                                     if cancellation.is_cancelled() {
+                                         None
+                                     } else {
+-                                        Some(
+-                                            track.map(|track| PlaybackRequest { selection, track }),
+-                                        )
++                                        Some(track.map(|track| PlaybackRequest {
++                                            selection,
++                                            track: track.map(|row| {
++                                                let available_when_prepared = row.location.exists();
++                                                TrackRef::new(Track {
++                                                    path: row.location,
++                                                    track_id: Some(row.id),
++                                                    album_id: row.album_id,
++                                                    title: row.title,
++                                                    available_when_prepared,
++                                                })
++                                            }),
++                                        }))
+                                     }
+                                 });
+                         }
+diff --git a/reactivity/ports/hummingbird/tests/query.rs b/reactivity/ports/hummingbird/tests/query.rs
+index 50bd818d81..5b4ca644a3 100644
+--- a/reactivity/ports/hummingbird/tests/query.rs
++++ b/reactivity/ports/hummingbird/tests/query.rs
+@@ -77,6 +77,14 @@ fn projection_is_not_matching_and_nullable_track_artist_is_not_album_artist() {
+     assert_eq!(playback.len(), 1);
+     assert_eq!(playback[0].id, 21);
+     assert_eq!(playback[0].location.to_str(), Some("/music/z.flac"));
++    let queued = tracks()
++        .by_id(21)
++        .for_queue()
++        .fetch_rows(database.connection())
++        .unwrap();
++    assert_eq!(queued[0].id, playback[0].id);
++    assert_eq!(queued[0].location, playback[0].location);
++    assert_eq!(queued[0].title, "Café Étude");
+     assert_eq!(
+         tracks()
+             .at_path(&playback[0].location)
+diff --git a/reactivity/ports/hummingbird/tests/queue.rs b/reactivity/ports/hummingbird/tests/queue.rs
+new file mode 100644
+index 0000000000..31ce4447d8
+--- /dev/null
++++ b/reactivity/ports/hummingbird/tests/queue.rs
+@@ -0,0 +1,304 @@
++use hummingbird_gpui_port::queue::{
++    EntryKey, LARGE_CHANGE, Navigation, Queue, QueueError, Repeat, Track, TrackRef, UNDO_LIMIT,
++};
++
++fn track(id: i64) -> TrackRef {
++    TrackRef::new(Track {
++        path: format!("/recordings/{id}.flac").into(),
++        track_id: Some(id),
++        album_id: Some(id / 10),
++        title: format!("Recording {id}"),
++        available_when_prepared: true,
++    })
++}
++fn available(track: &Track) -> bool {
++    track.track_id != Some(2)
++}
++fn draw(_: usize) -> usize {
++    0
++}
++fn queue(ids: &[i64]) -> Queue {
++    let mut queue = Queue::default();
++    queue
++        .append(ids.iter().map(|&id| track(id)).collect(), &mut draw)
++        .unwrap();
++    queue
++}
++fn keys(queue: &Queue) -> Vec<EntryKey> {
++    (0..queue.len())
++        .map(|index| queue.at(index).unwrap().key)
++        .collect()
++}
++fn ids(queue: &Queue) -> Vec<i64> {
++    (0..queue.len())
++        .map(|index| queue.at(index).unwrap().track.track_id.unwrap())
++        .collect()
++}
++fn snapshot(queue: &Queue) -> (Vec<EntryKey>, Option<EntryKey>, bool) {
++    (keys(queue), queue.current(), queue.shuffled())
++}
++
++#[test]
++fn manual_next_bypasses_repeat_one_and_navigation_skips_unavailable_paths() {
++    let mut queue = queue(&[1, 2, 3]);
++    let first = queue.at(0).unwrap().key;
++    let last = queue.at(2).unwrap().key;
++    assert_eq!(
++        queue.next(false, &available, &mut draw),
++        Navigation::Changed(first)
++    );
++    queue.set_repeat(Repeat::One);
++    assert_eq!(
++        queue.next(false, &available, &mut draw),
++        Navigation::Repeat(first)
++    );
++    assert_eq!(
++        queue.next(true, &available, &mut draw),
++        Navigation::Changed(last)
++    );
++    assert_eq!(queue.next(true, &available, &mut draw), Navigation::End);
++    assert_eq!(
++        queue.previous(&available, &mut draw),
++        Navigation::Changed(first)
++    );
++    assert_eq!(queue.previous(&available, &mut draw), Navigation::End);
++    queue.set_repeat(Repeat::All);
++    assert_eq!(
++        queue.previous(&available, &mut draw),
++        Navigation::Changed(last)
++    );
++    assert_eq!(
++        queue.next(false, &available, &mut draw),
++        Navigation::Changed(first)
++    );
++    queue.set_always_repeat(true);
++    queue.set_repeat(Repeat::Off);
++    assert_eq!(queue.repeat(), Repeat::All);
++    queue.set_always_repeat(false);
++    assert_eq!(queue.repeat(), Repeat::All);
++    assert_eq!(queue.next(false, &|_| false, &mut draw), Navigation::End);
++}
++
++#[test]
++fn duplicate_tracks_share_metadata_but_keep_distinct_entry_and_original_identity() {
++    let shared = track(1);
++    let mut queue = Queue::default();
++    queue
++        .append(vec![shared.clone(), track(3), shared.clone()], &mut draw)
++        .unwrap();
++    let original = keys(&queue);
++    assert_ne!(original[0], original[2]);
++    assert!(TrackRef::ptr_eq(
++        &queue.at(0).unwrap().track,
++        &queue.at(2).unwrap().track
++    ));
++    queue.jump(original[2], &available).unwrap();
++    queue.toggle_shuffle(&mut draw);
++    queue.toggle_shuffle(&mut draw);
++    assert_eq!(queue.current(), Some(original[2]));
++    assert_eq!(queue.current_position(), Some(2));
++    assert_eq!(keys(&queue), original);
++    queue.remove(&[original[0]]);
++    assert_eq!(queue.current(), Some(original[2]));
++    assert!(queue.entry(original[0]).is_none());
++    assert!(queue.undo());
++    assert_eq!(keys(&queue), original);
++    assert!(TrackRef::ptr_eq(&shared, &queue.at(0).unwrap().track));
++}
++
++#[test]
++fn no_current_survives_remove_move_shuffle_and_undo() {
++    let mut queue = queue(&[1, 3, 4]);
++    let first = queue.at(0).unwrap().key;
++    assert!(queue.remove(&[first]));
++    assert_eq!(queue.current(), None);
++    assert!(queue.undo());
++    assert_eq!(queue.current(), None);
++    assert!(queue.move_entries(&[first], 2));
++    assert_eq!(queue.current(), None);
++    queue.toggle_shuffle(&mut draw);
++    queue.toggle_shuffle(&mut draw);
++    assert_eq!(queue.current(), None);
++    assert!(queue.undo());
++    assert_eq!(queue.current(), None);
++}
++
++#[test]
++fn inverse_operations_restore_full_order_current_and_original_permutation() {
++    let mut queue = queue(&[1, 3, 4, 5, 6]);
++    let current = queue.at(3).unwrap().key;
++    queue.jump(current, &available).unwrap();
++    queue.toggle_shuffle(&mut draw);
++    let before = snapshot(&queue);
++    let first = queue.at(0).unwrap().key;
++    let last = queue.at(4).unwrap().key;
++    queue.move_entries(&[last, first, first], 1);
++    assert_eq!(queue.current(), Some(current));
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++    queue.insert(99, vec![track(7), track(8)]).unwrap();
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++    queue.remove(&[first, current]);
++    assert_eq!(queue.current(), None);
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++    queue.clear(true);
++    assert_eq!(keys(&queue), vec![current]);
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++    queue.replace(vec![track(9)], &mut draw).unwrap();
++    assert_eq!(queue.current(), None);
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++    queue.toggle_shuffle(&mut draw);
++    assert_eq!(ids(&queue), vec![1, 3, 4, 5, 6]);
++    assert_eq!(queue.current(), Some(current));
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++}
++
++#[test]
++fn moving_a_block_preserves_source_order_and_current_key() {
++    let mut queue = queue(&[1, 2, 3, 4, 5, 6]);
++    let current = queue.at(3).unwrap().key;
++    let selected = [queue.at(4).unwrap().key, queue.at(1).unwrap().key, current];
++    queue.jump(current, &available).unwrap();
++    assert!(queue.move_entries(&selected, 0));
++    assert_eq!(ids(&queue), vec![2, 4, 5, 1, 3, 6]);
++    assert_eq!(queue.current_position(), Some(1));
++    let before = snapshot(&queue);
++    assert!(!queue.move_entries(&selected, 0));
++    assert_eq!(snapshot(&queue), before);
++    assert!(queue.move_entries(&selected, usize::MAX));
++    assert_eq!(ids(&queue), vec![1, 3, 6, 2, 4, 5]);
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++}
++
++#[test]
++fn shuffle_only_reorders_future_suffix_then_new_batch_and_preserves_original_append() {
++    let mut queue = queue(&[1, 3, 4, 5]);
++    let original = keys(&queue);
++    queue.jump(original[1], &available).unwrap();
++    queue.toggle_shuffle(&mut draw);
++    assert_eq!(&keys(&queue)[..2], &original[..2]);
++    assert_eq!(ids(&queue), vec![1, 3, 5, 4]);
++    queue.append(vec![track(7), track(8)], &mut draw).unwrap();
++    assert_eq!(ids(&queue), vec![1, 3, 5, 4, 8, 7]);
++    queue.toggle_shuffle(&mut draw);
++    assert_eq!(ids(&queue), vec![1, 3, 4, 5, 7, 8]);
++    assert_eq!(queue.current(), Some(original[1]));
++}
++
++#[test]
++fn keys_never_recycle_after_replace_undo_or_history_eviction() {
++    let mut queue = queue(&[1]);
++    let retired = queue.at(0).unwrap().key;
++    queue.replace(vec![track(3)], &mut draw).unwrap();
++    let newer = queue.at(0).unwrap().key;
++    assert_eq!(queue.jump(retired, &available), Err(QueueError::StaleEntry));
++    assert!(queue.undo());
++    assert_eq!(queue.at(0).unwrap().key, retired);
++    queue.append(vec![track(4)], &mut draw).unwrap();
++    assert!(queue.at(1).unwrap().key > newer);
++    for id in 0..UNDO_LIMIT + 3 {
++        queue.insert(0, vec![track(id as i64)]).unwrap();
++    }
++    assert_eq!(queue.history_len(), UNDO_LIMIT);
++    for _ in 0..UNDO_LIMIT {
++        assert!(queue.undo());
++    }
++    assert!(!queue.undo());
++}
++
++#[test]
++fn large_history_threshold_is_strict_and_evicts_through_previous_large_only() {
++    let mut queue = queue(&[1]);
++    queue
++        .insert(0, (0..LARGE_CHANGE).map(|id| track(id as i64)).collect())
++        .unwrap();
++    queue
++        .insert(0, (0..=LARGE_CHANGE).map(|id| track(id as i64)).collect())
++        .unwrap();
++    assert_eq!(queue.history_len(), 3);
++    queue.insert(0, vec![track(9)]).unwrap();
++    let before = snapshot(&queue);
++    queue
++        .insert(0, (0..=LARGE_CHANGE).map(|id| track(id as i64)).collect())
++        .unwrap();
++    assert_eq!(queue.history_len(), 2);
++    assert!(queue.undo());
++    assert_eq!(snapshot(&queue), before);
++    assert!(queue.undo());
++    assert!(!queue.undo());
++}
++
++#[test]
++fn empty_and_invalid_operations_do_not_mint_history() {
++    let mut queue = Queue::default();
++    assert_eq!(queue.append(vec![], &mut draw).unwrap(), None);
++    assert!(!queue.remove(&[]));
++    assert!(!queue.move_entries(&[], 0));
++    assert_eq!(queue.history_len(), 0);
++    assert!(!queue.same_album());
++    queue.append(vec![track(1), track(3)], &mut draw).unwrap();
++    assert!(queue.same_album());
++    let unavailable = queue.insert(0, vec![track(2)]).unwrap().unwrap();
++    let before = queue.current();
++    assert_eq!(
++        queue.jump(unavailable, &available).unwrap(),
++        Navigation::End
++    );
++    assert_eq!(queue.current(), before);
++}
++
++#[test]
++fn navigation_matches_the_executed_pinned_manager_and_explicit_legacy_bugs_are_corrected() {
++    fn navigation(queue: &Queue, result: Navigation) -> String {
++        match result {
++            Navigation::Changed(key) => format!(
++                "changed:{}",
++                queue.entry(key).unwrap().track.track_id.unwrap()
++            ),
++            Navigation::Repeat(key) => format!(
++                "repeat:{}",
++                queue.entry(key).unwrap().track.track_id.unwrap()
++            ),
++            Navigation::End => "end".into(),
++        }
++    }
++    let fixture = include_str!("../upstream/queue-navigation.txt");
++    let mut queue = queue(&[1, 2, 3]);
++    let mut trace = Vec::new();
++    let result = queue.next(false, &available, &mut draw);
++    trace.push(format!("next={}", navigation(&queue, result)));
++    queue.set_repeat(Repeat::One);
++    let result = queue.next(false, &available, &mut draw);
++    trace.push(format!("repeat_one={}", navigation(&queue, result)));
++    let result = queue.next(true, &available, &mut draw);
++    trace.push(format!("manual_next={}", navigation(&queue, result)));
++    let result = queue.next(true, &available, &mut draw);
++    trace.push(format!("manual_end={}", navigation(&queue, result)));
++    queue.set_repeat(Repeat::All);
++    let result = queue.next(false, &available, &mut draw);
++    trace.push(format!("wrap_next={}", navigation(&queue, result)));
++    let result = queue.previous(&available, &mut draw);
++    trace.push(format!("wrap_previous={}", navigation(&queue, result)));
++    let missing = queue.at(1).unwrap().key;
++    trace.push(format!(
++        "missing_jump={}",
++        queue.jump(missing, &available).unwrap() == Navigation::End
++    ));
++    assert_eq!(trace, fixture.lines().take(7).collect::<Vec<_>>());
++    assert_eq!(
++        fixture.lines().skip(7).collect::<Vec<_>>(),
++        [
++            "legacy_remove_without_current=true",
++            "legacy_unshuffle_current=Some(0)",
++            "legacy_duplicate_current=Some(0)",
++        ]
++    );
++    // The three old outcomes are genuine compatibility negatives, not the
++    // replacement's desired behavior; focused tests above prove their fixes.
++}
+diff --git a/reactivity/ports/hummingbird/tests/queue_consumer.rs b/reactivity/ports/hummingbird/tests/queue_consumer.rs
+new file mode 100644
+index 0000000000..eb363cb22c
+--- /dev/null
++++ b/reactivity/ports/hummingbird/tests/queue_consumer.rs
+@@ -0,0 +1,276 @@
++use gpui::{Error, Key, Role, Win, WindowOptions};
++
++fn queue_control<L: gpui::LaneSet<Library>>(
++    owner: &Win<Library, L>,
++    list: gpui::ListId,
++    key: hummingbird_gpui_port::queue::EntryKey,
++    role: Role,
++    text: Option<&str>,
++) -> gpui::Target {
++    let row = owner
++        .list_item(owner.list(list).unwrap(), gpui::ItemKey::new(key.get()))
++        .unwrap();
++    let query = owner.role(role).within(row);
++    if let Some(text) = text {
++        query.text(text).one().unwrap()
++    } else {
++        query.one().unwrap()
++    }
++}
++use hummingbird_gpui_port::{
++    app::{Library, connect, recordings, track_key},
++    database::Database,
++    transcript::settle,
++    worker::Worker,
++};
++use std::time::Duration;
++
++#[test]
++fn reconstructed_public_queue_has_a_new_list_domain_and_rejects_old_decoder_eos() {
++    use hummingbird_gpui_port::{
++        queue::{Track, TrackRef},
++        queue_view::QueueScreen,
++    };
++    let track = TrackRef::new(Track {
++        path: "/prepared/file.flac".into(),
++        track_id: None,
++        album_id: None,
++        title: "Prepared file".into(),
++        available_when_prepared: true,
++    });
++    let mut screen = QueueScreen::new(gpui::ListId::new(4000)).unwrap();
++    screen.enqueue(track.clone());
++    let old_eos = screen.playback().plan().unwrap().end_of_stream();
++    let (sender, inbox) = gpui::Remote::bounded(2);
++    let mut owner = Win::with_size(screen, 720, 420)
++        .unwrap()
++        .with_inbox(inbox, QueueScreen::receive_end_of_stream)
++        .unwrap();
++    let old_target = owner
++        .role(Role::CheckBox)
++        .name("Prepared file")
++        .one()
++        .unwrap();
++    owner
++        .update(|screen| {
++            *screen = QueueScreen::new(gpui::ListId::new(4001)).unwrap();
++            screen.enqueue(track);
++        })
++        .unwrap();
++    let new_target = owner
++        .role(Role::CheckBox)
++        .name("Prepared file")
++        .one()
++        .unwrap();
++    assert_ne!(old_target, new_target);
++    assert_eq!(owner.activate(old_target), Err(Error::StaleTarget));
++    let stamp = owner
++        .with_model(|screen| screen.playback().plan().unwrap().stamp())
++        .unwrap();
++    sender.try_send(old_eos).unwrap();
++    owner.deliver_ready(2).unwrap();
++    assert_eq!(
++        owner
++            .with_model(|screen| screen.playback().plan().unwrap().stamp())
++            .unwrap(),
++        stamp
++    );
++    assert_eq!(
++        owner
++            .with_model(|screen| screen.playback().queue().len())
++            .unwrap(),
++        1
++    );
++}
++
++#[test]
++fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_source_admission() {
++    let path = std::env::temp_dir().join(format!(
++        "hummingbird-queue-{}-{}.flac",
++        std::process::id(),
++        fastrand::u64(..)
++    ));
++    std::fs::write(&path, b"availability fixture; no decoder claim").unwrap();
++    let database = Database::fixture().unwrap();
++    database
++        .connection()
++        .execute(
++            "UPDATE track SET location = ?1 WHERE id = 44",
++            [path.to_str().unwrap()],
++        )
++        .unwrap();
++    let (worker, inbox) = Worker::new(database).unwrap();
++    let (model, questions) = connect(worker.handle()).unwrap();
++    let mut owner = Win::with_questions(
++        model,
++        questions,
++        WindowOptions {
++            size: [720, 1000],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++    .with_inbox(inbox, Library::receive)
++    .unwrap();
++    settle(&mut owner, &worker).unwrap();
++    let list = owner.list(recordings(Default::default())).unwrap();
++    owner.scroll_to_key(list, track_key(44)).unwrap();
++    let item = owner.list_item(list, track_key(44)).unwrap();
++    owner
++        .activate(owner.role(Role::Button).within(item).one().unwrap())
++        .unwrap();
++    settle(&mut owner, &worker).unwrap();
++    let add = owner.button("Add prepared recording 44 to queue");
++    for _ in 0..3 {
++        owner.activate(add).unwrap();
++    }
++    let (keys, stamp, queue_list) = owner
++        .with_model(|model| {
++            let queue = model.queue.playback().queue();
++            let keys = (0..queue.len())
++                .map(|index| queue.at(index).unwrap().key)
++                .collect::<Vec<_>>();
++            assert!(hummingbird_gpui_port::queue::TrackRef::ptr_eq(
++                &queue.at(0).unwrap().track,
++                &queue.at(2).unwrap().track
++            ));
++            assert_eq!(queue.at(0).unwrap().track.title, "Καλημέρα");
++            (
++                keys,
++                model.queue.playback().plan().unwrap().stamp(),
++                model.queue.list_id(),
++            )
++        })
++        .unwrap();
++    assert_ne!(keys[0], keys[2]);
++    let first = queue_control(&owner, queue_list, keys[0], Role::CheckBox, None);
++    owner.focus(first).unwrap();
++    owner.key(Key::Space).unwrap();
++    assert_eq!(
++        owner
++            .with_model(|model| model.queue.selected().to_vec())
++            .unwrap(),
++        vec![keys[0]]
++    );
++    assert_eq!(
++        owner
++            .with_model(|model| model.queue.playback().plan().unwrap().stamp())
++            .unwrap(),
++        stamp
++    );
++    let mut checked = None;
++    owner
++        .visit(|part| {
++            if part.target() == first {
++                checked = part.checked()
++            }
++        })
++        .unwrap();
++    assert_eq!(checked, Some(true));
++    owner
++        .activate(queue_control(
++            &owner,
++            queue_list,
++            keys[2],
++            Role::Button,
++            Some("Range"),
++        ))
++        .unwrap();
++    assert_eq!(
++        owner
++            .with_model(|model| model.queue.selected().to_vec())
++            .unwrap(),
++        keys
++    );
++    owner
++        .activate(queue_control(
++            &owner,
++            queue_list,
++            keys[1],
++            Role::CheckBox,
++            None,
++        ))
++        .unwrap();
++    owner.activate(owner.button("Move selected last")).unwrap();
++    assert_eq!(
++        owner
++            .with_model(|model| {
++                let queue = model.queue.playback().queue();
++                (0..queue.len())
++                    .map(|index| queue.at(index).unwrap().key)
++                    .collect::<Vec<_>>()
++            })
++            .unwrap(),
++        vec![keys[1], keys[0], keys[2]]
++    );
++    let live = queue_control(&owner, queue_list, keys[0], Role::CheckBox, None);
++    assert_eq!(
++        live, first,
++        "reordering keeps the keyed row's public target"
++    );
++    owner.activate(live).unwrap();
++    owner.activate(owner.button("Remove selected")).unwrap();
++    assert_eq!(owner.activate(first), Err(Error::StaleTarget));
++    owner.activate(owner.button("Undo queue edit")).unwrap();
++    let restored = queue_control(&owner, queue_list, keys[0], Role::CheckBox, None);
++    assert_ne!(restored, first, "undo does not revive a retired UI target");
++    assert_eq!(owner.activate(first), Err(Error::StaleTarget));
++    assert_eq!(
++        owner
++            .list_state(owner.list(queue_list).unwrap())
++            .unwrap()
++            .len,
++        3
++    );
++
++    // Commit a real service replacement, admit just its inbox notification,
++    // and leave the new question completions pending. The previous good
++    // prepared recording is still labelled honestly and cannot enqueue into
++    // the new library generation. Existing owned queue tracks remain valid.
++    worker
++        .replace_database(Database::fixture().unwrap())
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap()
++        .unwrap();
++    owner.deliver_ready(1).unwrap();
++    assert_eq!(
++        owner.with_model(|model| model.version.generation).unwrap(),
++        1
++    );
++    assert!(
++        owner
++            .contains_text("Add prepared recording 44 to queue")
++            .unwrap()
++    );
++    owner.activate(add).unwrap();
++    assert_eq!(
++        owner
++            .with_model(|model| model.queue.playback().queue().len())
++            .unwrap(),
++        3
++    );
++    assert!(
++        owner
++            .contains_text("This prepared recording belongs to the previous library source")
++            .unwrap()
++    );
++    assert_eq!(
++        owner
++            .with_model(|model| model
++                .queue
++                .playback()
++                .queue()
++                .at(0)
++                .unwrap()
++                .track
++                .path
++                .clone())
++            .unwrap(),
++        path
++    );
++    settle(&mut owner, &worker).unwrap();
++    drop(owner);
++    worker.finish().unwrap();
++    std::fs::remove_file(path).unwrap();
++}
+diff --git a/reactivity/ports/hummingbird/tests/queue_costs.rs b/reactivity/ports/hummingbird/tests/queue_costs.rs
+new file mode 100644
+index 0000000000..32745b8f6a
+--- /dev/null
++++ b/reactivity/ports/hummingbird/tests/queue_costs.rs
+@@ -0,0 +1,167 @@
++//! Requested Rust allocation controls and actual public list realization. These
++//! are not timings, allocator/RSS measurements or a legacy application baseline.
++use hummingbird_gpui_port::{
++    queue::{Queue, Track, TrackRef},
++    queue_view::QueueScreen,
++};
++fn track(id: usize) -> TrackRef {
++    TrackRef::new(Track {
++        path: format!("/prepared/{id}.flac").into(),
++        track_id: Some(id as i64),
++        album_id: Some(1),
++        title: format!("Prepared {id}"),
++        available_when_prepared: true,
++    })
++}
++fn draw(_: usize) -> usize {
++    0
++}
++fn report(label: &str, count: usize, shared: bool, info: allocation_counter::AllocationInfo) {
++    println!("QUEUE_ALLOC {label} count={count} shared={shared} {info:?}");
++}
++#[test]
++fn large_queue_inverse_edits_and_history_retirement_have_explicit_allocation_costs() {
++    for count in [4096, 4097, 100_000] {
++        for shared in [true, false] {
++            let shared_track = track(0);
++            let mut queue = Queue::default();
++            let mount = allocation_counter::measure(|| {
++                let tracks = (0..count)
++                    .map(|id| {
++                        if shared {
++                            shared_track.clone()
++                        } else {
++                            track(id)
++                        }
++                    })
++                    .collect();
++                queue.append(tracks, &mut draw).unwrap();
++            });
++            report("construct", count, shared, mount);
++            assert_eq!(queue.len(), count);
++            let original = (0..count)
++                .map(|index| queue.at(index).unwrap().key)
++                .collect::<Vec<_>>();
++            let mut selected = original.iter().step_by(2).copied().collect::<Vec<_>>();
++            selected.reverse();
++            selected.extend_from_slice(&original[..2]);
++            let moved = allocation_counter::measure(|| {
++                assert!(queue.move_entries(&selected, count));
++            });
++            report("move_arbitrary", count, shared, moved);
++            let undo = allocation_counter::measure(|| {
++                assert!(queue.undo());
++            });
++            report("undo_move", count, shared, undo);
++            assert_eq!(
++                (0..count)
++                    .map(|index| queue.at(index).unwrap().key)
++                    .collect::<Vec<_>>(),
++                original
++            );
++            let removed = allocation_counter::measure(|| {
++                assert!(queue.remove(&selected));
++            });
++            report("remove_arbitrary", count, shared, removed);
++            let undo = allocation_counter::measure(|| {
++                assert!(queue.undo());
++            });
++            report("undo_remove", count, shared, undo);
++            assert_eq!(
++                (0..count)
++                    .map(|index| queue.at(index).unwrap().key)
++                    .collect::<Vec<_>>(),
++                original
++            );
++            let destruction = allocation_counter::measure(|| drop(queue));
++            report(
++                "drop_current_and_remaining_history_on_ui_thread",
++                count,
++                shared,
++                destruction,
++            );
++            // A replacement retains its entire old sheet for undo. After29
++            // small replacements it is the oldest remaining record, including
++            // the strict4096 case whose older Inserted record was just evicted.
++            let mut queue = Queue::default();
++            queue
++                .append(
++                    (0..count)
++                        .map(|id| {
++                            if shared {
++                                shared_track.clone()
++                            } else {
++                                track(id)
++                            }
++                        })
++                        .collect(),
++                    &mut draw,
++                )
++                .unwrap();
++            queue.replace(vec![track(count)], &mut draw).unwrap();
++            for id in 0..29 {
++                queue
++                    .replace(vec![track(count + id + 1)], &mut draw)
++                    .unwrap();
++            }
++            assert_eq!(queue.history_len(), 30);
++            let retirement = allocation_counter::measure(|| {
++                queue.replace(vec![track(count + 31)], &mut draw).unwrap();
++            });
++            report(
++                "retire_large_history_on_ui_thread",
++                count,
++                shared,
++                retirement,
++            );
++            assert_eq!(queue.len(), 1);
++        }
++    }
++}
++#[test]
++fn one_hundred_thousand_prepared_entries_keep_public_view_realization_bounded() {
++    let shared = track(1);
++    let mut screen = QueueScreen::new(gpui::ListId::new(900_000)).unwrap();
++    screen.enqueue_many((0..100_000).map(|_| shared.clone()).collect());
++    let metadata_owners = TrackRef::strong_count(&shared);
++    let list_id = screen.list_id();
++    let mut owner = None;
++    let mount = allocation_counter::measure(|| {
++        owner = Some(gpui::Win::with_size(screen, 720, 420).unwrap());
++    });
++    report(
++        "public_view_incremental_mount_given_prepared_model",
++        100_000,
++        true,
++        mount,
++    );
++    let mut owner = owner.unwrap();
++    assert_eq!(TrackRef::strong_count(&shared), metadata_owners);
++    let list = owner.list(list_id).unwrap();
++    assert_eq!(owner.list_state(list).unwrap().realized_rows, 4);
++    let last = owner
++        .with_model(|screen| screen.playback().queue().at(99_999).unwrap().key)
++        .unwrap();
++    owner
++        .scroll_to_key(list, gpui::ItemKey::new(last.get()))
++        .unwrap();
++    assert_eq!(owner.list_state(list).unwrap().realized_rows, 4);
++    assert!(owner.inspect().unwrap().nodes.len() < 100);
++    assert_eq!(TrackRef::strong_count(&shared), metadata_owners);
++    println!(
++        "QUEUE_VIEW_LAYOUT screen={} window={} realized=4",
++        size_of::<QueueScreen>(),
++        size_of::<gpui::Win<QueueScreen>>()
++    );
++    println!(
++        "QUEUE_APP_LAYOUT library={} element={}",
++        size_of::<hummingbird_gpui_port::app::Library>(),
++        size_of::<gpui::El<'_>>()
++    );
++    #[cfg(feature = "native")]
++    println!(
++        "QUEUE_NATIVE_LAYOUT document={} option_document={}",
++        size_of::<gpui::Window<hummingbird_gpui_port::app::Library>>(),
++        size_of::<Option<gpui::Window<hummingbird_gpui_port::app::Library>>>()
++    );
++}
+diff --git a/reactivity/ports/hummingbird/tests/queue_playback.rs b/reactivity/ports/hummingbird/tests/queue_playback.rs
+new file mode 100644
+index 0000000000..ea0f1ffc3f
+--- /dev/null
++++ b/reactivity/ports/hummingbird/tests/queue_playback.rs
+@@ -0,0 +1,234 @@
++use hummingbird_gpui_port::{
++    queue::{Entry, EntryKey, Queue, Repeat, Track, TrackRef},
++    queue_playback::{Plan, PlanStamp, PlaybackQueue},
++};
++fn track(id: i64) -> TrackRef {
++    TrackRef::new(Track {
++        path: format!("/recordings/{id}.flac").into(),
++        track_id: Some(id),
++        album_id: Some(1),
++        title: format!("Recording {id}"),
++        available_when_prepared: true,
++    })
++}
++fn available(_: &Track) -> bool {
++    true
++}
++fn draw(_: usize) -> usize {
++    0
++}
++fn playback() -> PlaybackQueue {
++    let mut playback = PlaybackQueue::new().unwrap();
++    playback
++        .append(vec![track(1), track(2), track(3)], &available, &mut draw)
++        .unwrap();
++    playback
++}
++#[test]
++fn eos_is_qualified_by_session_occurrence_and_current_entry() {
++    let mut player = playback();
++    let first = player.queue().at(0).unwrap().key;
++    let old = player.plan().unwrap().end_of_stream();
++    player.play(first, &available).unwrap();
++    assert!(!player.end_of_stream(old, &available, &mut draw).unwrap());
++    let current = player.plan().unwrap().end_of_stream();
++    assert!(
++        player
++            .end_of_stream(current, &available, &mut draw)
++            .unwrap()
++    );
++    assert_eq!(player.queue().current_position(), Some(1));
++    assert!(
++        !player
++            .end_of_stream(current, &available, &mut draw)
++            .unwrap()
++    );
++    let old_session = player.plan().unwrap().end_of_stream();
++    let mut replacement = playback();
++    replacement.next(&available, &mut draw).unwrap();
++    assert_eq!(replacement.queue().current(), player.queue().current());
++    assert!(
++        !replacement
++            .end_of_stream(old_session, &available, &mut draw)
++            .unwrap()
++    );
++}
++#[test]
++fn repeat_one_creates_a_new_occurrence_and_manual_next_bypasses_it() {
++    let mut player = playback();
++    player.set_repeat(Repeat::One, &available).unwrap();
++    let before = player.plan().unwrap().clone();
++    assert_eq!(before.lookahead.as_ref().unwrap().key, before.current.key);
++    assert!(
++        player
++            .end_of_stream(before.end_of_stream(), &available, &mut draw)
++            .unwrap()
++    );
++    let repeated = player.plan().unwrap();
++    assert_eq!(repeated.current.key, before.current.key);
++    assert_ne!(repeated.stamp(), before.stamp());
++    assert!(
++        !player
++            .end_of_stream(before.end_of_stream(), &available, &mut draw)
++            .unwrap()
++    );
++    player.next(&available, &mut draw).unwrap();
++    assert_eq!(player.queue().current_position(), Some(1));
++}
++#[test]
++fn every_accepted_queue_or_policy_edit_retires_previous_eos_authority() {
++    let mut player = playback();
++    let mut previous = player.plan().unwrap().end_of_stream();
++    player
++        .append(vec![track(4)], &available, &mut draw)
++        .unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    previous = player.plan().unwrap().end_of_stream();
++    let last = player.queue().at(3).unwrap().key;
++    player.move_entries(&[last], 1, &available).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    assert_eq!(player.plan().unwrap().lookahead.as_ref().unwrap().key, last);
++    previous = player.plan().unwrap().end_of_stream();
++    player.remove(&[last], &available).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    previous = player.plan().unwrap().end_of_stream();
++    player.undo(&available).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    previous = player.plan().unwrap().end_of_stream();
++    player.toggle_shuffle(&available, &mut draw).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    previous = player.plan().unwrap().end_of_stream();
++    player.set_repeat(Repeat::All, &available).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    previous = player.plan().unwrap().end_of_stream();
++    player.availability_changed(&|_| false).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    assert!(player.plan().unwrap().lookahead.is_none());
++    previous = player.plan().unwrap().end_of_stream();
++    player
++        .replace(vec![track(5)], &available, &mut draw)
++        .unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    previous = player.plan().unwrap().end_of_stream();
++    player.clear(true, &available).unwrap();
++    assert!(
++        !player
++            .end_of_stream(previous, &available, &mut draw)
++            .unwrap()
++    );
++    assert!(player.plan().unwrap().lookahead.is_none());
++}
++#[test]
++fn no_op_edits_do_not_create_a_new_plan_and_borrowed_projection_clones_nothing() {
++    let mut player = playback();
++    let before = player.plan().unwrap().stamp();
++    let first = player.queue().at(0).unwrap().key;
++    assert!(!player.set_repeat(Repeat::Off, &available).unwrap());
++    assert!(!player.move_entries(&[first], 0, &available).unwrap());
++    assert!(!player.remove(&[], &available).unwrap());
++    assert!(
++        player
++            .append(vec![], &available, &mut draw)
++            .unwrap()
++            .is_none()
++    );
++    for _ in 0..100 {
++        let plan = player.plan().unwrap();
++        assert_eq!(plan.stamp(), before);
++        assert!(TrackRef::ptr_eq(
++            &plan.current.track,
++            &player.queue().entry(first).unwrap().track
++        ));
++    }
++}
++#[test]
++fn removing_current_resolves_the_next_live_playable_key_and_old_plan_is_immutable() {
++    let mut player = playback();
++    let old = player.plan().unwrap().clone();
++    let last = player.queue().at(2).unwrap().key;
++    let available = |track: &Track| track.track_id != Some(2);
++    player.remove(&[old.current.key], &available).unwrap();
++    assert_eq!(player.plan().unwrap().current.key, last);
++    assert_eq!(old.current.track.track_id, Some(1));
++    assert!(
++        !player
++            .end_of_stream(old.end_of_stream(), &available, &mut draw)
++            .unwrap()
++    );
++    player.remove(&[last], &available).unwrap();
++    assert!(player.plan().is_none());
++    player.undo(&available).unwrap();
++    assert!(
++        player.plan().is_none(),
++        "undo while stopped must not start playback"
++    );
++}
++#[test]
++fn shuffled_wrap_commits_a_new_permutation_before_installing_its_successor() {
++    let mut player = playback();
++    let last = player.queue().at(2).unwrap().key;
++    player.play(last, &available).unwrap();
++    player.toggle_shuffle(&available, &mut draw).unwrap();
++    player.set_repeat(Repeat::All, &available).unwrap();
++    let before = player.plan().unwrap().clone();
++    assert!(
++        before.lookahead.is_none(),
++        "a shuffled wrap is resolved at EOS"
++    );
++    assert!(
++        player
++            .end_of_stream(before.end_of_stream(), &available, &mut draw)
++            .unwrap()
++    );
++    assert_eq!(player.queue().current_position(), Some(0));
++    assert_ne!(player.plan().unwrap().stamp(), before.stamp());
++}
++#[test]
++fn queue_and_plan_carriers_are_measured_without_claiming_a_stack_peak() {
++    println!(
++        "QUEUE_LAYOUT key={} option_key={} entry={} queue={} stamp={} plan={} option_plan={} controller={}",
++        size_of::<EntryKey>(),
++        size_of::<Option<EntryKey>>(),
++        size_of::<Entry>(),
++        size_of::<Queue>(),
++        size_of::<PlanStamp>(),
++        size_of::<Plan>(),
++        size_of::<Option<Plan>>(),
++        size_of::<PlaybackQueue>()
++    );
++    assert_eq!(size_of::<EntryKey>(), 8);
++    assert_eq!(size_of::<Option<EntryKey>>(), 8);
++    assert_eq!(size_of::<Entry>(), 16);
++}
+diff --git a/reactivity/ports/hummingbird/upstream/queue-navigation.txt b/reactivity/ports/hummingbird/upstream/queue-navigation.txt
+new file mode 100644
+index 0000000000..1ccd388cbf
+--- /dev/null
++++ b/reactivity/ports/hummingbird/upstream/queue-navigation.txt
+@@ -0,0 +1,10 @@
++next=changed:1
++repeat_one=repeat:1
++manual_next=changed:3
++manual_end=end
++wrap_next=changed:1
++wrap_previous=changed:3
++missing_jump=true
++legacy_remove_without_current=true
++legacy_unshuffle_current=Some(0)
++legacy_duplicate_current=Some(0)

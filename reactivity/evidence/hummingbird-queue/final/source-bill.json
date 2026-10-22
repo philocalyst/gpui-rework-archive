@@ -1,0 +1,1021 @@
+{
+  "scope": "Committed app src/ and tests/ Rust; shipping excludes AST test spans and external tests. Copied, uncompiled upstream reference source is charged separately. No macro expansion; ambiguity remains charged.",
+  "helper_sha256": "a7de17c706314b71d2983d3bdd04291ef57e98e4d74d1be7bb474369b491ae1b",
+  "tokei_sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712",
+  "snapshots": [
+    {
+      "commit": "c88a545d3749638e9b7321b02be31d9465548233",
+      "files": {
+        "reactivity/ports/hummingbird/src/app.rs": {
+          "sha256": "c8ce715b76305315e16fd181c5cf5f8d08cd2f3bc7657aeab2a6fbc131e10087",
+          "physical_lines": 213,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 207,
+          "shipping_code_lines": 207,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/database.rs": {
+          "sha256": "906e9a199b8305081908dc415ce5be3d2855a3522875348ae43d797a20e40af7",
+          "physical_lines": 148,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 139,
+          "shipping_code_lines": 139,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/lib.rs": {
+          "sha256": "5a08cbc89d8d2ea81f21189463b90a76494579858c6effb32455c2c506689d47",
+          "physical_lines": 7,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 7,
+          "shipping_code_lines": 7,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/main.rs": {
+          "sha256": "99666f77a54f8ee5efaf1339965206b1d2b5a17819e635c1d49e0cafb4f6b113",
+          "physical_lines": 90,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 87,
+          "shipping_code_lines": 87,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/migrations.rs": {
+          "sha256": "6cba44fd2743d420b87cef51f591fbfd3706a517629fc45393f5b5657f981a2a",
+          "physical_lines": 159,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 158,
+          "shipping_code_lines": 158,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/query.rs": {
+          "sha256": "f8867b38948f69dee6c927a28574836bb31d91a2acc138e1869854e469ddc4b0",
+          "physical_lines": 312,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 297,
+          "all_code_lines": 297,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/query_helpers.rs": {
+          "sha256": "4fed0b718a998b2c066079d4a423950c9ac6f7151d1f521b3f0d56ae96ea8b48",
+          "physical_lines": 230,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 224,
+          "shipping_code_lines": 224,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/search.rs": {
+          "sha256": "fa28af10c19162bef0c413750c0aa56128848bd090b505289a985a8ecd423415",
+          "physical_lines": 154,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 141,
+          "shipping_code_lines": 141,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/transcript.rs": {
+          "sha256": "41d224cd935e2a40abca4cf5d8a358b05da37d2820740281ccf5285333c621ad",
+          "physical_lines": 177,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 165,
+          "shipping_code_lines": 165,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/worker.rs": {
+          "sha256": "92075ac958a2a70d5a6fc1c25c61f8cc69ffbe6a8d5476bff965e33033c35014",
+          "physical_lines": 237,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 223,
+          "shipping_code_lines": 223,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/tests/query.rs": {
+          "sha256": "f23d966c0e9deb16c147133984e2bc35bd8703407954839e43483f87d626fa6e",
+          "physical_lines": 128,
+          "external_test": true,
+          "test_ranges": [
+            [
+              6,
+              0,
+              45,
+              1
+            ],
+            [
+              47,
+              0,
+              95,
+              1
+            ],
+            [
+              97,
+              0,
+              128,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 123,
+          "shipping_code_lines": 0,
+          "test_code_lines": 123
+        },
+        "reactivity/ports/hummingbird/tests/search.rs": {
+          "sha256": "e69eebb78a7a759763f7896f68442cacc43d04fc5883b05c0e44995d82612050",
+          "physical_lines": 91,
+          "external_test": true,
+          "test_ranges": [
+            [
+              14,
+              0,
+              37,
+              1
+            ],
+            [
+              39,
+              0,
+              75,
+              1
+            ],
+            [
+              77,
+              0,
+              91,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 83,
+          "shipping_code_lines": 0,
+          "test_code_lines": 83
+        },
+        "reactivity/ports/hummingbird/tests/transcript.rs": {
+          "sha256": "81f16b1002092d7c4e74066182e0b2a66ca03652d8e8ba53a91b65e24e941366",
+          "physical_lines": 92,
+          "external_test": true,
+          "test_ranges": [
+            [
+              1,
+              0,
+              7,
+              1
+            ],
+            [
+              9,
+              0,
+              36,
+              1
+            ],
+            [
+              38,
+              0,
+              92,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 87,
+          "shipping_code_lines": 0,
+          "test_code_lines": 87
+        }
+      },
+      "shipping_code_lines": 1648,
+      "test_code_lines": 293
+    },
+    {
+      "commit": "1ca457059b6747000b27c00f8f6bbb9c81f3577e",
+      "files": {
+        "reactivity/ports/hummingbird/src/app.rs": {
+          "sha256": "896c4e8616e23f364a35844024a05268052ae6f1f090a7c6b85f341e50a19276",
+          "physical_lines": 246,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 238,
+          "shipping_code_lines": 238,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/database.rs": {
+          "sha256": "906e9a199b8305081908dc415ce5be3d2855a3522875348ae43d797a20e40af7",
+          "physical_lines": 148,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 139,
+          "all_code_lines": 139,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/lib.rs": {
+          "sha256": "0420a2d6b7b76f9171118c64ace0bee42172e9d52b5e927952c104a803f50dba",
+          "physical_lines": 10,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 10,
+          "shipping_code_lines": 10,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/main.rs": {
+          "sha256": "56b0b7f248b18d1c0f8192792a5a138a234aa47121667a596dd5653e1fa9b047",
+          "physical_lines": 90,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 87,
+          "shipping_code_lines": 87,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/migrations.rs": {
+          "sha256": "6cba44fd2743d420b87cef51f591fbfd3706a517629fc45393f5b5657f981a2a",
+          "physical_lines": 159,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 158,
+          "shipping_code_lines": 158,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/query.rs": {
+          "sha256": "9f273585dd564366e2f5bfb43b4af3ce2d5786cd1ad91f58fbf6d0066260ee46",
+          "physical_lines": 346,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 329,
+          "shipping_code_lines": 329,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/query_helpers.rs": {
+          "sha256": "4fed0b718a998b2c066079d4a423950c9ac6f7151d1f521b3f0d56ae96ea8b48",
+          "physical_lines": 230,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 224,
+          "shipping_code_lines": 224,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/queue.rs": {
+          "sha256": "55aa809969cc81e3110908d8541dddf4806c99f3e73b55475e7193ce9f7b51ee",
+          "physical_lines": 646,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 609,
+          "shipping_code_lines": 609,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/queue_playback.rs": {
+          "sha256": "15d9457828cba3d5565c915729e7d4956f74d805a44d8897f733c610b7fb6ce4",
+          "physical_lines": 324,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 307,
+          "shipping_code_lines": 307,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/queue_view.rs": {
+          "sha256": "aef2c4135f1b15e4e7486222f880e4d4d269b19b93b076a49319fc981424531e",
+          "physical_lines": 247,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 238,
+          "all_code_lines": 238,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/search.rs": {
+          "sha256": "fa28af10c19162bef0c413750c0aa56128848bd090b505289a985a8ecd423415",
+          "physical_lines": 154,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 141,
+          "shipping_code_lines": 141,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/transcript.rs": {
+          "sha256": "d34272cad1729319a40aa96e9d5447d2901bdcd408160d57ed04807aee2f887c",
+          "physical_lines": 184,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 172,
+          "shipping_code_lines": 172,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/worker.rs": {
+          "sha256": "18770a47f9c6047cd297bdaff1359a44022008c5d4d8f4ea98e7a83b6b4d833f",
+          "physical_lines": 248,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 234,
+          "all_code_lines": 234,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/tests/query.rs": {
+          "sha256": "f370df0dee4d85b6ae7535cd86af99a3ee7d3ff2aeff568349558dff98ffdbac",
+          "physical_lines": 136,
+          "external_test": true,
+          "test_ranges": [
+            [
+              6,
+              0,
+              45,
+              1
+            ],
+            [
+              47,
+              0,
+              103,
+              1
+            ],
+            [
+              105,
+              0,
+              136,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "shipping_code_lines": 0,
+          "all_code_lines": 131,
+          "test_code_lines": 131
+        },
+        "reactivity/ports/hummingbird/tests/queue.rs": {
+          "sha256": "06d545a3b48dfbc40920672c8493f9c04745124f48ddd8ea5ff4dbfcf50fd020",
+          "physical_lines": 304,
+          "external_test": true,
+          "test_ranges": [
+            [
+              41,
+              0,
+              80,
+              1
+            ],
+            [
+              82,
+              0,
+              107,
+              1
+            ],
+            [
+              109,
+              0,
+              124,
+              1
+            ],
+            [
+              126,
+              0,
+              159,
+              1
+            ],
+            [
+              161,
+              0,
+              177,
+              1
+            ],
+            [
+              179,
+              0,
+              192,
+              1
+            ],
+            [
+              194,
+              0,
+              213,
+              1
+            ],
+            [
+              215,
+              0,
+              235,
+              1
+            ],
+            [
+              237,
+              0,
+              254,
+              1
+            ],
+            [
+              256,
+              0,
+              304,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 291,
+          "shipping_code_lines": 0,
+          "test_code_lines": 291
+        },
+        "reactivity/ports/hummingbird/tests/queue_consumer.rs": {
+          "sha256": "4dd21a23347e924a0530506d47d3606f96cf05958fa896bb18774bf146dbd641",
+          "physical_lines": 262,
+          "external_test": true,
+          "test_ranges": [
+            [
+              10,
+              0,
+              58,
+              1
+            ],
+            [
+              60,
+              0,
+              262,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "shipping_code_lines": 0,
+          "all_code_lines": 255,
+          "test_code_lines": 255
+        },
+        "reactivity/ports/hummingbird/tests/queue_costs.rs": {
+          "sha256": "cc1c8cc28a029a9777f57292130994d88c153d94f93d3b26db4ed6c0eefbb613",
+          "physical_lines": 153,
+          "external_test": true,
+          "test_ranges": [
+            [
+              22,
+              0,
+              120,
+              1
+            ],
+            [
+              121,
+              0,
+              153,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 148,
+          "shipping_code_lines": 0,
+          "test_code_lines": 148
+        },
+        "reactivity/ports/hummingbird/tests/queue_playback.rs": {
+          "sha256": "7049065a8391f32d4745a044e411739b2235b90c692d2ed26f96b7ddf49947cf",
+          "physical_lines": 234,
+          "external_test": true,
+          "test_ranges": [
+            [
+              27,
+              0,
+              55,
+              1
+            ],
+            [
+              56,
+              0,
+              77,
+              1
+            ],
+            [
+              78,
+              0,
+              152,
+              1
+            ],
+            [
+              153,
+              0,
+              175,
+              1
+            ],
+            [
+              176,
+              0,
+              197,
+              1
+            ],
+            [
+              198,
+              0,
+              217,
+              1
+            ],
+            [
+              218,
+              0,
+              234,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "shipping_code_lines": 0,
+          "all_code_lines": 234,
+          "test_code_lines": 234
+        },
+        "reactivity/ports/hummingbird/tests/search.rs": {
+          "sha256": "e69eebb78a7a759763f7896f68442cacc43d04fc5883b05c0e44995d82612050",
+          "physical_lines": 91,
+          "external_test": true,
+          "test_ranges": [
+            [
+              14,
+              0,
+              37,
+              1
+            ],
+            [
+              39,
+              0,
+              75,
+              1
+            ],
+            [
+              77,
+              0,
+              91,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "shipping_code_lines": 0,
+          "all_code_lines": 83,
+          "test_code_lines": 83
+        },
+        "reactivity/ports/hummingbird/tests/transcript.rs": {
+          "sha256": "81f16b1002092d7c4e74066182e0b2a66ca03652d8e8ba53a91b65e24e941366",
+          "physical_lines": 92,
+          "external_test": true,
+          "test_ranges": [
+            [
+              1,
+              0,
+              7,
+              1
+            ],
+            [
+              9,
+              0,
+              36,
+              1
+            ],
+            [
+              38,
+              0,
+              92,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 87,
+          "shipping_code_lines": 0,
+          "test_code_lines": 87
+        }
+      },
+      "shipping_code_lines": 2886,
+      "test_code_lines": 1229
+    },
+    {
+      "commit": "365efc09f1207718aac7c7cfa3d9f7bfa3a5d5b9",
+      "files": {
+        "reactivity/ports/hummingbird/src/app.rs": {
+          "sha256": "896c4e8616e23f364a35844024a05268052ae6f1f090a7c6b85f341e50a19276",
+          "physical_lines": 246,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 238,
+          "shipping_code_lines": 238,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/database.rs": {
+          "sha256": "906e9a199b8305081908dc415ce5be3d2855a3522875348ae43d797a20e40af7",
+          "physical_lines": 148,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 139,
+          "shipping_code_lines": 139,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/lib.rs": {
+          "sha256": "0420a2d6b7b76f9171118c64ace0bee42172e9d52b5e927952c104a803f50dba",
+          "physical_lines": 10,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 10,
+          "shipping_code_lines": 10,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/main.rs": {
+          "sha256": "56b0b7f248b18d1c0f8192792a5a138a234aa47121667a596dd5653e1fa9b047",
+          "physical_lines": 90,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 87,
+          "all_code_lines": 87,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/migrations.rs": {
+          "sha256": "6cba44fd2743d420b87cef51f591fbfd3706a517629fc45393f5b5657f981a2a",
+          "physical_lines": 159,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 158,
+          "all_code_lines": 158,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/query.rs": {
+          "sha256": "9f273585dd564366e2f5bfb43b4af3ce2d5786cd1ad91f58fbf6d0066260ee46",
+          "physical_lines": 346,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 329,
+          "shipping_code_lines": 329,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/query_helpers.rs": {
+          "sha256": "4fed0b718a998b2c066079d4a423950c9ac6f7151d1f521b3f0d56ae96ea8b48",
+          "physical_lines": 230,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 224,
+          "shipping_code_lines": 224,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/queue.rs": {
+          "sha256": "9644d1fb5efd77ddd9f607b42633ab80fd809b3648efbbe938dc205a0977c290",
+          "physical_lines": 741,
+          "external_test": false,
+          "test_ranges": [
+            [
+              671,
+              0,
+              741,
+              1
+            ],
+            [
+              674,
+              4,
+              701,
+              5
+            ],
+            [
+              702,
+              4,
+              740,
+              5
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 704,
+          "shipping_code_lines": 633,
+          "test_code_lines": 71
+        },
+        "reactivity/ports/hummingbird/src/queue_playback.rs": {
+          "sha256": "d3e7163d732b225363ab5e35d2423ee72f52351af3935f6b073210ed5eaa6371",
+          "physical_lines": 362,
+          "external_test": false,
+          "test_ranges": [
+            [
+              328,
+              0,
+              362,
+              1
+            ],
+            [
+              331,
+              4,
+              361,
+              5
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 339,
+          "shipping_code_lines": 304,
+          "test_code_lines": 35
+        },
+        "reactivity/ports/hummingbird/src/queue_view.rs": {
+          "sha256": "746ddb5ec274ce68513871956f9cd2a2fb1b95bf7390a7989f89cd20f57f63fa",
+          "physical_lines": 247,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 238,
+          "shipping_code_lines": 238,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/search.rs": {
+          "sha256": "fa28af10c19162bef0c413750c0aa56128848bd090b505289a985a8ecd423415",
+          "physical_lines": 154,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 141,
+          "all_code_lines": 141,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/transcript.rs": {
+          "sha256": "d34272cad1729319a40aa96e9d5447d2901bdcd408160d57ed04807aee2f887c",
+          "physical_lines": 184,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "all_code_lines": 172,
+          "shipping_code_lines": 172,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/src/worker.rs": {
+          "sha256": "18770a47f9c6047cd297bdaff1359a44022008c5d4d8f4ea98e7a83b6b4d833f",
+          "physical_lines": 248,
+          "external_test": false,
+          "test_ranges": [],
+          "unclassified": [],
+          "shipping_code_lines": 234,
+          "all_code_lines": 234,
+          "test_code_lines": 0
+        },
+        "reactivity/ports/hummingbird/tests/query.rs": {
+          "sha256": "f370df0dee4d85b6ae7535cd86af99a3ee7d3ff2aeff568349558dff98ffdbac",
+          "physical_lines": 136,
+          "external_test": true,
+          "test_ranges": [
+            [
+              6,
+              0,
+              45,
+              1
+            ],
+            [
+              47,
+              0,
+              103,
+              1
+            ],
+            [
+              105,
+              0,
+              136,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 131,
+          "shipping_code_lines": 0,
+          "test_code_lines": 131
+        },
+        "reactivity/ports/hummingbird/tests/queue.rs": {
+          "sha256": "06d545a3b48dfbc40920672c8493f9c04745124f48ddd8ea5ff4dbfcf50fd020",
+          "physical_lines": 304,
+          "external_test": true,
+          "test_ranges": [
+            [
+              41,
+              0,
+              80,
+              1
+            ],
+            [
+              82,
+              0,
+              107,
+              1
+            ],
+            [
+              109,
+              0,
+              124,
+              1
+            ],
+            [
+              126,
+              0,
+              159,
+              1
+            ],
+            [
+              161,
+              0,
+              177,
+              1
+            ],
+            [
+              179,
+              0,
+              192,
+              1
+            ],
+            [
+              194,
+              0,
+              213,
+              1
+            ],
+            [
+              215,
+              0,
+              235,
+              1
+            ],
+            [
+              237,
+              0,
+              254,
+              1
+            ],
+            [
+              256,
+              0,
+              304,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "shipping_code_lines": 0,
+          "all_code_lines": 291,
+          "test_code_lines": 291
+        },
+        "reactivity/ports/hummingbird/tests/queue_consumer.rs": {
+          "sha256": "92803b6ee1a1e8d13785e0829924c7af8a426418bab811cf70f71af68dd64701",
+          "physical_lines": 276,
+          "external_test": true,
+          "test_ranges": [
+            [
+              28,
+              0,
+              84,
+              1
+            ],
+            [
+              86,
+              0,
+              276,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 268,
+          "shipping_code_lines": 0,
+          "test_code_lines": 268
+        },
+        "reactivity/ports/hummingbird/tests/queue_costs.rs": {
+          "sha256": "7059820e9b3dc022bf503827ebc2ca9125384df2499f32962e7c86ec47379a74",
+          "physical_lines": 167,
+          "external_test": true,
+          "test_ranges": [
+            [
+              22,
+              0,
+              120,
+              1
+            ],
+            [
+              121,
+              0,
+              167,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "shipping_code_lines": 0,
+          "all_code_lines": 162,
+          "test_code_lines": 162
+        },
+        "reactivity/ports/hummingbird/tests/queue_playback.rs": {
+          "sha256": "7049065a8391f32d4745a044e411739b2235b90c692d2ed26f96b7ddf49947cf",
+          "physical_lines": 234,
+          "external_test": true,
+          "test_ranges": [
+            [
+              27,
+              0,
+              55,
+              1
+            ],
+            [
+              56,
+              0,
+              77,
+              1
+            ],
+            [
+              78,
+              0,
+              152,
+              1
+            ],
+            [
+              153,
+              0,
+              175,
+              1
+            ],
+            [
+              176,
+              0,
+              197,
+              1
+            ],
+            [
+              198,
+              0,
+              217,
+              1
+            ],
+            [
+              218,
+              0,
+              234,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 234,
+          "shipping_code_lines": 0,
+          "test_code_lines": 234
+        },
+        "reactivity/ports/hummingbird/tests/search.rs": {
+          "sha256": "e69eebb78a7a759763f7896f68442cacc43d04fc5883b05c0e44995d82612050",
+          "physical_lines": 91,
+          "external_test": true,
+          "test_ranges": [
+            [
+              14,
+              0,
+              37,
+              1
+            ],
+            [
+              39,
+              0,
+              75,
+              1
+            ],
+            [
+              77,
+              0,
+              91,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 83,
+          "shipping_code_lines": 0,
+          "test_code_lines": 83
+        },
+        "reactivity/ports/hummingbird/tests/transcript.rs": {
+          "sha256": "81f16b1002092d7c4e74066182e0b2a66ca03652d8e8ba53a91b65e24e941366",
+          "physical_lines": 92,
+          "external_test": true,
+          "test_ranges": [
+            [
+              1,
+              0,
+              7,
+              1
+            ],
+            [
+              9,
+              0,
+              36,
+              1
+            ],
+            [
+              38,
+              0,
+              92,
+              1
+            ]
+          ],
+          "unclassified": [],
+          "all_code_lines": 87,
+          "shipping_code_lines": 0,
+          "test_code_lines": 87
+        }
+      },
+      "shipping_code_lines": 2907,
+      "test_code_lines": 1362
+    }
+  ]
+}

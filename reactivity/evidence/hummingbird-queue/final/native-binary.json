@@ -1,0 +1,16 @@
+{
+  "source_commit": "365efc09f1207718aac7c7cfa3d9f7bfa3a5d5b9",
+  "binary": "/tmp/hummingbird-queue-365-native-frozen",
+  "bytes": 420811168,
+  "sha256": "a07cf39a122f75a4d42bc225671eb25dd979b620c537f69c1012a55a219a79d1",
+  "profile": "default debug native, root config present, global Rust flag variables unset",
+  "sections": {
+    ".rodata": 7667608,
+    ".eh_frame": 3916976,
+    ".text": 35757895,
+    ".data.rel.ro": 1130840,
+    ".debug_info": 142129561,
+    ".debug_str": 134393375
+  },
+  "scope": "Absolute frozen linked artifact bill, no matched old-player baseline, stack or timing claim."
+}

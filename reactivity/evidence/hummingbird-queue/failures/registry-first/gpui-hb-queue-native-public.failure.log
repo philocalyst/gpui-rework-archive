@@ -1,0 +1,55 @@
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Multiple symbols for level 1/group 1 on key <FK23>
+>                   Using F23, ignoring XF86TouchpadOff
+> Warning:          Symbol map for key <FK23> redefined
+>                   Using last definition for conflicting fields
+> Warning:          Symbol map for key <FK24> redefined
+>                   Using last definition for conflicting fields
+> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn
+> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff
+> Warning:          Could not resolve keysym XF86ActionOnSelection
+> Warning:          Could not resolve keysym XF86ContextualInsert
+> Warning:          Could not resolve keysym XF86ContextualQuery
+Errors from xkbcomp are not fatal to the X server
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Multiple symbols for level 1/group 1 on key <FK23>
+>                   Using F23, ignoring XF86TouchpadOff
+> Warning:          Symbol map for key <FK23> redefined
+>                   Using last definition for conflicting fields
+> Warning:          Symbol map for key <FK24> redefined
+>                   Using last definition for conflicting fields
+> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn
+> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff
+> Warning:          Could not resolve keysym XF86ActionOnSelection
+> Warning:          Could not resolve keysym XF86ContextualInsert
+> Warning:          Could not resolve keysym XF86ContextualQuery
+Errors from xkbcomp are not fatal to the X server
+dbus-daemon[1854412]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=1854585 comm="busctl --json=short --timeout=2 --address=unix:pat")
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Multiple symbols for level 1/group 1 on key <FK23>
+>                   Using F23, ignoring XF86TouchpadOff
+> Warning:          Symbol map for key <FK23> redefined
+>                   Using last definition for conflicting fields
+> Warning:          Symbol map for key <FK24> redefined
+>                   Using last definition for conflicting fields
+> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn
+> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff
+> Warning:          Could not resolve keysym XF86ActionOnSelection
+> Warning:          Could not resolve keysym XF86ContextualInsert
+> Warning:          Could not resolve keysym XF86ContextualQuery
+Errors from xkbcomp are not fatal to the X server
+dbus-daemon[1854412]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+HUMMINGBIRD_PRESENT,ReferenceCpu,1,1
+HUMMINGBIRD_PRESENT,ReferenceCpu,3,3
+HUMMINGBIRD_PRESENT,ReferenceCpu,5,5
+HUMMINGBIRD_PRESENT,ReferenceCpu,6,6
+HUMMINGBIRD_PRESENT,ReferenceCpu,10,10
+HUMMINGBIRD_PRESENT,ReferenceCpu,11,11
+HUMMINGBIRD_PRESENT,ReferenceCpu,13,13
+HUMMINGBIRD_PRESENT,ReferenceCpu,15,15
+HUMMINGBIRD_PRESENT,ReferenceCpu,17,17
+HUMMINGBIRD_PRESENT,ReferenceCpu,19,19
+HUMMINGBIRD_PRESENT,ReferenceCpu,21,21
+HUMMINGBIRD_PRESENT,ReferenceCpu,22,22
+X connection to :167 broken (explicit kill or server shutdown).

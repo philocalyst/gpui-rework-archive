@@ -1,0 +1,86 @@
+     Locking 1 package to latest Rust 1.97.1 compatible version
+      Adding allocation-counter v0.8.1
+   Compiling hummingbird-gpui-port v0.1.0 (/tmp/gpui-hummingbird-queue-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.67s
+     Running tests/queue.rs (/tmp/gpui-presented-basis-target/debug/deps/queue-214735c0facf49bc)
+
+running 10 tests
+test duplicate_tracks_share_metadata_but_keep_distinct_entry_and_original_identity ... ok
+test empty_and_invalid_operations_do_not_mint_history ... ok
+test inverse_operations_restore_full_order_current_and_original_permutation ... ok
+test keys_never_recycle_after_replace_undo_or_history_eviction ... ok
+test large_history_threshold_is_strict_and_evicts_through_previous_large_only ... ok
+test manual_next_bypasses_repeat_one_and_navigation_skips_unavailable_paths ... ok
+test moving_a_block_preserves_source_order_and_current_key ... ok
+test navigation_matches_the_executed_pinned_manager_and_explicit_legacy_bugs_are_corrected ... ok
+test no_current_survives_remove_move_shuffle_and_undo ... ok
+test shuffle_only_reorders_future_suffix_then_new_batch_and_preserves_original_append ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/queue_costs.rs (/tmp/gpui-presented-basis-target/debug/deps/queue_costs-9c2ed61bd7e49e6e)
+
+running 2 tests
+test large_queue_inverse_edits_and_history_retirement_have_explicit_allocation_costs ... QUEUE_ALLOC construct count=4096 shared=true AllocationInfo { count_total: 5, count_current: 4, count_max: 4, bytes_total: 164192, bytes_current: 131424, bytes_max: 131424 }
+QUEUE_ALLOC move_arbitrary count=4096 shared=true AllocationInfo { count_total: 12, count_current: 1, count_max: 3, bytes_total: 147408, bytes_current: 65536, bytes_max: 114704 }
+QUEUE_ALLOC undo_move count=4096 shared=true AllocationInfo { count_total: 1, count_current: -1, count_max: 1, bytes_total: 16392, bytes_current: -65536, bytes_max: 16392 }
+QUEUE_ALLOC remove_arbitrary count=4096 shared=true AllocationInfo { count_total: 13, count_current: 1, count_max: 4, bytes_total: 245696, bytes_current: 98304, bytes_max: 196640 }
+QUEUE_ALLOC undo_remove count=4096 shared=true AllocationInfo { count_total: 0, count_current: -1, count_max: 0, bytes_total: 0, bytes_current: -98304, bytes_max: 0 }
+QUEUE_ALLOC drop_current_and_remaining_history_on_ui_thread count=4096 shared=true AllocationInfo { count_total: 0, count_current: -4, count_max: 0, bytes_total: 0, bytes_current: -131424, bytes_max: 0 }
+QUEUE_ALLOC retire_large_history_on_ui_thread count=4096 shared=true AllocationInfo { count_total: 6, count_current: 3, count_max: 6, bytes_total: 224, bytes_current: -98088, bytes_max: 224 }
+QUEUE_ALLOC construct count=4096 shared=false AllocationInfo { count_total: 12293, count_current: 12292, count_max: 12292, bytes_total: 754016, bytes_current: 721248, bytes_max: 721248 }
+QUEUE_ALLOC move_arbitrary count=4096 shared=false AllocationInfo { count_total: 12, count_current: 1, count_max: 3, bytes_total: 147408, bytes_current: 65536, bytes_max: 114704 }
+QUEUE_ALLOC undo_move count=4096 shared=false AllocationInfo { count_total: 1, count_current: -1, count_max: 1, bytes_total: 16392, bytes_current: -65536, bytes_max: 16392 }
+QUEUE_ALLOC remove_arbitrary count=4096 shared=false AllocationInfo { count_total: 13, count_current: 1, count_max: 4, bytes_total: 245696, bytes_current: 98304, bytes_max: 196640 }
+QUEUE_ALLOC undo_remove count=4096 shared=false AllocationInfo { count_total: 0, count_current: -1, count_max: 0, bytes_total: 0, bytes_current: -98304, bytes_max: 0 }
+QUEUE_ALLOC drop_current_and_remaining_history_on_ui_thread count=4096 shared=false AllocationInfo { count_total: 0, count_current: -12292, count_max: 0, bytes_total: 0, bytes_current: -721248, bytes_max: 0 }
+QUEUE_ALLOC retire_large_history_on_ui_thread count=4096 shared=false AllocationInfo { count_total: 6, count_current: -12285, count_max: 6, bytes_total: 224, bytes_current: -687912, bytes_max: 224 }
+QUEUE_ALLOC construct count=4097 shared=true AllocationInfo { count_total: 5, count_current: 4, count_max: 4, bytes_total: 164232, bytes_current: 131456, bytes_max: 131456 }
+QUEUE_ALLOC move_arbitrary count=4097 shared=true AllocationInfo { count_total: 12, count_current: 1, count_max: 3, bytes_total: 147416, bytes_current: 65536, bytes_max: 114712 }
+QUEUE_ALLOC undo_move count=4097 shared=true AllocationInfo { count_total: 1, count_current: -1, count_max: 1, bytes_total: 16400, bytes_current: -65536, bytes_max: 16400 }
+QUEUE_ALLOC remove_arbitrary count=4097 shared=true AllocationInfo { count_total: 13, count_current: 1, count_max: 4, bytes_total: 245720, bytes_current: 98304, bytes_max: 196664 }
+QUEUE_ALLOC undo_remove count=4097 shared=true AllocationInfo { count_total: 0, count_current: -1, count_max: 0, bytes_total: 0, bytes_current: -98304, bytes_max: 0 }
+QUEUE_ALLOC drop_current_and_remaining_history_on_ui_thread count=4097 shared=true AllocationInfo { count_total: 0, count_current: -4, count_max: 0, bytes_total: 0, bytes_current: -131456, bytes_max: 0 }
+QUEUE_ALLOC retire_large_history_on_ui_thread count=4097 shared=true AllocationInfo { count_total: 6, count_current: 3, count_max: 6, bytes_total: 224, bytes_current: -98112, bytes_max: 224 }
+QUEUE_ALLOC construct count=4097 shared=false AllocationInfo { count_total: 12296, count_current: 12295, count_max: 12295, bytes_total: 754200, bytes_current: 721424, bytes_max: 721424 }
+QUEUE_ALLOC move_arbitrary count=4097 shared=false AllocationInfo { count_total: 12, count_current: 1, count_max: 3, bytes_total: 147416, bytes_current: 65536, bytes_max: 114712 }
+QUEUE_ALLOC undo_move count=4097 shared=false AllocationInfo { count_total: 1, count_current: -1, count_max: 1, bytes_total: 16400, bytes_current: -65536, bytes_max: 16400 }
+QUEUE_ALLOC remove_arbitrary count=4097 shared=false AllocationInfo { count_total: 13, count_current: 1, count_max: 4, bytes_total: 245720, bytes_current: 98304, bytes_max: 196664 }
+QUEUE_ALLOC undo_remove count=4097 shared=false AllocationInfo { count_total: 0, count_current: -1, count_max: 0, bytes_total: 0, bytes_current: -98304, bytes_max: 0 }
+QUEUE_ALLOC drop_current_and_remaining_history_on_ui_thread count=4097 shared=false AllocationInfo { count_total: 0, count_current: -12295, count_max: 0, bytes_total: 0, bytes_current: -721424, bytes_max: 0 }
+QUEUE_ALLOC retire_large_history_on_ui_thread count=4097 shared=false AllocationInfo { count_total: 6, count_current: -12288, count_max: 6, bytes_total: 224, bytes_current: -688080, bytes_max: 224 }
+QUEUE_ALLOC construct count=100000 shared=true AllocationInfo { count_total: 5, count_current: 4, count_max: 4, bytes_total: 4000352, bytes_current: 3200352, bytes_max: 3200352 }
+QUEUE_ALLOC move_arbitrary count=100000 shared=true AllocationInfo { count_total: 16, count_current: 0, count_max: 3, bytes_total: 2497104, bytes_current: 248576, bytes_max: 1972880 }
+QUEUE_ALLOC undo_move count=100000 shared=true AllocationInfo { count_total: 1, count_current: -1, count_max: 1, bytes_total: 400008, bytes_current: -1048576, bytes_max: 400008 }
+QUEUE_ALLOC remove_arbitrary count=100000 shared=true AllocationInfo { count_total: 17, count_current: 1, count_max: 4, bytes_total: 4345664, bytes_current: 1572864, bytes_max: 3559328 }
+QUEUE_ALLOC undo_remove count=100000 shared=true AllocationInfo { count_total: 0, count_current: -1, count_max: 0, bytes_total: 0, bytes_current: -1572864, bytes_max: 0 }
+QUEUE_ALLOC drop_current_and_remaining_history_on_ui_thread count=100000 shared=true AllocationInfo { count_total: 0, count_current: -3, count_max: 0, bytes_total: 0, bytes_current: -2400352, bytes_max: 0 }
+QUEUE_ALLOC retire_large_history_on_ui_thread count=100000 shared=true AllocationInfo { count_total: 6, count_current: 3, count_max: 6, bytes_total: 224, bytes_current: -2399784, bytes_max: 224 }
+QUEUE_ALLOC construct count=100000 shared=false AllocationInfo { count_total: 300005, count_current: 300004, count_max: 300004, bytes_total: 18400352, bytes_current: 17600352, bytes_max: 17600352 }
+QUEUE_ALLOC move_arbitrary count=100000 shared=false AllocationInfo { count_total: 16, count_current: 0, count_max: 3, bytes_total: 2497104, bytes_current: 248576, bytes_max: 1972880 }
+QUEUE_ALLOC undo_move count=100000 shared=false AllocationInfo { count_total: 1, count_current: -1, count_max: 1, bytes_total: 400008, bytes_current: -1048576, bytes_max: 400008 }
+QUEUE_ALLOC remove_arbitrary count=100000 shared=false AllocationInfo { count_total: 17, count_current: 1, count_max: 4, bytes_total: 4345664, bytes_current: 1572864, bytes_max: 3559328 }
+QUEUE_ALLOC undo_remove count=100000 shared=false AllocationInfo { count_total: 0, count_current: -1, count_max: 0, bytes_total: 0, bytes_current: -1572864, bytes_max: 0 }
+QUEUE_ALLOC drop_current_and_remaining_history_on_ui_thread count=100000 shared=false AllocationInfo { count_total: 0, count_current: -300003, count_max: 0, bytes_total: 0, bytes_current: -16800352, bytes_max: 0 }
+QUEUE_ALLOC retire_large_history_on_ui_thread count=100000 shared=false AllocationInfo { count_total: 6, count_current: -299997, count_max: 6, bytes_total: 224, bytes_current: -16799784, bytes_max: 224 }
+ok
+test one_hundred_thousand_prepared_entries_keep_public_view_realization_bounded ... QUEUE_ALLOC public_view_incremental_mount_given_prepared_model count=100000 shared=true AllocationInfo { count_total: 2148, count_current: 428, count_max: 585, bytes_total: 488430, bytes_current: 115121, bytes_max: 180772 }
+QUEUE_VIEW_LAYOUT screen=264 window=8 realized=4
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.36s
+
+     Running tests/queue_playback.rs (/tmp/gpui-presented-basis-target/debug/deps/queue_playback-f53a8574f31f526d)
+
+running 7 tests
+test eos_is_qualified_by_session_occurrence_and_current_entry ... ok
+test every_accepted_queue_or_policy_edit_retires_previous_eos_authority ... ok
+test no_op_edits_do_not_create_a_new_plan_and_borrowed_projection_clones_nothing ... ok
+test queue_and_plan_carriers_are_measured_without_claiming_a_stack_peak ... QUEUE_LAYOUT key=8 option_key=8 entry=16 queue=128 stamp=24 plan=56 option_plan=56 controller=200
+ok
+test removing_current_resolves_the_next_live_playable_key_and_old_plan_is_immutable ... ok
+test repeat_one_creates_a_new_occurrence_and_manual_next_bypasses_it ... ok
+test shuffled_wrap_commits_a_new_permutation_before_installing_its_successor ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
