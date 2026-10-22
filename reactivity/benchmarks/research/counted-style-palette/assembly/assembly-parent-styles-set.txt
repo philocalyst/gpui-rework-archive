@@ -1,0 +1,84 @@
+
+/root/gpui-palette-phase/target-parent/release/deps/gpui-cbd3c7d919c25ad8:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000b3ee60 <<gpui::runtime::styles::Styles>::set>:
+  b3ee60:	41 57                	push   %r15
+  b3ee62:	41 56                	push   %r14
+  b3ee64:	53                   	push   %rbx
+  b3ee65:	48 83 ec 30          	sub    $0x30,%rsp
+  b3ee69:	48 89 d3             	mov    %rdx,%rbx
+  b3ee6c:	49 89 f6             	mov    %rsi,%r14
+  b3ee6f:	49 89 ff             	mov    %rdi,%r15
+  b3ee72:	83 3f 01             	cmpl   $0x1,(%rdi)
+  b3ee75:	0f 84 92 00 00 00    	je     b3ef0d <<gpui::runtime::styles::Styles>::set+0xad>
+  b3ee7b:	48 c7 44 24 08 00 00 	movq   $0x0,0x8(%rsp)
+  b3ee82:	00 00 
+  b3ee84:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+  b3ee89:	4c 89 3c 24          	mov    %r15,(%rsp)
+  b3ee8d:	48 8d 7c 24 18       	lea    0x18(%rsp),%rdi
+  b3ee92:	48 89 e6             	mov    %rsp,%rsi
+  b3ee95:	e8 46 5c f8 ff       	call   ac4ae0 <<alloc::vec::Vec<gpui::style::Style> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui::style::Style, core::iter::adapters::map::Map<core::ops::range::Range<usize>, <gpui::runtime::styles::Styles>::set::{closure#0}>>>::from_iter>
+  b3ee9a:	49 8b 07             	mov    (%r15),%rax
+  b3ee9d:	48 85 c0             	test   %rax,%rax
+  b3eea0:	74 51                	je     b3eef3 <<gpui::runtime::styles::Styles>::set+0x93>
+  b3eea2:	83 f8 01             	cmp    $0x1,%eax
+  b3eea5:	75 18                	jne    b3eebf <<gpui::runtime::styles::Styles>::set+0x5f>
+  b3eea7:	49 8b 47 08          	mov    0x8(%r15),%rax
+  b3eeab:	48 85 c0             	test   %rax,%rax
+  b3eeae:	74 43                	je     b3eef3 <<gpui::runtime::styles::Styles>::set+0x93>
+  b3eeb0:	49 8b 7f 10          	mov    0x10(%r15),%rdi
+  b3eeb4:	48 6b f0 58          	imul   $0x58,%rax,%rsi
+  b3eeb8:	ba 04 00 00 00       	mov    $0x4,%edx
+  b3eebd:	eb 2e                	jmp    b3eeed <<gpui::runtime::styles::Styles>::set+0x8d>
+  b3eebf:	49 8b 47 10          	mov    0x10(%r15),%rax
+  b3eec3:	48 85 c0             	test   %rax,%rax
+  b3eec6:	74 13                	je     b3eedb <<gpui::runtime::styles::Styles>::set+0x7b>
+  b3eec8:	49 8b 7f 08          	mov    0x8(%r15),%rdi
+  b3eecc:	48 6b f0 58          	imul   $0x58,%rax,%rsi
+  b3eed0:	ba 04 00 00 00       	mov    $0x4,%edx
+  b3eed5:	ff 15 8d dd 99 00    	call   *0x99dd8d(%rip)        # 14dcc68 <_DYNAMIC+0x248>
+  b3eedb:	49 8b 77 20          	mov    0x20(%r15),%rsi
+  b3eedf:	48 85 f6             	test   %rsi,%rsi
+  b3eee2:	74 0f                	je     b3eef3 <<gpui::runtime::styles::Styles>::set+0x93>
+  b3eee4:	49 8b 7f 18          	mov    0x18(%r15),%rdi
+  b3eee8:	ba 01 00 00 00       	mov    $0x1,%edx
+  b3eeed:	ff 15 75 dd 99 00    	call   *0x99dd75(%rip)        # 14dcc68 <_DYNAMIC+0x248>
+  b3eef3:	49 c7 07 01 00 00 00 	movq   $0x1,(%r15)
+  b3eefa:	0f 10 44 24 18       	movups 0x18(%rsp),%xmm0
+  b3eeff:	41 0f 11 47 08       	movups %xmm0,0x8(%r15)
+  b3ef04:	48 8b 44 24 28       	mov    0x28(%rsp),%rax
+  b3ef09:	49 89 47 18          	mov    %rax,0x18(%r15)
+  b3ef0d:	49 8b 77 18          	mov    0x18(%r15),%rsi
+  b3ef11:	49 39 f6             	cmp    %rsi,%r14
+  b3ef14:	73 46                	jae    b3ef5c <<gpui::runtime::styles::Styles>::set+0xfc>
+  b3ef16:	49 8b 47 10          	mov    0x10(%r15),%rax
+  b3ef1a:	49 6b ce 58          	imul   $0x58,%r14,%rcx
+  b3ef1e:	48 8b 53 50          	mov    0x50(%rbx),%rdx
+  b3ef22:	48 89 54 08 50       	mov    %rdx,0x50(%rax,%rcx,1)
+  b3ef27:	0f 10 43 40          	movups 0x40(%rbx),%xmm0
+  b3ef2b:	0f 11 44 08 40       	movups %xmm0,0x40(%rax,%rcx,1)
+  b3ef30:	0f 10 03             	movups (%rbx),%xmm0
+  b3ef33:	0f 10 4b 10          	movups 0x10(%rbx),%xmm1
+  b3ef37:	0f 10 53 20          	movups 0x20(%rbx),%xmm2
+  b3ef3b:	0f 10 5b 30          	movups 0x30(%rbx),%xmm3
+  b3ef3f:	0f 11 5c 08 30       	movups %xmm3,0x30(%rax,%rcx,1)
+  b3ef44:	0f 11 54 08 20       	movups %xmm2,0x20(%rax,%rcx,1)
+  b3ef49:	0f 11 4c 08 10       	movups %xmm1,0x10(%rax,%rcx,1)
+  b3ef4e:	0f 11 04 08          	movups %xmm0,(%rax,%rcx,1)
+  b3ef52:	48 83 c4 30          	add    $0x30,%rsp
+  b3ef56:	5b                   	pop    %rbx
+  b3ef57:	41 5e                	pop    %r14
+  b3ef59:	41 5f                	pop    %r15
+  b3ef5b:	c3                   	ret
+  b3ef5c:	48 8d 15 4d 28 93 00 	lea    0x93284d(%rip),%rdx        # 14717b0 <anon.2b588236270343dd83719753d3f0d92c.74.llvm.1843217591618200416>
+  b3ef63:	4c 89 f7             	mov    %r14,%rdi
+  b3ef66:	ff 15 4c dd 99 00    	call   *0x99dd4c(%rip)        # 14dccb8 <_DYNAMIC+0x298>
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:

@@ -1,0 +1,552 @@
+
+/root/gpui-palette-phase/target-candidate/release/deps/gpui-cbd3c7d919c25ad8:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000ba54f0 <<gpui::runtime::styles::Styles>::set>:
+  ba54f0:	55                   	push   %rbp
+  ba54f1:	41 57                	push   %r15
+  ba54f3:	41 56                	push   %r14
+  ba54f5:	41 55                	push   %r13
+  ba54f7:	41 54                	push   %r12
+  ba54f9:	53                   	push   %rbx
+  ba54fa:	48 81 ec d8 00 00 00 	sub    $0xd8,%rsp
+  ba5501:	48 8b 07             	mov    (%rdi),%rax
+  ba5504:	48 85 c0             	test   %rax,%rax
+  ba5507:	74 5d                	je     ba5566 <<gpui::runtime::styles::Styles>::set+0x76>
+  ba5509:	83 f8 01             	cmp    $0x1,%eax
+  ba550c:	0f 85 36 01 00 00    	jne    ba5648 <<gpui::runtime::styles::Styles>::set+0x158>
+  ba5512:	48 8b 47 18          	mov    0x18(%rdi),%rax
+  ba5516:	48 39 c6             	cmp    %rax,%rsi
+  ba5519:	0f 83 17 08 00 00    	jae    ba5d36 <<gpui::runtime::styles::Styles>::set+0x846>
+  ba551f:	48 8b 47 10          	mov    0x10(%rdi),%rax
+  ba5523:	48 6b ce 58          	imul   $0x58,%rsi,%rcx
+  ba5527:	48 8b 72 50          	mov    0x50(%rdx),%rsi
+  ba552b:	48 89 74 08 50       	mov    %rsi,0x50(%rax,%rcx,1)
+  ba5530:	0f 10 42 40          	movups 0x40(%rdx),%xmm0
+  ba5534:	0f 11 44 08 40       	movups %xmm0,0x40(%rax,%rcx,1)
+  ba5539:	f3 0f 6f 02          	movdqu (%rdx),%xmm0
+  ba553d:	f3 0f 6f 4a 10       	movdqu 0x10(%rdx),%xmm1
+  ba5542:	f3 0f 6f 52 20       	movdqu 0x20(%rdx),%xmm2
+  ba5547:	0f 10 5a 30          	movups 0x30(%rdx),%xmm3
+  ba554b:	0f 11 5c 08 30       	movups %xmm3,0x30(%rax,%rcx,1)
+  ba5550:	f3 0f 7f 54 08 20    	movdqu %xmm2,0x20(%rax,%rcx,1)
+  ba5556:	f3 0f 7f 4c 08 10    	movdqu %xmm1,0x10(%rax,%rcx,1)
+  ba555c:	f3 0f 7f 04 08       	movdqu %xmm0,(%rax,%rcx,1)
+  ba5561:	e9 67 07 00 00       	jmp    ba5ccd <<gpui::runtime::styles::Styles>::set+0x7dd>
+  ba5566:	66 0f 6e 42 54       	movd   0x54(%rdx),%xmm0
+  ba556b:	66 0f 74 05 7d e5 57 	pcmpeqb -0xa81a83(%rip),%xmm0        # 123af0 <anon.060c8676cb73f183ba2b04c0c1f1de78.103.llvm.4965635254875407653+0xd0>
+  ba5572:	ff 
+  ba5573:	66 0f 76 c9          	pcmpeqd %xmm1,%xmm1
+  ba5577:	66 0f 60 c0          	punpcklbw %xmm0,%xmm0
+  ba557b:	66 0f ef c8          	pxor   %xmm0,%xmm1
+  ba557f:	f2 0f 70 c9 50       	pshuflw $0x50,%xmm1,%xmm1
+  ba5584:	66 0f 61 c0          	punpcklwd %xmm0,%xmm0
+  ba5588:	f3 0f 10 c1          	movss  %xmm1,%xmm0
+  ba558c:	0f 50 c0             	movmskps %xmm0,%eax
+  ba558f:	83 f8 0f             	cmp    $0xf,%eax
+  ba5592:	0f 85 8e 00 00 00    	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba5598:	8b 42 10             	mov    0x10(%rdx),%eax
+  ba559b:	0b 42 14             	or     0x14(%rdx),%eax
+  ba559e:	0f 85 82 00 00 00    	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba55a4:	f6 02 01             	testb  $0x1,(%rdx)
+  ba55a7:	75 7d                	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba55a9:	f6 42 08 01          	testb  $0x1,0x8(%rdx)
+  ba55ad:	75 77                	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba55af:	81 7a 18 00 00 80 41 	cmpl   $0x41800000,0x18(%rdx)
+  ba55b6:	75 6e                	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba55b8:	0f 28 05 71 f5 57 ff 	movaps -0xa80a8f(%rip),%xmm0        # 124b30 <anon.6d0a52469d251ddef724da8834f2bd62.46.llvm.18134592454904780574+0x140>
+  ba55bf:	0f 29 44 24 50       	movaps %xmm0,0x50(%rsp)
+  ba55c4:	48 c7 44 24 60 00 00 	movq   $0x0,0x60(%rsp)
+  ba55cb:	00 00 
+  ba55cd:	0f 10 42 3c          	movups 0x3c(%rdx),%xmm0
+  ba55d1:	0f 29 84 24 80 00 00 	movaps %xmm0,0x80(%rsp)
+  ba55d8:	00 
+  ba55d9:	66 0f 6f 44 24 50    	movdqa 0x50(%rsp),%xmm0
+  ba55df:	66 0f ef c9          	pxor   %xmm1,%xmm1
+  ba55e3:	f3 0f 7e 52 4c       	movq   0x4c(%rdx),%xmm2
+  ba55e8:	66 0f 74 84 24 80 00 	pcmpeqb 0x80(%rsp),%xmm0
+  ba55ef:	00 00 
+  ba55f1:	66 0f 74 d1          	pcmpeqb %xmm1,%xmm2
+  ba55f5:	66 0f db c2          	pand   %xmm2,%xmm0
+  ba55f9:	66 0f d7 c0          	pmovmskb %xmm0,%eax
+  ba55fd:	3d ff ff 00 00       	cmp    $0xffff,%eax
+  ba5602:	75 22                	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba5604:	48 b8 00 00 00 00 00 	movabs $0x3f80000000000000,%rax
+  ba560b:	00 80 3f 
+  ba560e:	48 33 42 24          	xor    0x24(%rdx),%rax
+  ba5612:	48 0b 42 1c          	or     0x1c(%rdx),%rax
+  ba5616:	75 0e                	jne    ba5626 <<gpui::runtime::styles::Styles>::set+0x136>
+  ba5618:	48 8b 42 34          	mov    0x34(%rdx),%rax
+  ba561c:	48 0b 42 2c          	or     0x2c(%rdx),%rax
+  ba5620:	0f 84 a7 06 00 00    	je     ba5ccd <<gpui::runtime::styles::Styles>::set+0x7dd>
+  ba5626:	48 83 f9 09          	cmp    $0x9,%rcx
+  ba562a:	0f 82 d7 03 00 00    	jb     ba5a07 <<gpui::runtime::styles::Styles>::set+0x517>
+  ba5630:	48 85 c9             	test   %rcx,%rcx
+  ba5633:	0f 89 f0 04 00 00    	jns    ba5b29 <<gpui::runtime::styles::Styles>::set+0x639>
+  ba5639:	45 31 e4             	xor    %r12d,%r12d
+  ba563c:	4c 89 e7             	mov    %r12,%rdi
+  ba563f:	48 89 ce             	mov    %rcx,%rsi
+  ba5642:	ff 15 c8 db 92 00    	call   *0x92dbc8(%rip)        # 14d3210 <_DYNAMIC+0x288>
+  ba5648:	48 8b 47 20          	mov    0x20(%rdi),%rax
+  ba564c:	48 39 c6             	cmp    %rax,%rsi
+  ba564f:	0f 83 f4 06 00 00    	jae    ba5d49 <<gpui::runtime::styles::Styles>::set+0x859>
+  ba5655:	48 89 8c 24 d0 00 00 	mov    %rcx,0xd0(%rsp)
+  ba565c:	00 
+  ba565d:	4c 8b 4f 18          	mov    0x18(%rdi),%r9
+  ba5661:	45 0f b6 14 31       	movzbl (%r9,%rsi,1),%r10d
+  ba5666:	48 8b 4f 10          	mov    0x10(%rdi),%rcx
+  ba566a:	48 85 c9             	test   %rcx,%rcx
+  ba566d:	0f 84 b0 06 00 00    	je     ba5d23 <<gpui::runtime::styles::Styles>::set+0x833>
+  ba5673:	48 89 7c 24 78       	mov    %rdi,0x78(%rsp)
+  ba5678:	4c 8b 5f 08          	mov    0x8(%rdi),%r11
+  ba567c:	4c 6b e1 5c          	imul   $0x5c,%rcx,%r12
+  ba5680:	44 0f b6 32          	movzbl (%rdx),%r14d
+  ba5684:	44 8b 6a 04          	mov    0x4(%rdx),%r13d
+  ba5688:	0f b6 5a 08          	movzbl 0x8(%rdx),%ebx
+  ba568c:	8b 7a 0c             	mov    0xc(%rdx),%edi
+  ba568f:	44 8b 42 10          	mov    0x10(%rdx),%r8d
+  ba5693:	8b 42 14             	mov    0x14(%rdx),%eax
+  ba5696:	89 44 24 38          	mov    %eax,0x38(%rsp)
+  ba569a:	8b 42 18             	mov    0x18(%rdx),%eax
+  ba569d:	89 44 24 4c          	mov    %eax,0x4c(%rsp)
+  ba56a1:	0f b6 42 54          	movzbl 0x54(%rdx),%eax
+  ba56a5:	88 44 24 0f          	mov    %al,0xf(%rsp)
+  ba56a9:	0f b6 42 56          	movzbl 0x56(%rdx),%eax
+  ba56ad:	88 44 24 0e          	mov    %al,0xe(%rsp)
+  ba56b1:	0f b6 42 57          	movzbl 0x57(%rdx),%eax
+  ba56b5:	88 44 24 0d          	mov    %al,0xd(%rsp)
+  ba56b9:	0f b6 42 55          	movzbl 0x55(%rdx),%eax
+  ba56bd:	88 44 24 0c          	mov    %al,0xc(%rsp)
+  ba56c1:	48 8d 42 3c          	lea    0x3c(%rdx),%rax
+  ba56c5:	48 89 84 24 c8 00 00 	mov    %rax,0xc8(%rsp)
+  ba56cc:	00 
+  ba56cd:	48 8b 42 24          	mov    0x24(%rdx),%rax
+  ba56d1:	48 89 84 24 c0 00 00 	mov    %rax,0xc0(%rsp)
+  ba56d8:	00 
+  ba56d9:	48 8b 42 1c          	mov    0x1c(%rdx),%rax
+  ba56dd:	48 89 84 24 b8 00 00 	mov    %rax,0xb8(%rsp)
+  ba56e4:	00 
+  ba56e5:	48 8b 42 34          	mov    0x34(%rdx),%rax
+  ba56e9:	48 89 84 24 b0 00 00 	mov    %rax,0xb0(%rsp)
+  ba56f0:	00 
+  ba56f1:	48 8b 42 2c          	mov    0x2c(%rdx),%rax
+  ba56f5:	48 89 84 24 a8 00 00 	mov    %rax,0xa8(%rsp)
+  ba56fc:	00 
+  ba56fd:	4d 8d 7b 3c          	lea    0x3c(%r11),%r15
+  ba5701:	31 ed                	xor    %ebp,%ebp
+  ba5703:	4c 89 64 24 70       	mov    %r12,0x70(%rsp)
+  ba5708:	eb 17                	jmp    ba5721 <<gpui::runtime::styles::Styles>::set+0x231>
+  ba570a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  ba5710:	49 83 c7 5c          	add    $0x5c,%r15
+  ba5714:	48 ff cd             	dec    %rbp
+  ba5717:	49 83 c4 a4          	add    $0xffffffffffffffa4,%r12
+  ba571b:	0f 84 66 01 00 00    	je     ba5887 <<gpui::runtime::styles::Styles>::set+0x397>
+  ba5721:	41 83 7f 1c 00       	cmpl   $0x0,0x1c(%r15)
+  ba5726:	74 e8                	je     ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5728:	41 83 7f c4 01       	cmpl   $0x1,-0x3c(%r15)
+  ba572d:	75 11                	jne    ba5740 <<gpui::runtime::styles::Styles>::set+0x250>
+  ba572f:	45 39 6f c8          	cmp    %r13d,-0x38(%r15)
+  ba5733:	0f 94 c0             	sete   %al
+  ba5736:	41 84 c6             	test   %al,%r14b
+  ba5739:	74 d5                	je     ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba573b:	eb 09                	jmp    ba5746 <<gpui::runtime::styles::Styles>::set+0x256>
+  ba573d:	0f 1f 00             	nopl   (%rax)
+  ba5740:	41 f6 c6 01          	test   $0x1,%r14b
+  ba5744:	75 ca                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5746:	41 83 7f cc 01       	cmpl   $0x1,-0x34(%r15)
+  ba574b:	75 0d                	jne    ba575a <<gpui::runtime::styles::Styles>::set+0x26a>
+  ba574d:	41 39 7f d0          	cmp    %edi,-0x30(%r15)
+  ba5751:	0f 94 c0             	sete   %al
+  ba5754:	84 c3                	test   %al,%bl
+  ba5756:	74 b8                	je     ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5758:	eb 05                	jmp    ba575f <<gpui::runtime::styles::Styles>::set+0x26f>
+  ba575a:	f6 c3 01             	test   $0x1,%bl
+  ba575d:	75 b1                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba575f:	45 39 47 d4          	cmp    %r8d,-0x2c(%r15)
+  ba5763:	75 ab                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5765:	8b 44 24 38          	mov    0x38(%rsp),%eax
+  ba5769:	41 39 47 d8          	cmp    %eax,-0x28(%r15)
+  ba576d:	75 a1                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba576f:	8b 44 24 4c          	mov    0x4c(%rsp),%eax
+  ba5773:	41 39 47 dc          	cmp    %eax,-0x24(%r15)
+  ba5777:	75 97                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5779:	0f b6 44 24 0f       	movzbl 0xf(%rsp),%eax
+  ba577e:	41 38 47 18          	cmp    %al,0x18(%r15)
+  ba5782:	75 8c                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5784:	0f b6 44 24 0e       	movzbl 0xe(%rsp),%eax
+  ba5789:	41 38 47 1a          	cmp    %al,0x1a(%r15)
+  ba578d:	75 81                	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba578f:	0f b6 44 24 0d       	movzbl 0xd(%rsp),%eax
+  ba5794:	41 38 47 1b          	cmp    %al,0x1b(%r15)
+  ba5798:	0f 85 72 ff ff ff    	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba579e:	0f b6 44 24 0c       	movzbl 0xc(%rsp),%eax
+  ba57a3:	41 38 47 19          	cmp    %al,0x19(%r15)
+  ba57a7:	0f 85 63 ff ff ff    	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba57ad:	89 7c 24 48          	mov    %edi,0x48(%rsp)
+  ba57b1:	4c 89 ff             	mov    %r15,%rdi
+  ba57b4:	48 89 74 24 30       	mov    %rsi,0x30(%rsp)
+  ba57b9:	48 8b b4 24 c8 00 00 	mov    0xc8(%rsp),%rsi
+  ba57c0:	00 
+  ba57c1:	48 89 94 24 a0 00 00 	mov    %rdx,0xa0(%rsp)
+  ba57c8:	00 
+  ba57c9:	4c 89 4c 24 28       	mov    %r9,0x28(%rsp)
+  ba57ce:	4c 89 54 24 20       	mov    %r10,0x20(%rsp)
+  ba57d3:	4c 89 5c 24 18       	mov    %r11,0x18(%rsp)
+  ba57d8:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+  ba57dd:	44 89 44 24 44       	mov    %r8d,0x44(%rsp)
+  ba57e2:	e8 59 3a 00 00       	call   ba9240 <<gpui_reactivity_core::geometry::Affine as gpui::property::ExactValue>::same>
+  ba57e7:	44 8b 44 24 44       	mov    0x44(%rsp),%r8d
+  ba57ec:	8b 7c 24 48          	mov    0x48(%rsp),%edi
+  ba57f0:	48 8b 4c 24 10       	mov    0x10(%rsp),%rcx
+  ba57f5:	4c 8b 5c 24 18       	mov    0x18(%rsp),%r11
+  ba57fa:	4c 8b 54 24 20       	mov    0x20(%rsp),%r10
+  ba57ff:	4c 8b 4c 24 28       	mov    0x28(%rsp),%r9
+  ba5804:	48 8b 74 24 30       	mov    0x30(%rsp),%rsi
+  ba5809:	48 8b 94 24 a0 00 00 	mov    0xa0(%rsp),%rdx
+  ba5810:	00 
+  ba5811:	84 c0                	test   %al,%al
+  ba5813:	0f 84 f7 fe ff ff    	je     ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5819:	49 8b 47 e0          	mov    -0x20(%r15),%rax
+  ba581d:	48 33 84 24 b8 00 00 	xor    0xb8(%rsp),%rax
+  ba5824:	00 
+  ba5825:	49 8b 4f e8          	mov    -0x18(%r15),%rcx
+  ba5829:	48 33 8c 24 c0 00 00 	xor    0xc0(%rsp),%rcx
+  ba5830:	00 
+  ba5831:	48 09 c1             	or     %rax,%rcx
+  ba5834:	48 8b 4c 24 10       	mov    0x10(%rsp),%rcx
+  ba5839:	0f 85 d1 fe ff ff    	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba583f:	49 8b 47 f0          	mov    -0x10(%r15),%rax
+  ba5843:	48 33 84 24 a8 00 00 	xor    0xa8(%rsp),%rax
+  ba584a:	00 
+  ba584b:	49 8b 4f f8          	mov    -0x8(%r15),%rcx
+  ba584f:	48 33 8c 24 b0 00 00 	xor    0xb0(%rsp),%rcx
+  ba5856:	00 
+  ba5857:	48 09 c1             	or     %rax,%rcx
+  ba585a:	48 8b 4c 24 10       	mov    0x10(%rsp),%rcx
+  ba585f:	0f 85 ab fe ff ff    	jne    ba5710 <<gpui::runtime::styles::Styles>::set+0x220>
+  ba5865:	4c 39 d1             	cmp    %r10,%rcx
+  ba5868:	0f 86 32 05 00 00    	jbe    ba5da0 <<gpui::runtime::styles::Styles>::set+0x8b0>
+  ba586e:	49 6b c2 5c          	imul   $0x5c,%r10,%rax
+  ba5872:	41 ff 4c 03 58       	decl   0x58(%r11,%rax,1)
+  ba5877:	41 ff 47 1c          	incl   0x1c(%r15)
+  ba587b:	40 f6 dd             	neg    %bpl
+  ba587e:	41 88 2c 31          	mov    %bpl,(%r9,%rsi,1)
+  ba5882:	e9 46 04 00 00       	jmp    ba5ccd <<gpui::runtime::styles::Styles>::set+0x7dd>
+  ba5887:	4c 39 d1             	cmp    %r10,%rcx
+  ba588a:	48 8b 7c 24 78       	mov    0x78(%rsp),%rdi
+  ba588f:	0f 86 8e 04 00 00    	jbe    ba5d23 <<gpui::runtime::styles::Styles>::set+0x833>
+  ba5895:	49 6b da 5c          	imul   $0x5c,%r10,%rbx
+  ba5899:	41 83 7c 1b 58 01    	cmpl   $0x1,0x58(%r11,%rbx,1)
+  ba589f:	4c 8b 84 24 d0 00 00 	mov    0xd0(%rsp),%r8
+  ba58a6:	00 
+  ba58a7:	4c 8b 7c 24 70       	mov    0x70(%rsp),%r15
+  ba58ac:	75 41                	jne    ba58ef <<gpui::runtime::styles::Styles>::set+0x3ff>
+  ba58ae:	49 01 db             	add    %rbx,%r11
+  ba58b1:	48 8b 42 50          	mov    0x50(%rdx),%rax
+  ba58b5:	49 89 43 50          	mov    %rax,0x50(%r11)
+  ba58b9:	0f 10 42 40          	movups 0x40(%rdx),%xmm0
+  ba58bd:	41 0f 11 43 40       	movups %xmm0,0x40(%r11)
+  ba58c2:	f3 0f 6f 02          	movdqu (%rdx),%xmm0
+  ba58c6:	f3 0f 6f 4a 10       	movdqu 0x10(%rdx),%xmm1
+  ba58cb:	f3 0f 6f 52 20       	movdqu 0x20(%rdx),%xmm2
+  ba58d0:	0f 10 5a 30          	movups 0x30(%rdx),%xmm3
+  ba58d4:	41 0f 11 5b 30       	movups %xmm3,0x30(%r11)
+  ba58d9:	f3 41 0f 7f 53 20    	movdqu %xmm2,0x20(%r11)
+  ba58df:	f3 41 0f 7f 4b 10    	movdqu %xmm1,0x10(%r11)
+  ba58e5:	f3 41 0f 7f 03       	movdqu %xmm0,(%r11)
+  ba58ea:	e9 de 03 00 00       	jmp    ba5ccd <<gpui::runtime::styles::Styles>::set+0x7dd>
+  ba58ef:	49 89 ce             	mov    %rcx,%r14
+  ba58f2:	45 31 e4             	xor    %r12d,%r12d
+  ba58f5:	31 c9                	xor    %ecx,%ecx
+  ba58f7:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  ba58fe:	00 00 
+  ba5900:	41 83 7c 0b 58 00    	cmpl   $0x0,0x58(%r11,%rcx,1)
+  ba5906:	0f 84 be 01 00 00    	je     ba5aca <<gpui::runtime::styles::Styles>::set+0x5da>
+  ba590c:	49 ff c4             	inc    %r12
+  ba590f:	48 83 c1 5c          	add    $0x5c,%rcx
+  ba5913:	49 39 cf             	cmp    %rcx,%r15
+  ba5916:	75 e8                	jne    ba5900 <<gpui::runtime::styles::Styles>::set+0x410>
+  ba5918:	49 83 fe 20          	cmp    $0x20,%r14
+  ba591c:	4c 89 c1             	mov    %r8,%rcx
+  ba591f:	0f 83 e2 00 00 00    	jae    ba5a07 <<gpui::runtime::styles::Styles>::set+0x517>
+  ba5925:	4d 89 f4             	mov    %r14,%r12
+  ba5928:	4c 89 dd             	mov    %r11,%rbp
+  ba592b:	4c 89 54 24 20       	mov    %r10,0x20(%rsp)
+  ba5930:	4c 89 4c 24 28       	mov    %r9,0x28(%rsp)
+  ba5935:	48 89 74 24 30       	mov    %rsi,0x30(%rsp)
+  ba593a:	49 89 d5             	mov    %rdx,%r13
+  ba593d:	49 ff c6             	inc    %r14
+  ba5940:	4d 6b fe 5c          	imul   $0x5c,%r14,%r15
+  ba5944:	ff 15 9e d8 92 00    	call   *0x92d89e(%rip)        # 14d31e8 <_DYNAMIC+0x260>
+  ba594a:	be 04 00 00 00       	mov    $0x4,%esi
+  ba594f:	4c 89 7c 24 38       	mov    %r15,0x38(%rsp)
+  ba5954:	4c 89 ff             	mov    %r15,%rdi
+  ba5957:	ff 15 6b d8 92 00    	call   *0x92d86b(%rip)        # 14d31c8 <_DYNAMIC+0x240>
+  ba595d:	48 85 c0             	test   %rax,%rax
+  ba5960:	0f 84 2a 04 00 00    	je     ba5d90 <<gpui::runtime::styles::Styles>::set+0x8a0>
+  ba5966:	49 89 c7             	mov    %rax,%r15
+  ba5969:	48 89 c7             	mov    %rax,%rdi
+  ba596c:	48 89 6c 24 18       	mov    %rbp,0x18(%rsp)
+  ba5971:	48 89 ee             	mov    %rbp,%rsi
+  ba5974:	48 8b 6c 24 70       	mov    0x70(%rsp),%rbp
+  ba5979:	48 89 ea             	mov    %rbp,%rdx
+  ba597c:	ff 15 6e d8 92 00    	call   *0x92d86e(%rip)        # 14d31f0 <memcpy@GLIBC_2.14>
+  ba5982:	41 0f 10 45 00       	movups 0x0(%r13),%xmm0
+  ba5987:	f3 41 0f 6f 4d 10    	movdqu 0x10(%r13),%xmm1
+  ba598d:	f3 41 0f 6f 55 20    	movdqu 0x20(%r13),%xmm2
+  ba5993:	41 0f 10 5d 30       	movups 0x30(%r13),%xmm3
+  ba5998:	41 0f 11 04 2f       	movups %xmm0,(%r15,%rbp,1)
+  ba599d:	f3 41 0f 7f 4c 2f 10 	movdqu %xmm1,0x10(%r15,%rbp,1)
+  ba59a4:	f3 41 0f 7f 54 2f 20 	movdqu %xmm2,0x20(%r15,%rbp,1)
+  ba59ab:	41 0f 11 5c 2f 30    	movups %xmm3,0x30(%r15,%rbp,1)
+  ba59b1:	f3 41 0f 6f 45 40    	movdqu 0x40(%r13),%xmm0
+  ba59b7:	f3 41 0f 7f 44 2f 40 	movdqu %xmm0,0x40(%r15,%rbp,1)
+  ba59be:	49 8b 45 50          	mov    0x50(%r13),%rax
+  ba59c2:	49 89 44 2f 50       	mov    %rax,0x50(%r15,%rbp,1)
+  ba59c7:	41 c7 44 2f 58 01 00 	movl   $0x1,0x58(%r15,%rbp,1)
+  ba59ce:	00 00 
+  ba59d0:	ba 04 00 00 00       	mov    $0x4,%edx
+  ba59d5:	48 8b 7c 24 18       	mov    0x18(%rsp),%rdi
+  ba59da:	48 89 ee             	mov    %rbp,%rsi
+  ba59dd:	ff 15 ed d7 92 00    	call   *0x92d7ed(%rip)        # 14d31d0 <_DYNAMIC+0x248>
+  ba59e3:	48 8b 6c 24 78       	mov    0x78(%rsp),%rbp
+  ba59e8:	4c 89 7d 08          	mov    %r15,0x8(%rbp)
+  ba59ec:	4c 89 75 10          	mov    %r14,0x10(%rbp)
+  ba59f0:	4d 89 fb             	mov    %r15,%r11
+  ba59f3:	48 8b 74 24 30       	mov    0x30(%rsp),%rsi
+  ba59f8:	4c 8b 4c 24 28       	mov    0x28(%rsp),%r9
+  ba59fd:	4c 8b 54 24 20       	mov    0x20(%rsp),%r10
+  ba5a02:	e9 0b 01 00 00       	jmp    ba5b12 <<gpui::runtime::styles::Styles>::set+0x622>
+  ba5a07:	48 89 d3             	mov    %rdx,%rbx
+  ba5a0a:	48 c7 84 24 88 00 00 	movq   $0x0,0x88(%rsp)
+  ba5a11:	00 00 00 00 00 
+  ba5a16:	48 89 8c 24 90 00 00 	mov    %rcx,0x90(%rsp)
+  ba5a1d:	00 
+  ba5a1e:	49 89 ff             	mov    %rdi,%r15
+  ba5a21:	48 89 bc 24 80 00 00 	mov    %rdi,0x80(%rsp)
+  ba5a28:	00 
+  ba5a29:	48 8d 7c 24 50       	lea    0x50(%rsp),%rdi
+  ba5a2e:	48 8d 84 24 80 00 00 	lea    0x80(%rsp),%rax
+  ba5a35:	00 
+  ba5a36:	49 89 f6             	mov    %rsi,%r14
+  ba5a39:	48 89 c6             	mov    %rax,%rsi
+  ba5a3c:	e8 5f b0 f1 ff       	call   ac0aa0 <<alloc::vec::Vec<gpui::style::Style> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui::style::Style, core::iter::adapters::map::Map<core::ops::range::Range<usize>, <gpui::runtime::styles::Styles>::set::{closure#2}>>>::from_iter>
+  ba5a41:	4c 89 f7             	mov    %r14,%rdi
+  ba5a44:	48 8b 74 24 60       	mov    0x60(%rsp),%rsi
+  ba5a49:	49 39 f6             	cmp    %rsi,%r14
+  ba5a4c:	0f 83 0a 03 00 00    	jae    ba5d5c <<gpui::runtime::styles::Styles>::set+0x86c>
+  ba5a52:	48 8b 44 24 58       	mov    0x58(%rsp),%rax
+  ba5a57:	48 6b cf 58          	imul   $0x58,%rdi,%rcx
+  ba5a5b:	48 8b 53 50          	mov    0x50(%rbx),%rdx
+  ba5a5f:	48 89 54 08 50       	mov    %rdx,0x50(%rax,%rcx,1)
+  ba5a64:	0f 10 43 40          	movups 0x40(%rbx),%xmm0
+  ba5a68:	0f 11 44 08 40       	movups %xmm0,0x40(%rax,%rcx,1)
+  ba5a6d:	0f 10 03             	movups (%rbx),%xmm0
+  ba5a70:	f3 0f 6f 4b 10       	movdqu 0x10(%rbx),%xmm1
+  ba5a75:	f3 0f 6f 53 20       	movdqu 0x20(%rbx),%xmm2
+  ba5a7a:	0f 10 5b 30          	movups 0x30(%rbx),%xmm3
+  ba5a7e:	0f 11 5c 08 30       	movups %xmm3,0x30(%rax,%rcx,1)
+  ba5a83:	f3 0f 7f 54 08 20    	movdqu %xmm2,0x20(%rax,%rcx,1)
+  ba5a89:	f3 0f 7f 4c 08 10    	movdqu %xmm1,0x10(%rax,%rcx,1)
+  ba5a8f:	0f 11 04 08          	movups %xmm0,(%rax,%rcx,1)
+  ba5a93:	4c 89 f9             	mov    %r15,%rcx
+  ba5a96:	49 8b 07             	mov    (%r15),%rax
+  ba5a99:	48 85 c0             	test   %rax,%rax
+  ba5a9c:	0f 84 10 02 00 00    	je     ba5cb2 <<gpui::runtime::styles::Styles>::set+0x7c2>
+  ba5aa2:	83 f8 01             	cmp    $0x1,%eax
+  ba5aa5:	0f 85 cd 01 00 00    	jne    ba5c78 <<gpui::runtime::styles::Styles>::set+0x788>
+  ba5aab:	48 8b 41 08          	mov    0x8(%rcx),%rax
+  ba5aaf:	48 85 c0             	test   %rax,%rax
+  ba5ab2:	0f 84 fa 01 00 00    	je     ba5cb2 <<gpui::runtime::styles::Styles>::set+0x7c2>
+  ba5ab8:	49 8b 7f 10          	mov    0x10(%r15),%rdi
+  ba5abc:	48 6b f0 58          	imul   $0x58,%rax,%rsi
+  ba5ac0:	ba 04 00 00 00       	mov    $0x4,%edx
+  ba5ac5:	e9 df 01 00 00       	jmp    ba5ca9 <<gpui::runtime::styles::Styles>::set+0x7b9>
+  ba5aca:	48 8b 7a 50          	mov    0x50(%rdx),%rdi
+  ba5ace:	49 89 7c 0b 50       	mov    %rdi,0x50(%r11,%rcx,1)
+  ba5ad3:	0f 10 42 40          	movups 0x40(%rdx),%xmm0
+  ba5ad7:	41 0f 11 44 0b 40    	movups %xmm0,0x40(%r11,%rcx,1)
+  ba5add:	f3 0f 6f 02          	movdqu (%rdx),%xmm0
+  ba5ae1:	f3 0f 6f 4a 10       	movdqu 0x10(%rdx),%xmm1
+  ba5ae6:	f3 0f 6f 52 20       	movdqu 0x20(%rdx),%xmm2
+  ba5aeb:	0f 10 5a 30          	movups 0x30(%rdx),%xmm3
+  ba5aef:	41 0f 11 5c 0b 30    	movups %xmm3,0x30(%r11,%rcx,1)
+  ba5af5:	f3 41 0f 7f 54 0b 20 	movdqu %xmm2,0x20(%r11,%rcx,1)
+  ba5afc:	f3 41 0f 7f 4c 0b 10 	movdqu %xmm1,0x10(%r11,%rcx,1)
+  ba5b03:	f3 41 0f 7f 04 0b    	movdqu %xmm0,(%r11,%rcx,1)
+  ba5b09:	41 c7 44 0b 58 01 00 	movl   $0x1,0x58(%r11,%rcx,1)
+  ba5b10:	00 00 
+  ba5b12:	4d 39 d6             	cmp    %r10,%r14
+  ba5b15:	0f 86 50 02 00 00    	jbe    ba5d6b <<gpui::runtime::styles::Styles>::set+0x87b>
+  ba5b1b:	41 ff 4c 1b 58       	decl   0x58(%r11,%rbx,1)
+  ba5b20:	45 88 24 31          	mov    %r12b,(%r9,%rsi,1)
+  ba5b24:	e9 a4 01 00 00       	jmp    ba5ccd <<gpui::runtime::styles::Styles>::set+0x7dd>
+  ba5b29:	49 89 fd             	mov    %rdi,%r13
+  ba5b2c:	49 89 f6             	mov    %rsi,%r14
+  ba5b2f:	48 89 d3             	mov    %rdx,%rbx
+  ba5b32:	48 89 cd             	mov    %rcx,%rbp
+  ba5b35:	ff 15 ad d6 92 00    	call   *0x92d6ad(%rip)        # 14d31e8 <_DYNAMIC+0x260>
+  ba5b3b:	41 bc 01 00 00 00    	mov    $0x1,%r12d
+  ba5b41:	be 01 00 00 00       	mov    $0x1,%esi
+  ba5b46:	48 89 ef             	mov    %rbp,%rdi
+  ba5b49:	ff 15 91 d6 92 00    	call   *0x92d691(%rip)        # 14d31e0 <_DYNAMIC+0x258>
+  ba5b4f:	48 89 e9             	mov    %rbp,%rcx
+  ba5b52:	48 85 c0             	test   %rax,%rax
+  ba5b55:	0f 84 e1 fa ff ff    	je     ba563c <<gpui::runtime::styles::Styles>::set+0x14c>
+  ba5b5b:	49 89 c7             	mov    %rax,%r15
+  ba5b5e:	4c 89 f7             	mov    %r14,%rdi
+  ba5b61:	49 39 ce             	cmp    %rcx,%r14
+  ba5b64:	0f 83 14 02 00 00    	jae    ba5d7e <<gpui::runtime::styles::Styles>::set+0x88e>
+  ba5b6a:	41 c6 04 3f 01       	movb   $0x1,(%r15,%rdi,1)
+  ba5b6f:	48 89 c8             	mov    %rcx,%rax
+  ba5b72:	48 c1 e0 20          	shl    $0x20,%rax
+  ba5b76:	48 89 ca             	mov    %rcx,%rdx
+  ba5b79:	48 b9 00 00 00 00 ff 	movabs $0xffffffff00000000,%rcx
+  ba5b80:	ff ff ff 
+  ba5b83:	48 01 c1             	add    %rax,%rcx
+  ba5b86:	48 b8 00 00 00 00 01 	movabs $0x100000000,%rax
+  ba5b8d:	00 00 00 
+  ba5b90:	48 39 c2             	cmp    %rax,%rdx
+  ba5b93:	41 be 01 02 00 00    	mov    $0x201,%r14d
+  ba5b99:	4c 0f 46 f1          	cmovbe %rcx,%r14
+  ba5b9d:	41 80 fe 01          	cmp    $0x1,%r14b
+  ba5ba1:	0f 84 38 01 00 00    	je     ba5cdf <<gpui::runtime::styles::Styles>::set+0x7ef>
+  ba5ba7:	ff 15 3b d6 92 00    	call   *0x92d63b(%rip)        # 14d31e8 <_DYNAMIC+0x260>
+  ba5bad:	bf b8 00 00 00       	mov    $0xb8,%edi
+  ba5bb2:	be 04 00 00 00       	mov    $0x4,%esi
+  ba5bb7:	ff 15 0b d6 92 00    	call   *0x92d60b(%rip)        # 14d31c8 <_DYNAMIC+0x240>
+  ba5bbd:	48 85 c0             	test   %rax,%rax
+  ba5bc0:	0f 84 4b 01 00 00    	je     ba5d11 <<gpui::runtime::styles::Styles>::set+0x821>
+  ba5bc6:	49 c1 ee 20          	shr    $0x20,%r14
+  ba5bca:	0f 10 05 bb 0c 5b ff 	movups -0xa4f345(%rip),%xmm0        # 15688c <anon.f746f020028a99f54d0ab49caf5b8340.280.llvm.98290111675911013+0x6d>
+  ba5bd1:	0f 11 40 40          	movups %xmm0,0x40(%rax)
+  ba5bd5:	0f 10 05 a0 0c 5b ff 	movups -0xa4f360(%rip),%xmm0        # 15687c <anon.f746f020028a99f54d0ab49caf5b8340.280.llvm.98290111675911013+0x5d>
+  ba5bdc:	0f 11 40 30          	movups %xmm0,0x30(%rax)
+  ba5be0:	0f 10 05 85 0c 5b ff 	movups -0xa4f37b(%rip),%xmm0        # 15686c <anon.f746f020028a99f54d0ab49caf5b8340.280.llvm.98290111675911013+0x4d>
+  ba5be7:	0f 11 40 20          	movups %xmm0,0x20(%rax)
+  ba5beb:	0f 10 05 6a 0c 5b ff 	movups -0xa4f396(%rip),%xmm0        # 15685c <anon.f746f020028a99f54d0ab49caf5b8340.280.llvm.98290111675911013+0x3d>
+  ba5bf2:	0f 11 40 10          	movups %xmm0,0x10(%rax)
+  ba5bf6:	0f 10 05 4f 0c 5b ff 	movups -0xa4f3b1(%rip),%xmm0        # 15684c <anon.f746f020028a99f54d0ab49caf5b8340.280.llvm.98290111675911013+0x2d>
+  ba5bfd:	0f 11 00             	movups %xmm0,(%rax)
+  ba5c00:	48 b9 00 00 00 00 01 	movabs $0x3000100000000,%rcx
+  ba5c07:	00 03 00 
+  ba5c0a:	48 89 48 50          	mov    %rcx,0x50(%rax)
+  ba5c0e:	44 89 70 58          	mov    %r14d,0x58(%rax)
+  ba5c12:	0f 10 03             	movups (%rbx),%xmm0
+  ba5c15:	f3 0f 6f 4b 10       	movdqu 0x10(%rbx),%xmm1
+  ba5c1a:	f3 0f 6f 53 20       	movdqu 0x20(%rbx),%xmm2
+  ba5c1f:	0f 10 5b 30          	movups 0x30(%rbx),%xmm3
+  ba5c23:	0f 11 40 5c          	movups %xmm0,0x5c(%rax)
+  ba5c27:	f3 0f 7f 48 6c       	movdqu %xmm1,0x6c(%rax)
+  ba5c2c:	f3 0f 7f 50 7c       	movdqu %xmm2,0x7c(%rax)
+  ba5c31:	0f 11 98 8c 00 00 00 	movups %xmm3,0x8c(%rax)
+  ba5c38:	f3 0f 6f 43 40       	movdqu 0x40(%rbx),%xmm0
+  ba5c3d:	f3 0f 7f 80 9c 00 00 	movdqu %xmm0,0x9c(%rax)
+  ba5c44:	00 
+  ba5c45:	48 8b 4b 50          	mov    0x50(%rbx),%rcx
+  ba5c49:	48 89 88 ac 00 00 00 	mov    %rcx,0xac(%rax)
+  ba5c50:	c7 80 b4 00 00 00 01 	movl   $0x1,0xb4(%rax)
+  ba5c57:	00 00 00 
+  ba5c5a:	49 c7 45 00 02 00 00 	movq   $0x2,0x0(%r13)
+  ba5c61:	00 
+  ba5c62:	49 89 45 08          	mov    %rax,0x8(%r13)
+  ba5c66:	49 c7 45 10 02 00 00 	movq   $0x2,0x10(%r13)
+  ba5c6d:	00 
+  ba5c6e:	4d 89 7d 18          	mov    %r15,0x18(%r13)
+  ba5c72:	49 89 6d 20          	mov    %rbp,0x20(%r13)
+  ba5c76:	eb 55                	jmp    ba5ccd <<gpui::runtime::styles::Styles>::set+0x7dd>
+  ba5c78:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  ba5c7c:	48 85 c0             	test   %rax,%rax
+  ba5c7f:	74 16                	je     ba5c97 <<gpui::runtime::styles::Styles>::set+0x7a7>
+  ba5c81:	49 8b 7f 08          	mov    0x8(%r15),%rdi
+  ba5c85:	48 6b f0 5c          	imul   $0x5c,%rax,%rsi
+  ba5c89:	ba 04 00 00 00       	mov    $0x4,%edx
+  ba5c8e:	ff 15 3c d5 92 00    	call   *0x92d53c(%rip)        # 14d31d0 <_DYNAMIC+0x248>
+  ba5c94:	4c 89 f9             	mov    %r15,%rcx
+  ba5c97:	48 8b 71 20          	mov    0x20(%rcx),%rsi
+  ba5c9b:	48 85 f6             	test   %rsi,%rsi
+  ba5c9e:	74 12                	je     ba5cb2 <<gpui::runtime::styles::Styles>::set+0x7c2>
+  ba5ca0:	49 8b 7f 18          	mov    0x18(%r15),%rdi
+  ba5ca4:	ba 01 00 00 00       	mov    $0x1,%edx
+  ba5ca9:	ff 15 21 d5 92 00    	call   *0x92d521(%rip)        # 14d31d0 <_DYNAMIC+0x248>
+  ba5caf:	4c 89 f9             	mov    %r15,%rcx
+  ba5cb2:	48 c7 01 01 00 00 00 	movq   $0x1,(%rcx)
+  ba5cb9:	f3 0f 6f 44 24 50    	movdqu 0x50(%rsp),%xmm0
+  ba5cbf:	f3 0f 7f 41 08       	movdqu %xmm0,0x8(%rcx)
+  ba5cc4:	48 8b 44 24 60       	mov    0x60(%rsp),%rax
+  ba5cc9:	48 89 41 18          	mov    %rax,0x18(%rcx)
+  ba5ccd:	48 81 c4 d8 00 00 00 	add    $0xd8,%rsp
+  ba5cd4:	5b                   	pop    %rbx
+  ba5cd5:	41 5c                	pop    %r12
+  ba5cd7:	41 5d                	pop    %r13
+  ba5cd9:	41 5e                	pop    %r14
+  ba5cdb:	41 5f                	pop    %r15
+  ba5cdd:	5d                   	pop    %rbp
+  ba5cde:	c3                   	ret
+  ba5cdf:	c6 84 24 80 00 00 00 	movb   $0x2,0x80(%rsp)
+  ba5ce6:	02 
+  ba5ce7:	48 8d 3d 31 0b 5b ff 	lea    -0xa4f4cf(%rip),%rdi        # 15681f <anon.f746f020028a99f54d0ab49caf5b8340.280.llvm.98290111675911013>
+  ba5cee:	48 8d 0d 3b 93 8c 00 	lea    0x8c933b(%rip),%rcx        # 146f030 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0x20>
+  ba5cf5:	4c 8d 05 6c 93 8c 00 	lea    0x8c936c(%rip),%r8        # 146f068 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0x58>
+  ba5cfc:	48 8d 94 24 80 00 00 	lea    0x80(%rsp),%rdx
+  ba5d03:	00 
+  ba5d04:	be 2b 00 00 00       	mov    $0x2b,%esi
+  ba5d09:	ff 15 71 d5 92 00    	call   *0x92d571(%rip)        # 14d3280 <_DYNAMIC+0x2f8>
+  ba5d0f:	eb 7d                	jmp    ba5d8e <<gpui::runtime::styles::Styles>::set+0x89e>
+  ba5d11:	bf 04 00 00 00       	mov    $0x4,%edi
+  ba5d16:	be b8 00 00 00       	mov    $0xb8,%esi
+  ba5d1b:	ff 15 d7 d4 92 00    	call   *0x92d4d7(%rip)        # 14d31f8 <_DYNAMIC+0x270>
+  ba5d21:	eb 6b                	jmp    ba5d8e <<gpui::runtime::styles::Styles>::set+0x89e>
+  ba5d23:	48 8d 15 9e 93 8c 00 	lea    0x8c939e(%rip),%rdx        # 146f0c8 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0xb8>
+  ba5d2a:	4c 89 d7             	mov    %r10,%rdi
+  ba5d2d:	48 89 ce             	mov    %rcx,%rsi
+  ba5d30:	ff 15 ea d4 92 00    	call   *0x92d4ea(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5d36:	48 8d 15 43 93 8c 00 	lea    0x8c9343(%rip),%rdx        # 146f080 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0x70>
+  ba5d3d:	48 89 f7             	mov    %rsi,%rdi
+  ba5d40:	48 89 c6             	mov    %rax,%rsi
+  ba5d43:	ff 15 d7 d4 92 00    	call   *0x92d4d7(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5d49:	48 8d 15 48 93 8c 00 	lea    0x8c9348(%rip),%rdx        # 146f098 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0x88>
+  ba5d50:	48 89 f7             	mov    %rsi,%rdi
+  ba5d53:	48 89 c6             	mov    %rax,%rsi
+  ba5d56:	ff 15 c4 d4 92 00    	call   *0x92d4c4(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5d5c:	48 8d 15 7d 93 8c 00 	lea    0x8c937d(%rip),%rdx        # 146f0e0 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0xd0>
+  ba5d63:	ff 15 b7 d4 92 00    	call   *0x92d4b7(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5d69:	eb 23                	jmp    ba5d8e <<gpui::runtime::styles::Styles>::set+0x89e>
+  ba5d6b:	48 8d 15 86 93 8c 00 	lea    0x8c9386(%rip),%rdx        # 146f0f8 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0xe8>
+  ba5d72:	4c 89 d7             	mov    %r10,%rdi
+  ba5d75:	4c 89 f6             	mov    %r14,%rsi
+  ba5d78:	ff 15 a2 d4 92 00    	call   *0x92d4a2(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5d7e:	48 8d 15 cb 92 8c 00 	lea    0x8c92cb(%rip),%rdx        # 146f050 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0x40>
+  ba5d85:	48 89 ce             	mov    %rcx,%rsi
+  ba5d88:	ff 15 92 d4 92 00    	call   *0x92d492(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5d8e:	0f 0b                	ud2
+  ba5d90:	bf 04 00 00 00       	mov    $0x4,%edi
+  ba5d95:	48 8b 74 24 38       	mov    0x38(%rsp),%rsi
+  ba5d9a:	ff 15 70 d4 92 00    	call   *0x92d470(%rip)        # 14d3210 <_DYNAMIC+0x288>
+  ba5da0:	48 8d 15 09 93 8c 00 	lea    0x8c9309(%rip),%rdx        # 146f0b0 <anon.f746f020028a99f54d0ab49caf5b8340.279.llvm.98290111675911013+0xa0>
+  ba5da7:	4c 89 d7             	mov    %r10,%rdi
+  ba5daa:	48 8b 74 24 10       	mov    0x10(%rsp),%rsi
+  ba5daf:	ff 15 6b d4 92 00    	call   *0x92d46b(%rip)        # 14d3220 <_DYNAMIC+0x298>
+  ba5db5:	48 89 c3             	mov    %rax,%rbx
+  ba5db8:	48 8b 44 24 50       	mov    0x50(%rsp),%rax
+  ba5dbd:	48 85 c0             	test   %rax,%rax
+  ba5dc0:	74 24                	je     ba5de6 <<gpui::runtime::styles::Styles>::set+0x8f6>
+  ba5dc2:	48 8b 7c 24 58       	mov    0x58(%rsp),%rdi
+  ba5dc7:	48 6b f0 58          	imul   $0x58,%rax,%rsi
+  ba5dcb:	ba 04 00 00 00       	mov    $0x4,%edx
+  ba5dd0:	eb 0e                	jmp    ba5de0 <<gpui::runtime::styles::Styles>::set+0x8f0>
+  ba5dd2:	48 89 c3             	mov    %rax,%rbx
+  ba5dd5:	ba 01 00 00 00       	mov    $0x1,%edx
+  ba5dda:	4c 89 ff             	mov    %r15,%rdi
+  ba5ddd:	48 89 ee             	mov    %rbp,%rsi
+  ba5de0:	ff 15 ea d3 92 00    	call   *0x92d3ea(%rip)        # 14d31d0 <_DYNAMIC+0x248>
+  ba5de6:	48 89 df             	mov    %rbx,%rdi
+  ba5de9:	e8 02 c2 8b 00       	call   1461ff0 <_Unwind_Resume@plt>
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:

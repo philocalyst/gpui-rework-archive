@@ -1,0 +1,14 @@
+Capture interval: 2026-10-22T00:14:32Z to 2026-10-22T00:14:38Z
+Order: parent-1, candidate-1, candidate-2, parent-2, parent-3, candidate-3
+Binary SHA-256 parent: c582e1faf306fa550f1e21bee1e71eadd7ae0aa74e7ed8f0face8b7d56cf0222
+Binary SHA-256 candidate: 4e7632ad0b6ac283ceeb375f74035d32c6040198d14ffe9768bc51dc79c3ccd8
+Captured runner SHA-256: 5f41a9e2d0b14d3a8996d7bc1ad87c9bf698acd8c867b116df4c9dd567f0f96b
+Parent source commit: f01947e679d9dd2ca7ef149b70dccff92dad67dc
+Candidate styles.rs SHA-256: 2e535b39a2a0ec699fcdee3465b84c1e61d378585606f83296592e5362e3b479
+Probe source SHA-256 in both variants: 6a09247eb8944d088912b9f1d13a5e22da70ee5f9c08dd0938bc4d828c12e935
+Toolchain: cargo 1.97.1, rustc 1.97.1 (8bab26f4f), LLVM 22.1.6
+Host: x86_64-unknown-linux-gnu; release; x11-minimal
+Capture protocol: direct frozen test binaries, ignored profile test, --test-threads=1; alternating P/C order
+Pressure: avg10 0.00 before/after; avg60 0.11->0.10; avg300 0.32->0.31
+Process snapshots: no running build/test jobs; two API cargo and one rustc process were stopped (T) before and after.
+Endpoint: internal elapsed_ns around Win::recording/lane/profile scopes; not OS presentation or end-to-end input latency.
