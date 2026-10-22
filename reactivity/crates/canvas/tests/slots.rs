@@ -108,7 +108,9 @@ fn transaction_rejection_and_drop_leave_complete_bank_untouched() {
     );
     assert_eq!(canvas.try_pixels().unwrap(), before);
     let edits = [SlotEdit::new(a, PaintColor::new(Color::WHITE))];
-    drop(canvas.prepare_slots(&edits).unwrap());
+    {
+        let _uncommitted = canvas.prepare_slots(&edits).unwrap();
+    }
     assert_eq!(canvas.try_pixels().unwrap(), before);
     canvas.prepare_slots(&edits).unwrap().commit();
     let pixels = canvas.try_pixels().unwrap();

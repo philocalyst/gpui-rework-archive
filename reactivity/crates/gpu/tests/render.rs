@@ -2523,7 +2523,7 @@ fn bank_scene(
         2,
         ImageProfile::Srgb,
         AlphaMode::Straight,
-        vec![255, 0, 255, 128].repeat(4).into_boxed_slice(),
+        [255, 0, 255, 128].repeat(4).into_boxed_slice(),
     )
     .unwrap();
     canvas
@@ -2612,8 +2612,84 @@ fn shared_bank_queues_a_patch_b_patch_c_without_poll_and_matches_full_literal_pa
                 gpu.prepare_slots(&bad, &view),
                 Err(gpui_gpu::SlotError::AlphaChanged { .. })
             ));
+            // A valid first edit followed by a rejected second edit must not
+            // change even the first bank word or revoke the complete packet.
+            let mixed = [
+                SlotEdit::new(slots[0], PaintColor::new(Color::WHITE)),
+                SlotEdit::new(slots[1], PaintColor::new(Color::TRANSPARENT)),
+            ];
+            assert!(matches!(
+                gpu.prepare_slots(&mixed, &view),
+                Err(gpui_gpu::SlotError::AlphaChanged { edit: 1 })
+            ));
+            // Positional keys have no hidden namespace. Another Canvas can
+            // supply an in-range literal position, which must reject by class.
+            let mut positions = Canvas::recording(1, 1, config).unwrap();
+            let positions = std::array::from_fn::<_, 4, _>(|_| {
+                positions.paint_slot(PaintColor::new(Color::WHITE)).unwrap()
+            });
+            assert!(matches!(
+                gpu.prepare_slots(
+                    &[SlotEdit::new(positions[1], PaintColor::new(Color::WHITE))],
+                    &view
+                ),
+                Err(gpui_gpu::SlotError::NotShared { edit: 0 })
+            ));
+            assert!(matches!(
+                gpu.prepare_slots(
+                    &[SlotEdit::new(positions[3], PaintColor::new(Color::WHITE))],
+                    &view
+                ),
+                Err(gpui_gpu::SlotError::MissingSlot { edit: 0 })
+            ));
             gpu.redraw(&view).unwrap().unwrap();
             assert_eq!(read_texture(&gpu, &targets[2]), actual[2]);
+        }
+    });
+}
+
+#[test]
+fn bank_patch_rejects_exceptional_opaque_proof_colors_then_full_render_recovers() {
+    use gpui_canvas::{PaintColor, SlotEdit};
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let config = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+        let mut canvas = Canvas::recording(16, 16, config).unwrap();
+        let slot = canvas.paint_slot(PaintColor::new(Color::WHITE)).unwrap();
+        let rect = Rect::new(0., 0., 16., 16.);
+        canvas
+            .fill_rect_slot(rect, Affine::IDENTITY, rect, slot)
+            .unwrap();
+        let target = output_texture(&gpu, &canvas);
+        let view = target.create_view(&Default::default());
+        gpu.render(canvas.prepared_scene(), &view).unwrap();
+        for first in [-0.0, f32::from_bits(0x8000_0001)] {
+            let color = Color::linear_srgb(first, 0.25, 0.5, 1.0).unwrap();
+            let working = PaintColor::new(color);
+            assert_eq!(working.working()[0].to_bits(), first.to_bits());
+            let edits = [SlotEdit::new(slot, working)];
+            let before = read_texture(&gpu, &target);
+            assert!(matches!(
+                gpu.prepare_slots(&edits, &view),
+                Err(gpui_gpu::SlotError::ProofColor { edit: 0 })
+            ));
+            gpu.redraw(&view).unwrap().unwrap();
+            assert_eq!(read_texture(&gpu, &target), before);
+            canvas.prepare_slots(&edits).unwrap().commit();
+            gpu.render(canvas.prepared_scene(), &view).unwrap();
+            let mut literal = Canvas::recording(16, 16, config).unwrap();
+            literal
+                .fill_rect(rect, Affine::IDENTITY, rect, color)
+                .unwrap();
+            let mut oracle = renderer(wgpu::TextureFormat::Rgba16Float).await;
+            assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &literal));
+            // Restore a normal proof class before checking the next rejected
+            // transition, so the test does not rely on a prior exceptional row.
+            canvas
+                .prepare_slots(&[SlotEdit::new(slot, PaintColor::new(Color::WHITE))])
+                .unwrap()
+                .commit();
+            gpu.render(canvas.prepared_scene(), &view).unwrap();
         }
     });
 }

@@ -5,6 +5,10 @@
 pub struct DamageRegion([u16; 4]);
 
 impl DamageRegion {
+    pub(crate) fn coordinates(self) -> [u16; 4] {
+        self.0
+    }
+
     pub fn is_empty(self) -> bool {
         self.0[0] == self.0[2] || self.0[1] == self.0[3]
     }

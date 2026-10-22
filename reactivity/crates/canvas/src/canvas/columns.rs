@@ -7,6 +7,8 @@ const FIRST_PAINT: u32 = 3;
 const MAX_ROWS: usize = super::MAX_COMMANDS * 2;
 const SHARED: u8 = 1;
 const RECTANGLE: u8 = 2;
+const SUPPORT_FLAG: u16 = 1 << 15;
+const _: () = assert!(16_384 < SUPPORT_FLAG);
 
 /// A validated author color converted once to the canonical working domain.
 /// Private lanes prevent callers constructing arbitrary/nonfinite GPU values.
@@ -94,8 +96,35 @@ impl StoredCommon {
 #[derive(Clone, Copy)]
 pub(super) struct PaintValue {
     value: PaintColor,
-    damage: DamageRegion,
-    flags: u8,
+    support: PaintSupport,
+}
+/// Four admitted coordinates use only bits 0..=14. The first two spare high
+/// bits carry material facts; they are masked before any geometry operation.
+#[derive(Clone, Copy, Default)]
+struct PaintSupport([u16; 4]);
+impl PaintSupport {
+    fn new(shared: bool) -> Self {
+        Self([u16::from(shared) * SUPPORT_FLAG, 0, 0, 0])
+    }
+    fn shared(self) -> bool {
+        self.0[0] & SUPPORT_FLAG != 0
+    }
+    fn rectangle(self) -> bool {
+        self.0[1] & SUPPORT_FLAG != 0
+    }
+    fn flags(self) -> u8 {
+        (u8::from(self.shared()) * SHARED) | (u8::from(self.rectangle()) * RECTANGLE)
+    }
+    fn damage(self) -> DamageRegion {
+        DamageRegion::checked_canvas_bounds(self.0.map(|v| usize::from(v & !SUPPORT_FLAG)))
+    }
+    fn include(&mut self, damage: DamageRegion, rectangle: bool) {
+        let shared = self.0[0] & SUPPORT_FLAG;
+        let rect = (self.0[1] & SUPPORT_FLAG) | (u16::from(rectangle) * SUPPORT_FLAG);
+        self.0 = self.damage().union(damage).coordinates();
+        self.0[0] |= shared;
+        self.0[1] |= rect;
+    }
 }
 #[derive(Default)]
 pub(super) struct Columns {
@@ -135,6 +164,25 @@ impl Columns {
         self.scopes.capacity() * size_of::<Scope>()
             + self.paints.capacity() * size_of::<PaintValue>()
     }
+    fn find_scope(&self, scope: Scope, viewport: Rect) -> Option<ScopeRef> {
+        let same = |value: &Scope| {
+            value.inverse.map(f64::to_bits) == scope.inverse.map(f64::to_bits)
+                && same_rect(value.clip, scope.clip)
+        };
+        if same(&implicit_scope(viewport)) {
+            return Some(ScopeRef(0));
+        }
+        // Adjacent cohorts can begin after the bounded discovery prefix.
+        // Reuse their most recently stored exact scope without growing a map.
+        if self.scopes.last().is_some_and(same) {
+            return Some(ScopeRef(self.scopes.len() as u32));
+        }
+        self.scopes
+            .iter()
+            .take(DISCOVERY)
+            .position(same)
+            .map(|index| ScopeRef(index as u32 + 1))
+    }
     // Reserve before the display-list commit. Existing immutable scopes and
     // paints keep their positions until the whole canonical scene is replaced.
     pub(super) fn admit(
@@ -150,12 +198,7 @@ impl Columns {
             inverse: [a, b, c, d],
             clip: common.clip,
         };
-        let same = |value: &Scope| {
-            value.inverse.map(f64::to_bits) == scope.inverse.map(f64::to_bits)
-                && same_rect(value.clip, scope.clip)
-        };
-        let new_scope =
-            !same(&implicit_scope(viewport)) && !self.scopes.iter().take(DISCOVERY).any(same);
+        let new_scope = self.find_scope(scope, viewport).is_none();
         let color = PaintColor(common.color);
         let new_paint = if new_shared {
             true
@@ -192,15 +235,8 @@ impl Columns {
             inverse: [a, b, c, d],
             clip: common.clip,
         };
-        let same = |value: &Scope| {
-            value.inverse.map(f64::to_bits) == scope.inverse.map(f64::to_bits)
-                && same_rect(value.clip, scope.clip)
-        };
-        if same(&implicit_scope(viewport)) {
-            return ScopeRef(0);
-        }
-        if let Some(index) = self.scopes.iter().take(DISCOVERY).position(same) {
-            return ScopeRef(index as u32 + 1);
+        if let Some(reference) = self.find_scope(scope, viewport) {
+            return reference;
         }
         let index = self.scopes.len();
         self.scopes.push(scope);
@@ -215,8 +251,7 @@ impl Columns {
         let index = self.paints.len();
         self.paints.push(PaintValue {
             value: color,
-            damage: DamageRegion::default(),
-            flags: 0,
+            support: PaintSupport::default(),
         });
         PaintRef(index as u32 + FIRST_PAINT)
     }
@@ -226,7 +261,7 @@ impl Columns {
     pub(super) fn set_literal(&mut self, reference: PaintRef, color: PaintColor) -> PaintRef {
         if reference.0 >= FIRST_PAINT {
             let value = &mut self.paints[(reference.0 - FIRST_PAINT) as usize];
-            if value.flags & SHARED == 0 {
+            if !value.support.shared() {
                 value.value = color;
                 return reference;
             }
@@ -235,7 +270,9 @@ impl Columns {
     }
     pub(super) fn needs_literal_entry(&self, reference: PaintRef, color: PaintColor) -> bool {
         if reference.0 >= FIRST_PAINT
-            && self.paints[(reference.0 - FIRST_PAINT) as usize].flags & SHARED == 0
+            && !self.paints[(reference.0 - FIRST_PAINT) as usize]
+                .support
+                .shared()
         {
             return false;
         }
@@ -262,8 +299,7 @@ impl Columns {
         let index = self.paints.len();
         self.paints.push(PaintValue {
             value: color,
-            damage: DamageRegion::default(),
-            flags: SHARED,
+            support: PaintSupport::new(true),
         });
         PaintSlot(std::num::NonZeroU32::new(index as u32 + FIRST_PAINT).unwrap())
     }
@@ -275,7 +311,7 @@ impl Columns {
         let index = slot.index() as usize;
         self.paints
             .get(index)
-            .filter(|value| value.flags & SHARED != 0)
+            .filter(|value| value.support.shared())
             .map(|_| PaintRef(slot.0.get()))
     }
     pub(super) fn resolve(&self, common: StoredCommon, viewport: Rect, image: bool) -> Common {
@@ -325,17 +361,16 @@ impl Columns {
             return;
         }
         let value = &mut self.paints[(paint.0 - FIRST_PAINT) as usize];
-        value.damage = value.damage.union(damage);
-        if rectangle {
-            value.flags |= RECTANGLE;
-        }
+        value.support.include(damage, rectangle);
     }
     pub(super) fn shared_slot(&self, paint: PaintRef) -> Option<PaintSlot> {
         if paint.0 < FIRST_PAINT {
             return None;
         }
-        (self.paints[(paint.0 - FIRST_PAINT) as usize].flags & SHARED != 0)
-            .then(|| PaintSlot(std::num::NonZeroU32::new(paint.0).unwrap()))
+        (self.paints[(paint.0 - FIRST_PAINT) as usize]
+            .support
+            .shared())
+        .then(|| PaintSlot(std::num::NonZeroU32::new(paint.0).unwrap()))
     }
     pub(super) fn bank(
         &self,
@@ -343,11 +378,11 @@ impl Columns {
         let end = self
             .paints
             .iter()
-            .rposition(|paint| paint.flags & SHARED != 0)
+            .rposition(|paint| paint.support.shared())
             .map_or(0, |last| last + 1);
         self.paints[..end].iter().map(|paint| PreparedPaint {
             value: paint.value,
-            flags: paint.flags,
+            flags: paint.support.flags(),
         })
     }
     pub(super) fn validate(&self, edits: &[SlotEdit]) -> Result<(DamageRegion, usize), SlotError> {
@@ -365,14 +400,14 @@ impl Columns {
                 .paints
                 .get(index)
                 .ok_or_else(|| fail(SlotErrorKind::MissingSlot))?;
-            if old.flags & SHARED == 0 {
+            if !old.support.shared() {
                 return Err(fail(SlotErrorKind::NotShared));
             }
             if old.value.0[3].to_bits() != write.value.0[3].to_bits() {
                 return Err(fail(SlotErrorKind::AlphaChanged));
             }
             if !same_color(old.value, write.value) {
-                damage = damage.union(old.damage);
+                damage = damage.union(old.support.damage());
                 changed += 1;
             }
         }
@@ -459,9 +494,134 @@ impl PreparedPaint {
     }
 }
 
+/// Temporary admission choice. The cache borrow ends before a command is stored.
+pub(super) enum PaintUse<'a> {
+    Literal,
+    Existing(PaintSlot),
+    Shared(&'a mut Option<PaintSlot>),
+}
+impl PaintUse<'_> {
+    pub(super) fn reference(&self) -> Option<PaintSlot> {
+        match self {
+            Self::Literal => None,
+            Self::Existing(slot) => Some(*slot),
+            Self::Shared(cache) => **cache,
+        }
+    }
+    pub(super) fn new_shared(&self) -> bool {
+        matches!(self, Self::Shared(None))
+    }
+    pub(super) fn commit(self, columns: &mut Columns, value: PaintColor) -> Option<PaintSlot> {
+        match self {
+            Self::Literal => None,
+            Self::Existing(slot) => Some(slot),
+            Self::Shared(cache) => {
+                Some(*cache.get_or_insert_with(|| columns.shared_reserved(value)))
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn support_flags_never_enter_empty_or_maximum_canvas_geometry() {
+        assert_eq!(size_of::<PaintValue>(), 24);
+        assert_eq!(size_of::<PaintSupport>(), 8);
+        for shared in [false, true] {
+            let mut support = PaintSupport::new(shared);
+            assert!(support.damage().is_empty());
+            assert_eq!(support.shared(), shared);
+            support.include(DamageRegion::default(), true);
+            assert!(support.damage().is_empty());
+            assert!(support.rectangle());
+            assert_eq!(support.shared(), shared);
+
+            support.include(
+                DamageRegion::checked_canvas_bounds([16_383, 0, 16_384, 1]),
+                false,
+            );
+            support.include(
+                DamageRegion::checked_canvas_bounds([0, 16_383, 1, 16_384]),
+                false,
+            );
+            assert_eq!(support.damage().bounds(), Some([0, 0, 16_384, 16_384]));
+            assert_eq!(support.flags(), (u8::from(shared) * SHARED) | RECTANGLE);
+            assert_eq!(support.damage().coordinates(), [0, 0, 16_384, 16_384]);
+        }
+    }
+
+    fn test_scope(index: usize, viewport: Rect) -> Common {
+        Common {
+            map: Mapping {
+                inverse: [index as f64 + 2.0, -0.0, -0.0, 1.0, 0.0, 0.0],
+            },
+            clip: viewport,
+            color: [0.0, 0.0, 0.0, 1.0],
+        }
+    }
+
+    #[test]
+    fn repeated_last_scope_after_discovery_prefix_needs_no_more_rows_or_allocations() {
+        let viewport = Rect::new(0.0, 0.0, 128.0, 128.0);
+        let mut columns = Columns::default();
+        for index in 0..=DISCOVERY {
+            let common = test_scope(index, viewport);
+            columns.admit(common, viewport, None, false, false).unwrap();
+            assert_eq!(columns.scope(common, viewport).0, index as u32 + 1);
+        }
+        let repeated = test_scope(DISCOVERY, viewport);
+        let count = allocation_counter::measure(|| {
+            for _ in 0..4096 {
+                columns
+                    .admit(repeated, viewport, None, false, false)
+                    .unwrap();
+                assert_eq!(columns.scope(repeated, viewport).0, DISCOVERY as u32 + 1);
+            }
+        });
+        assert_eq!(columns.scopes.len(), DISCOVERY + 1);
+        assert_eq!((count.count_total, count.bytes_total), (0, 0));
+
+        // The shortcut preserves exact inverse and clip bits.
+        let mut different = repeated;
+        different.map.inverse[1] = 0.0;
+        columns
+            .admit(different, viewport, None, false, false)
+            .unwrap();
+        assert_ne!(columns.scope(different, viewport).0, DISCOVERY as u32 + 1);
+    }
+
+    #[test]
+    fn alternating_late_scopes_disclose_bounded_discovery_fallback_growth() {
+        let viewport = Rect::new(0.0, 0.0, 128.0, 128.0);
+        let mut columns = Columns::default();
+        for index in 0..DISCOVERY + 2 {
+            let common = test_scope(index, viewport);
+            columns.admit(common, viewport, None, false, false).unwrap();
+            columns.scope(common, viewport);
+        }
+        let count = allocation_counter::measure(|| {
+            for index in 0..128 {
+                let common = test_scope(DISCOVERY + index % 2, viewport);
+                columns.admit(common, viewport, None, false, false).unwrap();
+                columns.scope(common, viewport);
+            }
+        });
+        // Neither alternating scope is in the prefix or equal to the last row.
+        assert_eq!(columns.scopes.len(), DISCOVERY + 2 + 128);
+        assert!(count.count_total > 0);
+        assert!(count.bytes_total >= columns.scopes.capacity() as u64 * size_of::<Scope>() as u64);
+        eprintln!(
+            "scope_late_alternating,rows={},capacity={},allocations={},requested={}",
+            columns.scopes.len(),
+            columns.scopes.capacity(),
+            count.count_total,
+            count.bytes_total
+        );
+    }
+
     #[test]
     fn complete_bank_layout_and_plain_recording_floor_are_explicit() {
         eprintln!(
@@ -501,33 +661,5 @@ mod tests {
             "scope_plain_recording,allocations={},requested={},peak={}",
             allocation.count_total, allocation.bytes_total, allocation.bytes_max
         );
-    }
-}
-
-/// Temporary admission choice. The cache borrow ends before a command is stored.
-pub(super) enum PaintUse<'a> {
-    Literal,
-    Existing(PaintSlot),
-    Shared(&'a mut Option<PaintSlot>),
-}
-impl PaintUse<'_> {
-    pub(super) fn reference(&self) -> Option<PaintSlot> {
-        match self {
-            Self::Literal => None,
-            Self::Existing(slot) => Some(*slot),
-            Self::Shared(cache) => **cache,
-        }
-    }
-    pub(super) fn new_shared(&self) -> bool {
-        matches!(self, Self::Shared(None))
-    }
-    pub(super) fn commit(self, columns: &mut Columns, value: PaintColor) -> Option<PaintSlot> {
-        match self {
-            Self::Literal => None,
-            Self::Existing(slot) => Some(slot),
-            Self::Shared(cache) => {
-                Some(*cache.get_or_insert_with(|| columns.shared_reserved(value)))
-            }
-        }
     }
 }
