@@ -40,6 +40,7 @@ mod identity_index;
 mod image;
 use identity_index::IdentityIndex;
 mod input;
+pub(crate) mod inspector;
 mod list;
 mod scroll;
 mod turn;
@@ -818,14 +819,21 @@ impl<M: View + 'static> Win<M> {
         questions: crate::Questions<M, Q>,
         options: WindowOptions,
     ) -> Result<Win<M, crate::reader::QuestionSet<Q, ()>>, Error> {
-        Win::mount_lanes(model, questions.bind(()), options, true, 1.0)
+        Win::mount_lanes(model, questions.bind(()), options, true, 1.0, false)
     }
     pub fn recording_questions<Q: LaneSet<M>>(
         model: M,
         questions: crate::Questions<M, Q>,
         options: WindowOptions,
     ) -> Result<Win<M, crate::reader::QuestionSet<Q, ()>>, Error> {
-        Win::mount_lanes(model, questions.bind(()), options, false, 1.0)
+        Win::mount_lanes(model, questions.bind(()), options, false, 1.0, false)
+    }
+    /// Mount the real application beside its opt-in retained inspector controls.
+    pub fn with_inspector(model: M, options: WindowOptions) -> Result<Self, Error> {
+        Self::mount_lanes(model, (), options, true, 1.0, true)
+    }
+    pub fn recording_with_inspector(model: M, options: WindowOptions) -> Result<Self, Error> {
+        Self::mount_lanes(model, (), options, false, 1.0, true)
     }
     pub fn new(model: M) -> Result<Self, Error> {
         Self::with_options(model, WindowOptions::default())
@@ -873,7 +881,14 @@ impl<M: View + 'static> Win<M> {
         automatic_presentation: bool,
         scale_factor: f32,
     ) -> Result<Self, Error> {
-        Self::mount_lanes(model, (), options, automatic_presentation, scale_factor)
+        Self::mount_lanes(
+            model,
+            (),
+            options,
+            automatic_presentation,
+            scale_factor,
+            false,
+        )
     }
 }
 impl<M: View + 'static> Win<M> {
@@ -893,6 +908,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         options: WindowOptions,
         automatic_presentation: bool,
         scale_factor: f32,
+        inspector: bool,
     ) -> Result<Self, Error> {
         // Until the full Win exists, this ordinary field-ordered value closes
         // every receiver before model destruction on ANY preparation failure.
@@ -926,7 +942,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             focused: None,
             sites,
             overrides: Overrides::default(),
-            metadata: None,
+            metadata: inspector.then(|| {
+                Box::new(Metadata {
+                    inspector: Some(Box::default()),
+                    ..Metadata::default()
+                })
+            }),
             viewports: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
@@ -979,8 +1000,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         lanes: L,
         options: WindowOptions,
         scale_factor: f32,
+        inspector: bool,
     ) -> Result<Self, Error> {
-        Self::mount_lanes(model, lanes, options, false, scale_factor)
+        Self::mount_lanes(model, lanes, options, false, scale_factor, inspector)
     }
     fn runtime_mut(&mut self) -> Result<RuntimeMut<'_, M, L>, Error> {
         Ok(RuntimeMut {
@@ -1164,6 +1186,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.current_presentation()?;
+        if runtime.inspector_picking() {
+            let target = runtime.inspector_pick(point).ok_or(Error::NotHittable)?;
+            return runtime.inspector_select(target);
+        }
         let Some(identity) = runtime.hit(point) else {
             runtime.focused = None;
             runtime.changed_nodes = 0;
@@ -1337,54 +1363,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         property: Property<T>,
         contribution: Contribution<T>,
     ) -> Result<Commit, Error> {
-        let mut runtime = self.runtime_mut()?;
-        runtime.live()?;
-        let index = runtime.resolve_index(target)?;
-        let identity = runtime.nodes[index].identity();
-        let epoch = runtime
-            .source_epoch
-            .checked_add(1)
-            .ok_or(Error::EpochExhausted)?;
-        let before = runtime.styles.get(index);
-        if let Contribution::Set(value) = &contribution {
-            property.validate(value)?;
-        }
-        if let Some(colors) = runtime.styles.declared_colors(index) {
-            runtime.overrides.refresh_color_base(identity, colors);
-        }
-        let explicit = matches!(&contribution, Contribution::Set(_));
-        let after = runtime
-            .overrides
-            .set(identity, before, property, contribution)?;
-        let count = runtime.nodes.len();
-        let relationship_changed =
-            runtime
-                .styles
-                .color_contribution(index, property.id(), after, explicit, count);
-        // Equal Set/Inherit still changes which immutable C paint row this
-        // node follows. Rebind C before a later shared-source write can occur.
-        runtime.dirty |= relationship_changed;
-        runtime.source_epoch = epoch;
-        runtime.counters.source_operations += 1;
-        runtime.changed_nodes = usize::from(!styles::exact_eq(&before, &after));
-        if !styles::exact_eq(&before, &after) {
-            if layout_changed(before, after) {
-                runtime.layout_dirty.insert(identity);
-            }
-            if before.font_size != after.font_size {
-                let slot = runtime.nodes[index].text_slot();
-                if let Some(text) = slot.get_mut(&mut runtime.texts) {
-                    text.shaped = None;
-                }
-            }
-            let count = runtime.nodes.len();
-            runtime.styles.set(index, after, count);
-            runtime.dirty = true;
-        }
-        if runtime.has_lists() {
-            runtime.describe(false)?;
-        }
-        runtime.present()
+        self.runtime_mut()?
+            .set_style_property(target, property, contribution)
     }
     pub fn try_button(&self, label: &str) -> Result<Target, Error> {
         self.find(NodeKind::Button, Some(label))
@@ -1567,34 +1547,36 @@ impl<M: View + 'static> Runtime<M> {
             images: image_drafts,
             geometry: geometry_drafts,
             style_ports,
-        } = self.model.view().flatten_lists(
-            MAX_NODES,
-            readers,
-            |id, style, source, row_height| {
-                if !seen.insert(id) {
-                    return Err(ListError::DuplicateList(id));
-                }
-                let previous = self
-                    .viewports
-                    .get(&ViewportKey::List(id))
-                    .and_then(ViewportState::list)
-                    .map(|state| (state.identity, state));
-                let style = previous.map_or(style, |(identity, _)| {
-                    self.overrides.resolve(identity, style)
-                });
-                let previous = previous.map(|(_, state)| state);
-                list::plan(
-                    previous,
-                    style,
-                    source,
-                    row_height,
-                    scroll
-                        .iter()
-                        .find(|request| request.id == id)
-                        .map(|request| request.position),
-                )
-            },
-        )?;
+        } = inspector::description(
+            &self.model,
+            self.inspector_enabled(),
+            self.requested_size,
+            self.requested_scale_factor,
+        )
+        .flatten_lists(MAX_NODES, readers, |id, style, source, row_height| {
+            if !seen.insert(id) {
+                return Err(ListError::DuplicateList(id));
+            }
+            let previous = self
+                .viewports
+                .get(&ViewportKey::List(id))
+                .and_then(ViewportState::list)
+                .map(|state| (state.identity, state));
+            let style = previous.map_or(style, |(identity, _)| {
+                self.overrides.resolve(identity, style)
+            });
+            let previous = previous.map(|(_, state)| state);
+            list::plan(
+                previous,
+                style,
+                source,
+                row_height,
+                scroll
+                    .iter()
+                    .find(|request| request.id == id)
+                    .map(|request| request.position),
+            )
+        })?;
         let mut scroll_drafts = Vec::new();
         let list_drafts: Vec<_> = viewport_drafts
             .into_iter()
@@ -1647,7 +1629,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             component_scopes.push(component_scope);
             if let Some(handler) = &node.on_click {
-                handler.validate(&self.model, &self.sources)?;
+                handler.admit(&self.model, &self.sources)?;
             }
             let field = match node.text.as_ref().and_then(|text| text.signal()) {
                 Some(signal) => self.sources.resolve(&self.model, signal)?,
@@ -2290,6 +2272,7 @@ impl<M: View + 'static> Runtime<M> {
             .then_some(self.complete_epoch)
     }
     fn present(&mut self) -> Result<Commit, Error> {
+        self.refresh_inspector(false)?;
         if !self.dirty {
             if self.source_epoch > 0
                 && self
@@ -2522,6 +2505,7 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
+        self.refresh_inspector(true)?;
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
@@ -2545,16 +2529,26 @@ impl<M: View + 'static> Runtime<M> {
         };
         #[cfg(feature = "accessibility")]
         let base_stamp = self.semantic_stamp();
+        let inspector_display = self.inspector_display();
         #[cfg(feature = "accessibility")]
         let mut observation = self
             .accessibility
             .as_mut()
             .map(|observer| observer.begin(base_stamp, size));
         self.styles.reset_canvas_slots();
+        let inspector_boundary = inspector_display
+            .as_ref()
+            .map_or(usize::MAX, |captions| captions.panel);
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
+            if index == inspector_boundary {
+                inspector_display
+                    .as_ref()
+                    .unwrap()
+                    .refresh(&presented, &mut self.texts);
+            }
             let layout = self.layout.layout(self.layout_nodes[index])?;
             let has_children = self
                 .nodes
@@ -3016,6 +3010,64 @@ fn layout_style(style: &Style) -> cephal::Style {
             FlexWrap::NoWrap
         },
         ..cephal::Style::DEFAULT
+    }
+}
+
+impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+    fn set_style_property<T: PartialEq>(
+        &mut self,
+        target: Target,
+        property: Property<T>,
+        contribution: Contribution<T>,
+    ) -> Result<Commit, Error> {
+        let runtime = self;
+        runtime.live()?;
+        let index = runtime.resolve_index(target)?;
+        let identity = runtime.nodes[index].identity();
+        let epoch = runtime
+            .source_epoch
+            .checked_add(1)
+            .ok_or(Error::EpochExhausted)?;
+        let before = runtime.styles.get(index);
+        if let Contribution::Set(value) = &contribution {
+            property.validate(value)?;
+        }
+        if let Some(colors) = runtime.styles.declared_colors(index) {
+            runtime.overrides.refresh_color_base(identity, colors);
+        }
+        let explicit = matches!(&contribution, Contribution::Set(_));
+        let after = runtime
+            .overrides
+            .set(identity, before, property, contribution)?;
+        let count = runtime.nodes.len();
+        let relationship_changed =
+            runtime
+                .styles
+                .color_contribution(index, property.id(), after, explicit, count);
+        // Equal Set/Inherit still changes which immutable C paint row this
+        // node follows. Rebind C before a later shared-source write can occur.
+        runtime.dirty |= relationship_changed;
+        runtime.source_epoch = epoch;
+        runtime.counters.source_operations += 1;
+        runtime.changed_nodes = usize::from(!styles::exact_eq(&before, &after));
+        if !styles::exact_eq(&before, &after) {
+            if layout_changed(before, after) {
+                runtime.layout_dirty.insert(identity);
+            }
+            if before.font_size != after.font_size {
+                let slot = runtime.nodes[index].text_slot();
+                if let Some(text) = slot.get_mut(&mut runtime.texts) {
+                    text.shaped = None;
+                }
+            }
+            let count = runtime.nodes.len();
+            runtime.styles.set(index, after, count);
+            runtime.dirty = true;
+        }
+        if runtime.has_lists() {
+            runtime.describe(false)?;
+        }
+        runtime.present()
     }
 }
 

@@ -277,7 +277,7 @@ mod tests {
             input: Signal::new(String::new()),
         };
         let lanes = Lane::new(inbox, |_: &mut Fault<MODE>, _: u32| {}, ());
-        let result_mount = Win::mount_lanes(model, lanes, options, false, scale);
+        let result_mount = Win::mount_lanes(model, lanes, options, false, scale, false);
         assert!(result_mount.is_err());
         assert!(
             result.recv().unwrap(),

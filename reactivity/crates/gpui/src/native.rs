@@ -133,6 +133,7 @@ pub struct Window<V: View + 'static, L: LaneSet<V> = ()> {
     presentation_error: Option<PresentationError>,
     presentation_feedback: Option<PresentationFeedback>,
     renderer: RendererPolicy,
+    inspector: bool,
 }
 impl<V: View + 'static> Window<V> {
     pub fn document(root: V) -> Self {
@@ -144,6 +145,7 @@ impl<V: View + 'static> Window<V> {
             presentation_error: None,
             presentation_feedback: None,
             renderer: RendererPolicy::Auto,
+            inspector: false,
         }
     }
 }
@@ -160,6 +162,7 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
             presentation_error: self.presentation_error,
             presentation_feedback: self.presentation_feedback,
             renderer: self.renderer,
+            inspector: self.inspector,
         }
     }
     /// Bind a typed FIFO completion lane when this window mounts.
@@ -176,7 +179,13 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
             presentation_error: self.presentation_error,
             presentation_feedback: self.presentation_feedback,
             renderer: self.renderer,
+            inspector: self.inspector,
         }
+    }
+    /// Show a retained inspector beside this window's actual application.
+    pub fn inspector(mut self) -> Self {
+        self.inspector = true;
+        self
     }
     pub fn title(mut self, title: impl Into<String>) -> Self {
         self.title = title.into();
@@ -427,6 +436,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                     ..WindowOptions::default()
                 },
                 window.scale_factor() as f32,
+                opening.inspector,
             )?;
             if let Some(wake) = &self.wake {
                 owner.attach_wake(wake);
@@ -1836,3 +1846,10 @@ mod image_tests;
     any(feature = "x11", feature = "x11-minimal")
 ))]
 mod style_tests;
+
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod inspector_tests;
