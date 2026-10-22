@@ -12,6 +12,93 @@ struct Interval {
     line: usize,
     hard_break: bool,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn byte_cuts_keep_boundary_ownership_and_only_visit_the_requested_source() {
+        // Structural work accounting, independent of shaping. The ordinary
+        // integration gates exercise these cuts on actual mixed-script fonts.
+        // 0..2 and 2..4 are soft-wrapped; 4..6 is an atomic CRLF gap.
+        let mut map = Details {
+            len: 10_000,
+            runs: Vec::new(),
+            lines: (0..2_500)
+                .map(|index| Line {
+                    start: index * 4,
+                    end: index * 4 + 4,
+                    top: index as f32 * 10.,
+                    height: 10.,
+                    baseline: index as f32 * 10. + 8.,
+                    width: 2.,
+                })
+                .collect(),
+            carets: Some(Vec::new()),
+        };
+        map.lines[0].end = 2;
+        map.lines[1].start = 2;
+        map.lines[1].end = 4;
+        map.lines[2].start = 6;
+        for byte in (0..=10_000).filter(|&byte| byte != 5) {
+            let line = if byte <= 2 {
+                0
+            } else if byte <= 4 {
+                1
+            } else if byte < 12 {
+                2
+            } else {
+                (byte / 4).min(2_499)
+            };
+            let mut stop = Stop {
+                byte,
+                bounds: Rect::new((byte % 4) as f32, line as f32 * 10., 1., 10.),
+                affinities: 3,
+            };
+            if byte == 2 {
+                stop.affinities = 1;
+                map.carets.as_mut().unwrap().push(stop);
+                stop.affinities = 2;
+                stop.bounds.y = 10.;
+            }
+            map.carets.as_mut().unwrap().push(stop);
+        }
+        let all = map.carets.as_deref().unwrap();
+        for line in [0, 1, 2, 999, 2_499] {
+            let owned = |interval: Interval| {
+                (
+                    interval.start.offset.byte(),
+                    interval.end.offset.byte(),
+                    interval.line,
+                )
+            };
+            let full = map
+                .intervals(all, 2.5)
+                .filter(|i| i.line == line)
+                .map(owned)
+                .collect::<Vec<_>>();
+            let cut = map
+                .intervals(map.line_stops(line), 2.5)
+                .filter(|i| i.line == line)
+                .map(owned)
+                .collect::<Vec<_>>();
+            assert_eq!(cut, full, "line{line}");
+            assert!(map.line_stops(line).len() <= 8);
+        }
+        assert_eq!(
+            map.stops(4, 6, false)
+                .iter()
+                .map(|s| s.byte)
+                .collect::<Vec<_>>(),
+            [4, 6]
+        );
+        let requested = map.stops(8_001, 8_003, false);
+        assert_eq!(requested.len(), 3);
+        assert_eq!(map.intervals(requested, 2.5).count(), 2);
+        assert_eq!(map.intervals(all, 2.5).count(), 9_999);
+    }
+}
 impl Interval {
     fn side(&self, right: bool) -> TextPosition {
         if right == (self.start_x < self.end_x) {
@@ -29,12 +116,31 @@ impl Details {
             .saturating_sub(1)
     }
 
-    fn intervals(&self, marker_width: f32) -> impl Iterator<Item = Interval> + '_ {
-        let groups = self
-            .carets
-            .as_deref()
-            .unwrap_or_default()
-            .chunk_by(|a, b| a.byte == b.byte);
+    /// Inclusive endpoint groups, with one optional following source boundary.
+    /// A paragraph separator starts at the old line's end but its other stop
+    /// belongs to the next paragraph. Soft wraps share one byte boundary; the
+    /// caller's owner-line filter discards that following line's first interval.
+    fn stops(&self, start: u32, end: u32, following: bool) -> &[Stop] {
+        let stops = self.carets.as_deref().unwrap_or_default();
+        let first = stops.partition_point(|stop| stop.byte < start);
+        let mut last = stops.partition_point(|stop| stop.byte <= end);
+        if following && let Some(next) = stops.get(last) {
+            last += stops[last..].partition_point(|stop| stop.byte == next.byte);
+        }
+        &stops[first..last]
+    }
+
+    fn line_stops(&self, line: usize) -> &[Stop] {
+        let line = self.lines[line];
+        self.stops(line.start, line.end, true)
+    }
+
+    fn intervals<'a>(
+        &'a self,
+        stops: &'a [Stop],
+        marker_width: f32,
+    ) -> impl Iterator<Item = Interval> + 'a {
+        let groups = stops.chunk_by(|a, b| a.byte == b.byte);
         groups
             .clone()
             .zip(groups.skip(1))
@@ -100,12 +206,13 @@ impl TextLayout {
             return None;
         }
         let map = self.mapping.as_ref()?;
-        let stops = map.carets.as_ref()?;
+        map.carets.as_ref()?;
         let line = map.line_at(point.y);
+        let stops = map.line_stops(line);
         let mut before: Option<(f32, TextPosition)> = None;
         let mut after: Option<(f32, TextPosition)> = None;
         for interval in map
-            .intervals(self.font_size * 0.25)
+            .intervals(stops, self.font_size * 0.25)
             .filter(|i| i.line == line)
         {
             // A hard break belongs to the preceding line; clicking its marker
@@ -189,7 +296,7 @@ impl TextLayout {
         }
         let map = self.mapping.as_ref().unwrap();
         let mut pending: Option<(Rect, usize)> = None;
-        for interval in map.intervals(self.font_size * 0.25) {
+        for interval in map.intervals(map.stops(start.0, end.0, false), self.font_size * 0.25) {
             if interval.start.offset < start
                 || interval.end.offset > end
                 || interval.bounds.width == 0.
@@ -241,7 +348,7 @@ impl TextLayout {
         let mut best = None;
         let mut distance = f32::INFINITY;
         for interval in map
-            .intervals(self.font_size * 0.25)
+            .intervals(map.line_stops(line), self.font_size * 0.25)
             .filter(|i| i.line == line && !i.hard_break)
         {
             let x = if right {
