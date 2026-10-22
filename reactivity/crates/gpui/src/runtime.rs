@@ -2071,7 +2071,7 @@ impl<M: View + 'static> Runtime<M> {
             nodes.push(node);
         }
         image::reconcile(&mut self.images, image_resources);
-        for node in old.into_iter().flatten() {
+        for node in old.iter().flatten() {
             changed += 1;
             if property_changed == Some(node.identity) {
                 property_changed = None;
