@@ -34,7 +34,7 @@ for paragraphs, iterations in [(1, 30000), (1800, 300)]:
         assert outputs['baseline'] == outputs['candidate'], outputs
 assert identities() == initial
 with (root / 'text-selection-cut.csv').open('w') as file:
-    writer = csv.DictWriter(file, fieldnames=list(rows[0])); writer.writeheader(); writer.writerows(rows)
+    writer = csv.DictWriter(file, fieldnames=list(rows[0]), lineterminator='\n'); writer.writeheader(); writer.writerows(rows)
 with (root / 'text-selection-cut-identities.csv').open('w') as file:
-    writer = csv.writer(file); writer.writerow(['path','sha256']); writer.writerows(initial.items())
+    writer = csv.writer(file, lineterminator='\n'); writer.writerow(['path','sha256']); writer.writerows(initial.items())
 print(f'END {len(rows)} rows, CPU {cpu}, {time.monotonic()-started:.3f}s, all per-pair identities/signatures equal')
