@@ -137,6 +137,7 @@ impl Collect<'_> {
         previous: Option<&Presented>,
         next: &Presented,
         state: (Option<&Metadata>, Option<editing::SelectionSnapshot>),
+        text: (Option<&text_geometry::Entry>, Option<&text_geometry::Entry>),
         list: Option<scroll::ViewportInfo>,
         row: Option<&ListRow>,
     ) {
@@ -169,7 +170,17 @@ impl Collect<'_> {
             self.full();
             return;
         }
-        if previous.kind != next.kind
+        let same_geometry = match text {
+            (Some(old), Some(new)) => {
+                std::sync::Arc::ptr_eq(&old.map, &new.map)
+                    && old.origin.x.to_bits() == new.origin.x.to_bits()
+                    && old.origin.y.to_bits() == new.origin.y.to_bits()
+            }
+            (None, None) => true,
+            _ => false,
+        };
+        if !same_geometry
+            || previous.kind != next.kind
             || previous.actions != next.actions
             || previous.text.as_deref() != next.text.as_deref()
             || metadata

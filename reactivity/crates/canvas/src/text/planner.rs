@@ -205,6 +205,7 @@ impl<'font> Planner<'font> {
             if !simple && details.is_none() {
                 details = Some(Details {
                     len: text.len() as u32,
+                    font_size: size,
                     runs: Vec::new(),
                     lines: Vec::new(),
                     carets: interactive.then(Vec::new),
@@ -430,6 +431,7 @@ impl<'font> Planner<'font> {
             if !encoded {
                 details = Some(Details {
                     len: text.len() as u32,
+                    font_size: size,
                     runs: vec![Run {
                         start: 0,
                         end: text.len() as u32,
@@ -458,7 +460,7 @@ impl<'font> Planner<'font> {
             font_size: size,
             glyphs,
             fonts: self.font_set(mask),
-            mapping: details.map(Box::new),
+            mapping: details.map(Arc::new),
         })
     }
 }

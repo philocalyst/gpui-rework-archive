@@ -68,3 +68,59 @@ fn scoped_geometry_allocation_and_payload_ledger() {
         }
     }
 }
+
+#[test]
+fn retained_geometry_drops_paint_leases_and_detaches_explicit_mutation() {
+    let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
+    let font = FontFace::bundled().unwrap();
+    let mut layout = font
+        .shaper()
+        .shape_interactive("office אבג\r\nnext", 16., Some(50.))
+        .unwrap();
+    let geometry = layout.retain_geometry().unwrap();
+    let before = geometry
+        .graphemes()
+        .map(|unit| {
+            (
+                unit.text_range(),
+                unit.bounds(),
+                unit.line(),
+                unit.direction(),
+            )
+        })
+        .collect::<Vec<_>>();
+    let font_set = Arc::downgrade(&layout.fonts);
+    let cost = allocation_counter::measure(|| {
+        let borrowed = layout.retain_geometry().unwrap();
+        assert!(Arc::ptr_eq(&borrowed, &geometry));
+    });
+    assert_eq!(cost.count_total, 0);
+    layout.discard_interaction();
+    assert!(layout.geometry().is_some_and(|map| map.carets.is_none()));
+    drop(layout);
+    assert!(
+        font_set.upgrade().is_none(),
+        "geometry must not retain glyph font-set leases"
+    );
+    assert_eq!(
+        geometry
+            .graphemes()
+            .map(|unit| (
+                unit.text_range(),
+                unit.bounds(),
+                unit.line(),
+                unit.direction()
+            ))
+            .collect::<Vec<_>>(),
+        before
+    );
+    let runs = geometry.runs().collect::<Vec<_>>();
+    assert_eq!(runs.first().unwrap().text_range().start.byte(), 0);
+    assert_eq!(
+        runs.last().unwrap().text_range().end.byte(),
+        geometry.text_len()
+    );
+    for pair in runs.windows(2) {
+        assert_eq!(pair[0].text_range().end, pair[1].text_range().start);
+    }
+}

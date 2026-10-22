@@ -56,7 +56,7 @@ pub use remote::{Lane, LaneSet};
 pub use runtime::{
     Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
     PointerEvent, PointerSession, PresentationToken, Query, SemanticSnapshot, SetError, Snapshot,
-    SnapshotNode, Win, WindowOptions,
+    SnapshotNode, TextGeometry, Win, WindowOptions,
 };
 pub use scroll::{
     Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,

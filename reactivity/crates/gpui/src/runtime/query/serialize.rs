@@ -74,8 +74,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 impl Serialize for Context<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut nodes = serializer.serialize_seq(Some(self.nodes.len()))?;
-        for node in self.nodes {
-            nodes.serialize_element(&self.part(node))?;
+        for index in 0..self.nodes.len() {
+            nodes.serialize_element(&self.part(index))?;
         }
         nodes.end()
     }

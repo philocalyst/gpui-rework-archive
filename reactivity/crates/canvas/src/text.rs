@@ -17,14 +17,15 @@ use swash::{
     scale::{Render, ScaleContext, Source},
     zeno::Format,
 };
+#[cfg(test)]
+mod geometry_ledger;
 mod layout;
 mod paragraph;
 mod planner;
-#[cfg(test)]
-mod geometry_ledger;
 use layout::Details;
 pub use layout::{
-    CaretAffinity, GlyphRun, TextDirection, TextLine, TextOffset, TextPosition, TextSelection,
+    CaretAffinity, GlyphRun, TextDirection, TextGeometry, TextGrapheme, TextLine, TextOffset,
+    TextPosition, TextRun, TextSelection,
 };
 
 const MAX_TEXT: usize = 32 * 1024;
@@ -233,7 +234,7 @@ pub struct TextLayout {
     font_size: f32,
     glyphs: Vec<Glyph>,
     fonts: Arc<FontSet>,
-    mapping: Option<Box<Details>>,
+    mapping: Option<Arc<Details>>,
 }
 impl TextLayout {
     pub fn font_size(&self) -> f32 {

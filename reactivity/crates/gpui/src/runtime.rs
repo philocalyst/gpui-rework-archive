@@ -37,7 +37,9 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 mod accessibility;
 mod delivery;
 mod editing;
+mod text_geometry;
 use editing::EditingIntent;
+pub use text_geometry::TextGeometry;
 mod identity_index;
 mod image;
 use identity_index::IdentityIndex;
@@ -783,7 +785,7 @@ struct Runtime<M> {
     complete_epoch: u64,
     presented: Vec<Presented>,
     canvas: Canvas,
-    text: Option<TextSystem>,
+    text: Option<Box<text_geometry::TextResources>>,
     poisoned: bool,
     counters: Counters,
     changed_nodes: usize,
@@ -2361,7 +2363,9 @@ impl<M: View + 'static> Runtime<M> {
             }
             Err(_) => {
                 self.rebuild_layout = true;
-                self.text = None;
+                if let Some(text) = &mut self.text {
+                    text.system = None;
+                }
                 self.texts
                     .iter_mut()
                     .flatten()
@@ -2381,6 +2385,9 @@ impl<M: View + 'static> Runtime<M> {
             self.presentation_size = prepared.dimensions();
             if !prepared.keeps_rows() {
                 self.presented = prepared.nodes;
+                if let Some(text) = &mut self.text {
+                    text.acknowledge();
+                }
                 if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
                     frozen.presented = frozen.candidate;
                 }
@@ -2410,6 +2417,13 @@ impl<M: View + 'static> Runtime<M> {
         }
         if self.metadata.as_deref().is_some_and(Metadata::unused) {
             self.metadata = None;
+        }
+        if self
+            .text
+            .as_deref()
+            .is_some_and(text_geometry::TextResources::unused)
+        {
+            self.text = None;
         }
         // Virtual rows can leave P solely because an ordinary ancestor moved.
         // Revalidate focus after the actual sheet swap, before native focus is
@@ -2453,13 +2467,21 @@ impl<M: View + 'static> Runtime<M> {
             u16::try_from(size[0]).map_err(|_| gpui_canvas::Error::InvalidDimensions)?,
             u16::try_from(size[1]).map_err(|_| gpui_canvas::Error::InvalidDimensions)?,
         ];
-        if self.text.is_none() && !self.texts.is_empty() {
-            self.text = Some(TextSystem::bundled()?);
+        if !self.texts.is_empty() {
+            let text = self.text.get_or_insert_with(Default::default);
+            if text.system.is_none() {
+                text.system = Some(TextSystem::bundled()?);
+            }
         }
         // One immutable parser for every measurement and final line layout in
         // this pass. A single face lease lets the raster cache remain mutable;
         // neither a string nor a glyph increments its reference count.
-        let font = self.text.as_ref().map(|text| text.font_face().clone());
+        let font = self
+            .text
+            .as_ref()
+            .and_then(|text| text.system.as_ref())
+            .map(|text| text.font_face().clone());
+        let mut text_geometry = Vec::new();
         let mut shaper = font.as_ref().map(|font| font.shaper());
         let active_selection = self.active_selection();
         let selection_snapshot = self.selection_snapshot();
@@ -2549,7 +2571,7 @@ impl<M: View + 'static> Runtime<M> {
                 service,
                 styles.get(index).font_size,
                 width,
-                active_selection.is_some_and(|(identity, _)| identity == node.identity()),
+                true,
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
@@ -2738,9 +2760,13 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
-            if paint && let Some(text) = node.text_slot().get_mut(&mut self.texts) {
+            let geometry = if let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = style.fg;
-                let service = self.text.as_mut().expect("text initialized before layout");
+                let service = self
+                    .text
+                    .as_mut()
+                    .and_then(|text| text.system.as_mut())
+                    .expect("text initialized before layout");
                 let selection = active_selection
                     .filter(|(identity, _)| *identity == node.identity())
                     .map(|(_, selection)| selection);
@@ -2748,82 +2774,95 @@ impl<M: View + 'static> Runtime<M> {
                     shaper.as_mut().expect("text initialized before layout"),
                     style.font_size,
                     Some(layout.content_box_width()),
-                    selection.is_some(),
+                    true,
                 )?;
                 let origin = Point {
                     x: layout.padding.left,
                     y: layout.padding.top,
                 };
-                let transform =
-                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
-                if let Some(selection) = selection {
-                    let mut failure = None;
-                    if !shape.selection_rects(selection, |bounds, _| {
-                        if failure.is_none() {
-                            failure = scene
-                                .fill_rect(
-                                    Rect::new(
-                                        origin.x + bounds.x,
-                                        origin.y + bounds.y,
-                                        bounds.width,
-                                        bounds.height,
-                                    ),
-                                    transform,
-                                    clip,
-                                    Color::rgba(70, 130, 240, 96),
-                                )
-                                .err();
+                let geometry = (
+                    origin,
+                    shape
+                        .retain_geometry()
+                        .expect("interactive layout has geometry"),
+                );
+                if paint {
+                    let transform =
+                        transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
+                    if let Some(selection) = selection {
+                        let mut failure = None;
+                        if !shape.selection_rects(selection, |bounds, _| {
+                            if failure.is_none() {
+                                failure = scene
+                                    .fill_rect(
+                                        Rect::new(
+                                            origin.x + bounds.x,
+                                            origin.y + bounds.y,
+                                            bounds.width,
+                                            bounds.height,
+                                        ),
+                                        transform,
+                                        clip,
+                                        Color::rgba(70, 130, 240, 96),
+                                    )
+                                    .err();
+                            }
+                        }) {
+                            return Err(Error::InvalidSelection);
                         }
-                    }) {
-                        return Err(Error::InvalidSelection);
+                        if let Some(error) = failure {
+                            return Err(error.into());
+                        }
                     }
-                    if let Some(error) = failure {
-                        return Err(error.into());
-                    }
-                }
-                if let Some((value, cache)) = self.styles.shared_paint(index, true) {
-                    scene.draw_text_scaled_shared(
-                        service,
-                        shape,
-                        origin,
-                        transform,
-                        clip,
-                        value,
-                        cache,
-                        scale_factor,
-                    )?;
-                } else {
-                    scene.draw_text_scaled(
-                        service,
-                        shape,
-                        origin,
-                        transform,
-                        clip,
-                        fg,
-                        scale_factor,
-                    )?;
-                }
-                if let Some(selection) = selection
-                    && selection.anchor.offset == selection.focus.offset
-                    && self.focused.and_then(|target| self.sites.resolve(target))
-                        == Some(node.identity())
-                {
-                    let bounds = shape
-                        .caret_bounds(selection.focus)
-                        .ok_or(Error::InvalidSelection)?;
-                    let rect = Rect::new(
-                        origin.x + bounds.x,
-                        origin.y + bounds.y,
-                        bounds.width,
-                        bounds.height,
-                    );
                     if let Some((value, cache)) = self.styles.shared_paint(index, true) {
-                        scene.fill_rounded_rect_shared(rect, 0., transform, clip, value, cache)?;
+                        scene.draw_text_scaled_shared(
+                            service,
+                            shape,
+                            origin,
+                            transform,
+                            clip,
+                            value,
+                            cache,
+                            scale_factor,
+                        )?;
                     } else {
-                        scene.fill_rect(rect, transform, clip, fg)?;
+                        scene.draw_text_scaled(
+                            service,
+                            shape,
+                            origin,
+                            transform,
+                            clip,
+                            fg,
+                            scale_factor,
+                        )?;
+                    }
+                    if let Some(selection) = selection
+                        && selection.anchor.offset == selection.focus.offset
+                        && self.focused.and_then(|target| self.sites.resolve(target))
+                            == Some(node.identity())
+                    {
+                        let bounds = shape
+                            .caret_bounds(selection.focus)
+                            .ok_or(Error::InvalidSelection)?;
+                        let rect = Rect::new(
+                            origin.x + bounds.x,
+                            origin.y + bounds.y,
+                            bounds.width,
+                            bounds.height,
+                        );
+                        if let Some((value, cache)) = self.styles.shared_paint(index, true) {
+                            scene.fill_rounded_rect_shared(
+                                rect, 0., transform, clip, value, cache,
+                            )?;
+                        } else {
+                            scene.fill_rect(rect, transform, clip, fg)?;
+                        }
                     }
                 }
-            }
+                Some(geometry)
+            } else {
+                None
+            };
             if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
                 scene.draw_image_with(
@@ -2876,6 +2915,13 @@ impl<M: View + 'static> Runtime<M> {
                 !hittable,
                 presented.last().map(|node: &Presented| node.parent),
             );
+            if let Some((origin, map)) = geometry {
+                text_geometry.push(text_geometry::Entry {
+                    row: presented.len() as u32,
+                    origin,
+                    map,
+                });
+            }
             presented.push(Presented {
                 identity: node.identity(),
                 parent: link,
@@ -2902,6 +2948,12 @@ impl<M: View + 'static> Runtime<M> {
                     self.presented.get(index),
                     &presented[index],
                     (self.metadata.as_deref(), selection_snapshot),
+                    (
+                        self.text.as_ref().and_then(|text| text.entry(index)),
+                        text_geometry
+                            .last()
+                            .filter(|entry| entry.row as usize == index),
+                    ),
                     viewport_geometry.info(
                         node.identity(),
                         [f64::from(rect.width), f64::from(rect.height)],
@@ -3008,6 +3060,9 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(editing) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
             editing.candidate = selection_snapshot;
         }
+        if let Some(text) = &mut self.text {
+            text.candidate = Some(text_geometry);
+        }
         self.prepared = Some(Prepared {
             size: prepared_size,
             scale_factor,
@@ -3021,7 +3076,9 @@ impl<M: View + 'static> Runtime<M> {
         self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;
         if self.texts.is_empty() {
-            self.text = None;
+            if let Some(text) = &mut self.text {
+                text.system = None;
+            }
         }
         self.dirty = false;
         self.rebuild_layout = false;

@@ -105,6 +105,7 @@ impl<M: View + 'static> Runtime<M> {
             let font = self
                 .text
                 .as_ref()
+                .and_then(|text| text.system.as_ref())
                 .expect("current text presentation has a font service")
                 .font_face()
                 .clone();
@@ -169,18 +170,6 @@ impl<M: View + 'static> Runtime<M> {
         })
     }
 
-    fn retire_interaction(&mut self, identity: u64) {
-        // Reconciliation can fail after partially replacing the dense lanes.
-        // Cleanup must not index a retired node or text slot in that case.
-        if let Some(index) = self.by_identity.get(identity)
-            && let Some(node) = self.nodes.get(index)
-            && let Some(Some(site)) = self.texts.get_mut(node.text_slot().0 as usize)
-            && let Some(shape) = &mut site.shaped
-        {
-            shape.layout.discard_interaction();
-        }
-    }
-
     fn set_selection(&mut self, index: usize, selection: TextSelection) -> bool {
         let node = &self.nodes[index];
         if self
@@ -201,13 +190,7 @@ impl<M: View + 'static> Runtime<M> {
             .as_mut()
             .and_then(|metadata| metadata.editing.as_mut())
             .and_then(|editing| editing.logical.take());
-        if let Some(previous) = &previous
-            && (previous.identity != next.identity
-                || previous.field != next.field
-                || !std::ptr::eq::<str>(previous.value.as_ref(), next.value.as_ref()))
-        {
-            self.retire_interaction(previous.identity);
-        }
+        drop(previous);
         self.metadata
             .get_or_insert_with(|| Box::new(Metadata::default()))
             .editing
@@ -218,7 +201,7 @@ impl<M: View + 'static> Runtime<M> {
     }
 
     pub(super) fn clear_editing(&mut self) -> bool {
-        let Some(previous) = self
+        let Some(_) = self
             .metadata
             .as_mut()
             .and_then(|metadata| metadata.editing.as_mut())
@@ -226,7 +209,6 @@ impl<M: View + 'static> Runtime<M> {
         else {
             return false;
         };
-        self.retire_interaction(previous.identity);
         self.dirty = true;
         true
     }
