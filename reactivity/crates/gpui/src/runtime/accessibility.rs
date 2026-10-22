@@ -69,6 +69,13 @@ impl Observer {
         self.pending = false;
         self.target = stamp;
     }
+    pub(super) fn relabel(&mut self, base: Stamp, target: Stamp) {
+        if self.pending {
+            self.target = target;
+        } else {
+            self.begin(base, target.size).finish(target, 0, 0);
+        }
+    }
     pub(super) fn invalidate(&mut self) {
         self.exact = false;
         self.indices.clear();

@@ -45,6 +45,8 @@ use list::{ListRow, ListState, ScrollRequest};
 use scroll::{ViewportKey, ViewportState};
 mod geometry;
 mod metadata;
+pub(crate) mod paint;
+use paint::PatchOutcome;
 mod query;
 mod semantics;
 mod styles;
@@ -1418,7 +1420,7 @@ impl<M: View + 'static> Runtime<M> {
                             || self
                                 .prepared
                                 .as_ref()
-                                .map_or(self.presented.as_slice(), |p| &p.nodes)
+                                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
                                 .iter()
                                 .any(|node| node.identity == *identity)
                     })
@@ -1983,9 +1985,11 @@ impl<M: View + 'static> Runtime<M> {
         self.changed_nodes = changed;
         Ok(())
     }
-    fn patch(&mut self, field: FieldId) -> Result<bool, Error> {
+    fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
+        let mut paint_edits = self.paint_begin(field);
+        let mut paint_eligible = paint_edits.is_some();
         let Some(fanout) = self.fanout.get(&field) else {
-            return Ok(false);
+            return Ok(PatchOutcome::Visual);
         };
         let mut needs = crate::source::Needs {
             text: false,
@@ -2013,7 +2017,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut semantic = false;
         let mut visual_changed = false;
         let mut last_changed = None;
-        for &destination in &fanout.destinations {
+        for (offset, &destination) in fanout.destinations.iter().enumerate() {
             self.counters.destination_compares += 1;
             let index = destination.node();
             let node = &self.nodes[index];
@@ -2026,6 +2030,33 @@ impl<M: View + 'static> Runtime<M> {
                         let after = self.overrides.update_base(identity, before, id, value)?;
                         let changed = !styles::exact_eq(&before, &after);
                         if changed {
+                            if let Some(plan) = &mut paint_edits {
+                                let before_color = if id == crate::property::PropertyId::Background
+                                {
+                                    before.bg
+                                } else {
+                                    before.fg
+                                };
+                                let color = if id == crate::property::PropertyId::Background {
+                                    after.bg
+                                } else {
+                                    after.fg
+                                };
+                                paint_eligible &=
+                                    before_color.alpha().to_bits() == color.alpha().to_bits();
+                                let cursor = self
+                                    .metadata
+                                    .as_ref()
+                                    .unwrap()
+                                    .paint
+                                    .as_ref()
+                                    .unwrap()
+                                    .index(plan, offset)
+                                    .unwrap();
+                                if let Some(index) = self.canvas.paint_index(cursor) {
+                                    plan.edits.push(gpui_canvas::PaintEdit::new(index, color));
+                                }
+                            }
                             if id.info().impact == crate::property::Impact::Layout {
                                 self.layout_dirty.insert(identity);
                             }
@@ -2110,7 +2141,16 @@ impl<M: View + 'static> Runtime<M> {
                 last_changed = Some(index);
             }
         }
-        Ok(semantic && !visual_changed)
+        if let Some(edits) = paint_edits
+            && self.paint_finish(edits, paint_eligible, visual_changed)?
+        {
+            return Ok(PatchOutcome::Complete);
+        }
+        Ok(if semantic && !visual_changed {
+            PatchOutcome::Metadata
+        } else {
+            PatchOutcome::Visual
+        })
     }
     fn commit(&self) -> Commit {
         Commit {
@@ -2127,7 +2167,12 @@ impl<M: View + 'static> Runtime<M> {
     }
     fn present(&mut self) -> Result<Commit, Error> {
         if !self.dirty {
-            if self.source_epoch > 0 && self.metadata.is_some() {
+            if self.source_epoch > 0
+                && self
+                    .metadata
+                    .as_deref()
+                    .is_some_and(Metadata::has_semantics)
+            {
                 return Ok(self.publish_metadata(Publish::All));
             }
             // Equal logical output extends the complete scene's coverage, even
@@ -2164,8 +2209,10 @@ impl<M: View + 'static> Runtime<M> {
         let prepared = self.prepared.take();
         let newly_presented = prepared.is_some() || !self.presentation_valid;
         if let Some(prepared) = prepared {
-            self.presented = prepared.nodes;
-            self.presentation_size = prepared.size.map(u32::from);
+            self.presentation_size = prepared.dimensions();
+            if !prepared.keeps_rows() {
+                self.presented = prepared.nodes;
+            }
             self.presentation_scale_factor = prepared.scale_factor;
         }
         if let Some(metadata) = &mut self.metadata
@@ -2379,6 +2426,7 @@ impl<M: View + 'static> Runtime<M> {
             .accessibility
             .as_mut()
             .map(|observer| observer.begin(base_stamp, size));
+        let mut paint_bindings = paint::Build::new(&self.fanout);
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
@@ -2475,6 +2523,7 @@ impl<M: View + 'static> Runtime<M> {
                 raw_bounds.intersection(viewport)
             };
             let paint = !in_scroll || !bounds.is_empty();
+            let bg_cursor = scene.paint_cursor();
             if paint && style.bg.alpha() > 0.0 {
                 scene.fill_rounded_rect(
                     rect,
@@ -2494,6 +2543,8 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
+            let bg_index = scene.paint_index(bg_cursor);
+            let fg_cursor = scene.paint_cursor();
             if paint && let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
@@ -2514,6 +2565,9 @@ impl<M: View + 'static> Runtime<M> {
                     fg,
                     scale_factor,
                 )?;
+            }
+            if let Some(bindings) = &mut paint_bindings {
+                bindings.capture(index, bg_index, scene.paint_index(fg_cursor));
             }
             if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
@@ -2684,6 +2738,13 @@ impl<M: View + 'static> Runtime<M> {
         }
         if let Some(leases) = image_leases {
             self.images.as_mut().unwrap().prepare(sequence, leases);
+        }
+        if let Some(bindings) = paint_bindings {
+            self.metadata
+                .get_or_insert_with(|| Box::new(Metadata::default()))
+                .paint = Some(bindings.finish());
+        } else if let Some(metadata) = &mut self.metadata {
+            metadata.paint = None;
         }
         self.prepared = Some(Prepared {
             size: prepared_size,
