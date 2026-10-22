@@ -334,6 +334,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .handler
             .take()
             .expect("admitted route");
+        let before = self.source_epoch;
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
             let Some((target, id, contribution)) = handler.proposal(&self.runtime.model)? else {
                 return Ok(false);
@@ -355,23 +356,23 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             // may still change the tool's ordinary model error/status state.
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
-            if let Err(error) =
-                handler.applied_logically(&mut self.runtime.model, result.as_ref().copied())
-            {
-                // The contribution and S may already be committed. A malformed
-                // mutable component projection is an owner fault, not editable
-                // draft validation: withdraw authority instead of skipping
-                // reconciliation while leaving the logical tree live.
-                self.poison();
-                return Err(error.into());
-            }
+            handler.applied_logically(&mut self.runtime.model, result.as_ref().copied())?;
             Ok(true)
         }));
         self.runtime.nodes[index].handler = Some(handler);
         match result {
             Ok(Ok(false)) => Ok(self.commit()),
             Ok(Ok(true)) => self.after_source_with_editing(None, editing),
-            Ok(Err(error)) => Err(error),
+            Ok(Err(error)) => {
+                // Within this closed operation only the reply can reject after
+                // S admission. The route is restored above before quarantine;
+                // an accepted contribution cannot leave stale logical authority
+                // live merely because its mutable projector was malformed.
+                if self.source_epoch != before {
+                    self.poison();
+                }
+                Err(error)
+            }
             Err(_) => {
                 self.poison();
                 Err(Error::OwnerPanicked)
