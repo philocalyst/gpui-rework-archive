@@ -1,0 +1,44 @@
+{
+  "base": "d6203e6ac4",
+  "baseline_fixture": "7f83fbc1106a2f151131fc32190148039787249f",
+  "final_source": "1b200d66cfc28a76e4c61b3d154a26055ae908a0",
+  "shipping_gpu_last_change": "72b8c1c3ce",
+  "source_status": [
+    "?? reactivity/evidence/gpu-shared-owner/"
+  ],
+  "source_clean_check": "git diff --exit-code -- crates/gpu benchmarks/gpu-owner (from reactivity/)",
+  "environment": "source /tmp/gpui-native-env.sh; CARGO_BUILD_JOBS=2; separate default and counters targets",
+  "results": {
+    "gpu_units": 9,
+    "presentation": 4,
+    "vulkan": 43,
+    "gpui_all_targets_passed": 449,
+    "gpui_all_targets_ignored": 25,
+    "native_programs": 2,
+    "strict_all_target_clippy": "pass",
+    "fixture_all_target_clippy": "pass",
+    "apple_aarch64_all_targets": "pass",
+    "windows_msvc_all_targets": "pass",
+    "targeted_format": "pass"
+  },
+  "commands_from_reactivity": [
+    "cargo test --offline --locked --release -p gpui_gpu --features vulkan-tests --all-targets -- --nocapture",
+    "cargo clippy --offline --locked -p gpui -p gpui_gpu --features gpui/x11,gpui_gpu/vulkan-tests --all-targets -- -D warnings",
+    "RUSTC_BOOTSTRAP=1 cargo check --offline --locked -p gpui --features desktop,gpui_canvas/parallel --all-targets --target aarch64-apple-darwin -Zbuild-std=std,panic_abort --jobs 2",
+    "RUSTC_BOOTSTRAP=1 cargo check --offline --locked -p gpui --features desktop,gpui_canvas/parallel --all-targets --target x86_64-pc-windows-msvc -Zbuild-std=std,panic_abort --jobs 2",
+    "cargo test --offline --locked -p gpui --features x11 --all-targets -- --nocapture",
+    "bash evidence/gpu-shared-owner/run-native.sh",
+    "bash evidence/gpu-shared-owner/capture-fixtures.sh",
+    "cargo clippy --offline --locked --manifest-path benchmarks/gpu-owner/Cargo.toml --all-targets -- -D warnings",
+    "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3 evidence/gpu-shared-owner/summarize.py",
+    "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3 evidence/gpu-shared-owner/capture-asm.py",
+    "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3 evidence/gpu-shared-owner/capture-lines.py"
+  ],
+  "new_process_static_data_bytes": 8,
+  "native_candidate_requested_bytes": 1008,
+  "allocation_limits": "Current-thread Rust requests/net accounting only; owner headers included, input scene/instance/adapter excluded in both controls; no complete stack/RSS/driver/GPU-memory or timing claim.",
+  "python": "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+  "default_target": "/tmp/gpui-shared-gpu-sol-target",
+  "counters_target": "/tmp/gpui-shared-gpu-sol-counts-target",
+  "native_environment_sha256": "abd136aac384458c19e7c3db828a52f5c760bce1fdf28bef2e8877892eaea134"
+}
