@@ -1994,41 +1994,41 @@ impl crate::Device for super::Device {
             .topology(conv::map_topology(desc.primitive.topology))
             .primitive_restart_enable(desc.primitive.strip_index_format.is_some());
 
-        let mut compiled_vs = None;
-        let mut compiled_ms = None;
-        let mut compiled_ts = None;
-        match &desc.vertex_processor {
+        let _vertex_stages = match &desc.vertex_processor {
             crate::VertexProcessor::Standard {
                 vertex_buffers: _,
                 vertex_stage,
             } => {
-                compiled_vs = Some(self.compile_stage(
+                let vertex = self.compile_stage(
                     vertex_stage,
                     naga::ShaderStage::Vertex,
                     &desc.layout.binding_map,
-                )?);
-                stages.push(compiled_vs.as_ref().unwrap().create_info);
+                )?;
+                stages.push(vertex.create_info);
+                (None, vertex)
             }
             crate::VertexProcessor::Mesh {
                 task_stage,
                 mesh_stage,
             } => {
-                if let Some(t) = task_stage.as_ref() {
-                    compiled_ts = Some(self.compile_stage(
-                        t,
-                        naga::ShaderStage::Task,
-                        &desc.layout.binding_map,
-                    )?);
-                    stages.push(compiled_ts.as_ref().unwrap().create_info);
+                let task = task_stage
+                    .as_ref()
+                    .map(|stage| {
+                        self.compile_stage(stage, naga::ShaderStage::Task, &desc.layout.binding_map)
+                    })
+                    .transpose()?;
+                if let Some(task) = &task {
+                    stages.push(task.create_info);
                 }
-                compiled_ms = Some(self.compile_stage(
+                let mesh = self.compile_stage(
                     mesh_stage,
                     naga::ShaderStage::Mesh,
                     &desc.layout.binding_map,
-                )?);
-                stages.push(compiled_ms.as_ref().unwrap().create_info);
+                )?;
+                stages.push(mesh.create_info);
+                (task, mesh)
             }
-        }
+        };
         let _compiled_fs = match desc.fragment_stage {
             Some(ref stage) => {
                 let compiled = self.compile_stage(
