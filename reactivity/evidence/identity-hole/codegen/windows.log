@@ -1,0 +1,15 @@
+warning: methods `contains` and `required` are never used
+   --> /root/gpui-identity-hole-hot/reactivity/crates/gpui/src/runtime/identity_index.rs:199:19
+    |
+ 77 | impl IdentityIndex {
+    | ------------------ methods in this implementation
+...
+199 |     pub(super) fn contains(&self, identity: u64) -> bool {
+    |                   ^^^^^^^^
+...
+205 |     pub(super) fn required(&self, identity: u64) -> usize {
+    |                   ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted

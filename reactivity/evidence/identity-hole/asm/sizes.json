@@ -1,0 +1,37 @@
+{
+  "build": {
+    "bytes": 1469,
+    "address": "0000000000506d50",
+    "symbol": "<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>"
+  },
+  "property": {
+    "bytes": 538,
+    "address": "00000000004cec50",
+    "symbol": "<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>"
+  },
+  "read": {
+    "bytes": 552,
+    "address": "0000000000504610",
+    "symbol": "identity_inline_control::read_properties"
+  },
+  "find_entry": {
+    "bytes": 91,
+    "address": "000000000050bea0",
+    "symbol": "<gpui::runtime::identity_index::IdentityIndex>::find_entry"
+  },
+  "contains": {
+    "bytes": 321,
+    "address": "000000000050bf00",
+    "symbol": "<gpui::runtime::identity_index::IdentityIndex>::contains"
+  },
+  "find_run": {
+    "bytes": 109,
+    "address": "000000000050c050",
+    "symbol": "<gpui::runtime::identity_index::IdentityIndex>::find_run"
+  },
+  "resolve": {
+    "bytes": 715,
+    "address": "00000000004e3540",
+    "symbol": "<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve"
+  }
+}

@@ -1,0 +1,104 @@
+
+/tmp/gpui-idnorm-hole-hot-target/release/examples/identity_inline_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000050bf00 <<gpui::runtime::identity_index::IdentityIndex>::contains>:
+  50bf00:	48 8b 07             	mov    (%rdi),%rax
+  50bf03:	48 8d 0d 4e da b3 ff 	lea    -0x4c25b2(%rip),%rcx        # 49958 <anon.d09c530fcf0481464f84ad373d3ecdcc.49.llvm.18423153612177447210+0x37b>
+  50bf0a:	48 63 04 81          	movslq (%rcx,%rax,4),%rax
+  50bf0e:	48 01 c8             	add    %rcx,%rax
+  50bf11:	ff e0                	jmp    *%rax
+  50bf13:	48 2b 77 08          	sub    0x8(%rdi),%rsi
+  50bf17:	0f 83 a4 00 00 00    	jae    50bfc1 <<gpui::runtime::identity_index::IdentityIndex>::contains+0xc1>
+  50bf1d:	31 c0                	xor    %eax,%eax
+  50bf1f:	c3                   	ret
+  50bf20:	48 8b 57 10          	mov    0x10(%rdi),%rdx
+  50bf24:	31 c0                	xor    %eax,%eax
+  50bf26:	48 85 d2             	test   %rdx,%rdx
+  50bf29:	0f 84 0e 01 00 00    	je     50c03d <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13d>
+  50bf2f:	48 8b 4f 08          	mov    0x8(%rdi),%rcx
+  50bf33:	48 83 fa 01          	cmp    $0x1,%rdx
+  50bf37:	74 2b                	je     50bf64 <<gpui::runtime::identity_index::IdentityIndex>::contains+0x64>
+  50bf39:	31 c0                	xor    %eax,%eax
+  50bf3b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  50bf40:	48 89 c7             	mov    %rax,%rdi
+  50bf43:	49 89 d0             	mov    %rdx,%r8
+  50bf46:	49 d1 e8             	shr    $1,%r8
+  50bf49:	4c 01 c0             	add    %r8,%rax
+  50bf4c:	49 89 c1             	mov    %rax,%r9
+  50bf4f:	49 c1 e1 04          	shl    $0x4,%r9
+  50bf53:	4a 39 34 09          	cmp    %rsi,(%rcx,%r9,1)
+  50bf57:	48 0f 47 c7          	cmova  %rdi,%rax
+  50bf5b:	4c 29 c2             	sub    %r8,%rdx
+  50bf5e:	48 83 fa 01          	cmp    $0x1,%rdx
+  50bf62:	77 dc                	ja     50bf40 <<gpui::runtime::identity_index::IdentityIndex>::contains+0x40>
+  50bf64:	48 89 c7             	mov    %rax,%rdi
+  50bf67:	48 c1 e7 04          	shl    $0x4,%rdi
+  50bf6b:	31 d2                	xor    %edx,%edx
+  50bf6d:	48 39 34 39          	cmp    %rsi,(%rcx,%rdi,1)
+  50bf71:	0f 96 c2             	setbe  %dl
+  50bf74:	48 01 c2             	add    %rax,%rdx
+  50bf77:	0f 84 c1 00 00 00    	je     50c03e <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13e>
+  50bf7d:	48 c1 e2 04          	shl    $0x4,%rdx
+  50bf81:	48 2b 74 11 f0       	sub    -0x10(%rcx,%rdx,1),%rsi
+  50bf86:	8b 44 11 fc          	mov    -0x4(%rcx,%rdx,1),%eax
+  50bf8a:	48 39 c6             	cmp    %rax,%rsi
+  50bf8d:	0f 92 c0             	setb   %al
+  50bf90:	c3                   	ret
+  50bf91:	48 8b 47 10          	mov    0x10(%rdi),%rax
+  50bf95:	48 85 c0             	test   %rax,%rax
+  50bf98:	0f 84 a0 00 00 00    	je     50c03e <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13e>
+  50bf9e:	48 8b 4f 08          	mov    0x8(%rdi),%rcx
+  50bfa2:	48 83 f8 01          	cmp    $0x1,%rax
+  50bfa6:	75 5a                	jne    50c002 <<gpui::runtime::identity_index::IdentityIndex>::contains+0x102>
+  50bfa8:	b0 01                	mov    $0x1,%al
+  50bfaa:	48 39 31             	cmp    %rsi,(%rcx)
+  50bfad:	0f 85 8b 00 00 00    	jne    50c03e <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13e>
+  50bfb3:	e9 85 00 00 00       	jmp    50c03d <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13d>
+  50bfb8:	48 2b 77 08          	sub    0x8(%rdi),%rsi
+  50bfbc:	73 0b                	jae    50bfc9 <<gpui::runtime::identity_index::IdentityIndex>::contains+0xc9>
+  50bfbe:	31 c0                	xor    %eax,%eax
+  50bfc0:	c3                   	ret
+  50bfc1:	48 3b 77 10          	cmp    0x10(%rdi),%rsi
+  50bfc5:	0f 92 c0             	setb   %al
+  50bfc8:	c3                   	ret
+  50bfc9:	48 8b 4f 10          	mov    0x10(%rdi),%rcx
+  50bfcd:	48 89 ca             	mov    %rcx,%rdx
+  50bfd0:	48 c1 ea 11          	shr    $0x11,%rdx
+  50bfd4:	81 e2 ff ff 01 00    	and    $0x1ffff,%edx
+  50bfda:	b0 01                	mov    $0x1,%al
+  50bfdc:	48 39 d6             	cmp    %rdx,%rsi
+  50bfdf:	72 5c                	jb     50c03d <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13d>
+  50bfe1:	48 89 c8             	mov    %rcx,%rax
+  50bfe4:	48 c1 e8 22          	shr    $0x22,%rax
+  50bfe8:	48 29 c6             	sub    %rax,%rsi
+  50bfeb:	72 51                	jb     50c03e <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13e>
+  50bfed:	48 39 d6             	cmp    %rdx,%rsi
+  50bff0:	0f 93 c2             	setae  %dl
+  50bff3:	81 e1 ff ff 01 00    	and    $0x1ffff,%ecx
+  50bff9:	48 39 ce             	cmp    %rcx,%rsi
+  50bffc:	0f 92 c0             	setb   %al
+  50bfff:	20 d0                	and    %dl,%al
+  50c001:	c3                   	ret
+  50c002:	31 d2                	xor    %edx,%edx
+  50c004:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  50c00b:	00 00 00 00 00
+  50c010:	48 89 d7             	mov    %rdx,%rdi
+  50c013:	49 89 c0             	mov    %rax,%r8
+  50c016:	49 d1 e8             	shr    $1,%r8
+  50c019:	4c 01 c2             	add    %r8,%rdx
+  50c01c:	4c 8d 0c 52          	lea    (%rdx,%rdx,2),%r9
+  50c020:	4a 39 34 89          	cmp    %rsi,(%rcx,%r9,4)
+  50c024:	48 0f 47 d7          	cmova  %rdi,%rdx
+  50c028:	4c 29 c0             	sub    %r8,%rax
+  50c02b:	48 83 f8 01          	cmp    $0x1,%rax
+  50c02f:	77 df                	ja     50c010 <<gpui::runtime::identity_index::IdentityIndex>::contains+0x110>
+  50c031:	48 8d 14 52          	lea    (%rdx,%rdx,2),%rdx
+  50c035:	b0 01                	mov    $0x1,%al
+  50c037:	48 39 34 91          	cmp    %rsi,(%rcx,%rdx,4)
+  50c03b:	75 01                	jne    50c03e <<gpui::runtime::identity_index::IdentityIndex>::contains+0x13e>
+  50c03d:	c3                   	ret
+  50c03e:	31 c0                	xor    %eax,%eax
+  50c040:	c3                   	ret

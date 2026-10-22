@@ -1,0 +1,14 @@
+{
+  "linux": {
+    "full_emitted_sha256": "3480b200b07f39b71bc94bdae62cf4296be312d4708e152574445a189c7ec4d3",
+    "display_sha256": "3480b200b07f39b71bc94bdae62cf4296be312d4708e152574445a189c7ec4d3"
+  },
+  "apple": {
+    "full_emitted_sha256": "8f57037bd7532824373c8ff3f4699a8d39f7d11f9d0f4ff5457863da8d5e54c3",
+    "display_sha256": "8f57037bd7532824373c8ff3f4699a8d39f7d11f9d0f4ff5457863da8d5e54c3"
+  },
+  "windows": {
+    "full_emitted_sha256": "fa97244586f36b3358355bea4f4bd18733ea820f677c4e3695e3da40ed2b5894",
+    "display_sha256": "de6052a4118954ab901e5db8897d33c48f85d8960883cef183956eb4f3e5aa40"
+  }
+}

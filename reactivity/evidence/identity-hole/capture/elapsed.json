@@ -1,0 +1,127 @@
+[
+  {
+    "round": 1,
+    "variant": "baseline",
+    "wall_seconds": 1.1165631730109453
+  },
+  {
+    "round": 1,
+    "variant": "packed",
+    "wall_seconds": 0.6155996100278571
+  },
+  {
+    "round": 1,
+    "variant": "runs",
+    "wall_seconds": 0.4661823399947025
+  },
+  {
+    "round": 1,
+    "variant": "inline",
+    "wall_seconds": 0.4660044040065259
+  },
+  {
+    "round": 1,
+    "variant": "hole",
+    "wall_seconds": 0.4657327969907783
+  },
+  {
+    "round": 2,
+    "variant": "packed",
+    "wall_seconds": 0.6155126779922284
+  },
+  {
+    "round": 2,
+    "variant": "runs",
+    "wall_seconds": 0.46600988000864163
+  },
+  {
+    "round": 2,
+    "variant": "inline",
+    "wall_seconds": 0.46556179702747613
+  },
+  {
+    "round": 2,
+    "variant": "hole",
+    "wall_seconds": 0.46567022701492533
+  },
+  {
+    "round": 2,
+    "variant": "baseline",
+    "wall_seconds": 1.0666317589930259
+  },
+  {
+    "round": 3,
+    "variant": "runs",
+    "wall_seconds": 0.46578349597984925
+  },
+  {
+    "round": 3,
+    "variant": "inline",
+    "wall_seconds": 0.46876733895624056
+  },
+  {
+    "round": 3,
+    "variant": "hole",
+    "wall_seconds": 0.4656015980290249
+  },
+  {
+    "round": 3,
+    "variant": "baseline",
+    "wall_seconds": 1.0659688540035859
+  },
+  {
+    "round": 3,
+    "variant": "packed",
+    "wall_seconds": 0.6154852550243959
+  },
+  {
+    "round": 4,
+    "variant": "inline",
+    "wall_seconds": 0.46479549194918945
+  },
+  {
+    "round": 4,
+    "variant": "hole",
+    "wall_seconds": 0.46569709200412035
+  },
+  {
+    "round": 4,
+    "variant": "baseline",
+    "wall_seconds": 1.0670352030429058
+  },
+  {
+    "round": 4,
+    "variant": "packed",
+    "wall_seconds": 0.6156439480255358
+  },
+  {
+    "round": 4,
+    "variant": "runs",
+    "wall_seconds": 0.46575362799922004
+  },
+  {
+    "round": 5,
+    "variant": "hole",
+    "wall_seconds": 0.4654321370180696
+  },
+  {
+    "round": 5,
+    "variant": "baseline",
+    "wall_seconds": 1.0670728749828413
+  },
+  {
+    "round": 5,
+    "variant": "packed",
+    "wall_seconds": 0.6160953780054115
+  },
+  {
+    "round": 5,
+    "variant": "runs",
+    "wall_seconds": 0.46538056997815147
+  },
+  {
+    "round": 5,
+    "variant": "inline",
+    "wall_seconds": 0.46534432895714417
+  }
+]

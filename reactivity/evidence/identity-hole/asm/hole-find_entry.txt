@@ -1,0 +1,38 @@
+
+/tmp/gpui-idnorm-hole-hot-target/release/examples/identity_inline_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000050bea0 <<gpui::runtime::identity_index::IdentityIndex>::find_entry>:
+  50bea0:	48 89 f0             	mov    %rsi,%rax
+  50bea3:	48 85 f6             	test   %rsi,%rsi
+  50bea6:	74 52                	je     50befa <<gpui::runtime::identity_index::IdentityIndex>::find_entry+0x5a>
+  50bea8:	48 83 f8 01          	cmp    $0x1,%rax
+  50beac:	75 0e                	jne    50bebc <<gpui::runtime::identity_index::IdentityIndex>::find_entry+0x1c>
+  50beae:	48 39 17             	cmp    %rdx,(%rdi)
+  50beb1:	75 45                	jne    50bef8 <<gpui::runtime::identity_index::IdentityIndex>::find_entry+0x58>
+  50beb3:	8b 57 08             	mov    0x8(%rdi),%edx
+  50beb6:	b8 01 00 00 00       	mov    $0x1,%eax
+  50bebb:	c3                   	ret
+  50bebc:	31 c9                	xor    %ecx,%ecx
+  50bebe:	66 90                	xchg   %ax,%ax
+  50bec0:	48 89 ce             	mov    %rcx,%rsi
+  50bec3:	49 89 c0             	mov    %rax,%r8
+  50bec6:	49 d1 e8             	shr    $1,%r8
+  50bec9:	4c 01 c1             	add    %r8,%rcx
+  50becc:	4c 8d 0c 49          	lea    (%rcx,%rcx,2),%r9
+  50bed0:	4a 39 14 8f          	cmp    %rdx,(%rdi,%r9,4)
+  50bed4:	48 0f 47 ce          	cmova  %rsi,%rcx
+  50bed8:	4c 29 c0             	sub    %r8,%rax
+  50bedb:	48 83 f8 01          	cmp    $0x1,%rax
+  50bedf:	77 df                	ja     50bec0 <<gpui::runtime::identity_index::IdentityIndex>::find_entry+0x20>
+  50bee1:	48 8d 04 49          	lea    (%rcx,%rcx,2),%rax
+  50bee5:	48 39 14 87          	cmp    %rdx,(%rdi,%rax,4)
+  50bee9:	75 0d                	jne    50bef8 <<gpui::runtime::identity_index::IdentityIndex>::find_entry+0x58>
+  50beeb:	48 8d 3c 87          	lea    (%rdi,%rax,4),%rdi
+  50beef:	8b 57 08             	mov    0x8(%rdi),%edx
+  50bef2:	b8 01 00 00 00       	mov    $0x1,%eax
+  50bef7:	c3                   	ret
+  50bef8:	31 c0                	xor    %eax,%eax
+  50befa:	c3                   	ret

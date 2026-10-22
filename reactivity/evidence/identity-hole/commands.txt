@@ -1,0 +1,35 @@
+# /root/gpui-identity-hole-hot, normal loader/toolchain environment:
+source /tmp/gpui-native-env.sh
+
+# Representation source2eae, cwd /root/gpui-identity-hole:
+CARGO_TARGET_DIR=/tmp/gpui-literal-dispatch-target cargo test --manifest-path reactivity/Cargo.toml -p gpui --lib --tests
+CARGO_TARGET_DIR=/tmp/gpui-literal-dispatch-target cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --all-targets -- -D warnings
+CARGO_TARGET_DIR=/tmp/gpui-idnorm-hole-target cargo test --release --manifest-path reactivity/Cargo.toml -p gpui --lib runtime::identity_index
+CARGO_TARGET_DIR=/tmp/gpui-literal-native-target cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --lib --features x11 -- -D warnings
+
+# Final boundary source db04, cwd /root/gpui-identity-hole-hot:
+# All-target Clippy ran before installing untracked benchmark example.
+CARGO_TARGET_DIR=/tmp/gpui-literal-dispatch-target cargo test --manifest-path reactivity/Cargo.toml -p gpui --lib runtime::identity_index
+CARGO_TARGET_DIR=/tmp/gpui-literal-dispatch-target cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --all-targets -- -D warnings
+CARGO_TARGET_DIR=/tmp/gpui-literal-native-target cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --lib --features x11 -- -D warnings
+CARGO_TARGET_DIR=/tmp/gpui-idnorm-hole-hot-target cargo test --release --manifest-path reactivity/Cargo.toml -p gpui --lib runtime::identity_index
+
+# New opt3 producer/caller; prior4 normalized source/rlib/executables reused by exacthash:
+CARGO_TARGET_DIR=/tmp/gpui-idnorm-hole-hot-target IDENTITY_INDEX_VARIANT=hole IDENTITY_INDEX_SOURCE=db04a211c5ba7a1d13647c2a62a03ec350adb5a9 cargo build --release --manifest-path reactivity/Cargo.toml -p gpui --example identity_inline_control --message-format=json -j2
+/tmp/gpui-idnorm-hole-hot-target/release/examples/identity_inline_control guard-large
+
+# Actual linked code:
+/nix/store/31gnwsgag5qa14hfblqi5hyn71pyx7py-binutils-2.46/bin/nm -S -C /tmp/gpui-idnorm-hole-hot-target/release/examples/identity_inline_control
+/nix/store/31gnwsgag5qa14hfblqi5hyn71pyx7py-binutils-2.46/bin/objdump -d -C --start-address=<symbol address> --stop-address=<address+size> /tmp/gpui-idnorm-hole-hot-target/release/examples/identity_inline_control
+
+# Layout/emitted-code only, exact production module include, no OS execution:
+rustc --edition=2024 --crate-type lib -C opt-level=3 --emit=asm /tmp/gpui-identity-hole-codegen/lib.rs -o /tmp/gpui-identity-hole-codegen/linux.s
+rustc --edition=2024 --crate-type lib -C opt-level=3 --emit=asm --target aarch64-apple-darwin --extern std=/tmp/gpui-accesskit-apple-target/aarch64-apple-darwin/debug/deps/libstd-4381a0d3d19def53.rlib -L dependency=/tmp/gpui-accesskit-apple-target/aarch64-apple-darwin/debug/deps /tmp/gpui-identity-hole-codegen/lib.rs -o /tmp/gpui-identity-hole-codegen/apple.s
+rustc --edition=2024 --crate-type lib -C opt-level=3 --emit=asm --target x86_64-pc-windows-msvc --extern std=/tmp/gpui-accesskit-windows-msvc-target/x86_64-pc-windows-msvc/debug/deps/libstd-69696b971a742356.rlib -L dependency=/tmp/gpui-accesskit-windows-msvc-target/x86_64-pc-windows-msvc/debug/deps /tmp/gpui-identity-hole-codegen/lib.rs -o /tmp/gpui-identity-hole-codegen/windows.s
+# Only trailing whitespace is normalized in archived assembly display files.
+
+python3 reactivity/evidence/identity-hole/run.py freeze
+python3 reactivity/evidence/identity-hole/run.py guard
+# Requires explicit root-coordinated START:
+IDENTITY_INDEX_QUIET=approved python3 reactivity/evidence/identity-hole/run.py capture --output reactivity/evidence/identity-hole/capture
+python3 reactivity/evidence/identity-hole/summarize.py

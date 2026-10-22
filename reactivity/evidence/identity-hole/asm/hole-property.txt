@@ -1,0 +1,132 @@
+
+/tmp/gpui-idnorm-hole-hot-target/release/examples/identity_inline_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004cec50 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>>:
+  4cec50:	41 57                	push   %r15
+  4cec52:	41 56                	push   %r14
+  4cec54:	53                   	push   %rbx
+  4cec55:	48 83 ec 40          	sub    $0x40,%rsp
+  4cec59:	48 8b 1e             	mov    (%rsi),%rbx
+  4cec5c:	48 85 db             	test   %rbx,%rbx
+  4cec5f:	74 15                	je     4cec76 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x26>
+  4cec61:	80 bb 1e 09 00 00 00 	cmpb   $0x0,0x91e(%rbx)
+  4cec68:	74 18                	je     4cec82 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x32>
+  4cec6a:	48 c7 07 0e 00 00 00 	movq   $0xe,(%rdi)
+  4cec71:	e9 a8 01 00 00       	jmp    4cee1e <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1ce>
+  4cec76:	48 c7 07 0d 00 00 00 	movq   $0xd,(%rdi)
+  4cec7d:	e9 9c 01 00 00       	jmp    4cee1e <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1ce>
+  4cec82:	4d 89 c7             	mov    %r8,%r15
+  4cec85:	49 89 fe             	mov    %rdi,%r14
+  4cec88:	48 8d 7c 24 08       	lea    0x8(%rsp),%rdi
+  4cec8d:	48 89 de             	mov    %rbx,%rsi
+  4cec90:	e8 ab 48 01 00       	call   4e3540 <<gpui::runtime::Runtime<identity_inline_control::Page>>::resolve>
+  4cec95:	48 8b 44 24 08       	mov    0x8(%rsp),%rax
+  4cec9a:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  4cec9f:	48 83 f8 fe          	cmp    $0xfffffffffffffffe,%rax
+  4ceca3:	75 38                	jne    4cecdd <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x8d>
+  4ceca5:	48 8b 83 10 02 00 00 	mov    0x210(%rbx),%rax
+  4cecac:	48 8d 0d 4d 7e b7 ff 	lea    -0x4881b3(%rip),%rcx        # 46b00 <anon.8fd225dda15fed816329c26c766449bb.33.llvm.12884013093526139475+0x70>
+  4cecb3:	48 63 04 81          	movslq (%rcx,%rax,4),%rax
+  4cecb7:	48 01 c8             	add    %rcx,%rax
+  4cecba:	ff e0                	jmp    *%rax
+  4cecbc:	48 2b 93 18 02 00 00 	sub    0x218(%rbx),%rdx
+  4cecc3:	0f 82 62 01 00 00    	jb     4cee2b <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1db>
+  4cecc9:	4c 89 f9             	mov    %r15,%rcx
+  4ceccc:	31 c0                	xor    %eax,%eax
+  4cecce:	48 3b 93 20 02 00 00 	cmp    0x220(%rbx),%rdx
+  4cecd5:	0f 92 c0             	setb   %al
+  4cecd8:	e9 af 00 00 00       	jmp    4ced8c <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x13c>
+  4cecdd:	48 8b 4c 24 38       	mov    0x38(%rsp),%rcx
+  4cece2:	4c 89 f7             	mov    %r14,%rdi
+  4cece5:	49 89 4e 30          	mov    %rcx,0x30(%r14)
+  4cece9:	0f 10 44 24 18       	movups 0x18(%rsp),%xmm0
+  4cecee:	0f 10 4c 24 28       	movups 0x28(%rsp),%xmm1
+  4cecf3:	41 0f 11 4e 20       	movups %xmm1,0x20(%r14)
+  4cecf8:	41 0f 11 46 10       	movups %xmm0,0x10(%r14)
+  4cecfd:	49 89 06             	mov    %rax,(%r14)
+  4ced00:	49 89 56 08          	mov    %rdx,0x8(%r14)
+  4ced04:	e9 15 01 00 00       	jmp    4cee1e <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1ce>
+  4ced09:	48 8b bb 18 02 00 00 	mov    0x218(%rbx),%rdi
+  4ced10:	48 8b b3 20 02 00 00 	mov    0x220(%rbx),%rsi
+  4ced17:	ff 15 bb 53 30 00    	call   *0x3053bb(%rip)        # 7d40d8 <_DYNAMIC+0x2c0>
+  4ced1d:	4c 89 f9             	mov    %r15,%rcx
+  4ced20:	eb 6a                	jmp    4ced8c <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x13c>
+  4ced22:	48 8b bb 18 02 00 00 	mov    0x218(%rbx),%rdi
+  4ced29:	48 8b b3 20 02 00 00 	mov    0x220(%rbx),%rsi
+  4ced30:	ff 15 aa 53 30 00    	call   *0x3053aa(%rip)        # 7d40e0 <_DYNAMIC+0x2c8>
+  4ced36:	4c 89 f9             	mov    %r15,%rcx
+  4ced39:	eb 51                	jmp    4ced8c <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x13c>
+  4ced3b:	48 2b 93 18 02 00 00 	sub    0x218(%rbx),%rdx
+  4ced42:	0f 82 e3 00 00 00    	jb     4cee2b <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1db>
+  4ced48:	4c 89 f9             	mov    %r15,%rcx
+  4ced4b:	48 8b 83 20 02 00 00 	mov    0x220(%rbx),%rax
+  4ced52:	48 89 c6             	mov    %rax,%rsi
+  4ced55:	48 c1 ee 11          	shr    $0x11,%rsi
+  4ced59:	81 e6 ff ff 01 00    	and    $0x1ffff,%esi
+  4ced5f:	48 39 f2             	cmp    %rsi,%rdx
+  4ced62:	72 32                	jb     4ced96 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x146>
+  4ced64:	48 89 c7             	mov    %rax,%rdi
+  4ced67:	48 c1 ef 22          	shr    $0x22,%rdi
+  4ced6b:	48 29 fa             	sub    %rdi,%rdx
+  4ced6e:	0f 82 b7 00 00 00    	jb     4cee2b <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1db>
+  4ced74:	48 39 f2             	cmp    %rsi,%rdx
+  4ced77:	40 0f 93 c6          	setae  %sil
+  4ced7b:	25 ff ff 01 00       	and    $0x1ffff,%eax
+  4ced80:	48 39 c2             	cmp    %rax,%rdx
+  4ced83:	0f 92 c0             	setb   %al
+  4ced86:	40 20 f0             	and    %sil,%al
+  4ced89:	0f b6 c0             	movzbl %al,%eax
+  4ced8c:	48 83 f8 01          	cmp    $0x1,%rax
+  4ced90:	0f 85 95 00 00 00    	jne    4cee2b <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1db>
+  4ced96:	48 8b 83 e8 01 00 00 	mov    0x1e8(%rbx),%rax
+  4ced9d:	48 85 c0             	test   %rax,%rax
+  4ceda0:	74 44                	je     4cede6 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x196>
+  4ceda2:	83 f8 02             	cmp    $0x2,%eax
+  4ceda5:	75 48                	jne    4cedef <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x19f>
+  4ceda7:	48 8b b3 08 02 00 00 	mov    0x208(%rbx),%rsi
+  4cedae:	48 39 f2             	cmp    %rsi,%rdx
+  4cedb1:	0f 83 8d 00 00 00    	jae    4cee44 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1f4>
+  4cedb7:	48 8b b3 f8 01 00 00 	mov    0x1f8(%rbx),%rsi
+  4cedbe:	48 8b 83 00 02 00 00 	mov    0x200(%rbx),%rax
+  4cedc5:	0f b6 14 10          	movzbl (%rax,%rdx,1),%edx
+  4cedc9:	b8 f0 01 00 00       	mov    $0x1f0,%eax
+  4cedce:	48 39 d6             	cmp    %rdx,%rsi
+  4cedd1:	77 2d                	ja     4cee00 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1b0>
+  4cedd3:	48 8d 05 46 34 2e 00 	lea    0x2e3446(%rip),%rax        # 7b2220 <anon.8fd225dda15fed816329c26c766449bb.10.llvm.12884013093526139475+0x508>
+  4cedda:	48 89 d7             	mov    %rdx,%rdi
+  4ceddd:	48 89 c2             	mov    %rax,%rdx
+  4cede0:	ff 15 02 53 30 00    	call   *0x305302(%rip)        # 7d40e8 <_DYNAMIC+0x2d0>
+  4cede6:	48 8d 3d 2b 97 b7 ff 	lea    -0x4868d5(%rip),%rdi        # 48518 <anon.f80460bc845ea345a3da101b2105e88a.9.llvm.9836169448118313327+0x818>
+  4ceded:	eb 19                	jmp    4cee08 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x1b8>
+  4cedef:	48 8b b3 00 02 00 00 	mov    0x200(%rbx),%rsi
+  4cedf6:	b8 f8 01 00 00       	mov    $0x1f8,%eax
+  4cedfb:	48 39 f2             	cmp    %rsi,%rdx
+  4cedfe:	73 57                	jae    4cee57 <<gpui::runtime::Win<identity_inline_control::Page>>::style_property::<core::option::Option<f32>>+0x207>
+  4cee00:	48 6b fa 58          	imul   $0x58,%rdx,%rdi
+  4cee04:	48 03 3c 03          	add    (%rbx,%rax,1),%rdi
+  4cee08:	ff 11                	call   *(%rcx)
+  4cee0a:	4c 89 f7             	mov    %r14,%rdi
+  4cee0d:	41 89 46 08          	mov    %eax,0x8(%r14)
+  4cee11:	f3 41 0f 11 46 0c    	movss  %xmm0,0xc(%r14)
+  4cee17:	49 c7 06 fe ff ff ff 	movq   $0xfffffffffffffffe,(%r14)
+  4cee1e:	48 89 f8             	mov    %rdi,%rax
+  4cee21:	48 83 c4 40          	add    $0x40,%rsp
+  4cee25:	5b                   	pop    %rbx
+  4cee26:	41 5e                	pop    %r14
+  4cee28:	41 5f                	pop    %r15
+  4cee2a:	c3                   	ret
+  4cee2b:	48 8d 3d 02 96 b7 ff 	lea    -0x4869fe(%rip),%rdi        # 48434 <anon.f80460bc845ea345a3da101b2105e88a.9.llvm.9836169448118313327+0x734>
+  4cee32:	48 8d 15 47 30 2e 00 	lea    0x2e3047(%rip),%rdx        # 7b1e80 <anon.8fd225dda15fed816329c26c766449bb.10.llvm.12884013093526139475+0x168>
+  4cee39:	be 15 00 00 00       	mov    $0x15,%esi
+  4cee3e:	ff 15 ac 52 30 00    	call   *0x3052ac(%rip)        # 7d40f0 <_DYNAMIC+0x2d8>
+  4cee44:	48 8d 05 bd 33 2e 00 	lea    0x2e33bd(%rip),%rax        # 7b2208 <anon.8fd225dda15fed816329c26c766449bb.10.llvm.12884013093526139475+0x4f0>
+  4cee4b:	48 89 d7             	mov    %rdx,%rdi
+  4cee4e:	48 89 c2             	mov    %rax,%rdx
+  4cee51:	ff 15 91 52 30 00    	call   *0x305291(%rip)        # 7d40e8 <_DYNAMIC+0x2d0>
+  4cee57:	48 8d 05 92 33 2e 00 	lea    0x2e3392(%rip),%rax        # 7b21f0 <anon.8fd225dda15fed816329c26c766449bb.10.llvm.12884013093526139475+0x4d8>
+  4cee5e:	48 89 d7             	mov    %rdx,%rdi
+  4cee61:	48 89 c2             	mov    %rax,%rdx
+  4cee64:	ff 15 7e 52 30 00    	call   *0x30527e(%rip)        # 7d40e8 <_DYNAMIC+0x2d0>
