@@ -1,0 +1,148 @@
+
+/tmp/gpui-identity-index-release-target/release/examples/identity_index_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004f8770 <identity_index_control::read_properties>:
+  4f8770:	55                   	push   %rbp
+  4f8771:	41 57                	push   %r15
+  4f8773:	41 56                	push   %r14
+  4f8775:	41 55                	push   %r13
+  4f8777:	41 54                	push   %r12
+  4f8779:	53                   	push   %rbx
+  4f877a:	48 81 ec 88 00 00 00 	sub    $0x88,%rsp
+  4f8781:	4c 89 44 24 08       	mov    %r8,0x8(%rsp)
+  4f8786:	4d 85 c0             	test   %r8,%r8
+  4f8789:	0f 84 c2 00 00 00    	je     4f8851 <identity_index_control::read_properties+0xe1>
+  4f878f:	48 89 d3             	mov    %rdx,%rbx
+  4f8792:	48 85 d2             	test   %rdx,%rdx
+  4f8795:	0f 84 b6 00 00 00    	je     4f8851 <identity_index_control::read_properties+0xe1>
+  4f879b:	49 89 f7             	mov    %rsi,%r15
+  4f879e:	49 89 fc             	mov    %rdi,%r12
+  4f87a1:	84 c9                	test   %cl,%cl
+  4f87a3:	0f 84 c0 00 00 00    	je     4f8869 <identity_index_control::read_properties+0xf9>
+  4f87a9:	45 31 ed             	xor    %r13d,%r13d
+  4f87ac:	31 ed                	xor    %ebp,%ebp
+  4f87ae:	66 90                	xchg   %ax,%ax
+  4f87b0:	48 8d 45 01          	lea    0x1(%rbp),%rax
+  4f87b4:	48 89 04 24          	mov    %rax,(%rsp)
+  4f87b8:	49 89 de             	mov    %rbx,%r14
+  4f87bb:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  4f87c0:	48 89 e8             	mov    %rbp,%rax
+  4f87c3:	48 09 d8             	or     %rbx,%rax
+  4f87c6:	48 c1 e8 20          	shr    $0x20,%rax
+  4f87ca:	74 14                	je     4f87e0 <identity_index_control::read_properties+0x70>
+  4f87cc:	48 89 e8             	mov    %rbp,%rax
+  4f87cf:	31 d2                	xor    %edx,%edx
+  4f87d1:	48 f7 f3             	div    %rbx
+  4f87d4:	eb 10                	jmp    4f87e6 <identity_index_control::read_properties+0x76>
+  4f87d6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  4f87dd:	00 00 00
+  4f87e0:	89 e8                	mov    %ebp,%eax
+  4f87e2:	31 d2                	xor    %edx,%edx
+  4f87e4:	f7 f3                	div    %ebx
+  4f87e6:	48 c1 e2 04          	shl    $0x4,%rdx
+  4f87ea:	41 0f 10 04 17       	movups (%r15,%rdx,1),%xmm0
+  4f87ef:	0f 29 44 24 10       	movaps %xmm0,0x10(%rsp)
+  4f87f4:	48 8d 44 24 10       	lea    0x10(%rsp),%rax
+  4f87f9:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  4f87fe:	48 8b 4c 24 18       	mov    0x18(%rsp),%rcx
+  4f8803:	48 8d 7c 24 50       	lea    0x50(%rsp),%rdi
+  4f8808:	4c 89 e6             	mov    %r12,%rsi
+  4f880b:	4c 8b 05 6e 94 2d 00 	mov    0x2d946e(%rip),%r8        # 7d1c80 <_DYNAMIC+0x638>
+  4f8812:	e8 99 5e fd ff       	call   4ce6b0 <<gpui::runtime::Win<identity_index_control::Page>>::style_property::<core::option::Option<f32>>>
+  4f8817:	83 7c 24 50 fe       	cmpl   $0xfffffffe,0x50(%rsp)
+  4f881c:	0f 85 c7 00 00 00    	jne    4f88e9 <identity_index_control::read_properties+0x179>
+  4f8822:	80 7c 24 58 00       	cmpb   $0x0,0x58(%rsp)
+  4f8827:	0f 84 18 01 00 00    	je     4f8945 <identity_index_control::read_properties+0x1d5>
+  4f882d:	8b 44 24 5c          	mov    0x5c(%rsp),%eax
+  4f8831:	49 01 c5             	add    %rax,%r13
+  4f8834:	48 81 c5 c1 00 00 00 	add    $0xc1,%rbp
+  4f883b:	49 ff ce             	dec    %r14
+  4f883e:	75 80                	jne    4f87c0 <identity_index_control::read_properties+0x50>
+  4f8840:	48 8b 2c 24          	mov    (%rsp),%rbp
+  4f8844:	48 3b 6c 24 08       	cmp    0x8(%rsp),%rbp
+  4f8849:	0f 85 61 ff ff ff    	jne    4f87b0 <identity_index_control::read_properties+0x40>
+  4f884f:	eb 03                	jmp    4f8854 <identity_index_control::read_properties+0xe4>
+  4f8851:	45 31 ed             	xor    %r13d,%r13d
+  4f8854:	4c 89 e8             	mov    %r13,%rax
+  4f8857:	48 81 c4 88 00 00 00 	add    $0x88,%rsp
+  4f885e:	5b                   	pop    %rbx
+  4f885f:	41 5c                	pop    %r12
+  4f8861:	41 5d                	pop    %r13
+  4f8863:	41 5e                	pop    %r14
+  4f8865:	41 5f                	pop    %r15
+  4f8867:	5d                   	pop    %rbp
+  4f8868:	c3                   	ret
+  4f8869:	48 c1 e3 04          	shl    $0x4,%rbx
+  4f886d:	45 31 ed             	xor    %r13d,%r13d
+  4f8870:	48 8d 6c 24 50       	lea    0x50(%rsp),%rbp
+  4f8875:	31 c0                	xor    %eax,%eax
+  4f8877:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  4f887e:	00 00
+  4f8880:	48 ff c0             	inc    %rax
+  4f8883:	48 89 04 24          	mov    %rax,(%rsp)
+  4f8887:	45 31 f6             	xor    %r14d,%r14d
+  4f888a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  4f8890:	43 0f 10 04 37       	movups (%r15,%r14,1),%xmm0
+  4f8895:	0f 29 44 24 10       	movaps %xmm0,0x10(%rsp)
+  4f889a:	48 8d 44 24 10       	lea    0x10(%rsp),%rax
+  4f889f:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  4f88a4:	48 8b 4c 24 18       	mov    0x18(%rsp),%rcx
+  4f88a9:	48 89 ef             	mov    %rbp,%rdi
+  4f88ac:	4c 89 e6             	mov    %r12,%rsi
+  4f88af:	4c 8b 05 ca 93 2d 00 	mov    0x2d93ca(%rip),%r8        # 7d1c80 <_DYNAMIC+0x638>
+  4f88b6:	e8 f5 5d fd ff       	call   4ce6b0 <<gpui::runtime::Win<identity_index_control::Page>>::style_property::<core::option::Option<f32>>>
+  4f88bb:	83 7c 24 50 fe       	cmpl   $0xfffffffe,0x50(%rsp)
+  4f88c0:	75 27                	jne    4f88e9 <identity_index_control::read_properties+0x179>
+  4f88c2:	80 7c 24 58 00       	cmpb   $0x0,0x58(%rsp)
+  4f88c7:	74 7c                	je     4f8945 <identity_index_control::read_properties+0x1d5>
+  4f88c9:	8b 44 24 5c          	mov    0x5c(%rsp),%eax
+  4f88cd:	49 01 c5             	add    %rax,%r13
+  4f88d0:	49 83 c6 10          	add    $0x10,%r14
+  4f88d4:	4c 39 f3             	cmp    %r14,%rbx
+  4f88d7:	75 b7                	jne    4f8890 <identity_index_control::read_properties+0x120>
+  4f88d9:	48 8b 04 24          	mov    (%rsp),%rax
+  4f88dd:	48 3b 44 24 08       	cmp    0x8(%rsp),%rax
+  4f88e2:	75 9c                	jne    4f8880 <identity_index_control::read_properties+0x110>
+  4f88e4:	e9 6b ff ff ff       	jmp    4f8854 <identity_index_control::read_properties+0xe4>
+  4f88e9:	48 8d 5c 24 18       	lea    0x18(%rsp),%rbx
+  4f88ee:	4c 8d 74 24 28       	lea    0x28(%rsp),%r14
+  4f88f3:	48 8b 84 24 80 00 00 	mov    0x80(%rsp),%rax
+  4f88fa:	00
+  4f88fb:	48 89 44 24 40       	mov    %rax,0x40(%rsp)
+  4f8900:	0f 10 44 24 50       	movups 0x50(%rsp),%xmm0
+  4f8905:	0f 10 4c 24 60       	movups 0x60(%rsp),%xmm1
+  4f890a:	0f 10 54 24 70       	movups 0x70(%rsp),%xmm2
+  4f890f:	0f 29 54 24 30       	movaps %xmm2,0x30(%rsp)
+  4f8914:	0f 29 4c 24 20       	movaps %xmm1,0x20(%rsp)
+  4f8919:	0f 29 44 24 10       	movaps %xmm0,0x10(%rsp)
+  4f891e:	48 8d 3d 54 05 b5 ff 	lea    -0x4afaac(%rip),%rdi        # 48e79 <anon.4a8959dad78390afcc8c5245d01facda.45.llvm.15754628351383591164>
+  4f8925:	48 8d 0d 0c 7b 2b 00 	lea    0x2b7b0c(%rip),%rcx        # 7b0438 <anon.4a8959dad78390afcc8c5245d01facda.44.llvm.15754628351383591164>
+  4f892c:	4c 8d 05 15 79 2b 00 	lea    0x2b7915(%rip),%r8        # 7b0248 <anon.4a8959dad78390afcc8c5245d01facda.3.llvm.15754628351383591164+0x18>
+  4f8933:	48 8d 54 24 10       	lea    0x10(%rsp),%rdx
+  4f8938:	be 2b 00 00 00       	mov    $0x2b,%esi
+  4f893d:	ff 15 65 90 2d 00    	call   *0x2d9065(%rip)        # 7d19a8 <_DYNAMIC+0x360>
+  4f8943:	0f 0b                	ud2
+  4f8945:	48 8d 3d 14 79 2b 00 	lea    0x2b7914(%rip),%rdi        # 7b0260 <anon.4a8959dad78390afcc8c5245d01facda.3.llvm.15754628351383591164+0x30>
+  4f894c:	ff 15 7e 8f 2d 00    	call   *0x2d8f7e(%rip)        # 7d18d0 <_DYNAMIC+0x288>
+  4f8952:	48 8b 54 24 10       	mov    0x10(%rsp),%rdx
+  4f8957:	48 83 ea 0d          	sub    $0xd,%rdx
+  4f895b:	b9 13 00 00 00       	mov    $0x13,%ecx
+  4f8960:	48 0f 4d ca          	cmovge %rdx,%rcx
+  4f8964:	48 83 f9 18          	cmp    $0x18,%rcx
+  4f8968:	74 09                	je     4f8973 <identity_index_control::read_properties+0x203>
+  4f896a:	4c 89 f3             	mov    %r14,%rbx
+  4f896d:	48 83 f9 13          	cmp    $0x13,%rcx
+  4f8971:	75 1d                	jne    4f8990 <identity_index_control::read_properties+0x220>
+  4f8973:	48 8b 33             	mov    (%rbx),%rsi
+  4f8976:	48 85 f6             	test   %rsi,%rsi
+  4f8979:	74 15                	je     4f8990 <identity_index_control::read_properties+0x220>
+  4f897b:	48 8b 7b 08          	mov    0x8(%rbx),%rdi
+  4f897f:	ba 01 00 00 00       	mov    $0x1,%edx
+  4f8984:	48 89 c3             	mov    %rax,%rbx
+  4f8987:	ff 15 03 8f 2d 00    	call   *0x2d8f03(%rip)        # 7d1890 <_DYNAMIC+0x248>
+  4f898d:	48 89 d8             	mov    %rbx,%rax
+  4f8990:	48 89 c7             	mov    %rax,%rdi
+  4f8993:	e8 f8 58 2b 00       	call   7ae290 <_Unwind_Resume@plt>

@@ -1,0 +1,80 @@
+[
+  {
+    "kind": "owner",
+    "round": 1,
+    "variant": "baseline",
+    "wall_seconds": 1.1164934420376085
+  },
+  {
+    "kind": "owner",
+    "round": 1,
+    "variant": "packed",
+    "wall_seconds": 0.6157196650165133
+  },
+  {
+    "kind": "owner",
+    "round": 1,
+    "variant": "runs",
+    "wall_seconds": 0.46670182002708316
+  },
+  {
+    "kind": "owner",
+    "round": 2,
+    "variant": "packed",
+    "wall_seconds": 0.5654510079766624
+  },
+  {
+    "kind": "owner",
+    "round": 2,
+    "variant": "runs",
+    "wall_seconds": 0.46543312299763784
+  },
+  {
+    "kind": "owner",
+    "round": 2,
+    "variant": "baseline",
+    "wall_seconds": 1.066647864994593
+  },
+  {
+    "kind": "owner",
+    "round": 3,
+    "variant": "runs",
+    "wall_seconds": 0.4655349350068718
+  },
+  {
+    "kind": "owner",
+    "round": 3,
+    "variant": "baseline",
+    "wall_seconds": 1.0675589049933478
+  },
+  {
+    "kind": "owner",
+    "round": 3,
+    "variant": "packed",
+    "wall_seconds": 0.6163808300043456
+  },
+  {
+    "kind": "tables",
+    "round": 1,
+    "variant": "tables",
+    "wall_seconds": 0.7658081440022215
+  },
+  {
+    "kind": "tables",
+    "round": 2,
+    "variant": "tables",
+    "wall_seconds": 0.7657603329862468
+  },
+  {
+    "kind": "tables",
+    "round": 3,
+    "variant": "tables",
+    "wall_seconds": 0.7655199979781173
+  },
+  {
+    "kind": "tables",
+    "round": 4,
+    "variant": "tables",
+    "wall_seconds": 0.7656348510063253
+  }
+]

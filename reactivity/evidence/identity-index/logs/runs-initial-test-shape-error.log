@@ -1,0 +1,41 @@
+   Compiling cephal v0.1.1 (/root/gpui-identity-runs/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-identity-runs/reactivity/crates/state)
+   Compiling parley v0.11.1 (/root/gpui-identity-runs/reactivity/vendor/parley)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-identity-runs/reactivity/crates/core)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-identity-runs/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/root/gpui-identity-runs/reactivity/crates/gpui)
+error[E0277]: the trait bound `std::iter::Chain<std::ops::Range<u64>, std::ops::Range<u64>>: ExactSizeIterator` is not satisfied
+   --> crates/gpui/src/runtime/identity_index.rs:318:33
+    |
+318 |         IdentityIndex::from_ids((1..20).chain(10..30));
+    |         ----------------------- ^^^^^^^^^^^^^^^^^^^^^ the trait `ExactSizeIterator` is not implemented for `std::iter::Chain<std::ops::Range<u64>, std::ops::Range<u64>>`
+    |         |
+    |         required by a bound introduced by this call
+    |
+    = help: the following other types implement trait `ExactSizeIterator`:
+              &mut I
+              Args
+              ArgsOs
+              ArrayChunks<I, N>
+              ArrayWindows<'_, T, N>
+              Box<I, A>
+              Chunks<'_, T>
+              ChunksExact<'_, T>
+            and 170 others
+note: required by a bound in `identity_index::IdentityIndex::from_ids`
+   --> crates/gpui/src/runtime/identity_index.rs:38:38
+    |
+ 38 |     pub(super) fn from_ids(ids: impl ExactSizeIterator<Item = u64> + Clone) -> Self {
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `IdentityIndex::from_ids`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `gpui` (lib test) due to 1 previous error

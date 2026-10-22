@@ -1,0 +1,157 @@
+
+/tmp/gpui-identity-index-release-target/release/examples/identity_index_control:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000505fa0 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>>:
+  505fa0:	55                   	push   %rbp
+  505fa1:	41 57                	push   %r15
+  505fa3:	41 56                	push   %r14
+  505fa5:	41 55                	push   %r13
+  505fa7:	41 54                	push   %r12
+  505fa9:	53                   	push   %rbx
+  505faa:	48 83 ec 18          	sub    $0x18,%rsp
+  505fae:	48 89 d1             	mov    %rdx,%rcx
+  505fb1:	49 89 d4             	mov    %rdx,%r12
+  505fb4:	49 29 f4             	sub    %rsi,%r12
+  505fb7:	48 ba cd cc cc cc cc 	movabs $0xcccccccccccccccd,%rdx
+  505fbe:	cc cc cc
+  505fc1:	4c 89 e0             	mov    %r12,%rax
+  505fc4:	48 f7 e2             	mul    %rdx
+  505fc7:	49 81 fc 28 09 3d 00 	cmp    $0x3d0928,%r12
+  505fce:	0f 83 6e 01 00 00    	jae    506142 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x1a2>
+  505fd4:	48 89 fb             	mov    %rdi,%rbx
+  505fd7:	48 39 ce             	cmp    %rcx,%rsi
+  505fda:	74 75                	je     506051 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0xb1>
+  505fdc:	48 c1 ea 05          	shr    $0x5,%rdx
+  505fe0:	48 8b 06             	mov    (%rsi),%rax
+  505fe3:	31 ff                	xor    %edi,%edi
+  505fe5:	49 89 f0             	mov    %rsi,%r8
+  505fe8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  505fef:	00
+  505ff0:	49 39 c8             	cmp    %rcx,%r8
+  505ff3:	74 6f                	je     506064 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0xc4>
+  505ff5:	4d 8b 08             	mov    (%r8),%r9
+  505ff8:	49 29 c1             	sub    %rax,%r9
+  505ffb:	72 0d                	jb     50600a <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x6a>
+  505ffd:	49 83 c0 28          	add    $0x28,%r8
+  506001:	4c 39 cf             	cmp    %r9,%rdi
+  506004:	48 8d 7f 01          	lea    0x1(%rdi),%rdi
+  506008:	74 e6                	je     505ff0 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x50>
+  50600a:	48 89 f5             	mov    %rsi,%rbp
+  50600d:	49 89 d5             	mov    %rdx,%r13
+  506010:	48 8d 04 95 00 00 00 	lea    0x0(,%rdx,4),%rax
+  506017:	00
+  506018:	4c 8d 34 40          	lea    (%rax,%rax,2),%r14
+  50601c:	ff 15 86 b8 2c 00    	call   *0x2cb886(%rip)        # 7d18a8 <_DYNAMIC+0x260>
+  506022:	be 04 00 00 00       	mov    $0x4,%esi
+  506027:	4c 89 f7             	mov    %r14,%rdi
+  50602a:	ff 15 58 b8 2c 00    	call   *0x2cb858(%rip)        # 7d1888 <_DYNAMIC+0x240>
+  506030:	48 85 c0             	test   %rax,%rax
+  506033:	0f 84 48 01 00 00    	je     506181 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x1e1>
+  506039:	49 89 c7             	mov    %rax,%r15
+  50603c:	49 8d 44 24 d8       	lea    -0x28(%r12),%rax
+  506041:	48 83 f8 28          	cmp    $0x28,%rax
+  506045:	48 89 e9             	mov    %rbp,%rcx
+  506048:	73 2e                	jae    506078 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0xd8>
+  50604a:	31 d2                	xor    %edx,%edx
+  50604c:	4c 89 e8             	mov    %r13,%rax
+  50604f:	eb 6d                	jmp    5060be <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x11e>
+  506051:	0f 57 c0             	xorps  %xmm0,%xmm0
+  506054:	0f 11 03             	movups %xmm0,(%rbx)
+  506057:	48 c7 43 10 00 00 00 	movq   $0x0,0x10(%rbx)
+  50605e:	00
+  50605f:	e9 cc 00 00 00       	jmp    506130 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x190>
+  506064:	48 89 43 08          	mov    %rax,0x8(%rbx)
+  506068:	48 89 53 10          	mov    %rdx,0x10(%rbx)
+  50606c:	48 c7 03 00 00 00 00 	movq   $0x0,(%rbx)
+  506073:	e9 b8 00 00 00       	jmp    506130 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x190>
+  506078:	4c 89 e8             	mov    %r13,%rax
+  50607b:	89 c6                	mov    %eax,%esi
+  50607d:	81 e6 fe ff 01 00    	and    $0x1fffe,%esi
+  506083:	4c 89 ff             	mov    %r15,%rdi
+  506086:	48 83 c7 14          	add    $0x14,%rdi
+  50608a:	31 d2                	xor    %edx,%edx
+  50608c:	49 89 c8             	mov    %rcx,%r8
+  50608f:	90                   	nop
+  506090:	4d 8b 08             	mov    (%r8),%r9
+  506093:	4c 89 4f ec          	mov    %r9,-0x14(%rdi)
+  506097:	89 57 f4             	mov    %edx,-0xc(%rdi)
+  50609a:	4d 8b 48 28          	mov    0x28(%r8),%r9
+  50609e:	4c 89 4f f8          	mov    %r9,-0x8(%rdi)
+  5060a2:	44 8d 4a 01          	lea    0x1(%rdx),%r9d
+  5060a6:	44 89 0f             	mov    %r9d,(%rdi)
+  5060a9:	48 83 c2 02          	add    $0x2,%rdx
+  5060ad:	49 83 c0 50          	add    $0x50,%r8
+  5060b1:	48 83 c7 18          	add    $0x18,%rdi
+  5060b5:	48 39 f2             	cmp    %rsi,%rdx
+  5060b8:	75 d6                	jne    506090 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0xf0>
+  5060ba:	a8 01                	test   $0x1,%al
+  5060bc:	74 15                	je     5060d3 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x133>
+  5060be:	48 8d 34 92          	lea    (%rdx,%rdx,4),%rsi
+  5060c2:	48 8b 0c f1          	mov    (%rcx,%rsi,8),%rcx
+  5060c6:	48 8d 34 52          	lea    (%rdx,%rdx,2),%rsi
+  5060ca:	49 89 0c b7          	mov    %rcx,(%r15,%rsi,4)
+  5060ce:	41 89 54 b7 08       	mov    %edx,0x8(%r15,%rsi,4)
+  5060d3:	48 8d 4c 24 0f       	lea    0xf(%rsp),%rcx
+  5060d8:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+  5060dd:	49 83 fc 50          	cmp    $0x50,%r12
+  5060e1:	73 78                	jae    50615b <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x1bb>
+  5060e3:	48 8d 48 01          	lea    0x1(%rax),%rcx
+  5060e7:	4c 89 fa             	mov    %r15,%rdx
+  5060ea:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  5060f0:	48 ff c9             	dec    %rcx
+  5060f3:	48 83 f9 02          	cmp    $0x2,%rcx
+  5060f7:	72 28                	jb     506121 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x181>
+  5060f9:	48 8b 32             	mov    (%rdx),%rsi
+  5060fc:	48 3b 72 0c          	cmp    0xc(%rdx),%rsi
+  506100:	48 8d 52 0c          	lea    0xc(%rdx),%rdx
+  506104:	75 ea                	jne    5060f0 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x150>
+  506106:	48 8d 3d 16 35 b4 ff 	lea    -0x4bcaea(%rip),%rdi        # 49623 <anon.fa2dfc39c532f35d501bec496967bb49.6.llvm.10732943817151751363>
+  50610d:	48 8d 15 dc aa 2a 00 	lea    0x2aaadc(%rip),%rdx        # 7b0bf0 <anon.fa2dfc39c532f35d501bec496967bb49.7.llvm.10732943817151751363>
+  506114:	be 49 00 00 00       	mov    $0x49,%esi
+  506119:	ff 15 c9 b7 2c 00    	call   *0x2cb7c9(%rip)        # 7d18e8 <_DYNAMIC+0x2a0>
+  50611f:	0f 0b                	ud2
+  506121:	4c 89 7b 08          	mov    %r15,0x8(%rbx)
+  506125:	48 89 43 10          	mov    %rax,0x10(%rbx)
+  506129:	48 c7 03 01 00 00 00 	movq   $0x1,(%rbx)
+  506130:	48 89 d8             	mov    %rbx,%rax
+  506133:	48 83 c4 18          	add    $0x18,%rsp
+  506137:	5b                   	pop    %rbx
+  506138:	41 5c                	pop    %r12
+  50613a:	41 5d                	pop    %r13
+  50613c:	41 5e                	pop    %r14
+  50613e:	41 5f                	pop    %r15
+  506140:	5d                   	pop    %rbp
+  506141:	c3                   	ret
+  506142:	48 8d 3d bb 34 b4 ff 	lea    -0x4bcb45(%rip),%rdi        # 49604 <anon.fa2dfc39c532f35d501bec496967bb49.3.llvm.10732943817151751363>
+  506149:	48 8d 15 88 aa 2a 00 	lea    0x2aaa88(%rip),%rdx        # 7b0bd8 <anon.fa2dfc39c532f35d501bec496967bb49.5.llvm.10732943817151751363>
+  506150:	be 3f 00 00 00       	mov    $0x3f,%esi
+  506155:	ff 15 8d b7 2c 00    	call   *0x2cb78d(%rip)        # 7d18e8 <_DYNAMIC+0x2a0>
+  50615b:	49 81 fc 48 03 00 00 	cmp    $0x348,%r12
+  506162:	73 2b                	jae    50618f <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x1ef>
+  506164:	48 8d 4c 24 10       	lea    0x10(%rsp),%rcx
+  506169:	ba 01 00 00 00       	mov    $0x1,%edx
+  50616e:	4c 89 ff             	mov    %r15,%rdi
+  506171:	4c 89 ee             	mov    %r13,%rsi
+  506174:	e8 b7 7b fe ff       	call   4edd30 <core::slice::sort::shared::smallsort::insertion_sort_shift_left::<gpui::runtime::identity_index::Entry, <[gpui::runtime::identity_index::Entry]>::sort_unstable_by_key<u64, <gpui::runtime::identity_index::IdentityIndex>::from_ids<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>::{closure#2}>::{closure#0}>>
+  506179:	4c 89 e8             	mov    %r13,%rax
+  50617c:	e9 62 ff ff ff       	jmp    5060e3 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x143>
+  506181:	bf 04 00 00 00       	mov    $0x4,%edi
+  506186:	4c 89 f6             	mov    %r14,%rsi
+  506189:	ff 15 f9 b7 2c 00    	call   *0x2cb7f9(%rip)        # 7d1988 <_DYNAMIC+0x340>
+  50618f:	48 8d 54 24 10       	lea    0x10(%rsp),%rdx
+  506194:	4c 89 ff             	mov    %r15,%rdi
+  506197:	4c 89 ee             	mov    %r13,%rsi
+  50619a:	e8 c1 8d ff ff       	call   4fef60 <core::slice::sort::unstable::ipnsort::<gpui::runtime::identity_index::Entry, <[gpui::runtime::identity_index::Entry]>::sort_unstable_by_key<u64, <gpui::runtime::identity_index::IdentityIndex>::from_ids<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>::{closure#2}>::{closure#0}>>
+  50619f:	4c 89 e8             	mov    %r13,%rax
+  5061a2:	e9 3c ff ff ff       	jmp    5060e3 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x143>
+  5061a7:	eb 00                	jmp    5061a9 <<gpui::runtime::identity_index::IdentityIndex>::from_ids::<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui::runtime::Node>, <gpui::runtime::Node>::identity>>+0x209>
+  5061a9:	48 89 c3             	mov    %rax,%rbx
+  5061ac:	ba 04 00 00 00       	mov    $0x4,%edx
+  5061b1:	4c 89 ff             	mov    %r15,%rdi
+  5061b4:	4c 89 f6             	mov    %r14,%rsi
+  5061b7:	ff 15 d3 b6 2c 00    	call   *0x2cb6d3(%rip)        # 7d1890 <_DYNAMIC+0x248>
+  5061bd:	48 89 df             	mov    %rbx,%rdi
+  5061c0:	e8 cb 80 2a 00       	call   7ae290 <_Unwind_Resume@plt>

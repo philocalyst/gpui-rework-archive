@@ -1,0 +1,83 @@
+{
+  "runner": "d3a71289825d739ae2c65f0f8378857b66d8dff32178c110bfbc0acdad78d3af",
+  "sources": {
+    "baseline": {
+      "pin": "59467a4136d92822e90dfcff329383c75f9c3c33",
+      "files": {
+        "reactivity/crates/gpui/src/runtime.rs": "bed03aba2e69560e1068ef0f423faecbb08b0c4dda7d82d7b90706c8b938258d",
+        "reactivity/crates/gpui/src/runtime/input.rs": "e0155d0ef99c7ffdb3c88edf787c73a2c8a64760c0f9e129f6156bd9ec2d2671",
+        "reactivity/crates/gpui/src/runtime/metadata.rs": "a1c345ab3182315d12fe4c51bf2a118ae54c25db095cfb9ce6a901a5804bc8e0",
+        "reactivity/crates/gpui/src/runtime/scroll.rs": "ed525b4a80964246ee0b706a10dca477b07e714962fa44798ec443cb92b41261",
+        "reactivity/crates/gpui/src/runtime/turn.rs": "34560d26a9d2ecf89c894ae7671460b54e48df1d2ec51df669ac3d00fe32640f",
+        "reactivity/Cargo.lock": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a"
+      },
+      "caller": "8c8037330659fcc22bf4304df626e2d4c7a7959d85696c3f011fe00b60ece185"
+    },
+    "packed": {
+      "pin": "8da013d5f81d2687d9fdc7321f91109713e1e6c1",
+      "files": {
+        "reactivity/crates/gpui/src/runtime.rs": "100950705a1b06efa648247e40db92152db069692f55eb92c198626af4ce2160",
+        "reactivity/crates/gpui/src/runtime/input.rs": "63765d3c2b3697476cc53d830487fbf651ef80bbe21f5f0f4b45488214e69615",
+        "reactivity/crates/gpui/src/runtime/metadata.rs": "6de956abbeee513709e9834508c4099c02a0c3b336397f910a699bb15a6d4b77",
+        "reactivity/crates/gpui/src/runtime/scroll.rs": "9d23df2b2a0a64d5e5188579a217c7c3ddf29e6e70a43de52239e439ff1e95fe",
+        "reactivity/crates/gpui/src/runtime/turn.rs": "e227a2c19a60a5bcde14870adb59f31d29a472e4a20c42b7839b28386d1f6ebf",
+        "reactivity/Cargo.lock": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a",
+        "reactivity/crates/gpui/src/runtime/identity_index.rs": "cd37ab0c45bafe0ea2b0ce41c56d27cc705832d6ff7a93851958e6471add8621"
+      },
+      "caller": "8c8037330659fcc22bf4304df626e2d4c7a7959d85696c3f011fe00b60ece185"
+    },
+    "runs": {
+      "pin": "75544537f7596a7e0929306ab27b48f9942b7062",
+      "files": {
+        "reactivity/crates/gpui/src/runtime.rs": "100950705a1b06efa648247e40db92152db069692f55eb92c198626af4ce2160",
+        "reactivity/crates/gpui/src/runtime/input.rs": "63765d3c2b3697476cc53d830487fbf651ef80bbe21f5f0f4b45488214e69615",
+        "reactivity/crates/gpui/src/runtime/metadata.rs": "6de956abbeee513709e9834508c4099c02a0c3b336397f910a699bb15a6d4b77",
+        "reactivity/crates/gpui/src/runtime/scroll.rs": "9d23df2b2a0a64d5e5188579a217c7c3ddf29e6e70a43de52239e439ff1e95fe",
+        "reactivity/crates/gpui/src/runtime/turn.rs": "e227a2c19a60a5bcde14870adb59f31d29a472e4a20c42b7839b28386d1f6ebf",
+        "reactivity/Cargo.lock": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a",
+        "reactivity/crates/gpui/src/runtime/identity_index.rs": "9695eed9ba3c7eea6e0e54fb1be7ec5d7e74465a2231e841d92dbba92084f7ac"
+      },
+      "caller": "8c8037330659fcc22bf4304df626e2d4c7a7959d85696c3f011fe00b60ece185"
+    }
+  },
+  "executables": {
+    "baseline": {
+      "path": "/tmp/gpui-identity-base-release-target/release/examples/identity_index_control",
+      "sha256": "0b253f10de3a11e7d94023f54939d8f485f24f9de19480f3069f025212544e58"
+    },
+    "packed": {
+      "path": "/tmp/gpui-identity-index-release-target/release/examples/identity_index_control",
+      "sha256": "2aa776def471a820913b4367ca8fb5c451b347f34ef8f42c27669aaf58bbc0fa"
+    },
+    "runs": {
+      "path": "/tmp/gpui-identity-runs-release-target/release/examples/identity_index_control",
+      "sha256": "72434441c2cd9a6a9b98b772b648aa146d4a5fe8c4031574b856d85c31325a6a"
+    },
+    "tables": {
+      "path": "/tmp/gpui-identity-tables-runs/target/release/identity_tables",
+      "sha256": "6fa73995694119800d6f2d50e6b088d93f2a4dce5d958ee56ca79e5c46455e04"
+    }
+  },
+  "files": {
+    "/tmp/gpui-identity-base-final-build.jsonl": "6b3478473ad80468776bc269e655d28309cd8a6b09dc23c21ca550d6e1e61cef",
+    "/tmp/gpui-identity-base-release-build.jsonl": "b37c8903e81a917c0af910716d8c798ee1cf5f1dae52f36cade55344c8704ef1",
+    "/tmp/gpui-identity-base-release-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "d23a4d018be34747ac96426c3bf6e9b50bbdce41e24ef8bfa59c57ac6a36a9a1",
+    "/tmp/gpui-identity-base-release-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "89e9ff995b7e5c357f91904cd13d2eefaac854a698573d00cb879eab5cfbed13",
+    "/tmp/gpui-identity-index-final-build.jsonl": "d6cdcaaf3af4d1335fbfb10af8a9dbea298384def33744d56b2a4678005d666a",
+    "/tmp/gpui-identity-index-release-build.jsonl": "bfcccd0ac9fa97ec11e1d85acc219903907f0cc7c0c207a48df1d0b824d9ea90",
+    "/tmp/gpui-identity-index-release-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "3382b3aa00ac45e070656a9feb0103dcacad65e20ee101fb9258397e0ebf3726",
+    "/tmp/gpui-identity-index-release-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "a04add8f48eb6a25e4d4ac505e8b2f899024eb4c1069be0939fdce683ff28ac8",
+    "/tmp/gpui-identity-runs-release-build.jsonl": "9b5ddb9c6ac27fc83b8266089244d8ee1f50c623ce1f6169ec915f2d88f65188",
+    "/tmp/gpui-identity-runs-release-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "da3e7acd45d4b00a5e0ff24c4b3c616c569861ad1b6962c55a3e0f7c5ce402da",
+    "/tmp/gpui-identity-runs-release-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "d072c4d71723d894bbbd69340759d90839df19db6dad83739530afba5852f26e",
+    "/tmp/gpui-identity-tables-runs-build.jsonl": "78ee08cebfb53e179d4c870609c5034618c4a571d5b4cc4420b0496faa172464",
+    "/tmp/gpui-identity-tables-runs/src/main.rs": "b1afdf489ad4d5e4583a9a6207dada20cefe0ff83788ba7686ee04a682798610",
+    "/tmp/gpui-identity-tables-runs/Cargo.toml": "93a13bf389db5cb64c79c99c839911a092af93609e6eb921cf664ba9977fdee4",
+    "/tmp/gpui-identity-tables-runs/Cargo.lock": "3a1ec2bbe5abc0d72fd5be1963272c61010d3806d9a3b5ad0c51525e4532c42a"
+  },
+  "fixtures": {
+    "owner.rs": "8c8037330659fcc22bf4304df626e2d4c7a7959d85696c3f011fe00b60ece185",
+    "tables.rs": "a3e78a33729fef8a60dde526edb4d67da1bfa348da284fe22bb6db3d55c2127b",
+    "tables_runs.rs": "b1afdf489ad4d5e4583a9a6207dada20cefe0ff83788ba7686ee04a682798610"
+  }
+}

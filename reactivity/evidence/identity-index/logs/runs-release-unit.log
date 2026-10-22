@@ -1,0 +1,35 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling cephal v0.1.1 (/root/gpui-identity-runs/reactivity/vendor/cephal)
+   Compiling parley v0.11.1 (/root/gpui-identity-runs/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-identity-runs/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-identity-runs/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-identity-runs/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-identity-runs/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 1m 02s
+     Running unittests src/lib.rs (/tmp/gpui-identity-runs-release-target/release/deps/gpui-559efaa5b4b411d5)
+
+running 11 tests
+test runtime::identity_index::tests::dense_reordering_does_not_allocate_an_unprofitable_run_table ... ok
+test runtime::identity_index::tests::duplicate_ids_are_an_internal_admission_error - should panic ... ok
+test runtime::identity_index::tests::header_and_exact_fallback_entry_layouts ... ok
+test runtime::identity_index::tests::empty_and_full_width_contiguous_ranges_allocate_nothing ... ok
+test runtime::identity_index::tests::overlapping_runs_reject_duplicate_identity_admission - should panic ... ok
+test runtime::identity_index::tests::sparse_edits_and_moved_subtrees_use_exact_affine_runs ... ok
+test runtime::identity_index::tests::a_large_replaced_child_run_retains_only_two_mappings ... ok
+test runtime::identity_index::tests::whole_replacement_releases_fallback_and_does_not_revive_ids ... ok
+test runtime::identity_index::tests::chunk_permutations_and_holes_match_the_previous_map ... ok
+test runtime::identity_index::tests::gaps_and_permutations_match_the_previous_map_exactly ... ok
+test runtime::identity_index::tests::live_storage_uses_no_range_heap_or_spare_fallback_capacity ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 104 filtered out; finished in 0.01s

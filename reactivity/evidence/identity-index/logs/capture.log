@@ -1,0 +1,27 @@
+START owner 1 baseline
+FINISHED owner 1 baseline 1.1165
+START owner 1 packed
+FINISHED owner 1 packed 0.6157
+START owner 1 runs
+FINISHED owner 1 runs 0.4667
+START owner 2 packed
+FINISHED owner 2 packed 0.5655
+START owner 2 runs
+FINISHED owner 2 runs 0.4654
+START owner 2 baseline
+FINISHED owner 2 baseline 1.0666
+START owner 3 runs
+FINISHED owner 3 runs 0.4655
+START owner 3 baseline
+FINISHED owner 3 baseline 1.0676
+START owner 3 packed
+FINISHED owner 3 packed 0.6164
+START tables 1 tables
+FINISHED tables 1 tables 0.7658
+START tables 2 tables
+FINISHED tables 2 tables 0.7658
+START tables 3 tables
+FINISHED tables 3 tables 0.7655
+START tables 4 tables
+FINISHED tables 4 tables 0.7656
+ALL_POSTGUARDS_PASS

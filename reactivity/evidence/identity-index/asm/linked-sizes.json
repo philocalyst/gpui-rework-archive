@@ -1,0 +1,72 @@
+[
+  {
+    "variant": "baseline",
+    "symbol": "_RNvCs4sBZDhJNMuL_22identity_index_control15read_properties",
+    "address": 5191424,
+    "bytes": 552,
+    "file": "baseline-4f3700.txt"
+  },
+  {
+    "variant": "baseline",
+    "symbol": "_RNvMsq_NtCsgID3RIcF1fr_4gpui7runtimeINtB5_7RuntimeNtCs4sBZDhJNMuL_22identity_index_control4PageE7resolveBO_.llvm.12325647580293631957",
+    "address": 5124176,
+    "bytes": 564,
+    "file": "baseline-4e3050.txt"
+  },
+  {
+    "variant": "packed",
+    "symbol": "_RINvMs_NtNtCsgID3RIcF1fr_4gpui7runtime14identity_indexNtB5_13IdentityIndex8from_idsINtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters3map3MapINtNtNtB1s_5slice4iter4IterNtB7_4NodeENvMsi_B7_B2y_8identityEECs4sBZDhJNMuL_22identity_index_control",
+    "address": 5267360,
+    "bytes": 549,
+    "file": "packed-505fa0.txt"
+  },
+  {
+    "variant": "packed",
+    "symbol": "_RNvCs4sBZDhJNMuL_22identity_index_control15read_properties",
+    "address": 5212016,
+    "bytes": 552,
+    "file": "packed-4f8770.txt"
+  },
+  {
+    "variant": "packed",
+    "symbol": "_RNvMs_NtNtCsgID3RIcF1fr_4gpui7runtime14identity_indexNtB4_13IdentityIndex3get",
+    "address": 5291312,
+    "bytes": 123,
+    "file": "packed-50bd30.txt"
+  },
+  {
+    "variant": "packed",
+    "symbol": "_RNvMsq_NtCsgID3RIcF1fr_4gpui7runtimeINtB5_7RuntimeNtCs4sBZDhJNMuL_22identity_index_control4PageE7resolveBO_.llvm.15312144705106359196",
+    "address": 5123744,
+    "bytes": 482,
+    "file": "packed-4e2ea0.txt"
+  },
+  {
+    "variant": "runs",
+    "symbol": "_RINvMs_NtNtCsgID3RIcF1fr_4gpui7runtime14identity_indexNtB5_13IdentityIndex8from_idsINtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters3map3MapINtNtNtB1s_5slice4iter4IterNtB7_4NodeENvMsi_B7_B2y_8identityEECs4sBZDhJNMuL_22identity_index_control",
+    "address": 5274544,
+    "bytes": 1359,
+    "file": "runs-507bb0.txt"
+  },
+  {
+    "variant": "runs",
+    "symbol": "_RNvCs4sBZDhJNMuL_22identity_index_control15read_properties",
+    "address": 5255600,
+    "bytes": 552,
+    "file": "runs-5031b0.txt"
+  },
+  {
+    "variant": "runs",
+    "symbol": "_RNvMs_NtNtCsgID3RIcF1fr_4gpui7runtime14identity_indexNtB4_13IdentityIndex3get",
+    "address": 5295152,
+    "bytes": 283,
+    "file": "runs-50cc30.txt"
+  },
+  {
+    "variant": "runs",
+    "symbol": "_RNvMsq_NtCsgID3RIcF1fr_4gpui7runtimeINtB5_7RuntimeNtCs4sBZDhJNMuL_22identity_index_control4PageE7resolveBO_.llvm.4204023257169198233",
+    "address": 5124992,
+    "bytes": 482,
+    "file": "runs-4e3380.txt"
+  }
+]

@@ -1,0 +1,48 @@
+    Checking rustix v1.1.5
+    Checking smallvec v1.16.3
+   Compiling zbus_macros v5.19.0
+    Checking polling v3.11.0
+    Checking async-io v2.6.0
+    Checking async-signal v0.2.14
+    Checking async-process v2.5.0
+    Checking parking_lot_core v0.9.12
+   Compiling wgpu-hal v29.0.4 (/root/gpui-identity-index/reactivity/vendor/wgpu-hal)
+    Checking zbus v5.19.0
+    Checking parking_lot v0.12.5
+    Checking gethostname v1.1.0
+    Checking rustix v0.38.44
+    Checking x11rb v0.13.2
+    Checking atspi-common v0.13.0
+   Compiling winit v0.30.13 (/root/gpui-identity-index/reactivity/vendor/winit)
+    Checking fontique v0.11.1
+    Checking icu_normalizer v2.3.0
+    Checking wgpu-core-deps-windows-linux-android v29.0.4
+    Checking icu_segmenter v2.3.0
+    Checking calloop v0.13.0
+    Checking atspi-proxies v0.13.0
+    Checking harfrust v0.12.0
+    Checking cephal v0.1.1 (/root/gpui-identity-index/reactivity/vendor/cephal)
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-identity-index/reactivity/crates/core)
+    Checking parley v0.11.1 (/root/gpui-identity-index/reactivity/vendor/parley)
+    Checking atspi v0.29.0
+    Checking accesskit_atspi_common v0.21.0
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking wgpu-core v29.0.4
+    Checking gpui_canvas v0.1.0 (/root/gpui-identity-index/reactivity/crates/canvas)
+    Checking accesskit_unix v0.24.0
+    Checking wgpu v29.0.4
+    Checking accesskit_winit v0.34.1
+    Checking gpui_gpu v0.1.0 (/root/gpui-identity-index/reactivity/crates/gpu)
+    Checking softbuffer v0.4.8 (/root/gpui-identity-index/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-identity-index/reactivity/crates/host)
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-identity-index/reactivity/crates/state)
+    Checking gpui v0.1.0 (/root/gpui-identity-index/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 11s

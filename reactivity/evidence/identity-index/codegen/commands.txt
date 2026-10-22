@@ -1,0 +1,13 @@
+The control.rs source includes the exact frozen production modules at their
+recorded worktree paths. Each command emitted optimized target assembly; it did
+not link or execute a desktop application. The saved *.s files select the four
+public caller bodies; provenance.json records the full emitted-file hashes.
+
+source /tmp/gpui-native-env.sh
+rustc --edition=2021 --crate-type lib -C opt-level=3 --emit=asm /tmp/gpui-identity-codegen/lib.rs -o /tmp/gpui-identity-codegen/x86_64-linux-final.s
+rustc --edition=2021 --crate-type lib -C opt-level=3 --emit=asm --target aarch64-apple-darwin --extern std=/tmp/gpui-accesskit-apple-target/aarch64-apple-darwin/debug/deps/libstd-4381a0d3d19def53.rlib -L dependency=/tmp/gpui-accesskit-apple-target/aarch64-apple-darwin/debug/deps /tmp/gpui-identity-codegen/lib.rs -o /tmp/gpui-identity-codegen/aarch64-apple-final.s
+rustc --edition=2021 --crate-type lib -C opt-level=3 --emit=asm --target x86_64-pc-windows-msvc --extern std=/tmp/gpui-accesskit-windows-msvc-target/x86_64-pc-windows-msvc/debug/deps/libstd-69696b971a742356.rlib -L dependency=/tmp/gpui-accesskit-windows-msvc-target/x86_64-pc-windows-msvc/debug/deps /tmp/gpui-identity-codegen/lib.rs -o /tmp/gpui-identity-codegen/x86_64-windows-final.s
+
+Compiler: /nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/bin/rustc
+The target std archives are the previously built, same-compiler target libraries.
+No claim is made about target hardware latency from emitted assembly.

@@ -1,0 +1,31 @@
+{
+  "source": "8da013d5f81d2687d9fdc7321f91109713e1e6c1",
+  "source_files": {
+    "/root/gpui-identity-index/reactivity/crates/gpui/src/runtime/identity_index.rs": "cd37ab0c45bafe0ea2b0ce41c56d27cc705832d6ff7a93851958e6471add8621",
+    "/root/gpui-identity-index/reactivity/crates/gpui/src/runtime.rs": "100950705a1b06efa648247e40db92152db069692f55eb92c198626af4ce2160",
+    "/root/gpui-identity-index/reactivity/evidence/identity-index/fixtures/owner.rs": "8c8037330659fcc22bf4304df626e2d4c7a7959d85696c3f011fe00b60ece185",
+    "/root/gpui-identity-index/reactivity/evidence/identity-index/fixtures/tables.rs": "a3e78a33729fef8a60dde526edb4d67da1bfa348da284fe22bb6db3d55c2127b"
+  },
+  "artifacts": {
+    "baseline": {
+      "binary": "/tmp/gpui-identity-base-release-target/release/examples/identity_index_control",
+      "files": {
+        "/tmp/gpui-identity-base-release-build.jsonl": "b37c8903e81a917c0af910716d8c798ee1cf5f1dae52f36cade55344c8704ef1",
+        "/tmp/gpui-identity-base-final-build.jsonl": "6b3478473ad80468776bc269e655d28309cd8a6b09dc23c21ca550d6e1e61cef",
+        "/tmp/gpui-identity-base-release-target/release/examples/identity_index_control": "0b253f10de3a11e7d94023f54939d8f485f24f9de19480f3069f025212544e58",
+        "/tmp/gpui-identity-base-release-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "d23a4d018be34747ac96426c3bf6e9b50bbdce41e24ef8bfa59c57ac6a36a9a1",
+        "/tmp/gpui-identity-base-release-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "89e9ff995b7e5c357f91904cd13d2eefaac854a698573d00cb879eab5cfbed13"
+      }
+    },
+    "packed": {
+      "binary": "/tmp/gpui-identity-index-release-target/release/examples/identity_index_control",
+      "files": {
+        "/tmp/gpui-identity-index-release-build.jsonl": "bfcccd0ac9fa97ec11e1d85acc219903907f0cc7c0c207a48df1d0b824d9ea90",
+        "/tmp/gpui-identity-index-final-build.jsonl": "d6cdcaaf3af4d1335fbfb10af8a9dbea298384def33744d56b2a4678005d666a",
+        "/tmp/gpui-identity-index-release-target/release/examples/identity_index_control": "2aa776def471a820913b4367ca8fb5c451b347f34ef8f42c27669aaf58bbc0fa",
+        "/tmp/gpui-identity-index-release-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "3382b3aa00ac45e070656a9feb0103dcacad65e20ee101fb9258397e0ebf3726",
+        "/tmp/gpui-identity-index-release-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "a04add8f48eb6a25e4d4ac505e8b2f899024eb4c1069be0939fdce683ff28ac8"
+      }
+    }
+  }
+}

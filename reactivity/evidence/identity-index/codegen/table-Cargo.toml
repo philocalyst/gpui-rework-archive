@@ -1,0 +1,9 @@
+[package]
+name = "identity_tables"
+version = "0.0.0"
+edition = "2021"
+[workspace]
+[dependencies]
+allocation-counter = "=0.8.1"
+[profile.release]
+opt-level = 3

@@ -1,0 +1,27 @@
+warning: methods `contains` and `required` are never used
+  --> /root/gpui-identity-index/reactivity/crates/gpui/src/runtime/identity_index.rs:72:19
+   |
+27 | impl IdentityIndex {
+   | ------------------ methods in this implementation
+...
+72 |     pub(super) fn contains(&self, identity: u64) -> bool {
+   |                   ^^^^^^^^
+...
+77 |     pub(super) fn required(&self, identity: u64) -> usize {
+   |                   ^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `contains` and `required` are never used
+   --> /root/gpui-identity-runs/reactivity/crates/gpui/src/runtime/identity_index.rs:124:19
+    |
+ 37 | impl IdentityIndex {
+    | ------------------ methods in this implementation
+...
+124 |     pub(super) fn contains(&self, identity: u64) -> bool {
+    |                   ^^^^^^^^
+...
+129 |     pub(super) fn required(&self, identity: u64) -> usize {
+    |                   ^^^^^^^^
+
+warning: 2 warnings emitted

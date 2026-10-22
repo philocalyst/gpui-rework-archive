@@ -1,0 +1,41 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-identity-index/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 28.11s
+     Running unittests src/lib.rs (/tmp/gpui-literal-dispatch-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 6 tests
+
+thread 'runtime::identity_index::tests::duplicate_ids_are_an_internal_admission_error' (3649413) panicked at crates/gpui/src/runtime/identity_index.rs:50:9:
+distinct admitted logical identities
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test runtime::identity_index::tests::header_and_exact_fallback_entry_layouts ... ok
+index-storage,contiguous,0,old,0,0,0,0,new,0,0,0,0
+index-storage,gaps,0,old,0,0,0,0,new,0,0,0,0
+index-storage,reverse,0,old,0,0,0,0,new,0,0,0,0
+index-storage,contiguous,1,old,2,208,192,208,new,0,0,0,0
+index-storage,gaps,1,old,2,208,192,208,new,0,0,0,0
+index-storage,reverse,1,old,2,208,192,208,new,0,0,0,0
+test runtime::identity_index::tests::whole_replacement_releases_fallback_and_does_not_revive_ids ... ok
+test runtime::identity_index::tests::duplicate_ids_are_an_internal_admission_error - should panic ... ok
+index-storage,contiguous,60,old,8,2400,1440,2400,new,0,0,0,0
+index-storage,gaps,60,old,8,2400,1440,2400,new,1,720,720,720
+index-storage,reverse,60,old,8,2400,1440,2400,new,1,720,720,720
+index-storage,contiguous,4096,old,377,206240,75168,140704,new,0,0,0,0
+test runtime::identity_index::tests::empty_and_full_width_contiguous_ranges_allocate_nothing ... ok
+index-storage,gaps,4096,old,377,206240,75168,140704,new,1,49152,49152,49152
+index-storage,reverse,4096,old,377,206240,75168,140704,new,1,49152,49152,49152
+test runtime::identity_index::tests::gaps_and_permutations_match_the_previous_map_exactly ... ok
+index-storage,contiguous,65536,old,5963,3289568,1192416,2240992,new,0,0,0,0
+index-storage,gaps,65536,old,5963,3289568,1192416,2240992,new,1,786432,786432,786432
+index-storage,reverse,65536,old,5963,3289568,1192416,2240992,new,1,786432,786432,786432
+test runtime::identity_index::tests::live_storage_uses_no_range_heap_or_spare_fallback_capacity ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 104 filtered out; finished in 0.05s
