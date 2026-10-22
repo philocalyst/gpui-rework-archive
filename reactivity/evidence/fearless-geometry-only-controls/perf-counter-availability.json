@@ -1,0 +1,8 @@
+{
+  "event": "PERF_COUNT_HW_CPU_CYCLES",
+  "exclude_kernel": true,
+  "exclude_hv": true,
+  "disabled": true,
+  "fd": 3,
+  "errno": 0
+}

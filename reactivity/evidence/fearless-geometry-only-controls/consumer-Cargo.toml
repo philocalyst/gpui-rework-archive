@@ -1,0 +1,13 @@
+[package]
+name = "canvas-pipeline-proof"
+version = "0.1.0"
+edition = "2024"
+[workspace]
+[dependencies]
+gpui_canvas = {path="/tmp/gpui-fearless-geometry-only-source/reactivity/crates/canvas",default-features=false}
+allocation-counter = "=0.8.1"
+[features]
+default=["simd"]
+simd=["gpui_canvas/simd"]
+[patch.crates-io]
+parley={path="/tmp/gpui-fearless-geometry-only-source/reactivity/vendor/parley"}
