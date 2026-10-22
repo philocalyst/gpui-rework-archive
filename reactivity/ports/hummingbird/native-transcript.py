@@ -118,6 +118,13 @@ def main():
                 events.append({"stage": "x11_text_edit", "query": "cafe", "visible_result_count": 3})
 
                 # Second edit traverses the actual native EditableText method.
+                # A text lease change retires its provider object. Reacquire
+                # from the acknowledged tree rather than using the pre-edit ID.
+                previous_search = search
+                search = find("Search recordings")
+                assert search[1:] != previous_search[1:], "old text lease retained native action authority"
+                events.append({"stage": "text_lease_replaced", "previous": list(previous_search[1:]),
+                               "current": list(search[1:])})
                 assert bus(address, "call", search[1], search[2], "org.a11y.atspi.EditableText", "SetTextContents", "s", "μαρ") == [True]
                 find("1 recordings for ‘μαρ’ — Longest first")
                 invoke(find("Play Καλημέρα"))
