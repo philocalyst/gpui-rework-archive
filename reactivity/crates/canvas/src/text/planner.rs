@@ -484,7 +484,7 @@ fn append_carets(
         if pair[0].is_some() && pair[0] == pair[1] {
             stops.push(Stop {
                 byte: global,
-                bounds: pair[0].unwrap(),
+                x: pair[0].unwrap().x,
                 affinities: 3,
             });
         } else {
@@ -492,7 +492,7 @@ fn append_carets(
                 if let Some(bounds) = bounds {
                     stops.push(Stop {
                         byte: global,
-                        bounds,
+                        x: bounds.x,
                         affinities: 1 << i,
                     });
                 }

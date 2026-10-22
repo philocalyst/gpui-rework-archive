@@ -111,9 +111,10 @@ impl Details {
                     affinity: CaretAffinity::Downstream,
                 });
                 let hard_break = end.byte > self.lines[line].end;
-                let left = start.bounds.x.min(end.bounds.x);
-                let direction = if !hard_break && start.bounds.x != end.bounds.x {
-                    if start.bounds.x < end.bounds.x {
+                let bounds = self.stop_bounds(start);
+                let left = start.x.min(end.x);
+                let direction = if !hard_break && start.x != end.x {
+                    if start.x < end.x {
                         TextDirection::LeftToRight
                     } else {
                         TextDirection::RightToLeft
@@ -136,26 +137,21 @@ impl Details {
                         offset: TextOffset(end.byte),
                         affinity: CaretAffinity::Upstream,
                     },
-                    start_x: start.bounds.x,
-                    end_x: end.bounds.x,
+                    start_x: start.x,
+                    end_x: end.x,
                     bounds: if hard_break {
                         Rect::new(
                             if marker_left {
-                                start.bounds.x - marker_width
+                                start.x - marker_width
                             } else {
-                                start.bounds.x
+                                start.x
                             },
-                            start.bounds.y,
+                            bounds.y,
                             marker_width,
-                            start.bounds.height,
+                            bounds.height,
                         )
                     } else {
-                        Rect::new(
-                            left,
-                            start.bounds.y,
-                            (end.bounds.x - start.bounds.x).abs(),
-                            start.bounds.height,
-                        )
+                        Rect::new(left, bounds.y, (end.x - start.x).abs(), bounds.height)
                     },
                     line,
                     hard_break,
@@ -516,25 +512,15 @@ mod tests {
         map.lines[1].end = 4;
         map.lines[2].start = 6;
         for byte in (0..=10_000).filter(|&byte| byte != 5) {
-            let line = if byte <= 2 {
-                0
-            } else if byte <= 4 {
-                1
-            } else if byte < 12 {
-                2
-            } else {
-                (byte / 4).min(2_499)
-            };
             let mut stop = Stop {
                 byte,
-                bounds: Rect::new((byte % 4) as f32, line as f32 * 10., 1., 10.),
+                x: (byte % 4) as f32,
                 affinities: 3,
             };
             if byte == 2 {
                 stop.affinities = 1;
                 map.carets.as_mut().unwrap().push(stop);
                 stop.affinities = 2;
-                stop.bounds.y = 10.;
             }
             map.carets.as_mut().unwrap().push(stop);
         }
