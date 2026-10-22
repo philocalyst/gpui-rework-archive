@@ -9,9 +9,13 @@ The engine supports:
 - flexbox, including `flex-wrap: balance`;
 - CSS grid, named lines, named areas, and auto-repeat;
 - `calc()`, sizing keywords, `box-sizing`, scroll containers, and containment;
-- absolute positioning and pixel snapping.
+- absolute and fixed positioning against the containing block (out-of-flow boxes are laid out by
+  their nearest positioned ancestor or the viewport, with static positions and self-alignment);
+- pixel snapping.
 
-Cephal passes 6,084 Chrome-generated layout fixtures vendored from taffy.
+Cephal passes the 6,504 Chrome-generated layout fixtures of taffy 0.15 and 188 of its own. Where
+cephal and taffy disagree, Chrome decides: `tests/fixtures/TAFFY_DIVERGENCES.md` lists the cases
+where taffy differs from the CSS specification and Chrome, with the fixtures that pin them.
 
 ## Incremental layout
 
@@ -20,7 +24,7 @@ affected nodes to a dirty queue. The scheduler processes the deepest dirty nodes
 Propagation stops when a recomputed answer stays unchanged.
 
 Clipped overflow changes stay inside the clipping node. An absolute box can move after a
-position-only update. Pixel snapping processes changed nodes and subtrees whose origin moved.
+position-only update without its containing block's in-flow content being laid out again. Pixel snapping processes changed nodes and subtrees whose origin moved.
 
 This model follows *Spineless Traversal for Layout Invalidation* by Kirisame, Wang, and
 Panchekha (PLDI 2025). The test suite checks that incremental and parallel results equal a
@@ -70,27 +74,39 @@ Frameworks that own their tree can implement `LayoutTree`, `CacheAccess`, and
 
 ## Performance
 
-These results use an Intel Core i9-13900K and 24 threads. Measurements come from
-`cargo bench` and `cargo run --release --example scaling`.
+Measured with `benches/suite.rs` on an Intel Core i9-13900K, pinned to one core, against taffy 0.15,
+Yoga 3.2.1 and Clay 0.14 on the same trees, including reading every layout back. Cold layout, in
+nanoseconds per node (an empty cell is a tree the engine cannot express):
 
-| Scenario | Serial | Parallel | taffy |
-| --- | ---: | ---: | ---: |
-| Contained edit in a 100,000-node list | 2 µs | 2.5 µs | 5 ms |
-| Move an absolute box in a 100,000-node tree | 2.4 µs | | 21 ms |
-| Leaf-width edit in a 100,000-node random tree | 8.4 ms | 10.0 ms | 18 ms |
-| Cold layout of 100,000 nested flex nodes | 34 ms | 12 ms | 39 ms |
-| Cold layout of 10,000 leaves in one flex row | 1.7 ms | 1.9 ms | 2.0 ms |
-| Cold layout of a 100×100 grid | 8.4 ms | 8.6 ms | 9.2 ms |
-| Cold layout of 10,000 random nodes | 25 ms | 12 ms | 22 ms |
-| Resize a 10,000-node random tree | 2.0 ms | 2.1 ms | 2.0 ms |
+| Workload (nodes) | cephal | taffy | Yoga | Clay |
+| --- | ---: | ---: | ---: | ---: |
+| 10,000 items in a flex column with gap | 60 | 216 | 349 | 83 |
+| 10,000 wrapping text items in a flex row | 187 | 289 | 1039 | |
+| 100×100 grid of auto tracks holding text | 449 | 604 | | |
+| a grid of flex cards of text (8,751) | 433 | 1044 | | |
+| nested intrinsic flex rows (101,111, `min-width: 0`) | 71 | 323 | 638 | |
 
-Run `cargo run --release --example scaling` to measure trees from 1,000 to 100,000 nodes.
-Use `scripts/plot_bench.py` to plot the results.
+Laying out in parallel on 16 cores brings the last two rows to 132 and 27 ns per node. On trees
+of about 100,000 nodes (a list, a dashboard, a document), a frame with a single edit (text, a width,
+moving a positioned box) takes 0.12–0.28 ms with cephal and 4.5–6 ms with taffy. Cephal is faster
+in every incremental scenario of the suite.
+
+```sh
+taskset -c 2 cargo bench --bench suite [-- <filter>...]   # cephal and taffy
+scripts/external.sh [<filter>...]                         # Yoga and Clay
+python3 scripts/plot_bench.py suite target/bench/suite.csv --out target/bench/plots
+```
+
+`scripts/perf.md` describes the workloads, options and plots.
 
 ## Tests
 
-- `tests/fixtures.rs` runs 6,084 Chrome-generated fixtures from taffy.
-- `tests/differential.rs` compares random trees with taffy.
+- `tests/fixtures.rs` runs 6,504 Chrome-generated fixtures from taffy 0.15
+  (`scripts/update_fixtures.sh` regenerates them) and cephal's own, written as HTML in
+  `tests/fixtures/html` and rendered in Chrome by `scripts/gen_fixtures.sh`.
+- `tests/differential.rs` compares random trees with taffy, apart from the divergences listed in
+  `tests/differential_known.txt`. `scripts/chrome_seeds.sh` renders those trees in Chrome to tell
+  which engine is right.
 - `tests/incremental.rs` compares incremental and parallel results with cold serial layouts.
 
 Use `CEPHAL_SEEDS` and `CEPHAL_STEPS` to set the size of the random test suites. Use

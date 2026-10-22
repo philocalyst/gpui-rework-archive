@@ -6,19 +6,19 @@
 //! Cephal's algorithms recurse; the core's nonrecursive topology operations do
 //! not imply support for arbitrary layout depth.
 //!
-//! On x86_64 with Cephal 0.1.1, Style is 288 bytes, Layout is 92 bytes,
-//! and NodeCache is 464 bytes before its optional spill. Each topology slot adds
-//! 113 bytes across separate layout/style/depth/count/flag/cache-handle lanes;
-//! the 464-byte cache box is allocated lazily for queried containers/measured
-//! leaves. Interned style payload is paid per distinct live style, with released
-//! slots reused. `storage` reports known lane and inline-cache payload only;
-//! vendor style-table metadata and cache spills are excluded, not claimed free.
+//! On x86_64 at Cephal `20c4c494`, Style is 288 bytes, Layout is 92 bytes,
+//! and NodeCache is an 8-byte handle to lazily allocated private cache storage.
+//! This adapter still boxes that handle; `storage` counts its known lane and
+//! outer-box payload only, excluding vendor cache inners/spills and style metadata.
+//! Neither the handle size nor that partial ledger is a complete memory claim.
 //! Pending edits use a sparse ordered set; compute rebuilds a temporary scheduler
 //! and filters pending changes by forest root in O(pending changes * depth).
 //! A clean call with no pending edits does no tree traversal. Pixel rounding,
 //! detailed grid diagnostics, parallel layout and absolute-position shortcuts
 //! are not implemented by this adapter; normal flex/block/grid algorithms and
-//! absolute placement still run through Cephal's serial unrounded compute path.
+//! direct-parent absolute placement still run through Cephal's serial unrounded
+//! compute path. Non-parent containing blocks require the new absolute-context
+//! trait storage, which this adapter does not yet retain.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -382,6 +382,7 @@ impl LayoutTree {
             let mut engine = Engine {
                 owner: self,
                 measure,
+                observed: 0,
             };
             for node in selected {
                 let key = EngineId::new(engine.owner.tree.layout_key(node));
@@ -472,6 +473,7 @@ impl LayoutTree {
 // capabilities. The codec includes generation; arena validation occurs at the
 // public boundary, and every engine id is minted from this adapter's topology.
 struct Engine<'a, 'service> {
+    observed: u8,
     owner: &'a mut LayoutTree,
     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
 }
@@ -536,10 +538,36 @@ impl EngineTree for Engine<'_, '_> {
     fn leaf_is_cheap(&self, node: EngineId) -> bool {
         !self.owner.measures.contains_key(&self.node(node))
     }
-    fn leaf_box(&self, node: EngineId) -> Option<cephal::compute::leaf::LeafBox> {
+    fn is_measured_leaf(&self, node: EngineId) -> bool {
+        self.owner.measures.contains_key(&self.node(node))
+    }
+    fn style_plan(&self, node: EngineId) -> Option<&cephal::compute::plan::StylePlan> {
         self.owner
             .styles
-            .leaf_box(self.owner.style_ids[self.slot(node)])
+            .plan(self.owner.style_ids[self.slot(node)])
+    }
+    fn query_meta(&self, node: EngineId) -> cephal::tree::QueryMeta {
+        let slot = self.slot(node);
+        let style = self.owner.style_ids[slot];
+        let leaf = self.owner.child_counts[slot] == 0;
+        cephal::tree::QueryMeta {
+            hidden: self.owner.styles.get(style).generates_no_box(),
+            cheap_leaf: leaf && !self.is_measured_leaf(node),
+            dependency: self.owner.styles.parent_size_dependency(style),
+            // This adapter uses Cephal's default leaf algorithm. Measurements
+            // may inspect either available axis, so height remains observed.
+            kind: if leaf {
+                cephal::tree::NodeKind::Leaf
+            } else {
+                self.owner.styles.kind(style)
+            },
+        }
+    }
+    fn take_observed(&mut self) -> u8 {
+        std::mem::take(&mut self.observed)
+    }
+    fn note_observed(&mut self, axes: u8) {
+        self.observed |= axes;
     }
     fn measure(&mut self, node: EngineId, input: MeasureInput) -> MeasureOutput {
         let node = self.node(node);

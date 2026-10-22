@@ -2575,10 +2575,12 @@ impl<M: View + 'static> Runtime<M> {
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
             if index == inspector_boundary {
-                inspector_display
-                    .as_ref()
-                    .unwrap()
-                    .refresh(&presented, &mut self.texts);
+                inspector_display.as_ref().unwrap().refresh(
+                    &presented,
+                    &mut self.texts,
+                    &mut self.layout,
+                    &self.layout_nodes,
+                )?;
             }
             let layout = self.layout.layout(self.layout_nodes[index])?;
             let has_children = self

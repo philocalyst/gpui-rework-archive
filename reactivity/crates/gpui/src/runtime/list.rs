@@ -138,6 +138,10 @@ pub(super) fn row_style(
     slot: Option<&ListRow>,
 ) -> cephal::Style {
     let mut style = layout_style(declared);
+    if kind == NodeKind::List {
+        // Rebased row offsets address this viewport's containing block.
+        style.position = cephal::style::Position::Relative;
+    }
     if matches!(kind, NodeKind::List | NodeKind::Scroll) && declared.width.is_none() {
         use cephal::style::Dimension;
         if parent.is_none() {

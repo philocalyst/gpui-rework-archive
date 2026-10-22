@@ -1,0 +1,70 @@
+{
+  "base": "d05b826b62",
+  "upstream": "20c4c494179078ddfde7e8532ffc93f28cf5b531",
+  "branch": "perf/cold-layout",
+  "source_sha256": {
+    "crates/core/src/layout.rs": "cfcb7a2b881a8138c1cd3bc4372ace876ef897d616b90475338ea25421de36ec",
+    "crates/gpui/src/runtime.rs": "5caf0b2d97ea6bb28cef5ddaacfa9089844e9899e5b5de2e9bb1365963e9a030",
+    "crates/gpui/src/runtime/inspector.rs": "caad116d7303f194559ff17db39096f9337c2de84ca8d882ed6fce840947bbba",
+    "crates/gpui/src/runtime/list.rs": "d58e84f2971f832dfe8aab2b348b416f8a2daf6704095f32e83508d88412f82d",
+    "Cargo.lock": "58dfb285d0842abfa40b1a234db8f2305d23840a64f40eb1ab32cc3ab3cc9b07"
+  },
+  "logs": {
+    "initial-api": {
+      "sha256": "12d8bfc0345c611a56e99a722a19cde749ce752078bf6169c0a153d35fd61cfe",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "core-verify": {
+      "sha256": "d53901eef97b05edc5529f25b60d8fa77d60eecf6ada494c5ac8c55b2f7f5f2f",
+      "groups": 5,
+      "passed": 30,
+      "ignored": 0
+    },
+    "core-clippy": {
+      "sha256": "d07f7599aecbdc82ad9de49f919e27382ad84a14563719c48bf48cbc0c9b0471",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "initial-caption-cache": {
+      "sha256": "be08ee4aa89c7ca1c5dd1302954c55afb19451fc26aadc92ff9422ec0e7a1740",
+      "groups": 1,
+      "passed": 10,
+      "ignored": 0
+    },
+    "caption-fixed-list-control": {
+      "sha256": "a7fa7052ab0a5150784fa81b18c52299e8fa7d6797c10c97daeac9caa9cec9de",
+      "groups": 2,
+      "passed": 21,
+      "ignored": 0
+    },
+    "public-verify": {
+      "sha256": "2cb237c65c86c30370f27b7dc492b948256bd676420a6daa05c9367bd7eef2cd",
+      "groups": 5,
+      "passed": 78,
+      "ignored": 0
+    },
+    "upstream-initial-offline": {
+      "sha256": "1f0c270f30fe053cdf82e9bf05567c3e4c6efe49ace4b051dab4425255e2839b",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "upstream-verify": {
+      "sha256": "4c883a3122a46f89481d05474751bcd997d18ce250b0578cc38b76cf2abb6d04",
+      "groups": 17,
+      "passed": 58,
+      "ignored": 15
+    },
+    "storage-control": {
+      "sha256": "c3411819ca77123e7cb99690e738615034d47bd98b668af70ef0bb877a300fcc",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    }
+  },
+  "limits": "Correctness and source/API integration, no GPUI timing/RSS improvement claim. Storage control retains an extra adapter box; NodeCache8 is only its handle, not the complete allocated cache.",
+  "upstream_whitespace": "Fixture XML spaces and rounding test EOF preserved from the source archive; first-party diff-check passed separately."
+}

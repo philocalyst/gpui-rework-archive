@@ -257,7 +257,7 @@ impl<M: View + 'static> Runtime<M> {
                     Caption::Pick.initial()
                 }
             ),
-        );
+        )?;
         if let Some(target) = selected {
             let index = self.inspector_app_index(target)?;
             let (width, background) = self
@@ -273,12 +273,12 @@ impl<M: View + 'static> Runtime<M> {
                     self.nodes[index].kind().role(),
                     self.nodes[index].identity()
                 ),
-            );
+            )?;
             self.refresh_caption(
                 panel,
                 Caption::Width,
                 format_args!("Width: {width:?}\n{width_presence:?}"),
-            );
+            )?;
             self.refresh_caption(
                 panel,
                 Caption::Background,
@@ -291,7 +291,7 @@ impl<M: View + 'static> Runtime<M> {
                         "Set"
                     }
                 ),
-            );
+            )?;
             if laid_out {
                 let size = self.layout.layout(self.layout_nodes[index])?.size;
                 let epoch = self.source_epoch;
@@ -302,24 +302,42 @@ impl<M: View + 'static> Runtime<M> {
                         "Layout: {:.1} × {:.1}\nlogical epoch {}",
                         size.width, size.height, epoch
                     ),
-                );
+                )?;
             }
         } else {
             for field in Caption::ALL {
                 if !matches!(field, Caption::Pick) {
-                    self.refresh_caption(panel, field, format_args!("{}", field.initial()));
+                    self.refresh_caption(panel, field, format_args!("{}", field.initial()))?;
                 }
             }
         }
         Ok(())
     }
-    fn refresh_caption(&mut self, panel: usize, field: Caption, value: fmt::Arguments<'_>) {
-        debug_assert_eq!(self.nodes[panel + field.offset()].kind(), field.kind());
-        let slot = self.nodes[panel + field.offset()].text_slot();
+    fn refresh_caption(
+        &mut self,
+        panel: usize,
+        field: Caption,
+        value: fmt::Arguments<'_>,
+    ) -> Result<(), Error> {
+        let index = panel + field.offset();
+        debug_assert_eq!(self.nodes[index].kind(), field.kind());
+        let slot = self.nodes[index].text_slot();
         let text = slot
             .get_mut(&mut self.texts)
             .expect("fixed inspector text slot");
-        self.dirty |= replace_caption(text, value);
+        if replace_caption(text, value) {
+            self.dirty = true;
+            // Fixed caption boxes still have content-size measurement answers.
+            // Late captions leave this invalidation pending for the next pass.
+            // Before a topology rebuild this may name the old layout cohort;
+            // that whole tree will be replaced. Afterward it names the new one.
+            if let Some(&node) = self.layout_nodes.get(index)
+                && !self.layout.is_poisoned()
+            {
+                self.layout.mark_dirty(node)?;
+            }
+        }
+        Ok(())
     }
 }
 // Preparation-local projection of two existing UI text slots. App rows precede
@@ -332,7 +350,13 @@ pub(super) struct DisplayCaptions {
     slots: [TextSlot; 2],
 }
 impl DisplayCaptions {
-    pub fn refresh(&self, candidate: &[Presented], texts: &mut [Option<TextSite>]) {
+    pub fn refresh(
+        &self,
+        candidate: &[Presented],
+        texts: &mut [Option<TextSite>],
+        layout: &mut LayoutTree,
+        layout_nodes: &[NodeId],
+    ) -> Result<(), Error> {
         let values = if let Some(node) = candidate.iter().find(|n| n.identity == self.identity) {
             let b = node.bounds;
             [
@@ -354,13 +378,20 @@ impl DisplayCaptions {
                 format!("Displayed transform @{}: —", self.epoch),
             ]
         };
-        for (slot, value) in self.slots.into_iter().zip(values) {
+        for ((slot, value), field) in self
+            .slots
+            .into_iter()
+            .zip(values)
+            .zip([Caption::Bounds, Caption::Transform])
+        {
             let text = slot.get_mut(texts).expect("checked inspector caption");
             if text.value.as_ref() != value {
                 text.value = value.into();
                 text.shaped = None;
+                layout.mark_dirty(layout_nodes[self.panel + field.offset()])?;
             }
         }
+        Ok(())
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
