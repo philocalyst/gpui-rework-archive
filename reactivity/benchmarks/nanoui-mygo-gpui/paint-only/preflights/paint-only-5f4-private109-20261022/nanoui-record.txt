@@ -1,0 +1,12 @@
+status=awaiting-manual-review
+source_commit=dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
+binary_sha256=0429ce2527c61be3e757de4a39d99aeca1190e2444bee0c4120379c22f1da7fe
+fixture_sha256=46061d578913885f42ca2e38bce6ad6714f47de70a36608bbeb673d9e822df1c
+source_tree=/tmp/luna-nanoui-pinned
+binary=/tmp/luna-nanoui-pinned-output/bin/luna-bench
+workloads=eager-0,eager-1000,eager-10000,virtual-250000
+checks=observer-preflight,800x600-client,exact-marker,button-and-row-ink,one-click-exact-marker-transition
+preflight_dir=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/paint-only/preflights/paint-only-5f4-private109-20261022
+evidence_manifest=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/paint-only/preflights/paint-only-5f4-private109-20261022/evidence.sha256
+evidence_manifest_sha256=085de75b96acd47050dc742b4b47226e32c22e7b9f6342a9247ba7f4c5339ea2
+build_config_sha256=377c926edd26105987d5d27e6ae7ee70c5e1728905ba557ec1e39030aeeb6972

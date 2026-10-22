@@ -152,3 +152,37 @@ Primary local implementation references (at the pins above):
   exact update) and `crates/gpui/src/native.rs` (input-result/redraw path).
 - Observer: `benchmarks/nanoui-mygo-gpui/src/main.rs` plus the reviewed
   executable SHA recorded in the run manifest.
+
+## Frozen 5f4 build and correctness preflight
+
+The first GPUI causal pair is built from cleanroom source
+`5f4db5f2886e6d72aefd585d21dd6543774f1393` in detached worktree
+`/root/gpui-paint-5f4/reactivity`, with locked release profile and `x11`
+features (including the normal accessibility backend). The immutable binaries
+and exact build records are listed in [`builds/5f4db5f/`](builds/5f4db5f/):
+the full-rebuild control SHA is
+`98b282b28965364796eeabc426b9cec4eb06f05f047814f438e7400ed3acc857`, and
+the direct style-port SHA is
+`02dfd8ab05c8f49054012ff0331e9d60751c53577dfe53d36cb719ec46926d27`. The
+control and direct source fixtures are pinned by their hashes in those
+manifests. No production source was changed for these builds.
+
+Sixteen correctness-only launches (four variants × four workloads) completed
+on persistent private Xvfb `:109`; the complete logs, initial screenshots,
+manifests, and hashes are in
+[`preflights/paint-only-5f4-private109-20261022/`](preflights/paint-only-5f4-private109-20261022/).
+Every cell passed the observer's exact initial marker and one red/green pixel
+transition, 800×600 client check, and button/text ink checks. The GPUI
+control/direct initial screenshots are byte-identical within each workload.
+Eager 10,000 is present and checked for all four apps. Virtual rows visible
+were 0–22; materialized rows were 23 for GPUI, 25 for MyGo, and 28 for
+NanoUI. Their overscan policies differ and remain an explicit capability
+difference. The display/logs verify the X11 server window and drawable;
+they are not scanout measurements. `x11` makes the GPUI accessibility bridge
+available, but the preflight does not demonstrate an active assistive
+technology client or live session-bus activation.
+
+All records remain `status=awaiting-manual-review`. The one-start/one-click
+durations printed by the observer are excluded correctness diagnostics, not
+performance results. The planned repeated 16-cell timing campaign remains
+unrun pending review and a separately coordinated quiet window.
