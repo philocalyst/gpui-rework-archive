@@ -1,6 +1,6 @@
 //! Real X11 target proof, rejection and pending-worker close lifecycle.
 use super::*;
-use crate::{El, button};
+use crate::{Color, El, button, column, div};
 use std::sync::{
     Weak,
     atomic::{AtomicBool, Ordering},
@@ -284,4 +284,174 @@ fn automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_w
         }
         eprintln!("GPUI_AUTO_TARGET_GATE,{name},pass");
     }
+}
+
+struct Fill(bool);
+impl View for Fill {
+    fn view(&self) -> El<'_> {
+        if self.0 {
+            column((div().size(24).bg(Color::BLACK),))
+        } else {
+            div()
+        }
+    }
+}
+#[derive(Clone, Copy)]
+enum FillPhase {
+    Initial,
+    Resize,
+    Resume(u64),
+    Complex(u64),
+    Upgrading,
+}
+struct FillScript {
+    host: NativeHost<Fill>,
+    phase: FillPhase,
+    checked: bool,
+    deadline: Instant,
+}
+impl FillScript {
+    fn assert_cold(&mut self) {
+        assert!(!self.host.upgrade_attempted);
+        assert!(self.host.upgrade.is_none());
+        assert!(self.host.upgrade_rejection.is_none());
+        assert!(self.host.instance.is_none());
+        let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
+            panic!("blank frame must remain on the software presenter")
+        };
+        assert!(surface.fetch().unwrap().iter().all(|&p| p == 0x00ff_ffff));
+        eprintln!("GPUI_AUTO_BLANK,cold,frames={}", self.host.presented_frames);
+    }
+    fn step(&mut self, event_loop: &ActiveEventLoop) {
+        assert!(Instant::now() < self.deadline, "blank-to-GPU deadline");
+        let Some(owner) = &self.host.owner else {
+            return;
+        };
+        let snapshot = owner.snapshot().unwrap();
+        if !snapshot.presentation_valid || snapshot.presentation_epoch != snapshot.source_epoch {
+            return;
+        }
+        match self.phase {
+            FillPhase::Initial => {
+                self.assert_cold();
+                self.phase = FillPhase::Resize;
+                let _ = self
+                    .host
+                    .window
+                    .as_ref()
+                    .unwrap()
+                    .request_inner_size(winit::dpi::PhysicalSize::new(400, 240));
+            }
+            FillPhase::Resize => {
+                if snapshot.size != [400, 240] {
+                    return;
+                }
+                self.assert_cold();
+                self.phase = FillPhase::Resume(self.host.presented_frames);
+                self.host.dispatch(event_loop, Callback::Suspended);
+                assert!(self.host.graphics.is_none());
+                self.host.dispatch(event_loop, Callback::Resumed);
+            }
+            FillPhase::Resume(frames) => {
+                if self.host.presented_frames == frames {
+                    return;
+                }
+                self.assert_cold();
+                self.phase = FillPhase::Complex(self.host.presented_frames);
+                self.host
+                    .owner
+                    .as_mut()
+                    .unwrap()
+                    .update(|m| m.0 = true)
+                    .unwrap();
+                self.host.request_redraw();
+            }
+            FillPhase::Complex(frames) => {
+                if self.host.presented_frames == frames {
+                    return;
+                }
+                assert!(self.host.upgrade_attempted);
+                assert!(self.host.instance.is_none());
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
+                    panic!("first complex frame must be software-presented")
+                };
+                assert!(surface.fetch().unwrap().iter().enumerate().all(|(i, &p)| {
+                    p == if i % 400 < 24 && i / 400 < 24 {
+                        0
+                    } else {
+                        0x00ff_ffff
+                    }
+                }));
+                let upgrade = self.host.upgrade.as_mut().unwrap();
+                let initialization = upgrade.initialization();
+                if !initialization.waiting_for_renderer() {
+                    return;
+                }
+                assert!(initialization.proved());
+                assert!(!initialization.renderer_started());
+                upgrade.release_renderer();
+                self.phase = FillPhase::Upgrading;
+                eprintln!(
+                    "GPUI_AUTO_BLANK,first_complex_cpu,epoch={}",
+                    snapshot.source_epoch
+                );
+            }
+            FillPhase::Upgrading => {
+                if !matches!(self.host.graphics, Some(Graphics::Gpu(_))) {
+                    return;
+                }
+                assert!(self.host.upgrade.is_none());
+                assert!(self.host.instance.is_some());
+                self.checked = true;
+                eprintln!("GPUI_AUTO_BLANK,gpu,epoch={}", snapshot.presentation_epoch);
+                event_loop.exit();
+            }
+        }
+    }
+}
+impl Host for FillScript {
+    fn dispatch(&mut self, event_loop: &ActiveEventLoop, callback: Callback<'_>) {
+        let idle = matches!(callback, Callback::AboutToWait);
+        self.host.dispatch(event_loop, callback);
+        assert!(self.host.error.is_none(), "{:?}", self.host.error);
+        if idle && !self.checked {
+            self.step(event_loop);
+            event_loop.set_control_flow(winit::event_loop::ControlFlow::WaitUntil(
+                Instant::now() + Duration::from_millis(10),
+            ));
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires private X11 and Mesa CPU Vulkan for delayed automatic handoff"]
+fn automatic_blank_stays_cold_across_resize_resume_then_upgrades_after_complex_cpu_frame() {
+    let mut event_loop = EventLoop::builder()
+        .with_x11()
+        .with_any_thread(true)
+        .build()
+        .unwrap();
+    let mut host = NativeHost::new(
+        Window::document(Fill(false))
+            .size(320, 180)
+            .renderer(RendererPolicy::Auto),
+    );
+    // Force a real candidate on llvmpipe. Without the fill certificate this
+    // would start a worker on the first blank frame, making assert_cold fail.
+    host.upgrade_policy = upgrade::Policy {
+        allow_cpu: true,
+        force_probe: true,
+        defer_renderer: true,
+        ..Default::default()
+    };
+    let script = FillScript {
+        host,
+        phase: FillPhase::Initial,
+        checked: false,
+        deadline: Instant::now() + Duration::from_secs(30),
+    };
+    let (mut driver, wake) = Driver::new(&event_loop, script);
+    driver.host_mut().host.wake = Some(wake);
+    event_loop.run_app_on_demand(&mut driver).unwrap();
+    assert!(driver.host().checked);
 }

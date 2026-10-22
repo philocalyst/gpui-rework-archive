@@ -636,11 +636,14 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             return Ok(());
         }
         if matches!(self.graphics, Some(Graphics::ReferenceCpu(..))) {
-            return match self.present_cpu() {
-                Ok((commit, full)) => {
+            let full = self.destination.requires_full();
+            return match self.present_cpu(full) {
+                Ok((commit, needs_gpu)) => {
                     self.destination.accepted(full);
                     self.did_present(RendererKind::ReferenceCpu, commit);
-                    self.start_upgrade();
+                    if needs_gpu {
+                        self.start_upgrade();
+                    }
                     Ok(())
                 }
                 Err(error) => {
@@ -845,8 +848,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             }
         }
     }
-    fn present_cpu(&mut self) -> Result<(Commit, bool), NativeError> {
-        let full = self.destination.requires_full();
+    fn present_cpu(&mut self, full: bool) -> Result<(Commit, bool), NativeError> {
         let Some(Graphics::ReferenceCpu(surface, history)) = &mut self.graphics else {
             unreachable!("CPU presentation requires an admitted CPU surface");
         };
@@ -866,7 +868,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 let commit = owner.presented(token)?;
                 // The solid backend may discard its pixel backing entirely.
                 *history = SurfaceDamage::default();
-                return Ok((commit, true));
+                return Ok((commit, false));
             }
         }
         let mut buffer = surface.buffer_mut().map_err(platform)?;
@@ -907,7 +909,11 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         }
         let commit = owner.presented(token)?;
         history.presented(damage);
-        Ok((commit, full))
+        // A certified fill needs no device, pipeline, worker or driver probe.
+        // The first complex frame is still submitted here before Auto starts
+        // its asynchronous handoff. Keep this decision independent of whether
+        // the platform offers a native fill or needs an ordinary CPU buffer.
+        Ok((commit, !notified))
     }
     fn input_result(&mut self, result: Result<Commit, Error>) -> Result<(), NativeError> {
         match result {
