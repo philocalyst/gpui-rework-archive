@@ -2649,6 +2649,99 @@ fn shared_bank_queues_a_patch_b_patch_c_without_poll_and_matches_full_literal_pa
 }
 
 #[test]
+fn literal_cow_and_equal_source_rows_preserve_queued_positional_and_slot_submissions() {
+    use gpui_canvas::{PaintColor, PaintEdit, SlotEdit};
+    use gpui_gpu::PaintRenderer;
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let original = Color::linear_srgb(0.25, 0.5, 0.75, 1.0).unwrap();
+            let changed = Color::linear_srgb(0.75, 0.25, 0.5, 1.0).unwrap();
+            let clip = Rect::new(0.0, 0.0, 32.0, 8.0);
+            let rect = |column| Rect::new(column as f32 * 8.0, 0.0, 8.0, 8.0);
+            let mut canvas = Canvas::recording(32, 8, config).unwrap();
+            canvas.clear(Color::WHITE);
+            let mut indices = Vec::new();
+            for column in 0..3 {
+                let cursor = canvas.paint_cursor();
+                canvas
+                    .fill_rect(rect(column), Affine::IDENTITY, clip, original)
+                    .unwrap();
+                indices.push(canvas.paint_index(cursor).unwrap());
+            }
+            let slot = canvas.paint_slot(PaintColor::new(original)).unwrap();
+            canvas
+                .fill_rect_slot(rect(3), Affine::IDENTITY, clip, slot)
+                .unwrap();
+            let mut gpu = PaintRenderer::new(renderer(format).await);
+            let targets = std::array::from_fn::<_, 3, _>(|_| output_texture(&gpu, &canvas));
+            gpu.render(
+                canvas.prepared_scene(),
+                &targets[0].create_view(&Default::default()),
+                &indices,
+            )
+            .unwrap();
+            // Equal positional writes detach before a later changed write,
+            // while no GPU word needs changing for the equal value itself.
+            canvas
+                .prepare_paint(&[PaintEdit::new(indices[0], original)])
+                .unwrap()
+                .commit();
+            let edits = [PaintEdit::new(indices[0], changed)];
+            canvas.prepare_paint(&edits).unwrap().commit();
+            gpu.prepare_paint_indexed(&edits, &targets[1].create_view(&Default::default()))
+                .unwrap()
+                .commit();
+            let mut gpu = gpu.into_inner();
+            let edits = [SlotEdit::new(slot, PaintColor::new(Color::WHITE))];
+            canvas.prepare_slots(&edits).unwrap().commit();
+            gpu.prepare_slots(&edits, &targets[2].create_view(&Default::default()))
+                .unwrap()
+                .commit();
+            // No readback or poll occurred between the three submissions.
+            let actual = targets.each_ref().map(|target| read_texture(&gpu, target));
+            let mut oracle = renderer(format).await;
+            for (frame, colors) in [
+                [original; 4],
+                [changed, original, original, original],
+                [changed, original, original, Color::WHITE],
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                let mut full = Canvas::with_color_config(32, 8, config).unwrap();
+                full.clear(Color::WHITE);
+                for (column, color) in colors.into_iter().enumerate() {
+                    full.fill_rect(rect(column), Affine::IDENTITY, clip, color)
+                        .unwrap();
+                }
+                assert_eq!(
+                    actual[frame],
+                    readback(&mut oracle, &full),
+                    "HDR={hdr} frame={frame}"
+                );
+                if hdr {
+                    assert_eq!(actual[frame], full.try_pixels().unwrap());
+                } else {
+                    for (&gpu, &cpu) in actual[frame].iter().zip(full.try_pixels().unwrap()) {
+                        assert!(gpu.abs_diff(cpu) <= 1);
+                    }
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn bank_patch_rejects_exceptional_opaque_proof_colors_then_full_render_recovers() {
     use gpui_canvas::{PaintColor, SlotEdit};
     pollster::block_on(async {

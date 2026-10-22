@@ -98,8 +98,10 @@ pub(super) struct PaintValue {
     value: PaintColor,
     support: PaintSupport,
 }
-/// Four admitted coordinates use only bits 0..=14. The first two spare high
-/// bits carry material facts; they are masked before any geometry operation.
+/// Four admitted coordinates use only bits 0..=14. Their four spare high bits
+/// carry material and literal ownership facts; they are masked before any
+/// geometry operation. Immutable rows may have multiple owners; exclusive rows
+/// have been positionally written and never participate in discovery again.
 #[derive(Clone, Copy, Default)]
 struct PaintSupport([u16; 4]);
 impl PaintSupport {
@@ -112,6 +114,23 @@ impl PaintSupport {
     fn rectangle(self) -> bool {
         self.0[1] & SUPPORT_FLAG != 0
     }
+    fn immutable(self) -> bool {
+        self.0[2] & SUPPORT_FLAG != 0
+    }
+    fn discoverable(self) -> bool {
+        !self.shared() && self.0[3] & SUPPORT_FLAG == 0
+    }
+    fn writable_literal(self) -> bool {
+        !self.shared() && !self.immutable()
+    }
+    fn alias(&mut self) {
+        debug_assert!(self.discoverable());
+        self.0[2] |= SUPPORT_FLAG;
+    }
+    fn exclusive(&mut self) {
+        debug_assert!(!self.shared() && !self.immutable());
+        self.0[3] |= SUPPORT_FLAG;
+    }
     fn flags(self) -> u8 {
         (u8::from(self.shared()) * SHARED) | (u8::from(self.rectangle()) * RECTANGLE)
     }
@@ -119,11 +138,12 @@ impl PaintSupport {
         DamageRegion::checked_canvas_bounds(self.0.map(|v| usize::from(v & !SUPPORT_FLAG)))
     }
     fn include(&mut self, damage: DamageRegion, rectangle: bool) {
-        let shared = self.0[0] & SUPPORT_FLAG;
-        let rect = (self.0[1] & SUPPORT_FLAG) | (u16::from(rectangle) * SUPPORT_FLAG);
+        let flags = self.0.map(|value| value & SUPPORT_FLAG);
         self.0 = self.damage().union(damage).coordinates();
-        self.0[0] |= shared;
-        self.0[1] |= rect;
+        for (coordinate, flag) in self.0.iter_mut().zip(flags) {
+            *coordinate |= flag;
+        }
+        self.0[1] |= u16::from(rectangle) * SUPPORT_FLAG;
     }
 }
 #[derive(Default)]
@@ -210,7 +230,7 @@ impl Columns {
             }
             false
         } else {
-            !(0..FIRST_PAINT).any(|index| same_color(color, implicit_paint(index).unwrap()))
+            self.find_literal(color).is_none()
         };
         if (new_scope && self.scopes.len() >= MAX_ROWS)
             || (new_paint && self.paints.len() >= MAX_ROWS)
@@ -242,11 +262,37 @@ impl Columns {
         self.scopes.push(scope);
         ScopeRef(index as u32 + 1)
     }
-    pub(super) fn literal(&mut self, color: PaintColor) -> PaintRef {
+    fn implicit_literal(color: PaintColor) -> Option<PaintRef> {
         for index in 0..FIRST_PAINT {
             if same_color(color, implicit_paint(index).unwrap()) {
-                return PaintRef(index);
+                return Some(PaintRef(index));
             }
+        }
+        None
+    }
+    fn find_literal(&self, color: PaintColor) -> Option<PaintRef> {
+        if let Some(reference) = Self::implicit_literal(color) {
+            return Some(reference);
+        }
+        let same =
+            |paint: &PaintValue| paint.support.discoverable() && same_color(paint.value, color);
+        if self.paints.last().is_some_and(same) {
+            return Some(PaintRef(self.paints.len() as u32 - 1 + FIRST_PAINT));
+        }
+        self.paints
+            .iter()
+            .take(DISCOVERY)
+            .position(same)
+            .map(|index| PaintRef(index as u32 + FIRST_PAINT))
+    }
+    pub(super) fn literal(&mut self, color: PaintColor) -> PaintRef {
+        if let Some(reference) = self.find_literal(color) {
+            if reference.0 >= FIRST_PAINT {
+                self.paints[(reference.0 - FIRST_PAINT) as usize]
+                    .support
+                    .alias();
+            }
+            return reference;
         }
         let index = self.paints.len();
         self.paints.push(PaintValue {
@@ -255,28 +301,38 @@ impl Columns {
         });
         PaintRef(index as u32 + FIRST_PAINT)
     }
-    // Nonshared literal entries are owned by exactly one common group. Keep
-    // that entry even when it later becomes an implicit color; repeated unique
-    // PaintIndex edits then overwrite one row rather than retain color history.
+    // A positional write must not mutate an aliased row or join discovery.
+    // Existing unique rows become exclusive; shared/immutable rows detach.
+    // Subsequent writes keep that exclusive row, without retaining history.
     pub(super) fn set_literal(&mut self, reference: PaintRef, color: PaintColor) -> PaintRef {
         if reference.0 >= FIRST_PAINT {
             let value = &mut self.paints[(reference.0 - FIRST_PAINT) as usize];
-            if !value.support.shared() {
+            if value.support.writable_literal() {
                 value.value = color;
+                value.support.exclusive();
                 return reference;
             }
         }
-        self.literal(color)
+        if let Some(reference) = Self::implicit_literal(color) {
+            return reference;
+        }
+        let index = self.paints.len();
+        let mut support = PaintSupport::default();
+        support.exclusive();
+        self.paints.push(PaintValue {
+            value: color,
+            support,
+        });
+        PaintRef(index as u32 + FIRST_PAINT)
     }
     pub(super) fn needs_literal_entry(&self, reference: PaintRef, color: PaintColor) -> bool {
-        if reference.0 >= FIRST_PAINT
-            && !self.paints[(reference.0 - FIRST_PAINT) as usize]
-                .support
-                .shared()
-        {
+        if reference.0 >= FIRST_PAINT && {
+            let support = self.paints[(reference.0 - FIRST_PAINT) as usize].support;
+            support.writable_literal()
+        } {
             return false;
         }
-        !(0..FIRST_PAINT).any(|i| same_color(color, implicit_paint(i).unwrap()))
+        Self::implicit_literal(color).is_none()
     }
     pub(super) fn reserve_literals(&mut self, additional: usize) -> Result<(), Error> {
         if self.paints.len().saturating_add(additional) > MAX_ROWS {
@@ -525,6 +581,169 @@ impl PaintUse<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn admit_literal(columns: &mut Columns, color: PaintColor) -> PaintRef {
+        let viewport = Rect::new(0.0, 0.0, 32.0, 32.0);
+        let mut common = test_scope(0, viewport);
+        common.map.inverse = [1.0, -0.0, -0.0, 1.0, 0.0, 0.0];
+        common.color = color.0;
+        columns.admit(common, viewport, None, false, false).unwrap();
+        columns.literal(color)
+    }
+
+    #[test]
+    fn literal_palette_shares_exact_bits_without_aliasing_mutable_sources() {
+        let color = PaintColor([0.25, 0.5, 0.75, 1.0]);
+        let mut columns = Columns::default();
+        let source = columns.shared(color).unwrap();
+        let first = admit_literal(&mut columns, color);
+        let repeated = admit_literal(&mut columns, color);
+        assert_eq!(first.0, repeated.0);
+        assert_ne!(first.0, source.0.get());
+        assert_eq!(columns.paints.len(), 2);
+        assert!(columns.paints[1].support.immutable());
+        assert!(!columns.paints[0].support.immutable());
+        let changed = PaintColor([0.5, 0.25, 0.75, 1.0]);
+        let edits = [SlotEdit::new(source, changed)];
+        columns.validate(&edits).unwrap();
+        columns.commit(&edits);
+        assert!(same_color(columns.paint(first), color));
+
+        // Numeric equality cannot merge distinct working-color bit patterns.
+        for sign in [0.0, -0.0] {
+            admit_literal(&mut columns, PaintColor([sign, 0.5, 0.75, 1.0]));
+        }
+        assert_eq!(columns.paints.len(), 4);
+        let mut fake = source;
+        fake.0 = std::num::NonZeroU32::new(first.0).unwrap();
+        assert_eq!(
+            columns
+                .validate(&[SlotEdit::new(fake, changed)])
+                .unwrap_err()
+                .reason,
+            SlotErrorKind::NotShared
+        );
+    }
+
+    #[test]
+    fn positional_writes_detach_once_and_never_rejoin_literal_discovery() {
+        let color = PaintColor([0.25, 0.5, 0.75, 1.0]);
+        let other = PaintColor([0.5, 0.25, 0.75, 1.0]);
+        let mut columns = Columns::default();
+        let palette = admit_literal(&mut columns, color);
+        assert_eq!(admit_literal(&mut columns, color).0, palette.0);
+        assert!(columns.needs_literal_entry(palette, color));
+        columns.reserve_literals(1).unwrap();
+        let mut detached = palette;
+        let measured = allocation_counter::measure(|| {
+            detached = columns.set_literal(palette, color);
+        });
+        assert_eq!(measured.count_total, 0);
+        assert_ne!(detached.0, palette.0);
+        assert!(!columns.paints[1].support.discoverable());
+        assert_eq!(admit_literal(&mut columns, color).0, palette.0);
+        let other_palette = admit_literal(&mut columns, other);
+        for i in 0..1000 {
+            let next = if i % 2 == 0 { other } else { color };
+            assert!(!columns.needs_literal_entry(detached, next));
+            assert_eq!(columns.set_literal(detached, next).0, detached.0);
+            let discovered = admit_literal(&mut columns, next);
+            assert_ne!(discovered.0, detached.0);
+            assert_eq!(
+                discovered.0,
+                if i % 2 == 0 {
+                    other_palette.0
+                } else {
+                    palette.0
+                }
+            );
+        }
+        assert_eq!(columns.paints.len(), 3);
+
+        // A unique original row can be edited without allocating, then stops
+        // being a discovery candidate even before it ever acquired a peer.
+        let unique = admit_literal(&mut columns, PaintColor([0.75, 0.25, 0.5, 1.0]));
+        assert!(!columns.needs_literal_entry(unique, color));
+        assert_eq!(columns.set_literal(unique, color).0, unique.0);
+        assert!(!columns.paints[3].support.discoverable());
+    }
+
+    #[test]
+    fn repeated_unique_and_late_miss_palette_storage_is_explicit() {
+        let color = |i: usize| PaintColor([0.25 + i as f32 / 8192.0, 0.5, 0.75, 1.0]);
+        for mode in 0..3 {
+            let mut columns = Columns::default();
+            let measured = allocation_counter::measure(|| {
+                for i in 0..4096 {
+                    let index = match mode {
+                        0 => 0,
+                        1 => i,
+                        _ if i < DISCOVERY + 2 => i,
+                        _ => DISCOVERY + (i % 2),
+                    };
+                    admit_literal(&mut columns, color(index));
+                }
+            });
+            assert_eq!(columns.paints.len(), if mode == 0 { 1 } else { 4096 });
+            eprintln!(
+                "literal_palette,mode={mode},rows={},capacity={},allocations={},requested={},live={}",
+                columns.paints.len(),
+                columns.paints.capacity(),
+                measured.count_total,
+                measured.bytes_total,
+                measured.bytes_current
+            );
+        }
+    }
+
+    #[test]
+    fn palette_flags_survive_support_union_without_leaking_into_geometry() {
+        for immutable in [false, true] {
+            let mut support = PaintSupport::default();
+            if immutable {
+                support.alias();
+            } else {
+                support.exclusive();
+            }
+            support.include(DamageRegion::default(), true);
+            assert!(support.damage().is_empty());
+            support.include(
+                DamageRegion::checked_canvas_bounds([0, 0, 16_384, 16_384]),
+                false,
+            );
+            assert_eq!(support.damage().bounds(), Some([0, 0, 16_384, 16_384]));
+            assert_eq!(support.flags(), RECTANGLE);
+            assert_eq!(support.immutable(), immutable);
+            assert_eq!(support.discoverable(), immutable);
+        }
+    }
+
+    #[test]
+    fn empty_and_clipped_calls_do_not_admit_literals_when_the_bank_is_full() {
+        let mut canvas =
+            super::super::Canvas::recording(32, 32, crate::ColorConfig::default()).unwrap();
+        canvas.commands.columns.paints = vec![
+            PaintValue {
+                value: PaintColor([0.25, 0.5, 0.75, 1.0]),
+                support: PaintSupport::new(true)
+            };
+            MAX_ROWS
+        ];
+        let clip = Rect::new(0.0, 0.0, 32.0, 32.0);
+        let measured = allocation_counter::measure(|| {
+            for rect in [
+                Rect::new(0.0, 0.0, 0.0, 16.0),
+                Rect::new(100.0, 100.0, 16.0, 16.0),
+            ] {
+                canvas
+                    .fill_rect(rect, crate::Affine::IDENTITY, clip, Color::rgb(23, 45, 67))
+                    .unwrap();
+            }
+        });
+        assert_eq!((measured.count_total, measured.bytes_total), (0, 0));
+        assert_eq!(canvas.commands.columns.paints.len(), MAX_ROWS);
+        assert_eq!(canvas.paint_cursor(), 0);
+    }
 
     #[test]
     fn support_flags_never_enter_empty_or_maximum_canvas_geometry() {

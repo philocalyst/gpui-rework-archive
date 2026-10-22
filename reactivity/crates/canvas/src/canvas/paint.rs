@@ -150,6 +150,10 @@ impl Canvas {
 
     /// Validate the whole edit list before any mutation. Geometry, clip,
     /// material, clear/configuration and command order remain unchanged.
+    /// Positional writes establish literal ownership, including equal-value
+    /// writes: shared source or immutable palette rows detach before mutation.
+    /// Detached exclusive rows are reused on later writes. Validation reserves
+    /// all required rows; dropping the guard leaves every binding unchanged.
     ///
     /// The diagnostic image becomes dirty on a changed value. Existing CPU
     /// rasterization can reuse geometry bins for the same tile envelope, while
