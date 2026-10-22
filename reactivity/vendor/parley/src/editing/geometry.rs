@@ -17,7 +17,7 @@ struct Entry {
 
 #[derive(Clone, Copy)]
 struct RunSlot {
-    item: usize,
+    item: u32,
     origin: f32,
 }
 
@@ -27,6 +27,11 @@ struct RunSlot {
 fn source_runs<B: Brush>(line: &Line<'_, B>, slots: &mut Vec<RunSlot>) -> Option<usize> {
     use crate::layout::data::LayoutItemKind;
     let items = &line.layout.data.line_items[line.data.item_range.clone()];
+    // This is a visual item position, not a shaped/source run identity. Keep
+    // the indexed implementation for a line that cannot reserve MAX as empty.
+    if items.len() > u32::MAX as usize {
+        return None;
+    }
     let mut min = usize::MAX;
     let mut max = 0;
     let mut count = 0;
@@ -53,16 +58,16 @@ fn source_runs<B: Brush>(line: &Line<'_, B>, slots: &mut Vec<RunSlot>) -> Option
     slots.resize(
         span,
         RunSlot {
-            item: usize::MAX,
+            item: u32::MAX,
             origin: 0.,
         },
     );
     for (position, item) in items.iter().enumerate() {
         if item.kind == LayoutItemKind::TextRun {
-            if slots[item.index - min].item != usize::MAX {
+            if slots[item.index - min].item != u32::MAX {
                 return None;
             }
-            slots[item.index - min].item = position;
+            slots[item.index - min].item = position as u32;
         }
     }
     Some(min)
@@ -121,10 +126,10 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                 return visit_indexed(layout, offsets, width, &mut visit);
             }
             for slot in &slots {
-                if slot.item == usize::MAX {
+                if slot.item == u32::MAX {
                     continue;
                 }
-                let run = line.item(slot.item)?.run()?;
+                let run = line.item(slot.item as usize)?.run()?;
                 let mut run_count = 0;
                 for cluster in run.clusters() {
                     // The old index explicitly exempts the empty layout's
@@ -381,8 +386,8 @@ fn visit_source_pairs<B: Brush, E>(
                 }
             }
         }
-        for slot in slots.iter().copied().filter(|slot| slot.item != usize::MAX) {
-            let run = line.item(slot.item).unwrap().run().unwrap();
+        for slot in slots.iter().copied().filter(|slot| slot.item != u32::MAX) {
+            let run = line.item(slot.item as usize).unwrap().run().unwrap();
             let mut prefix = slot.origin;
             rtl.clear();
             if run.is_rtl() {
