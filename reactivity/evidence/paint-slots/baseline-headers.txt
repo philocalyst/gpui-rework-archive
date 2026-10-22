@@ -1,0 +1,22 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-paint-slots-control/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 50.40s
+     Running unittests src/lib.rs (/tmp/gpui-paint-slots-control-target/release/deps/gpui-559efaa5b4b411d5)
+
+running 1 test
+test runtime::paint::tests::cold_storage_and_warm_edits_have_explicit_allocation_costs ... paint_headers,Node=40,Presented=80,Runtime=2320,Fanout=32,Metadata=256,State=112,Field=16,Sink=8,Prepared=40
+paint_mount,bound=false,allocations=41,retained=6180,peak=6340
+paint_warm,allocations=0,bytes=0
+paint_mount,bound=true,allocations=51,retained=7044,peak=7204
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 103 filtered out; finished in 0.00s
+

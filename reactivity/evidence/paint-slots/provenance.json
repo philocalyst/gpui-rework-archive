@@ -1,0 +1,145 @@
+{
+  "base": "de18f040c98dbfc32d33bd1e51515bbf11bce53b",
+  "candidate_source": "acdd3818a03850456f77ebb488e1b57ffffea042",
+  "control_source": "e01acb28cc",
+  "production_commits": [
+    "be3809f750b2d479c6cc6459f09f3e1d99f8402e",
+    "d7fcdf62caa44343acc4fa75adace3df6468120a"
+  ],
+  "profile": "default release; no native features for allocation/codegen fixtures",
+  "build_jobs": 2,
+  "no_timing_capture": true,
+  "row_count_each": 30,
+  "machine": "x86_64",
+  "artifacts": [
+    {
+      "variant": "baseline",
+      "name": "paint_slot_storage",
+      "path": "/tmp/gpui-paint-slots-control-target/release/examples/paint_slot_storage",
+      "sha256": "514c609195d3397286a7f0b73aa60c16e842f45f574a90edb58493bb1251de42",
+      "fixture_sha256": "2bdc2d82354aa40df7c3714b70ca1b7dd8616babfeaa2d4bdc94ce9553167675",
+      "source_commit": "82036847fb65c7a5152ccf70fee6ef5f85c3b641"
+    },
+    {
+      "variant": "baseline",
+      "name": "paint_slot_codegen",
+      "path": "/tmp/gpui-paint-slots-control-target/release/examples/paint_slot_codegen",
+      "sha256": "2613951106335d89bcf0d40b50ae078d6df4602261afb95158c9c8d4bfa7d37c",
+      "fixture_sha256": "a10121472c005032d56795be0a33d8e1f9468f622aea8de7795e0ad0b05063e8",
+      "source_commit": "e01acb28ccaf6bf643c152d54752f04ecc644c34"
+    },
+    {
+      "variant": "candidate",
+      "name": "paint_slot_storage",
+      "path": "/tmp/gpui-paint-slots-target/release/examples/paint_slot_storage",
+      "sha256": "0e80e4ca1d578e78034a86865535ffa789417a772fb8fdac7ee943382391849b",
+      "fixture_sha256": "2bdc2d82354aa40df7c3714b70ca1b7dd8616babfeaa2d4bdc94ce9553167675",
+      "source_commit": "3b3b1227e770c146c90fb5821479700e894a27a6"
+    },
+    {
+      "variant": "candidate",
+      "name": "paint_slot_codegen",
+      "path": "/tmp/gpui-paint-slots-target/release/examples/paint_slot_codegen",
+      "sha256": "67bad5c70cc72a0cf0307a037ef229a96b99fc5282ab4deb321c74c024f021c1",
+      "fixture_sha256": "a10121472c005032d56795be0a33d8e1f9468f622aea8de7795e0ad0b05063e8",
+      "source_commit": "acdd3818a03850456f77ebb488e1b57ffffea042"
+    }
+  ],
+  "gates": {
+    "canvas-parallel.txt": {
+      "passed": 154,
+      "failed_results": false
+    },
+    "vulkan.txt": {
+      "passed": 39,
+      "failed_results": false
+    },
+    "owner-default.txt": {
+      "passed": 363,
+      "failed_results": false
+    },
+    "owner-native-units.txt": {
+      "passed": 134,
+      "failed_results": false
+    },
+    "owner-release-units.txt": {
+      "passed": 103,
+      "failed_results": false
+    },
+    "native-bridge.txt": {
+      "passed": 1,
+      "failed_results": false
+    },
+    "clippy.txt": {
+      "passed": 0,
+      "failed_results": false,
+      "exit_code": 0
+    },
+    "docs.txt": {
+      "passed": 26,
+      "failed_results": false,
+      "gpui_merged_pass": 1,
+      "gpui_separate": 23,
+      "canvas": 2
+    },
+    "support-scope.txt": {
+      "passed": 4,
+      "failed_results": false
+    },
+    "baseline-headers.txt": {
+      "passed": 1,
+      "failed_results": false
+    }
+  },
+  "dependencies_added": 0,
+  "local_unsafe_added": false,
+  "notes": [
+    "No source/profile swaps in allocation execution; source SHA matches before/after",
+    "Existing vendor ICU warning preserved in logs",
+    "Actual native display :94; software Vulkan correctness, no hardware latency claim",
+    "Initial consumer fixture did not acknowledge P; both failed identically; corrected consumer final outputs retained",
+    "Ordinary property-copy and per-port transient BTreeMap costs are not fixed in this source"
+  ],
+  "commands": {
+    "owner-default.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui --lib --tests -- --test-threads=1",
+    "canvas-parallel.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_canvas -p gpui_gpu --features gpui_canvas/parallel --lib --tests -- --test-threads=1",
+    "vulkan.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_gpu --features vulkan-tests --test render -- --test-threads=1",
+    "owner-native-units.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui --features x11,wayland --lib -- --nocapture --test-threads=1",
+    "owner-release-units.txt": "cargo test --release --manifest-path reactivity/Cargo.toml -p gpui --lib -- --nocapture --test-threads=1",
+    "docs.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_canvas -p gpui --doc -- --test-threads=1",
+    "clippy.txt": "cargo clippy --manifest-path reactivity/Cargo.toml -p gpui_canvas -p gpui_gpu -p gpui --features gpui/x11,gpui/wayland,gpui_canvas/parallel,gpui_gpu/vulkan-tests --all-targets -- -D warnings",
+    "native-bridge.txt": "DISPLAY=:94 cargo test --manifest-path reactivity/Cargo.toml -p gpui --features x11,wayland --lib native_todo_port_presents_edits_pointer_actions_resize_and_inspection -- --ignored --exact native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection --nocapture --test-threads=1"
+  },
+  "code_size": {
+    "storage": {
+      "baseline": {
+        "text": 7944145,
+        "data": 153160,
+        "bss": 5795
+      },
+      "candidate": {
+        "text": 7963365,
+        "data": 153696,
+        "bss": 6523
+      }
+    },
+    "property": {
+      "baseline": {
+        "text": 7946978,
+        "data": 153960,
+        "bss": 3139
+      },
+      "candidate": {
+        "text": 7969210,
+        "data": 154600,
+        "bss": 739
+      }
+    }
+  },
+  "fixture_failure": {
+    "cause": "initial recording C was not acknowledged before inspect; P empty on both variants",
+    "resolution": "two-line explicit initial acknowledgement in final fixture",
+    "timing_samples": 0
+  },
+  "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+}
