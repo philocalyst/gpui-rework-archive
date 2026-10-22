@@ -128,41 +128,27 @@ impl Searcher {
             Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
             Sort::Longest => tracks().sort_desc(TrackColumn::Length),
         };
-        let rows = match query
-            .for_search()
-            .fetch_cancellable(database.connection(), &mut cancelled)
-        {
+        let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
+        let rows = match query.for_search().fetch_matching(
+            database.connection(),
+            &mut cancelled,
+            |title, artists| {
+                self.corpus.clear();
+                self.corpus.push_str(title);
+                self.corpus.push(' ');
+                self.corpus.push_str(artists.unwrap_or_default());
+                pattern
+                    .score(
+                        Utf32Str::new(&self.corpus, &mut self.utf32),
+                        &mut self.matcher,
+                    )
+                    .is_some()
+            },
+        ) {
             Ok(Some(rows)) => rows,
             Ok(None) => return None,
             Err(error) => return Some(Err(error.into())),
         };
-        let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
-        let mut matches = Vec::new();
-        for row in rows {
-            if cancelled() {
-                return None;
-            }
-            self.corpus.clear();
-            self.corpus.push_str(&row.title);
-            self.corpus.push(' ');
-            self.corpus
-                .push_str(row.artist_names.as_deref().unwrap_or_default());
-            if pattern
-                .score(
-                    Utf32Str::new(&self.corpus, &mut self.utf32),
-                    &mut self.matcher,
-                )
-                .is_some()
-            {
-                matches.push(row);
-            }
-        }
-        if cancelled() {
-            return None;
-        }
-        Some(Ok(SearchPage {
-            input,
-            rows: matches,
-        }))
+        Some(Ok(SearchPage { input, rows }))
     }
 }

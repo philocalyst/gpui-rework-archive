@@ -73,6 +73,10 @@ completion per question. `Completion::run_cancellable` checks obsolete work;
 search also checks before SQLite, between fetched rows, between matching
 candidates and before publishing. SQLite's internal sort/step is not preempted.
 The UI never waits for database/matcher work or joins the worker in a callback.
+Matching borrows SQLite's current UTF-8 row values and reuses the worker's corpus
+scratch; only accepted rows allocate owned title/artist strings. Every row still
+validates its projected types and UTF-8 before filtering. No borrowed SQLite
+value escapes a statement step, and SQL order remains the result order.
 
 Search, playback and database mutation commands share that one sequenced channel.
 After an SQLite import commits, the worker advances its authoritative database

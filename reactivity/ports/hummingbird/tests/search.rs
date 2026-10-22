@@ -55,7 +55,9 @@ fn cancellation_discards_partial_sql_and_matching_results_and_next_query_recover
         searcher
             .search(&database, input(""), || {
                 checks += 1;
-                checks == 14
+                // Nine rows now match during retrieval, followed by the final
+                // cancellation check before returning the completed page.
+                checks == 11
             })
             .is_none()
     );
@@ -70,4 +72,20 @@ fn cancellation_discards_partial_sql_and_matching_results_and_next_query_recover
             .unwrap(),
         Err(SourceError::QueryTooLong)
     ));
+}
+
+#[test]
+fn nonmatching_rows_still_validate_sqlite_text_before_skipping_owned_storage() {
+    let database = Database::fixture().unwrap();
+    database
+        .connection()
+        .execute(
+            "UPDATE track SET title = CAST(X'FF' AS TEXT) WHERE id = 1",
+            [],
+        )
+        .unwrap();
+    let result = Searcher::default()
+        .search(&database, input("no matching recording"), || false)
+        .unwrap();
+    assert!(matches!(result, Err(SourceError::Sqlite(_))));
 }

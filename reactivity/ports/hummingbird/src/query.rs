@@ -235,13 +235,16 @@ impl TrackQuery {
 impl TrackQueryForSearch {
     pub fn fetch_rows(self, connection: &Connection) -> Result<Vec<TrackSearchRow>> {
         Ok(self
-            .fetch_cancellable(connection, || false)?
+            .fetch_matching(connection, || false, |_, _| true)?
             .expect("uncancelled query completes"))
     }
-    pub(crate) fn fetch_cancellable(
+    /// Match while SQLite owns the row text. Only accepted rows acquire owned
+    /// strings; no borrowed SQLite value survives the next statement step.
+    pub(crate) fn fetch_matching(
         self,
         connection: &Connection,
         mut cancelled: impl FnMut() -> bool,
+        mut matches: impl FnMut(&str, Option<&str>) -> bool,
     ) -> Result<Option<Vec<TrackSearchRow>>> {
         let query = self.query.build(TrackProjection::Search);
         let mut statement = connection.prepare(&query.sql)?;
@@ -251,12 +254,18 @@ impl TrackQueryForSearch {
             if cancelled() {
                 return Ok(None);
             }
-            output.push(TrackSearchRow {
-                id: row.get(0)?,
-                title: row.get(1)?,
-                artist_names: row.get(2)?,
-                album_id: row.get(3)?,
-            });
+            let id = row.get(0)?;
+            let title = row.get_ref(1)?.as_str()?;
+            let artist_names = row.get_ref(2)?.as_str_or_null()?;
+            let album_id = row.get(3)?;
+            if matches(title, artist_names) {
+                output.push(TrackSearchRow {
+                    id,
+                    title: title.to_owned(),
+                    artist_names: artist_names.map(str::to_owned),
+                    album_id,
+                });
+            }
         }
         Ok((!cancelled()).then_some(output))
     }
