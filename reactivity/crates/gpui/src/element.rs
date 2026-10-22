@@ -70,12 +70,88 @@ pub(crate) struct Handler(Box<dyn Route>);
 pub(crate) enum Admission {
     Model { exact: Option<FieldId> },
     Window(crate::runtime::inspector::WindowAction),
+    Property,
 }
 trait Route {
     fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError>;
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
     fn owner_scope(&self, _receiver: &dyn Any, _sources: &dyn Any) -> Result<u32, BindError> {
         Ok(0)
+    }
+    fn property(&self, _phase: PropertyPhase<'_>) -> Result<(), BindError> {
+        unreachable!("only an admitted property route performs a property exchange")
+    }
+}
+
+// Borrowed only for this opt-in vtable call. Ordinary invoke keeps its original
+// ABI; neither this phase nor its output is retained in a route or runtime.
+enum PropertyPhase<'a> {
+    Propose(&'a dyn Any, &'a mut Option<PropertyChange>),
+    Reply(&'a mut dyn Any, Result<(), &'a crate::Error>),
+}
+
+/// One owned contribution interpreted against the current logical target.
+/// This is not a presentation or revision lease.
+pub type PropertyChange = (
+    crate::Target,
+    PropertyId,
+    crate::property::Contribution<crate::property::PropertyValue>,
+);
+
+/// Build an ordinary click route for an opt-in property editor.
+/// `proposal` reads the current owner. None performs no property operation.
+/// The result method receives canonical rejection or logical acceptance after
+/// the proposal borrow ends. Acceptance does not promise preparation or ACK:
+/// those follow through the ordinary window publication/error path.
+pub fn property_action<M: 'static, F, R>(
+    proposal: F,
+    applied_logically: R,
+) -> impl IntoHandler<M, shape::Property>
+where
+    F: Fn(&M) -> Option<PropertyChange> + 'static,
+    R: Fn(&mut M, Result<(), &crate::Error>) + 'static,
+{
+    PropertyRoute {
+        proposal,
+        applied_logically,
+        model: PhantomData,
+    }
+}
+struct PropertyRoute<M, F, R> {
+    proposal: F,
+    applied_logically: R,
+    model: PhantomData<fn(M)>,
+}
+impl<M: 'static, F, R> Route for PropertyRoute<M, F, R>
+where
+    F: Fn(&M) -> Option<PropertyChange>,
+    R: Fn(&mut M, Result<(), &crate::Error>),
+{
+    fn admit(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Admission, BindError> {
+        receiver
+            .is::<M>()
+            .then_some(Admission::Property)
+            .ok_or(BindError::ReceiverMismatch)
+    }
+    fn invoke(&self, _: &mut dyn Any) -> Result<(), BindError> {
+        unreachable!("property routes use their distinct logical transaction")
+    }
+    fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
+        match phase {
+            PropertyPhase::Propose(receiver, output) => {
+                let receiver = receiver
+                    .downcast_ref::<M>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                *output = (self.proposal)(receiver);
+            }
+            PropertyPhase::Reply(receiver, result) => {
+                let receiver = receiver
+                    .downcast_mut::<M>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                (self.applied_logically)(receiver, result);
+            }
+        }
+        Ok(())
     }
 }
 
@@ -90,8 +166,8 @@ impl Handler {
     ) -> Result<Admission, BindError> {
         self.0.admit(receiver, sources)
     }
-    // Component projections admit only model-relative actions. A window effect
-    // has no child receiver and cannot acquire authority from a projector.
+    // Retained component boundary checks are ordinary model routes. A window
+    // action or property proposal cannot substitute for that projection check.
     pub(crate) fn validate(
         &self,
         receiver: &dyn Any,
@@ -99,12 +175,25 @@ impl Handler {
     ) -> Result<Option<FieldId>, BindError> {
         match self.admit(receiver, sources)? {
             Admission::Model { exact } => Ok(exact),
-            Admission::Window(_) => Err(BindError::ReceiverMismatch),
+            Admission::Window(_) | Admission::Property => Err(BindError::ReceiverMismatch),
         }
     }
-
     pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
         self.0.invoke(receiver)
+    }
+
+    pub(crate) fn proposal(&self, receiver: &dyn Any) -> Result<Option<PropertyChange>, BindError> {
+        let mut output = None;
+        self.0
+            .property(PropertyPhase::Propose(receiver, &mut output))?;
+        Ok(output)
+    }
+    pub(crate) fn applied_logically(
+        &self,
+        receiver: &mut dyn Any,
+        result: Result<(), &crate::Error>,
+    ) -> Result<(), BindError> {
+        self.0.property(PropertyPhase::Reply(receiver, result))
     }
 
     pub(crate) fn owner_scope(
@@ -150,9 +239,7 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
         let sources = sources
             .downcast_ref::<Sources<P>>()
             .ok_or(BindError::ReceiverMismatch)?;
-        self.component
-            .validate_handler(parent, sources, &self.handler)
-            .map(|exact| Admission::Model { exact })
+        self.component.admit_handler(parent, sources, &self.handler)
     }
     fn owner_scope(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<u32, BindError> {
         let parent = receiver
@@ -168,6 +255,28 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
             .downcast_mut::<P>()
             .ok_or(BindError::ReceiverMismatch)?;
         self.handler.invoke(self.component.project_mut(parent)?)
+    }
+    fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
+        match phase {
+            PropertyPhase::Propose(receiver, output) => {
+                let parent = receiver
+                    .downcast_ref::<P>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                self.handler.0.property(PropertyPhase::Propose(
+                    (self.component.read)(parent),
+                    output,
+                ))
+            }
+            PropertyPhase::Reply(receiver, result) => {
+                let parent = receiver
+                    .downcast_mut::<P>()
+                    .ok_or(BindError::ReceiverMismatch)?;
+                self.handler.0.property(PropertyPhase::Reply(
+                    self.component.project_mut(parent)?,
+                    result,
+                ))
+            }
+        }
     }
 }
 
@@ -938,6 +1047,17 @@ impl<M: 'static, F: Fn(&mut M) + 'static> IntoHandler<M, shape::Method> for F {
 }
 
 impl<M, T, F> sealed::Handler<M, shape::Field> for FieldAction<M, T, F> {}
+impl<M, F, R> sealed::Handler<M, shape::Property> for PropertyRoute<M, F, R> {}
+impl<M: 'static, F, R> IntoHandler<M, shape::Property> for PropertyRoute<M, F, R>
+where
+    F: Fn(&M) -> Option<PropertyChange> + 'static,
+    R: Fn(&mut M, Result<(), &crate::Error>) + 'static,
+{
+    fn install(self, mut element: El<'_>) -> El<'_> {
+        element.on_click = Some(Handler(Box::new(self)));
+        element
+    }
+}
 impl<M: 'static, T: 'static, F: Fn(&mut T) + 'static> IntoHandler<M, shape::Field>
     for FieldAction<M, T, F>
 {
@@ -975,6 +1095,7 @@ pub mod shape {
     pub struct View;
     pub struct Method;
     pub struct Field;
+    pub struct Property;
 }
 
 /// Closed constructor-child family. The inferred shape parameter separates
@@ -1150,10 +1271,48 @@ mod tests {
             route.admit(&(), &Sources::<()>::new()),
             Ok(Admission::Window(_))
         ));
-        assert_eq!(
-            route.validate(&(), &Sources::<()>::new()),
+        struct Child;
+        impl View for Child {
+            fn view(&self) -> El<'_> {
+                div()
+            }
+        }
+        struct Parent(Child);
+        let child = Component::new(FieldId::new(1), "child", |p: &Parent| &p.0, |p| &mut p.0);
+        let parent = Parent(Child);
+        let sources = Sources::new().component(child);
+        assert!(matches!(
+            route.in_component(child).admit(&parent, &sources),
             Err(BindError::ReceiverMismatch)
+        ));
+    }
+
+    #[test]
+    fn property_method_items_keep_an_empty_capture_and_ordinary_headers() {
+        let action = property_action(|_: &Model| None, |_: &mut Model, _| {});
+        assert_eq!(size_of_val(&action), 0);
+        let mut nodes = button("apply").on_click(action).flatten();
+        let handler = nodes[0].on_click.take().unwrap();
+        assert_eq!(size_of_val(handler.0.as_ref()), 0);
+        assert_eq!(size_of::<Handler>(), 16);
+        assert_eq!(size_of::<Admission>(), 16);
+        eprintln!(
+            "property_action_headers,Handler={},Admission={},PropertyChange={},OptionChange={},PropertyPhase={}",
+            size_of::<Handler>(),
+            size_of::<Admission>(),
+            size_of::<PropertyChange>(),
+            size_of::<Option<PropertyChange>>(),
+            size_of::<PropertyPhase<'_>>()
         );
+        let model = Model {
+            count: Signal::new(0),
+            other: Signal::new(0),
+        };
+        assert!(matches!(
+            handler.admit(&model, &Sources::<Model>::new()),
+            Ok(Admission::Property)
+        ));
+        assert!(handler.proposal(&model).unwrap().is_none());
     }
 
     #[test]
@@ -1167,15 +1326,18 @@ mod tests {
             handler.invoke(&mut wrong_receiver),
             Err(BindError::ReceiverMismatch)
         );
-        assert_eq!(
-            handler.validate(&wrong_receiver, &()),
+        assert!(matches!(
+            handler.admit(&wrong_receiver, &()),
             Err(BindError::ReceiverMismatch)
-        );
+        ));
         let mut model = Model {
             count: Signal::new(1),
             other: Signal::new(7),
         };
-        assert_eq!(handler.validate(&model, &Sources::<Model>::new()), Ok(None));
+        assert!(matches!(
+            handler.admit(&model, &Sources::<Model>::new()),
+            Ok(Admission::Model { exact: None })
+        ));
         assert_eq!(handler.invoke(&mut model), Ok(()));
         assert_eq!(*model.count, 2);
         assert_eq!(*model.other, 7);
@@ -1193,11 +1355,13 @@ mod tests {
         let mut nodes = button("increment").on_click(action).flatten();
         let handler = nodes[0].on_click.take().unwrap();
         assert_eq!(std::mem::size_of_val(handler.0.as_ref()), action_bytes);
-        assert_eq!(handler.validate(&model, &sources), Ok(Some(COUNT.id())));
-        assert_eq!(
-            handler.validate(&model, &()),
-            Err(BindError::ReceiverMismatch)
+        assert!(
+            matches!(handler.admit(&model, &sources), Ok(Admission::Model { exact: Some(field) }) if field == COUNT.id())
         );
+        assert!(matches!(
+            handler.admit(&model, &()),
+            Err(BindError::ReceiverMismatch)
+        ));
         assert_eq!(handler.invoke(&mut 0_u32), Err(BindError::ReceiverMismatch));
         assert_eq!(handler.invoke(&mut model), Ok(()));
         assert_eq!(*model.count, 2);
@@ -1213,9 +1377,8 @@ mod tests {
             .on_click(imposter.update(|count| *count += 1))
             .flatten();
         let handler = nodes[0].on_click.take().unwrap();
-        assert_eq!(
-            handler.validate(&model, &sources),
-            Err(BindError::ProjectionMismatch(COUNT.id()))
+        assert!(
+            matches!(handler.admit(&model, &sources), Err(BindError::ProjectionMismatch(field)) if field == COUNT.id())
         );
         assert_eq!(*model.other, 7);
     }

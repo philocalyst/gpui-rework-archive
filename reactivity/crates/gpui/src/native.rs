@@ -1995,3 +1995,10 @@ mod style_tests;
     any(feature = "x11", feature = "x11-minimal")
 ))]
 mod inspector_tests;
+
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod property_action_tests;
