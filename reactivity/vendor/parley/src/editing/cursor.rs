@@ -15,13 +15,17 @@ pub struct Cursor {
 impl Cursor {
     /// Creates a new cursor from the given byte index and affinity.
     pub fn from_byte_index<B: Brush>(layout: &Layout<B>, index: usize, affinity: Affinity) -> Self {
-        Self::from_source_cluster(layout, affinity, Cluster::from_byte_index(layout, index))
+        Self::from_source_cluster(
+            layout,
+            affinity,
+            Cluster::from_byte_index(layout, index).as_ref(),
+        )
     }
 
     pub(super) fn from_source_cluster<B: Brush>(
         layout: &Layout<B>,
         affinity: Affinity,
-        cluster: Option<Cluster<'_, B>>,
+        cluster: Option<&Cluster<'_, B>>,
     ) -> Self {
         if let Some(cluster) = cluster {
             let index = cluster.text_range().start;
@@ -285,16 +289,20 @@ impl Cursor {
     ///
     /// The `width` parameter defines the width of the resulting rectangle.
     pub fn geometry<B: Brush>(&self, layout: &Layout<B>, width: f32) -> BoundingBox {
-        self.geometry_with(layout, width, self.logical_clusters(layout), |cluster| {
-            cluster.visual_offset().unwrap_or_default()
-        })
+        let clusters = self.logical_clusters(layout);
+        self.geometry_with(
+            layout,
+            width,
+            clusters.each_ref().map(Option::as_ref),
+            |cluster| cluster.visual_offset().unwrap_or_default(),
+        )
     }
 
     pub(super) fn geometry_with<B: Brush>(
         &self,
         layout: &Layout<B>,
         width: f32,
-        clusters: [Option<Cluster<'_, B>>; 2],
+        clusters: [Option<&Cluster<'_, B>>; 2],
         mut offset: impl FnMut(&Cluster<'_, B>) -> f32,
     ) -> BoundingBox {
         let [upstream, downstream] = clusters;
@@ -306,12 +314,12 @@ impl Cursor {
         if trailing {
             if let Some(cluster) = upstream {
                 if !cluster.is_hard_line_break() {
-                    return cursor_rect(&cluster, !cluster.is_rtl(), width, offset(&cluster));
+                    return cursor_rect(cluster, !cluster.is_rtl(), width, offset(cluster));
                 }
             }
         }
         if let Some(cluster) = downstream {
-            cursor_rect(&cluster, cluster.is_rtl(), width, offset(&cluster))
+            cursor_rect(cluster, cluster.is_rtl(), width, offset(cluster))
         } else {
             last_line_cursor_rect(layout, width)
         }
@@ -413,6 +421,14 @@ fn cursor_rect<B: Brush>(
         line_x += cluster.advance();
     }
     let line = cluster.line();
+    line_cursor_rect(&line, size, line_x)
+}
+
+pub(super) fn line_cursor_rect<B: Brush>(
+    line: &Line<'_, B>,
+    size: f32,
+    line_x: f32,
+) -> BoundingBox {
     let metrics = line.metrics();
     BoundingBox::new(
         line_x as f64,

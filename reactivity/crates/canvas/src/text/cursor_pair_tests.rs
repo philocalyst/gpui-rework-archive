@@ -18,6 +18,9 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
     for source in [
         "",
         "a",
+        "abcdef",
+        "abcdefg",
+        "abcdefgh",
         "office ffi fi  spaces   tail ",
         "a\u{301}b\u{200d}c defghijklmnop",
         "abc אבג 123 xyz العربية نهاية",

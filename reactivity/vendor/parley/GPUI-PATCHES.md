@@ -39,10 +39,11 @@ break_next keeps the original checkpoint/revert contract. A shared readiness
 check preserves done/invalid-width behavior; no retained flag, duplicate break
 algorithm, generic boolean specialization or additional cache is introduced.
 
-`CursorGeometry::geometries_at` resolves both affinities' shared source neighbours
-once. It reuses one rectangle only for identical canonical cursors or for exact
-source-adjacent, visually adjacent entries in one run and line, excluding hard
-breaks. The index construction and cursor rectangle then use the identical f32
-prefix addition, including RTL and signed zero. Other boundaries retain both
-geometry evaluations. Layout, cursor and retained map layouts do not change;
-there is no additional allocation, worker state or persistent cache.
+`CursorGeometry::geometries_at` uses the existing byte map to prove source
+adjacency, then checks exact visual adjacency within one run and line. The cached
+f32 prefix already contains the common edge, so that branch constructs no
+Cluster or Cursor. It shares the original line/width rectangle arithmetic.
+Endpoints, gaps and other boundaries retain canonical cursor policy in a
+separate fallback. Private cursor helpers borrow Cluster values, avoiding large
+Copy staging. Layout, cursor and retained map layouts do not change; there is no
+additional allocation, worker state, unsafe code or persistent cache.
