@@ -1,15 +1,21 @@
 # Shipping core code ledger
 
-Current frozen source `f490974fdc1ff440762a01fedc4d2b4a6c40417c`:
-**30,007** non-test code lines, including 18 build-script lines. Original GPUI
+Latest measured source `f0bd5335aeb831523f5c52777911b6052c7cabac`:
+**30,390** non-test code lines, including 18 build-script lines. Original GPUI
 `41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,922**, including 28 build-script
-lines. [The exact current snapshot](f490974fdc.json) records every counted file.
+lines. [The exact source snapshot](f0bd5335ae.json) records every counted file.
 Comments, tests, blanks, examples, vendors and support tools are excluded; host
 shader proof/generator source inside the shipping library remains charged.
 
 The [combined text/static source ebfdb2](../compact-static-main/core-lines.json)
 measures 29,975. The integrated surface descriptor removal subtracts six and the
-controlled checkbox adds 38. These measured source deltas do not establish
+controlled checkbox adds 38, giving the [30,007-line source](f490974fdc.json).
+Cached-edge text adds six, basis factoring adds 209 and contained property
+actions add 168 in the integrated formatting. The property producer separately
+measures 169 against its earlier base; export wrapping accounts for the one-line
+difference. These are measured source bills. A property action counter defect
+is under repair, so this latest count is not a combined correctness certificate.
+These measured source deltas do not establish
 feature equivalence, future final size, or permission to compress readable code.
 All imported vendor code, patches, static shader words and helpers retain their
 separate costs in the producer archives.

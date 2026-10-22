@@ -71,13 +71,15 @@ signed-zero alias geometry, legal graphemes, source-affinity line ownership and
 provider retirement as invariant gates. Glyph/font payloads must remain outside
 historical geometry.
 The [transform audit](docs/presented-transform-factorization-luna.md) identifies
-two redundant local-origin words per Presented row. The isolated successor
-keeps translation and size explicit and factors exact linear bases into the
-existing geometry epoch streams. A finite-basis prefix and tagged radius suffix
-may reuse the existing two Vec owners without new headers. This requires exact
-P/C scale, omitted-ancestor, signed-zero, failed-candidate and KEEP proofs;
-tiny custom-only owners and dense unique bases must be charged. Neither a
-64-byte row nor an end-to-end gain is accepted until measured.
+two redundant local-origin words per Presented row. The
+[integrated successor](evidence/presented-basis/ADOPTION.md) keeps translation
+and size explicit and factors exact linear bases into existing geometry epoch
+streams. Exact diagonal coefficients fit inline; general finite bases precede
+tagged radii in the existing two Vec owners. Its producer measures 80→64-byte
+rows with P/C scale, omitted-ancestor, signed-zero, failed-candidate and KEEP
+proofs. Tiny general-only owners regress 408 retained requested bytes and dense
+general siblings regress 344; query Context adds 16 borrowed bytes. Preserve
+these costs and qualify the merged source separately.
 The [compression audit](docs/text-map-compression-luna.md) prices source-domain
 rank planes and exact repeated-line templates after a bitwise compact-stop
 control. The [intrinsic measurement audit](docs/intrinsic-text-measure-luna.md)
@@ -88,15 +90,33 @@ The [scoped text audit](docs/scoped-parallel-text-next-luna.md) finds redundant
 source/geometry queries before thread scheduling: resolve both affinities from
 one neighbour pair and reuse the exact f32 boundary recurrence only for proved
 visual adjacency in one run/line. Keep bidi/wrap/hard-break fallbacks and the
-small-string direct path. The isolated implementation must pass packed-output,
-branch-census, allocation and optimized-assembly/performance gates before
-adoption. Parallel planners duplicate font and paragraph scratch; scheduling
+small-string direct path. The
+[integrated cached-edge implementation](benchmarks/caret-pair-controls/cached-edge/README.md)
+passes packed-output, branch-census, allocation and linked-code/performance
+controls at its exact producer pins. The common path constructs neither Cursor
+nor Cluster; fallback borrows source neighbours. A separate bounded prepass stops
+after the ninth boundary. Heap ownership is unchanged. The next structural text
+experiment targets the per-byte owner map and entry array using
+[ordered bulk emission](docs/monotonic-caret-stream-luna.md). The later
+[preflight audit](docs/monotonic-caret-preflight-luna.md) replaces comparator
+sorting with a bounded per-line run-identity scatter and preserves range/overlap
+validation before callbacks. It still needs the adversarial empty-edge bidi
+fixture, an implementation and measured controls. Preserve exact RTL f32
+recurrence; do not reverse-subtract advances or assume wrapped u32 source
+offsets remain monotonic above 4 GiB. Canvas already admits at most 32 KiB.
+Parallel planners duplicate font and paragraph scratch; scheduling
 and variable-output merge storage require separate measured justification.
 
 
 Typed reflection must also support arbitrary inspector value entry and contained
 component/tool owners without mirroring application membership or bypassing
-source admission. Designer color still needs shared batch/palette operations,
+source admission. [Contained property actions](benchmarks/contained-owner/README.md)
+are integrated, with one canonical logical kernel and a typed result method
+before the normal source barrier. A merged-source audit found an edit-count
+undercount; fix it with an exact turn-local identity union before combined
+qualification. Public mounted-target selection and canonical current-value
+refresh still require a cohesive API seam. Designer color still needs shared
+batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut
 primitive and tagged HDR storage.
 

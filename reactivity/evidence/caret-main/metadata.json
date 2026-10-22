@@ -1,0 +1,55 @@
+{
+  "source": "538191fa01",
+  "same_canvas_inputs_at": "f0bd5335ae",
+  "input_pathspecs": [
+    "reactivity/Cargo.toml",
+    "reactivity/Cargo.lock",
+    "reactivity/crates/canvas",
+    "reactivity/crates/core",
+    "reactivity/vendor/parley",
+    "reactivity/vendor/parley_engine",
+    ".cargo/config.toml"
+  ],
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///root/gpui-ce3/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "manifest_path": "/root/gpui-ce3/reactivity/crates/canvas/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_canvas",
+      "src_path": "/root/gpui-ce3/reactivity/crates/canvas/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [
+      "default",
+      "parallel",
+      "simd"
+    ],
+    "filenames": [
+      "/root/gpui-ce3/reactivity/target/debug/deps/gpui_canvas-28ceec100c0b3fdd"
+    ],
+    "executable": "/root/gpui-ce3/reactivity/target/debug/deps/gpui_canvas-28ceec100c0b3fdd",
+    "fresh": false
+  },
+  "passed": 193,
+  "ignored": 4,
+  "harnesses": 28,
+  "strict": true,
+  "format": true,
+  "scope": "Canvas parallel library/public/docs plus all-target strict and formatting. GPUI integration qualified separately."
+}

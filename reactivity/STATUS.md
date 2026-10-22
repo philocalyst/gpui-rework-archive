@@ -12,7 +12,7 @@ describe the intended complete system; this page records what is connected now.
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
-| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; external component-library overrides use ordinary typed APIs | Arbitrary text/numeric entry and contained tooling owners, complete theme cascade and user-defined component schemas remain |
+| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components can propose property edits through ordinary typed click methods | Property edit count reconciliation is under repair; public mounted-target selection/current-value refresh, arbitrary built-in entry, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
@@ -44,12 +44,18 @@ required tree. Stock Linux adapter construction starts background work even
 before activation, so lazy conversion is not a zero-cost native AT claim.
 
 On the current 64-bit build, Node is 40 B, an actual text-site entry is 80 B,
-Presented is 80 B and a frozen list-viewport entry is 40 B. Author Color is 16 B and
+Presented is 64 B and a frozen list-viewport entry is 40 B. Author Color is 16 B and
 Style is 88 B. Resolved styles use an owner-owned default/dense/shared lane with
 bounded exact discovery and an unrestricted dense fallback; its header adds 40 B
 per owner. Unicode TextLayout is 56 B, eight bytes larger than its predecessor.
 These are exact retained layouts, not whole-window memory figures; layout/font/scene
 storage and native services remain separately owned.
+The [presentation-basis producer](evidence/presented-basis/final/README.md)
+measures that 80→64 B row change at alignment 8. General bases reuse existing
+geometry epoch streams; ordinary diagonal rows need no pool. Tiny general-only
+owners add 408 requested retained bytes and dense general siblings add 344;
+query Context adds 16 borrowed bytes. These costs accompany the common large
+cohort savings. Row stride does not imply cache-line-aligned allocation.
 
 Designer colors now expose `OutputProfile::max_chroma` and `Color::fit_chroma`
 through one Fearless SIMD/Fallback kernel. They preserve Oklch author/alpha bits
@@ -61,6 +67,24 @@ and [lattice/adaptive controls](evidence/gamut-search-controls/README.md) retain
 precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
+
+Latest integrated source `f0bd5335ae` combines cached-edge caret lowering,
+compact presentation rows and contained property actions. The
+[four-way text controls](benchmarks/caret-pair-controls/cached-edge/README.md)
+qualify their isolated pins: final versus original medians are about 40% lower
+for long Latin shaping, 17% for RTL and 23% for mixed text, with identical heap
+rows and explicit small-cohort results. Direct/packed geometry oracles and an
+identical 83-case public transcript pass. Main's unchanged Canvas inputs also
+pass 193 cases/docs, four ignored, strict checks and formatting at `538191fa01`.
+These are text measurements, not native latency or RSS results.
+
+The [basis archive](evidence/presented-basis/final/README.md) and
+[contained-editor archive](benchmarks/contained-owner/README.md) retain their
+exact producer default/native/strict/cross and actual AT/Apply qualifications.
+Independent merged-source review then found a public `Commit.changed_nodes`
+undercount for property actions with no-op replies. The combined main campaign
+was interrupted rather than certified; a public failing control and exact
+identity-union fix are in progress. No combined-main success is claimed here.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),
@@ -86,8 +110,8 @@ executable digests and owned-process cleanup checks hold.
 [Surface owner removal](evidence/surface-config-owner/README.md) measures
 GpuSurface 1,072→1,008 bytes at its separate 64-bit producer pin, with no RSS
 claim. [Checkbox identity/focus and sparse/full payload evidence](evidence/typed-checkbox/README.md)
-retains its own producer pins. The transform factorization and contained
-inspector editor remain isolated work.
+retains its own producer pins. Later transform and contained-editor integrations
+retain their separate source qualifications above.
 
 The [combined text/Future/native campaign](evidence/text-main-integration/README.md)
 pins main source `007f10ccbd`: 529 GPUI cases/docs (27 ignored), strict checks,
