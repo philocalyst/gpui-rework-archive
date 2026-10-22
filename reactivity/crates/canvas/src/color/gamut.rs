@@ -231,19 +231,19 @@ fn first_exit<S: Simd>(
     let mut start = zero;
     for turn in [turns[0], turns[1], infinity] {
         let end = turn.min(bound);
-        let is_turn = turn.simd_lt(bound);
-        let radius = is_turn.select(
-            critical_radius(simd, p, is_turn.select(turn, infinity)),
-            zero,
-        );
+        let radius = critical_radius(simd, p, turn);
+        let overlaps = (turn - radius).simd_lt(bound);
+        let radius = overlaps.select(radius + (turn - end).abs(), zero);
         let finite_radius = radius.simd_lt(f64::INFINITY);
         let safe_radius = finite_radius.select(radius, zero);
         let value = p.evaluate(end);
         let error = endpoint_error(p, end, safe_radius);
         let uncertain = !finite_radius | value.abs().simd_le(error);
         let pending = result.simd_eq(f64::INFINITY) & unresolved.simd_eq(f64::INFINITY);
-        let earliest = finite_radius.select((end - safe_radius).max(0.0), zero);
-        unresolved = (pending & uncertain).select(earliest, unresolved);
+        // An uncertain extremum can hide an outward pair of roots before it.
+        // The whole preceding monotone interval is unresolved, not just the
+        // derivative-root enclosure. A failed enclosure has no certified start.
+        unresolved = (pending & uncertain).select(finite_radius.select(start, zero), unresolved);
         let active = pending & !uncertain & value.simd_gt(error);
         if active.to_bitmask() & 7 != 0 {
             let mut low = start;

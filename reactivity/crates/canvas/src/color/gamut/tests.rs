@@ -21,6 +21,7 @@ fn check_limits<S: Simd>(simd: S) {
     let mut worst_normal_scaled = 0.0_f64;
     for (profile, l, h, expected) in cases() {
         if l == 0.0 || l == 1.0 {
+            assert_eq!(profile.max_chroma(l, h).unwrap() as f64, expected);
             continue;
         }
         let cap = limit(simd, profile, l, h).unwrap();
@@ -163,10 +164,7 @@ fn polynomial_cases<S: Simd>(simd: S) {
     let r: [f64; 4] = r.into();
     let unresolved: [f64; 4] = unresolved.into();
     assert_eq!(r[0], f64::INFINITY);
-    assert!(
-        (unresolved[0] - 1.0).abs() < 1e-12,
-        "unresolved touch {unresolved:?}"
-    );
+    assert_eq!(unresolved[0], 0.0);
     assert!((r[1] - 1.0).abs() < 1e-12, "first of three {r:?}");
     assert!((r[2] - 0.25).abs() < 1e-12, "linear {r:?}");
     assert_eq!(r[3], f64::INFINITY);
@@ -192,7 +190,7 @@ fn nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign() {
     let r: [f64; 4] = r.into();
     let unresolved: [f64; 4] = unresolved.into();
     assert_eq!(r[0], f64::INFINITY);
-    assert!((unresolved[0] - 11.0 / 15.0).abs() < 1e-12);
+    assert_eq!(unresolved[0], 0.0);
 }
 
 #[test]
