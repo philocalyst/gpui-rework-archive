@@ -1,0 +1,15 @@
+    Blocking waiting for file lock on package cache
+   Compiling cephal v0.1.1 (/root/gpui-ce3/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-ce3/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 32.27s
+     Running unittests src/lib.rs (target/debug/deps/gpui-3119c911f6f1cfd7)
+
+running 1 test
+inspector_blank_headless_retained,plain_bytes=5636,plain_allocs=21,tool_bytes=52392,tool_allocs=179,delta_bytes=46756 (includes font/text/layout/paint resources)
+inspector_bytes,Node=40,Runtime=1888,Metadata=264,Inspector=24,Handler=16,WindowAction=1,tool_nodes=17,texts_capacity=14
+test runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 133 filtered out; finished in 0.02s
+

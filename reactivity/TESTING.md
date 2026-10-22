@@ -6,6 +6,13 @@ publication, input routing and visitors serve native apps, `Application::demo`,
 `Win::demo`, the inspector and tests. The synchronous production surface exists
 in `gpui`; native accessibility uses that same sheet and action dispatcher.
 Virtual time and the full asynchronous graph remain separate implementation gates.
+
+Headless windows acknowledge canonical commands without reserving a CPU image.
+`with_pixels` allocates and renders diagnostic backing on demand; resize releases
+the old backing and leaves its replacement lazy. Semantic-only tests therefore
+pay no framebuffer allocation. The [matched owner fixture](evidence/headless-image-lazy/README.md)
+records the exact cost and feature-profile differences. Pixel diagnostics do not
+acknowledge a native presentation.
 The supplied `final/10-quality.md` supplies the broader feature corpus, subject
 to [CONTRACT.md](CONTRACT.md)'s explicit semantic amendments.
 
