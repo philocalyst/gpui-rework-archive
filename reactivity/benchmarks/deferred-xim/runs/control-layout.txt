@@ -1,0 +1,5 @@
+print-type-size type: `platform_impl::linux::x11::window::UnownedWindow`: 784 bytes, alignment: 8 bytes
+print-type-size type: `platform_impl::linux::x11::event_processor::EventProcessor`: 664 bytes, alignment: 8 bytes
+print-type-size type: `platform_impl::linux::x11::window::SharedState`: 640 bytes, alignment: 8 bytes
+print-type-size type: `platform_impl::linux::x11::ime::inner::ImeInner`: 344 bytes, alignment: 8 bytes
+print-type-size type: `platform_impl::linux::x11::ActiveEventLoop`: 200 bytes, alignment: 8 bytes

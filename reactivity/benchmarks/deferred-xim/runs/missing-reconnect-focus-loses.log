@@ -1,0 +1,34 @@
+CREATE W1 xid=6291458
+CREATE W2 xid=6291459
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=false
+FOCUS window=6291458 value=true
+PHASE plain-before-enable
+KEY window=6291458 logical=Character("q") text=Some("q")
+KEY window=6291458 logical=Dead(None) text=None
+KEY window=6291458 logical=Character("é") text=Some("é")
+KEY window=6291458 logical=Named(Compose) text=None
+KEY window=6291458 logical=Dead(None) text=None
+KEY window=6291458 logical=Character("œ") text=Some("œ")
+PHASE enable-W1-first-q-same-pump
+IME window=6291459 Disabled
+IME window=6291458 Disabled
+IME window=6291458 Enabled
+IME window=6291458 Preedit("", None)
+IME window=6291458 Commit("Ω")
+PHASE W2-independent-disabled
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=true
+KEY window=6291459 logical=Character("q") text=Some("q")
+PHASE W2-enable-first-q-same-pump
+IME window=6291459 Enabled
+IME window=6291459 Preedit("", None)
+IME window=6291459 Commit("Ω")
+PHASE server-destroy-reinstantiate
+KEY window=6291459 logical=Character("q") text=Some("q")
+
+thread 'main' (3932005) panicked at src/main.rs:56:9:
+assertion `left == right` failed: expected exactly one "Ω": [Observed { window: 6291459, kind: "key", text: "q" }]
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

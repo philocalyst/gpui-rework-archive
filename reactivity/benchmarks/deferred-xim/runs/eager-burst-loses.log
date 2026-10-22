@@ -1,0 +1,62 @@
+CREATE W1 xid=6291460
+CREATE W2 xid=6291461
+IME window=6291460 Disabled
+IME window=6291461 Disabled
+FOCUS window=6291460 value=false
+FOCUS window=6291461 value=false
+FOCUS window=6291460 value=true
+MODIFIERS window=6291460 ModifiersState(0x0)
+PHASE plain-before-enable
+MODIFIERS window=6291460 ModifiersState(0x0)
+KEY window=6291460 logical=Character("q") text=Some("q")
+KEY window=6291460 logical=Dead(None) text=None
+KEY window=6291460 logical=Character("é") text=Some("é")
+KEY window=6291460 logical=Named(Compose) text=None
+KEY window=6291460 logical=Dead(None) text=None
+KEY window=6291460 logical=Character("œ") text=Some("œ")
+KEY window=6291460 logical=Named(Control) text=None
+MODIFIERS window=6291460 ModifiersState(CONTROL)
+KEY window=6291460 logical=Character("q") text=Some("q")
+MODIFIERS window=6291460 ModifiersState(0x0)
+PHASE enable-W1-first-q-same-pump
+IME window=6291460 Enabled
+MODIFIERS window=6291460 ModifiersState(0x0)
+FOCUS window=6291460 value=false
+FOCUS window=6291461 value=true
+MODIFIERS window=6291461 ModifiersState(0x0)
+MODIFIERS window=6291461 ModifiersState(0x0)
+FOCUS window=6291461 value=false
+FOCUS window=6291460 value=true
+MODIFIERS window=6291460 ModifiersState(0x0)
+IME window=6291460 Preedit("", None)
+IME window=6291460 Commit("Ω")
+PHASE W2-independent-disabled
+MODIFIERS window=6291460 ModifiersState(0x0)
+FOCUS window=6291460 value=false
+FOCUS window=6291461 value=true
+MODIFIERS window=6291461 ModifiersState(0x0)
+KEY window=6291461 logical=Character("q") text=Some("q")
+PHASE W2-enable-first-q-same-pump
+IME window=6291461 Enabled
+MODIFIERS window=6291461 ModifiersState(0x0)
+FOCUS window=6291461 value=false
+FOCUS window=6291460 value=true
+MODIFIERS window=6291460 ModifiersState(0x0)
+MODIFIERS window=6291460 ModifiersState(0x0)
+FOCUS window=6291460 value=false
+FOCUS window=6291461 value=true
+MODIFIERS window=6291461 ModifiersState(0x0)
+IME window=6291461 Preedit("", None)
+IME window=6291461 Commit("Ω")
+PHASE shortcut-after-enable
+MODIFIERS window=6291461 ModifiersState(CONTROL)
+MODIFIERS window=6291461 ModifiersState(CONTROL)
+MODIFIERS window=6291461 ModifiersState(CONTROL)
+MODIFIERS window=6291461 ModifiersState(0x0)
+KEY window=6291461 logical=Named(Control) text=None
+MODIFIERS window=6291461 ModifiersState(CONTROL)
+KEY window=6291461 logical=Character("q") text=Some("q")
+
+thread 'main' (3960506) panicked at src/main.rs:435:5:
+assertion failed: p.modifiers.is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

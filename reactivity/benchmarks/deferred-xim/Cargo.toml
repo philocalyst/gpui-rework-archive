@@ -1,0 +1,10 @@
+[package]
+name = "deferred-xim-probe"
+version = "0.0.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+winit = { path = "../../vendor/winit", default-features = false, features = ["x11", "rwh_06"] }
+x11rb = { version = "0.13", features = ["xtest"] }

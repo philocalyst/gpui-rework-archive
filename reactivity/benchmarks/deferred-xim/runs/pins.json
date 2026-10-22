@@ -1,0 +1,82 @@
+{
+  "production_head": "a44ff50c6bdd7d7db79975a6459565d32a6cd128",
+  "production_commits": [
+    "f51089671a",
+    "a44ff50c6b"
+  ],
+  "baseline": "c9344bdd592c2c7474ba9412bc17e00a4c1c453a",
+  "provider": "fcitx/xcb-imdkit 621048bd50e8f3cbf52335f824f7b4d708a21b14",
+  "display": ":110",
+  "target": "x86_64-unknown-linux-gnu",
+  "rustc": "1.97.1 8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "qualification": "correctness only; adoption blocked by instantiate callback client_data lifetime; no timing/RSS runs",
+  "artifacts": [
+    {
+      "path": "/tmp/gpui-deferred-xim-frozen/server",
+      "bytes": 17728,
+      "sha256": "170ef976c3bd4417e2c21e94a0fd0fc5684deddfb76440e99e32ac09b3ceb7c6"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-frozen/libxcb-imdkit.so",
+      "bytes": 641600,
+      "sha256": "7bec3a436b8d2aefe827420a27912eb146f4201617abf60ff2b5ca90251ed6da"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-frozen/deferral-f510-probe",
+      "bytes": 51541336,
+      "sha256": "75462c25d8594be8c068bb99f20636352a30d105aeaf29a3c22904c1f3666c5a"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-frozen/eager-c934-probe",
+      "bytes": 51646256,
+      "sha256": "c9376bbbab760afaa0dff7e8064b1cc1ecaac6b6058309086d85bbbb6a63937e"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-frozen/candidate-a44-probe",
+      "bytes": 51610000,
+      "sha256": "16babd636da6f2f785f7917543be2e9c294b6fcb97550fb0f094b528a4ee3143"
+    },
+    {
+      "path": "/root/gpui-deferred-xim-sol/reactivity/benchmarks/deferred-xim/src/main.rs",
+      "bytes": 21464,
+      "sha256": "a37f7f9a25650abd93dcc407bae1296fd27557fad56f3d84a1d1705f0c2fbbb8"
+    },
+    {
+      "path": "/root/gpui-deferred-xim-sol/reactivity/benchmarks/deferred-xim/server.c",
+      "bytes": 5339,
+      "sha256": "480546cc2a25119740a645a134fa52ba50b769efbb481eb662811cf327051c99"
+    },
+    {
+      "path": "/root/gpui-deferred-xim-sol/reactivity/benchmarks/deferred-xim/Cargo.lock",
+      "bytes": 35883,
+      "sha256": "8deaa306a6e9ba5bd7d178d442ea239a3078b5bf7dfd314849015fd8ac190f8f"
+    },
+    {
+      "path": "/root/gpui-deferred-xim-sol/reactivity/benchmarks/deferred-xim/runs/eager-control-source.rs",
+      "bytes": 19231,
+      "sha256": "aa22a7074a1ecb488bdb7ca25445ab667f93d99acf84ed0bff227cdf818316e8"
+    },
+    {
+      "path": "/root/gpui-deferred-xim-sol/reactivity/benchmarks/deferred-xim/runs/deferral-only-control-source.rs",
+      "bytes": 18088,
+      "sha256": "8206e113211236fff959118556cbed69ac05b6c38b43716818e10cb7c624bf57"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-libX11-1.8.13.tar.xz",
+      "bytes": 1803464,
+      "sha256": "69606f485c2c07c14ef64f75b7bb326d48587af33795d9ab3e607c0b5f94f11c"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-target/debug/deps/libwinit-40566a5eefcfb87c.rlib",
+      "bytes": 33362324,
+      "sha256": "4ae691ec934485b1e19d0c12e34431353035c8fc2319a0066786688eb7b93d7f"
+    },
+    {
+      "path": "/tmp/gpui-deferred-xim-control-target/debug/deps/libwinit-fe0964e3bf873428.rlib",
+      "bytes": 33038040,
+      "sha256": "29216176ed336fd631bc2c2bccd5d6c86c58a9ccb6a66a9588f1c76b1d414c7d"
+    }
+  ],
+  "candidate_winit_rlib": "/tmp/gpui-deferred-xim-target/debug/deps/libwinit-40566a5eefcfb87c.rlib",
+  "eager_winit_rlib": "/tmp/gpui-deferred-xim-control-target/debug/deps/libwinit-fe0964e3bf873428.rlib"
+}

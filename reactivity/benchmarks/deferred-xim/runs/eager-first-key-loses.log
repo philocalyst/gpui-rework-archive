@@ -1,0 +1,29 @@
+CREATE W1 xid=6291460
+CREATE W2 xid=6291461
+IME window=6291460 Disabled
+IME window=6291461 Disabled
+FOCUS window=6291460 value=false
+FOCUS window=6291461 value=false
+FOCUS window=6291460 value=true
+MODIFIERS window=6291460 ModifiersState(0x0)
+PHASE plain-before-enable
+MODIFIERS window=6291460 ModifiersState(0x0)
+KEY window=6291460 logical=Character("q") text=Some("q")
+KEY window=6291460 logical=Dead(None) text=None
+KEY window=6291460 logical=Character("é") text=Some("é")
+KEY window=6291460 logical=Named(Compose) text=None
+KEY window=6291460 logical=Dead(None) text=None
+KEY window=6291460 logical=Character("œ") text=Some("œ")
+KEY window=6291460 logical=Named(Control) text=None
+MODIFIERS window=6291460 ModifiersState(CONTROL)
+KEY window=6291460 logical=Character("q") text=Some("q")
+MODIFIERS window=6291460 ModifiersState(0x0)
+PHASE enable-W1-first-q-same-pump
+KEY window=6291460 logical=Character("q") text=Some("q")
+IME window=6291460 Enabled
+
+thread 'main' (3960467) panicked at src/main.rs:152:9:
+assertion `left == right` failed: expected exactly one "Ω": [Observed { window: 6291460, kind: "key", text: "q" }, Observed { window: 6291460, kind: "enabled", text: "" }]
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

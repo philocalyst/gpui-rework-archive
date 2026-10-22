@@ -1,0 +1,278 @@
+CREATE W1 xid=4194306
+CREATE W2 xid=4194307
+FOCUS window=4194306 value=false
+FOCUS window=4194307 value=false
+FOCUS window=4194306 value=true
+MODIFIERS window=4194306 ModifiersState(0x0)
+PHASE plain-before-enable
+MODIFIERS window=4194306 ModifiersState(0x0)
+KEY window=4194306 logical=Character("q") text=Some("q")
+KEY window=4194306 logical=Dead(None) text=None
+KEY window=4194306 logical=Character("é") text=Some("é")
+KEY window=4194306 logical=Named(Compose) text=None
+KEY window=4194306 logical=Dead(None) text=None
+KEY window=4194306 logical=Character("œ") text=Some("œ")
+KEY window=4194306 logical=Named(Control) text=None
+MODIFIERS window=4194306 ModifiersState(CONTROL)
+KEY window=4194306 logical=Character("q") text=Some("q")
+MODIFIERS window=4194306 ModifiersState(0x0)
+PHASE enable-W1-first-q-same-pump
+IME window=4194307 Disabled
+IME window=4194306 Disabled
+IME window=4194306 Enabled
+KEY window=4194306 logical=Character("q") text=Some("q")
+IME window=4194306 Preedit("", None)
+IME window=4194306 Commit("Ω")
+PHASE W2-independent-disabled
+MODIFIERS window=4194306 ModifiersState(0x0)
+FOCUS window=4194306 value=false
+FOCUS window=4194307 value=true
+MODIFIERS window=4194307 ModifiersState(0x0)
+KEY window=4194307 logical=Character("q") text=Some("q")
+PHASE W2-enable-first-q-same-pump
+IME window=4194307 Enabled
+IME window=4194307 Preedit("", None)
+IME window=4194307 Commit("Ω")
+PHASE shortcut-after-enable
+MODIFIERS window=4194307 ModifiersState(CONTROL)
+MODIFIERS window=4194307 ModifiersState(CONTROL)
+MODIFIERS window=4194307 ModifiersState(CONTROL)
+MODIFIERS window=4194307 ModifiersState(0x0)
+KEY window=4194307 logical=Named(Control) text=None
+MODIFIERS window=4194307 ModifiersState(CONTROL)
+KEY window=4194307 logical=Character("q") text=Some("q")
+MODIFIERS window=4194307 ModifiersState(0x0)
+PHASE burst-shift-one-event-time-translation
+MODIFIERS window=4194307 ModifiersState(SHIFT)
+MODIFIERS window=4194307 ModifiersState(SHIFT)
+MODIFIERS window=4194307 ModifiersState(SHIFT)
+MODIFIERS window=4194307 ModifiersState(0x0)
+KEY window=4194307 logical=Named(Shift) text=None
+MODIFIERS window=4194307 ModifiersState(SHIFT)
+KEY window=4194307 logical=Character("!") text=Some("!")
+MODIFIERS window=4194307 ModifiersState(0x0)
+PHASE preedit-cancel-commit-focus
+IME window=4194307 Preedit("", None)
+IME window=4194307 Preedit("x", Some((1, 1)))
+IME window=4194307 Preedit("", None)
+IME window=4194307 Preedit("", None)
+IME window=4194307 Preedit("x", Some((1, 1)))
+IME window=4194307 Preedit("", None)
+IME window=4194307 Preedit("", None)
+IME window=4194307 Commit("Ω")
+IME window=4194307 Preedit("", None)
+IME window=4194307 Preedit("x", Some((1, 1)))
+MODIFIERS window=4194307 ModifiersState(0x0)
+FOCUS window=4194307 value=false
+FOCUS window=4194306 value=true
+MODIFIERS window=4194306 ModifiersState(0x0)
+IME window=4194307 Preedit("", None)
+IME window=4194306 Preedit("", None)
+IME window=4194306 Commit("Ω")
+MODIFIERS window=4194306 ModifiersState(0x0)
+FOCUS window=4194306 value=false
+FOCUS window=4194307 value=true
+MODIFIERS window=4194307 ModifiersState(0x0)
+PHASE server-destroy-reinstantiate
+IME window=4194307 Preedit("", None)
+IME window=4194307 Commit("Ω")
+MODIFIERS window=4194307 ModifiersState(0x0)
+FOCUS window=4194307 value=false
+FOCUS window=4194306 value=true
+MODIFIERS window=4194306 ModifiersState(0x0)
+IME window=4194306 Preedit("", None)
+IME window=4194306 Commit("Ω")
+MODIFIERS window=4194306 ModifiersState(0x0)
+FOCUS window=4194306 value=false
+FOCUS window=4194307 value=true
+MODIFIERS window=4194307 ModifiersState(0x0)
+IME window=4194307 Preedit("", None)
+IME window=4194307 Commit("Ω")
+PHASE late-window-W3
+CREATE W3 xid=4194312
+IME window=4194312 Disabled
+FOCUS window=4194312 value=false
+MODIFIERS window=4194307 ModifiersState(0x0)
+FOCUS window=4194307 value=false
+FOCUS window=4194312 value=true
+MODIFIERS window=4194312 ModifiersState(0x0)
+IME window=4194312 Enabled
+IME window=4194312 Preedit("", None)
+IME window=4194312 Commit("Ω")
+PHASE queued-enable-closed-window
+PHASE rapid-toggle-W1
+FOCUS window=4194306 value=true
+MODIFIERS window=4194306 ModifiersState(0x0)
+IME window=4194306 Disabled
+IME window=4194306 Enabled
+IME window=4194306 Disabled
+IME window=4194306 Enabled
+IME window=4194306 Preedit("", None)
+IME window=4194306 Commit("Ω")
+IME window=4194306 Disabled
+PHASE cross-thread-allow-wakes-without-redraw
+IME window=4194306 Enabled
+IME window=4194306 Preedit("", None)
+IME window=4194306 Commit("Ω")
+PHASE ordinary-compose-after-disable
+IME window=4194306 Disabled
+KEY window=4194306 logical=Dead(None) text=None
+KEY window=4194306 logical=Character("é") text=Some("é")
+KEY window=4194306 logical=Named(Compose) text=None
+KEY window=4194306 logical=Dead(None) text=None
+KEY window=4194306 logical=Character("œ") text=Some("œ")
+MODIFIERS window=4194306 ModifiersState(0x0)
+FOCUS window=4194306 value=false
+FOCUS window=4194307 value=true
+MODIFIERS window=4194307 ModifiersState(0x0)
+IME window=4194307 Preedit("", None)
+IME window=4194307 Commit("Ω")
+SERVER TRACE BEFORE RESTART
+SERVER READY window=6291456
+SERVER opcode=1 window=0
+SERVER opcode=30 window=0
+SERVER opcode=38 window=0
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=4194306 style=1026 spot=0,0
+SERVER opcode=54 window=4194306 style=1026 spot=31,47
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=58 window=4194306 style=1026 spot=31,47
+SERVER opcode=60 window=4194306 style=1026 spot=31,47
+SERVER KEY window=4194306 code=24 type=2
+SERVER COMMIT window=4194306 text=Ω
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=59 window=4194306 style=1026 spot=31,47
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=4194307 style=1026 spot=0,0
+SERVER opcode=56 window=4194307 style=1026 spot=0,0
+SERVER opcode=58 window=4194307 style=1026 spot=0,0
+SERVER opcode=54 window=4194307 style=1026 spot=73,89
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=24 type=2
+SERVER COMMIT window=4194307 text=Ω
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=37 type=2
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=24 type=2
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=50 type=2
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=10 type=2
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=33 type=2
+SERVER opcode=74 window=4194307 style=1026 spot=73,89
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=9 type=2
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=33 type=2
+SERVER opcode=74 window=4194307 style=1026 spot=73,89
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=24 type=2
+SERVER COMMIT window=4194307 text=Ω
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=33 type=2
+SERVER opcode=74 window=4194307 style=1026 spot=73,89
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=59 window=4194307 style=1026 spot=73,89
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=58 window=4194306 style=1026 spot=31,47
+SERVER opcode=60 window=4194306 style=1026 spot=31,47
+SERVER KEY window=4194306 code=24 type=2
+SERVER COMMIT window=4194306 text=Ω
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=59 window=4194306 style=1026 spot=31,47
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=58 window=4194307 style=1026 spot=73,89
+SERVER TRACE AFTER RESTART
+SERVER READY window=6291456
+SERVER opcode=1 window=0
+SERVER opcode=30 window=0
+SERVER opcode=38 window=0
+SERVER opcode=50 window=4194306 style=1026 spot=0,0
+SERVER opcode=54 window=4194306 style=1026 spot=31,47
+SERVER opcode=50 window=4194307 style=1026 spot=0,0
+SERVER opcode=54 window=4194307 style=1026 spot=73,89
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=58 window=4194307 style=1026 spot=73,89
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=24 type=2
+SERVER COMMIT window=4194307 text=Ω
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=59 window=4194307 style=1026 spot=73,89
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=58 window=4194306 style=1026 spot=31,47
+SERVER opcode=60 window=4194306 style=1026 spot=31,47
+SERVER KEY window=4194306 code=24 type=2
+SERVER COMMIT window=4194306 text=Ω
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=59 window=4194306 style=1026 spot=31,47
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=58 window=4194307 style=1026 spot=73,89
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=24 type=2
+SERVER COMMIT window=4194307 text=Ω
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=59 window=4194307 style=1026 spot=73,89
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=4194312 style=1026 spot=0,0
+SERVER opcode=56 window=4194312 style=1026 spot=0,0
+SERVER opcode=58 window=4194312 style=1026 spot=0,0
+SERVER opcode=60 window=4194312 style=1026 spot=0,0
+SERVER KEY window=4194312 code=24 type=2
+SERVER COMMIT window=4194312 text=Ω
+SERVER opcode=52 window=4194312 style=1026 spot=0,0
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=59 window=4194307 style=1026 spot=73,89
+SERVER opcode=56 window=4194306 style=1026 spot=31,47
+SERVER opcode=58 window=4194306 style=1026 spot=31,47
+SERVER opcode=52 window=4194306 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=4194306 style=1026 spot=0,0
+SERVER opcode=56 window=4194306 style=1026 spot=0,0
+SERVER opcode=58 window=4194306 style=1026 spot=0,0
+SERVER opcode=54 window=4194306 style=1026 spot=31,47
+SERVER opcode=52 window=4194306 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=4194306 style=1026 spot=0,0
+SERVER opcode=56 window=4194306 style=1026 spot=0,0
+SERVER opcode=58 window=4194306 style=1026 spot=0,0
+SERVER opcode=54 window=4194306 style=1026 spot=31,47
+SERVER opcode=60 window=4194306 style=1026 spot=31,47
+SERVER KEY window=4194306 code=24 type=2
+SERVER COMMIT window=4194306 text=Ω
+SERVER opcode=52 window=4194306 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=4194306 style=1026 spot=0,0
+SERVER opcode=56 window=4194306 style=1026 spot=0,0
+SERVER opcode=58 window=4194306 style=1026 spot=0,0
+SERVER opcode=54 window=4194306 style=1026 spot=31,47
+SERVER opcode=60 window=4194306 style=1026 spot=31,47
+SERVER KEY window=4194306 code=24 type=2
+SERVER COMMIT window=4194306 text=Ω
+SERVER opcode=52 window=4194306 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=59 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=4194307 style=1026 spot=73,89
+SERVER opcode=58 window=4194307 style=1026 spot=73,89
+SERVER opcode=60 window=4194307 style=1026 spot=73,89
+SERVER KEY window=4194307 code=24 type=2
+SERVER COMMIT window=4194307 text=Ω
+
+PASS mode=late

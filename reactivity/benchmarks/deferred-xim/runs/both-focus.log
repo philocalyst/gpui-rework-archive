@@ -1,0 +1,335 @@
+CREATE W1 xid=6291458
+CREATE W2 xid=6291459
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=false
+FOCUS window=6291458 value=true
+MODIFIERS window=6291458 ModifiersState(0x0)
+PHASE plain-before-enable
+MODIFIERS window=6291458 ModifiersState(0x0)
+KEY window=6291458 logical=Character("q") text=Some("q")
+KEY window=6291458 logical=Dead(None) text=None
+KEY window=6291458 logical=Character("é") text=Some("é")
+KEY window=6291458 logical=Named(Compose) text=None
+KEY window=6291458 logical=Dead(None) text=None
+KEY window=6291458 logical=Character("œ") text=Some("œ")
+KEY window=6291458 logical=Named(Control) text=None
+MODIFIERS window=6291458 ModifiersState(CONTROL)
+KEY window=6291458 logical=Character("q") text=Some("q")
+MODIFIERS window=6291458 ModifiersState(0x0)
+PHASE enable-W1-first-q-same-pump
+MODIFIERS window=6291458 ModifiersState(0x0)
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=true
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(0x0)
+FOCUS window=6291459 value=false
+FOCUS window=6291458 value=true
+MODIFIERS window=6291458 ModifiersState(0x0)
+IME window=6291459 Disabled
+IME window=6291458 Disabled
+IME window=6291458 Enabled
+IME window=6291458 Preedit("", None)
+IME window=6291458 Commit("Ω")
+PHASE W2-independent-disabled
+MODIFIERS window=6291458 ModifiersState(0x0)
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=true
+MODIFIERS window=6291459 ModifiersState(0x0)
+KEY window=6291459 logical=Character("q") text=Some("q")
+PHASE W2-enable-first-q-same-pump
+IME window=6291459 Enabled
+IME window=6291459 Preedit("", None)
+IME window=6291459 Commit("Ω")
+PHASE shortcut-after-enable
+MODIFIERS window=6291459 ModifiersState(CONTROL)
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(0x0)
+KEY window=6291459 logical=Named(Control) text=None
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(CONTROL)
+KEY window=6291459 logical=Character("q") text=Some("q")
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(CONTROL)
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(CONTROL)
+MODIFIERS window=6291459 ModifiersState(0x0)
+PHASE burst-shift-one-event-time-translation
+MODIFIERS window=6291459 ModifiersState(SHIFT)
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(0x0)
+KEY window=6291459 logical=Named(Shift) text=None
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(SHIFT)
+KEY window=6291459 logical=Character("!") text=Some("!")
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(SHIFT)
+MODIFIERS window=6291459 ModifiersState(0x0)
+MODIFIERS window=6291459 ModifiersState(SHIFT)
+MODIFIERS window=6291459 ModifiersState(0x0)
+PHASE preedit-cancel-commit-focus
+IME window=6291459 Preedit("", None)
+IME window=6291459 Preedit("x", Some((1, 1)))
+IME window=6291459 Preedit("", None)
+IME window=6291459 Preedit("", None)
+IME window=6291459 Preedit("x", Some((1, 1)))
+IME window=6291459 Preedit("", None)
+IME window=6291459 Preedit("", None)
+IME window=6291459 Commit("Ω")
+IME window=6291459 Preedit("", None)
+IME window=6291459 Preedit("x", Some((1, 1)))
+MODIFIERS window=6291459 ModifiersState(0x0)
+FOCUS window=6291459 value=false
+FOCUS window=6291458 value=true
+MODIFIERS window=6291458 ModifiersState(0x0)
+IME window=6291459 Preedit("", None)
+IME window=6291458 Preedit("", None)
+IME window=6291458 Commit("Ω")
+MODIFIERS window=6291458 ModifiersState(0x0)
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=true
+MODIFIERS window=6291459 ModifiersState(0x0)
+PHASE server-destroy-reinstantiate
+IME window=6291459 Preedit("", None)
+IME window=6291459 Commit("Ω")
+MODIFIERS window=6291459 ModifiersState(0x0)
+FOCUS window=6291459 value=false
+FOCUS window=6291458 value=true
+MODIFIERS window=6291458 ModifiersState(0x0)
+IME window=6291458 Preedit("", None)
+IME window=6291458 Commit("Ω")
+MODIFIERS window=6291458 ModifiersState(0x0)
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=true
+MODIFIERS window=6291459 ModifiersState(0x0)
+IME window=6291459 Preedit("", None)
+IME window=6291459 Commit("Ω")
+PHASE late-window-W3
+CREATE W3 xid=6291464
+IME window=6291464 Disabled
+FOCUS window=6291464 value=false
+MODIFIERS window=6291459 ModifiersState(0x0)
+FOCUS window=6291459 value=false
+FOCUS window=6291464 value=true
+MODIFIERS window=6291464 ModifiersState(0x0)
+IME window=6291464 Enabled
+IME window=6291464 Preedit("", None)
+IME window=6291464 Commit("Ω")
+PHASE queued-enable-closed-window
+PHASE rapid-toggle-W1
+FOCUS window=6291458 value=true
+MODIFIERS window=6291458 ModifiersState(0x0)
+IME window=6291458 Disabled
+IME window=6291458 Enabled
+IME window=6291458 Disabled
+IME window=6291458 Enabled
+IME window=6291458 Preedit("", None)
+IME window=6291458 Commit("Ω")
+IME window=6291458 Disabled
+PHASE cross-thread-allow-wakes-without-redraw
+IME window=6291458 Enabled
+IME window=6291458 Preedit("", None)
+IME window=6291458 Commit("Ω")
+PHASE ordinary-compose-after-disable
+IME window=6291458 Disabled
+KEY window=6291458 logical=Dead(None) text=None
+KEY window=6291458 logical=Character("é") text=Some("é")
+KEY window=6291458 logical=Named(Compose) text=None
+KEY window=6291458 logical=Dead(None) text=None
+KEY window=6291458 logical=Character("œ") text=Some("œ")
+MODIFIERS window=6291458 ModifiersState(0x0)
+FOCUS window=6291458 value=false
+FOCUS window=6291459 value=true
+MODIFIERS window=6291459 ModifiersState(0x0)
+IME window=6291459 Preedit("", None)
+IME window=6291459 Commit("Ω")
+SERVER TRACE BEFORE RESTART
+SERVER READY window=4194304
+SERVER opcode=1 window=0
+SERVER opcode=30 window=0
+SERVER opcode=38 window=0
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=6291458 style=1026 spot=0,0
+SERVER opcode=56 window=6291458 style=1026 spot=0,0
+SERVER opcode=58 window=6291458 style=1026 spot=0,0
+SERVER opcode=54 window=6291458 style=1026 spot=31,47
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=2
+SERVER COMMIT window=6291458 text=Ω
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=3
+SERVER opcode=56 window=6291458 style=1026 spot=31,47
+SERVER opcode=59 window=6291458 style=1026 spot=31,47
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=6291459 style=1026 spot=0,0
+SERVER opcode=56 window=6291459 style=1026 spot=0,0
+SERVER opcode=58 window=6291459 style=1026 spot=0,0
+SERVER opcode=54 window=6291459 style=1026 spot=73,89
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=2
+SERVER COMMIT window=6291459 text=Ω
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=37 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=37 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=50 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=10 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=10 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=50 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=33 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=33 type=3
+SERVER opcode=74 window=6291459 style=1026 spot=73,89
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=9 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=9 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=33 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=33 type=3
+SERVER opcode=74 window=6291459 style=1026 spot=73,89
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=2
+SERVER COMMIT window=6291459 text=Ω
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=3
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=33 type=2
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=33 type=3
+SERVER opcode=74 window=6291459 style=1026 spot=73,89
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=59 window=6291459 style=1026 spot=73,89
+SERVER opcode=56 window=6291458 style=1026 spot=31,47
+SERVER opcode=58 window=6291458 style=1026 spot=31,47
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=2
+SERVER COMMIT window=6291458 text=Ω
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=3
+SERVER opcode=56 window=6291458 style=1026 spot=31,47
+SERVER opcode=59 window=6291458 style=1026 spot=31,47
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=58 window=6291459 style=1026 spot=73,89
+SERVER TRACE AFTER RESTART
+SERVER READY window=4194304
+SERVER opcode=1 window=0
+SERVER opcode=30 window=0
+SERVER opcode=38 window=0
+SERVER opcode=50 window=6291459 style=1026 spot=0,0
+SERVER opcode=54 window=6291459 style=1026 spot=73,89
+SERVER opcode=50 window=6291458 style=1026 spot=0,0
+SERVER opcode=54 window=6291458 style=1026 spot=31,47
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=58 window=6291459 style=1026 spot=73,89
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=2
+SERVER COMMIT window=6291459 text=Ω
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=3
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=59 window=6291459 style=1026 spot=73,89
+SERVER opcode=56 window=6291458 style=1026 spot=31,47
+SERVER opcode=58 window=6291458 style=1026 spot=31,47
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=2
+SERVER COMMIT window=6291458 text=Ω
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=3
+SERVER opcode=56 window=6291458 style=1026 spot=31,47
+SERVER opcode=59 window=6291458 style=1026 spot=31,47
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=58 window=6291459 style=1026 spot=73,89
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=2
+SERVER COMMIT window=6291459 text=Ω
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=3
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=59 window=6291459 style=1026 spot=73,89
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=6291464 style=1026 spot=0,0
+SERVER opcode=56 window=6291464 style=1026 spot=0,0
+SERVER opcode=58 window=6291464 style=1026 spot=0,0
+SERVER opcode=60 window=6291464 style=1026 spot=0,0
+SERVER KEY window=6291464 code=24 type=2
+SERVER COMMIT window=6291464 text=Ω
+SERVER opcode=60 window=6291464 style=1026 spot=0,0
+SERVER KEY window=6291464 code=24 type=3
+SERVER opcode=52 window=6291464 style=1026 spot=0,0
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=59 window=6291459 style=1026 spot=73,89
+SERVER opcode=56 window=6291458 style=1026 spot=31,47
+SERVER opcode=58 window=6291458 style=1026 spot=31,47
+SERVER opcode=52 window=6291458 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=6291458 style=1026 spot=0,0
+SERVER opcode=56 window=6291458 style=1026 spot=0,0
+SERVER opcode=58 window=6291458 style=1026 spot=0,0
+SERVER opcode=54 window=6291458 style=1026 spot=31,47
+SERVER opcode=52 window=6291458 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=6291458 style=1026 spot=0,0
+SERVER opcode=56 window=6291458 style=1026 spot=0,0
+SERVER opcode=58 window=6291458 style=1026 spot=0,0
+SERVER opcode=54 window=6291458 style=1026 spot=31,47
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=2
+SERVER COMMIT window=6291458 text=Ω
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=3
+SERVER opcode=52 window=6291458 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=52 window=0 style=2064 spot=0,0
+SERVER opcode=50 window=6291458 style=1026 spot=0,0
+SERVER opcode=56 window=6291458 style=1026 spot=0,0
+SERVER opcode=58 window=6291458 style=1026 spot=0,0
+SERVER opcode=54 window=6291458 style=1026 spot=31,47
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=2
+SERVER COMMIT window=6291458 text=Ω
+SERVER opcode=60 window=6291458 style=1026 spot=31,47
+SERVER KEY window=6291458 code=24 type=3
+SERVER opcode=52 window=6291458 style=1026 spot=31,47
+SERVER opcode=50 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=58 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=0 style=2064 spot=0,0
+SERVER opcode=59 window=0 style=2064 spot=0,0
+SERVER opcode=56 window=6291459 style=1026 spot=73,89
+SERVER opcode=58 window=6291459 style=1026 spot=73,89
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=2
+SERVER COMMIT window=6291459 text=Ω
+SERVER opcode=60 window=6291459 style=1026 spot=73,89
+SERVER KEY window=6291459 code=24 type=3
+
+PASS mode=focus
