@@ -1,0 +1,21 @@
+    Blocking waiting for file lock on package cache
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-paint-patch/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.58s
+     Running unittests src/lib.rs (/tmp/gpui-paint-patch-target/debug/deps/gpui_canvas-029ec7ac3a6d0647)
+
+running 1 test
+paint_storage,Canvas=552,DisplayList=288,PaintIndex=4,PaintEdit=20,PaintCommit=40
+paint_commit_allocations=0,bytes=0
+test canvas::paint::tests::paint_plan_adds_no_canvas_fields_and_allocates_nothing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 32 filtered out; finished in 0.00s
+
