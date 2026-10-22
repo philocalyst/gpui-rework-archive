@@ -264,3 +264,94 @@ fn request_and_reply_panics_restore_the_owned_route_until_close() {
         assert_eq!(drops.load(Ordering::SeqCst), before + 1);
     }
 }
+
+#[test]
+fn post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l() {
+    use std::sync::atomic::{AtomicBool, Ordering};
+    static BAD_WRITE: AtomicBool = AtomicBool::new(false);
+    struct Child {
+        target: Option<Target>,
+        replies: u32,
+    }
+    impl Child {
+        fn proposal(&self) -> Option<gpui::PropertyChange> {
+            self.target.map(|target| {
+                (
+                    target,
+                    PropertyId::Width,
+                    Contribution::Set(PropertyValue::Dimension(Some(180.))),
+                )
+            })
+        }
+        fn reply(&mut self, _: Result<(), &Error>) {
+            self.replies += 1;
+        }
+    }
+    impl View for Child {
+        fn view(&self) -> El<'_> {
+            button("Apply").on_click(gpui::property_action(Self::proposal, Self::reply))
+        }
+    }
+    struct Parent {
+        correct: Child,
+        wrong: Child,
+    }
+    impl Parent {
+        const CHILD: Component<Self, Child> = Component::new(
+            FieldId::new(1),
+            "child",
+            |m| &m.correct,
+            |m| {
+                if BAD_WRITE.load(Ordering::SeqCst) {
+                    &mut m.wrong
+                } else {
+                    &mut m.correct
+                }
+            },
+        );
+    }
+    impl View for Parent {
+        fn sources() -> Sources<Self> {
+            Sources::new().component(Self::CHILD)
+        }
+        fn view(&self) -> El<'_> {
+            row((button("Subject").w(120), Self::CHILD.view(self)))
+        }
+    }
+    let mut win = Win::new(Parent {
+        correct: Child {
+            target: None,
+            replies: 0,
+        },
+        wrong: Child {
+            target: None,
+            replies: 0,
+        },
+    })
+    .unwrap();
+    let subject = win.button("Subject");
+    win.update(|m| m.correct.target = Some(subject)).unwrap();
+    let apply = win.button("Apply");
+    let before = win.counters().source_operations;
+    // Simulate a contract-violating writer that changes after mount without an
+    // owner operation. Shared admission still selects the registered child.
+    BAD_WRITE.store(true, Ordering::SeqCst);
+    let result = win.activate(apply);
+    BAD_WRITE.store(false, Ordering::SeqCst);
+    assert!(matches!(
+        result,
+        Err(Error::Binding(
+            gpui::BindError::ComponentProjectionMismatch(_)
+        ))
+    ));
+    assert_eq!(win.counters().source_operations, before + 1);
+    assert_eq!(win.root().unwrap().correct.replies, 0);
+    assert_eq!(win.root().unwrap().wrong.replies, 0);
+    assert!(matches!(
+        win.property_value(subject, PropertyId::Width),
+        Err(Error::Poisoned)
+    ));
+    assert!(matches!(win.with_scene(|_, _| ()), Err(Error::Poisoned)));
+    assert!(matches!(win.activate(apply), Err(Error::Poisoned)));
+    win.close();
+}

@@ -355,7 +355,16 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             // may still change the tool's ordinary model error/status state.
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
-            handler.applied_logically(&mut self.runtime.model, result.as_ref().copied())?;
+            if let Err(error) =
+                handler.applied_logically(&mut self.runtime.model, result.as_ref().copied())
+            {
+                // The contribution and S may already be committed. A malformed
+                // mutable component projection is an owner fault, not editable
+                // draft validation: withdraw authority instead of skipping
+                // reconciliation while leaving the logical tree live.
+                self.poison();
+                return Err(error.into());
+            }
             Ok(true)
         }));
         self.runtime.nodes[index].handler = Some(handler);
