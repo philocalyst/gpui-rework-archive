@@ -21,12 +21,20 @@ impl View for StorageOwner {
             // rather than disappearing after the first viewport's children.
             let el = div()
                 .size(1)
-                .transform(Affine::translation(0., -(index as f32)));
+                .transform(Affine {
+                    a: if self.mode == 4 {
+                        1.0 + index as f32 / 8192.0
+                    } else {
+                        1.0
+                    },
+                    ty: -(index as f32),
+                    ..Affine::IDENTITY
+                });
             match self.mode {
                 0 => el,
                 1 => el.bg(Color::BLACK),
                 2 => el.bg(&self.color),
-                3 => el.bg(Color::rgb(index as u8, (index >> 8) as u8, 127)),
+                3 | 4 => el.bg(Color::rgb(index as u8, (index >> 8) as u8, 127)),
                 _ => unreachable!(),
             }
         }))
@@ -36,7 +44,7 @@ impl View for StorageOwner {
 fn main() {
     println!("count,mode,pending,allocations,requested,retained,peak,command_lanes,draws");
     for count in [0, 1, 4096] {
-        for mode in 0..4 {
+        for mode in 0..5 {
             for pending in [false, true] {
                 let mut owner = None;
                 let allocation = allocation_counter::measure(|| {
