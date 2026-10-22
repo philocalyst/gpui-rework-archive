@@ -1,0 +1,31 @@
+# Shipping core code ledger
+
+Pinned source `8350157374`: **26,069** non-test code lines. Original GPUI crate
+`41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,894**. No feature-equivalence or
+future final-size claim follows from this comparison.
+
+Current scope is the six shipping first-party libraries under `crates/{canvas,
+core,gpui,gpu,host,state}/src`. The original scope is `crates/gpui/src`. Tests are
+removed using the pinned Syn parser and Cargo-aware module propagation, including
+custom crate roots. Tokei 15.0.0 then counts actual source reports' `code` fields;
+its aggregate Total also adds fenced documentation examples and is deliberately
+not used. Comments, blanks, documentation examples, all vendors and all support
+or experimental code are excluded. Macro/configuration ambiguities stay charged.
+Each snapshot records per-file hashes, diagnostics, tools and Cargo manifests.
+
+Reproduce from `reactivity` (provide the installed Tokei binary):
+
+```sh
+cargo build --offline --locked --release --manifest-path tools/inventory-rust/Cargo.toml
+python3 tools/core_lines.py --ref 8350157374 \
+  --helper tools/inventory-rust/target/release/inventory-rust --tokei /path/to/tokei
+python3 tools/core_lines.py --ref 41a42eb96d --original \
+  --helper tools/inventory-rust/target/release/inventory-rust --tokei /path/to/tokei
+INVENTORY_RUST_HELPER=$PWD/tools/inventory-rust/target/release/inventory-rust \
+TOKEI=/path/to/tokei python3 -m unittest discover -s tools -p test_core_lines.py -v
+```
+
+Three real-parser/counter fixtures cover shared Unicode lines, CRLF, raw strings,
+nested comments, documentation code fences and test-only modules reached from a
+custom `gpui.rs` crate root. This is a source-size ledger, not permission to pack
+statements or replace clear structure with code golf.

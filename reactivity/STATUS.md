@@ -319,15 +319,25 @@ of production: its exact 8-byte node saving did not justify unresolved phase cos
 
 ## Scope and line accounting
 
-[line-counts.json](evidence/line-counts.json) counts physical Rust lines, including
-comments/blanks and embedded tests. Examples/external tests and every vendor tree
-are separate. The source f2c33080ef snapshot contains **34,273 crate src lines** and
-**24,879 external test/example/other lines**, or **59,152 first-party crate lines**,
-across production and experimental crates.
-Src includes embedded tests; it is not a production SLOC claim. Standalone comparison
-harnesses outside crates are excluded. Complete Winit, Cephal, Softbuffer, Wgpu-HAL
-and Parley sources total **145,962 Rust lines**, including their tests/examples.
-Vendoring has not made those dependencies disappear.
+The primary size measure is **shipping first-party core library code**, excluding
+comments, blank lines, tests, documentation examples, vendors, labs, application
+examples, benchmarks, tools and evidence. Source `8350157374` contains **26,069**
+code lines across Canvas/Core/GPUI/GPU/Host/State. The original GPUI crate at
+`41a42eb96d` contains **56,894** under the same comment/test exclusion rules.
+These are actual source counts, not forecasts or a feature-equivalence claim.
+The original framework still provides substantial functionality missing here.
+
+[The counter and pinned per-file ledgers](evidence/core-lines/README.md) combine
+Syn test/module analysis with Tokei's source-code classification. Ambiguous macro
+or cfg syntax remains charged and appears in diagnostics. Code is kept readable;
+one physical line may contain several statements, so line count alone is not a
+complexity or quality measure. No projected final count is used as an acceptance
+gate. New capabilities must first be reviewed for a simpler shared formulation.
+
+The older [physical-line ledger](evidence/line-counts.json) and the
+[broad source inventory](evidence/source-inventory/) retain separate historical
+accounting for comments, tests, experiments, tools and complete vendored sources.
+They are not the core-code metric. Vendoring does not make dependency code vanish.
 
 [Baseline](evidence/baseline.json) pins the original 260,010 physical Rust lines
 and inspector/transforms/testing branch deltas. Legacy remains a plumbing and
