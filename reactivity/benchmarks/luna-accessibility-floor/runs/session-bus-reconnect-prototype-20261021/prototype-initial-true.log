@@ -1,0 +1,13 @@
+SERVICE_READY unique=Some(OwnedUniqueName(":1.1"))
+PROTOTYPE_STATUS Some(true)
+INITIAL_STATUS_OBSERVED value=true
+PROTOTYPE_STATUS Some(false)
+PROTOTYPE_STATUS Some(true)
+PROTOTYPE_STATUS Some(false)
+PROTOTYPE_STATUS Some(true)
+PROTOTYPE_STATUS None
+SERVICE_READY unique=Some(OwnedUniqueName(":1.7"))
+PROTOTYPE_STATUS Some(false)
+PROTOTYPE_STATUS Some(true)
+PROTOTYPE_STATUS None
+PROTOTYPE_RECOVERED mode=prototype-initial-true
