@@ -1,0 +1,12 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-reactive-styles/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.58s
+  Executable unittests src/lib.rs (/tmp/gpui-style-target/debug/deps/gpui-3eaf6c563bc32a3a)

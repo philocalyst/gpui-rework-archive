@@ -1,0 +1,12 @@
+
+running 2 tests
+test semantic::decoration_tests::binding_accumulator_costs_are_cold_and_literal_overwrites_release_it ... style_decorations,ports=0,requests=0,requested=0,retained=0,peak=0
+style_decorations,ports=1,requests=2,requested=80,retained=80,peak=80
+style_decorations,ports=2,requests=3,requested=128,retained=104,peak=128
+style_decorations,ports=8,requests=5,requested=416,retained=248,peak=344
+ok
+test semantic::decoration_tests::cold_headers_and_alternating_builders_have_one_nonrecursive_decoration ... style_decorations,alternating,requests=3,requested=128,retained=128,peak=128
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 101 filtered out; finished in 0.00s
+

@@ -39,10 +39,12 @@ that additional construction tradeoff was not silently added to this slice.
 Decorations48 and ElementExtra56 share dynamic fields, radius, scroll and names.
 The closed leaf enum is56, and can never contain another decoration. A decorated
 image/reader/list may need that one additional leaf box. Literal/semantic-only
-legacy forms retain their existing fast shape. Flex is104 in this first source
-(previous literal recipe16), a real transient/stored-recipe regression targeted
-by the separate refinement; recipes allocate nothing. Do not apply this recipe
-number to the later generic representation without its own ledger.
+legacy forms retain their existing fast shape. Flex is104 in this first source,
+a real transient/stored-recipe regression targeted by the separate refinement;
+recipes allocate nothing. The previous description estimated the preceding
+literal recipe at16B; an independent probe of the exact f019 source measured12B.
+The raw first-source artifacts remain unchanged. See the final generic recipe
+and baseline probe in [compact-Flex evidence](compact-flex/README.md).
 
 Element construction, requested bytes (allocator requests, not allocator bins):
 
