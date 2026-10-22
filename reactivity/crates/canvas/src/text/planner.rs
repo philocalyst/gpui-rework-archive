@@ -444,7 +444,7 @@ fn append_carets(
     // A fixed small number of direct queries is linear in source
     // length and avoids an index for e.g. one huge grapheme. Bulk
     // maps use constant-time source/prefix lookup per destination.
-    let geometry = if segmenter.segment_str(content).count() > 8 {
+    let geometry = if segmenter.segment_str(content).nth(8).is_some() {
         Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
     } else {
         None
