@@ -63,7 +63,10 @@ primitive and tagged HDR storage.
 The [Solid/Ripple review](docs/async-graph-luna.md) identifies compositional
 Future/stream/optimistic adapters as the remaining async ergonomics work; retain
 the existing frozen inputs, cancellation hints, stale-result admission and
-previous-value projections. A Future adapter must wake or retire an obsolete
+previous-value projections. The [typed Future admission audit](docs/async-admission-luna.md)
+selects an injected exact-task cancel handle and clearing the pinned Future
+before terminal publication, with no task state added to ordinary controllers.
+A Future adapter must wake or retire an obsolete
 Pending task before reusing its physical completion credit; poll-only cancellation
 cannot satisfy that lifecycle. The [portable presenter review](docs/portable-presenter-luna.md)
 and [color derivation](docs/color-formulation-luna.md) are proposals with explicit

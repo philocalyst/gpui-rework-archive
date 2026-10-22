@@ -17,7 +17,7 @@ describe the intended complete system; this page records what is connected now.
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/HAL 30, build-time typed wgsl-rs generation/validation, shared device/pipeline context with independent renderer states and retained layout authority; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; offline shader admission, native HDR negotiation, other primitives and hardware/backend conformance remain |
-| Native | Vendor-owned backend hints and target proof; Winit software-first windows, background GPU preparation, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
+| Native | Vendor-owned backend hints and target proof; Winit software-first windows, no Auto GPU initialization for certified fills, background GPU preparation for general scenes, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
 | Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library port with shared native/headless View, typed workers and database-backed playback requests | Hummingbird audio/scanner/navigation/queue/artwork/media services and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
 
@@ -61,6 +61,15 @@ and [lattice/adaptive controls](evidence/gamut-search-controls/README.md) retain
 precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
+
+The later [blank Auto refinement](evidence/auto-blank-cold/README.md) pins
+source `8158386886`: certified command-free opaque SDR fills never attempt GPU
+initialization, including blank resize/resume; first complex CPU pixels precede
+normal delayed handoff. Seven actual native cases, 173 GPUI unit cases (23
+ignored), strict all-target Clippy and Apple/Windows desktop compilation pass.
+It adds two shipping code lines and no owner fields. This is work elimination,
+not a new hardware startup/RSS measurement. The full combined campaign remains
+qualified separately below.
 
 The latest [combined core/catalog/graphics checks](evidence/core-catalog-integration/README.md)
 pin library source `6d77c71c12`: 43 core, 493 GPUI (25 ignored), 182 Canvas
@@ -106,8 +115,8 @@ shader artifacts and [acknowledged text geometry](docs/acknowledged-text-geometr
 remain isolated implementation slices; their provisional results are not current
 shipping measurements.
 
-The [source ledger](evidence/core-lines/README.md) counts 28,403 non-test library
-code lines at `6d77c71c12`, including 13 build-script lines, versus original
+The [source ledger](evidence/core-lines/README.md) counts 28,405 non-test library
+code lines at `8158386886`, including 13 build-script lines, versus original
 GPUI's 56,922 including 28 build-script lines. These are pinned actual counts,
 not a current-feature-equivalence or predicted final-size claim. Dependencies,
 local vendor patches, tools, app ports and fixtures retain their separate scopes.

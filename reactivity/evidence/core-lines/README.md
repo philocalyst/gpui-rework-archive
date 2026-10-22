@@ -1,10 +1,10 @@
 # Shipping core code ledger
 
-Current frozen source `6d77c71c12`: **28,403** non-test code lines including
+Current frozen source `8158386886`: **28,405** non-test code lines including
 13 build-script lines; original GPUI `41a42eb96d6c04e5e71f3577d12934d4de569b20`:
 **56,922** including 28 build-script lines. The current per-file snapshot is in
-[the combined core/catalog integration evidence](../core-catalog-integration/core-lines-6d77c71c12.json.gz).
-The preceding 8ea source measured 27,696 under the same rule. No feature-equivalence
+[the blank Auto refinement evidence](../auto-blank-cold/checks/core-lines.json.gz).
+Source 6d77 measured 28,403 and preceding 8ea measured 27,696 under the same rule. No feature-equivalence
 or future final-size claim follows from this comparison.
 
 Historical source `8350157374` measured **26,069** under `src`; original GPUI

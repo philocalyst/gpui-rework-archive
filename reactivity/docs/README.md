@@ -9,6 +9,7 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Core](research-core.md) | JustRach NanoUI, MyGo, zgui, Bevy, Rust, data structures and PanGui |
 | [Full feature audit](feature-parity.md) | Original GPUI behavior gaps, representative Hummingbird fixtures and conservative migration rules; full replacement scope retained |
 | [Solid and Ripple async graph](async-graph-luna.md) | Pinned runtime and accessible author sources, typed lane fit and remaining Future/stream/optimistic ergonomics |
+| [Typed Future admission](async-admission-luna.md) | Injected exact-task cancellation, pinned Future teardown before completion, unchanged ordinary controller storage and adversarial lifecycle traces |
 | [Portable presenter boundary](portable-presenter-luna.md) | Vendor-owned hints/target proof/leases, source-review corrections and cross-platform fallback limits |
 | [Graphics work elimination](graphics-work-elimination-luna.md) | Device-owned resources, shader artifact safety, backend preservation contracts and separately gated first-window experiments |
 | [Offline shader proof](offline-shader-proof-luna.md) | Exact six-binding ABI, Vulkan artifact generation, enabled robustness policies, host bounds and unsafe admission gates; proposed, not implemented |
