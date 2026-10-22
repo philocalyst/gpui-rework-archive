@@ -543,9 +543,9 @@ impl TextSlot {
         }
     }
 }
-/// A closed kind and an optional admitted text-lane index fit in one word.
-/// Zero in the upper bits means no text; the lower four bits encode the kind
-/// including the checkbox state. No Rust enum representation is reinterpreted.
+/// The low four bits encode kind, the high bit encodes route eligibility, and
+/// the bounded middle payload addresses text or image content. Eligibility
+/// survives a property route's temporary take. No enum layout is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
 const _: () = assert!(MAX_NODES * 2 < (Content::ROUTE >> 4) as usize);
