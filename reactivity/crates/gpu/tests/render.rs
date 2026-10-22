@@ -2986,3 +2986,35 @@ fn shared_context_drop_and_real_destroy_never_rebind_old_state() {
             .unwrap();
     });
 }
+
+#[test]
+fn unsupported_context_format_does_not_request_a_device() {
+    pollster::block_on(async {
+        let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+        descriptor.backends = wgpu::Backends::VULKAN;
+        let instance = wgpu::Instance::new(descriptor);
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                force_fallback_adapter: true,
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+        let before = instance.generate_report().unwrap();
+        assert!(matches!(
+            gpui_gpu::GpuContext::request(&adapter, wgpu::TextureFormat::Rgba32Float).await,
+            Err(gpui_gpu::Error::UnsupportedTarget(
+                wgpu::TextureFormat::Rgba32Float
+            ))
+        ));
+        let after = instance.generate_report().unwrap();
+        eprintln!(
+            "unsupported_format_devices,before={:?},after={:?}",
+            before.hub.devices, after.hub.devices
+        );
+        assert_eq!(
+            before, after,
+            "unsupported format must leave all device/resource registries untouched"
+        );
+    });
+}

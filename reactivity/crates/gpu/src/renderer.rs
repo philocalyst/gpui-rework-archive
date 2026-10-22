@@ -48,6 +48,15 @@ impl std::fmt::Display for Error {
 }
 impl std::error::Error for Error {}
 
+fn validate_format(format: wgpu::TextureFormat) -> Result<(), Error> {
+    match format {
+        wgpu::TextureFormat::Rgba8UnormSrgb
+        | wgpu::TextureFormat::Bgra8UnormSrgb
+        | wgpu::TextureFormat::Rgba16Float => Ok(()),
+        _ => Err(Error::UnsupportedTarget(format)),
+    }
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct DrawData {
@@ -357,6 +366,16 @@ pub struct GpuContext {
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct ContextId(usize);
+impl ContextId {
+    fn next(source: &AtomicUsize) -> Result<Self, Error> {
+        source
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+                value.checked_add(1)
+            })
+            .map(Self)
+            .map_err(|_| Error::ResourceLimit)
+    }
+}
 // Identity generation only: no GPU resource is stored in this static.
 static NEXT_CONTEXT: AtomicUsize = AtomicUsize::new(1);
 
@@ -389,6 +408,7 @@ impl GpuContext {
         adapter: &wgpu::Adapter,
         format: wgpu::TextureFormat,
     ) -> Result<Self, Error> {
+        validate_format(format)?;
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("GPUI"),
@@ -403,14 +423,7 @@ impl GpuContext {
         queue: wgpu::Queue,
         format: wgpu::TextureFormat,
     ) -> Result<Self, Error> {
-        if !matches!(
-            format,
-            wgpu::TextureFormat::Rgba8UnormSrgb
-                | wgpu::TextureFormat::Bgra8UnormSrgb
-                | wgpu::TextureFormat::Rgba16Float
-        ) {
-            return Err(Error::UnsupportedTarget(format));
-        }
+        validate_format(format)?;
         let errors = device.push_error_scope(wgpu::ErrorFilter::Validation);
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("GPUI tile compositor"),
@@ -453,13 +466,7 @@ impl GpuContext {
             format,
             pipeline,
             layout,
-            id: ContextId(
-                NEXT_CONTEXT
-                    .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
-                        value.checked_add(1)
-                    })
-                    .expect("GPU context identity exhausted"),
-            ),
+            id: ContextId::next(&NEXT_CONTEXT)?,
         })
     }
     pub fn device(&self) -> &wgpu::Device {
@@ -506,6 +513,10 @@ impl GpuContext {
     }
 }
 impl RendererState {
+    /// Create independent resources on a live context. Device health remains
+    /// the caller's responsibility; this does not replace its loss callback.
+    /// After loss WGPU may return invalid handles whose later use can panic
+    /// through validation. Retire the context and its states on device loss.
     pub fn new(context: &GpuContext) -> Self {
         let device = &context.device;
         let globals = Buffer::new(device, "globals", 48, true);
@@ -1303,6 +1314,17 @@ fn validate_draw(
 mod tests {
     use super::*;
     use gpui_canvas::Rect;
+
+    #[test]
+    fn context_identity_exhaustion_is_an_error_without_wraparound() {
+        let source = AtomicUsize::new(usize::MAX - 1);
+        assert_eq!(ContextId::next(&source).unwrap().0, usize::MAX - 1);
+        assert!(matches!(
+            ContextId::next(&source),
+            Err(Error::ResourceLimit)
+        ));
+        assert_eq!(source.load(Ordering::Relaxed), usize::MAX);
+    }
 
     #[test]
     fn packet_storage_ledger() {
