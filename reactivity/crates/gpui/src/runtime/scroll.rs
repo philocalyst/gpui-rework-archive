@@ -318,7 +318,7 @@ pub(super) fn geometry<M: View + 'static>(
         let identity = state.identity(key);
         let layout = runtime
             .layout
-            .layout(runtime.layout_nodes[runtime.by_identity[&identity]])?;
+            .layout(runtime.layout_nodes[runtime.by_identity.required(identity)])?;
         match key {
             ViewportKey::List(id) => {
                 let state = state.list().unwrap();
@@ -400,7 +400,7 @@ pub(super) fn geometry<M: View + 'static>(
     for viewport in &mut infos.scrolls {
         let layout = runtime
             .layout
-            .layout(runtime.layout_nodes[runtime.by_identity[&viewport.identity]])?;
+            .layout(runtime.layout_nodes[runtime.by_identity.required(viewport.identity)])?;
         let size = [f64::from(layout.size.width), f64::from(layout.size.height)];
         if [
             viewport.min.x,

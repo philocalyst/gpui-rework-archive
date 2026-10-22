@@ -180,7 +180,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             Key::Enter => runtime.activate(target),
             Key::Space => {
                 let identity = runtime.resolve(target)?;
-                if runtime.nodes[runtime.by_identity[&identity]].kind() == NodeKind::Input {
+                if runtime.nodes[runtime.by_identity.required(identity)].kind() == NodeKind::Input {
                     runtime.edit_text(target, |value| value.push(' '))
                 } else {
                     runtime.activate(target)
@@ -193,7 +193,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 
 impl<M: View + 'static> Runtime<M> {
     fn focusable(&self, identity: u64) -> bool {
-        self.by_identity.get(&identity).is_some_and(|&index| {
+        self.by_identity.get(identity).is_some_and(|index| {
             let node = &self.nodes[index];
             matches!(node.kind(), NodeKind::Input | NodeKind::Button) || node.handler.is_some()
         })

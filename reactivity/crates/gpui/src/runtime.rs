@@ -36,7 +36,9 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 #[cfg(feature = "accessibility")]
 mod accessibility;
 mod delivery;
+mod identity_index;
 mod image;
+use identity_index::IdentityIndex;
 mod input;
 mod list;
 mod scroll;
@@ -652,7 +654,7 @@ struct Runtime<M> {
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
     images: Option<Box<image::Images>>,
-    by_identity: BTreeMap<u64, usize>,
+    by_identity: IdentityIndex,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
     focused: Option<Target>,
@@ -848,7 +850,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             styles: styles::Styles::default(),
             texts: Vec::new(),
             images: None,
-            by_identity: BTreeMap::new(),
+            by_identity: IdentityIndex::default(),
             fanout: BTreeMap::new(),
             next_identity: 1,
             focused: None,
@@ -1157,7 +1159,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             // The old sheet remains diagnostic; current addresses do not.
             let target = if runtime.logical_valid
                 && !runtime.poisoned
-                && let Some(&index) = runtime.by_identity.get(&identity)
+                && let Some(index) = runtime.by_identity.get(identity)
                 && (all_targets
                     || runtime.nodes[index].handler.is_some()
                     || runtime.nodes[index].kind() == NodeKind::Input)
@@ -1245,7 +1247,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
-        Ok(property.get(runtime.styles.get(runtime.by_identity[&identity])))
+        Ok(property.get(runtime.styles.get(runtime.by_identity.required(identity))))
     }
     fn style_contribution<T>(
         &self,
@@ -1272,7 +1274,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let index = runtime.by_identity[&identity];
+        let index = runtime.by_identity.required(identity);
         let before = *runtime.styles.get(index);
         let after = runtime
             .overrides
@@ -1334,7 +1336,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .find(|node| {
                 node.kind == kind
                     && label.is_none_or(|text| node.text.as_deref() == Some(text))
-                    && runtime.by_identity.contains_key(&node.identity)
+                    && runtime.by_identity.contains(node.identity)
             })
             .map(|node| node.identity)
             .ok_or(Error::MissingElement)?;
@@ -1414,7 +1416,7 @@ impl<M: View + 'static> Runtime<M> {
             .resolve(target)
             .filter(|identity| {
                 self.logical_valid
-                    && self.by_identity.get(identity).is_some_and(|&index| {
+                    && self.by_identity.get(*identity).is_some_and(|index| {
                         !self.has_lists()
                             || !self.in_list(index)
                             || self
@@ -1961,20 +1963,15 @@ impl<M: View + 'static> Runtime<M> {
         self.styles = styles.finish();
         self.texts = texts;
         self.fanout = fanout;
-        self.by_identity = self
-            .nodes
-            .iter()
-            .enumerate()
-            .map(|(i, node)| (node.identity(), i))
-            .collect();
+        self.by_identity = IdentityIndex::from_ids(self.nodes.iter().map(Node::identity));
         self.overrides
-            .retain(|identity| self.by_identity.contains_key(&identity));
+            .retain(|identity| self.by_identity.contains(identity));
         if let Some(metadata) = &mut self.metadata {
             metadata
                 .overrides
-                .retain(|identity, _| self.by_identity.contains_key(identity));
+                .retain(|identity, _| self.by_identity.contains(*identity));
             if let Some(geometry) = metadata.geometry.as_mut() {
-                geometry.retain(|identity| self.by_identity.contains_key(&identity));
+                geometry.retain(|identity| self.by_identity.contains(identity));
                 if geometry.unused() {
                     metadata.geometry = None;
                 }
@@ -2311,7 +2308,7 @@ impl<M: View + 'static> Runtime<M> {
             // including inspector contributions applied before description.
             for (&key, state) in &self.viewports {
                 let identity = state.identity(key);
-                let index = self.by_identity[&identity];
+                let index = self.by_identity.required(identity);
                 if self.nodes[index].parent.index().is_some_and(|parent| {
                     self.layout_dirty.contains(&self.nodes[parent].identity())
                 }) {
@@ -2319,7 +2316,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
             for identity in &self.layout_dirty {
-                let index = self.by_identity[identity];
+                let index = self.by_identity.required(*identity);
                 let id = self.layout_nodes[index];
                 self.layout.set_style(
                     id,
@@ -2681,8 +2678,8 @@ impl<M: View + 'static> Runtime<M> {
                 geometry.freeze(|identity| {
                     !list_mode
                         || logical_indices
-                            .get(&identity)
-                            .and_then(|&index| published.get(index))
+                            .get(identity)
+                            .and_then(|index| published.get(index))
                             .and_then(|entry| entry.index())
                             .and_then(|index| presented.get(index))
                             .is_some_and(|node| node.identity == identity)
@@ -2720,7 +2717,7 @@ impl<M: View + 'static> Runtime<M> {
             // row clipping can omit a declared viewport; the existing logical
             // to published scratch proves exact admitted identity without a map.
             sheet.viewports = viewport_geometry.freeze(|identity| {
-                let index = self.by_identity[&identity];
+                let index = self.by_identity.required(identity);
                 published[index]
                     .index()
                     .filter(|&index| presented[index].identity == identity)
@@ -2786,7 +2783,7 @@ impl<M: View + 'static> Runtime<M> {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
-                    if let Some(&logical) = self.by_identity.get(&node.identity)
+                    if let Some(logical) = self.by_identity.get(node.identity)
                         && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
                     {
                         return Some(node.identity);

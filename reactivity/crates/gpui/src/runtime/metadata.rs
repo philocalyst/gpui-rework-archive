@@ -340,8 +340,8 @@ impl<M: View + 'static> Runtime<M> {
                     // shift P. Verify identity before using the cheap path.
                     let part = self
                         .by_identity
-                        .get(&identity)
-                        .and_then(|&index| {
+                        .get(identity)
+                        .and_then(|index| {
                             self.presented
                                 .get(index)
                                 .filter(|node| node.identity == identity)
@@ -521,7 +521,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 if let Some(base) = base.filter(|base| base.name.is_some()) {
                     return Ok(base.name.as_deref());
                 }
-                let node = &runtime.nodes[runtime.by_identity[&identity]];
+                let node = &runtime.nodes[runtime.by_identity.required(identity)];
                 Ok((node.kind() != NodeKind::Input)
                     .then(|| {
                         node.text_slot()
