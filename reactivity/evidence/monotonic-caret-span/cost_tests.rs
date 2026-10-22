@@ -2,11 +2,12 @@
 use crate::{FontFamilyName, LayoutContext, OverflowWrap, StyleProperty, editing::CursorGeometry};
 use alloc::{format, string::String};
 use core::{hint::black_box, ops::ControlFlow};
+use std::println;
 
 #[test]
 fn indexed_and_streamed_scoped_allocation_rows() {
     let mut fonts = super::span_tests::fonts();
-    let mut context = LayoutContext::new();
+    let mut context = LayoutContext::<()>::new();
     for (name, source, width) in [
         ("empty", String::new(), None),
         ("tiny", "Count".into(), None),
