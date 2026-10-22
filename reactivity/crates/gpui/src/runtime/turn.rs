@@ -168,7 +168,25 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let result = match exact {
             Some(field) => {
                 self.runtime.counters.exact_updates += 1;
-                match catch_unwind(AssertUnwindSafe(|| self.patch(field))) {
+                let realize = self.has_lists()
+                    && self.fanout.get(&field).is_some_and(|fanout| {
+                        fanout.destinations.iter().any(|destination| {
+                            destination.property().is_some_and(|id| {
+                                id.info().impact != crate::property::Impact::Paint
+                            })
+                        })
+                    });
+                match catch_unwind(AssertUnwindSafe(|| {
+                    let semantic = self.patch(field)?;
+                    // Ordinary retained trees patch directly. Mixed virtual-list
+                    // windows still need their list realization boundary.
+                    if realize && self.dirty {
+                        self.describe(false)?;
+                        Ok(false)
+                    } else {
+                        Ok(semantic)
+                    }
+                })) {
                     Ok(result) => result,
                     Err(_) => {
                         self.poison();

@@ -3,37 +3,45 @@
 use super::*;
 use crate::{ItemKey, SemanticText};
 
-// Packed destinations reserve two low bits for the port independently of the
-// compact parent's larger domain. Keep future node-cap changes checked too.
-const _: () = assert!(MAX_NODES <= (u32::MAX >> 2) as usize + 1);
-
+// Node-major checked wire layout: node17 | closed property13 | class2.
+const _: () = assert!(MAX_NODES <= 1 << 17);
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Port {
     Visual = 0,
     Name = 1,
     Description = 2,
+    Style = 3,
 }
-/// MAX_NODES is 100,000; two low port bits leave ample checked index space.
 #[derive(Clone, Copy)]
 pub(super) struct Destination(u32);
 impl Destination {
     pub fn new(node: usize, port: Port) -> Self {
-        assert!(node < MAX_NODES);
-        Self((u32::try_from(node).expect("bounded node index") << 2) | port as u32)
+        assert!(node < MAX_NODES && port != Port::Style);
+        Self((node as u32) << 15 | port as u32)
+    }
+    pub fn style(node: usize, property: crate::property::PropertyId) -> Self {
+        assert!(node < MAX_NODES && (property as u16) <= 8191);
+        Self((node as u32) << 15 | (property as u32) << 2 | Port::Style as u32)
     }
     pub fn packed(self) -> u32 {
         self.0
     }
     pub fn node(self) -> usize {
-        (self.0 >> 2) as usize
+        (self.0 >> 15) as usize
     }
     pub fn port(self) -> Port {
         match self.0 & 3 {
             0 => Port::Visual,
             1 => Port::Name,
             2 => Port::Description,
-            _ => unreachable!("private packed port"),
+            _ => Port::Style,
         }
+    }
+    pub fn property(self) -> Option<crate::property::PropertyId> {
+        (self.port() == Port::Style).then(|| {
+            crate::property::PropertyId::from_code(((self.0 >> 2) & 8191) as u16)
+                .expect("closed style destination")
+        })
     }
 }
 
@@ -350,7 +358,7 @@ impl<M: View + 'static> Runtime<M> {
                         && let Some(fanout) = self.fanout.get(&field)
                     {
                         for destination in &fanout.destinations {
-                            if destination.port() == Port::Visual {
+                            if !matches!(destination.port(), Port::Name | Port::Description) {
                                 continue;
                             }
                             let index = destination.node();
@@ -426,7 +434,7 @@ impl<M: View + 'static> Runtime<M> {
                     Publish::Field(field) => {
                         if let Some(fanout) = self.fanout.get(&field) {
                             for destination in &fanout.destinations {
-                                if destination.port() != Port::Visual {
+                                if matches!(destination.port(), Port::Name | Port::Description) {
                                     patch(
                                         metadata,
                                         self.nodes[destination.node()].identity(),
@@ -590,5 +598,67 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.counters.source_operations += 1;
         runtime.changed_nodes = usize::from(changed);
         Ok(runtime.publish_metadata(Publish::Identity(identity)))
+    }
+}
+
+#[cfg(test)]
+mod destination_tests {
+    use super::*;
+    use crate::property::{PROPERTIES, PropertyId};
+    fn checked(raw: u32) -> Option<Destination> {
+        let node = (raw >> 15) as usize;
+        let property = ((raw >> 2) & 8191) as u16;
+        if node >= MAX_NODES {
+            return None;
+        }
+        if raw & 3 == 3 {
+            PropertyId::from_code(property)?;
+        } else if property != 0 {
+            return None;
+        }
+        Some(Destination(raw))
+    }
+    #[test]
+    fn closed_destinations_round_trip_without_truncating_or_mixing_node_groups() {
+        assert_eq!(size_of::<Destination>(), 4);
+        let mut values = Vec::new();
+        for node in [0, 1, MAX_NODES - 1] {
+            for port in [Port::Visual, Port::Name, Port::Description] {
+                let value = Destination::new(node, port);
+                let decoded = checked(value.packed()).unwrap();
+                assert_eq!(decoded.node(), node);
+                assert_eq!(decoded.port(), port);
+                assert!(decoded.property().is_none());
+                values.push(value);
+            }
+            for property in PROPERTIES {
+                let value = Destination::style(node, property.id);
+                let decoded = checked(value.packed()).unwrap();
+                assert_eq!(decoded.node(), node);
+                assert_eq!(decoded.port(), Port::Style);
+                assert_eq!(decoded.property(), Some(property.id));
+                values.push(value);
+            }
+        }
+        values.sort_unstable_by_key(|value| value.packed());
+        assert!(
+            values
+                .windows(2)
+                .all(|pair| pair[0].node() <= pair[1].node())
+        );
+        for port in [0, 1, 2] {
+            assert!(checked((1 << 2) | port).is_none());
+        }
+        for invalid in [0, 14, 8191] {
+            assert!(checked((invalid << 2) | 3).is_none());
+        }
+        assert!(checked((MAX_NODES as u32) << 15).is_none());
+        assert!(checked(u32::MAX).is_none());
+        assert_eq!(
+            checked((PropertyId::CornerRadius as u32) << 2 | 3)
+                .unwrap()
+                .property(),
+            Some(PropertyId::CornerRadius)
+        );
     }
 }

@@ -5,7 +5,7 @@ use gpui::{
 };
 
 struct Panel {
-    recipe: Flex,
+    recipe: Flex<'static>,
     height: f32,
 }
 impl View for Panel {
@@ -20,7 +20,7 @@ impl View for Panel {
         ))
     }
 }
-fn panel(recipe: Flex) -> Win<Panel> {
+fn panel(recipe: Flex<'static>) -> Win<Panel> {
     Application::demo()
         .open(Panel {
             recipe,
