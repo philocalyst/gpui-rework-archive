@@ -1,0 +1,68 @@
+   Compiling gpui v0.1.0 (/root/gpui-typed-catalog/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.55s
+     Running tests/inspector.rs (/tmp/gpui-typed-catalog-target/debug/deps/inspector-3d8e8be9ed0efd69)
+
+running 11 tests
+test typed_inspection_preserves_presence_and_reveals_updated_component_defaults ... ok
+test invalid_and_foreign_inspector_edits_fail_before_source_admission ... ok
+test paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output ... ok
+test inspector_controls_without_a_selection_are_inert ... FAILED
+test inspector_parent_walk_stops_at_the_application_root ... FAILED
+test actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_properties ... FAILED
+test inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base ... FAILED
+test pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_repair ... FAILED
+test idle_inspector_refreshes_allocate_nothing_with_or_without_selection ... ok
+test inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame ... FAILED
+test inspector_selection_rejects_foreign_panel_and_removed_targets_before_admission ... FAILED
+
+failures:
+
+---- inspector_controls_without_a_selection_are_inert stdout ----
+
+thread 'inspector_controls_without_a_selection_are_inert' (567114) panicked at crates/gpui/tests/inspector.rs:8:61:
+called `Result::unwrap()` on an `Err` value: AmbiguousElement { matches: 2 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- inspector_parent_walk_stops_at_the_application_root stdout ----
+
+thread 'inspector_parent_walk_stops_at_the_application_root' (567116) panicked at crates/gpui/tests/inspector.rs:203:18:
+called `Result::unwrap()` on an `Err` value: NotHittable
+
+---- actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_properties stdout ----
+
+thread 'actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_properties' (567111) panicked at crates/gpui/tests/inspector.rs:8:61:
+called `Result::unwrap()` on an `Err` value: AmbiguousElement { matches: 2 }
+
+---- inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base stdout ----
+
+thread 'inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base' (567113) panicked at crates/gpui/tests/inspector.rs:8:61:
+called `Result::unwrap()` on an `Err` value: AmbiguousElement { matches: 2 }
+
+---- pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_repair stdout ----
+
+thread 'pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_repair' (567120) panicked at crates/gpui/tests/inspector.rs:8:61:
+called `Result::unwrap()` on an `Err` value: AmbiguousElement { matches: 2 }
+
+---- inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame stdout ----
+
+thread 'inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame' (567115) panicked at crates/gpui/tests/inspector.rs:8:61:
+called `Result::unwrap()` on an `Err` value: AmbiguousElement { matches: 2 }
+
+---- inspector_selection_rejects_foreign_panel_and_removed_targets_before_admission stdout ----
+
+thread 'inspector_selection_rejects_foreign_panel_and_removed_targets_before_admission' (567117) panicked at crates/gpui/tests/inspector.rs:8:61:
+called `Result::unwrap()` on an `Err` value: AmbiguousElement { matches: 2 }
+
+
+failures:
+    actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_properties
+    inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base
+    inspector_controls_without_a_selection_are_inert
+    inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame
+    inspector_parent_walk_stops_at_the_application_root
+    inspector_selection_rejects_foreign_panel_and_removed_targets_before_admission
+    pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_repair
+
+test result: FAILED. 4 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `-p gpui --test inspector`
