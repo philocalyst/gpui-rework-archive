@@ -1,0 +1,43 @@
+{
+  "tested_source": "ff49d8482e",
+  "native_and_cross_source": "56e1f5ddf1",
+  "qualification": "UI-core/library/vendor source is identical across these commits; only the independent Hummingbird workspace and its evidence were added. Native metadata lists exact guarded source hashes and the actual executable. Cross checks compile actual adapters using build-std, without foreign OS execution.",
+  "logs": {
+    "core": {
+      "sha256": "71dd1150a5c626d2268a09d87ecbf9cfb15a31eccd382faacd2305af6c953aaa",
+      "groups": 5,
+      "passed": 31,
+      "ignored": 0
+    },
+    "public": {
+      "sha256": "7d507f0cb52c967e528a329b15750b21237150f521b14f3fe729b31fdba8bac6",
+      "groups": 46,
+      "passed": 472,
+      "ignored": 24
+    },
+    "clippy": {
+      "sha256": "984538baa8a66eea80a778438dc6ba8ab678052a2b1b612e9db2ab2e4f0afe3a",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "apple": {
+      "sha256": "961d748b7daa9de21481fed6e00bfc929aa95916702e4d04a50ef9025542a210",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "msvc": {
+      "sha256": "34e23f15c43b123bda4aa38a1bcd9dc66c427c3de3d79e42facf8c6d560e5d91",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "native-build": {
+      "sha256": "2e8ce50045b38a33fde6e9aff56fba08785c3856214583ab4ed4c0b2cbf4e4be",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0
+    }
+  }
+}

@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # A real native client on a private bus; never changes desktop AT settings.
 set -euo pipefail
-task_launcher=${1:?Pass the executable at-spi-bus-launcher path}
+task_launcher=${1:?Pass at-spi-bus-launcher and optionally a prebuilt GPUI test executable}
+shift
 test -x "$task_launcher"
-if [[ ${2-} != --private-session ]]; then
-    exec dbus-run-session -- bash "$0" "$task_launcher" --private-session
+if [[ ${1-} != --private-session ]]; then
+    exec dbus-run-session -- bash "$0" "$task_launcher" --private-session "$@"
 fi
+shift
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 GSETTINGS_BACKEND=memory "$task_launcher" --launch-immediately --a11y=0 &
 task_launcher_pid=$!
@@ -29,6 +31,12 @@ for task_attempt in {1..50}; do
     fi
     sleep 0.1
 done
-cargo test --locked -p gpui --features x11 --lib \
-    native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation \
-    -- --ignored --exact --nocapture
+task_case=native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation
+if (( $# )); then
+    test "$#" -eq 1
+    test -x "$1"
+    "$1" "$task_case" --ignored --exact --nocapture --test-threads=1
+else
+    cargo test --locked -p gpui --features x11 --lib "$task_case" \
+        -- --ignored --exact --nocapture
+fi

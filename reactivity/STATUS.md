@@ -12,14 +12,14 @@ describe the intended complete system; this page records what is connected now.
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
-| Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style, geometry and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal with typed literal/direct-Signal dimensions and flex recipes, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | General Reader/Motion recipe algebra, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
+| Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style, geometry and semantic overrides, shared transform/hit/paint geometry, real retained native inspector | Inspector controls cover width/background; metadata-driven editors, complete theme cascade and user-defined component schemas remain |
+| Layout and text | Cephal perf/cold-layout with direct lazy cache handles; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, accessible text range actions, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
-| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, admitted-packet replay and registered-source transactional color patches | Coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
+| GPU | WGPU/HAL 30, build-time generation/validation of the same Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, admitted-packet replay and registered-source transactional color patches | Coalesced token gaps can rebuild packets; replay/patch draws the full target; portable target proof/vendor admission, native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI, suspend/recreate and observed X11 destination invalidation | Unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
-| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library, including explicit worker search and restored domain inputs | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
+| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library port with shared native/headless View, typed workers and database-backed playback requests | Hummingbird audio/scanner/navigation/queue/artwork/media services and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
@@ -52,6 +52,29 @@ These are exact retained layouts, not whole-window memory figures; layout/font/s
 storage and native services remain separately owned.
 
 ## Current verification
+
+The latest [combined cache integration](evidence/flat-cache-integration/README.md)
+passes 31 core cases with layout verification, 472 GPUI cases/docs (24 ignored),
+strict core Clippy, four actual native protocol scripts and Apple/Windows desktop
+all-target compilation. The preceding [text/graphics integration](evidence/stack-integration/README.md)
+passes 177 Canvas cases (four ignored), 49 GPU cases including real Vulkan pixels,
+and strict GPUI Clippy. Counts overlap; neither compile checks nor llvmpipe prove
+native foreign-platform execution or hardware performance. Source-qualified
+producer reports retain their own controls and measured losses.
+
+The [real Hummingbird port](ports/hummingbird/README.md) is integrated, including
+its [native transcript](ports/hummingbird/evidence/README.md). The later borrowed
+SQL-row refinement passes nine query/search/public-owner cases, strict headless
+Clippy and the shared executable transcript. Full original framework parity is
+still missing; the [feature audit](docs/feature-parity.md) is a delivery map,
+not a narrowed 1.0 target. Accessible text range editing, selective containing
+blocks and portable WGPU admission remain separate active source slices.
+
+The [source ledger](evidence/core-lines/README.md) counts 26,806 non-test library
+code lines at `6e9839856d`, including 13 build-script lines, versus original
+GPUI's 56,922 including 28 build-script lines. These are pinned actual counts,
+not a current-feature-equivalence or predicted final-size claim. Dependencies,
+local vendor patches, tools, app ports and fixtures retain their separate scopes.
 
 The [combined core/paint checks](evidence/core-paint-integration/README.md)
 pin implementation `de18f040c9`: **622 workspace cases/doctests**, 130 accessible

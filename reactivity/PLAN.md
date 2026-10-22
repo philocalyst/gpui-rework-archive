@@ -19,6 +19,32 @@ implements a layout adapter, or that any competitor has been beaten. See
 [STATUS.md](STATUS.md) for what actually runs and
 [the experiment register](EXPERIMENTS.md) for the remaining choices.
 
+## Current integration priorities
+
+The full original framework remains the replacement target. The
+[feature audit](docs/feature-parity.md) records missing behavior, not permission
+to reduce the 1.0 scope. The real [Hummingbird Library port](ports/hummingbird/README.md)
+now tests SQLite queries, Nucleo matching, stable row actions and typed asynchronous
+delivery through the same public View/Win/Window. Grow it into the full player,
+then use Zed to exercise independently owned components, editors and multiwindow
+services; a synthetic scale fixture cannot stand in for those application contracts.
+
+The active slices are target-compatible portable WGPU/HAL admission, complete
+accessible text editing and native lifecycle, and selective nonparent containing
+blocks over Cephal `perf/cold-layout`. Preserve software-first startup and
+acknowledged semantic/scene authority while integrating them. SIMD uses one
+fearless_simd formulation and fallback, with assembly and measured controls.
+Typed reflection must feed real inspector controls and component override
+composition. Designer color needs shared batch operations, explicit gamut/mix
+contracts and accessibility contrast, beyond tagged HDR storage.
+
+The [Solid/Ripple review](docs/async-graph-luna.md) identifies compositional
+Future/stream/optimistic adapters as the remaining async ergonomics work; retain
+the existing frozen inputs, cancellation hints, stale-result admission and
+previous-value projections. The [portable presenter review](docs/portable-presenter-luna.md)
+and [color derivation](docs/color-formulation-luna.md) are proposals with explicit
+source-review corrections, not implemented performance results.
+
 ## Input contracts and evidence
 
 The supplied `designs/reactivity/final/00-model.md` and its eleven statutes supply
@@ -257,7 +283,8 @@ and dropping its payload on a failed presentation would lose a valid result.
 
 ## Cephal layout and mathematical simplification
 
-Use pinned [Cephal 0.1.1](vendor/PROVENANCE.md), without `taffy-compat`, through
+Use [Cephal perf/cold-layout `20c4c494`](vendor/PROVENANCE.md), whose package
+version remains 0.1.1, without `taffy-compat`, through
 `LayoutTree`, `CacheAccess` and `Incremental` over our topology. Its owning `Tree`
 is a useful cold-layout oracle but is not a second production tree. Implement
 style interning, measured content, caches, scheduler flags and layout outputs as
@@ -380,10 +407,11 @@ presentation lane may consume immutable committed geometry and bounded patches;
 it may not mutate application state from an input thread. Winit event ownership
 and native rendering callbacks constrain which thread placements are legal.
 
-SIMD is part of the lane format: contiguous same-kind values, predictable lengths,
-aligned bulk operations and scalar tails. First inspect LLVM's vectorization of
-clear/dedup/compare/damage/animation loops. Then test target-dispatched intrinsics
-with one checked CPU-feature boundary and a scalar oracle. Avoid forcing gathers
+SIMD is part of the lane format: contiguous same-kind values, predictable lengths
+and bulk operations. Use one fearless_simd formulation whose fallback executes
+the same logic; scalar calls are a small batch of that pipeline. Inspect LLVM's
+vectorization of clear/dedup/compare/damage/animation loops and validate generated
+assembly against matched production workloads. Avoid forcing gathers
 over a pointer graph, and avoid enabling AVX globally for a distributable binary.
 Measure frequency throttling, lane occupancy, instruction cache, branch misses,
 tail cost and memory bandwidth. Unsafe must remove a measured cost and have a
@@ -466,11 +494,11 @@ gate passes; the user's authorization to delete does not prove parity.
 
 ## Code and performance budgets
 
-Use a soft design budget of 8k first-party production Rust lines for the
-reactivity/tree/port/scheduler/inspection kernel, 20k for core authoring/layout
-integration/standard controls/testing surface, and 35k for the replacement's
-first-party framework glue including renderer/platform adapters. These are
-review triggers, not evidence of completion or a reason to omit tests/features.
+Use actual [shipping core counts](evidence/core-lines/README.md), excluding
+comments, blanks and tests and charging library build scripts. Do not predict a
+final size. If an abstraction starts growing per-property/per-platform mirrors,
+review its formulation before extending it. Readable shared code and representative
+application usage establish simplicity; shorter syntax alone does not.
 Text/shaping/layout/windowing/render dependencies, vendored code, generated code,
 tests, examples and all feature crates must also be reported in the total.
 An order-of-magnitude claim requires equivalent scope and explicit counting;
