@@ -1,0 +1,84 @@
+/tmp/gpui-typed-catalog-evidence/final/binaries/one  :
+section                  size       addr
+.interp                    83        736
+.note.ABI-tag              32        820
+.dynsym                  1944        856
+.gnu.version              162       2800
+.gnu.version_r            384       2964
+.gnu.hash                  28       3352
+.dynstr                  1194       3380
+.rela.dyn              223944       4576
+.rela.plt                  48     228520
+.gcc_except_table       77952     228568
+.rodata               6522144     306528
+.debug_gdb_scripts         34    6828672
+.eh_frame_hdr           39012    6828708
+.eh_frame              264872    6867720
+.text                 3691127    7136688
+.init                      27   10827816
+.fini                      13   10827844
+.plt                       48   10827872
+.tdata                    912   10832016
+.tbss                      72   10832928
+.fini_array                 8   10832928
+.init_array                16   10832936
+.data.rel.ro           166160   10832952
+.dynamic                  480   10999112
+.got                    14392   10999592
+.got.plt                   40   11013984
+.relro_padding            120   11014024
+.tm_clone_table             0   11018120
+.data                    2616   11018120
+.bss                      291   11020736
+.comment                  157          0
+.debug_abbrev          177318          0
+.debug_info          15708183          0
+.debug_aranges         305120          0
+.debug_ranges         5966128          0
+.debug_str           30322474          0
+.debug_line           7161039          0
+Total                70648574
+
+
+/tmp/gpui-typed-catalog-evidence/final/binaries/two  :
+section                  size       addr
+.interp                    83        736
+.note.ABI-tag              32        820
+.dynsym                  1944        856
+.gnu.version              162       2800
+.gnu.version_r            384       2964
+.gnu.hash                  28       3352
+.dynstr                  1194       3380
+.rela.dyn              224208       4576
+.rela.plt                  48     228784
+.gcc_except_table       81268     228832
+.rodata               6522352     310112
+.debug_gdb_scripts         34    6832464
+.eh_frame_hdr           39564    6832500
+.eh_frame              269716    6872064
+.text                 3813751    7145888
+.init                      27   10959640
+.fini                      13   10959668
+.plt                       48   10959696
+.tdata                    912   10963840
+.tbss                      72   10964752
+.fini_array                 8   10964752
+.init_array                16   10964760
+.data.rel.ro           166312   10964776
+.dynamic                  480   11131088
+.got                    14416   11131568
+.got.plt                   40   11145984
+.relro_padding           3288   11146024
+.tm_clone_table             0   11150120
+.data                    2616   11150120
+.bss                      291   11152736
+.comment                  157          0
+.debug_abbrev          177449          0
+.debug_info          15896520          0
+.debug_aranges         306208          0
+.debug_ranges         6043936          0
+.debug_str           30633466          0
+.debug_line           7237393          0
+Total                71438436
+
+

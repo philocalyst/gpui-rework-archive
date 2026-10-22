@@ -1,0 +1,15 @@
+{
+  "source": "579e956f303bd78530da159b7f5f05decb73a406",
+  "x11_all_targets": {
+    "passed": 468,
+    "failed": 0,
+    "ignored": 25,
+    "binaries": 66
+  },
+  "external_passed": 5,
+  "default_headers_passed": 2,
+  "doctests_passed": 24,
+  "compile_fail_in_doctests": 23,
+  "native_passed": 1,
+  "clippy": "offline locked gpui x11 all-targets -D warnings: passed"
+}
