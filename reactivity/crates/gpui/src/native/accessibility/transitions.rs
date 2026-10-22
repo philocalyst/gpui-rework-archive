@@ -1275,3 +1275,67 @@ fn checkbox_state_native_click_and_sparse_updates_match_full_acknowledged_tree()
     acknowledge(&mut win);
     apply(&win, base, &mut tree, Some(1));
 }
+
+#[test]
+fn same_pool_index_with_different_exact_basis_updates_native_sparse_tree() {
+    struct BasisScene(Affine);
+    impl View for BasisScene {
+        fn view(&self) -> El<'_> {
+            div()
+                .size(16)
+                .bg(crate::Color::BLACK)
+                .name("basis")
+                .transform(self.0)
+        }
+    }
+    // Both maps occupy pool index zero in their own sheet. Their square bounds
+    // are equal, so native dirtiness must compare decoded maps, never keys.
+    let first = Affine {
+        a: 1.0,
+        b: 0.25,
+        c: -0.25,
+        d: 1.0,
+        tx: 4.0,
+        ty: 0.0,
+    };
+    let second = Affine {
+        a: 1.0,
+        b: -0.25,
+        c: 0.25,
+        d: 1.0,
+        tx: 0.0,
+        ty: 4.0,
+    };
+    let mut win = Win::recording(
+        BasisScene(first),
+        WindowOptions {
+            size: [128, 128],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    acknowledge(&mut win);
+    win.accessibility_observe(true).unwrap();
+    let base = win.accessibility_state().unwrap();
+    let mut tree = Tree::new(full(&win), true);
+    let before = win.snapshot().unwrap();
+    win.update(|model| model.0 = second).unwrap();
+    assert_eq!(
+        win.snapshot().unwrap().nodes[0].transform,
+        before.nodes[0].transform
+    );
+    acknowledge(&mut win);
+    let after = win.snapshot().unwrap();
+    assert_eq!(after.nodes[0].bounds, before.nodes[0].bounds);
+    assert_ne!(after.nodes[0].transform, before.nodes[0].transform);
+    let base = apply(&win, base, &mut tree, Some(1));
+    // Exact diagonal coefficients carry the admitted scale in the row, while
+    // the same native full/sparse oracle covers the general-pool scale change.
+    win.resize_scaled([128, 128], 2.0).unwrap();
+    acknowledge(&mut win);
+    let base = apply(&win, base, &mut tree, Some(1));
+    win.update(|model| model.0 = Affine::scale(-1.25, 1.5))
+        .unwrap();
+    acknowledge(&mut win);
+    apply(&win, base, &mut tree, Some(1));
+}

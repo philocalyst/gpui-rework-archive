@@ -683,10 +683,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 nodes: &state.presented,
                 sheet: &metadata.presented,
                 scale: f64::from(state.presentation_scale_factor),
-                geometry: metadata.geometry.as_deref().map_or_else(
-                    || geometry::GeometryView::empty(state.presentation_scale_factor),
-                    |geometry| geometry.view(state.presentation_scale_factor),
-                ),
+                geometry: metadata
+                    .geometry
+                    .as_deref()
+                    .map_or_else(geometry::GeometryView::empty, geometry::Geometry::view),
             };
             for (_, offset, list) in plan.iter(context) {
                 count += 1;

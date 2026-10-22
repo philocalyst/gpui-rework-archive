@@ -219,3 +219,44 @@ fn typed_paint_keep_preserves_custom_basis_and_radius_storage() {
         storage
     );
 }
+
+#[test]
+fn custom_candidate_survives_failed_default_lowering_without_a_custom_p_owner() {
+    let custom = Affine {
+        a: 1.25,
+        b: 0.125,
+        tx: 4.0,
+        ..Affine::IDENTITY
+    };
+    let mut model = Panel::new(Affine::IDENTITY);
+    model.radius = 0.0;
+    let mut win = Win::recording(
+        model,
+        WindowOptions {
+            size: [128, 128],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    let old = projection(&win);
+    assert!(win.runtime().unwrap().metadata.is_none());
+    win.update(|model| model.map = custom).unwrap();
+    let coherent = win.with_scene(|_, token| token).unwrap();
+    assert_eq!(projection(&win), old);
+    assert!(
+        win.update(|model| {
+            model.map = Affine::IDENTITY;
+            model.broken = true;
+        })
+        .is_err()
+    );
+    assert_eq!(projection(&win), old);
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), coherent);
+    win.presented(coherent).unwrap();
+    assert_eq!(projection(&win).map, expected(custom, 1.0));
+    win.update(|model| model.broken = false).unwrap();
+    ack(&mut win);
+    assert_eq!(projection(&win).map, expected(Affine::IDENTITY, 1.0));
+    assert!(win.runtime().unwrap().metadata.is_none());
+}

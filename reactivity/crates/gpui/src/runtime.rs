@@ -372,7 +372,7 @@ mod parent_tests {
         println!(
             "Parent={} Map={} Node={} Presented={}",
             size_of::<Parent>(),
-            size_of::<geometry::BasisKey>(),
+            size_of::<geometry::MapBasis>(),
             size_of::<Node>(),
             size_of::<Presented>()
         );
@@ -754,7 +754,7 @@ struct Presented {
     kind: NodeKind,
     text: Option<SharedText>,
     placement: geometry::Placement,
-    basis: geometry::BasisKey,
+    basis: geometry::MapBasis,
     bounds: Rect,
     hittable: bool,
     actions: Actions,
@@ -772,10 +772,7 @@ impl<M> Runtime<M> {
         self.metadata
             .as_ref()
             .and_then(|m| m.geometry.as_deref())
-            .map_or_else(
-                || geometry::GeometryView::empty(self.presentation_scale_factor),
-                |geometry| geometry.view(self.presentation_scale_factor),
-            )
+            .map_or_else(geometry::GeometryView::empty, geometry::Geometry::view)
     }
 }
 
@@ -2711,10 +2708,7 @@ impl<M: View + 'static> Runtime<M> {
             .metadata
             .as_ref()
             .and_then(|m| m.geometry.as_deref())
-            .map_or_else(
-                || geometry::GeometryView::empty(self.presentation_scale_factor),
-                |geometry| geometry.view(self.presentation_scale_factor),
-            );
+            .map_or_else(geometry::GeometryView::empty, geometry::Geometry::view);
         #[cfg(feature = "accessibility")]
         let mut observation = self
             .accessibility
@@ -2731,7 +2725,7 @@ impl<M: View + 'static> Runtime<M> {
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
                     &presented,
-                    geometry::Bases::new(scale_factor, &geometry_records),
+                    geometry::Bases::new(&geometry_records),
                     &mut self.texts,
                     &mut self.layout,
                     &self.layout_nodes,
@@ -3010,10 +3004,9 @@ impl<M: View + 'static> Runtime<M> {
                     map,
                 });
             }
-            let basis = geometry::BasisKey::record(
+            let basis = geometry::MapBasis::record(
                 transform,
                 published_parent.index().map(|index| presented[index].basis),
-                scale_factor,
                 &mut geometry_records,
             );
             presented.push(Presented {
@@ -3042,7 +3035,7 @@ impl<M: View + 'static> Runtime<M> {
                     (self.presented.get(index), &presented[index]),
                     (
                         previous_geometry.bases(),
-                        geometry::Bases::new(scale_factor, &geometry_records),
+                        geometry::Bases::new(&geometry_records),
                     ),
                     (self.metadata.as_deref(), selection_snapshot),
                     (

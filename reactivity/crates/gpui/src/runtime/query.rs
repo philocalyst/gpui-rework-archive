@@ -676,3 +676,22 @@ pub(super) fn contains_point(
     }
     true
 }
+
+#[cfg(test)]
+mod geometry_layout_tests {
+    use super::*;
+    #[test]
+    fn basis_borrowed_geometry_context_layout_is_explicit() {
+        println!(
+            "BASIS_QUERY_LAYOUT context={} context_align={} part={} geometry_view={} bases={}",
+            size_of::<Context<'_>>(),
+            std::mem::align_of::<Context<'_>>(),
+            size_of::<Part<'_>>(),
+            size_of::<super::super::geometry::GeometryView<'_>>(),
+            size_of::<super::super::geometry::Bases<'_>>()
+        );
+        assert_eq!(size_of::<Part<'_>>(), 16);
+        assert_eq!(size_of::<super::super::geometry::GeometryView<'_>>(), 24);
+        assert_eq!(size_of::<super::super::geometry::Bases<'_>>(), 16);
+    }
+}

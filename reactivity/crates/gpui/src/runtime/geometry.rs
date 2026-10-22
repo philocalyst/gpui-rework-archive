@@ -33,9 +33,6 @@ impl Basis {
     fn from_map(map: Affine) -> Self {
         Self([map.a, map.b, map.c, map.d].map(f32::to_bits))
     }
-    fn dpi(scale: f32) -> Self {
-        Self([scale.to_bits(), 0, 0, scale.to_bits()])
-    }
     fn map(self, translation: Point) -> Affine {
         let [a, b, c, d] = self.0.map(f32::from_bits);
         Affine {
@@ -95,39 +92,38 @@ impl Record {
     }
 }
 
-/// Keys belong to one sheet's pool and scale. Zero is its exact DPI basis;
-/// MAX is unavailable. Other values are one-based indices in the basis prefix.
+/// Exact diagonal coefficients fit inline when both off-diagonal words are +0.
+/// Finite admitted a cannot equal either reserved NaN tag. General bases use a
+/// direct index in their own sheet's stream; no sibling interning is performed.
 #[derive(Clone, Copy)]
-pub(super) struct BasisKey(u32);
+pub(super) struct MapBasis([u32; 2]);
 const _: () = assert!(MAX_NODES < u32::MAX as usize);
-impl BasisKey {
-    pub fn record(
-        map: Option<Affine>,
-        parent: Option<Self>,
-        scale: f32,
-        records: &mut Vec<Record>,
-    ) -> Self {
+impl MapBasis {
+    const POOLED: u32 = 0x7fc0_0001;
+    const INVALID: u32 = 0x7fc0_0002;
+
+    pub fn record(map: Option<Affine>, parent: Option<Self>, records: &mut Vec<Record>) -> Self {
         debug_assert!(map.is_none_or(|map| map.is_finite() && map.is_invertible()));
         let Some(map) = map else {
-            return Self(u32::MAX);
+            return Self([Self::INVALID, 0]);
         };
         let basis = Basis::from_map(map);
-        if basis == Basis::dpi(scale) {
-            return Self(0);
+        if map.b.to_bits() == 0 && map.c.to_bits() == 0 {
+            return Self([map.a.to_bits(), map.d.to_bits()]);
         }
         if let Some(parent) = parent
-            && Bases::new(scale, records).get(parent) == Some(basis)
+            && Bases::new(records).get(parent) == Some(basis)
         {
             return parent;
         }
-        // Only emitted rows append bases. MAX_NODES bounds both the Vec and
-        // this conversion, leaving the unavailable sentinel disjoint.
+        // Only emitted rows append bases, before any radius suffix exists.
         assert!(
             records.len() < MAX_NODES,
             "basis belongs to the admitted sheet"
         );
+        let index = records.len() as u32;
         records.push(Record::from_basis(basis));
-        Self(records.len() as u32)
+        Self([Self::POOLED, index])
     }
 }
 
@@ -135,21 +131,20 @@ impl BasisKey {
 /// acknowledged queries obtain it from a once-split immutable Geometry view.
 #[derive(Clone, Copy)]
 pub(super) struct Bases<'a> {
-    scale: f32,
     records: &'a [Record],
 }
 impl<'a> Bases<'a> {
-    pub fn new(scale: f32, records: &'a [Record]) -> Self {
-        Self { scale, records }
+    pub fn new(records: &'a [Record]) -> Self {
+        Self { records }
     }
-    fn get(self, key: BasisKey) -> Option<Basis> {
-        match key.0 {
-            0 => Some(Basis::dpi(self.scale)),
-            u32::MAX => None,
-            index => Some(self.records[index as usize - 1].basis()),
+    fn get(self, basis: MapBasis) -> Option<Basis> {
+        match basis.0 {
+            [MapBasis::INVALID, _] => None,
+            [MapBasis::POOLED, index] => Some(self.records[index as usize].basis()),
+            [a, d] => Some(Basis([a, 0, 0, d])),
         }
     }
-    pub fn transform(self, key: BasisKey, placement: Placement) -> Option<Affine> {
+    pub fn transform(self, key: MapBasis, placement: Placement) -> Option<Affine> {
         self.get(key).map(|basis| basis.map(placement.translation))
     }
 }
@@ -159,25 +154,22 @@ impl<'a> Bases<'a> {
 pub(super) struct GeometryView<'a> {
     records: &'a [Record],
     radius_start: usize,
-    scale: f32,
 }
 impl<'a> GeometryView<'a> {
-    pub fn empty(scale: f32) -> Self {
+    pub fn empty() -> Self {
         Self {
             records: &[],
             radius_start: 0,
-            scale,
         }
     }
-    fn new(scale: f32, records: &'a [Record]) -> Self {
+    fn new(records: &'a [Record]) -> Self {
         Self {
             records,
             radius_start: records.partition_point(Record::is_basis),
-            scale,
         }
     }
     pub fn bases(self) -> Bases<'a> {
-        Bases::new(self.scale, &self.records[..self.radius_start])
+        Bases::new(&self.records[..self.radius_start])
     }
     pub fn radius(self, identity: u64) -> f32 {
         let radii = &self.records[self.radius_start..];
@@ -207,8 +199,8 @@ impl Geometry {
     ) -> Contribution<crate::property::PropertyValue> {
         self.overrides.contribution(identity, id)
     }
-    pub fn view(&self, scale: f32) -> GeometryView<'_> {
-        GeometryView::new(scale, &self.presented)
+    pub fn view(&self) -> GeometryView<'_> {
+        GeometryView::new(&self.presented)
     }
     pub fn freeze(&self, mut column: Vec<Record>, include: impl Fn(u64) -> bool) -> Vec<Record> {
         // Bases are already stable direct indices. Append only published radii;
@@ -572,13 +564,13 @@ mod basis_tests {
     }
     #[test]
     fn exact_admitted_maps_and_zero_origin_extent_survive_factorization() {
-        assert_eq!(size_of::<BasisKey>(), 4);
+        assert_eq!(size_of::<MapBasis>(), 8);
         assert_eq!(size_of::<Placement>(), 16);
         assert_eq!(size_of::<Record>(), 16);
         let mut records = Vec::new();
-        let absent = BasisKey::record(None, None, 1.0, &mut records);
+        let absent = MapBasis::record(None, None, &mut records);
         assert!(
-            Bases::new(1.0, &records)
+            Bases::new(&records)
                 .transform(absent, Placement::new([0.0, -0.0], None))
                 .is_none()
         );
@@ -606,8 +598,8 @@ mod basis_tests {
             },
         ] {
             let placement = Placement::new([-0.0, f32::MIN_POSITIVE], Some(map));
-            let key = BasisKey::record(Some(map), None, 1.0, &mut records);
-            let actual = Bases::new(1.0, &records).transform(key, placement).unwrap();
+            let key = MapBasis::record(Some(map), None, &mut records);
+            let actual = Bases::new(&records).transform(key, placement).unwrap();
             assert_eq!(bits(actual), bits(map));
             let local = placement.local_rect();
             assert_eq!(
@@ -624,34 +616,73 @@ mod basis_tests {
             b: 0.125,
             ..Affine::IDENTITY
         };
-        let parent = BasisKey::record(Some(map), None, 1.0, &mut records);
+        let parent = MapBasis::record(Some(map), None, &mut records);
         let translated = Affine {
             tx: 7.0,
             ty: -0.0,
             ..map
         };
-        let child = BasisKey::record(Some(translated), Some(parent), 1.0, &mut records);
+        let child = MapBasis::record(Some(translated), Some(parent), &mut records);
         assert_eq!(parent.0, child.0);
         assert_eq!(records.len(), 1);
         let changed = Affine { c: -0.0, ..map };
-        let signed = BasisKey::record(Some(changed), Some(parent), 1.0, &mut records);
+        let signed = MapBasis::record(Some(changed), Some(parent), &mut records);
         assert_ne!(signed.0, parent.0);
-        let default = BasisKey::record(Some(Affine::IDENTITY), None, 1.0, &mut records);
-        assert_eq!(default.0, 0);
-        assert_ne!(
-            bits(
-                Bases::new(1.0, &records)
-                    .transform(default, Placement::new([1.0; 2], Some(Affine::IDENTITY)))
-                    .unwrap()
-            ),
-            bits(
-                Bases::new(2.0, &records)
-                    .transform(default, Placement::new([1.0; 2], Some(Affine::IDENTITY)))
-                    .unwrap()
-            )
-        );
-        let sibling = BasisKey::record(Some(map), None, 1.0, &mut records);
+        let default = MapBasis::record(Some(Affine::IDENTITY), None, &mut records);
+        assert_eq!(default.0, [1.0f32.to_bits(); 2]);
+        let dpi_two = MapBasis::record(Some(Affine::scale(2.0, 2.0)), None, &mut records);
+        assert_ne!(default.0, dpi_two.0);
+        assert!(Bases::new(&records).get(default) == Some(Basis::from_map(Affine::IDENTITY)));
+        let sibling = MapBasis::record(Some(map), None, &mut records);
         assert_ne!(sibling.0, parent.0); // No sibling interner or hash pass.
+    }
+    #[test]
+    fn finite_diagonals_are_inline_but_signed_off_diagonal_zeros_are_pooled() {
+        let mut records = Vec::new();
+        for map in [
+            Affine::scale(-2.0, 0.25),
+            Affine::scale(f32::from_bits(1), f32::MAX),
+        ] {
+            let encoded = MapBasis::record(Some(map), None, &mut records);
+            assert!(records.is_empty());
+            assert_eq!(
+                bits(
+                    Bases::new(&records)
+                        .transform(encoded, Placement::new([1.0; 2], Some(map)))
+                        .unwrap()
+                ),
+                bits(map)
+            );
+        }
+        for map in [
+            Affine {
+                b: -0.0,
+                ..Affine::IDENTITY
+            },
+            Affine {
+                c: -0.0,
+                ..Affine::IDENTITY
+            },
+        ] {
+            let encoded = MapBasis::record(Some(map), None, &mut records);
+            assert_eq!(encoded.0[0], MapBasis::POOLED);
+            assert_eq!(
+                bits(
+                    Bases::new(&records)
+                        .transform(encoded, Placement::new([1.0; 2], Some(map)))
+                        .unwrap()
+                ),
+                bits(map)
+            );
+        }
+        let mut other = Vec::new();
+        let alternate = Affine {
+            b: 0.5,
+            ..Affine::IDENTITY
+        };
+        let key = MapBasis::record(Some(alternate), None, &mut other);
+        assert_eq!(key.0, [MapBasis::POOLED, 0]);
+        assert!(Bases::new(&records).get(key) != Bases::new(&other).get(key));
     }
     #[test]
     fn mixed_stream_keeps_full_radius_identity_and_empty_candidate_clears_p() {
@@ -662,7 +693,7 @@ mod basis_tests {
             b: 0.25,
             ..Affine::IDENTITY
         };
-        let key = BasisKey::record(Some(map), None, 1.0, &mut records);
+        let key = MapBasis::record(Some(map), None, &mut records);
         for (identity, value) in [(1, -0.0), (u64::MAX, 3.5)] {
             geometry.store(
                 identity,
@@ -672,18 +703,137 @@ mod basis_tests {
             );
         }
         geometry.prepare(geometry.freeze(records, |_| true));
-        assert!(geometry.view(1.0).records.is_empty());
+        assert!(geometry.view().records.is_empty());
         geometry.acknowledge();
-        let view = geometry.view(1.0);
+        let view = geometry.view();
         assert_eq!(view.radius_start, 1);
         assert_eq!(view.radius(1).to_bits(), (-0.0f32).to_bits());
         assert_eq!(view.radius(u64::MAX), 3.5);
         assert_eq!(view.radius(2), 0.0);
         assert!(view.bases().get(key) == Some(Basis::from_map(map)));
         geometry.acknowledge(); // KEEP has no candidate and preserves P.
-        assert_eq!(geometry.view(1.0).radius_start, 1);
+        assert_eq!(geometry.view().radius_start, 1);
         geometry.prepare(Vec::new());
         geometry.acknowledge();
-        assert!(geometry.view(1.0).records.is_empty());
+        assert!(geometry.view().records.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod virtual_basis_tests {
+    use super::*;
+    use crate::{El, ItemKey, ItemSource, ListId, uniform_list};
+    struct Rows;
+    impl ItemSource for Rows {
+        fn len(&self) -> usize {
+            10_000
+        }
+        fn key(&self, index: usize) -> ItemKey {
+            ItemKey::new(index as u64)
+        }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            (key.get() < 10_000).then_some(key.get() as usize)
+        }
+        fn row(&self, index: usize) -> El<'_> {
+            crate::div()
+                .w(64)
+                .h(16)
+                .rounded(4.0)
+                .bg(Color::BLACK)
+                .name(index.to_string())
+                .transform(Affine {
+                    a: 1.0 + (index % 128) as f32 / 256.0,
+                    b: 0.125,
+                    ..Affine::IDENTITY
+                })
+        }
+    }
+    const LIST: ListId = ListId::new(0xb4515);
+    impl View for Rows {
+        fn view(&self) -> El<'_> {
+            uniform_list(LIST, self, 16).w(64).h(64)
+        }
+    }
+    fn published_rows(win: &Win<Rows>) -> Vec<(String, [u32; 4])> {
+        let mut rows = Vec::new();
+        let mut targets = Vec::new();
+        let mut parents = Vec::new();
+        win.visit(|part| {
+            targets.push(part.target());
+            if let Some(parent) = part.parent() {
+                parents.push(parent);
+            }
+            if let Some(name) = part.name()
+                && let Ok(index) = name.parse::<usize>()
+            {
+                let map = part.transform().unwrap();
+                let actual = [map.a, map.b, map.c, map.d].map(f32::to_bits);
+                assert_eq!(
+                    actual,
+                    [1.0 + (index % 128) as f32 / 256.0, 0.125, 0.0, 1.0].map(f32::to_bits)
+                );
+                assert_eq!(part.corner_radius(), 4.0);
+                rows.push((name.to_owned(), actual));
+            }
+        })
+        .unwrap();
+        assert!(parents.into_iter().all(|parent| targets.contains(&parent)));
+        rows
+    }
+    #[test]
+    fn omitted_virtual_geometry_has_no_basis_key_and_radius_capacity_is_charged() {
+        let mut win = Win::recording(
+            Rows,
+            WindowOptions {
+                size: [64, 16],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        let before = published_rows(&win);
+        assert!(!before.is_empty());
+        let runtime = win.runtime().unwrap();
+        let geometry = runtime
+            .metadata
+            .as_ref()
+            .unwrap()
+            .geometry
+            .as_ref()
+            .unwrap();
+        let view = geometry.view();
+        assert_eq!(view.radius_start, before.len());
+        assert_eq!(geometry.presented.len() - view.radius_start, before.len());
+        assert!(geometry.current.len() > before.len());
+        assert!(runtime.nodes.len() > runtime.presented.len());
+        println!(
+            "BASIS_VIRTUAL_RADIUS logical_rows={} published_rows={} published_custom={} logical_radii={} published_radii={} record_capacity={} retained_record_bytes={}",
+            runtime.nodes.len(),
+            runtime.presented.len(),
+            before.len(),
+            geometry.current.len(),
+            geometry.presented.len() - view.radius_start,
+            geometry.presented.capacity(),
+            geometry.presented.capacity() * size_of::<Record>()
+        );
+        // List-local realization is larger than the physical window. Omitted
+        // descendants append no basis; the inherited radius reserve remains.
+        let list = win.list(LIST).unwrap();
+        win.scroll_to_index(list, 500).unwrap();
+        assert_eq!(published_rows(&win), before);
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        let after = published_rows(&win);
+        assert_ne!(after, before);
+        let runtime = win.runtime().unwrap();
+        let geometry = runtime
+            .metadata
+            .as_ref()
+            .unwrap()
+            .geometry
+            .as_ref()
+            .unwrap();
+        assert_eq!(geometry.view().radius_start, after.len());
     }
 }

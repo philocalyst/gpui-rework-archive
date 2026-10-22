@@ -50,6 +50,16 @@ fn proposal_basis_headers_and_owner_allocations() {
         };
     }
     header!(Presented);
+    header!(Option<Presented>);
+    header!(geometry::Placement);
+    header!(geometry::MapBasis);
+    header!(geometry::Record);
+    header!(geometry::Bases<'_>);
+    header!(geometry::GeometryView<'_>);
+    header!(Affine);
+    header!(CoordinateSpace);
+    header!(Point);
+    header!(Rect);
     header!(ProposedRow);
     header!(ProposedPlacement);
     header!(Prepared);
@@ -236,7 +246,7 @@ fn inline_basis_proposal_uses_existing_row_padding() {
         + size_of::<NodeKind>()
         + size_of::<Option<SharedText>>()
         + size_of::<geometry::Placement>()
-        + size_of::<geometry::BasisKey>()
+        + size_of::<geometry::MapBasis>()
         + size_of::<Rect>()
         + size_of::<bool>()
         + size_of::<Actions>();
