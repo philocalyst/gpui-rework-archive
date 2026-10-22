@@ -349,6 +349,49 @@ fn direct_pair<B: Brush>(layout: &Layout<B>, byte: usize, width: f32) -> Option<
     ])
 }
 
+// The monotonic byte owners already carry their exact visual prefixes. Keep
+// large Cluster reconstruction cold, and share the ordinary cursor policy.
+#[inline(never)]
+fn cached_pair<B: Brush>(
+    layout: &Layout<B>,
+    byte: usize,
+    width: f32,
+    previous: Option<&Entry>,
+    next: Option<&Entry>,
+) -> Option<[BoundingBox; 2]> {
+    let downstream = next.and_then(|entry| entry.path.cluster(layout));
+    let upstream_cursor =
+        Cursor::from_source_cluster(layout, Affinity::Upstream, downstream.as_ref());
+    if upstream_cursor.index() != byte {
+        return None;
+    }
+    let upstream = previous.and_then(|entry| entry.path.cluster(layout));
+    let clusters = [upstream.as_ref(), downstream.as_ref()];
+    let geometry = |cursor: Cursor| {
+        cursor.geometry_with(layout, width, clusters, |cluster| {
+            [previous, next]
+                .into_iter()
+                .flatten()
+                .find(|entry| entry.path == cluster.path())
+                .expect("geometry reborrows one of the two source-owner paths")
+                .offset
+        })
+    };
+    let first = geometry(upstream_cursor);
+    Some([
+        first,
+        if byte == 0 || downstream.is_none() {
+            first
+        } else {
+            geometry(Cursor::from_source_cluster(
+                layout,
+                Affinity::Downstream,
+                downstream.as_ref(),
+            ))
+        },
+    ])
+}
+
 fn visit_indexed<B: Brush, E>(
     layout: &Layout<B>,
     offsets: impl IntoIterator<Item = usize>,
@@ -387,6 +430,8 @@ fn visit_source_pairs<B: Brush, E>(
 ) -> ControlFlow<E> {
     let mut offsets = offsets.peekable();
     let mut last_request = None;
+    let mut previous_owner = None;
+    let mut previous_owner_end = 0;
     for line in layout.lines() {
         let (min, slots) =
             source_runs(&line, inline, spill).expect("preflight verified run identities");
@@ -424,6 +469,16 @@ fn visit_source_pairs<B: Brush, E>(
                     prefix += cluster.advance();
                     offset
                 };
+                // Empty ranges, including the empty layout's metrics space,
+                // never own a byte in the original random-access byte map.
+                if range.is_empty() || layout.data.text_len == 0 {
+                    previous_shared = false;
+                    continue;
+                }
+                let current = Entry {
+                    path: cluster.path(),
+                    offset,
+                };
                 while let Some(&byte) = offsets.peek().filter(|&&byte| byte < range.end) {
                     if last_request.is_some_and(|previous| byte < previous) {
                         return visit_direct(layout, offsets, width, visit);
@@ -444,22 +499,59 @@ fn visit_source_pairs<B: Brush, E>(
                             );
                             Some([bounds; 2])
                         } else {
-                            direct_pair(layout, byte, width)
+                            cached_pair(
+                                layout,
+                                byte,
+                                width,
+                                previous_owner
+                                    .as_ref()
+                                    .filter(|_| previous_owner_end == byte),
+                                Some(&current),
+                            )
                         }
                     } else if byte > range.start {
                         // The ordinary cursor canonicalizes an in-cluster
                         // byte to its start, so this request would snap away.
                         None
                     } else {
-                        direct_pair(layout, byte, width)
+                        cached_pair(
+                            layout,
+                            byte,
+                            width,
+                            previous_owner
+                                .as_ref()
+                                .filter(|_| previous_owner_end == byte),
+                            None,
+                        )
                     };
                     visit(byte, pair)?;
                 }
                 previous_end = range.end;
                 previous_offset = offset;
                 previous_shared = !range.is_empty() && !cluster.is_hard_line_break();
+                previous_owner = Some(current);
+                previous_owner_end = range.end;
             }
         }
     }
-    visit_direct(layout, offsets, width, visit)
+    while let Some(&byte) = offsets.peek() {
+        if last_request.is_some_and(|previous| byte < previous) {
+            return visit_direct(layout, offsets, width, visit);
+        }
+        offsets.next();
+        last_request = Some(byte);
+        visit(
+            byte,
+            cached_pair(
+                layout,
+                byte,
+                width,
+                previous_owner
+                    .as_ref()
+                    .filter(|_| previous_owner_end == byte),
+                None,
+            ),
+        )?;
+    }
+    ControlFlow::Continue(())
 }
