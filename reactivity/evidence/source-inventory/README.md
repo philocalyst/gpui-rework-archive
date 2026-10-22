@@ -61,3 +61,35 @@ predate the follow-up fixes for Unicode character span columns and authored
 assembly classification, and the change to read attributes directly from Syn.
 Their recorded source pin and totals have not been retagged as results from the
 corrected tool. Generate a new snapshot after adopting those corrections.
+
+## Corrected integrated snapshot
+
+`experiment-dc577564e5.json.gz` inventories source `dc577564e5` with the corrected
+tool at that same commit. `original-corrected-dc577564e5.json.gz` applies that
+tool to the original `41a42eb96d` source. Both are ordinary JSON compressed
+losslessly; `SHA256SUMS` pins the captured files and the three integration logs.
+Three Rust and ten Python tests pass. Exact text-query disassemblies are charged
+as generated while adjacent authored assembly remains handwritten.
+
+| Integrated experiment | Non-test physical lines |
+| --- | ---: |
+| Libraries | 29,580 |
+| Labs | 2,939 |
+| Examples | 6,251 |
+| Benchmarks and fixtures | 4,861 |
+| Tools | 1,002 |
+| Evidence helper source | 3,075 |
+| **All handwritten first-party source** | **47,708** |
+| First-party including generated captures | 87,662 |
+| Vendor, excluding generated | 149,703 |
+| All generated, including vendor | 39,955 |
+| **All active non-test, all charges** | **237,366** |
+
+Known active test lines are 45,912; all active physical source is 283,278 lines.
+Excluded legacy/input physical source is 264,978 lines and stays visible in the
+548,256-line repository total. The corrected original non-test total remains
+202,755. These are source accounting boundaries, not feature-equivalent sizes:
+the grand total has not reached a reduction over that original boundary.
+The first-party source total is not the library subtotal, and vendor/generated
+charges are not removed from the grand total. One experiment file and six
+original files retain conservative ambiguity charges, detailed in the ledgers.
