@@ -355,7 +355,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             // may still change the tool's ordinary model error/status state.
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
-            handler.applied_logically(&mut self.runtime.model, result.as_ref().map(|()| ()))?;
+            handler.applied_logically(&mut self.runtime.model, result.as_ref().copied())?;
             Ok(true)
         }));
         self.runtime.nodes[index].handler = Some(handler);
