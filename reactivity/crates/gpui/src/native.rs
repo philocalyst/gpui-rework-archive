@@ -384,6 +384,13 @@ struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
     #[cfg(test)]
     upgrade_rejection: Option<String>,
 }
+impl<V: View + 'static, L: LaneSet<V>> Drop for NativeHost<V, L> {
+    fn drop(&mut self) {
+        // Exiting is not guaranteed on early failure or unwind. A worker's safe
+        // target lease must not leave this retired owner visibly on screen.
+        self.hide_and_cancel_upgrade();
+    }
+}
 impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
     fn new(opening: Window<V, L>) -> Self {
         let renderer_policy = opening.renderer;
@@ -530,7 +537,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         self.graphics = Some(Graphics::ReferenceCpu(surface, SurfaceDamage::default()));
         self.resize([size.width, size.height])
     }
-    fn retire_window(&mut self) {
+    fn hide_and_cancel_upgrade(&mut self) {
         // A cancelled worker may retain an unconfigured native target while a
         // driver call finishes. Hide promptly before dropping this UI lease;
         // never let that retained target keep a closed owner visibly alive.
@@ -538,6 +545,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             window.set_visible(false);
         }
         self.upgrade = None;
+    }
+    fn retire_window(&mut self) {
+        self.hide_and_cancel_upgrade();
         #[cfg(feature = "accessibility")]
         {
             self.accessibility = None;
@@ -1163,12 +1173,9 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             Callback::Suspended => {
                 self.destination.invalidate();
                 self.pointer = PointerSession::default();
-                if let Some(window) = &self.window {
-                    window.set_visible(false);
-                }
                 // Dropping both bounded channel endpoints cancels this admission
                 // generation; a late worker can only drop its owned resources.
-                self.upgrade = None;
+                self.hide_and_cancel_upgrade();
                 self.upgrade_attempted = false;
                 self.instance = None;
                 self.graphics = None;

@@ -1,12 +1,21 @@
 //! Real X11 target proof, rejection and pending-worker close lifecycle.
 use super::*;
 use crate::{El, button};
-use std::sync::{Weak, mpsc::SyncSender};
+use std::sync::{
+    Weak,
+    atomic::{AtomicBool, Ordering},
+    mpsc::SyncSender,
+};
 use wgpu::rwh::HasWindowHandle;
 use winit::platform::{run_on_demand::EventLoopExtRunOnDemand, x11::EventLoopBuilderExtX11};
 use x11rb::protocol::xproto::{ConnectionExt, MapState};
 
-struct Document;
+struct Document(Arc<AtomicBool>);
+impl Drop for Document {
+    fn drop(&mut self) {
+        self.0.store(true, Ordering::Release);
+    }
+}
 impl View for Document {
     fn view(&self) -> El<'_> {
         button("CPU frame remains live").on_click(|_: &mut Self| {})
@@ -16,6 +25,8 @@ struct Script {
     host: NativeHost<Document>,
     expected: Option<&'static str>,
     close: bool,
+    direct_drop: bool,
+    model_dropped: Arc<AtomicBool>,
     initialization: Option<Arc<upgrade::Initialization>>,
     hold: Option<SyncSender<()>>,
     lease: Option<Weak<NativeWindow>>,
@@ -74,15 +85,27 @@ impl Host for Script {
             self.xid = Some(raw.window.try_into().unwrap());
             // The external gate keeps the real proved Surface/Arc alive after
             // cancellation. This call must retire UI authority without joining.
-            self.host
-                .window_event(event_loop, &WindowEvent::CloseRequested)
-                .unwrap();
-            assert!(self.host.window.is_none());
-            assert!(self.host.upgrade.is_none());
-            assert!(self.host.graphics.is_none());
-            let owner = self.host.owner.as_mut().unwrap();
-            assert!(owner.is_closed());
-            assert!(matches!(owner.activate(target), Err(Error::Closed)));
+            if self.direct_drop {
+                // Replace only the test holder; the actual initialized host is
+                // dropped directly, without dispatching Exiting/CloseRequested.
+                let retired = std::mem::replace(
+                    &mut self.host,
+                    NativeHost::new(Window::document(Document(Arc::new(AtomicBool::new(false))))),
+                );
+                drop(retired);
+                event_loop.exit();
+            } else {
+                self.host
+                    .window_event(event_loop, &WindowEvent::CloseRequested)
+                    .unwrap();
+                assert!(self.host.window.is_none());
+                assert!(self.host.upgrade.is_none());
+                assert!(self.host.graphics.is_none());
+                let owner = self.host.owner.as_mut().unwrap();
+                assert!(owner.is_closed());
+                assert!(matches!(owner.activate(target), Err(Error::Closed)));
+            }
+            assert!(self.model_dropped.load(Ordering::Acquire));
             assert!(!initialization.renderer_started());
             self.checked = true;
         } else if self.host.upgrade_rejection.as_deref() == self.expected {
@@ -188,9 +211,21 @@ fn automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_w
         None,
         true,
     ));
+    cases.push((
+        "direct host drop",
+        upgrade::Policy {
+            allow_cpu: true,
+            force_probe: true,
+            defer_renderer: true,
+            ..Default::default()
+        },
+        None,
+        true,
+    ));
     for (name, policy, expected, close) in cases {
+        let model_dropped = Arc::new(AtomicBool::new(false));
         let mut host = NativeHost::new(
-            Window::document(Document)
+            Window::document(Document(Arc::clone(&model_dropped)))
                 .size(320, 180)
                 .renderer(RendererPolicy::Auto),
         );
@@ -199,6 +234,8 @@ fn automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_w
             host,
             expected,
             close,
+            direct_drop: name == "direct host drop",
+            model_dropped,
             initialization: None,
             hold: None,
             lease: None,

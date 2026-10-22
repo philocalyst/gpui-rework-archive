@@ -30,7 +30,9 @@ imposes main-thread creation on macOS/Metal, not Linux X11. Winit initializes
 XInitThreads and retains a Send+Sync XConnection; X11 set_visible(false) sends
 and flushes XUnmapWindow. A cancelled driver call cannot be interrupted; the
 native owner hides/retires the visible X11 target immediately while its safe
-resource lease can outlive the owner until that call returns.
+resource lease can outlive the owner until that call returns. A minimal native
+host Drop guard also hides/cancels on early failure or unwind, without relying on
+CloseRequested/Exiting or joining the worker; normal field drops retire the owner.
 
 Metal retains headless device/renderer preparation and late event-thread layer
 attachment. Its target compatibility therefore remains unproved until after
