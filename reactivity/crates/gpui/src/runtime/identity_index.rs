@@ -174,19 +174,26 @@ impl IdentityIndex {
                 // IDs inside the hole must not alias the prefix's indices.
                 (index >= cut && index < shape.len()).then_some(index as usize)
             }
-            Self::Runs(runs) => {
-                let next = runs.partition_point(|run| run.first_id <= identity);
-                let run = &runs[next.checked_sub(1)?];
-                // Comparing displacement avoids an overflowing exclusive end
-                // for a run whose last admitted identity is u64::MAX.
-                let delta = identity - run.first_id;
-                (delta < u64::from(run.len)).then(|| run.first_index as usize + delta as usize)
-            }
-            Self::Indexed(entries) => entries
-                .binary_search_by_key(&identity, |entry| entry.identity)
-                .ok()
-                .map(|index| entries[index].index as usize),
+            Self::Runs(runs) => Self::find_run(runs, identity),
+            Self::Indexed(entries) => Self::find_entry(entries, identity),
         }
+    }
+
+    // Keep general searches outside the inline contiguous/hole arithmetic.
+    fn find_run(runs: &[Run], identity: u64) -> Option<usize> {
+        let next = runs.partition_point(|run| run.first_id <= identity);
+        let run = &runs[next.checked_sub(1)?];
+        // Comparing displacement avoids an overflowing exclusive end
+        // for a run whose last admitted identity is u64::MAX.
+        let delta = identity - run.first_id;
+        (delta < u64::from(run.len)).then(|| run.first_index as usize + delta as usize)
+    }
+
+    fn find_entry(entries: &[Entry], identity: u64) -> Option<usize> {
+        entries
+            .binary_search_by_key(&identity, |entry| entry.identity)
+            .ok()
+            .map(|index| entries[index].index as usize)
     }
 
     pub(super) fn contains(&self, identity: u64) -> bool {
