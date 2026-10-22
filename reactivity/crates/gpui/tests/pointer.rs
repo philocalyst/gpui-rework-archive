@@ -255,7 +255,7 @@ fn wheel_uses_the_ordinary_two_axis_scroll_router() {
 }
 
 #[test]
-fn focused_input_mouse_turns_allocate_nothing_and_do_no_visual_work() {
+fn repeated_input_clicks_allocate_nothing_after_selection_activation() {
     struct Input(Signal<String>);
     impl View for Input {
         fn sources() -> Sources<Self> {
@@ -272,6 +272,11 @@ fn focused_input_mouse_turns_allocate_nothing_and_do_no_visual_work() {
     }
     let mut win = Win::with_size(Input(Signal::new(String::new())), 96, 64).unwrap();
     let mut mouse = PointerSession::default();
+    // The first click activates the one cold selection and publishes its caret.
+    win.pointer_event(&mut mouse, point(8.0)).unwrap();
+    win.pointer_event(&mut mouse, PointerEvent::Press).unwrap();
+    win.pointer_event(&mut mouse, PointerEvent::Release)
+        .unwrap();
     win.reset_counters().unwrap();
     let allocations = allocation_counter::measure(|| {
         for _ in 0..1_000 {

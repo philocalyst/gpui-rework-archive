@@ -6,7 +6,8 @@ use crate::{Point, ScrollDelta};
 /// One portable mouse stream. Points are physical window coordinates; wheel
 /// displacement is window-logical, with positive values scrolling right/down.
 /// Native adapters normalize platform units before entering this same path.
-/// This floor does not model touch, capture, multiple devices or drag gestures.
+/// Text selection retains a pressed input while the pointer moves within the
+/// window, including outside that input. Touch and multiple devices are separate.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PointerEvent {
     Move(Point),
@@ -39,14 +40,20 @@ impl PointerSession {
     }
 }
 
-/// Committed text and a small portable key floor. Text inserts at the end and
-/// backspace removes one Unicode scalar. Selection, IME and shortcuts are not
-/// represented by this enum.
+/// Committed text and portable editing keys. Text replaces the current range;
+/// backspace removes a selected range or one whole extended grapheme.
+/// Visual arrows require an acknowledged current layout; IME is separate.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Key<'a> {
     /// Committed printable text; payloads containing control characters are ignored.
     Text(&'a str),
     Backspace,
+    Left {
+        extend: bool,
+    },
+    Right {
+        extend: bool,
+    },
     Tab,
     ReverseTab,
     Enter,
@@ -61,9 +68,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// presentation. A fresh hit on a newer acknowledged sheet may activate
     /// the same surviving target.
     ///
-    /// Moving, cancellation and an unpaired release need no hit test. They do
-    /// not prepare a frame; the returned commit can still report an already
-    /// outstanding frame. Nonfinite positions behave as leaving the window.
+    /// A move extends a pressed input's selection through current geometry.
+    /// Other moves, cancellation and an unpaired release prepare no frame.
+    /// Nonfinite positions behave as leaving the window.
     pub fn pointer_event(
         &mut self,
         session: &mut PointerSession,
@@ -94,6 +101,22 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.changed_nodes = 0;
+        if matches!(event, PointerEvent::Move(_))
+            && !runtime.inspector_picking()
+            && let Some(target) = session.pressed
+        {
+            if let Ok(index) = runtime.resolve_index(target) {
+                if runtime.nodes[index].kind() == NodeKind::Input {
+                    let result = runtime.select_pointer(target, session.position.unwrap(), true);
+                    if matches!(result, Err(Error::StaleTarget)) {
+                        session.cancel();
+                    }
+                    return result;
+                }
+            } else {
+                session.cancel();
+            }
+        }
         if !matches!(event, PointerEvent::Press)
             && !(matches!(event, PointerEvent::Release) && pressed.is_some())
         {
@@ -111,12 +134,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             }
         });
         if matches!(event, PointerEvent::Press) {
+            session.pressed = hit;
+            let previous = runtime.focused;
             if let Some(target) = hit.filter(|_| !picking) {
+                if runtime.nodes[runtime.resolve_index(target)?].kind() == NodeKind::Input {
+                    return runtime.select_pointer(target, session.position.unwrap(), false);
+                }
                 runtime.focus(target)?;
             } else {
                 runtime.focused = None;
             }
-            session.pressed = hit;
+            return runtime.publish_focus_change(previous);
         } else if let Some(target) = pressed.filter(|target| Some(*target) == hit) {
             if picking {
                 return runtime.inspector_select(target);
@@ -129,13 +157,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Focus a live logical control without using displayed coordinates. This
     /// remains available to repair text after a failed presentation.
     pub fn focus(&mut self, target: Target) -> Result<Commit, Error> {
-        self.runtime_mut()?.focus(target)
+        let mut runtime = self.runtime_mut()?;
+        let previous = runtime.focused;
+        runtime.focus(target)?;
+        runtime.publish_focus_change(previous)
     }
     pub fn clear_focus(&mut self) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
+        let previous = runtime.focused;
         runtime.focused = None;
         runtime.changed_nodes = 0;
-        Ok(runtime.commit())
+        runtime.publish_focus_change(previous)
     }
     /// A removed control or quarantined owner has no focus. Reading focus does
     /// not mutate source state, mint an identity, or require a current frame.
@@ -150,6 +182,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.changed_nodes = 0;
         if matches!(key, Key::Tab | Key::ReverseTab) {
             let previous = runtime.focused;
+            let prepared = runtime.latest_token;
             let commit = runtime.tab(matches!(key, Key::ReverseTab))?;
             let focused = runtime.focused;
             let identity = focused.and_then(|target| runtime.resolve(target).ok());
@@ -159,10 +192,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                         && node.actions.contains(super::ActionKind::ScrollIntoView)
                 })
             });
-            drop(runtime);
             if !reveal {
-                return Ok(commit);
+                return runtime.publish_focus_change(previous);
             }
+            drop(runtime);
             let Some(target) = focused else {
                 return Ok(commit);
             };
@@ -175,6 +208,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             {
                 runtime.focused = previous.filter(|target| runtime.resolve(*target).is_ok());
             }
+            if revealed.is_ok() {
+                let mut runtime = self.runtime_mut()?;
+                // Reveal either prepares a full scene with this focus or does
+                // nothing; a metadata epoch alone cannot prove caret painting.
+                if runtime.latest_token == prepared {
+                    return runtime.publish_focus_change(previous);
+                }
+            }
             return revealed;
         }
         let Some(target) = runtime.focused else {
@@ -182,15 +223,21 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         };
         match key {
             Key::Text(text) if text.chars().any(char::is_control) => Ok(runtime.commit()),
-            Key::Text(text) => runtime.edit_text(target, |value| value.push_str(text)),
-            Key::Backspace => runtime.edit_text(target, |value| {
-                value.pop();
-            }),
+            Key::Text(text) => runtime.replace_input(target, None, text),
+            Key::Backspace => runtime.backspace_input(target),
+            Key::Left { extend } | Key::Right { extend } => {
+                let index = runtime.resolve_index(target)?;
+                if runtime.nodes[index].kind() == NodeKind::Input {
+                    runtime.move_selection(target, matches!(key, Key::Right { .. }), extend)
+                } else {
+                    Ok(runtime.commit())
+                }
+            }
             Key::Enter => runtime.activate(target),
             Key::Space => {
                 let index = runtime.resolve_index(target)?;
                 if runtime.nodes[index].kind() == NodeKind::Input {
-                    runtime.edit_text(target, |value| value.push(' '))
+                    runtime.replace_input(target, None, " ")
                 } else {
                     runtime.activate(target)
                 }

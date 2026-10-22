@@ -1051,6 +1051,7 @@ dependencies = [
  "gpui_reactivity_core",
  "gpui_reactivity_host",
  "gpui_reactivity_state",
+ "icu_segmenter",
  "pollster",
  "serde",
  "serde_json",

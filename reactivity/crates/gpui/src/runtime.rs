@@ -36,6 +36,8 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 #[cfg(feature = "accessibility")]
 mod accessibility;
 mod delivery;
+mod editing;
+use editing::EditingIntent;
 mod identity_index;
 mod image;
 use identity_index::IdentityIndex;
@@ -89,6 +91,7 @@ pub enum Error {
     StalePresentation,
     NotInteractive,
     NotInput,
+    InvalidSelection,
     NotHittable,
     MissingElement,
     AmbiguousElement { matches: usize },
@@ -588,16 +591,31 @@ impl Node {
     }
 }
 impl TextSite {
-    fn shape<'n>(
+    fn shape_for<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
         font_size: f32,
         width: Option<f32>,
+        interactive: bool,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         let key = width.map(f32::to_bits);
-        if self.shaped.as_ref().is_none_or(|shape| shape.width != key) {
-            let layout = service.shape(&self.value, font_size, width)?;
+        if self.shaped.as_ref().is_none_or(|shape| {
+            shape.width != key
+                || (interactive
+                    && shape
+                        .layout
+                        .caret_bounds(gpui_canvas::TextPosition {
+                            offset: gpui_canvas::TextOffset::new(0).unwrap(),
+                            affinity: gpui_canvas::CaretAffinity::Downstream,
+                        })
+                        .is_none())
+        }) {
+            let layout = if interactive {
+                service.shape_interactive(&self.value, font_size, width)?
+            } else {
+                service.shape(&self.value, font_size, width)?
+            };
             self.shaped = Some(Shaped { width: key, layout });
         }
         Ok(&self.shaped.as_ref().unwrap().layout)
@@ -1147,7 +1165,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .map(|identity| runtime.sites.target(identity)))
     }
 
-    /// Test input still goes through admitted geometry and the ordinary hit path.
+    /// Click a live target through acknowledged geometry and the ordinary hit path.
     pub fn click(&mut self, target: Target) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
@@ -1179,8 +1197,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         if hit != identity {
             return Err(Error::NotHittable);
         }
+        if runtime.nodes[runtime.resolve_index(target)?].kind() == NodeKind::Input {
+            return runtime.select_pointer(target, point, false);
+        }
+        let previous = runtime.focused;
         runtime.focus(target)?;
-        runtime.activate(target)
+        runtime.activate_focused(target, previous)
     }
     pub fn click_at(&mut self, point: Point) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
@@ -1191,24 +1213,27 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             return runtime.inspector_select(target);
         }
         let Some(identity) = runtime.hit(point) else {
+            let previous = runtime.focused;
             runtime.focused = None;
             runtime.changed_nodes = 0;
+            runtime.publish_focus_change(previous)?;
             return Err(Error::NotHittable);
         };
         let target = runtime.sites.target(identity);
+        if runtime.nodes[runtime.resolve_index(target)?].kind() == NodeKind::Input {
+            return runtime.select_pointer(target, point, false);
+        }
+        let previous = runtime.focused;
         runtime.focus(target)?;
-        runtime.activate(target)
+        runtime.activate_focused(target, previous)
     }
-    /// The editing floor inserts at the end; full selection/IME is a host/text
-    /// layer. Character boundaries are preserved by the backspace operation.
+    /// Insert committed text into the input's current logical selection.
+    /// An input without an active selection starts at its document end.
     pub fn type_text(&mut self, target: Target, text: &str) -> Result<Commit, Error> {
-        self.runtime_mut()?
-            .edit_text(target, |value| value.push_str(text))
+        self.runtime_mut()?.replace_input(target, None, text)
     }
     pub fn backspace(&mut self, target: Target) -> Result<Commit, Error> {
-        self.runtime_mut()?.edit_text(target, |value| {
-            value.pop();
-        })
+        self.runtime_mut()?.backspace_input(target)
     }
     /// Retry a pending presentation, or do zero description/layout/paint work.
     pub fn settle(&mut self) -> Result<Commit, Error> {
@@ -1522,6 +1547,9 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn poison(&mut self) {
+        if let Some(metadata) = &mut self.metadata {
+            metadata.editing = None;
+        }
         self.focused = None;
         self.poisoned = true;
         self.logical_valid = false;
@@ -2272,6 +2300,7 @@ impl<M: View + 'static> Runtime<M> {
             .then_some(self.complete_epoch)
     }
     fn present(&mut self) -> Result<Commit, Error> {
+        self.reconcile_editing(EditingIntent::None)?;
         self.refresh_inspector(false)?;
         if !self.dirty {
             if self.source_epoch > 0
@@ -2388,6 +2417,7 @@ impl<M: View + 'static> Runtime<M> {
         // neither a string nor a glyph increments its reference count.
         let font = self.text.as_ref().map(|text| text.font_face().clone());
         let mut shaper = font.as_ref().map(|font| font.shaper());
+        let active_selection = self.active_selection();
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -2470,10 +2500,11 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            match node.text_slot().get_mut(texts).unwrap().shape(
+            match node.text_slot().get_mut(texts).unwrap().shape_for(
                 service,
                 styles.get(index).font_size,
                 width,
+                active_selection.is_some_and(|(identity, _)| identity == node.identity()),
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
@@ -2663,10 +2694,14 @@ impl<M: View + 'static> Runtime<M> {
             if paint && let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
-                let shape = text.shape(
+                let selection = active_selection
+                    .filter(|(identity, _)| *identity == node.identity())
+                    .map(|(_, selection)| selection);
+                let shape = text.shape_for(
                     shaper.as_mut().expect("text initialized before layout"),
                     style.font_size,
                     Some(layout.content_box_width()),
+                    selection.is_some(),
                 )?;
                 let origin = Point {
                     x: layout.padding.left,
@@ -2674,6 +2709,31 @@ impl<M: View + 'static> Runtime<M> {
                 };
                 let transform =
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
+                if let Some(selection) = selection {
+                    let mut failure = None;
+                    if !shape.selection_rects(selection, |bounds, _| {
+                        if failure.is_none() {
+                            failure = scene
+                                .fill_rect(
+                                    Rect::new(
+                                        origin.x + bounds.x,
+                                        origin.y + bounds.y,
+                                        bounds.width,
+                                        bounds.height,
+                                    ),
+                                    transform,
+                                    clip,
+                                    Color::rgba(70, 130, 240, 96),
+                                )
+                                .err();
+                        }
+                    }) {
+                        return Err(Error::InvalidSelection);
+                    }
+                    if let Some(error) = failure {
+                        return Err(error.into());
+                    }
+                }
                 if let Some((value, cache)) = self.styles.shared_paint(index, true) {
                     scene.draw_text_scaled_shared(
                         service,
@@ -2695,6 +2755,26 @@ impl<M: View + 'static> Runtime<M> {
                         fg,
                         scale_factor,
                     )?;
+                }
+                if let Some(selection) = selection
+                    && selection.anchor.offset == selection.focus.offset
+                    && self.focused.and_then(|target| self.sites.resolve(target))
+                        == Some(node.identity())
+                {
+                    let bounds = shape
+                        .caret_bounds(selection.focus)
+                        .ok_or(Error::InvalidSelection)?;
+                    let rect = Rect::new(
+                        origin.x + bounds.x,
+                        origin.y + bounds.y,
+                        bounds.width,
+                        bounds.height,
+                    );
+                    if let Some((value, cache)) = self.styles.shared_paint(index, true) {
+                        scene.fill_rounded_rect_shared(rect, 0., transform, clip, value, cache)?;
+                    } else {
+                        scene.fill_rect(rect, transform, clip, fg)?;
+                    }
                 }
             }
             if paint && let Some(image) = node.content.image_use() {
@@ -3440,26 +3520,37 @@ mod tests {
             field: None,
             shaped: None,
         };
-        let wide = site.shape(&mut shaper, 16.0, Some(140.0)).unwrap().height;
-        let narrow = site.shape(&mut shaper, 16.0, Some(40.0)).unwrap().height;
+        let wide = site
+            .shape_for(&mut shaper, 16.0, Some(140.0), false)
+            .unwrap()
+            .height;
+        let narrow = site
+            .shape_for(&mut shaper, 16.0, Some(40.0), false)
+            .unwrap()
+            .height;
         assert!(narrow > wide);
         let pointer = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
-        site.shape(&mut shaper, 16.0, Some(40.0)).unwrap();
+        site.shape_for(&mut shaper, 16.0, Some(40.0), false)
+            .unwrap();
         assert_eq!(
             pointer,
             site.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
         );
         assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
-        site.shape(&mut shaper, 16.0, None).unwrap();
+        site.shape_for(&mut shaper, 16.0, None, false).unwrap();
         assert_eq!(site.shaped.as_ref().unwrap().width, None);
-        site.shape(&mut shaper, 16.0, Some(-0.0)).unwrap();
+        site.shape_for(&mut shaper, 16.0, Some(-0.0), false)
+            .unwrap();
         assert_eq!(
             site.shaped.as_ref().unwrap().width,
             Some(f32::MIN_POSITIVE.to_bits())
         );
         site.value = SharedText::from("漢");
         site.shaped = None;
-        assert!(site.shape(&mut shaper, 16.0, Some(40.0)).is_err());
+        assert!(
+            site.shape_for(&mut shaper, 16.0, Some(40.0), false)
+                .is_err()
+        );
         assert!(site.shaped.is_none());
     }
 }

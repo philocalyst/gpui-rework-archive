@@ -34,8 +34,9 @@ pub use element::{
     ChildSeq, El, Element, IntoHandler, Role, button, column, div, label, row, text, text_input,
 };
 pub use gpui_canvas::{
-    AlphaMode, ColorConfig, ColorSpace, Image, ImageKey, ImagePixels, ImageProfile, ImageSampling,
-    OutputProfile, PixelFormat, SdrMapping, oklch,
+    AlphaMode, CaretAffinity, ColorConfig, ColorSpace, Image, ImageKey, ImagePixels, ImageProfile,
+    ImageSampling, OutputProfile, PixelFormat, SdrMapping, TextOffset, TextPosition, TextSelection,
+    oklch,
 };
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};

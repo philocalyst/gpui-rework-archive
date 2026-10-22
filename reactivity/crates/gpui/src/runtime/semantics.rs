@@ -154,18 +154,19 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 self.scroll_into_view(target)
             }
             Action::Activate => runtime.activate(target),
-            Action::Focus => runtime.focus(target),
+            Action::Focus => {
+                drop(runtime);
+                self.focus(target)
+            }
             Action::Blur => {
                 if runtime.focused == Some(target) {
-                    runtime.focused = None;
+                    drop(runtime);
+                    return self.clear_focus();
                 }
                 runtime.changed_nodes = 0;
                 Ok(runtime.commit())
             }
-            Action::SetValue(value) => runtime.edit_text(target, |text| {
-                text.clear();
-                text.push_str(value);
-            }),
+            Action::SetValue(value) => runtime.set_input_value(target, value),
         }
     }
 }
