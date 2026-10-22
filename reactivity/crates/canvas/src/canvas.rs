@@ -1829,14 +1829,14 @@ fn render_band<W: PixelWriter>(
         members,
     );
     #[cfg(feature = "simd")]
-    // RGBA occupies four f32 lanes on every backend. Wider ISA dispatch would
-    // clone the complete raster pipeline without widening this kernel. Use the
-    // guaranteed target baseline, avoiding CPU detection and startup state.
+    // Four f64 lattice sites share a geometry kernel. Use the guaranteed
+    // target baseline, avoiding CPU detection and retained startup state.
+    // Additional ISA variants must earn their complete raster-body cost.
     dispatch!(Level::baseline(), simd => render_band_impl(simd, frame, writer, pixels, offsets, members))
 }
 
-// Geometry helpers remain shared; the leaf sample pipeline carries the selected
-// token, so every hot blend is a direct call with no per-pixel feature checks.
+// Each band carries its geometry token. The original array-shaped blend and
+// image pipeline stays shared, allowing LLVM to vectorize its four RGBA lanes.
 #[inline(never)]
 fn render_band_impl<W: PixelWriter, S: Simd>(
     simd: S,
@@ -1849,7 +1849,7 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
     let band_index = frame.tile_bounds[1];
     let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
-    let mut samples = Samples::with_simd(simd);
+    let mut samples = Samples::new();
     // All admitted writers emit at most eight elements. These fixed local buffers
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [W::Element::default(); 8];
@@ -2006,8 +2006,8 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
 // In particular, adding an image path must not duplicate that dispatch in each
 // output-format loop or extend the live ranges of ordinary rect/glyph state.
 #[inline(never)]
-fn render_image_command<S: Simd>(
-    samples: &mut Samples<S>,
+fn render_image_command(
+    samples: &mut Samples,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2040,8 +2040,8 @@ fn render_image_command<S: Simd>(
 }
 
 #[inline(never)]
-fn render_rounded_image<S: Simd>(
-    samples: &mut Samples<S>,
+fn render_rounded_image(
+    samples: &mut Samples,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2073,8 +2073,8 @@ fn render_rounded_image<S: Simd>(
         });
     }
 }
-fn render_shaped_image<S: Simd>(
-    samples: &mut Samples<S>,
+fn render_shaped_image(
+    samples: &mut Samples,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2094,8 +2094,8 @@ fn render_shaped_image<S: Simd>(
 // Keep image-only scratch off image-free raster frames. Direct linear/HDR and
 // straight-sRGB byte-table inputs never construct or initialize a decode memo.
 #[inline(never)]
-fn render_cached_image<S: Simd>(
-    samples: &mut Samples<S>,
+fn render_cached_image(
+    samples: &mut Samples,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2121,8 +2121,8 @@ fn render_cached_image<S: Simd>(
     });
 }
 #[inline(never)]
-fn render_image<S: Simd>(
-    samples: &mut Samples<S>,
+fn render_image(
+    samples: &mut Samples,
     command: &BorrowedCommand<'_>,
     [left, top, right, bottom]: [usize; 4],
     stats: &mut RenderStats,
