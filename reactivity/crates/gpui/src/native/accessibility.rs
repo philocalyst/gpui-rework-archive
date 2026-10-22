@@ -377,7 +377,13 @@ impl Bridge {
         let mut updated = false;
         self.adapter.update_if_active(|| {
             let update = if let Some(indices) = delta.filter(|_| !relink.root) {
-                project_sparse(&sheet, indices, &relink.parents, &self.cohort)
+                project_sparse(
+                    &sheet,
+                    indices,
+                    &relink.parents,
+                    &self.cohort,
+                    Some(&relink.new_ids),
+                )
             } else if full {
                 project(&sheet, state, &self.title, &self.cohort)
             } else {
@@ -620,7 +626,7 @@ fn project(
             focus = id;
         }
         let mut node = projected_node(part);
-        cohort.append(part, &mut node, &mut nodes);
+        cohort.append(part, &mut node, &mut nodes, None);
         ancestors.push((part.target(), nodes.len()));
         nodes.push((id, node));
     });
@@ -635,26 +641,12 @@ fn project(
     }
 }
 
-fn projected_text(part: Part<'_>, node: &Node) -> Option<Node> {
-    if renamed_text(part) {
-        let mut label = Node::new(accesskit::Role::Label);
-        if let Some(text) = part.text() {
-            label.set_value(text);
-        }
-        if let Some(bounds) = node.bounds() {
-            label.set_bounds(bounds);
-        }
-        Some(label)
-    } else {
-        None
-    }
-}
-
 fn project_sparse(
     sheet: &crate::runtime::SemanticSheet<'_>,
     indices: &[u32],
     parents: &[u32],
     cohort: &Cohort,
+    new_ids: Option<&std::ops::Range<u64>>,
 ) -> TreeUpdate {
     // Both frontiers are sorted/unique. Parents only relink changed native IDs;
     // do not duplicate an existing replacement or clone unchanged input leases.
@@ -672,7 +664,7 @@ fn project_sparse(
             let part = sheet
                 .part_at(index as usize)
                 .expect("exact transition P index");
-            1 + cohort.text_count(part)
+            1 + cohort.text_count_for(part, new_ids)
         })
         .sum();
     let mut update = focus_update(sheet, cohort);
@@ -681,13 +673,12 @@ fn project_sparse(
         let part = sheet
             .part_at(index as usize)
             .expect("exact transition P index");
-        let id = cohort.id(part);
         let mut node = projected_node(part);
-        cohort.append(part, &mut node, &mut update.nodes);
+        cohort.append(part, &mut node, &mut update.nodes, new_ids);
         for child in sheet.children(index as usize) {
             node.push_child(cohort.id(child));
         }
-        update.nodes.push((id, node));
+        update.nodes.push((cohort.id(part), node));
     }
     update
 }
@@ -701,6 +692,8 @@ mod linux_tests;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod geometry_tests;
 #[cfg(test)]
 mod selection_tests;
 #[cfg(test)]

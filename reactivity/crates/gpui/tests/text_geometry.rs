@@ -170,3 +170,122 @@ fn wrapped_directional_runs_cover_source_and_containing_hit_is_not_nearest_caret
     })
     .unwrap();
 }
+
+#[test]
+fn physical_geometry_keeps_padding_fractional_dpi_reflection_shear_and_exact_target_hits() {
+    struct Surface;
+    impl View for Surface {
+        fn view(&self) -> El<'_> {
+            column((text("office café אבג العربية\r\nnext line")
+                .w(90)
+                .p(4)
+                .rounded(10.)
+                .transform(Affine {
+                    a: -1.,
+                    b: 0.1,
+                    c: 0.15,
+                    d: 1.,
+                    tx: 108.,
+                    ty: 3.,
+                })
+                .name("shaped"),))
+            .w(100)
+            .h(36)
+            .scroll(Axis::Y)
+        }
+    }
+    let mut win = Win::recording_scaled(
+        Surface,
+        WindowOptions {
+            size: [240, 160],
+            ..Default::default()
+        },
+        1.25,
+    )
+    .unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let mut admitted = 0;
+    let mut clipped = 0;
+    win.visit(|part| {
+        if part.name() == Some("shaped") {
+            let geometry = part.text_geometry().unwrap();
+            let origin = geometry.origin();
+            assert_eq!(origin, Point { x: 4., y: 4. });
+            let affine = part.transform().unwrap();
+            let coefficients = geometry.transform().unwrap().coefficients();
+            assert_eq!(
+                coefficients,
+                [
+                    f64::from(affine.a),
+                    f64::from(affine.b),
+                    f64::from(affine.c),
+                    f64::from(affine.d),
+                    f64::from(affine.tx) + f64::from(affine.a) * 4. + f64::from(affine.c) * 4.,
+                    f64::from(affine.ty) + f64::from(affine.b) * 4. + f64::from(affine.d) * 4.
+                ]
+            );
+            for unit in geometry
+                .layout()
+                .graphemes()
+                .filter(|unit| !unit.is_hard_break() && unit.bounds().width > 0.)
+            {
+                let bounds = unit.bounds();
+                let point = geometry
+                    .transform()
+                    .unwrap()
+                    .to_window(Point {
+                        x: bounds.x + bounds.width * 0.5,
+                        y: bounds.y + bounds.height * 0.5,
+                    })
+                    .unwrap();
+                if part.contains_point(point) {
+                    admitted += 1;
+                    assert!(geometry.hit_position(point).is_some());
+                    assert_eq!(
+                        geometry.grapheme_at(point).unwrap().text_range(),
+                        unit.text_range()
+                    );
+                } else {
+                    clipped += 1;
+                    assert_eq!(geometry.hit_position(point), None);
+                    assert!(geometry.grapheme_at(point).is_none());
+                    assert!(
+                        geometry.position_at(point).is_some(),
+                        "unclipped nearest caret is the drag policy"
+                    );
+                }
+            }
+            assert_eq!(geometry.hit_position(Point { x: 200., y: 100. }), None);
+        }
+    })
+    .unwrap();
+    assert!(admitted > 0 && clipped > 0);
+}
+
+#[test]
+fn zero_advance_unit_retains_visible_semantic_extent_without_a_damage_rectangle() {
+    let win = Win::demo(Page {
+        value: "\u{200d}".into(),
+        width: 70.,
+        broken: false,
+    });
+    win.visit(|part| {
+        if part.name() == Some("paragraph") {
+            let geometry = part.text_geometry().unwrap();
+            let unit = geometry.layout().graphemes().next().unwrap();
+            assert_eq!(unit.bounds().width, 0.);
+            let full = geometry.bounds(unit.bounds()).unwrap();
+            let visible = geometry.visible_bounds(unit.bounds()).unwrap();
+            assert_eq!(full.width, 0.);
+            assert_eq!(visible.width, 0.);
+            assert!(visible.height > 0.);
+            assert!(
+                geometry
+                    .visible_bounds(Rect::new(-100., -100., 0., 10.))
+                    .is_none()
+            );
+        }
+    })
+    .unwrap();
+}

@@ -155,6 +155,27 @@ impl TextGeometry {
             self.font_size * 0.25,
         )
     }
+    /// Units in an exact source range. Invalid or reversed endpoints return
+    /// None before iteration; bounds use the same source-affinity ownership.
+    pub fn graphemes_in(
+        &self,
+        range: std::ops::Range<TextOffset>,
+    ) -> Option<impl Iterator<Item = TextGrapheme> + '_> {
+        if range.start > range.end {
+            return None;
+        }
+        let stops = self.carets.as_deref()?;
+        for offset in [range.start, range.end] {
+            let index = stops.partition_point(|stop| stop.byte < offset.0);
+            if stops.get(index).is_none_or(|stop| stop.byte != offset.0) {
+                return None;
+            }
+        }
+        Some(self.intervals(
+            self.stops(range.start.0, range.end.0),
+            self.font_size * 0.25,
+        ))
+    }
     /// The containing grapheme, distinct from nearest-caret midpoint policy.
     /// Outside/zero-area advances and nonfinite points produce None.
     pub fn grapheme_at(&self, point: Point) -> Option<TextGrapheme> {
@@ -183,10 +204,18 @@ impl TextGeometry {
             .lines
             .last()
             .filter(|line| self.carets.is_some() && line.start == self.len && line.end == self.len)
-            .map(|line| TextRun {
+            .map(|_| TextRun {
                 start: self.len,
                 end: self.len,
-                bounds: Rect::new(0., line.top, 0., line.height),
+                bounds: {
+                    let caret = self
+                        .caret_bounds(TextPosition {
+                            offset: TextOffset(self.len),
+                            affinity: CaretAffinity::Downstream,
+                        })
+                        .expect("interactive terminal line has a caret");
+                    Rect::new(caret.x, caret.y, 0., caret.height)
+                },
                 line: self.lines.len() - 1,
                 direction: TextDirection::LeftToRight,
             });

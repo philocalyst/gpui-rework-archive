@@ -94,6 +94,7 @@ async fn named(bus: &Connection, roots: Vec<Address>, name: &str) -> Option<Addr
 enum Evidence {
     Activated,
     Renamed,
+    Geometry([(i32, (i32, i32, i32, i32)); 3]),
     Edited,
     Invoked,
     Reactivated,
@@ -232,6 +233,26 @@ async fn run_client(
         input, stale_input,
         "native input identity retires with its source lease"
     );
+    let text = proxy(&bus, &input, "org.a11y.atspi.Text").await?;
+    let mut extents = [(0, (0, 0, 0, 0)); 3];
+    for (slot, offset) in extents.iter_mut().zip([5i32, 7, 9]) {
+        let rect: (i32, i32, i32, i32) = text.call("GetCharacterExtents", &(offset, 1u32)).await?;
+        assert!(
+            rect.2 > 0 && rect.3 > 0,
+            "visible native character {offset}: {rect:?}"
+        );
+        let hit: i32 = text
+            .call(
+                "GetOffsetAtPoint",
+                &(rect.0 + rect.2 / 2, rect.1 + rect.3 / 2, 1u32),
+            )
+            .await?;
+        assert_eq!(hit, offset, "native extents/hit roundtrip");
+        *slot = (offset, rect);
+    }
+    notify(Evidence::Geometry(extents));
+    gate.recv().await?;
+
     assert!(
         proxy(&bus, &stale_input, "org.a11y.atspi.EditableText")
             .await?
@@ -507,6 +528,45 @@ impl Script {
                     assert_eq!(owner.counters().paint_passes, before.paint_passes);
                     assert_eq!(self.host.presented_frames, frames);
                     assert_eq!(owner.accessibility_state().unwrap().epoch, 1);
+                    self.gate.try_send(()).unwrap();
+                }
+                Evidence::Geometry(extents) => {
+                    let input = owner.input();
+                    let before = owner.counters();
+                    let mut checked = 0;
+                    owner
+                        .visit(|part| {
+                            if part.target() != input {
+                                return;
+                            }
+                            let geometry = part.text_geometry().unwrap();
+                            for (offset, actual) in extents {
+                                let byte = CONTENT.char_indices().nth(offset as usize).unwrap().0;
+                                let unit = geometry
+                                    .layout()
+                                    .grapheme(crate::TextOffset::new(byte).unwrap())
+                                    .unwrap();
+                                let expected = geometry.visible_bounds(unit.bounds()).unwrap();
+                                for (actual, expected) in [
+                                    (actual.0, expected.x),
+                                    (actual.1, expected.y),
+                                    (actual.2, expected.width),
+                                    (actual.3, expected.height),
+                                ] {
+                                    assert!(
+                                        (actual - expected as i32).abs() <= 1,
+                                        "AT-SPI/P geometry {actual} {expected}"
+                                    );
+                                }
+                                checked += 1;
+                            }
+                        })
+                        .unwrap();
+                    assert_eq!(checked, 3);
+                    assert_eq!(owner.counters(), before, "queries do not prepare a frame");
+                    eprintln!(
+                        "GPUI_NATIVE_TEXT_GEOMETRY greek/hebrew/arabic extents+hit+ordinary-P matched"
+                    );
                     self.gate.try_send(()).unwrap();
                 }
                 Evidence::Edited => {

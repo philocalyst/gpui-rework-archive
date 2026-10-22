@@ -121,10 +121,13 @@ fn consumer_validates_topology_names_values_full_geometry_and_live_focus() {
     assert_eq!(node.role(), accesskit::Role::TextInput);
     assert_eq!(node.data().label(), None);
     assert_eq!(node.data().value(), Some("value != name"));
-    let full = node.data().bounds().unwrap();
+    let full = node.bounding_box().unwrap();
     assert!(full.x0 < 0.0);
     assert!(full.x1 - full.x0 > f64::from(win.bounds(input).unwrap().width));
-    assert!(node.data().transform().is_none());
+    assert!(
+        node.data().transform().is_some(),
+        "leaf input carries its exact text affine"
+    );
     assert!(node.data().supports_action(accesskit::Action::SetValue));
     assert!(
         node.data()
@@ -494,7 +497,13 @@ fn library_projects_bounded_frozen_count_positions_and_never_resurrects_ids() {
     let row0 = id(&win, win.list_item(list, crate::ItemKey::new(0)).unwrap());
     let row2 = id(&win, win.list_item(list, crate::ItemKey::new(2)).unwrap());
     let initial = projection(&win);
-    assert!(initial.nodes.len() < 100);
+    // Wrapped TextRuns add native children; viewport materialization still
+    // stays bounded independently from the250,000 source rows.
+    assert!(
+        initial.nodes.len() < 256,
+        "native nodes={}",
+        initial.nodes.len()
+    );
     assert_eq!(
         initial
             .nodes
@@ -595,7 +604,6 @@ fn renamed_static_text_preserves_content_and_explicit_none_then_inherits() {
     let mut win = Win::demo(Greeting("Hello".into()));
     let target = win.role(Role::Text).one().unwrap();
     let native = id(&win, target);
-    let child = NodeId(native.0 + 1);
     let mut tree = Tree::new(projection(&win), true);
     let check = |tree: &Tree, expected_name: Option<&str>, content: &str| {
         let parent = tree
@@ -609,14 +617,21 @@ fn renamed_static_text_preserves_content_and_explicit_none_then_inherits() {
         );
         assert_eq!(parent.data().label(), expected_name);
         assert_eq!(parent.data().value(), None);
-        let label = tree
-            .state()
-            .node_by_tree_local_id(child, TreeId::ROOT)
+        let label = parent
+            .children()
+            .find(|child| child.role() == accesskit::Role::Label)
             .unwrap();
         assert_eq!(label.data().value(), Some(content));
         assert_eq!(label.role(), accesskit::Role::Label);
         assert_eq!(label.parent_id(), Some(parent.id()));
-        assert_eq!(label.raw_bounds(), parent.raw_bounds());
+        let actual = label.bounding_box().unwrap();
+        let expected = parent.bounding_box().unwrap();
+        for (a, b) in [actual.x0, actual.y0, actual.x1, actual.y1]
+            .into_iter()
+            .zip([expected.x0, expected.y0, expected.x1, expected.y1])
+        {
+            assert!((a - b).abs() < 1e-3);
+        }
         assert!(!label.data().supports_action(accesskit::Action::Click));
     };
     check(&tree, Some("Greeting"), "Hello");
@@ -641,6 +656,12 @@ fn renamed_static_text_preserves_content_and_explicit_none_then_inherits() {
     .unwrap();
     tree.update_and_process_changes(projection(&win), &mut Changes::default());
     check(&tree, Some("Greeting"), "Changed text");
+    let child = tree
+        .state()
+        .node_by_tree_local_id(native, TreeId::ROOT)
+        .unwrap()
+        .data()
+        .children()[0];
     win.set_semantic(
         target,
         crate::semantic::NAME,
@@ -684,9 +705,15 @@ fn renamed_static_text_preserves_content_and_explicit_none_then_inherits() {
         )
         .unwrap();
     let mut tree = Tree::new(projection(&plain), true);
+    let carrier = tree
+        .state()
+        .node_by_tree_local_id(native, TreeId::ROOT)
+        .unwrap()
+        .data()
+        .children()[0];
     assert!(
         tree.state()
-            .node_by_tree_local_id(NodeId(native.0 + 1), TreeId::ROOT)
+            .node_by_tree_local_id(carrier, TreeId::ROOT)
             .is_some()
     );
     plain
@@ -707,7 +734,7 @@ fn renamed_static_text_preserves_content_and_explicit_none_then_inherits() {
     );
     assert!(
         tree.state()
-            .node_by_tree_local_id(NodeId(native.0 + 1), TreeId::ROOT)
+            .node_by_tree_local_id(carrier, TreeId::ROOT)
             .is_none()
     );
 }

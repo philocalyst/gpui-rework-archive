@@ -736,8 +736,8 @@ impl<'a> Range<'a> {
     /// Returns the range's transformed bounding boxes relative to the tree's
     /// container (e.g. window).
     ///
-    /// If the return value is empty, it means that the source tree doesn't
-    /// provide enough information to calculate bounding boxes. Otherwise,
+    /// If the return value is empty, the source tree does not provide enough
+    /// geometry, or the range is outside all ancestor clips. Otherwise,
     /// there will always be at least one box, even if it's zero-width,
     /// as it is for a degenerate range.
     pub fn bounding_boxes(&self) -> Vec<Rect> {
@@ -817,7 +817,9 @@ impl<'a> Range<'a> {
                     }
                 }
             }
-            result.push(node.transform().transform_rect_bbox(rect));
+            if let Some(rect) = visible_text_bounds(node, rect) {
+                result.push(rect);
+            }
             None
         })
         .unwrap_or(result)
@@ -930,6 +932,32 @@ impl WeakRange {
         let end = InnerPosition::upgrade(tree_state, self.end, self.node_id)?;
         Some(Range { node, start, end })
     }
+}
+
+// Continuous semantic clipping, independent from any renderer's sample mask.
+// Keep an in-clip zero-width caret, but never fabricate one at an outside edge.
+fn visible_text_bounds(node: &NodeRef, rect: Rect) -> Option<Rect> {
+    let mut rect = node.transform().transform_rect_bbox(rect);
+    let mut parent = node.parent();
+    while let Some(node) = parent {
+        if node.clips_children() {
+            if let Some(clip) = node.bounding_box() {
+                let axis = |start: f64, end: f64, low: f64, high: f64| {
+                    if start == end {
+                        (start >= low && start < high).then_some((start, end))
+                    } else {
+                        let start = start.max(low);
+                        let end = end.min(high);
+                        (end > start).then_some((start, end))
+                    }
+                };
+                (rect.x0, rect.x1) = axis(rect.x0, rect.x1, clip.x0, clip.x1)?;
+                (rect.y0, rect.y1) = axis(rect.y0, rect.y1, clip.y0, clip.y1)?;
+            }
+        }
+        parent = node.parent();
+    }
+    Some(rect)
 }
 
 fn text_node_filter(root_id: FullNodeId, node: &NodeRef) -> FilterResult {
@@ -2004,6 +2032,63 @@ mod tests {
                 .node_by_id(nid(NodeId(1)))
                 .unwrap()
                 .supports_text_ranges()
+        );
+    }
+
+    #[test]
+    fn ancestor_clips_preserve_inside_zero_width_and_reject_outside_edges() {
+        use super::visible_text_bounds;
+        use accesskit::{Affine, Node, Role, TextDirection, TreeId, TreeInfo, TreeUpdate};
+        let mut window = Node::new(Role::Window);
+        window.set_bounds(Rect::new(0., 0., 50., 50.));
+        window.set_clips_children();
+        window.set_children([NodeId(1)]);
+        let mut clip = Node::new(Role::GenericContainer);
+        clip.set_transform(Affine::translate((5., 0.)));
+        clip.set_bounds(Rect::new(10., 5., 30., 25.));
+        clip.set_clips_children();
+        clip.set_children([NodeId(2)]);
+        let mut label = Node::new(Role::Label);
+        label.set_children([NodeId(3)]);
+        let mut run = Node::new(Role::TextRun);
+        run.set_value("a");
+        run.set_character_lengths([1]);
+        run.set_character_positions([0.]);
+        run.set_character_widths([40.]);
+        run.set_text_direction(TextDirection::LeftToRight);
+        run.set_bounds(Rect::new(0., 0., 40., 30.));
+        let tree = crate::Tree::new(
+            TreeUpdate {
+                nodes: vec![
+                    (NodeId(0), window),
+                    (NodeId(1), clip),
+                    (NodeId(2), label),
+                    (NodeId(3), run),
+                ],
+                tree: Some(TreeInfo::new(NodeId(0))),
+                tree_id: TreeId::ROOT,
+                focus: NodeId(0),
+            },
+            false,
+        );
+        let run = tree.state().node_by_id(nid(NodeId(3))).unwrap();
+        assert_eq!(
+            visible_text_bounds(&run, Rect::new(0., 0., 40., 30.)),
+            Some(Rect::new(15., 5., 35., 25.))
+        );
+        assert_eq!(
+            visible_text_bounds(&run, Rect::new(10., 8., 10., 18.)),
+            Some(Rect::new(15., 8., 15., 18.))
+        );
+        assert_eq!(
+            visible_text_bounds(&run, Rect::new(30., 8., 30., 18.)),
+            None
+        );
+        assert_eq!(visible_text_bounds(&run, Rect::new(-5., 8., 0., 18.)), None);
+        let label = tree.state().node_by_id(nid(NodeId(2))).unwrap();
+        assert_eq!(
+            label.document_range().bounding_boxes(),
+            vec![Rect::new(15., 5., 35., 25.)]
         );
     }
 

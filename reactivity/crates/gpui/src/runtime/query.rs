@@ -148,6 +148,12 @@ impl<'a> Part<'a> {
         self.node().text.as_ref()
     }
     #[cfg(feature = "accessibility")]
+    pub(crate) fn text_geometry_lease(
+        self,
+    ) -> Option<&'a std::sync::Arc<gpui_canvas::TextGeometry>> {
+        Some(&self.context.text?.entry(self.index as usize)?.map)
+    }
+    #[cfg(feature = "accessibility")]
     pub(crate) fn native_parent_index(self) -> Option<usize> {
         self.node().parent.index()
     }
@@ -178,6 +184,19 @@ impl<'a> Part<'a> {
     pub fn text(self) -> Option<&'a str> {
         self.node().text.as_deref()
     }
+    /// Exact target/rounded-shape and viewport hit from this P. This is the
+    /// ordinary dispatcher predicate, independent from newer logical state.
+    pub fn contains_point(self, point: crate::Point) -> bool {
+        contains_point(
+            self.context.nodes,
+            self.context.geometry,
+            self.context
+                .metadata
+                .is_some_and(|metadata| !metadata.viewports.is_empty()),
+            self.index as usize,
+            point,
+        )
+    }
     /// Exact text geometry and origin from this acknowledged presentation.
     /// Available while native accessibility is inactive and across failed L/C.
     pub fn text_geometry(self) -> Option<super::text_geometry::TextGeometry<'a>> {
@@ -191,6 +210,13 @@ impl<'a> Part<'a> {
     pub(super) fn text_clip(self) -> Rect {
         let size = self.context.size;
         let viewport = Rect::new(0., 0., size[0] as f32, size[1] as f32);
+        if self
+            .context
+            .metadata
+            .is_none_or(|metadata| metadata.viewports.is_empty())
+        {
+            return viewport;
+        }
         let mut clip = viewport;
         let mut index = Some(self.index as usize);
         while let Some(row) = index {
@@ -199,14 +225,13 @@ impl<'a> Part<'a> {
                 node.kind,
                 super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
             ) {
-                clip = super::list::viewport_clip(
-                    clip,
-                    viewport,
-                    node.transform.get(),
-                    node.rect,
-                    size,
-                )
-                .map_or(Rect::default(), |(paint, _)| paint);
+                clip = node
+                    .transform
+                    .get()
+                    .and_then(|map| {
+                        gpui_reactivity_core::CoordinateSpace::new(map).bounds(node.rect)
+                    })
+                    .map_or(Rect::default(), |bounds| clip.intersection(bounds));
             }
             index = node.parent.index();
         }
@@ -599,4 +624,49 @@ mod tests {
         context.focused_hint = Some(1);
         assert!(SemanticSheet(context).focused().is_none());
     }
+}
+
+// Shared by production pointer dispatch and borrowed public/native queries.
+// Every clip/shape belongs to P; current logical viewports cannot skip checks.
+pub(super) fn contains_point(
+    nodes: &[Presented],
+    geometry: Option<&super::geometry::Geometry>,
+    has_viewports: bool,
+    index: usize,
+    point: crate::Point,
+) -> bool {
+    use gpui_reactivity_core::CoordinateSpace;
+    let node = &nodes[index];
+    if !node.bounds.contains(point)
+        || !node.transform.get().is_some_and(|map| {
+            let radius = geometry.map_or(0., |geometry| geometry.frozen_radius(node.identity));
+            if radius == 0. {
+                CoordinateSpace::new(map).hit(node.rect, point)
+            } else {
+                gpui_canvas::rounded_rect_contains(node.rect, radius, map, point).unwrap_or(false)
+            }
+        })
+    {
+        return false;
+    }
+    // The empty frozen P column proves absence without consulting L.
+    if !has_viewports {
+        return true;
+    }
+    let mut parent = node.parent.index();
+    while let Some(index) = parent {
+        let node = &nodes[index];
+        if matches!(
+            node.kind,
+            super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
+        ) && !node
+            .transform
+            .get()
+            .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
+        {
+            return false;
+        }
+        parent = node.parent.index();
+    }
+    true
 }

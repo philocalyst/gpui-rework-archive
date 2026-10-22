@@ -101,11 +101,30 @@ impl<'a> TextGeometry<'a> {
             bounds[3] - bounds[1],
         ))
     }
-    /// Sample-aware viewport clipping from this P, never current scroll state.
+    /// Continuous viewport clipping from this P, never current scroll state.
+    /// This is semantic geometry, distinct from the raster sample clip.
     /// A transformed rectangle's physical AABB is conservative under shear.
     pub fn visible_bounds(self, local: Rect) -> Option<Rect> {
-        let bounds = self.bounds(local)?.intersection(self.part.text_clip());
-        (!bounds.is_empty()).then_some(bounds)
+        let bounds = self.bounds(local)?;
+        let clip = self.part.text_clip();
+        if clip.is_empty() {
+            return None;
+        }
+        let axis = |start: f32, length: f32, clip: f32, extent: f32| {
+            if length == 0. {
+                (f64::from(start) >= f64::from(clip)
+                    && f64::from(start) < f64::from(clip) + f64::from(extent))
+                .then_some((start, 0.))
+            } else {
+                let left = start.max(clip);
+                let right =
+                    (f64::from(start) + f64::from(length)).min(f64::from(clip) + f64::from(extent));
+                (right > f64::from(left)).then_some((left, (right - f64::from(left)) as f32))
+            }
+        };
+        let (x, width) = axis(bounds.x, bounds.width, clip.x, clip.width)?;
+        let (y, height) = axis(bounds.y, bounds.height, clip.y, clip.height)?;
+        Some(Rect::new(x, y, width, height))
     }
     pub fn caret_bounds(self, position: gpui_canvas::TextPosition) -> Option<Rect> {
         self.bounds(self.map.caret_bounds(position)?)
@@ -123,14 +142,13 @@ impl<'a> TextGeometry<'a> {
     }
     pub fn hit_position(self, point: Point) -> Option<gpui_canvas::TextPosition> {
         self.part
-            .text_clip()
-            .contains(point)
+            .contains_point(point)
             .then(|| self.position_at(point))
             .flatten()
     }
     /// Containing visible unit, distinct from nearest-caret midpoint behavior.
     pub fn grapheme_at(self, point: Point) -> Option<gpui_canvas::TextGrapheme> {
-        if !self.part.text_clip().contains(point) {
+        if !self.part.contains_point(point) {
             return None;
         }
         self.map.grapheme_at(self.to_local(point)?)
