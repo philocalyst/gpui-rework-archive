@@ -124,3 +124,46 @@ fn retained_geometry_drops_paint_leases_and_detaches_explicit_mutation() {
         assert_eq!(pair[0].text_range().end, pair[1].text_range().start);
     }
 }
+
+#[test]
+fn canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding() {
+    let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
+    let font = FontFace::bundled().unwrap();
+    let mut shaper = font.shaper();
+    for (name, source) in [
+        ("empty", String::new()),
+        ("ascii32k", "a".repeat(MAX_TEXT)),
+        ("ligatures", "office affine e\u{301}".into()),
+        ("paragraphs", "a\r\n\r\nb\r\n\u{2028}\u{2028}".into()),
+        ("bidi", "abc אבג 123 العربية xyz".into()),
+        (
+            "isolates",
+            "a \u{2067}אבג 12\u{2069} b \u{202e}BC\u{202c}D".into(),
+        ),
+        ("zwj", "👩\u{200d}💻 e\u{301} नमस्ते".into()),
+        ("one_long_grapheme", format!("a{}", "\u{301}".repeat(1024))),
+    ] {
+        for width in [None, Some(0.), Some(55.), Some(400.)] {
+            let layout = shaper.shape_interactive(&source, 16., width).unwrap();
+            let stops = layout.mapping.as_ref().unwrap().carets.as_deref().unwrap();
+            let (mut common, mut split, mut exclusive) = (0, 0, 0);
+            for group in stops.chunk_by(|a, b| a.byte == b.byte) {
+                match group {
+                    [only] if only.affinities == 3 => common += 1,
+                    [upstream, downstream]
+                        if upstream.affinities == 1 && downstream.affinities == 2 =>
+                    {
+                        split += 1
+                    }
+                    [only] if only.affinities == 1 || only.affinities == 2 => exclusive += 1,
+                    _ => panic!("unexpected producer group {name} {width:?}: {group:?}"),
+                }
+            }
+            println!(
+                "CARET_GROUPS case={name} width={width:?} bytes={} stops={} common={common} split={split} exclusive={exclusive}",
+                source.len(),
+                stops.len()
+            );
+        }
+    }
+}
