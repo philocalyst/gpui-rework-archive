@@ -319,6 +319,18 @@ pub enum AnswerSource {
 pub trait CacheAccess {
     fn cache(&self, node: NodeId) -> &NodeCache;
     fn cache_mut(&mut self, node: NodeId) -> &mut NodeCache;
+    /// Whether this node's subtree is still zeroed by a hidden layout. An override
+    /// must revoke this proof whenever mutable cache access or an edit can change
+    /// its answers or descendants, before the subtree is queried again.
+    fn is_hidden_layout(&self, node: NodeId) -> bool {
+        self.cache(node).is_hidden()
+    }
+    /// Records a zeroed nonempty subtree after a non-speculative hidden layout.
+    /// The default keeps the proof in the node's cache; trees with existing
+    /// bookkeeping may keep it there instead, under the same invalidation rule.
+    fn mark_hidden_layout(&mut self, node: NodeId) {
+        self.cache_mut(node).mark_hidden();
+    }
     /// The frame counter used to mark live cache entries.
     fn generation(&self) -> u32;
     /// Nesting depth of speculative computation; while positive, nothing is cached or written.

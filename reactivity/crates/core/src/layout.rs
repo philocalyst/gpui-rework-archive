@@ -35,6 +35,10 @@ use cephal::{NodeCache, NodeId as EngineId};
 use crate::{NodeId, NodeKind, Tree, TreeError};
 
 const NO_STYLE: u32 = u32::MAX;
+// The scheduler preserves META_MASK for tree-owned facts. Query metadata comes
+// from StyleTable, so this adapter can use one of those bits for hidden layout.
+const HIDDEN_SUBTREE: u8 = 0x10;
+const _: () = assert!(HIDDEN_SUBTREE & cephal::schedule::META_MASK == HIDDEN_SUBTREE);
 
 /// A hook is installed only on a node that declares content measurement. When
 /// external data consulted by the hook changes, call `mark_dirty` on that node.
@@ -302,7 +306,7 @@ impl LayoutTree {
         }
         // A node becoming cheap no longer needs its old content-query cache.
         if self.is_cheap(node) {
-            self.caches[index] = NodeCache::new();
+            self.reset_cache(index);
         }
         self.mark_dirty(node)?;
         Ok(true)
@@ -343,7 +347,7 @@ impl LayoutTree {
             let index = self.tree.slot(parent);
             self.child_counts[index] -= 1;
             if self.is_cheap(parent) {
-                self.caches[index] = NodeCache::new();
+                self.reset_cache(index);
             }
             self.mark_dirty(parent)?;
         }
@@ -385,7 +389,7 @@ impl LayoutTree {
         if let Some(old) = old_parent {
             let index = self.tree.slot(old);
             if self.is_cheap(old) {
-                self.caches[index] = NodeCache::new();
+                self.reset_cache(index);
             }
             self.mark_dirty(old)?;
         }
@@ -457,8 +461,8 @@ impl LayoutTree {
         } else {
             // Cache-entry generations influence eviction detection. Never reuse
             // a generation while an old entry can still carry that stamp.
-            for cache in &mut self.caches {
-                cache.clear();
+            for slot in 0..self.caches.len() {
+                self.clear_cache(slot);
             }
             self.generation = 1;
         }
@@ -480,7 +484,7 @@ impl LayoutTree {
             scheduler.run(&mut engine, engine_root, changed);
             if changed {
                 let slot = engine.owner.tree.slot(root);
-                engine.owner.caches[slot].clear();
+                engine.owner.clear_cache(slot);
             }
             cephal::compute::compute_root_layout(&mut engine, engine_root, viewport);
         }
@@ -565,7 +569,7 @@ impl LayoutTree {
                 .remove(&node)
                 .is_some()
             {
-                self.caches[self.tree.slot(node)].clear();
+                self.clear_cache(self.tree.slot(node));
                 self.pending.insert(node);
             }
             let Some(parent) = self.tree.parent(node).unwrap() else {
@@ -583,6 +587,14 @@ impl LayoutTree {
         {
             self.absolute_contexts = None;
         }
+    }
+    fn clear_cache(&mut self, slot: usize) {
+        self.flags[slot] &= !HIDDEN_SUBTREE;
+        self.caches[slot].clear();
+    }
+    fn reset_cache(&mut self, slot: usize) {
+        self.flags[slot] &= !HIDDEN_SUBTREE;
+        self.caches[slot] = NodeCache::new();
     }
     fn is_cheap(&self, node: NodeId) -> bool {
         self.child_counts[self.tree.slot(node)] == 0 && !self.measures.contains_key(&node)
@@ -778,7 +790,17 @@ impl CacheAccess for Engine<'_, '_> {
     }
     fn cache_mut(&mut self, node: EngineId) -> &mut NodeCache {
         let slot = self.slot(node);
+        self.owner.flags[slot] &= !HIDDEN_SUBTREE;
         &mut self.owner.caches[slot]
+    }
+    fn is_hidden_layout(&self, node: EngineId) -> bool {
+        self.owner.flags[self.slot(node)] & HIDDEN_SUBTREE != 0
+    }
+    fn mark_hidden_layout(&mut self, node: EngineId) {
+        if self.owner.speculation == 0 {
+            let slot = self.slot(node);
+            self.owner.flags[slot] |= HIDDEN_SUBTREE;
+        }
     }
     fn generation(&self) -> u32 {
         self.owner.generation
@@ -813,6 +835,67 @@ impl Incremental for Engine<'_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn hidden_marker_uses_flags_and_revokes_on_mutation_and_rollover() {
+        let mut tree = LayoutTree::new();
+        let hidden = tree
+            .insert(
+                None,
+                NodeKind::Element,
+                Style {
+                    display: cephal::style::Display::None,
+                    ..Style::DEFAULT
+                },
+            )
+            .unwrap();
+        let leaf = tree
+            .insert(Some(hidden), NodeKind::Element, Style::DEFAULT)
+            .unwrap();
+        let other = tree
+            .insert(None, NodeKind::Element, Style::DEFAULT)
+            .unwrap();
+        tree.compute(hidden, Size::MAX_CONTENT).unwrap();
+        let slot = tree.tree.slot(hidden);
+        assert_ne!(tree.flags[slot] & HIDDEN_SUBTREE, 0);
+        assert_eq!(tree.flags[tree.tree.slot(leaf)] & HIDDEN_SUBTREE, 0);
+        assert_eq!(tree.storage().cache_heap_bytes, 0);
+        let key = EngineId::new(tree.tree.layout_key(hidden));
+        {
+            let mut engine = Engine {
+                owner: &mut tree,
+                measure: None,
+                observed: 0,
+            };
+            engine.set_speculation(1);
+            cephal::compute::compute_hidden_layout(&mut engine, key);
+            assert!(engine.is_hidden_layout(key));
+            engine.cache_mut(key).clear();
+            assert!(!engine.is_hidden_layout(key));
+            cephal::compute::compute_hidden_layout(&mut engine, key);
+            assert!(!engine.is_hidden_layout(key));
+            engine.mark_hidden_layout(key);
+            assert!(!engine.is_hidden_layout(key));
+            engine.set_speculation(0);
+            cephal::compute::compute_hidden_layout(&mut engine, key);
+            assert!(engine.is_hidden_layout(key));
+            assert_eq!(engine.cache(key).allocated_bytes(), 0);
+        }
+        // Rollover clears even a different forest's proof, before stamps reuse.
+        tree.generation = u32::MAX;
+        tree.compute(other, Size::MAX_CONTENT).unwrap();
+        assert_eq!(tree.generation(), 1);
+        assert_eq!(tree.flags[slot] & HIDDEN_SUBTREE, 0);
+        tree.mark_dirty(hidden).unwrap();
+        tree.compute(hidden, Size::MAX_CONTENT).unwrap();
+        assert_ne!(tree.flags[slot] & HIDDEN_SUBTREE, 0);
+        tree.remove(hidden).unwrap();
+        let reused = tree
+            .insert(None, NodeKind::Element, Style::DEFAULT)
+            .unwrap();
+        assert_eq!(tree.flags[tree.tree.slot(reused)], 0);
+        assert_eq!(tree.storage().cache_heap_bytes, 0);
+    }
+
     #[test]
     fn generation_rollover_clears_old_cache_stamps() {
         let mut tree = LayoutTree::new();

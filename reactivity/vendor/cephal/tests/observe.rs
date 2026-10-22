@@ -83,6 +83,26 @@ impl CacheAccess for Host {
 
 const VIEWPORT: Size<AvailableSpace> = Size { width: AvailableSpace::Definite(300.0), height: AvailableSpace::MaxContent };
 
+#[test]
+fn default_hidden_hooks_keep_cache_markers_and_speculation_policy() {
+    let mut host = Host::default();
+    let leaf = host.add(Style::DEFAULT, &[]);
+    let container = host.add(Style::DEFAULT, &[leaf]);
+    host.set_speculation(1);
+    cephal::compute::compute_hidden_layout(&mut host, container);
+    assert!(!host.is_hidden_layout(container));
+    assert_eq!(host.cache(container).allocated_bytes(), 0);
+    host.set_speculation(0);
+    cephal::compute::compute_hidden_layout(&mut host, container);
+    assert!(host.is_hidden_layout(container));
+    assert!(host.cache(container).is_hidden());
+    assert!(host.cache(container).allocated_bytes() > 0);
+    assert!(!host.is_hidden_layout(leaf));
+    assert_eq!(host.cache(leaf).allocated_bytes(), 0);
+    host.cache_mut(container).clear();
+    assert!(!host.is_hidden_layout(container));
+}
+
 /// A flex row of two sized leaves and a hidden one.
 fn row(host: &mut Host) -> (NodeId, [NodeId; 3]) {
     let mut leaf = Style::DEFAULT;
