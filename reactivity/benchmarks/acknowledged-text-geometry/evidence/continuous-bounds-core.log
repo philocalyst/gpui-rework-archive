@@ -1,0 +1,50 @@
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.04s
+     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui_reactivity_core-18c647f44aa72104)
+
+running 1 test
+test tree::tests::exhausted_generation_retires_slot_without_aba ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/layout.rs (/tmp/gpui-acknowledged-text-target/debug/deps/layout-ff758783447e1145)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/spatial.rs (/tmp/gpui-acknowledged-text-target/debug/deps/spatial-38e281d3e2b97fd7)
+
+running 14 tests
+test continuous_bounds_preserve_zero_area_and_wide_corner_arithmetic ... ok
+test coordinate_model_handles_reflection_shear_nonfinite_and_overflow ... ok
+test invalid_foreign_and_noop_mutations_do_zero_work ... ok
+test rotated_hit_uses_inverse_and_transformed_ancestor_clips ... ok
+test sub_ulp_extents_at_tile_boundaries_remain_damaged_and_hittable ... ok
+test sparse_record_swap_remove_and_slot_reuse_preserve_survivors ... ok
+test unrepresentable_forward_bounds_damage_viewport_and_tiny_inverse_stays_hittable ... ok
+test wide_ancestor_composition_does_not_erase_recoverable_geometry ... ok
+test wide_translation_cancels_before_output_narrowing ... ok
+test nested_geometry_reparent_damage_clip_and_singular_transition ... ok
+test deep_spatial_refresh_and_removal_do_not_recurse ... ok
+test sparse_damage_is_bounded_and_covers_fractional_edges ... ok
+test deep_hit_queries_are_linear_and_rejected_clips_prune_descendants ... ok
+test randomized_spatial_mutations_match_from_scratch_coordinates_and_damage ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+     Running tests/tree_oracle.rs (/tmp/gpui-acknowledged-text-target/debug/deps/tree_oracle-949a6ed9f665b5dd)
+
+running 3 tests
+test arena_identity_stale_ids_and_failure_atomicity ... ok
+test deep_tree_streaming_removal_and_drop ... ok
+test randomized_edits_match_independent_adjacency_oracle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+   Doc-tests gpui_reactivity_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

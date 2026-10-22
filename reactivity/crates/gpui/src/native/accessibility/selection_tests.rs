@@ -113,11 +113,11 @@ fn selection(
 ) -> TextSelection {
     TextSelection {
         anchor: TextPosition {
-            node: NodeId(id.0 + 1 + anchor_run),
+            node: NodeId(id.0 + 2 + anchor_run),
             character_index: anchor,
         },
         focus: TextPosition {
-            node: NodeId(id.0 + 1 + focus_run),
+            node: NodeId(id.0 + 2 + focus_run),
             character_index: focus,
         },
     }
@@ -343,7 +343,7 @@ fn long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip() {
     );
     let first = tree
         .state()
-        .node_by_tree_local_id(NodeId(id.0 + 1), TreeId::ROOT)
+        .node_by_tree_local_id(NodeId(id.0 + 2), TreeId::ROOT)
         .unwrap();
     assert_eq!(first.data().character_lengths(), &[0, 2]);
     assert_eq!(
@@ -577,4 +577,66 @@ fn cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair()
     assert!(delta.is_empty());
     assert!(cohort.update_delta(&win, delta).unwrap().qualified);
     assert_eq!((cohort.full_visits, cohort.source_clones), (visits, clones));
+}
+
+#[test]
+fn input_root_survives_wrap_and_font_changes_but_old_run_positions_retire() {
+    use crate::property::{Contribution, FONT_SIZE, WIDTH};
+    let mut win = Win::demo(Inputs::new(
+        "office café אבג العربية repeated words for wrapping",
+    ));
+    let target = target(&win, 1);
+    win.focus(target).unwrap();
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let root = native_id(&win, &cohort, target);
+    let snapshot = |win: &Win<Inputs>, cohort: &Cohort| {
+        let tree = Tree::new(
+            project(
+                &win.accessibility_sheet().unwrap(),
+                win.accessibility_state().unwrap(),
+                "Inputs",
+                cohort,
+            ),
+            true,
+        );
+        let input = tree
+            .state()
+            .node_by_tree_local_id(root, TreeId::ROOT)
+            .unwrap();
+        assert_eq!(tree.state().focus_id_in_tree(), input.id());
+        assert_eq!(
+            input.document_range().text(),
+            win.root().unwrap().a.as_str()
+        );
+        input.document_range().to_text_selection()
+    };
+    let mut previous = snapshot(&win, &cohort);
+    for change in 0..2 {
+        if change == 0 {
+            win.set_property(target, WIDTH, Contribution::Set(Some(75.)))
+                .unwrap();
+        } else {
+            win.set_property(target, FONT_SIZE, Contribution::Set(24.))
+                .unwrap();
+        }
+        assert!(cohort.refresh(&win).unwrap());
+        assert_eq!(native_id(&win, &cohort, target), root);
+        assert_eq!(cohort.target(&win, root).unwrap(), target);
+        assert!(
+            cohort.selection(root, previous).is_none(),
+            "retired child range"
+        );
+        let current = snapshot(&win, &cohort);
+        assert_ne!(current.anchor.node, previous.anchor.node);
+        let decoded = cohort.selection(root, current).unwrap();
+        assert_eq!(decoded.anchor.offset.byte(), 0);
+        assert_eq!(decoded.focus.offset.byte(), win.root().unwrap().a.len());
+        previous = current;
+    }
+    win.set(Inputs::A, "new source".into()).unwrap();
+    cohort.refresh(&win).unwrap();
+    assert_ne!(native_id(&win, &cohort, target), root);
+    assert!(cohort.target(&win, root).is_err());
+    assert!(cohort.selection(root, previous).is_none());
 }

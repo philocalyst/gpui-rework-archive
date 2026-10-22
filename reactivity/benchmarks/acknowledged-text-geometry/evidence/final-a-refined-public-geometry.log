@@ -1,0 +1,12 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.42s
+     Running tests/text_geometry.rs (/tmp/gpui-acknowledged-text-target/debug/deps/text_geometry-1debcfcadc0f8453)
+
+running 4 tests
+test zero_advance_unit_retains_visible_semantic_extent_without_a_damage_rectangle ... ok
+test physical_geometry_keeps_padding_fractional_dpi_reflection_shear_and_exact_target_hits ... ok
+test wrapped_directional_runs_cover_source_and_containing_hit_is_not_nearest_caret ... ok
+test old_p_and_eligible_c_keep_exact_geometry_after_new_l_reshapes_then_fails ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

@@ -1,0 +1,22 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.62s
+     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui-570045ec564061e7)
+
+running 1 test
+
+thread 'native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units' (737735) panicked at crates/gpui/src/element.rs:408:9:
+this element does not accept children
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units' (737735) panicked at crates/gpui/src/native/accessibility/geometry_tests.rs:106:14:
+called `Result::unwrap()` on an `Err` value: OwnerPanicked
+test native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units ... FAILED
+
+failures:
+
+failures:
+    native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 197 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p gpui --lib`

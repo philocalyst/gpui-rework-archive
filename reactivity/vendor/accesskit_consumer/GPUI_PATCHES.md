@@ -15,3 +15,12 @@ General navigation retains upstream interior-offset flooring. Explicit editing
 adapters must additionally require exact round-trip equality before dispatching
 a range action. See `../accesskit/GPUI_PATCHES.md` for the private schema and
 compatibility boundary; upstream-only consumers cannot decode its escapes.
+
+Acknowledged text geometry lowering also clips text-range bounding boxes against
+`clips_children` ancestor bounds in window coordinates. This is continuous
+semantic geometry, not a raster sample mask. Zero-width carets inside a clip
+survive; fully clipped ranges return no boxes. Under arbitrary rotated clips,
+these are conservative transformed axis-aligned bounds, as are AccessKit's
+existing node bounds. GPUI admits diagonal viewport transforms and uses its
+exact inverse/rounded target predicate for public point admission. This is a
+coordinated private behavior change, not an assertion of upstream equivalence.

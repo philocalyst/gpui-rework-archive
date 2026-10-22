@@ -1,0 +1,8 @@
+0000000000a5b4e0 000000000000014e t <gpui::runtime::query::SemanticSheet>::visit::<gpui::native::accessibility::project::{closure#0}>
+0000000000a5b630 00000000000003e4 t <gpui::runtime::query::SemanticSheet>::visit::<gpui::native::accessibility::project::{closure#1}>
+0000000000a6e740 00000000000001f6 t <core::iter::adapters::chain::Chain<core::slice::iter::Iter<u32>, core::iter::adapters::filter::Filter<core::slice::iter::Iter<u32>, gpui::native::accessibility::project_sparse::{closure#0}>> as core::iter::traits::iterator::Iterator>::fold::<usize, core::iter::adapters::copied::copy_fold<u32, usize, core::iter::adapters::map::map_fold<u32, usize, usize, gpui::native::accessibility::project_sparse::{closure#1}, <usize as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<core::iter::adapters::chain::Chain<core::slice::iter::Iter<u32>, core::iter::adapters::filter::Filter<core::slice::iter::Iter<u32>, gpui::native::accessibility::project_sparse::{closure#0}>>>, gpui::native::accessibility::project_sparse::{closure#1}>>::{closure#0}>::{closure#0}>::{closure#0}>
+0000000000a784b0 0000000000000733 T gpui::native::accessibility::project_sparse
+0000000000a78bf0 0000000000000baa t gpui::native::accessibility::projected_node
+0000000000a797a0 00000000000002ca t gpui::native::accessibility::projected_text
+0000000000a79a70 00000000000004d8 T gpui::native::accessibility::project
+0000000000a26c70 0000000000000159 T query_visit_control

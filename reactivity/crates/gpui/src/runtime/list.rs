@@ -354,43 +354,17 @@ impl<M: View + 'static> Runtime<M> {
             .ok_or(ListError::NotList.into())
     }
     pub(super) fn sheet_hit(&self, index: usize, point: Point) -> bool {
-        let node = &self.presented[index];
-        if !node.bounds.contains(point)
-            || !node.transform.get().is_some_and(|map| {
-                let radius = self
-                    .metadata
-                    .as_ref()
-                    .and_then(|m| m.geometry.as_ref())
-                    .map_or(0.0, |g| g.frozen_radius(node.identity));
-                if radius == 0.0 {
-                    CoordinateSpace::new(map).hit(node.rect, point)
-                } else {
-                    gpui_canvas::rounded_rect_contains(node.rect, radius, map, point)
-                        .unwrap_or(false)
-                }
-            })
-        {
-            return false;
-        }
-        if self.viewports.is_empty() {
-            return true;
-        }
-        let mut cursor = node.parent.index();
-        while let Some(index) = cursor {
-            let node = &self.presented[index];
-            if matches!(
-                node.kind,
-                NodeKind::List | NodeKind::ListItem | NodeKind::Scroll
-            ) && !node
-                .transform
-                .get()
-                .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
-            {
-                return false;
-            }
-            cursor = node.parent.index();
-        }
-        true
+        super::query::contains_point(
+            &self.presented,
+            self.metadata
+                .as_ref()
+                .and_then(|metadata| metadata.geometry.as_deref()),
+            self.metadata
+                .as_ref()
+                .is_some_and(|metadata| !metadata.presented.viewports.is_empty()),
+            index,
+            point,
+        )
     }
     pub(super) fn in_list(&self, mut index: usize) -> bool {
         loop {

@@ -3,7 +3,9 @@
 use super::*;
 use crate::Point;
 
-struct Interval {
+/// One source grapheme advance, derived on demand from canonical caret stops.
+#[derive(Clone, Copy, Debug)]
+pub struct TextGrapheme {
     start: TextPosition,
     end: TextPosition,
     start_x: f32,
@@ -11,9 +13,28 @@ struct Interval {
     bounds: Rect,
     line: usize,
     hard_break: bool,
+    direction: TextDirection,
 }
 
-impl Interval {
+type Interval = TextGrapheme;
+
+impl TextGrapheme {
+    pub fn text_range(self) -> std::ops::Range<TextOffset> {
+        self.start.offset..self.end.offset
+    }
+    pub fn bounds(self) -> Rect {
+        self.bounds
+    }
+    pub fn line(self) -> usize {
+        self.line
+    }
+    pub fn direction(self) -> TextDirection {
+        self.direction
+    }
+    pub fn is_hard_break(self) -> bool {
+        self.hard_break
+    }
+
     fn side(&self, right: bool) -> TextPosition {
         if right == (self.start_x < self.end_x) {
             self.end
@@ -24,6 +45,22 @@ impl Interval {
 }
 
 impl Details {
+    // Source-ordered boundaries remain authoritative when caret tops overlap.
+    // End excludes hard separators: upstream at a soft wrap stays on the old
+    // line, while the end of a hard separator advances across the source gap.
+    pub(super) fn source_line(&self, position: TextPosition) -> usize {
+        let byte = position.offset.0;
+        match position.affinity {
+            CaretAffinity::Upstream if byte != 0 => self
+                .lines
+                .partition_point(|line| line.end < byte)
+                .min(self.lines.len() - 1),
+            _ => self
+                .lines
+                .partition_point(|line| line.start <= byte)
+                .saturating_sub(1),
+        }
+    }
     fn line_at(&self, y: f32) -> usize {
         self.lines
             .partition_point(|line| line.top <= y)
@@ -69,17 +106,27 @@ impl Details {
             .filter_map(move |(a, b)| {
                 let start = a.iter().find(|stop| stop.affinities & 2 != 0)?;
                 let end = b.iter().find(|stop| stop.affinities & 1 != 0)?;
-                let line = self.line_at(start.bounds.y);
-                let hard_break = start.bounds.y != end.bounds.y;
+                let line = self.source_line(TextPosition {
+                    offset: TextOffset(start.byte),
+                    affinity: CaretAffinity::Downstream,
+                });
+                let hard_break = end.byte > self.lines[line].end;
                 let left = start.bounds.x.min(end.bounds.x);
-                let marker_left = hard_break && {
+                let direction = if !hard_break && start.bounds.x != end.bounds.x {
+                    if start.bounds.x < end.bounds.x {
+                        TextDirection::LeftToRight
+                    } else {
+                        TextDirection::RightToLeft
+                    }
+                } else {
                     let first = self.runs.partition_point(|run| (run.line as usize) < line);
                     self.runs[first..]
                         .iter()
                         .take_while(|run| run.line as usize == line)
                         .find(|run| run.start <= start.byte && start.byte <= run.end)
-                        .is_some_and(|run| run.direction == TextDirection::RightToLeft)
+                        .map_or(TextDirection::LeftToRight, |run| run.direction)
                 };
+                let marker_left = hard_break && direction == TextDirection::RightToLeft;
                 Some(Interval {
                     start: TextPosition {
                         offset: TextOffset(start.byte),
@@ -112,12 +159,119 @@ impl Details {
                     },
                     line,
                     hard_break,
+                    direction,
                 })
             })
     }
 }
 
-impl TextLayout {
+impl TextGeometry {
+    /// Source-ordered grapheme advances, including atomic hard-break markers.
+    /// Nothing is retained or allocated. Requires interactive shaping.
+    pub fn graphemes(&self) -> impl Iterator<Item = TextGrapheme> + '_ {
+        self.intervals(
+            self.carets.as_deref().unwrap_or_default(),
+            self.font_size * 0.25,
+        )
+    }
+    /// Units in an exact source range. Invalid or reversed endpoints return
+    /// None before iteration; bounds use the same source-affinity ownership.
+    pub fn graphemes_in(
+        &self,
+        range: std::ops::Range<TextOffset>,
+    ) -> Option<impl Iterator<Item = TextGrapheme> + '_> {
+        if range.start > range.end {
+            return None;
+        }
+        let stops = self.carets.as_deref()?;
+        for offset in [range.start, range.end] {
+            let index = stops.partition_point(|stop| stop.byte < offset.0);
+            if stops.get(index).is_none_or(|stop| stop.byte != offset.0) {
+                return None;
+            }
+        }
+        Some(self.intervals(
+            self.stops(range.start.0, range.end.0),
+            self.font_size * 0.25,
+        ))
+    }
+    /// The containing grapheme, distinct from nearest-caret midpoint policy.
+    /// Outside/zero-area advances and nonfinite points produce None.
+    pub fn grapheme_at(&self, point: Point) -> Option<TextGrapheme> {
+        if !point.x.is_finite() || !point.y.is_finite() {
+            return None;
+        }
+        let line = self.line_at(point.y);
+        self.intervals(self.line_tail(line), self.font_size * 0.25)
+            .take_while(|unit| unit.start.offset.0 <= self.lines[line].end)
+            .find(|unit| unit.line == line && unit.bounds.contains(point))
+    }
+    /// Advance at an exact grapheme start; interiors and the terminal caret
+    /// have no grapheme. The byte lookup reuses the existing sorted stops.
+    pub fn grapheme(&self, start: TextOffset) -> Option<TextGrapheme> {
+        let stops = self.carets.as_deref()?;
+        let first = stops.partition_point(|stop| stop.byte < start.0);
+        self.intervals(&stops[first..], self.font_size * 0.25)
+            .next()
+            .filter(|unit| unit.start.offset == start)
+    }
+    /// Source-ordered directional runs, split only at legal grapheme boundaries.
+    /// Font-run boundaries inside a grapheme do not split the selectable unit.
+    /// Equal direction does not imply visual adjacency across bidi isolates;
+    /// an affinity discontinuity starts a new run instead of spanning a gap.
+    pub fn runs(&self) -> impl Iterator<Item = TextRun> + '_ {
+        let mut units = self.graphemes().peekable();
+        let mut terminal = self
+            .lines
+            .last()
+            .filter(|line| self.carets.is_some() && line.start == self.len && line.end == self.len)
+            .map(|_| TextRun {
+                start: self.len,
+                end: self.len,
+                bounds: {
+                    let caret = self
+                        .caret_bounds(TextPosition {
+                            offset: TextOffset(self.len),
+                            affinity: CaretAffinity::Downstream,
+                        })
+                        .expect("interactive terminal line has a caret");
+                    Rect::new(caret.x, caret.y, 0., caret.height)
+                },
+                line: self.lines.len() - 1,
+                direction: TextDirection::LeftToRight,
+            });
+        std::iter::from_fn(move || {
+            let Some(first) = units.next() else {
+                return terminal.take();
+            };
+            let mut run = TextRun {
+                start: first.start.offset.0,
+                end: first.end.offset.0,
+                bounds: first.bounds,
+                line: first.line,
+                direction: first.direction,
+            };
+            let mut edge = first.end_x;
+            while let Some(next) = units.peek().filter(|next| {
+                next.line == run.line
+                    && next.direction == run.direction
+                    && next.start.offset.0 == run.end
+                    && next.start_x == edge
+                    && next.bounds.y == run.bounds.y
+                    && next.bounds.height == run.bounds.height
+            }) {
+                let right =
+                    (run.bounds.x + run.bounds.width).max(next.bounds.x + next.bounds.width);
+                run.bounds.x = run.bounds.x.min(next.bounds.x);
+                run.bounds.width = right - run.bounds.x;
+                run.end = next.end.offset.0;
+                edge = next.end_x;
+                units.next();
+            }
+            Some(run)
+        })
+    }
+
     /// Nearest legal grapheme caret in layout-local coordinates. Points outside
     /// the layout clamp to the nearest line and visual interval. At an interval
     /// midpoint the left side wins; bidi joins retain that side's affinity.
@@ -127,9 +281,12 @@ impl TextLayout {
         if !point.x.is_finite() || !point.y.is_finite() {
             return None;
         }
-        let map = self.mapping.as_ref()?;
+        self.position_on_line(self.line_at(point.y), point.x)
+    }
+
+    fn position_on_line(&self, line: usize, x: f32) -> Option<TextPosition> {
+        let map = self;
         map.carets.as_ref()?;
-        let line = map.line_at(point.y);
         let stops = map.line_tail(line);
         let mut before: Option<(f32, TextPosition)> = None;
         let mut after: Option<(f32, TextPosition)> = None;
@@ -157,17 +314,17 @@ impl TextLayout {
             };
             // Compare edges before subtracting. At distant finite points every
             // f32 distance can round to the same value, losing visual order.
-            if point.x < left {
+            if x < left {
                 if after.is_none_or(|(edge, _)| left < edge) {
                     after = Some((left, at_left));
                 }
-            } else if point.x > right {
+            } else if x > right {
                 if before.is_none_or(|(edge, _)| right > edge) {
                     before = Some((right, at_right));
                 }
             } else {
                 let middle = (f64::from(left) + f64::from(right)) * 0.5;
-                return Some(if f64::from(point.x) > middle {
+                return Some(if f64::from(x) > middle {
                     at_right
                 } else {
                     at_left
@@ -177,7 +334,7 @@ impl TextLayout {
         let best = match (before, after) {
             (Some((left, a)), Some((right, b))) => {
                 let middle = (f64::from(left) + f64::from(right)) * 0.5;
-                Some(if f64::from(point.x) > middle { b } else { a })
+                Some(if f64::from(x) > middle { b } else { a })
             }
             (Some((_, position)), None) | (None, Some((_, position))) => Some(position),
             (None, None) => None,
@@ -187,14 +344,22 @@ impl TextLayout {
             stops
                 .iter()
                 .take_while(|stop| stop.byte <= map.lines[line].end)
-                .find(|stop| map.line_at(stop.bounds.y) == line)
-                .map(|stop| TextPosition {
-                    offset: TextOffset(stop.byte),
-                    affinity: if stop.affinities & 2 != 0 {
-                        CaretAffinity::Downstream
-                    } else {
-                        CaretAffinity::Upstream
-                    },
+                .find_map(|stop| {
+                    [CaretAffinity::Downstream, CaretAffinity::Upstream]
+                        .into_iter()
+                        .find_map(|affinity| {
+                            let mask = if affinity == CaretAffinity::Downstream {
+                                2
+                            } else {
+                                1
+                            };
+                            let position = TextPosition {
+                                offset: TextOffset(stop.byte),
+                                affinity,
+                            };
+                            (stop.affinities & mask != 0 && map.source_line(position) == line)
+                                .then_some(position)
+                        })
                 })
         })
     }
@@ -218,7 +383,7 @@ impl TextLayout {
         if start == end {
             return true;
         }
-        let map = self.mapping.as_ref().unwrap();
+        let map = self;
         let mut pending: Option<(Rect, usize)> = None;
         for interval in map.intervals(map.stops(start.0, end.0), self.font_size * 0.25) {
             if interval.bounds.width == 0. {
@@ -264,8 +429,8 @@ impl TextLayout {
 
     fn move_visual(&self, position: TextPosition, right: bool) -> Option<TextPosition> {
         let bounds = self.caret_bounds(position)?;
-        let map = self.mapping.as_ref()?;
-        let line = map.line_at(bounds.y);
+        let map = self;
+        let line = map.caret_line(position)?;
         let mut best = None;
         let mut distance = f32::INFINITY;
         for interval in map
@@ -292,13 +457,32 @@ impl TextLayout {
         } else {
             line.checked_sub(1)
         };
-        if let Some(next) = next_line.and_then(|index| map.lines.get(index)) {
-            return self.position_at(Point {
-                x: if right { -f32::MAX } else { f32::MAX },
-                y: next.top,
-            });
+        if let Some(next) = next_line.filter(|index| *index < map.lines.len()) {
+            return self.position_on_line(next, if right { -f32::MAX } else { f32::MAX });
         }
         Some(position)
+    }
+}
+
+impl TextLayout {
+    /// Nearest grapheme caret; see [`TextGeometry::position_at`].
+    pub fn position_at(&self, point: Point) -> Option<TextPosition> {
+        self.geometry()?.position_at(point)
+    }
+    /// Allocation-free rectangles; invalid endpoints invoke no callbacks.
+    pub fn selection_rects(
+        &self,
+        selection: TextSelection,
+        visit: impl FnMut(Rect, usize),
+    ) -> bool {
+        self.geometry()
+            .is_some_and(|map| map.selection_rects(selection, visit))
+    }
+    pub fn previous_visual(&self, position: TextPosition) -> Option<TextPosition> {
+        self.geometry()?.previous_visual(position)
+    }
+    pub fn next_visual(&self, position: TextPosition) -> Option<TextPosition> {
+        self.geometry()?.next_visual(position)
     }
 }
 
@@ -313,6 +497,7 @@ mod tests {
         // 0..2 and 2..4 are soft-wrapped; 4..6 is an atomic CRLF gap.
         let mut map = Details {
             len: 10_000,
+            font_size: 10.,
             runs: Vec::new(),
             lines: (0..2_500)
                 .map(|index| Line {
@@ -386,5 +571,29 @@ mod tests {
         assert_eq!(requested.len(), 3);
         assert_eq!(map.intervals(requested, 2.5).count(), 2);
         assert_eq!(map.intervals(all, 2.5).count(), 9_999);
+    }
+}
+
+/// A directional, single-line source span, derived without allocation.
+#[derive(Clone, Copy, Debug)]
+pub struct TextRun {
+    start: u32,
+    end: u32,
+    bounds: Rect,
+    line: usize,
+    direction: TextDirection,
+}
+impl TextRun {
+    pub fn text_range(self) -> std::ops::Range<TextOffset> {
+        TextOffset(self.start)..TextOffset(self.end)
+    }
+    pub fn bounds(self) -> Rect {
+        self.bounds
+    }
+    pub fn line(self) -> usize {
+        self.line
+    }
+    pub fn direction(self) -> TextDirection {
+        self.direction
     }
 }

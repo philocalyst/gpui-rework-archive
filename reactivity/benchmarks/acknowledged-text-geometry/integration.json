@@ -1,0 +1,179 @@
+{
+  "producer_source": "86dd5861429522a2ce4dd8c0edb3a6f3483a7d04",
+  "producer_evidence_commit": "f131e4b368",
+  "integration_base": "b0fdc8f815d40acc3032b0b82c08603fb1876aac",
+  "modified_source_files": [
+    {
+      "path": "reactivity/crates/canvas/src/lib.rs",
+      "producer_sha256": "8aadd5144b3bc0a22ff1f60384f30ffa01ba5d94234deb98a3ede119bd8126bb",
+      "integrated_sha256": "8aadd5144b3bc0a22ff1f60384f30ffa01ba5d94234deb98a3ede119bd8126bb",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text.rs",
+      "producer_sha256": "161f5a0e7185cbce705ee5d58cd0f1e6209c5c385ffc4e150871afecf1ac2890",
+      "integrated_sha256": "161f5a0e7185cbce705ee5d58cd0f1e6209c5c385ffc4e150871afecf1ac2890",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/geometry_ledger.rs",
+      "producer_sha256": "baadc8703b3ad87589335c16e56a6c4d1a0c8d78f559c44207000da4d489a5a6",
+      "integrated_sha256": "baadc8703b3ad87589335c16e56a6c4d1a0c8d78f559c44207000da4d489a5a6",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/layout.rs",
+      "producer_sha256": "47a07d31cfe582f8db7a004567885819da7581106b6dce5c1f11ba9997ea8f5d",
+      "integrated_sha256": "47a07d31cfe582f8db7a004567885819da7581106b6dce5c1f11ba9997ea8f5d",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/layout/interaction.rs",
+      "producer_sha256": "39cad80b565f5d0b582bb22a0a6f4bfa26b38e03984f0b2ebcd953e2513e83f2",
+      "integrated_sha256": "39cad80b565f5d0b582bb22a0a6f4bfa26b38e03984f0b2ebcd953e2513e83f2",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/line_ownership_tests.rs",
+      "producer_sha256": "c7d6c72604b3f014f98f86a46bee1c72be2c58b450825991a6b729b43a688fe8",
+      "integrated_sha256": "c7d6c72604b3f014f98f86a46bee1c72be2c58b450825991a6b729b43a688fe8",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/planner.rs",
+      "producer_sha256": "a38a1e2da276bd439e88726ecc7f4ef9782f43cf87dc700552a934dc81095ca4",
+      "integrated_sha256": "a38a1e2da276bd439e88726ecc7f4ef9782f43cf87dc700552a934dc81095ca4",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/selection.rs",
+      "producer_sha256": "25489828d8a97a6c61cd76c6b52495048c15df60bf4a3a277b44bd12ded952a9",
+      "integrated_sha256": "25489828d8a97a6c61cd76c6b52495048c15df60bf4a3a277b44bd12ded952a9",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/core/src/geometry.rs",
+      "producer_sha256": "1ef7c0cb4e1ab0cb70cbffcceaef85b94b318749795da89a1f9552a610ae63d4",
+      "integrated_sha256": "1ef7c0cb4e1ab0cb70cbffcceaef85b94b318749795da89a1f9552a610ae63d4",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/core/tests/spatial.rs",
+      "producer_sha256": "34a791f934bc4fd807ae7b4f7bba560f6bcdb1dbcf1a932cccad2c038e23f4cd",
+      "integrated_sha256": "34a791f934bc4fd807ae7b4f7bba560f6bcdb1dbcf1a932cccad2c038e23f4cd",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/lib.rs",
+      "producer_sha256": "ee22e3fafb9a79b088e7cde0960eb57c820f1ea3221f3028b58c51f7bfee49d3",
+      "integrated_sha256": "b39ee02078005f931068d948da812c3ba5cbac21f84b26092b485328659a6c1e",
+      "exact": false
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility.rs",
+      "producer_sha256": "a3cb57ad3a05df5890fd9e23caa23f3fb9d7e9fce350286ade6645ba2534b6ca",
+      "integrated_sha256": "a3cb57ad3a05df5890fd9e23caa23f3fb9d7e9fce350286ade6645ba2534b6ca",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/geometry_tests.rs",
+      "producer_sha256": "8567f3f34ac58757376587ce51d31f2a7486595f7a441ea103b4df8dd84ef202",
+      "integrated_sha256": "8567f3f34ac58757376587ce51d31f2a7486595f7a441ea103b4df8dd84ef202",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/linux_tests.rs",
+      "producer_sha256": "19a7c446ce69020314c5f0a7ece15ec449ba250e2509fbc93241bde9f17f31c0",
+      "integrated_sha256": "19a7c446ce69020314c5f0a7ece15ec449ba250e2509fbc93241bde9f17f31c0",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/selection_tests.rs",
+      "producer_sha256": "d695f81112752e71b01c552291f423f66ddee12e1edb98857a7c084df939a921",
+      "integrated_sha256": "d695f81112752e71b01c552291f423f66ddee12e1edb98857a7c084df939a921",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/tests.rs",
+      "producer_sha256": "1c22939908e1efe27e2cf7e102532f0a17ecd2bc241a893a5c77c2d147884d3b",
+      "integrated_sha256": "1c22939908e1efe27e2cf7e102532f0a17ecd2bc241a893a5c77c2d147884d3b",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/text.rs",
+      "producer_sha256": "9220cc6abcf34860e51e12be3ae4b687c290c7d07d2aac8dc4692f2f008fef7b",
+      "integrated_sha256": "9220cc6abcf34860e51e12be3ae4b687c290c7d07d2aac8dc4692f2f008fef7b",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/transitions.rs",
+      "producer_sha256": "0297a8c971bf70f653712b35ad973e9b328afda4715d7913a63d6fa05c618c22",
+      "integrated_sha256": "0297a8c971bf70f653712b35ad973e9b328afda4715d7913a63d6fa05c618c22",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime.rs",
+      "producer_sha256": "ae8d38cb873c861018f73cdcfc89d78d894386233e97f5ac5e3399f127ad8b66",
+      "integrated_sha256": "ae8d38cb873c861018f73cdcfc89d78d894386233e97f5ac5e3399f127ad8b66",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/accessibility.rs",
+      "producer_sha256": "c2ebf48b57a7692da5b0fdb58e97b4bb5a734f68350f2c384ebbf05139f0d612",
+      "integrated_sha256": "c2ebf48b57a7692da5b0fdb58e97b4bb5a734f68350f2c384ebbf05139f0d612",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/editing.rs",
+      "producer_sha256": "a8dc63bd9633a739c113b76a841ca6fa37c1d0ff61340cec2875155a9a696ee3",
+      "integrated_sha256": "a8dc63bd9633a739c113b76a841ca6fa37c1d0ff61340cec2875155a9a696ee3",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/list.rs",
+      "producer_sha256": "cf8474a1070fa0d5ac5bce22315bf9e247f0a3f059d8ace83acab66fca19e5a3",
+      "integrated_sha256": "cf8474a1070fa0d5ac5bce22315bf9e247f0a3f059d8ace83acab66fca19e5a3",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/query.rs",
+      "producer_sha256": "55944cb45c4e1c3b158dd3906f41c4d116089008730f4eedb5a80883cf6e8440",
+      "integrated_sha256": "55944cb45c4e1c3b158dd3906f41c4d116089008730f4eedb5a80883cf6e8440",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/query/serialize.rs",
+      "producer_sha256": "d2b0db4de8f091fda506902965a8620f85168ca860e90fde9db91262c68d815a",
+      "integrated_sha256": "d2b0db4de8f091fda506902965a8620f85168ca860e90fde9db91262c68d815a",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/text_geometry.rs",
+      "producer_sha256": "d1879b33fb500976b591de68da1b30a86e53717c0d1207e9a7aa15862c038c17",
+      "integrated_sha256": "d1879b33fb500976b591de68da1b30a86e53717c0d1207e9a7aa15862c038c17",
+      "exact": true
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/text_geometry.rs",
+      "producer_sha256": "74e3ebbf30ce9dc47a9d5ade52ac49cd0990d07587ec7c6d183caac19a081568",
+      "integrated_sha256": "74e3ebbf30ce9dc47a9d5ade52ac49cd0990d07587ec7c6d183caac19a081568",
+      "exact": true
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/GPUI_PATCHES.md",
+      "producer_sha256": "aeefe4c4d20c634420b3080cbe69bccbe2d9160a99165004e86f684e2af06e0e",
+      "integrated_sha256": "aeefe4c4d20c634420b3080cbe69bccbe2d9160a99165004e86f684e2af06e0e",
+      "exact": true
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/text.rs",
+      "producer_sha256": "c370be52b723075ebb27cf93dbaa8913faabbae5951aaa4cf645899aed02ed42",
+      "integrated_sha256": "c370be52b723075ebb27cf93dbaa8913faabbae5951aaa4cf645899aed02ed42",
+      "exact": true
+    }
+  ],
+  "source_merge": "Only gpui/src/lib.rs differs from producer among these paths: it also retains integrated Future question exports. Other Future/Auto/vendor/Hummingbird source remains separately qualified.",
+  "producer_archive_files_verified": 126,
+  "qualification": "All producer gates retain source86dd. Combined main source tests are a separate followup.",
+  "editorial_correction": "README states inspector allocation growth explicitly; raw measurements unchanged."
+}

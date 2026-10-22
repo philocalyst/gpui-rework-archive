@@ -56,7 +56,7 @@ fn apply<M: View + 'static>(
         None => assert!(delta.is_none(), "transition must use full fallback"),
     }
     let update = if let Some(indices) = delta {
-        project_sparse(&sheet, indices, &[], &cohort(win))
+        project_sparse(&sheet, indices, &[], &cohort(win), None)
     } else {
         full(win)
     };
@@ -548,7 +548,7 @@ fn sparse_transition_measurements() {
             black_box(project(&sheet, state, "Oracle", &cohort(&win)));
         });
         report("leaf_projection", count, true, || {
-            let update = project_sparse(&sheet, delta, &[], &cohort(&win));
+            let update = project_sparse(&sheet, delta, &[], &cohort(&win), None);
             assert_eq!(update.nodes.len(), 1);
             black_box(update);
         });
@@ -561,7 +561,7 @@ fn sparse_transition_measurements() {
         });
         report("leaf_projection_consumer", count, true, || {
             tree.update_and_process_changes(
-                project_sparse(&sheet, delta, &[], &cohort(&win)),
+                project_sparse(&sheet, delta, &[], &cohort(&win), None),
                 &mut Changes::default(),
             );
         });
@@ -971,6 +971,7 @@ fn thousand_node_paint_and_one_input_edit_keep_cohort_frontier_bounded() {
         indices,
         &relink.parents,
         &cohort,
+        Some(&relink.new_ids),
     );
     assert_eq!(update.nodes.len(), 3);
     tree.update_and_process_changes(update, &mut Changes::default());
@@ -993,5 +994,124 @@ fn thousand_node_paint_and_one_input_edit_keep_cohort_frontier_bounded() {
             .unwrap();
         assert_eq!(actual.data(), expected.data());
         assert_eq!(actual.parent_id(), expected.parent_id());
+    }
+}
+
+#[test]
+fn selection_and_placement_keep_native_run_arrays_while_wrap_retires_them() {
+    let mut win = Win::with_size(
+        Texts {
+            value: Signal::new("office café אבג words for wrapping".into()),
+        },
+        240,
+        240,
+    )
+    .unwrap();
+    win.accessibility_observe(true).unwrap();
+    let target = win.role(Role::TextInput).one().unwrap();
+    let mut cohort = cohort(&win);
+    let mut tree = Tree::new(
+        project(
+            &win.accessibility_sheet().unwrap(),
+            win.accessibility_state().unwrap(),
+            "Runs",
+            &cohort,
+        ),
+        true,
+    );
+    let mut base = win.accessibility_state().unwrap();
+    let mut root = None;
+    win.visit(|part| {
+        if part.target() == target {
+            root = Some(cohort.id(part));
+        }
+    })
+    .unwrap();
+    let root = root.unwrap();
+    for change in 0..3 {
+        let old_range = tree
+            .state()
+            .node_by_tree_local_id(root, TreeId::ROOT)
+            .unwrap()
+            .document_range()
+            .to_text_selection();
+        let position = |byte| crate::TextPosition {
+            offset: crate::TextOffset::new(byte).unwrap(),
+            affinity: crate::CaretAffinity::Downstream,
+        };
+        match change {
+            0 => {
+                win.select(
+                    target,
+                    crate::TextSelection {
+                        anchor: position(0),
+                        focus: position(3),
+                    },
+                )
+                .unwrap();
+            }
+            1 => {
+                win.set_property(
+                    target,
+                    TRANSFORM,
+                    Contribution::Set(Affine {
+                        tx: 7.5,
+                        ty: 3.25,
+                        ..Affine::IDENTITY
+                    }),
+                )
+                .unwrap();
+            }
+            _ => {
+                win.set_property(target, WIDTH, Contribution::Set(Some(60.)))
+                    .unwrap();
+            }
+        }
+        let state = win.accessibility_state().unwrap();
+        let indices = win.accessibility_delta(base, state).unwrap();
+        let storage = cohort.storage();
+        let clones = cohort.source_clones;
+        let mut relink = None;
+        let work = allocation_counter::measure(|| {
+            relink = Some(cohort.update_delta(&win, indices).unwrap());
+        });
+        let relink = relink.unwrap();
+        assert_eq!(work.count_total, 0);
+        assert_eq!(cohort.storage(), storage);
+        assert_eq!(cohort.source_clones, clones);
+        let update = project_sparse(
+            &win.accessibility_sheet().unwrap(),
+            indices,
+            &relink.parents,
+            &cohort,
+            Some(&relink.new_ids),
+        );
+        let emitted = update
+            .nodes
+            .iter()
+            .filter(|(_, node)| node.role() == accesskit::Role::TextRun)
+            .count();
+        if change < 2 {
+            assert_eq!(
+                emitted, 0,
+                "same immutable arrays under selection/placement"
+            );
+            assert!(cohort.selection(root, old_range).is_some());
+        } else {
+            assert!(emitted > 1);
+            assert!(cohort.selection(root, old_range).is_none());
+        }
+        tree.update_and_process_changes(update, &mut Changes::default());
+        let expected = project(&win.accessibility_sheet().unwrap(), state, "Runs", &cohort);
+        for (id, node) in expected.nodes {
+            assert_eq!(
+                tree.state()
+                    .node_by_tree_local_id(id, TreeId::ROOT)
+                    .unwrap()
+                    .data(),
+                &node
+            );
+        }
+        base = state;
     }
 }

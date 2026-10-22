@@ -1,0 +1,25 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+error[E0599]: no method named `set` found for struct `gpui_reactivity_state::Signal<std::string::String>` in the current scope
+    --> crates/gpui/src/native/accessibility/geometry_tests.rs:216:18
+     |
+ 215 | /             page.value
+ 216 | |                 .set("new logical source reshaped before later failure".into());
+     | |_________________-^^^
+     |
+    ::: /nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/core/src/pin.rs:1481:12
+     |
+1481 |       pub fn set(&mut self, value: Ptr::Target)
+     |              --- the method is available for `Pin<gpui_reactivity_state::Signal<std::string::String>>` here
+     |
+help: consider wrapping the receiver expression with the appropriate type
+     |
+ 215 |             Pin::new(page.value)
+     |             +++++++++          +
+help: there is a method `get` with a similar name
+     |
+ 216 -                 .set("new logical source reshaped before later failure".into());
+ 216 +                 .get("new logical source reshaped before later failure".into());
+     |
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `gpui` (lib test) due to 1 previous error

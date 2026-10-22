@@ -3,6 +3,7 @@ use super::{FontFace, FontSlot, Glyph, TextLayout};
 use crate::Rect;
 use std::ops::Range;
 mod interaction;
+pub use interaction::{TextGrapheme, TextRun};
 
 /// UTF-8 document byte offset, distinct from glyph indices and UTF-16 units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -65,12 +66,17 @@ pub enum TextDirection {
 }
 
 #[derive(Clone, Debug)]
-pub(super) struct Details {
-    pub len: u32,
-    pub runs: Vec<Run>,
-    pub lines: Vec<Line>,
-    pub carets: Option<Vec<Stop>>,
+/// Immutable layout geometry. Cloned leases retain no glyph buffers or font faces.
+/// Text positions are UTF-8 bytes at legal grapheme boundaries, not glyph indices.
+pub struct TextGeometry {
+    pub(super) len: u32,
+    pub(super) font_size: f32,
+    pub(super) runs: Vec<Run>,
+    pub(super) lines: Vec<Line>,
+    pub(super) carets: Option<Vec<Stop>>,
 }
+pub(super) type Details = TextGeometry;
+
 #[derive(Clone, Copy, Debug)]
 pub(super) struct Run {
     pub start: u32,
@@ -125,6 +131,8 @@ impl<'a> GlyphRun<'a> {
 #[derive(Clone, Copy, Debug)]
 pub struct TextLine(Line);
 impl TextLine {
+    /// Source content, excluding hard line/paragraph separators. Glyph runs and
+    /// the document retain the separators and their source byte ranges.
     pub fn text_range(self) -> Range<TextOffset> {
         TextOffset(self.0.start)..TextOffset(self.0.end)
     }
@@ -185,27 +193,20 @@ impl TextLayout {
         };
         single.into_iter().chain(many.iter().copied()).map(TextLine)
     }
-    /// Geometry exists only when interactive shaping was requested. Invalid
-    /// bytes (including CRLF/combining interiors) produce None, never a snap.
-    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
-        let map = self.mapping.as_ref()?;
-        let stops = map.carets.as_ref()?;
-        let mask = match position.affinity {
-            CaretAffinity::Upstream => 1,
-            CaretAffinity::Downstream => 2,
-        };
-        let first = stops.partition_point(|stop| stop.byte < position.offset.0);
-        stops[first..]
-            .iter()
-            .take_while(|stop| stop.byte == position.offset.0)
-            .find(|stop| stop.affinities & mask != 0)
-            .map(|stop| stop.bounds)
+    /// Borrow this layout's immutable map, when a detailed layout was needed.
+    pub fn geometry(&self) -> Option<&TextGeometry> {
+        self.mapping.as_deref()
     }
-    /// Validates both endpoints in this layout's current interaction map.
-    /// It is not a document-revision token or an editor mutation.
+    /// Retain exact geometry independently from this layout's glyph/font payload.
+    pub fn retain_geometry(&self) -> Option<std::sync::Arc<TextGeometry>> {
+        self.mapping.clone()
+    }
+    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+        self.geometry()?.caret_bounds(position)
+    }
     pub fn validates_selection(&self, selection: TextSelection) -> bool {
-        self.caret_bounds(selection.anchor).is_some()
-            && self.caret_bounds(selection.focus).is_some()
+        self.geometry()
+            .is_some_and(|map| map.validates_selection(selection))
     }
 
     /// Release opt-in caret geometry while preserving the canonical glyphs,
@@ -215,6 +216,8 @@ impl TextLayout {
         let Some(map) = &mut self.mapping else {
             return;
         };
+        // Explicit mutation detaches shared geometry; preparation never uses COW.
+        let map = std::sync::Arc::make_mut(map);
         map.carets = None;
         let simple = map.lines.len() == 1
             && map.runs.len() <= 1
@@ -238,5 +241,43 @@ impl TextLayout {
                 self.mapping = None;
             }
         }
+    }
+}
+
+impl TextGeometry {
+    pub fn text_len(&self) -> usize {
+        self.len as usize
+    }
+    pub fn lines(&self) -> impl Iterator<Item = TextLine> + Clone {
+        self.lines.iter().copied().map(TextLine)
+    }
+    /// Geometry exists only when interactive shaping was requested. Invalid
+    /// bytes (including CRLF/combining interiors) produce None, never a snap.
+    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+        let map = self;
+        let stops = map.carets.as_ref()?;
+        let mask = match position.affinity {
+            CaretAffinity::Upstream => 1,
+            CaretAffinity::Downstream => 2,
+        };
+        let first = stops.partition_point(|stop| stop.byte < position.offset.0);
+        stops[first..]
+            .iter()
+            .take_while(|stop| stop.byte == position.offset.0)
+            .find(|stop| stop.affinities & mask != 0)
+            .map(|stop| stop.bounds)
+    }
+    /// Source line owning this legal caret, including its requested affinity.
+    /// Soft-wrap aliases can own different lines. After a hard separator both
+    /// affinities belong to the following line, even when caret tops coincide.
+    pub fn caret_line(&self, position: TextPosition) -> Option<usize> {
+        self.caret_bounds(position)?;
+        Some(self.source_line(position))
+    }
+    /// Validates both endpoints in this layout's current interaction map.
+    /// It is not a document-revision token or an editor mutation.
+    pub fn validates_selection(&self, selection: TextSelection) -> bool {
+        self.caret_bounds(selection.anchor).is_some()
+            && self.caret_bounds(selection.focus).is_some()
     }
 }

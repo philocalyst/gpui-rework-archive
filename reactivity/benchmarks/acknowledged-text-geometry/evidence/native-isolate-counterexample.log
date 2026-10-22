@@ -1,0 +1,43 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.90s
+     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui-570045ec564061e7)
+
+running 1 test
+ISOLATE_UNIT "a" Rect { x: 0.0, y: 0.0, width: 8.976001, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT " " Rect { x: 8.976001, y: 0.0, width: 4.160001, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT "\u{2067}" Rect { x: 13.136002, y: 0.0, width: 0.0, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT "א" Rect { x: 50.736004, y: 0.0, width: 10.1119995, height: 21.792 } line=0 dir=RightToLeft
+ISOLATE_UNIT "ב" Rect { x: 41.584003, y: 0.0, width: 9.152, height: 21.792 } line=0 dir=RightToLeft
+ISOLATE_UNIT "ג" Rect { x: 35.600002, y: 0.0, width: 5.984001, height: 21.792 } line=0 dir=RightToLeft
+ISOLATE_UNIT " " Rect { x: 31.440002, y: 0.0, width: 4.16, height: 21.792 } line=0 dir=RightToLeft
+ISOLATE_UNIT "1" Rect { x: 13.136002, y: 0.0, width: 9.152, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT "2" Rect { x: 22.288002, y: 0.0, width: 9.152, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT "\u{2069}" Rect { x: 60.848003, y: 0.0, width: 0.0, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT " " Rect { x: 60.848003, y: 0.0, width: 4.16, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT "z" Rect { x: 65.008, y: 0.0, width: 7.5199966, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT " " Rect { x: 72.528, y: 0.0, width: 4.1600037, height: 21.792 } line=0 dir=LeftToRight
+ISOLATE_UNIT "\u{2066}" Rect { x: 0.0, y: 21.792, width: 0.0, height: 21.792 } line=1 dir=LeftToRight
+ISOLATE_UNIT "a" Rect { x: 0.0, y: 21.792, width: 8.976001, height: 21.792 } line=1 dir=LeftToRight
+ISOLATE_UNIT "b" Rect { x: 8.976001, y: 21.792, width: 9.840001, height: 21.792 } line=1 dir=LeftToRight
+ISOLATE_UNIT "c" Rect { x: 18.816002, y: 21.792, width: 7.6800003, height: 21.792 } line=1 dir=LeftToRight
+ISOLATE_UNIT "\u{2069}" Rect { x: 26.496002, y: 21.792, width: 0.0, height: 21.792 } line=1 dir=LeftToRight
+ISOLATE_RUN TextRun { start: 0, end: 5, bounds: Rect { x: 0.0, y: 0.0, width: 13.136002, height: 21.792 }, line: 0, direction: LeftToRight }
+ISOLATE_RUN TextRun { start: 5, end: 12, bounds: Rect { x: 31.440002, y: 0.0, width: 29.408, height: 21.792 }, line: 0, direction: RightToLeft }
+ISOLATE_RUN TextRun { start: 12, end: 20, bounds: Rect { x: 13.136002, y: 0.0, width: 63.552002, height: 21.792 }, line: 0, direction: LeftToRight }
+ISOLATE_RUN TextRun { start: 20, end: 29, bounds: Rect { x: 0.0, y: 21.792, width: 26.496002, height: 21.792 }, line: 1, direction: LeftToRight }
+
+thread 'native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units' (785664) panicked at crates/gpui/src/native/accessibility/geometry_tests.rs:181:25:
+assertion `left == right` failed: source="a \u{2067}אבג 12\u{2069} z \u{2066}abc\u{2069}" range=TextOffset(5)..TextOffset(7) bounds=Rect { x: 50.736004, y: 0.0, width: 10.1119995, height: 21.792 } public_hit=Some(TextOffset(5)..TextOffset(7))
+  left: 13
+ right: 3
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units ... FAILED
+
+failures:
+
+failures:
+    native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p gpui --lib`

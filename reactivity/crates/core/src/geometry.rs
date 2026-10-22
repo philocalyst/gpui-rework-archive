@@ -285,24 +285,12 @@ impl CoordinateSpace {
         if !rect.is_valid() || self.uncertain || !self.matrix.into_iter().all(f64::is_finite) {
             return MappedBounds::Unbounded;
         }
-        let [a, b, c, d, tx, ty] = self.matrix;
+        let [a, b, c, d, _, _] = self.matrix;
         let det = a * d - b * c;
         if rect.is_empty() || det == 0.0 {
             return MappedBounds::Empty;
         }
-        let (x, y) = (rect.x as f64, rect.y as f64);
-        let (right, bottom) = (x + rect.width as f64, y + rect.height as f64);
-        let points = [[x, y], [right, y], [x, bottom], [right, bottom]];
-        let mut min = [f64::INFINITY; 2];
-        let mut max = [f64::NEG_INFINITY; 2];
-        for p in points {
-            let x = a * p[0] + c * p[1] + tx;
-            let y = b * p[0] + d * p[1] + ty;
-            min[0] = min[0].min(x);
-            min[1] = min[1].min(y);
-            max[0] = max[0].max(x);
-            max[1] = max[1].max(y);
-        }
+        let [min, max] = self.extrema(rect);
         // Outward rounding covers exact affine corner positions after f32 conversion.
         let min = min.map(|v| (v as f32).next_down());
         let max = max.map(|v| (v as f32).next_up());
@@ -317,6 +305,40 @@ impl CoordinateSpace {
         } else {
             MappedBounds::Unbounded
         }
+    }
+    /// Continuous semantic AABB, preserving zero-width/height ranges and point
+    /// geometry. Corners and extents use f64 before checked nearest narrowing.
+    /// This is not outward-rounded damage coverage; use `mapped_bounds` there.
+    /// A singular finite forward mapping can still produce a semantic bound.
+    pub fn continuous_bounds(self, rect: Rect) -> Option<Rect> {
+        if !rect.is_valid() || self.uncertain || !self.matrix.into_iter().all(f64::is_finite) {
+            return None;
+        }
+        let [min, max] = self.extrema(rect);
+        let result = Rect::new(
+            min[0] as f32,
+            min[1] as f32,
+            (max[0] - min[0]) as f32,
+            (max[1] - min[1]) as f32,
+        );
+        result.is_valid().then_some(result)
+    }
+    fn extrema(self, rect: Rect) -> [[f64; 2]; 2] {
+        let [a, b, c, d, tx, ty] = self.matrix;
+        let (x, y) = (rect.x as f64, rect.y as f64);
+        let (right, bottom) = (x + rect.width as f64, y + rect.height as f64);
+        let points = [[x, y], [right, y], [x, bottom], [right, bottom]];
+        let mut min = [f64::INFINITY; 2];
+        let mut max = [f64::NEG_INFINITY; 2];
+        for p in points {
+            let x = a * p[0] + c * p[1] + tx;
+            let y = b * p[0] + d * p[1] + ty;
+            min[0] = min[0].min(x);
+            min[1] = min[1].min(y);
+            max[0] = max[0].max(x);
+            max[1] = max[1].max(y);
+        }
+        [min, max]
     }
     pub fn hit(self, rect: Rect, window_point: Point) -> bool {
         if !rect.is_valid() || rect.is_empty() {

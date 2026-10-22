@@ -10,6 +10,70 @@ fn geometry(x: f32, y: f32) -> Geometry {
         clip: None,
     }
 }
+
+#[test]
+fn continuous_bounds_preserve_zero_area_and_wide_corner_arithmetic() {
+    use gpui_reactivity_core::MappedBounds;
+    let identity = CoordinateSpace::new(Affine::IDENTITY);
+    for rect in [
+        Rect::new(3., 4., 0., 12.),
+        Rect::new(3., 4., 12., 0.),
+        Rect::new(3., 4., 0., 0.),
+    ] {
+        assert_eq!(identity.continuous_bounds(rect), Some(rect));
+        assert_eq!(identity.mapped_bounds(rect), MappedBounds::Empty);
+    }
+    let reflect_shear = CoordinateSpace::new(Affine {
+        a: -1.,
+        b: 0.5,
+        c: 2.,
+        d: -1.,
+        tx: 3.,
+        ty: 4.,
+    });
+    assert_eq!(
+        reflect_shear.continuous_bounds(Rect::new(2., 3., 0., 5.)),
+        Some(Rect::new(7., -3., 10., 5.))
+    );
+    // At 2^24, forming bottom as f32 loses the entire one-unit caret height.
+    // Compose and cancel in wide precision before narrowing the final AABB.
+    let large = CoordinateSpace::new(Affine {
+        a: 1.,
+        b: 0.,
+        c: 1.,
+        d: 1.,
+        tx: -33_554_432.,
+        ty: -16_777_216.,
+    });
+    assert_eq!(
+        large.continuous_bounds(Rect::new(16_777_216., 16_777_216., 0., 1.)),
+        Some(Rect::new(0., 0., 1., 1.))
+    );
+    let singular = CoordinateSpace::new(Affine::scale(0., 0.));
+    assert_eq!(
+        singular.continuous_bounds(Rect::new(1., 2., 0., 3.)),
+        Some(Rect::default())
+    );
+    assert_eq!(
+        singular.mapped_bounds(Rect::new(1., 2., 4., 3.)),
+        MappedBounds::Empty
+    );
+    for rect in [
+        Rect::new(f32::NAN, 0., 0., 1.),
+        Rect::new(0., 0., -1., 0.),
+        Rect::new(0., 0., 0., f32::INFINITY),
+    ] {
+        assert_eq!(identity.continuous_bounds(rect), None);
+        assert_eq!(identity.mapped_bounds(rect), MappedBounds::Unbounded);
+    }
+    let huge = CoordinateSpace::new(Affine::scale(f32::MAX, f32::MAX));
+    assert_eq!(
+        huge.continuous_bounds(Rect::new(f32::MAX, 0., 0., 1.)),
+        None
+    );
+    let wide = identity.translated(f64::MAX, 0.);
+    assert_eq!(wide.continuous_bounds(Rect::new(0., 0., 0., 1.)), None);
+}
 fn covered(damage: &Damage, p: Point) -> bool {
     damage.tiles().any(|tile| tile.contains(p))
 }
