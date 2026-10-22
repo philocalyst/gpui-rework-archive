@@ -69,3 +69,19 @@ The GPU consumer requires one fresh inferred (or future explicit) layout per
 context, never one shared across contexts/formats. State holds one clone until
 drop, potentially extending layout lifetime past context drop, with no clone per
 draw. Published archive/checksums remain unchanged; this is an authored delta.
+
+## Experimental offline shader admission
+
+The optional `shader-artifacts` feature adds a backend-neutral, sealed revision-two
+profile query for an exact live Device and an allocation-free Adapter feature
+request hint. Only Vulkan devices with enabled PASSTHROUGH_SHADERS and represented
+effective HAL code-generation policy admit this family. Other backends/devices
+return no profile; adapter support alone never certifies a Device. Borrowed HAL
+guards inspect immutable policy only, without resource access or construction.
+
+This query does not validate caller artifacts or authorize arbitrary unsafe
+shader bytes. The GPU crate separately generates, validates and reflects its
+private per-stage SPIR-V and interface together. Runtime failures propagate.
+There is no core fork, new device field, cache, driver operation, callback takeover
+or global state. Archive, license and upstream checksums above remain unchanged;
+these new authored API lines are charged separately from the published package.

@@ -1,5 +1,48 @@
 # Vulkan-first offline shader proof
 
+Implementation qualification, 2026-10-22: the opt-in Sol experiment is recorded in
+`../evidence/offline-shader/`. The original read-only report below remains pinned
+to its audited source. Its full-module and extension assumptions need these
+corrections before implementing passthrough:
+
+- WGPU 30.0.1 enables Vulkan SEPARATE_ENTRY_POINTS unconditionally. A full two-entry
+  artifact does not preserve this workaround. The experiment emits independent
+  vertex/fragment modules using PipelineOptions and the same selected-entry,
+  empty-constant `process_overrides` compaction as HAL. All four vertex artifacts
+  are byte-compared before deduplication; no workaround is disabled.
+- SPIR-V 1.0 storage buffers require the emitted
+  SPV_KHR_storage_buffer_storage_class extension. The generator permits exactly
+  this extension, and device admission requires its actually enabled Vulkan
+  extension when the effective target is below SPIR-V 1.3; newer target versions
+  imply the promoted Vulkan core support. The earlier no-extension statement is
+  incorrect. Lower-version output and matched guards are not byte equivalence.
+- Four generated buffer/image profiles are selected from actual live HAL Naga
+  options. Local indices, loops and integer division remain checked. Pipeline
+  constants are empty, workgroup initialization is enabled, there are no workgroup
+  variables, varyings, binding arrays, ray/mesh/task operations or overrides, and
+  the generated BGL uses exact ascending bindings. These fixed pipeline facts
+  make HAL's other temporary options inert; their future changes require review.
+- Static private u32 arrays and the generated BGL share one build proof and
+  revision. Runtime admission performs no immutable hash scan or word conversion.
+  The feature is off by default; other devices retain owned checked WGSL. Invalid
+  build proofs fail the build. Runtime shader/pipeline/device errors propagate,
+  including the checked get-bind-group-layout certificate on a destroyed device.
+- The unsafe exception is confined to one private GPU call site, invoked once
+  per stage, plus two vendor-local immutable HAL borrows. Default GPU builds keep
+  forbid(unsafe_code). No untrusted shader bytes or caller-selected policy enter.
+- Raw per-stage modules retain **two native VkShaderModule objects** through core
+  pipeline leases. Checked WGSL retains an Intermediate owner and frees its two
+  temporary native modules after compilation. Both routes still compile a driver
+  pipeline; request_device work remains. Rust allocation results do not establish
+  GPU-memory savings. Hardware GPU-time and macOS/Windows runtime gates remain
+  outstanding, so this experiment is neither default-enabled nor a hardware
+  performance recommendation.
+
+The host generator, optional dependencies, artifact bytes, vendor/core authored
+lines, constructor scopes, fallback overhead and raw-module lifetime are charged
+in that evidence. No source reduction is claimed from moving work into a build
+script or vendor.
+
 Read-only research, 2026-10-22. Audited repository snapshot: 8ea8b9d76abb76717bd84fc28a5d471ce69f5ed3. No production files were changed and no build, test, timing, or GPU run was performed.
 
 Implementation disposition: keep all platform-specific artifact admission and

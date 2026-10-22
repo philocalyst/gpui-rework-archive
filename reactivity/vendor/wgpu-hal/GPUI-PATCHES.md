@@ -29,3 +29,15 @@ unconfigured surface proof; Metal and Wayland keep late target creation. Wayland
 needs a qualified unmap/reconfigure lifecycle before a worker may retain its
 window through an uninterruptible driver call. The paired WGPU boundary and
 remaining platform limits are documented in `../wgpu/GPUI-PATCHES.md`.
+
+The authored Vulkan `Device::shader_artifact_checks` query reads the exact live
+device's Naga options and actual enabled storage-class extension where needed.
+It admits only represented buffer/image Restrict-or-Unchecked policies with
+local index Restrict, loop/integer-division guards, no coordinate adjustment,
+and the fixed revision-two contract. Separate-entry-point workarounds remain
+enabled: the consumer generates one independently validated module per stage.
+It does not change native shader ownership, submission, resource lifetime or
+code-generation options. Raw modules therefore retain their VkShaderModule
+payload through core pipeline leases; checked Intermediate modules instead
+destroy their temporary native modules after pipeline compilation. This is an
+explicit artifact-route lifetime cost, not a GPU-memory reduction claim.
