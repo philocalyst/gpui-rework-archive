@@ -7,7 +7,7 @@ fn scoped_geometry_allocation_and_payload_ledger() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let font = FontFace::bundled().unwrap();
     println!(
-        "GEOMETRY_HEADERS layout={} details={} stop={} run={} line={} system={} caret_owner={} stop_view={} common_stop={} builder={}",
+        "GEOMETRY_HEADERS layout={} details={} stop={} run={} line={} system={} caret_owner={} stop_view={} common_stop={} builder={} builder_option={}",
         size_of::<TextLayout>(),
         size_of::<Details>(),
         size_of::<layout::Stop>(),
@@ -17,7 +17,8 @@ fn scoped_geometry_allocation_and_payload_ledger() {
         size_of::<Option<Carets>>(),
         size_of::<Stops<'_>>(),
         size_of::<CommonStop>(),
-        size_of::<CaretBuilder>()
+        size_of::<CaretBuilder>(),
+        size_of::<Option<CaretBuilder>>()
     );
     for (name, value, width) in [
         ("empty", String::new(), None),
