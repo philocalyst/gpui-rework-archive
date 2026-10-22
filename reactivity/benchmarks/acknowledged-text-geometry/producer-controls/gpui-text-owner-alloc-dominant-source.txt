@@ -1,0 +1,16 @@
+<parley::layout::line_break::BreakerState as core::clone::Clone>::clone
+/root/gpui-acknowledged-text-geometry/reactivity/vendor/parley/src/layout/line_break.rs:623
+<parley::layout::line_break::BreakerState as core::clone::Clone>::clone_from
+/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/core/src/clone.rs:249
+<parley::layout::line_break::BreakLines<()>>::break_next
+/root/gpui-acknowledged-text-geometry/reactivity/vendor/parley/src/layout/line_break.rs:1039
+<parley::layout::line_break::BreakLines<()>>::break_remaining
+/root/gpui-acknowledged-text-geometry/reactivity/vendor/parley/src/layout/line_break.rs:1435
+<parley::layout::layout::Layout<()>>::break_all_lines
+/root/gpui-acknowledged-text-geometry/reactivity/vendor/parley/src/layout/layout.rs:212
+<gpui_canvas::text::planner::Planner>::shape_inner
+/root/gpui-acknowledged-text-geometry/reactivity/crates/canvas/src/text/planner.rs:194
+<gpui::runtime::TextSite>::shape_for
+/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui/src/runtime.rs:623
+<gpui::runtime::Runtime<gpui::runtime::text_geometry::tests::Page>>::present_inner::{closure#9}
+/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui/src/runtime.rs:2570

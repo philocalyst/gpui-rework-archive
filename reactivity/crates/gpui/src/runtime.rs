@@ -2571,7 +2571,10 @@ impl<M: View + 'static> Runtime<M> {
                 service,
                 styles.get(index).font_size,
                 width,
-                true,
+                // Intrinsic probes cannot publish geometry. Final finite
+                // placement upgrades the cache before retaining C/P maps.
+                input.known_dimensions.width.is_some()
+                    || matches!(input.available_space.width, AvailableSpace::Definite(_)),
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
