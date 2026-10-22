@@ -232,9 +232,12 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         Some(result)
     }
 
+    fn entry(&self, byte: usize) -> Option<&Entry> {
+        self.entries.get(*self.bytes.get(byte)? as usize)
+    }
+
     fn cluster(&self, byte: usize) -> Option<Cluster<'a, B>> {
-        let index = *self.bytes.get(byte)? as usize;
-        self.entries.get(index)?.path.cluster(self.layout)
+        self.entry(byte)?.path.cluster(self.layout)
     }
 
     /// The same snapping and endpoint/affinity policy as Cursor::from_byte_index.
@@ -251,7 +254,14 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         if let Some(bounds) = self.shared_edge(byte, width) {
             return Some([bounds; 2]);
         }
-        self.boundary_geometries(byte, width)
+        pair_from_entries(
+            self.layout,
+            byte,
+            width,
+            byte.checked_sub(1)
+                .and_then(|previous| self.entry(previous)),
+            self.entry(byte),
+        )
     }
 
     fn shared_edge(&self, byte: usize, width: f32) -> Option<BoundingBox> {
@@ -281,38 +291,6 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                 if rtl { previous.offset } else { next.offset },
             )
         })
-    }
-
-    // Keep large source-cluster reconstruction outside the cached-edge frame.
-    #[inline(never)]
-    fn boundary_geometries(&self, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
-        let next = self.cluster(byte);
-        let upstream = Cursor::from_source_cluster(self.layout, Affinity::Upstream, next.as_ref());
-        if upstream.index() != byte {
-            return None;
-        }
-        let previous = byte.checked_sub(1).and_then(|b| self.cluster(b));
-        let clusters = [previous.as_ref(), next.as_ref()];
-        // A present byte-zero cluster forces both cursors downstream. A
-        // missing next cluster forces both to the upstream text endpoint.
-        let same_edge = byte == 0 || next.is_none();
-        let geometry = |cursor: Cursor| {
-            cursor.geometry_with(self.layout, width, clusters, |cluster| {
-                let index = self.bytes[cluster.text_range().start] as usize;
-                self.entries[index].offset
-            })
-        };
-        let first = geometry(upstream);
-        Some([
-            first,
-            if same_edge {
-                first
-            } else {
-                let downstream =
-                    Cursor::from_source_cluster(self.layout, Affinity::Downstream, next.as_ref());
-                geometry(downstream)
-            },
-        ])
     }
 
     /// The existing Cursor geometry policy, using cached source/prefix lookups.
@@ -349,10 +327,10 @@ fn direct_pair<B: Brush>(layout: &Layout<B>, byte: usize, width: f32) -> Option<
     ])
 }
 
-// The monotonic byte owners already carry their exact visual prefixes. Keep
-// large Cluster reconstruction cold, and share the ordinary cursor policy.
+// Indexed and monotonic byte owners carry the same exact visual prefixes.
+// Keep reconstruction cold and apply one shared cursor endpoint/affinity policy.
 #[inline(never)]
-fn cached_pair<B: Brush>(
+fn pair_from_entries<B: Brush>(
     layout: &Layout<B>,
     byte: usize,
     width: f32,
@@ -499,7 +477,7 @@ fn visit_source_pairs<B: Brush, E>(
                             );
                             Some([bounds; 2])
                         } else {
-                            cached_pair(
+                            pair_from_entries(
                                 layout,
                                 byte,
                                 width,
@@ -514,7 +492,7 @@ fn visit_source_pairs<B: Brush, E>(
                         // byte to its start, so this request would snap away.
                         None
                     } else {
-                        cached_pair(
+                        pair_from_entries(
                             layout,
                             byte,
                             width,
@@ -542,7 +520,7 @@ fn visit_source_pairs<B: Brush, E>(
         last_request = Some(byte);
         visit(
             byte,
-            cached_pair(
+            pair_from_entries(
                 layout,
                 byte,
                 width,
