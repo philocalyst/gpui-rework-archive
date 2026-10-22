@@ -409,7 +409,7 @@ fn retained_style_owner_memory() {
 }
 
 #[test]
-fn inspector_dense_lane_is_reclaimed_after_inherit_and_redescription() {
+fn inspector_shared_lane_is_reclaimed_after_inherit_and_redescription() {
     let mut win = open(
         Adversary {
             count: 128,
@@ -431,7 +431,7 @@ fn inspector_dense_lane_is_reclaimed_after_inherit_and_redescription() {
     .unwrap();
     assert!(matches!(
         win.runtime().unwrap().styles,
-        styles::Styles::Dense(_)
+        styles::Styles::Shared { .. }
     ));
     win.set_property(panel, crate::property::BACKGROUND, Contribution::Inherit)
         .unwrap();
