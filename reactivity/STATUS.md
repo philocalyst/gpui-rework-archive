@@ -62,6 +62,15 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [Vulkan stage ownership repair](evidence/vulkan-stage-ownership/README.md)
+qualifies isolated source `52701c8cc7`: 44 real Vulkan pixel cases, eight GPU
+units, four presentation cases, scoped lifetime/error/unwind regression, strict
+all-target checks and Apple/Windows GPU compilation pass. Stage-local modules
+now clean up on every construction exit; reusable Raw modules keep their owner.
+The modified vendor file loses 36 non-test code lines and the local stage type
+shrinks 80→72 bytes. Six first-party libraries remain byte-identical to the
+preceding source. This is no new startup/RSS or hardware measurement.
+
 The later [blank Auto refinement](evidence/auto-blank-cold/README.md) pins
 source `8158386886`: certified command-free opaque SDR fills never attempt GPU
 initialization, including blank resize/resume; first complex CPU pixels precede

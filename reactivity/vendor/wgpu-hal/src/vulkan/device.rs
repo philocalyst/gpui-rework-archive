@@ -249,10 +249,20 @@ impl super::DeviceShared {
     }
 }
 
-struct CompiledStage {
+struct CompiledStage<'a> {
     create_info: vk::PipelineShaderStageCreateInfo<'static>,
     _entry_point: CString,
-    temp_raw_module: Option<vk::ShaderModule>,
+    temporary_owner: Option<&'a ash::Device>,
+}
+
+impl Drop for CompiledStage<'_> {
+    fn drop(&mut self) {
+        if let Some(device) = self.temporary_owner {
+            // create_info already names the uniquely owned stage-local module.
+            // Borrow its device until success/error/unwind cleanup completes.
+            unsafe { device.destroy_shader_module(self.create_info.module, None) };
+        }
+    }
 }
 
 struct MemoryProperties {
@@ -701,8 +711,9 @@ impl super::Device {
         stage: &crate::ProgrammableStage<super::ShaderModule>,
         naga_stage: naga::ShaderStage,
         binding_map: &naga::back::spv::BindingMap,
-    ) -> Result<CompiledStage, crate::PipelineError> {
+    ) -> Result<CompiledStage<'_>, crate::PipelineError> {
         let stage_flags = crate::auxil::map_naga_stage(naga_stage);
+        let entry_point = CString::new(stage.entry_point).unwrap();
         let vk_module = match *stage.module {
             super::ShaderModule::Raw(raw) => raw,
             super::ShaderModule::Intermediate {
@@ -791,7 +802,6 @@ impl super::Device {
             flags |= vk::PipelineShaderStageCreateFlags::ALLOW_VARYING_SUBGROUP_SIZE
         }
 
-        let entry_point = CString::new(stage.entry_point).unwrap();
         let mut create_info = vk::PipelineShaderStageCreateInfo::default()
             .flags(flags)
             .stage(conv::map_shader_stage(stage_flags))
@@ -803,9 +813,9 @@ impl super::Device {
         Ok(CompiledStage {
             create_info,
             _entry_point: entry_point,
-            temp_raw_module: match *stage.module {
+            temporary_owner: match *stage.module {
                 super::ShaderModule::Raw(_) => None,
-                super::ShaderModule::Intermediate { .. } => Some(vk_module),
+                super::ShaderModule::Intermediate { .. } => Some(&self.shared.raw),
             },
         })
     }
@@ -1984,42 +1994,42 @@ impl crate::Device for super::Device {
             .topology(conv::map_topology(desc.primitive.topology))
             .primitive_restart_enable(desc.primitive.strip_index_format.is_some());
 
-        let mut compiled_vs = None;
-        let mut compiled_ms = None;
-        let mut compiled_ts = None;
-        match &desc.vertex_processor {
+        let _vertex_stages = match &desc.vertex_processor {
             crate::VertexProcessor::Standard {
                 vertex_buffers: _,
                 vertex_stage,
             } => {
-                compiled_vs = Some(self.compile_stage(
+                let vertex = self.compile_stage(
                     vertex_stage,
                     naga::ShaderStage::Vertex,
                     &desc.layout.binding_map,
-                )?);
-                stages.push(compiled_vs.as_ref().unwrap().create_info);
+                )?;
+                stages.push(vertex.create_info);
+                (None, vertex)
             }
             crate::VertexProcessor::Mesh {
                 task_stage,
                 mesh_stage,
             } => {
-                if let Some(t) = task_stage.as_ref() {
-                    compiled_ts = Some(self.compile_stage(
-                        t,
-                        naga::ShaderStage::Task,
-                        &desc.layout.binding_map,
-                    )?);
-                    stages.push(compiled_ts.as_ref().unwrap().create_info);
+                let task = task_stage
+                    .as_ref()
+                    .map(|stage| {
+                        self.compile_stage(stage, naga::ShaderStage::Task, &desc.layout.binding_map)
+                    })
+                    .transpose()?;
+                if let Some(task) = &task {
+                    stages.push(task.create_info);
                 }
-                compiled_ms = Some(self.compile_stage(
+                let mesh = self.compile_stage(
                     mesh_stage,
                     naga::ShaderStage::Mesh,
                     &desc.layout.binding_map,
-                )?);
-                stages.push(compiled_ms.as_ref().unwrap().create_info);
+                )?;
+                stages.push(mesh.create_info);
+                (task, mesh)
             }
-        }
-        let compiled_fs = match desc.fragment_stage {
+        };
+        let _compiled_fs = match desc.fragment_stage {
             Some(ref stage) => {
                 let compiled = self.compile_stage(
                     stage,
@@ -2181,35 +2191,6 @@ impl crate::Device for super::Device {
             unsafe { self.shared.set_object_name(raw, label) };
         }
 
-        if let Some(CompiledStage {
-            temp_raw_module: Some(raw_module),
-            ..
-        }) = compiled_vs
-        {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
-        if let Some(CompiledStage {
-            temp_raw_module: Some(raw_module),
-            ..
-        }) = compiled_ts
-        {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
-        if let Some(CompiledStage {
-            temp_raw_module: Some(raw_module),
-            ..
-        }) = compiled_ms
-        {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
-        if let Some(CompiledStage {
-            temp_raw_module: Some(raw_module),
-            ..
-        }) = compiled_fs
-        {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
-
         self.counters.render_pipelines.add(1);
 
         Ok(super::RenderPipeline {
@@ -2262,10 +2243,6 @@ impl crate::Device for super::Device {
         let raw = raw_vec.pop().unwrap();
         if let Some(label) = desc.label {
             unsafe { self.shared.set_object_name(raw, label) };
-        }
-
-        if let Some(raw_module) = compiled.temp_raw_module {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
         }
 
         self.counters.compute_pipelines.add(1);
@@ -2396,21 +2373,6 @@ impl crate::Device for super::Device {
             )
             .map_err(|(_, e)| super::map_pipeline_err(e))
         }?;
-
-        if let Some(raw_module) = compiled_ray_gen.temp_raw_module {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
-
-        if let Some(raw_module) = compiled_miss.temp_raw_module {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
-
-        for raw_module in compiled_stages
-            .into_iter()
-            .flat_map(|stage| stage.temp_raw_module)
-        {
-            unsafe { self.shared.raw.destroy_shader_module(raw_module, None) };
-        }
 
         self.counters.ray_tracing_pipelines.add(1);
 
@@ -3113,4 +3075,88 @@ impl super::DeviceShared {
 struct ImageWithoutMemory {
     raw: vk::Image,
     requirements: vk::MemoryRequirements,
+}
+
+#[cfg(test)]
+mod stage_ownership_tests {
+    use super::*;
+    use core::sync::atomic::{AtomicU64, Ordering};
+    use vk::Handle;
+
+    static DESTROYED: AtomicU64 = AtomicU64::new(0);
+
+    // A Vulkan dispatch boundary fixture, not a real driver or allocation probe.
+    unsafe extern "system" fn destroy_module(
+        _: vk::Device,
+        module: vk::ShaderModule,
+        _: *const vk::AllocationCallbacks<'_>,
+    ) {
+        DESTROYED.fetch_add(module.as_raw(), Ordering::SeqCst);
+    }
+
+    fn stage(device: &ash::Device, raw: u64, temporary: bool) -> CompiledStage<'_> {
+        CompiledStage {
+            create_info: vk::PipelineShaderStageCreateInfo::default()
+                .module(vk::ShaderModule::from_raw(raw)),
+            _entry_point: CString::new("main").unwrap(),
+            temporary_owner: temporary.then_some(device),
+        }
+    }
+
+    #[test]
+    fn stage_temporaries_retire_on_success_error_and_unwind_without_owning_raw_modules() {
+        struct PreviousStage {
+            _info: vk::PipelineShaderStageCreateInfo<'static>,
+            _entry: CString,
+            _module: Option<vk::ShaderModule>,
+        }
+        assert!(mem::size_of::<CompiledStage<'_>>() <= mem::size_of::<PreviousStage>());
+        std::println!(
+            "compiled_stage_bytes: previous={} borrowed_owner={}",
+            mem::size_of::<PreviousStage>(),
+            mem::size_of::<CompiledStage<'_>>()
+        );
+        // Only the exact destroy function can be called on this fake device;
+        // ash installs panic stubs for the intentionally absent functions.
+        let device = unsafe {
+            ash::Device::load_with(
+                |name| {
+                    if name == c"vkDestroyShaderModule" {
+                        destroy_module as *const () as *const core::ffi::c_void
+                    } else {
+                        ptr::null()
+                    }
+                },
+                vk::Device::from_raw(1),
+            )
+        };
+        for failed_stage in [0, 1, 2] {
+            DESTROYED.store(0, Ordering::SeqCst);
+            let result = (|| {
+                let _vertex = stage(&device, 1, true);
+                if failed_stage == 1 {
+                    return Err(());
+                }
+                let _fragment = stage(&device, 2, true);
+                if failed_stage == 2 {
+                    return Err(());
+                }
+                Ok(())
+            })();
+            assert_eq!(result.is_err(), failed_stage != 0);
+            assert_eq!(
+                DESTROYED.load(Ordering::SeqCst),
+                if failed_stage == 1 { 1 } else { 3 }
+            );
+        }
+        DESTROYED.store(0, Ordering::SeqCst);
+        let result = std::panic::catch_unwind(|| {
+            let _stage = stage(&device, 4, true);
+            panic!("injected pipeline construction unwind");
+        });
+        assert!(result.is_err());
+        assert_eq!(DESTROYED.load(Ordering::SeqCst), 4);
+        drop(stage(&device, 8, false));
+        assert_eq!(DESTROYED.load(Ordering::SeqCst), 4);
+    }
 }

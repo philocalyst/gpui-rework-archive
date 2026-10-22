@@ -29,3 +29,16 @@ unconfigured surface proof; Metal and Wayland keep late target creation. Wayland
 needs a qualified unmap/reconfigure lifecycle before a worker may retain its
 window through an uninterruptible driver call. The paired WGPU boundary and
 remaining platform limits are documented in `../wgpu/GPUI-PATCHES.md`.
+
+Vulkan stage-local shader modules now have scoped ownership. Previously render,
+compute and ray-tracing pipeline construction destroyed these modules only
+after successful driver creation; an earlier stage or driver error skipped the
+cleanup. `CompiledStage` now owns cleanup through an optional device borrow;
+its existing creation descriptor already stores the module handle. Reusable
+`Raw` shader modules retain their original owner and lifetime.
+Entry-point CString validation precedes native module creation. No renderer,
+window or device ownership field or reference count is added. The dispatch
+boundary regression covers success, early returns and unwind; it is a fake
+device lifetime test, separate from actual Vulkan rendering conformance.
+The [Vulkan lifetime rule](https://docs.vulkan.org/refpages/latest/refpages/source/vkDestroyShaderModule.html)
+permits destroying shader modules while their created pipelines remain in use.
