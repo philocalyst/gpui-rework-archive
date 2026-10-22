@@ -1,0 +1,19 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-paint-literal-cow/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.33s
+     Running tests/literal_cow.rs (/tmp/gpui-paint-literal-cow-target/debug/deps/literal_cow-27f64f61206c52b5)
+
+running 2 tests
+test dropped_and_rejected_transactions_preserve_all_aliases_and_future_source_updates ... ok
+test equal_and_changed_positional_writes_detach_locally_without_mutating_literal_peers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

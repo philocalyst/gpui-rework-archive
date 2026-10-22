@@ -1,0 +1,87 @@
+   Compiling ttf-parser v0.25.1
+   Compiling skrifa v0.44.0
+   Compiling memmap2 v0.9.11
+   Compiling parlance v0.1.1
+   Compiling cfg-if v1.0.5
+   Compiling slab v0.4.12
+   Compiling linebender_resource_handle v0.1.1
+   Compiling fontique v0.11.1
+   Compiling polling v3.11.0
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_segmenter v2.3.0
+   Compiling async-io v2.6.0
+   Compiling parley_data v0.11.1
+   Compiling syn v3.0.9
+   Compiling enumflags2 v0.7.12
+   Compiling harfrust v0.12.0
+   Compiling zcheapstr v1.1.0
+   Compiling errno v0.3.14
+   Compiling winnow v1.0.4
+   Compiling zeno v0.3.3
+   Compiling zmij v1.0.23
+   Compiling yazi v0.2.1
+   Compiling cephal v0.1.1 (/root/gpui-paint-literal-cow/reactivity/vendor/cephal)
+   Compiling async-task v4.7.1
+   Compiling endi v1.1.1
+   Compiling zvariant v5.15.1
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-paint-literal-cow/reactivity/crates/core)
+   Compiling swash v0.2.10
+   Compiling zvariant_utils v4.2.0
+   Compiling signal-hook-registry v1.4.8
+   Compiling parley v0.11.1 (/root/gpui-paint-literal-cow/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling async-channel v2.5.0
+   Compiling uuid v1.28.0
+   Compiling atomic-waker v1.1.2
+   Compiling serde_json v1.0.154
+   Compiling piper v0.2.5
+   Compiling async-signal v0.2.14
+   Compiling gpui_canvas v0.1.0 (/root/gpui-paint-literal-cow/reactivity/crates/canvas)
+   Compiling zbus_names v4.3.5
+   Compiling async-lock v3.4.2
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing-core v0.1.36
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling tracing v0.1.44
+   Compiling async-process v2.5.0
+   Compiling zbus_macros v5.19.0
+   Compiling blocking v1.7.0
+   Compiling accesskit v0.25.1
+   Compiling async-executor v1.14.0
+   Compiling async-broadcast v0.7.2
+   Compiling gethostname v1.1.0
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-paint-literal-cow/reactivity/crates/state)
+   Compiling ordered-stream v0.2.0
+   Compiling async-recursion v1.2.0
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling arcstr v1.2.0
+   Compiling foldhash v0.1.5
+   Compiling hex v0.4.3
+   Compiling equivalent v1.0.3
+   Compiling allocation-counter v0.8.1
+   Compiling allocator-api2 v0.2.21
+   Compiling x11rb-protocol v0.13.2
+   Compiling hashbrown v0.15.5
+   Compiling zbus v5.19.0
+   Compiling x11rb v0.13.2
+   Compiling gpui v0.1.0 (/root/gpui-paint-literal-cow/reactivity/crates/gpui)
+   Compiling accesskit_consumer v0.39.1
+   Compiling unicode-ccc v0.4.0
+   Compiling triomphe v0.1.16
+   Compiling log v0.4.34
+   Compiling unicode-script v0.5.8
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling unicode-properties v0.1.4
+   Compiling rustybuzz v0.20.1
+   Compiling fontdue v0.9.4
+    Finished `release` profile [optimized] target(s) in 1m 25s

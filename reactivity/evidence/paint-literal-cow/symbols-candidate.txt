@@ -1,0 +1,7 @@
+0000000000020dd0 0000000000000046 t core::ptr::drop_glue::<gpui_canvas::canvas::columns::Columns>
+0000000000025920 000000000000022e t <gpui_canvas::canvas::columns::Columns>::find_scope
+0000000000025b50 0000000000000125 t <gpui_canvas::canvas::columns::Columns>::find_literal
+0000000000025c80 0000000000000258 t <gpui_canvas::canvas::columns::Columns>::admit
+0000000000025ee0 00000000000001bb t <gpui_canvas::canvas::columns::Columns>::store
+00000000000260a0 000000000000014b t <gpui_canvas::canvas::columns::Columns>::support
+0000000000021f40 000000000000035b t <gpui_canvas::canvas::Canvas>::fill_shape

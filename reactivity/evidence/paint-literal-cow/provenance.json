@@ -1,0 +1,160 @@
+{
+  "base": "570b4d9274fbe8a71a0d176f20802c576fc9f0a6",
+  "production_commit": "2f70493566",
+  "candidate_fixture_pin": "1e5d2b147f",
+  "control_fixture_pin": "4681430fef",
+  "source_sha256": {
+    "reactivity/crates/canvas/src/canvas/columns.rs": "1c8eed2e540a4b04b500c799783c98b49ec491767ed761f5fb2fb0908e087c97",
+    "reactivity/crates/canvas/src/canvas/paint.rs": "8eb44318622fd3e418e5a5a9a9488174640e3a03ab0827db686d8820f3277742",
+    "reactivity/crates/canvas/tests/literal_cow.rs": "1393f5a7c80b336df93bf9f47959c35828c2a7fa04612e1a817192c6ceb52799",
+    "reactivity/crates/gpu/tests/render.rs": "fd6930e1a543af226cd3c3493fa191fd6eec734b4fa43ffd13409329e672d7bd"
+  },
+  "artifacts": [
+    {
+      "variant": "candidate",
+      "name": "canvas_literal_cow_storage",
+      "path": "/tmp/gpui-paint-literal-cow-target/release/examples/canvas_literal_cow_storage",
+      "sha256": "530313a1a7d6f41a0d8c924f05c50a64f4ab0ec7975159af13d9fdca9f7cc466",
+      "fixture_sha256": "d36f8e6f713d9afde7c603ba4c7b10bee2fb84c6ab61dbffcaa57a6d131683f0"
+    },
+    {
+      "variant": "candidate",
+      "name": "literal_cow_storage",
+      "path": "/tmp/gpui-paint-literal-cow-target/release/examples/literal_cow_storage",
+      "sha256": "123333b32e8eac7c92f7768af3ddfc6d446bc52a644ad9b5995ecf143d2864ba",
+      "fixture_sha256": "bd38d9dede211f4da9a01c5704f970320b3e631289de8b2a895bf5919b73bc04"
+    },
+    {
+      "variant": "candidate",
+      "name": "paint_slot_codegen",
+      "path": "/tmp/gpui-paint-literal-cow-target/release/examples/paint_slot_codegen",
+      "sha256": "3a8d8f34aff1f4ce6a30e89787442ccdfa256eb7e91d3de0bc5352212d127b3d",
+      "fixture_sha256": "a10121472c005032d56795be0a33d8e1f9468f622aea8de7795e0ad0b05063e8"
+    },
+    {
+      "variant": "control",
+      "name": "canvas_literal_cow_storage",
+      "path": "/tmp/gpui-paint-literal-cow-control-target/release/examples/canvas_literal_cow_storage",
+      "sha256": "ecd4d91396d3df9b99dfebd4ae3988db3fb6502bd44dbfe16fc3af7a25cc141a",
+      "fixture_sha256": "d36f8e6f713d9afde7c603ba4c7b10bee2fb84c6ab61dbffcaa57a6d131683f0"
+    },
+    {
+      "variant": "control",
+      "name": "literal_cow_storage",
+      "path": "/tmp/gpui-paint-literal-cow-control-target/release/examples/literal_cow_storage",
+      "sha256": "eb0fa8c6d496923119513c201e027691063cfb919033c5b7d052a4a15890e256",
+      "fixture_sha256": "bd38d9dede211f4da9a01c5704f970320b3e631289de8b2a895bf5919b73bc04"
+    },
+    {
+      "variant": "control",
+      "name": "paint_slot_codegen",
+      "path": "/tmp/gpui-paint-literal-cow-control-target/release/examples/paint_slot_codegen",
+      "sha256": "b58df46faf61cee21dc86177f025a445aabea19fb021317128052ac9116caad7",
+      "fixture_sha256": "a10121472c005032d56795be0a33d8e1f9468f622aea8de7795e0ad0b05063e8"
+    }
+  ],
+  "jobs": 2,
+  "profile": "default release for untimed allocation/codegen controls; Canvas parallel and GPU vulkan-tests for correctness",
+  "no_timing_capture": true,
+  "headers_added": 0,
+  "local_unsafe_added": false,
+  "dependencies_added": 0,
+  "notes": [
+    "Two ownership bits occupy existing PaintSupport spare coordinate bits; they are excluded from public geometry and GPU flags.",
+    "All original pre-bank unique-space loss controls remain unchanged.",
+    "Initial public damage expectation omitted existing outward rounding; corrected test, unchanged production.",
+    "Initial GPU test omitted required opaque SDR clear; corrected fixture, unchanged production.",
+    "An early release build was canceled before artifact use to give the two package examples distinct names; only final release artifacts are reported.",
+    "Candidate and control use dedicated targets; frozen earlier handoff targets remain untouched."
+  ],
+  "commands": {
+    "canvas-preliminary.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_canvas --features parallel --lib --tests -- --nocapture --test-threads=1",
+    "columns-final.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_canvas --features parallel --lib canvas::columns::tests -- --nocapture --test-threads=1",
+    "public-final.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_canvas --features parallel --test literal_cow -- --nocapture --test-threads=1",
+    "vulkan-final.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui_gpu --features vulkan-tests --test render -- --test-threads=1",
+    "clippy.txt": "cargo clippy --manifest-path reactivity/Cargo.toml -p gpui_canvas -p gpui_gpu --features gpui_canvas/parallel,gpui_gpu/vulkan-tests --all-targets -- -D warnings",
+    "release": "cargo build --manifest-path reactivity/Cargo.toml --release -p gpui_canvas -p gpui --example canvas_literal_cow_storage --example literal_cow_storage --example paint_slot_codegen"
+  },
+  "row_counts": {
+    "owner_each": 48,
+    "canvas_each": 45
+  },
+  "gates": {
+    "canvas-preliminary.txt": {
+      "passed": 150,
+      "ignored": 4,
+      "exit_code": 0,
+      "scope": "Before the later pure writable_literal predicate extraction and additional empty-bank test; final columns/public/Vulkan checks cover final source. No native or GPUI full suite is claimed for this COW source."
+    },
+    "vulkan-final.txt": {
+      "passed": 40,
+      "ignored": 0,
+      "exit_code": 0
+    },
+    "clippy.txt": {
+      "passed": 0,
+      "ignored": 0,
+      "exit_code": 0
+    },
+    "columns-final.txt": {
+      "passed": 9,
+      "ignored": 0,
+      "filtered": 35,
+      "exit_code": 0
+    },
+    "public-final.txt": {
+      "passed": 2,
+      "ignored": 0,
+      "filtered": 0,
+      "exit_code": 0
+    }
+  },
+  "controls": {
+    "owner": {
+      "rows_each": 48,
+      "identical_rows": 44
+    },
+    "canvas": {
+      "rows_each": 45,
+      "identical_rows": 39
+    }
+  },
+  "code_size": {
+    "canvas": {
+      "control": {
+        "text": 409816,
+        "data": 14424,
+        "bss": 6867
+      },
+      "candidate": {
+        "text": 409872,
+        "data": 14448,
+        "bss": 6779
+      }
+    },
+    "owner": {
+      "control": {
+        "text": 7965713,
+        "data": 153832,
+        "bss": 4051
+      },
+      "candidate": {
+        "text": 7964753,
+        "data": 153856,
+        "bss": 4987
+      }
+    },
+    "property": {
+      "control": {
+        "text": 7971550,
+        "data": 154888,
+        "bss": 2211
+      },
+      "candidate": {
+        "text": 7970590,
+        "data": 154912,
+        "bss": 3147
+      }
+    }
+  }
+}

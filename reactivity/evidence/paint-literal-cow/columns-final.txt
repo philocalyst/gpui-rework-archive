@@ -1,0 +1,32 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-paint-literal-cow/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.60s
+     Running unittests src/lib.rs (/tmp/gpui-paint-literal-cow-target/debug/deps/gpui_canvas-807740d032b08a19)
+
+running 9 tests
+test canvas::columns::tests::alternating_late_scopes_disclose_bounded_discovery_fallback_growth ... scope_late_alternating,rows=162,capacity=256,allocations=2,requested=18432
+ok
+test canvas::columns::tests::complete_bank_layout_and_plain_recording_floor_are_explicit ... scope_bank_layout,Canvas=488,DisplayList=288,Columns=48,Inline=56,CommonGroup=32,Scope=48,Paint=24,Stored=24,Frame=88,Prepared=56,PreparedGroup=104,Slot=4,OptionSlot=4,Edit=20
+scope_plain_recording,allocations=2,requested=240,peak=240
+ok
+test canvas::columns::tests::empty_and_clipped_calls_do_not_admit_literals_when_the_bank_is_full ... ok
+test canvas::columns::tests::literal_palette_shares_exact_bits_without_aliasing_mutable_sources ... ok
+test canvas::columns::tests::palette_flags_survive_support_union_without_leaking_into_geometry ... ok
+test canvas::columns::tests::positional_writes_detach_once_and_never_rejoin_literal_discovery ... ok
+test canvas::columns::tests::repeated_last_scope_after_discovery_prefix_needs_no_more_rows_or_allocations ... ok
+test canvas::columns::tests::repeated_unique_and_late_miss_palette_storage_is_explicit ... literal_palette,mode=0,rows=1,capacity=4,allocations=1,requested=96,live=96
+literal_palette,mode=1,rows=4096,capacity=4096,allocations=11,requested=196512,live=98304
+literal_palette,mode=2,rows=4096,capacity=4096,allocations=11,requested=196512,live=98304
+ok
+test canvas::columns::tests::support_flags_never_enter_empty_or_maximum_canvas_geometry ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 35 filtered out; finished in 0.13s
+
