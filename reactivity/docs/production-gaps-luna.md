@@ -21,6 +21,23 @@ fixed-L/h unit-cube chroma boundary, explicitly distinct from CSS local-MINDE.
 Neither slice supplies a complete inherited theme, arbitrary inspector text entry,
 palette interpolation or contrast API merely by exposing its first primitive.
 
+## Disposition after acknowledged text and typed catalog integration
+
+At `007f10ccbd` and its combined campaign, source-qualified native text selection,
+atomic replacement, wrapped/bidi TextRuns, caret/character geometry and late
+provider activation are implemented and exercised through actual Linux AT-SPI.
+Ordinary profiles include accessibility, including `native`; the historical
+negative capability/profile assertions below do not describe current behavior.
+The typed catalog now exposes all 13 properties/eight value families through
+ordinary validated transactions and native inspector controls. Arbitrary value
+entry, contained tooling owners, custom component schemas and theme cascade
+remain. Designer gamut fitting is integrated; palette/mix/contrast still remain.
+The [next control audit](accessibility-checkbox-luna.md) selects checked state,
+role and existing activation/focus routes as a bounded production slice, with
+stable identity across toggles. It is an isolated implementation until its
+source and native gates are adopted. IME/clipboard, relationships, virtual-item
+realization and UIA/VoiceOver runtime coverage are still incomplete.
+
 ## Accessibility and native feature profile
 
 **Strengths to preserve.** The native layer has a real AccessKit Winit integration, owner-thread command application, session/closed checks, bounded ingress, and lifecycle handling. Ingress tests cover deactivation revoking queued work and closure; Linux test code exercises late AT-SPI service creation, registry owner replacement and destroy. These are meaningful foundations. Feature selection is explicit: default is `simd` only; `desktop`, `x11`, and `wayland` include `accessibility`, while `native`, `x11-minimal`, and `wayland-minimal` can build without it ([Cargo.toml lines 25–36](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/Cargo.toml#L25-L36)). README explains the intended normal versus diagnostic profiles, so this is not an undisclosed default omission.
