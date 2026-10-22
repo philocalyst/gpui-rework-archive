@@ -274,6 +274,10 @@ impl TextGeometry {
     /// Geometry exists only when interactive shaping was requested. Invalid
     /// bytes (including CRLF/combining interiors) produce None, never a snap.
     pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+        self.caret_stop(position)
+            .map(|stop| self.stop_bounds(&stop))
+    }
+    fn caret_stop(&self, position: TextPosition) -> Option<Stop> {
         let map = self;
         let stops = map.carets.as_ref()?.stops();
         let mask = match position.affinity {
@@ -286,7 +290,6 @@ impl TextGeometry {
             .iter()
             .take_while(|stop| stop.byte == position.offset.0)
             .find(|stop| stop.affinities & mask != 0)
-            .map(|stop| self.stop_bounds(&stop))
     }
     fn stop_bounds(&self, stop: &Stop) -> Rect {
         // Equal producer rectangles retain upstream bits, even when the two
@@ -311,13 +314,12 @@ impl TextGeometry {
     /// Soft-wrap aliases can own different lines. After a hard separator both
     /// affinities belong to the following line, even when caret tops coincide.
     pub fn caret_line(&self, position: TextPosition) -> Option<usize> {
-        self.caret_bounds(position)?;
+        self.caret_stop(position)?;
         Some(self.source_line(position))
     }
     /// Validates both endpoints in this layout's current interaction map.
     /// It is not a document-revision token or an editor mutation.
     pub fn validates_selection(&self, selection: TextSelection) -> bool {
-        self.caret_bounds(selection.anchor).is_some()
-            && self.caret_bounds(selection.focus).is_some()
+        self.caret_stop(selection.anchor).is_some() && self.caret_stop(selection.focus).is_some()
     }
 }

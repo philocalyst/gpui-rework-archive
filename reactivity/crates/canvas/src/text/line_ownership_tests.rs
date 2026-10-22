@@ -185,6 +185,20 @@ fn wrapped_zero_and_small_line_heights_keep_producer_source_ownership() {
                     *hard,
                     "{source:?} height={height} range={range:?}"
                 );
+                let expected = fixture
+                    .cursors
+                    .iter()
+                    .find(|(position, _, _)| {
+                        position.offset.byte() == range.start
+                            && position.affinity == CaretAffinity::Downstream
+                    })
+                    .unwrap()
+                    .2;
+                assert_eq!(
+                    [unit.bounds().y.to_bits(), unit.bounds().height.to_bits()],
+                    [expected[1], expected[3]],
+                    "producer interval metrics {source:?} height={height} range={range:?}"
+                );
             }
             for (position, line, bounds) in fixture.cursors {
                 assert_eq!(

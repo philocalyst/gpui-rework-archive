@@ -103,7 +103,24 @@ impl Details {
                     affinity: CaretAffinity::Downstream,
                 });
                 let hard_break = end.byte > self.lines[line].end;
-                let bounds = self.stop_bounds(&start);
+                // A legal start lies in this line's content range. Earlier
+                // ends are no later than its start, so an upstream alias can
+                // differ only at a preceding end's equality (a soft wrap).
+                // Keep the producer's upstream bits there; byte zero coerces
+                // to downstream. Never infer ownership from caret y.
+                let geometry_line = if start.affinities & 1 != 0
+                    && start.byte != 0
+                    && line != 0
+                    && self.lines[line - 1].end == start.byte
+                {
+                    self.source_line(TextPosition {
+                        offset: TextOffset(start.byte),
+                        affinity: CaretAffinity::Upstream,
+                    })
+                } else {
+                    line
+                };
+                let metrics = &self.lines[geometry_line];
                 let left = start.x.min(end.x);
                 let direction = if !hard_break && start.x != end.x {
                     if start.x < end.x {
@@ -138,12 +155,12 @@ impl Details {
                             } else {
                                 start.x
                             },
-                            bounds.y,
+                            metrics.top,
                             marker_width,
-                            bounds.height,
+                            metrics.height,
                         )
                     } else {
-                        Rect::new(left, bounds.y, (end.x - start.x).abs(), bounds.height)
+                        Rect::new(left, metrics.top, (end.x - start.x).abs(), metrics.height)
                     },
                     line,
                     hard_break,
@@ -418,7 +435,8 @@ impl TextGeometry {
     fn move_visual(&self, position: TextPosition, right: bool) -> Option<TextPosition> {
         let bounds = self.caret_bounds(position)?;
         let map = self;
-        let line = map.caret_line(position)?;
+        // The successful bounds lookup above already validated byte/affinity.
+        let line = map.source_line(position);
         let mut best = None;
         let mut distance = f32::INFINITY;
         for interval in map
