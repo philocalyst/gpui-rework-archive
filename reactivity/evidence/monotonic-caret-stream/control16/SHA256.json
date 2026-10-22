@@ -54,5 +54,8 @@
   "rejected-public-patch/build.log.gz": "abacc57c4865a80a76a71d049cb249aebc50b79234c6994ee805dedca1e8cd8e",
   "rejected-public-patch/lock.log.gz": "8d1cec1342bf00dbd3c78945c8b515f89e2a016fc70353ce0051e0cd1706c345",
   "rejected-public-patch/rejection.json.gz": "8f4e87b827692aa84791a6862c201734ec282ccb7aa7b04a41900f2f0a7d5919",
+  "source-bill.json": "930aaf0f76b313cbed0823f23a8706011df797dfe9d1d591d6f396fe374a38a9",
+  "source.patch.gz": "cd2b0f7e4764a995f501150d82198676cd131e8eddd7ab444d743fbdbb89c699",
+  "support.patch.gz": "6c0c9f276cb68b8b61b20c0aaaa291ec31befc43c05be516872c160265dc46f9",
   "vendor-strict.log.gz": "4cf55d43613ea801d98585a9c7a2e30f2126e52f6de6535f10abf966bac77bea"
 }
