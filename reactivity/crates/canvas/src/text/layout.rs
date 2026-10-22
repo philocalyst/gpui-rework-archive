@@ -2,6 +2,7 @@
 use super::{FontFace, FontSlot, Glyph, TextLayout};
 use crate::Rect;
 use std::ops::Range;
+mod interaction;
 
 /// UTF-8 document byte offset, distinct from glyph indices and UTF-16 units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
