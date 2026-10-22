@@ -1,0 +1,23 @@
+[
+  {
+    "fingerprint": "/tmp/gpui-offline-shader-target/release/.fingerprint/gpui_gpu-219984cf26922adc/build-script-build-script-build.json",
+    "features": "[\"default\", \"offline-shader\", \"simd\"]",
+    "binary": "/tmp/gpui-offline-shader-target/release/build/gpui_gpu-219984cf26922adc/build-script-build",
+    "bytes": 11643552,
+    "sha256": "300e4640cbc17bb727f8e717e0755a9ac75404a717619fae2e402f9c962bb61b"
+  },
+  {
+    "fingerprint": "/tmp/gpui-offline-shader-target/release/.fingerprint/gpui_gpu-adaec1003f5e5cb7/build-script-build-script-build.json",
+    "features": "[\"default\", \"simd\"]",
+    "binary": "/tmp/gpui-offline-shader-target/release/build/gpui_gpu-adaec1003f5e5cb7/build-script-build",
+    "bytes": 8249856,
+    "sha256": "811b2388c1c5f3b1e5f18d455a2dfaf3422cdaec137ee8882eebd0e5962f089f"
+  },
+  {
+    "fingerprint": "/tmp/gpui-offline-shader-target/release/.fingerprint/gpui_gpu-f52a32dc68bc9b5b/build-script-build-script-build.json",
+    "features": "[\"default\", \"offline-shader\", \"simd\", \"vulkan-tests\"]",
+    "binary": "/tmp/gpui-offline-shader-target/release/build/gpui_gpu-f52a32dc68bc9b5b/build-script-build",
+    "bytes": 11643472,
+    "sha256": "f84d229466c908e41a38aabc46f7d92e18f9f42d31d3f9880a4f499ed137a632"
+  }
+]
