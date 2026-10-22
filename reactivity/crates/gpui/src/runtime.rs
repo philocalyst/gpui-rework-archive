@@ -1363,20 +1363,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         target: Target,
         id: crate::property::PropertyId,
     ) -> Result<crate::property::PropertyValue, Error> {
-        use crate::property::PropertyDestination;
         let runtime = self.runtime()?;
         runtime.live()?;
         let index = runtime.resolve_index(target)?;
-        Ok(match id.info().destination {
-            PropertyDestination::Style => runtime.styles.with(index, |style| id.value(style))?,
-            PropertyDestination::Geometry => id.value(
-                &runtime
-                    .metadata
-                    .as_ref()
-                    .and_then(|m| m.geometry.as_ref())
-                    .map_or_else(Default::default, |g| g.get(runtime.nodes[index].identity())),
-            )?,
-        })
+        runtime.property_value_at(index, id)
     }
     /// Contribution presence is distinct from equality with a lower/default value.
     pub fn property_contribution(
@@ -1387,16 +1377,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
-        Ok(match id.info().destination {
-            crate::property::PropertyDestination::Style => {
-                runtime.overrides.contribution(identity, id)
-            }
-            crate::property::PropertyDestination::Geometry => runtime
-                .metadata
-                .as_ref()
-                .and_then(|m| m.geometry.as_ref())
-                .map_or(Contribution::Inherit, |g| g.contribution(identity, id)),
-        })
+        Ok(runtime.property_contribution_at(identity, id))
     }
     /// Validated catalog contribution. The ID owns destination, validation,
     /// exact authoring equality and impact; mismatched values reject atomically.
@@ -1612,7 +1593,9 @@ impl<M: View + 'static> Runtime<M> {
             style_ports,
         } = inspector::description(
             &self.model,
-            self.inspector_enabled(),
+            self.metadata
+                .as_deref()
+                .and_then(|m| m.inspector.as_deref()),
             self.requested_size,
             self.requested_scale_factor,
         )
@@ -3158,6 +3141,42 @@ fn layout_style(style: &Style) -> cephal::Style {
     }
 }
 
+impl<M> Runtime<M> {
+    fn property_value_at(
+        &self,
+        index: usize,
+        id: crate::property::PropertyId,
+    ) -> Result<crate::property::PropertyValue, Error> {
+        Ok(match id.info().destination {
+            crate::property::PropertyDestination::Style => {
+                self.styles.with(index, |style| id.value(style))?
+            }
+            crate::property::PropertyDestination::Geometry => id.value(
+                &self
+                    .metadata
+                    .as_ref()
+                    .and_then(|m| m.geometry.as_ref())
+                    .map_or_else(Default::default, |g| g.get(self.nodes[index].identity())),
+            )?,
+        })
+    }
+    fn property_contribution_at(
+        &self,
+        identity: u64,
+        id: crate::property::PropertyId,
+    ) -> Contribution<crate::property::PropertyValue> {
+        match id.info().destination {
+            crate::property::PropertyDestination::Style => {
+                self.overrides.contribution(identity, id)
+            }
+            crate::property::PropertyDestination::Geometry => self
+                .metadata
+                .as_ref()
+                .and_then(|m| m.geometry.as_ref())
+                .map_or(Contribution::Inherit, |g| g.contribution(identity, id)),
+        }
+    }
+}
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     fn property_edit_target(&self, target: Target) -> Result<(usize, u64), Error> {
         self.live()?;
