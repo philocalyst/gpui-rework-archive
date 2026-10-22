@@ -1,6 +1,43 @@
-//! Focus and normalized keys belong to the ordinary exclusive window runtime.
+//! Focus and normalized input belong to the ordinary exclusive window runtime.
 use super::{Commit, Error, NodeKind, Runtime, Target, View, Win};
 use crate::remote::LaneSet;
+use crate::{Point, ScrollDelta};
+
+/// One portable mouse stream. Points are physical window coordinates; wheel
+/// displacement is window-logical, with positive values scrolling right/down.
+/// Native adapters normalize platform units before entering this same path.
+/// This floor does not model touch, capture, multiple devices or drag gestures.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PointerEvent {
+    Move(Point),
+    Leave,
+    Press,
+    Release,
+    Wheel(ScrollDelta),
+    Cancel,
+}
+
+/// Caller-owned state for one mouse stream, without an allocation or an owner
+/// reference. A press retains only a window-qualified target; release performs
+/// a fresh acknowledged-sheet hit test. Moving a session to another window
+/// cannot transfer that press's authority.
+#[derive(Debug, Default)]
+pub struct PointerSession {
+    position: Option<Point>,
+    pressed: Option<Target>,
+}
+impl PointerSession {
+    pub fn position(&self) -> Option<Point> {
+        self.position
+    }
+
+    /// Cancel a gesture while keeping the last position. This does not change
+    /// keyboard focus or source state. Replace the session with its default
+    /// when window movement, resize or suspension invalidates its coordinates.
+    pub fn cancel(&mut self) {
+        self.pressed = None;
+    }
+}
 
 /// Committed text and a small portable key floor. Text inserts at the end and
 /// backspace removes one Unicode scalar. Selection, IME and shortcuts are not
@@ -17,6 +54,69 @@ pub enum Key<'a> {
 }
 
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    /// Dispatch the same normalized mouse protocol as the native host. A press
+    /// focuses its hit control; only release over that same live target invokes
+    /// it. Leave, wheel, explicit cancellation and failed press/release consume
+    /// the gesture. A rejected stale release cannot be retried after a new
+    /// presentation. A fresh hit on a newer acknowledged sheet may activate
+    /// the same surviving target.
+    ///
+    /// Moving, cancellation and an unpaired release need no hit test. They do
+    /// not prepare a frame; the returned commit can still report an already
+    /// outstanding frame. Nonfinite positions behave as leaving the window.
+    pub fn pointer_event(
+        &mut self,
+        session: &mut PointerSession,
+        event: PointerEvent,
+    ) -> Result<Commit, Error> {
+        // Consume first, including on a closed/poisoned owner or failed hit.
+        // A failed release must never be replayable against a newer sheet.
+        let pressed = if matches!(event, PointerEvent::Move(_)) {
+            None
+        } else {
+            session.pressed.take()
+        };
+        match event {
+            PointerEvent::Move(point) => {
+                session.position = (point.x.is_finite() && point.y.is_finite()).then_some(point);
+                if session.position.is_none() {
+                    session.cancel();
+                }
+            }
+            PointerEvent::Leave => session.position = None,
+            PointerEvent::Wheel(delta) => {
+                if let Some(point) = session.position {
+                    return self.scroll_at_2d(point, delta);
+                }
+            }
+            PointerEvent::Press | PointerEvent::Release | PointerEvent::Cancel => {}
+        }
+        let mut runtime = self.runtime_mut()?;
+        runtime.live()?;
+        runtime.changed_nodes = 0;
+        if !matches!(event, PointerEvent::Press)
+            && !(matches!(event, PointerEvent::Release) && pressed.is_some())
+        {
+            return Ok(runtime.commit());
+        }
+        runtime.current_presentation()?;
+        let hit = session
+            .position
+            .and_then(|point| runtime.hit(point))
+            .map(|identity| runtime.sites.target(identity));
+        if matches!(event, PointerEvent::Press) {
+            if let Some(target) = hit {
+                runtime.focus(target)?;
+            } else {
+                runtime.focused = None;
+            }
+            session.pressed = hit;
+        } else if let Some(target) = pressed.filter(|target| Some(*target) == hit) {
+            return runtime.activate(target);
+        }
+        Ok(runtime.commit())
+    }
+
     /// Focus a live logical control without using displayed coordinates. This
     /// remains available to repair text after a failed presentation.
     pub fn focus(&mut self, target: Target) -> Result<Commit, Error> {

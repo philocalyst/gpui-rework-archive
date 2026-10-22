@@ -53,8 +53,8 @@ pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 pub use remote::{Lane, LaneSet};
 pub use runtime::{
     Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
-    PresentationToken, Query, SemanticSnapshot, SetError, Snapshot, SnapshotNode, Win,
-    WindowOptions,
+    PointerEvent, PointerSession, PresentationToken, Query, SemanticSnapshot, SetError, Snapshot,
+    SnapshotNode, Win, WindowOptions,
 };
 pub use scroll::{
     Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,
@@ -83,8 +83,8 @@ pub mod prelude {
     pub use crate::{
         Action, ActionKind, Affine, Align, AlphaMode, Axis, Color, Component, El, Element, FieldId,
         Flex, Flow, Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource,
-        Justify, Key, ListId, Point, Rect, Remote, ScrollDelta, ScrollOffset, Signal, Source,
-        Sources, Target, View, Win, button, column, div, image, label, oklch, rgb, row, text,
-        text_input, uniform_list,
+        Justify, Key, ListId, Point, PointerEvent, PointerSession, Rect, Remote, ScrollDelta,
+        ScrollOffset, Signal, Source, Sources, Target, View, Win, button, column, div, image,
+        label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }
