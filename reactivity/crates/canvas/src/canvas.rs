@@ -1981,25 +1981,43 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
         {
             writer.write(color, &mut uniform_bytes[..W::ELEMENTS]);
         }
+        if uniform_color.is_some() {
+            write_uniform_tile::<W>(pixels, frame.width, left, right, &uniform_bytes);
+            continue;
+        }
         for y in top..bottom {
             for x in left..right {
                 let offset = ((y - top) * frame.width + x) * W::ELEMENTS;
                 let destination = &mut pixels[offset..offset + W::ELEMENTS];
-                if uniform_color.is_some() {
-                    destination.copy_from_slice(&uniform_bytes[..W::ELEMENTS]);
-                } else {
-                    let color = samples.color((y - top) * TILE + x - left);
-                    let bits = color.map(f32::to_bits);
-                    if bits != encoded_color {
-                        writer.write(color, &mut encoded_bytes[..W::ELEMENTS]);
-                        encoded_color = bits;
-                    }
-                    destination.copy_from_slice(&encoded_bytes[..W::ELEMENTS]);
+                let color = samples.color((y - top) * TILE + x - left);
+                let bits = color.map(f32::to_bits);
+                if bits != encoded_color {
+                    writer.write(color, &mut encoded_bytes[..W::ELEMENTS]);
+                    encoded_color = bits;
                 }
+                destination.copy_from_slice(&encoded_bytes[..W::ELEMENTS]);
             }
         }
     }
     stats
+}
+
+// Keep the encoded uniform-row loop's few live values separate from the large
+// raster band. One checked row span owns the output bounds; sample reduction and
+// color-cache state never enter this path. All writers and SIMD policies share it.
+#[inline(never)]
+fn write_uniform_tile<W: PixelWriter>(
+    pixels: &mut [W::Element],
+    width: usize,
+    left: usize,
+    right: usize,
+    encoded: &[W::Element; 8],
+) {
+    for row in pixels.chunks_exact_mut(width * W::ELEMENTS) {
+        for pixel in row[left * W::ELEMENTS..right * W::ELEMENTS].chunks_exact_mut(W::ELEMENTS) {
+            pixel.copy_from_slice(&encoded[..W::ELEMENTS]);
+        }
+    }
 }
 
 // Keep image dispatch and its typed closures out of the common raster loop.
