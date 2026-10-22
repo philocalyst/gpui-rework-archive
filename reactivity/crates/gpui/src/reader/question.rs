@@ -867,9 +867,7 @@ mod tests {
     #[test]
     fn close_and_natural_drop_release_owner_lease_before_synchronous_task_cancellation() {
         use std::{
-            cell::RefCell,
             pin::Pin,
-            rc::Rc,
             sync::{Weak, atomic::AtomicUsize},
             task::{Context, Poll},
         };
@@ -910,7 +908,9 @@ mod tests {
             }
         }
         for close in [false, true] {
-            let controller = Rc::new(RefCell::new(None::<Weak<Controller<u32, Infallible>>>));
+            let controller = Arc::new(std::sync::Mutex::new(
+                None::<Weak<Controller<u32, Infallible>>>,
+            ));
             let capture = controller.clone();
             let drops = Arc::new(AtomicUsize::new(0));
             let observed = drops.clone();
@@ -920,12 +920,12 @@ mod tests {
                     |v| *v,
                     Executor,
                     move |_| CheckDrop {
-                        controller: capture.borrow().as_ref().unwrap().clone(),
+                        controller: capture.lock().unwrap().as_ref().unwrap().clone(),
                         drops: observed.clone(),
                     },
                 )
                 .unwrap();
-            *controller.borrow_mut() = Some(Arc::downgrade(plan.lanes.control()));
+            *controller.lock().unwrap() = Some(Arc::downgrade(plan.lanes.control()));
             let model = Model {
                 value: crate::Signal::new(1),
                 other: crate::Signal::new(2),
