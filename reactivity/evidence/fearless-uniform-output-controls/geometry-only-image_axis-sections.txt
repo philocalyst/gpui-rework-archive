@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-geometry-only-bench-target/release/examples/image_axis  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1728      856
+.gnu.version           144     2584
+.gnu.version_r         368     2728
+.gnu.hash               28     3096
+.dynstr               1137     3124
+.rela.dyn            20640     4264
+.rela.plt               48    24904
+.gcc_except_table    36244    24952
+.rodata              31856    61216
+.eh_frame_hdr         5436    93072
+.eh_frame            29064    98512
+.text               373303   131680
+.init                   27   504984
+.fini                   13   505012
+.plt                    48   505040
+.tdata                  32   509184
+.tbss                 3192   509216
+.fini_array              8   509216
+.init_array             16   509224
+.data.rel.ro         11000   509240
+.dynamic               480   520240
+.got                  2784   520720
+.got.plt                40   523504
+.relro_padding         744   523544
+.tm_clone_table          0   527640
+.data                 5592   527640
+.bss                   203   533232
+.comment               157        0
+Total               524447
+
+

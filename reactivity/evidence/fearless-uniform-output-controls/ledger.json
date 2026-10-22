@@ -1,0 +1,604 @@
+{
+  "source_checkpoint": {
+    "source_commit": "1023e8e0f3d42df2db0d64a1e9d24dc786ebcc13",
+    "source_tree": "cefb815b4557c4977b57795bd7d1074b6416cdb8",
+    "tested_source_commit": "c8df36cb5d75469a38f843c502f01b0e96a58ac4",
+    "tree_identical": true,
+    "parent": "05af5841e15cdddd9f0bce62b9f35ccc9966c312"
+  },
+  "status": "Final bounded candidate qualified on this host; integrate carefully with independent main paint/HDR/space changes. No more algorithm iterations in this slice.",
+  "correctness": {
+    "default_full_release_passed": 146,
+    "fallback_full_release_passed": 146,
+    "ignored_each": 4,
+    "clippy": "bothpoliciespassed",
+    "cross_compile": "AppleAArch64 and WindowsMSVC alltargets, normalandFallback each; compileonly, no native runtime claims"
+  },
+  "cross_command": "source /tmp/gpui-a11y-env.sh; CARGO_TARGET_DIR=/tmp/gpui-fearless-pipeline-target CARGO_BUILD_JOBS=2 RUSTC_BOOTSTRAP=1 cargo check --offline --locked --manifest-path /root/gpui-fearless-abi/reactivity/Cargo.toml -p gpui_canvas --all-targets --target TARGET -Zbuild-std=std,panic_abort [--no-default-features]",
+  "structural": {
+    "Canvas_header_bytes": 488,
+    "Samples_bytes": 69664,
+    "blank_recording_allocations": 0,
+    "blank_first_allocations": 3,
+    "blank_first_bytes": 2328,
+    "scene_sdr_first_allocations": 4,
+    "scene_sdr_first_bytes": 2420,
+    "scene_hdr_first_allocations": 4,
+    "scene_hdr_first_bytes": 4664,
+    "warm_allocations": 0,
+    "mask_kernel_bytes": 1373,
+    "mask_kernel_stack_bytes": 328,
+    "render_band_wrapper_bytes": 6,
+    "uniform_helper_bytes_per_writer": [
+      340,
+      361,
+      361
+    ],
+    "uniform_helpers_total": 1062,
+    "band_body_reduction_vs_geometry_only": 1118,
+    "new_uniform_helper_source_diff": {
+      "added": 28,
+      "removed": 10,
+      "test_lines_added": 0
+    },
+    "production_Rust_diff_from_original_including_blank_comments_excluding_test_modules": {
+      "added": 187,
+      "removed": 21,
+      "net": 166
+    },
+    "attribution": "Encoding was already onceperuniformtile before this change. Existing uniform stores were already unswitched/vectorized. New checkedrowspan helper precomputes bounds/vector limits outside rowloop and isolates live registers; previous emitted perrow reloads were observed. Do not attribute58%gain to encodingonce, removedbranch, or newlyvectorizedstores; causal shares versuslayout are unmeasured."
+  },
+  "text_bytes": {
+    "original_external": 2266423,
+    "simd_external": 2266967,
+    "fallback_external": 2268391,
+    "baseline-cpu": 2293975,
+    "baseline-image_axis": 371511,
+    "geometry-only-cpu": 2294519,
+    "geometry-only-image_axis": 373303,
+    "uniform-output-cpu": 2294503,
+    "uniform-output-image_axis": 373287,
+    "uniform-output-scalar-cpu": 2295927,
+    "uniform-output-scalar-image_axis": 372999
+  },
+  "consumer_sha256": {
+    "simd": "a768abb36457523a974e40901a93fb516c0b997e604dc61beaec4bc166b4441a",
+    "scalar": "0e67afba64f234ec83ff22f520a754b98ce8948716d0b396046c43735d0a0411"
+  },
+  "consumer_profiles": "Ordinary external build under normal/default and no-defaultfeatures, both Canvas/lib and consumer compiled fresh:false; no SIMD public window/header knob. Normal links no Fallback band/detector; scalar links Fallback and no detector.",
+  "timing": "1260records,3interleaved processrounds,8warmimageframesperround; complete originalcpu/images sources identical and allsource/rlib/executable guards and structural stats/digests pass. One host quiet window. Not a universal speed claim. Nearest+3.5%aggregate and Fallbacklabels+2.3% remain explicit losses. Observed perround ranges/IQR are not confidence intervals.",
+  "timing_summary": [
+    {
+      "kind": "cpu",
+      "case": "alpha_overlap",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 9762.714,
+        "geometry-only": 3316.463,
+        "uniform-output": 3294.033,
+        "geometry-only-scalar": 3376.935,
+        "uniform-output-scalar": 3294.373
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.3397070732585222,
+        "uniform-output": 0.33740955639999287,
+        "geometry-only-scalar": 0.345901252459101,
+        "uniform-output-scalar": 0.3374443827812635
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "alpha_overlap",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 51.641,
+        "geometry-only": 52.071,
+        "uniform-output": 44.971,
+        "geometry-only-scalar": 51.021,
+        "uniform-output-scalar": 45.941
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.008326717143355,
+        "uniform-output": 0.8708390619856315,
+        "geometry-only-scalar": 0.9879940357467903,
+        "uniform-output-scalar": 0.8896225867043629
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "boundary_dense",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 5.726,
+        "geometry-only": 4.867,
+        "uniform-output": 4.847,
+        "geometry-only-scalar": 5.089,
+        "uniform-output-scalar": 5.21
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.8499825358016067,
+        "uniform-output": 0.846489696122948,
+        "geometry-only-scalar": 0.8887530562347189,
+        "uniform-output-scalar": 0.9098847362906043
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "boundary_dense",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 4.256,
+        "geometry-only": 3.355,
+        "uniform-output": 3.371,
+        "geometry-only-scalar": 3.576,
+        "uniform-output-scalar": 3.694
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.788298872180451,
+        "uniform-output": 0.7920582706766917,
+        "geometry-only-scalar": 0.8402255639097744,
+        "uniform-output-scalar": 0.8679511278195489
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "flat",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 9522.949,
+        "geometry-only": 5739.357,
+        "uniform-output": 5748.836,
+        "geometry-only-scalar": 5762.367,
+        "uniform-output-scalar": 5728.136
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.602686940778534,
+        "uniform-output": 0.6036823257165401,
+        "geometry-only-scalar": 0.6051032091004582,
+        "uniform-output-scalar": 0.6015086293122015
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "flat",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 192.224,
+        "geometry-only": 208.055,
+        "uniform-output": 80.542,
+        "geometry-only-scalar": 192.594,
+        "uniform-output-scalar": 99.452
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.0823570417845847,
+        "uniform-output": 0.4190007491260197,
+        "geometry-only-scalar": 1.0019248376893624,
+        "uniform-output-scalar": 0.5173755618445147
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "labels",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 8023.486,
+        "geometry-only": 8074.058,
+        "uniform-output": 7929.704,
+        "geometry-only-scalar": 8100.478,
+        "uniform-output-scalar": 8231.881
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.006302995979553,
+        "uniform-output": 0.9883115643250328,
+        "geometry-only-scalar": 1.0095958290448814,
+        "uniform-output-scalar": 1.0259731244000425
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "labels",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 5732.826,
+        "geometry-only": 5912.87,
+        "uniform-output": 5630.264,
+        "geometry-only-scalar": 5779.977,
+        "uniform-output-scalar": 5862.289
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.0314058023041341,
+        "uniform-output": 0.982109695985889,
+        "geometry-only-scalar": 1.0082247394217092,
+        "uniform-output-scalar": 1.0225827541251034
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "opaque_overlap",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 9841.557,
+        "geometry-only": 3351.494,
+        "uniform-output": 3297.322,
+        "geometry-only-scalar": 3394.524,
+        "uniform-output-scalar": 3296.582
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.3405450987074504,
+        "uniform-output": 0.33504068512736346,
+        "geometry-only-scalar": 0.3449173743544847,
+        "uniform-output-scalar": 0.3349654937729873
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "opaque_overlap",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 20.04,
+        "geometry-only": 21.11,
+        "uniform-output": 14.671,
+        "geometry-only-scalar": 20.271,
+        "uniform-output-scalar": 15.231
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.0533932135728543,
+        "uniform-output": 0.7320858283433134,
+        "geometry-only-scalar": 1.0115269461077845,
+        "uniform-output-scalar": 0.7600299401197605
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "sheared",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 3408.755,
+        "geometry-only": 2579.627,
+        "uniform-output": 2574.946,
+        "geometry-only-scalar": 2833.872,
+        "uniform-output-scalar": 2848.023
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.7567651532597678,
+        "uniform-output": 0.7553919246176389,
+        "geometry-only-scalar": 0.8313510357887263,
+        "uniform-output-scalar": 0.8355024048369566
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "sheared",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 2371.332,
+        "geometry-only": 1753.518,
+        "uniform-output": 1725.368,
+        "geometry-only-scalar": 1982.014,
+        "uniform-output-scalar": 1994.354
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.7394654143747059,
+        "uniform-output": 0.7275944490269604,
+        "geometry-only-scalar": 0.8358230732769599,
+        "uniform-output-scalar": 0.8410268996496485
+      }
+    },
+    {
+      "kind": "images",
+      "case": "hdr",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 5130.0325,
+        "geometry-only": 5141.493,
+        "uniform-output": 5131.9325,
+        "geometry-only-scalar": 5197.4745,
+        "uniform-output-scalar": 5172.7685
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.0022340014415114,
+        "uniform-output": 1.0003703680239842,
+        "geometry-only-scalar": 1.0131465054071296,
+        "uniform-output-scalar": 1.0083305515121006
+      }
+    },
+    {
+      "kind": "images",
+      "case": "nearest",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 3391.5295,
+        "geometry-only": 3393.365,
+        "uniform-output": 3510.9725,
+        "geometry-only-scalar": 3426.1805,
+        "uniform-output-scalar": 3400.0995000000003
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.000541201248581,
+        "uniform-output": 1.0352180336334977,
+        "geometry-only-scalar": 1.0102169242520225,
+        "uniform-output-scalar": 1.0025268835196628
+      }
+    },
+    {
+      "kind": "images",
+      "case": "one",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 6618.3150000000005,
+        "geometry-only": 6622.67,
+        "uniform-output": 6626.026,
+        "geometry-only-scalar": 6691.496999999999,
+        "uniform-output-scalar": 6593.3645
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 1.0006580224724873,
+        "uniform-output": 1.0011651001803328,
+        "geometry-only-scalar": 1.011057497263276,
+        "uniform-output-scalar": 0.9962300827325383
+      }
+    },
+    {
+      "kind": "images",
+      "case": "p3",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 7700.049,
+        "geometry-only": 7230.084000000001,
+        "uniform-output": 7196.8279999999995,
+        "geometry-only-scalar": 7912.544,
+        "uniform-output-scalar": 7755.210999999999
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.9389659728139393,
+        "uniform-output": 0.9346470392591008,
+        "geometry-only-scalar": 1.0275965776321683,
+        "uniform-output-scalar": 1.0071638505157563
+      }
+    },
+    {
+      "kind": "images",
+      "case": "premul",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 7553.001,
+        "geometry-only": 6879.681500000001,
+        "uniform-output": 6907.627,
+        "geometry-only-scalar": 7956.9,
+        "uniform-output-scalar": 7581.9315
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.9108540433133797,
+        "uniform-output": 0.914553963384885,
+        "geometry-only-scalar": 1.0534753007446973,
+        "uniform-output-scalar": 1.0038303318111568
+      }
+    },
+    {
+      "kind": "images",
+      "case": "shared48",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 24121.285,
+        "geometry-only": 24046.799,
+        "uniform-output": 24080.839500000002,
+        "geometry-only-scalar": 24182.9015,
+        "uniform-output-scalar": 24174.981
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.9969120218926977,
+        "uniform-output": 0.998323244387685,
+        "geometry-only-scalar": 1.002554445171557,
+        "uniform-output-scalar": 1.002226083726468
+      }
+    },
+    {
+      "kind": "images",
+      "case": "shear",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 38618.854,
+        "geometry-only": 38518.581000000006,
+        "uniform-output": 38347.4985,
+        "geometry-only-scalar": 38450.634999999995,
+        "uniform-output-scalar": 35619.3475
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.9974035221241937,
+        "uniform-output": 0.9929734968313664,
+        "geometry-only-scalar": 0.9956441224278689,
+        "uniform-output-scalar": 0.9223305150380693
+      }
+    },
+    {
+      "kind": "images",
+      "case": "tiny",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 61.3265,
+        "geometry-only": 60.016,
+        "uniform-output": 25.6755,
+        "geometry-only-scalar": 60.5515,
+        "uniform-output-scalar": 26.315
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "geometry-only": 0.9786307713631137,
+        "uniform-output": 0.4186689277881503,
+        "geometry-only-scalar": 0.9873627224772324,
+        "uniform-output-scalar": 0.42909672001500165
+      }
+    }
+  ],
+  "nearest_rounds": [
+    {
+      "flavor": "baseline",
+      "round": 0,
+      "warm_frames": 8,
+      "median_ns": 3546533.0,
+      "observed_min_ns": 3530938.0,
+      "observed_max_ns": 3786623.0,
+      "q1_ns": 3534314.75,
+      "q3_ns": 3632696.75
+    },
+    {
+      "flavor": "baseline",
+      "round": 1,
+      "warm_frames": 8,
+      "median_ns": 3384799.0,
+      "observed_min_ns": 3372964.0,
+      "observed_max_ns": 3773853.0,
+      "q1_ns": 3377396.5,
+      "q3_ns": 3388152.5
+    },
+    {
+      "flavor": "baseline",
+      "round": 2,
+      "warm_frames": 8,
+      "median_ns": 3388304.5,
+      "observed_min_ns": 3382355.0,
+      "observed_max_ns": 3571108.0,
+      "q1_ns": 3386279.0,
+      "q3_ns": 3397596.75
+    },
+    {
+      "flavor": "geometry-only",
+      "round": 0,
+      "warm_frames": 8,
+      "median_ns": 3383924.5,
+      "observed_min_ns": 3368634.0,
+      "observed_max_ns": 3723082.0,
+      "q1_ns": 3374824.0,
+      "q3_ns": 3441530.25
+    },
+    {
+      "flavor": "geometry-only",
+      "round": 1,
+      "warm_frames": 8,
+      "median_ns": 3399929.5,
+      "observed_min_ns": 3393265.0,
+      "observed_max_ns": 3619199.0,
+      "q1_ns": 3397304.25,
+      "q3_ns": 3440520.75
+    },
+    {
+      "flavor": "geometry-only",
+      "round": 2,
+      "warm_frames": 8,
+      "median_ns": 3387444.0,
+      "observed_min_ns": 3375164.0,
+      "observed_max_ns": 3403685.0,
+      "q1_ns": 3380459.0,
+      "q3_ns": 3390650.0
+    },
+    {
+      "flavor": "uniform-output",
+      "round": 0,
+      "warm_frames": 8,
+      "median_ns": 3384469.5,
+      "observed_min_ns": 3372484.0,
+      "observed_max_ns": 3554328.0,
+      "q1_ns": 3381349.25,
+      "q3_ns": 3425110.0
+    },
+    {
+      "flavor": "uniform-output",
+      "round": 1,
+      "warm_frames": 8,
+      "median_ns": 3470371.5,
+      "observed_min_ns": 3439076.0,
+      "observed_max_ns": 3650500.0,
+      "q1_ns": 3446421.0,
+      "q3_ns": 3589591.5
+    },
+    {
+      "flavor": "uniform-output",
+      "round": 2,
+      "warm_frames": 8,
+      "median_ns": 3550478.0,
+      "observed_min_ns": 3534438.0,
+      "observed_max_ns": 3767422.0,
+      "q1_ns": 3542040.5,
+      "q3_ns": 3706761.25
+    },
+    {
+      "flavor": "geometry-only-scalar",
+      "round": 0,
+      "warm_frames": 8,
+      "median_ns": 3426655.5,
+      "observed_min_ns": 3410505.0,
+      "observed_max_ns": 3605299.0,
+      "q1_ns": 3412442.5,
+      "q3_ns": 3456638.25
+    },
+    {
+      "flavor": "geometry-only-scalar",
+      "round": 1,
+      "warm_frames": 8,
+      "median_ns": 3429580.5,
+      "observed_min_ns": 3416194.0,
+      "observed_max_ns": 3443336.0,
+      "q1_ns": 3423918.5,
+      "q3_ns": 3434760.25
+    },
+    {
+      "flavor": "geometry-only-scalar",
+      "round": 2,
+      "warm_frames": 8,
+      "median_ns": 3409200.0,
+      "observed_min_ns": 3399285.0,
+      "observed_max_ns": 3709581.0,
+      "q1_ns": 3403064.75,
+      "q3_ns": 3451136.0
+    },
+    {
+      "flavor": "uniform-output-scalar",
+      "round": 0,
+      "warm_frames": 8,
+      "median_ns": 3394289.5,
+      "observed_min_ns": 3385685.0,
+      "observed_max_ns": 3541697.0,
+      "q1_ns": 3387750.0,
+      "q3_ns": 3423605.25
+    },
+    {
+      "flavor": "uniform-output-scalar",
+      "round": 1,
+      "warm_frames": 8,
+      "median_ns": 3378384.0,
+      "observed_min_ns": 3367814.0,
+      "observed_max_ns": 3555468.0,
+      "q1_ns": 3373946.5,
+      "q3_ns": 3385407.25
+    },
+    {
+      "flavor": "uniform-output-scalar",
+      "round": 2,
+      "warm_frames": 8,
+      "median_ns": 3440065.5,
+      "observed_min_ns": 3422795.0,
+      "observed_max_ns": 3610219.0,
+      "q1_ns": 3425977.5,
+      "q3_ns": 3475446.75
+    }
+  ]
+}

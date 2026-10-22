@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-uniform-output-scalar-bench-target/release/examples/image_axis  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1728      856
+.gnu.version           144     2584
+.gnu.version_r         368     2728
+.gnu.hash               28     3096
+.dynstr               1137     3124
+.rela.dyn            20808     4264
+.rela.plt               48    25072
+.gcc_except_table    36276    25120
+.rodata              31992    61408
+.eh_frame_hdr         5484    93400
+.eh_frame            29464    98888
+.text               372999   132448
+.init                   27   505448
+.fini                   13   505476
+.plt                    48   505504
+.tdata                  32   509648
+.tbss                 3192   509680
+.fini_array              8   509680
+.init_array             16   509688
+.data.rel.ro         11048   509704
+.dynamic               480   520752
+.got                  2824   521232
+.got.plt                40   524056
+.relro_padding         192   524096
+.tm_clone_table          0   528192
+.data                 5592   528192
+.bss                   203   533784
+.comment               157        0
+Total               524463
+
+

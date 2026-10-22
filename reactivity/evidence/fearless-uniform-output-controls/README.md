@@ -1,0 +1,7 @@
+Source-only integration commit: `1023e8e0f3d42df2db0d64a1e9d24dc786ebcc13`, parent `05af5841`; its tree is identical to tested `c8df36cb5d`. `final-source.patch` excludes rejected variants. Merge carefully with main paint/HDR/space changes.
+
+The final default host control preserves geometry gains and removes the proof-flat regression: flat .419x, opaque .732x, alpha .871x, transformed .728x, boundary .792x, labels .982x original median. Nearest image sampling remains1.035x; Fallback labels remains1.023x. All raw rows, observed per-round nearest intervals, immutable builds and before/after source/library/executable guards are retained. Ranges/IQR are descriptive, not confidence intervals.
+
+Encoding was already once per uniform tile. Stores were already vectorized. The narrow helper changes checked row-span shape and register lifetime; it precomputes bounds/vector limits outside the row loop and avoids prior per-row reloads. The causal share of the58%flat improvement versus layout is not measured, so do not invent a single-cause speed claim.
+
+Both146-test policies, strict lint, Apple/MSVC compile checks and normal external header/allocation/output checks pass. This host ran Fallback/SSE2/SSE4.2/AVX2 parity; there is no native Apple/MSVC or AVX512 runtime claim. Normal external text adds544bytes. Broader all-ISA, explicitRGBA, AoS/SoA, compact-source and earlier geometry-only losses remain separately archived.

@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-baseline-bench-target/release/examples/image_axis  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1728      856
+.gnu.version           144     2584
+.gnu.version_r         368     2728
+.gnu.hash               28     3096
+.dynstr               1137     3124
+.rela.dyn            20568     4264
+.rela.plt               48    24832
+.gcc_except_table    36308    24880
+.rodata              31824    61200
+.eh_frame_hdr         5420    93024
+.eh_frame            29108    98448
+.text               371511   131664
+.init                   27   503176
+.fini                   13   503204
+.plt                    48   503232
+.tdata                  32   507376
+.tbss                 3192   507408
+.fini_array              8   507408
+.init_array             16   507416
+.data.rel.ro         10952   507432
+.dynamic               480   518384
+.got                  2776   518864
+.got.plt                40   521640
+.relro_padding        2608   521680
+.tm_clone_table          0   525776
+.data                 5592   525776
+.bss                   203   531368
+.comment               157        0
+Total               524451
+
+
