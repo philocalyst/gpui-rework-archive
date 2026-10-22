@@ -1,0 +1,76 @@
+    Blocking waiting for file lock on build directory
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_gpu v0.1.0 (/root/gpui-paint-coupling/reactivity/crates/gpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.24s
+     Running unittests src/lib.rs (/tmp/gpui-paint-coupling-target/debug/deps/gpui_gpu-7f5226d9118a94f6)
+
+running 8 tests
+test renderer::paint::tests::optional_map_and_guards_have_explicit_storage ... ok
+test renderer::tests::packet_storage_ledger ... ok
+test renderer::tests::precision_admission_rejects_finite_but_overflowing_intermediates ... ok
+test renderer::tests::word_writers_preserve_float_and_metadata_bits ... ok
+test shader::ui::__validate_wgsl ... ok
+test renderer::tests::storage_records_match_shader_stride_and_offsets ... ok
+test shader::tests::generated_shader_validates ... ok
+test renderer::tests::certificates_imply_sample_membership_in_both_numeric_domains ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/render.rs (/tmp/gpui-paint-coupling-target/debug/deps/render-b38daf36f668586b)
+
+running 37 tests
+test narrowed_inverse_preserves_the_adversarial_half_open_edge ... ok
+test float_target_rejects_sdr_scene_metadata_before_submission ... ok
+test linear_float_target_retains_hdr_and_premultiplied_alpha ... ok
+test opaque_proof_changes_do_not_discard_background_records ... ok
+test images_reach_linear_hdr_and_display_p3_output_without_a_linear_gpu_mirror ... ok
+test explicit_packet_redraw_submits_complete_pixels_to_fresh_targets_after_scene_drop ... ok
+test failed_preparation_after_image_upload_discards_the_previous_packet ... ok
+test clip_extent_sum_preserves_half_open_sample_membership ... ok
+test hdr_and_wide_gamut_packets_redraw_exactly_without_reencoding_or_uploads ... ok
+test inverse_lattice_clips_preserve_actual_vulkan_pixels ... ok
+test maximum_admitted_tone_mapping_is_finite_and_bright ... ok
+test mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent ... ok
+test paint_modes_foreign_ordinals_and_attempted_full_failures_revoke_mapping ... ok
+test all_authored_color_layouts_reach_real_sdr_and_hdr_targets ... ok
+test queued_redraw_keeps_its_packet_before_later_uploads_and_buffer_replacement ... ok
+test grouped_and_inline_packets_match_every_pixel_in_mixed_scenes ... ok
+test physical_glyph_masks_map_back_to_logical_rectangles ... ok
+test real_vulkan_pixels_match_cpu_sampling_and_preserve_correlated_edges ... ok
+test paint_validation_is_atomic_and_hdr_proof_changes_require_full_rebuild ... ok
+test real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks ... ok
+test opaque_tile_proofs_skip_overlap_and_preserve_later_edges ... ok
+test rounded_image_material_decodes_exact_hdr_coverage ... ok
+test packed_images_profiles_alpha_filters_and_cache_match_cpu ... ok
+test redraw_rejects_wrong_targets_without_discarding_the_valid_packet ... ok
+test text_free_reset_releases_keys_without_invalidating_in_flight_text ... ok
+test paint_packets_queue_a_patch_b_patch_c_before_readback_and_match_full_rebuilds ... ok
+test rounded_images_share_pixels_and_fixed_packet_strides_preserve_queued_order ... ok
+test uniform_float_tiles_preserve_reference_output_bits ... ok
+test zero_coverage_hdr_preserves_numeric_zero_across_cpu_and_gpu ... ok
+test rounded_circle_pythagorean_sites_neighbor_radii_and_origin_cancellation ... ok
+test unkeyed_calls_revalidate_mutable_headers_and_distinct_scenes_and_modes ... ok
+test tile_certificates_fall_back_for_clip_alpha_shear_and_ambiguous_edges ... ok
+test zero_coverage_draw_preserves_threshold_clear_and_hdr_bits ... ok
+test analytic_rounded_rectangles_match_cpu_and_never_use_rect_certificates ... ok
+test unicode_paragraphs_fallback_and_fractional_density_match_cpu ... ok
+test grouped_error_envelopes_match_inline_across_fractional_glyph_samples ... ok
+test separate_identical_color_calls_keep_independent_positional_groups ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s
+
+   Doc-tests gpui_gpu
+
+running 1 test
+test crates/gpu/src/renderer/paint.rs - renderer::paint::GpuPaintCommit (line 312) - compile fail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
