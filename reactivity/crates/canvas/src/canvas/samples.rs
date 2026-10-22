@@ -51,7 +51,7 @@ impl<S: Simd> Samples<S> {
             self.simd,
             &mut self.samples[pixel * 16..pixel * 16 + 16],
             color,
-            coverage,
+            &coverage,
         );
     }
 
@@ -74,7 +74,7 @@ impl<S: Simd> Samples<S> {
         blend_sources(
             self.simd,
             &mut self.samples[pixel * 16..pixel * 16 + 16],
-            sources,
+            &sources,
         );
     }
 
@@ -111,9 +111,11 @@ fn blend_one<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f32)
     source_over(simd, dst, src, coverage);
 }
 
+// Borrow fixed sample blocks across target-feature entries, so their SIMD
+// closures carry addresses instead of materializing array copies on the stack.
 #[simd]
-fn blend_coverage<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], coverage: [f32; 16]) {
-    for (sample, coverage) in dst.iter_mut().zip(coverage) {
+fn blend_coverage<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], coverage: &[f32; 16]) {
+    for (sample, coverage) in dst.iter_mut().zip(coverage.iter().copied()) {
         // Do not blend zero coverage: multiplication by zero can change HDR
         // signed zeros, and evaluating an absent sample can create NaNs.
         if coverage > 0.0 {
@@ -123,8 +125,8 @@ fn blend_coverage<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], coverag
 }
 
 #[simd]
-fn blend_sources<S: Simd>(simd: S, dst: &mut [[f32; 4]], sources: [Option<[f32; 4]>; 16]) {
-    for (sample, source) in dst.iter_mut().zip(sources) {
+fn blend_sources<S: Simd>(simd: S, dst: &mut [[f32; 4]], sources: &[Option<[f32; 4]>; 16]) {
+    for (sample, source) in dst.iter_mut().zip(sources.iter().copied()) {
         if let Some(source) = source {
             source_over(simd, sample, source, 1.0);
         }
