@@ -5,6 +5,8 @@ use crate::{
 };
 use std::{collections::HashMap, sync::Arc};
 
+mod bins;
+use bins::RasterScratch;
 mod glyph_axis;
 mod image_axis;
 mod paint;
@@ -26,6 +28,7 @@ const SAMPLES: [f64; 4] = [0.125, 0.375, 0.625, 0.875];
 pub struct RenderStats {
     pub render_count: u64,
     pub commands: usize,
+    /// Command references in the tiles rasterized by this call, before opacity cuts.
     pub tile_references: usize,
     pub full_rect_tiles: usize,
     pub skipped_command_tiles: usize,
@@ -37,10 +40,13 @@ pub struct RenderStats {
     /// Exact capacities of typed draw/resource Vec lanes; excludes opaque
     /// HashMap bucket/control allocation, raster bodies and Canvas header.
     pub command_bytes: usize,
+    /// CSR vector capacity bytes; excludes the lazy scratch header.
     pub bin_bytes: usize,
     /// Number of disjoint 16-row output bands rendered in this frame.
     pub output_bands: usize,
     pub parallel: bool,
+    /// This raster reused geometry bins; pixels and opaque cuts are recomputed.
+    pub bins_reused: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -421,6 +427,19 @@ impl DisplayList {
     }
     fn iter(&self) -> impl ExactSizeIterator<Item = BorrowedCommand<'_>> + DoubleEndedIterator {
         self.order.iter().map(|&address| self.get(address))
+    }
+    /// Device-clipped integer bounds in painter order. CSR construction needs
+    /// no material, resource lease, inverse mapping, or command reconstruction.
+    fn ordered_bounds(&self) -> impl ExactSizeIterator<Item = [u16; 4]> + DoubleEndedIterator {
+        self.order.iter().map(|&address| {
+            if address & INLINE_DRAW != 0 {
+                self.inline[(address & !INLINE_DRAW) as usize]
+                    .geometry
+                    .bounds
+            } else {
+                self.placements[address as usize].geometry.bounds
+            }
+        })
     }
     // Addresses are private and constructed only by admitted appends. Every
     // resource/common/geometry index belongs to this DisplayList; no external
@@ -854,9 +873,7 @@ pub struct Canvas {
     mask_bytes: usize,
     references: usize,
     dirty: bool,
-    offsets: Vec<usize>,
-    indices: Vec<u32>,
-    cursor: Vec<usize>,
+    raster: Option<Box<RasterScratch>>,
     stats: RenderStats,
     tile_proofs: bool,
 }
@@ -911,9 +928,7 @@ impl Canvas {
             mask_bytes: 0,
             references: 0,
             dirty: false,
-            offsets: Vec::new(),
-            indices: Vec::new(),
-            cursor: Vec::new(),
+            raster: None,
             stats: RenderStats::default(),
             tile_proofs: true,
         }
@@ -993,6 +1008,7 @@ impl Canvas {
         }
     }
     pub fn clear(&mut self, color: Color) {
+        self.invalidate_bins();
         self.commands.clear();
         self.mask_bytes = 0;
         self.references = 0;
@@ -1343,6 +1359,9 @@ impl Canvas {
             .reserve(pending.len(), resources, pending.len() > 1)?;
         self.mask_bytes += bytes;
         self.references += refs;
+        if !pending.is_empty() {
+            self.invalidate_bins();
+        }
         Ok(())
     }
     /// Premultiplied output, top-left origin, tightly packed rows. RGBA8 uses
@@ -1467,33 +1486,15 @@ impl Canvas {
             };
             return;
         }
-        let tiles = (tile_bounds[2] - tile_bounds[0]) * (tile_bounds[3] - tile_bounds[1]);
-        self.offsets.clear();
-        self.offsets.resize(tiles + 1, 0);
-        for command in self.commands.iter() {
-            visit_tiles(&command, tile_bounds, |tile| self.offsets[tile + 1] += 1);
-        }
-        for i in 1..self.offsets.len() {
-            self.offsets[i] += self.offsets[i - 1];
-        }
-        self.indices.clear();
-        self.indices.resize(*self.offsets.last().unwrap(), 0);
-        // Counting cursor is transient O(tile count), never O(pixel count).
-        self.cursor.clear();
-        self.cursor.extend_from_slice(&self.offsets[..tiles]);
-        for (index, command) in self.commands.iter().enumerate() {
-            visit_tiles(&command, tile_bounds, |tile| {
-                self.indices[self.cursor[tile]] = index as u32;
-                self.cursor[tile] += 1;
-            });
-        }
+        let raster = self.raster.get_or_insert_with(Box::default);
+        let bins_reused = raster.prepare(&self.commands, tile_bounds);
         let mut stats = RenderStats {
             render_count: self.stats.render_count.saturating_add(1),
             commands: self.commands.len(),
-            tile_references: self.indices.len(),
             retained_mask_bytes: self.mask_bytes,
             command_bytes: self.commands.bytes(),
-            bin_bytes: self.bin_bytes(),
+            bin_bytes: raster.bytes(),
+            bins_reused,
             ..RenderStats::default()
         };
         let frame = Frame {
@@ -1501,8 +1502,7 @@ impl Canvas {
             height: self.height,
             clear: self.clear,
             commands: &self.commands,
-            offsets: &self.offsets,
-            indices: &self.indices,
+            raster,
             tile_proofs: self.tile_proofs,
             tile_bounds,
         };
@@ -1518,6 +1518,7 @@ impl Canvas {
                 }
             }
         };
+        stats.tile_references = rendered.tile_references;
         stats.full_rect_tiles = rendered.full_rect_tiles;
         stats.skipped_command_tiles = rendered.skipped_command_tiles;
         stats.boundary_pixels = rendered.boundary_pixels;
@@ -1527,9 +1528,12 @@ impl Canvas {
         self.stats = stats;
     }
     fn bin_bytes(&self) -> usize {
-        self.offsets.capacity() * std::mem::size_of::<usize>()
-            + self.cursor.capacity() * std::mem::size_of::<usize>()
-            + self.indices.capacity() * 4
+        self.raster.as_ref().map_or(0, |raster| raster.bytes())
+    }
+    fn invalidate_bins(&mut self) {
+        if let Some(raster) = &mut self.raster {
+            raster.invalidate();
+        }
     }
 }
 
@@ -1541,8 +1545,7 @@ struct Frame<'a> {
     height: usize,
     clear: [f32; 4],
     commands: &'a DisplayList,
-    offsets: &'a [usize],
-    indices: &'a [u32],
+    raster: &'a RasterScratch,
     tile_proofs: bool,
     tile_bounds: [usize; 4],
 }
@@ -1600,6 +1603,7 @@ impl RenderSchedule for Serial {
     }
 }
 fn combine_stats(mut left: RenderStats, right: RenderStats) -> RenderStats {
+    left.tile_references += right.tile_references;
     left.full_rect_tiles += right.full_rect_tiles;
     left.skipped_command_tiles += right.skipped_command_tiles;
     left.boundary_pixels += right.boundary_pixels;
@@ -1726,8 +1730,8 @@ fn render_band<W: PixelWriter>(
     let mut encoded_color = frame.clear.map(f32::to_bits);
     let mut encoded_bytes = clear;
     for column in 0..columns {
-        let tile = (band_index - frame.tile_bounds[1]) * columns + column;
-        let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
+        let ordered = frame.raster.tile(frame.tile_bounds[0] + column, band_index);
+        stats.tile_references += ordered.len();
         let left = (frame.tile_bounds[0] + column) * TILE;
         let top = band_index * TILE;
         let right = (left + TILE).min(frame.width);
@@ -2083,6 +2087,7 @@ impl CanvasScene<'_> {
             .draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
     }
     pub fn commit(self) {
+        self.target.invalidate_bins();
         self.target.clear = self.pending.clear;
         self.target.commands = self.pending.commands;
         self.target.mask_bytes = self.pending.mask_bytes;
@@ -2108,19 +2113,6 @@ fn validate_rect(rect: Rect) -> Result<(), Error> {
         Err(Error::InvalidGeometry)
     } else {
         Ok(())
-    }
-}
-fn visit_tiles(
-    command: &BorrowedCommand<'_>,
-    tile_bounds: [usize; 4],
-    mut visit: impl FnMut(usize),
-) {
-    let [x, y, r, b] = command.bounds;
-    let columns = tile_bounds[2] - tile_bounds[0];
-    for ty in (y / TILE).max(tile_bounds[1])..b.div_ceil(TILE).min(tile_bounds[3]) {
-        for tx in (x / TILE).max(tile_bounds[0])..r.div_ceil(TILE).min(tile_bounds[2]) {
-            visit((ty - tile_bounds[1]) * columns + tx - tile_bounds[0]);
-        }
     }
 }
 fn full_tile(

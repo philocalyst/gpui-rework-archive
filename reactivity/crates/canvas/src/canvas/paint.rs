@@ -145,8 +145,9 @@ impl Canvas {
     /// material, clear/configuration and command order remain unchanged.
     ///
     /// The diagnostic image becomes dirty on a changed value. Existing CPU
-    /// rasterization still rebuilds disposable CSR bins; this API does not
-    /// claim removal of that work or authority over an external buffer's age.
+    /// rasterization can reuse geometry bins for the same tile envelope, while
+    /// recomputing current opacity cuts. External buffer age remains the host's
+    /// responsibility.
     pub fn prepare_paint<'canvas, 'edits>(
         &'canvas mut self,
         edits: &'edits [PaintEdit],

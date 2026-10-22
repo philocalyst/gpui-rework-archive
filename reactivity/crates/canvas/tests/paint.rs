@@ -97,6 +97,10 @@ fn patches_match_full_replacement_for_profiles_hdr_masks_and_ordered_overlap() {
             assert_eq!(plan.commit(), damage);
             scene(&mut full, &mut text, &layout, colors);
             assert_eq!(patched.pixels(), full.pixels(), "{config:?}, which {which}");
+            assert!(
+                patched.stats().bins_reused,
+                "same-envelope SDR/P3/HDR paint"
+            );
             assert_eq!(
                 patched.prepared_scene().storage().lane_bytes(),
                 storage.lane_bytes()
