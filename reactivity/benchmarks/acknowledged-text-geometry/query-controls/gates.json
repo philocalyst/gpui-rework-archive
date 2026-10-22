@@ -1,0 +1,57 @@
+{
+  "source": "6654378606c052bb39c9338e85441e98b5b86835",
+  "features": "default(simd) for public/lib/Clippy; x11 for matched release clients",
+  "scope": "No B foreignruntime/nativeprotocol rerun. A exact86dd native/cross/fullmatrix remains separate; this control changes query indexing only.",
+  "gates": {
+    "gpui-ack-query-usize-public-tests.log": {
+      "passed": 29,
+      "ignored": 0
+    },
+    "gpui-ack-query-usize-queries.log": {
+      "passed": 3,
+      "ignored": 0
+    },
+    "gpui-ack-query-usize-lib.log": {
+      "passed": 130,
+      "ignored": 5
+    },
+    "strict_default_all_targets_clippy": true
+  },
+  "files_sha256": {
+    "gpui-ack-query-usize-queries.log": "555824f011eb09a007b0c0194492024c1c2beb2568b990adcae2a4d0fa9b9ff6",
+    "gpui-ack-query-usize-clippy.log": "0c642590a7a8e084522078c15f367ef851a13432e1692b53601ee3242e3b4ba7",
+    "gpui-ack-query-a-final-build.log": "0cfb012e004d7b863ad78b424993c2e6e20dc9d3126593936574d8002b14344b",
+    "gpui-ack-query-usize-build.log": "affa4cc0d70621166b309208bd280ae07905835ce325f2768c4744fa9c873434",
+    "gpui-ack-query-usize-public-tests.log": "f4389c928f3856fb11e5371f77866dcddd3dfdaf41ba77e839af699d112231d5",
+    "gpui-ack-query-usize-lib.log": "b1d1520191905b9f35a85094914c6641d08f3eb41a218ac5c0ea6cc00e62fe38",
+    "results.json": "54356481b371d061886a85023c90abed991bf9c02f7f36322f3c456fdd6c86c9",
+    "gpui-ack-query-usize-core-lines.json": "0a024f7106d484b3a0849455ead03e2cba070d54509528aa603b64f8519992bf",
+    "gpui-ack-query-usize-tests.log": "f1597486566af7ec006510dd356eeaa1611fad30023644b5276786dcb47fe550",
+    "usize/symbols.txt": "71b5bacd3e68aba0ee308cc0f80f7ede7bf37b8ad04cf0654f953ba70342aa04",
+    "usize/project-visit.asm": "3817bb11772239d478b31192638736b8ed428abe6aa8e0f27a0a5e8cf53d9dd2",
+    "usize/output.txt": "aa2a75a0f7b95ce923cb5c4bb12549d4ed30804707a82885085ff099d5b4a83a",
+    "usize/visit.asm": "ff3ba4d7220d98883a1d39f3e5de6b169f66cbd191d364d93356d5b58b9a70f4",
+    "usize/projected-node.asm": "871e2c9a88bd2e84a355f6c8d02f641c26f562590ed3588eab0fa43d28b638ea",
+    "usize/cohort-append.asm": "25e7d6797636019cc5177a8b93593cff64e7b092456bc723489dbcb863708150",
+    "usize/client.sha256": "019b96f6b6c70efc7dfca3cb983c94a1ddd2dec9be8a01c99ead6e9d07276133",
+    "usize/sites-target.asm": "daaf4f6eacd2e954a0cb99e674dfd43300314813f806590100f847a0b5588436",
+    "usize/Cargo.lock": "b38df00753088fb2f0139b3bdf6970278c8a8abe845329ebcf4a17c6dbc155b8",
+    "usize/project.asm": "acd5eba8a514cec66070685b988d02757cd082324996a70f86e091e69c9bfe0f",
+    "usize/client.rs": "d764cde530dde7b83aa687a641f626b6af273d2309c10b3e5c0c61bbfe14b3a3",
+    "usize/Cargo.toml": "0a91a6a73a02272211eca60c0761bfd71c1266b42af3494926a5a3bd9f2c72b5",
+    "a/symbols.txt": "d20840fb82291e4deaee1ebdd3f7bef97ffd574a3e5d7fdfe88194099f3440a1",
+    "a/project-visit.asm": "8ffb081b5f4542c07821b334a67a88b3af9b91a1d72e78a01f25c173b16654b6",
+    "a/part-target.asm": "66e8802535541a5abd7a1127d3b73f110a87389e33ece64d2f12b99fac487dab",
+    "a/output.txt": "aa2a75a0f7b95ce923cb5c4bb12549d4ed30804707a82885085ff099d5b4a83a",
+    "a/visit.asm": "314b55543cb085988921637979033d03fb4e6cfa0f68dd1988776728c467511c",
+    "a/projected-node.asm": "6ce5319e1c9c4c93842302efaa691a26e316a270ed8f695e633b3c1c15d8ea88",
+    "a/cohort-append.asm": "2617d8a0e244eceb37a72ba056af9c9bdcf85b653c682c93cfccc130ac66dc01",
+    "a/client.sha256": "bb0d177d3f94fee9817917ffc7596002f6c46125fe4552873e18934ba4c132f8",
+    "a/sites-target.asm": "bec880118ac1c964c3b5eb8d25bd6838c7dd3f7c948b0da6e324e40fd6505b16",
+    "a/Cargo.lock": "b38df00753088fb2f0139b3bdf6970278c8a8abe845329ebcf4a17c6dbc155b8",
+    "a/visit-inner.asm": "d009464c93e256e615a39d60f54f900f2f890d7bf94516f2f8fb1a61e23ca251",
+    "a/project.asm": "0c5f494ff7baee9d2f863cfae0ba70063f7cd7401349af42d46af64927ba4c3a",
+    "a/client.rs": "d764cde530dde7b83aa687a641f626b6af273d2309c10b3e5c0c61bbfe14b3a3",
+    "a/Cargo.toml": "7e372231c82818eb51766964d29d997f5969ed79a6447c5210266f681199d9c7"
+  }
+}

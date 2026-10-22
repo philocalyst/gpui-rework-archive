@@ -1,0 +1,11 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.50s
+     Running tests/queries.rs (/tmp/gpui-acknowledged-text-target/debug/deps/queries-ccdd25b7bc489f51)
+
+running 3 tests
+test query_reads_the_acknowledged_sheet_while_source_edits_wait_for_repair ... ok
+test semantic_queries_use_presented_roles_and_bounds_without_diagnostic_snapshots ... ok
+test scoped_preorder_queries_match_an_independent_parent_walk_for_every_subtree ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

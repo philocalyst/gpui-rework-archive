@@ -1,0 +1,22 @@
+   Compiling wgpu-hal v30.0.1 (/root/gpui-acknowledged-text-controls/reactivity/vendor/wgpu-hal)
+   Compiling accesskit v0.25.1 (/root/gpui-acknowledged-text-controls/reactivity/vendor/accesskit)
+   Compiling winit v0.30.13 (/root/gpui-acknowledged-text-controls/reactivity/vendor/winit)
+   Compiling parley_engine v0.12.0 (/root/gpui-acknowledged-text-controls/reactivity/vendor/parley_engine)
+   Compiling accesskit_consumer v0.39.1 (/root/gpui-acknowledged-text-controls/reactivity/vendor/accesskit_consumer)
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu v30.0.1 (/root/gpui-acknowledged-text-controls/reactivity/vendor/wgpu)
+   Compiling cephal v0.1.1 (/root/gpui-acknowledged-text-controls/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/core)
+   Compiling accesskit_atspi_common v0.21.0 (/root/gpui-acknowledged-text-controls/reactivity/vendor/accesskit_atspi_common)
+   Compiling wgpu-core v30.0.1
+   Compiling gpui_gpu v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/gpu)
+   Compiling parley v0.12.0 (/root/gpui-acknowledged-text-controls/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/canvas)
+   Compiling accesskit_unix v0.24.0 (/root/gpui-acknowledged-text-controls/reactivity/vendor/accesskit_unix)
+   Compiling accesskit_winit v0.34.1
+   Compiling softbuffer v0.4.8 (/root/gpui-acknowledged-text-controls/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/host)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-controls/reactivity/crates/gpui)
+   Compiling ack-query-control v0.0.0 (/tmp/gpui-ack-query-control/usize)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 45s
