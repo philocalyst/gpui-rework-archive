@@ -46,6 +46,81 @@ fn producer_bidi_split_empty_edge_and_inline_box_pairs_match_index() {
     super::span_tests::census_layouts(|layout, _| admitted_like_index(layout));
 }
 
+#[test]
+fn borrowed_spacing_and_completion_match_ordinary_cursors() {
+    use crate::{Alignment, AlignmentOptions, Cursor, layout::Affinity};
+    let mut fonts = super::span_tests::fonts();
+    let mut context = LayoutContext::<()>::new();
+    let families = ["primary", "Arabic", "Hebrew"].map(|s| FontFamilyName::Named(s.into()));
+    for source in [
+        "",
+        "\n\n",
+        "office  אבג العربية \r\nx",
+        "a\u{301}\u{200d}b \u{a0}\u{3000}x",
+    ] {
+        for (word, letter) in [(-24., 0.), (0., -20.), (13.25, 1.25)] {
+            for wrap in [None, Some(0.), Some(31.)] {
+                let mut builder = context.ranged_builder(&mut fonts, source, 1., false);
+                builder.push_default(&families[..]);
+                builder.push_default(StyleProperty::FontSize(16.));
+                builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
+                builder.push_default(StyleProperty::WordSpacing(word));
+                builder.push_default(StyleProperty::LetterSpacing(letter));
+                let mut layout = builder.build(source);
+                layout.break_all_lines(wrap);
+                for alignment in [Alignment::Start, Alignment::Justify] {
+                    layout.align(alignment, AlignmentOptions::default());
+                    for width in [-0., 1., -1., 1e20] {
+                        let requests = (0..=source.len())
+                            .chain([source.len(), 0, source.len(), usize::MAX, 0])
+                            .collect::<Vec<_>>();
+                        let mut received = Vec::new();
+                        assert_eq!(
+                            CursorGeometry::try_for_each_pair(
+                                &layout,
+                                requests.iter().copied(),
+                                width,
+                                |byte, pair| {
+                                    let upstream =
+                                        Cursor::from_byte_index(&layout, byte, Affinity::Upstream);
+                                    let expected = (upstream.index() == byte).then(|| {
+                                        [
+                                            upstream.geometry(&layout, width),
+                                            Cursor::from_byte_index(
+                                                &layout,
+                                                byte,
+                                                Affinity::Downstream,
+                                            )
+                                            .geometry(&layout, width),
+                                        ]
+                                    });
+                                    assert_eq!(
+                                        pair.map(|p| p.map(bits)),
+                                        expected.map(|p| p.map(bits))
+                                    );
+                                    received.push(byte);
+                                    ControlFlow::<()>::Continue(())
+                                }
+                            ),
+                            Some(ControlFlow::Continue(())),
+                        );
+                        assert_eq!(received, requests);
+                        let mut called = 0;
+                        assert_eq!(
+                            CursorGeometry::try_for_each_pair(&layout, requests, width, |_, _| {
+                                called += 1;
+                                ControlFlow::Break("stop")
+                            }),
+                            Some(ControlFlow::Break("stop")),
+                        );
+                        assert_eq!(called, 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn rejected_before_geometry_callback(layout: &Layout<()>) {
     assert!(CursorGeometry::new(layout).is_none());
     let mut callbacks = 0;
