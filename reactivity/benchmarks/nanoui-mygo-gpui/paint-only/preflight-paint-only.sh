@@ -126,6 +126,8 @@ sha_is "$FONT" "$FONT_SHA"
 
 [[ $(git -C "$LUNA_MYGO_SOURCE_TREE" rev-parse HEAD) == "$MYGO_COMMIT" ]]
 [[ $(git -C "$LUNA_NANOUI_SOURCE_TREE" rev-parse HEAD) == "$NANOUI_COMMIT" ]]
+[[ $(git -C "$LUNA_MYGO_SOURCE_TREE" rev-parse --show-toplevel) == "$LUNA_MYGO_SOURCE_TREE" ]]
+[[ $(git -C "$LUNA_NANOUI_SOURCE_TREE" rev-parse --show-toplevel) == "$LUNA_NANOUI_SOURCE_TREE" ]]
 git -C "$LUNA_MYGO_SOURCE_TREE" diff --quiet "$MYGO_COMMIT" --
 [[ $(git -C "$LUNA_NANOUI_SOURCE_TREE" diff --name-only "$NANOUI_COMMIT" --) == build.zig ]]
 [[ $(git -C "$LUNA_NANOUI_SOURCE_TREE" diff --binary "$NANOUI_COMMIT" -- build.zig | sha256sum | cut -d' ' -f1) == "$NANOUI_PATCH_SHA" ]]
@@ -194,6 +196,11 @@ for workload in "${workloads[@]}"; do
   done
 done
 
+(
+  cd "$OUT"
+  sha256sum ./*.log ./*.ppm > evidence.sha256
+)
+evidence_sha=$(sha256sum "$OUT/evidence.sha256" | cut -d' ' -f1)
 build_config_sha=$(sha256sum "$LUNA_NANOUI_SOURCE_TREE/build.zig" | cut -d' ' -f1)
 for variant in gpui-control gpui-direct; do
   if [[ "$variant" == gpui-control ]]; then
@@ -212,6 +219,8 @@ for variant in gpui-control gpui-direct; do
     echo "workloads=$WORKLOADS"
     echo "checks=$CHECKS"
     echo "preflight_dir=$OUT"
+    echo "evidence_manifest=$OUT/evidence.sha256"
+    echo "evidence_manifest_sha256=$evidence_sha"
   } > "$OUT/$variant-record.txt"
 done
 for app in mygo nanoui; do
@@ -232,6 +241,8 @@ for app in mygo nanoui; do
     echo "workloads=$WORKLOADS"
     echo "checks=$CHECKS"
     echo "preflight_dir=$OUT"
+    echo "evidence_manifest=$OUT/evidence.sha256"
+    echo "evidence_manifest_sha256=$evidence_sha"
     if [[ "$app" == nanoui ]]; then echo "build_config_sha256=$build_config_sha"; fi
   } > "$OUT/$app-record.txt"
 done
@@ -263,5 +274,5 @@ done
   echo "peer_font_sha256=$FONT_SHA"
   echo "evidence_dir=$OUT"
 } > "$OUT/record.txt"
-(cd "$OUT" && sha256sum ./*.log ./*.ppm ./*-record.txt record.txt > sha256.txt)
+(cd "$OUT" && sha256sum ./*.log ./*.ppm ./*-record.txt record.txt evidence.sha256 > sha256.txt)
 echo "preflight evidence ready for manual review: $OUT"

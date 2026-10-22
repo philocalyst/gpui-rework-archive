@@ -79,7 +79,7 @@ sha_is() {
 }
 has_line() { rg -Fxq "$2" "$1" || { echo "record $1 missing: $2" >&2; return 1; }; }
 record_ok() {
-  local record=$1 sha=$2 fixture=$3 source=$4
+  local record=$1 sha=$2 fixture=$3 source=$4 evidence_dir evidence_manifest evidence_sha
   [[ -f "$record" ]] || { echo "missing reviewed record $record" >&2; return 1; }
   has_line "$record" 'status=pass'
   has_line "$record" "binary_sha256=$sha"
@@ -87,6 +87,16 @@ record_ok() {
   has_line "$record" "source_commit=$source"
   has_line "$record" 'workloads=eager-0,eager-1000,eager-10000,virtual-250000'
   has_line "$record" 'checks=observer-preflight,800x600-client,exact-marker,button-and-row-ink,one-click-exact-marker-transition'
+  evidence_dir=$(awk -F= '$1=="preflight_dir"{print substr($0,index($0,"=")+1)}' "$record")
+  evidence_manifest=$(awk -F= '$1=="evidence_manifest"{print substr($0,index($0,"=")+1)}' "$record")
+  evidence_sha=$(awk -F= '$1=="evidence_manifest_sha256"{print $2}' "$record")
+  [[ -n "$evidence_dir" && "$evidence_manifest" == "$evidence_dir/evidence.sha256" && -n "$evidence_sha" ]] || {
+    echo "preflight record $record lacks the evidence manifest identity" >&2; return 1;
+  }
+  sha_is "$evidence_manifest" "$evidence_sha"
+  (cd "$evidence_dir" && sha256sum -c evidence.sha256 >/dev/null) || {
+    echo "preflight images/logs differ from reviewed evidence manifest in $evidence_dir" >&2; return 1;
+  }
 }
 gpui_build_manifest_ok() {
   local manifest=$1 binary=$2 sha=$3 fixture=$4 fixture_sha=$5

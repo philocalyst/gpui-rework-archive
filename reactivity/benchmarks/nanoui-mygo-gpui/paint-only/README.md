@@ -73,7 +73,10 @@ exists and a reviewer has checked all preflight records.
 checks. It creates one screenshot and log per variant/workload, emits records
 with `status=awaiting-manual-review`, and hashes the artifacts. Review every
 image and log before changing those records to `status=pass`; the capture guard
-rejects records that still await review.
+rejects records that still await review and rechecks the evidence manifest
+against every screenshot/log before timing. After editing the record statuses,
+regenerate the directory's top-level `sha256.txt`; the immutable
+`evidence.sha256` continues to cover the reviewed images and logs.
 
 Use 100 fresh starts and 10 click transitions per start, giving 1,000 click
 samples per cell; take the existing five 750 ms idle samples only as a small
