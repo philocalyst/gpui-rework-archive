@@ -2,7 +2,7 @@
 //! is a window-qualified selection and picking mode. UI text uses the ordinary
 //! text lane; there is no copied application tree or per-node diagnostic data.
 use super::*;
-use crate::property::{BACKGROUND, WIDTH};
+use crate::property::{PROPERTIES, PropertyId, PropertyValue, ValueKind, WIDTH};
 use crate::{El, button, column, div, rgb, row, text};
 use std::fmt;
 
@@ -25,10 +25,23 @@ fn replace_caption(text: &mut TextSite, value: fmt::Arguments<'_>) -> bool {
     true
 }
 
-#[derive(Default)]
 pub(super) struct Inspector {
     selected: Option<Target>,
+    property: PropertyId,
+    component: u8,
     picking: bool,
+    rejected: Option<Rejection>,
+}
+impl Default for Inspector {
+    fn default() -> Self {
+        Self {
+            selected: None,
+            property: PropertyId::Width,
+            component: 0,
+            picking: false,
+            rejected: None,
+        }
+    }
 }
 #[derive(Clone, Copy)]
 pub(crate) enum WindowAction {
@@ -38,22 +51,35 @@ pub(crate) enum WindowAction {
 pub(crate) enum InspectorAction {
     Pick,
     Parent,
-    WidthGrow,
-    WidthAuto,
-    WidthInherit,
-    BackgroundSet,
-    BackgroundInherit,
+    Choose(PropertyId),
+    Edit(PropertyId, EditorOp),
+}
+#[derive(Clone, Copy)]
+pub(crate) enum EditorOp {
+    Component,
+    Decrease,
+    Increase,
+    Auto,
+    Inherit,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Rejection {
+    Property(crate::property::PropertyErrorKind),
+    InvalidColor,
+    ColorOutOfRange,
 }
 // This fixed tree is an explicit private contract. Offsets are used only after
 // discovering the current panel root in this description's logical cohort.
-const PANEL_NODES: usize = 17;
+const CATALOG: usize = 5;
+const EDITOR: usize = CATALOG + PROPERTIES.len();
+const PANEL_NODES: usize = EDITOR + 10;
 #[derive(Clone, Copy, Debug)]
 enum Caption {
     Pick,
     Selection,
     Layout,
-    Width,
-    Background,
+    Editor,
+    Component,
     Bounds,
     Transform,
 }
@@ -62,8 +88,8 @@ impl Caption {
         Self::Pick,
         Self::Selection,
         Self::Layout,
-        Self::Width,
-        Self::Background,
+        Self::Editor,
+        Self::Component,
         Self::Bounds,
         Self::Transform,
     ];
@@ -72,10 +98,10 @@ impl Caption {
             Self::Pick => 2,
             Self::Selection => 3,
             Self::Layout => 4,
-            Self::Width => 5,
-            Self::Background => 10,
-            Self::Bounds => 15,
-            Self::Transform => 16,
+            Self::Editor => EDITOR,
+            Self::Component => EDITOR + 1,
+            Self::Bounds => EDITOR + 8,
+            Self::Transform => EDITOR + 9,
         }
     }
     const fn initial(self) -> &'static str {
@@ -83,15 +109,15 @@ impl Caption {
             Self::Pick => "Pick element",
             Self::Selection => "Select an application element",
             Self::Layout => "Layout: —",
-            Self::Width => "Width: —",
-            Self::Background => "Background: —",
+            Self::Editor => "Logical value: —",
+            Self::Component => "Component",
             Self::Bounds => "Presented bounds: —",
             Self::Transform => "Presented transform: —",
         }
     }
     const fn kind(self) -> NodeKind {
         match self {
-            Self::Pick => NodeKind::Button,
+            Self::Pick | Self::Component => NodeKind::Button,
             _ => NodeKind::Text,
         }
     }
@@ -116,6 +142,7 @@ fn line(value: &'static str) -> El<'static> {
 }
 fn control(label: &'static str, action: InspectorAction) -> El<'static> {
     button(label)
+        .name(label)
         .h(28)
         .p(4)
         .font_size(12)
@@ -123,7 +150,7 @@ fn control(label: &'static str, action: InspectorAction) -> El<'static> {
         .fg(rgb(0xf8fafc))
         .on_window(WindowAction::Inspector(action))
 }
-fn panel(height: f32) -> El<'static> {
+fn panel(height: f32, property: PropertyId) -> El<'static> {
     use InspectorAction::*;
     column(
         [
@@ -131,42 +158,139 @@ fn panel(height: f32) -> El<'static> {
             control(Caption::Pick.initial(), Pick),
             caption(Caption::Selection),
             caption(Caption::Layout),
-            caption(Caption::Width),
+        ]
+        .into_iter()
+        .chain(
+            PROPERTIES
+                .iter()
+                .map(|info| control(info.name, Choose(info.id))),
+        )
+        .chain([
+            caption(Caption::Editor),
+            control(
+                Caption::Component.initial(),
+                Edit(property, EditorOp::Component),
+            ),
             row((
-                control("Width +20", WidthGrow),
-                control("Auto", WidthAuto),
-                control("Inherit width", WidthInherit),
-            ))
-            .gap(4),
-            caption(Caption::Background),
-            row((
-                control("Set tint", BackgroundSet),
-                control("Inherit tint", BackgroundInherit),
+                control("Decrease", Edit(property, EditorOp::Decrease)),
+                control("Increase", Edit(property, EditorOp::Increase)),
+                control("Auto", Edit(property, EditorOp::Auto)),
+                control("Inherit", Edit(property, EditorOp::Inherit)),
             ))
             .gap(4),
             control("Select parent", Parent),
             caption(Caption::Bounds),
             caption(Caption::Transform),
-        ]
-        .into_iter(),
+        ]),
     )
     .w(320)
     .h(height)
     .p(12)
     .gap(8)
     .bg(rgb(0x0f172a))
+    .scroll(crate::Axis::Y)
+    .name("GPUI Inspector")
+}
+fn components(kind: ValueKind) -> u8 {
+    match kind {
+        ValueKind::Transform => 6,
+        ValueKind::Color => 4,
+        _ => 1,
+    }
+}
+fn component_name(value: PropertyValue, component: u8) -> &'static str {
+    match value {
+        PropertyValue::Transform(_) => ["a", "b", "c", "d", "tx", "ty"][component as usize],
+        PropertyValue::Color(color) if color.space() == crate::ColorSpace::Oklch => {
+            ["L", "C", "h", "alpha"][component as usize]
+        }
+        PropertyValue::Color(_) => ["R", "G", "B", "alpha"][component as usize],
+        _ => "value",
+    }
+}
+fn cycle<T: Copy + Eq>(current: T, values: &[T], direction: f32) -> T {
+    values
+        .iter()
+        .position(|value| *value == current)
+        .map_or(current, |index| {
+            values[(index + if direction > 0. { 1 } else { values.len() - 1 }) % values.len()]
+        })
+}
+// These are explicit step/cycle controls, not arbitrary numeric/text entry.
+// The declaration and Color constructors remain the only range validators.
+fn adjust(value: PropertyValue, component: u8, direction: f32) -> Result<PropertyValue, Error> {
+    use crate::{Align, ColorSpace, Flow, Justify};
+    use PropertyValue::*;
+    Ok(match value {
+        Dimension(value) => Dimension(Some(value.unwrap_or(0.) + direction)),
+        Number(value) => Number(value + direction),
+        Flag(_) => Flag(direction > 0.),
+        Flow(value) => Flow(cycle(value, &[Flow::Row, Flow::Column], direction)),
+        Align(value) => Align(cycle(
+            value,
+            &[
+                Align::Start,
+                Align::End,
+                Align::Center,
+                Align::Stretch,
+                Align::Baseline,
+            ],
+            direction,
+        )),
+        Justify(value) => Justify(cycle(
+            value,
+            &[
+                Justify::Start,
+                Justify::End,
+                Justify::Center,
+                Justify::SpaceBetween,
+                Justify::SpaceAround,
+                Justify::SpaceEvenly,
+            ],
+            direction,
+        )),
+        Transform(value) => {
+            let mut values = [value.a, value.b, value.c, value.d, value.tx, value.ty];
+            values[component as usize] += direction;
+            let [a, b, c, d, tx, ty] = values;
+            Transform(Affine { a, b, c, d, tx, ty })
+        }
+        Color(value) => {
+            let mut values = value.channels();
+            let step = if value.space() == ColorSpace::Oklch && component == 2 {
+                15.
+            } else {
+                0.05
+            };
+            values[component as usize] += direction * step;
+            let [a, b, c, alpha] = values;
+            Color(match value.space() {
+                ColorSpace::Srgb => crate::Color::srgb(a, b, c, alpha),
+                ColorSpace::LinearSrgb => crate::Color::linear_srgb(a, b, c, alpha),
+                ColorSpace::DisplayP3 => crate::Color::display_p3(a, b, c, alpha),
+                ColorSpace::LinearDisplayP3 => crate::Color::linear_display_p3(a, b, c, alpha),
+                ColorSpace::Oklch => crate::Color::oklch(a, b, c, alpha),
+            }?)
+        }
+    })
 }
 impl<M: View + 'static> Runtime<M> {
-    pub(super) fn inspector_enabled(&self) -> bool {
-        self.metadata
-            .as_deref()
-            .is_some_and(|m| m.inspector.is_some())
-    }
-    pub(super) fn inspector_picking(&self) -> bool {
+    fn inspector(&self) -> Option<&Inspector> {
         self.metadata
             .as_deref()
             .and_then(|m| m.inspector.as_deref())
-            .is_some_and(|i| i.picking)
+    }
+    fn inspector_mut(&mut self) -> &mut Inspector {
+        self.metadata
+            .as_deref_mut()
+            .and_then(|m| m.inspector.as_deref_mut())
+            .expect("enabled inspector")
+    }
+    pub(super) fn inspector_enabled(&self) -> bool {
+        self.inspector().is_some()
+    }
+    pub(super) fn inspector_picking(&self) -> bool {
+        self.inspector().is_some_and(|i| i.picking)
     }
     fn inspector_panel(&self) -> Option<usize> {
         if !self.inspector_enabled() {
@@ -202,7 +326,7 @@ impl<M: View + 'static> Runtime<M> {
     }
     pub(super) fn inspector_display(&self) -> Option<DisplayCaptions> {
         let panel = self.inspector_panel()?;
-        let target = self.metadata.as_ref()?.inspector.as_ref()?.selected?;
+        let target = self.inspector()?.selected?;
         let selected = self.inspector_app_index(target).ok()?;
         Some(DisplayCaptions {
             panel,
@@ -234,18 +358,15 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
             }
         }
-        let state = self.metadata.as_ref().unwrap().inspector.as_ref().unwrap();
+        let state = self.inspector().unwrap();
         let selected = state
             .selected
             .filter(|target| self.inspector_app_index(*target).is_ok());
         let picking = state.picking;
-        self.metadata
-            .as_mut()
-            .unwrap()
-            .inspector
-            .as_mut()
-            .unwrap()
-            .selected = selected;
+        let property = state.property;
+        let component = state.component;
+        let rejected = state.rejected;
+        self.inspector_mut().selected = selected;
         self.refresh_caption(
             panel,
             Caption::Pick,
@@ -260,11 +381,7 @@ impl<M: View + 'static> Runtime<M> {
         )?;
         if let Some(target) = selected {
             let index = self.inspector_app_index(target)?;
-            let (width, background) = self
-                .styles
-                .with(index, |style| (WIDTH.get(style), BACKGROUND.get(style)));
-            let width_presence = self.overrides.get(self.nodes[index].identity(), WIDTH);
-            let background_presence = self.overrides.get(self.nodes[index].identity(), BACKGROUND);
+            let identity = self.nodes[index].identity();
             self.refresh_caption(
                 panel,
                 Caption::Selection,
@@ -274,23 +391,41 @@ impl<M: View + 'static> Runtime<M> {
                     self.nodes[index].identity()
                 ),
             )?;
+            for (row, info) in PROPERTIES.iter().enumerate() {
+                let value = self.property_value_at(index, info.id)?;
+                let presence = self.property_contribution_at(identity, info.id);
+                self.refresh_text(
+                    panel + CATALOG + row,
+                    format_args!(
+                        "{}{}: {value:?}\n{}",
+                        if info.id == property { "> " } else { "" },
+                        info.name,
+                        if matches!(presence, Contribution::Inherit) {
+                            "Inherit"
+                        } else {
+                            "Set"
+                        }
+                    ),
+                )?;
+            }
+            let value = self.property_value_at(index, property)?;
+            if let Some(reason) = rejected {
+                self.refresh_caption(
+                    panel,
+                    Caption::Editor,
+                    format_args!("Last edit rejected: {reason:?}"),
+                )?;
+            } else {
+                self.refresh_caption(
+                    panel,
+                    Caption::Editor,
+                    format_args!("Logical {}: {value:?}", property.info().name),
+                )?;
+            }
             self.refresh_caption(
                 panel,
-                Caption::Width,
-                format_args!("Width: {width:?}\n{width_presence:?}"),
-            )?;
-            self.refresh_caption(
-                panel,
-                Caption::Background,
-                format_args!(
-                    "Background: {:.2?}\n{}",
-                    background.channels(),
-                    if matches!(background_presence, Contribution::Inherit) {
-                        "Inherit"
-                    } else {
-                        "Set"
-                    }
-                ),
+                Caption::Component,
+                format_args!("Component: {}", component_name(value, component)),
             )?;
             if laid_out {
                 let size = self.layout.layout(self.layout_nodes[index])?.size;
@@ -310,6 +445,9 @@ impl<M: View + 'static> Runtime<M> {
                     self.refresh_caption(panel, field, format_args!("{}", field.initial()))?;
                 }
             }
+            for (row, info) in PROPERTIES.iter().enumerate() {
+                self.refresh_text(panel + CATALOG + row, format_args!("{}", info.name))?;
+            }
         }
         Ok(())
     }
@@ -321,6 +459,9 @@ impl<M: View + 'static> Runtime<M> {
     ) -> Result<(), Error> {
         let index = panel + field.offset();
         debug_assert_eq!(self.nodes[index].kind(), field.kind());
+        self.refresh_text(index, value)
+    }
+    fn refresh_text(&mut self, index: usize, value: fmt::Arguments<'_>) -> Result<(), Error> {
         let slot = self.nodes[index].text_slot();
         let text = slot
             .get_mut(&mut self.texts)
@@ -402,16 +543,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let state = self
-            .runtime
-            .metadata
-            .as_mut()
-            .unwrap()
-            .inspector
-            .as_mut()
-            .unwrap();
+        let state = self.inspector_mut();
         state.selected = Some(target);
         state.picking = false;
+        state.rejected = None;
         self.runtime.source_epoch = epoch;
         self.runtime.counters.source_operations += 1;
         self.runtime.changed_nodes = 0;
@@ -426,34 +561,53 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             return Err(Error::MissingElement);
         }
         self.runtime.changed_nodes = 0;
-        if matches!(action, Pick) {
+        let state = self.inspector().unwrap();
+        let old = (state.property, state.component, state.picking);
+        if matches!(action, Edit(id, _) if id != state.property) {
+            return Err(Error::StaleTarget);
+        }
+        let control = match action {
+            Pick => Some((state.property, state.component, true)),
+            Choose(id) => Some((id, 0, state.picking)),
+            Edit(id, EditorOp::Component) => Some((
+                id,
+                (state.component + 1) % components(id.info().kind),
+                state.picking,
+            )),
+            _ => None,
+        };
+        if let Some(next) = control {
+            if next == old && state.rejected.is_none() {
+                return Ok(self.commit());
+            }
             let epoch = self
                 .source_epoch
                 .checked_add(1)
                 .ok_or(Error::EpochExhausted)?;
-            self.runtime
-                .metadata
-                .as_mut()
-                .unwrap()
-                .inspector
-                .as_mut()
-                .unwrap()
-                .picking = true;
+            let state = self.inspector_mut();
+            (state.property, state.component, state.picking) = next;
+            state.rejected = None;
+            if next.0 != old.0 {
+                let panel = self.inspector_panel().unwrap();
+                for (offset, op) in [
+                    (1, EditorOp::Component),
+                    (3, EditorOp::Decrease),
+                    (4, EditorOp::Increase),
+                    (5, EditorOp::Auto),
+                    (6, EditorOp::Inherit),
+                ] {
+                    self.nodes[panel + EDITOR + offset].handler = Some(
+                        crate::element::Handler::window(WindowAction::Inspector(Edit(next.0, op))),
+                    );
+                }
+            }
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
             self.runtime.changed_nodes = 0;
+            self.runtime.dirty = true;
             return self.present();
         }
-        let Some(target) = self
-            .runtime
-            .metadata
-            .as_ref()
-            .unwrap()
-            .inspector
-            .as_ref()
-            .unwrap()
-            .selected
-        else {
+        let Some(target) = self.inspector().unwrap().selected else {
             return Ok(self.commit());
         };
         let index = match self.inspector_app_index(target) {
@@ -462,7 +616,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             Err(error) => return Err(error),
         };
         match action {
-            Pick => unreachable!(),
+            Pick | Choose(_) => unreachable!(),
             Parent => {
                 let parent = self.nodes[index].parent.index().ok_or(Error::StaleTarget)?;
                 let target = self.sites.target(self.nodes[parent].identity());
@@ -471,21 +625,59 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 }
                 self.inspector_select(target)
             }
-            WidthGrow => {
-                let width = self
-                    .styles
-                    .with(index, |style| WIDTH.get(style))
-                    .unwrap_or(0.0)
-                    + 20.0;
-                self.set_property(target, WIDTH, Contribution::Set(Some(width)))
+            Edit(id, op) => {
+                let value = self.property_value_at(index, id)?;
+                let contribution = match op {
+                    EditorOp::Inherit => Contribution::Inherit,
+                    EditorOp::Auto => Contribution::Set(PropertyValue::Dimension(None)),
+                    EditorOp::Decrease | EditorOp::Increase => {
+                        let value = match adjust(
+                            value,
+                            old.1,
+                            if matches!(op, EditorOp::Increase) {
+                                1.
+                            } else {
+                                -1.
+                            },
+                        ) {
+                            Ok(value) => value,
+                            Err(Error::Canvas(gpui_canvas::Error::InvalidColor)) => {
+                                return self.reject_editor(Rejection::InvalidColor);
+                            }
+                            Err(Error::Canvas(gpui_canvas::Error::ColorOutOfRange)) => {
+                                return self.reject_editor(Rejection::ColorOutOfRange);
+                            }
+                            Err(error) => return Err(error),
+                        };
+                        Contribution::Set(value)
+                    }
+                    EditorOp::Component => unreachable!(),
+                };
+                if let Contribution::Set(value) = contribution
+                    && let Err(error) = id.validate_erased(value)
+                {
+                    return self.reject_editor(Rejection::Property(error.reason));
+                }
+                let epoch = self
+                    .source_epoch
+                    .checked_add(1)
+                    .ok_or(Error::EpochExhausted)?;
+                self.inspector_mut().rejected = None;
+                self.set_property_value_at(index, epoch, id, contribution)
             }
-            WidthAuto => self.set_property(target, WIDTH, Contribution::Set(None)),
-            WidthInherit => self.set_property(target, WIDTH, Contribution::Inherit),
-            BackgroundSet => {
-                self.set_property(target, BACKGROUND, Contribution::Set(rgb(0x0d9488)))
-            }
-            BackgroundInherit => self.set_property(target, BACKGROUND, Contribution::Inherit),
         }
+    }
+    fn reject_editor(&mut self, reason: Rejection) -> Result<Commit, Error> {
+        let state = self.inspector_mut();
+        if state.rejected == Some(reason) {
+            return Ok(self.commit());
+        }
+        state.rejected = Some(reason);
+        self.changed_nodes = 0;
+        self.dirty = true;
+        // Feedback is a same-S interaction frame. The canonical writer was not
+        // admitted: no property/contribution/source epoch changes on rejection.
+        self.present()
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
@@ -499,25 +691,28 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         Ok(runtime
-            .metadata
-            .as_deref()
-            .and_then(|m| m.inspector.as_deref())
+            .inspector()
             .and_then(|i| i.selected)
             .filter(|target| runtime.inspector_app_index(*target).is_ok()))
     }
 }
 
-pub(super) fn description<M: View>(model: &M, enabled: bool, size: [u32; 2], scale: f32) -> El<'_> {
+pub(super) fn description<'a, M: View>(
+    model: &'a M,
+    inspector: Option<&Inspector>,
+    size: [u32; 2],
+    scale: f32,
+) -> El<'a> {
     let app = model.view();
-    if !enabled {
+    let Some(inspector) = inspector else {
         return app;
-    }
+    };
     let width = size[0] as f32 / scale;
     let height = size[1] as f32 / scale;
     // Installed at initial mount; tool changes retain the application path.
     row((
         div().w((width - 320.0).max(0.0)).h(height).child(app),
-        panel(height),
+        panel(height, inspector.property),
     ))
     .w(width)
     .h(height)
@@ -528,7 +723,7 @@ mod tests {
     use super::*;
     #[test]
     fn every_typed_caption_matches_its_constructed_panel_slot() {
-        let nodes = panel(560.0).flatten();
+        let nodes = panel(560.0, PropertyId::Width).flatten();
         assert_eq!(nodes.len(), PANEL_NODES);
         for field in Caption::ALL {
             let node = &nodes[field.offset()];

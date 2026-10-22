@@ -4,6 +4,25 @@ use gpui::{
     property::{BACKGROUND, Contribution, HEIGHT, TRANSFORM, WIDTH},
 };
 
+fn control<M: View + 'static>(window: &Win<M>, name: &str) -> Target {
+    let panel = window
+        .role(gpui::Role::ScrollView)
+        .name("GPUI Inspector")
+        .one()
+        .unwrap();
+    window.query().name(name).within(panel).one().unwrap()
+}
+fn click_control<M: View + 'static>(
+    window: &mut Win<M>,
+    name: &str,
+) -> Result<gpui::Commit, Error> {
+    let target = control(window, name);
+    window.scroll_into_view(target)?;
+    let token = window.with_scene(|_, token| token)?;
+    window.presented(token)?;
+    window.click(target)
+}
+
 struct Panel {
     width: u32,
 }
@@ -145,15 +164,16 @@ fn inspector_controls_without_a_selection_are_inert() {
         }
         assert_eq!(window.inspector_selected().unwrap(), None);
         window.reset_counters().unwrap();
-        for label in [
-            "Width +20",
-            "Auto",
-            "Inherit width",
-            "Set tint",
-            "Inherit tint",
-            "Select parent",
-        ] {
-            assert_eq!(window.click(window.button(label)).unwrap().changed_nodes, 0);
+        // Position-free ordinary activation isolates inert editing from the
+        // intentional presentation work needed to scroll an offscreen control.
+        for label in ["Decrease", "Increase", "Auto", "Inherit", "Select parent"] {
+            assert_eq!(
+                window
+                    .activate(control(&window, label))
+                    .unwrap()
+                    .changed_nodes,
+                0
+            );
         }
         assert_eq!(window.counters().source_operations, 0);
         assert_eq!(window.counters().owner_reruns, 0);
@@ -183,7 +203,7 @@ fn inspector_parent_walk_stops_at_the_application_root() {
     for _ in 0..3 {
         assert_eq!(
             window
-                .click(window.button("Select parent"))
+                .activate(control(&window, "Select parent"))
                 .unwrap()
                 .changed_nodes,
             0
@@ -289,24 +309,28 @@ fn actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_propert
     assert_eq!(win.inspector_selected().unwrap(), Some(target));
     assert_eq!(win.root().unwrap().clicks, 0);
     win.reset_counters().unwrap();
-    win.click(win.button("Width +20")).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(100.0));
+    click_control(&mut win, "Increase").unwrap();
+    assert_eq!(win.property(target, WIDTH).unwrap(), Some(81.0));
     assert_eq!(
         win.contribution(target, WIDTH).unwrap(),
-        Contribution::Set(Some(100.0))
+        Contribution::Set(Some(81.0))
     );
-    win.click(win.button("Auto")).unwrap();
+    click_control(&mut win, "Auto").unwrap();
     assert_eq!(
         win.contribution(target, WIDTH).unwrap(),
         Contribution::Set(None)
     );
     win.update(|m| m.width = 140).unwrap();
     assert_eq!(card(&win), target);
-    win.click(win.button("Inherit width")).unwrap();
+    click_control(&mut win, "Inherit").unwrap();
     assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
-    win.click(win.button("Set tint")).unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), rgb(0x0d9488));
-    win.click(win.button("Inherit tint")).unwrap();
+    click_control(&mut win, "background").unwrap();
+    click_control(&mut win, "Increase").unwrap();
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap(),
+        Color::srgb(18. / 255. + 0.05, 52. / 255., 86. / 255., 1.).unwrap()
+    );
+    click_control(&mut win, "Inherit").unwrap();
     assert_eq!(win.property(target, BACKGROUND).unwrap(), rgb(0x123456));
     assert_eq!(
         win.counters().owner_reruns,
@@ -327,7 +351,7 @@ fn inspector_selection_rejects_foreign_panel_and_removed_targets_before_admissio
     let before = a.snapshot().unwrap().source_epoch;
     assert_eq!(a.inspector_select(card(&b)), Err(Error::StaleTarget));
     assert_eq!(
-        a.inspector_select(a.button("Set tint")),
+        a.inspector_select(control(&a, "Increase")),
         Err(Error::StaleTarget)
     );
     assert_eq!(a.snapshot().unwrap().source_epoch, before);
@@ -336,7 +360,10 @@ fn inspector_selection_rejects_foreign_panel_and_removed_targets_before_admissio
     assert_eq!(a.inspector_selected().unwrap(), None);
     let epoch = a.snapshot().unwrap().source_epoch;
     assert_eq!(a.inspector_select(original), Err(Error::StaleTarget));
-    assert_eq!(a.click(a.button("Set tint")).unwrap().changed_nodes, 0);
+    assert_eq!(
+        a.activate(control(&a, "Increase")).unwrap().changed_nodes,
+        0
+    );
     assert_eq!(a.snapshot().unwrap().source_epoch, epoch);
     a.update(|m| m.show = true).unwrap();
     assert_ne!(card(&a), original);
@@ -360,12 +387,19 @@ fn pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_
     pointer_click(&mut win, &mut mouse, Point { x: 20.0, y: 20.0 }).unwrap();
     acknowledge(&mut win);
     assert_eq!(win.inspector_selected().unwrap(), Some(target));
-    let tint = win.button("Set tint");
+    click_control(&mut win, "background").unwrap();
+    acknowledge(&mut win);
+    let tint = control(&win, "Increase");
+    win.scroll_into_view(tint).unwrap();
+    acknowledge(&mut win);
     win.focus(tint).unwrap();
     assert!(win.update(|m| m.broken = true).is_err());
     assert_eq!(win.click(tint), Err(Error::PresentationStale));
     win.key(Key::Enter).unwrap_err(); // logical tint commits, visual prepare still fails
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), rgb(0x0d9488));
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap(),
+        Color::srgb(18. / 255. + 0.05, 52. / 255., 86. / 255., 1.).unwrap()
+    );
     win.update(|m| m.broken = false).unwrap();
     acknowledge(&mut win);
     assert_eq!(win.inspector_selected().unwrap(), Some(target));
@@ -408,17 +442,17 @@ fn inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base
     let target = win.query().name("bound card").one().unwrap();
     win.inspector_select(target).unwrap();
     win.reset_counters().unwrap();
-    win.click(win.button("Width +20")).unwrap();
+    click_control(&mut win, "Increase").unwrap();
     win.click(win.button("Update source")).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(100.0));
-    win.click(win.button("Inherit width")).unwrap();
+    assert_eq!(win.property(target, WIDTH).unwrap(), Some(81.0));
+    click_control(&mut win, "Inherit").unwrap();
     assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
     assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().descriptions, 0);
     win.resize_scaled([1200, 840], 1.5).unwrap();
     assert_eq!(win.inspector_selected().unwrap(), Some(target));
     assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
-    assert!(win.bounds(win.button("Set tint")).unwrap().x > 700.0);
+    assert!(win.bounds(control(&win, "Increase")).unwrap().x > 700.0);
 }
 
 #[test]
@@ -436,7 +470,7 @@ fn inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_f
         .filter(|t| t.starts_with("Displayed "))
         .cloned()
         .collect();
-    win.click(win.button("Width +20")).unwrap();
+    click_control(&mut win, "Increase").unwrap();
     win.set_property(
         target,
         TRANSFORM,
@@ -493,7 +527,7 @@ fn inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_f
             .any(|n| n.text.as_deref() == Some(transform_label.as_str()))
     );
     assert!(
-        bounds.width >= 100.0 && (bounds.width - 100.0).abs() < 1e-3,
+        bounds.width >= 81.0 && (bounds.width - 81.0).abs() < 1e-3,
         "conservative bounds round outward"
     );
     assert_eq!(transform.tx, 30.0);
@@ -506,4 +540,168 @@ fn inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_f
     );
     assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().paint_passes, 0);
+}
+
+#[test]
+fn catalog_controls_edit_and_inherit_all_thirteen_picked_live_properties() {
+    use gpui::property::{PROPERTIES, PropertyValue};
+    let mut win = inspected(false);
+    let target = card(&win);
+    click_control(&mut win, "Pick element").unwrap();
+    pointer_click(
+        &mut win,
+        &mut PointerSession::default(),
+        Point { x: 20., y: 20. },
+    )
+    .unwrap();
+    assert_eq!(win.inspector_selected().unwrap(), Some(target));
+    win.reset_counters().unwrap();
+    for info in PROPERTIES {
+        click_control(&mut win, info.name).unwrap();
+        let before = win.property_value(target, info.id).unwrap();
+        let direction = match before {
+            PropertyValue::Color(value)
+                if value.space() == gpui::ColorSpace::Oklch && value.channels()[0] >= 0.95 =>
+            {
+                "Decrease"
+            }
+            _ => "Increase",
+        };
+        click_control(&mut win, direction).unwrap();
+        let after = win.property_value(target, info.id).unwrap();
+        assert_ne!(after, before, "{}", info.name);
+        assert_eq!(
+            win.property_contribution(target, info.id).unwrap(),
+            Contribution::Set(after)
+        );
+        click_control(&mut win, "Inherit").unwrap();
+        assert_eq!(win.property_value(target, info.id).unwrap(), before);
+        assert_eq!(
+            win.property_contribution(target, info.id).unwrap(),
+            Contribution::Inherit
+        );
+    }
+    assert_eq!(win.counters().owner_reruns, 0);
+    assert_eq!(win.counters().descriptions, 0);
+}
+
+#[test]
+fn transform_editor_exposes_each_of_the_six_components() {
+    use gpui::property::{PropertyId, PropertyValue};
+    let mut win = inspected(false);
+    let target = card(&win);
+    win.inspector_select(target).unwrap();
+    click_control(&mut win, "transform").unwrap();
+    for (index, name) in ["a", "b", "c", "d", "tx", "ty"].into_iter().enumerate() {
+        assert!(win.contains_text(&format!("Component: {name}")).unwrap());
+        click_control(&mut win, "Increase").unwrap();
+        let mut matrix = [1., 0., 0., 1., 0., 0.];
+        matrix[index] += 1.;
+        let [a, b, c, d, tx, ty] = matrix;
+        assert_eq!(
+            win.property_value(target, PropertyId::Transform).unwrap(),
+            PropertyValue::Transform(Affine { a, b, c, d, tx, ty })
+        );
+        click_control(&mut win, "Inherit").unwrap();
+        if index != 5 {
+            click_control(&mut win, "Component").unwrap();
+        }
+    }
+}
+
+#[test]
+fn color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly() {
+    use gpui::property::{PropertyId, PropertyValue};
+    struct Surface(Color);
+    impl View for Surface {
+        fn view(&self) -> El<'_> {
+            div().size(60).bg(self.0).name("surface")
+        }
+    }
+    for color in [
+        Color::srgb(0.2, 0.3, 0.4, 0.5).unwrap(),
+        Color::linear_srgb(1.5, -0.1, 0.4, 0.5).unwrap(),
+        Color::display_p3(0.2, 0.3, 0.4, 0.5).unwrap(),
+        Color::linear_display_p3(1.5, -0.1, 0.4, 0.5).unwrap(),
+        Color::oklch(0.4, 0.1, 30., 0.5).unwrap(),
+    ] {
+        let mut win = Win::with_inspector(
+            Surface(color),
+            gpui::WindowOptions {
+                size: [800, 560],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let target = win.query().name("surface").one().unwrap();
+        win.inspector_select(target).unwrap();
+        click_control(&mut win, "background").unwrap();
+        for component in 0..4 {
+            click_control(&mut win, "Increase").unwrap();
+            let PropertyValue::Color(after) =
+                win.property_value(target, PropertyId::Background).unwrap()
+            else {
+                panic!()
+            };
+            assert_eq!(after.space(), color.space());
+            for channel in 0..4 {
+                let delta = if channel == component {
+                    if color.space() == gpui::ColorSpace::Oklch && channel == 2 {
+                        15.
+                    } else {
+                        0.05
+                    }
+                } else {
+                    0.
+                };
+                assert!(
+                    (after.channels()[channel] - (color.channels()[channel] + delta)).abs() < 2e-7
+                );
+            }
+            click_control(&mut win, "Inherit").unwrap();
+            let PropertyValue::Color(restored) =
+                win.property_value(target, PropertyId::Background).unwrap()
+            else {
+                panic!()
+            };
+            assert!(restored.same_authoring(color));
+            if component != 3 {
+                click_control(&mut win, "Component").unwrap();
+            }
+        }
+    }
+    let mut win = inspected(false);
+    let target = card(&win);
+    win.inspector_select(target).unwrap();
+    click_control(&mut win, "gap").unwrap();
+    let epoch = win.inspect().unwrap().source_epoch;
+    click_control(&mut win, "Decrease").unwrap();
+    assert_eq!(win.inspect().unwrap().source_epoch, epoch);
+    assert_eq!(
+        win.property_value(target, PropertyId::Gap).unwrap(),
+        PropertyValue::Number(0.)
+    );
+    assert_eq!(
+        win.property_contribution(target, PropertyId::Gap).unwrap(),
+        Contribution::Inherit
+    );
+    assert!(
+        win.contains_text("Last edit rejected: Property(Negative)")
+            .unwrap()
+    );
+    click_control(&mut win, "Increase").unwrap();
+    assert!(!win.contains_text("Last edit rejected:").unwrap());
+    click_control(&mut win, "background").unwrap();
+    for _ in 0..3 {
+        click_control(&mut win, "Component").unwrap();
+    }
+    let epoch = win.inspect().unwrap().source_epoch;
+    click_control(&mut win, "Increase").unwrap();
+    assert_eq!(win.inspect().unwrap().source_epoch, epoch);
+    assert!(
+        win.contains_text("Last edit rejected: InvalidColor")
+            .unwrap()
+    );
+    click_control(&mut win, "Decrease").unwrap();
+    assert!(!win.contains_text("Last edit rejected:").unwrap());
 }
