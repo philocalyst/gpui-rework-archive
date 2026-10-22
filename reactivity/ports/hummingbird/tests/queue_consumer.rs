@@ -1,4 +1,22 @@
 use gpui::{Error, Key, Role, Win, WindowOptions};
+
+fn queue_control<L: gpui::LaneSet<Library>>(
+    owner: &Win<Library, L>,
+    list: gpui::ListId,
+    key: hummingbird_gpui_port::queue::EntryKey,
+    role: Role,
+    text: Option<&str>,
+) -> gpui::Target {
+    let row = owner
+        .list_item(owner.list(list).unwrap(), gpui::ItemKey::new(key.get()))
+        .unwrap();
+    let query = owner.role(role).within(row);
+    if let Some(text) = text {
+        query.text(text).one().unwrap()
+    } else {
+        query.one().unwrap()
+    }
+}
 use hummingbird_gpui_port::{
     app::{Library, connect, recordings, track_key},
     database::Database,
@@ -28,14 +46,22 @@ fn reconstructed_public_queue_has_a_new_list_domain_and_rejects_old_decoder_eos(
         .unwrap()
         .with_inbox(inbox, QueueScreen::receive_end_of_stream)
         .unwrap();
-    let old_target = owner.query().name("Select queue entry 1").one().unwrap();
+    let old_target = owner
+        .role(Role::CheckBox)
+        .name("Prepared file")
+        .one()
+        .unwrap();
     owner
         .update(|screen| {
             *screen = QueueScreen::new(gpui::ListId::new(4001)).unwrap();
             screen.enqueue(track);
         })
         .unwrap();
-    let new_target = owner.query().name("Select queue entry 1").one().unwrap();
+    let new_target = owner
+        .role(Role::CheckBox)
+        .name("Prepared file")
+        .one()
+        .unwrap();
     assert_ne!(old_target, new_target);
     assert_eq!(owner.activate(old_target), Err(Error::StaleTarget));
     let stamp = owner
@@ -117,11 +143,7 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
         })
         .unwrap();
     assert_ne!(keys[0], keys[2]);
-    let first = owner
-        .query()
-        .name(&format!("Select queue entry {}", keys[0].get()))
-        .one()
-        .unwrap();
+    let first = queue_control(&owner, queue_list, keys[0], Role::CheckBox, None);
     owner.focus(first).unwrap();
     owner.key(Key::Space).unwrap();
     assert_eq!(
@@ -146,13 +168,13 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
         .unwrap();
     assert_eq!(checked, Some(true));
     owner
-        .activate(
-            owner
-                .query()
-                .name(&format!("Select range to queue entry {}", keys[2].get()))
-                .one()
-                .unwrap(),
-        )
+        .activate(queue_control(
+            &owner,
+            queue_list,
+            keys[2],
+            Role::Button,
+            Some("Range"),
+        ))
         .unwrap();
     assert_eq!(
         owner
@@ -161,13 +183,13 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
         keys
     );
     owner
-        .activate(
-            owner
-                .query()
-                .name(&format!("Select queue entry {}", keys[1].get()))
-                .one()
-                .unwrap(),
-        )
+        .activate(queue_control(
+            &owner,
+            queue_list,
+            keys[1],
+            Role::CheckBox,
+            None,
+        ))
         .unwrap();
     owner.activate(owner.button("Move selected last")).unwrap();
     assert_eq!(
@@ -181,11 +203,7 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
             .unwrap(),
         vec![keys[1], keys[0], keys[2]]
     );
-    let live = owner
-        .query()
-        .name(&format!("Select queue entry {}", keys[0].get()))
-        .one()
-        .unwrap();
+    let live = queue_control(&owner, queue_list, keys[0], Role::CheckBox, None);
     assert_eq!(
         live, first,
         "reordering keeps the keyed row's public target"
@@ -194,11 +212,7 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
     owner.activate(owner.button("Remove selected")).unwrap();
     assert_eq!(owner.activate(first), Err(Error::StaleTarget));
     owner.activate(owner.button("Undo queue edit")).unwrap();
-    let restored = owner
-        .query()
-        .name(&format!("Select queue entry {}", keys[0].get()))
-        .one()
-        .unwrap();
+    let restored = queue_control(&owner, queue_list, keys[0], Role::CheckBox, None);
     assert_ne!(restored, first, "undo does not revive a retired UI target");
     assert_eq!(owner.activate(first), Err(Error::StaleTarget));
     assert_eq!(

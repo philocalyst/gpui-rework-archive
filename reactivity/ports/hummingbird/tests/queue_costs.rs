@@ -123,6 +123,7 @@ fn one_hundred_thousand_prepared_entries_keep_public_view_realization_bounded() 
     let shared = track(1);
     let mut screen = QueueScreen::new(gpui::ListId::new(900_000)).unwrap();
     screen.enqueue_many((0..100_000).map(|_| shared.clone()).collect());
+    let metadata_owners = TrackRef::strong_count(&shared);
     let list_id = screen.list_id();
     let mut owner = None;
     let mount = allocation_counter::measure(|| {
@@ -135,6 +136,7 @@ fn one_hundred_thousand_prepared_entries_keep_public_view_realization_bounded() 
         mount,
     );
     let mut owner = owner.unwrap();
+    assert_eq!(TrackRef::strong_count(&shared), metadata_owners);
     let list = owner.list(list_id).unwrap();
     assert_eq!(owner.list_state(list).unwrap().realized_rows, 4);
     let last = owner
@@ -145,9 +147,21 @@ fn one_hundred_thousand_prepared_entries_keep_public_view_realization_bounded() 
         .unwrap();
     assert_eq!(owner.list_state(list).unwrap().realized_rows, 4);
     assert!(owner.inspect().unwrap().nodes.len() < 100);
+    assert_eq!(TrackRef::strong_count(&shared), metadata_owners);
     println!(
         "QUEUE_VIEW_LAYOUT screen={} window={} realized=4",
         size_of::<QueueScreen>(),
         size_of::<gpui::Win<QueueScreen>>()
+    );
+    println!(
+        "QUEUE_APP_LAYOUT library={} element={}",
+        size_of::<hummingbird_gpui_port::app::Library>(),
+        size_of::<gpui::El<'_>>()
+    );
+    #[cfg(feature = "native")]
+    println!(
+        "QUEUE_NATIVE_LAYOUT document={} option_document={}",
+        size_of::<gpui::Window<hummingbird_gpui_port::app::Library>>(),
+        size_of::<Option<gpui::Window<hummingbird_gpui_port::app::Library>>>()
     );
 }

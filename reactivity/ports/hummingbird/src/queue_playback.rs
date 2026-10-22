@@ -25,6 +25,10 @@ pub struct Plan {
     pub lookahead: Option<Entry>,
 }
 impl Plan {
+    /// A fresh stamp retires EOS authority. It does not alone request reopening
+    /// or seeking this path: edits reconcile lookahead while explicit play is a
+    /// restart intent. A future real decoder adapter must distinguish those
+    /// accepted intents instead of restarting the current file on every edit.
     pub fn stamp(&self) -> PlanStamp {
         self.stamp
     }
@@ -171,11 +175,9 @@ impl PlaybackQueue {
         self.navigate(navigation, serial, available);
         Ok(true)
     }
-    pub fn stop(&mut self) -> Result<(), QueueError> {
-        let serial = self.next_serial()?;
-        self.serial = serial.get();
+    /// Revocation requires no fresh stamp and remains available at exhaustion.
+    pub fn stop(&mut self) {
         self.plan = None;
-        Ok(())
     }
     pub fn append(
         &mut self,
@@ -233,13 +235,13 @@ impl PlaybackQueue {
         let Some(removal) = self.queue.remove_with_position(keys) else {
             return Ok(false);
         };
-        if self.plan.is_some() && self.queue.current().is_none() {
-            if let Some(key) = removal
+        if self.plan.is_some()
+            && self.queue.current().is_none()
+            && let Some(key) = removal
                 .next_index
                 .and_then(|index| self.queue.available_from(index, available))
-            {
-                self.queue.jump(key, available)?;
-            }
+        {
+            self.queue.jump(key, available)?;
         }
         self.refresh(serial, available);
         Ok(true)
@@ -320,5 +322,41 @@ impl PlaybackQueue {
         let serial = self.next_serial()?;
         self.refresh(serial, available);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn exhausted_plan_sequence_rejects_mutation_but_stop_still_revokes_eos() {
+        let track = TrackRef::new(Track {
+            path: "/prepared.flac".into(),
+            track_id: None,
+            album_id: None,
+            title: String::new(),
+            available_when_prepared: true,
+        });
+        let mut player = PlaybackQueue::new().unwrap();
+        player
+            .append(vec![track.clone()], &|_| true, &mut |_| 0)
+            .unwrap();
+        let key = player.queue.at(0).unwrap().key;
+        let event = player.plan().unwrap().end_of_stream();
+        player.serial = u64::MAX;
+        assert_eq!(player.play(key, &|_| true), Err(QueueError::PlanExhausted));
+        assert_eq!(
+            player.remove(&[key], &|_| true),
+            Err(QueueError::PlanExhausted)
+        );
+        assert_eq!(
+            player.replace(vec![track], &|_| true, &mut |_| 0),
+            Err(QueueError::PlanExhausted)
+        );
+        assert_eq!(player.queue.len(), 1);
+        assert_eq!(player.plan().unwrap().end_of_stream(), event);
+        player.stop();
+        assert!(player.plan().is_none());
+        assert!(!player.end_of_stream(event, &|_| true, &mut |_| 0).unwrap());
     }
 }

@@ -85,9 +85,29 @@ struct Before {
     current: Option<EntryKey>,
     shuffled: bool,
 }
+#[derive(Clone, Copy)]
+struct InsertedKeys {
+    first: EntryKey,
+    count: usize,
+}
+impl InsertedKeys {
+    fn iter(self) -> impl ExactSizeIterator<Item = EntryKey> + DoubleEndedIterator {
+        (0..self.count).map(move |offset| {
+            EntryKey(
+                NonZeroU64::new(self.first.get() + offset as u64)
+                    .expect("the allocated contiguous key range is checked and nonzero"),
+            )
+        })
+    }
+    fn contains(self, key: EntryKey) -> bool {
+        key.get()
+            .checked_sub(self.first.get())
+            .is_some_and(|offset| offset < self.count as u64)
+    }
+}
 enum Undo {
     Inserted {
-        keys: Vec<EntryKey>,
+        keys: InsertedKeys,
         before: Before,
     },
     Removed {
@@ -114,7 +134,7 @@ enum Undo {
 impl Undo {
     fn items(&self) -> usize {
         match self {
-            Self::Inserted { keys, .. } => keys.len(),
+            Self::Inserted { keys, .. } => keys.count,
             Self::Removed { entries, .. } => entries.len(),
             Self::Moved { positions, .. } => positions.len(),
             Self::Shuffled { .. } => 0,
@@ -219,13 +239,21 @@ impl Queue {
         }
         self.undo.push_back(action);
     }
-    fn allocate(&mut self, tracks: Vec<TrackRef>) -> Result<Vec<EntryKey>, QueueError> {
+    fn allocate(&mut self, tracks: Vec<TrackRef>) -> Result<Option<InsertedKeys>, QueueError> {
         let count = u64::try_from(tracks.len()).map_err(|_| QueueError::KeyExhausted)?;
         let end = self
             .next_key
             .checked_add(count)
             .ok_or(QueueError::KeyExhausted)?;
-        let mut keys = Vec::with_capacity(tracks.len());
+        if tracks.is_empty() {
+            return Ok(None);
+        }
+        let keys = InsertedKeys {
+            first: EntryKey(
+                NonZeroU64::new(self.next_key + 1).expect("nonempty checked key range"),
+            ),
+            count: tracks.len(),
+        };
         self.sheet.entries.reserve(tracks.len());
         for (index, track) in tracks.into_iter().enumerate() {
             let key = EntryKey(
@@ -233,10 +261,9 @@ impl Queue {
                     .expect("the checked key range starts above zero"),
             );
             self.sheet.entries.push(Entry { key, track });
-            keys.push(key);
         }
         self.next_key = end;
-        Ok(keys)
+        Ok(Some(keys))
     }
     /// Inserts before this playback-order position, clamped to the end.
     /// While shuffled, inserted tracks append to the original permutation.
@@ -249,14 +276,14 @@ impl Queue {
             return Ok(None);
         }
         let before = self.before();
-        let keys = self.allocate(tracks)?;
-        let first = keys[0];
+        let keys = self
+            .allocate(tracks)?
+            .expect("a nonempty insert allocates a key range");
+        let first = keys.first;
         let position = position.min(self.len());
-        self.sheet
-            .order
-            .splice(position..position, keys.iter().copied());
+        self.sheet.order.splice(position..position, keys.iter());
         if self.shuffled {
-            self.sheet.original.extend_from_slice(&keys);
+            self.sheet.original.extend(keys.iter());
         }
         self.remember(Undo::Inserted { keys, before });
         Ok(Some(first))
@@ -287,7 +314,10 @@ impl Queue {
             .ok_or(QueueError::KeyExhausted)?;
         let before = self.before();
         let sheet = std::mem::take(&mut self.sheet);
-        self.sheet.order = self.allocate(tracks)?;
+        self.sheet.order = self
+            .allocate(tracks)?
+            .map(|keys| keys.iter().collect())
+            .unwrap_or_default();
         if self.shuffled {
             self.sheet.original.clone_from(&self.sheet.order);
             shuffle(&mut self.sheet.order, draw);
@@ -437,16 +467,9 @@ impl Queue {
         };
         let before = match action {
             Undo::Inserted { keys, before } => {
-                // Keys are allocated monotonically, hence sorted already.
-                self.sheet
-                    .order
-                    .retain(|key| keys.binary_search(key).is_err());
-                self.sheet
-                    .original
-                    .retain(|key| keys.binary_search(key).is_err());
-                self.sheet
-                    .entries
-                    .retain(|entry| keys.binary_search(&entry.key).is_err());
+                self.sheet.order.retain(|key| !keys.contains(*key));
+                self.sheet.original.retain(|key| !keys.contains(*key));
+                self.sheet.entries.retain(|entry| !keys.contains(entry.key));
                 before
             }
             Undo::Removed {
@@ -643,4 +666,76 @@ fn restore_keys<T>(
     }
     debug_assert_eq!(source, 0);
     debug_assert!(removed.next().is_none());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn contiguous_inserted_range_includes_maximum_key_and_never_recycles() {
+        let track = TrackRef::new(Track {
+            path: "/prepared.flac".into(),
+            track_id: None,
+            album_id: None,
+            title: String::new(),
+            available_when_prepared: true,
+        });
+        let mut queue = Queue {
+            next_key: u64::MAX - 1,
+            ..Default::default()
+        };
+        let key = queue.insert(0, vec![track.clone()]).unwrap().unwrap();
+        assert_eq!(key.get(), u64::MAX);
+        assert_eq!(
+            queue.insert(0, vec![track.clone()]),
+            Err(QueueError::KeyExhausted)
+        );
+        assert_eq!(queue.len(), 1);
+        queue.replace(Vec::new(), &mut |_| 0).unwrap();
+        assert!(queue.is_empty());
+        assert!(queue.undo());
+        assert_eq!(queue.at(0).unwrap().key, key);
+        assert!(queue.undo());
+        assert!(queue.is_empty());
+        assert_eq!(queue.insert(0, vec![track]), Err(QueueError::KeyExhausted));
+    }
+    #[test]
+    fn inverse_key_merge_restores_every_small_removal_subset_without_reordering() {
+        for count in 1..11 {
+            let tracks = (0..count)
+                .map(|id| {
+                    TrackRef::new(Track {
+                        path: format!("/{id}").into(),
+                        track_id: None,
+                        album_id: None,
+                        title: String::new(),
+                        available_when_prepared: true,
+                    })
+                })
+                .collect::<Vec<_>>();
+            for mask in 1..(1usize << count) {
+                let mut queue = Queue::default();
+                queue.append(tracks.clone(), &mut |_| 0).unwrap();
+                let original = queue.sheet.order.clone();
+                let selected = original
+                    .iter()
+                    .enumerate()
+                    .filter(|(index, _)| mask & (1 << index) != 0)
+                    .map(|(_, key)| *key)
+                    .collect::<Vec<_>>();
+                assert!(queue.remove(&selected));
+                assert!(queue.undo());
+                assert_eq!(queue.sheet.order, original);
+                assert_eq!(
+                    queue
+                        .sheet
+                        .entries
+                        .iter()
+                        .map(|entry| entry.key)
+                        .collect::<Vec<_>>(),
+                    original
+                );
+            }
+        }
+    }
 }

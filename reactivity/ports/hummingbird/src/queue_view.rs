@@ -172,22 +172,22 @@ impl ItemSource for QueueScreen {
         let entry = self.playback.queue().at(index).unwrap();
         let key = entry.key;
         let play = button("Prepare")
-            .name(format!("Prepare queue entry {}", key.get()))
+            .name(format!("Prepare {}", entry.track.title))
             .w(80);
         row((
             checkbox(
                 entry.track.title.as_str(),
                 self.selected.binary_search(&key).is_ok(),
             )
-            .name(format!("Select queue entry {}", key.get()))
+            .description("Select or unselect this queued recording")
             .w(240)
             .on_click(move |model: &mut Self| model.toggle(key)),
             button("Only")
-                .name(format!("Select only queue entry {}", key.get()))
+                .name(format!("Select only {}", entry.track.title))
                 .w(55)
                 .on_click(move |model: &mut Self| model.select(key)),
             button("Range")
-                .name(format!("Select range to queue entry {}", key.get()))
+                .name(format!("Select range to {}", entry.track.title))
                 .w(70)
                 .on_click(move |model: &mut Self| model.range(key)),
             if available(&entry.track) {
@@ -234,8 +234,8 @@ impl View for QueueScreen {
                 || "No decoder plan".into(),
                 |plan| {
                     format!(
-                        "Prepared queue entry {} — {}",
-                        plan.current.key.get(),
+                        "Prepared {} — {}",
+                        plan.current.track.title,
                         plan.current.track.path.display()
                     )
                 },
