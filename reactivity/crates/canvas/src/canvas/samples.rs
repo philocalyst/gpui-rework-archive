@@ -7,6 +7,32 @@ use fearless_simd_macros::simd;
 
 const PIXELS: usize = TILE * TILE;
 
+/// Source colors and geometric presence are separate. A present transparent
+/// color still blends (and may change a signed zero); absence never blends.
+pub(super) struct Sources {
+    colors: [[f32; 4]; 16],
+    present: u16,
+}
+impl Sources {
+    #[inline]
+    pub(super) fn from_fn(mut source: impl FnMut(usize) -> Option<[f32; 4]>) -> Self {
+        let mut present = 0;
+        let colors = std::array::from_fn(|index| match source(index) {
+            Some(color) => {
+                present |= 1 << index;
+                color
+            }
+            None => [0.0; 4],
+        });
+        Self { colors, present }
+    }
+
+    #[cfg(test)]
+    pub(super) fn get(&self, index: usize) -> Option<[f32; 4]> {
+        (self.present & (1 << index) != 0).then_some(self.colors[index])
+    }
+}
+
 pub(super) struct Samples<S: Simd> {
     simd: S,
     uniform: [[f32; 4]; PIXELS],
@@ -55,17 +81,20 @@ impl<S: Simd> Samples<S> {
         );
     }
 
-    pub(super) fn blend_sources(&mut self, pixel: usize, sources: [Option<[f32; 4]>; 16]) {
+    pub(super) fn blend_sources(&mut self, pixel: usize, sources: &Sources) {
+        if sources.present == 0 {
+            return;
+        }
         let bit = 1 << (pixel % 64);
         if self.mixed[pixel / 64] & bit == 0 {
-            let bits = sources[0].map(|color| color.map(f32::to_bits));
-            if sources
-                .iter()
-                .all(|color| color.map(|c| c.map(f32::to_bits)) == bits)
+            let bits = sources.colors[0].map(f32::to_bits);
+            if sources.present == u16::MAX
+                && sources
+                    .colors
+                    .iter()
+                    .all(|color| color.map(f32::to_bits) == bits)
             {
-                if let Some(source) = sources[0] {
-                    blend_one(self.simd, &mut self.uniform[pixel], source, 1.0);
-                }
+                blend_one(self.simd, &mut self.uniform[pixel], sources.colors[0], 1.0);
                 return;
             }
             self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
@@ -123,10 +152,19 @@ fn blend_coverage<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], coverag
 }
 
 #[simd]
-fn blend_sources<S: Simd>(simd: S, dst: &mut [[f32; 4]], sources: [Option<[f32; 4]>; 16]) {
-    for (sample, source) in dst.iter_mut().zip(sources) {
-        if let Some(source) = source {
+fn blend_sources<S: Simd>(simd: S, dst: &mut [[f32; 4]], sources: &Sources) {
+    if sources.present == u16::MAX {
+        // Ordinary interior image samples are all present: contiguous RGBA
+        // loads need no Option decoding, mask construction, or bit selection.
+        for (sample, source) in dst.iter_mut().zip(sources.colors) {
             source_over(simd, sample, source, 1.0);
+        }
+    } else {
+        let mut mask = sources.present;
+        while mask != 0 {
+            let sample = mask.trailing_zeros() as usize;
+            source_over(simd, &mut dst[sample], sources.colors[sample], 1.0);
+            mask &= mask - 1;
         }
     }
 }
@@ -268,9 +306,9 @@ mod backend_tests {
                             tile.color(255).map(f32::to_bits),
                             sample_mean(&expected).map(f32::to_bits)
                         );
-                        let sources =
+                        let sources: [Option<[f32; 4]>; 16] =
                             std::array::from_fn(|i| ((i + turn) % 3 != 0).then_some(source));
-                        tile.blend_sources(255, sources);
+                        tile.blend_sources(255, &Sources::from_fn(|i| sources[i]));
                         for (sample, source) in expected.iter_mut().zip(sources) {
                             if let Some(source) = source {
                                 reference(sample, source, 1.0);
@@ -284,6 +322,37 @@ mod backend_tests {
                 }
             }
         }
+        // Presence describes geometry, not source opacity: Some(transparent)
+        // performs source-over and changes -0, while None preserves old bits.
+        let clear = [-0.0; 4];
+        for mask in 0..=u16::MAX {
+            tile.reset(clear, true);
+            let sources = Sources::from_fn(|index| (mask & (1 << index) != 0).then_some([0.0; 4]));
+            tile.blend_sources(255, &sources);
+            expected.fill(clear);
+            for (index, sample) in expected.iter_mut().enumerate() {
+                if mask & (1 << index) != 0 {
+                    reference(sample, [0.0; 4], 1.0);
+                }
+            }
+            assert_eq!(
+                tile.color(255).map(f32::to_bits),
+                sample_mean(&expected).map(f32::to_bits)
+            );
+            if mask != 0 && mask != u16::MAX {
+                assert!(
+                    tile.samples[255 * 16..256 * 16]
+                        .iter()
+                        .zip(expected)
+                        .all(|(a, b)| a.map(f32::to_bits) == b.map(f32::to_bits)),
+                    "{:?}, presence={mask:x}",
+                    simd.level()
+                );
+            }
+        }
+        assert_eq!(std::mem::size_of::<Sources>(), 260);
+        assert_eq!(std::mem::align_of::<Sources>(), 4);
+        assert_eq!(std::mem::size_of::<[Option<[f32; 4]>; 16]>(), 320);
         // Backend tokens are zero-sized. Sample storage has exactly the prior
         // 16-byte RGBA records and promotion bitmap, with no dispatch header.
         assert_eq!(std::mem::size_of::<S>(), 0);

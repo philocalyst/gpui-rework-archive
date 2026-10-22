@@ -22,7 +22,7 @@ mod samples;
 #[cfg(test)]
 mod simd_tests;
 use glyph_axis::GlyphAxis;
-use samples::Samples;
+use samples::{Samples, Sources};
 
 const TILE: usize = 16;
 const MAX_PIXELS: usize = 16 * 1024 * 1024;
@@ -2118,7 +2118,7 @@ fn render_image<S: Simd>(
 ) {
     for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
         for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
-            let sources = std::array::from_fn(|i| {
+            let sources = Sources::from_fn(|i| {
                 stats.sample_tests += 1;
                 let wx = x as f64 + SAMPLES[i % 4];
                 let wy = y as f64 + SAMPLES[i / 4];
@@ -2132,7 +2132,7 @@ fn render_image<S: Simd>(
                 let (lx, ly) = command.map.local(wx, wy);
                 sample(lx - command.rect.x as f64, ly - command.rect.y as f64)
             });
-            samples.blend_sources((y - top) * TILE + x - left, sources);
+            samples.blend_sources((y - top) * TILE + x - left, &sources);
             stats.boundary_pixels += 1;
         }
     }

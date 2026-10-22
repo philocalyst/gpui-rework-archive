@@ -1,5 +1,5 @@
 //! Exact separable taps; each of the sixteen correlated samples still blends.
-use super::{BorrowedCommand, RenderStats, SAMPLES, Samples, TILE};
+use super::{BorrowedCommand, RenderStats, SAMPLES, Samples, Sources, TILE};
 use crate::image::{ImageSampling, ImageView, lerp};
 use fearless_simd::Simd;
 #[derive(Clone, Copy)]
@@ -147,32 +147,32 @@ impl Column {
         rows: [Tap; 4],
         linear: bool,
         texel: &mut impl FnMut(usize, usize) -> [f32; 4],
-    ) -> [Option<[f32; 4]>; 16] {
-        let mut result = [None; 16];
-        for (sy, row) in rows.into_iter().enumerate() {
+    ) -> Sources {
+        Sources::from_fn(|index| {
+            let sy = index / 4;
+            let sx = index % 4;
+            let row = rows[sy];
             if row.low == u32::MAX {
-                continue;
+                return None;
             }
-            self.fill(row.low, linear, texel);
-            if linear {
-                self.fill(row.high, linear, texel);
+            if sx == 0 {
+                self.fill(row.low, linear, texel);
+                if linear {
+                    self.fill(row.high, linear, texel);
+                }
             }
-            // Adjacent (or clamped identical) rows cannot collide in parity.
-            // The full row key proves reuse, including reflected scans.
+            if self.taps[sx].low == u32::MAX {
+                return None;
+            }
+            // Adjacent/clamped filter rows cannot collide in parity.
             let low = &self.rows[(row.low & 1) as usize].colors;
             let high = &self.rows[(row.high & 1) as usize].colors;
-            for sx in 0..4 {
-                if self.taps[sx].low == u32::MAX {
-                    continue;
-                }
-                result[sy * 4 + sx] = Some(if linear {
-                    lerp(low[sx], high[sx], row.fraction)
-                } else {
-                    low[sx]
-                });
-            }
-        }
-        result
+            Some(if linear {
+                lerp(low[sx], high[sx], row.fraction)
+            } else {
+                low[sx]
+            })
+        })
     }
 }
 // Image-only scratch stays out of image-free raster frames; no owning lease or
@@ -198,7 +198,7 @@ pub(super) fn render<S: Simd>(
         let mut column = Column::new(axes.columns[x - tile[0]]);
         for y in tile[1].max(command.bounds[1])..tile[3].min(command.bounds[3]) {
             let sources = column.sources(axes.rows[y - tile[1]], linear, &mut texel);
-            samples.blend_sources((y - tile[1]) * TILE + x - tile[0], sources);
+            samples.blend_sources((y - tile[1]) * TILE + x - tile[0], &sources);
             stats.boundary_pixels += 1;
         }
     }
@@ -331,7 +331,7 @@ mod tests {
                                             )
                                         };
                                         assert_eq!(
-                                            bits(actual[i]),
+                                            bits(actual.get(i)),
                                             bits(expected),
                                             "a={a} d={d} b={b:?} c={c:?} rect={rect:?} pixel={x},{y} sample={i}"
                                         );
