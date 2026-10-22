@@ -1,0 +1,70 @@
+/tmp/gpui-cephal-oof-captures/public-oof-owner  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1920       856
+.gnu.version            160      2776
+.gnu.version_r          384      2936
+.gnu.hash                28      3320
+.dynstr                1187      3348
+.rela.dyn            192600      4536
+.rela.plt                48    197136
+.gcc_except_table     71712    197184
+.rodata             4483328    268896
+.eh_frame_hdr         35340   4752224
+.eh_frame            242128   4787568
+.text               3483671   5033792
+.init                    27   8517464
+.fini                    13   8517492
+.plt                     48   8517520
+.tdata                  912   8521664
+.tbss                  3192   8522576
+.fini_array               8   8522576
+.init_array              16   8522584
+.data.rel.ro         142776   8522600
+.dynamic                480   8665376
+.got                  12912   8665856
+.got.plt                 40   8678768
+.relro_padding          616   8678808
+.tm_clone_table           0   8682904
+.data                  5696   8682904
+.bss                    291   8688600
+.comment                157         0
+Total               8679805
+
+
+/tmp/gpui-cephal-single-captures/public-single-owner  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1920       856
+.gnu.version            160      2776
+.gnu.version_r          384      2936
+.gnu.hash                28      3320
+.dynstr                1187      3348
+.rela.dyn            192888      4536
+.rela.plt                48    197424
+.gcc_except_table     71908    197472
+.rodata             4483352    269408
+.eh_frame_hdr         35436   4752760
+.eh_frame            242600   4788200
+.text               3486551   5034896
+.init                    27   8521448
+.fini                    13   8521476
+.plt                     48   8521504
+.tdata                  912   8525648
+.tbss                  3192   8526560
+.fini_array               8   8526560
+.init_array              16   8526568
+.data.rel.ro         142856   8526584
+.dynamic                480   8669440
+.got                  12984   8669920
+.got.plt                 40   8682904
+.relro_padding          576   8682944
+.tm_clone_table           0   8687040
+.data                  5696   8687040
+.bss                    291   8692736
+.comment                157         0
+Total               8683873
+
+

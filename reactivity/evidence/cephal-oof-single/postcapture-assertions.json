@@ -1,0 +1,5 @@
+{
+  "all_owner_allocation_and_work_rows_equal_d8": true,
+  "all_public_delta_rows_equal_expected": true,
+  "raw_nanoseconds_excluded": true
+}
