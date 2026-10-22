@@ -1,3 +1,5 @@
+mod gamut;
+
 use crate::Error;
 
 /// Author color encoding. RGB can be negative or exceed one; alpha cannot.
