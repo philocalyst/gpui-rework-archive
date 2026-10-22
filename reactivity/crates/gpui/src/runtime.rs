@@ -2637,13 +2637,17 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
-            let hittable = node.text_slot().0 != u32::MAX
-                || style.bg.alpha() > 0.0
-                || node.handler.is_some()
-                || matches!(node.kind(), NodeKind::Input | NodeKind::Image);
+            // Empty bounds can never pass sheet_hit, including wheel routing.
+            // Keep the existing byte as the common-path candidate test; loading
+            // and decoding the parent word is needed only to skip a cold run.
+            let hittable = !bounds.is_empty()
+                && (node.text_slot().0 != u32::MAX
+                    || style.bg.alpha() > 0.0
+                    || node.handler.is_some()
+                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image));
             let link = PresentedLink::new(
                 published_parent,
-                !hittable || bounds.is_empty(),
+                !hittable,
                 presented.last().map(|node: &Presented| node.parent),
             );
             presented.push(Presented {
@@ -2820,7 +2824,7 @@ impl<M: View + 'static> Runtime<M> {
         while remaining != 0 {
             let index = remaining - 1;
             let node = &self.presented[index];
-            if node.parent.skip() != 0 {
+            if !node.hittable {
                 remaining -= node.parent.skip();
                 continue;
             }

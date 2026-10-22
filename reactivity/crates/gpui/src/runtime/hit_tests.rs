@@ -51,7 +51,7 @@ impl View for Page {
     }
 }
 // Frozen exhaustive oracle: the previous implementation's reverse scan and
-// ancestor routing. It reads original eligibility, never compressed jumps.
+// ancestor routing. It reads row eligibility, never compressed jumps.
 fn exhaustive<M: View + 'static>(runtime: &Runtime<M>, point: Point) -> Option<u64> {
     if !Rect::new(
         0.0,
@@ -100,6 +100,10 @@ fn compare<M: View + 'static>(win: &Win<M>) {
     let mut impossible = 0;
     for (index, node) in runtime.presented.iter().enumerate() {
         assert!(node.parent.index().is_none_or(|parent| parent < index));
+        if node.bounds.is_empty() {
+            assert!(!node.hittable);
+            assert!(!runtime.sheet_hit(index, Point { x: 0.0, y: 0.0 }));
+        }
         if !node.hittable || node.bounds.is_empty() {
             impossible += 1;
         } else {
