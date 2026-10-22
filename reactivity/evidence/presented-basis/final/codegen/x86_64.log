@@ -1,0 +1,66 @@
+warning: field `size` is never read
+ --> /tmp/gpui-presented-basis-asm/src/shipping_codec.rs:6:9
+  |
+4 | pub(super) struct Placement {
+  |                   --------- field in this struct
+5 |     pub translation: Point,
+6 |     pub size: [f32; 2],
+  |         ^^^^
+  |
+  = note: `Placement` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated items `new` and `local_rect` are never used
+  --> /tmp/gpui-presented-basis-asm/src/shipping_codec.rs:9:12
+   |
+ 8 | impl Placement {
+   | -------------- associated items in this implementation
+ 9 |     pub fn new(size: [f32; 2], map: Option<Affine>) -> Self {
+   |            ^^^
+...
+18 |     pub fn local_rect(self) -> Rect {
+   |            ^^^^^^^^^^
+
+warning: struct `Radius` is never constructed
+  --> /tmp/gpui-presented-basis-asm/src/shipping_codec.rs:43:8
+   |
+43 | struct Radius {
+   |        ^^^^^^
+
+warning: associated items `from_radius` and `radius` are never used
+  --> /tmp/gpui-presented-basis-asm/src/shipping_codec.rs:66:8
+   |
+54 | impl Record {
+   | ----------- associated items in this implementation
+...
+66 |     fn from_radius(radius: Radius) -> Self {
+   |        ^^^^^^^^^^^
+...
+81 |     fn radius(self) -> Radius {
+   |        ^^^^^^
+
+warning: struct `GeometryView` is never constructed
+   --> /tmp/gpui-presented-basis-asm/src/shipping_codec.rs:149:19
+    |
+149 | pub(super) struct GeometryView<'a> {
+    |                   ^^^^^^^^^^^^
+
+warning: associated items `empty`, `new`, `bases`, and `radius` are never used
+   --> /tmp/gpui-presented-basis-asm/src/shipping_codec.rs:154:12
+    |
+153 | impl<'a> GeometryView<'a> {
+    | ------------------------- associated items in this implementation
+154 |     pub fn empty() -> Self {
+    |            ^^^^^
+...
+160 |     fn new(records: &'a [Record]) -> Self {
+    |        ^^^
+...
+166 |     pub fn bases(self) -> Bases<'a> {
+    |            ^^^^^
+...
+169 |     pub fn radius(self, identity: u64) -> f32 {
+    |            ^^^^^^
+
+warning: 6 warnings emitted
+

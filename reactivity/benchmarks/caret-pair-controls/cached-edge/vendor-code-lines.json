@@ -1,0 +1,18 @@
+{
+  "tool": "tokei15.0.0",
+  "scope": "changed Parley source files; no test modules in these files",
+  "counts": {
+    "9f9ed16a1a": {
+      "geometry.rs": 78,
+      "cursor.rs": 348
+    },
+    "d74fc223e799956c1e21997dd7eec88abe8aff39": {
+      "geometry.rs": 131,
+      "cursor.rs": 348
+    },
+    "7eb75ab3971e76f645cb9316a3b1f8b9d7644270": {
+      "geometry.rs": 142,
+      "cursor.rs": 363
+    }
+  }
+}

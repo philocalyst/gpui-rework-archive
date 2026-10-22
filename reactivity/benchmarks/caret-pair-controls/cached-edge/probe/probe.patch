@@ -1,0 +1,155 @@
+diff --git a/reactivity/crates/canvas/src/text/cursor_pair_tests.rs b/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
+index 55e4e36a4a..6c91cb38a7 100644
+--- a/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
++++ b/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
+@@ -1,6 +1,6 @@
+ //! Compare the bulk pair with two independent, unindexed producer queries.
+ use super::*;
+-use parley::{Alignment, AlignmentOptions};
++use parley::{Alignment, AlignmentOptions, CursorGeometryBranchCensus};
+ 
+ fn bits(bounds: parley::BoundingBox) -> [u64; 4] {
+     [bounds.x0, bounds.y0, bounds.x1, bounds.y1].map(f64::to_bits)
+@@ -15,6 +15,7 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+     let mut accepted = 0;
+     let mut snapped = 0;
+     let mut distinct = 0;
++    let mut census = CursorGeometryBranchCensus::default();
+     for source in [
+         "",
+         "a",
+@@ -73,7 +74,11 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+                                             })
+                                         },
+                                     );
+-                                    let actual = geometry.geometries_at(byte, width);
++                                    let actual = geometry.geometries_at_with_census(
++                                        byte,
++                                        width,
++                                        &mut census,
++                                    );
+                                     let expected = direct[0].zip(direct[1]).map(|(a, b)| [a, b]);
+                                     assert_eq!(
+                                         actual.map(|pair| pair.map(bits)),
+@@ -100,7 +105,19 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+         distinct > 100,
+         "wrap/bidi/run affinity exceptions must occur"
+     );
+-    eprintln!("cursor_pairs,accepted={accepted},snapped={snapped},distinct={distinct}");
++    assert!(census.shared_ltr > 0 && census.shared_rtl > 0);
++    assert!(census.endpoint_fallback > 0 && census.other_fallback > snapped);
++    assert_eq!(
++        census.shared_ltr + census.shared_rtl + census.endpoint_fallback + census.other_fallback,
++        accepted + snapped
++    );
++    eprintln!(
++        "cursor_pairs,accepted={accepted},snapped={snapped},distinct={distinct},shared_ltr={},shared_rtl={},endpoint_fallback={},other_fallback={}",
++        census.shared_ltr,
++        census.shared_rtl,
++        census.endpoint_fallback,
++        census.other_fallback,
++    );
+ }
+ 
+ fn assert_lowered_stops(layout: &parley::Layout<()>, source: &str) {
+diff --git a/reactivity/vendor/parley/src/editing/geometry.rs b/reactivity/vendor/parley/src/editing/geometry.rs
+index 58c5e859d2..f2b1152f09 100644
+--- a/reactivity/vendor/parley/src/editing/geometry.rs
++++ b/reactivity/vendor/parley/src/editing/geometry.rs
+@@ -14,6 +14,16 @@ struct Entry {
+     offset: f32,
+ }
+ 
++/// Temporary test-probe counters for CursorGeometry::geometries_at.
++#[doc(hidden)]
++#[derive(Default, Debug)]
++pub struct CursorGeometryBranchCensus {
++    pub shared_ltr: usize,
++    pub shared_rtl: usize,
++    pub endpoint_fallback: usize,
++    pub other_fallback: usize,
++}
++
+ /// Transient lookup over one immutably borrowed, fully line-broken layout.
+ ///
+ /// Construction visits each visible cluster and covered source byte once.
+@@ -92,13 +102,48 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
+     /// visual entries also share the exact f32 boundary recurrence, so their
+     /// two rectangles need only one geometry evaluation.
+     pub fn geometries_at(&self, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
+-        if let Some(bounds) = self.shared_edge(byte, width) {
++        self.geometries_at_inner(byte, width, None)
++    }
++
++    /// Temporary test-probe entry point; counters are LTR, RTL, endpoint
++    /// fallback (byte 0 or text_len), and other fallback respectively.
++    #[doc(hidden)]
++    pub fn geometries_at_with_census(
++        &self,
++        byte: usize,
++        width: f32,
++        census: &mut CursorGeometryBranchCensus,
++    ) -> Option<[BoundingBox; 2]> {
++        self.geometries_at_inner(byte, width, Some(census))
++    }
++
++    fn geometries_at_inner(
++        &self,
++        byte: usize,
++        width: f32,
++        mut census: Option<&mut CursorGeometryBranchCensus>,
++    ) -> Option<[BoundingBox; 2]> {
++        if let Some((bounds, rtl)) = self.shared_edge(byte, width) {
++            if let Some(census) = census.as_mut() {
++                if rtl {
++                    census.shared_rtl += 1;
++                } else {
++                    census.shared_ltr += 1;
++                }
++            }
+             return Some([bounds; 2]);
+         }
++        if let Some(census) = census.as_mut() {
++            if byte == 0 || byte == self.layout.data.text_len {
++                census.endpoint_fallback += 1;
++            } else {
++                census.other_fallback += 1;
++            }
++        }
+         self.boundary_geometries(byte, width)
+     }
+ 
+-    fn shared_edge(&self, byte: usize, width: f32) -> Option<BoundingBox> {
++    fn shared_edge(&self, byte: usize, width: f32) -> Option<(BoundingBox, bool)> {
+         let previous_index = *self.bytes.get(byte.checked_sub(1)?)? as usize;
+         let next_index = *self.bytes.get(byte)? as usize;
+         let previous = self.entries.get(previous_index)?;
+@@ -119,10 +164,13 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
+         // the index constructor filled each range and rejected overlaps.
+         // Visual adjacency in one run proves the exact f32 prefix edge.
+         adjacent.then(|| {
+-            line_cursor_rect(
+-                &line,
+-                width,
+-                if rtl { previous.offset } else { next.offset },
++            (
++                line_cursor_rect(
++                    &line,
++                    width,
++                    if rtl { previous.offset } else { next.offset },
++                ),
++                rtl,
+             )
+         })
+     }
+diff --git a/reactivity/vendor/parley/src/editing/mod.rs b/reactivity/vendor/parley/src/editing/mod.rs
+index a0ffbbd5fa..218a9b7e11 100644
+--- a/reactivity/vendor/parley/src/editing/mod.rs
++++ b/reactivity/vendor/parley/src/editing/mod.rs
+@@ -8,5 +8,5 @@ mod selection;
+ 
+ pub use self::cursor::*;
+ pub use self::editor::*;
+-pub use self::geometry::CursorGeometry;
++pub use self::geometry::{CursorGeometry, CursorGeometryBranchCensus};
+ pub use self::selection::*;

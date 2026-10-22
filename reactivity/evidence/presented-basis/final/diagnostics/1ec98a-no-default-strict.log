@@ -1,0 +1,97 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+    Checking stable_deref_trait v1.2.1
+    Checking writeable v0.6.4
+    Checking once_cell v1.21.4
+    Checking litemap v0.8.3
+    Checking smallvec v1.16.3
+   Compiling syn v3.0.9
+    Checking utf8_iter v1.0.4
+    Checking foldhash v0.2.0
+    Checking icu_properties_data v2.3.0
+    Checking libc v0.2.191
+    Checking icu_locale_fallback_data v2.3.0
+    Checking memmap2 v0.9.12
+    Checking icu_segmenter_data v2.3.0
+    Checking icu_normalizer_data v2.3.0
+    Checking hashbrown v0.17.1
+    Checking bitflags v2.13.2
+    Checking linebender_resource_handle v0.1.1
+    Checking parlance v0.1.1
+    Checking serde_core v1.0.229
+   Compiling synstructure v0.14.0
+    Checking parley_emoji v0.12.0
+    Checking cephal v0.1.1 (/tmp/gpui-presented-basis-sol/reactivity/vendor/cephal)
+   Compiling zerofrom-derive v0.1.8
+    Checking zerofrom v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking yoke v0.8.3
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+    Checking zerovec v0.11.8
+    Checking tinystr v0.8.4
+    Checking bytemuck v1.25.2
+    Checking icu_locale_core v2.3.0
+    Checking font-types v0.12.7
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+    Checking icu_collections v2.3.0
+    Checking icu_provider v2.3.1
+    Checking read-fonts v0.41.0
+    Checking icu_locale_fallback v2.3.0
+    Checking icu_properties v2.3.0
+    Checking read-fonts v0.46.0
+    Checking harfrust v0.12.0
+    Checking fontique v0.12.0
+    Checking parley_data v0.12.0
+    Checking icu_segmenter v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking skrifa v0.44.0
+   Compiling serde_derive v1.0.229
+    Checking skrifa v0.49.0
+    Checking parley_engine v0.12.0 (/tmp/gpui-presented-basis-sol/reactivity/vendor/parley_engine)
+    Checking yazi v0.2.1
+    Checking zeno v0.3.3
+    Checking parley v0.12.0 (/tmp/gpui-presented-basis-sol/reactivity/vendor/parley)
+    Checking swash v0.2.10
+    Checking serde v1.0.229
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-presented-basis-sol/reactivity/crates/core)
+   Compiling fearless_simd_macros v0.1.0
+    Checking zmij v1.0.23
+    Checking memchr v2.8.3
+    Checking ttf-parser v0.25.1
+    Checking itoa v1.0.18
+    Checking fearless_simd v1.1.0
+    Checking serde_json v1.0.154
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-presented-basis-sol/reactivity/crates/state)
+    Checking arcstr v1.2.0
+    Checking pin-project-lite v0.2.17
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-presented-basis-sol/reactivity/crates/canvas)
+    Checking gpui v0.1.0 (/tmp/gpui-presented-basis-sol/reactivity/crates/gpui)
+error: usage of `bool::then` in `filter_map`
+   --> crates/gpui/src/runtime/geometry.rs:209:43
+    |
+209 |           column.extend(self.current.iter().filter_map(|(identity, style)| {
+    |  ___________________________________________^
+210 | |             (style.corner_radius.to_bits() != 0 && include(*identity)).then(|| {
+211 | |                 Record::from_radius(Radius {
+212 | |                     identity: *identity,
+...   |
+215 | |             })
+216 | |         }));
+    | |__________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#filter_map_bool_then
+    = note: `-D clippy::filter-map-bool-then` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::filter_map_bool_then)]`
+help: use `filter` then `map` instead
+    |
+209 ~         column.extend(self.current.iter().filter(|&(identity, style)| (style.corner_radius.to_bits() != 0 && include(*identity))).map(|(identity, style)| Record::from_radius(Radius {
+210 +                     identity: *identity,
+211 +                     value: style.corner_radius,
+212 ~                 })));
+    |
+
+error: could not compile `gpui` (lib) due to 1 previous error

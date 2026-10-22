@@ -1,0 +1,61 @@
+{
+  "base": "619788822bf4f55818007ac596af0d607b4ebb3b",
+  "candidate": "9c1dbdf1e0a8ca15be8624cb68d295db9fcb36b3",
+  "paths": [
+    "reactivity/crates/gpui/src/native/accessibility/transitions.rs",
+    "reactivity/crates/gpui/src/runtime.rs",
+    "reactivity/crates/gpui/src/runtime/accessibility.rs",
+    "reactivity/crates/gpui/src/runtime/basis_layout_probe.rs",
+    "reactivity/crates/gpui/src/runtime/basis_lifecycle_tests.rs",
+    "reactivity/crates/gpui/src/runtime/editing.rs",
+    "reactivity/crates/gpui/src/runtime/geometry.rs",
+    "reactivity/crates/gpui/src/runtime/hit_tests.rs",
+    "reactivity/crates/gpui/src/runtime/inspector.rs",
+    "reactivity/crates/gpui/src/runtime/list.rs",
+    "reactivity/crates/gpui/src/runtime/query.rs",
+    "reactivity/crates/gpui/src/runtime/scroll.rs",
+    "reactivity/crates/gpui/src/runtime/style_ledger.rs",
+    "reactivity/crates/gpui/tests/inspector.rs"
+  ],
+  "counts": {
+    "base": {
+      "code_lines": 10862,
+      "files": {
+        "reactivity/crates/gpui/src/runtime/accessibility.rs": 349,
+        "reactivity/crates/gpui/src/runtime/editing.rs": 735,
+        "reactivity/crates/gpui/src/runtime/style_ledger.rs": 431,
+        "reactivity/crates/gpui/src/runtime/geometry.rs": 363,
+        "reactivity/crates/gpui/src/native/accessibility/transitions.rs": 1249,
+        "reactivity/crates/gpui/src/runtime/scroll.rs": 949,
+        "reactivity/crates/gpui/src/runtime/hit_tests.rs": 214,
+        "reactivity/crates/gpui/src/runtime/list.rs": 363,
+        "reactivity/crates/gpui/src/runtime/inspector.rs": 806,
+        "reactivity/crates/gpui/tests/inspector.rs": 709,
+        "reactivity/crates/gpui/src/runtime/query.rs": 599,
+        "reactivity/crates/gpui/src/runtime.rs": 4095
+      }
+    },
+    "candidate": {
+      "code_lines": 12058,
+      "files": {
+        "reactivity/crates/gpui/src/runtime/basis_lifecycle_tests.rs": 305,
+        "reactivity/crates/gpui/src/runtime/hit_tests.rs": 214,
+        "reactivity/crates/gpui/src/runtime/scroll.rs": 961,
+        "reactivity/crates/gpui/src/runtime/basis_layout_probe.rs": 277,
+        "reactivity/crates/gpui/src/runtime/list.rs": 370,
+        "reactivity/crates/gpui/src/runtime/geometry.rs": 805,
+        "reactivity/crates/gpui/src/native/accessibility/transitions.rs": 1308,
+        "reactivity/crates/gpui/src/runtime/accessibility.rs": 364,
+        "reactivity/crates/gpui/src/runtime/style_ledger.rs": 432,
+        "reactivity/crates/gpui/tests/inspector.rs": 768,
+        "reactivity/crates/gpui/src/runtime/editing.rs": 735,
+        "reactivity/crates/gpui/src/runtime/inspector.rs": 808,
+        "reactivity/crates/gpui/src/runtime/query.rs": 613,
+        "reactivity/crates/gpui/src/runtime.rs": 4098
+      }
+    }
+  },
+  "all_changed_rust_code_delta": 1196,
+  "shipping_code_delta": 209,
+  "test_fixture_ledger_code_delta": 987
+}

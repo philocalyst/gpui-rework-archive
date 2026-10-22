@@ -1,0 +1,913 @@
+{
+  "source_commit": "9c1dbdf1e0a8ca15be8624cb68d295db9fcb36b3",
+  "roots": [
+    "reactivity/crates/canvas/src/",
+    "reactivity/crates/core/src/",
+    "reactivity/crates/gpui/src/",
+    "reactivity/crates/gpu/src/",
+    "reactivity/crates/host/src/",
+    "reactivity/crates/state/src/"
+  ],
+  "build_scripts": [
+    "reactivity/crates/gpu/build.rs"
+  ],
+  "scope": "six shipping first-party libraries",
+  "core_non_test_code_lines": 30216,
+  "library_src_code_lines": 30198,
+  "library_build_code_lines": 18,
+  "excluded": "tests, comments, blanks, documentation examples, labs, application examples, benchmarks, tools, evidence, vendors",
+  "uncertainty": "Unexpanded macro and conditional-import ambiguities stay charged; inspect per-file diagnostics.",
+  "tokei_version": "tokei 15.0.0 compiled with serialization support: json, cbor, yaml",
+  "tokei_sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712",
+  "rust_helper_sha256": "a7de17c706314b71d2983d3bdd04291ef57e98e4d74d1be7bb474369b491ae1b",
+  "counter_sha256": "20bdec60f793b8da41974073f7b5eab5d7f03eff2e84ceee868e41c90e0438ca",
+  "inventory_sha256": "d5b2a0b4afddc0eda26f3ce7b199f48200606080a496f96a4696cd9c411ab81c",
+  "cargo_manifests_sha256": {
+    "Cargo.toml": "e9fe696a58323a8962fc322330ab8abc04643650027dda6c03c3d6d0142ce206",
+    "crates/gpui/Cargo.toml": "4675e9f9a2d31a659dd6cca607c36e0b4417b347de2eeeb79dd799a843b7a487",
+    "crates/gpui_apple/Cargo.toml": "8497cb81515453570c428e9ce72e61b80cb46a91b384854ff781e980fbf746d5",
+    "crates/gpui_ce_fonts/Cargo.toml": "22505ff6c615b7fb08c34cda924a219b1ee6204d18e401e1e6bae9cd74f55abb",
+    "crates/gpui_ce_parley/Cargo.toml": "b96650794bc284c58026d53029daa2ad0c8663f81c6ea0ee95b688beca8da39c",
+    "crates/gpui_ce_util/Cargo.toml": "763f490ae25d5a2f783430925a29d8904f2a28e5e8d71869d1ef1cc714ea0a16",
+    "crates/gpui_collections/Cargo.toml": "80ecafe4cae50a31eb22d2298ca07abd575e6c0c18b0f4850a8e64a24c9cee0e",
+    "crates/gpui_derive_refineable/Cargo.toml": "d0523cd801a35cff10a2a4b8db8d891e903a954a25427201a29ad4f6cd7eed5b",
+    "crates/gpui_elements/Cargo.toml": "fbd376109e55fc641d6105771656eec8259cc65bd1f3062d9a4d13d31b60b737",
+    "crates/gpui_ios/Cargo.toml": "8125873d235654dd8d6b0027124969c871e6253e8a30e66bbd5f4e01d0c42f74",
+    "crates/gpui_linux/Cargo.toml": "265b75451540b5e8e81230ba488e5801c7e28a3c5803263725c23062f16ab2c3",
+    "crates/gpui_macos/Cargo.toml": "18cb40758632b6efa4d8f86e2c208209f839cd4c97ae40908114d66b1dcb03f1",
+    "crates/gpui_macros/Cargo.toml": "b88fd8ea1df4d179eae76c3a8bdb7a047fac35c461564564fcc5a1ef8adb9490",
+    "crates/gpui_media/Cargo.toml": "0d2be2a44e28797c48ac24c17a34c1a1ef8aaf3cfafd7b98722bbfc03266f5fb",
+    "crates/gpui_mobile/Cargo.toml": "52adcd6111c4606a6e1a595255d6e38775b7909a52d3e3fb421a01e262127e4f",
+    "crates/gpui_path/Cargo.toml": "c074540c1d810d86eb93a4a11b863e847a8c05e0d15eeaf1ab3eb94219b2ec10",
+    "crates/gpui_platform/Cargo.toml": "c23f9cacbd605b1198d623b5429217d53407b31452e717fe1aa8dc0a1ed59587",
+    "crates/gpui_refineable/Cargo.toml": "362dc7ca856999f22a414c5359ad7232200c88a14729b9475dede2c116bb6f00",
+    "crates/gpui_render/Cargo.toml": "6815ec8f32fa44aa99ee30b90a580aaef264e5586a22a3aab2c808742e9a8340",
+    "crates/gpui_scheduler/Cargo.toml": "2a0a4cc83c26870a3a1fa891893b93e2573cae35b76f84895c5625c7faff3aeb",
+    "crates/gpui_shared_string/Cargo.toml": "471884dbae6267cbcb946db4be3049e481f0600bc72917198259cbf5f707156d",
+    "crates/gpui_sum_tree/Cargo.toml": "5f57e3890c62d088740003eb900525e59932d597beae6eb4f182ff2785c90d3e",
+    "crates/gpui_tokio/Cargo.toml": "5d2d50be1c2d7099a32fb71e5d538ef7ca284ec8e9f11395dfbdf421f7a53fa1",
+    "crates/gpui_web/Cargo.toml": "f8e6d76aff0951f83a74b11652c935071c8c7ae0009a8a0783af41b99ceae9be",
+    "crates/gpui_web/examples/hello_web/Cargo.toml": "457f87d2394fdcc267c3d37f8e188c1d43137c10fab32086894cbadb7946b943",
+    "crates/gpui_wgpu/Cargo.toml": "a8d6af7452f9bd78e32871c34e147b0ead499ba4c0e2306ef6947386883ce407",
+    "crates/gpui_windows/Cargo.toml": "7736560f3d1ca000e515d3a07cb1c431fdb0f01412cffe3f1c411e7757e4e7b4",
+    "crates/gpui_zed_util/Cargo.toml": "9e52eb49efbb41e6ce79e4b4501964bc878b078d3d61ab154708f259bb347a05",
+    "examples/mobile/Cargo.toml": "dfb46466aeb9c902eac93552fc9e37a01083f9e7839e0b27b6d1aee810608a99",
+    "reactivity/Cargo.toml": "d03d32db802e06ee9d17bd33f59733be7d74109e7bf918635e3e9b00cdc330f4",
+    "reactivity/benchmarks/acknowledged-text-geometry/evidence/query-release-baseline/Cargo.toml": "d11606c3db511315290f1be2f86c18a54b719bbd1cdacc3e01578ac7acedcaef",
+    "reactivity/benchmarks/acknowledged-text-geometry/evidence/query-release-candidate/Cargo.toml": "ca00e7d25151e843c86ff070f0a15407a1724fb7e9914c49df10b264913a625f",
+    "reactivity/benchmarks/acknowledged-text-geometry/query-controls/a/Cargo.toml": "7e372231c82818eb51766964d29d997f5969ed79a6447c5210266f681199d9c7",
+    "reactivity/benchmarks/acknowledged-text-geometry/query-controls/usize/Cargo.toml": "0a91a6a73a02272211eca60c0761bfd71c1266b42af3494926a5a3bd9f2c72b5",
+    "reactivity/benchmarks/gpu-owner/Cargo.toml": "66981980cb80d4797d3d9bbb8ca66ca4f318fa3083ff9b1aed6672025207978f",
+    "reactivity/benchmarks/luna-accessibility-floor/async-io/Cargo.toml": "60aefc230c2e6e8b93af19f12bed7bf50147f902d6d9b3c1fc3dd38385d7da6d",
+    "reactivity/benchmarks/luna-accessibility-floor/channel-generation-probe/Cargo.toml": "d66953dfbc9d94d8905f802110fa65737ff4ae6796aff9a5434b069e3c08685f",
+    "reactivity/benchmarks/luna-accessibility-floor/late-activation/Cargo.toml": "36215e937a7f1e5689549ae53842c7c3049e5e4f2c68c3d92c4235a3f3e8dde1",
+    "reactivity/benchmarks/luna-accessibility-floor/tokio/Cargo.toml": "501ab1fcfb347bdb70e55071b4ce1689a3bdb38a500f03f2c59ecc858a27d460",
+    "reactivity/benchmarks/nanoui-mygo-gpui/Cargo.toml": "791556fdf8f2ae7539e8e26d7d0809f431b185407f76b1c456642d3496f76a81",
+    "reactivity/crates/algebra-lab/Cargo.toml": "985122a8d50020f67d2dce0f792d1cf27d8bf954384aeded3bac83513075fafe",
+    "reactivity/crates/api-lab/Cargo.toml": "cb41f4266e51ced386e28440024cc725f2263663f76108b4296f2a4b2b9884d8",
+    "reactivity/crates/canvas/Cargo.toml": "eb41eb188e3e047c7393bf109c5b9675985582fa08b44332670a80db59310ebd",
+    "reactivity/crates/core/Cargo.toml": "c55a76531f66bd21203dae6e6732fcd285714a58f056d9f8c006322dca19771f",
+    "reactivity/crates/coverage-lab/Cargo.toml": "20fe027fccedee8299bd15b24c6100134417b7f890b455aab638e60e79db2321",
+    "reactivity/crates/gpu/Cargo.toml": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222",
+    "reactivity/crates/gpui/Cargo.toml": "d38b762ff72b2903f87f3c4b95315e790bbdc6fa7707f19014eccbbd0dee661a",
+    "reactivity/crates/host/Cargo.toml": "c02f5f0790b534c063a1e2adf204f1645a1b9ce1bb201f393c9acbfb9d98528e",
+    "reactivity/crates/ownership-lab/Cargo.toml": "e56378f1c4c7bde47e64d7634862cb02a323b47e838baf5c810863cc6af5342d",
+    "reactivity/crates/presenter-tests/Cargo.toml": "ed2b2e5719563abef985fd565ea7680a1c70fd58ada28abc833aa36ba6a72753",
+    "reactivity/crates/retained/Cargo.toml": "c8f5a0f2ac5bc6ea2b4a29c8aeda5fa21b669940c7e5d7b366f29e66078aaa3f",
+    "reactivity/crates/state/Cargo.toml": "2d57c69725f2fd00bfed4b1d256db0a86c44d2bc792dddff2dd60b88f06b18bc",
+    "reactivity/crates/template-lab/Cargo.toml": "a06d0f84831b9e29744df98deeae23d01e4939a27efa0cb020d6914488d8a92b",
+    "reactivity/evidence/cephal-flat-cache/payload-driver/Cargo.toml": "60bd1994cb0dc07d299e6d4e17416f08d02a298b377511765cf35bd2513aca87",
+    "reactivity/evidence/cephal-hidden-marker/driver/Cargo.toml": "efd075a2070f61c39fd03377cd4a73dc6221831bef82c516a32799bad1dba76c",
+    "reactivity/evidence/cephal-oof-records/driver/Cargo.toml": "336900095c5ddfdf75ae0b8bfdb7b728643f860cad489305c687d7f139133b57",
+    "reactivity/evidence/cephal-oof-records/map-ledger/Cargo.toml": "3ba14d2a073cfbf06f06427b9576d790c0d09d6ab456cacb8bf94ed308d2ad27",
+    "reactivity/evidence/cephal-oof-records/public/Cargo.toml": "67d9bcad68244c03243c174056a850a29d949ac4dc9a2aa07b80f8421b6a1074",
+    "reactivity/evidence/cephal-oof-single/ledger/Cargo.toml": "8b7bd99e0bec3f80d25fdb08dca957cf68e7d8fc8e2cf8b4bc53bf77ef542afa",
+    "reactivity/evidence/native-text-selection/codec-probe/Cargo.toml": "f71a9ac4f21868b711e332ec3911ba96541eb8943b0b4c8df0e4c7bdda067cea",
+    "reactivity/evidence/static-shader/generator/Cargo.toml": "04c38e6057408e4f9d31d19517cd71ed4ec4927e4dd8f9b9f7c45be3d104d74a",
+    "reactivity/evidence/typed-catalog/client-fixture/Cargo.toml": "3a8cdd32aea17b328882f1817c94b95b2fa7de8f80683c37c1883cc8f97e286a",
+    "reactivity/evidence/typed-catalog/client-fixture/libraries/action-button/Cargo.toml": "62a6c98c4261bb99c6347907dddb240538c6dfa04805f6aec4a7f7c76820480f",
+    "reactivity/evidence/typed-catalog/client-fixture/libraries/filter-chip/Cargo.toml": "91153888e6785ddc44f10d3c22e04fd7ac58f5b6a005e00269f588c05069dcf0",
+    "reactivity/evidence/wgsl-buildtime/external-driver/Cargo.toml": "dfd01e4af82c276e3bee3968d30304ed9b6a5e2357a9c5389c352dac9694b273",
+    "reactivity/ports/hummingbird/Cargo.toml": "1a343a4fe139a97a73f0eec436a983eae24c8fbceb96f509dae4105a40a2ce66",
+    "reactivity/ports/hummingbird/evidence/borrowed-search/driver/Cargo.toml": "f04e8c42cb362dfac966655cebbf5bc4510c16254ed409800dbc4fc1618bbea1",
+    "reactivity/tools/inventory-rust/Cargo.toml": "a5fb7fbfc88b26dbdd9994c272d26dfc1c3a7257fdcffd508cf3392b86dde553",
+    "reactivity/vendor/accesskit/Cargo.toml": "4622b7e8e02906e376ac9f4eb5d954237d35477ed760476cc0f97188a56da1a5",
+    "reactivity/vendor/accesskit_atspi_common/Cargo.toml": "58502ae92b23c889a2b5b60e643c9e6f7f67fff4ab3d628bff132ea9b6bb3e7c",
+    "reactivity/vendor/accesskit_consumer/Cargo.toml": "9e32ab843ddc713da76250587ad624cd772b2fe1ef676a83bbcce29d87c5beb9",
+    "reactivity/vendor/accesskit_macos/Cargo.toml": "6b7055b3a6c35490c7684bc7b1269bd12e776c44be73d1ee4a8f984509838c07",
+    "reactivity/vendor/accesskit_unix/Cargo.toml": "e046eb9e0b1d8fa61838f3e6005523ccf7681d349af2dee9e2fd64c67489b242",
+    "reactivity/vendor/cephal/Cargo.toml": "fed063e737f0fefb416e581588fab5d101e8938cebb420d832e51f9172b9a1ee",
+    "reactivity/vendor/parley/Cargo.toml": "2c56dc23a167e24c92ed4c29ce905a31ecb847ec59ebe7d8e7707087fec5a09a",
+    "reactivity/vendor/parley_engine/Cargo.toml": "115f26056ee14ccf6272d4f1f3373d356dbc21b14c9429890da01485cb0ca927",
+    "reactivity/vendor/softbuffer/Cargo.toml": "e521b1d6b4f09dcf8a90c57d4c99bc3a4e4d0529dda625ed8bf5dd9577257422",
+    "reactivity/vendor/wgpu-core/Cargo.toml": "c218342b95ef3b727a0e32a74597e0e19275c8d64d214b210fdb171caf4b15bd",
+    "reactivity/vendor/wgpu-hal/Cargo.toml": "120c5e78708fe77156a23e9d7b1ddb1f5cb14040fca6f7de358849a50de03b3e",
+    "reactivity/vendor/wgpu/Cargo.toml": "f630292115a79f237447bdf561eccb93eca1b4f7c4b1446868af7faaa7ddae09",
+    "reactivity/vendor/winit/Cargo.toml": "2aeb741d47b763ee198ca915c330a6bf0b1fc094dd69357e80278b7852289c61",
+    "site/player/Cargo.toml": "7905c91c1b74adca1d079ea0d139832c8fe404ba5d4f329cc4caafa7c750caab",
+    "tooling/perf/Cargo.toml": "a2dbfe0a2bc2bc17e34681596bc009caba1ff9b935afaa8b4eb022a02eb7446a"
+  },
+  "files": {
+    "reactivity/crates/canvas/src/canvas.rs": {
+      "source_sha256": "0391372788fa1b77edf041142d366283146301f50441b02770ac5a004f48db64",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 2650
+    },
+    "reactivity/crates/canvas/src/canvas/bins.rs": {
+      "source_sha256": "2e03d85da420c94ba02aa2ead9b671db7d7b9064778dcbf8bb02a58544f588d9",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 104
+    },
+    "reactivity/crates/canvas/src/canvas/columns.rs": {
+      "source_sha256": "a54e0cbbb1c67d2d23e6d53f535a0a51aa7992da6a94e855896b5c206381360d",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 547
+    },
+    "reactivity/crates/canvas/src/canvas/glyph_axis.rs": {
+      "source_sha256": "f060c15e923bd027c2b5ed55bce66c18243aaf482e3d21298f8b92dfc2d4ea94",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 98
+    },
+    "reactivity/crates/canvas/src/canvas/image_axis.rs": {
+      "source_sha256": "58a628d2d45334cc61cef73631e93f3dfa46884160bb0a3150f8c3a486f1d838",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 179
+    },
+    "reactivity/crates/canvas/src/canvas/mask_kernel.rs": {
+      "source_sha256": "d705803687c49f9656aec56aa07701546ddb269043c3577f7420757b214d11b8",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 63
+    },
+    "reactivity/crates/canvas/src/canvas/paint.rs": {
+      "source_sha256": "39bc755b9aa00c5072505c83655a2390507685aeeef93ce35d358c5a789a15a6",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 209
+    },
+    "reactivity/crates/canvas/src/canvas/rounded.rs": {
+      "source_sha256": "3d575ea1f650493d4e9beeb282a3dfe410af67ac651a7431800b213b65bcf924",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 38
+    },
+    "reactivity/crates/canvas/src/canvas/samples.rs": {
+      "source_sha256": "cd0ec5ffe15678fc9569189b77e8284baa0ff40a2ce9f2481a4ef58dc578355f",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 112
+    },
+    "reactivity/crates/canvas/src/canvas/simd_tests.rs": {
+      "source_sha256": "33365012911b25f56cb5e5bd18893a4b4de12dce488c2ed9b0e0dedf21e9051e",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/canvas/src/color.rs": {
+      "source_sha256": "35848adc117fe5215bc80e921912c665c5b485c45538fee4777018e49df08cfb",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 662
+    },
+    "reactivity/crates/canvas/src/color/gamut.rs": {
+      "source_sha256": "75054e29399be75a01aacaf3e87bb91b71afa374bf8095e3a377d798dd551751",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 265
+    },
+    "reactivity/crates/canvas/src/color/gamut/tests.rs": {
+      "source_sha256": "e1cebf516da535790679fa63f3d302361b2938f4b37b9aed9a79da853c4507f8",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/canvas/src/damage.rs": {
+      "source_sha256": "25f5fe53314d02d0180a3334cc22549711cb7dd21d2e8ed72e27520975529941",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 31
+    },
+    "reactivity/crates/canvas/src/image.rs": {
+      "source_sha256": "39af731a2a7e054fa86c11289699a811e4bf68cd25094af898bbd73f31e3b464",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 370
+    },
+    "reactivity/crates/canvas/src/image/transfer.rs": {
+      "source_sha256": "b25553a496729d4ca1e2372d46941393dccda6da55ff454138d73751f7188d30",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 258
+    },
+    "reactivity/crates/canvas/src/lib.rs": {
+      "source_sha256": "8aadd5144b3bc0a22ff1f60384f30ffa01ba5d94234deb98a3ede119bd8126bb",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 57
+    },
+    "reactivity/crates/canvas/src/text.rs": {
+      "source_sha256": "161f5a0e7185cbce705ee5d58cd0f1e6209c5c385ffc4e150871afecf1ac2890",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 519
+    },
+    "reactivity/crates/canvas/src/text/geometry_ledger.rs": {
+      "source_sha256": "c9b80cbb2ab5286549254c58ff2bcb11e8a4e9da4bd10588423249863b51c956",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/canvas/src/text/layout.rs": {
+      "source_sha256": "b10aafdd08199c4e763c6ce0165a0bba9b8014ec5f4c26d07a04717dd77820e6",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 271
+    },
+    "reactivity/crates/canvas/src/text/layout/interaction.rs": {
+      "source_sha256": "cb7fedc8a64bc38d4e4a49d6a7bd1151fd6908a4dc75d45e3b83fb714a637638",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 453
+    },
+    "reactivity/crates/canvas/src/text/line_break_tests.rs": {
+      "source_sha256": "916edd405b738d250e58bef2daba55316d4026f4d405a364895fb6757ca3d02e",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/canvas/src/text/line_ownership_tests.rs": {
+      "source_sha256": "0b6bfc056755010bd7acfd643fb2570ebf6f24dc541815d07a8372a1a4c09c52",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/canvas/src/text/paragraph.rs": {
+      "source_sha256": "1f01a61295eacabf52b50e6a0a44da42ce333773fae7c1a9ce7e1c868c1d3780",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 37
+    },
+    "reactivity/crates/canvas/src/text/planner.rs": {
+      "source_sha256": "0a49d5e31f389ade564ac6df2050b2f08d987c0e7dd017f9da266ce4cf5fe1ea",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 500
+    },
+    "reactivity/crates/core/src/damage.rs": {
+      "source_sha256": "389a3f5fcabcd14ab25624c47f8dbdb27efbaddb5c9456709c7ba6547f10f0c3",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 115
+    },
+    "reactivity/crates/core/src/geometry.rs": {
+      "source_sha256": "1ef7c0cb4e1ab0cb70cbffcceaef85b94b318749795da89a1f9552a610ae63d4",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 339
+    },
+    "reactivity/crates/core/src/inspect.rs": {
+      "source_sha256": "c3be727cf2e2bd33246bb41ad91cfb811c33e35a39bad031f6d07363d7adeb38",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 20
+    },
+    "reactivity/crates/core/src/layout.rs": {
+      "source_sha256": "19e012b77be0881c0bba4c5fc075c1c893834492a511610aee17d8ca184fc29b",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 737
+    },
+    "reactivity/crates/core/src/lib.rs": {
+      "source_sha256": "0bdc1a07cdcb7b81f5264d012592a18620c4c8ae3b78013f89d0cb004f7b02df",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 12
+    },
+    "reactivity/crates/core/src/spatial.rs": {
+      "source_sha256": "b497392441478e55770ef33cc86b9ea211135e3e0a933779fed495a8a7f95060",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 226
+    },
+    "reactivity/crates/core/src/tree.rs": {
+      "source_sha256": "86688fad538bdfcb939441cb20868dced764d8293a30595e1cb3a37fa1d0a238",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 362
+    },
+    "reactivity/crates/gpu/build.rs": {
+      "source_sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 18
+    },
+    "reactivity/crates/gpu/src/lib.rs": {
+      "source_sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 9
+    },
+    "reactivity/crates/gpu/src/renderer.rs": {
+      "source_sha256": "a5903d52cdc625cc37f71b231b038f3946ae1cf84df0e8f97c62189b634db95d",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 1222
+    },
+    "reactivity/crates/gpu/src/renderer/artifact.rs": {
+      "source_sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 47
+    },
+    "reactivity/crates/gpu/src/renderer/images.rs": {
+      "source_sha256": "368e1bf78865e679c422dc0c6aeb8ba1b9038c02672fc0356864609b9d1cb932",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 171
+    },
+    "reactivity/crates/gpu/src/renderer/owned.rs": {
+      "source_sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 68
+    },
+    "reactivity/crates/gpu/src/renderer/paint.rs": {
+      "source_sha256": "47bfb85fddfe86d39092fdfa08fb48827b3c39a033367983a337ae6e2c73b604",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 337
+    },
+    "reactivity/crates/gpu/src/renderer/slots.rs": {
+      "source_sha256": "06d1cbd9dc55f5d0c9a9d1715b57103f9b4b61cc1e4a08418466e66b1a300bed",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 158
+    },
+    "reactivity/crates/gpu/src/shader.rs": {
+      "source_sha256": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 483
+    },
+    "reactivity/crates/gpu/src/shader_build.rs": {
+      "source_sha256": "3fbbcd5627a1f2f8415fecaf153814a70c83dbfd1ed6e10fb3f39bee2cca3d1d",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 487
+    },
+    "reactivity/crates/gpui/src/application.rs": {
+      "source_sha256": "b0a9dde34248bbfcc88112b141927ac75ad0a3908bd8b236cc4780562fc83873",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 27
+    },
+    "reactivity/crates/gpui/src/component.rs": {
+      "source_sha256": "0a5372073d9a4de8e66115116679b3953905f366a83bdf5df95f7ac748254473",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 85
+    },
+    "reactivity/crates/gpui/src/element.rs": {
+      "source_sha256": "85a4defa114087e1d4f21f61c006c8248514f504c3afe1d94f3fde92cb67b75b",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 935
+    },
+    "reactivity/crates/gpui/src/identity.rs": {
+      "source_sha256": "8348756f0524ba3bb91094c2c24c1d12d557f4dfc72387aee507ab0d4bcc2b5b",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 38
+    },
+    "reactivity/crates/gpui/src/image.rs": {
+      "source_sha256": "1c7f8cd7509d963622339942d70dab50e6f38c9f9800c24e92196f8d8aafcff7",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 14
+    },
+    "reactivity/crates/gpui/src/lib.rs": {
+      "source_sha256": "c60b2128cbce6c8f9d412c407d2221f116177c4dd1aaaedc6081d748e58ca7a1",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 77
+    },
+    "reactivity/crates/gpui/src/list.rs": {
+      "source_sha256": "1c459748c7edebe54f99ace83cd67529ee31987cc410582058180a0cebbc6611",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 100
+    },
+    "reactivity/crates/gpui/src/native.rs": {
+      "source_sha256": "658d6b86ddc44742f9af19639ae3442d07590c74e7b8d76b293b3f217b717ba0",
+      "test_only": false,
+      "unclassified": [
+        {
+          "lines": [
+            42,
+            0,
+            50,
+            28
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/library.rs"
+          ]
+        },
+        {
+          "lines": [
+            1221,
+            0,
+            1227,
+            26
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/todos.rs"
+          ]
+        }
+      ],
+      "code_lines": 1062
+    },
+    "reactivity/crates/gpui/src/native/accessibility.rs": {
+      "source_sha256": "fff35d2a7eeee9483b6dbed4ec0968a8aa5d99495fc862ff5668bc7462c4ad54",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 645
+    },
+    "reactivity/crates/gpui/src/native/accessibility/geometry_tests.rs": {
+      "source_sha256": "8567f3f34ac58757376587ce51d31f2a7486595f7a441ea103b4df8dd84ef202",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests.rs": {
+      "source_sha256": "33124bee6d9ec431d749e64e16705a4354ce00674344d510cfba046dc4028c59",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests/checkbox.rs": {
+      "source_sha256": "e3c83ee4b900c1b9bf86631d411d23929096dda1309c6b7938ac2b22f55b276b",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests/lifecycle.rs": {
+      "source_sha256": "80eec81cc0b8986a221fc1c58549446ccbe867438f851eadd7fb7988044847a7",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/accessibility/selection_tests.rs": {
+      "source_sha256": "d695f81112752e71b01c552291f423f66ddee12e1edb98857a7c084df939a921",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/accessibility/tests.rs": {
+      "source_sha256": "ce41cd25c92b649317ecc434b8907ab4ba5d90eed0b355b2b1c6d0b328639816",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/accessibility/text.rs": {
+      "source_sha256": "9220cc6abcf34860e51e12be3ae4b687c290c7d07d2aac8dc4692f2f008fef7b",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 529
+    },
+    "reactivity/crates/gpui/src/native/accessibility/transitions.rs": {
+      "source_sha256": "9eda889b8bc858170acbf1d9e2df7b3d867c9bc9e41ae8ac72b1d6b79b227a28",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/destination.rs": {
+      "source_sha256": "1100a860096a42c820dc7b48e4a67509cf76987927ee2e14d8734de77a42251a",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 27
+    },
+    "reactivity/crates/gpui/src/native/destination_tests.rs": {
+      "source_sha256": "80e9a9e5ecacb66ae676e754a2bfee2cc20ae37eefd930cdaacb9e6210d6c582",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/destination_tests/record.rs": {
+      "source_sha256": "a52aa33ba44c25a604adff875a7d0ebc32a41d49e95545c738ed515966b354af",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/image_tests.rs": {
+      "source_sha256": "6b0c4e3e8d3c4afd42e54baa00497f232f31638223cf8d1acc5302c48d108ddf",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/inspector_tests.rs": {
+      "source_sha256": "2a56c610e4ae23da12f50f42d30308734ad592d58f7d8186ea2e347249f5ba41",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/list_tests.rs": {
+      "source_sha256": "3c6af2fa8c01f575a5b9c8e5b33fa55e5c2b6665bee5c8136fa384f1215fc997",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/paint_tests.rs": {
+      "source_sha256": "185ff8b175cf17e45737eeaad1379d29b939622ab38384b52243bdcbfaeb6cc4",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/question_tests.rs": {
+      "source_sha256": "f2248ea291dc00495bc12df542c69c9ae826de3672de3804f08b9c1027739b1f",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/remote_tests.rs": {
+      "source_sha256": "b1258594d961bbba4e89cb816e1c6c00a623b2f969b684673489580f2eb1f45e",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/scroll_tests.rs": {
+      "source_sha256": "9414206d1e2e0aafb86644f1aeaacc3eb89e27cbfcd24df9d26be83828e5c908",
+      "test_only": true,
+      "unclassified": [
+        {
+          "lines": [
+            11,
+            0,
+            12,
+            10
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/panes.rs"
+          ]
+        }
+      ],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/solid_tests.rs": {
+      "source_sha256": "d260130ceed4e53aba85eb22e6fc14ea363aa2b87e6f45b6f5bbd4cd56641389",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/style_tests.rs": {
+      "source_sha256": "f960650978e8c3e210c4b57a049b1165f5bf0841be586bfb25175ee1f5eaa61b",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/unicode_tests.rs": {
+      "source_sha256": "e5126ce8e2845a9ac001c3ffbb8bb07244c7b6ff3830e4e459062328a3b33a3c",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/native/upgrade.rs": {
+      "source_sha256": "03cfabb1c49266c473c6d3d153d76e0007bd5bbaa8428474a4f09040916cae5e",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 275
+    },
+    "reactivity/crates/gpui/src/native/upgrade_tests.rs": {
+      "source_sha256": "7d1b00da0c0017784c7a8394028dc120145838eefa145015b8494b13135d59bd",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/property.rs": {
+      "source_sha256": "55374c57e51926337e2cc1b0ae6ba007f1d7a75e591c369d42f4d849ab85a898",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 577
+    },
+    "reactivity/crates/gpui/src/reader.rs": {
+      "source_sha256": "7defb74f2e3ef00b94d2ae2d91919a948283f6024cc95a5c266b872541dc4640",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 322
+    },
+    "reactivity/crates/gpui/src/reader/future.rs": {
+      "source_sha256": "d2025b1474c1cac3b083577234d01ac0f42cc3a66dfdb33e26d577fad0ad56ff",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 130
+    },
+    "reactivity/crates/gpui/src/reader/inputs.rs": {
+      "source_sha256": "d0f213f657693b7d3b87c1dd899e9504dbf240a70d2d17a0fb70dcddbd258ba0",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 212
+    },
+    "reactivity/crates/gpui/src/reader/linear_mailbox.rs": {
+      "source_sha256": "eb837024c17a33cb8e2552685d4a6caddb4ebb062d426910f4c90f177ae441e0",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 83
+    },
+    "reactivity/crates/gpui/src/reader/question.rs": {
+      "source_sha256": "6e011c85363d4153b4b276ea56080766ecc73552329a74b076c8c016e7985473",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 783
+    },
+    "reactivity/crates/gpui/src/remote.rs": {
+      "source_sha256": "32f46c9e9f362765bbd3aa6bbaea6ed1234419ec959456db8260c93d724cfc97",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 287
+    },
+    "reactivity/crates/gpui/src/runtime.rs": {
+      "source_sha256": "d9366ea48daedb73ffcc313243e0caa5d7554375c880432f0031a8ec38c49a8c",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 3010
+    },
+    "reactivity/crates/gpui/src/runtime/accessibility.rs": {
+      "source_sha256": "b972afc5267beb8048dc0f5898fdf8223307947aa2ede1a81e9646afebcda662",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 302
+    },
+    "reactivity/crates/gpui/src/runtime/basis_layout_probe.rs": {
+      "source_sha256": "f83f18726a3c9c0f5b51fa78b88dfee9bb7e504d32daf8caca322ccb99c5efea",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/runtime/basis_lifecycle_tests.rs": {
+      "source_sha256": "18cf23aed016ef65bb9c50d89de7b49d94d695eff79031fdbff5026eae4970e5",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/runtime/delivery.rs": {
+      "source_sha256": "b4b2c4eae6f2111cfc5e214a5c6146d65d85ca681d869138564a9e343a369584",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 196
+    },
+    "reactivity/crates/gpui/src/runtime/editing.rs": {
+      "source_sha256": "37b610c0556ec38fb61e1417ee4694c527fdb9a3c8247d34ec84c34c1bafb120",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 503
+    },
+    "reactivity/crates/gpui/src/runtime/geometry.rs": {
+      "source_sha256": "9da5364905da35f12b7e1f72c8702ac438fc588ec5a6ac7f9228bc7815004230",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 364
+    },
+    "reactivity/crates/gpui/src/runtime/hit_tests.rs": {
+      "source_sha256": "b18c874ca29d6fe4519ff9e7c7708c97a968b6b2c2130f5b95d2c5b1c31e2738",
+      "test_only": true,
+      "unclassified": [],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/runtime/identity_index.rs": {
+      "source_sha256": "60982f39d3b0db098f2b9211b56fe4ff96ac5aa960e10e31aad12b3e88e34419",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 114
+    },
+    "reactivity/crates/gpui/src/runtime/image.rs": {
+      "source_sha256": "e2ff2da37ec6d2b2861cdcf640d341416ec91fe86a121fcee494ee47ad7a84f2",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 101
+    },
+    "reactivity/crates/gpui/src/runtime/input.rs": {
+      "source_sha256": "00abb8696afcbf5bb8bee9c395c05e66e30d991c93db5048fb8973aeac9fb060",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 264
+    },
+    "reactivity/crates/gpui/src/runtime/inspector.rs": {
+      "source_sha256": "d3ab085918896a5c71ebd9b1c6e6b7552b5d64cd96a5dbf9a0024dbc6000f235",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 715
+    },
+    "reactivity/crates/gpui/src/runtime/list.rs": {
+      "source_sha256": "bba192ee17998dfbdc7d5aafde9624eea2260309f1547457e064ff847439eb3e",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 366
+    },
+    "reactivity/crates/gpui/src/runtime/metadata.rs": {
+      "source_sha256": "fac20fb7e96ac6026bdf302a73acfa15aa79e0e12fe58e386e64a43431848b1f",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 586
+    },
+    "reactivity/crates/gpui/src/runtime/paint.rs": {
+      "source_sha256": "c62ea4461cf3e172e21cf18b57d341ad5788be12898178c971a430d26db8f6dc",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 171
+    },
+    "reactivity/crates/gpui/src/runtime/query.rs": {
+      "source_sha256": "34ad56c69780446a5096165ed814ed7a873300a2b0ae90ccc9c427caf124d791",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 566
+    },
+    "reactivity/crates/gpui/src/runtime/query/serialize.rs": {
+      "source_sha256": "6ea4642ad59b5c04bb0f5544b0fa63e56f752e88d9f1431753d7b5f6c815cd23",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 126
+    },
+    "reactivity/crates/gpui/src/runtime/scroll.rs": {
+      "source_sha256": "1c8ad47e197bf9fc58534141630f28ab00c6b2e2862a388f7811a8659dca271a",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 784
+    },
+    "reactivity/crates/gpui/src/runtime/semantics.rs": {
+      "source_sha256": "b93a1c687c7795c6275fd915cf4a6f6b59a9a1ff3487c723dfdc6e752016cd0e",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 186
+    },
+    "reactivity/crates/gpui/src/runtime/style_ledger.rs": {
+      "source_sha256": "d8ce15b2afcff5618ea113ad12c3f4c862d3cd0d3698f026e4d1ecd0d67fd2b9",
+      "test_only": true,
+      "unclassified": [
+        {
+          "lines": [
+            4,
+            0,
+            5,
+            13
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/graphics.rs"
+          ]
+        },
+        {
+          "lines": [
+            11,
+            0,
+            16,
+            12
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/library.rs"
+          ]
+        },
+        {
+          "lines": [
+            19,
+            0,
+            21,
+            10
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/todos.rs"
+          ]
+        },
+        {
+          "lines": [
+            22,
+            0,
+            23,
+            14
+          ],
+          "reason": "unresolved or configuration-dependent out-of-line module",
+          "candidates": [
+            "reactivity/crates/gpui/examples/support/workspace.rs"
+          ]
+        }
+      ],
+      "code_lines": 0
+    },
+    "reactivity/crates/gpui/src/runtime/styles.rs": {
+      "source_sha256": "df50dd0c8f75a7594b9b1340403583e83b8a71b111236dc59a7d80a95a2449a9",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 302
+    },
+    "reactivity/crates/gpui/src/runtime/styles/colours.rs": {
+      "source_sha256": "a52ffa7b3a1adddf943a36220f1a8e6f29d68e2183e5aafa05ed176a00618ad2",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 437
+    },
+    "reactivity/crates/gpui/src/runtime/text_geometry.rs": {
+      "source_sha256": "d1879b33fb500976b591de68da1b30a86e53717c0d1207e9a7aa15862c038c17",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 119
+    },
+    "reactivity/crates/gpui/src/runtime/turn.rs": {
+      "source_sha256": "b6437ded1288015cfe005fb2779bab59031299541ccdd076107ea8cd0eac57e5",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 304
+    },
+    "reactivity/crates/gpui/src/scroll.rs": {
+      "source_sha256": "86bd2b22785955abfe7359b067df34258c669431ab6073cf2184c593cf456bd8",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 72
+    },
+    "reactivity/crates/gpui/src/semantic.rs": {
+      "source_sha256": "70cb64214d34b3f2f03dd3eaa3c951acfc96615139ddfd11dc462433d6c1a3d3",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 261
+    },
+    "reactivity/crates/gpui/src/shared_text.rs": {
+      "source_sha256": "e4e173c56b7a596137488d1f8000f68cae14ca9cf86f604e9797048ec23714a2",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 29
+    },
+    "reactivity/crates/gpui/src/source.rs": {
+      "source_sha256": "451c3b090d8a870e7f5d105b16aaa5a67513b9dea057ca74476e53f605586d69",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 939
+    },
+    "reactivity/crates/gpui/src/style.rs": {
+      "source_sha256": "96d911bd372565a53c3debbc44075f358bc3089d407e2d3fa7cb9ef3f1b13110",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 201
+    },
+    "reactivity/crates/gpui/src/style_port.rs": {
+      "source_sha256": "6fb56cdc98ca9aaf0f39c2cd527ccc851cae6ba875f34ac805b519fdfc211db9",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 206
+    },
+    "reactivity/crates/host/src/lib.rs": {
+      "source_sha256": "b83d02834f8b2e7f6cd6cb4b11f77c1deb5cfd00217fd523530d17482ded38b3",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 49
+    },
+    "reactivity/crates/host/src/native.rs": {
+      "source_sha256": "95078f73d63e9aa311944d64cf37a306d00013185feae719279573eb220f8077",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 92
+    },
+    "reactivity/crates/state/src/field.rs": {
+      "source_sha256": "90dfe1e8354fdd9cb38f15f2089fc997da7d84343598755af7397b7860440b56",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 44
+    },
+    "reactivity/crates/state/src/handoff.rs": {
+      "source_sha256": "3f70a2000b41c3af26e9f92a714da3d9ee21976addea2e0cfff96166850f5302",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 58
+    },
+    "reactivity/crates/state/src/lib.rs": {
+      "source_sha256": "8d460d5915f14824b6b840116a08a10973f6fd2cea1a55fc3578aee41c3eb0b1",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 11
+    },
+    "reactivity/crates/state/src/publication.rs": {
+      "source_sha256": "a456c9f7e283683ab4cfcd71c55c98167620d136265f8f0375599f1766d1047d",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 69
+    },
+    "reactivity/crates/state/src/request.rs": {
+      "source_sha256": "08e1978efe93ce7974cfabecd67112e312701b3414aa480f9c01a402e9568ca7",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 167
+    },
+    "reactivity/crates/state/src/signal.rs": {
+      "source_sha256": "05d2670eef676e4931a02a48c5557d252dc599851448bdab7a7d4fdf16360dad",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 60
+    }
+  }
+}

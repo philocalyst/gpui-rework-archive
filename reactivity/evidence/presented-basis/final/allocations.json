@@ -1,0 +1,1929 @@
+{
+  "source_pins": {
+    "base": "619788822bf4f55818007ac596af0d607b4ebb3b",
+    "four_byte": "b048b83ba5d1295e439c09d8b575a4704a95157a",
+    "eight_byte": "9c1dbdf1e0a8ca15be8624cb68d295db9fcb36b3"
+  },
+  "rows": [
+    {
+      "case": "plain",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "plain",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6904,
+          "retained": 5676,
+          "peak": 5836
+        },
+        "four_byte": {
+          "case": "plain",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        },
+        "eight_byte": {
+          "case": "plain",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      }
+    },
+    {
+      "case": "named",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "named",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 41,
+          "requested": 7524,
+          "retained": 6000,
+          "peak": 6160
+        },
+        "four_byte": {
+          "case": "named",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 41,
+          "requested": 7508,
+          "retained": 5984,
+          "peak": 6144
+        },
+        "eight_byte": {
+          "case": "named",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 41,
+          "requested": 7508,
+          "retained": 5984,
+          "peak": 6144
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -16
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -16
+      }
+    },
+    {
+      "case": "rounded",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "rounded",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 40,
+          "requested": 7416,
+          "retained": 6068,
+          "peak": 6228
+        },
+        "four_byte": {
+          "case": "rounded",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 40,
+          "requested": 7400,
+          "retained": 6052,
+          "peak": 6212
+        },
+        "eight_byte": {
+          "case": "rounded",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 40,
+          "requested": 7400,
+          "retained": 6052,
+          "peak": 6212
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -16
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -16
+      }
+    },
+    {
+      "case": "custom_root",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "custom_root",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6904,
+          "retained": 5676,
+          "peak": 5836
+        },
+        "four_byte": {
+          "case": "custom_root",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 37,
+          "requested": 7312,
+          "retained": 6084,
+          "peak": 6244
+        },
+        "eight_byte": {
+          "case": "custom_root",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 37,
+          "requested": 7312,
+          "retained": 6084,
+          "peak": 6244
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 408,
+        "retained": 408,
+        "peak": 408
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": 408,
+        "retained": 408,
+        "peak": 408
+      }
+    },
+    {
+      "case": "axis_root",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "axis_root",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6904,
+          "retained": 5676,
+          "peak": 5836
+        },
+        "four_byte": {
+          "case": "axis_root",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 37,
+          "requested": 7312,
+          "retained": 6084,
+          "peak": 6244
+        },
+        "eight_byte": {
+          "case": "axis_root",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 408,
+        "retained": 408,
+        "peak": 408
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      }
+    },
+    {
+      "case": "sparse_custom",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "sparse_custom",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6904,
+          "retained": 5676,
+          "peak": 5836
+        },
+        "four_byte": {
+          "case": "sparse_custom",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        },
+        "eight_byte": {
+          "case": "sparse_custom",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      }
+    },
+    {
+      "case": "same_custom_siblings",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "same_custom_siblings",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6904,
+          "retained": 5676,
+          "peak": 5836
+        },
+        "four_byte": {
+          "case": "same_custom_siblings",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        },
+        "eight_byte": {
+          "case": "same_custom_siblings",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      }
+    },
+    {
+      "case": "unique_custom",
+      "children": 0,
+      "cohorts": {
+        "base": {
+          "case": "unique_custom",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6904,
+          "retained": 5676,
+          "peak": 5836
+        },
+        "four_byte": {
+          "case": "unique_custom",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        },
+        "eight_byte": {
+          "case": "unique_custom",
+          "children": 0,
+          "rows": 1,
+          "row_capacity": 1,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 34,
+          "requested": 6888,
+          "retained": 5660,
+          "peak": 5828
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16,
+        "retained": -16,
+        "peak": -8
+      }
+    },
+    {
+      "case": "plain",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "plain",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 38,
+          "requested": 8504,
+          "retained": 6484,
+          "peak": 6700
+        },
+        "four_byte": {
+          "case": "plain",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 38,
+          "requested": 8472,
+          "retained": 6452,
+          "peak": 6668
+        },
+        "eight_byte": {
+          "case": "plain",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 38,
+          "requested": 8472,
+          "retained": 6452,
+          "peak": 6668
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      }
+    },
+    {
+      "case": "named",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "named",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 45,
+          "requested": 9124,
+          "retained": 6808,
+          "peak": 7024
+        },
+        "four_byte": {
+          "case": "named",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 45,
+          "requested": 9092,
+          "retained": 6776,
+          "peak": 6992
+        },
+        "eight_byte": {
+          "case": "named",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 45,
+          "requested": 9092,
+          "retained": 6776,
+          "peak": 6992
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      }
+    },
+    {
+      "case": "rounded",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "rounded",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 44,
+          "requested": 9016,
+          "retained": 6876,
+          "peak": 7092
+        },
+        "four_byte": {
+          "case": "rounded",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 44,
+          "requested": 8984,
+          "retained": 6844,
+          "peak": 7060
+        },
+        "eight_byte": {
+          "case": "rounded",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 44,
+          "requested": 8984,
+          "retained": 6844,
+          "peak": 7060
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      }
+    },
+    {
+      "case": "custom_root",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "custom_root",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 39,
+          "requested": 8696,
+          "retained": 6676,
+          "peak": 6892
+        },
+        "four_byte": {
+          "case": "custom_root",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        },
+        "eight_byte": {
+          "case": "custom_root",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      }
+    },
+    {
+      "case": "axis_root",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "axis_root",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 39,
+          "requested": 8696,
+          "retained": 6676,
+          "peak": 6892
+        },
+        "four_byte": {
+          "case": "axis_root",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        },
+        "eight_byte": {
+          "case": "axis_root",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 39,
+          "requested": 8664,
+          "retained": 6644,
+          "peak": 6860
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -32,
+        "retained": -32,
+        "peak": -32
+      }
+    },
+    {
+      "case": "sparse_custom",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "sparse_custom",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 39,
+          "requested": 8696,
+          "retained": 6676,
+          "peak": 6892
+        },
+        "four_byte": {
+          "case": "sparse_custom",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        },
+        "eight_byte": {
+          "case": "sparse_custom",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      }
+    },
+    {
+      "case": "same_custom_siblings",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "same_custom_siblings",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 39,
+          "requested": 8696,
+          "retained": 6676,
+          "peak": 6892
+        },
+        "four_byte": {
+          "case": "same_custom_siblings",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        },
+        "eight_byte": {
+          "case": "same_custom_siblings",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      }
+    },
+    {
+      "case": "unique_custom",
+      "children": 1,
+      "cohorts": {
+        "base": {
+          "case": "unique_custom",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 39,
+          "requested": 8696,
+          "retained": 6676,
+          "peak": 6892
+        },
+        "four_byte": {
+          "case": "unique_custom",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        },
+        "eight_byte": {
+          "case": "unique_custom",
+          "children": 1,
+          "rows": 2,
+          "row_capacity": 2,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 42,
+          "requested": 9088,
+          "retained": 7068,
+          "peak": 7284
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": 392,
+        "retained": 392,
+        "peak": 392
+      }
+    },
+    {
+      "case": "plain",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "plain",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 106,
+          "requested": 144801,
+          "retained": 37173,
+          "peak": 45360
+        },
+        "four_byte": {
+          "case": "plain",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 106,
+          "requested": 143761,
+          "retained": 36133,
+          "peak": 45360
+        },
+        "eight_byte": {
+          "case": "plain",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 106,
+          "requested": 143761,
+          "retained": 36133,
+          "peak": 45360
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      }
+    },
+    {
+      "case": "named",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "named",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 113,
+          "requested": 145421,
+          "retained": 37497,
+          "peak": 45584
+        },
+        "four_byte": {
+          "case": "named",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 113,
+          "requested": 144381,
+          "retained": 36457,
+          "peak": 45584
+        },
+        "eight_byte": {
+          "case": "named",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 113,
+          "requested": 144381,
+          "retained": 36457,
+          "peak": 45584
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      }
+    },
+    {
+      "case": "rounded",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "rounded",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 112,
+          "requested": 145313,
+          "retained": 37565,
+          "peak": 45424
+        },
+        "four_byte": {
+          "case": "rounded",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 112,
+          "requested": 144273,
+          "retained": 36525,
+          "peak": 45424
+        },
+        "eight_byte": {
+          "case": "rounded",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 112,
+          "requested": 144273,
+          "retained": 36525,
+          "peak": 45424
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      }
+    },
+    {
+      "case": "custom_root",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "custom_root",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 107,
+          "requested": 144993,
+          "retained": 37365,
+          "peak": 45360
+        },
+        "four_byte": {
+          "case": "custom_root",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 110,
+          "requested": 144377,
+          "retained": 36749,
+          "peak": 45360
+        },
+        "eight_byte": {
+          "case": "custom_root",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 110,
+          "requested": 144377,
+          "retained": 36749,
+          "peak": 45360
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": -616,
+        "retained": -616,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": -616,
+        "retained": -616,
+        "peak": 0
+      }
+    },
+    {
+      "case": "axis_root",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "axis_root",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 107,
+          "requested": 144993,
+          "retained": 37365,
+          "peak": 45360
+        },
+        "four_byte": {
+          "case": "axis_root",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 110,
+          "requested": 144377,
+          "retained": 36749,
+          "peak": 45360
+        },
+        "eight_byte": {
+          "case": "axis_root",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 107,
+          "requested": 143953,
+          "retained": 36325,
+          "peak": 45360
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": -616,
+        "retained": -616,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -1040,
+        "retained": -1040,
+        "peak": 0
+      }
+    },
+    {
+      "case": "sparse_custom",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "sparse_custom",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 107,
+          "requested": 145081,
+          "retained": 37453,
+          "peak": 45360
+        },
+        "four_byte": {
+          "case": "sparse_custom",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 110,
+          "requested": 144465,
+          "retained": 36837,
+          "peak": 45360
+        },
+        "eight_byte": {
+          "case": "sparse_custom",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 110,
+          "requested": 144465,
+          "retained": 36837,
+          "peak": 45360
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": -616,
+        "retained": -616,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": -616,
+        "retained": -616,
+        "peak": 0
+      }
+    },
+    {
+      "case": "same_custom_siblings",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "same_custom_siblings",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 107,
+          "requested": 144993,
+          "retained": 37365,
+          "peak": 45360
+        },
+        "four_byte": {
+          "case": "same_custom_siblings",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 64,
+          "record_capacity": 64,
+          "allocations": 114,
+          "requested": 146297,
+          "retained": 37709,
+          "peak": 45360
+        },
+        "eight_byte": {
+          "case": "same_custom_siblings",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 64,
+          "record_capacity": 64,
+          "allocations": 114,
+          "requested": 146297,
+          "retained": 37709,
+          "peak": 45360
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 7,
+        "requested": 1304,
+        "retained": 344,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 7,
+        "requested": 1304,
+        "retained": 344,
+        "peak": 0
+      }
+    },
+    {
+      "case": "unique_custom",
+      "children": 64,
+      "cohorts": {
+        "base": {
+          "case": "unique_custom",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 111,
+          "requested": 156297,
+          "retained": 45724,
+          "peak": 52292
+        },
+        "four_byte": {
+          "case": "unique_custom",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 64,
+          "record_capacity": 64,
+          "allocations": 118,
+          "requested": 157601,
+          "retained": 46068,
+          "peak": 51764
+        },
+        "eight_byte": {
+          "case": "unique_custom",
+          "children": 64,
+          "rows": 65,
+          "row_capacity": 65,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 64,
+          "record_capacity": 64,
+          "allocations": 118,
+          "requested": 157601,
+          "retained": 46068,
+          "peak": 51764
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 7,
+        "requested": 1304,
+        "retained": 344,
+        "peak": -528
+      },
+      "eight_byte_delta": {
+        "allocations": 7,
+        "requested": 1304,
+        "retained": 344,
+        "peak": -528
+      }
+    },
+    {
+      "case": "plain",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "plain",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 313,
+          "requested": 2157769,
+          "retained": 481653,
+          "peak": 698160
+        },
+        "four_byte": {
+          "case": "plain",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 313,
+          "requested": 2141369,
+          "retained": 465253,
+          "peak": 698160
+        },
+        "eight_byte": {
+          "case": "plain",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 313,
+          "requested": 2141369,
+          "retained": 465253,
+          "peak": 698160
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      }
+    },
+    {
+      "case": "named",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "named",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 320,
+          "requested": 2158389,
+          "retained": 481977,
+          "peak": 698384
+        },
+        "four_byte": {
+          "case": "named",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 320,
+          "requested": 2141989,
+          "retained": 465577,
+          "peak": 698384
+        },
+        "eight_byte": {
+          "case": "named",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 320,
+          "requested": 2141989,
+          "retained": 465577,
+          "peak": 698384
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      }
+    },
+    {
+      "case": "rounded",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "rounded",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 319,
+          "requested": 2158281,
+          "retained": 482045,
+          "peak": 698224
+        },
+        "four_byte": {
+          "case": "rounded",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 319,
+          "requested": 2141881,
+          "retained": 465645,
+          "peak": 698224
+        },
+        "eight_byte": {
+          "case": "rounded",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 1,
+          "allocations": 319,
+          "requested": 2141881,
+          "retained": 465645,
+          "peak": 698224
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      }
+    },
+    {
+      "case": "custom_root",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "custom_root",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 312,
+          "requested": 2127241,
+          "retained": 466485,
+          "peak": 698160
+        },
+        "four_byte": {
+          "case": "custom_root",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 315,
+          "requested": 2111265,
+          "retained": 450509,
+          "peak": 698160
+        },
+        "eight_byte": {
+          "case": "custom_root",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 315,
+          "requested": 2111265,
+          "retained": 450509,
+          "peak": 698160
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": -15976,
+        "retained": -15976,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": -15976,
+        "retained": -15976,
+        "peak": 0
+      }
+    },
+    {
+      "case": "axis_root",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "axis_root",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 312,
+          "requested": 2127241,
+          "retained": 466485,
+          "peak": 698160
+        },
+        "four_byte": {
+          "case": "axis_root",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 315,
+          "requested": 2111265,
+          "retained": 450509,
+          "peak": 698160
+        },
+        "eight_byte": {
+          "case": "axis_root",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 312,
+          "requested": 2110841,
+          "retained": 450085,
+          "peak": 698160
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": -15976,
+        "retained": -15976,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 0,
+        "requested": -16400,
+        "retained": -16400,
+        "peak": 0
+      }
+    },
+    {
+      "case": "sparse_custom",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "sparse_custom",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 314,
+          "requested": 2158049,
+          "retained": 481933,
+          "peak": 698160
+        },
+        "four_byte": {
+          "case": "sparse_custom",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 317,
+          "requested": 2142073,
+          "retained": 465957,
+          "peak": 698160
+        },
+        "eight_byte": {
+          "case": "sparse_custom",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1,
+          "record_capacity": 4,
+          "allocations": 317,
+          "requested": 2142073,
+          "retained": 465957,
+          "peak": 698160
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 3,
+        "requested": -15976,
+        "retained": -15976,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 3,
+        "requested": -15976,
+        "retained": -15976,
+        "peak": 0
+      }
+    },
+    {
+      "case": "same_custom_siblings",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "same_custom_siblings",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 314,
+          "requested": 2157961,
+          "retained": 481845,
+          "peak": 698160
+        },
+        "four_byte": {
+          "case": "same_custom_siblings",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1024,
+          "record_capacity": 1024,
+          "allocations": 325,
+          "requested": 2174625,
+          "retained": 482189,
+          "peak": 698160
+        },
+        "eight_byte": {
+          "case": "same_custom_siblings",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1024,
+          "record_capacity": 1024,
+          "allocations": 325,
+          "requested": 2174625,
+          "retained": 482189,
+          "peak": 698160
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 11,
+        "requested": 16664,
+        "retained": 344,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 11,
+        "requested": 16664,
+        "retained": 344,
+        "peak": 0
+      }
+    },
+    {
+      "case": "unique_custom",
+      "children": 1024,
+      "cohorts": {
+        "base": {
+          "case": "unique_custom",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "false",
+          "geometry": "false",
+          "records": 0,
+          "record_capacity": 0,
+          "allocations": 321,
+          "requested": 2296753,
+          "retained": 595228,
+          "peak": 698160
+        },
+        "four_byte": {
+          "case": "unique_custom",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1024,
+          "record_capacity": 1024,
+          "allocations": 332,
+          "requested": 2313417,
+          "retained": 595572,
+          "peak": 698160
+        },
+        "eight_byte": {
+          "case": "unique_custom",
+          "children": 1024,
+          "rows": 1025,
+          "row_capacity": 1025,
+          "metadata": "true",
+          "geometry": "true",
+          "records": 1024,
+          "record_capacity": 1024,
+          "allocations": 332,
+          "requested": 2313417,
+          "retained": 595572,
+          "peak": 698160
+        }
+      },
+      "four_byte_delta": {
+        "allocations": 11,
+        "requested": 16664,
+        "retained": 344,
+        "peak": 0
+      },
+      "eight_byte_delta": {
+        "allocations": 11,
+        "requested": 16664,
+        "retained": 344,
+        "peak": 0
+      }
+    }
+  ]
+}

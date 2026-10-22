@@ -1,0 +1,86 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-presented-basis-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.77s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-e6cd8fa3fbb726e9)
+
+running 13 tests
+test runtime::basis_layout_probe::basis_ordinary_window_allocation_cohorts ... BASIS_WINDOW case=plain children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6888 retained=5660 peak=5828
+BASIS_WINDOW case=named children=0 rows=1 row_capacity=1 metadata=true geometry=false records=0 record_capacity=0 allocations=41 requested=7508 retained=5984 peak=6144
+BASIS_WINDOW case=rounded children=0 rows=1 row_capacity=1 metadata=true geometry=true records=1 record_capacity=1 allocations=40 requested=7400 retained=6052 peak=6212
+BASIS_WINDOW case=custom_root children=0 rows=1 row_capacity=1 metadata=true geometry=true records=1 record_capacity=4 allocations=37 requested=7312 retained=6084 peak=6244
+BASIS_WINDOW case=axis_root children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6888 retained=5660 peak=5828
+BASIS_WINDOW case=sparse_custom children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6888 retained=5660 peak=5828
+BASIS_WINDOW case=same_custom_siblings children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6888 retained=5660 peak=5828
+BASIS_WINDOW case=unique_custom children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6888 retained=5660 peak=5828
+BASIS_WINDOW case=plain children=1 rows=2 row_capacity=2 metadata=false geometry=false records=0 record_capacity=0 allocations=38 requested=8472 retained=6452 peak=6668
+BASIS_WINDOW case=named children=1 rows=2 row_capacity=2 metadata=true geometry=false records=0 record_capacity=0 allocations=45 requested=9092 retained=6776 peak=6992
+BASIS_WINDOW case=rounded children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=1 allocations=44 requested=8984 retained=6844 peak=7060
+BASIS_WINDOW case=custom_root children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9088 retained=7068 peak=7284
+BASIS_WINDOW case=axis_root children=1 rows=2 row_capacity=2 metadata=false geometry=false records=0 record_capacity=0 allocations=39 requested=8664 retained=6644 peak=6860
+BASIS_WINDOW case=sparse_custom children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9088 retained=7068 peak=7284
+BASIS_WINDOW case=same_custom_siblings children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9088 retained=7068 peak=7284
+BASIS_WINDOW case=unique_custom children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9088 retained=7068 peak=7284
+BASIS_WINDOW case=plain children=64 rows=65 row_capacity=65 metadata=false geometry=false records=0 record_capacity=0 allocations=106 requested=143761 retained=36133 peak=45360
+BASIS_WINDOW case=named children=64 rows=65 row_capacity=65 metadata=true geometry=false records=0 record_capacity=0 allocations=113 requested=144381 retained=36457 peak=45584
+BASIS_WINDOW case=rounded children=64 rows=65 row_capacity=65 metadata=true geometry=true records=1 record_capacity=1 allocations=112 requested=144273 retained=36525 peak=45424
+BASIS_WINDOW case=custom_root children=64 rows=65 row_capacity=65 metadata=true geometry=true records=1 record_capacity=4 allocations=110 requested=144377 retained=36749 peak=45360
+BASIS_WINDOW case=axis_root children=64 rows=65 row_capacity=65 metadata=false geometry=false records=0 record_capacity=0 allocations=107 requested=143953 retained=36325 peak=45360
+BASIS_WINDOW case=sparse_custom children=64 rows=65 row_capacity=65 metadata=true geometry=true records=1 record_capacity=4 allocations=110 requested=144465 retained=36837 peak=45360
+BASIS_WINDOW case=same_custom_siblings children=64 rows=65 row_capacity=65 metadata=true geometry=true records=64 record_capacity=64 allocations=114 requested=146297 retained=37709 peak=45360
+BASIS_WINDOW case=unique_custom children=64 rows=65 row_capacity=65 metadata=true geometry=true records=64 record_capacity=64 allocations=118 requested=157601 retained=46068 peak=51764
+BASIS_WINDOW case=plain children=1024 rows=1025 row_capacity=1025 metadata=false geometry=false records=0 record_capacity=0 allocations=313 requested=2141369 retained=465253 peak=698160
+BASIS_WINDOW case=named children=1024 rows=1025 row_capacity=1025 metadata=true geometry=false records=0 record_capacity=0 allocations=320 requested=2141989 retained=465577 peak=698384
+BASIS_WINDOW case=rounded children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1 record_capacity=1 allocations=319 requested=2141881 retained=465645 peak=698224
+BASIS_WINDOW case=custom_root children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1 record_capacity=4 allocations=315 requested=2111265 retained=450509 peak=698160
+BASIS_WINDOW case=axis_root children=1024 rows=1025 row_capacity=1025 metadata=false geometry=false records=0 record_capacity=0 allocations=312 requested=2110841 retained=450085 peak=698160
+BASIS_WINDOW case=sparse_custom children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1 record_capacity=4 allocations=317 requested=2142073 retained=465957 peak=698160
+BASIS_WINDOW case=same_custom_siblings children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1024 record_capacity=1024 allocations=325 requested=2174625 retained=482189 peak=698160
+BASIS_WINDOW case=unique_custom children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1024 record_capacity=1024 allocations=332 requested=2313417 retained=595572 peak=698160
+ok
+test runtime::basis_layout_probe::inline_basis_proposal_uses_existing_row_padding ... BASIS_INLINE_PROPOSAL actual_row=64 actual_field_bytes=63 padding=1 proposed_row=64 proposed_align=8
+BASIS_INLINE_OFFSETS identity=32 parent=56 kind=61 text=40 placement=0 basis=48 bounds=16 hittable=62 actions=60
+ok
+test runtime::basis_layout_probe::proposal_basis_headers_and_owner_allocations ... BASIS_PROPOSAL_HEADER Presented size=64 align=8
+BASIS_PROPOSAL_HEADER Option<Presented> size=64 align=8
+BASIS_PROPOSAL_HEADER geometry::Placement size=16 align=4
+BASIS_PROPOSAL_HEADER geometry::MapBasis size=8 align=4
+BASIS_PROPOSAL_HEADER geometry::Record size=16 align=4
+BASIS_PROPOSAL_HEADER geometry::Bases<'_> size=16 align=8
+BASIS_PROPOSAL_HEADER geometry::GeometryView<'_> size=24 align=8
+BASIS_PROPOSAL_HEADER Affine size=24 align=4
+BASIS_PROPOSAL_HEADER CoordinateSpace size=56 align=8
+BASIS_PROPOSAL_HEADER Point size=8 align=4
+BASIS_PROPOSAL_HEADER Rect size=16 align=4
+BASIS_PROPOSAL_HEADER ProposedRow size=64 align=8
+BASIS_PROPOSAL_HEADER ProposedPlacement size=16 align=4
+BASIS_PROPOSAL_HEADER Prepared size=40 align=8
+BASIS_PROPOSAL_HEADER Option<Prepared> size=40 align=8
+BASIS_PROPOSAL_HEADER Runtime<()> size=1824 align=8
+BASIS_PROPOSAL_HEADER Metadata size=264 align=8
+BASIS_PROPOSAL_HEADER geometry::Geometry size=96 align=8
+BASIS_PROPOSAL_HEADER (u64, crate::property::GeometryStyle) size=16 align=8
+BASIS_PROPOSAL_HEADER [u32; 4] size=16 align=4
+BASIS_PROPOSAL_HEADER SeparatePools size=48 align=8
+BASIS_PROPOSAL_HEADER MetadataWithSeparatePools size=272 align=8
+BASIS_PROPOSAL_HEADER GeometryWithSeparatePools size=144 align=8
+BASIS_PROPOSAL_OWNER metadata_baseline allocations=1 requested=264 retained=264 peak=264
+BASIS_PROPOSAL_OWNER metadata_separate_none allocations=1 requested=272 retained=272 peak=272
+BASIS_PROPOSAL_OWNER rounded_geometry_baseline_and_shared_stream allocations=1 requested=96 retained=96 peak=96
+BASIS_PROPOSAL_OWNER rounded_geometry_separate_direct allocations=1 requested=144 retained=144 peak=144
+BASIS_PROPOSAL_OWNER custom_only_shared_headers allocations=2 requested=360 retained=360 peak=360
+BASIS_PROPOSAL_OWNER custom_only_sidecar_headers allocations=2 requested=320 retained=320 peak=320
+ok
+test runtime::basis_lifecycle_tests::candidate_scale_failed_lowering_and_empty_ack_keep_geometry_epoch_coherent ... ok
+test runtime::basis_lifecycle_tests::custom_candidate_survives_failed_default_lowering_without_a_custom_p_owner ... ok
+test runtime::basis_lifecycle_tests::typed_paint_keep_preserves_custom_basis_and_radius_storage ... ok
+test runtime::basis_lifecycle_tests::unavailable_parent_map_does_not_reject_a_finite_admitted_child ... ok
+test runtime::geometry::basis_tests::exact_admitted_maps_and_zero_origin_extent_survive_factorization ... ok
+test runtime::geometry::basis_tests::finite_diagonals_are_inline_but_signed_off_diagonal_zeros_are_pooled ... ok
+test runtime::geometry::basis_tests::mixed_stream_keeps_full_radius_identity_and_empty_candidate_clears_p ... ok
+test runtime::geometry::basis_tests::parent_reuse_requires_every_basis_bit_and_keys_are_sheet_local ... ok
+test runtime::geometry::virtual_basis_tests::omitted_virtual_geometry_has_no_basis_key_and_radius_capacity_is_charged ... BASIS_VIRTUAL_RADIUS logical_rows=9 published_rows=5 published_custom=2 logical_radii=4 published_radii=2 record_capacity=6 retained_record_bytes=96
+ok
+test runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit ... BASIS_QUERY_LAYOUT context=112 context_align=8 part=16 geometry_view=24 bases=16
+ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 138 filtered out; finished in 0.14s
+
