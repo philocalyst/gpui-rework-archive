@@ -1,0 +1,93 @@
+{
+  "helper_sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea",
+  "tokei_sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712",
+  "groups": {
+    "accesskit": {
+      "shipping_non_test_code_lines": 3097,
+      "files": {
+        "vendor/accesskit/src/lib.rs": "12c41a220bf4d903d98476aa3295134b7da6cd43111ecdedc9cb1fd6c29a7ca7",
+        "vendor/accesskit/src/geometry.rs": "2f2c37da6a856f1463c593bd2c01d07f237951556c3f72594cb05a2561afa7ed",
+        "vendor/accesskit/src/text_lengths.rs": "edbd70172a5af866fa4d0ee70fbe9e28d6e4a5928a613aa8a5759e89c4fb27dd"
+      }
+    },
+    "accesskit_consumer": {
+      "shipping_non_test_code_lines": 3658,
+      "files": {
+        "vendor/accesskit_consumer/src/node.rs": "79686e8c6867cff462dd7920bba8774dc01163829f1cfb75d46af07cbf2ec6a2",
+        "vendor/accesskit_consumer/src/lib.rs": "c05cb365dd464b05b18f6ac97ff98c22e507f37c22918cb19c47b80dd9e85227",
+        "vendor/accesskit_consumer/src/text_codec_tests.rs": "d76a73c2bf036194316b26b2cdbf9f3363b0a7c095f9046ae33b5e5fc480fe1d",
+        "vendor/accesskit_consumer/src/filters.rs": "0511ef395f702095a0add38d3659492bf646dfd120eaa75232275bcfadb963b3",
+        "vendor/accesskit_consumer/src/iterators.rs": "454de6ccb571e7bd831c721b8ba4eb76dbefbe97043abfc727b917c2bcc28a1a",
+        "vendor/accesskit_consumer/src/text.rs": "207ef2aa16ab3ea7098dbb34d5db7d50e42bdebcdf44fd45a24e0a45d12331ca",
+        "vendor/accesskit_consumer/src/tree.rs": "8b600cfb981db3c41d88619db30a93293d8fa8fca6dd37853b4b3e746129f0c5"
+      }
+    },
+    "accesskit_macos": {
+      "shipping_non_test_code_lines": 2286,
+      "files": {
+        "vendor/accesskit_macos/src/node.rs": "8d2ef59cc7bce6684b3d322f1e0870a493ee7abbf50b43ec65c43b4b7fc6b5eb",
+        "vendor/accesskit_macos/src/util.rs": "a2c014d62ebdc4e4ef3677b00b3635d68017658f7823b6bb0324ebd8fca0e424",
+        "vendor/accesskit_macos/src/lib.rs": "b1df68dc7181efe2f833df5367493a3d2cc06dc2993202f612c4bf18285f7972",
+        "vendor/accesskit_macos/src/context.rs": "044150b753eeed39855a9bf5893c7eb20f06183068a697bca529407e2b989261",
+        "vendor/accesskit_macos/src/filters.rs": "cfe74d16da43ccfda209f11107faf78442c6830fa126cf2d48ffdcdf14c65288",
+        "vendor/accesskit_macos/src/event.rs": "e3cc2226539c79b4153fbbdf17963db91699fe1f0a9827326f2f919578d75335",
+        "vendor/accesskit_macos/src/adapter.rs": "622334ba9d79d695bd320a6da0be4d6b4476f3031dcd8b2f0e0f358bcbc9b122",
+        "vendor/accesskit_macos/src/subclass.rs": "54bfb61ddd2f8f10d5b2d632849c20a2f6b0d6716cae5091ae4122d8afbb42b9",
+        "vendor/accesskit_macos/src/patch.rs": "66cd13504699cb38789cdb07f7cb2c7878c0ef0f867a4f6040b3d014ef63d7d6"
+      }
+    },
+    "accesskit_atspi_common": {
+      "shipping_non_test_code_lines": 3614,
+      "files": {
+        "vendor/accesskit_atspi_common/src/simplified.rs": "f5da65c5f7f92e54747ad0f957522fc2bf7f6e215a1b1582b0ea1526f9404bb5",
+        "vendor/accesskit_atspi_common/src/node.rs": "3e8169ff47a14a46241e8a808e42c9f0d3d19fd334b37fdcd270497fe2a8fac4",
+        "vendor/accesskit_atspi_common/src/text_attributes.rs": "eeeb55273de1e21aca136a2f082cd2a91354f5166c15fa7fa5924aff60577f04",
+        "vendor/accesskit_atspi_common/src/rect.rs": "b24337632621ee6bfa6397525bbd864b08b94e23c9201ebefd0fd73d1aa112e2",
+        "vendor/accesskit_atspi_common/src/callback.rs": "17c178506a151d0341f4f7eb0824daf57cfd6190170a6af2627701237a805d12",
+        "vendor/accesskit_atspi_common/src/util.rs": "8b3c60980dd6448cdfacc6e45c8fd3886c41456ca9ba86d0904601143d673566",
+        "vendor/accesskit_atspi_common/src/error.rs": "9905c653b2b86274331ba783f6ed3f37acf9bd3f450e59811bdc6b7522c51ff7",
+        "vendor/accesskit_atspi_common/src/lib.rs": "2cdd44a13d5403fb8327f6b0fdb6761066c910d603de5c441bb15c17830b070e",
+        "vendor/accesskit_atspi_common/src/context.rs": "83feb006a50a9015079d80ece57885717bca6f1731bd90d1d332bea4e87e6940",
+        "vendor/accesskit_atspi_common/src/filters.rs": "cfe74d16da43ccfda209f11107faf78442c6830fa126cf2d48ffdcdf14c65288",
+        "vendor/accesskit_atspi_common/src/action.rs": "36d0787759c74a16a0718a81bd9b10d73d03c1114610c7c7d529ef8f2bd8efb5",
+        "vendor/accesskit_atspi_common/src/adapter.rs": "2f1a7498903790b4a00934a322d1a363389acb7c6664ecf6ba58e5de08ef3a20",
+        "vendor/accesskit_atspi_common/src/events.rs": "151b7ac8a6ccd2b4ab7ad81dc4c8618f4270182d6def747ce31b1bd30d039ee0"
+      }
+    },
+    "accesskit_unix": {
+      "shipping_non_test_code_lines": 2312,
+      "files": {
+        "vendor/accesskit_unix/src/util.rs": "2a043a60ea1d76c5603d65d5a9844586f00d1d310902032214a10c70b80750c5",
+        "vendor/accesskit_unix/src/lib.rs": "4416ce59366d321c3dbd29a1054c3ad6c426168c97f7b237ff3e818de6c3168c",
+        "vendor/accesskit_unix/src/context.rs": "6dca0ead057f6c50dd5c7f878d0c33a3a4e44309d63f3671122f8891dd571b46",
+        "vendor/accesskit_unix/src/executor.rs": "38e4a47fc2afd555d91d8e74156165d7da632c381e488a1c7693ed140ff278fa",
+        "vendor/accesskit_unix/src/adapter.rs": "0d09b3944a98998c7e7138e1077fbcd4e0ff19d1d2e09e665d14daa9273640e3",
+        "vendor/accesskit_unix/src/context_tests.rs": "7b5a4d8ed9e1ac9a05c8bfd33525313cedae978f16b32b59cbeadc72708c3e95",
+        "vendor/accesskit_unix/src/atspi/bus.rs": "f5d23f8250988c4d4b4cc966c444a6c9596a9f3aa4aa11f68525eaa7c684dae8",
+        "vendor/accesskit_unix/src/atspi/object_id.rs": "d0046b00da17de03c1aecbe6b50b1eb6cad5d7c3f28235f7abe263cc4d483d3f",
+        "vendor/accesskit_unix/src/atspi/object_address.rs": "71f293f5de1c46e5e2a2503053baa3c1fe7c62c13cc7c957dbf2843dfa531e79",
+        "vendor/accesskit_unix/src/atspi/mod.rs": "2ea8e56ae5d3fde6a380582890597d49a0390a86dfddcb275df5281ad46cd90e",
+        "vendor/accesskit_unix/src/atspi/interfaces/accessible.rs": "b60a1c989be3edf03e9661df8663cdd1b3930ac40db40058cafabb322ce38626",
+        "vendor/accesskit_unix/src/atspi/interfaces/selection.rs": "980d556b2620de481146580744d80f3bde0631b148d1330aed268a0a5a6b7905",
+        "vendor/accesskit_unix/src/atspi/interfaces/component.rs": "bb95115fe289aa2b92b6fce76a7a60df9a93a06a32281192aa4fdd6e75373fc3",
+        "vendor/accesskit_unix/src/atspi/interfaces/image.rs": "29cbbe368afbbbb8bfe9a8ede4dc4a2154c329e136e6aa5f115a37aa5b403b0e",
+        "vendor/accesskit_unix/src/atspi/interfaces/editable_text.rs": "93144da3a4c7a96f5979a228ec27096dda9bbe075c1e4827523d910dbbd88369",
+        "vendor/accesskit_unix/src/atspi/interfaces/application.rs": "530316441ee42b415605f6f50526ac776d8ab038aff24dfa02d4352dedcf2db0",
+        "vendor/accesskit_unix/src/atspi/interfaces/cache.rs": "abf640927b5dc79cae1ff19a1562721ffc833ffe3a4bede0e07f66d54e8314e2",
+        "vendor/accesskit_unix/src/atspi/interfaces/mod.rs": "a3f7875a51c3f69de9a6cbbf03044fa588270d6095c00446525308d84a5172fb",
+        "vendor/accesskit_unix/src/atspi/interfaces/action.rs": "7ffa334b1cace21aa567a074d0c1ba59dd2229449af02ffc329bfd4671940903",
+        "vendor/accesskit_unix/src/atspi/interfaces/text.rs": "3e36eb6bdd8dcdb7d9831474aec4d0cc86ba281d65addbbb52e72aa165b64ed9",
+        "vendor/accesskit_unix/src/atspi/interfaces/value.rs": "829dfa73ab581da1be9210c1a6a0361bbb8563fb8d49c7057557cc1ddefafbab",
+        "vendor/accesskit_unix/src/atspi/interfaces/document.rs": "61cde20381ea0966adb5ed67ad262a7d8231c10c44cbeecda639316154618f1a",
+        "vendor/accesskit_unix/src/atspi/interfaces/hyperlink.rs": "9a53b1d164208963ed047326f12ab380700807a3338b8c76f4edd8a492cd35d8"
+      }
+    },
+    "evidence_tooling": {
+      "shipping_non_test_code_lines": 53,
+      "files": {
+        "evidence/native-text-selection/count_extra.py": "b247e8674dee8711e985a32ebc61b07dd3d6de7ee4dcb1744fc0b7ed76c28182",
+        "evidence/native-text-selection/codec-probe/src/main.rs": "fd8d74a64689f89b5140f0a23c88a3e2b665c6b922ec4871391f30fb1c12f744"
+      }
+    }
+  }
+}
