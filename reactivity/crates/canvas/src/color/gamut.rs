@@ -1,6 +1,6 @@
 //! Designer unit-cube limits, separate from output mapping and composition.
 use super::*;
-use fearless_simd::{Simd, f64x4, prelude::*};
+use fearless_simd::{Simd, f32x4, f64x4, mask32x4, mask64x4, prelude::*, u32x4};
 use fearless_simd_macros::simd;
 
 impl OutputProfile {
@@ -211,10 +211,67 @@ fn endpoint_error<S: Simd>(p: Polynomial<S>, t: f64x4<S>, radius: f64x4<S>) -> f
         + ((p.a.abs() * 3.0 * t + p.b.abs()) + p.a.abs() * radius) * radius * radius
 }
 
+#[inline(always)]
+fn widen<S: Simd>(value: f32x4<S>) -> f64x4<S> {
+    let (low, high) = value.widen();
+    low.combine(high)
+}
+#[inline(always)]
+fn narrow<S: Simd>(value: f64x4<S>) -> f32x4<S> {
+    let (low, high) = value.split();
+    low.narrow(high)
+}
+#[inline(always)]
+fn narrow_mask<S: Simd>(mask: mask64x4<S>) -> mask32x4<S> {
+    let (low, high) = mask.to_vector().split();
+    mask32x4::from_vector(low.narrow(high))
+}
+
+// Earlier intervals must be certified no-exit: flooring start can precede this
+// interval. High is exclusive, not an assumed outside sample. Strict midpoints
+// remain below end even when ceil(end) crosses a local extremum or reentry.
+// Infinity's bits are a sentinel only, retaining f32MAX as a searchable value.
+#[inline(always)]
+fn lattice_exit<S: Simd>(
+    p: Polynomial<S>,
+    start: f64x4<S>,
+    end: f64x4<S>,
+    lightness: f64,
+    active: mask64x4<S>,
+) -> (f64x4<S>, usize) {
+    let simd = start.token();
+    let zero = u32x4::splat(simd, 0);
+    let one = u32x4::splat(simd, 1);
+    let start = (start * lightness).min(f32::MAX as f64);
+    let end = end * lightness;
+    let low_float = narrow(start);
+    let high_float = narrow(end);
+    let mut low = low_float.bitcast::<u32x4<S>>()
+        - narrow_mask(widen(low_float).simd_gt(start)).select(one, zero);
+    let mut high = high_float.bitcast::<u32x4<S>>()
+        + narrow_mask(widen(high_float).simd_lt(end)).select(one, zero);
+    let active = narrow_mask(active);
+    let mut evaluations = 0;
+    loop {
+        let searching = active & (high - low).simd_gt(1);
+        if searching.to_bitmask() & 7 == 0 {
+            break;
+        }
+        let middle = low + ((high - low) >> 1);
+        let chroma = widen(middle.bitcast::<f32x4<S>>());
+        let outside = narrow_mask(p.evaluate(chroma / lightness).simd_gt(0.0));
+        high = (searching & outside).select(middle, high);
+        low = (searching & !outside).select(middle, low);
+        evaluations += 1;
+    }
+    (widen(low.bitcast::<f32x4<S>>()), evaluations)
+}
+
 // Allowed is polynomial <=0. Each derivative interval is monotone, so an
 // outward endpoint brackets the first exit. Unresolved contacts block that
 // lane's later answers; their earliest possible t is returned separately.
 // Admission compares that uncertainty with other independently resolved faces.
+// Results are exact f32 chroma widened to f64; uncertainty stays in t=C/L.
 // No whole-gamut monotonicity is assumed. All RGB lanes share the same solve.
 #[simd]
 fn first_exit<S: Simd>(
@@ -222,7 +279,7 @@ fn first_exit<S: Simd>(
     p: Polynomial<S>,
     turns: [f64x4<S>; 2],
     bound: f64x4<S>,
-    iterations: usize,
+    lightness: f64,
 ) -> [f64x4<S>; 2] {
     let infinity = f64x4::splat(simd, f64::INFINITY);
     let mut result = p.d.simd_gt(0.0).select(f64x4::splat(simd, 0.0), infinity);
@@ -246,15 +303,8 @@ fn first_exit<S: Simd>(
         unresolved = (pending & uncertain).select(finite_radius.select(start, zero), unresolved);
         let active = pending & !uncertain & value.simd_gt(error);
         if active.to_bitmask() & 7 != 0 {
-            let mut low = start;
-            let mut high = end;
-            for _ in 0..iterations {
-                let middle = low + (high - low) * 0.5;
-                let outside = p.evaluate(middle).simd_gt(0.0);
-                high = (active & outside).select(middle, high);
-                low = (active & !outside).select(middle, low);
-            }
-            result = active.select(low, result);
+            let (chroma, _) = lattice_exit(p, start, end, lightness, active);
+            result = active.select(chroma, result);
         }
         start = end;
     }
@@ -275,27 +325,27 @@ fn limit<S: Simd>(simd: S, profile: OutputProfile, lightness: f32, hue: f32) -> 
     let bound = 1.0 + p.b.abs().max(p.c.abs()).max(p.d.abs()) / leading;
     let rgb = f64x4::from_fn(simd, |lane| if lane < 3 { 1.0 } else { 0.0 });
     let bound = rgb.simd_eq(1.0).select(bound, f64x4::splat(simd, 1.0));
-    let [lower, lower_unresolved] = first_exit(simd, p.lower(), turns, bound, 96);
+    let l = lightness as f64;
+    let [lower, lower_unresolved] = first_exit(simd, p.lower(), turns, bound, l);
     let lower: [f64; 4] = lower.into();
     let lower = lower[..3].iter().copied().fold(f64::INFINITY, f64::min);
     if !lower.is_finite() {
         return Err(Error::ColorOutOfRange);
     }
-    let l = lightness as f64;
     let [upper, upper_unresolved] = first_exit(
         simd,
         p.upper(1.0 / (l * l * l)),
         turns,
-        f64x4::splat(simd, lower),
-        64,
+        f64x4::splat(simd, lower / l),
+        l,
     );
     let upper: [f64; 4] = upper.into();
     let cap = upper[..3].iter().copied().fold(lower, f64::min);
     let unresolved: [f64; 4] = lower_unresolved.min(upper_unresolved).into();
-    if unresolved[..3].iter().any(|&t| t < cap) {
+    if unresolved[..3].iter().any(|&t| t < cap / l) {
         return Err(Error::ColorOutOfRange);
     }
-    let limit = cap * l;
+    let limit = cap;
     if !limit.is_finite() || limit < 0.0 {
         return Err(Error::ColorOutOfRange);
     }

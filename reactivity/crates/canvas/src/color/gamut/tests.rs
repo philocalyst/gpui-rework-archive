@@ -159,7 +159,7 @@ fn polynomial_cases<S: Simd>(simd: S) {
         p,
         critical_points(simd, p),
         f64x4::splat(simd, 10.0),
-        96,
+        1.0,
     );
     let r: [f64; 4] = r.into();
     let unresolved: [f64; 4] = unresolved.into();
@@ -186,7 +186,7 @@ fn nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign() {
         c: f64x4::splat(s, 781.0 / 256.0),
         d: f64x4::splat(s, -242.0 / 256.0),
     };
-    let [r, unresolved] = first_exit(s, p, critical_points(s, p), f64x4::splat(s, 4.0), 96);
+    let [r, unresolved] = first_exit(s, p, critical_points(s, p), f64x4::splat(s, 4.0), 1.0);
     let r: [f64; 4] = r.into();
     let unresolved: [f64; 4] = unresolved.into();
     assert_eq!(r[0], f64::INFINITY);
@@ -225,4 +225,96 @@ fn finite_input_sweep_keeps_exact_membership_and_a_nearby_outward_witness() {
             );
         }
     }
+}
+
+fn lattice_geometry<S: Simd>(s: S) {
+    let v = |x| f64x4::splat(s, x);
+    let active = mask64x4::splat(s, true);
+    let ulp = 2.0_f64.powi(-23);
+    let narrow = Polynomial {
+        a: v(0.0),
+        b: v(-1.0),
+        c: v(2.0 + ulp),
+        d: v(-(1.0 + ulp / 4.0) * (1.0 + 3.0 * ulp / 4.0)),
+    };
+    // No representable f32 lies in this outward excursion. Ceil(end) is already
+    // in the later reentry, so treating that exclusive bound as outside fails.
+    assert!(narrow.evaluate(v(1.0 + ulp))[0] < 0.0);
+    let (cap, steps) = lattice_exit(narrow, v(0.0), v(1.0 + ulp / 2.0), 1.0, active);
+    assert_eq!(cap[0], 1.0);
+    assert!(steps <= 31);
+    println!("lattice sub-ULP excursion: {steps} evaluations");
+    let [resolved, unknown] = first_exit(s, narrow, critical_points(s, narrow), v(2.0), 1.0);
+    assert_eq!(resolved[0], f64::INFINITY);
+    assert_eq!(unknown[0], 0.0, "numerical admission remains conservative");
+
+    let min_l = f32::from_bits(1) as f64;
+    for (name, p, l, start, end, expected) in [
+        (
+            "floor start",
+            Polynomial {
+                a: v(0.0),
+                b: v(0.0),
+                c: v(1.0),
+                d: v(-(1.0 + 2.0 * ulp)),
+            },
+            1.0,
+            1.0 + ulp / 4.0,
+            1.0 + 3.0 * ulp,
+            (1.0 + 2.0 * ulp) as f32,
+        ),
+        (
+            "subnormal",
+            Polynomial {
+                a: v(0.0),
+                b: v(0.0),
+                c: v(1.0),
+                d: v(-0.25),
+            },
+            min_l,
+            0.0,
+            0.5,
+            0.0,
+        ),
+        (
+            "finite sentinel",
+            Polynomial {
+                a: v(1.0),
+                b: v(0.0),
+                c: v(0.0),
+                d: v(-((f32::MAX as f64 * 0.5) / min_l).powi(3)),
+            },
+            min_l,
+            0.0,
+            f32::MAX as f64 * 2.0 / min_l,
+            f32::MAX * 0.5,
+        ),
+    ] {
+        let (cap, steps) = lattice_exit(p, v(start), v(end), l, active);
+        assert_eq!((cap[0] as f32).to_bits(), expected.to_bits(), "{name}");
+        assert!(steps <= 31);
+        assert!(p.evaluate(v(f32::MAX as f64 / l))[0].is_finite());
+        println!("lattice {name}: {steps} evaluations");
+    }
+    // The upper boundary precedes the continuous lower boundary but shares its
+    // inward f32 predecessor. Searching only through that predecessor is safe.
+    let linear = |root: f64| Polynomial {
+        a: v(0.0),
+        b: v(0.0),
+        c: v(1.0),
+        d: v(-root),
+    };
+    let lower = linear(1.0 + 3.0 * ulp / 4.0);
+    let [lower, _] = first_exit(s, lower, critical_points(s, lower), v(2.0), 1.0);
+    assert_eq!(lower[0], 1.0);
+    let upper = linear(1.0 + ulp / 4.0);
+    let [upper, unknown] = first_exit(s, upper, critical_points(s, upper), lower, 1.0);
+    assert_eq!(upper[0], f64::INFINITY);
+    assert_eq!(unknown[0], f64::INFINITY);
+}
+#[test]
+fn ordered_f32_search_handles_exclusive_bounds_tiny_excursions_and_finite_extremes() {
+    lattice_geometry(fearless_simd::Fallback::new());
+    #[cfg(target_arch = "x86_64")]
+    lattice_geometry(fearless_simd::Level::new().as_sse2().unwrap());
 }
