@@ -262,7 +262,6 @@ fn surface_config(size: [u32; 2], format: wgpu::TextureFormat) -> wgpu::SurfaceC
 
 struct GpuSurface {
     handle: wgpu::Surface<'static>,
-    config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
     errors: Arc<DeviceErrors>,
     packet_token: Option<crate::PresentationToken>,
@@ -521,7 +520,6 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             renderer,
             errors,
             packet_token: None,
-            config: surface_config([size.width.max(1), size.height.max(1)], format),
         })));
         self.resize([size.width, size.height])
     }
@@ -582,9 +580,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             }
             match graphics {
                 Graphics::Gpu(gpu) => {
-                    gpu.config.width = size[0];
-                    gpu.config.height = size[1];
-                    gpu.handle.configure(gpu.renderer.device(), &gpu.config);
+                    let config = surface_config(size, gpu.renderer.format());
+                    gpu.handle.configure(gpu.renderer.device(), &config);
                 }
                 Graphics::ReferenceCpu(surface, damage) => {
                     surface
@@ -805,8 +802,6 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         // when this handoff fails and software presents again in this turn.
         self.destination.invalidate();
         let size = window.inner_size();
-        gpu.config.width = size.width.max(1);
-        gpu.config.height = size.height.max(1);
         let owner = self.owner.as_mut().expect("upgrade has an owner");
         let result = (|| {
             if gpu.errors.take().is_some() {
@@ -816,7 +811,11 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             if size.width > limit || size.height > limit {
                 return Err(NativeError::UnsupportedSurface);
             }
-            gpu.handle.configure(gpu.renderer.device(), &gpu.config);
+            let config = surface_config(
+                [size.width.max(1), size.height.max(1)],
+                gpu.renderer.format(),
+            );
+            gpu.handle.configure(gpu.renderer.device(), &config);
             let frame = match gpu.handle.get_current_texture() {
                 wgpu::CurrentSurfaceTexture::Success(frame) => frame,
                 _ => return Err(NativeError::SurfaceUnavailable),
