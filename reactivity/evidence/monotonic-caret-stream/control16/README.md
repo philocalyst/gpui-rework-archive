@@ -116,6 +116,10 @@ remain outside Git at the recorded paths. The historical public fixture omitted
 the current `wgpu-core` path patch; that unexecuted build is preserved under
 `rejected-public-patch`, and both qualified public builds use every root patch.
 All registry package versions in that corrected public lock match the root lock.
+`source.patch.gz` reconstructs the three production/Canvas-test files from the
+baseline; `support.patch.gz` restores every private fixture/preparer/driver.
+Both were applied to a temporary baseline Git index and compared byte-for-byte
+against their recorded target objects. The source bill records decoded hashes.
 
 Core non-test code is 30,420 → 30,432, including 18 build-script lines. The
 authored Parley delta is separately **+227 code lines**, so shipping code grows
@@ -134,3 +138,11 @@ the ordinary driver in the same support directory. Rebuild/freeze scoped
 examples at both pins, refresh metadata from Cargo's exact artifact records,
 then run `run_pair.py` only in a newly coordinated quiet window. Gzip files
 are lossless; `SHA256.json` records the archived bytes.
+
+If the spike commits are unavailable, start a new checkout at the recorded
+baseline, apply both decompressed patches with `git apply`, and commit the
+reconstructed source locally. Pass that local revision to `prepare.py --ref`;
+its production blobs must match the archive's source hashes. The original spike
+commit hash is provenance, not a requirement to keep unpublished Git objects.
+Update recorded absolute fixture paths and rebuild both independent targets;
+never relabel a different existing executable as the frozen binary.
