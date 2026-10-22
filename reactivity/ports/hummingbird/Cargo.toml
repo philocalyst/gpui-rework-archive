@@ -1,0 +1,26 @@
+[package]
+name = "hummingbird-gpui-port"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[workspace]
+resolver = "3"
+
+[features]
+default = []
+native = ["gpui/x11"]
+
+[dependencies]
+gpui = { path = "../../crates/gpui" }
+rusqlite = { version = "=0.40.2", default-features = false, features = ["bundled"] }
+nucleo-matcher = "=0.3.1"
+
+[patch.crates-io]
+parley = { path = "../../vendor/parley" }
+winit = { path = "../../vendor/winit" }
+wgpu-hal = { path = "../../vendor/wgpu-hal" }
+softbuffer = { path = "../../vendor/softbuffer" }
+accesskit_unix = { path = "../../vendor/accesskit_unix" }
+accesskit_atspi_common = { path = "../../vendor/accesskit_atspi_common" }
