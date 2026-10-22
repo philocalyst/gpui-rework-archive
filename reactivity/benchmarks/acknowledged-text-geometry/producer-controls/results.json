@@ -187,7 +187,8 @@
     "/tmp/gpui-text-batch-target/debug/deps/unicode_text-6680e35d878c6572": "29de579df51635a929daf796d2a505076ace05c26ef979fd93618c806304aa60"
   },
   "files_sha256": {
-    "README.md": "bbbb8ff08b016acad1e0f8d73953fcd1f0078f6a6cc49b3902054ac35a6a06e9",
+    "README.md": "1f07f5d8b86b2e39588ba5cdfdd5ad9adb7d506a498b57bfa72168a5cd76821c",
+    "all-source-inventory.json": "eb77673cbc8c63aeae08b4ea48ad04242b5a699272eade29d6b37f9af73ce3c5",
     "batch-final-canvas.log": "a77705090837909967451b0745edfa77d8e7224260aff5c32ab6e9fd6ba728d6",
     "batch-final-owner.log": "56038091b4083ea050145899877e38e4a682ea79ef89ac0e9e7166c9716d5825",
     "gpui-text-alloc-stacks.c": "922d9f64f6f934c846fd37873cfa0f1b6fe76d9ebe69c6e04c9c851716600c54",
