@@ -198,6 +198,8 @@ impl TextGeometry {
     }
     /// Source-ordered directional runs, split only at legal grapheme boundaries.
     /// Font-run boundaries inside a grapheme do not split the selectable unit.
+    /// Equal direction does not imply visual adjacency across bidi isolates;
+    /// an affinity discontinuity starts a new run instead of spanning a gap.
     pub fn runs(&self) -> impl Iterator<Item = TextRun> + '_ {
         let mut units = self.graphemes().peekable();
         let mut terminal = self
@@ -230,16 +232,21 @@ impl TextGeometry {
                 line: first.line,
                 direction: first.direction,
             };
+            let mut edge = first.end_x;
             while let Some(next) = units.peek().filter(|next| {
                 next.line == run.line
                     && next.direction == run.direction
                     && next.start.offset.0 == run.end
+                    && next.start_x == edge
+                    && next.bounds.y == run.bounds.y
+                    && next.bounds.height == run.bounds.height
             }) {
                 let right =
                     (run.bounds.x + run.bounds.width).max(next.bounds.x + next.bounds.width);
                 run.bounds.x = run.bounds.x.min(next.bounds.x);
                 run.bounds.width = right - run.bounds.x;
                 run.end = next.end.offset.0;
+                edge = next.end_x;
                 units.next();
             }
             Some(run)

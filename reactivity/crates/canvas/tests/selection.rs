@@ -510,3 +510,43 @@ fn distant_hits_and_line_transitions_choose_physical_extrema() {
         position(13, A::Upstream)
     );
 }
+
+#[test]
+fn directional_run_boxes_do_not_span_disconnected_isolate_fragments() {
+    let font = FontFace::bundled().unwrap();
+    for source in [
+        "a \u{2067}אבג 12\u{2069} z \u{2066}abc\u{2069}",
+        "a \u{2067}א \u{2066}abc 12\u{2069} בג\u{2069} end",
+        "a \u{2068}אבג 12\u{2069} z",
+    ] {
+        for width in [None, Some(92.), Some(48.)] {
+            let layout = font.shaper().shape_interactive(source, 16., width).unwrap();
+            let geometry = layout.geometry().unwrap();
+            let runs = geometry.runs().collect::<Vec<_>>();
+            assert_eq!(runs.first().unwrap().text_range().start.byte(), 0);
+            assert_eq!(runs.last().unwrap().text_range().end.byte(), source.len());
+            for pair in runs.windows(2) {
+                assert_eq!(pair[0].text_range().end, pair[1].text_range().start);
+            }
+            for unit in geometry
+                .graphemes()
+                .filter(|unit| unit.bounds().width > 0. && !unit.is_hard_break())
+            {
+                let bounds = unit.bounds();
+                let center = Point {
+                    x: bounds.x + bounds.width * 0.5,
+                    y: bounds.y + bounds.height * 0.5,
+                };
+                let owners = runs
+                    .iter()
+                    .filter(|run| run.bounds().contains(center))
+                    .collect::<Vec<_>>();
+                assert_eq!(owners.len(), 1, "{source:?} {width:?} unit={unit:?}");
+                let owner = owners[0].text_range();
+                assert!(
+                    owner.start <= unit.text_range().start && unit.text_range().end <= owner.end
+                );
+            }
+        }
+    }
+}

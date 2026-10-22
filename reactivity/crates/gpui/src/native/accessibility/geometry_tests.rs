@@ -168,7 +168,9 @@ fn wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units() {
                             input
                                 .text_position_at_point(native_point)
                                 .to_global_usv_index(),
-                            start_usv
+                            start_usv,
+                            "source={source:?} range={range:?} bounds={rect:?} public_hit={:?}",
+                            geometry.grapheme_at(point).map(|unit| unit.text_range())
                         );
                         assert_eq!(geometry.grapheme_at(point).unwrap().text_range(), range);
                     }
