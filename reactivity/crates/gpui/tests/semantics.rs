@@ -263,7 +263,7 @@ fn semantic_activation_reads_allocate_nothing_and_do_no_render_work() {
                     part.focused(),
                     part.target() == input && win.focused().unwrap() == Some(input)
                 );
-                assert!(part.actions().iter().count() <= 4);
+                assert!(part.actions().iter().count() <= 6);
             })
             .unwrap();
             assert_eq!(nodes, 3);

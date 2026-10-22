@@ -10,8 +10,13 @@ use core::slice;
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(deny_unknown_fields))]
 pub(super) struct ExtendedCharacterLengths {
-    pub lengths: Box<[u8]>,
-    pub overflows: Box<[u32]>,
+    pub units: usize,
+    pub data: Box<[u8]>,
+}
+impl ExtendedCharacterLengths {
+    pub fn lengths(&self) -> &[u8] {
+        self.data.get(..self.units).unwrap_or_default()
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -20,7 +25,7 @@ pub(super) struct ExtendedCharacterLengths {
 #[serde(untagged)]
 pub(super) enum SerializedCharacterLengths {
     Ordinary(Vec<u8>),
-    Extended(Box<ExtendedCharacterLengths>),
+    Extended(ExtendedCharacterLengths),
 }
 #[cfg(feature = "serde")]
 impl SerializedCharacterLengths {
@@ -37,19 +42,24 @@ impl SerializedCharacterLengths {
 #[derive(Clone, Debug)]
 pub struct DecodedCharacterLengths<'a> {
     lengths: slice::Iter<'a, u8>,
-    overflows: slice::Iter<'a, u32>,
+    overflows: &'a [u8],
 }
 impl<'a> DecodedCharacterLengths<'a> {
-    fn new(value: &str, lengths: &'a [u8], overflows: &'a [u32]) -> Option<Self> {
+    fn new(value: &str, lengths: &'a [u8], overflows: &'a [u8]) -> Option<Self> {
+        if overflows.len() % 4 != 0 {
+            return None;
+        }
         let result = Self {
             lengths: lengths.iter(),
-            overflows: overflows.iter(),
+            overflows,
         };
-        let mut overflow = overflows.iter();
+        let mut overflow = overflows;
         let mut byte = 0usize;
         for &length in lengths {
             let length = if length == 0 {
-                let &length = overflow.next()?;
+                let (encoded, rest) = overflow.split_first_chunk::<4>()?;
+                overflow = rest;
+                let length = u32::from_le_bytes(*encoded);
                 if length <= u8::MAX.into() {
                     return None;
                 }
@@ -62,14 +72,18 @@ impl<'a> DecodedCharacterLengths<'a> {
                 return None;
             }
         }
-        (byte == value.len() && overflow.next().is_none()).then_some(result)
+        (byte == value.len() && overflow.is_empty()).then_some(result)
     }
 }
 impl Iterator for DecodedCharacterLengths<'_> {
     type Item = usize;
     fn next(&mut self) -> Option<Self::Item> {
         match self.lengths.next()? {
-            0 => self.overflows.next().and_then(|&n| usize::try_from(n).ok()),
+            0 => {
+                let (encoded, rest) = self.overflows.split_first_chunk::<4>()?;
+                self.overflows = rest;
+                usize::try_from(u32::from_le_bytes(*encoded)).ok()
+            }
             &n => Some(usize::from(n)),
         }
     }
@@ -91,10 +105,13 @@ impl Node {
             .indices
             .get(&self.properties.values, PropertyId::CharacterLengths)
         {
-            PropertyValue::ExtendedCharacterLengths(value) if !value.overflows.is_empty() => {
-                &*value.overflows
+            PropertyValue::ExtendedCharacterLengths(value) => {
+                let overflows = value.data.get(value.units..)?;
+                if overflows.is_empty() {
+                    return None;
+                }
+                overflows
             }
-            PropertyValue::ExtendedCharacterLengths(_) => return None,
             _ => &[],
         };
         DecodedCharacterLengths::new(self.value()?, self.character_lengths(), overflows)
@@ -116,7 +133,7 @@ impl Node {
                 bytes.push(length);
             } else {
                 bytes.push(0);
-                overflows.push(length);
+                overflows.extend_from_slice(&length.to_le_bytes());
             }
         }
         if self
@@ -129,10 +146,14 @@ impl Node {
         let value = if overflows.is_empty() {
             PropertyValue::LengthVec(bytes)
         } else {
-            PropertyValue::ExtendedCharacterLengths(Box::new(ExtendedCharacterLengths {
-                lengths: bytes.into_boxed_slice(),
-                overflows: overflows.into_boxed_slice(),
-            }))
+            let units = bytes.len();
+            // Append once, after the prefix is complete; never shift it at an
+            // escape. Free the construction scratch after freezing one payload.
+            bytes.extend_from_slice(&overflows);
+            PropertyValue::ExtendedCharacterLengths(ExtendedCharacterLengths {
+                units,
+                data: bytes.into_boxed_slice(),
+            })
         };
         self.properties.set(PropertyId::CharacterLengths, value);
         true
@@ -168,10 +189,10 @@ mod tests {
         else {
             panic!()
         };
-        assert_eq!(&*extended.overflows, &[256]);
-        assert_eq!(size_of::<ExtendedCharacterLengths>(), 32);
+        assert_eq!(&extended.data[extended.units..], &256u32.to_le_bytes());
+        assert_eq!(size_of::<ExtendedCharacterLengths>(), 24);
         // These variants use no more storage than the original largest value.
-        assert!(size_of::<Box<ExtendedCharacterLengths>>() <= size_of::<crate::Rect>());
+        assert!(size_of::<ExtendedCharacterLengths>() <= size_of::<crate::Rect>());
         std::println!(
             "codec_sizes Node={} PropertyValue={} Properties={} indices={} exception={}",
             size_of::<Node>(),
@@ -219,7 +240,30 @@ mod tests {
             ("a", vec![2], vec![]),
             ("", vec![0], vec![u32::MAX]),
         ] {
-            assert!(DecodedCharacterLengths::new(value, &bytes, &overflows).is_none());
+            let tail = overflows
+                .into_iter()
+                .flat_map(u32::to_le_bytes)
+                .collect::<Vec<_>>();
+            assert!(DecodedCharacterLengths::new(value, &bytes, &tail).is_none());
+        }
+        let mut node = Node::new(Role::TextRun);
+        node.set_value(a);
+        for (units, data) in [
+            (usize::MAX, vec![0, 0, 1, 0, 0]),
+            (1, vec![0, 0, 1, 0]),
+            (1, vec![0, 0, 1, 0, 0, 0]),
+            (1, vec![0, 0, 1, 0, 0, 0, 1, 0, 0]),
+            (0, vec![0, 1, 0, 0]),
+            (1, vec![255]),
+        ] {
+            node.properties.set(
+                PropertyId::CharacterLengths,
+                PropertyValue::ExtendedCharacterLengths(ExtendedCharacterLengths {
+                    units,
+                    data: data.into_boxed_slice(),
+                }),
+            );
+            assert!(node.decoded_character_lengths().is_none());
         }
     }
 
@@ -238,16 +282,17 @@ mod tests {
         encoded.set_value("a".repeat(256));
         assert!(encoded.set_text_character_lengths([256]));
         let wire = serde_json::to_string(&encoded).unwrap();
-        assert!(wire.contains("\"characterLengths\":{\"lengths\":[0],\"overflows\":[256]}"));
+        assert!(wire.contains("\"characterLengths\":{\"units\":1,\"data\":[0,0,1,0,0]}"));
         let decoded: Node = serde_json::from_str(&wire).unwrap();
         assert_eq!(decoded, encoded);
-        let invalid: Node = serde_json::from_str(&wire.replace("[256]", "[255]")).unwrap();
+        let invalid: Node =
+            serde_json::from_str(&wire.replace("[0,0,1,0,0]", "[0,255,0,0,0]")).unwrap();
         assert!(invalid.decoded_character_lengths().is_none());
         assert!(
             schemars::schema_for!(Node)
                 .to_value()
                 .to_string()
-                .contains("overflows")
+                .contains("units")
         );
     }
 }
