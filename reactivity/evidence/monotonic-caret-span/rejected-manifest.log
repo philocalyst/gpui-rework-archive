@@ -1,0 +1,12 @@
+error: feature `libm` includes `peniko/libm`, but `peniko` is not a dependency
+  --> ../tmp/gpui-caret-span-fixture/Cargo.toml:49:8
+   |
+49 |   libm = [
+   |  ________^
+50 | |     "fontique/libm",
+51 | |     "parley_engine/libm",
+52 | |     "peniko/libm",
+53 | |     "dep:core_maths",
+54 | | ]
+   | |_^
+error: failed to parse manifest at `/tmp/gpui-caret-span-fixture/Cargo.toml`
