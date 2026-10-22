@@ -252,15 +252,6 @@ struct GpuSurface {
     packet_token: Option<crate::PresentationToken>,
 }
 impl GpuSurface {
-    #[cfg(test)]
-    fn render(
-        &mut self,
-        scene: gpui_canvas::PreparedScene<'_>,
-        token: crate::PresentationToken,
-        target: &wgpu::TextureView,
-    ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
-        self.render_paint(scene, token, None, target)
-    }
     fn render_paint(
         &mut self,
         scene: gpui_canvas::PreparedScene<'_>,
@@ -1271,7 +1262,7 @@ mod tests {
         let target = texture.create_view(&Default::default());
         for (window, reused) in [(&a, false), (&a, true), (&b, false), (&a, false)] {
             window
-                .with_scene(|scene, token| gpu.render(scene, token, &target))
+                .with_scene(|scene, token| gpu.render_paint(scene, token, None, &target))
                 .unwrap()
                 .unwrap();
             assert_eq!(gpu.renderer.stats().packet_reused, reused);
@@ -1279,12 +1270,12 @@ mod tests {
         // A renderer mode change invalidates its packet even though the native
         // token is still current. The adapter must fall back to full admission.
         gpu.renderer.set_tile_proofs(false);
-        a.with_scene(|scene, token| gpu.render(scene, token, &target))
+        a.with_scene(|scene, token| gpu.render_paint(scene, token, None, &target))
             .unwrap()
             .unwrap();
         assert!(!gpu.renderer.stats().packet_reused);
         gpu.renderer.set_tile_proofs(true);
-        a.with_scene(|scene, token| gpu.render(scene, token, &target))
+        a.with_scene(|scene, token| gpu.render_paint(scene, token, None, &target))
             .unwrap()
             .unwrap();
         // Failed replacement revokes the old native binding as well. The public
@@ -1292,13 +1283,13 @@ mod tests {
         assert!(
             b.with_scene(|mut scene, token| {
                 scene.width += 1;
-                gpu.render(scene, token, &target)
+                gpu.render_paint(scene, token, None, &target)
             })
             .unwrap()
             .is_err()
         );
         assert!(gpu.packet_token.is_none());
-        a.with_scene(|scene, token| gpu.render(scene, token, &target))
+        a.with_scene(|scene, token| gpu.render_paint(scene, token, None, &target))
             .unwrap()
             .unwrap();
         assert!(!gpu.renderer.stats().packet_reused);
@@ -1645,9 +1636,10 @@ mod tests {
                                                 view_formats: &[],
                                             },
                                         );
-                                        gpu.render(
+                                        gpu.render_paint(
                                             scene,
                                             token,
+                                            None,
                                             &texture.create_view(&Default::default()),
                                         )
                                         .unwrap();
