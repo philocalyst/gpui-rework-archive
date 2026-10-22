@@ -1,0 +1,80 @@
+{
+  "source_commit": "87ef97396311cc7c74ccfe3c5c67b5d3d1afec0c",
+  "baseline": "7c3c3b800e92d27516eda5ce475d92505cc756be",
+  "method": "Syn removes all test-only AST spans; Tokei 15.0.0 counts each Rust file own code, excluding comments, blanks and documentation snippets. Every changed non-test source file is charged, including native adapters; this slice changes no non-library executable or script. Manifest and lock add one dependency line each.",
+  "files": [
+    {
+      "path": "reactivity/crates/canvas/src/text/layout.rs",
+      "before_sha256": "15780a7b4345f901c644549d9cb8eba840720500a01c414c5337102b10090251",
+      "source_sha256": "ec90c828b0782096574fc29cf5db0006da7e46cf80b65088ac2e6dd25b13b370",
+      "before_code": 172,
+      "after_code": 200,
+      "delta_code": 28
+    },
+    {
+      "path": "reactivity/crates/gpui/src/lib.rs",
+      "before_sha256": "98dd4be5470707879f8b3a057113fdbdf52f49040c6347fcdfa8c105e8a664db",
+      "source_sha256": "c95618447c64cb71e0b7311be2b82c121cde2f97187d8c5e32a633d40bd5e7a3",
+      "before_code": 75,
+      "after_code": 76,
+      "delta_code": 1
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native.rs",
+      "before_sha256": "0b0db459a41dfdb20032abab0b3091fefab48d97f27a0730e5024303ee6f2e95",
+      "source_sha256": "ce6931c549c839599f05affaa28306cb7cb68db284d8f864bfdcba7dcea688d1",
+      "before_code": 1036,
+      "after_code": 1043,
+      "delta_code": 7
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime.rs",
+      "before_sha256": "2f9bbc1373d5a35e93d9c45f87bd9604590c66f182b37791fa20b99228f41e40",
+      "source_sha256": "9d5736220e1acc746cb4ff4991ba4d4c268963c64bfbb76e9eea71aea3217082",
+      "before_code": 2737,
+      "after_code": 2819,
+      "delta_code": 82
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/editing.rs",
+      "before_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_sha256": "4191a327a53e52df5d948fcaa66637937029818722ca80b6db1a71e9a394f0d2",
+      "before_code": 0,
+      "after_code": 460,
+      "delta_code": 460
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/input.rs",
+      "before_sha256": "c08aef95771adeff8cb4e1fbe18caa817501fac8fe8b4386c38686de622f6c70",
+      "source_sha256": "2b643408ca001dcdbed84bbf44ebab42d794b6050d598855e5cf776b4ce890ff",
+      "before_code": 220,
+      "after_code": 264,
+      "delta_code": 44
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/metadata.rs",
+      "before_sha256": "8b3c0884fa5fec7418adfe025abeb77a3e51e91305f81ea9cd1ca808b421863e",
+      "source_sha256": "fac20fb7e96ac6026bdf302a73acfa15aa79e0e12fe58e386e64a43431848b1f",
+      "before_code": 584,
+      "after_code": 586,
+      "delta_code": 2
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/semantics.rs",
+      "before_sha256": "0ba48f5fed0533c3b699f252f7359ba8f0b4f8fdbf96fa6144896051fdab58c4",
+      "source_sha256": "8e0b6b32c9bd653e97044a679ebb87a7be8f44110ec6d14d7037f23dad978f55",
+      "before_code": 156,
+      "after_code": 157,
+      "delta_code": 1
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/turn.rs",
+      "before_sha256": "64007673550743c59b903208b29961768502f037ec8cb065492e074a44b791a3",
+      "source_sha256": "e0d8493992184b925b13d379d87460c3f97f2e3000829f2df66fc924f6e1f481",
+      "before_code": 280,
+      "after_code": 271,
+      "delta_code": -9
+    }
+  ],
+  "delta_all_non_test_code": 616
+}
