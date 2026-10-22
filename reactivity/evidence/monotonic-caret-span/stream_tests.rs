@@ -141,9 +141,19 @@ fn trailing_source_gap_and_empty_middle_run_keep_exact_byte_owners() {
     let empty = &mut middle.data.line_items[1];
     empty.shaped_cluster_range.end = empty.shaped_cluster_range.start;
     empty.text_range.end = empty.text_range.start;
-    // Its recorded advance stays nonzero: following prefixes must still add it,
-    // while the empty run owns neither byte of the resulting source gap.
-    assert!(empty.advance > 0.);
+    // This empty run remains between two other source identities, but owns
+    // neither byte of the resulting source gap.
+    assert_eq!(
+        middle
+            .get(0)
+            .unwrap()
+            .item(1)
+            .unwrap()
+            .run()
+            .unwrap()
+            .advance(),
+        0.
+    );
     admitted_like_index(&middle);
 }
 
