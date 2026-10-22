@@ -8,9 +8,10 @@ use std::{any::Any, marker::PhantomData};
 use crate::{
     View,
     component::Component,
+    property::PropertyId,
     source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
     style::{Affine, Align, Color, Flex, Flow, Justify, Style},
-    style_port::{IntoProp, PropInput, Value},
+    style_port::{IntoProp, StyleSignal, Value},
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -346,9 +347,10 @@ impl<'a> El<'a> {
         let radius = radius.into_prop();
         if let Some(value) = radius.literal() {
             if let Some(extra) = self.extra.as_deref_mut() {
-                extra.unbind(crate::property::PropertyId::CornerRadius);
+                extra.unbind(PropertyId::CornerRadius);
             }
-            // Preserve the original radius builder's deferred, typed admission.
+            // Preserve the original radius builder's deferred, typed admission
+            // and raw f32 bits, including invalid NaN payloads until admission.
             self.extra
                 .get_or_insert_with(|| {
                     Box::new(crate::semantic::ElementExtra::Decorations(
@@ -358,10 +360,13 @@ impl<'a> El<'a> {
                 .set_geometry(crate::property::GeometryStyle {
                     corner_radius: value,
                 });
-            self
         } else {
-            self.property_operand(crate::property::PropertyId::CornerRadius, radius)
+            self.bind_property(
+                PropertyId::CornerRadius,
+                radius.signal().expect("signal radius"),
+            );
         }
+        self
     }
     pub fn rounded_md(self) -> Self {
         self.rounded(6.0)
@@ -402,72 +407,114 @@ impl<'a> El<'a> {
         handler.install(self)
     }
 
-    fn property_operand<T: Value>(
-        mut self,
-        id: crate::property::PropertyId,
-        input: PropInput<'a, T>,
-    ) -> Self {
-        if let Some(signal) = input.signal() {
-            self.extra
-                .get_or_insert_with(|| {
-                    Box::new(crate::semantic::ElementExtra::Decorations(
-                        Default::default(),
-                    ))
-                })
-                .bind(id, signal);
-        } else {
-            let value = input
-                .scalar()
-                .admit(id)
-                .expect("invalid literal style property");
-            if let Some(extra) = self.extra.as_deref_mut() {
-                extra.unbind(id);
-            }
-            match id.info().destination {
-                crate::property::PropertyDestination::Style => {
-                    id.set_erased(&mut self.style, value)
-                        .expect("validated literal property");
-                }
-                crate::property::PropertyDestination::Geometry => {
-                    let crate::property::PropertyValue::Number(radius) = value else {
-                        unreachable!()
-                    };
-                    self.extra
-                        .get_or_insert_with(|| {
-                            Box::new(crate::semantic::ElementExtra::Decorations(
-                                Default::default(),
-                            ))
-                        })
-                        .set_geometry(crate::property::GeometryStyle {
-                            corner_radius: radius,
-                        });
-                }
-            }
-            if self.extra.as_deref().is_some_and(|extra| extra.empty()) {
-                self.extra = None;
+    fn bind_property(&mut self, id: PropertyId, signal: &'a dyn StyleSignal) {
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Decorations(
+                    Default::default(),
+                ))
+            })
+            .bind(id, signal);
+    }
+
+    #[inline]
+    fn unbind_property(&mut self, id: PropertyId) {
+        if self.extra.is_some() {
+            Self::unbind_existing_property(&mut self.extra, id);
+        }
+    }
+
+    #[cold]
+    fn unbind_existing_property(
+        extra: &mut Option<Box<crate::semantic::ElementExtra<'a>>>,
+        id: PropertyId,
+    ) {
+        if let Some(value) = extra.as_deref_mut() {
+            value.unbind(id);
+            if value.empty() {
+                *extra = None;
             }
         }
+    }
+
+    fn literal_properties<const CODE: u16, const SIZE: bool, T: Value, I: IntoProp<'a, T>>(
+        &mut self,
+        input: I,
+    ) {
+        let id = const {
+            let id = PropertyId::from_code(CODE).expect("closed property code");
+            assert!(matches!(
+                id.info().destination,
+                crate::property::PropertyDestination::Style
+            ));
+            id
+        };
+        // Keep the original input type through conversion/admission: e.g. an
+        // integer is statically finite, so literal callers need no float error
+        // branches for a value that cannot reach them.
+        let scalar = input
+            .into_prop()
+            .literal()
+            .expect("sealed literal")
+            .scalar();
+        let value = scalar.narrow(id).expect("invalid literal style property");
+        PropertyId::set_literal::<CODE>(&mut self.style, value)
+            .expect("invalid literal style property");
+        self.unbind_property(id);
+        if SIZE {
+            let id = PropertyId::Height;
+            let value = scalar.narrow(id).expect("invalid literal style property");
+            PropertyId::set_literal::<{ PropertyId::Height as u16 }>(&mut self.style, value)
+                .expect("invalid literal style property");
+            self.unbind_property(id);
+        }
+    }
+
+    // The sealed input family is resolved before erasure. In particular, the
+    // literal instantiation has no signal callback, binding or allocation path.
+    fn property_input<const CODE: u16, const SIZE: bool, T: Value, I: IntoProp<'a, T>>(
+        &mut self,
+        input: I,
+    ) {
+        const { assert!(!SIZE || CODE == PropertyId::Width as u16) };
+        let id = const { PropertyId::from_code(CODE).expect("closed property code") };
+        if I::IS_LITERAL {
+            self.literal_properties::<CODE, SIZE, T, I>(input);
+        } else {
+            let input = input.into_prop();
+            if let Some(signal) = input.signal() {
+                self.bind_property(id, signal);
+                if SIZE {
+                    self.bind_property(PropertyId::Height, signal);
+                }
+            } else {
+                self.literal_properties::<CODE, SIZE, T, _>(input);
+            }
+        }
+    }
+    pub fn w(mut self, width: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::Width as u16 }, false, f64, _>(width);
         self
     }
-    pub fn w(self, width: impl IntoProp<'a, f64>) -> Self {
-        self.property_operand(crate::property::PropertyId::Width, width.into_prop())
+    pub fn h(mut self, height: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::Height as u16 }, false, f64, _>(height);
+        self
     }
-    pub fn h(self, height: impl IntoProp<'a, f64>) -> Self {
-        self.property_operand(crate::property::PropertyId::Height, height.into_prop())
+    pub fn size(mut self, size: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::Width as u16 }, true, f64, _>(size);
+        self
     }
-    pub fn size(self, size: impl IntoProp<'a, f64>) -> Self {
-        let input = size.into_prop();
-        self.property_operand(crate::property::PropertyId::Width, input)
-            .property_operand(crate::property::PropertyId::Height, input)
+    pub fn gap(mut self, gap: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::Gap as u16 }, false, f64, _>(gap);
+        self
     }
-    pub fn gap(self, gap: impl IntoProp<'a, f64>) -> Self {
-        self.property_operand(crate::property::PropertyId::Gap, gap.into_prop())
+    pub fn p(mut self, padding: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::Padding as u16 }, false, f64, _>(padding);
+        self
     }
-    pub fn p(self, padding: impl IntoProp<'a, f64>) -> Self {
-        self.property_operand(crate::property::PropertyId::Padding, padding.into_prop())
-    }
-    pub fn font_size(self, size: impl IntoProp<'a, f64>) -> Self {
-        self.property_operand(crate::property::PropertyId::FontSize, size.into_prop())
+    pub fn font_size(mut self, size: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::FontSize as u16 }, false, f64, _>(size);
+        self
     }
     pub fn text_xs(self) -> Self {
         self.font_size(12)
@@ -478,29 +525,33 @@ impl<'a> El<'a> {
     pub fn text_lg(self) -> Self {
         self.font_size(18)
     }
-    pub fn fg(self, color: impl IntoProp<'a, Color>) -> Self {
-        self.property_operand(crate::property::PropertyId::Foreground, color.into_prop())
+    pub fn fg(mut self, color: impl IntoProp<'a, Color>) -> Self {
+        self.property_input::<{ PropertyId::Foreground as u16 }, false, Color, _>(color);
+        self
     }
-    pub fn bg(self, color: impl IntoProp<'a, Color>) -> Self {
-        self.property_operand(crate::property::PropertyId::Background, color.into_prop())
+    pub fn bg(mut self, color: impl IntoProp<'a, Color>) -> Self {
+        self.property_input::<{ PropertyId::Background as u16 }, false, Color, _>(color);
+        self
     }
-    pub fn transform(self, transform: impl IntoProp<'a, Affine>) -> Self {
-        self.property_operand(
-            crate::property::PropertyId::Transform,
-            transform.into_prop(),
-        )
+    pub fn transform(mut self, transform: impl IntoProp<'a, Affine>) -> Self {
+        self.property_input::<{ PropertyId::Transform as u16 }, false, Affine, _>(transform);
+        self
     }
-    pub fn flow(self, flow: impl IntoProp<'a, Flow>) -> Self {
-        self.property_operand(crate::property::PropertyId::Flow, flow.into_prop())
+    pub fn flow(mut self, flow: impl IntoProp<'a, Flow>) -> Self {
+        self.property_input::<{ PropertyId::Flow as u16 }, false, Flow, _>(flow);
+        self
     }
-    pub fn align(self, align: impl IntoProp<'a, Align>) -> Self {
-        self.property_operand(crate::property::PropertyId::Align, align.into_prop())
+    pub fn align(mut self, align: impl IntoProp<'a, Align>) -> Self {
+        self.property_input::<{ PropertyId::Align as u16 }, false, Align, _>(align);
+        self
     }
-    pub fn justify(self, justify: impl IntoProp<'a, Justify>) -> Self {
-        self.property_operand(crate::property::PropertyId::Justify, justify.into_prop())
+    pub fn justify(mut self, justify: impl IntoProp<'a, Justify>) -> Self {
+        self.property_input::<{ PropertyId::Justify as u16 }, false, Justify, _>(justify);
+        self
     }
-    pub fn wrap(self, wrap: impl IntoProp<'a, bool>) -> Self {
-        self.property_operand(crate::property::PropertyId::Wrap, wrap.into_prop())
+    pub fn wrap(mut self, wrap: impl IntoProp<'a, bool>) -> Self {
+        self.property_input::<{ PropertyId::Wrap as u16 }, false, bool, _>(wrap);
+        self
     }
     pub fn layout(self, recipe: impl crate::FlexRecipe<'a>) -> Self {
         recipe.apply_to(self)
@@ -1191,6 +1242,123 @@ mod tests {
         assert_eq!(nodes[0].style.width, Some(320.0));
         assert_eq!(nodes[0].style.height, Some(24.0));
         assert_eq!(nodes[0].style.fg, Color::rgb(1, 2, 3));
+    }
+
+    #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)] // borrowed-input conformance
+    fn static_and_erased_literals_match_the_canonical_typed_schema() {
+        use crate::{PropInput, property::*};
+        fn same(a: &Style, b: &Style) {
+            macro_rules! fields {
+                ($($property:ident),+) => {$(
+                    assert!($property.same_authoring(&$property.get(a), &$property.get(b)),
+                        "{}", $property.info().name);
+                )+};
+            }
+            fields!(
+                WIDTH, HEIGHT, GAP, PADDING, FONT_SIZE, FOREGROUND, BACKGROUND, FLOW, TRANSFORM,
+                ALIGN, JUSTIFY, WRAP
+            );
+        }
+        macro_rules! check {
+            ($method:ident, $input:ty, $property:ident, $literal:expr, $expected:expr) => {{
+                let literal = $literal;
+                let mut expected = Style::default();
+                $property.set(&mut expected, $expected).unwrap();
+                let erased: PropInput<'_, $input> = literal.into_prop();
+                for element in [
+                    div().$method(literal),
+                    div().$method(&literal),
+                    div().$method(erased),
+                ] {
+                    same(&element.style, &expected);
+                    assert!(element.extra.is_none(), "literal must not install an extra");
+                }
+            }};
+        }
+        macro_rules! numbers {
+            ($($ty:ty),+) => {$(
+                check!(w, f64, WIDTH, 3 as $ty, Some(3.0));
+                check!(h, f64, HEIGHT, 3 as $ty, Some(3.0));
+                check!(gap, f64, GAP, 3 as $ty, 3.0);
+                check!(p, f64, PADDING, 3 as $ty, 3.0);
+                check!(font_size, f64, FONT_SIZE, 3 as $ty, 3.0);
+            )+};
+        }
+        numbers!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+        check!(w, f64, WIDTH, -0.0_f64, Some(-0.0));
+        check!(p, f64, PADDING, -0.0_f32, -0.0);
+        // Preserve the inherited IntoLength→f64→f32 conversion, including its
+        // double-rounding boundaries, rather than silently switching casts.
+        let midpoint = (1_u64 << 63) + (1_u64 << 39) + 1;
+        check!(w, f64, WIDTH, midpoint, Some((midpoint as f64) as f32));
+        let midpoint = (1_i64 << 62) + (1_i64 << 38) + 1;
+        check!(h, f64, HEIGHT, midpoint, Some((midpoint as f64) as f32));
+        for color in [
+            Color::rgb(1, 2, 3),
+            Color::display_p3(-0.0, 0.5, 1.0, 0.5).unwrap(),
+            Color::linear_srgb(-2.0, -0.0, 3.0, 1.0).unwrap(),
+            Color::oklch(0.5, 0.2, 123.0, 0.75).unwrap(),
+        ] {
+            check!(fg, Color, FOREGROUND, color, color);
+            check!(bg, Color, BACKGROUND, color, color);
+        }
+        let map = Affine {
+            a: 1.0,
+            b: -0.0,
+            c: 0.0,
+            d: -1.0,
+            tx: -0.0,
+            ty: 4.0,
+        };
+        check!(transform, Affine, TRANSFORM, map, map);
+        check!(flow, Flow, FLOW, Flow::Row, Flow::Row);
+        check!(align, Align, ALIGN, Align::Baseline, Align::Baseline);
+        check!(
+            justify,
+            Justify,
+            JUSTIFY,
+            Justify::SpaceEvenly,
+            Justify::SpaceEvenly
+        );
+        check!(wrap, bool, WRAP, true, true);
+    }
+
+    #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)]
+    fn literal_radius_retains_original_bits_until_typed_admission() {
+        use crate::PropInput;
+        for radius in [-1.0, -0.0, f32::INFINITY, f32::from_bits(0xff80_0001)] {
+            let erased: PropInput<'_, f32> = radius.into_prop();
+            for mut element in [
+                div().rounded(radius),
+                div().rounded(&radius),
+                div().rounded(erased),
+            ] {
+                let parts = element.extra.take().unwrap().into_parts();
+                assert_eq!(
+                    parts.geometry.unwrap().corner_radius.to_bits(),
+                    radius.to_bits()
+                );
+            }
+        }
+        let radius = Signal::new(3.0);
+        let mut result = None;
+        let cost = allocation_counter::measure(|| {
+            result = Some(div().rounded(&radius).rounded(0.0));
+        });
+        // Removing the last radius binding reuses its existing decoration box.
+        assert_eq!(cost.count_total, 2);
+        assert_eq!(
+            cost.bytes_total as usize,
+            size_of::<crate::semantic::ElementExtra<'_>>()
+                + size_of::<crate::style_port::Binding<'_>>()
+        );
+        assert_eq!(
+            cost.bytes_current as usize,
+            size_of::<crate::semantic::ElementExtra<'_>>()
+        );
+        drop(result);
     }
 
     #[test]

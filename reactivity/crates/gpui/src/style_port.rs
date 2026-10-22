@@ -15,9 +15,18 @@ pub(crate) enum Scalar {
 }
 
 impl Scalar {
+    pub(crate) fn admit(self, id: PropertyId) -> Result<PropertyValue, PropertyError> {
+        let value = self.narrow(id)?;
+        id.validate_erased(value)?;
+        Ok(value)
+    }
+
     /// Keep the wide IntoLength value until admission: narrowing first would
     /// silently accept a negative subnormal as -0, or infinity from overflow.
-    pub(crate) fn admit(self, id: PropertyId) -> Result<PropertyValue, PropertyError> {
+    /// Literal authoring applies the same schema validator without its erased
+    /// callback table; dynamic publication uses `admit` above.
+    #[inline]
+    pub(crate) fn narrow(self, id: PropertyId) -> Result<PropertyValue, PropertyError> {
         let value = match self {
             Self::Value(value) => value,
             Self::Number(number) => {
@@ -35,7 +44,7 @@ impl Scalar {
                     });
                 }
                 let narrowed = number as f32;
-                let numeric = |value| match id.info().kind {
+                let numeric = |value| match id.value_kind() {
                     ValueKind::Dimension => PropertyValue::Dimension(Some(value)),
                     _ => PropertyValue::Number(value),
                 };
@@ -48,7 +57,6 @@ impl Scalar {
                 numeric(narrowed)
             }
         };
-        id.validate_erased(value)?;
         Ok(value)
     }
 }
@@ -82,7 +90,11 @@ impl<T: Value> StyleSignal for Signal<T> {
 }
 
 mod sealed {
-    pub trait Input<T> {}
+    // A literal's type makes source installation unreachable. Explicitly
+    // erased inputs and signals still use the operand match.
+    pub trait Input<T> {
+        const IS_LITERAL: bool;
+    }
 }
 
 /// A library-closed property input. Numeric builders accept every IntoLength
@@ -93,7 +105,7 @@ pub trait IntoProp<'a, T>: sealed::Input<T> {
     fn into_prop(self) -> PropInput<'a, T>;
 }
 
-/// An opaque borrowed operand, also used by Copy flow recipes.
+/// An opaque operand for explicitly erasing the literal/signal input form.
 pub struct PropInput<'a, T>(Operand<'a, T>);
 #[derive(Clone, Copy)]
 enum Operand<'a, T> {
@@ -115,7 +127,9 @@ impl<T: PartialEq> PartialEq for PropInput<'_, T> {
         }
     }
 }
-impl<T> sealed::Input<T> for PropInput<'_, T> {}
+impl<T> sealed::Input<T> for PropInput<'_, T> {
+    const IS_LITERAL: bool = false;
+}
 impl<'a, T> IntoProp<'a, T> for PropInput<'a, T> {
     fn into_prop(self) -> Self {
         self
@@ -130,6 +144,7 @@ impl<T: fmt::Debug> fmt::Debug for PropInput<'_, T> {
     }
 }
 impl<'a, T> PropInput<'a, T> {
+    #[cfg(test)]
     pub(crate) fn scalar(self) -> Scalar
     where
         T: Value,
@@ -159,15 +174,15 @@ macro_rules! numbers {
             const CODEC: SourceCodec = SourceCodec::$codec::<Self>();
             fn scalar(self) -> Scalar { Scalar::Number(crate::IntoLength::into_length(self)) }
         }
-        impl sealed::Input<f64> for $ty {}
+        impl sealed::Input<f64> for $ty { const IS_LITERAL: bool = true; }
         impl<'a> IntoProp<'a, f64> for $ty {
             fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Literal(crate::IntoLength::into_length(self))) }
         }
-        impl sealed::Input<f64> for &$ty {}
+        impl sealed::Input<f64> for &$ty { const IS_LITERAL: bool = true; }
         impl<'a> IntoProp<'a, f64> for &$ty {
             fn into_prop(self) -> PropInput<'a, f64> { (*self).into_prop() }
         }
-        impl sealed::Input<f64> for &Signal<$ty> {}
+        impl sealed::Input<f64> for &Signal<$ty> { const IS_LITERAL: bool = false; }
         impl<'a> IntoProp<'a, f64> for &'a Signal<$ty> {
             fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Signal(self)) }
         }
@@ -182,19 +197,25 @@ numbers!(f32 => for_style, f64 => for_value, u8 => for_style,
 
 // Corner radius preserves its established f32 authoring domain. Unlike the
 // pre-existing length builders, literal radius errors are deferred to mount.
-impl sealed::Input<f32> for f32 {}
+impl sealed::Input<f32> for f32 {
+    const IS_LITERAL: bool = true;
+}
 impl<'a> IntoProp<'a, f32> for f32 {
     fn into_prop(self) -> PropInput<'a, f32> {
         PropInput(Operand::Literal(self))
     }
 }
-impl sealed::Input<f32> for &f32 {}
+impl sealed::Input<f32> for &f32 {
+    const IS_LITERAL: bool = true;
+}
 impl<'a> IntoProp<'a, f32> for &f32 {
     fn into_prop(self) -> PropInput<'a, f32> {
         PropInput(Operand::Literal(*self))
     }
 }
-impl sealed::Input<f32> for &Signal<f32> {}
+impl sealed::Input<f32> for &Signal<f32> {
+    const IS_LITERAL: bool = false;
+}
 impl<'a> IntoProp<'a, f32> for &'a Signal<f32> {
     fn into_prop(self) -> PropInput<'a, f32> {
         PropInput(Operand::Signal(self))
@@ -207,15 +228,15 @@ macro_rules! values {
             const CODEC: SourceCodec = SourceCodec::$codec::<Self>();
             fn scalar(self) -> Scalar { Scalar::Value(PropertyValue::$variant(self)) }
         }
-        impl sealed::Input<$ty> for $ty {}
+        impl sealed::Input<$ty> for $ty { const IS_LITERAL: bool = true; }
         impl<'a> IntoProp<'a, $ty> for $ty {
             fn into_prop(self) -> PropInput<'a, $ty> { PropInput(Operand::Literal(self)) }
         }
-        impl sealed::Input<$ty> for &$ty {}
+        impl sealed::Input<$ty> for &$ty { const IS_LITERAL: bool = true; }
         impl<'a> IntoProp<'a, $ty> for &$ty {
             fn into_prop(self) -> PropInput<'a, $ty> { PropInput(Operand::Literal(*self)) }
         }
-        impl sealed::Input<$ty> for &Signal<$ty> {}
+        impl sealed::Input<$ty> for &Signal<$ty> { const IS_LITERAL: bool = false; }
         impl<'a> IntoProp<'a, $ty> for &'a Signal<$ty> {
             fn into_prop(self) -> PropInput<'a, $ty> { PropInput(Operand::Signal(self)) }
         }

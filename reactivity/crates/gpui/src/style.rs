@@ -194,6 +194,7 @@ where
     J: Copy + crate::IntoProp<'a, Justify>,
     W: Copy + crate::IntoProp<'a, bool>,
 {
+    #[inline]
     fn apply_to(self, mut element: crate::El<'a>) -> crate::El<'a> {
         element = element.flow(self.flow);
         if let Some(gap) = self.gap {
@@ -215,6 +216,7 @@ impl<'a, G, A, J, W> FlexRecipe<'a> for &Flex<G, A, J, W>
 where
     Flex<G, A, J, W>: Copy + FlexRecipe<'a>,
 {
+    #[inline]
     fn apply_to(self, element: crate::El<'a>) -> crate::El<'a> {
         (*self).apply_to(element)
     }

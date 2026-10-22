@@ -332,6 +332,7 @@ impl<T, D: PropertyDomain> Property<T, D> {
     }
 }
 
+#[inline]
 fn nonnegative(value: &f32) -> Result<(), PropertyErrorKind> {
     if !value.is_finite() {
         Err(PropertyErrorKind::NonFinite)
@@ -341,9 +342,11 @@ fn nonnegative(value: &f32) -> Result<(), PropertyErrorKind> {
         Ok(())
     }
 }
+#[inline]
 fn dimension(value: &Option<f32>) -> Result<(), PropertyErrorKind> {
     value.as_ref().map_or(Ok(()), nonnegative)
 }
+#[inline]
 fn font_size(value: &f32) -> Result<(), PropertyErrorKind> {
     if !value.is_finite() {
         Err(PropertyErrorKind::NonFinite)
@@ -387,6 +390,9 @@ macro_rules! properties {
             pub const fn info(self) -> &'static PropertyInfo {
                 match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info() }
             }
+            pub(crate) const fn value_kind(self) -> ValueKind {
+                match self { $(Self::$id => ValueKind::$kind),+, Self::CornerRadius => ValueKind::Number }
+            }
             pub(crate) fn get_erased(self, style: &Style) -> Result<PropertyValue,PropertyError> {
                 match self { $(Self::$id => Ok(PropertyValue::$kind($name.get(style)))),+, Self::CornerRadius=>Err(wrong_destination(self,PropertyDestination::Style)) }
             }
@@ -397,9 +403,26 @@ macro_rules! properties {
                     _ => Err(PropertyError { property: self, reason: PropertyErrorKind::WrongKind { expected: self.info().kind, actual: value.kind() } }),
                 }
             }
+            // Literal authoring has a compile-time field and performs no source
+            // subscription or previous-value comparison. Use
+            // this SAME schema's field/validator directly, so external callers
+            // need not load the inspector's callback descriptor to set a value.
+            pub(crate) fn set_literal<const CODE: u16>(style: &mut Style, value: PropertyValue) -> Result<(), PropertyError> {
+                let id = const { Self::from_code(CODE).expect("closed property code") };
+                match (id, value) {
+                    $((Self::$id, PropertyValue::$kind(value)) => {
+                        let verdict: Result<(),PropertyErrorKind> = ($validate)(&value);
+                        verdict.map_err(|reason| PropertyError { property: id, reason })?;
+                        style.$field = value;
+                        Ok(())
+                    },)+
+                    _ => Err(PropertyError { property: id, reason: PropertyErrorKind::WrongKind { expected: id.info().kind, actual: value.kind() } }),
+                }
+            }
         }
     };
 }
+#[inline]
 fn finite_transform(value: &Affine) -> Result<(), PropertyErrorKind> {
     if value.is_finite() {
         Ok(())
