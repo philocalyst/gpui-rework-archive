@@ -337,6 +337,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let before = self.source_epoch;
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
             let Some((target, id, contribution)) = handler.proposal(&self.runtime.model)? else {
+                self.runtime.changed_nodes = 0;
                 return Ok(false);
             };
             let epoch = self
