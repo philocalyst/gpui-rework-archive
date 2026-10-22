@@ -2511,16 +2511,20 @@ fn blend(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
         dst[i] = src[i] * coverage + dst[i] * (1.0 - alpha);
     }
 }
+#[cfg(test)]
 fn sample_mean(samples: &[[f32; 4]; 16]) -> [f32; 4] {
+    sample_mean_at(|index| samples[index])
+}
+fn sample_mean_at(mut sample: impl FnMut(usize) -> [f32; 4]) -> [f32; 4] {
     // Sixteen identical f32 values sum exactly in f64 (24+4 significant
     // bits). Narrow once, preserving a uniform tile's exact working color.
     // Otherwise a zero-coverage command could move the clear across an output
     // quantization threshold merely by materializing its sample tile.
     // Seed from the first sample so sixteen negative zeros retain their sign,
     // just as the uniform-color path does. Starting with +0 would erase it.
-    let [first, rest @ ..] = samples;
-    let mut sum = first.map(f64::from);
-    for sample in rest {
+    let mut sum = sample(0).map(f64::from);
+    for index in 1..16 {
+        let sample = sample(index);
         for i in 0..4 {
             sum[i] += sample[i] as f64;
         }
