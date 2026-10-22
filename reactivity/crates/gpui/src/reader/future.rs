@@ -19,6 +19,8 @@ pub trait QuestionTask {
 
 /// An explicitly supplied executor; GPUI installs no hidden runtime.
 pub trait QuestionExecutor {
+    /// Handle destruction must also be prompt, nonblocking and non-panicking;
+    /// it must not join or reclaim storage borrowed by an active poll.
     type Task: QuestionTask;
 
     /// Enqueue promptly without polling inline or reentering GPUI. A worker may

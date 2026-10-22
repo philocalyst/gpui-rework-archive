@@ -746,6 +746,12 @@ where
             controller.current.store(0, Ordering::Release);
             controller.mailbox.close();
         }
+        // Cancellation must precede other user destructors: one may unwind
+        // this method before start.take(). Ordinary starter hooks are no-ops.
+        if let Some(start) = &mut self.start {
+            start.cancel();
+            start.retire();
+        }
         self.staged_terminal = None;
         self.pending = None;
         self.state = State::Empty;

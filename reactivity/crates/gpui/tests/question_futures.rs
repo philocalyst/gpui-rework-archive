@@ -738,3 +738,55 @@ fn dependent_input_becoming_pending_or_fault_cancels_its_future() {
         assert!(!win.question_info(second).unwrap().completion_leased);
     }
 }
+
+#[test]
+fn close_requests_cancellation_before_a_freezer_destructor_unwinds_cleanup() {
+    struct Bomb;
+    impl Drop for Bomb {
+        fn drop(&mut self) {
+            panic!("freezer destructor");
+        }
+    }
+    let (executor, driver) = Driver::new();
+    let (dropped, drops) = mpsc::channel();
+    let bomb = Bomb;
+    let (questions, answer) = Questions::new()
+        .question_future(
+            Model::QUERY,
+            move |value| {
+                let _ = &bomb;
+                value.clone()
+            },
+            executor,
+            move |query| probe(query, dropped.clone()),
+        )
+        .unwrap();
+    let mut win = Win::with_questions(
+        Model {
+            query: Signal::new("A".into()),
+            unrelated: Signal::new(0),
+            answer,
+        },
+        questions,
+        WindowOptions {
+            size: [160, 60],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let mut task = driver.next();
+    assert_eq!(task.poll(), Poll::Pending);
+    assert!(win.question_info(answer).unwrap().completion_leased);
+    assert!(catch_unwind(AssertUnwindSafe(|| win.close())).is_err());
+    assert!(task.control.cancelled.load(Ordering::SeqCst));
+    assert_eq!(task.control.retired.load(Ordering::SeqCst), 1);
+    assert!(
+        drops.try_recv().is_err(),
+        "requesting abort did not destroy the user future or return its lease"
+    );
+    assert!(task.future.is_some());
+    assert_eq!(task.poll(), Poll::Ready(()));
+    assert_eq!(drops.try_recv().unwrap(), "A");
+    win.close();
+    assert!(win.is_closed());
+}
