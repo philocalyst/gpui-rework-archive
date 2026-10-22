@@ -473,9 +473,11 @@ impl GpuContext {
         // Each context must mint a fresh layout handle, including if this ever
         // uses explicit layouts. Sharing a BGL across contexts/formats would
         // invalidate the state/context identity certificate.
-        let layout = explicit
-            .map(|(_, layout, _)| layout)
-            .unwrap_or_else(|| pipeline.get_bind_group_layout(0));
+        // Keep this checked pipeline lookup on the explicit route too: after
+        // device loss creation errors can be ignored by WGPU's scopes, while
+        // this rejects the invalid pipeline instead of returning a dead owner.
+        drop(explicit);
+        let layout = pipeline.get_bind_group_layout(0);
         let error = errors.pop().await;
         #[cfg(feature = "offline-shader")]
         let error = {
