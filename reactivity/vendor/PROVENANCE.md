@@ -3,7 +3,7 @@
 Winit retains its complete published archive. Cephal now contains the complete
 git archive of the requested performance branch, including licenses, fixtures,
 examples and manifests. Both are excluded from workspace membership. Local
-adapter changes remain in the first-party layout boundary.
+adapter changes are recorded in the first-party boundary and vendor patch notes.
 
 | Directory | Package | Upstream commit | Source archive SHA256 |
 | --- | --- | --- | --- |
@@ -38,3 +38,18 @@ archives with narrowly recorded Apple presenter ownership patches. Their pinned
 upstream revisions, archive hashes, changes, and platform validation limits are
 in [PRESENTER_PATCHES.md](PRESENTER_PATCHES.md). They are excluded from workspace
 membership and selected by root Cargo `[patch.crates-io]` entries.
+
+`wgpu` now retains the complete published 30.0.1 archive, both licenses,
+original manifests, VCS metadata and per-file checksums in
+[`wgpu/UPSTREAM.json`](wgpu/UPSTREAM.json). Its safe presentation helper delegates
+platform hints/recovery/target preparation order to HAL; see
+[`wgpu/GPUI-PATCHES.md`](wgpu/GPUI-PATCHES.md). The import and relocated policy
+are charged vendor source, not a first-party line-count reduction.
+
+The coordinated `accesskit` 0.25.1, `accesskit_consumer` 0.39.1 and
+`accesskit_macos` 0.27.1 archives retain their licenses, original manifests and
+VCS metadata. Each `GPUI_PATCHES.md` records its archive hash, schema changes and
+platform limits. The private exceptional-unit encoding requires the matching
+consumer and adapters; upstream-only readers cannot interpret its escapes.
+Existing Unix and AT-SPI-common patch notes also record their action/lifecycle
+changes. Independent application workspaces must apply these same path patches.

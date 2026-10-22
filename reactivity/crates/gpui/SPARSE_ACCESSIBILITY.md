@@ -41,11 +41,12 @@ metadata for older P.
 The accessibility build adds an 8-byte optional observer pointer per runtime,
 besides the existing 8-byte acknowledged sequence. Headless/AT-disabled builds
 omit both. Inactive native observation allocates nothing and performs no
-comparison or conversion walk. Active observation allocates one 80-byte box and
+comparison or conversion walk. Active observation allocates one 96-byte box and
 one lazily grown vector (at most 16,384 payload bytes); deactivation drops both.
 No node or presented-entry size changes. No history accumulates.
 
-Sparse conversion is not O(1) end to end: current focus still scans P. Common
+Sparse conversion is not O(1) end to end. Current focus uses a verified logical
+index hint and scans P only on mismatch; absent focus returns the root. Common
 field/inspector collection follows verified hints plus existing name lookups,
 while a mismatched inspector hint scans P. Active visual preparation compares
 nodes before it can discover topology/cap fallback.
@@ -91,6 +92,13 @@ no-session-bus presentation test must also pass. Consumer/schema proof does not
 substitute for VoiceOver/UIA/Orca or whole-process AT memory/latency evidence.
 
 ## Capture on this implementation
+
+The captures below precede source-qualified text cohorts and the focus-hint
+refinement. Their descriptor was 80 bytes; the current 96-byte descriptor adds
+two monotonic field-authority bounds. Their timings are historical controls,
+not rerun results for the later implementation. The current
+[text authority evidence](../../evidence/native-text-selection/README.md) records
+actual sparse discovery visits, allocations and full-tree oracles separately.
 
 [Final CSV](evidence/accessibility-transitions.csv),
 [storage ledger](evidence/accessibility-transition-storage.csv), and the

@@ -148,10 +148,13 @@ independently materialized eager rows; timing never substitutes for that oracle.
 Native accessibility tests use the pinned AccessKit Consumer to check tree
 replacement/removal, names distinct from edited values, full physical geometry,
 live focus, frozen list positions, session cancellation and bounded action
-admission. Text-unit tests include multibyte scalars and CRLF; no selection or
-glyph-position capability is invented. The actual Linux AT-SPI client activates
+admission. Public selection/range replacement and native text actions share the
+ordinary writer. Text-unit tests include long graphemes, multibyte scalars,
+CRLF and malformed serialized lengths. The actual Linux AT-SPI client activates
 after initial P, reads renamed text and its actual content, edits input, invokes
-an action and reactivates without forcing a frame. The absent-session-bus case
+an action and reactivates without forcing a frame. Its text transcript also
+selects in reverse, moves the caret, inserts/deletes Unicode ranges and rejects
+interior/split-UTF-8 offsets. The absent-session-bus case
 still presents real CPU content. These prove separate boundaries from UIA and
 VoiceOver runtime behavior; see [the native contract](crates/gpui/ACCESSIBILITY.md).
 Sparse publication additionally compares its complete Consumer result against

@@ -5,6 +5,10 @@ the ordinary live input target. UTF-8 offsets must be extended-grapheme
 boundaries in the current logical source. Explicit ranges address the current
 source; they do not bind a previously observed document revision. Reversed
 ranges are accepted. Invalid endpoints fail before changing source or selection.
+`TextSelection::from_bytes(anchor, focus)` constructs directed downstream
+endpoints; `TextSelection::caret(byte)` constructs a collapsed caret. Both
+return `None` for an unrepresentable offset and can be used in constants.
+Applying them still validates the current document's grapheme boundaries.
 
 Typing replaces the current range. Backspace removes the range, or the complete
 preceding grapheme at a caret, including a CRLF or emoji ZWJ sequence. Edits can
@@ -43,16 +47,29 @@ one candidate, including otherwise unchanged or metadata-only actions. Rejected
 actions restore previous focus before source admission; accepted source changes
 retain their logical focus or reconciliation cleanup when presentation fails.
 
-On 64-bit targets there is one 40-byte cold `Editing` allocation per active
-window and one 8-byte optional slot in the cold `Metadata`. A plain window that
-has not allocated this carrier requests its full 264 bytes plus the 40-byte
-selection box: 304 bytes before interaction geometry and allocator overhead.
+On 64-bit targets one cold 88-byte `Editing` allocation contains the 40-byte
+logical selection and two 24-byte candidate/presented offset snapshots. It uses
+the existing 8-byte optional slot in cold `Metadata`. A plain window that
+has not allocated this carrier requests its full 264 bytes plus the 88-byte
+selection box: 352 bytes before interaction geometry and allocator overhead.
 A window already using the carrier requests only the selection box. The same
 allocation is reused when activation moves between inputs. A one-word
 immutable text lease, node identity, and source field qualify retained offsets
 and prevent allocator-address reuse from reviving old authority. External text
 or field replacement revokes the stored range. No fields were added to
 `Runtime`, `Node` (40 bytes), or `TextSite` (80 bytes).
+Revocation releases the logical source lease immediately; P/C offsets survive
+until their corresponding complete presentation is replaced. The owner can
+therefore retain 40 empty logical bytes while only old snapshots remain.
+
+`Win::selection` reads the current logical source. Borrowed `Part::selection`
+and semantic serialization read the acknowledged input's selection, including
+after a newer preparation fails or an older eligible candidate is acknowledged.
+Native positional actions additionally require a current provider publication,
+field and immutable text lease. `Action::ReplaceText` carries one explicit
+range and value through the same writer; it does not queue a selection first.
+Native SetTextSelection/ReplaceSelectedText are advertised only with this source
+authority. See [native text evidence](../../evidence/native-text-selection/README.md).
 
 Only the active input requests caret geometry in its existing single shaped
 layout. Switching inputs releases the previous caret map; ordinary glyph
@@ -66,5 +83,7 @@ this slice makes no new SIMD or constant-time editing claim.
 This is a usable selection foundation, with explicit remaining browser-level
 work: IME composition, clipboard and word-selection commands, vertical/preferred
 column navigation, selection autoscroll, caret blinking, cross-window capture,
-and accessibility UTF-16 range actions. AccessKit range actions remain
-unadvertised; `SetValue` continues to use the proven position-free authority.
+and native wrapped-text/caret geometry. Linux scalar and Apple UTF-16 selection
+endpoints now require exact selectable-boundary round trips. Actual AT-SPI
+selection/insertion/deletion passes; Apple/MSVC checks compile their real
+providers, with native VoiceOver/UIA execution still required.

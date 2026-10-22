@@ -45,8 +45,9 @@ caret painting through the ordinary window and native input paths.
 
 Linux can instead enable `wayland`; macOS/Windows use `desktop`.
 These normal desktop profiles include the real native AccessKit adapter.
-`native`, `x11-minimal` and `wayland-minimal` are explicitly AT-disabled transport
-diagnostics; the default headless build remains dependency-light. See
+`native` includes accessibility too. `x11-minimal` and `wayland-minimal` are
+explicitly AT-disabled transport diagnostics; the default headless build remains
+dependency-light. See
 [native accessibility](ACCESSIBILITY.md) for ownership, action quotas, actual
 AT-SPI proof commands, measured costs and the remaining OS/virtual-item limits.
 `Application::run(root)` opens a default document window;
@@ -162,7 +163,7 @@ input-version and cohort graph remains outstanding.
 Current boundaries are explicit: one root owner; full scene preparation on a
 visual/hit change; layout topology rebuilds after structural changes; Cephal
 depth bounded to 128; viewport clipping; the canvas's documented text/script
-limits; append and Unicode-scalar backspace rather than selection/IME; no
+limits; IME, clipboard, vertical selection and autoscroll remain; no
 complete async graph, embedded native/web content,
 or compatibility facade yet. GPU completion is distinct from presentation
 acknowledgement; Wgpu retains submitted resource leases. Multiwindow device
