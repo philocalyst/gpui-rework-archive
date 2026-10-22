@@ -565,12 +565,7 @@ fn projected_node(part: Part<'_>) -> Node {
 }
 
 fn focus_update(sheet: &crate::runtime::SemanticSheet<'_>, cohort: &Cohort) -> TreeUpdate {
-    let mut focus = ROOT;
-    sheet.visit(|part| {
-        if part.focused() {
-            focus = cohort.id(part);
-        }
-    });
+    let focus = sheet.focused().map_or(ROOT, |part| cohort.id(part));
     TreeUpdate {
         nodes: Vec::new(),
         tree: None,
