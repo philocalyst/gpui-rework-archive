@@ -2102,6 +2102,7 @@ fn validate_rect(rect: Rect) -> Result<(), Error> {
         Ok(())
     }
 }
+#[inline]
 fn visit_tiles(
     command: &BorrowedCommand<'_>,
     tile_bounds: [usize; 4],
