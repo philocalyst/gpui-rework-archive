@@ -79,6 +79,80 @@ pub struct LayoutStorage {
     pub absolute_contexts: usize,
 }
 
+// Most OOF trees have one recorded containing block. Keep that record in the
+// cold owner allocation instead of reserving a whole B-tree leaf for it. Once
+// promoted, stay a map until empty ownership is released: take/reinsert must
+// not churn between representations during a layout pass.
+enum AbsoluteContexts {
+    Empty,
+    Single(NodeId, AbsoluteContext),
+    Many(BTreeMap<NodeId, AbsoluteContext>),
+}
+
+impl AbsoluteContexts {
+    fn len(&self) -> usize {
+        match self {
+            Self::Empty => 0,
+            Self::Single(..) => 1,
+            Self::Many(records) => records.len(),
+        }
+    }
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    fn get(&self, node: &NodeId) -> Option<&AbsoluteContext> {
+        match self {
+            Self::Single(key, record) if key == node => Some(record),
+            Self::Many(records) => records.get(node),
+            _ => None,
+        }
+    }
+    fn insert(&mut self, node: NodeId, record: AbsoluteContext) {
+        match self {
+            Self::Empty => *self = Self::Single(node, record),
+            Self::Single(key, previous) if *key == node => *previous = record,
+            Self::Single(..) => {
+                let Self::Single(key, previous) = std::mem::replace(self, Self::Empty) else {
+                    unreachable!()
+                };
+                let mut records = BTreeMap::new();
+                records.insert(key, previous);
+                records.insert(node, record);
+                *self = Self::Many(records);
+            }
+            Self::Many(records) => {
+                records.insert(node, record);
+            }
+        }
+    }
+    fn remove(&mut self, node: &NodeId) -> Option<AbsoluteContext> {
+        match self {
+            Self::Single(key, _) if key == node => {
+                let Self::Single(_, record) = std::mem::replace(self, Self::Empty) else {
+                    unreachable!()
+                };
+                Some(record)
+            }
+            Self::Many(records) => records.remove(node),
+            _ => None,
+        }
+    }
+    #[cfg(test)]
+    fn iter(&self) -> impl Iterator<Item = (&NodeId, &AbsoluteContext)> {
+        let single = match self {
+            Self::Single(key, record) => Some((key, record)),
+            _ => None,
+        };
+        let many = match self {
+            Self::Many(records) => Some(records),
+            _ => None,
+        };
+        single
+            .into_iter()
+            .chain(many.into_iter().flat_map(BTreeMap::iter))
+    }
+}
+
 /// Retained flex/block/grid layout using the core Tree as its sole topology.
 /// Normal empty-content leaves never allocate NodeCache. Styles are interned and
 /// references released on replacement/removal. All public node operations check
@@ -91,9 +165,8 @@ pub struct LayoutTree {
     child_counts: Vec<u32>,
     flags: Vec<u8>,
     caches: Vec<NodeCache>,
-    // Box keeps the cold map header off empty trees: one owner word, no per-node lane.
-    #[allow(clippy::box_collection)]
-    absolute_contexts: Option<Box<BTreeMap<NodeId, AbsoluteContext>>>,
+    // One owner word, no per-node lane or allocation before the first record.
+    absolute_contexts: Option<Box<AbsoluteContexts>>,
     styles: StyleTable,
     measures: BTreeMap<NodeId, MeasureFn>,
     // Only full generational core capabilities survive between computes. A
@@ -653,7 +726,7 @@ impl EngineTree for Engine<'_, '_> {
             let node = self.node(node);
             self.owner
                 .absolute_contexts
-                .get_or_insert_with(|| Box::new(BTreeMap::new()))
+                .get_or_insert_with(|| Box::new(AbsoluteContexts::Empty))
                 .insert(node, context);
         }
     }
@@ -826,6 +899,46 @@ mod tests {
             assert!(context.placed.is_empty());
             assert!(context.viewport.is_empty());
         }
+    }
+
+    #[test]
+    fn cold_context_owner_replaces_takes_and_promotes_without_demotion() {
+        let mut tree = Tree::new();
+        let first = tree.insert(None, NodeKind::Element).unwrap();
+        let second = tree.insert(None, NodeKind::Element).unwrap();
+        let mut records = Box::new(AbsoluteContexts::Empty);
+        let allocation = &*records as *const AbsoluteContexts;
+        records.insert(first, AbsoluteContext::default());
+        assert!(matches!(*records, AbsoluteContexts::Single(..)));
+        let mut replacement = AbsoluteContext::default();
+        replacement.entries.reserve_exact(3);
+        records.insert(first, replacement);
+        assert_eq!(records.len(), 1);
+        assert_eq!(records.get(&first).unwrap().entries.capacity(), 3);
+        assert!(matches!(*records, AbsoluteContexts::Single(..)));
+        let moved = records.remove(&first).unwrap();
+        assert!(records.is_empty());
+        assert!(records.get(&second).is_none());
+        records.insert(first, moved);
+        assert!(matches!(*records, AbsoluteContexts::Single(..)));
+        records.insert(second, AbsoluteContext::default());
+        assert!(matches!(*records, AbsoluteContexts::Many(..)));
+        assert_eq!(records.len(), 2);
+        let moved = records.remove(&first).unwrap();
+        assert!(matches!(*records, AbsoluteContexts::Many(..)));
+        records.insert(first, moved);
+        records.remove(&first).unwrap();
+        records.remove(&second).unwrap();
+        assert!(records.is_empty());
+        assert!(matches!(*records, AbsoluteContexts::Many(..)));
+        records.insert(second, AbsoluteContext::default());
+        assert!(matches!(*records, AbsoluteContexts::Many(..)));
+        assert_eq!(allocation, &*records as *const AbsoluteContexts);
+        println!(
+            "AbsoluteContexts={},LayoutTree={}",
+            size_of::<AbsoluteContexts>(),
+            size_of::<LayoutTree>()
+        );
     }
 
     #[test]
