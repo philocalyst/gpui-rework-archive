@@ -1647,6 +1647,7 @@ impl<M: View + 'static> Runtime<M> {
         mount: bool,
         scroll: &[ScrollRequest],
         readers: &dyn crate::reader::ReaderValues,
+        mut property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
         let reuse_identities = self.logical_valid;
         self.counters.descriptions += 1;
@@ -2062,11 +2063,24 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 Content::new(draft.kind, text_slot)
             };
+            if property_changed == Some(node.identity) {
+                node_changed = true;
+                property_changed = None;
+            }
             changed += usize::from(node_changed);
             nodes.push(node);
         }
         image::reconcile(&mut self.images, image_resources);
-        changed += old.iter().filter(|node| node.is_some()).count();
+        for node in old.into_iter().flatten() {
+            changed += 1;
+            if property_changed == Some(node.identity) {
+                property_changed = None;
+            }
+        }
+        // A previous site can be consumed before its component scope rejects
+        // reuse. Its replacement has a fresh identity, so count the edited old
+        // destination once even when neither surviving nor retired loop saw it.
+        changed += usize::from(property_changed.is_some());
         let topology = old_ids.len() != nodes.len()
             || old_ids
                 .iter()
@@ -3361,12 +3375,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         id: crate::property::PropertyId,
         contribution: Contribution<crate::property::PropertyValue>,
     ) -> Result<Commit, Error> {
-        self.apply_property_value_at(index, id, contribution)?;
+        let changed = self.apply_property_value_at(index, id, contribution)?;
         self.source_epoch = epoch;
         self.counters.source_operations += 1;
         if id.info().destination == crate::property::PropertyDestination::Style && self.has_lists()
         {
-            self.describe(false)?;
+            self.describe_with_changed(false, &[], changed)?;
         }
         self.present()
     }
@@ -3378,23 +3392,23 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         index: usize,
         id: crate::property::PropertyId,
         contribution: Contribution<crate::property::PropertyValue>,
-    ) -> Result<(), Error> {
+    ) -> Result<Option<NonZeroU64>, Error> {
         use crate::property::PropertyDestination;
         if let Contribution::Set(value) = contribution {
             id.validate_erased(value)?;
         }
-        match id.info().destination {
+        let changed = match id.info().destination {
             PropertyDestination::Style => self.set_style_value(index, id, contribution)?,
             PropertyDestination::Geometry => self.set_geometry_value(index, id, contribution)?,
-        }
-        Ok(())
+        };
+        Ok(changed.then_some(self.nodes[index].identity))
     }
     fn set_style_value(
         &mut self,
         index: usize,
         id: crate::property::PropertyId,
         contribution: Contribution<crate::property::PropertyValue>,
-    ) -> Result<(), Error> {
+    ) -> Result<bool, Error> {
         let runtime = self;
         let identity = runtime.nodes[index].identity();
         let before = runtime.styles.get(index);
@@ -3412,8 +3426,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         // Equal Set/Inherit still changes which immutable C paint row this
         // node follows. Rebind C before a later shared-source write can occur.
         runtime.dirty |= relationship_changed;
-        runtime.changed_nodes = usize::from(!styles::exact_eq(&before, &after));
-        if !styles::exact_eq(&before, &after) {
+        let changed = !styles::exact_eq(&before, &after);
+        runtime.changed_nodes = usize::from(changed);
+        if changed {
             if layout_changed(before, after) {
                 runtime.layout_dirty.insert(identity);
             }
@@ -3427,7 +3442,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             runtime.styles.set(index, after, count);
             runtime.dirty = true;
         }
-        Ok(())
+        Ok(changed)
     }
 }
 

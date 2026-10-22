@@ -371,7 +371,7 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
         index: usize,
         id: crate::property::PropertyId,
         contribution: Contribution<crate::property::PropertyValue>,
-    ) -> Result<(), Error> {
+    ) -> Result<bool, Error> {
         let runtime = self;
         let identity = runtime.nodes[index].identity();
         let before = runtime
@@ -395,7 +395,7 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
         if runtime.metadata.as_deref().is_some_and(Metadata::unused) {
             runtime.metadata = None;
         }
-        Ok(())
+        Ok(changed)
     }
 }
 

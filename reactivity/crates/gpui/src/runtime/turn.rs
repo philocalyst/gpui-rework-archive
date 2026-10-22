@@ -69,6 +69,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         mount: bool,
         scroll: &[ScrollRequest],
     ) -> Result<(), Error> {
+        self.describe_with_changed(mount, scroll, None)
+    }
+    pub(super) fn describe_with_changed(
+        &mut self,
+        mount: bool,
+        scroll: &[ScrollRequest],
+        property_changed: Option<NonZeroU64>,
+    ) -> Result<(), Error> {
         let was_valid = self.logical_valid;
         match catch_unwind(AssertUnwindSafe(|| {
             self.runtime.sources.validate(&mut self.runtime.model)?;
@@ -79,7 +87,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     crate::reader::question::Change::Mount,
                 )?;
             }
-            self.runtime.describe_inner(mount, scroll, self.lanes)
+            self.runtime
+                .describe_inner(mount, scroll, self.lanes, property_changed)
         })) {
             Ok(Ok(())) => Ok(()),
             Ok(Err(error)) => {
@@ -142,6 +151,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         exact: Option<FieldId>,
         editing: EditingIntent,
     ) -> Result<Commit, Error> {
+        self.after_source_changed(exact, editing, None)
+    }
+    fn after_source_changed(
+        &mut self,
+        exact: Option<FieldId>,
+        editing: EditingIntent,
+        property_changed: Option<NonZeroU64>,
+    ) -> Result<Commit, Error> {
         let questions_changed = match catch_unwind(AssertUnwindSafe(|| {
             self.lanes.refresh(
                 &self.runtime.model,
@@ -161,20 +178,21 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 return Err(Error::OwnerPanicked);
             }
         };
-        self.after_admission_with_editing(exact, questions_changed, editing)
+        self.after_admission_changed(exact, questions_changed, editing, property_changed)
     }
     pub(super) fn after_admission(
         &mut self,
         exact: Option<FieldId>,
         questions_changed: bool,
     ) -> Result<Commit, Error> {
-        self.after_admission_with_editing(exact, questions_changed, EditingIntent::None)
+        self.after_admission_changed(exact, questions_changed, EditingIntent::None, None)
     }
-    fn after_admission_with_editing(
+    fn after_admission_changed(
         &mut self,
         exact: Option<FieldId>,
         questions_changed: bool,
         editing: EditingIntent,
+        property_changed: Option<NonZeroU64>,
     ) -> Result<Commit, Error> {
         // A bank-only candidate cannot include changed caret visibility.
         // Disable that early publication before patching, then combine both
@@ -223,7 +241,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             }
             None => {
                 self.runtime.counters.coarse_updates += 1;
-                self.describe(false).map(|()| PatchOutcome::Visual)
+                self.describe_with_changed(false, &[], property_changed)
+                    .map(|()| PatchOutcome::Visual)
             }
         };
         if let Err(error) = result {
@@ -335,6 +354,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .take()
             .expect("admitted route");
         let before = self.source_epoch;
+        let mut property_changed = None;
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
             let Some((target, id, contribution)) = handler.proposal(&self.runtime.model)? else {
                 self.runtime.changed_nodes = 0;
@@ -350,20 +370,21 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             if let Err(error) = &result
                 && !matches!(error, Error::StaleTarget | Error::Property(_))
             {
-                return result.map(|()| true);
+                return result.map(|_| true);
             }
             // Accepted contributions and the ordinary reply method are one
             // source operation. Rejection changes no contribution; its reply
             // may still change the tool's ordinary model error/status state.
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
-            handler.applied_logically(&mut self.runtime.model, result.as_ref().copied())?;
+            handler.applied_logically(&mut self.runtime.model, result.as_ref().map(|_| ()))?;
+            property_changed = result.ok().flatten();
             Ok(true)
         }));
         self.runtime.nodes[index].handler = Some(handler);
         match result {
             Ok(Ok(false)) => Ok(self.commit()),
-            Ok(Ok(true)) => self.after_source_with_editing(None, editing),
+            Ok(Ok(true)) => self.after_source_changed(None, editing, property_changed),
             Ok(Err(error)) => {
                 // Within this closed operation only the reply can reject after
                 // S admission. The route is restored above before quarantine;
