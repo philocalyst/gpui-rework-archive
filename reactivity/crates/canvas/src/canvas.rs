@@ -6,7 +6,7 @@ use crate::{
 use std::{collections::HashMap, sync::Arc};
 
 mod bins;
-use bins::RasterScratch;
+use bins::{Membership, RasterScratch};
 mod glyph_axis;
 mod image_axis;
 mod paint;
@@ -45,7 +45,7 @@ pub struct RenderStats {
     /// Number of disjoint 16-row output bands rendered in this frame.
     pub output_bands: usize,
     pub parallel: bool,
-    /// This raster reused geometry bins; pixels and opaque cuts are recomputed.
+    /// This raster reused geometry bins; same-alpha opaque cuts remain valid.
     pub bins_reused: bool,
 }
 
@@ -1497,6 +1497,7 @@ impl Canvas {
             bins_reused,
             ..RenderStats::default()
         };
+        let (raster, cuts) = raster.rows(tile_bounds);
         let frame = Frame {
             width: self.width,
             height: self.height,
@@ -1507,15 +1508,18 @@ impl Canvas {
             tile_bounds,
         };
         let rendered = if let Some(words) = external {
-            schedule.render(frame, BgrxEncoder(self.color_config.encoder()), words)
+            schedule.render(frame, BgrxEncoder(self.color_config.encoder()), words, cuts)
         } else {
             match self.color_config.format {
                 crate::PixelFormat::Rgba8Premultiplied => {
-                    schedule.render(frame, self.color_config.encoder(), &mut self.pixels)
+                    schedule.render(frame, self.color_config.encoder(), &mut self.pixels, cuts)
                 }
-                crate::PixelFormat::Rgba16Float => {
-                    schedule.render(frame, self.color_config.half_encoder(), &mut self.pixels)
-                }
+                crate::PixelFormat::Rgba16Float => schedule.render(
+                    frame,
+                    self.color_config.half_encoder(),
+                    &mut self.pixels,
+                    cuts,
+                ),
             }
         };
         stats.tile_references = rendered.tile_references;
@@ -1545,7 +1549,7 @@ struct Frame<'a> {
     height: usize,
     clear: [f32; 4],
     commands: &'a DisplayList,
-    raster: &'a RasterScratch,
+    raster: &'a Membership,
     tile_proofs: bool,
     tile_bounds: [usize; 4],
 }
@@ -1583,6 +1587,7 @@ trait RenderSchedule {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
+        cuts: &mut [usize],
     ) -> RenderStats;
 }
 struct Serial;
@@ -1592,13 +1597,15 @@ impl RenderSchedule for Serial {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
+        cuts: &mut [usize],
     ) -> RenderStats {
         pixels
             .chunks_mut(TILE * frame.width * W::ELEMENTS)
             .enumerate()
             .skip(frame.tile_bounds[1])
             .take(frame.tile_bounds[3] - frame.tile_bounds[1])
-            .map(|(index, band)| render_band(frame, writer, index, band))
+            .zip(cuts.chunks_mut(frame.raster.columns()))
+            .map(|((index, band), cuts)| render_band(frame, writer, index, band, cuts))
             .fold(RenderStats::default(), combine_stats)
     }
 }
@@ -1669,6 +1676,7 @@ impl RenderSchedule for RenderPool {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
+        cuts: &mut [usize],
     ) -> RenderStats {
         use rayon::prelude::*;
         // Estimate distinguishes a proven uniform viewport fill from sampled
@@ -1696,7 +1704,7 @@ impl RenderSchedule for RenderPool {
             },
         );
         if work < self.min_work || frame.height <= TILE {
-            return Serial.render(frame, writer, pixels);
+            return Serial.render(frame, writer, pixels, cuts);
         }
         let mut stats = self.pool.install(|| {
             pixels
@@ -1704,7 +1712,8 @@ impl RenderSchedule for RenderPool {
                 .enumerate()
                 .skip(frame.tile_bounds[1])
                 .take(frame.tile_bounds[3] - frame.tile_bounds[1])
-                .map(|(index, band)| render_band(frame, writer, index, band))
+                .zip(cuts.par_chunks_mut(frame.raster.columns()))
+                .map(|((index, band), cuts)| render_band(frame, writer, index, band, cuts))
                 .reduce(RenderStats::default, combine_stats)
         });
         stats.parallel = true;
@@ -1717,6 +1726,7 @@ fn render_band<W: PixelWriter>(
     writer: W,
     band_index: usize,
     pixels: &mut [W::Element],
+    cuts: &mut [usize],
 ) -> RenderStats {
     let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
@@ -1729,7 +1739,8 @@ fn render_band<W: PixelWriter>(
     // so HDR positive/negative zeros remain distinct; this is not quantization.
     let mut encoded_color = frame.clear.map(f32::to_bits);
     let mut encoded_bytes = clear;
-    for column in 0..columns {
+    let first = frame.tile_bounds[0] - frame.raster.left();
+    for (column, cut) in cuts[first..first + columns].iter_mut().enumerate() {
         let ordered = frame.raster.tile(frame.tile_bounds[0] + column, band_index);
         stats.tile_references += ordered.len();
         let left = (frame.tile_bounds[0] + column) * TILE;
@@ -1737,15 +1748,18 @@ fn render_band<W: PixelWriter>(
         let right = (left + TILE).min(frame.width);
         let bottom = (top + TILE).min(frame.height);
         let start = if frame.tile_proofs {
-            ordered
-                .iter()
-                .rposition(|index| {
-                    let command = frame.commands.get(frame.commands.order[*index as usize]);
-                    command.color[3] == 1.0
-                        && matches!(command.source, BorrowedSource::Rect)
-                        && full_tile(&command, left, top, right, bottom)
-                })
-                .unwrap_or(0)
+            if *cut == usize::MAX {
+                *cut = ordered
+                    .iter()
+                    .rposition(|index| {
+                        let command = frame.commands.get(frame.commands.order[*index as usize]);
+                        command.color[3] == 1.0
+                            && matches!(command.source, BorrowedSource::Rect)
+                            && full_tile(&command, left, top, right, bottom)
+                    })
+                    .unwrap_or(0);
+            }
+            *cut
         } else {
             0
         };

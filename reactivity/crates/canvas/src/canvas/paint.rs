@@ -145,8 +145,8 @@ impl Canvas {
     /// material, clear/configuration and command order remain unchanged.
     ///
     /// The diagnostic image becomes dirty on a changed value. Existing CPU
-    /// rasterization can reuse geometry bins for the same tile envelope, while
-    /// recomputing current opacity cuts. External buffer age remains the host's
+    /// rasterization can reuse geometry bins and exact-alpha opaque cuts.
+    /// External buffer age remains the host's
     /// responsibility.
     pub fn prepare_paint<'canvas, 'edits>(
         &'canvas mut self,
