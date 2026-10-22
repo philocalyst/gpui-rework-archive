@@ -408,10 +408,10 @@ fn selection_request_and_reply_panics_restore_dense_and_sparse_routes_until_clos
                 panic: false,
             };
             let site = div().size(8).on_click(gpui::property_selection(
-                move |owner: &Self| {
+                move |owner: &Self, _| {
                     guard.retain();
                     assert!(!owner.request_panics, "selection request panic");
-                    Some((owner.target.unwrap(), gpui::PropertyId::Width))
+                    Some((owner.target.unwrap(), gpui::property::PropertyId::Width))
                 },
                 |_: &mut Self, _| panic!("selection reply panic"),
             ));
