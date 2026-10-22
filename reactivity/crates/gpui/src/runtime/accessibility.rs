@@ -69,11 +69,20 @@ impl Observer {
         self.pending = false;
         self.target = stamp;
     }
-    pub(super) fn relabel(&mut self, base: Stamp, target: Stamp) {
-        if self.pending {
+    pub(super) fn relabel(&mut self, base: Stamp, previous: Stamp, target: Stamp) {
+        if self.pending && self.target == previous {
+            // This collector actually described the preceding complete C.
             self.target = target;
-        } else {
+        } else if previous == base {
+            // No earlier unobserved candidate can differ from acknowledged P.
             self.begin(base, target.size).finish(target, 0, 0);
+        } else {
+            // Late activation (or lost collection) cannot certify C from P.
+            self.base = base;
+            self.target = target;
+            self.indices.clear();
+            self.exact = false;
+            self.pending = true;
         }
     }
     pub(super) fn invalidate(&mut self) {

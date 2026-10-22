@@ -767,3 +767,104 @@ fn paint_complete_transitions_preserve_pending_full_rows_and_zero_node_deltas() 
     // still consumable through the independent full fallback.
     apply(&win, base, &mut tree, None);
 }
+
+#[test]
+fn pending_complete_coverage_noop_preserves_exact_consumer_transition() {
+    for mode in 0..3 {
+        let mut win = Win::recording(
+            PaintPage {
+                color: Signal::new(crate::Color::BLACK),
+                map: Signal::new(Affine::IDENTITY),
+            },
+            WindowOptions {
+                size: [120, 120],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        acknowledge(&mut win);
+        let target = win.button("Paint");
+        win.focus(target).unwrap();
+        let base = win.accessibility_state().unwrap();
+        let mut tree = Tree::new(full(&win), true);
+        win.accessibility_observe(true).unwrap();
+        match mode {
+            0 => {
+                win.set(PaintPage::COLOR, crate::Color::WHITE).unwrap();
+            }
+            1 => {
+                win.set(PaintPage::MAP, Affine::translation(5.0, 0.0))
+                    .unwrap();
+            }
+            _ => {
+                win.set_property(
+                    target,
+                    crate::property::BACKGROUND,
+                    Contribution::Set(crate::Color::WHITE),
+                )
+                .unwrap();
+            }
+        }
+        let candidate = win.with_scene(|_, token| token).unwrap();
+        let value = match mode {
+            0 => crate::Color::WHITE,
+            1 => crate::Color::BLACK,
+            _ => crate::rgb(0x123456),
+        };
+        let commit = win.set(PaintPage::COLOR, value).unwrap();
+        assert_eq!(
+            win.with_scene(|_, token| token).unwrap(),
+            candidate,
+            "no new visual candidate needed"
+        );
+        assert_eq!(commit.prepared_epoch, Some(2));
+        assert_eq!(win.accessibility_state().unwrap(), base);
+        let next = if mode == 2 {
+            crate::rgb(0xabcdef)
+        } else {
+            crate::Color::BLACK
+        };
+        win.set(PaintPage::COLOR, next).unwrap();
+        let latest = win.with_scene(|_, token| token).unwrap();
+        let final_commit = win.set(PaintPage::COLOR, next).unwrap();
+        assert_eq!(win.with_scene(|_, token| token).unwrap(), latest);
+        assert_eq!(final_commit.prepared_epoch, Some(4));
+        win.presented(latest).unwrap();
+        apply(&win, base, &mut tree, Some(if mode == 1 { 2 } else { 0 }));
+        assert_eq!(win.focused().unwrap(), Some(target));
+    }
+}
+
+#[test]
+fn observer_enabled_after_full_candidate_never_invents_empty_paint_delta() {
+    for change in [false, true] {
+        let mut win = Win::recording(
+            PaintPage {
+                color: Signal::new(crate::Color::BLACK),
+                map: Signal::new(Affine::IDENTITY),
+            },
+            WindowOptions {
+                size: [120, 120],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        acknowledge(&mut win);
+        win.set(PaintPage::MAP, Affine::translation(5.0, 0.0))
+            .unwrap();
+        let base = win.accessibility_state().unwrap();
+        let mut tree = Tree::new(full(&win), true);
+        win.accessibility_observe(true).unwrap(); // C existed before observer.
+        win.set(
+            PaintPage::COLOR,
+            if change {
+                crate::Color::WHITE
+            } else {
+                crate::Color::BLACK
+            },
+        )
+        .unwrap();
+        acknowledge(&mut win);
+        apply(&win, base, &mut tree, None);
+    }
+}
