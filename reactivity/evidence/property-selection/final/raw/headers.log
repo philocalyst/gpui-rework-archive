@@ -1,0 +1,11 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-property-selection-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.38s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-812eb2da5cb24682)
+
+running 1 test
+test element::tests::property_method_items_keep_an_empty_capture_and_ordinary_headers ... property_action_headers,Handler=16,Admission=16,PropertyChange=48,OptionChange=48,PropertyPhase=40
+property_state_headers,State=80,Result=80,Request=48,OptionRequest=48,Phase=40,SelectionCapture=0
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 151 filtered out; finished in 0.00s
+
