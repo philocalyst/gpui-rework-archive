@@ -32,6 +32,8 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Accessibility transition descriptor](accessibility-transition-descriptor-luna.md) | Acknowledged sequence/epoch authority, active-only bounded deltas, metadata publication and full-tree fallbacks |
 | [Accessibility text and virtualization](accessibility-text-virtualization-luna.md) | Chromium/Compose/Qt comparisons, frozen row derivation, text offset contracts and focus across lost surfaces |
 | [Acknowledged text geometry](acknowledged-text-geometry-luna.md) | Exact P/C geometry, public/native queries, immutable details versus arena costs, transformed hit policies and late activation |
+| [Exact retained text compression](text-map-compression-luna.md) | Bit-exact stop reconstruction, measured-capacity controls and costed rank/template proposals |
+| [Intrinsic text work elimination](intrinsic-text-measure-luna.md) | Existing Parley metric scan, Cephal axis/run-mode authority and pre-break admission gates |
 | [Reader/cohort implementation seam](reader-cohort-implementation-luna.md) | Typed Library question, exact input-version admission, source replacement and bounded completion ownership; Salsa/Bevy/Adapton comparisons |
 | [Direct reactive style ports](style-ports-luna.md) | Proposed typed sink/fanout integration, numeric promotion, sparse override bases, packed destinations and exact publication/impact gates |
 | [Pointer/gesture authority](pointer-gesture-authority-luna.md) | Proposed shared native/test reducer, source and presentation stamps, origin/cancellation contracts and repeated hit work |

@@ -64,6 +64,12 @@ source/binary growth and tiny-label regressions; keep bit-exact producer width,
 signed-zero alias geometry, legal graphemes, source-affinity line ownership and
 provider retirement as invariant gates. Glyph/font payloads must remain outside
 historical geometry.
+The [compression audit](docs/text-map-compression-luna.md) prices source-domain
+rank planes and exact repeated-line templates after a bitwise compact-stop
+control. The [intrinsic measurement audit](docs/intrinsic-text-measure-luna.md)
+selects a possible existing Parley scalar metric scan, guarded by explicit
+Cephal axis/run-mode authority and unchanged glyph/error admission. Do not
+replace height-bearing measurement or infer MaxContent/full-width equivalence.
 
 Typed reflection must also support arbitrary inspector value entry and contained
 component/tool owners without mirroring application membership or bypassing
