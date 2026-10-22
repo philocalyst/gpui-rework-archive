@@ -21,6 +21,7 @@ nucleo-matcher = "=0.3.1"
 parley = { path = "../../vendor/parley" }
 parley_engine = { path = "../../vendor/parley_engine" }
 winit = { path = "../../vendor/winit" }
+wgpu = { path = "../../vendor/wgpu" }
 wgpu-hal = { path = "../../vendor/wgpu-hal" }
 softbuffer = { path = "../../vendor/softbuffer" }
 accesskit_unix = { path = "../../vendor/accesskit_unix" }
