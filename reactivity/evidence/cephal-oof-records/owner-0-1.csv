@@ -1,0 +1,4 @@
+count,stage,nanoseconds,retained_delta,total_requested,peak_new_bytes,allocations,nodes,draws,measure_calls
+1,mount,409039,14582,130010,60192,295,2,9,2
+1,render,551292,5252,5252,5252,3,2,9,2
+1,edit,181764,708,116796,47737,243,2,10,2
