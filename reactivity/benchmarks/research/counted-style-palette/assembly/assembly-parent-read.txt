@@ -1,0 +1,1068 @@
+
+/root/gpui-palette-phase/target-parent/release/deps/gpui-cbd3c7d919c25ad8:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000cb20d0 <gpui::runtime::style_ledger::palette_read_probe>:
+  cb20d0:	53                   	push   %rbx
+  cb20d1:	48 83 ec 10          	sub    $0x10,%rsp
+  cb20d5:	48 85 f6             	test   %rsi,%rsi
+  cb20d8:	74 41                	je     cb211b <gpui::runtime::style_ledger::palette_read_probe+0x4b>
+  cb20da:	48 89 f0             	mov    %rsi,%rax
+  cb20dd:	48 89 fa             	mov    %rdi,%rdx
+  cb20e0:	48 8b 0f             	mov    (%rdi),%rcx
+  cb20e3:	48 85 c9             	test   %rcx,%rcx
+  cb20e6:	74 3b                	je     cb2123 <gpui::runtime::style_ledger::palette_read_probe+0x53>
+  cb20e8:	48 8b 7a 18          	mov    0x18(%rdx),%rdi
+  cb20ec:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+  cb20f0:	83 f9 01             	cmp    $0x1,%ecx
+  cb20f3:	75 44                	jne    cb2139 <gpui::runtime::style_ledger::palette_read_probe+0x69>
+  cb20f5:	48 8d 50 ff          	lea    -0x1(%rax),%rdx
+  cb20f9:	48 39 fa             	cmp    %rdi,%rdx
+  cb20fc:	0f 83 70 0f 00 00    	jae    cb3072 <gpui::runtime::style_ledger::palette_read_probe+0xfa2>
+  cb2102:	89 c1                	mov    %eax,%ecx
+  cb2104:	83 e1 03             	and    $0x3,%ecx
+  cb2107:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb210b:	0f 83 3a 04 00 00    	jae    cb254b <gpui::runtime::style_ledger::palette_read_probe+0x47b>
+  cb2111:	31 ff                	xor    %edi,%edi
+  cb2113:	45 31 c0             	xor    %r8d,%r8d
+  cb2116:	e9 9d 04 00 00       	jmp    cb25b8 <gpui::runtime::style_ledger::palette_read_probe+0x4e8>
+  cb211b:	45 31 c0             	xor    %r8d,%r8d
+  cb211e:	e9 17 0f 00 00       	jmp    cb303a <gpui::runtime::style_ledger::palette_read_probe+0xf6a>
+  cb2123:	48 b9 00 00 00 18 04 	movabs $0x418000000,%rcx
+  cb212a:	00 00 00 
+  cb212d:	48 0f af c1          	imul   %rcx,%rax
+  cb2131:	49 89 c0             	mov    %rax,%r8
+  cb2134:	e9 01 0f 00 00       	jmp    cb303a <gpui::runtime::style_ledger::palette_read_probe+0xf6a>
+  cb2139:	48 8b 4a 20          	mov    0x20(%rdx),%rcx
+  cb213d:	48 8b 52 08          	mov    0x8(%rdx),%rdx
+  cb2141:	45 31 c9             	xor    %r9d,%r9d
+  cb2144:	45 31 d2             	xor    %r10d,%r10d
+  cb2147:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+  cb214e:	00 00 
+  cb2150:	4c 39 d1             	cmp    %r10,%rcx
+  cb2153:	0f 84 f6 0e 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2159:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb215e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2161:	0f 86 fb 0e 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2167:	49 ff c2             	inc    %r10
+  cb216a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb216e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2173:	4c 89 cb             	mov    %r9,%rbx
+  cb2176:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb217b:	4c 01 db             	add    %r11,%rbx
+  cb217e:	49 01 d9             	add    %rbx,%r9
+  cb2181:	4c 39 d0             	cmp    %r10,%rax
+  cb2184:	75 ca                	jne    cb2150 <gpui::runtime::style_ledger::palette_read_probe+0x80>
+  cb2186:	45 31 d2             	xor    %r10d,%r10d
+  cb2189:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2190:	4c 39 d1             	cmp    %r10,%rcx
+  cb2193:	0f 84 b6 0e 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2199:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb219e:	4c 39 c6             	cmp    %r8,%rsi
+  cb21a1:	0f 86 bb 0e 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb21a7:	49 ff c2             	inc    %r10
+  cb21aa:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb21ae:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb21b3:	4c 89 cb             	mov    %r9,%rbx
+  cb21b6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb21bb:	4c 01 db             	add    %r11,%rbx
+  cb21be:	49 01 d9             	add    %rbx,%r9
+  cb21c1:	4c 39 d0             	cmp    %r10,%rax
+  cb21c4:	75 ca                	jne    cb2190 <gpui::runtime::style_ledger::palette_read_probe+0xc0>
+  cb21c6:	45 31 d2             	xor    %r10d,%r10d
+  cb21c9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb21d0:	4c 39 d1             	cmp    %r10,%rcx
+  cb21d3:	0f 84 76 0e 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb21d9:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb21de:	4c 39 c6             	cmp    %r8,%rsi
+  cb21e1:	0f 86 7b 0e 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb21e7:	49 ff c2             	inc    %r10
+  cb21ea:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb21ee:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb21f3:	4c 89 cb             	mov    %r9,%rbx
+  cb21f6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb21fb:	4c 01 db             	add    %r11,%rbx
+  cb21fe:	49 01 d9             	add    %rbx,%r9
+  cb2201:	4c 39 d0             	cmp    %r10,%rax
+  cb2204:	75 ca                	jne    cb21d0 <gpui::runtime::style_ledger::palette_read_probe+0x100>
+  cb2206:	45 31 d2             	xor    %r10d,%r10d
+  cb2209:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2210:	4c 39 d1             	cmp    %r10,%rcx
+  cb2213:	0f 84 36 0e 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2219:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb221e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2221:	0f 86 3b 0e 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2227:	49 ff c2             	inc    %r10
+  cb222a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb222e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2233:	4c 89 cb             	mov    %r9,%rbx
+  cb2236:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb223b:	4c 01 db             	add    %r11,%rbx
+  cb223e:	49 01 d9             	add    %rbx,%r9
+  cb2241:	4c 39 d0             	cmp    %r10,%rax
+  cb2244:	75 ca                	jne    cb2210 <gpui::runtime::style_ledger::palette_read_probe+0x140>
+  cb2246:	45 31 d2             	xor    %r10d,%r10d
+  cb2249:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2250:	4c 39 d1             	cmp    %r10,%rcx
+  cb2253:	0f 84 f6 0d 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2259:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb225e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2261:	0f 86 fb 0d 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2267:	49 ff c2             	inc    %r10
+  cb226a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb226e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2273:	4c 89 cb             	mov    %r9,%rbx
+  cb2276:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb227b:	4c 01 db             	add    %r11,%rbx
+  cb227e:	49 01 d9             	add    %rbx,%r9
+  cb2281:	4c 39 d0             	cmp    %r10,%rax
+  cb2284:	75 ca                	jne    cb2250 <gpui::runtime::style_ledger::palette_read_probe+0x180>
+  cb2286:	45 31 d2             	xor    %r10d,%r10d
+  cb2289:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2290:	4c 39 d1             	cmp    %r10,%rcx
+  cb2293:	0f 84 b6 0d 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2299:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb229e:	4c 39 c6             	cmp    %r8,%rsi
+  cb22a1:	0f 86 bb 0d 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb22a7:	49 ff c2             	inc    %r10
+  cb22aa:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb22ae:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb22b3:	4c 89 cb             	mov    %r9,%rbx
+  cb22b6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb22bb:	4c 01 db             	add    %r11,%rbx
+  cb22be:	49 01 d9             	add    %rbx,%r9
+  cb22c1:	4c 39 d0             	cmp    %r10,%rax
+  cb22c4:	75 ca                	jne    cb2290 <gpui::runtime::style_ledger::palette_read_probe+0x1c0>
+  cb22c6:	45 31 d2             	xor    %r10d,%r10d
+  cb22c9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb22d0:	4c 39 d1             	cmp    %r10,%rcx
+  cb22d3:	0f 84 76 0d 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb22d9:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb22de:	4c 39 c6             	cmp    %r8,%rsi
+  cb22e1:	0f 86 7b 0d 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb22e7:	49 ff c2             	inc    %r10
+  cb22ea:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb22ee:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb22f3:	4c 89 cb             	mov    %r9,%rbx
+  cb22f6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb22fb:	4c 01 db             	add    %r11,%rbx
+  cb22fe:	49 01 d9             	add    %rbx,%r9
+  cb2301:	4c 39 d0             	cmp    %r10,%rax
+  cb2304:	75 ca                	jne    cb22d0 <gpui::runtime::style_ledger::palette_read_probe+0x200>
+  cb2306:	45 31 d2             	xor    %r10d,%r10d
+  cb2309:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2310:	4c 39 d1             	cmp    %r10,%rcx
+  cb2313:	0f 84 36 0d 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2319:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb231e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2321:	0f 86 3b 0d 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2327:	49 ff c2             	inc    %r10
+  cb232a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb232e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2333:	4c 89 cb             	mov    %r9,%rbx
+  cb2336:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb233b:	4c 01 db             	add    %r11,%rbx
+  cb233e:	49 01 d9             	add    %rbx,%r9
+  cb2341:	4c 39 d0             	cmp    %r10,%rax
+  cb2344:	75 ca                	jne    cb2310 <gpui::runtime::style_ledger::palette_read_probe+0x240>
+  cb2346:	45 31 d2             	xor    %r10d,%r10d
+  cb2349:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2350:	4c 39 d1             	cmp    %r10,%rcx
+  cb2353:	0f 84 f6 0c 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2359:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb235e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2361:	0f 86 fb 0c 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2367:	49 ff c2             	inc    %r10
+  cb236a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb236e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2373:	4c 89 cb             	mov    %r9,%rbx
+  cb2376:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb237b:	4c 01 db             	add    %r11,%rbx
+  cb237e:	49 01 d9             	add    %rbx,%r9
+  cb2381:	4c 39 d0             	cmp    %r10,%rax
+  cb2384:	75 ca                	jne    cb2350 <gpui::runtime::style_ledger::palette_read_probe+0x280>
+  cb2386:	45 31 d2             	xor    %r10d,%r10d
+  cb2389:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2390:	4c 39 d1             	cmp    %r10,%rcx
+  cb2393:	0f 84 b6 0c 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2399:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb239e:	4c 39 c6             	cmp    %r8,%rsi
+  cb23a1:	0f 86 bb 0c 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb23a7:	49 ff c2             	inc    %r10
+  cb23aa:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb23ae:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb23b3:	4c 89 cb             	mov    %r9,%rbx
+  cb23b6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb23bb:	4c 01 db             	add    %r11,%rbx
+  cb23be:	49 01 d9             	add    %rbx,%r9
+  cb23c1:	4c 39 d0             	cmp    %r10,%rax
+  cb23c4:	75 ca                	jne    cb2390 <gpui::runtime::style_ledger::palette_read_probe+0x2c0>
+  cb23c6:	45 31 d2             	xor    %r10d,%r10d
+  cb23c9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb23d0:	4c 39 d1             	cmp    %r10,%rcx
+  cb23d3:	0f 84 76 0c 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb23d9:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb23de:	4c 39 c6             	cmp    %r8,%rsi
+  cb23e1:	0f 86 7b 0c 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb23e7:	49 ff c2             	inc    %r10
+  cb23ea:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb23ee:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb23f3:	4c 89 cb             	mov    %r9,%rbx
+  cb23f6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb23fb:	4c 01 db             	add    %r11,%rbx
+  cb23fe:	49 01 d9             	add    %rbx,%r9
+  cb2401:	4c 39 d0             	cmp    %r10,%rax
+  cb2404:	75 ca                	jne    cb23d0 <gpui::runtime::style_ledger::palette_read_probe+0x300>
+  cb2406:	45 31 d2             	xor    %r10d,%r10d
+  cb2409:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2410:	4c 39 d1             	cmp    %r10,%rcx
+  cb2413:	0f 84 36 0c 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2419:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb241e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2421:	0f 86 3b 0c 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2427:	49 ff c2             	inc    %r10
+  cb242a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb242e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2433:	4c 89 cb             	mov    %r9,%rbx
+  cb2436:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb243b:	4c 01 db             	add    %r11,%rbx
+  cb243e:	49 01 d9             	add    %rbx,%r9
+  cb2441:	4c 39 d0             	cmp    %r10,%rax
+  cb2444:	75 ca                	jne    cb2410 <gpui::runtime::style_ledger::palette_read_probe+0x340>
+  cb2446:	45 31 d2             	xor    %r10d,%r10d
+  cb2449:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2450:	4c 39 d1             	cmp    %r10,%rcx
+  cb2453:	0f 84 f6 0b 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2459:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb245e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2461:	0f 86 fb 0b 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2467:	49 ff c2             	inc    %r10
+  cb246a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb246e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2473:	4c 89 cb             	mov    %r9,%rbx
+  cb2476:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb247b:	4c 01 db             	add    %r11,%rbx
+  cb247e:	49 01 d9             	add    %rbx,%r9
+  cb2481:	4c 39 d0             	cmp    %r10,%rax
+  cb2484:	75 ca                	jne    cb2450 <gpui::runtime::style_ledger::palette_read_probe+0x380>
+  cb2486:	45 31 d2             	xor    %r10d,%r10d
+  cb2489:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2490:	4c 39 d1             	cmp    %r10,%rcx
+  cb2493:	0f 84 b6 0b 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2499:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb249e:	4c 39 c6             	cmp    %r8,%rsi
+  cb24a1:	0f 86 bb 0b 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb24a7:	49 ff c2             	inc    %r10
+  cb24aa:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb24ae:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb24b3:	4c 89 cb             	mov    %r9,%rbx
+  cb24b6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb24bb:	4c 01 db             	add    %r11,%rbx
+  cb24be:	49 01 d9             	add    %rbx,%r9
+  cb24c1:	4c 39 d0             	cmp    %r10,%rax
+  cb24c4:	75 ca                	jne    cb2490 <gpui::runtime::style_ledger::palette_read_probe+0x3c0>
+  cb24c6:	45 31 d2             	xor    %r10d,%r10d
+  cb24c9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb24d0:	4c 39 d1             	cmp    %r10,%rcx
+  cb24d3:	0f 84 76 0b 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb24d9:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb24de:	4c 39 c6             	cmp    %r8,%rsi
+  cb24e1:	0f 86 7b 0b 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb24e7:	49 ff c2             	inc    %r10
+  cb24ea:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb24ee:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb24f3:	4c 89 cb             	mov    %r9,%rbx
+  cb24f6:	46 8b 4c 02 18       	mov    0x18(%rdx,%r8,1),%r9d
+  cb24fb:	4c 01 db             	add    %r11,%rbx
+  cb24fe:	49 01 d9             	add    %rbx,%r9
+  cb2501:	4c 39 d0             	cmp    %r10,%rax
+  cb2504:	75 ca                	jne    cb24d0 <gpui::runtime::style_ledger::palette_read_probe+0x400>
+  cb2506:	45 31 d2             	xor    %r10d,%r10d
+  cb2509:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  cb2510:	4c 39 d1             	cmp    %r10,%rcx
+  cb2513:	0f 84 36 0b 00 00    	je     cb304f <gpui::runtime::style_ledger::palette_read_probe+0xf7f>
+  cb2519:	46 0f b6 04 17       	movzbl (%rdi,%r10,1),%r8d
+  cb251e:	4c 39 c6             	cmp    %r8,%rsi
+  cb2521:	0f 86 3b 0b 00 00    	jbe    cb3062 <gpui::runtime::style_ledger::palette_read_probe+0xf92>
+  cb2527:	49 ff c2             	inc    %r10
+  cb252a:	4d 6b c0 58          	imul   $0x58,%r8,%r8
+  cb252e:	46 8b 5c 02 10       	mov    0x10(%rdx,%r8,1),%r11d
+  cb2533:	46 8b 44 02 18       	mov    0x18(%rdx,%r8,1),%r8d
+  cb2538:	4d 01 d9             	add    %r11,%r9
+  cb253b:	4d 01 c8             	add    %r9,%r8
+  cb253e:	4d 89 c1             	mov    %r8,%r9
+  cb2541:	4c 39 d0             	cmp    %r10,%rax
+  cb2544:	75 ca                	jne    cb2510 <gpui::runtime::style_ledger::palette_read_probe+0x440>
+  cb2546:	e9 ef 0a 00 00       	jmp    cb303a <gpui::runtime::style_ledger::palette_read_probe+0xf6a>
+  cb254b:	49 89 c1             	mov    %rax,%r9
+  cb254e:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2552:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2559:	31 ff                	xor    %edi,%edi
+  cb255b:	45 31 c0             	xor    %r8d,%r8d
+  cb255e:	66 90                	xchg   %ax,%ax
+  cb2560:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2567:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb256e:	4d 01 c3             	add    %r8,%r11
+  cb2571:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2578:	49 01 d8             	add    %rbx,%r8
+  cb257b:	4d 01 d8             	add    %r11,%r8
+  cb257e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2585:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2589:	4c 01 db             	add    %r11,%rbx
+  cb258c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2590:	49 01 db             	add    %rbx,%r11
+  cb2593:	4d 01 c3             	add    %r8,%r11
+  cb2596:	48 83 c7 04          	add    $0x4,%rdi
+  cb259a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb259e:	45 8b 02             	mov    (%r10),%r8d
+  cb25a1:	49 01 d8             	add    %rbx,%r8
+  cb25a4:	4d 01 d8             	add    %r11,%r8
+  cb25a7:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb25ae:	49 39 f9             	cmp    %rdi,%r9
+  cb25b1:	75 ad                	jne    cb2560 <gpui::runtime::style_ledger::palette_read_probe+0x490>
+  cb25b3:	48 85 c9             	test   %rcx,%rcx
+  cb25b6:	74 33                	je     cb25eb <gpui::runtime::style_ledger::palette_read_probe+0x51b>
+  cb25b8:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb25bc:	48 01 f7             	add    %rsi,%rdi
+  cb25bf:	48 83 c7 18          	add    $0x18,%rdi
+  cb25c3:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb25c7:	45 31 d2             	xor    %r10d,%r10d
+  cb25ca:	4d 89 c3             	mov    %r8,%r11
+  cb25cd:	0f 1f 00             	nopl   (%rax)
+  cb25d0:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb25d5:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb25d9:	4c 01 db             	add    %r11,%rbx
+  cb25dc:	49 01 d8             	add    %rbx,%r8
+  cb25df:	49 83 c2 58          	add    $0x58,%r10
+  cb25e3:	4d 89 c3             	mov    %r8,%r11
+  cb25e6:	4d 39 d1             	cmp    %r10,%r9
+  cb25e9:	75 e5                	jne    cb25d0 <gpui::runtime::style_ledger::palette_read_probe+0x500>
+  cb25eb:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb25ef:	73 04                	jae    cb25f5 <gpui::runtime::style_ledger::palette_read_probe+0x525>
+  cb25f1:	31 ff                	xor    %edi,%edi
+  cb25f3:	eb 72                	jmp    cb2667 <gpui::runtime::style_ledger::palette_read_probe+0x597>
+  cb25f5:	49 89 c1             	mov    %rax,%r9
+  cb25f8:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb25fc:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2603:	31 ff                	xor    %edi,%edi
+  cb2605:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb260c:	00 00 00 00 
+  cb2610:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2617:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb261e:	4d 01 c3             	add    %r8,%r11
+  cb2621:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2628:	49 01 d8             	add    %rbx,%r8
+  cb262b:	4d 01 d8             	add    %r11,%r8
+  cb262e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2635:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2639:	4c 01 db             	add    %r11,%rbx
+  cb263c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2640:	49 01 db             	add    %rbx,%r11
+  cb2643:	4d 01 c3             	add    %r8,%r11
+  cb2646:	48 83 c7 04          	add    $0x4,%rdi
+  cb264a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb264e:	45 8b 02             	mov    (%r10),%r8d
+  cb2651:	49 01 d8             	add    %rbx,%r8
+  cb2654:	4d 01 d8             	add    %r11,%r8
+  cb2657:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb265e:	49 39 f9             	cmp    %rdi,%r9
+  cb2661:	75 ad                	jne    cb2610 <gpui::runtime::style_ledger::palette_read_probe+0x540>
+  cb2663:	a8 03                	test   $0x3,%al
+  cb2665:	74 34                	je     cb269b <gpui::runtime::style_ledger::palette_read_probe+0x5cb>
+  cb2667:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb266b:	48 01 f7             	add    %rsi,%rdi
+  cb266e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2672:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2676:	45 31 d2             	xor    %r10d,%r10d
+  cb2679:	4d 89 c3             	mov    %r8,%r11
+  cb267c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2680:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2685:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2689:	4c 01 db             	add    %r11,%rbx
+  cb268c:	49 01 d8             	add    %rbx,%r8
+  cb268f:	49 83 c2 58          	add    $0x58,%r10
+  cb2693:	4d 89 c3             	mov    %r8,%r11
+  cb2696:	4d 39 d1             	cmp    %r10,%r9
+  cb2699:	75 e5                	jne    cb2680 <gpui::runtime::style_ledger::palette_read_probe+0x5b0>
+  cb269b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb269f:	73 04                	jae    cb26a5 <gpui::runtime::style_ledger::palette_read_probe+0x5d5>
+  cb26a1:	31 ff                	xor    %edi,%edi
+  cb26a3:	eb 72                	jmp    cb2717 <gpui::runtime::style_ledger::palette_read_probe+0x647>
+  cb26a5:	49 89 c1             	mov    %rax,%r9
+  cb26a8:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb26ac:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb26b3:	31 ff                	xor    %edi,%edi
+  cb26b5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb26bc:	00 00 00 00 
+  cb26c0:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb26c7:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb26ce:	4d 01 c3             	add    %r8,%r11
+  cb26d1:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb26d8:	49 01 d8             	add    %rbx,%r8
+  cb26db:	4d 01 d8             	add    %r11,%r8
+  cb26de:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb26e5:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb26e9:	4c 01 db             	add    %r11,%rbx
+  cb26ec:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb26f0:	49 01 db             	add    %rbx,%r11
+  cb26f3:	4d 01 c3             	add    %r8,%r11
+  cb26f6:	48 83 c7 04          	add    $0x4,%rdi
+  cb26fa:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb26fe:	45 8b 02             	mov    (%r10),%r8d
+  cb2701:	49 01 d8             	add    %rbx,%r8
+  cb2704:	4d 01 d8             	add    %r11,%r8
+  cb2707:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb270e:	49 39 f9             	cmp    %rdi,%r9
+  cb2711:	75 ad                	jne    cb26c0 <gpui::runtime::style_ledger::palette_read_probe+0x5f0>
+  cb2713:	a8 03                	test   $0x3,%al
+  cb2715:	74 34                	je     cb274b <gpui::runtime::style_ledger::palette_read_probe+0x67b>
+  cb2717:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb271b:	48 01 f7             	add    %rsi,%rdi
+  cb271e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2722:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2726:	45 31 d2             	xor    %r10d,%r10d
+  cb2729:	4d 89 c3             	mov    %r8,%r11
+  cb272c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2730:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2735:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2739:	4c 01 db             	add    %r11,%rbx
+  cb273c:	49 01 d8             	add    %rbx,%r8
+  cb273f:	49 83 c2 58          	add    $0x58,%r10
+  cb2743:	4d 89 c3             	mov    %r8,%r11
+  cb2746:	4d 39 d1             	cmp    %r10,%r9
+  cb2749:	75 e5                	jne    cb2730 <gpui::runtime::style_ledger::palette_read_probe+0x660>
+  cb274b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb274f:	73 04                	jae    cb2755 <gpui::runtime::style_ledger::palette_read_probe+0x685>
+  cb2751:	31 ff                	xor    %edi,%edi
+  cb2753:	eb 72                	jmp    cb27c7 <gpui::runtime::style_ledger::palette_read_probe+0x6f7>
+  cb2755:	49 89 c1             	mov    %rax,%r9
+  cb2758:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb275c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2763:	31 ff                	xor    %edi,%edi
+  cb2765:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb276c:	00 00 00 00 
+  cb2770:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2777:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb277e:	4d 01 c3             	add    %r8,%r11
+  cb2781:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2788:	49 01 d8             	add    %rbx,%r8
+  cb278b:	4d 01 d8             	add    %r11,%r8
+  cb278e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2795:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2799:	4c 01 db             	add    %r11,%rbx
+  cb279c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb27a0:	49 01 db             	add    %rbx,%r11
+  cb27a3:	4d 01 c3             	add    %r8,%r11
+  cb27a6:	48 83 c7 04          	add    $0x4,%rdi
+  cb27aa:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb27ae:	45 8b 02             	mov    (%r10),%r8d
+  cb27b1:	49 01 d8             	add    %rbx,%r8
+  cb27b4:	4d 01 d8             	add    %r11,%r8
+  cb27b7:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb27be:	49 39 f9             	cmp    %rdi,%r9
+  cb27c1:	75 ad                	jne    cb2770 <gpui::runtime::style_ledger::palette_read_probe+0x6a0>
+  cb27c3:	a8 03                	test   $0x3,%al
+  cb27c5:	74 34                	je     cb27fb <gpui::runtime::style_ledger::palette_read_probe+0x72b>
+  cb27c7:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb27cb:	48 01 f7             	add    %rsi,%rdi
+  cb27ce:	48 83 c7 18          	add    $0x18,%rdi
+  cb27d2:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb27d6:	45 31 d2             	xor    %r10d,%r10d
+  cb27d9:	4d 89 c3             	mov    %r8,%r11
+  cb27dc:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb27e0:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb27e5:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb27e9:	4c 01 db             	add    %r11,%rbx
+  cb27ec:	49 01 d8             	add    %rbx,%r8
+  cb27ef:	49 83 c2 58          	add    $0x58,%r10
+  cb27f3:	4d 89 c3             	mov    %r8,%r11
+  cb27f6:	4d 39 d1             	cmp    %r10,%r9
+  cb27f9:	75 e5                	jne    cb27e0 <gpui::runtime::style_ledger::palette_read_probe+0x710>
+  cb27fb:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb27ff:	73 04                	jae    cb2805 <gpui::runtime::style_ledger::palette_read_probe+0x735>
+  cb2801:	31 ff                	xor    %edi,%edi
+  cb2803:	eb 72                	jmp    cb2877 <gpui::runtime::style_ledger::palette_read_probe+0x7a7>
+  cb2805:	49 89 c1             	mov    %rax,%r9
+  cb2808:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb280c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2813:	31 ff                	xor    %edi,%edi
+  cb2815:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb281c:	00 00 00 00 
+  cb2820:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2827:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb282e:	4d 01 c3             	add    %r8,%r11
+  cb2831:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2838:	49 01 d8             	add    %rbx,%r8
+  cb283b:	4d 01 d8             	add    %r11,%r8
+  cb283e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2845:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2849:	4c 01 db             	add    %r11,%rbx
+  cb284c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2850:	49 01 db             	add    %rbx,%r11
+  cb2853:	4d 01 c3             	add    %r8,%r11
+  cb2856:	48 83 c7 04          	add    $0x4,%rdi
+  cb285a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb285e:	45 8b 02             	mov    (%r10),%r8d
+  cb2861:	49 01 d8             	add    %rbx,%r8
+  cb2864:	4d 01 d8             	add    %r11,%r8
+  cb2867:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb286e:	49 39 f9             	cmp    %rdi,%r9
+  cb2871:	75 ad                	jne    cb2820 <gpui::runtime::style_ledger::palette_read_probe+0x750>
+  cb2873:	a8 03                	test   $0x3,%al
+  cb2875:	74 34                	je     cb28ab <gpui::runtime::style_ledger::palette_read_probe+0x7db>
+  cb2877:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb287b:	48 01 f7             	add    %rsi,%rdi
+  cb287e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2882:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2886:	45 31 d2             	xor    %r10d,%r10d
+  cb2889:	4d 89 c3             	mov    %r8,%r11
+  cb288c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2890:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2895:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2899:	4c 01 db             	add    %r11,%rbx
+  cb289c:	49 01 d8             	add    %rbx,%r8
+  cb289f:	49 83 c2 58          	add    $0x58,%r10
+  cb28a3:	4d 89 c3             	mov    %r8,%r11
+  cb28a6:	4d 39 d1             	cmp    %r10,%r9
+  cb28a9:	75 e5                	jne    cb2890 <gpui::runtime::style_ledger::palette_read_probe+0x7c0>
+  cb28ab:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb28af:	73 04                	jae    cb28b5 <gpui::runtime::style_ledger::palette_read_probe+0x7e5>
+  cb28b1:	31 ff                	xor    %edi,%edi
+  cb28b3:	eb 72                	jmp    cb2927 <gpui::runtime::style_ledger::palette_read_probe+0x857>
+  cb28b5:	49 89 c1             	mov    %rax,%r9
+  cb28b8:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb28bc:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb28c3:	31 ff                	xor    %edi,%edi
+  cb28c5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb28cc:	00 00 00 00 
+  cb28d0:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb28d7:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb28de:	4d 01 c3             	add    %r8,%r11
+  cb28e1:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb28e8:	49 01 d8             	add    %rbx,%r8
+  cb28eb:	4d 01 d8             	add    %r11,%r8
+  cb28ee:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb28f5:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb28f9:	4c 01 db             	add    %r11,%rbx
+  cb28fc:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2900:	49 01 db             	add    %rbx,%r11
+  cb2903:	4d 01 c3             	add    %r8,%r11
+  cb2906:	48 83 c7 04          	add    $0x4,%rdi
+  cb290a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb290e:	45 8b 02             	mov    (%r10),%r8d
+  cb2911:	49 01 d8             	add    %rbx,%r8
+  cb2914:	4d 01 d8             	add    %r11,%r8
+  cb2917:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb291e:	49 39 f9             	cmp    %rdi,%r9
+  cb2921:	75 ad                	jne    cb28d0 <gpui::runtime::style_ledger::palette_read_probe+0x800>
+  cb2923:	a8 03                	test   $0x3,%al
+  cb2925:	74 34                	je     cb295b <gpui::runtime::style_ledger::palette_read_probe+0x88b>
+  cb2927:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb292b:	48 01 f7             	add    %rsi,%rdi
+  cb292e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2932:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2936:	45 31 d2             	xor    %r10d,%r10d
+  cb2939:	4d 89 c3             	mov    %r8,%r11
+  cb293c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2940:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2945:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2949:	4c 01 db             	add    %r11,%rbx
+  cb294c:	49 01 d8             	add    %rbx,%r8
+  cb294f:	49 83 c2 58          	add    $0x58,%r10
+  cb2953:	4d 89 c3             	mov    %r8,%r11
+  cb2956:	4d 39 d1             	cmp    %r10,%r9
+  cb2959:	75 e5                	jne    cb2940 <gpui::runtime::style_ledger::palette_read_probe+0x870>
+  cb295b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb295f:	73 04                	jae    cb2965 <gpui::runtime::style_ledger::palette_read_probe+0x895>
+  cb2961:	31 ff                	xor    %edi,%edi
+  cb2963:	eb 72                	jmp    cb29d7 <gpui::runtime::style_ledger::palette_read_probe+0x907>
+  cb2965:	49 89 c1             	mov    %rax,%r9
+  cb2968:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb296c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2973:	31 ff                	xor    %edi,%edi
+  cb2975:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb297c:	00 00 00 00 
+  cb2980:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2987:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb298e:	4d 01 c3             	add    %r8,%r11
+  cb2991:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2998:	49 01 d8             	add    %rbx,%r8
+  cb299b:	4d 01 d8             	add    %r11,%r8
+  cb299e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb29a5:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb29a9:	4c 01 db             	add    %r11,%rbx
+  cb29ac:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb29b0:	49 01 db             	add    %rbx,%r11
+  cb29b3:	4d 01 c3             	add    %r8,%r11
+  cb29b6:	48 83 c7 04          	add    $0x4,%rdi
+  cb29ba:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb29be:	45 8b 02             	mov    (%r10),%r8d
+  cb29c1:	49 01 d8             	add    %rbx,%r8
+  cb29c4:	4d 01 d8             	add    %r11,%r8
+  cb29c7:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb29ce:	49 39 f9             	cmp    %rdi,%r9
+  cb29d1:	75 ad                	jne    cb2980 <gpui::runtime::style_ledger::palette_read_probe+0x8b0>
+  cb29d3:	a8 03                	test   $0x3,%al
+  cb29d5:	74 34                	je     cb2a0b <gpui::runtime::style_ledger::palette_read_probe+0x93b>
+  cb29d7:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb29db:	48 01 f7             	add    %rsi,%rdi
+  cb29de:	48 83 c7 18          	add    $0x18,%rdi
+  cb29e2:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb29e6:	45 31 d2             	xor    %r10d,%r10d
+  cb29e9:	4d 89 c3             	mov    %r8,%r11
+  cb29ec:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb29f0:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb29f5:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb29f9:	4c 01 db             	add    %r11,%rbx
+  cb29fc:	49 01 d8             	add    %rbx,%r8
+  cb29ff:	49 83 c2 58          	add    $0x58,%r10
+  cb2a03:	4d 89 c3             	mov    %r8,%r11
+  cb2a06:	4d 39 d1             	cmp    %r10,%r9
+  cb2a09:	75 e5                	jne    cb29f0 <gpui::runtime::style_ledger::palette_read_probe+0x920>
+  cb2a0b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2a0f:	73 04                	jae    cb2a15 <gpui::runtime::style_ledger::palette_read_probe+0x945>
+  cb2a11:	31 ff                	xor    %edi,%edi
+  cb2a13:	eb 72                	jmp    cb2a87 <gpui::runtime::style_ledger::palette_read_probe+0x9b7>
+  cb2a15:	49 89 c1             	mov    %rax,%r9
+  cb2a18:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2a1c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2a23:	31 ff                	xor    %edi,%edi
+  cb2a25:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2a2c:	00 00 00 00 
+  cb2a30:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2a37:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2a3e:	4d 01 c3             	add    %r8,%r11
+  cb2a41:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2a48:	49 01 d8             	add    %rbx,%r8
+  cb2a4b:	4d 01 d8             	add    %r11,%r8
+  cb2a4e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2a55:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2a59:	4c 01 db             	add    %r11,%rbx
+  cb2a5c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2a60:	49 01 db             	add    %rbx,%r11
+  cb2a63:	4d 01 c3             	add    %r8,%r11
+  cb2a66:	48 83 c7 04          	add    $0x4,%rdi
+  cb2a6a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2a6e:	45 8b 02             	mov    (%r10),%r8d
+  cb2a71:	49 01 d8             	add    %rbx,%r8
+  cb2a74:	4d 01 d8             	add    %r11,%r8
+  cb2a77:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2a7e:	49 39 f9             	cmp    %rdi,%r9
+  cb2a81:	75 ad                	jne    cb2a30 <gpui::runtime::style_ledger::palette_read_probe+0x960>
+  cb2a83:	a8 03                	test   $0x3,%al
+  cb2a85:	74 34                	je     cb2abb <gpui::runtime::style_ledger::palette_read_probe+0x9eb>
+  cb2a87:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2a8b:	48 01 f7             	add    %rsi,%rdi
+  cb2a8e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2a92:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2a96:	45 31 d2             	xor    %r10d,%r10d
+  cb2a99:	4d 89 c3             	mov    %r8,%r11
+  cb2a9c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2aa0:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2aa5:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2aa9:	4c 01 db             	add    %r11,%rbx
+  cb2aac:	49 01 d8             	add    %rbx,%r8
+  cb2aaf:	49 83 c2 58          	add    $0x58,%r10
+  cb2ab3:	4d 89 c3             	mov    %r8,%r11
+  cb2ab6:	4d 39 d1             	cmp    %r10,%r9
+  cb2ab9:	75 e5                	jne    cb2aa0 <gpui::runtime::style_ledger::palette_read_probe+0x9d0>
+  cb2abb:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2abf:	73 04                	jae    cb2ac5 <gpui::runtime::style_ledger::palette_read_probe+0x9f5>
+  cb2ac1:	31 ff                	xor    %edi,%edi
+  cb2ac3:	eb 72                	jmp    cb2b37 <gpui::runtime::style_ledger::palette_read_probe+0xa67>
+  cb2ac5:	49 89 c1             	mov    %rax,%r9
+  cb2ac8:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2acc:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2ad3:	31 ff                	xor    %edi,%edi
+  cb2ad5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2adc:	00 00 00 00 
+  cb2ae0:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2ae7:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2aee:	4d 01 c3             	add    %r8,%r11
+  cb2af1:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2af8:	49 01 d8             	add    %rbx,%r8
+  cb2afb:	4d 01 d8             	add    %r11,%r8
+  cb2afe:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2b05:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2b09:	4c 01 db             	add    %r11,%rbx
+  cb2b0c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2b10:	49 01 db             	add    %rbx,%r11
+  cb2b13:	4d 01 c3             	add    %r8,%r11
+  cb2b16:	48 83 c7 04          	add    $0x4,%rdi
+  cb2b1a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2b1e:	45 8b 02             	mov    (%r10),%r8d
+  cb2b21:	49 01 d8             	add    %rbx,%r8
+  cb2b24:	4d 01 d8             	add    %r11,%r8
+  cb2b27:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2b2e:	49 39 f9             	cmp    %rdi,%r9
+  cb2b31:	75 ad                	jne    cb2ae0 <gpui::runtime::style_ledger::palette_read_probe+0xa10>
+  cb2b33:	a8 03                	test   $0x3,%al
+  cb2b35:	74 34                	je     cb2b6b <gpui::runtime::style_ledger::palette_read_probe+0xa9b>
+  cb2b37:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2b3b:	48 01 f7             	add    %rsi,%rdi
+  cb2b3e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2b42:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2b46:	45 31 d2             	xor    %r10d,%r10d
+  cb2b49:	4d 89 c3             	mov    %r8,%r11
+  cb2b4c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2b50:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2b55:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2b59:	4c 01 db             	add    %r11,%rbx
+  cb2b5c:	49 01 d8             	add    %rbx,%r8
+  cb2b5f:	49 83 c2 58          	add    $0x58,%r10
+  cb2b63:	4d 89 c3             	mov    %r8,%r11
+  cb2b66:	4d 39 d1             	cmp    %r10,%r9
+  cb2b69:	75 e5                	jne    cb2b50 <gpui::runtime::style_ledger::palette_read_probe+0xa80>
+  cb2b6b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2b6f:	73 04                	jae    cb2b75 <gpui::runtime::style_ledger::palette_read_probe+0xaa5>
+  cb2b71:	31 ff                	xor    %edi,%edi
+  cb2b73:	eb 72                	jmp    cb2be7 <gpui::runtime::style_ledger::palette_read_probe+0xb17>
+  cb2b75:	49 89 c1             	mov    %rax,%r9
+  cb2b78:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2b7c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2b83:	31 ff                	xor    %edi,%edi
+  cb2b85:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2b8c:	00 00 00 00 
+  cb2b90:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2b97:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2b9e:	4d 01 c3             	add    %r8,%r11
+  cb2ba1:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2ba8:	49 01 d8             	add    %rbx,%r8
+  cb2bab:	4d 01 d8             	add    %r11,%r8
+  cb2bae:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2bb5:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2bb9:	4c 01 db             	add    %r11,%rbx
+  cb2bbc:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2bc0:	49 01 db             	add    %rbx,%r11
+  cb2bc3:	4d 01 c3             	add    %r8,%r11
+  cb2bc6:	48 83 c7 04          	add    $0x4,%rdi
+  cb2bca:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2bce:	45 8b 02             	mov    (%r10),%r8d
+  cb2bd1:	49 01 d8             	add    %rbx,%r8
+  cb2bd4:	4d 01 d8             	add    %r11,%r8
+  cb2bd7:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2bde:	49 39 f9             	cmp    %rdi,%r9
+  cb2be1:	75 ad                	jne    cb2b90 <gpui::runtime::style_ledger::palette_read_probe+0xac0>
+  cb2be3:	a8 03                	test   $0x3,%al
+  cb2be5:	74 34                	je     cb2c1b <gpui::runtime::style_ledger::palette_read_probe+0xb4b>
+  cb2be7:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2beb:	48 01 f7             	add    %rsi,%rdi
+  cb2bee:	48 83 c7 18          	add    $0x18,%rdi
+  cb2bf2:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2bf6:	45 31 d2             	xor    %r10d,%r10d
+  cb2bf9:	4d 89 c3             	mov    %r8,%r11
+  cb2bfc:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2c00:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2c05:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2c09:	4c 01 db             	add    %r11,%rbx
+  cb2c0c:	49 01 d8             	add    %rbx,%r8
+  cb2c0f:	49 83 c2 58          	add    $0x58,%r10
+  cb2c13:	4d 89 c3             	mov    %r8,%r11
+  cb2c16:	4d 39 d1             	cmp    %r10,%r9
+  cb2c19:	75 e5                	jne    cb2c00 <gpui::runtime::style_ledger::palette_read_probe+0xb30>
+  cb2c1b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2c1f:	73 04                	jae    cb2c25 <gpui::runtime::style_ledger::palette_read_probe+0xb55>
+  cb2c21:	31 ff                	xor    %edi,%edi
+  cb2c23:	eb 72                	jmp    cb2c97 <gpui::runtime::style_ledger::palette_read_probe+0xbc7>
+  cb2c25:	49 89 c1             	mov    %rax,%r9
+  cb2c28:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2c2c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2c33:	31 ff                	xor    %edi,%edi
+  cb2c35:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2c3c:	00 00 00 00 
+  cb2c40:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2c47:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2c4e:	4d 01 c3             	add    %r8,%r11
+  cb2c51:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2c58:	49 01 d8             	add    %rbx,%r8
+  cb2c5b:	4d 01 d8             	add    %r11,%r8
+  cb2c5e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2c65:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2c69:	4c 01 db             	add    %r11,%rbx
+  cb2c6c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2c70:	49 01 db             	add    %rbx,%r11
+  cb2c73:	4d 01 c3             	add    %r8,%r11
+  cb2c76:	48 83 c7 04          	add    $0x4,%rdi
+  cb2c7a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2c7e:	45 8b 02             	mov    (%r10),%r8d
+  cb2c81:	49 01 d8             	add    %rbx,%r8
+  cb2c84:	4d 01 d8             	add    %r11,%r8
+  cb2c87:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2c8e:	49 39 f9             	cmp    %rdi,%r9
+  cb2c91:	75 ad                	jne    cb2c40 <gpui::runtime::style_ledger::palette_read_probe+0xb70>
+  cb2c93:	a8 03                	test   $0x3,%al
+  cb2c95:	74 34                	je     cb2ccb <gpui::runtime::style_ledger::palette_read_probe+0xbfb>
+  cb2c97:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2c9b:	48 01 f7             	add    %rsi,%rdi
+  cb2c9e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2ca2:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2ca6:	45 31 d2             	xor    %r10d,%r10d
+  cb2ca9:	4d 89 c3             	mov    %r8,%r11
+  cb2cac:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2cb0:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2cb5:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2cb9:	4c 01 db             	add    %r11,%rbx
+  cb2cbc:	49 01 d8             	add    %rbx,%r8
+  cb2cbf:	49 83 c2 58          	add    $0x58,%r10
+  cb2cc3:	4d 89 c3             	mov    %r8,%r11
+  cb2cc6:	4d 39 d1             	cmp    %r10,%r9
+  cb2cc9:	75 e5                	jne    cb2cb0 <gpui::runtime::style_ledger::palette_read_probe+0xbe0>
+  cb2ccb:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2ccf:	73 04                	jae    cb2cd5 <gpui::runtime::style_ledger::palette_read_probe+0xc05>
+  cb2cd1:	31 ff                	xor    %edi,%edi
+  cb2cd3:	eb 72                	jmp    cb2d47 <gpui::runtime::style_ledger::palette_read_probe+0xc77>
+  cb2cd5:	49 89 c1             	mov    %rax,%r9
+  cb2cd8:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2cdc:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2ce3:	31 ff                	xor    %edi,%edi
+  cb2ce5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2cec:	00 00 00 00 
+  cb2cf0:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2cf7:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2cfe:	4d 01 c3             	add    %r8,%r11
+  cb2d01:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2d08:	49 01 d8             	add    %rbx,%r8
+  cb2d0b:	4d 01 d8             	add    %r11,%r8
+  cb2d0e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2d15:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2d19:	4c 01 db             	add    %r11,%rbx
+  cb2d1c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2d20:	49 01 db             	add    %rbx,%r11
+  cb2d23:	4d 01 c3             	add    %r8,%r11
+  cb2d26:	48 83 c7 04          	add    $0x4,%rdi
+  cb2d2a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2d2e:	45 8b 02             	mov    (%r10),%r8d
+  cb2d31:	49 01 d8             	add    %rbx,%r8
+  cb2d34:	4d 01 d8             	add    %r11,%r8
+  cb2d37:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2d3e:	49 39 f9             	cmp    %rdi,%r9
+  cb2d41:	75 ad                	jne    cb2cf0 <gpui::runtime::style_ledger::palette_read_probe+0xc20>
+  cb2d43:	a8 03                	test   $0x3,%al
+  cb2d45:	74 34                	je     cb2d7b <gpui::runtime::style_ledger::palette_read_probe+0xcab>
+  cb2d47:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2d4b:	48 01 f7             	add    %rsi,%rdi
+  cb2d4e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2d52:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2d56:	45 31 d2             	xor    %r10d,%r10d
+  cb2d59:	4d 89 c3             	mov    %r8,%r11
+  cb2d5c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2d60:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2d65:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2d69:	4c 01 db             	add    %r11,%rbx
+  cb2d6c:	49 01 d8             	add    %rbx,%r8
+  cb2d6f:	49 83 c2 58          	add    $0x58,%r10
+  cb2d73:	4d 89 c3             	mov    %r8,%r11
+  cb2d76:	4d 39 d1             	cmp    %r10,%r9
+  cb2d79:	75 e5                	jne    cb2d60 <gpui::runtime::style_ledger::palette_read_probe+0xc90>
+  cb2d7b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2d7f:	73 04                	jae    cb2d85 <gpui::runtime::style_ledger::palette_read_probe+0xcb5>
+  cb2d81:	31 ff                	xor    %edi,%edi
+  cb2d83:	eb 72                	jmp    cb2df7 <gpui::runtime::style_ledger::palette_read_probe+0xd27>
+  cb2d85:	49 89 c1             	mov    %rax,%r9
+  cb2d88:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2d8c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2d93:	31 ff                	xor    %edi,%edi
+  cb2d95:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2d9c:	00 00 00 00 
+  cb2da0:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2da7:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2dae:	4d 01 c3             	add    %r8,%r11
+  cb2db1:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2db8:	49 01 d8             	add    %rbx,%r8
+  cb2dbb:	4d 01 d8             	add    %r11,%r8
+  cb2dbe:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2dc5:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2dc9:	4c 01 db             	add    %r11,%rbx
+  cb2dcc:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2dd0:	49 01 db             	add    %rbx,%r11
+  cb2dd3:	4d 01 c3             	add    %r8,%r11
+  cb2dd6:	48 83 c7 04          	add    $0x4,%rdi
+  cb2dda:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2dde:	45 8b 02             	mov    (%r10),%r8d
+  cb2de1:	49 01 d8             	add    %rbx,%r8
+  cb2de4:	4d 01 d8             	add    %r11,%r8
+  cb2de7:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2dee:	49 39 f9             	cmp    %rdi,%r9
+  cb2df1:	75 ad                	jne    cb2da0 <gpui::runtime::style_ledger::palette_read_probe+0xcd0>
+  cb2df3:	a8 03                	test   $0x3,%al
+  cb2df5:	74 34                	je     cb2e2b <gpui::runtime::style_ledger::palette_read_probe+0xd5b>
+  cb2df7:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2dfb:	48 01 f7             	add    %rsi,%rdi
+  cb2dfe:	48 83 c7 18          	add    $0x18,%rdi
+  cb2e02:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2e06:	45 31 d2             	xor    %r10d,%r10d
+  cb2e09:	4d 89 c3             	mov    %r8,%r11
+  cb2e0c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2e10:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2e15:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2e19:	4c 01 db             	add    %r11,%rbx
+  cb2e1c:	49 01 d8             	add    %rbx,%r8
+  cb2e1f:	49 83 c2 58          	add    $0x58,%r10
+  cb2e23:	4d 89 c3             	mov    %r8,%r11
+  cb2e26:	4d 39 d1             	cmp    %r10,%r9
+  cb2e29:	75 e5                	jne    cb2e10 <gpui::runtime::style_ledger::palette_read_probe+0xd40>
+  cb2e2b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2e2f:	73 04                	jae    cb2e35 <gpui::runtime::style_ledger::palette_read_probe+0xd65>
+  cb2e31:	31 ff                	xor    %edi,%edi
+  cb2e33:	eb 72                	jmp    cb2ea7 <gpui::runtime::style_ledger::palette_read_probe+0xdd7>
+  cb2e35:	49 89 c1             	mov    %rax,%r9
+  cb2e38:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2e3c:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2e43:	31 ff                	xor    %edi,%edi
+  cb2e45:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2e4c:	00 00 00 00 
+  cb2e50:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2e57:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2e5e:	4d 01 c3             	add    %r8,%r11
+  cb2e61:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2e68:	49 01 d8             	add    %rbx,%r8
+  cb2e6b:	4d 01 d8             	add    %r11,%r8
+  cb2e6e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2e75:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2e79:	4c 01 db             	add    %r11,%rbx
+  cb2e7c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2e80:	49 01 db             	add    %rbx,%r11
+  cb2e83:	4d 01 c3             	add    %r8,%r11
+  cb2e86:	48 83 c7 04          	add    $0x4,%rdi
+  cb2e8a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2e8e:	45 8b 02             	mov    (%r10),%r8d
+  cb2e91:	49 01 d8             	add    %rbx,%r8
+  cb2e94:	4d 01 d8             	add    %r11,%r8
+  cb2e97:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2e9e:	49 39 f9             	cmp    %rdi,%r9
+  cb2ea1:	75 ad                	jne    cb2e50 <gpui::runtime::style_ledger::palette_read_probe+0xd80>
+  cb2ea3:	a8 03                	test   $0x3,%al
+  cb2ea5:	74 34                	je     cb2edb <gpui::runtime::style_ledger::palette_read_probe+0xe0b>
+  cb2ea7:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2eab:	48 01 f7             	add    %rsi,%rdi
+  cb2eae:	48 83 c7 18          	add    $0x18,%rdi
+  cb2eb2:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2eb6:	45 31 d2             	xor    %r10d,%r10d
+  cb2eb9:	4d 89 c3             	mov    %r8,%r11
+  cb2ebc:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2ec0:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2ec5:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2ec9:	4c 01 db             	add    %r11,%rbx
+  cb2ecc:	49 01 d8             	add    %rbx,%r8
+  cb2ecf:	49 83 c2 58          	add    $0x58,%r10
+  cb2ed3:	4d 89 c3             	mov    %r8,%r11
+  cb2ed6:	4d 39 d1             	cmp    %r10,%r9
+  cb2ed9:	75 e5                	jne    cb2ec0 <gpui::runtime::style_ledger::palette_read_probe+0xdf0>
+  cb2edb:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2edf:	73 04                	jae    cb2ee5 <gpui::runtime::style_ledger::palette_read_probe+0xe15>
+  cb2ee1:	31 ff                	xor    %edi,%edi
+  cb2ee3:	eb 72                	jmp    cb2f57 <gpui::runtime::style_ledger::palette_read_probe+0xe87>
+  cb2ee5:	49 89 c1             	mov    %rax,%r9
+  cb2ee8:	49 83 e1 fc          	and    $0xfffffffffffffffc,%r9
+  cb2eec:	4c 8d 96 20 01 00 00 	lea    0x120(%rsi),%r10
+  cb2ef3:	31 ff                	xor    %edi,%edi
+  cb2ef5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2efc:	00 00 00 00 
+  cb2f00:	45 8b 9a f0 fe ff ff 	mov    -0x110(%r10),%r11d
+  cb2f07:	41 8b 9a f8 fe ff ff 	mov    -0x108(%r10),%ebx
+  cb2f0e:	4d 01 c3             	add    %r8,%r11
+  cb2f11:	45 8b 82 48 ff ff ff 	mov    -0xb8(%r10),%r8d
+  cb2f18:	49 01 d8             	add    %rbx,%r8
+  cb2f1b:	4d 01 d8             	add    %r11,%r8
+  cb2f1e:	45 8b 9a 50 ff ff ff 	mov    -0xb0(%r10),%r11d
+  cb2f25:	41 8b 5a a0          	mov    -0x60(%r10),%ebx
+  cb2f29:	4c 01 db             	add    %r11,%rbx
+  cb2f2c:	45 8b 5a a8          	mov    -0x58(%r10),%r11d
+  cb2f30:	49 01 db             	add    %rbx,%r11
+  cb2f33:	4d 01 c3             	add    %r8,%r11
+  cb2f36:	48 83 c7 04          	add    $0x4,%rdi
+  cb2f3a:	41 8b 5a f8          	mov    -0x8(%r10),%ebx
+  cb2f3e:	45 8b 02             	mov    (%r10),%r8d
+  cb2f41:	49 01 d8             	add    %rbx,%r8
+  cb2f44:	4d 01 d8             	add    %r11,%r8
+  cb2f47:	49 81 c2 60 01 00 00 	add    $0x160,%r10
+  cb2f4e:	49 39 f9             	cmp    %rdi,%r9
+  cb2f51:	75 ad                	jne    cb2f00 <gpui::runtime::style_ledger::palette_read_probe+0xe30>
+  cb2f53:	a8 03                	test   $0x3,%al
+  cb2f55:	74 34                	je     cb2f8b <gpui::runtime::style_ledger::palette_read_probe+0xebb>
+  cb2f57:	48 6b ff 58          	imul   $0x58,%rdi,%rdi
+  cb2f5b:	48 01 f7             	add    %rsi,%rdi
+  cb2f5e:	48 83 c7 18          	add    $0x18,%rdi
+  cb2f62:	4c 6b c9 58          	imul   $0x58,%rcx,%r9
+  cb2f66:	45 31 d2             	xor    %r10d,%r10d
+  cb2f69:	4d 89 c3             	mov    %r8,%r11
+  cb2f6c:	0f 1f 40 00          	nopl   0x0(%rax)
+  cb2f70:	42 8b 5c 17 f8       	mov    -0x8(%rdi,%r10,1),%ebx
+  cb2f75:	46 8b 04 17          	mov    (%rdi,%r10,1),%r8d
+  cb2f79:	4c 01 db             	add    %r11,%rbx
+  cb2f7c:	49 01 d8             	add    %rbx,%r8
+  cb2f7f:	49 83 c2 58          	add    $0x58,%r10
+  cb2f83:	4d 89 c3             	mov    %r8,%r11
+  cb2f86:	4d 39 d1             	cmp    %r10,%r9
+  cb2f89:	75 e5                	jne    cb2f70 <gpui::runtime::style_ledger::palette_read_probe+0xea0>
+  cb2f8b:	48 83 fa 03          	cmp    $0x3,%rdx
+  cb2f8f:	73 04                	jae    cb2f95 <gpui::runtime::style_ledger::palette_read_probe+0xec5>
+  cb2f91:	31 d2                	xor    %edx,%edx
+  cb2f93:	eb 72                	jmp    cb3007 <gpui::runtime::style_ledger::palette_read_probe+0xf37>
+  cb2f95:	48 89 c7             	mov    %rax,%rdi
+  cb2f98:	48 83 e7 fc          	and    $0xfffffffffffffffc,%rdi
+  cb2f9c:	4c 8d 8e 20 01 00 00 	lea    0x120(%rsi),%r9
+  cb2fa3:	31 d2                	xor    %edx,%edx
+  cb2fa5:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  cb2fac:	00 00 00 00 
+  cb2fb0:	45 8b 91 f0 fe ff ff 	mov    -0x110(%r9),%r10d
+  cb2fb7:	45 8b 99 f8 fe ff ff 	mov    -0x108(%r9),%r11d
+  cb2fbe:	4d 01 c2             	add    %r8,%r10
+  cb2fc1:	45 8b 81 48 ff ff ff 	mov    -0xb8(%r9),%r8d
+  cb2fc8:	4d 01 d8             	add    %r11,%r8
+  cb2fcb:	4d 01 d0             	add    %r10,%r8
+  cb2fce:	45 8b 91 50 ff ff ff 	mov    -0xb0(%r9),%r10d
+  cb2fd5:	45 8b 59 a0          	mov    -0x60(%r9),%r11d
+  cb2fd9:	4d 01 d3             	add    %r10,%r11
+  cb2fdc:	45 8b 51 a8          	mov    -0x58(%r9),%r10d
+  cb2fe0:	4d 01 da             	add    %r11,%r10
+  cb2fe3:	4d 01 c2             	add    %r8,%r10
+  cb2fe6:	48 83 c2 04          	add    $0x4,%rdx
+  cb2fea:	45 8b 59 f8          	mov    -0x8(%r9),%r11d
+  cb2fee:	45 8b 01             	mov    (%r9),%r8d
+  cb2ff1:	4d 01 d8             	add    %r11,%r8
+  cb2ff4:	4d 01 d0             	add    %r10,%r8
+  cb2ff7:	49 81 c1 60 01 00 00 	add    $0x160,%r9
+  cb2ffe:	48 39 d7             	cmp    %rdx,%rdi
+  cb3001:	75 ad                	jne    cb2fb0 <gpui::runtime::style_ledger::palette_read_probe+0xee0>
+  cb3003:	a8 03                	test   $0x3,%al
+  cb3005:	74 33                	je     cb303a <gpui::runtime::style_ledger::palette_read_probe+0xf6a>
+  cb3007:	48 6b c2 58          	imul   $0x58,%rdx,%rax
+  cb300b:	48 01 f0             	add    %rsi,%rax
+  cb300e:	48 83 c0 18          	add    $0x18,%rax
+  cb3012:	48 6b c9 58          	imul   $0x58,%rcx,%rcx
+  cb3016:	31 d2                	xor    %edx,%edx
+  cb3018:	4c 89 c6             	mov    %r8,%rsi
+  cb301b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  cb3020:	8b 7c 10 f8          	mov    -0x8(%rax,%rdx,1),%edi
+  cb3024:	44 8b 04 10          	mov    (%rax,%rdx,1),%r8d
+  cb3028:	48 01 f7             	add    %rsi,%rdi
+  cb302b:	49 01 f8             	add    %rdi,%r8
+  cb302e:	48 83 c2 58          	add    $0x58,%rdx
+  cb3032:	4c 89 c6             	mov    %r8,%rsi
+  cb3035:	48 39 d1             	cmp    %rdx,%rcx
+  cb3038:	75 e6                	jne    cb3020 <gpui::runtime::style_ledger::palette_read_probe+0xf50>
+  cb303a:	4c 89 44 24 08       	mov    %r8,0x8(%rsp)
+  cb303f:	48 8d 44 24 08       	lea    0x8(%rsp),%rax
+  cb3044:	48 8b 44 24 08       	mov    0x8(%rsp),%rax
+  cb3049:	48 83 c4 10          	add    $0x10,%rsp
+  cb304d:	5b                   	pop    %rbx
+  cb304e:	c3                   	ret
+  cb304f:	48 8d 15 22 ee 7c 00 	lea    0x7cee22(%rip),%rdx        # 1481e78 <anon.42afcd8300e456a6680788a317729674.95.llvm.849338327868170028+0xe70>
+  cb3056:	48 89 cf             	mov    %rcx,%rdi
+  cb3059:	48 89 ce             	mov    %rcx,%rsi
+  cb305c:	ff 15 56 9c 82 00    	call   *0x829c56(%rip)        # 14dccb8 <_DYNAMIC+0x298>
+  cb3062:	48 8d 15 27 ee 7c 00 	lea    0x7cee27(%rip),%rdx        # 1481e90 <anon.42afcd8300e456a6680788a317729674.95.llvm.849338327868170028+0xe88>
+  cb3069:	4c 89 c7             	mov    %r8,%rdi
+  cb306c:	ff 15 46 9c 82 00    	call   *0x829c46(%rip)        # 14dccb8 <_DYNAMIC+0x298>
+  cb3072:	48 8d 15 e7 ed 7c 00 	lea    0x7cede7(%rip),%rdx        # 1481e60 <anon.42afcd8300e456a6680788a317729674.95.llvm.849338327868170028+0xe58>
+  cb3079:	48 89 fe             	mov    %rdi,%rsi
+  cb307c:	ff 15 36 9c 82 00    	call   *0x829c36(%rip)        # 14dccb8 <_DYNAMIC+0x298>
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:
