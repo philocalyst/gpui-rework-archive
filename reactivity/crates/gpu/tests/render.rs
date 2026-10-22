@@ -2928,6 +2928,13 @@ fn shared_context_drop_and_real_destroy_never_rebind_old_state() {
         ));
         drop(abandoned);
 
+        // Drop the last explicit context/device/queue owner while its state
+        // still holds buffers/atlas leases, then release those leases safely.
+        let detached = renderer(owner.format()).await;
+        let orphan = RendererState::new(detached.context());
+        drop(detached);
+        drop(orphan);
+
         let destroyed = renderer(owner.format()).await;
         let mut stale = RendererState::new(destroyed.context());
         let destroyed_target = output_texture(&destroyed, &canvas);
