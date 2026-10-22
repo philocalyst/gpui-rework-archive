@@ -53,7 +53,7 @@ pub use util::CustomCursor;
 use atoms::*;
 use dnd::{Dnd, DndState};
 use event_processor::{EventProcessor, MAX_MOD_REPLAY_LEN};
-use ime::{Ime, ImeCreationError, ImeReceiver, ImeRequest, ImeSender};
+use ime::{Ime, ImeCreationError, ImeEventSender, ImeReceiver, ImeRequest, ImeSender};
 pub(crate) use monitor::{MonitorHandle, VideoModeHandle};
 use window::UnownedWindow;
 pub(crate) use xdisplay::{XConnection, XError, XNotSupported};
@@ -134,6 +134,8 @@ pub struct ActiveEventLoop {
     exit: Cell<Option<i32>>,
     root: xproto::Window,
     ime: Option<RefCell<Ime>>,
+    // Consumed on first admission; an open failure retains ordinary XKB input.
+    ime_event_sender: Option<ImeEventSender>,
     windows: RefCell<HashMap<WindowId, Weak<UnownedWindow>>>,
     redraw_sender: WakeSender<WindowId>,
     activation_sender: WakeSender<ActivationToken>,
@@ -208,15 +210,6 @@ impl<T: 'static> EventLoop<T> {
             }
         }
 
-        let ime = Ime::new(Arc::clone(&xconn), ime_event_sender);
-        if let Err(ImeCreationError::OpenFailure(state)) = ime.as_ref() {
-            warn!("Failed to open input method: {state:#?}");
-        } else if let Err(err) = ime.as_ref() {
-            warn!("Failed to set input method destruction callback: {err:?}");
-        }
-
-        let ime = ime.ok().map(RefCell::new);
-
         let randr_event_offset =
             xconn.select_xrandr_input(root).expect("Failed to query XRandR extension");
 
@@ -285,7 +278,8 @@ impl<T: 'static> EventLoop<T> {
         xmodmap.reload_from_x_connection(&xconn);
 
         let window_target = ActiveEventLoop {
-            ime,
+            ime: None,
+            ime_event_sender: Some(ime_event_sender),
             root,
             control_flow: Cell::new(ControlFlow::default()),
             exit: Cell::new(None),
@@ -316,7 +310,7 @@ impl<T: 'static> EventLoop<T> {
             dnd,
             devices: Default::default(),
             randr_event_offset,
-            ime_receiver,
+            ime_receiver: PeekableReceiver::from_recv(ime_receiver),
             ime_event_receiver,
             xi2ext,
             xfiltered_modifiers: VecDeque::with_capacity(MAX_MOD_REPLAY_LEN),
@@ -435,7 +429,8 @@ impl<T: 'static> EventLoop<T> {
     }
 
     fn has_pending(&mut self) -> bool {
-        self.event_processor.poll()
+        self.event_processor.ime_receiver.has_incoming()
+            || self.event_processor.poll()
             || self.user_receiver.has_incoming()
             || self.redraw_receiver.has_incoming()
     }
@@ -568,6 +563,9 @@ impl<T: 'static> EventLoop<T> {
             }
         }
 
+        self.event_processor.process_ime_requests();
+        self.event_processor.drain_ime_events(|target, event| callback(event, target));
+
         // This is always the last event we dispatch before poll again
         {
             callback(Event::AboutToWait, &self.event_processor.target);
@@ -578,6 +576,8 @@ impl<T: 'static> EventLoop<T> {
     where
         F: FnMut(Event<T>, &RootAEL),
     {
+        self.event_processor.process_ime_requests();
+        self.event_processor.drain_ime_events(|target, event| callback(event, target));
         let mut xev = MaybeUninit::uninit();
 
         while unsafe { self.event_processor.poll_one_event(xev.as_mut_ptr()) } {

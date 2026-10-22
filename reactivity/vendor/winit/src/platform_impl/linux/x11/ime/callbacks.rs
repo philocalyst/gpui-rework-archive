@@ -150,6 +150,13 @@ unsafe fn replace_im(inner: *mut ImeInner) -> Result<(), ReplaceImError> {
         (*inner).contexts = new_contexts;
         (*inner).is_destroyed = false;
         (*inner).is_fallback = is_fallback;
+        if let Some(window) = (*inner).focused_window {
+            if let Some(Some(context)) = (*inner).contexts.get(&window) {
+                if let Err(err) = context.focus(xconn) {
+                    tracing::warn!("Failed to restore replacement input context focus: {err:?}");
+                }
+            }
+        }
     }
     Ok(())
 }

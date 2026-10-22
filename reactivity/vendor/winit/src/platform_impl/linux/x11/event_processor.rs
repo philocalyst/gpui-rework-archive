@@ -79,27 +79,80 @@ impl EventProcessor {
     where
         F: FnMut(&RootAEL, Event<T>),
     {
+        // Admit queued requests before the next key's filter/lookup.
+        self.process_ime_requests();
+        self.drain_ime_events(&mut callback);
         self.process_xevent(xev, &mut callback);
+        self.process_ime_requests();
+        self.drain_ime_events(callback);
+    }
 
-        let window_target = Self::window_target_mut(&mut self.target);
-
-        // Handle IME requests.
+    pub fn process_ime_requests(&mut self) {
         while let Ok(request) = self.ime_receiver.try_recv() {
-            let ime = match window_target.ime.as_mut() {
-                Some(ime) => ime,
-                None => continue,
+            let window = match request {
+                ImeRequest::Position(window, ..) | ImeRequest::Allow(window, _) => window,
             };
-            let ime = ime.get_mut();
-            match request {
-                ImeRequest::Position(window_id, x, y) => {
-                    ime.send_xim_spot(window_id, x, y);
-                },
-                ImeRequest::Allow(window_id, allowed) => {
-                    ime.set_ime_allowed(window_id, allowed);
-                },
+            // Requests may outlive their window; do not create an XIC for a stale XID.
+            let Some(spot) = self.with_window(window as _, |window| {
+                let mut state = window.shared_state_lock();
+                if let ImeRequest::Position(_, x, y) = request {
+                    state.ime_spot = (x, y);
+                }
+                state.ime_spot
+            }) else {
+                continue;
+            };
+            let wt = Self::window_target_mut(&mut self.target);
+            if matches!(request, ImeRequest::Allow(_, true)) && wt.ime.is_none() {
+                if let Some(sender) = wt.ime_event_sender.take() {
+                    match super::Ime::new(Arc::clone(&wt.xconn), sender) {
+                        Ok(mut ime) => {
+                            // Existing windows must participate in XIM reconnect callbacks.
+                            for (id, window) in wt.windows.get_mut().iter() {
+                                if let Some(window) = window.upgrade() {
+                                    if let Err(err) = ime.create_context(id.0 as _, false) {
+                                        tracing::warn!("Failed to create input context: {err:?}");
+                                    }
+                                    let (x, y) = window.shared_state_lock().ime_spot;
+                                    ime.send_xim_spot(id.0 as _, x, y);
+                                }
+                            }
+                            if let Some(window) = self.active_window {
+                                ime.focus(window as _)
+                                    .expect("Failed to focus input context");
+                            }
+                            wt.ime = Some(RefCell::new(ime));
+                        }
+                        Err(super::ImeCreationError::OpenFailure(state)) => {
+                            tracing::warn!("Failed to open input method: {state:#?}");
+                        }
+                        Err(err) => {
+                            tracing::warn!(
+                                "Failed to set input method destruction callback: {err:?}"
+                            );
+                        }
+                    }
+                }
+            }
+            if let Some(ime) = wt.ime.as_mut() {
+                let ime = ime.get_mut();
+                if let ImeRequest::Allow(_, allowed) = request {
+                    let changed = ime.is_ime_allowed(window) != allowed;
+                    ime.set_ime_allowed(window, allowed);
+                    // Replacing a focused XIC must restore its focus before the next key.
+                    if changed && self.active_window == Some(window as _) {
+                        ime.focus(window).expect("Failed to focus input context");
+                    }
+                }
+                ime.send_xim_spot(window, spot.0, spot.1);
             }
         }
+    }
 
+    pub fn drain_ime_events<T: 'static, F>(&mut self, mut callback: F)
+    where
+        F: FnMut(&RootAEL, Event<T>),
+    {
         // Drain IME events.
         while let Ok((window, event)) = self.ime_event_receiver.try_recv() {
             let window_id = mkwid(window as xproto::Window);

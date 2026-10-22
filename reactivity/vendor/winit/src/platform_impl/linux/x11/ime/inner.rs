@@ -23,6 +23,8 @@ pub(crate) struct ImeInner {
     pub im: Option<InputMethod>,
     pub potential_input_methods: PotentialInputMethods,
     pub contexts: HashMap<ffi::Window, Option<ImeContext>>,
+    // XIC focus must survive replacing the XIM after server loss/availability.
+    pub focused_window: Option<ffi::Window>,
     // WARNING: this is initially zeroed!
     pub destroy_callback: ffi::XIMCallback,
     pub event_sender: ImeEventSender,
@@ -43,6 +45,7 @@ impl ImeInner {
             im: None,
             potential_input_methods,
             contexts: HashMap::new(),
+            focused_window: None,
             destroy_callback: unsafe { mem::zeroed() },
             event_sender,
             is_destroyed: false,

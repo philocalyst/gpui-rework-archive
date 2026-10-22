@@ -28,7 +28,7 @@ pub enum ImeEvent {
     Disabled,
 }
 
-pub type ImeReceiver = Receiver<ImeRequest>;
+pub(super) type ImeReceiver = super::PeekableReceiver<ImeRequest>;
 pub type ImeSender = Sender<ImeRequest>;
 pub type ImeEventReceiver = Receiver<(ffi::Window, ImeEvent)>;
 pub type ImeEventSender = Sender<(ffi::Window, ImeEvent)>;
@@ -153,6 +153,9 @@ impl Ime {
     }
 
     pub fn remove_context(&mut self, window: ffi::Window) -> Result<bool, XError> {
+        if self.inner.focused_window == Some(window) {
+            self.inner.focused_window = None;
+        }
         if let Some(Some(context)) = self.inner.contexts.remove(&window) {
             unsafe {
                 self.inner.destroy_ic_if_necessary(context.ic)?;
@@ -164,6 +167,9 @@ impl Ime {
     }
 
     pub fn focus(&mut self, window: ffi::Window) -> Result<bool, XError> {
+        if self.inner.contexts.contains_key(&window) {
+            self.inner.focused_window = Some(window);
+        }
         if self.is_destroyed() {
             return Ok(false);
         }
@@ -175,6 +181,9 @@ impl Ime {
     }
 
     pub fn unfocus(&mut self, window: ffi::Window) -> Result<bool, XError> {
+        if self.inner.focused_window == Some(window) {
+            self.inner.focused_window = None;
+        }
         if self.is_destroyed() {
             return Ok(false);
         }

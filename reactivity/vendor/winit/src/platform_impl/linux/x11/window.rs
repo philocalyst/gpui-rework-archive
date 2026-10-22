@@ -61,6 +61,8 @@ pub struct SharedState {
     pub base_size: Option<Size>,
     pub visibility: Visibility,
     pub has_focus: bool,
+    // Preserve spot requests before XIM admission and across XIC style changes.
+    pub ime_spot: (i16, i16),
     pub(crate) redraw_invalidated: bool,
     // Use `Option` to not apply hittest logic when it was never requested.
     pub cursor_hittest: Option<bool>,
@@ -101,6 +103,7 @@ impl SharedState {
             resize_increments: None,
             base_size: None,
             has_focus: false,
+            ime_spot: (0, 0),
             redraw_invalidated: true,
             cursor_hittest: None,
         })
@@ -1741,6 +1744,7 @@ impl UnownedWindow {
             x,
             y,
         ));
+        self.redraw_sender.waker.ping();
     }
 
     #[inline]
@@ -1750,6 +1754,7 @@ impl UnownedWindow {
             .lock()
             .unwrap()
             .send(ImeRequest::Allow(self.xwindow as ffi::Window, allowed));
+        self.redraw_sender.waker.ping();
     }
 
     #[inline]
