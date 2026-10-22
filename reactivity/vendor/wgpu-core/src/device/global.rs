@@ -1032,6 +1032,56 @@ impl Global {
         id::ShaderModuleId,
         Option<pipeline::CreateShaderModuleError>,
     ) {
+        // SAFETY: preserve this entry point's existing unchecked shader contract.
+        unsafe {
+            self.device_create_shader_module_passthrough_impl(
+                device_id,
+                desc,
+                #[cfg(feature = "shader-artifacts")]
+                None,
+                id_in,
+            )
+        }
+    }
+
+    /// Create a Vulkan module recipe without retaining a native shader module.
+    /// Native creation/driver validation errors occur during pipeline construction.
+    /// Empty recipe compilation information does not establish shader validity.
+    ///
+    /// # Safety
+    /// The words must satisfy the ordinary unchecked passthrough contract,
+    /// including shader validity, interface compatibility and required runtime checks.
+    /// Static storage proves only the source lifetime.
+    #[cfg(feature = "shader-artifacts")]
+    #[doc(hidden)]
+    pub unsafe fn device_create_shader_module_static_spirv(
+        &self,
+        device_id: DeviceId,
+        label: Label<'_>,
+        entry_points: &[wgt::PassthroughShaderEntryPoint<'_>],
+        words: &'static [u32],
+        id_in: Option<id::ShaderModuleId>,
+    ) -> (id::ShaderModuleId, Option<pipeline::CreateShaderModuleError>) {
+        let desc = pipeline::ShaderModuleDescriptorPassthrough {
+            label,
+            entry_points: Cow::Borrowed(entry_points),
+            spirv: Some(Cow::Borrowed(words)),
+            ..Default::default()
+        };
+        // SAFETY: static storage proves lifetime; the caller still proves the
+        // unchanged unchecked shader/interface/runtime-check contract.
+        unsafe {
+            self.device_create_shader_module_passthrough_impl(device_id, &desc, Some(words), id_in)
+        }
+    }
+
+    unsafe fn device_create_shader_module_passthrough_impl(
+        &self,
+        device_id: DeviceId,
+        desc: &pipeline::ShaderModuleDescriptorPassthrough<'_>,
+        #[cfg(feature = "shader-artifacts")] static_spirv: Option<&'static [u32]>,
+        id_in: Option<id::ShaderModuleId>,
+    ) -> (id::ShaderModuleId, Option<pipeline::CreateShaderModuleError>) {
         profiling::scope!("Device::create_shader_module_passthrough");
 
         let hub = &self.hub;
@@ -1040,7 +1090,13 @@ impl Global {
         let error = 'error: {
             let device = self.hub.devices.get(device_id);
 
-            let result = unsafe { device.create_shader_module_passthrough(desc) };
+            let result = unsafe {
+                device.create_shader_module_passthrough_with_static_spirv(
+                    desc,
+                    #[cfg(feature = "shader-artifacts")]
+                    static_spirv,
+                )
+            };
 
             let shader = match result {
                 Ok(shader) => shader,

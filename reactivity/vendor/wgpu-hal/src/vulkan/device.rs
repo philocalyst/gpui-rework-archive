@@ -751,6 +751,10 @@ impl super::Device {
         let entry_point = CString::new(stage.entry_point).unwrap();
         let vk_module = match *stage.module {
             super::ShaderModule::Raw(raw) => raw,
+            #[cfg(feature = "shader-artifacts")]
+            super::ShaderModule::StaticSpirV(words) => {
+                self.create_shader_module_impl(words, &None)?
+            }
             super::ShaderModule::Intermediate {
                 ref naga_shader,
                 runtime_checks,
@@ -850,6 +854,8 @@ impl super::Device {
             _entry_point: entry_point,
             temporary_owner: match *stage.module {
                 super::ShaderModule::Raw(_) => None,
+                #[cfg(feature = "shader-artifacts")]
+                super::ShaderModule::StaticSpirV(_) => Some(&self.shared.raw),
                 super::ShaderModule::Intermediate { .. } => Some(&self.shared.raw),
             },
         })
@@ -1946,6 +1952,8 @@ impl crate::Device for super::Device {
             crate::ShaderInput::SpirV(data) => {
                 super::ShaderModule::Raw(self.create_shader_module_impl(data, &desc.label)?)
             }
+            #[cfg(feature = "shader-artifacts")]
+            crate::ShaderInput::StaticSpirV(data) => super::ShaderModule::StaticSpirV(data),
             crate::ShaderInput::MetalLib { .. }
             | crate::ShaderInput::Msl { .. }
             | crate::ShaderInput::Dxil { .. }
@@ -1963,6 +1971,8 @@ impl crate::Device for super::Device {
             super::ShaderModule::Raw(raw) => {
                 unsafe { self.shared.raw.destroy_shader_module(raw, None) };
             }
+            #[cfg(feature = "shader-artifacts")]
+            super::ShaderModule::StaticSpirV(_) => {}
             super::ShaderModule::Intermediate { .. } => {}
         }
 

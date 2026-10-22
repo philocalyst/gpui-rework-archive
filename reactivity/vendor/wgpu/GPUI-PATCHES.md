@@ -85,3 +85,16 @@ private per-stage SPIR-V and interface together. Runtime failures propagate.
 There is no core fork, new device field, cache, driver operation, callback takeover
 or global state. Archive, license and upstream checksums above remain unchanged;
 these new authored API lines are charged separately from the published package.
+
+
+## Experimental static SPIR-V recipe
+
+The existing optional shader-artifacts feature now propagates to Core/HAL. Its
+hidden unsafe Device::create_shader_module_static_spirv accepts process-static
+words and forwards the typed borrow directly through Core. It returns None only
+when native Core dispatch is absent; Core feature/backend/device/driver failures
+produce invalid shader handles and normal error-scope reports. Static storage is
+not a validity or guard proof. GPUI retains its sealed exact-profile admission and
+private generated artifact/interface proof. The new method is not a general safe
+shader ingestion API. Existing error/result wrapping is shared with ordinary
+passthrough without constructing an additional all-backend descriptor in WGPU.

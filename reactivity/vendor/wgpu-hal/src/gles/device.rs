@@ -1487,6 +1487,13 @@ impl crate::Device for super::Device {
                 crate::ShaderInput::Glsl { shader, .. } => super::ShaderModuleSource::Passthrough {
                     source: shader.to_owned(),
                 },
+                #[cfg(feature = "shader-artifacts")]
+                crate::ShaderInput::StaticSpirV(_) => {
+                    self.counters.shader_modules.sub(1);
+                    return Err(crate::ShaderError::Compilation(
+                        "Static SPIR-V requires the Vulkan backend".into(),
+                    ));
+                }
                 crate::ShaderInput::SpirV(_)
                 | crate::ShaderInput::MetalLib { .. }
                 | crate::ShaderInput::Msl { .. }

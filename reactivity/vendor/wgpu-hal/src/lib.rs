@@ -2535,6 +2535,10 @@ pub enum ShaderInput<'a> {
         num_workgroups: hashbrown::HashMap<String, (u32, u32, u32)>,
     },
     SpirV(&'a [u32]),
+    /// Vulkan-only immutable recipe. Native modules are scoped to pipeline creation.
+    /// Static storage does not establish shader validity or runtime-check safety.
+    #[cfg(feature = "shader-artifacts")]
+    StaticSpirV(&'static [u32]),
     Dxil {
         shader: &'a [u8],
     },
@@ -2555,6 +2559,8 @@ impl fmt::Debug for ShaderInput<'_> {
             Self::MetalLib { .. } => f.debug_tuple("MetalLib").finish_non_exhaustive(),
             Self::Msl { .. } => f.debug_tuple("Msl").finish_non_exhaustive(),
             Self::SpirV { .. } => f.debug_tuple("SpirV").finish_non_exhaustive(),
+            #[cfg(feature = "shader-artifacts")]
+            Self::StaticSpirV { .. } => f.debug_tuple("StaticSpirV").finish_non_exhaustive(),
             Self::Dxil { .. } => f.debug_tuple("Dxil").finish_non_exhaustive(),
             Self::Hlsl { .. } => f.debug_tuple("Hlsl").finish_non_exhaustive(),
             Self::Glsl { .. } => f.debug_tuple("Glsl").finish_non_exhaustive(),

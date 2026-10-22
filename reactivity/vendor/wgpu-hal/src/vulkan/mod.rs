@@ -1146,6 +1146,8 @@ impl crate::DynCommandBuffer for CommandBuffer {}
 #[derive(Debug)]
 pub enum ShaderModule {
     Raw(vk::ShaderModule),
+    #[cfg(feature = "shader-artifacts")]
+    StaticSpirV(&'static [u32]),
     Intermediate {
         naga_shader: crate::NagaShader,
         runtime_checks: wgt::ShaderRuntimeChecks,

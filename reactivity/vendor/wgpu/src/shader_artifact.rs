@@ -48,3 +48,40 @@ impl Device {
         None
     }
 }
+
+impl Device {
+    /// Create an immutable SPIR-V recipe whose native modules live only during
+    /// pipeline creation. Each pipeline stage use creates its own native module.
+    /// Native module creation and driver validation errors are deferred until
+    /// pipeline construction; cover that operation with error scopes too. Empty
+    /// compilation information at recipe creation is not a validation proof.
+    ///
+    /// Returns `None` only when native Core dispatch is unavailable. Unsupported
+    /// Core backends, missing features and device errors use normal error scopes.
+    ///
+    /// # Safety
+    /// The words must satisfy [`Device::create_shader_module_passthrough`]'s
+    /// unchecked shader contract, including validity, interface compatibility
+    /// and required runtime checks. Static storage establishes only lifetime.
+    #[doc(hidden)]
+    pub unsafe fn create_shader_module_static_spirv(
+        &self,
+        label: Label<'_>,
+        entry_points: &[PassthroughShaderEntryPoint<'_>],
+        words: &'static [u32],
+    ) -> Option<ShaderModule> {
+        #[cfg(wgpu_core)]
+        {
+            let core = self.inner.as_core_opt()?;
+            // SAFETY: the caller supplies the unchanged passthrough proof.
+            let module =
+                unsafe { core.create_shader_module_static_spirv(label, entry_points, words) };
+            Some(ShaderModule { inner: module })
+        }
+        #[cfg(not(wgpu_core))]
+        {
+            let _ = (label, entry_points, words);
+            None
+        }
+    }
+}

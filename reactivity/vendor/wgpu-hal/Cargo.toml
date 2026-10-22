@@ -50,6 +50,7 @@ targets = [
 ignored = ["cfg_aliases"]
 
 [features]
+shader-artifacts = []
 device_lost_panic = []
 dx12 = [
     "dep:arrayvec",
