@@ -112,11 +112,12 @@ mod tests {
         }
         // Exercise both private address forms without loading a shared font
         // in this unit binary (the font lifecycle oracle owns that registry).
-        let draw = canvas.commands.inline[0];
+        let common = canvas.commands.inline[0].common;
+        let geometry = canvas.commands.inline[0].geometry;
         canvas.commands.append(
-            draw.common,
+            common,
             [super::super::PendingDraw {
-                geometry: draw.geometry,
+                geometry,
                 source: super::super::RECT_SOURCE,
             }],
             true,
