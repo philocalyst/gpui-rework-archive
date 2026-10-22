@@ -170,7 +170,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 self.runtime.counters.exact_updates += 1;
                 let realize = self.has_lists()
                     && self.fanout.get(&field).is_some_and(|fanout| {
-                        fanout.destinations.iter().any(|destination| {
+                        fanout.destinations().iter().any(|destination| {
                             destination.property().is_some_and(|id| {
                                 id.info().impact != crate::property::Impact::Paint
                             })
@@ -267,7 +267,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .ok_or(Error::UnregisteredInput {
                 node: self.runtime.by_identity[&identity],
             })?;
-        let codec = self.runtime.fanout[&field].codec;
+        let codec = self.runtime.fanout[&field].codec();
         let mut input = match catch_unwind(AssertUnwindSafe(|| {
             self.runtime
                 .sources

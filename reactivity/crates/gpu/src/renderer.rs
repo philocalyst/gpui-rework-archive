@@ -6,8 +6,10 @@ use gpui_canvas::{
 use std::{borrow::Cow, collections::HashMap};
 mod images;
 mod paint;
+mod slots;
 pub use images::ImageStats;
 pub use paint::{GpuPaintCommit, GpuPaintEdit, PaintBinding, PaintError, PaintRenderer};
+pub use slots::{GpuSlotCommit, SlotError};
 
 const MAX_DRAWS: usize = 65_536;
 const MAX_REFERENCES: usize = 4 * 1024 * 1024;
@@ -307,11 +309,22 @@ impl Atlas {
 
 // A binding to this renderer's current buffers and atlas, not a second scene.
 // Invalidate before any preparation can replace or overwrite those resources.
+const BANK_PACKET: u32 = 1 << 31;
+const SLOT_COLOR: u32 = 1 << 31;
+const _: () = assert!(MAX_DRAWS + 1 < SLOT_COLOR as usize);
 struct Packet {
     bindings: wgpu::BindGroup,
     size: [u32; 2],
 }
 
+impl Packet {
+    fn dimensions(&self) -> [u32; 2] {
+        [self.size[0] & !BANK_PACKET, self.size[1]]
+    }
+    fn banked(&self) -> bool {
+        self.size[0] & BANK_PACKET != 0
+    }
+}
 /// GPU-owned caches and one fullscreen tile compositor. It consumes canonical
 /// scene records directly; no CPU image, MSAA image or float intermediate exists.
 pub struct Renderer {
@@ -523,6 +536,11 @@ impl Renderer {
         self.ranges.clear();
         self.ranges.resize(columns * rows, [0, 0]);
         self.records.clear();
+        let bank_count = scene.paint_bank().len();
+        if bank_count > MAX_DRAWS * 2 {
+            return Err(Error::ResourceLimit);
+        }
+        let bank_words = slots::prefix_words(bank_count);
         let word_count = scene.groups().try_fold(0usize, |sum, group| {
             let n = group.placements().len();
             let compact = compact_group(group, self.grouped_records);
@@ -530,8 +548,9 @@ impl Renderer {
             sum.checked_add(words).ok_or(Error::ResourceLimit)
         })?;
         self.records
-            .try_reserve_exact(word_count)
+            .try_reserve_exact(word_count + bank_words)
             .map_err(|_| Error::ResourceLimit)?;
+        slots::write_prefix(&mut self.records, scene, bank_count);
         self.cursors.clear();
         self.cursors.resize(columns * rows, 0);
         self.residuals.clear();
@@ -562,8 +581,12 @@ impl Renderer {
                     error[1] = error[1].max(e[1]);
                 }
                 let common = self.records.len() as u32;
-                self.records
-                    .extend_from_slice(&common_words(group, error, correction));
+                let mut words = common_words(group, error, correction);
+                if let Some(slot) = group.paint_slot() {
+                    words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
+                    words[4][0] |= SLOT_COLOR;
+                }
+                self.records.extend_from_slice(&words);
                 shared_groups += 1;
                 compact_draws += group.placements().len();
                 for p in group.placements() {
@@ -593,8 +616,12 @@ impl Renderer {
                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
                     has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
-                    self.records
-                        .extend_from_slice(&inline_words(draw, error, correction));
+                    let mut words = inline_words(draw, error, correction);
+                    if let Some(slot) = group.paint_slot() {
+                        words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
+                        words[5][3] |= SLOT_COLOR;
+                    }
+                    self.records.extend_from_slice(&words);
                     original_references = self.bin_draw(
                         draw,
                         error,
@@ -620,7 +647,7 @@ impl Renderer {
         let mask_bytes = self.prepare_atlas(scene, has_masks)?;
         // Patch only resource coordinates after every draw has passed admission.
         // Metadata words/correction indices and private common addresses remain.
-        let mut word = 0;
+        let mut word = bank_words;
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
             if compact {
@@ -687,7 +714,7 @@ impl Renderer {
                 word -= 5;
             }
         }
-        debug_assert_eq!((word, reverse_ordinal), (0, 0));
+        debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
@@ -715,7 +742,12 @@ impl Renderer {
             | tone
             | if hdr { 4 } else { 0 };
         let globals = Globals {
-            viewport: [scene.width, scene.height, columns as u32, mode],
+            viewport: [
+                scene.width,
+                scene.height,
+                columns as u32,
+                mode | if bank_count != 0 { 8 } else { 0 },
+            ],
             clear: scene.clear,
             mapping: [exposure, 0.0, 0.0, 0.0],
         };
@@ -774,7 +806,10 @@ impl Renderer {
         let submitted = self.submit(target, &bindings);
         self.packet = Some(Packet {
             bindings,
-            size: [scene.width, scene.height],
+            size: [
+                scene.width | if bank_count != 0 { BANK_PACKET } else { 0 },
+                scene.height,
+            ],
         });
         self.stats = Stats {
             submissions: self.stats.submissions.saturating_add(1),
@@ -835,7 +870,7 @@ impl Renderer {
         let Some(packet) = &self.packet else {
             return Ok(None);
         };
-        if [target.texture().width(), target.texture().height()] != packet.size
+        if [target.texture().width(), target.texture().height()] != packet.dimensions()
             || target.texture().format() != self.format
         {
             return Err(Error::InvalidScene);

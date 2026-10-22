@@ -157,7 +157,8 @@ impl PaintRenderer {
                 if let Some(site) = sites.get_mut(next)
                     && site.index.order() as usize == ordinal
                 {
-                    site.word = (compact || group.placements().len() == 1)
+                    site.word = (group.paint_slot().is_none()
+                        && (compact || group.placements().len() == 1))
                         .then(|| NonZeroU32::new((word + if compact { 3 } else { 4 }) as u32))
                         .flatten();
                     site.rectangle = group
@@ -229,7 +230,7 @@ impl PaintRenderer {
         target: &'target wgpu::TextureView,
     ) -> Result<GpuPaintCommit<'owner, 'edits, 'target>, PaintError> {
         let packet = self.inner.packet.as_ref().ok_or(PaintError::NoPacket)?;
-        if [target.texture().width(), target.texture().height()] != packet.size
+        if [target.texture().width(), target.texture().height()] != packet.dimensions()
             || target.texture().format() != self.inner.format
         {
             return Err(PaintError::InvalidTarget);

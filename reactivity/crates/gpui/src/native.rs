@@ -6,7 +6,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use gpui_gpu::{PaintRenderer, Renderer, wgpu};
+use gpui_gpu::{Renderer, wgpu};
 use gpui_reactivity_host::native::{Callback, Driver, Host, Wake, winit};
 use winit::{
     dpi::LogicalSize,
@@ -247,7 +247,7 @@ fn surface_config(size: [u32; 2], format: wgpu::TextureFormat) -> wgpu::SurfaceC
 struct GpuSurface {
     handle: wgpu::Surface<'static>,
     config: wgpu::SurfaceConfiguration,
-    renderer: PaintRenderer,
+    renderer: Renderer,
     errors: Arc<DeviceErrors>,
     packet_token: Option<crate::PresentationToken>,
 }
@@ -256,7 +256,7 @@ impl GpuSurface {
         &mut self,
         scene: gpui_canvas::PreparedScene<'_>,
         token: crate::PresentationToken,
-        paint: Option<&crate::runtime::paint::PaintState>,
+        paint: Option<&crate::runtime::paint::SlotTransition>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
         if self.packet_token == Some(token)
@@ -265,9 +265,8 @@ impl GpuSurface {
             return Ok(submitted);
         }
         if let Some(paint) = paint
-            && paint.from.is_some()
-            && self.packet_token == paint.from
-            && let Ok(plan) = self.renderer.prepare_paint_indexed(&paint.edits, target)
+            && self.packet_token == Some(paint.from)
+            && let Ok(plan) = self.renderer.prepare_slots(&paint.edits, target)
         {
             self.packet_token = None; // revoke before the first queue write
             let submitted = plan.commit();
@@ -275,11 +274,7 @@ impl GpuSurface {
             return Ok(submitted);
         }
         self.packet_token = None;
-        let submitted = self.renderer.render_indices(
-            scene,
-            target,
-            paint.into_iter().flat_map(|state| state.requested(scene)),
-        )?;
+        let submitted = self.renderer.render(scene, target)?;
         self.packet_token = Some(token);
         Ok(submitted)
     }
@@ -499,7 +494,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         let size = window.inner_size();
         self.graphics = Some(Graphics::Gpu(Box::new(GpuSurface {
             handle,
-            renderer: PaintRenderer::new(renderer),
+            renderer,
             errors,
             packet_token: None,
             config: surface_config([size.width.max(1), size.height.max(1)], format),

@@ -128,7 +128,7 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             .unwrap();
             Some(std::mem::replace(
                 &mut gpu.renderer,
-                PaintRenderer::new(renderer),
+                renderer,
             ))
         } else {
             None

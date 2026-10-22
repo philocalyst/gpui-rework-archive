@@ -595,9 +595,47 @@ impl TextSite {
         Ok(&self.shaped.as_ref().unwrap().layout)
     }
 }
-struct Fanout {
-    codec: TextCodec,
-    destinations: Vec<Destination>,
+enum Fanout {
+    General {
+        codec: TextCodec,
+        destinations: Vec<Destination>,
+    },
+    Color(styles::ColorSlot),
+}
+impl Fanout {
+    fn new(codec: TextCodec) -> Self {
+        Self::General {
+            codec,
+            destinations: Vec::new(),
+        }
+    }
+    fn codec(&self) -> TextCodec {
+        match self {
+            Self::General { codec, .. } => *codec,
+            Self::Color(_) => TextCodec::for_style::<Color>(),
+        }
+    }
+    fn destinations(&self) -> &[Destination] {
+        match self {
+            Self::General { destinations, .. } => destinations,
+            Self::Color(_) => &[],
+        }
+    }
+    fn destinations_mut(&mut self) -> &mut Vec<Destination> {
+        match self {
+            Self::General { destinations, .. } => destinations,
+            Self::Color(_) => unreachable!("color fanout installed after description"),
+        }
+    }
+    #[cfg(test)]
+    fn destination_bytes(&self) -> usize {
+        match self {
+            Self::General { destinations, .. } => {
+                destinations.capacity() * size_of::<Destination>()
+            }
+            Self::Color(_) => 0,
+        }
+    }
 }
 struct Presented {
     identity: u64,
@@ -1245,7 +1283,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
-        Ok(property.get(runtime.styles.get(runtime.by_identity[&identity])))
+        Ok(property.get(&runtime.styles.get(runtime.by_identity[&identity])))
     }
     fn style_contribution<T>(
         &self,
@@ -1273,10 +1311,25 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         let index = runtime.by_identity[&identity];
-        let before = *runtime.styles.get(index);
+        let before = runtime.styles.get(index);
+        if let Contribution::Set(value) = &contribution {
+            property.validate(value)?;
+        }
+        if let Some(colors) = runtime.styles.declared_colors(index) {
+            runtime.overrides.refresh_color_base(identity, colors);
+        }
+        let explicit = matches!(&contribution, Contribution::Set(_));
         let after = runtime
             .overrides
             .set(identity, before, property, contribution)?;
+        let count = runtime.nodes.len();
+        let relationship_changed =
+            runtime
+                .styles
+                .color_contribution(index, property.id(), after, explicit, count);
+        // Equal Set/Inherit still changes which immutable C paint row this
+        // node follows. Rebind C before a later shared-source write can occur.
+        runtime.dirty |= relationship_changed;
         runtime.source_epoch = epoch;
         runtime.counters.source_operations += 1;
         runtime.changed_nodes = usize::from(!styles::exact_eq(&before, &after));
@@ -1564,11 +1617,8 @@ impl<M: View + 'static> Runtime<M> {
                     .ok_or(Error::Binding(BindError::TypeMismatch(field)))?;
                 fanout
                     .entry(field)
-                    .or_insert_with(|| Fanout {
-                        codec,
-                        destinations: Vec::new(),
-                    })
-                    .destinations
+                    .or_insert_with(|| Fanout::new(codec))
+                    .destinations_mut()
                     .push(Destination::new(index, Port::Visual));
             }
             fields.push(field);
@@ -1578,15 +1628,27 @@ impl<M: View + 'static> Runtime<M> {
                 .validate(&geometry.corner_radius)
                 .map_err(|error| Error::GeometryProperty { node, error })?;
         }
+        let mut color_discovery = styles::ColorDiscovery::default();
         for draft in style_ports {
             if let Some(field) = self.sources.resolve(&self.model, draft.signal)? {
+                use crate::property::PropertyId;
+                if matches!(
+                    draft.property,
+                    PropertyId::Foreground | PropertyId::Background
+                ) {
+                    let foreground = draft.property == PropertyId::Foreground;
+                    let style = drafts[draft.node as usize].style;
+                    color_discovery.bind(
+                        field,
+                        draft.node as usize,
+                        foreground,
+                        if foreground { style.fg } else { style.bg },
+                    );
+                }
                 fanout
                     .entry(field)
-                    .or_insert_with(|| Fanout {
-                        codec: draft.signal.codec(),
-                        destinations: Vec::new(),
-                    })
-                    .destinations
+                    .or_insert_with(|| Fanout::new(draft.signal.codec()))
+                    .destinations_mut()
                     .push(Destination::style(draft.node as usize, draft.property));
             }
         }
@@ -1609,11 +1671,8 @@ impl<M: View + 'static> Runtime<M> {
                         .ok_or(Error::Binding(BindError::TypeMismatch(field)))?;
                     fanout
                         .entry(field)
-                        .or_insert_with(|| Fanout {
-                            codec,
-                            destinations: Vec::new(),
-                        })
-                        .destinations
+                        .or_insert_with(|| Fanout::new(codec))
+                        .destinations_mut()
                         .push(Destination::new(
                             annotation.node as usize,
                             if slot == 0 {
@@ -1632,7 +1691,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut promotions: BTreeMap<FieldId, SharedText> = BTreeMap::new();
         for fanout in fanout.values_mut() {
             fanout
-                .destinations
+                .destinations_mut()
                 .sort_unstable_by_key(|destination| destination.packed());
         }
         let old_styles = std::mem::take(&mut self.styles);
@@ -1675,7 +1734,8 @@ impl<M: View + 'static> Runtime<M> {
             .iter()
             .map(|node| node.as_ref().unwrap().identity())
             .collect::<Vec<_>>();
-        let mut styles = styles::Builder::new(drafts.len());
+        let color_fields: Vec<_> = color_discovery.fields().collect();
+        let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
@@ -1711,10 +1771,18 @@ impl<M: View + 'static> Runtime<M> {
                 .and_then(|&old_index| old[old_index].take())
                 .filter(|node| node.component_scope == component_scopes[index]);
             let previous_style = if previous.is_some() {
-                *old_styles.get(*previous_index.unwrap())
+                old_styles.get(*previous_index.unwrap())
             } else {
                 draft.style
             };
+            if previous.is_some()
+                && old_styles.binding_fields(*previous_index.unwrap())
+                    != styles.binding_fields(index)
+            {
+                // Equal current colors do not make two source relationships
+                // interchangeable. Rebind the complete scene before slot edits.
+                self.dirty = true;
+            }
             let mut node_changed = previous.is_none();
             let mut node = if let Some(node) = previous {
                 node
@@ -1801,7 +1869,16 @@ impl<M: View + 'static> Runtime<M> {
             }
             node.parent = Parent::new(parent);
             node.ordinal = ordinal;
-            styles.push(&style);
+            let mask = u8::from(matches!(
+                self.overrides
+                    .get(node.identity(), crate::property::FOREGROUND),
+                Contribution::Set(_)
+            )) | (u8::from(matches!(
+                self.overrides
+                    .get(node.identity(), crate::property::BACKGROUND),
+                Contribution::Set(_)
+            )) << 1);
+            styles.declaration(index, draft.style, style, mask);
             node.handler = draft.on_click;
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
@@ -1960,6 +2037,17 @@ impl<M: View + 'static> Runtime<M> {
         self.nodes = nodes;
         self.styles = styles.finish();
         self.texts = texts;
+        for (field, slot) in color_fields {
+            let entry = fanout.get_mut(&field).expect("registered color fanout");
+            debug_assert!(entry.destinations().iter().all(|d| matches!(
+                d.property(),
+                Some(
+                    crate::property::PropertyId::Foreground
+                        | crate::property::PropertyId::Background
+                )
+            )));
+            *entry = Fanout::Color(slot);
+        }
         self.fanout = fanout;
         self.by_identity = self
             .nodes
@@ -1986,8 +2074,35 @@ impl<M: View + 'static> Runtime<M> {
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
-        let mut paint_edits = self.paint_begin(field);
-        let mut paint_eligible = paint_edits.is_some();
+        if let Some(Fanout::Color(slot)) = self.fanout.get(&field) {
+            let slot = *slot;
+            self.counters.source_reads += 1;
+            let frozen = self.sources.freeze(
+                &self.model,
+                field,
+                TextCodec::for_style::<Color>(),
+                crate::source::Needs {
+                    text: false,
+                    style: true,
+                },
+            )?;
+            let crate::property::PropertyValue::Color(color) = frozen
+                .style
+                .expect("color source frozen")
+                .admit(crate::property::PropertyId::Foreground)?
+            else {
+                return Err(Error::Binding(BindError::TypeMismatch(field)));
+            };
+            let eligible =
+                !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
+            let change = self.styles.update_color(slot, color);
+            self.changed_nodes = change.as_ref().map_or(0, |change| change.users as usize);
+            if eligible && self.finish_color_slot(change.as_ref())? {
+                return Ok(PatchOutcome::Complete);
+            }
+            self.dirty |= self.changed_nodes != 0;
+            return Ok(PatchOutcome::Visual);
+        }
         let Some(fanout) = self.fanout.get(&field) else {
             return Ok(PatchOutcome::Visual);
         };
@@ -1995,7 +2110,7 @@ impl<M: View + 'static> Runtime<M> {
             text: false,
             style: false,
         };
-        for destination in &fanout.destinations {
+        for destination in fanout.destinations() {
             if destination.port() == Port::Style {
                 needs.style = true;
             } else {
@@ -2005,10 +2120,10 @@ impl<M: View + 'static> Runtime<M> {
         self.counters.source_reads += 1;
         let frozen = self
             .sources
-            .freeze(&self.model, field, fanout.codec, needs)?;
+            .freeze(&self.model, field, fanout.codec(), needs)?;
         // A numeric source may feed width, font size AND text. Reject every bad
         // sink before the first logical destination or inspector base is edited.
-        for destination in &fanout.destinations {
+        for destination in fanout.destinations() {
             if let Some(id) = destination.property() {
                 frozen.style.expect("style codec requested").admit(id)?;
             }
@@ -2017,7 +2132,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut semantic = false;
         let mut visual_changed = false;
         let mut last_changed = None;
-        for (offset, &destination) in fanout.destinations.iter().enumerate() {
+        for &destination in fanout.destinations() {
             self.counters.destination_compares += 1;
             let index = destination.node();
             let node = &self.nodes[index];
@@ -2026,37 +2141,10 @@ impl<M: View + 'static> Runtime<M> {
                 let value = frozen.style.expect("style codec requested").admit(id)?;
                 let changed = match id.info().destination {
                     crate::property::PropertyDestination::Style => {
-                        let before = *self.styles.get(index);
+                        let before = self.styles.get(index);
                         let after = self.overrides.update_base(identity, before, id, value)?;
                         let changed = !styles::exact_eq(&before, &after);
                         if changed {
-                            if let Some(plan) = &mut paint_edits {
-                                let before_color = if id == crate::property::PropertyId::Background
-                                {
-                                    before.bg
-                                } else {
-                                    before.fg
-                                };
-                                let color = if id == crate::property::PropertyId::Background {
-                                    after.bg
-                                } else {
-                                    after.fg
-                                };
-                                paint_eligible &=
-                                    before_color.alpha().to_bits() == color.alpha().to_bits();
-                                let cursor = self
-                                    .metadata
-                                    .as_ref()
-                                    .unwrap()
-                                    .paint
-                                    .as_ref()
-                                    .unwrap()
-                                    .index(plan, offset)
-                                    .unwrap();
-                                if let Some(index) = self.canvas.paint_index(cursor) {
-                                    plan.edits.push(gpui_canvas::PaintEdit::new(index, color));
-                                }
-                            }
                             if id.info().impact == crate::property::Impact::Layout {
                                 self.layout_dirty.insert(identity);
                             }
@@ -2140,11 +2228,6 @@ impl<M: View + 'static> Runtime<M> {
                 self.changed_nodes += 1;
                 last_changed = Some(index);
             }
-        }
-        if let Some(edits) = paint_edits
-            && self.paint_finish(edits, paint_eligible, visual_changed)?
-        {
-            return Ok(PatchOutcome::Complete);
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
@@ -2291,7 +2374,7 @@ impl<M: View + 'static> Runtime<M> {
                     gpui_reactivity_core::NodeKind::Element,
                     list::row_style(
                         node.kind(),
-                        self.styles.get(index),
+                        &self.styles.get(index),
                         node.parent.index().map(|index| self.styles.get(index).flow),
                         self.list_rows.get(&node.identity()),
                     ),
@@ -2325,7 +2408,7 @@ impl<M: View + 'static> Runtime<M> {
                     id,
                     list::row_style(
                         self.nodes[index].kind(),
-                        self.styles.get(index),
+                        &self.styles.get(index),
                         self.nodes[index]
                             .parent
                             .index()
@@ -2426,7 +2509,7 @@ impl<M: View + 'static> Runtime<M> {
             .accessibility
             .as_mut()
             .map(|observer| observer.begin(base_stamp, size));
-        let mut paint_bindings = paint::Build::new(&self.fanout);
+        self.styles.reset_canvas_slots();
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
@@ -2523,15 +2606,14 @@ impl<M: View + 'static> Runtime<M> {
                 raw_bounds.intersection(viewport)
             };
             let paint = !in_scroll || !bounds.is_empty();
-            let bg_cursor = scene.paint_cursor();
             if paint && style.bg.alpha() > 0.0 {
-                scene.fill_rounded_rect(
-                    rect,
-                    radius,
-                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
-                    clip,
-                    style.bg,
-                )?;
+                let transform =
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
+                if let Some((value, cache)) = self.styles.shared_paint(index, false) {
+                    scene.fill_rounded_rect_shared(rect, radius, transform, clip, value, cache)?;
+                } else {
+                    scene.fill_rounded_rect(rect, radius, transform, clip, style.bg)?;
+                }
             } else if paint && (node.handler.is_some() || node.kind() == NodeKind::Input) {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
@@ -2543,8 +2625,6 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
-            let bg_index = scene.paint_index(bg_cursor);
-            let fg_cursor = scene.paint_cursor();
             if paint && let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = style.fg;
                 let service = self.text.as_mut().expect("text initialized before layout");
@@ -2553,21 +2633,34 @@ impl<M: View + 'static> Runtime<M> {
                     style.font_size,
                     Some(layout.content_box_width()),
                 )?;
-                scene.draw_text_scaled(
-                    service,
-                    shape,
-                    Point {
-                        x: layout.padding.left,
-                        y: layout.padding.top,
-                    },
-                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
-                    clip,
-                    fg,
-                    scale_factor,
-                )?;
-            }
-            if let Some(bindings) = &mut paint_bindings {
-                bindings.capture(index, bg_index, scene.paint_index(fg_cursor));
+                let origin = Point {
+                    x: layout.padding.left,
+                    y: layout.padding.top,
+                };
+                let transform =
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
+                if let Some((value, cache)) = self.styles.shared_paint(index, true) {
+                    scene.draw_text_scaled_shared(
+                        service,
+                        shape,
+                        origin,
+                        transform,
+                        clip,
+                        value,
+                        cache,
+                        scale_factor,
+                    )?;
+                } else {
+                    scene.draw_text_scaled(
+                        service,
+                        shape,
+                        origin,
+                        transform,
+                        clip,
+                        fg,
+                        scale_factor,
+                    )?;
+                }
             }
             if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
@@ -2739,13 +2832,7 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(leases) = image_leases {
             self.images.as_mut().unwrap().prepare(sequence, leases);
         }
-        if let Some(bindings) = paint_bindings {
-            self.metadata
-                .get_or_insert_with(|| Box::new(Metadata::default()))
-                .paint = Some(bindings.finish());
-        } else if let Some(metadata) = &mut self.metadata {
-            metadata.paint = None;
-        }
+        self.styles.clear_slot_transition();
         self.prepared = Some(Prepared {
             size: prepared_size,
             scale_factor,
@@ -3460,7 +3547,7 @@ mod semantic_storage_ledger {
             let destinations = runtime
                 .fanout
                 .values()
-                .map(|fanout| fanout.destinations.capacity() * size_of::<Destination>())
+                .map(|fanout| fanout.destination_bytes())
                 .sum::<usize>();
             println!(
                 "dense,ports={ports},nodes={},allocations={},retained={},peak={},base_capacity_bytes={base},name_capacity_bytes={names},description_capacity_bytes={descriptions},fanout_capacity_bytes={destinations},promotions={}",
@@ -3570,7 +3657,7 @@ mod style_port_tests {
             let before = win.runtime().unwrap().styles.get(index).to_owned();
             assert!(win.set(Panel::NUMBER, 0.0).is_err());
             let runtime = win.runtime().unwrap();
-            assert!(styles::exact_eq(runtime.styles.get(index), &before));
+            assert!(styles::exact_eq(&runtime.styles.get(index), &before));
             assert!(
                 runtime
                     .texts
@@ -3678,17 +3765,28 @@ mod style_port_tests {
                 runtime
                     .fanout
                     .values()
-                    .map(|fanout| fanout.destinations.capacity() * size_of::<Destination>())
+                    .map(|fanout| fanout.destination_bytes())
                     .sum::<usize>()
             );
             assert_eq!(
                 runtime
                     .fanout
                     .values()
-                    .map(|fanout| fanout.destinations.len())
+                    .map(|fanout| fanout.destinations().len())
                     .sum::<usize>(),
-                ports
+                if ports == 8 { 6 } else { ports }
             );
+            if ports == 8 {
+                assert!(runtime.styles.binding_fields(0).iter().all(Option::is_some));
+                assert_eq!(
+                    runtime
+                        .fanout
+                        .values()
+                        .filter(|f| matches!(f, Fanout::Color(_)))
+                        .count(),
+                    1
+                );
+            }
             drop(win);
         }
         struct Plain;

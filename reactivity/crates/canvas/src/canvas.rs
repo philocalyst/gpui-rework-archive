@@ -5,6 +5,11 @@ use crate::{
 };
 use std::{collections::HashMap, sync::Arc};
 
+mod columns;
+use columns::{Columns, PaintUse, StoredCommon};
+pub use columns::{
+    PaintColor, PaintSlot, PreparedPaint, SlotCommit, SlotEdit, SlotError, SlotErrorKind,
+};
 mod bins;
 use bins::RasterScratch;
 mod glyph_axis;
@@ -237,8 +242,13 @@ struct PendingDraw {
     source: u32,
 }
 struct InlineDraw {
-    common: Common,
+    common: StoredCommon,
     geometry: Geometry,
+    source: u32,
+}
+struct CommonGroup {
+    common: StoredCommon,
+    range: [u32; 2],
 }
 struct Placement {
     geometry: Geometry,
@@ -300,9 +310,8 @@ impl MaskIndex {
 struct DisplayList {
     order: Vec<u32>,
     inline: Vec<InlineDraw>,
-    inline_sources: Vec<u32>,
-    commons: Vec<Common>,
-    group_ranges: Vec<[u32; 2]>,
+    commons: Vec<CommonGroup>,
+    columns: Columns,
     placements: Vec<Placement>,
     masks: Vec<Arc<Raster>>,
     mask_index: MaskIndex,
@@ -391,9 +400,8 @@ impl DisplayList {
     fn clear(&mut self) {
         self.order.clear();
         self.inline.clear();
-        self.inline_sources.clear();
         self.commons.clear();
-        self.group_ranges.clear();
+        self.columns.clear();
         self.placements.clear();
         self.masks.clear();
         self.mask_index.clear();
@@ -407,10 +415,8 @@ impl DisplayList {
                 .as_ref()
                 .map_or(0, |_| size_of::<ImageResources>()),
             order_bytes: self.order.capacity() * size_of::<u32>(),
-            inline_bytes: self.inline.capacity() * size_of::<InlineDraw>()
-                + self.inline_sources.capacity() * size_of::<u32>(),
-            common_bytes: self.commons.capacity() * size_of::<Common>()
-                + self.group_ranges.capacity() * size_of::<[u32; 2]>(),
+            inline_bytes: self.inline.capacity() * size_of::<InlineDraw>(),
+            common_bytes: self.commons.capacity() * size_of::<CommonGroup>() + self.columns.bytes(),
             placement_bytes: self.placements.capacity() * size_of::<Placement>(),
             resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
                 + self
@@ -425,8 +431,13 @@ impl DisplayList {
     fn bytes(&self) -> usize {
         self.storage().lane_bytes()
     }
-    fn iter(&self) -> impl ExactSizeIterator<Item = BorrowedCommand<'_>> + DoubleEndedIterator {
-        self.order.iter().map(|&address| self.get(address))
+    fn iter(
+        &self,
+        viewport: Rect,
+    ) -> impl ExactSizeIterator<Item = BorrowedCommand<'_>> + DoubleEndedIterator {
+        self.order
+            .iter()
+            .map(move |&address| self.get(address, viewport))
     }
     /// Device-clipped integer bounds in painter order. CSR construction needs
     /// no material, resource lease, inverse mapping, or command reconstruction.
@@ -445,43 +456,56 @@ impl DisplayList {
     // resource/common/geometry index belongs to this DisplayList; no external
     // stale address can enter this indexing path.
     #[inline]
-    fn parts(&self, address: u32) -> (&Common, &Geometry, u32) {
+    fn stored(&self, address: u32) -> (StoredCommon, &Geometry, u32) {
         if address & INLINE_DRAW != 0 {
             let draw = &self.inline[(address & !INLINE_DRAW) as usize];
-            (
-                &draw.common,
-                &draw.geometry,
-                self.inline_sources[(address & !INLINE_DRAW) as usize],
-            )
+            (draw.common, &draw.geometry, draw.source)
         } else {
             let p = &self.placements[address as usize];
-            (&self.commons[p.common as usize], &p.geometry, p.source)
+            (
+                self.commons[p.common as usize].common,
+                &p.geometry,
+                p.source,
+            )
         }
     }
     #[inline]
-    fn get(&self, address: u32) -> BorrowedCommand<'_> {
-        let (common, geometry, source) = self.parts(address);
+    fn parts(&self, address: u32, viewport: Rect) -> (Common, &Geometry, u32) {
+        let (common, geometry, source) = self.stored(address);
+        let image = source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0;
+        (
+            self.columns.resolve(common, viewport, image),
+            geometry,
+            source,
+        )
+    }
+    #[inline]
+    fn source(&self, source: u32) -> BorrowedSource<'_> {
+        if source == RECT_SOURCE {
+            BorrowedSource::Rect
+        } else if source & ROUNDED_SOURCE != 0 {
+            BorrowedSource::Rounded(f32::from_bits(source & !ROUNDED_SOURCE))
+        } else if source & IMAGE_SOURCE != 0 {
+            let image = &self.images.as_ref().unwrap().values[(source & RESOURCE_INDEX) as usize];
+            if source & NEAREST_SOURCE != 0 {
+                BorrowedSource::ImageNearest(image)
+            } else {
+                BorrowedSource::ImageLinear(image)
+            }
+        } else {
+            BorrowedSource::Glyph(&self.masks[source as usize])
+        }
+    }
+    #[inline]
+    fn get(&self, address: u32, viewport: Rect) -> BorrowedCommand<'_> {
+        let (common, geometry, source) = self.parts(address, viewport);
         BorrowedCommand {
             rect: geometry.rect,
             clip: common.clip,
             map: common.map,
             color: common.color,
             bounds: geometry.bounds.map(usize::from),
-            source: if source == RECT_SOURCE {
-                BorrowedSource::Rect
-            } else if source & ROUNDED_SOURCE != 0 {
-                BorrowedSource::Rounded(f32::from_bits(source & !ROUNDED_SOURCE))
-            } else if source & IMAGE_SOURCE != 0 {
-                let image =
-                    &self.images.as_ref().unwrap().values[(source & RESOURCE_INDEX) as usize];
-                if source & NEAREST_SOURCE != 0 {
-                    BorrowedSource::ImageNearest(image)
-                } else {
-                    BorrowedSource::ImageLinear(image)
-                }
-            } else {
-                BorrowedSource::Glyph(&self.masks[source as usize])
-            },
+            source: self.source(source),
         }
     }
     // Reserve all lanes before publication. Allocation failure can grow capacity
@@ -503,17 +527,11 @@ impl DisplayList {
             self.commons
                 .try_reserve(1)
                 .map_err(|_| Error::ResourceLimit)?;
-            self.group_ranges
-                .try_reserve(1)
-                .map_err(|_| Error::ResourceLimit)?;
             self.placements
                 .try_reserve(draws)
                 .map_err(|_| Error::ResourceLimit)?;
         } else {
             self.inline
-                .try_reserve(draws)
-                .map_err(|_| Error::ResourceLimit)?;
-            self.inline_sources
                 .try_reserve(draws)
                 .map_err(|_| Error::ResourceLimit)?;
         }
@@ -525,20 +543,36 @@ impl DisplayList {
         pending: impl IntoIterator<Item = PendingDraw>,
         grouped: bool,
         masks: Vec<Arc<Raster>>,
+        viewport: Rect,
+        shared: Option<PaintSlot>,
     ) {
         for mask in masks {
             let index = self.masks.len() as u32;
             self.mask_index.insert(mask.key, index);
             self.masks.push(mask);
         }
+        let mut pending = pending.into_iter().peekable();
+        let image = pending.peek().is_some_and(|draw| {
+            draw.source & ROUNDED_SOURCE == 0 && draw.source & IMAGE_SOURCE != 0
+        });
+        let common = self.columns.store(common, viewport, shared, image);
         let group = self.commons.len() as u32;
         if grouped {
-            self.commons.push(common);
-            self.group_ranges.push([self.order.len() as u32; 2]);
+            self.commons.push(CommonGroup {
+                common,
+                range: [self.order.len() as u32; 2],
+            });
         }
         for command in pending {
             let source = command.source;
             let geometry = command.geometry;
+            if !image {
+                self.columns.support(
+                    common.paint,
+                    DamageRegion::checked_canvas_bounds(geometry.bounds.map(usize::from)),
+                    source == RECT_SOURCE,
+                );
+            }
             if grouped {
                 self.order.push(self.placements.len() as u32);
                 self.placements.push(Placement {
@@ -548,12 +582,15 @@ impl DisplayList {
                 });
             } else {
                 self.order.push(INLINE_DRAW | self.inline.len() as u32);
-                self.inline.push(InlineDraw { geometry, common });
-                self.inline_sources.push(source);
+                self.inline.push(InlineDraw {
+                    geometry,
+                    common,
+                    source,
+                });
             }
         }
         if grouped {
-            self.group_ranges[group as usize][1] = self.order.len() as u32;
+            self.commons[group as usize].range[1] = self.order.len() as u32;
         }
     }
 }
@@ -680,21 +717,36 @@ pub struct PreparedGroup<'a> {
     order: &'a [u32],
 }
 impl<'a> PreparedGroup<'a> {
+    /// Shared working paint relationship in this canonical scene, if present.
+    pub fn paint_slot(self) -> Option<PaintSlot> {
+        let (stored, _, source) = self.commands.stored(self.order[0]);
+        if source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
+            return None;
+        }
+        self.commands.columns.shared_slot(stored.paint)
+    }
+
     pub fn placements(
         self,
     ) -> impl ExactSizeIterator<Item = PreparedPlacement<'a>> + DoubleEndedIterator {
         self.order.iter().map(move |&address| {
-            let (common, geometry, _) = self.commands.parts(address);
+            let (stored, geometry, source) = self.commands.stored(address);
             PreparedPlacement {
                 local_rect: geometry.rect,
                 bounds: device_bounds(geometry.bounds),
-                source: self.commands.get(address).source.prepared(common.color),
+                source: self.commands.source(source).prepared([
+                    stored.image_radius(),
+                    0.0,
+                    0.0,
+                    1.0,
+                ]),
             }
         })
     }
 }
 struct Groups<'a> {
     commands: &'a DisplayList,
+    extent: [u16; 2],
     front: usize,
     back: usize,
     remaining: usize,
@@ -702,7 +754,7 @@ struct Groups<'a> {
 impl<'a> Groups<'a> {
     fn view(&self, start: usize, end: usize) -> PreparedGroup<'a> {
         let address = self.commands.order[start];
-        let (common, _, source) = self.commands.parts(address);
+        let (common, _, source) = self.commands.parts(address, extent_rect(self.extent));
         PreparedGroup {
             inverse: common.map.inverse,
             clip: common.clip,
@@ -727,7 +779,7 @@ impl<'a> Iterator for Groups<'a> {
         self.front = if address & INLINE_DRAW != 0 {
             start + 1
         } else {
-            self.commands.group_ranges[self.commands.placements[address as usize].common as usize]
+            self.commands.commons[self.commands.placements[address as usize].common as usize].range
                 [1] as usize
         };
         self.remaining -= 1;
@@ -746,15 +798,23 @@ impl DoubleEndedIterator for Groups<'_> {
         self.back -= 1;
         let address = self.commands.order[self.back];
         if address & INLINE_DRAW == 0 {
-            self.back = self.commands.group_ranges
-                [self.commands.placements[address as usize].common as usize][0]
-                as usize;
+            self.back = self.commands.commons
+                [self.commands.placements[address as usize].common as usize]
+                .range[0] as usize;
         }
         self.remaining -= 1;
         Some(self.view(self.back, end))
     }
 }
 impl ExactSizeIterator for Groups<'_> {}
+#[inline]
+fn viewport_rect(width: usize, height: usize) -> Rect {
+    Rect::new(0.0, 0.0, width as f32, height as f32)
+}
+#[inline]
+fn extent_rect([width, height]: [u16; 2]) -> Rect {
+    viewport_rect(width as usize, height as usize)
+}
 #[inline]
 fn device_bounds([left, top, right, bottom]: [u16; 4]) -> Rect {
     Rect::new(
@@ -784,8 +844,17 @@ pub struct PreparedScene<'a> {
     pub color_config: ColorConfig,
     pub clear: [f32; 4],
     commands: &'a DisplayList,
+    extent: [u16; 2],
 }
 impl<'a> PreparedScene<'a> {
+    /// Prefix ending at the last shared row. Positions include intervening
+    /// literal rows so a slot has the same checked address in every backend.
+    pub fn paint_bank(
+        self,
+    ) -> impl ExactSizeIterator<Item = PreparedPaint> + DoubleEndedIterator + 'a {
+        self.commands.columns.bank()
+    }
+
     /// Certify a command-free opaque sRGB/SDR scene for native solid fill.
     /// Returns the exact same0x00RRGGBB word as render_bgrx, without an output
     /// buffer, bins or raster work. Other scenes require the ordinary renderer.
@@ -823,6 +892,7 @@ impl<'a> PreparedScene<'a> {
     pub fn groups(self) -> impl ExactSizeIterator<Item = PreparedGroup<'a>> + DoubleEndedIterator {
         Groups {
             commands: self.commands,
+            extent: self.extent,
             front: 0,
             back: self.commands.order.len(),
             remaining: self.commands.commons.len() + self.commands.inline.len(),
@@ -841,7 +911,7 @@ impl<'a> PreparedScene<'a> {
     }
 
     pub fn draws(self) -> impl ExactSizeIterator<Item = PreparedDraw<'a>> + DoubleEndedIterator {
-        self.commands.iter().map(|command| {
+        self.commands.iter(extent_rect(self.extent)).map(|command| {
             let [left, top, right, bottom] = command.bounds;
             PreparedDraw {
                 local_rect: command.rect,
@@ -962,8 +1032,10 @@ impl Canvas {
             return full;
         }
         let mut damage = DamageRegion::default();
-        let mut previous = previous.commands.iter();
-        let mut next = self.commands.iter();
+        let mut previous = previous
+            .commands
+            .iter(viewport_rect(previous.width, previous.height));
+        let mut next = self.commands.iter(viewport_rect(self.width, self.height));
         // Zip may consume an unmatched item from its first iterator. Bound the
         // shared prefix explicitly so removals retain their old support.
         for _ in 0..previous.len().min(next.len()) {
@@ -993,6 +1065,7 @@ impl Canvas {
             color_config: self.color_config,
             clear: self.clear,
             commands: &self.commands,
+            extent: [self.width as u16, self.height as u16],
         }
     }
     /// Describes the bytes returned by pixels. Display P3 requires a tagged,
@@ -1024,7 +1097,14 @@ impl Canvas {
         clip: Rect,
         color: Color,
     ) -> Result<(), Error> {
-        self.fill_shape(rect, transform, clip, color, RECT_SOURCE)
+        self.fill_shape(
+            rect,
+            transform,
+            clip,
+            PaintColor::new(color),
+            RECT_SOURCE,
+            PaintUse::Literal,
+        )
     }
     /// Sample a rounded rectangle at the same 4×4 lattice as other commands.
     /// Radius is finite/nonnegative and is clamped against the local extents;
@@ -1044,30 +1124,153 @@ impl Canvas {
         } else {
             ROUNDED_SOURCE | radius.to_bits()
         };
-        self.fill_shape(rect, transform, clip, color, source)
+        self.fill_shape(
+            rect,
+            transform,
+            clip,
+            PaintColor::new(color),
+            source,
+            PaintUse::Literal,
+        )
     }
+    pub fn fill_rect_slot(
+        &mut self,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        slot: PaintSlot,
+    ) -> Result<(), Error> {
+        self.fill_shape(
+            rect,
+            transform,
+            clip,
+            self.slot_color(slot)?,
+            RECT_SOURCE,
+            PaintUse::Existing(slot),
+        )
+    }
+    pub fn fill_rounded_rect_slot(
+        &mut self,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        slot: PaintSlot,
+    ) -> Result<(), Error> {
+        rounded::validate_radius(radius)?;
+        let source = if radius == 0.0 {
+            RECT_SOURCE
+        } else {
+            ROUNDED_SOURCE | radius.to_bits()
+        };
+        self.fill_shape(
+            rect,
+            transform,
+            clip,
+            self.slot_color(slot)?,
+            source,
+            PaintUse::Existing(slot),
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
     fn fill_shape(
         &mut self,
         rect: Rect,
         transform: Affine,
         clip: Rect,
-        color: Color,
+        color: PaintColor,
         source: u32,
+        paint: PaintUse<'_>,
     ) -> Result<(), Error> {
         validate_rect(clip)?;
         let common = Common {
             clip,
             map: Mapping::new(transform)?,
-            color: color.premultiplied(),
+            color: color.0,
         };
         let command = self.prepare(rect, transform, common, source)?;
         if let Some(command) = command {
+            self.commands.columns.admit(
+                common,
+                viewport_rect(self.width, self.height),
+                paint.reference(),
+                source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0,
+                paint.new_shared(),
+            )?;
             self.admit(std::slice::from_ref(&command), &[], 0)?;
-            self.commands
-                .append(common, std::iter::once(command), false, Vec::new());
+            let shared = paint.commit(&mut self.commands.columns, color);
+            self.commands.append(
+                common,
+                std::iter::once(command),
+                false,
+                Vec::new(),
+                viewport_rect(self.width, self.height),
+                shared,
+            );
             self.dirty = true;
         }
         Ok(())
+    }
+    /// Initialize the shared row only if a command is actually admitted.
+    /// A populated positional cache reuses its current owned bank color; use
+    /// prepare_slots for transactional changes instead of passing a new initial.
+    #[allow(clippy::too_many_arguments)]
+    pub fn fill_rounded_rect_shared(
+        &mut self,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        initial: PaintColor,
+        cache: &mut Option<PaintSlot>,
+    ) -> Result<(), Error> {
+        rounded::validate_radius(radius)?;
+        let value = if let Some(slot) = *cache {
+            self.slot_color(slot)?
+        } else {
+            initial
+        };
+        let source = if radius == 0.0 {
+            RECT_SOURCE
+        } else {
+            ROUNDED_SOURCE | radius.to_bits()
+        };
+        self.fill_shape(
+            rect,
+            transform,
+            clip,
+            value,
+            source,
+            PaintUse::Shared(cache),
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled_shared(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        initial: PaintColor,
+        cache: &mut Option<PaintSlot>,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
+        let value = if let Some(slot) = *cache {
+            self.slot_color(slot)?
+        } else {
+            initial
+        };
+        self.draw_text_working(
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            value,
+            raster_scale,
+            PaintUse::Shared(cache),
+        )
     }
     /// Reconstruct immutable pixels across `rect`, using linear-premultiplied
     /// texel colors. Geometry/clip use the same sample sites as other draws.
@@ -1150,6 +1353,13 @@ impl Canvas {
                 .try_reserve(1)
                 .map_err(|_| Error::ResourceLimit)?;
         }
+        self.commands.columns.admit(
+            common,
+            viewport_rect(self.width, self.height),
+            None,
+            true,
+            false,
+        )?;
         self.admit(std::slice::from_ref(&command), &[], 0)?;
         if unpublished.is_some() {
             self.commands.images = unpublished;
@@ -1160,8 +1370,14 @@ impl Canvas {
             resources.index.insert(image.key(), index);
             resources.bytes += image.pixel_bytes();
         }
-        self.commands
-            .append(common, std::iter::once(command), false, Vec::new());
+        self.commands.append(
+            common,
+            std::iter::once(command),
+            false,
+            Vec::new(),
+            viewport_rect(self.width, self.height),
+            None,
+        );
         self.dirty = true;
         Ok(())
     }
@@ -1194,6 +1410,51 @@ impl Canvas {
         color: Color,
         raster_scale: f32,
     ) -> Result<(), Error> {
+        self.draw_text_working(
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            PaintColor::new(color),
+            raster_scale,
+            PaintUse::Literal,
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled_slot(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        slot: PaintSlot,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
+        self.draw_text_working(
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            self.slot_color(slot)?,
+            raster_scale,
+            PaintUse::Existing(slot),
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn draw_text_working(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        color: PaintColor,
+        raster_scale: f32,
+        paint: PaintUse<'_>,
+    ) -> Result<(), Error> {
         text.validate(layout)?;
         if !raster_scale.is_finite() || raster_scale <= 0.0 {
             return Err(Error::InvalidGeometry);
@@ -1213,7 +1474,7 @@ impl Canvas {
         let common = Common {
             clip,
             map: Mapping::new(transform)?,
-            color: color.premultiplied(),
+            color: color.0,
         };
         let mut pending = Vec::with_capacity(layout.glyphs().len());
         let mut resources = Vec::<Arc<Raster>>::new();
@@ -1264,10 +1525,27 @@ impl Canvas {
                 pending.push(command);
             }
         }
+        if !pending.is_empty() {
+            self.commands.columns.admit(
+                common,
+                viewport_rect(self.width, self.height),
+                paint.reference(),
+                false,
+                paint.new_shared(),
+            )?;
+        }
         self.admit(&pending, &resources, pending_bytes)?;
         if !pending.is_empty() {
+            let shared = paint.commit(&mut self.commands.columns, color);
             let grouped = pending.len() > 1;
-            self.commands.append(common, pending, grouped, resources);
+            self.commands.append(
+                common,
+                pending,
+                grouped,
+                resources,
+                viewport_rect(self.width, self.height),
+                shared,
+            );
             self.dirty = true;
         }
         Ok(())
@@ -1679,22 +1957,25 @@ impl RenderSchedule for RenderPool {
             (frame.tile_bounds[2] * TILE).min(frame.width),
             (frame.tile_bounds[3] * TILE).min(frame.height),
         ];
-        let work = frame.commands.iter().fold(
-            (pixel_bounds[2] - pixel_bounds[0]) * (pixel_bounds[3] - pixel_bounds[1]),
-            |work, command| {
-                let [left, top, right, bottom] = command.bounds;
-                let area = right
-                    .min(pixel_bounds[2])
-                    .saturating_sub(left.max(pixel_bounds[0]))
-                    * bottom
-                        .min(pixel_bounds[3])
-                        .saturating_sub(top.max(pixel_bounds[1]));
-                let uniform = frame.tile_proofs
-                    && matches!(command.source, BorrowedSource::Rect)
-                    && full_tile(&command, 0, 0, frame.width, frame.height);
-                work.saturating_add(if uniform { area / 256 } else { area * 16 })
-            },
-        );
+        let work = frame
+            .commands
+            .iter(viewport_rect(frame.width, frame.height))
+            .fold(
+                (pixel_bounds[2] - pixel_bounds[0]) * (pixel_bounds[3] - pixel_bounds[1]),
+                |work, command| {
+                    let [left, top, right, bottom] = command.bounds;
+                    let area = right
+                        .min(pixel_bounds[2])
+                        .saturating_sub(left.max(pixel_bounds[0]))
+                        * bottom
+                            .min(pixel_bounds[3])
+                            .saturating_sub(top.max(pixel_bounds[1]));
+                    let uniform = frame.tile_proofs
+                        && matches!(command.source, BorrowedSource::Rect)
+                        && full_tile(&command, 0, 0, frame.width, frame.height);
+                    work.saturating_add(if uniform { area / 256 } else { area * 16 })
+                },
+            );
         if work < self.min_work || frame.height <= TILE {
             return Serial.render(frame, writer, pixels);
         }
@@ -1740,7 +2021,10 @@ fn render_band<W: PixelWriter>(
             ordered
                 .iter()
                 .rposition(|index| {
-                    let command = frame.commands.get(frame.commands.order[*index as usize]);
+                    let command = frame.commands.get(
+                        frame.commands.order[*index as usize],
+                        viewport_rect(frame.width, frame.height),
+                    );
                     command.color[3] == 1.0
                         && matches!(command.source, BorrowedSource::Rect)
                         && full_tile(&command, left, top, right, bottom)
@@ -1752,7 +2036,10 @@ fn render_band<W: PixelWriter>(
         stats.skipped_command_tiles += start;
         let mut uniform = Some(frame.clear);
         for &index in &ordered[start..] {
-            let command = frame.commands.get(frame.commands.order[index as usize]);
+            let command = frame.commands.get(
+                frame.commands.order[index as usize],
+                viewport_rect(frame.width, frame.height),
+            );
             let full = frame.tile_proofs
                 && matches!(command.source, BorrowedSource::Rect)
                 && full_tile(&command, left, top, right, bottom);
@@ -2037,6 +2324,83 @@ impl CanvasScene<'_> {
     ) -> Result<(), Error> {
         self.pending
             .fill_rounded_rect(rect, radius, transform, clip, color)
+    }
+    pub fn fill_rect_slot(
+        &mut self,
+        rect: Rect,
+        transform: Affine,
+        clip: Rect,
+        slot: PaintSlot,
+    ) -> Result<(), Error> {
+        self.pending.fill_rect_slot(rect, transform, clip, slot)
+    }
+    pub fn fill_rounded_rect_slot(
+        &mut self,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        slot: PaintSlot,
+    ) -> Result<(), Error> {
+        self.pending
+            .fill_rounded_rect_slot(rect, radius, transform, clip, slot)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled_slot(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        slot: PaintSlot,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
+        self.pending.draw_text_scaled_slot(
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            slot,
+            raster_scale,
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn fill_rounded_rect_shared(
+        &mut self,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        initial: PaintColor,
+        cache: &mut Option<PaintSlot>,
+    ) -> Result<(), Error> {
+        self.pending
+            .fill_rounded_rect_shared(rect, radius, transform, clip, initial, cache)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled_shared(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        initial: PaintColor,
+        cache: &mut Option<PaintSlot>,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
+        self.pending.draw_text_scaled_shared(
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            initial,
+            cache,
+            raster_scale,
+        )
     }
     pub fn draw_image(
         &mut self,

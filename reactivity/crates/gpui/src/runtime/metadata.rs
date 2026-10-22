@@ -196,7 +196,6 @@ pub(super) struct Metadata {
     pub presented: Sheet,
     pub candidate: Option<Sheet>,
     pub geometry: Option<Box<super::geometry::Geometry>>,
-    pub paint: Option<Box<super::paint::PaintState>>,
 }
 impl Metadata {
     pub fn base(&self, identity: u64) -> Option<&Declared> {
@@ -222,7 +221,6 @@ impl Metadata {
     }
     pub fn unused(&self) -> bool {
         self.geometry.is_none()
-            && self.paint.is_none()
             && self.base.is_empty()
             && self.overrides.is_empty()
             && self.candidate.is_none()
@@ -368,7 +366,7 @@ impl<M: View + 'static> Runtime<M> {
                     if let Some(metadata) = self.metadata.as_deref()
                         && let Some(fanout) = self.fanout.get(&field)
                     {
-                        for destination in &fanout.destinations {
+                        for destination in fanout.destinations() {
                             if !matches!(destination.port(), Port::Name | Port::Description) {
                                 continue;
                             }
@@ -444,7 +442,7 @@ impl<M: View + 'static> Runtime<M> {
                     Publish::Identity(identity) => patch(metadata, identity, true),
                     Publish::Field(field) => {
                         if let Some(fanout) = self.fanout.get(&field) {
-                            for destination in &fanout.destinations {
+                            for destination in fanout.destinations() {
                                 if matches!(destination.port(), Port::Name | Port::Description) {
                                     patch(
                                         metadata,

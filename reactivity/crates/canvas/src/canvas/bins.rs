@@ -112,7 +112,11 @@ mod tests {
         }
         // Exercise both private address forms without loading a shared font
         // in this unit binary (the font lifecycle oracle owns that registry).
-        let common = canvas.commands.inline[0].common;
+        let common = canvas.commands.columns.resolve(
+            canvas.commands.inline[0].common,
+            super::super::viewport_rect(65, 49),
+            false,
+        );
         let geometry = canvas.commands.inline[0].geometry;
         canvas.commands.append(
             common,
@@ -122,6 +126,8 @@ mod tests {
             }],
             true,
             Vec::new(),
+            super::super::viewport_rect(65, 49),
+            None,
         );
         let image = Image::linear_srgb(
             1,
@@ -142,7 +148,10 @@ mod tests {
         let commands = &canvas.commands;
         assert!(!commands.inline.is_empty());
         assert!(!commands.placements.is_empty());
-        let expected: Vec<_> = commands.iter().map(|c| c.bounds).collect();
+        let expected: Vec<_> = commands
+            .iter(super::super::viewport_rect(65, 49))
+            .map(|c| c.bounds)
+            .collect();
         assert_eq!(commands.ordered_bounds().len(), expected.len());
         assert!(
             commands

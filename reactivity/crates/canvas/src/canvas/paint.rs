@@ -45,6 +45,7 @@ pub enum PaintErrorKind {
     /// Edits must have strictly increasing group positions. Coalescing belongs
     /// to the source owner, which knows the intended order of its writes.
     Unordered,
+    ResourceLimit,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PaintError {
@@ -86,15 +87,17 @@ impl PaintCommit<'_, '_> {
     }
     pub fn commit(self) -> DamageRegion {
         for edit in self.edits {
-            let address = self.canvas.commands.order[edit.index.0 as usize];
-            if address & INLINE_DRAW != 0 {
-                self.canvas.commands.inline[(address & !INLINE_DRAW) as usize]
-                    .common
-                    .color = edit.color;
+            let commands = &mut self.canvas.commands;
+            let address = commands.order[edit.index.0 as usize];
+            let common = if address & INLINE_DRAW != 0 {
+                &mut commands.inline[(address & !INLINE_DRAW) as usize].common
             } else {
-                let common = self.canvas.commands.placements[address as usize].common;
-                self.canvas.commands.commons[common as usize].color = edit.color;
-            }
+                let group = commands.placements[address as usize].common;
+                &mut commands.commons[group as usize].common
+            };
+            common.paint = commands
+                .columns
+                .set_literal(common.paint, PaintColor(edit.color));
         }
         self.canvas.dirty |= self.changed != 0;
         self.damage
@@ -102,12 +105,16 @@ impl PaintCommit<'_, '_> {
 }
 
 impl DisplayList {
-    fn paint_group(&self, start: u32) -> Result<(u32, &Common, DamageRegion), PaintErrorKind> {
+    fn paint_group(
+        &self,
+        start: u32,
+        viewport: Rect,
+    ) -> Result<(u32, Common, DamageRegion), PaintErrorKind> {
         let &address = self
             .order
             .get(start as usize)
             .ok_or(PaintErrorKind::MissingGroup)?;
-        let (common, geometry, source) = self.parts(address);
+        let (common, geometry, source) = self.parts(address, viewport);
         if source != RECT_SOURCE && source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
             return Err(PaintErrorKind::NotColor);
         }
@@ -115,7 +122,7 @@ impl DisplayList {
             DamageRegion::checked_canvas_bounds(geometry.bounds.map(usize::from))
         } else {
             let p = &self.placements[address as usize];
-            if self.group_ranges[p.common as usize][0] != start {
+            if self.commons[p.common as usize].range[0] != start {
                 return Err(PaintErrorKind::MissingGroup);
             }
             // All placements share this clip. Using it avoids a glyph-count
@@ -136,7 +143,7 @@ impl Canvas {
 
     pub fn paint_index(&self, cursor: u32) -> Option<PaintIndex> {
         self.commands
-            .paint_group(cursor)
+            .paint_group(cursor, viewport_rect(self.width, self.height))
             .ok()
             .map(|_| PaintIndex(cursor))
     }
@@ -155,17 +162,34 @@ impl Canvas {
         let mut previous = None;
         let mut damage = DamageRegion::default();
         let mut changed = 0;
+        let mut literals = 0;
         for (i, edit) in edits.iter().enumerate() {
             let fail = |reason| PaintError { edit: i, reason };
             if previous.is_some_and(|index| index >= edit.index) {
                 return Err(fail(PaintErrorKind::Unordered));
             }
             previous = Some(edit.index);
-            let (address, common, support) =
-                self.commands.paint_group(edit.index.0).map_err(fail)?;
+            let (address, common, support) = self
+                .commands
+                .paint_group(edit.index.0, viewport_rect(self.width, self.height))
+                .map_err(fail)?;
             if edit.color[3] == 0.0 || edit.color[3].to_bits() != common.color[3].to_bits() {
                 return Err(fail(PaintErrorKind::AlphaChanged));
             }
+            let reference = if address & INLINE_DRAW != 0 {
+                self.commands.inline[(address & !INLINE_DRAW) as usize]
+                    .common
+                    .paint
+            } else {
+                self.commands.commons[self.commands.placements[address as usize].common as usize]
+                    .common
+                    .paint
+            };
+            literals += usize::from(
+                self.commands
+                    .columns
+                    .needs_literal_entry(reference, PaintColor(edit.color)),
+            );
             if edit.color.map(f32::to_bits) == common.color.map(f32::to_bits) {
                 continue;
             }
@@ -189,6 +213,13 @@ impl Canvas {
             };
             damage = damage.union(support);
         }
+        self.commands
+            .columns
+            .reserve_literals(literals)
+            .map_err(|_| PaintError {
+                edit: 0,
+                reason: PaintErrorKind::ResourceLimit,
+            })?;
         Ok(PaintCommit {
             canvas: self,
             edits,
@@ -202,7 +233,7 @@ impl PreparedScene<'_> {
     /// turn the index into a cross-scene identity or generation capability.
     pub fn paint_index(self, cursor: u32) -> Option<PaintIndex> {
         self.commands
-            .paint_group(cursor)
+            .paint_group(cursor, extent_rect(self.extent))
             .ok()
             .map(|_| PaintIndex(cursor))
     }

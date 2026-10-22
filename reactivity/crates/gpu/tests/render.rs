@@ -2446,3 +2446,174 @@ fn separate_identical_color_calls_keep_independent_positional_groups() {
         }
     });
 }
+
+fn bank_scene(
+    canvas: &mut Canvas,
+    colors: [Color; 2],
+    banked: bool,
+) -> Option<[gpui_canvas::PaintSlot; 2]> {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling, PaintColor};
+    canvas.clear(Color::WHITE);
+    let clip = Rect::new(0.0, 0.0, 64.0, 48.0);
+    let a = banked.then(|| canvas.paint_slot(PaintColor::new(colors[0])).unwrap());
+    if let Some(a) = a {
+        canvas
+            .fill_rect_slot(clip, Affine::IDENTITY, clip, a)
+            .unwrap();
+    } else {
+        canvas
+            .fill_rect(clip, Affine::IDENTITY, clip, colors[0])
+            .unwrap();
+    }
+    // A literal row separates shared positions; no dense source-only remap.
+    canvas
+        .fill_rect(
+            Rect::new(3.0, 4.0, 7.0, 6.0),
+            Affine::IDENTITY,
+            clip,
+            Color::rgb(23, 45, 67),
+        )
+        .unwrap();
+    let b = banked.then(|| canvas.paint_slot(PaintColor::new(colors[1])).unwrap());
+    let rect = Rect::new(0.125, 0.375, 31.0, 27.0);
+    let transform = Affine {
+        a: -1.0,
+        c: 0.25,
+        tx: 43.0,
+        ty: 4.0,
+        ..Affine::IDENTITY
+    };
+    if let Some(b) = b {
+        canvas
+            .fill_rounded_rect_slot(rect, 6.0, transform, clip, b)
+            .unwrap();
+    } else {
+        canvas
+            .fill_rounded_rect(rect, 6.0, transform, clip, colors[1])
+            .unwrap();
+    }
+    let mut text = TextSystem::bundled().unwrap();
+    let layout = text.shape("ABA café", 16.0, None).unwrap();
+    if let Some(b) = b {
+        canvas
+            .draw_text_scaled_slot(
+                &mut text,
+                &layout,
+                Point { x: 1.0, y: 8.0 },
+                Affine::IDENTITY,
+                clip,
+                b,
+                1.0,
+            )
+            .unwrap();
+    } else {
+        canvas
+            .draw_text(
+                &mut text,
+                &layout,
+                Point { x: 1.0, y: 8.0 },
+                Affine::IDENTITY,
+                clip,
+                colors[1],
+            )
+            .unwrap();
+    }
+    let image = Image::rgba8(
+        2,
+        2,
+        ImageProfile::Srgb,
+        AlphaMode::Straight,
+        vec![255, 0, 255, 128].repeat(4).into_boxed_slice(),
+    )
+    .unwrap();
+    canvas
+        .draw_image(
+            &image,
+            Rect::new(45.0, 30.0, 12.0, 12.0),
+            Affine::IDENTITY,
+            clip,
+            ImageSampling::Nearest,
+        )
+        .unwrap();
+    a.zip(b).map(|(a, b)| [a, b])
+}
+#[test]
+fn shared_bank_queues_a_patch_b_patch_c_without_poll_and_matches_full_literal_packets() {
+    use gpui_canvas::{PaintColor, SlotEdit};
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let mut gpu = renderer(format).await;
+            let colors = [
+                [Color::BLACK, Color::rgba(0, 0, 255, 128)],
+                [Color::rgb(80, 120, 160), Color::rgba(255, 0, 0, 128)],
+                [Color::rgb(20, 40, 60), Color::rgba(0, 255, 0, 128)],
+            ];
+            let mut canvas = Canvas::recording(64, 48, config).unwrap();
+            let slots = bank_scene(&mut canvas, colors[0], true).unwrap();
+            let targets = std::array::from_fn::<_, 3, _>(|_| output_texture(&gpu, &canvas));
+            gpu.render(
+                canvas.prepared_scene(),
+                &targets[0].create_view(&Default::default()),
+            )
+            .unwrap();
+            for index in 1..3 {
+                let edits = slots
+                    .into_iter()
+                    .zip(colors[index])
+                    .map(|(slot, color)| SlotEdit::new(slot, PaintColor::new(color)))
+                    .collect::<Vec<_>>();
+                canvas.prepare_slots(&edits).unwrap().commit();
+                let view = targets[index].create_view(&Default::default());
+                let plan = gpu.prepare_slots(&edits, &view).unwrap();
+                assert_eq!(plan.changed_slots(), 2);
+                assert_eq!(plan.upload_bytes(), 32);
+                plan.commit();
+                let stats = gpu.stats();
+                assert_eq!(stats.instance_upload_bytes, 32);
+                assert_eq!(
+                    (
+                        stats.validated_draws,
+                        stats.binning_tile_visits,
+                        stats.bind_group_creations
+                    ),
+                    (0, 0, 0)
+                );
+            }
+            // No submit was polled/read back before all A/B/C commands queued.
+            let actual = targets.each_ref().map(|target| read_texture(&gpu, target));
+            let mut oracle = renderer(format).await;
+            for index in 0..3 {
+                let mut full = Canvas::recording(64, 48, config).unwrap();
+                bank_scene(&mut full, colors[index], false);
+                assert_eq!(
+                    actual[index],
+                    readback(&mut oracle, &full),
+                    "HDR={hdr} frame={index}"
+                );
+                if !hdr {
+                    for (&gpu, &cpu) in actual[index].iter().zip(full.pixels()) {
+                        assert!(gpu.abs_diff(cpu) <= 1);
+                    }
+                }
+            }
+            let bad = [SlotEdit::new(slots[0], PaintColor::new(Color::TRANSPARENT))];
+            let view = targets[2].create_view(&Default::default());
+            assert!(matches!(
+                gpu.prepare_slots(&bad, &view),
+                Err(gpui_gpu::SlotError::AlphaChanged { .. })
+            ));
+            gpu.redraw(&view).unwrap().unwrap();
+            assert_eq!(read_texture(&gpu, &targets[2]), actual[2]);
+        }
+    });
+}
