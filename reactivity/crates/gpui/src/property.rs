@@ -368,7 +368,12 @@ macro_rules! properties {
         pub const $name: Property<$ty> = Property(&$decl);)+
         /// References to the same declaration metadata as the typed selectors.
         pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, CORNER_RADIUS.info()];
-        const _: () = { $(assert!(PropertyId::$id as u16 <= 8191);)+ assert!(PropertyId::CornerRadius as u16 <= 8191); };
+        const _: () = {
+            $(assert!(PropertyId::$id as u16 <= 8191);
+              // Closed runtime batch masks must expand deliberately with schema.
+              assert!((PropertyId::$id as u16) < u16::BITS as u16);)+
+            assert!(PropertyId::CornerRadius as u16 <= 8191);
+        };
         impl PropertyId {
             pub(crate) const fn from_code(code: u16) -> Option<Self> {
                 match code {
@@ -458,6 +463,19 @@ pub(crate) enum PropertyValue {
     Flag(bool),
 }
 impl PropertyValue {
+    pub(crate) fn same_authoring(self, other: Self) -> bool {
+        match (self, other) {
+            (Self::Dimension(a), Self::Dimension(b)) => ExactValue::same(&a, &b),
+            (Self::Number(a), Self::Number(b)) => ExactValue::same(&a, &b),
+            (Self::Color(a), Self::Color(b)) => ExactValue::same(&a, &b),
+            (Self::Flow(a), Self::Flow(b)) => ExactValue::same(&a, &b),
+            (Self::Transform(a), Self::Transform(b)) => ExactValue::same(&a, &b),
+            (Self::Align(a), Self::Align(b)) => ExactValue::same(&a, &b),
+            (Self::Justify(a), Self::Justify(b)) => ExactValue::same(&a, &b),
+            (Self::Flag(a), Self::Flag(b)) => ExactValue::same(&a, &b),
+            _ => false,
+        }
+    }
     pub(crate) fn kind(self) -> ValueKind {
         match self {
             Self::Dimension(_) => ValueKind::Dimension,
@@ -483,6 +501,27 @@ struct Overlay<D> {
     values: BTreeMap<PropertyId, PropertyValue>,
 }
 impl<D: PropertyDomain> Overrides<D> {
+    pub(crate) fn masks(&self, identity: u64, id: PropertyId) -> bool {
+        self.entries
+            .get(&identity)
+            .is_some_and(|overlay| overlay.values.contains_key(&id))
+    }
+
+    /// Change only a present inspector lower base, without copying the resolved
+    /// style for ordinary users. Returns whether this particular sink is masked.
+    pub(crate) fn publish_base(
+        &mut self,
+        identity: u64,
+        id: PropertyId,
+        value: PropertyValue,
+    ) -> Result<bool, PropertyError> {
+        let Some(overlay) = self.entries.get_mut(&identity) else {
+            return Ok(false);
+        };
+        D::set_erased(id, &mut overlay.base, value)?;
+        Ok(overlay.values.contains_key(&id))
+    }
+
     pub(crate) fn get<T>(&self, identity: u64, property: Property<T, D>) -> Contribution<T> {
         let Some(overlay) = self.entries.get(&identity) else {
             return Contribution::Inherit;

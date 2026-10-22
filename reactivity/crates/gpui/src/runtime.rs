@@ -2012,6 +2012,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
+        let mut style_changed = false;
         let mut last_changed = None;
         for &destination in &fanout.destinations {
             self.counters.destination_compares += 1;
@@ -2022,9 +2023,9 @@ impl<M: View + 'static> Runtime<M> {
                 let value = frozen.style.expect("style codec requested").admit(id)?;
                 let changed = match id.info().destination {
                     crate::property::PropertyDestination::Style => {
-                        let before = *self.styles.get(index);
-                        let after = self.overrides.update_base(identity, before, id, value)?;
-                        let changed = !styles::exact_eq(&before, &after);
+                        let masked = self.overrides.publish_base(identity, id, value)?;
+                        let changed = !masked
+                            && !id.get_erased(self.styles.get(index))?.same_authoring(value);
                         if changed {
                             if id.info().impact == crate::property::Impact::Layout {
                                 self.layout_dirty.insert(identity);
@@ -2034,7 +2035,7 @@ impl<M: View + 'static> Runtime<M> {
                             {
                                 text.shaped = None;
                             }
-                            self.styles.set(index, after, self.nodes.len());
+                            style_changed = true;
                         }
                         changed
                     }
@@ -2109,6 +2110,19 @@ impl<M: View + 'static> Runtime<M> {
                 self.changed_nodes += 1;
                 last_changed = Some(index);
             }
+        }
+        if style_changed {
+            let scalar = frozen.style.expect("style codec requested");
+            self.styles.transform(
+                styles::users(&fanout.destinations, &self.nodes, &self.overrides),
+                self.nodes.len(),
+                |mask, style| {
+                    for id in mask.properties() {
+                        id.set_erased(style, scalar.admit(id).expect("admitted source sink"))
+                            .expect("closed Style sink");
+                    }
+                },
+            );
         }
         Ok(semantic && !visual_changed)
     }

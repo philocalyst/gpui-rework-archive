@@ -1,9 +1,77 @@
 //! Current-owner resolved styles. A sheet never borrows this mutable lane.
 use super::Style;
+use crate::property::{PropertyDestination, PropertyId};
+
+/// The source's already sorted destinations provide each node exactly once.
+/// Inspector presence is stable while its lower base advances during a patch.
+pub(super) fn users<'a>(
+    destinations: &'a [super::Destination],
+    nodes: &'a [super::Node],
+    overrides: &'a crate::property::Overrides,
+) -> impl Iterator<Item = (usize, Mask)> + Clone + 'a {
+    destinations
+        .chunk_by(|a, b| a.node() == b.node())
+        .filter_map(move |destinations| {
+            let index = destinations[0].node();
+            let identity = nodes[index].identity();
+            let mut mask = Mask::default();
+            for destination in destinations {
+                if let Some(id) = destination.property()
+                    && id.info().destination == PropertyDestination::Style
+                    && !overrides.masks(identity, id)
+                {
+                    mask.insert(id);
+                }
+            }
+            (!mask.is_empty()).then_some((index, mask))
+        })
+}
 
 const PALETTE_LIMIT: usize = 32;
 const SMALL_OWNER: usize = 8;
 const _: () = assert!(PALETTE_LIMIT <= u8::MAX as usize);
+
+/// A library-closed set of Style fields. Geometry has its own publication lane.
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+pub(super) struct Mask(u16);
+impl Mask {
+    pub(super) fn insert(&mut self, id: PropertyId) {
+        assert_eq!(id.info().destination, PropertyDestination::Style);
+        self.0 |= 1 << id as u16;
+    }
+    pub(super) fn is_empty(self) -> bool {
+        self.0 == 0
+    }
+    pub(super) fn properties(self) -> impl Iterator<Item = PropertyId> {
+        let mut bits = self.0;
+        std::iter::from_fn(move || {
+            if bits == 0 {
+                return None;
+            }
+            let code = bits.trailing_zeros() as u16;
+            bits &= bits - 1;
+            Some(PropertyId::from_code(code).expect("closed style mask"))
+        })
+    }
+}
+
+#[derive(Clone, Copy, Default)]
+struct Coverage {
+    users: u32,
+    // Empty after the first user means conflicting masks, not an empty edit.
+    mask: Mask,
+}
+impl Coverage {
+    fn add(&mut self, mask: Mask) {
+        debug_assert!(!mask.is_empty());
+        if self.users == 0 {
+            self.mask = mask;
+        } else if self.mask != mask {
+            self.mask = Mask::default();
+        }
+        self.users += 1;
+    }
+}
 
 #[derive(Clone, Copy)]
 pub(super) struct Entry {
@@ -101,6 +169,129 @@ impl Styles {
         let mut values: Vec<_> = (0..count).map(|index| *self.get(index)).collect();
         values[index] = value;
         *self = Self::Dense(values);
+    }
+
+    /// Users are unique, in node order, and cover only effective/unmasked fields.
+    /// The iterator borrows the existing fanout; no per-user edits are retained.
+    /// `apply` is the runtime's already-admitted closed property operation.
+    pub(super) fn transform<I>(&mut self, users: I, count: usize, apply: impl Fn(Mask, &mut Style))
+    where
+        I: Iterator<Item = (usize, Mask)> + Clone,
+    {
+        match self {
+            Self::Default => {
+                let mut coverage = Coverage::default();
+                for (_, mask) in users.clone() {
+                    coverage.add(mask);
+                }
+                if coverage.users as usize == count && !coverage.mask.is_empty() {
+                    let mut value = Style::DEFAULT;
+                    apply(coverage.mask, &mut value);
+                    if exact_eq(&value, &Style::DEFAULT) {
+                        return;
+                    }
+                    *self = if count <= SMALL_OWNER {
+                        Self::Dense(vec![value; count])
+                    } else {
+                        Self::Shared {
+                            palette: Box::new([Entry {
+                                value,
+                                users: count as u32,
+                            }]),
+                            indices: vec![0; count].into_boxed_slice(),
+                        }
+                    };
+                    return;
+                }
+                // Sparse first mutation materializes the one-byte selector
+                // lane, as set does; it never scans unrelated owner values.
+                for (index, mask) in users {
+                    let mut value = *self.get(index);
+                    apply(mask, &mut value);
+                    self.set(index, value, count);
+                }
+                return;
+            }
+            Self::Dense(values) => {
+                for (index, mask) in users {
+                    apply(mask, &mut values[index]);
+                }
+                return;
+            }
+            Self::Shared { .. } => {}
+        }
+
+        let mut coverage = [Coverage::default(); PALETTE_LIMIT];
+        let mut full = [false; PALETTE_LIMIT];
+        let Self::Shared { palette, indices } = self else {
+            unreachable!()
+        };
+        for (index, mask) in users.clone() {
+            coverage[usize::from(indices[index])].add(mask);
+        }
+        let mut partial = false;
+        for (index, selected) in coverage.iter().enumerate().take(palette.len()) {
+            full[index] = selected.users == palette[index].users
+                && selected.users != 0
+                && !selected.mask.is_empty();
+            if full[index] {
+                apply(selected.mask, &mut palette[index].value);
+            } else if selected.users != 0 {
+                partial = true;
+            }
+        }
+
+        if partial {
+            for (index, mask) in users.clone() {
+                if let Self::Shared { indices, .. } = self
+                    && full[usize::from(indices[index])]
+                {
+                    continue;
+                }
+                let mut value = *self.get(index);
+                apply(mask, &mut value);
+                self.set(index, value, count);
+            }
+        }
+        let Self::Shared { palette, indices } = self else {
+            // A mixed turn can reach 32 slots before final coalescence, even
+            // when its post-turn unique diversity would fit. This conservative
+            // dense fallback already includes all whole-class edits.
+            return;
+        };
+
+        // A class may converge onto another after its property transform.
+        // Keep full slots live through partial edits, then merge. Every user of
+        // such a source slot is in `users`, including any partial arrivals, so
+        // selector rewrites need no owner-wide scan. New turns start without
+        // duplicate live patterns, rather than accumulating a slot high-water.
+        let mut remap: [u8; PALETTE_LIMIT] = std::array::from_fn(|i| i as u8);
+        let mut merged = false;
+        for index in 0..palette.len() {
+            if !full[index] || palette[index].users == 0 {
+                continue;
+            }
+            if let Some(next) = palette.iter().enumerate().position(|(other, entry)| {
+                other != index && entry.users != 0 && exact_eq(&entry.value, &palette[index].value)
+            }) {
+                palette[next].users += palette[index].users;
+                palette[index].users = 0;
+                remap[index] = next as u8;
+                merged = true;
+            }
+        }
+        if merged {
+            for index in 0..palette.len() {
+                let mut next = remap[index];
+                while next != remap[usize::from(next)] {
+                    next = remap[usize::from(next)];
+                }
+                remap[index] = next;
+            }
+            for (index, _) in users {
+                indices[index] = remap[usize::from(indices[index])];
+            }
+        }
     }
 }
 
@@ -317,6 +508,168 @@ mod tests {
                     entry.users as usize,
                     indices.iter().filter(|&&i| i as usize == index).count()
                 );
+            }
+        }
+    }
+
+    fn mask(ids: &[PropertyId]) -> Mask {
+        let mut mask = Mask::default();
+        for &id in ids {
+            mask.insert(id);
+        }
+        mask
+    }
+
+    fn recolor(mask: Mask, style: &mut Style, color: Color) {
+        for id in mask.properties() {
+            id.set_erased(style, crate::property::PropertyValue::Color(color))
+                .unwrap();
+        }
+    }
+
+    #[test]
+    fn whole_patterns_transform_once_without_selector_writes_or_allocations() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        let count = 4096;
+        let mut lane = build((0..count).map(|i| numbered(i % 8)), count);
+        let Styles::Shared { palette, indices } = &lane else {
+            panic!("expected shared lane")
+        };
+        let palette_ptr = palette.as_ptr();
+        let selectors_ptr = indices.as_ptr();
+        let selectors = indices.to_vec();
+        let calls = AtomicUsize::new(0);
+        let color = Color::rgb(4, 5, 6);
+        let fields = mask(&[PropertyId::Foreground, PropertyId::Background]);
+        let allocation = allocation_counter::measure(|| {
+            lane.transform((0..count).map(|i| (i, fields)), count, |mask, style| {
+                calls.fetch_add(1, Ordering::Relaxed);
+                recolor(mask, style, color);
+            });
+        });
+        assert_eq!(calls.load(Ordering::Relaxed), 8);
+        assert_eq!(allocation.count_total, 0);
+        let Styles::Shared { palette, indices } = &lane else {
+            panic!("whole transform densified")
+        };
+        assert_eq!(palette.as_ptr(), palette_ptr);
+        assert_eq!(indices.as_ptr(), selectors_ptr);
+        assert_eq!(indices.as_ref(), selectors);
+        for index in 0..count {
+            let value = lane.get(index);
+            assert_eq!(value.width, Some((index % 8) as f32));
+            assert!(value.fg.same_authoring(color));
+            assert!(value.bg.same_authoring(color));
+        }
+        assert_counts(&lane);
+    }
+
+    #[test]
+    fn converging_property_masks_merge_and_reuse_slots_across_turns() {
+        let count = 128;
+        let x = Color::rgb(1, 2, 3);
+        let y = Color::rgb(4, 5, 6);
+        let bg = mask(&[PropertyId::Background]);
+        let fg = mask(&[PropertyId::Foreground]);
+        let users = || (0..count).map(|i| (i, if i % 2 == 0 { bg } else { fg }));
+        let mut lane = build(
+            (0..count).map(|i| Style {
+                bg: if i % 2 == 0 { y } else { x },
+                fg: if i % 2 == 0 { x } else { y },
+                ..Style::DEFAULT
+            }),
+            count,
+        );
+        for turn in 0..100 {
+            let color = if turn % 2 == 0 { x } else { y };
+            lane.transform(users(), count, |mask, style| recolor(mask, style, color));
+            let Styles::Shared { palette, .. } = &lane else {
+                panic!("duplicate live patterns exhausted palette")
+            };
+            assert!(palette.len() <= 3);
+            assert_eq!(
+                palette.iter().filter(|entry| entry.users != 0).count(),
+                if turn % 2 == 0 { 1 } else { 2 }
+            );
+            for index in 0..count {
+                let value = lane.get(index);
+                assert!(
+                    value
+                        .bg
+                        .same_authoring(if index % 2 == 0 { color } else { x })
+                );
+                assert!(
+                    value
+                        .fg
+                        .same_authoring(if index % 2 == 0 { x } else { color })
+                );
+            }
+            assert_counts(&lane);
+        }
+    }
+
+    #[test]
+    fn coalescing_full_class_keeps_unselected_peers_and_partial_arrivals() {
+        let x = Color::rgb(1, 2, 3);
+        let y = Color::rgb(4, 5, 6);
+        let z = Color::rgb(7, 8, 9);
+        let fields = mask(&[PropertyId::Background]);
+        let count = 128;
+        let mut lane = build(
+            (0..count).map(|i| Style {
+                bg: if i < 32 {
+                    y
+                } else if i < 96 {
+                    x
+                } else {
+                    z
+                },
+                ..Style::DEFAULT
+            }),
+            count,
+        );
+        // The partial user joins the first/full class during set. Coalescence
+        // must rewrite it too, but never free the unselected middle class.
+        lane.transform(
+            (0..32).chain(std::iter::once(96)).map(|i| (i, fields)),
+            count,
+            |mask, style| recolor(mask, style, x),
+        );
+        for index in 0..count {
+            assert!(
+                lane.get(index)
+                    .bg
+                    .same_authoring(if index <= 96 { x } else { z })
+            );
+        }
+        let Styles::Shared { palette, .. } = &lane else {
+            panic!("unexpected dense lane")
+        };
+        assert_eq!(palette.iter().filter(|entry| entry.users != 0).count(), 2);
+        assert_counts(&lane);
+    }
+
+    #[test]
+    fn mixed_masks_and_dense_overflow_match_independent_per_node_edits() {
+        for period in [1, 8, 32, 64] {
+            let count = 256;
+            let mut lane = build((0..count).map(|i| numbered(i % period)), count);
+            let mut expected: Vec<_> = (0..count).map(|i| numbered(i % period)).collect();
+            let bg = mask(&[PropertyId::Background]);
+            let both = mask(&[PropertyId::Background, PropertyId::Foreground]);
+            for turn in 0..64 {
+                let color = Color::rgb(turn, 0, 0);
+                let users = (0..count).filter_map(|i| {
+                    (i % 3 != 0).then_some((i, if i % 2 == 0 { both } else { bg }))
+                });
+                for (index, mask) in users.clone() {
+                    recolor(mask, &mut expected[index], color);
+                }
+                lane.transform(users, count, |mask, style| recolor(mask, style, color));
+                for (index, value) in expected.iter().enumerate() {
+                    assert!(exact_eq(lane.get(index), value));
+                }
+                assert_counts(&lane);
             }
         }
     }
