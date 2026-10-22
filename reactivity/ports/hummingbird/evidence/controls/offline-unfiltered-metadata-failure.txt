@@ -1,0 +1,9 @@
+Command: cargo metadata --offline --locked --all-features --format-version 1
+Exit: 101
+error: failed to download `wgpu-core-deps-emscripten v30.0.1`
+
+Caused by:
+  attempting to make an HTTP request, but --offline was specified
+
+This is an unavailable cross-target package-cache entry, not a native build failure.
+The Linux-filtered command succeeded; this port does not claim cross-target gates.

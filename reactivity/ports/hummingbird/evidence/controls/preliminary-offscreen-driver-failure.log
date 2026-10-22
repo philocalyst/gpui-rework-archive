@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 147, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 106, in main
+    assert find("Play CAFE Étude")[1:] == play[1:], "row's native action identity changed after SQL resort"
+           ~~~~^^^^^^^^^^^^^^^^^^^
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 92, in find
+    return wait(lambda: named(name), deadline, "visible acknowledged accessible: " + name)
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 19, in wait
+    raise TimeoutError(description)
+TimeoutError: visible acknowledged accessible: Play CAFE Étude

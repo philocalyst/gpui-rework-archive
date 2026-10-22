@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 142, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 93, in main
+    find("9 recordings for ‘’ — Title")
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 87, in find
+    return wait(lambda: named(name), deadline, "visible acknowledged accessible: " + name)
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 15, in wait
+    result = predicate()
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 87, in <lambda>
+    return wait(lambda: named(name), deadline, "visible acknowledged accessible: " + name)
+                        ~~~~~^^^^^^
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 82, in named
+    return next((node for node in tree() if node[0] == name), None)
+                                  ~~~~^^
+  File "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird/native-transcript.py", line 75, in tree
+    name = bus(address, "get-property", destination, path, "org.a11y.atspi.Accessible", "Name")[0]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: string index out of range

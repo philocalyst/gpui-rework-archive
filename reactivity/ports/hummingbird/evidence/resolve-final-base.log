@@ -1,0 +1,9 @@
+     Locking 8 packages to latest Rust 1.97.1 compatible versions
+    Updating fontique v0.11.1 -> v0.12.0
+    Updating parley v0.11.1 (/tmp/gpui-hummingbird-port-sol/reactivity/vendor/parley) -> v0.12.0
+    Updating parley_data v0.11.1 -> v0.12.0
+      Adding parley_emoji v0.12.0
+      Adding parley_engine v0.12.0 (/tmp/gpui-hummingbird-port-sol/reactivity/vendor/parley_engine)
+    Updating pollster v0.4.0 -> v1.0.1
+      Adding read-fonts v0.46.0
+      Adding skrifa v0.49.0
