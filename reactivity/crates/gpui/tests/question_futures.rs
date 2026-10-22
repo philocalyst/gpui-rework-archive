@@ -790,3 +790,134 @@ fn close_requests_cancellation_before_a_freezer_destructor_unwinds_cleanup() {
     win.close();
     assert!(win.is_closed());
 }
+
+#[test]
+fn close_cancels_both_future_lanes_before_a_head_freezer_or_outer_inbox_panics() {
+    struct Bomb(bool);
+    impl Drop for Bomb {
+        fn drop(&mut self) {
+            if self.0 {
+                panic!("close cleanup destructor");
+            }
+        }
+    }
+    for inbox_panic in [false, true] {
+        let (first_executor, first_driver) = Driver::new();
+        let (second_executor, second_driver) = Driver::new();
+        let (dropped, drops) = mpsc::channel();
+        let first_dropped = dropped.clone();
+        let (plan, _) = Questions::new()
+            .question_future(Model::QUERY, Clone::clone, first_executor, move |query| {
+                probe(query, first_dropped.clone())
+            })
+            .unwrap();
+        let bomb = Bomb(!inbox_panic);
+        let (plan, answer) = plan
+            .question_future(
+                Model::QUERY,
+                move |query| {
+                    let _ = &bomb;
+                    query.clone()
+                },
+                second_executor,
+                move |query| probe(query, dropped.clone()),
+            )
+            .unwrap();
+        let win = Win::with_questions(
+            Model {
+                query: Signal::new("A".into()),
+                unrelated: Signal::new(0),
+                answer,
+            },
+            plan,
+            WindowOptions {
+                size: [160, 60],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let (remote, inbox) = gpui::Remote::bounded(1);
+        let mut win = win.with_inbox(inbox, |_, _: Bomb| {}).unwrap();
+        if inbox_panic {
+            remote.try_send(Bomb(true)).unwrap();
+        }
+        let mut first = first_driver.next();
+        let mut second = second_driver.next();
+        assert_eq!(first.poll(), Poll::Pending);
+        assert_eq!(second.poll(), Poll::Pending);
+        assert!(catch_unwind(AssertUnwindSafe(|| win.close())).is_err());
+        for task in [&first, &second] {
+            assert!(task.control.cancelled.load(Ordering::SeqCst));
+            assert_eq!(task.control.retired.load(Ordering::SeqCst), 1);
+            assert!(task.future.is_some());
+        }
+        assert!(drops.try_recv().is_err());
+        assert!(
+            matches!(
+                remote.try_send(Bomb(false)),
+                Err(gpui::SendError::Closed(_))
+            ),
+            "outer inbox was detached during cancellation phase before cleanup panicked"
+        );
+        assert_eq!(first.poll(), Poll::Ready(()));
+        assert_eq!(second.poll(), Poll::Ready(()));
+        assert_eq!(drops.try_iter().count(), 2);
+        win.close();
+    }
+}
+
+#[test]
+fn close_defers_a_ready_response_destructor_until_both_future_tasks_are_cancelled() {
+    struct AnswerBomb;
+    impl Drop for AnswerBomb {
+        fn drop(&mut self) {
+            panic!("ready response destructor");
+        }
+    }
+    let (pending_executor, pending_driver) = Driver::new();
+    let (ready_executor, ready_driver) = Driver::new();
+    let (dropped, drops) = mpsc::channel();
+    let (plan, answer) = Questions::new()
+        .question_future(Model::QUERY, Clone::clone, pending_executor, move |query| {
+            probe(query, dropped.clone())
+        })
+        .unwrap();
+    let (plan, _) = plan
+        .question_future(Model::QUERY, Clone::clone, ready_executor, |_| async {
+            Ok::<_, Domain>(AnswerBomb)
+        })
+        .unwrap();
+    let win = Win::with_questions(
+        Model {
+            query: Signal::new("A".into()),
+            unrelated: Signal::new(0),
+            answer,
+        },
+        plan,
+        WindowOptions {
+            size: [160, 60],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let (remote, inbox) = gpui::Remote::<()>::bounded(1);
+    let mut win = win.with_inbox(inbox, |_, ()| {}).unwrap();
+    let mut pending = pending_driver.next();
+    let mut ready = ready_driver.next();
+    assert_eq!(pending.poll(), Poll::Pending);
+    assert_eq!(ready.poll(), Poll::Ready(()));
+    assert!(catch_unwind(AssertUnwindSafe(|| win.close())).is_err());
+    for task in [&pending, &ready] {
+        assert!(task.control.cancelled.load(Ordering::SeqCst));
+        assert_eq!(task.control.retired.load(Ordering::SeqCst), 1);
+    }
+    assert!(drops.try_recv().is_err());
+    assert!(matches!(
+        remote.try_send(()),
+        Err(gpui::SendError::Closed(()))
+    ));
+    assert_eq!(pending.poll(), Poll::Ready(()));
+    assert_eq!(drops.try_recv().unwrap(), "A");
+    assert_eq!(ready.poll(), Poll::Ready(()));
+    win.close();
+}

@@ -329,6 +329,12 @@ pub struct QuestionLane<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> {
     cursor: usize,
     stats: QuestionStats,
 }
+/// Only the transient close stack owns these responses; never an owner field.
+#[doc(hidden)]
+pub struct RetiredQuestion<T, E, L> {
+    _response: Option<Message<T, E>>,
+    _tail: L,
+}
 impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> QuestionLane<M, A, I, T, E, F, S, L> {
     #[inline]
     fn control(&self) -> &Arc<Controller<T, E>> {
@@ -653,6 +659,7 @@ where
 {
     const EMPTY: bool = false;
     const QUESTIONS: bool = true;
+    type Retired = RetiredQuestion<T, E, L::Retired>;
     fn count(&self) -> usize {
         1 + self.tail.count()
     }
@@ -738,26 +745,34 @@ where
         }
         Ok(())
     }
-    fn close(&mut self) {
+    fn cancel_questions(&mut self) -> Self::Retired {
         self.gate.revoke();
         // Relinquish the owner lease before running input/result destructors.
         // A still-running physical cap owns any deferred response reclamation.
-        if let Some(controller) = self.controller.take() {
+        let response = self.controller.take().and_then(|controller| {
             controller.current.store(0, Ordering::Release);
             controller.mailbox.close();
-        }
-        // Cancellation must precede other user destructors: one may unwind
-        // this method before start.take(). Ordinary starter hooks are no-ops.
+            // Atomically release this Arc or take unique ownership. Unlike
+            // try_unwrap followed by dropping Err(Arc), this has no last-cap
+            // race that could run a response destructor in this phase.
+            Arc::into_inner(controller).and_then(|controller| controller.mailbox.into_payload())
+        });
         if let Some(start) = &mut self.start {
             start.cancel();
             start.retire();
         }
+        RetiredQuestion {
+            _response: response,
+            _tail: self.tail.cancel_questions(),
+        }
+    }
+    fn clear(&mut self) {
         self.staged_terminal = None;
         self.pending = None;
         self.state = State::Empty;
         self.freeze.take();
         self.start.take();
-        self.tail.close();
+        self.tail.clear();
     }
     fn start_questions(&mut self) -> bool {
         let own = self.start_pending();
@@ -797,6 +812,7 @@ impl<Q, L> sealed::Sealed for QuestionSet<Q, L> {}
 impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
     const EMPTY: bool = false;
     const QUESTIONS: bool = true;
+    type Retired = (Q::Retired, L::Retired);
     fn count(&self) -> usize {
         self.lanes.count() + self.tail.count()
     }
@@ -837,12 +853,15 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         let tail = self.tail.apply_questions(model, sources, applied);
         own.and(tail)
     }
-    fn close(&mut self) {
+    fn cancel_questions(&mut self) -> Self::Retired {
         if let Some(scope) = &mut self.scope {
             scope.revoke();
         }
-        self.lanes.close();
-        self.tail.close();
+        (self.lanes.cancel_questions(), self.tail.cancel_questions())
+    }
+    fn clear(&mut self) {
+        self.lanes.clear();
+        self.tail.clear();
     }
     fn start_questions(&mut self) -> bool {
         let own = self.lanes.start_questions();

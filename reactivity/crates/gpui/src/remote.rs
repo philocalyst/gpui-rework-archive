@@ -194,6 +194,7 @@ pub(crate) mod sealed {
 pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     const EMPTY: bool;
     const QUESTIONS: bool = false;
+    type Retired;
     fn count(&self) -> usize;
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
@@ -208,7 +209,15 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     fn start_questions(&mut self) -> bool {
         false
     }
-    fn close(&mut self);
+    fn cancel_questions(&mut self) -> Self::Retired;
+    fn clear(&mut self);
+    fn close(&mut self) {
+        // Complete cancellation across the static chain before any retained
+        // response, input, inbox or closure destructor can unwind cleanup.
+        let retired = self.cancel_questions();
+        drop(retired);
+        self.clear();
+    }
     #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &Wake);
     fn signal(&self);
@@ -222,6 +231,7 @@ pub enum Stage {
 impl sealed::Sealed for () {}
 impl<M> LaneSet<M> for () {
     const EMPTY: bool = true;
+    type Retired = ();
     fn count(&self) -> usize {
         0
     }
@@ -233,7 +243,8 @@ impl<M> LaneSet<M> for () {
         Stage::Empty
     }
     fn apply(&mut self, _: &mut M, _: &mut usize) {}
-    fn close(&mut self) {}
+    fn cancel_questions(&mut self) {}
+    fn clear(&mut self) {}
     #[cfg(feature = "native-core")]
     fn attach(&mut self, _: &Wake) {}
     fn signal(&self) {}
@@ -269,6 +280,7 @@ impl<T, F, L: ReaderValues> ReaderValues for Lane<T, F, L> {
 impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
     const EMPTY: bool = false;
     const QUESTIONS: bool = L::QUESTIONS;
+    type Retired = (Option<Receiver<T>>, L::Retired);
     fn count(&self) -> usize {
         1 + self.tail.count()
     }
@@ -291,9 +303,12 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
         }
         self.tail.apply(model, applied);
     }
-    fn close(&mut self) {
+    fn cancel_questions(&mut self) -> Self::Retired {
+        (self.inbox.receiver.take(), self.tail.cancel_questions())
+    }
+    fn clear(&mut self) {
         self.inbox.close();
-        self.tail.close();
+        self.tail.clear();
     }
     fn refresh(&mut self, model: &M, sources: &Sources<M>, change: Change) -> Result<bool, Error> {
         self.tail.refresh(model, sources, change)
