@@ -206,3 +206,33 @@ fn tallest_admitted_canvas_keeps_sample_storage_on_leaf_worker_stacks() {
     );
     assert_eq!(parallel.stats().sample_tests, serial.stats().sample_tests);
 }
+
+#[test]
+fn scheduling_threshold_preserves_exact_pixel_and_command_boundaries() {
+    for (commands, threshold, expected) in [
+        (0, 0, true),
+        (0, 2048, true),
+        (0, 2049, false),
+        (1, 2056, true),
+        (1, 2057, false),
+        (2, 2064, true),
+        (2, 2065, false),
+    ] {
+        let pool = RenderPool::new(2).unwrap().with_min_work(threshold);
+        let mut canvas = Canvas::recording(64, 32, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        let clip = Rect::new(0.0, 0.0, 64.0, 32.0);
+        for _ in 0..commands {
+            canvas
+                .fill_rect(clip, Affine::IDENTITY, clip, Color::BLACK)
+                .unwrap();
+        }
+        canvas.pixels_with(&pool);
+        assert_eq!(
+            canvas.stats().parallel,
+            expected,
+            "commands={commands},threshold={threshold}"
+        );
+        assert_eq!(canvas.stats().output_bands, 2);
+    }
+}

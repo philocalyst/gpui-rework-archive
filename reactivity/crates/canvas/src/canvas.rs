@@ -1693,9 +1693,11 @@ impl RenderSchedule for RenderPool {
             (frame.tile_bounds[2] * TILE).min(frame.width),
             (frame.tile_bounds[3] * TILE).min(frame.height),
         ];
-        let work = frame.commands.iter().fold(
-            (pixel_bounds[2] - pixel_bounds[0]) * (pixel_bounds[3] - pixel_bounds[1]),
-            |work, command| {
+        let mut work = (pixel_bounds[2] - pixel_bounds[0]) * (pixel_bounds[3] - pixel_bounds[1]);
+        // The estimate is monotone. Once this lower bound reaches the threshold,
+        // no later command can change the scheduling decision.
+        if work < self.min_work {
+            for command in frame.commands.iter() {
                 let [left, top, right, bottom] = command.bounds;
                 let area = right
                     .min(pixel_bounds[2])
@@ -1706,9 +1708,12 @@ impl RenderSchedule for RenderPool {
                 let uniform = frame.tile_proofs
                     && matches!(command.source, BorrowedSource::Rect)
                     && full_tile(&command, 0, 0, frame.width, frame.height);
-                work.saturating_add(if uniform { area / 256 } else { area * 16 })
-            },
-        );
+                work = work.saturating_add(if uniform { area / 256 } else { area * 16 });
+                if work >= self.min_work {
+                    break;
+                }
+            }
+        }
         if work < self.min_work || frame.height <= TILE {
             return Serial.render(frame, writer, pixels, offsets, members);
         }
