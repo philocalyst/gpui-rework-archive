@@ -8,12 +8,12 @@ describe the intended complete system; this page records what is connected now.
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
 | Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, shared native pointer/focus/keyboard input, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay, touch/capture/drag and hover callbacks remain |
-| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, source-qualified selection and atomic range edits, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; wrapped text/caret geometry, IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
+| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, source-qualified selection and atomic range edits, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; external component-library overrides use ordinary typed APIs | Arbitrary text/numeric entry and contained tooling owners, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, accessible text geometry, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/HAL 30, build-time typed wgsl-rs generation/validation, shared device/pipeline context with independent renderer states and retained layout authority; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; offline shader admission, native HDR negotiation, other primitives and hardware/backend conformance remain |
@@ -61,6 +61,29 @@ and [lattice/adaptive controls](evidence/gamut-search-controls/README.md) retain
 precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
+
+The [combined text/Future/native campaign](evidence/text-main-integration/README.md)
+pins main source `007f10ccbd`: 529 GPUI cases/docs (27 ignored), strict checks,
+formatting, nine Hummingbird cases, five external catalog cases and the shared
+headless transcript pass. Actual AT-SPI geometry/edit/reactivation and late
+service/owner replacement pass, as do native Future wakes and cold blank-to-GPU
+handoff. Hummingbird passes real X11/AT-SPI through CPU, GPU and Auto using the
+same copied executable. GPU uses llvmpipe; Auto stays CPU on this host. All
+source/artifact guards and owned-process cleanup checks pass.
+
+The [acknowledged text geometry baseline](benchmarks/acknowledged-text-geometry/README.md)
+is integrated from `86dd586142`: 506 GPUI cases/docs, 188 Canvas cases, core
+cases, strict checks, Apple/Windows compilation and actual AT-SPI geometry,
+selection/edit and provider lifecycle checks pass at that pin. Public Part and
+native adapters borrow the same eligible C/acknowledged P map; obsolete glyph
+and font buffers stay out of historical geometry. Source ranges and affinity
+own lines even with overlapping caret tops. Ordinary headers stay unchanged
+except Runtime, which shrinks 64 B. The full-feature plain owner is 5,588 B;
+the inspector grows to 82,694 B. A 32 KiB paragraph retains about 1.62 MB of map
+capacity and adds about 1.65 MB per old epoch; construction costs and the indexed
+Part bounds checks are explicitly charged. Compact maps and safe query controls
+remain separate experiments. Combined main qualification follows separately;
+the producer tests retain their original source pins.
 
 The [combined Hummingbird renderer checks](ports/hummingbird/evidence/renderer-policies/README.md)
 pin source `c73144892c`: the shared executable passes its headless transcript and
@@ -111,11 +134,11 @@ the expanded inspector, target leases, Todo, provider lifecycle, real registry
 Unicode text/actions and no-session-bus presentation. The shared Hummingbird
 executable passes its headless SQL and actual X11/AT-SPI transcripts.
 
-This full native-feature plain headless owner retains 5,652 requested Rust bytes
+At source `6d77`, the full native-feature plain headless owner retains 5,652 requested Rust bytes
 in 21 allocations. The owner with its 28-node inspector panel retains 64,878 in 250; its active-tool
 increment is 59,226 bytes including text/font/layout/paint resources, and 100 warm
-idle operations allocate nothing. Runtime 1904 is that full-feature profile;
-default remains 1888. [Lazy-image controls](evidence/headless-image-lazy/README.md)
+idle operations allocate nothing. Runtime 1904 is that source’s full-feature profile;
+its default was 1888. [Lazy-image controls](evidence/headless-image-lazy/README.md)
 separately prove removal of the eager 1,792,000-byte image allocation. Neither
 ledger measures RSS or native blank-window memory. The shared GPU context also
 retains a 1,924-byte Rust layout lease if a context is dropped before its states;
@@ -141,12 +164,11 @@ failure is preserved. Full original framework parity is
 still missing; the [feature audit](docs/feature-parity.md) is a delivery map,
 not a narrowed 1.0 target. Shared GPU resources, typed catalog controls and
 designer gamut operations are integrated in the latest combined freeze. Offline
-shader artifacts and [acknowledged text geometry](docs/acknowledged-text-geometry-luna.md)
-remain isolated implementation slices; their provisional results are not current
-shipping measurements.
+shader artifacts remain isolated; acknowledged text geometry is now integrated
+from its separately qualified correctness baseline described above.
 
-The [source ledger](evidence/core-lines/README.md) counts 28,659 non-test library
-code lines at `a951113912`, including 13 build-script lines, versus original
+The [source ledger](evidence/core-lines/README.md) counts 29,365 non-test library
+code lines at `007f10ccbd`, including 13 build-script lines, versus original
 GPUI's 56,922 including 28 build-script lines. These are pinned actual counts,
 not a current-feature-equivalence or predicted final-size claim. Dependencies,
 local vendor patches, tools, app ports and fixtures retain their separate scopes.

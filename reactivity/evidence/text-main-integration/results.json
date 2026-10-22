@@ -1,0 +1,237 @@
+[
+  {
+    "case": "gpui-full",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "log_sha256": "58ab489252cd7a745d917b6c4f3d93900defaac0e0cc1c28fa8b04fdd919af18"
+  },
+  {
+    "case": "gpui-strict",
+    "command": [
+      "cargo",
+      "clippy",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--features",
+      "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0,
+    "log_sha256": "86e92b355dd6e56af65563953960a95cd76350412b8f300b92cfc27d8e432555"
+  },
+  {
+    "case": "format",
+    "command": [
+      "cargo",
+      "fmt",
+      "--package",
+      "gpui",
+      "--package",
+      "gpui_canvas",
+      "--package",
+      "gpui_reactivity_core",
+      "--",
+      "--check"
+    ],
+    "exit": 0,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "case": "hummingbird-build",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "ports/hummingbird/Cargo.toml",
+      "--features",
+      "native",
+      "--bin",
+      "hummingbird-gpui-port",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "log_sha256": "ffead34325781844d68e70d54b3f56b5c3744dbf0cfde9468e81ff5eeed7578e"
+  },
+  {
+    "case": "hummingbird-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "ports/hummingbird/Cargo.toml",
+      "--features",
+      "native"
+    ],
+    "exit": 0,
+    "log_sha256": "a04b54a97702c699557cde39a22bdc8f3749fc25533c1d9e0760597b9f9c6f87"
+  },
+  {
+    "case": "hummingbird-headless",
+    "command": [
+      "/tmp/gpui-text-main-gates/hummingbird-frozen",
+      "--headless"
+    ],
+    "exit": 0,
+    "log_sha256": "111b4d0afb990a7cc0251e6f71c768213dc148f95b854d918c6db4091b419fbf"
+  },
+  {
+    "case": "catalog-client",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "evidence/typed-catalog/client-fixture/Cargo.toml"
+    ],
+    "exit": 0,
+    "log_sha256": "d4dce5c965908504a7268e0aeb3083beef776ff1628d17f04ec2b33f0de36ecb"
+  },
+  {
+    "case": "hummingbird-cpu",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-text-main-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-text-main-gates/hummingbird-cpu.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "cpu"
+    ],
+    "exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "hummingbird-gpu",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-text-main-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-text-main-gates/hummingbird-gpu.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "gpu"
+    ],
+    "exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "hummingbird-auto",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-text-main-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-text-main-gates/hummingbird-auto.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "auto"
+    ],
+    "exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "actual-registry",
+    "command": [
+      "bash",
+      "/root/gpui-ce3/reactivity/tools/test_atspi.sh",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "/tmp/gpui-text-main-gates/gpui-frozen"
+    ],
+    "exit": 0,
+    "log_sha256": "e19fc05320545e09d74866b1b492a480fd9b610a6c6e2d902eb551d0d9fd6aea"
+  },
+  {
+    "case": "late-service",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-text-main-gates/gpui-frozen",
+      "native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "6bb4913d008af6985060b8e42c3a94d8fdc650b788957c3c2cf6a22d3bb50c03"
+  },
+  {
+    "case": "future-wake",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-text-main-gates/gpui-frozen",
+      "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "07f2dcd38761c8632d8da63130b6d2a2119524ea5ad49a9209b54ef5391783d4"
+  },
+  {
+    "case": "blank-handoff",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-text-main-gates/gpui-frozen",
+      "native::upgrade_tests::automatic_blank_stays_cold_across_resize_resume_then_upgrades_after_complex_cpu_frame",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "c98f6eef5e22e7c3179915c52655c333515137c502dcfd3c7c131276f4f16bf6"
+  }
+]

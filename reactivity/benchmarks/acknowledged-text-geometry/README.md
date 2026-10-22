@@ -119,7 +119,12 @@ cases and strict full-feature/all-target checks. The shipping library counter is
 separate full inventory charges all source: 316,917 active non-test physical
 lines, including 56,955 first-party, 39,955 generated and 220,007 vendor lines.
 Those full-inventory numbers pin shipping source 86dd before this evidence
-archive is added; later ledgers must also charge the archived helper/fixtures.
+archive is added. After the archive, the f131 ledger is 319,534 active
+non-test physical lines / 59,572 first-party non-test lines; generated/vendor
+counts stay unchanged. This charges the archived helpers, fixtures and assembly.
+The shipping core remains 29,109 code lines. Flattened release client manifests
+are raw original inputs; recreate `src/main.rs` from adjacent `client.rs` in a
+scratch directory before rebuilding, and provide the pinned worktree paths.
 Actual Linux tests roundtrip AT-SPI Unicode character extents → hit offset →
 ordinary P oracle, plus reversed selection, caret, UTF-8 InsertText/DeleteText,
 invalid ranges, late service/provider activation and owner replacement/destruction.

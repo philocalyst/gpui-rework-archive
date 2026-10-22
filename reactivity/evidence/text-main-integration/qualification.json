@@ -1,0 +1,38 @@
+{
+  "source": "007f10ccbdf278dc16242b157d19e12075d5ba2f",
+  "gpui_passed": 529,
+  "gpui_ignored": 27,
+  "gpui_groups": 48,
+  "hummingbird_passed": 9,
+  "catalog_client_passed": 5,
+  "native_cases": [
+    "actual AT-SPI Registry Unicode extents/hit/edit/reactivation",
+    "late service/provider replacement/destroy",
+    "exact Future cancellation/result wake",
+    "blank resize/resume/no initialization then complex CPU-to-GPU handoff"
+  ],
+  "hummingbird_policies": {
+    "cpu": {
+      "frames": 8,
+      "observed_renderers": [
+        "ReferenceCpu"
+      ]
+    },
+    "gpu": {
+      "frames": 8,
+      "observed_renderers": [
+        "Gpu"
+      ]
+    },
+    "auto": {
+      "frames": 8,
+      "observed_renderers": [
+        "ReferenceCpu"
+      ]
+    }
+  },
+  "source_files_guarded": 1920,
+  "source_and_binaries_unchanged": true,
+  "all_owned_displays_stopped": true,
+  "limits": "Combined behavior and allocator/geometry accounting, not timing, RSS, native HDR, hardware conformance or foreign-OS runtime."
+}

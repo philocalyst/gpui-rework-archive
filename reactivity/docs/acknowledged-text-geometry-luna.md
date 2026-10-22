@@ -1,5 +1,16 @@
 # Acknowledged text geometry: ownership and implementation plan
 
+Implementation disposition, 2026-10-22: the immutable geometry-only Arc
+formulation is integrated from source `86dd586142`; [actual costs and gates](../benchmarks/acknowledged-text-geometry/README.md)
+replace the estimates below for that implementation. Glyph/font payloads stay
+in logical layout, while exact C/P sidecars serve public queries and late native
+activation. Source/affinity line ownership and continuous zero-area bounds have
+independent producer and extreme-coordinate oracles. This is a correctness
+baseline: stop capacity, transient construction, native projection and indexed
+Part costs remain measured regressions. Compression and borrow-bound query
+controls stay isolated. The earlier proposal and inspected snapshots below
+retain their historical scope; no memory winner or full editing parity follows.
+
 Research is read-only against `/root/gpui-ce3/reactivity`. I did not edit production, build, benchmark, or launch agents. This note distinguishes current behavior from the proposal below; none of the cost estimates are measurements or performance claims.
 
 ## Recommendation

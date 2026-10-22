@@ -55,13 +55,15 @@ the full authored/vendor/binary bill before integration. Maintenance5 inline
 stages require separate queried/enabled state and pointer-lifetime proof; the
 first static recipe does not depend on that extension.
 
-The [acknowledged geometry slice](docs/acknowledged-text-geometry-luna.md) must retain
-exact old P/C text maps for public queries and native wrapped/directional runs,
-including late accessibility activation after failed newer shaping. Measure its
-stop-map payload and transient/old-epoch costs before choosing Arc or arena
-handles; shared immutable geometry must not retain obsolete glyph buffers.
-Leaf semantic text nodes should carry placement without another native node;
-structural exceptions, clipping and all character offsets need explicit tests.
+The [acknowledged geometry baseline](benchmarks/acknowledged-text-geometry/README.md)
+now preserves exact old P/C maps for ordinary queries and native wrapped/bidi
+runs, including late activation after failed newer shaping. Continue with
+source-derived compact stops, safe borrowed-index checks and construction stack
+attribution before an arena. Charge all headers, old epochs, native arrays,
+source/binary growth and tiny-label regressions; keep bit-exact producer width,
+signed-zero alias geometry, legal graphemes, source-affinity line ownership and
+provider retirement as invariant gates. Glyph/font payloads must remain outside
+historical geometry.
 
 Typed reflection must also support arbitrary inspector value entry and contained
 component/tool owners without mirroring application membership or bypassing
