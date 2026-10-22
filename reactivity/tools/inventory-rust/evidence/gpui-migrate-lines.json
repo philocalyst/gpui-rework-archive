@@ -1,0 +1,17 @@
+{
+  "source_commit": "489533572f4a1b88ec3cc7251b2a06b36dea5f26",
+  "method": "Tokei15 own source code; subtract two cfg(test) module declaration lines from main.rs. tests.rs and tests/migrate_cli.rs are test-only; pinned .rs.txt files are 270 lines of verbatim test data, not executable tool source. No other production language or script was added.",
+  "files": [
+    {
+      "path": "tools/inventory-rust/src/bin/gpui/main.rs",
+      "code_lines": 228,
+      "source_sha256": "3e4cf452834b1fb5f980993be41314c82463d76ccec653e27f2c34d990e37baf"
+    },
+    {
+      "path": "tools/inventory-rust/src/bin/gpui/migrate.rs",
+      "code_lines": 440,
+      "source_sha256": "5910bcbbcc81d32bf7be3ca13d72ecee9e688b0170e69a5e245178548c43ae76"
+    }
+  ],
+  "all_non_test_code_lines": 666
+}
