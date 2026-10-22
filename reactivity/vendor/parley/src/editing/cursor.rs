@@ -290,7 +290,7 @@ impl Cursor {
     ///
     /// The `width` parameter defines the width of the resulting rectangle.
     pub fn geometry<B: Brush>(&self, layout: &Layout<B>, width: f32) -> BoundingBox {
-        self.geometry_with(layout, width, self.visual_clusters(layout), |cluster| {
+        self.geometry_with(layout, width, self.logical_clusters(layout), |cluster| {
             cluster.visual_offset().unwrap_or_default()
         })
     }
@@ -302,30 +302,23 @@ impl Cursor {
         clusters: [Option<Cluster<'_, B>>; 2],
         mut offset: impl FnMut(&Cluster<'_, B>) -> f32,
     ) -> BoundingBox {
-        match clusters {
-            [Some(left), Some(right)] => {
-                if left.is_end_of_line() {
-                    if left.is_soft_line_break() {
-                        let (cluster, at_end) = if left.is_rtl()
-                            && self.affinity == Affinity::Downstream
-                            || !left.is_rtl() && self.affinity == Affinity::Upstream
-                        {
-                            (left, true)
-                        } else {
-                            (right, false)
-                        };
-                        cursor_rect(&cluster, at_end, width, offset(&cluster))
-                    } else {
-                        cursor_rect(&right, false, width, offset(&right))
-                    }
-                } else {
-                    cursor_rect(&left, true, width, offset(&left))
+        let [upstream, downstream] = clusters;
+        // Affinity attaches to a source neighbour, not a visual neighbour.
+        // A visual predecessor can be on another line at a bidi soft wrap.
+        // Asking that predecessor whether it ends a line can send the caret
+        // back two lines, losing the source boundary's actual owner.
+        let trailing = self.affinity == Affinity::Upstream || downstream.is_none();
+        if trailing {
+            if let Some(cluster) = upstream {
+                if !cluster.is_hard_line_break() {
+                    return cursor_rect(&cluster, !cluster.is_rtl(), width, offset(&cluster));
                 }
             }
-            [Some(left), None] if left.is_hard_line_break() => last_line_cursor_rect(layout, width),
-            [Some(left), _] => cursor_rect(&left, true, width, offset(&left)),
-            [_, Some(right)] => cursor_rect(&right, false, width, offset(&right)),
-            _ => last_line_cursor_rect(layout, width),
+        }
+        if let Some(cluster) = downstream {
+            cursor_rect(&cluster, cluster.is_rtl(), width, offset(&cluster))
+        } else {
+            last_line_cursor_rect(layout, width)
         }
     }
 

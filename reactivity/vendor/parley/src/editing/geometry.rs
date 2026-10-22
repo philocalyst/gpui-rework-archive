@@ -93,7 +93,13 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
 
     /// The existing Cursor geometry policy, using cached source/prefix lookups.
     pub fn geometry(&self, cursor: Cursor, width: f32) -> BoundingBox {
-        let clusters = cursor.visual_clusters_with(|byte| self.cluster(byte));
+        let clusters = [
+            cursor
+                .index()
+                .checked_sub(1)
+                .and_then(|byte| self.cluster(byte)),
+            self.cluster(cursor.index()),
+        ];
         cursor.geometry_with(self.layout, width, clusters, |cluster| {
             let index = cluster.run.cluster_range().start + cluster.path().logical_index();
             // Every cluster reachable through this borrowed layout's visual

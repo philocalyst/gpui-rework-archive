@@ -1,0 +1,41 @@
+{
+  "parent": "f11425bac2",
+  "spike": "76fd0b4662",
+  "integration_change": "Order nearest before/after edges, avoiding catastrophic distance ties at far finite points; independent extreme hits and cross-line motion regression.",
+  "source_sha256": {
+    "crates/canvas/Cargo.toml": "427b9c45d356e7b30fe51f242ccc25a5625e0d96ab79661c17876db963aaaa98",
+    "crates/canvas/src/text/layout.rs": "15780a7b4345f901c644549d9cb8eba840720500a01c414c5337102b10090251",
+    "crates/canvas/src/text/layout/interaction.rs": "55da870fe055d5b40d00eb30b48d0393c551626cbbcad868d8f01df4da11f28a",
+    "crates/canvas/tests/selection.rs": "cf3691866d258428d7547d2216d84e3ec029a46508b5182b09114059223c168e",
+    "vendor/parley/src/editing/cursor.rs": "956e3534b7b381a29c0dcf72e1848943a6d07c56f22825d8e6220ad29cfd1bfc",
+    "vendor/parley/src/editing/geometry.rs": "e080ff135a61e729fa3919e796fdd7daef03c596b06e483148e10406ef623099"
+  },
+  "gates": {
+    "control": {
+      "groups": 1,
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0
+    },
+    "selection": {
+      "groups": 1,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    "clippy": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "parallel-release": {
+      "groups": 28,
+      "passed": 171,
+      "failed": 0,
+      "ignored": 4
+    }
+  },
+  "retained_bytes_added": 0,
+  "timing_claim": "none"
+}

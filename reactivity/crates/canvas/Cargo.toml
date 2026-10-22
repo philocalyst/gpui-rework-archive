@@ -24,6 +24,7 @@ name = "parallel"
 required-features = ["parallel"]
 
 [dev-dependencies]
+parley = { version = "=0.11.1", default-features = false, features = ["word-boundaries"] }
 rustybuzz = "=0.20.1"
 fontdue = "=0.9.4"
 allocation-counter = "=0.8.1"
