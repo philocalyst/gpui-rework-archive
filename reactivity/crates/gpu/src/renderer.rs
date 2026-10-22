@@ -1523,4 +1523,97 @@ mod tests {
         }
         assert!(accepted > 20, "exercise nontrivial successful certificates");
     }
+    #[cfg(feature = "vulkan-tests")]
+    #[test]
+    fn packet_reference_cap_and_atlas_last_row_admission() {
+        pollster::block_on(async {
+            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+            desc.backends = wgpu::Backends::VULKAN;
+            let instance = wgpu::Instance::new(desc);
+            let adapter = instance
+                .request_adapter(&wgpu::RequestAdapterOptions {
+                    force_fallback_adapter: true,
+                    ..Default::default()
+                })
+                .await
+                .unwrap();
+            let context = GpuContext::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+                .await
+                .unwrap();
+            let mut state = RendererState::new(&context);
+            state.ranges.resize(1, [0, 0]);
+            state.cursors.resize(1, 0);
+            let draw = PreparedDraw {
+                local_rect: Rect::new(0., 0., 1., 1.),
+                inverse: [1., 0., 0., 1., 0., 0.],
+                clip: Rect::new(0., 0., 1., 1.),
+                bounds: Rect::new(0., 0., 1., 1.),
+                color: [1.; 4],
+                source: gpui_canvas::PreparedSource::Solid,
+            };
+            assert_eq!(
+                state
+                    .bin_draw(draw, [0.; 2], 0, MAX_DRAWS - 1, 1, 1, 1, MAX_REFERENCES - 1)
+                    .unwrap(),
+                MAX_REFERENCES
+            );
+            let before = (state.ranges.clone(), state.cursors.clone());
+            for previous in [MAX_REFERENCES, usize::MAX] {
+                assert!(matches!(
+                    state.bin_draw(draw, [0.; 2], 0, 0, 1, 1, 1, previous),
+                    Err(Error::ResourceLimit)
+                ));
+                assert_eq!((&state.ranges, &state.cursors), (&before.0, &before.1));
+            }
+            assert_eq!(
+                tile_bounds(65_535, 1024, 16_384, 1024),
+                [16_368, 1008, 16_384, 1024]
+            );
+            let mut fonts = gpui_canvas::TextSystem::bundled().unwrap();
+            let run = fonts.shape("X", 18., None).unwrap();
+            let mut canvas = gpui_canvas::Canvas::recording(32, 32, Default::default()).unwrap();
+            canvas
+                .draw_text(
+                    &mut fonts,
+                    &run,
+                    gpui_canvas::Point { x: 0., y: 0. },
+                    gpui_canvas::Affine::IDENTITY,
+                    Rect::new(0., 0., 32., 32.),
+                    gpui_canvas::Color::BLACK,
+                )
+                .unwrap();
+            let key = canvas.prepared_scene().masks().next().unwrap().key;
+            let coverage = vec![255; MAX_ATLAS_SIDE as usize];
+            let mask = GlyphMask {
+                key,
+                width: MAX_ATLAS_SIDE as usize,
+                height: 1,
+                coverage: &coverage,
+            };
+            let mut atlas = Atlas::new(context.device(), MAX_ATLAS_SIDE);
+            atlas.x = 1;
+            atlas.y = MAX_ATLAS_SIDE - 1;
+            atlas.row_height = 1;
+            assert!(atlas.insert(context.queue(), mask).is_none());
+            assert_eq!(
+                (atlas.x, atlas.y, atlas.row_height, atlas.entries.len()),
+                (1, MAX_ATLAS_SIDE - 1, 1, 0)
+            );
+            atlas.x = 0;
+            atlas.row_height = 0;
+            assert_eq!(
+                atlas.insert(context.queue(), mask),
+                Some(MAX_ATLAS_SIDE as usize)
+            );
+            let tile = atlas.entries[&key];
+            assert_eq!(
+                (tile.x, tile.y, tile.width, tile.height),
+                (0, MAX_ATLAS_SIDE - 1, MAX_ATLAS_SIDE, 1)
+            );
+            context
+                .device()
+                .poll(wgpu::PollType::wait_indefinitely())
+                .unwrap();
+        });
+    }
 }

@@ -3,6 +3,16 @@ use naga::{AddressSpace, ArraySize, Module, ShaderStage, StorageAccess, TypeInne
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fmt::Write as _, path::Path, process::Command};
 
+const CAPABILITIES: [naga::back::spv::Capability; 7] = [
+    naga::back::spv::Capability::Shader,
+    naga::back::spv::Capability::Matrix,
+    naga::back::spv::Capability::Sampled1D,
+    naga::back::spv::Capability::Image1D,
+    naga::back::spv::Capability::ImageQuery,
+    naga::back::spv::Capability::DerivativeControl,
+    naga::back::spv::Capability::StorageImageExtendedFormats,
+];
+
 fn hash(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()
@@ -292,15 +302,7 @@ pub fn generate(source: &str, out: &Path) {
         writeln!(rust,"wgpu::BindGroupLayoutEntry {{ binding:{binding},visibility:wgpu::ShaderStages::FRAGMENT,ty:{ty},count:None }},").unwrap();
     }
     rust.push_str("];\n");
-    let caps = [
-        spv::Capability::Shader,
-        spv::Capability::Matrix,
-        spv::Capability::Sampled1D,
-        spv::Capability::Image1D,
-        spv::Capability::ImageQuery,
-        spv::Capability::DerivativeControl,
-        spv::Capability::StorageImageExtendedFormats,
-    ];
+    let caps = CAPABILITIES;
     let binding_map: spv::BindingMap = bindings
         .iter()
         .map(|(b, _, _)| {
@@ -439,4 +441,75 @@ pub fn generate(source: &str, out: &Path) {
         artifacts.join(",\n")
     );
     std::fs::write(out.join("ui-artifacts.json"), manifest).expect("write artifact manifest");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn source() -> String {
+        std::fs::read_to_string(std::env::var_os("GPUI_PROOF_WGSL").unwrap()).unwrap()
+    }
+    #[test]
+    fn changed_binding_cannot_keep_the_generated_host_layout() {
+        let source = source();
+        let changed = source.replace("@binding(5)", "@binding(6)");
+        assert_ne!(source, changed);
+        let module = naga::front::wgsl::parse_str(&changed).unwrap();
+        let info = validate(&module);
+        assert!(
+            std::panic::catch_unwind(|| reflect(
+                &module,
+                &info,
+                &[
+                    ("fragment", ShaderStage::Fragment),
+                    ("vertex", ShaderStage::Vertex)
+                ]
+            ))
+            .is_err()
+        );
+    }
+    #[test]
+    fn writable_resource_cannot_pass_read_only_abi_proof() {
+        let source = source();
+        let changed = source.replace("var<storage, read> WORDS", "var<storage, read_write> WORDS");
+        assert_ne!(source, changed);
+        let module = naga::front::wgsl::parse_str(&changed).unwrap();
+        let info = validate(&module);
+        assert!(
+            std::panic::catch_unwind(|| reflect(
+                &module,
+                &info,
+                &[
+                    ("fragment", ShaderStage::Fragment),
+                    ("vertex", ShaderStage::Vertex)
+                ]
+            ))
+            .is_err()
+        );
+    }
+    #[test]
+    fn changed_descriptor_set_cannot_pass_physical_binding_proof() {
+        let bytes = std::fs::read(std::env::var_os("GPUI_PROOF_FRAGMENT").unwrap()).unwrap();
+        let mut words = bytes
+            .chunks_exact(4)
+            .map(|b| u32::from_le_bytes(b.try_into().unwrap()))
+            .collect::<Vec<_>>();
+        decorations(&words, &CAPABILITIES, &[0, 1, 2, 3, 4, 5]);
+        let mut at = 5;
+        let mut changed = false;
+        while at < words.len() {
+            let count = (words[at] >> 16) as usize;
+            if words[at] & 0xffff == 71 && count == 4 && words[at + 2] == 34 {
+                words[at + 3] = 1;
+                changed = true;
+                break;
+            }
+            at += count;
+        }
+        assert!(changed);
+        let caps = CAPABILITIES;
+        assert!(
+            std::panic::catch_unwind(|| decorations(&words, &caps, &[0, 1, 2, 3, 4, 5])).is_err()
+        );
+    }
 }

@@ -23,8 +23,12 @@ impl Adapter {
     /// This is only a request hint; re-admit against the resulting Device.
     pub fn shader_artifact_features(&self) -> Features {
         #[cfg(vulkan)]
-        if self.get_info().backend == Backend::Vulkan {
-            return self.features() & Features::PASSTHROUGH_SHADERS;
+        if self.features().contains(Features::PASSTHROUGH_SHADERS) {
+            // SAFETY: only borrow the backend guard to discriminate the API;
+            // no raw resource is accessed, changed, submitted or destroyed.
+            if unsafe { self.as_hal::<hal::api::Vulkan>() }.is_some() {
+                return Features::PASSTHROUGH_SHADERS;
+            }
         }
         Features::empty()
     }

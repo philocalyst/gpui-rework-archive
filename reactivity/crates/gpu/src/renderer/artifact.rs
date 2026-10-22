@@ -22,10 +22,7 @@ pub(super) fn create(
     wgpu::PipelineLayout,
 )> {
     let profile = device.shader_artifact_profile()?;
-    if profile.revision() != bundle::REVISION {
-        return None;
-    }
-    let words = *bundle::WORDS.get(profile.variant())?;
+    let words = select(profile.revision(), profile.variant())?;
     // Every context creates a fresh BGL, preserving the retained layout's
     // context-identity certificate even when hardware interns its layout data.
     let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -58,4 +55,23 @@ pub(super) fn create(
     let vertex = module(&bundle::VERTEX, &ENTRIES[..1]);
     let fragment = module(words, &ENTRIES[1..]);
     Some((vertex, fragment, layout, pipeline_layout))
+}
+
+fn select(revision: u32, variant: usize) -> Option<&'static [u32]> {
+    if revision != bundle::REVISION {
+        return None;
+    }
+    bundle::WORDS.get(variant).copied()
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn stale_revision_and_missing_variant_decline_before_raw_creation() {
+        assert!(select(bundle::REVISION + 1, 0).is_none());
+        assert!(select(bundle::REVISION, usize::MAX).is_none());
+        for variant in 0..4 {
+            assert!(select(bundle::REVISION, variant).is_some());
+        }
+    }
 }
