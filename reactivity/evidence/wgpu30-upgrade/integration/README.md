@@ -1,0 +1,1 @@
+Combined integration of WGPU 30.0.1 / WGSL-RS beta.6 onto SIMD source `8350157374`, committed as `669c83750a`. The GPU manifest retains default SIMD propagation and disables Canvas dependency defaults. Logs cover this combined checkout; parent evidence remains qualified to its original standalone source. Owned Xvfb :120 was stopped after the native gate.
