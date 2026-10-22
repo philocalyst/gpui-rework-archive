@@ -61,7 +61,7 @@ fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
         .poll(wgpu::PollType::wait_indefinitely())
         .unwrap();
     receive.recv().unwrap().unwrap();
-    let mapped = buffer.get_mapped_range(..);
+    let mapped = buffer.get_mapped_range(..).unwrap();
     let mut output = Vec::new();
     for row in mapped.chunks_exact(stride as usize) {
         output.extend_from_slice(&row[..(texture.width() * bytes) as usize]);

@@ -244,6 +244,7 @@ fn surface_config(size: [u32; 2], format: wgpu::TextureFormat) -> wgpu::SurfaceC
     wgpu::SurfaceConfiguration {
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
         format,
+        color_space: wgpu::SurfaceColorSpace::Srgb,
         width: size[0],
         height: size[1],
         present_mode: wgpu::PresentMode::Fifo,
@@ -655,7 +656,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                         Err(error) => return Err(error.into()),
                     };
                     self.window.as_ref().unwrap().pre_present_notify();
-                    frame.present();
+                    graphics.renderer.queue().present(frame);
                     let commit = owner.presented(token)?;
                     self.did_present(RendererKind::Gpu, commit);
                     self.recoveries = 0;
@@ -785,7 +786,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 gpu.render_paint(scene, token, paint, &view).map(|_| token)
             })??;
             window.pre_present_notify();
-            frame.present();
+            gpu.renderer.queue().present(frame);
             owner.presented(token).map_err(NativeError::from)
         })();
         match result {
