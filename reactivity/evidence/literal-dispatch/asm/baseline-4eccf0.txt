@@ -1,0 +1,75 @@
+
+/tmp/gpui-literal-dispatch-base-target/release/examples/literal_startup:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004eccf0 <literal_startup::single_width_probe>:
+  4eccf0:	53                   	push   %rbx
+  4eccf1:	48 81 ec 40 01 00 00 	sub    $0x140,%rsp
+  4eccf8:	48 89 fb             	mov    %rdi,%rbx
+  4eccfb:	0f 10 05 2e ba b5 ff 	movups -0x4a45d2(%rip),%xmm0        # 48730 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110>
+  4ecd02:	0f 11 84 24 e8 00 00 	movups %xmm0,0xe8(%rsp)
+  4ecd09:	00
+  4ecd0a:	0f 10 0d 2f ba b5 ff 	movups -0x4a45d1(%rip),%xmm1        # 48740 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x10>
+  4ecd11:	0f 11 8c 24 f8 00 00 	movups %xmm1,0xf8(%rsp)
+  4ecd18:	00
+  4ecd19:	0f 10 15 30 ba b5 ff 	movups -0x4a45d0(%rip),%xmm2        # 48750 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x20>
+  4ecd20:	0f 11 94 24 08 01 00 	movups %xmm2,0x108(%rsp)
+  4ecd27:	00
+  4ecd28:	0f 10 1d 31 ba b5 ff 	movups -0x4a45cf(%rip),%xmm3        # 48760 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x30>
+  4ecd2f:	0f 11 9c 24 18 01 00 	movups %xmm3,0x118(%rsp)
+  4ecd36:	00
+  4ecd37:	0f 10 25 32 ba b5 ff 	movups -0x4a45ce(%rip),%xmm4        # 48770 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x40>
+  4ecd3e:	0f 11 a4 24 28 01 00 	movups %xmm4,0x128(%rsp)
+  4ecd45:	00
+  4ecd46:	48 b8 00 00 00 00 01 	movabs $0x3000100000000,%rax
+  4ecd4d:	00 03 00
+  4ecd50:	48 89 84 24 38 01 00 	mov    %rax,0x138(%rsp)
+  4ecd57:	00
+  4ecd58:	0f 57 ed             	xorps  %xmm5,%xmm5
+  4ecd5b:	0f 11 6c 24 18       	movups %xmm5,0x18(%rsp)
+  4ecd60:	48 c7 44 24 28 00 00 	movq   $0x0,0x28(%rsp)
+  4ecd67:	00 00
+  4ecd69:	48 c7 44 24 30 08 00 	movq   $0x8,0x30(%rsp)
+  4ecd70:	00 00
+  4ecd72:	48 c7 44 24 38 00 00 	movq   $0x0,0x38(%rsp)
+  4ecd79:	00 00
+  4ecd7b:	48 c7 44 24 40 ff ff 	movq   $0xffffffffffffffff,0x40(%rsp)
+  4ecd82:	ff ff
+  4ecd84:	0f 10 ac 24 d8 00 00 	movups 0xd8(%rsp),%xmm5
+  4ecd8b:	00
+  4ecd8c:	0f 11 6c 24 48       	movups %xmm5,0x48(%rsp)
+  4ecd91:	0f 11 44 24 58       	movups %xmm0,0x58(%rsp)
+  4ecd96:	0f 11 4c 24 68       	movups %xmm1,0x68(%rsp)
+  4ecd9b:	0f 11 54 24 78       	movups %xmm2,0x78(%rsp)
+  4ecda0:	0f 11 9c 24 88 00 00 	movups %xmm3,0x88(%rsp)
+  4ecda7:	00
+  4ecda8:	0f 11 a4 24 98 00 00 	movups %xmm4,0x98(%rsp)
+  4ecdaf:	00
+  4ecdb0:	48 89 84 24 a8 00 00 	mov    %rax,0xa8(%rsp)
+  4ecdb7:	00
+  4ecdb8:	48 c7 84 24 b0 00 00 	movq   $0x0,0xb0(%rsp)
+  4ecdbf:	00 00 00 00 00
+  4ecdc4:	0f 10 44 24 10       	movups 0x10(%rsp),%xmm0
+  4ecdc9:	0f 11 84 24 b8 00 00 	movups %xmm0,0xb8(%rsp)
+  4ecdd0:	00
+  4ecdd1:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  4ecdd6:	48 89 84 24 c8 00 00 	mov    %rax,0xc8(%rsp)
+  4ecddd:	00
+  4ecdde:	c6 84 24 d0 00 00 00 	movb   $0x0,0xd0(%rsp)
+  4ecde5:	00
+  4ecde6:	89 f0                	mov    %esi,%eax
+  4ecde8:	0f 57 c0             	xorps  %xmm0,%xmm0
+  4ecdeb:	f2 48 0f 2a c0       	cvtsi2sd %rax,%xmm0
+  4ecdf0:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4ecdf7:	00
+  4ecdf8:	f2 0f 11 44 24 08    	movsd  %xmm0,0x8(%rsp)
+  4ecdfe:	48 8d 74 24 28       	lea    0x28(%rsp),%rsi
+  4ece03:	48 89 e1             	mov    %rsp,%rcx
+  4ece06:	ba 01 00 00 00       	mov    $0x1,%edx
+  4ece0b:	e8 40 d8 00 00       	call   4fa650 <<gpui::element::El>::property_operand::<f64>>
+  4ece10:	48 89 d8             	mov    %rbx,%rax
+  4ece13:	48 81 c4 40 01 00 00 	add    $0x140,%rsp
+  4ece1a:	5b                   	pop    %rbx
+  4ece1b:	c3                   	ret
