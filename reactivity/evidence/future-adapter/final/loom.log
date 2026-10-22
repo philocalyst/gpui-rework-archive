@@ -1,0 +1,46 @@
+   Compiling rustversion v1.0.23
+   Compiling tracing-core v0.1.36
+   Compiling log v0.4.34
+   Compiling regex-syntax v0.8.11
+   Compiling generator v0.8.11
+   Compiling lazy_static v1.5.1
+   Compiling sharded-slab v0.1.7
+   Compiling tracing v0.1.44
+   Compiling regex-automata v0.4.18
+   Compiling tracing-log v0.2.0
+   Compiling thread_local v1.1.10
+   Compiling smallvec v1.16.3
+   Compiling nu-ansi-term v0.50.3
+   Compiling matchers v0.2.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling loom v0.7.2
+   Compiling rtrb v0.4.0
+   Compiling gpui_reactivity_ownership_lab v0.1.0 (/root/gpui-future-sol/reactivity/crates/ownership-lab)
+warning: method `into_payload` is never used
+  --> crates/ownership-lab/tests/../../gpui/src/reader/linear_mailbox.rs:92:19
+   |
+12 | impl<P> Mailbox<P> {
+   | ------------------ method in this implementation
+...
+92 |     pub(super) fn into_payload(self) -> Option<P> {
+   |                   ^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `gpui_reactivity_ownership_lab` (test "question_mailbox") generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.70s
+     Running tests/question_mailbox.rs (/root/gpui-future-target/debug/deps/question_mailbox-6194c88483392a72)
+
+running 9 tests
+test a_worker_lease_defers_reclamation_after_close_but_cannot_admit_it ... ok
+test notification_and_payload_drop_run_outside_the_mutex ... ok
+test callback_close_discards_a_staged_response_without_taking_it ... ok
+test abandonment_releases_credit_without_a_payload_and_stays_bounded ... ok
+test a_late_old_notification_cannot_overwrite_a_reused_physical_lease ... ok
+test staged_readiness_keeps_the_payload_sealed_across_owner_refresh ... ok
+test close_never_waits_for_a_descheduled_producer_holding_the_response_mutex ... ok
+test close_racing_publication_releases_exactly_one_owned_payload ... ok
+test a_single_wake_after_terminal_cannot_strand_a_published_response ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

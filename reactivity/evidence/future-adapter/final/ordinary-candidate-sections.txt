@@ -1,0 +1,35 @@
+/tmp/future-control-candidate  :
+section                 size       addr
+.interp                   83        736
+.note.ABI-tag             32        820
+.dynsym                 3192        856
+.gnu.version             266       4048
+.gnu.version_r           464       4316
+.gnu.hash                 28       4784
+.dynstr                 1953       4812
+.rela.dyn             262176       6768
+.rela.plt                 48     268944
+.gcc_except_table      92432     268992
+.rodata              6560328     361424
+.eh_frame_hdr          44076    6921752
+.eh_frame             293008    6965832
+.text                4032871    7262944
+.init                     27   11295816
+.fini                     13   11295844
+.plt                      48   11295872
+.tdata                   920   11300016
+.tbss                    104   11300936
+.fini_array                8   11300936
+.init_array               16   11300944
+.data.rel.ro          190152   11300960
+.dynamic                 480   11491112
+.got                   16200   11491592
+.got.plt                  40   11507792
+.relro_padding          1928   11507832
+.tm_clone_table            0   11511928
+.data                   2624   11511928
+.bss                     323   11514552
+.comment                 157          0
+Total               11503997
+
+

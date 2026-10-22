@@ -1,0 +1,42 @@
+
+running 16 tests
+owner_record,State_u64_infallible=24,Work_u64=40,Source_version=8,Reader_version=16,QuestionInfo=96
+family=one_source,plan=328,inputs=40,versions=4,optional_versions=8,allocations=2,requested=120
+question_plan,allocations=2,requested=120,projection_allocations=2,projection_requested=88,Reader=16,Completion=40,Version=32,Controller=64,El=176
+plan_bytes=328
+family=two_sources,plan=368,inputs=80,versions=8,optional_versions=12,allocations=2,requested=120
+bound_lane_bytes=320
+family=three_nested,plan=416,inputs=120,versions=12,optional_versions=16,allocations=2,requested=120
+family=reader_and_source,total_plan=656,incremental_allocations=1,incremental_requested=80,reader_versions=16
+Node=40 Presented=80 El=176 Draft=152 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=264 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16
+Extra=56 Annotations=48 ListSpec=48 AnnotationDraft=56
+element,absent,allocations=0,bytes=0
+element,semantic,allocations=1,bytes=56
+test component::tests::component_storage_ledger_has_no_owning_model_pointer ... element,list,allocations=1,bytes=56
+ok
+element,combined,allocations=2,bytes=104
+test reader::question::tests::input_family_owner_record_ledger ... ok
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... ignored, explicit cold and warm whole-operation allocation ledger
+test runtime::semantic_storage_ledger::dense_annotation_capacity_evidence ... ignored, manual dense storage evidence; includes 30,003 layout nodes
+element,component_named=false,allocations=3,bytes=88
+test element::tests::size_ledger_counts_inline_route_and_style_costs ... ok
+element,component_named=true,allocations=4,bytes=144
+test runtime::style_ledger::real_application_and_adversarial_distribution ... ignored, explicit retained style/map distribution; no timing claim
+test runtime::style_ledger::retained_style_cost ... ignored, explicit paired release fixture; coordinate a quiet CPU window
+test runtime::style_ledger::retained_style_owner_memory ... ignored, explicit whole-owner allocation and peak ledger, including layout/canvas
+test reader::tests::absent_plan_and_static_producer_projection_allocation_ledger ... ok
+test reader::tests::input_family_storage_and_allocation_ledger ... ok
+remote=16 inbox=56 lane=72 notification=0 delivery=72 error=128 empty_win=8 channel_allocs=3 channel_bytes=832 bind_allocs=0 bind_bytes=0
+test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... ok
+test remote::ledger::requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer ... ok
+test runtime::semantic_storage_ledger::shared_ports_retain_one_payload_and_do_not_create_text_service ... ok
+test runtime::style_port_tests::fresh_cold_binding_owner_ledger ... ok
+style_lane,default,nodes=4096,allocations=0,requested_bytes=0,live_bytes=0,peak_bytes=0
+style_lane,small,nodes=3,allocations=1,requested_bytes=264,live_bytes=264,peak_bytes=264
+test runtime::style_ledger::inspector_dense_lane_is_reclaimed_after_inherit_and_redescription ... ok
+style_lane,shared,nodes=4096,allocations=3,requested_bytes=7616,live_bytes=4800,peak_bytes=7616
+style_lane,unique,nodes=4096,allocations=3,requested_bytes=367360,live_bytes=360448,peak_bytes=367360
+test runtime::styles::tests::style_lane_allocation_ledger ... ok
+
+test result: ok. 11 passed; 0 failed; 5 ignored; 0 measured; 118 filtered out; finished in 0.01s
+
