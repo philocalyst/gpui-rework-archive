@@ -18,7 +18,7 @@ fn contained_editor_allocation_ledger() {
     let mut owner = owner.unwrap();
     let idle = allocation_counter::measure(|| {
         for _ in 0..100 {
-            owner.resize(800, 400).unwrap();
+            owner.resize([800, 400]).unwrap();
         }
     });
     assert_eq!(idle.count_total, 0);
