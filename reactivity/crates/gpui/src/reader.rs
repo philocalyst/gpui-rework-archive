@@ -14,8 +14,10 @@ use std::{
     },
 };
 
+mod future;
 mod inputs;
 mod linear_mailbox;
+pub use future::{QuestionExecutor, QuestionTask};
 pub use inputs::QuestionInputs;
 pub(crate) mod question;
 mod sync {
