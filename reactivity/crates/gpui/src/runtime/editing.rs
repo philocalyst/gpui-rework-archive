@@ -659,7 +659,7 @@ mod tests {
     }
 
     #[test]
-    fn only_the_active_input_retains_caret_geometry_and_one_cold_state() {
+    fn all_presented_inputs_retain_stable_geometry_and_share_one_cold_editor() {
         let mut win = Win::demo(Inputs {
             a: Signal::new("first".into()),
             b: Signal::new("אבג".into()),
@@ -684,6 +684,19 @@ mod tests {
                 .caret_bounds(position(0).unwrap())
                 .is_some()
         };
+        let maps = targets.map(|target| {
+            let runtime = win.runtime().unwrap();
+            let index = runtime.resolve_index(target).unwrap();
+            let layout = &runtime.nodes[index]
+                .text_slot()
+                .get(&runtime.texts)
+                .unwrap()
+                .shaped
+                .as_ref()
+                .unwrap()
+                .layout;
+            std::ptr::from_ref(layout.geometry().unwrap())
+        });
         {
             let runtime = win.runtime().unwrap();
             assert!(
@@ -692,8 +705,8 @@ mod tests {
                     .as_ref()
                     .is_none_or(|m| m.editing.is_none())
             );
-            assert!(!has_map(runtime, targets[0]));
-            assert!(!has_map(runtime, targets[1]));
+            assert!(has_map(runtime, targets[0]));
+            assert!(has_map(runtime, targets[1]));
         }
         let caret = TextSelection {
             anchor: position(0).unwrap(),
@@ -703,7 +716,7 @@ mod tests {
         let allocation = {
             let runtime = win.runtime().unwrap();
             assert!(has_map(runtime, targets[0]));
-            assert!(!has_map(runtime, targets[1]));
+            assert!(has_map(runtime, targets[1]));
             std::ptr::from_ref(
                 runtime
                     .metadata
@@ -716,8 +729,20 @@ mod tests {
         };
         win.select(targets[1], caret).unwrap();
         let runtime = win.runtime().unwrap();
-        assert!(!has_map(runtime, targets[0]));
+        assert!(has_map(runtime, targets[0]));
         assert!(has_map(runtime, targets[1]));
+        for (target, map) in targets.into_iter().zip(maps) {
+            let index = runtime.resolve_index(target).unwrap();
+            let layout = &runtime.nodes[index]
+                .text_slot()
+                .get(&runtime.texts)
+                .unwrap()
+                .shaped
+                .as_ref()
+                .unwrap()
+                .layout;
+            assert_eq!(std::ptr::from_ref(layout.geometry().unwrap()), map);
+        }
         assert_eq!(
             std::ptr::from_ref(
                 runtime
