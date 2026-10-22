@@ -207,3 +207,244 @@ fn a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once() 
     win.close();
     assert_eq!(drops.load(Ordering::SeqCst), 8);
 }
+
+// Every visual site keeps its kind and ordinal while handler density changes.
+// No child text rows dilute the all-route control.
+struct ColumnPage {
+    count: usize,
+    routes: usize,
+    generation: usize,
+    called: Option<(usize, usize)>,
+    events: Arc<std::sync::Mutex<Vec<(usize, usize)>>>,
+}
+struct ColumnCapture {
+    generation: usize,
+    node: usize,
+    events: Arc<std::sync::Mutex<Vec<(usize, usize)>>>,
+}
+impl ColumnCapture {
+    fn call(&self, page: &mut ColumnPage) {
+        page.called = Some((self.generation, self.node));
+    }
+}
+impl Drop for ColumnCapture {
+    fn drop(&mut self) {
+        self.events
+            .lock()
+            .unwrap()
+            .push((self.generation, self.node));
+    }
+}
+impl ColumnPage {
+    fn route<'a>(&self, node: usize, element: El<'a>) -> El<'a> {
+        if node >= self.routes {
+            return element;
+        }
+        let capture = ColumnCapture {
+            generation: self.generation,
+            node,
+            events: self.events.clone(),
+        };
+        element.on_click(move |page: &mut Self| capture.call(page))
+    }
+}
+impl View for ColumnPage {
+    fn view(&self) -> El<'_> {
+        self.route(
+            0,
+            column((1..self.count).map(|node| self.route(node, div().size(8)))),
+        )
+    }
+}
+
+#[test]
+fn retained_routes_cross_all_sparse_dense_and_absent_modes_with_exact_retirement_order() {
+    let events = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let mut win = Win::demo(ColumnPage {
+        count: 9,
+        routes: 9,
+        generation: 0,
+        called: None,
+        events: events.clone(),
+    });
+    let targets = win
+        .snapshot()
+        .unwrap()
+        .nodes
+        .into_iter()
+        .map(|node| node.target.unwrap())
+        .collect::<Vec<_>>();
+    for (generation, old_routes, routes) in [(1, 9, 2), (2, 2, 0), (3, 0, 9), (4, 9, 6), (5, 6, 7)]
+    {
+        events.lock().unwrap().clear();
+        win.update(|page| {
+            page.generation = generation;
+            page.routes = routes;
+        })
+        .unwrap();
+        assert_eq!(
+            *events.lock().unwrap(),
+            (0..old_routes)
+                .map(|node| (generation - 1, node))
+                .collect::<Vec<_>>()
+        );
+        let snapshot = win.snapshot().unwrap();
+        for (node, target) in targets.iter().copied().enumerate() {
+            if node < routes {
+                assert_eq!(snapshot.nodes[node].target, Some(target));
+            } else {
+                assert_eq!(snapshot.nodes[node].target, None);
+                assert_eq!(win.activate(target), Err(Error::NotInteractive));
+            }
+        }
+    }
+    events.lock().unwrap().clear();
+    win.activate(targets[6]).unwrap();
+    assert_eq!(win.root().unwrap().called, Some((5, 6)));
+    assert_eq!(
+        *events.lock().unwrap(),
+        (0..7).map(|node| (5, node)).collect::<Vec<_>>()
+    );
+    events.lock().unwrap().clear();
+    win.close();
+    assert_eq!(
+        *events.lock().unwrap(),
+        (0..7).map(|node| (5, node)).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn keyed_route_retirement_tracks_consumption_order_and_then_old_row_order() {
+    const LIST: ListId = ListId::new(710);
+    struct Page {
+        keys: Vec<u64>,
+        generation: usize,
+        selected: Option<u64>,
+        events: Arc<std::sync::Mutex<Vec<(usize, usize)>>>,
+    }
+    impl ItemSource for Page {
+        fn len(&self) -> usize {
+            self.keys.len()
+        }
+        fn key(&self, index: usize) -> ItemKey {
+            ItemKey::new(self.keys[index])
+        }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            self.keys.iter().position(|value| *value == key.get())
+        }
+        fn row(&self, index: usize) -> El<'_> {
+            let key = self.keys[index];
+            let guard = ColumnCapture {
+                generation: self.generation,
+                node: key as usize,
+                events: self.events.clone(),
+            };
+            button(format!("key {key}")).on_click(move |page: &mut Self| {
+                guard.retain();
+                page.selected = Some(key);
+            })
+        }
+    }
+    impl View for Page {
+        fn view(&self) -> El<'_> {
+            uniform_list(LIST, self, 16).h(128).w(200)
+        }
+    }
+    let events = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let mut win = Win::with_size(
+        Page {
+            keys: (0..6).collect(),
+            generation: 0,
+            selected: None,
+            events: events.clone(),
+        },
+        240,
+        160,
+    )
+    .unwrap();
+    let kept = win.button("key 1");
+    let removed = win.button("key 4");
+    win.update(|page| {
+        page.keys.reverse();
+        page.generation = 1;
+    })
+    .unwrap();
+    assert_eq!(
+        *events.lock().unwrap(),
+        (0..6).rev().map(|key| (0, key)).collect::<Vec<_>>()
+    );
+    assert_eq!(win.button("key 1"), kept);
+    events.lock().unwrap().clear();
+    win.update(|page| {
+        page.keys = vec![5, 1, 3];
+        page.generation = 2;
+    })
+    .unwrap();
+    assert_eq!(
+        *events.lock().unwrap(),
+        [5, 1, 3, 4, 2, 0].map(|key| (1, key))
+    );
+    assert_eq!(win.button("key 1"), kept);
+    assert_eq!(win.activate(removed), Err(Error::StaleTarget));
+    win.activate(kept).unwrap();
+    assert_eq!(win.root().unwrap().selected, Some(1));
+}
+impl ColumnCapture {
+    fn retain(&self) {}
+}
+
+#[test]
+fn selection_request_and_reply_panics_restore_dense_and_sparse_routes_until_close() {
+    struct Owner {
+        target: Option<Target>,
+        request_panics: bool,
+        sparse: bool,
+        drops: Arc<AtomicUsize>,
+    }
+    impl View for Owner {
+        fn view(&self) -> El<'_> {
+            let guard = Retire {
+                drops: self.drops.clone(),
+                panic: false,
+            };
+            let site = div().size(8).on_click(gpui::property_selection(
+                move |owner: &Self| {
+                    guard.retain();
+                    assert!(!owner.request_panics, "selection request panic");
+                    Some((owner.target.unwrap(), gpui::PropertyId::Width))
+                },
+                |_: &mut Self, _| panic!("selection reply panic"),
+            ));
+            if self.sparse {
+                column((site, column((0..32).map(|_| div()))))
+            } else {
+                site
+            }
+        }
+    }
+    for sparse in [false, true] {
+        for request_panics in [false, true] {
+            let drops = Arc::new(AtomicUsize::new(0));
+            let mut win = Win::demo(Owner {
+                target: None,
+                request_panics,
+                sparse,
+                drops: drops.clone(),
+            });
+            let target = win
+                .snapshot()
+                .unwrap()
+                .nodes
+                .iter()
+                .find_map(|node| node.target)
+                .unwrap();
+            win.update(|owner| owner.target = Some(target)).unwrap();
+            let before = drops.load(Ordering::SeqCst);
+            assert_eq!(win.activate(target), Err(Error::OwnerPanicked));
+            assert_eq!(drops.load(Ordering::SeqCst), before);
+            assert_eq!(win.activate(target), Err(Error::Poisoned));
+            win.close();
+            assert_eq!(drops.load(Ordering::SeqCst), before + 1);
+        }
+    }
+}

@@ -338,7 +338,7 @@ mod parent_tests {
 
     #[test]
     fn nonzero_identity_keeps_old_node_migration_in_place() {
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
         let nodes = (1..=64)
             .map(|identity| Node {
@@ -347,7 +347,6 @@ mod parent_tests {
                 ordinal: 0,
                 content: Content::new(NodeKind::Div, TextSlot::NONE),
                 component_scope: 0,
-                handler: None,
             })
             .collect::<Vec<_>>();
         let pointer = nodes.as_ptr().cast::<u8>();
@@ -475,8 +474,8 @@ mod parent_tests {
         assert_eq!(size_of::<NodeKind>(), 1);
         assert_eq!(size_of::<Option<NodeKind>>(), 1);
         assert_eq!(size_of::<Content>(), 4);
-        assert_eq!(size_of::<Node>(), 40);
-        assert_eq!(size_of::<Option<Node>>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
+        assert_eq!(size_of::<Option<Node>>(), 24);
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
@@ -549,8 +548,15 @@ impl TextSlot {
 /// including the checkbox state. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES * 2 <= (u32::MAX >> 4) as usize);
+const _: () = assert!(MAX_NODES * 2 < (Content::ROUTE >> 4) as usize);
 impl Content {
+    const ROUTE: u32 = 1 << 31;
+    fn has_route(self) -> bool {
+        self.0 & Self::ROUTE != 0
+    }
+    fn with_route(self, present: bool) -> Self {
+        Self((self.0 & !Self::ROUTE) | if present { Self::ROUTE } else { 0 })
+    }
     #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
         let kind = match kind {
@@ -596,7 +602,7 @@ impl Content {
         if self.kind() == NodeKind::Image {
             return TextSlot::NONE;
         }
-        let text = self.0 >> 4;
+        let text = (self.0 & !Self::ROUTE) >> 4;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
     fn image(image: image::ImageUse) -> Self {
@@ -605,7 +611,7 @@ impl Content {
         Self(((value + 1) << 4) | 6)
     }
     fn image_use(self) -> Option<image::ImageUse> {
-        let value = self.0 >> 4;
+        let value = (self.0 & !Self::ROUTE) >> 4;
         if self.kind() != NodeKind::Image || value == 0 {
             return None;
         }
@@ -620,13 +626,15 @@ impl Content {
         })
     }
 }
+mod handlers;
+use handlers::HandlerSites;
+
 struct Node {
     identity: NonZeroU64,
     parent: Parent,
     ordinal: u32,
     content: Content,
     component_scope: u32,
-    handler: Option<Handler>,
 }
 #[cfg(test)]
 mod hit_tests;
@@ -634,7 +642,7 @@ mod hit_tests;
 mod style_ledger;
 impl Node {
     fn focusable(&self) -> bool {
-        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.handler.is_some()
+        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.content.has_route()
     }
     #[inline]
     fn identity(&self) -> u64 {
@@ -816,6 +824,7 @@ struct Runtime<M> {
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
+    handlers: HandlerSites,
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
     images: Option<Box<image::Images>>,
@@ -1023,6 +1032,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             model: pending.model,
             sources,
             nodes: Vec::new(),
+            handlers: HandlerSites::default(),
             styles: styles::Styles::default(),
             texts: Vec::new(),
             images: None,
@@ -1354,7 +1364,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 && !runtime.poisoned
                 && let Some(index) = runtime.by_identity.get(identity)
                 && (all_targets
-                    || runtime.nodes[index].handler.is_some()
+                    || runtime.nodes[index].content.has_route()
                     || runtime.nodes[index].kind() == NodeKind::Input)
             {
                 Some(runtime.sites.target(identity))
@@ -1726,6 +1736,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut component_scopes = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0usize; drafts.len() + 1];
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
+        let mut route_count = 0;
         for (index, node) in drafts.iter().enumerate() {
             new_counts[node.parent.map_or(0, |parent| parent as usize + 1)] += 1;
             let depth = node.parent.map_or(0, |parent| depths[parent as usize] + 1);
@@ -1747,6 +1758,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             component_scopes.push(component_scope);
             if let Some(handler) = &node.on_click {
+                route_count += 1;
                 handler.admit(&self.model, &self.sources)?;
             }
             let field = match node.text.as_ref().and_then(|text| text.signal()) {
@@ -1850,6 +1862,11 @@ impl<M: View + 'static> Runtime<M> {
         }
         let old_styles = std::mem::take(&mut self.styles);
         let siblings = siblings::Siblings::new(&self.nodes);
+        // Siblings is the last reader of old ordinals. Until reset below,
+        // consumed old rows carry their cold route slot instead. This linear
+        // indexing needs no scratch allocation or per-row sparse search.
+        let mut old_handlers = std::mem::take(&mut self.handlers);
+        old_handlers.index_old(&mut self.nodes);
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()
             .map(Some)
@@ -1887,6 +1904,7 @@ impl<M: View + 'static> Runtime<M> {
             .collect::<Vec<_>>();
         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
+        let mut handlers = handlers::Builder::new(drafts.len(), route_count);
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
         let mut texts =
@@ -1929,9 +1947,20 @@ impl<M: View + 'static> Runtime<M> {
                             .is_some_and(|node| node.kind().site_kind() == draft.kind.site_kind())
                     })
             };
-            let previous = previous_index
-                .and_then(|old_index| old[old_index].take())
-                .filter(|node| node.component_scope == component_scopes[index]);
+            let previous = previous_index.and_then(|old_index| old[old_index].take());
+            // Own the consumed route alongside the row. Scope rejection drops
+            // it here; a surviving route drops at replacement below, exactly
+            // where the former Node handler field was dropped.
+            let mut previous_handler = previous
+                .as_ref()
+                .and_then(|node| old_handlers.take_slot(node.ordinal));
+            let previous = previous.filter(|node| {
+                let keep = node.component_scope == component_scopes[index];
+                if !keep {
+                    drop(previous_handler.take());
+                }
+                keep
+            });
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
             } else {
@@ -1960,7 +1989,6 @@ impl<M: View + 'static> Runtime<M> {
                     ordinal,
                     content: Content::new(draft.kind, TextSlot::NONE),
                     component_scope: component_scopes[index],
-                    handler: None,
                 }
             };
             let mut site = node.text_slot().take(&mut self.texts);
@@ -2041,7 +2069,7 @@ impl<M: View + 'static> Runtime<M> {
             {
                 site.shaped = None;
             }
-            if node.handler.is_some() != draft.on_click.is_some() {
+            if node.content.has_route() != draft.on_click.is_some() {
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
@@ -2059,7 +2087,9 @@ impl<M: View + 'static> Runtime<M> {
                 Contribution::Set(_)
             )) << 1);
             styles.declaration(index, draft.style, style, mask);
-            node.handler = draft.on_click;
+            drop(previous_handler);
+            let has_route = draft.on_click.is_some();
+            handlers.push(index, draft.on_click);
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
@@ -2072,7 +2102,8 @@ impl<M: View + 'static> Runtime<M> {
                 Content::image(image)
             } else {
                 Content::new(draft.kind, text_slot)
-            };
+            }
+            .with_route(has_route);
             if property_changed == Some(node.identity) {
                 node_changed = true;
                 property_changed = None;
@@ -2225,6 +2256,7 @@ impl<M: View + 'static> Runtime<M> {
         self.viewports = viewports;
         self.list_rows = list_rows;
         self.nodes = nodes;
+        self.handlers = handlers.finish();
         self.styles = styles.finish();
         // A replacement source bank has no authority over the preceding
         // Canvas slots, even if every effective value and binding is equal.
@@ -2852,7 +2884,7 @@ impl<M: View + 'static> Runtime<M> {
                 } else {
                     scene.fill_rounded_rect(rect, radius, transform, clip, style.bg)?;
                 }
-            } else if paint && (node.handler.is_some() || node.kind() == NodeKind::Input) {
+            } else if paint && (node.content.has_route() || node.kind() == NodeKind::Input) {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
                 scene.fill_rounded_rect(
@@ -3011,7 +3043,7 @@ impl<M: View + 'static> Runtime<M> {
             let hittable = !bounds.is_empty()
                 && (node.text_slot().0 != u32::MAX
                     || style.bg.alpha() > 0.0
-                    || node.handler.is_some()
+                    || node.content.has_route()
                     || matches!(node.kind(), NodeKind::Input | NodeKind::Image));
             let link = PresentedLink::new(
                 published_parent,
@@ -3042,7 +3074,7 @@ impl<M: View + 'static> Runtime<M> {
                 basis,
                 bounds,
                 hittable,
-                actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
+                actions: Actions::for_node(node.kind(), node.content.has_route()).scroll_into_view(
                     node.parent.index().is_some_and(|parent| {
                         clip_membership.get(parent).is_some_and(|flags| *flags != 0)
                     }) || parent_is_viewport,
@@ -3232,7 +3264,7 @@ impl<M: View + 'static> Runtime<M> {
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
                     if let Some(logical) = self.by_identity.get(node.identity)
-                        && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
+                        && (self.nodes[logical].content.has_route() || node.kind == NodeKind::Input)
                     {
                         return Some(node.identity);
                     }
@@ -3972,7 +4004,7 @@ mod semantic_storage_ledger {
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
@@ -4367,7 +4399,7 @@ mod style_port_tests {
             size_of::<Destination>(),
             size_of::<crate::Flex>()
         );
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
@@ -4382,3 +4414,6 @@ mod basis_layout_probe;
 
 #[cfg(test)]
 mod basis_lifecycle_tests;
+
+#[cfg(test)]
+mod route_ledger;

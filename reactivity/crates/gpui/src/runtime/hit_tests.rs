@@ -69,7 +69,7 @@ fn exhaustive<M: View + 'static>(runtime: &Runtime<M>, point: Point) -> Option<u
             while let Some(index) = cursor {
                 let node = &runtime.presented[index];
                 if let Some(logical) = runtime.by_identity.get(node.identity)
-                    && (runtime.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
+                    && (runtime.nodes[logical].content.has_route() || node.kind == NodeKind::Input)
                 {
                     return Some(node.identity);
                 }

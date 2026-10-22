@@ -76,7 +76,6 @@ mod tests {
                         TextSlot::NONE,
                     ),
                     component_scope: 0,
-                    handler: None,
                 };
                 *ordinal += 1;
                 node

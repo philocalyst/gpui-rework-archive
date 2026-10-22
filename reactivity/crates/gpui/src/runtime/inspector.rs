@@ -623,7 +623,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     (5, EditorOp::Auto),
                     (6, EditorOp::Inherit),
                 ] {
-                    self.nodes[panel + EDITOR + offset].handler = Some(
+                    *self.handlers.get_mut(panel + EDITOR + offset) = Some(
                         crate::element::Handler::window(WindowAction::Inspector(Edit(next.0, op))),
                     );
                 }
