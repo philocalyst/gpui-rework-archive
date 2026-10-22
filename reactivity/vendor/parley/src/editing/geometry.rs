@@ -105,14 +105,12 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         if upstream.index() != byte {
             return None;
         }
-        let downstream = Cursor::from_source_cluster(
-            self.layout,
-            Affinity::Downstream,
-            next.map(|(_, cluster)| cluster),
-        );
         let previous = byte.checked_sub(1).and_then(|b| self.indexed_cluster(b));
         let clusters = [previous.map(|(_, c)| c), next.map(|(_, c)| c)];
-        let same_edge = upstream == downstream
+        // A present byte-zero cluster forces both cursors downstream. A
+        // missing next cluster forces both to the upstream text endpoint.
+        let same_edge = byte == 0
+            || next.is_none()
             || previous.zip(next).is_some_and(|((pi, p), (ni, n))| {
                 let [pp, np] = [self.entries[pi].path, self.entries[ni].path];
                 p.text_range().end == byte
@@ -140,6 +138,11 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
             if same_edge {
                 first
             } else {
+                let downstream = Cursor::from_source_cluster(
+                    self.layout,
+                    Affinity::Downstream,
+                    next.map(|(_, cluster)| cluster),
+                );
                 geometry(downstream)
             },
         ])

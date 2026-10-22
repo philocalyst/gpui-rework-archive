@@ -55,6 +55,7 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
                         ] {
                             planner.layout.align(alignment, AlignmentOptions::default());
                             let geometry = CursorGeometry::new(&planner.layout).unwrap();
+                            assert_lowered_stops(&planner.layout, source);
                             for byte in (0..=source.len()).chain([usize::MAX]) {
                                 for width in [-0., 1., -1., 1e20] {
                                     let direct = [Affinity::Upstream, Affinity::Downstream].map(
@@ -97,4 +98,50 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
         "wrap/bidi/run affinity exceptions must occur"
     );
     eprintln!("cursor_pairs,accepted={accepted},snapped={snapped},distinct={distinct}");
+}
+
+fn assert_lowered_stops(layout: &parley::Layout<()>, source: &str) {
+    // The reference deliberately uses direct unindexed producer queries and
+    // the original numeric-rectangle coalescing rule. Compare actual packed
+    // Stop bits, not only the pair API's widened bounding boxes.
+    let mut expected = Vec::new();
+    for byte in GraphemeClusterSegmenter::new().segment_str(source) {
+        let pair = [Affinity::Upstream, Affinity::Downstream].map(|affinity| {
+            let cursor = Cursor::from_byte_index(layout, byte, affinity);
+            (cursor.index() == byte).then(|| {
+                let r = cursor.geometry(layout, 1.);
+                Rect::new(
+                    r.x0 as f32,
+                    (13.25 + r.y0) as f32,
+                    (r.x1 - r.x0) as f32,
+                    (r.y1 - r.y0) as f32,
+                )
+            })
+        });
+        if let [Some(a), Some(b)] = pair
+            && a == b
+        {
+            expected.push(((17 + byte) as u32, a.x.to_bits(), 3));
+        } else {
+            for (i, bounds) in pair.into_iter().enumerate() {
+                if let Some(bounds) = bounds {
+                    expected.push(((17 + byte) as u32, bounds.x.to_bits(), 1 << i));
+                }
+            }
+        }
+    }
+    let mut actual = Vec::new();
+    append_carets(&mut actual, layout, source, 17, 13.25).unwrap();
+    let actual = actual
+        .iter()
+        .map(|stop| (stop.byte, stop.x.to_bits(), stop.affinities))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        actual, expected,
+        "packed source/affinity/x bits for {source:?}"
+    );
+    assert_eq!(
+        append_carets(&mut Vec::new(), layout, source, 17, f32::INFINITY),
+        Err(Error::InvalidGeometry),
+    );
 }
