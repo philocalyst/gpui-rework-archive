@@ -4,6 +4,10 @@ use super::{DisplayList, TILE};
 // Admission bounds regional CSR references and every painter ordinal.
 const _: () = assert!(super::MAX_REFERENCES < u32::MAX as usize);
 const _: () = assert!(super::MAX_COMMANDS <= u16::MAX as usize + 1);
+// Tile endpoints use at most eleven bits. Retire cut certificates lazily in an
+// unused bound bit, so paint commits never scan tiles or enlarge the header.
+const CUTS_DIRTY: u16 = 1 << 15;
+const _: () = assert!(16_384 / TILE < CUTS_DIRTY as usize);
 
 #[derive(Default)]
 pub(super) struct RasterScratch {
@@ -17,12 +21,16 @@ impl RasterScratch {
     pub(super) fn invalidate(&mut self) {
         self.bounds = [0; 4];
     }
+    pub(super) fn revoke_cuts(&mut self) {
+        self.bounds[0] |= CUTS_DIRTY;
+    }
     pub(super) fn bytes(&self) -> usize {
         (self.offsets.capacity() + self.indices.capacity()) * size_of::<u32>()
     }
     /// Borrow contiguous physical rows. Recursive workers split both membership
     /// and output at the same row boundary; only immutable offsets overlap.
     pub(super) fn rows(&mut self, bounds: [usize; 4]) -> ([u16; 4], &[u32], &mut [u32]) {
+        debug_assert_eq!(self.bounds[0] & CUTS_DIRTY, 0);
         let stride = usize::from(self.bounds[2] - self.bounds[0]);
         let first = (bounds[1] - usize::from(self.bounds[1])) * stride;
         let end = (bounds[3] - usize::from(self.bounds[1])) * stride;
@@ -39,9 +47,18 @@ impl RasterScratch {
         debug_assert!(bounds[0] < bounds[2] && bounds[1] < bounds[3]);
         debug_assert!(bounds.iter().all(|&edge| edge <= 16_384 / TILE));
         let key = bounds.map(|edge| edge as u16);
-        let cached = self.bounds;
+        let mut cached = self.bounds;
+        cached[0] &= !CUTS_DIRTY;
         if key[0] >= cached[0] && key[1] >= cached[1] && key[2] <= cached[2] && key[3] <= cached[3]
         {
+            if self.bounds[0] & CUTS_DIRTY != 0 {
+                for span in self.offsets.windows(2) {
+                    if span[0] != span[1] {
+                        self.indices[span[0] as usize] &= u16::MAX as u32;
+                    }
+                }
+                self.bounds = cached;
+            }
             return true;
         }
         // Allocation failure cannot publish a partially rebuilt CSR.
