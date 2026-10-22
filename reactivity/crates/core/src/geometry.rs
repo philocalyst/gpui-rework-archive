@@ -109,6 +109,7 @@ impl Affine {
             ty: 0.0,
         }
     }
+    #[inline]
     pub fn is_finite(self) -> bool {
         [self.a, self.b, self.c, self.d, self.tx, self.ty]
             .into_iter()
