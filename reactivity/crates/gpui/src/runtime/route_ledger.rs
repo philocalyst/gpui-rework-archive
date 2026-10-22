@@ -1,6 +1,13 @@
 //! Test-only whole-owner allocator requests; these counters are not RSS.
 use super::*;
 use crate::prelude::*;
+#[path = "../../examples/support/graphics.rs"]
+mod graphics;
+#[cfg(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal")))]
+use crate::native::test_todos as todos;
+#[cfg(not(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal"))))]
+#[path = "../../examples/support/todos.rs"]
+mod todos;
 #[path = "../../examples/support/workspace.rs"]
 mod workspace;
 
