@@ -7,7 +7,7 @@ use std::ops::Range;
 struct Fixture {
     map: Details,
     units: Vec<(Range<usize>, usize, bool)>,
-    cursors: Vec<(TextPosition, usize)>,
+    cursors: Vec<(TextPosition, usize, [u32; 4])>,
 }
 fn lower(source: &str, line_height: f32) -> Fixture {
     let face = FontFace::bundled().unwrap();
@@ -95,6 +95,17 @@ fn lower(source: &str, line_height: f32) -> Fixture {
             ));
         }
         for byte in boundaries {
+            let upstream = Cursor::from_byte_index(planned, byte, Affinity::Upstream);
+            let producer_bounds = |cursor: Cursor| {
+                let r = cursor.geometry(planned, 1.);
+                Rect::new(
+                    r.x0 as f32,
+                    (f64::from(height) + r.y0) as f32,
+                    (r.x1 - r.x0) as f32,
+                    (r.y1 - r.y0) as f32,
+                )
+            };
+            let upstream_bounds = producer_bounds(upstream);
             for (requested, affinity) in [
                 (CaretAffinity::Upstream, Affinity::Upstream),
                 (CaretAffinity::Downstream, Affinity::Downstream),
@@ -102,6 +113,12 @@ fn lower(source: &str, line_height: f32) -> Fixture {
                 let cursor = Cursor::from_byte_index(planned, byte, affinity);
                 if cursor.index() != byte {
                     continue;
+                }
+                let mut bounds = producer_bounds(cursor);
+                // The original producer merges Rect equality and retains the
+                // upstream bits, including equal signed-zero coordinates.
+                if upstream.index() == byte && bounds == upstream_bounds {
+                    bounds = upstream_bounds;
                 }
                 let [upstream, downstream] = cursor.logical_clusters(planned);
                 let cluster = if cursor.affinity() == Affinity::Upstream || downstream.is_none() {
@@ -118,6 +135,7 @@ fn lower(source: &str, line_height: f32) -> Fixture {
                         affinity: requested,
                     },
                     base + line,
+                    [bounds.x, bounds.y, bounds.width, bounds.height].map(f32::to_bits),
                 ));
             }
         }
@@ -165,12 +183,32 @@ fn wrapped_zero_and_small_line_heights_keep_producer_source_ownership() {
                     *hard,
                     "{source:?} height={height} range={range:?}"
                 );
+                let expected = fixture
+                    .cursors
+                    .iter()
+                    .find(|(position, _, _)| {
+                        position.offset.byte() == range.start
+                            && position.affinity == CaretAffinity::Downstream
+                    })
+                    .unwrap()
+                    .2;
+                assert_eq!(
+                    [unit.bounds().y.to_bits(), unit.bounds().height.to_bits()],
+                    [expected[1], expected[3]],
+                    "producer interval metrics {source:?} height={height} range={range:?}"
+                );
             }
-            for (position, line) in fixture.cursors {
+            for (position, line, bounds) in fixture.cursors {
                 assert_eq!(
                     fixture.map.caret_line(position),
                     Some(line),
                     "{source:?} height={height} caret={position:?}"
+                );
+                let actual = fixture.map.caret_bounds(position).unwrap();
+                assert_eq!(
+                    [actual.x, actual.y, actual.width, actual.height].map(f32::to_bits),
+                    bounds,
+                    "producer rect bits {source:?} height={height} caret={position:?}"
                 );
             }
         }
@@ -230,5 +268,59 @@ fn visual_line_transitions_do_not_rehit_collapsed_line_tops() {
             }),
             None
         );
+    }
+}
+
+#[test]
+fn source_line_geometry_reconstruction_preserves_producer_arithmetic_bits() {
+    // Independent arithmetic oracle: Parley widens each f32 edge before
+    // subtracting, while frozen lines perform their add/subtract in f32.
+    // Include signed zero, subnormals, cancellation, large exponents and
+    // adjacent representable values. No quantization or narrowed domain.
+    let values = [
+        0.,
+        -0.,
+        f32::from_bits(1),
+        -f32::from_bits(1),
+        f32::MIN_POSITIVE,
+        -f32::MIN_POSITIVE,
+        f32::from_bits(0x3f7f_ffff),
+        1.,
+        -1.,
+        f32::from_bits(0x3f80_0001),
+        16.,
+        -16.,
+        16_777_216.,
+        -16_777_216.,
+        1e20,
+        -1e20,
+        f32::MAX,
+        -f32::MAX,
+    ];
+    for before in values {
+        for a in values {
+            let min = a.min(before);
+            let max = a.max(before);
+            assert_eq!(
+                (max - min).to_bits(),
+                ((f64::from(max) - f64::from(min)) as f32).to_bits(),
+                "height min={min:?} max={max:?}"
+            );
+            for paragraph_height in values {
+                assert_eq!(
+                    (paragraph_height + min).to_bits(),
+                    ((f64::from(paragraph_height) + f64::from(min)) as f32).to_bits(),
+                    "top height={paragraph_height:?} min={min:?}"
+                );
+            }
+        }
+        // The producer adds the one-pixel width in f32 before widening. It
+        // can round to zero and must never be reconstructed as a literal 1.
+        let x1 = before + 1.;
+        let expected = (f64::from(x1) - f64::from(before)) as f32;
+        assert_eq!(expected.to_bits(), (x1 - before).to_bits());
+        if before.abs() >= 33_554_432. {
+            assert_eq!(expected, 0.);
+        }
     }
 }

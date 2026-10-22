@@ -99,7 +99,7 @@ pub(super) struct Line {
 #[derive(Clone, Copy, Debug)]
 pub(super) struct Stop {
     pub byte: u32,
-    pub bounds: Rect,
+    pub x: f32,
     // 1 upstream, 2 downstream, 3 either. Equal geometry is retained once.
     pub affinities: u8,
 }
@@ -254,6 +254,9 @@ impl TextGeometry {
     /// Geometry exists only when interactive shaping was requested. Invalid
     /// bytes (including CRLF/combining interiors) produce None, never a snap.
     pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+        self.caret_stop(position).map(|stop| self.stop_bounds(stop))
+    }
+    fn caret_stop(&self, position: TextPosition) -> Option<&Stop> {
         let map = self;
         let stops = map.carets.as_ref()?;
         let mask = match position.affinity {
@@ -265,19 +268,37 @@ impl TextGeometry {
             .iter()
             .take_while(|stop| stop.byte == position.offset.0)
             .find(|stop| stop.affinities & mask != 0)
-            .map(|stop| stop.bounds)
+    }
+    fn stop_bounds(&self, stop: &Stop) -> Rect {
+        // Equal producer rectangles retain upstream bits, even when the two
+        // requested affinities own different source lines with equal geometry.
+        let affinity = if stop.affinities & 1 != 0 {
+            CaretAffinity::Upstream
+        } else {
+            CaretAffinity::Downstream
+        };
+        let line = &self.lines[self.source_line(TextPosition {
+            offset: TextOffset(stop.byte),
+            affinity,
+        })];
+        Rect::new(
+            stop.x,
+            line.top,
+            (f64::from(stop.x + 1.) - f64::from(stop.x)) as f32,
+            line.height,
+        )
     }
     /// Source line owning this legal caret, including its requested affinity.
     /// Soft-wrap aliases can own different lines. After a hard separator both
     /// affinities belong to the following line, even when caret tops coincide.
     pub fn caret_line(&self, position: TextPosition) -> Option<usize> {
-        self.caret_bounds(position)?;
+        self.caret_stop(position)?;
         Some(self.source_line(position))
     }
     /// Validates both endpoints in this layout's current interaction map.
     /// It is not a document-revision token or an editor mutation.
     pub fn validates_selection(&self, selection: TextSelection) -> bool {
-        self.caret_bounds(selection.anchor).is_some()
-            && self.caret_bounds(selection.focus).is_some()
+        self.caret_stop(selection.anchor).is_some()
+            && self.caret_stop(selection.focus).is_some()
     }
 }
