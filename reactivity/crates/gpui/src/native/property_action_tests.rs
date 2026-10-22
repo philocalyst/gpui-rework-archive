@@ -110,7 +110,7 @@ impl Script {
                 assert!(
                     owner.root().unwrap().editor.status.contains("NonFinite"),
                     "draft={:?} status={:?}",
-                    &*owner.root().unwrap().editor.draft,
+                    *owner.root().unwrap().editor.draft,
                     owner.root().unwrap().editor.status
                 );
                 let target = owner.button("Library button");
