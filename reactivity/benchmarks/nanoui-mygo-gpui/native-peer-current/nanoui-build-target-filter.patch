@@ -1,0 +1,12 @@
+diff --git a/build.zig b/build.zig
+index b9a7908..9ca1490 100644
+--- a/build.zig
++++ b/build.zig
+@@ -1,6 +1,6 @@
+ const std = @import("std");
+ 
+-const examples = [_][]const u8{ "hello", "counter", "gallery" };
++const examples = [_][]const u8{ "luna-bench" };
+ const frameworks = [_][]const u8{ "AppKit", "WebKit", "Metal", "QuartzCore", "CoreText", "CoreGraphics", "CoreFoundation", "Foundation", "ImageIO", "UniformTypeIdentifiers", "CoreVideo" };
+ 
+ pub fn build(b: *std.Build) void {

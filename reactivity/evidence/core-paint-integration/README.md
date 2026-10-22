@@ -37,3 +37,10 @@ makes active header storage 16 B larger; recording-only Canvas is 64 B smaller.
 The [five-way performance report](../../benchmarks/bin-miss/README.md) preserves
 cold costs, intermediate losses and the causal assembly controls. This combined
 campaign establishes correctness, not native latency/RSS or hardware speedups.
+
+The same compiled accessible X11/Wayland unit executable was subsequently run
+with the two exact public-style allocation/header ledger filters (one case
+each, both passed). `owner-ledger.log` and `runtime-headers.log` preserve those
+outputs. Runtime is 2336 B with accessibility; the plain recording owner
+requests 34 allocations / 6776 B, retains 5532 B and peaks at 5692 B in this
+allocator-request fixture. This is neither RSS nor native-window storage.

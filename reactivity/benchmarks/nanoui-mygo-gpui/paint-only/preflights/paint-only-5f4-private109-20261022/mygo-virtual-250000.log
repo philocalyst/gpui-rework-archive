@@ -1,0 +1,17 @@
+BINARY_IDENTITY,mygo,/tmp/luna-mygo-pinned-bin,e68767b866432dad27fc44e646217b60b1e5e60cb6e43fb2e80c8e41be4785df
+X11_VISUAL,33,16711680,65280,255
+X11_SCREEN,1280,800,325,203,24
+2026/10/21 21:05:31 mygo: native UI draws without the GPU: there is none
+STARTUP,0,52813423,4292613150
+WINDOW_GEOMETRY,0,4194306,240,100,800,600,240,100,24
+SCREENSHOT,0,/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/paint-only/preflights/paint-only-5f4-private109-20261022/mygo-virtual-250000.ppm
+PREFLIGHT_TEXT,0,button_dark_pixels=598,first_row_dark_pixels=157
+PREFLIGHT_ROWS,0,app=mygo,mode=virtual,requested=250000,visible_ids=0..22,materialized_expected=25,viewport=784x530,row_height=24
+CLICK,0,0,17095430,4279549480
+WINDOW,0,800,600
+STARTUP_P50_NS,1,52813423
+STARTUP_P95_NS,1,52813423
+STARTUP_P99_NS,1,52813423
+CLICK_P50_NS,1,17095430
+CLICK_P95_NS,1,17095430
+CLICK_P99_NS,1,17095430

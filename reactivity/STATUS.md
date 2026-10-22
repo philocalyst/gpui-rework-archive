@@ -256,6 +256,20 @@ The measurement rows pin their own baselines. Dense text, thin leases, color
 packing and row derivation were measured independently; their percentages are
 not additive, and a combined native memory/performance improvement is not inferred.
 
+The [16-cell direct-paint campaign](benchmarks/nanoui-mygo-gpui/paint-only/results/paint-only-5f4-peer-16cell-20261022/README.md)
+pins GPUI `5f4db5f288`, JustRach NanoUI and MyGo, with 100 fresh starts, 1,000
+clicks and five idle samples per cell. Within GPUI, registered direct color
+updates versus matched full-description controls give p50 click-to-server-pixel
+0.130 versus 0.151 ms at eager zero, 0.143 versus 1.994 ms at eager 1K,
+0.274 versus 24.167 ms at eager 10K, and 0.135 versus 0.214 ms at virtual 250K.
+Startup is effectively unchanged within each GPUI pair; eager 10K is about
+182 ms. Its direct-path idle PSS is 50,826–50,992 KiB; there is no near-zero
+native memory claim. The pinned observer uses the upper central sample for
+even-n p50. Root independently verified raw counts, unique event IDs, quantiles,
+memory extrema, executable hashes and exact paired GPUI preflight images.
+Peer backend/font/styling/overscan and accessibility differences remain explicit;
+these Xvfb software observations are not a universal ranking or scanout result.
+
 The [audited native-default comparison](benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/README.md)
 pins JustRach NanoUI, MyGo, and GPUI `724ece73cb`, with 100 fresh starts,
 1,000 clicks and five idle samples per accepted cell. GPUI's three fixtures
