@@ -265,6 +265,22 @@ fn independent_inputs_list_rebind_and_provider_restart_do_not_reuse_authority() 
 }
 
 #[test]
+fn empty_static_text_does_not_qualify_another_owner() {
+    let first = Win::demo(Inputs::new(""));
+    let second = Win::demo(Inputs::new(""));
+    let mut cohort = Cohort::default();
+    cohort.refresh(&first).unwrap();
+    let id = native_id(&first, &cohort, target(&first, 1));
+    assert_eq!(cohort.target(&second, id), Err(Error::StaleTarget));
+    assert_eq!(cohort.refresh(&second), Err(Error::StaleTarget));
+    assert!(cohort.target(&first, id).is_ok());
+    assert_eq!(
+        Cohort::default().target(&first, NodeId(2)),
+        Err(Error::StaleTarget)
+    );
+}
+
+#[test]
 fn long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip() {
     let value = format!("a{}\r\n", "\u{301}".repeat(200));
     let mut win = Win::demo(Inputs::new(&value));

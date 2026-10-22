@@ -26,7 +26,7 @@ impl<'a> Context<'a> {
             selection: runtime
                 .metadata
                 .as_ref()
-                .and_then(|m| m.selection.as_ref())
+                .and_then(|m| m.editing.as_ref())
                 .and_then(|frozen| frozen.presented),
             geometry: runtime
                 .metadata
@@ -368,6 +368,12 @@ fn sheet<M: View + 'static>(runtime: &Runtime<M>) -> Result<(), Error> {
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn accessibility_namespace(&self) -> Result<std::num::NonZeroU64, Error> {
+        let runtime = self.runtime()?;
+        runtime.live()?;
+        Ok(runtime.sites.namespace())
+    }
     #[cfg(feature = "accessibility")]
     pub(crate) fn accessibility_sheet(&self) -> Result<SemanticSheet<'_>, Error> {
         let runtime = self.runtime()?;

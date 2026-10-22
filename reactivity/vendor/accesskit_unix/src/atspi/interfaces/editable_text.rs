@@ -32,9 +32,14 @@ impl EditableTextInterface {
 
     fn insert_text(&self, position: i32, text: &str, length: i32) -> fdo::Result<bool> {
         // AT-SPI defines length in bytes, while position is a USV offset.
-        let length = usize::try_from(length).map_err(|_| fdo::Error::InvalidArgs("negative insertion length".into()))?;
-        let text = text.get(..length.min(text.len())).ok_or_else(|| fdo::Error::InvalidArgs("insertion length splits UTF-8".into()))?;
-        self.0.replace_text(position, position, text).map_err(self.map_error())
+        let length = usize::try_from(length)
+            .map_err(|_| fdo::Error::InvalidArgs("negative insertion length".into()))?;
+        let text = text
+            .get(..length.min(text.len()))
+            .ok_or_else(|| fdo::Error::InvalidArgs("insertion length splits UTF-8".into()))?;
+        self.0
+            .replace_text(position, position, text)
+            .map_err(self.map_error())
     }
 
     fn copy_text(&self, _start_pos: i32, _end_pos: i32) -> fdo::Result<()> {
@@ -46,7 +51,9 @@ impl EditableTextInterface {
     }
 
     fn delete_text(&self, start_pos: i32, end_pos: i32) -> fdo::Result<bool> {
-        self.0.replace_text(start_pos, end_pos, "").map_err(self.map_error())
+        self.0
+            .replace_text(start_pos, end_pos, "")
+            .map_err(self.map_error())
     }
 
     fn paste_text(&self, _position: i32) -> fdo::Result<bool> {

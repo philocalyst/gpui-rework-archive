@@ -117,11 +117,11 @@ impl Collect<'_> {
         index: usize,
         previous: Option<&Presented>,
         next: &Presented,
-        metadata: Option<&Metadata>,
-        selection: Option<editing::SelectionSnapshot>,
+        state: (Option<&Metadata>, Option<editing::SelectionSnapshot>),
         list: Option<scroll::ViewportInfo>,
         row: Option<&ListRow>,
     ) {
+        let (metadata, selection) = state;
         if !self.exact {
             return;
         }
@@ -154,7 +154,7 @@ impl Collect<'_> {
             || previous.actions != next.actions
             || previous.text.as_deref() != next.text.as_deref()
             || metadata
-                .and_then(|m| m.selection.as_ref())
+                .and_then(|m| m.editing.as_ref())
                 .and_then(|frozen| frozen.presented)
                 .and_then(|snapshot| snapshot.selection(previous.identity))
                 != selection.and_then(|snapshot| snapshot.selection(next.identity))

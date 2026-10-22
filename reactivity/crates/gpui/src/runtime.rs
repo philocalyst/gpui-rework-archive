@@ -2348,7 +2348,7 @@ impl<M: View + 'static> Runtime<M> {
             self.presentation_size = prepared.dimensions();
             if !prepared.keeps_rows() {
                 self.presented = prepared.nodes;
-                if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.selection.as_mut()) {
+                if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
                     frozen.presented = frozen.candidate;
                 }
             }
@@ -2369,11 +2369,11 @@ impl<M: View + 'static> Runtime<M> {
         }
         if let Some(metadata) = &mut self.metadata
             && metadata
-                .selection
+                .editing
                 .as_ref()
                 .is_some_and(|frozen| frozen.unused())
         {
-            metadata.selection = None;
+            metadata.editing = None;
         }
         if self.metadata.as_deref().is_some_and(Metadata::unused) {
             self.metadata = None;
@@ -2868,8 +2868,7 @@ impl<M: View + 'static> Runtime<M> {
                     index,
                     self.presented.get(index),
                     &presented[index],
-                    self.metadata.as_deref(),
-                    selection_snapshot,
+                    (self.metadata.as_deref(), selection_snapshot),
                     viewport_geometry.info(
                         node.identity(),
                         [f64::from(rect.width), f64::from(rect.height)],
@@ -2973,13 +2972,8 @@ impl<M: View + 'static> Runtime<M> {
             self.images.as_mut().unwrap().prepare(sequence, leases);
         }
         self.styles.clear_slot_transition();
-        if let Some(metadata) = &mut self.metadata {
-            if selection_snapshot.is_some() || metadata.selection.is_some() {
-                metadata
-                    .selection
-                    .get_or_insert_with(Default::default)
-                    .candidate = selection_snapshot;
-            }
+        if let Some(editing) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
+            editing.candidate = selection_snapshot;
         }
         self.prepared = Some(Prepared {
             size: prepared_size,

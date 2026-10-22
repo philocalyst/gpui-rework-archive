@@ -4,7 +4,7 @@ use super::*;
 use gpui_canvas::{CaretAffinity, TextOffset, TextPosition, TextSelection};
 use icu_segmenter::GraphemeClusterSegmenter;
 
-pub(super) struct Editing {
+struct LogicalSelection {
     identity: u64,
     field: FieldId,
     value: SharedText,
@@ -19,8 +19,13 @@ pub(super) struct SelectionSnapshot {
     identity: NonZeroU64,
     selection: TextSelection,
 }
+/// One cold owner keeps logical, candidate and acknowledged lifetimes separate.
+/// Revocation drops the logical source lease immediately; old P/C offsets remain
+/// until the corresponding complete scene is replaced. This avoids another
+/// Metadata slot/allocation, at the cost of 40 empty bytes while only P/C survive.
 #[derive(Default)]
-pub(super) struct FrozenSelection {
+pub(super) struct Editing {
+    logical: Option<LogicalSelection>,
     pub presented: Option<SelectionSnapshot>,
     pub candidate: Option<SelectionSnapshot>,
 }
@@ -29,9 +34,9 @@ impl SelectionSnapshot {
         (self.identity.get() == identity).then_some(self.selection)
     }
 }
-impl FrozenSelection {
+impl Editing {
     pub fn unused(&self) -> bool {
-        self.presented.is_none() && self.candidate.is_none()
+        self.logical.is_none() && self.presented.is_none() && self.candidate.is_none()
     }
 }
 
@@ -72,7 +77,7 @@ fn validates(value: &str, selection: TextSelection) -> bool {
 
 impl<M: View + 'static> Runtime<M> {
     pub(super) fn active_selection(&self) -> Option<(u64, TextSelection)> {
-        let state = self.metadata.as_ref()?.editing.as_ref()?;
+        let state = self.metadata.as_ref()?.editing.as_ref()?.logical.as_ref()?;
         let index = self.by_identity.get(state.identity)?;
         self.editing_at(index)
             .map(|state| (state.identity, state.selection))
@@ -135,8 +140,8 @@ impl<M: View + 'static> Runtime<M> {
         Ok(index)
     }
 
-    fn editing_at(&self, index: usize) -> Option<&Editing> {
-        let state = self.metadata.as_ref()?.editing.as_ref()?;
+    fn editing_at(&self, index: usize) -> Option<&LogicalSelection> {
+        let state = self.metadata.as_ref()?.editing.as_ref()?.logical.as_ref()?;
         let node = &self.nodes[index];
         let text = node.text_slot().get(&self.texts)?;
         (node.kind() == NodeKind::Input
@@ -185,7 +190,7 @@ impl<M: View + 'static> Runtime<M> {
             return false;
         }
         let text = node.text_slot().get(&self.texts).unwrap();
-        let next = Editing {
+        let next = LogicalSelection {
             identity: node.identity(),
             field: text.field.unwrap(),
             value: text.value.clone(),
@@ -194,7 +199,8 @@ impl<M: View + 'static> Runtime<M> {
         let previous = self
             .metadata
             .as_mut()
-            .and_then(|metadata| metadata.editing.take());
+            .and_then(|metadata| metadata.editing.as_mut())
+            .and_then(|editing| editing.logical.take());
         if let Some(previous) = &previous
             && (previous.identity != next.identity
                 || previous.field != next.field
@@ -202,16 +208,11 @@ impl<M: View + 'static> Runtime<M> {
         {
             self.retire_interaction(previous.identity);
         }
-        let storage = match previous {
-            Some(mut storage) => {
-                *storage = next;
-                storage
-            }
-            None => Box::new(next),
-        };
         self.metadata
             .get_or_insert_with(|| Box::new(Metadata::default()))
-            .editing = Some(storage);
+            .editing
+            .get_or_insert_with(Default::default)
+            .logical = Some(next);
         self.dirty = true;
         true
     }
@@ -220,7 +221,8 @@ impl<M: View + 'static> Runtime<M> {
         let Some(previous) = self
             .metadata
             .as_mut()
-            .and_then(|metadata| metadata.editing.take())
+            .and_then(|metadata| metadata.editing.as_mut())
+            .and_then(|editing| editing.logical.take())
         else {
             return false;
         };
@@ -260,6 +262,7 @@ impl<M: View + 'static> Runtime<M> {
             .metadata
             .as_ref()
             .and_then(|metadata| metadata.editing.as_ref())
+            .and_then(|editing| editing.logical.as_ref())
             .is_some_and(|state| {
                 !self.logical_valid
                     || self
@@ -599,6 +602,81 @@ mod tests {
     }
 
     #[test]
+    fn shared_owner_drops_revoked_logical_lease_but_keeps_old_p_until_repair_ack() {
+        let mut win = Win::recording(
+            Inputs {
+                a: Signal::new("ab".into()),
+                b: Signal::new("cd".into()),
+            },
+            WindowOptions::default(),
+        )
+        .unwrap();
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        let input = win.role(crate::Role::TextInput).text("ab").one().unwrap();
+        let selection = TextSelection {
+            anchor: position(0).unwrap(),
+            focus: position(1).unwrap(),
+        };
+        win.select(input, selection).unwrap();
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        let allocation = std::ptr::from_ref(
+            win.runtime()
+                .unwrap()
+                .metadata
+                .as_ref()
+                .unwrap()
+                .editing
+                .as_deref()
+                .unwrap(),
+        );
+        assert!(win.update(|m| *m.a = "漢".into()).is_err());
+        {
+            let runtime = win.runtime().unwrap();
+            let editing = runtime.metadata.as_ref().unwrap().editing.as_ref().unwrap();
+            assert!(
+                editing.logical.is_none(),
+                "revocation drops the source lease, not merely its authority bit"
+            );
+            assert_eq!(
+                editing
+                    .presented
+                    .unwrap()
+                    .selection(runtime.resolve(input).unwrap()),
+                Some(selection)
+            );
+        }
+        win.perform(input, Action::SetValue("repair")).unwrap();
+        assert_eq!(
+            std::ptr::from_ref(
+                win.runtime()
+                    .unwrap()
+                    .metadata
+                    .as_ref()
+                    .unwrap()
+                    .editing
+                    .as_deref()
+                    .unwrap()
+            ),
+            allocation
+        );
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 6);
+        win.update(|m| *m.a = "plain".into()).unwrap();
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        assert!(
+            win.runtime()
+                .unwrap()
+                .metadata
+                .as_ref()
+                .is_none_or(|m| m.editing.is_none())
+        );
+    }
+
+    #[test]
     fn only_the_active_input_retains_caret_geometry_and_one_cold_state() {
         let mut win = Win::demo(Inputs {
             a: Signal::new("first".into()),
@@ -671,10 +749,11 @@ mod tests {
             allocation
         );
         if cfg!(target_pointer_width = "64") {
-            assert_eq!(std::mem::size_of::<Editing>(), 40);
+            assert_eq!(std::mem::size_of::<LogicalSelection>(), 40);
+            assert_eq!(std::mem::size_of::<Option<LogicalSelection>>(), 40);
+            assert_eq!(std::mem::size_of::<Editing>(), 88);
             assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
             assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
-            assert_eq!(std::mem::size_of::<FrozenSelection>(), 48);
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);
             assert_eq!(std::mem::size_of::<Node>(), 40);
             assert_eq!(std::mem::size_of::<TextSite>(), 80);

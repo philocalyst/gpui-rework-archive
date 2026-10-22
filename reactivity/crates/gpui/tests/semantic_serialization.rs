@@ -63,7 +63,23 @@ fn serializes_the_same_parts_actions_names_geometry_and_focus_as_public_queries(
     assert_eq!(node["value"], "ready");
     assert_eq!(node["focused"], true);
     assert_eq!(node["target"], serde_json::to_value(target).unwrap());
-    assert_eq!(node["actions"], json!(["Focus", "Blur", "SetValue"]));
+    assert_eq!(
+        node["actions"],
+        json!([
+            "Focus",
+            "Blur",
+            "SetValue",
+            "SetTextSelection",
+            "ReplaceSelectedText"
+        ])
+    );
+    assert_eq!(
+        node["selection"],
+        json!({
+            "anchor": { "byte": 5, "affinity": "downstream" },
+            "focus": { "byte": 5, "affinity": "downstream" },
+        })
+    );
     let mut count = 0;
     win.visit(|part| {
         // Compare the same JSON representation: Value's in-memory f32

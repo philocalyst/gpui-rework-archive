@@ -135,14 +135,20 @@ struct SelectionPosition {
 }
 impl From<gpui_canvas::TextPosition> for SelectionPosition {
     fn from(position: gpui_canvas::TextPosition) -> Self {
-        Self { byte: position.offset.byte(), affinity: match position.affinity {
-            gpui_canvas::CaretAffinity::Upstream => "upstream",
-            gpui_canvas::CaretAffinity::Downstream => "downstream",
-        } }
+        Self {
+            byte: position.offset.byte(),
+            affinity: match position.affinity {
+                gpui_canvas::CaretAffinity::Upstream => "upstream",
+                gpui_canvas::CaretAffinity::Downstream => "downstream",
+            },
+        }
     }
 }
 impl From<gpui_canvas::TextSelection> for Selection {
     fn from(selection: gpui_canvas::TextSelection) -> Self {
-        Self { anchor: selection.anchor.into(), focus: selection.focus.into() }
+        Self {
+            anchor: selection.anchor.into(),
+            focus: selection.focus.into(),
+        }
     }
 }

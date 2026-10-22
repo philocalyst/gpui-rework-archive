@@ -18,12 +18,14 @@ struct Input {
 pub(super) struct Cohort {
     inputs: Vec<Input>,
     next: u64,
+    window: Option<std::num::NonZeroU64>,
 }
 impl Default for Cohort {
     fn default() -> Self {
         Self {
             inputs: Vec::new(),
             next: INPUT_IDS,
+            window: None,
         }
     }
 }
@@ -37,6 +39,13 @@ impl Cohort {
         &mut self,
         owner: &Win<M, L>,
     ) -> Result<bool, Error> {
+        let window = owner.accessibility_namespace()?;
+        // Bridge/Cohort belongs to one owner lifetime, including empty/static
+        // text allocations. A new Win requires a new native adapter, never an
+        // arithmetic reinterpretation of this provider's old logical node IDs.
+        if self.window.is_some_and(|previous| previous != window) {
+            return Err(Error::StaleTarget);
+        }
         let sheet = owner.accessibility_sheet()?;
         let mut count = 0;
         sheet.visit(|part| count += usize::from(part.value().is_some()));
@@ -83,6 +92,7 @@ impl Cohort {
         inputs.sort_unstable_by_key(|input| input.identity);
         self.inputs = inputs;
         self.next = next;
+        self.window = Some(window);
         Ok(changed)
     }
     fn input(&self, identity: u64) -> Option<&Input> {
@@ -104,6 +114,9 @@ impl Cohort {
         owner: &Win<M, L>,
         id: NodeId,
     ) -> Result<Target, Error> {
+        if self.window != Some(owner.accessibility_namespace()?) {
+            return Err(Error::StaleTarget);
+        }
         if id.0 < INPUT_IDS {
             if id.0 == 0 || id.0 & 1 != 0 {
                 return Err(Error::StaleTarget);

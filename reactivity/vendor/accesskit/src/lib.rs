@@ -867,7 +867,7 @@ enum PropertyValue {
     Color(Color),
     TextDecoration(TextDecoration),
     LengthVec(Vec<u8>),
-    ExtendedCharacterLengths(Box<text_lengths::ExtendedCharacterLengths>),
+    ExtendedCharacterLengths(text_lengths::ExtendedCharacterLengths),
     CoordVec(Vec<f32>),
     Bool(bool),
     Invalid(Invalid),
@@ -1993,7 +1993,7 @@ impl PropertyIndices {
     fn get_length_vec_property<'a>(&self, values: &'a [PropertyValue], id: PropertyId) -> &'a [u8] {
         match self.get(values, id) {
             PropertyValue::LengthVec(v) => v,
-            PropertyValue::ExtendedCharacterLengths(v) => &v.lengths,
+            PropertyValue::ExtendedCharacterLengths(v) => v.lengths(),
             _ => &[],
         }
     }
