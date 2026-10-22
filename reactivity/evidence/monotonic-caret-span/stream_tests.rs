@@ -123,6 +123,31 @@ fn gaps_and_empty_layouts_remain_admitted_without_coverage_requirement() {
 }
 
 #[test]
+fn trailing_source_gap_and_empty_middle_run_keep_exact_byte_owners() {
+    let mut trailing = layout("abcdefgh", None);
+    trailing.data.line_items[0].shaped_cluster_range.end -= 1;
+    trailing.data.line_items[0].text_range.end -= 1;
+    admitted_like_index(&trailing);
+
+    let mut fonts = super::span_tests::fonts();
+    let mut context = LayoutContext::<()>::new();
+    let mut builder = context.ranged_builder(&mut fonts, "abcdefgh", 1., false);
+    builder.push_default(FontFamilyName::Named("primary".into()));
+    builder.push_default(StyleProperty::FontSize(16.));
+    builder.push(StyleProperty::FontSize(23.), 2..4);
+    let mut middle = builder.build("abcdefgh");
+    middle.break_all_lines(None);
+    assert_eq!(middle.data.line_items.len(), 3);
+    let empty = &mut middle.data.line_items[1];
+    empty.shaped_cluster_range.end = empty.shaped_cluster_range.start;
+    empty.text_range.end = empty.text_range.start;
+    // Its recorded advance stays nonzero: following prefixes must still add it,
+    // while the empty run owns neither byte of the resulting source gap.
+    assert!(empty.advance > 0.);
+    admitted_like_index(&middle);
+}
+
+#[test]
 fn invalid_private_run_identity_keeps_old_panic_before_callbacks() {
     use std::panic::{AssertUnwindSafe, catch_unwind};
     let mut malformed = layout("abcdefgh", None);
