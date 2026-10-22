@@ -1275,11 +1275,12 @@ mod tests {
         assert_eq!(size_of::<Handler>(), 16);
         assert_eq!(size_of::<Admission>(), 16);
         eprintln!(
-            "property_action_headers,Handler={},Admission={},PropertyChange={},OptionChange={}",
+            "property_action_headers,Handler={},Admission={},PropertyChange={},OptionChange={},PropertyPhase={}",
             size_of::<Handler>(),
             size_of::<Admission>(),
             size_of::<PropertyChange>(),
-            size_of::<Option<PropertyChange>>()
+            size_of::<Option<PropertyChange>>(),
+            size_of::<PropertyPhase<'_>>()
         );
         let model = Model {
             count: Signal::new(0),

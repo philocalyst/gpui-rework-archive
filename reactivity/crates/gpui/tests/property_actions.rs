@@ -10,6 +10,42 @@ use property_workbench::Companion;
 fn mounted() -> Win<Companion> {
     Win::with_size(Companion::default(), 800, 400).unwrap()
 }
+
+#[test]
+fn contained_editor_allocation_ledger() {
+    let mut owner = None;
+    let mount = allocation_counter::measure(|| owner = Some(mounted()));
+    let mut owner = owner.unwrap();
+    let idle = allocation_counter::measure(|| {
+        for _ in 0..100 {
+            owner.resize(800, 400).unwrap();
+        }
+    });
+    assert_eq!(idle.count_total, 0);
+    let target = owner.button("Library button");
+    select(&mut owner, target, PropertyId::Width);
+    draft(&mut owner, "193.25");
+    let action = allocation_counter::measure(|| {
+        owner.click(owner.button("Apply")).unwrap();
+    });
+    assert_eq!(
+        owner.property_value(target, PropertyId::Width).unwrap(),
+        PropertyValue::Dimension(Some(193.25))
+    );
+    println!(
+        "contained_editor_cost,Win={},Companion={},ValueEntry={},mount_count={},mount_requested={},mount_retained={},idle_count={},action_count={},action_requested={},action_retained={}",
+        size_of_val(&owner),
+        size_of::<Companion>(),
+        size_of_val(&owner.root().unwrap().editor),
+        mount.count_total,
+        mount.bytes_total,
+        mount.bytes_current,
+        idle.count_total,
+        action.count_total,
+        action.bytes_total,
+        action.bytes_current
+    );
+}
 fn select(win: &mut Win<Companion>, target: Target, id: PropertyId) {
     let value = win.property_value(target, id).unwrap();
     win.update(|m| m.editor.select(target, id, value)).unwrap();
