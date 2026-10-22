@@ -208,6 +208,27 @@ fn component_name(value: PropertyValue, component: u8) -> &'static str {
         _ => "value",
     }
 }
+struct EditorValue(PropertyValue, u8);
+impl fmt::Display for EditorValue {
+    fn fmt(&self, output: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            PropertyValue::Color(color) => write!(
+                output,
+                "{:?} {}={:?}",
+                color.space(),
+                component_name(self.0, self.1),
+                color.channels()[self.1 as usize]
+            ),
+            PropertyValue::Transform(value) => write!(
+                output,
+                "{}={:?}",
+                component_name(self.0, self.1),
+                [value.a, value.b, value.c, value.d, value.tx, value.ty][self.1 as usize]
+            ),
+            value => write!(output, "{value:?}"),
+        }
+    }
+}
 fn cycle<T: Copy + Eq>(current: T, values: &[T], direction: f32) -> T {
     values
         .iter()
@@ -419,7 +440,11 @@ impl<M: View + 'static> Runtime<M> {
                 self.refresh_caption(
                     panel,
                     Caption::Editor,
-                    format_args!("Logical {}: {value:?}", property.info().name),
+                    format_args!(
+                        "Logical {}:\n{}",
+                        property.info().name,
+                        EditorValue(value, component)
+                    ),
                 )?;
             }
             self.refresh_caption(
