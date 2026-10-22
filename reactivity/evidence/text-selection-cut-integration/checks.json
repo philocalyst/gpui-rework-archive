@@ -1,0 +1,25 @@
+{
+  "parent": "6c01a0ae66",
+  "source": [
+    "88ea40418a",
+    "9e49540c47"
+  ],
+  "producer_evidence": "92cb6c14a7",
+  "query_source_sha256": "fef9bf05af854be9e94abc542fbed99ceeabe536a70e67894ec89ddde5046e37",
+  "gates": {
+    "release": {
+      "groups": 28,
+      "passed": 172,
+      "failed": 0,
+      "ignored": 4
+    },
+    "clippy": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "integration_timing": "none; producer matched timings remain pinned to original experiment source",
+  "retained_bytes_added": 0
+}
