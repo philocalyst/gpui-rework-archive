@@ -530,3 +530,63 @@ fn a_former_forest_root_uses_its_new_initial_containing_block() {
     tree.compute(root, definite_viewport(300.0, 200.0)).unwrap();
     assert_eq!(tree.storage().absolute_contexts, 0);
 }
+
+#[test]
+fn many_cold_forest_holders_survive_removal_reuse_and_replacement() {
+    use cephal::style::Position;
+    let mut tree = LayoutTree::new();
+    let available = definite_viewport(320.0, 240.0);
+    let mut roots = Vec::new();
+    for index in 0..48 {
+        let root = tree
+            .insert(
+                None,
+                NodeKind::Element,
+                Style {
+                    position: Position::Relative,
+                    ..sized(320.0, 240.0)
+                },
+            )
+            .unwrap();
+        let bridge = tree
+            .insert(Some(root), NodeKind::Element, sized(30.0, 20.0))
+            .unwrap();
+        tree.insert(
+            Some(bridge),
+            NodeKind::Element,
+            out_of_flow(Position::Absolute, index as f32, 17.0),
+        )
+        .unwrap();
+        tree.compute(root, available).unwrap();
+        roots.push(root);
+    }
+    assert!(tree.storage().absolute_contexts >= 48);
+    for (index, root) in roots.iter_mut().enumerate() {
+        if index % 3 == 0 {
+            let old = *root;
+            tree.remove(old).unwrap();
+            *root = tree
+                .insert(None, NodeKind::Element, sized(320.0, 240.0))
+                .unwrap();
+            assert_ne!(*root, old);
+            tree.insert(
+                Some(*root),
+                NodeKind::Element,
+                out_of_flow(Position::Fixed, 23.0, index as f32),
+            )
+            .unwrap();
+        } else {
+            let mut style = tree.style(*root).unwrap().clone();
+            style.position = Position::Static;
+            tree.set_style(*root, style).unwrap();
+        }
+        tree.compute(*root, available).unwrap();
+    }
+    for &root in &roots {
+        assert_cold(&tree, root, available);
+    }
+    for root in roots {
+        tree.remove(root).unwrap();
+    }
+    assert_eq!(tree.storage().absolute_contexts, 0);
+}
