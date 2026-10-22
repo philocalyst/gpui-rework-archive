@@ -60,7 +60,7 @@
       "passed": 365,
       "ignored": 8,
       "exit_code": 0,
-      "scope": "All production edits present; before addition of one cfg(test)-only old-map reference test. That final test is covered in styles-tests.txt. A full final-source rerun is in progress and will be attached separately."
+      "scope": "Earlier production-equivalent default run, preserved separately; owner-final.txt covers the exact final source including the private old-map reference test."
     },
     "styles-tests.txt": {
       "passed": 14,
@@ -75,6 +75,12 @@
     "clippy.txt": {
       "passed": 0,
       "ignored": 0,
+      "exit_code": 0
+    },
+    "owner-final.txt": {
+      "passed": 366,
+      "ignored": 8,
+      "suites": 40,
       "exit_code": 0
     }
   }
