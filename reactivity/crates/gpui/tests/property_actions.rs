@@ -345,7 +345,7 @@ fn post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l() {
                 )
             })
         }
-        fn reply(&mut self, _: Result<(), &Error>) {
+        fn reply(&mut self, _: Result<gpui::PropertyState, &Error>) {
             self.replies += 1;
         }
     }

@@ -34,9 +34,9 @@ impl Script {
             .key_input(&NativeKey::Character(value.into()), Some(value))
             .unwrap();
     }
-    fn apply(&mut self, event_loop: &ActiveEventLoop) {
+    fn click_target(&mut self, event_loop: &ActiveEventLoop, target: crate::Target) {
         let owner = self.host.owner.as_ref().unwrap();
-        let bounds = owner.bounds(owner.button("Apply")).unwrap();
+        let bounds = owner.bounds(target).unwrap();
         self.host
             .window_event(
                 event_loop,
@@ -62,6 +62,10 @@ impl Script {
         // Press can prepare caret blur. Release uses its acknowledged P; an
         // immediate release during pending C is intentionally rejected today.
         self.release = true;
+    }
+    fn apply(&mut self, event_loop: &ActiveEventLoop) {
+        let target = self.host.owner.as_ref().unwrap().button("Apply");
+        self.click_target(event_loop, target);
     }
     fn step(&mut self, event_loop: &ActiveEventLoop) {
         assert!(
@@ -98,15 +102,23 @@ impl Script {
         }
         match self.stage {
             0 => {
-                let target = owner.button("Library button");
-                let value = owner.property_value(target, PropertyId::Width).unwrap();
-                owner
-                    .update(|m| m.editor.select(target, PropertyId::Width, value))
-                    .unwrap();
+                let target = owner.query().name("Inspect application").one().unwrap();
+                self.click_target(event_loop, target);
             }
-            1 => self.enter("NaN"),
-            2 => self.apply(event_loop),
-            3 => {
+            1 => {
+                let target = owner.button("Library button");
+                self.click_target(event_loop, target);
+            }
+            2 => {
+                assert_eq!(
+                    owner.root().unwrap().editor.selected.unwrap().0,
+                    owner.button("Library button")
+                );
+                assert_eq!(owner.root().unwrap().application.presses, 0);
+                self.enter("NaN");
+            }
+            3 => self.apply(event_loop),
+            4 => {
                 assert!(
                     owner.root().unwrap().editor.status.contains("NonFinite"),
                     "draft={:?} status={:?}",
@@ -120,8 +132,8 @@ impl Script {
                 );
                 self.enter("193.25");
             }
-            4 => self.apply(event_loop),
-            5 => {
+            5 => self.apply(event_loop),
+            6 => {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
@@ -137,14 +149,14 @@ impl Script {
                 assert_eq!(surface.fetch().unwrap()[20 * 800 + 180], 0x123456);
                 self.enter("bad syntax");
             }
-            6 => self.apply(event_loop),
-            7 => {
+            7 => self.apply(event_loop),
+            8 => {
                 assert_eq!(&**owner.root().unwrap().editor.draft, "bad syntax");
                 assert!(owner.contains_text("Expected a number").unwrap());
                 self.enter("211.75");
             }
-            8 => self.apply(event_loop),
-            9 => {
+            9 => self.apply(event_loop),
+            10 => {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
@@ -152,11 +164,11 @@ impl Script {
                 );
                 owner.update(|m| m.show_application = false).unwrap();
             }
-            10 => self.apply(event_loop),
-            11 => {
+            11 => self.apply(event_loop),
+            12 => {
                 assert!(owner.root().unwrap().editor.status.contains("StaleTarget"));
                 eprintln!(
-                    "NATIVE_PROPERTY_ENTRY: typed draft, canonical rejection, syntax error, recovery, Apply pointer, server pixel, stale-target feedback, exact ACK"
+                    "NATIVE_PROPERTY_ENTRY: public selection pointer, typed draft, canonical rejection, syntax error, recovery, Apply pointer, server pixel, stale-target feedback, exact ACK"
                 );
                 self.complete = true;
                 event_loop.exit();

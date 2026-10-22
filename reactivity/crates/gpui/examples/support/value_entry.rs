@@ -1,9 +1,9 @@
 //! Reusable contained editor: ordinary model/input sources and catalog writes.
 use gpui::{
-    ColorSpace, Error, PropertyChange,
+    ColorSpace, Error, PropertyChange, PropertyState,
     prelude::*,
     property::{Contribution, PropertyId, PropertyValue},
-    property_action,
+    property_action, property_selection,
 };
 
 pub struct ValueEntry {
@@ -80,9 +80,21 @@ impl ValueEntry {
         self.selected
             .map(|(target, id, _)| (target, id, Contribution::Inherit))
     }
-    fn applied_logically(&mut self, result: Result<(), &Error>) {
+    pub fn selected_logically(&mut self, result: Result<PropertyState, &Error>) {
+        match result {
+            Ok(state) => self.select(state.target, state.id, state.value),
+            Err(error) => self.status = format!("Rejected: {error}"),
+        }
+    }
+    fn refresh(&self, _: Target) -> Option<(Target, PropertyId)> {
+        self.selected.map(|(target, id, _)| (target, id))
+    }
+    fn applied_logically(&mut self, result: Result<PropertyState, &Error>) {
         self.status = match result {
-            Ok(()) => "Logical contribution accepted".into(),
+            Ok(state) => {
+                self.select(state.target, state.id, state.value);
+                "Logical contribution accepted".into()
+            }
             Err(error) => format!("Rejected: {error}"),
         };
     }
@@ -119,6 +131,9 @@ impl View for ValueEntry {
             button("Inherit")
                 .h(32)
                 .on_click(property_action(Self::inherit, Self::applied_logically)),
+            button("Refresh selection")
+                .h(32)
+                .on_click(property_selection(Self::refresh, Self::selected_logically)),
             text(message).name("Property result").h(32),
         ))
         .gap(8)

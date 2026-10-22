@@ -43,7 +43,7 @@ impl Page {
             },
         ))
     }
-    fn replied(&mut self, result: Result<(), &Error>) {
+    fn replied(&mut self, result: Result<gpui::PropertyState, &Error>) {
         assert_eq!(
             result.is_err(),
             self.stale_proposal
@@ -339,7 +339,7 @@ fn changed_component_scope_counts_consumed_old_target_and_fresh_replacement() {
                 Contribution::Set(PropertyValue::Dimension(Some(20.0))),
             ))
         }
-        fn replied(&mut self, result: Result<(), &Error>) {
+        fn replied(&mut self, result: Result<gpui::PropertyState, &Error>) {
             assert!(result.is_ok());
             self.switched = true;
         }
