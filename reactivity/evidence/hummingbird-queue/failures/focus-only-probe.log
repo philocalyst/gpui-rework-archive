@@ -1,0 +1,11 @@
+ACK Ok(Commit { source_epoch: 0, presentation_epoch: 0, presentation_valid: true, prepared_epoch: None, changed_nodes: 3 })
+FOCUS_INPUT Ok(Commit { source_epoch: 0, presentation_epoch: 0, presentation_valid: true, prepared_epoch: None, changed_nodes: 0 })
+ACK Ok(Commit { source_epoch: 0, presentation_epoch: 0, presentation_valid: true, prepared_epoch: None, changed_nodes: 0 })
+PRESS Ok(Commit { source_epoch: 0, presentation_epoch: 0, presentation_valid: true, prepared_epoch: None, changed_nodes: 0 }) focused=Ok(Some(Target { window: 1, identity: 3 }))
+RELEASE Ok(Commit { source_epoch: 1, presentation_epoch: 0, presentation_valid: true, prepared_epoch: Some(1), changed_nodes: 1 }) checked=true
+
+thread 'main' (1885529) panicked at /tmp/gpui-hb-focus-pointer-probe.rs:15:139:
+assertion `left == right` failed
+  left: Ok(Commit { source_epoch: 1, presentation_epoch: 0, presentation_valid: true, prepared_epoch: Some(1), changed_nodes: 1 })
+ right: Err(PresentationStale)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,0 +1,10 @@
+[package]
+name = "monotonic-caret-census"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+gpui_canvas = { path = "/root/gpui-monotonic-caret-inline/reactivity/crates/canvas" }
+allocation-counter = "=0.8.1"
+[patch.crates-io]
+parley = { path = "/tmp/gpui-monotonic-census-inline/parley" }
+parley_engine = { path = "/root/gpui-monotonic-caret-inline/reactivity/vendor/parley_engine" }
