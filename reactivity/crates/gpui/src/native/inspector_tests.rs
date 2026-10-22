@@ -10,7 +10,14 @@ use winit::{
 struct App;
 impl View for App {
     fn view(&self) -> El<'_> {
-        column((div().w(80).h(60).bg(rgb(0x123456)).name("native card"),))
+        column((
+            div().w(80).h(60).bg(rgb(0x123456)).name("native card"),
+            div()
+                .w(80)
+                .h(60)
+                .bg(rgb(0x405060))
+                .name("second native card"),
+        ))
     }
 }
 struct Script {
@@ -19,6 +26,7 @@ struct Script {
     deadline: Instant,
     minimum_frames: u64,
     complete: bool,
+    rejected_epoch: u64,
 }
 impl Script {
     fn click(&mut self, event_loop: &ActiveEventLoop, point: crate::Point) {
@@ -47,16 +55,30 @@ impl Script {
         self.minimum_frames = self.host.presented_frames + 1;
         self.host.request_redraw();
     }
-    fn control(&mut self, event_loop: &ActiveEventLoop, name: &str) {
-        let owner = self.host.owner.as_ref().unwrap();
-        let bounds = owner.bounds(owner.button(name)).unwrap();
+    fn control(&mut self, event_loop: &ActiveEventLoop, name: &str) -> bool {
+        let owner = self.host.owner.as_mut().unwrap();
+        let panel = owner
+            .role(crate::Role::ScrollView)
+            .name("GPUI Inspector")
+            .one()
+            .unwrap();
+        let target = owner.query().name(name).within(panel).one().unwrap();
+        owner.scroll_into_view(target).unwrap();
+        if owner.inspect().unwrap().prepared_epoch.is_some() {
+            self.minimum_frames = self.host.presented_frames + 1;
+            self.host.request_redraw();
+            return false;
+        }
+        let bounds = owner.bounds(target).unwrap();
+        assert!(!bounds.is_empty());
         self.click(
             event_loop,
             crate::Point {
-                x: bounds.x + 10.0,
-                y: bounds.y + 10.0,
+                x: bounds.x + bounds.width / 2.,
+                y: bounds.y + bounds.height / 2.,
             },
         );
+        true
     }
     fn step(&mut self, event_loop: &ActiveEventLoop) {
         assert!(
@@ -79,37 +101,46 @@ impl Script {
         match self.stage {
             0 => {
                 owner.reset_counters().unwrap();
-                for label in [
-                    "Width +20",
-                    "Auto",
-                    "Inherit width",
-                    "Set tint",
-                    "Inherit tint",
-                    "Select parent",
-                ] {
-                    self.control(event_loop, label);
-                }
-                let owner = self.host.owner.as_ref().unwrap();
                 assert_eq!(owner.inspector_selected().unwrap(), None);
                 assert_eq!(owner.counters().source_operations, 0);
-                self.control(event_loop, "Pick element");
+                if !self.control(event_loop, "Pick element") {
+                    return;
+                }
             }
             1 => self.click(event_loop, crate::Point { x: 20.0, y: 20.0 }),
             2 => {
                 let card = owner.query().name("native card").one().unwrap();
                 assert_eq!(owner.inspector_selected().unwrap(), Some(card));
-                self.control(event_loop, "Width +20");
+                if !self.control(event_loop, "Increase") {
+                    return;
+                }
             }
             3 => {
                 let card = owner.inspector_selected().unwrap().unwrap();
                 assert_eq!(
                     owner.property(card, crate::property::WIDTH).unwrap(),
-                    Some(100.0)
+                    Some(81.0)
                 );
-                self.control(event_loop, "Set tint");
+                if !self.control(event_loop, "background") {
+                    return;
+                }
             }
-            4 => self.control(event_loop, "Inherit width"),
+            4 => {
+                if !self.control(event_loop, "Increase") {
+                    return;
+                }
+            }
             5 => {
+                if !self.control(event_loop, "width") {
+                    return;
+                }
+            }
+            6 => {
+                if !self.control(event_loop, "Inherit") {
+                    return;
+                }
+            }
+            7 => {
                 let card = owner.inspector_selected().unwrap().unwrap();
                 assert_eq!(
                     owner.property(card, crate::property::WIDTH).unwrap(),
@@ -117,7 +148,7 @@ impl Script {
                 );
                 assert_eq!(
                     owner.property(card, crate::property::BACKGROUND).unwrap(),
-                    rgb(0x0d9488)
+                    crate::Color::srgb(18. / 255. + 0.05, 52. / 255., 86. / 255., 1.).unwrap()
                 );
                 assert_eq!(owner.counters().owner_reruns, 0);
                 assert_eq!(owner.counters().descriptions, 0);
@@ -127,13 +158,121 @@ impl Script {
                 let pixels = surface.fetch().unwrap();
                 assert_eq!(
                     pixels[20 * 800 + 20],
-                    0x0d9488,
-                    "native application pixels reflect inspector tint"
+                    0x1f3456,
+                    "native application pixels reflect the actual sRGB channel step"
                 );
                 assert_eq!(
                     pixels[540 * 800 + 780],
                     0x0f172a,
                     "panel is independently retained and painted"
+                );
+                if !self.control(event_loop, "corner_radius") {
+                    return;
+                }
+            }
+            8 => {
+                if !self.control(event_loop, "Increase") {
+                    return;
+                }
+            }
+            9 => {
+                let card = owner.inspector_selected().unwrap().unwrap();
+                assert_eq!(
+                    owner
+                        .property(card, crate::property::CORNER_RADIUS)
+                        .unwrap(),
+                    1.
+                );
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
+                    unreachable!()
+                };
+                let pixels = surface.fetch().unwrap();
+                assert_ne!(
+                    pixels[0], 0x1f3456,
+                    "rounded native corner has partial coverage"
+                );
+                assert_eq!(pixels[801], 0x1f3456);
+                if !self.control(event_loop, "transform") {
+                    return;
+                }
+            }
+            10..=13 => {
+                if !self.control(event_loop, "Component") {
+                    return;
+                }
+            }
+            14 => {
+                if !self.control(event_loop, "Increase") {
+                    return;
+                }
+            }
+            15 => {
+                let card = owner.inspector_selected().unwrap().unwrap();
+                assert_eq!(
+                    owner.property(card, crate::property::TRANSFORM).unwrap().tx,
+                    1.
+                );
+                let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics else {
+                    unreachable!()
+                };
+                let pixels = surface.fetch().unwrap();
+                assert_ne!(pixels[20 * 800], 0x1f3456);
+                assert_eq!(pixels[20 * 800 + 1], 0x1f3456);
+                if !self.control(event_loop, "gap") {
+                    return;
+                }
+            }
+            16 => {
+                self.rejected_epoch = owner.inspect().unwrap().source_epoch;
+                if !self.control(event_loop, "Decrease") {
+                    return;
+                }
+            }
+            17 => {
+                assert_eq!(owner.inspect().unwrap().source_epoch, self.rejected_epoch);
+                assert!(
+                    owner
+                        .contains_text("Last edit rejected: Property(Negative)")
+                        .unwrap()
+                );
+                if !self.control(event_loop, "Increase") {
+                    return;
+                }
+            }
+            18 => {
+                if !self.control(event_loop, "Pick element") {
+                    return;
+                }
+            }
+            19 => {
+                let card = owner.query().name("native card").one().unwrap();
+                owner
+                    .set_property(
+                        card,
+                        crate::property::WIDTH,
+                        crate::property::Contribution::Set(Some(90.)),
+                    )
+                    .unwrap();
+                // An actual physical click during pending C cannot re-pick P.
+                self.click(event_loop, crate::Point { x: 20., y: 80. });
+                assert_eq!(
+                    self.host
+                        .owner
+                        .as_ref()
+                        .unwrap()
+                        .inspector_selected()
+                        .unwrap(),
+                    Some(card)
+                );
+            }
+            20 => self.click(event_loop, crate::Point { x: 20., y: 80. }),
+            21 => {
+                let second = owner.query().name("second native card").one().unwrap();
+                assert_eq!(owner.inspector_selected().unwrap(), Some(second));
+                assert_eq!(owner.counters().owner_reruns, 0);
+                assert_eq!(owner.counters().descriptions, 0);
+                eprintln!(
+                    "NATIVE_CATALOG: pick, scroll/ACK, width Set/Inherit, sRGB channel pixel, radius corner pixel, tx pixel, rejected negative step + recovery, stale-P ignored/re-pick"
                 );
                 self.complete = true;
                 event_loop.exit();
@@ -173,6 +312,7 @@ fn native_inspector_picks_and_edits_actual_application_without_owner_rerun() {
         deadline: Instant::now() + Duration::from_secs(20),
         minimum_frames: 1,
         complete: false,
+        rejected_epoch: 0,
     };
     let (mut driver, wake) = Driver::new(&event_loop, script);
     driver.host_mut().host.wake = Some(wake);

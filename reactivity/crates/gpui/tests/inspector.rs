@@ -602,6 +602,10 @@ fn transform_editor_exposes_each_of_the_six_components() {
             win.property_value(target, PropertyId::Transform).unwrap(),
             PropertyValue::Transform(Affine { a, b, c, d, tx, ty })
         );
+        assert!(
+            win.contains_text(&format!("Logical transform:\n{name}={:?}", matrix[index]))
+                .unwrap()
+        );
         click_control(&mut win, "Inherit").unwrap();
         if index != 5 {
             click_control(&mut win, "Component").unwrap();
@@ -644,6 +648,20 @@ fn color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly()
                 panic!()
             };
             assert_eq!(after.space(), color.space());
+            let names = if color.space() == gpui::ColorSpace::Oklch {
+                ["L", "C", "h", "alpha"]
+            } else {
+                ["R", "G", "B", "alpha"]
+            };
+            assert!(
+                win.contains_text(&format!(
+                    "Logical background:\n{:?} {}={:?}",
+                    after.space(),
+                    names[component],
+                    after.channels()[component]
+                ))
+                .unwrap()
+            );
             for channel in 0..4 {
                 let delta = if channel == component {
                     if color.space() == gpui::ColorSpace::Oklch && channel == 2 {
