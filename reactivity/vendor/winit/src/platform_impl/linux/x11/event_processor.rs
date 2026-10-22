@@ -1022,18 +1022,29 @@ impl EventProcessor {
             false
         };
 
-        // Always update the modifiers when we're not replaying.
-        if !replay {
+        let ime_allowed = Self::window_target(&self.target).ime.as_ref()
+            .is_some_and(|ime| ime.borrow().is_ime_allowed(window as _));
+        // Ordinary keys forwarded by XIM can also arrive after newer real releases.
+        // Their core state belongs to that key, not to the live XKB state.
+        let replay = replay
+            || ime_allowed && keycode != 0 && self.core_state_differs(keycode, xev.state as u16);
+        if !replay && !ime_allowed {
             self.update_mods_from_core_event(window_id, xev.state as u16, &mut callback);
         }
 
         if keycode != 0 && !self.is_composing {
             // Don't alter the modifiers state from replaying.
-            if replay {
-                self.send_synthic_modifier_from_core(window_id, xev.state as u16, &mut callback);
-            }
-
-            if let Some(mut key_processor) = self.xkb_context.key_context() {
+            let mut event_state = if replay {
+                self.send_synthic_modifier_from_core(window_id, xev.state as u16, &mut callback)
+            } else {
+                None
+            };
+            let key_context = if let Some(state) = event_state.as_mut() {
+                self.xkb_context.key_context_with_state(state)
+            } else {
+                self.xkb_context.key_context()
+            };
+            if let Some(mut key_processor) = key_context {
                 let event = key_processor.process_key_event(keycode, state, repeat);
                 let event = Event::WindowEvent {
                     window_id,
@@ -1072,17 +1083,28 @@ impl EventProcessor {
         }
     }
 
+    fn core_state_differs(&mut self, keycode: u32, core: u16) -> bool {
+        let expected = self.xkb_mod_mask_from_core(core);
+        let core_mask = self.xkb_mod_mask_from_core(0xff);
+        self.xkb_context.state_mut().is_some_and(|state| {
+            let current = state.depressed_modifiers()
+                | state.latched_modifiers() | state.locked_modifiers();
+            current & core_mask != expected || state.layout(keycode) != Self::core_keyboard_group(core)
+        })
+    }
+
     fn send_synthic_modifier_from_core<T: 'static, F>(
         &mut self,
         window_id: crate::window::WindowId,
         state: u16,
         mut callback: F,
-    ) where
+    ) -> Option<XkbState>
+    where
         F: FnMut(&RootAEL, Event<T>),
     {
         let keymap = match self.xkb_context.keymap_mut() {
             Some(keymap) => keymap,
-            None => return,
+            None => return None,
         };
 
         let wt = Self::window_target(&self.target);
@@ -1092,7 +1114,7 @@ impl EventProcessor {
         // will be restored later.
         let mut xkb_state = match XkbState::new_x11(xcb, keymap) {
             Some(xkb_state) => xkb_state,
-            None => return,
+            None => return None,
         };
 
         let mask = self.xkb_mod_mask_from_core(state);
@@ -1103,6 +1125,7 @@ impl EventProcessor {
             Event::WindowEvent { window_id, event: WindowEvent::ModifiersChanged(mods.into()) };
 
         callback(&self.target, event);
+        Some(xkb_state)
     }
 
     fn xinput2_button_input<T: 'static, F>(
