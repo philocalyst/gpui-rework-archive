@@ -1,0 +1,9 @@
+{
+  "binary": "/tmp/gpui-contained-owner-spike-target/debug/deps/gpui-08eabea4b8bd987d",
+  "frozen_binary": "/tmp/gpui-contained-entry-native-9ec-control",
+  "sha256": "c64fa2204be0f5d1d9507a421e379b49cf6f834799c4ede2618164e934c9c1d9",
+  "mtime_ns": 1792696642669168942,
+  "qualification_log": "/tmp/gpui-contained-entry-native-run-v2.log",
+  "source": "9ec0bf4346f2d6a76c3f52ad357965a0af4547a6",
+  "note": "Original passing native control; predates malformed-projector and one-slot refinements. Final qualification is separate."
+}

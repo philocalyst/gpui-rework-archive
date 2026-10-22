@@ -1,0 +1,117 @@
+{
+  "rustc": 12019306335353385202,
+  "features": "[\"default\", \"simd\"]",
+  "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+  "target": 10166460236151739919,
+  "profile": 10220379689200424945,
+  "path": 15427980404098425784,
+  "deps": [
+    [
+      535147103364023206,
+      "icu_segmenter",
+      false,
+      10872040373452668746
+    ],
+    [
+      1001648224152866569,
+      "arcstr",
+      false,
+      13742488917365701927
+    ],
+    [
+      2251399859588827949,
+      "pin_project_lite",
+      false,
+      1191638877463689097
+    ],
+    [
+      4295957145130622623,
+      "zbus",
+      false,
+      6888951440401714821
+    ],
+    [
+      5686200050580704112,
+      "gpui",
+      false,
+      14288413784378834510
+    ],
+    [
+      6359120849577304855,
+      "x11rb",
+      false,
+      9373766907126371269
+    ],
+    [
+      6557439603276904804,
+      "serde",
+      false,
+      2726441765809648363
+    ],
+    [
+      8160210889872729633,
+      "serde_json",
+      false,
+      15440217517953987704
+    ],
+    [
+      11048071599106839258,
+      "allocation_counter",
+      false,
+      14377779078634819521
+    ],
+    [
+      11671159878170094075,
+      "gpui_reactivity_state",
+      false,
+      13981615737759569378
+    ],
+    [
+      13316223584457521750,
+      "cephal",
+      false,
+      14174875526635754568
+    ],
+    [
+      13672653153045154758,
+      "gpui_reactivity_core",
+      false,
+      7304373674950695361
+    ],
+    [
+      14670221084672822999,
+      "triomphe",
+      false,
+      16351210426949966268
+    ],
+    [
+      17032968227276897852,
+      "gpui_canvas",
+      false,
+      10725204403586012600
+    ],
+    [
+      17400412893666519160,
+      "zruntime",
+      false,
+      1895633350316060665
+    ],
+    [
+      17719763280398284109,
+      "accesskit_consumer",
+      false,
+      1024923372706197012
+    ]
+  ],
+  "local": [
+    {
+      "CheckDepInfo": {
+        "dep_info": "release/.fingerprint/gpui-bcf457ce7db1ee75/dep-test-integration-test-unit_action_cost",
+        "checksum": false
+      }
+    }
+  ],
+  "rustflags": [],
+  "config": 9396254390672932401,
+  "compile_kind": 0
+}

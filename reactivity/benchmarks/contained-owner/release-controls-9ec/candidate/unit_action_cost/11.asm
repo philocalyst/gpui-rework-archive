@@ -1,0 +1,178 @@
+
+/tmp/gpui-contained-owner-spike-target/release/deps/unit_action_cost-bcf457ce7db1ee75:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000070ca50 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change>:
+  70ca50:	41 57                	push   %r15
+  70ca52:	41 56                	push   %r14
+  70ca54:	41 54                	push   %r12
+  70ca56:	53                   	push   %rbx
+  70ca57:	50                   	push   %rax
+  70ca58:	48 8b 86 10 06 00 00 	mov    0x610(%rsi),%rax
+  70ca5f:	48 85 c0             	test   %rax,%rax
+  70ca62:	74 12                	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70ca64:	48 8b 80 e0 00 00 00 	mov    0xe0(%rax),%rax
+  70ca6b:	48 85 c0             	test   %rax,%rax
+  70ca6e:	74 06                	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70ca70:	80 78 24 02          	cmpb   $0x2,0x24(%rax)
+  70ca74:	75 63                	jne    70cad9 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x89>
+  70ca76:	0f 10 86 60 06 00 00 	movups 0x660(%rsi),%xmm0
+  70ca7d:	0f b6 86 20 07 00 00 	movzbl 0x720(%rsi),%eax
+  70ca84:	48 83 be 80 06 00 00 	cmpq   $0x0,0x680(%rsi)
+  70ca8b:	00 
+  70ca8c:	74 1c                	je     70caaa <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x5a>
+  70ca8e:	84 c0                	test   %al,%al
+  70ca90:	74 0a                	je     70ca9c <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x4c>
+  70ca92:	48 83 be 88 05 00 00 	cmpq   $0xffffffffffffffff,0x588(%rsi)
+  70ca99:	ff 
+  70ca9a:	74 0e                	je     70caaa <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x5a>
+  70ca9c:	48 8b 96 90 06 00 00 	mov    0x690(%rsi),%rdx
+  70caa3:	b9 01 00 00 00       	mov    $0x1,%ecx
+  70caa8:	eb 02                	jmp    70caac <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x5c>
+  70caaa:	31 c9                	xor    %ecx,%ecx
+  70caac:	48 8b b6 08 07 00 00 	mov    0x708(%rsi),%rsi
+  70cab3:	48 89 4f 08          	mov    %rcx,0x8(%rdi)
+  70cab7:	48 89 57 10          	mov    %rdx,0x10(%rdi)
+  70cabb:	0f 11 47 18          	movups %xmm0,0x18(%rdi)
+  70cabf:	48 89 77 28          	mov    %rsi,0x28(%rdi)
+  70cac3:	88 47 30             	mov    %al,0x30(%rdi)
+  70cac6:	48 c7 07 fe ff ff ff 	movq   $0xfffffffffffffffe,(%rdi)
+  70cacd:	48 83 c4 08          	add    $0x8,%rsp
+  70cad1:	5b                   	pop    %rbx
+  70cad2:	41 5c                	pop    %r12
+  70cad4:	41 5e                	pop    %r14
+  70cad6:	41 5f                	pop    %r15
+  70cad8:	c3                   	ret
+  70cad9:	48 8b 00             	mov    (%rax),%rax
+  70cadc:	4c 8b 86 e8 01 00 00 	mov    0x1e8(%rsi),%r8
+  70cae3:	4d 85 c0             	test   %r8,%r8
+  70cae6:	0f 84 99 00 00 00    	je     70cb85 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x135>
+  70caec:	41 83 f8 01          	cmp    $0x1,%r8d
+  70caf0:	0f 85 ab 00 00 00    	jne    70cba1 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x151>
+  70caf6:	4c 8b 96 f8 01 00 00 	mov    0x1f8(%rsi),%r10
+  70cafd:	4d 85 d2             	test   %r10,%r10
+  70cb00:	0f 84 70 ff ff ff    	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cb06:	4c 8b 86 f0 01 00 00 	mov    0x1f0(%rsi),%r8
+  70cb0d:	45 31 c9             	xor    %r9d,%r9d
+  70cb10:	49 83 fa 01          	cmp    $0x1,%r10
+  70cb14:	74 2e                	je     70cb44 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0xf4>
+  70cb16:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  70cb1d:	00 00 00 
+  70cb20:	4d 89 cb             	mov    %r9,%r11
+  70cb23:	4c 89 d3             	mov    %r10,%rbx
+  70cb26:	48 d1 eb             	shr    $1,%rbx
+  70cb29:	49 01 d9             	add    %rbx,%r9
+  70cb2c:	4d 89 ce             	mov    %r9,%r14
+  70cb2f:	49 c1 e6 04          	shl    $0x4,%r14
+  70cb33:	4b 39 04 30          	cmp    %rax,(%r8,%r14,1)
+  70cb37:	4d 0f 47 cb          	cmova  %r11,%r9
+  70cb3b:	49 29 da             	sub    %rbx,%r10
+  70cb3e:	49 83 fa 01          	cmp    $0x1,%r10
+  70cb42:	77 dc                	ja     70cb20 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0xd0>
+  70cb44:	4d 89 cb             	mov    %r9,%r11
+  70cb47:	49 c1 e3 04          	shl    $0x4,%r11
+  70cb4b:	45 31 d2             	xor    %r10d,%r10d
+  70cb4e:	4b 39 04 18          	cmp    %rax,(%r8,%r11,1)
+  70cb52:	41 0f 96 c2          	setbe  %r10b
+  70cb56:	4d 01 ca             	add    %r9,%r10
+  70cb59:	0f 84 17 ff ff ff    	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cb5f:	49 c1 e2 04          	shl    $0x4,%r10
+  70cb63:	4b 2b 44 10 f0       	sub    -0x10(%r8,%r10,1),%rax
+  70cb68:	47 8b 4c 10 fc       	mov    -0x4(%r8,%r10,1),%r9d
+  70cb6d:	4c 39 c8             	cmp    %r9,%rax
+  70cb70:	0f 83 00 ff ff ff    	jae    70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cb76:	4d 01 d0             	add    %r10,%r8
+  70cb79:	45 8b 40 f8          	mov    -0x8(%r8),%r8d
+  70cb7d:	4c 01 c0             	add    %r8,%rax
+  70cb80:	e9 82 00 00 00       	jmp    70cc07 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x1b7>
+  70cb85:	48 2b 86 f0 01 00 00 	sub    0x1f0(%rsi),%rax
+  70cb8c:	0f 82 e4 fe ff ff    	jb     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cb92:	48 3b 86 f8 01 00 00 	cmp    0x1f8(%rsi),%rax
+  70cb99:	0f 83 d7 fe ff ff    	jae    70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cb9f:	eb 66                	jmp    70cc07 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x1b7>
+  70cba1:	4c 8b 8e f8 01 00 00 	mov    0x1f8(%rsi),%r9
+  70cba8:	4d 85 c9             	test   %r9,%r9
+  70cbab:	0f 84 c5 fe ff ff    	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cbb1:	4c 8b 86 f0 01 00 00 	mov    0x1f0(%rsi),%r8
+  70cbb8:	49 83 f9 01          	cmp    $0x1,%r9
+  70cbbc:	75 0b                	jne    70cbc9 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x179>
+  70cbbe:	49 39 00             	cmp    %rax,(%r8)
+  70cbc1:	0f 85 af fe ff ff    	jne    70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cbc7:	eb 3a                	jmp    70cc03 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x1b3>
+  70cbc9:	45 31 d2             	xor    %r10d,%r10d
+  70cbcc:	0f 1f 40 00          	nopl   0x0(%rax)
+  70cbd0:	4d 89 d3             	mov    %r10,%r11
+  70cbd3:	4c 89 cb             	mov    %r9,%rbx
+  70cbd6:	48 d1 eb             	shr    $1,%rbx
+  70cbd9:	49 01 da             	add    %rbx,%r10
+  70cbdc:	4f 8d 34 52          	lea    (%r10,%r10,2),%r14
+  70cbe0:	4b 39 04 b0          	cmp    %rax,(%r8,%r14,4)
+  70cbe4:	4d 0f 47 d3          	cmova  %r11,%r10
+  70cbe8:	49 29 d9             	sub    %rbx,%r9
+  70cbeb:	49 83 f9 01          	cmp    $0x1,%r9
+  70cbef:	77 df                	ja     70cbd0 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x180>
+  70cbf1:	4f 8d 0c 52          	lea    (%r10,%r10,2),%r9
+  70cbf5:	4b 39 04 88          	cmp    %rax,(%r8,%r9,4)
+  70cbf9:	0f 85 77 fe ff ff    	jne    70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cbff:	4f 8d 04 88          	lea    (%r8,%r9,4),%r8
+  70cc03:	41 8b 40 08          	mov    0x8(%r8),%eax
+  70cc07:	48 89 fb             	mov    %rdi,%rbx
+  70cc0a:	48 89 f7             	mov    %rsi,%rdi
+  70cc0d:	49 89 f6             	mov    %rsi,%r14
+  70cc10:	48 89 c6             	mov    %rax,%rsi
+  70cc13:	49 89 cf             	mov    %rcx,%r15
+  70cc16:	49 89 d4             	mov    %rdx,%r12
+  70cc19:	e8 c2 da ff ff       	call   70a6e0 <<gpui::runtime::Runtime<unit_action_cost::Model>>::editing_at>
+  70cc1e:	4c 89 f6             	mov    %r14,%rsi
+  70cc21:	48 89 df             	mov    %rbx,%rdi
+  70cc24:	48 85 c0             	test   %rax,%rax
+  70cc27:	0f 84 49 fe ff ff    	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cc2d:	80 78 24 02          	cmpb   $0x2,0x24(%rax)
+  70cc31:	0f 84 3f fe ff ff    	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cc37:	4c 89 e2             	mov    %r12,%rdx
+  70cc3a:	4c 89 f9             	mov    %r15,%rcx
+  70cc3d:	4c 8b 08             	mov    (%rax),%r9
+  70cc40:	4d 85 e4             	test   %r12,%r12
+  70cc43:	74 19                	je     70cc5e <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x20e>
+  70cc45:	4c 8b 86 b0 05 00 00 	mov    0x5b0(%rsi),%r8
+  70cc4c:	49 31 d0             	xor    %rdx,%r8
+  70cc4f:	49 89 ca             	mov    %rcx,%r10
+  70cc52:	4d 31 ca             	xor    %r9,%r10
+  70cc55:	4d 09 c2             	or     %r8,%r10
+  70cc58:	41 0f 94 c0          	sete   %r8b
+  70cc5c:	eb 03                	jmp    70cc61 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x211>
+  70cc5e:	45 31 c0             	xor    %r8d,%r8d
+  70cc61:	44 8b 50 18          	mov    0x18(%rax),%r10d
+  70cc65:	8b 40 20             	mov    0x20(%rax),%eax
+  70cc68:	4c 8b 9e e8 05 00 00 	mov    0x5e8(%rsi),%r11
+  70cc6f:	4d 85 db             	test   %r11,%r11
+  70cc72:	74 17                	je     70cc8b <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x23b>
+  70cc74:	4c 33 9e b0 05 00 00 	xor    0x5b0(%rsi),%r11
+  70cc7b:	4c 33 8e f0 05 00 00 	xor    0x5f0(%rsi),%r9
+  70cc82:	4d 09 d9             	or     %r11,%r9
+  70cc85:	41 0f 94 c1          	sete   %r9b
+  70cc89:	eb 03                	jmp    70cc8e <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x23e>
+  70cc8b:	45 31 c9             	xor    %r9d,%r9d
+  70cc8e:	41 39 c2             	cmp    %eax,%r10d
+  70cc91:	0f 85 df fd ff ff    	jne    70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cc97:	45 30 c8             	xor    %r9b,%r8b
+  70cc9a:	0f 84 d6 fd ff ff    	je     70ca76 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x26>
+  70cca0:	48 8b 86 60 06 00 00 	mov    0x660(%rsi),%rax
+  70cca7:	48 83 f8 ff          	cmp    $0xffffffffffffffff,%rax
+  70ccab:	74 28                	je     70ccd5 <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x285>
+  70ccad:	48 ff c0             	inc    %rax
+  70ccb0:	48 89 86 60 06 00 00 	mov    %rax,0x660(%rsi)
+  70ccb7:	48 ff 86 b0 06 00 00 	incq   0x6b0(%rsi)
+  70ccbe:	c6 86 1f 07 00 00 01 	movb   $0x1,0x71f(%rsi)
+  70ccc5:	48 83 c4 08          	add    $0x8,%rsp
+  70ccc9:	5b                   	pop    %rbx
+  70ccca:	41 5c                	pop    %r12
+  70cccc:	41 5e                	pop    %r14
+  70ccce:	41 5f                	pop    %r15
+  70ccd0:	e9 8b 19 01 00       	jmp    71e660 <<gpui::runtime::Runtime<unit_action_cost::Model>>::present>
+  70ccd5:	48 89 96 e8 05 00 00 	mov    %rdx,0x5e8(%rsi)
+  70ccdc:	48 89 8e f0 05 00 00 	mov    %rcx,0x5f0(%rsi)
+  70cce3:	48 c7 07 1f 00 00 00 	movq   $0x1f,(%rdi)
+  70ccea:	e9 de fd ff ff       	jmp    70cacd <<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change+0x7d>

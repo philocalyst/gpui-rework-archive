@@ -1,0 +1,10 @@
+
+running 1 test
+inspector_blank_headless_retained,plain_bytes=5588,plain_allocs=21,tool_bytes=82694,tool_allocs=356,delta_bytes=77106 (includes font/text/layout/paint resources)
+inspector_bytes,Node=40,Runtime=1840,Metadata=264,Inspector=24,Handler=16,WindowAction=4,tool_nodes=28,texts_capacity=26
+catalog_headers,El=176,Style=88,Presented=80,Admission=16,InspectorAction=4
+catalog_warm_inspector_idle,allocations=0,total_bytes=0,retained=0
+test runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 209 filtered out; finished in 0.02s
+

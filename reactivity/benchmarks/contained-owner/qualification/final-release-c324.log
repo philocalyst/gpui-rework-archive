@@ -1,0 +1,20 @@
+   Compiling gpui v0.1.0 (/root/gpui-contained-property-exchange/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 17.27s
+     Running tests/unit_action_cost.rs (/tmp/gpui-contained-property-exchange-target/release/deps/unit_action_cost-bcf457ce7db1ee75)
+
+running 1 test
+ordinary_unit_cost,Win=8,El=176,mount_count=305,mount_requested=128258,mount_retained=12770,action_count=13,action_requested=1740,action_retained=0
+test ordinary_unit_action_cost ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/unit_action_cost_two.rs (/tmp/gpui-contained-property-exchange-target/release/deps/unit_action_cost_two-c899ee77dd9a9ab3)
+
+running 2 tests
+ordinary_unit_cost,Win=8,El=176,mount_count=305,mount_requested=128258,mount_retained=12770,action_count=13,action_requested=1740,action_retained=0
+second_unit_cost,Win=8,El=176,mount_count=314,mount_requested=134312,mount_retained=15670,action_count=13,action_requested=1740,action_retained=0
+test ordinary_unit_action_cost ... ok
+test second_ordinary_unit_action_cost ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

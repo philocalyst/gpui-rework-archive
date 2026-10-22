@@ -1,0 +1,8 @@
+
+running 1 test
+property_declaration_bytes=56
+catalog_baseline,info=24,value=28,contribution=28,declaration=56,catalog_reference_bytes=104
+test property::tests::catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 209 filtered out; finished in 0.00s
+

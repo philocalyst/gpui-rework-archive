@@ -1,0 +1,29 @@
+   Compiling gpui v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.47s
+     Running tests/property_actions.rs (/tmp/gpui-contained-owner-spike-target/debug/deps/property_actions-3101e020bc047140)
+
+running 6 tests
+
+thread 'request_and_reply_panics_restore_the_owned_route_until_close' (1350380) panicked at crates/gpui/tests/property_actions.rs:236:25:
+request panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'request_and_reply_panics_restore_the_owned_route_until_close' (1350380) panicked at crates/gpui/tests/property_actions.rs:243:39:
+reply panic
+test request_and_reply_panics_restore_the_owned_route_until_close ... ok
+test logical_acceptance_is_distinct_from_acknowledged_presentation ... ok
+test accepted_contribution_survives_failed_preparation_then_repairs ... ok
+test proposed_foreign_and_stale_targets_report_but_original_stale_event_rejects ... ok
+test one_editor_family_routes_geometry_color_and_six_affine_components ... ok
+test actual_contained_apply_rejects_and_recovers_without_losing_the_route ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/unit_action_cost.rs (/tmp/gpui-contained-owner-spike-target/debug/deps/unit_action_cost-88b917e81f2e8201)
+
+running 1 test
+ordinary_unit_cost,Win=8,El=176,mount_count=305,mount_requested=128258,mount_retained=12770,action_count=13,action_requested=1740,action_retained=0
+test ordinary_unit_action_cost ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

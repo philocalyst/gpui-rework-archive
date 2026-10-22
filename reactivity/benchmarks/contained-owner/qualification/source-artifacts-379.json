@@ -1,0 +1,295 @@
+{
+  "source": "379ad7ed6d005a2f2a37fa8239133e7a7edd60f8",
+  "shipping_source": "f8467390d50e5feb32407753170b6f763b4c872c",
+  "baseline": "58995b75eaab408f488141ef77ed2b0d9ad0abe0",
+  "jobs": 2,
+  "encoded_rustflags": "",
+  "timings": false,
+  "source_sha256": {
+    "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+    "reactivity/Cargo.lock": "8100b5e0fb2911b7dc6f1207c90f4d56d8670c2fce90c5e71d879b9d6a066e82",
+    "reactivity/crates/gpui/Cargo.toml": "d38b762ff72b2903f87f3c4b95315e790bbdc6fa7707f19014eccbbd0dee661a",
+    "reactivity/crates/gpui/src/element.rs": "716d819a8255a8f373274adc653c45957d2b26e1176a53cde59de8f3cb5f95e6",
+    "reactivity/crates/gpui/src/component.rs": "e2239f3fb99289449daf6f3c93a7371a32ec6936b5046466faa6bb2c115c8d5c",
+    "reactivity/crates/gpui/src/lib.rs": "fadfb0170dca40f937db9fdfdc810e91d5f68f7b97c23aa4fb5f10f7deb8e425",
+    "reactivity/crates/gpui/src/runtime.rs": "5dcd257e42668b2aacf6bed0db1ad2f60331a9294a69d529e11aaaefc40c13d8",
+    "reactivity/crates/gpui/src/runtime/turn.rs": "aa9df0ea52c6c6111305c95b01f634fa932a13a4ee4e235e595c925bd42acd01",
+    "reactivity/crates/gpui/src/native.rs": "50b5425b84cb50c92fa2356d6165ab5573a538de631603fe3736bb830e1de962",
+    "reactivity/crates/gpui/src/native/property_action_tests.rs": "8c1b772ad821a69ba1eae5de364fcb713a7275b2f6a60072c61dc20956f18e37",
+    "reactivity/crates/gpui/examples/support/value_entry.rs": "2e4db734e51e69e01dcd1fed1a6a0a9df0eabc2f1084424905608a455d00d2c1",
+    "reactivity/crates/gpui/examples/support/property_workbench.rs": "fb9f521f67fa32ccce296814d27d5229c7bcf73d8b7a45f0b47453bb861a148e",
+    "reactivity/crates/gpui/tests/property_actions.rs": "bf5e7357588ac7b9ec013c1aeb06770283d64d048c871e0f54e5c6547b2a3c7b",
+    "reactivity/crates/gpui/tests/unit_action_cost.rs": "6ca3a0b26e5db4c8af8f6e27a0eda78ab4a5ec24702cb1e3fb0869a31f920062",
+    "reactivity/crates/gpui/tests/unit_action_cost_two.rs": "af63399d490204e079811758815027fd298def126c7bf4888daaf22f0b5d0fab"
+  },
+  "artifacts": {
+    "default": {
+      "binary": "/tmp/gpui-contained-property-exchange-target/debug/deps/gpui-812eb2da5cb24682",
+      "sha256": "51003605fe1aa84e80af1bf8dcb77e42cbe776cc66e59dd94cf50bdfccc3e35e",
+      "fingerprint": {
+        "rustc": 12019306335353385202,
+        "features": "[\"default\", \"simd\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 13433137496993833081,
+        "profile": 1722584277633009122,
+        "path": 8373320921053062204,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            15844599515134855215
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            13769763344448808657
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            18149132658175354002
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            16667559302071214571
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            1661777925463489056
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            6262495323071950020
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            18299403665279195733
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            10234812100649264418
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            1956965360139467576
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            10834142700374903475
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3867407105249395930
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            16987542324369189632
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            10501004832522073820
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            3538160140347914145
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            5548306974855318006
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "debug/.fingerprint/gpui-812eb2da5cb24682/dep-test-lib-gpui",
+              "checksum": false
+            }
+          }
+        ],
+        "rustflags": [],
+        "config": 9396254390672932401,
+        "compile_kind": 0
+      },
+      "frozen_binary": "/tmp/gpui-contained-entry-header-control-379-bin"
+    },
+    "native": {
+      "binary": "/tmp/gpui-contained-property-exchange-target/debug/deps/gpui-d2af6da82aed2907",
+      "sha256": "d2a222a6230778aaba61874e90634af11f52767b6ae5eaa7e0fd389b06c708d6",
+      "fingerprint": {
+        "rustc": 12019306335353385202,
+        "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 13433137496993833081,
+        "profile": 1722584277633009122,
+        "path": 8373320921053062204,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            1679156596388638293
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            13769763344448808657
+          ],
+          [
+            1940408237737794595,
+            "accesskit_winit",
+            false,
+            8166529841818765273
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            18149132658175354002
+          ],
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            6349949968334315157
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            3681901550565744458
+          ],
+          [
+            4590322165379248138,
+            "gpui_reactivity_host",
+            false,
+            8216045264639510602
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            4253771333197950478
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            15112484921851378063
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            18299403665279195733
+          ],
+          [
+            8676817272026490959,
+            "accesskit",
+            false,
+            7536307125205925038
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            6336431791032742245
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            10234812100649264418
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            5756668335638660555
+          ],
+          [
+            11905275778120334160,
+            "softbuffer",
+            false,
+            17337316631797714773
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            10834142700374903475
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3867407105249395930
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            16987542324369189632
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            14127714144122636994
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            6897795945288400051
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            323892105043191227
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "debug/.fingerprint/gpui-d2af6da82aed2907/dep-test-lib-gpui",
+              "checksum": false
+            }
+          }
+        ],
+        "rustflags": [],
+        "config": 9396254390672932401,
+        "compile_kind": 0
+      },
+      "frozen_binary": "/tmp/gpui-contained-entry-final-native-bin"
+    }
+  }
+}

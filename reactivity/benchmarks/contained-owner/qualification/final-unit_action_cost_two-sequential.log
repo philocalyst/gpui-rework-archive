@@ -1,0 +1,9 @@
+
+running 2 tests
+test ordinary_unit_action_cost ... ordinary_unit_cost,Win=8,El=176,mount_count=305,mount_requested=128258,mount_retained=12770,action_count=13,action_requested=1740,action_retained=0
+ok
+test second_ordinary_unit_action_cost ... second_unit_cost,Win=8,El=176,mount_count=315,mount_requested=134376,mount_retained=15670,action_count=13,action_requested=1740,action_retained=0
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

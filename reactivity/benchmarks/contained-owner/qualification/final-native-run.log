@@ -1,0 +1,7 @@
+
+running 1 test
+NATIVE_PROPERTY_ENTRY: typed draft, canonical rejection, syntax error, recovery, Apply pointer, server pixel, stale-target feedback, exact ACK
+test native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 209 filtered out; finished in 0.91s
+

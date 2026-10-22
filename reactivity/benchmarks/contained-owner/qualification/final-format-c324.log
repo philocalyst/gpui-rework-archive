@@ -1,0 +1,13 @@
+Diff in /root/gpui-contained-property-exchange/reactivity/crates/gpui/tests/property_actions.rs:65:
+     let input = win.find_input().unwrap();
+     let end = win.root().unwrap().editor.draft.len();
+     let preceding = win
+-        .replace(input, TextSelection::from_bytes(0, end).unwrap(), "bad syntax")
++        .replace(
++            input,
++            TextSelection::from_bytes(0, end).unwrap(),
++            "bad syntax",
++        )
+         .unwrap();
+     assert!(preceding.changed_nodes > 0);
+     let status = win.root().unwrap().editor.status.clone();

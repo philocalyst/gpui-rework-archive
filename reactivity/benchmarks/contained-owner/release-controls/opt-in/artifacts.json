@@ -1,0 +1,220 @@
+{
+  "candidate": {
+    "source": "5ffbe09e18bddaaa36c9cd3eeda4ffa0170d74d6",
+    "binary": "/tmp/gpui-contained-owner-spike-target/release/deps/property_actions-e550015686cf69d3",
+    "frozen_binary": "/tmp/gpui-contained-entry-release-final-controls/candidate/property_actions",
+    "sha256": "76f29c4dc831d381caf634509892e296683bb15dbdce6e4abe05aea954fe5062",
+    "client_sha256": "855fd3aabeee4248cac2287a68b85954ea3bf7d87c59cc60940c557a5a0632a5",
+    "bodies": [
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::owner_scope",
+        "asm": "00.asm"
+      },
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::owner_scope",
+        "asm": "01.asm"
+      },
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::owner_scope",
+        "asm": "02.asm"
+      },
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::owner_scope",
+        "asm": "03.asm"
+      },
+      {
+        "bytes": 23,
+        "name": "core::ptr::drop_glue::<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}>>",
+        "asm": "04.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::invoke",
+        "asm": "05.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::invoke",
+        "asm": "06.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::invoke",
+        "asm": "07.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::invoke",
+        "asm": "08.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::admit",
+        "asm": "09.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::admit",
+        "asm": "10.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::admit",
+        "asm": "11.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::admit",
+        "asm": "12.asm"
+      },
+      {
+        "bytes": 77,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::applied_logically",
+        "asm": "13.asm"
+      },
+      {
+        "bytes": 82,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::applied_logically",
+        "asm": "14.asm"
+      },
+      {
+        "bytes": 91,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::applied_logically",
+        "asm": "15.asm"
+      },
+      {
+        "bytes": 91,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::applied_logically",
+        "asm": "16.asm"
+      },
+      {
+        "bytes": 103,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::proposal",
+        "asm": "17.asm"
+      },
+      {
+        "bytes": 115,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::proposal",
+        "asm": "18.asm"
+      },
+      {
+        "bytes": 127,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::proposal",
+        "asm": "19.asm"
+      },
+      {
+        "bytes": 162,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::proposal",
+        "asm": "20.asm"
+      },
+      {
+        "bytes": 294,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::IntoHandler<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, gpui::element::shape::Property>>::install",
+        "asm": "21.asm"
+      }
+    ]
+  },
+  "exchange": {
+    "source": "f8467390d50e5feb32407753170b6f763b4c872c",
+    "binary": "/tmp/gpui-contained-property-exchange-target/release/deps/property_actions-e550015686cf69d3",
+    "frozen_binary": "/tmp/gpui-contained-entry-release-final-controls/exchange/property_actions",
+    "sha256": "2352c854a792b428b7b348830d3c7a1023057714ad69ec72bd13de51fa65f3e5",
+    "client_sha256": "855fd3aabeee4248cac2287a68b85954ea3bf7d87c59cc60940c557a5a0632a5",
+    "bodies": [
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::owner_scope",
+        "asm": "00.asm"
+      },
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::owner_scope",
+        "asm": "01.asm"
+      },
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::owner_scope",
+        "asm": "02.asm"
+      },
+      {
+        "bytes": 18,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::owner_scope",
+        "asm": "03.asm"
+      },
+      {
+        "bytes": 23,
+        "name": "core::ptr::drop_glue::<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}>>",
+        "asm": "04.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::invoke",
+        "asm": "05.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::invoke",
+        "asm": "06.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::invoke",
+        "asm": "07.asm"
+      },
+      {
+        "bytes": 26,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::invoke",
+        "asm": "08.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::admit",
+        "asm": "09.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::admit",
+        "asm": "10.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::admit",
+        "asm": "11.asm"
+      },
+      {
+        "bytes": 72,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::admit",
+        "asm": "12.asm"
+      },
+      {
+        "bytes": 192,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::inherit, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::property",
+        "asm": "13.asm"
+      },
+      {
+        "bytes": 197,
+        "name": "<gpui::element::PropertyRoute<property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::proposal, <property_actions::post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l::Child>::reply> as gpui::element::Route>::property",
+        "asm": "14.asm"
+      },
+      {
+        "bytes": 249,
+        "name": "<gpui::element::PropertyRoute<property_actions::property_workbench::value_entry::ValueEntry, <property_actions::property_workbench::value_entry::ValueEntry>::proposal, <property_actions::property_workbench::value_entry::ValueEntry>::applied_logically> as gpui::element::Route>::property",
+        "asm": "15.asm"
+      },
+      {
+        "bytes": 258,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::Route>::property",
+        "asm": "16.asm"
+      },
+      {
+        "bytes": 294,
+        "name": "<gpui::element::PropertyRoute<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#0}, <property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner as gpui::View>::view::{closure#1}> as gpui::element::IntoHandler<property_actions::request_and_reply_panics_restore_the_owned_route_until_close::Owner, gpui::element::shape::Property>>::install",
+        "asm": "17.asm"
+      }
+    ]
+  }
+}

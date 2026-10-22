@@ -1,0 +1,10 @@
+{
+  "source": "379ad7ed6d005a2f2a37fa8239133e7a7edd60f8",
+  "shipping_source": "f8467390d50e5feb32407753170b6f763b4c872c",
+  "binary": "/tmp/gpui-contained-property-exchange-target/debug/deps/gpui-d2af6da82aed2907",
+  "frozen_binary": "/tmp/gpui-contained-entry-final-native-bin",
+  "sha256": "d2a222a6230778aaba61874e90634af11f52767b6ae5eaa7e0fd389b06c708d6",
+  "features": "desktop,x11,wayland,gpui_canvas/parallel",
+  "profile": "debug",
+  "encoded_rustflags": ""
+}

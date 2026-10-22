@@ -1,0 +1,24 @@
+   Compiling gpui v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.71s
+     Running tests/property_actions.rs (/tmp/gpui-contained-owner-spike-target/debug/deps/property_actions-3101e020bc047140)
+
+running 3 tests
+test logical_acceptance_is_distinct_from_acknowledged_presentation ... FAILED
+test proposed_foreign_and_stale_targets_report_but_original_stale_event_rejects ... ok
+test actual_contained_apply_rejects_and_recovers_without_losing_the_route ... ok
+
+failures:
+
+---- logical_acceptance_is_distinct_from_acknowledged_presentation stdout ----
+
+thread 'logical_acceptance_is_distinct_from_acknowledged_presentation' (1329166) panicked at crates/gpui/src/runtime.rs:1422:14:
+button was not found in the presented sheet: MissingElement
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    logical_acceptance_is_distinct_from_acknowledged_presentation
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `-p gpui --test property_actions`

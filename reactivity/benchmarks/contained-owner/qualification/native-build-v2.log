@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.67s
+  Executable unittests src/lib.rs (/tmp/gpui-contained-owner-spike-target/debug/deps/gpui-08eabea4b8bd987d)

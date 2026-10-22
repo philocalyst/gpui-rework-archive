@@ -1,0 +1,15 @@
+   Compiling gpui v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/gpui)
+error[E0599]: no method named `validate` found for reference `&element::Handler` in the current scope
+    --> crates/gpui/src/runtime.rs:1676:23
+     |
+1676 |                 check.validate(&self.model, &self.sources)?;
+     |                       ^^^^^^^^ method not found in `&element::Handler`
+     |
+     = help: items from traits can only be used if the trait is implemented and in scope
+     = note: the following traits define an item `validate`, perhaps you need to implement one of them:
+             candidate #1: `ComponentSchema`
+             candidate #2: `QuestionInputs`
+             candidate #3: `source::Field`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `gpui` (lib) due to 1 previous error

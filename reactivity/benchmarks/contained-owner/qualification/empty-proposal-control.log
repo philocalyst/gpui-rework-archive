@@ -1,0 +1,21 @@
+   Compiling gpui v0.1.0 (/root/gpui-contained-property-exchange/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.33s
+     Running tests/property_actions.rs (/tmp/gpui-contained-property-exchange-target/debug/deps/property_actions-3101e020bc047140)
+
+running 1 test
+
+thread 'empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit' (1485687) panicked at crates/gpui/tests/property_actions.rs:78:5:
+assertion `left == right` failed
+  left: 2
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit ... FAILED
+
+failures:
+
+failures:
+    empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p gpui --test property_actions`

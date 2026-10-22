@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets' (1345305) panicked at crates/gpui/src/native/property_action_tests.rs:92:17:
+assertion failed: owner.root().unwrap().editor.status.contains("NonFinite")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets ... FAILED
+
+failures:
+
+failures:
+    native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 208 filtered out; finished in 0.09s
+

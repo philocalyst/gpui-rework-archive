@@ -1,0 +1,7 @@
+{
+  "source": "6da5c93b9c3bea34fcd39827e8e920348c9b1c8c",
+  "binary": "/tmp/gpui-contained-property-exchange-target/debug/deps/property_actions-3101e020bc047140",
+  "frozen_binary": "/tmp/gpui-contained-entry-empty-proposal-control-bin",
+  "sha256": "9e11f8a28e092db0ea9119b66ff7c39dcf32eb93214db52488f8fe138893305e",
+  "expected_failure": "Commit.changed_nodes reports2 instead of0; source, reply status and paint assertions passed first"
+}
