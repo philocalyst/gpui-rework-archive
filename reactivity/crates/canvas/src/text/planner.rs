@@ -1,5 +1,5 @@
-//! Scoped Unicode planning. No Parley layout or mutable font database survives
-//! lowering into Canvas's owned glyphs and optional interaction map.
+//! Scoped Unicode planning. Parley layouts and the mutable font database stay
+//! within the planning pass; outputs own only Canvas glyphs and interaction data.
 use super::layout::{Details, Line, Run, Stop, TextDirection};
 use super::*;
 use fontique::{Blob, Collection, CollectionOptions, FontInfoOverride, SourceCache};
@@ -43,6 +43,9 @@ impl<'font> Cmap<'font> {
 pub(super) struct Planner<'font> {
     fonts: FontContext,
     context: LayoutContext<()>,
+    // Reuse the one paragraph being lowered, including Parley Engine's shaped
+    // buffers. This scratch dies with TextShaper, never with a returned layout.
+    layout: parley::Layout<()>,
     faces: FontSet,
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
@@ -65,6 +68,7 @@ impl<'font> Planner<'font> {
                 source_cache: SourceCache::default(),
             },
             context: LayoutContext::new(),
+            layout: parley::Layout::default(),
             faces,
             blob_ids: [None; 3],
             sets: [Some(base), None, None, None],
@@ -148,6 +152,21 @@ impl<'font> Planner<'font> {
         max_width: Option<f32>,
         interactive: bool,
     ) -> Result<TextLayout, Error> {
+        let result = self.shape_inner(text, size, max_width, interactive);
+        if result.is_err() {
+            // An invalid or expanding font can create a rejected large layout.
+            // Do not keep its buffers for later calls in this planning pass.
+            self.layout = parley::Layout::default();
+        }
+        result
+    }
+    fn shape_inner(
+        &mut self,
+        text: &str,
+        size: f32,
+        max_width: Option<f32>,
+        interactive: bool,
+    ) -> Result<TextLayout, Error> {
         let needed = self.coverage(text)?;
         let mut names = FAMILIES.map(|name| FontFamilyName::Named(name.into()));
         let mut family_count = 1;
@@ -171,8 +190,9 @@ impl<'font> Planner<'font> {
             builder.push_default(&names[..family_count]);
             builder.push_default(StyleProperty::FontSize(size));
             builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
-            let mut planned = builder.build(content);
-            planned.break_all_lines(max_width);
+            builder.build_into(&mut self.layout, content);
+            self.layout.break_all_lines(max_width);
+            let planned = &self.layout;
             let simple = !interactive
                 && paragraph.content.end == text.len()
                 && paragraph.content.start == 0
@@ -236,8 +256,9 @@ impl<'font> Planner<'font> {
                     d.lines.push(Line {
                         start: (paragraph.content.start + range.start) as u32,
                         end: (paragraph.content.start + range.end) as u32,
-                        top: height + m.block_min_coord,
-                        height: m.line_height,
+                        top: height + m.block_min_coord.min(m.content_block_min_coord),
+                        height: m.block_max_coord.max(m.content_block_max_coord)
+                            - m.block_min_coord.min(m.content_block_min_coord),
                         baseline: height + m.baseline,
                         width: if content.is_empty() { 0. } else { m.advance },
                     });
@@ -250,7 +271,7 @@ impl<'font> Planner<'font> {
                         .run()
                         .normalized_coords()
                         .iter()
-                        .any(|&coordinate| coordinate != 0)
+                        .any(|coordinate| coordinate.to_bits() != 0)
                     {
                         return Err(Error::UnsupportedFontFormat);
                     }
@@ -265,26 +286,7 @@ impl<'font> Planner<'font> {
                     let first = glyphs.len();
                     // This API shapes one style over each paragraph, so every
                     // positioned item covers its run's full visual glyph range.
-                    let mut visual = run.run().visual_clusters();
-                    let mut clusters = std::iter::from_fn(|| {
-                        let cluster = visual.next()?;
-                        let mut source = cluster.text_range();
-                        // Parley splits ligatures into logical caret components.
-                        // In RTL the glyph-bearing component is at the highest
-                        // byte offset; canonical glyph clusters still start at
-                        // the first source byte, as HarfBuzz clusters do.
-                        if cluster.is_ligature_start() {
-                            for component in
-                                visual.clone().take_while(|c| c.is_ligature_continuation())
-                            {
-                                let part = component.text_range();
-                                source.start = source.start.min(part.start);
-                                source.end = source.end.max(part.end);
-                            }
-                        }
-                        Some((cluster, source))
-                    })
-                    .flat_map(|(cluster, source)| cluster.glyphs().map(move |_| source.clone()));
+                    let mut clusters = run.run().glyph_source_ranges();
                     for g in run.positioned_glyphs() {
                         let source = clusters.next().ok_or(Error::InvalidFont)?;
                         if content.is_empty() {
@@ -353,7 +355,7 @@ impl<'font> Planner<'font> {
                 // length and avoids an index for e.g. one huge grapheme. Bulk
                 // maps use constant-time source/prefix lookup per destination.
                 let geometry = if segmenter.segment_str(content).count() > 8 {
-                    Some(CursorGeometry::new(&planned).ok_or(Error::InvalidFont)?)
+                    Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
                 } else {
                     None
                 };
@@ -364,14 +366,14 @@ impl<'font> Planner<'font> {
                         .enumerate()
                     {
                         let cursor = geometry.as_ref().map_or_else(
-                            || Cursor::from_byte_index(&planned, byte, affinity),
+                            || Cursor::from_byte_index(planned, byte, affinity),
                             |index| index.cursor(byte, affinity),
                         );
                         if cursor.index() != byte {
                             continue;
                         }
                         let r = geometry.as_ref().map_or_else(
-                            || cursor.geometry(&planned, 1.),
+                            || cursor.geometry(planned, 1.),
                             |index| index.geometry(cursor, 1.),
                         );
                         let bounds = Rect::new(
@@ -478,7 +480,11 @@ fn register_font(
             width: Some(Default::default()),
             style: Some(Default::default()),
             weight: Some(Default::default()),
-            axes: None,
+            // Fontique 0.12 compares a variable weight axis's default directly
+            // to the CSS request, independently of the overridden face weight.
+            // This registry describes an explicit default instance: prevent a
+            // synthesized wght=400 coordinate without changing the font bytes.
+            axes: Some(&[(skrifa::Tag::new(b"wght"), 400.)]),
         }),
     );
     if registered.is_empty() {
@@ -490,6 +496,48 @@ fn register_font(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejected_expanding_output_does_not_contaminate_the_next_paragraph() {
+        let face = FontFace::new(&PRIMARY_BYTES[..]).unwrap();
+        let mut planner = Planner::new(&face).unwrap();
+        planner
+            .shape("first paragraph", 18., Some(40.), true)
+            .unwrap();
+        // Exercise the output guard directly: public TextShaper also limits
+        // source bytes, whereas a font may expand short admitted source.
+        assert!(matches!(
+            planner.shape(&"W".repeat(MAX_GLYPHS + 1), 18., None, false),
+            Err(Error::ResourceLimit)
+        ));
+        let source = "office\n\nnext";
+        let actual = planner.shape(source, 18., Some(60.), true).unwrap();
+        let expected = face
+            .shaper()
+            .shape_interactive(source, 18., Some(60.))
+            .unwrap();
+        assert_eq!(actual.glyphs(), expected.glyphs());
+        assert_eq!(
+            [actual.width, actual.height, actual.baseline],
+            [expected.width, expected.height, expected.baseline]
+        );
+        for byte in source
+            .char_indices()
+            .map(|(byte, _)| byte)
+            .chain([source.len()])
+        {
+            for affinity in [CaretAffinity::Upstream, CaretAffinity::Downstream] {
+                let position = TextPosition {
+                    offset: TextOffset::new(byte).unwrap(),
+                    affinity,
+                };
+                assert_eq!(
+                    actual.caret_bounds(position),
+                    expected.caret_bounds(position)
+                );
+            }
+        }
+    }
     use parley::Cursor;
 
     fn cmap_record(bytes: &[u8]) -> usize {
@@ -625,6 +673,8 @@ mod tests {
                             kind: parley::InlineBoxKind::InFlow,
                             width: 3.125,
                             height: 13.75,
+                            baseline: None,
+                            vertical_align: Default::default(),
                         });
                     }
                 }

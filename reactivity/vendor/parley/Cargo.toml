@@ -10,10 +10,10 @@
 # See Cargo.toml.orig for the original contents.
 
 [package]
-edition = "2021"
+edition = "2024"
 rust-version = "1.88"
 name = "parley"
-version = "0.11.1"
+version = "0.12.0"
 build = false
 exclude = ["/tests"]
 autolib = false
@@ -33,27 +33,29 @@ categories = [
 ]
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/linebender/parley"
+resolver = "2"
 
 [package.metadata.docs.rs]
 all-features = true
 
 [features]
-accesskit = ["dep:accesskit", "word-boundaries"]
-complex-scripts = []
-default = ["system", "word-boundaries"]
-word-boundaries = []
+bytemuck = [
+    "fontique/bytemuck",
+    "parlance/bytemuck",
+    "parley_engine/bytemuck",
+]
+complex-scripts = ["parley_engine/complex-scripts"]
+default = ["system"]
 libm = [
     "fontique/libm",
-    "harfrust/libm",
+    "parley_engine/libm",
     "peniko/libm",
-    "skrifa/libm",
     "dep:core_maths",
 ]
 std = [
     "fontique/std",
-    "harfrust/std",
+    "parley_engine/std",
     "peniko/std",
-    "skrifa/std",
     "parlance/std",
 ]
 system = [
@@ -65,43 +67,20 @@ system = [
 name = "parley"
 path = "src/lib.rs"
 
-[dependencies.accesskit]
-version = "0.24.0"
-optional = true
-
 [dependencies.core_maths]
 version = "0.1.1"
 optional = true
 
 [dependencies.fontique]
-version = "0.11.1"
-default-features = false
-
-[dependencies.harfrust]
 version = "0.12.0"
 default-features = false
 
 [dependencies.hashbrown]
-version = "0.17.0"
+version = "0.17.1"
 features = [
     "default-hasher",
     "raw-entry",
 ]
-default-features = false
-
-[dependencies.icu_normalizer]
-version = "2.1.1"
-features = ["compiled_data"]
-default-features = false
-
-[dependencies.icu_properties]
-version = "2.1.2"
-features = ["compiled_data"]
-default-features = false
-
-[dependencies.icu_segmenter]
-version = "2.1.2"
-features = ["compiled_data"]
 default-features = false
 
 [dependencies.linebender_resource_handle]
@@ -109,20 +88,37 @@ version = "0.1.1"
 default-features = false
 
 [dependencies.parlance]
-version = "0.1.0"
+version = "0.1.1"
 default-features = false
 
-[dependencies.parley_data]
-version = "0.11.1"
-features = ["baked"]
+[dependencies.parley_engine]
+version = "0.12.0"
 default-features = false
 
-[dependencies.skrifa]
-version = "0.44.0"
+[dependencies.smallvec]
+version = "1.16.2"
+
+[dev-dependencies.bytemuck]
+version = "1.25.2"
+default-features = false
+
+[dev-dependencies.icu_properties]
+version = "2.3.0"
+features = ["compiled_data"]
+default-features = false
+
+[dev-dependencies.icu_segmenter]
+version = "2.3.0"
+features = ["compiled_data"]
+default-features = false
+
+[dev-dependencies.parlance]
+version = "0.1.1"
+features = ["bytemuck"]
 default-features = false
 
 [dev-dependencies.peniko]
-version = "0.6.0"
+version = "0.6.1"
 default-features = false
 
 [target.'cfg(not(target_os = "android"))'.dev-dependencies.oxipng]

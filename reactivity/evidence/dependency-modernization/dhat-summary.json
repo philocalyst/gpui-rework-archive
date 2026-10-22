@@ -1,0 +1,426 @@
+{
+  "method": "First actual Parley/Engine/Fontique stack frame; addresses and binary paths removed only for grouping. Inlined frames may combine call sites. Whole-process DHAT totals include mount, render, and edit; no timing comparison.",
+  "profiles": [
+    {
+      "profile": "owner-dc577.json",
+      "profile_sha256": "5e8ba6b9a0d9acac53e8d3d7a5d77ae087d8e814e8a55c1a23943a8f3f05eca3",
+      "command": "/tmp/gpui-dependency-allocation-binaries/dc577564e5/unicode_text_measure 1000",
+      "totals": {
+        "requested_bytes": 12197358,
+        "allocation_blocks": 32777,
+        "peak_live_bytes": 3446152,
+        "peak_live_blocks": 4288,
+        "end_live_bytes": 608,
+        "end_live_blocks": 2
+      },
+      "first_text_stack_frame": {
+        "<alloc::raw_vec::RawVec<parley::layout::data::ClusterData>>::grow_one": {
+          "requested_bytes": 1792000,
+          "allocation_blocks": 6000
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::RunData>>::grow_one": {
+          "requested_bytes": 1408000,
+          "allocation_blocks": 2000
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::LineData>>::grow_one": {
+          "requested_bytes": 832000,
+          "allocation_blocks": 2000
+        },
+        "<parley::layout::line_break::BreakLines<()>>::start_new_line": {
+          "requested_bytes": 384000,
+          "allocation_blocks": 2000
+        },
+        "<parley::builder::RangedBuilder<()>>::build::<&str>": {
+          "requested_bytes": 352000,
+          "allocation_blocks": 2000
+        },
+        "<parley::layout::data::LayoutData<()>>::push_run": {
+          "requested_bytes": 256000,
+          "allocation_blocks": 2000
+        },
+        "parley::shape::shape_item::<()>": {
+          "requested_bytes": 173904,
+          "allocation_blocks": 288
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::LayoutItem>>::grow_one": {
+          "requested_bytes": 128000,
+          "allocation_blocks": 2000
+        },
+        "parley::analysis::analyze_text::<()>": {
+          "requested_bytes": 49440,
+          "allocation_blocks": 1504
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::glyph::Glyph>>::grow_one": {
+          "requested_bytes": 40000,
+          "allocation_blocks": 500
+        },
+        "<parley::lru_cache::LruCache<parley::shape::cache::ShapePlanId, harfrust::hb::ot_shape_plan::hb_ot_shape_plan_t>>::entry::<parley::shape::cache::ShapePlanKey, parley::shape::shape_item<()>::{closure#3}>": {
+          "requested_bytes": 11648,
+          "allocation_blocks": 38
+        },
+        "<parley::lru_cache::LruCache<parley::shape::cache::ShapeDataKey, harfrust::hb::face::ShaperData>>::entry::<parley::shape::cache::ShapeDataKey, parley::shape::shape_item<()>::{closure#0}>": {
+          "requested_bytes": 10720,
+          "allocation_blocks": 10
+        },
+        "<alloc::raw_vec::RawVec<parley::lru_cache::Entry<parley::shape::cache::ShapeDataKey, harfrust::hb::face::ShaperData>>>::grow_one": {
+          "requested_bytes": 3776,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley::lru_cache::Entry<parley::shape::cache::ShapePlanId, harfrust::hb::ot_shape_plan::hb_ot_shape_plan_t>>>::grow_one": {
+          "requested_bytes": 3776,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::collection::query::CachedFamily>>::grow_one": {
+          "requested_bytes": 1472,
+          "allocation_blocks": 2
+        },
+        "<parley::resolve::range::RangedStyleBuilder<()>>::finish": {
+          "requested_bytes": 1152,
+          "allocation_blocks": 4
+        },
+        "<alloc::raw_vec::RawVec<parley::resolve::RangedStyle<()>>>::grow_one": {
+          "requested_bytes": 1088,
+          "allocation_blocks": 2
+        },
+        "<fontique::family::FamilyInfo>::new::<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<fontique::font::FontInfo>>>": {
+          "requested_bytes": 896,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley::lru_cache::Entry<parley::shape::cache::ShapeInstanceId, harfrust::hb::face::ShaperInstance>>>::grow_one": {
+          "requested_bytes": 896,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::font::FontInfo>>::grow_one": {
+          "requested_bytes": 768,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>))>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>), hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 488,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(alloc::sync::Arc<[u8]>, fontique::family_name::FamilyName)>>::reserve_rehash::<hashbrown::map::make_hasher<alloc::sync::Arc<[u8]>, fontique::family_name::FamilyName, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 360,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, fontique::family_name::FamilyName)>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, fontique::family_name::FamilyName, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 296,
+          "allocation_blocks": 2
+        },
+        "<alloc::vec::Vec<(fontique::family::FamilyId, alloc::vec::Vec<fontique::font::FontInfo>)> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<(fontique::family::FamilyId, alloc::vec::Vec<fontique::font::FontInfo>), core::iter::adapters::map::Map<hashbrown::map::IntoIter<fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>)>, <fontique::collection::CommonData>::register_fonts::{closure#0}>>>::from_iter": {
+          "requested_bytes": 256,
+          "allocation_blocks": 2
+        },
+        "<parley::resolve::ResolveContext>::resolve_font_family": {
+          "requested_bytes": 192,
+          "allocation_blocks": 4
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, core::option::Option<fontique::family::FamilyInfo>)>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, core::option::Option<fontique::family::FamilyInfo>, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 168,
+          "allocation_blocks": 2
+        },
+        "<smallvec::SmallVec<[fontique::font::AxisInfo; 1]>>::try_grow": {
+          "requested_bytes": 128,
+          "allocation_blocks": 4
+        },
+        "<fontique::family_name::FamilyNameMap>::get_or_insert": {
+          "requested_bytes": 128,
+          "allocation_blocks": 4
+        },
+        "<alloc::raw_vec::RawVec<parley::analysis::cluster::Char>>::grow_one": {
+          "requested_bytes": 96,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::family::FamilyId>>::grow_one": {
+          "requested_bytes": 64,
+          "allocation_blocks": 2
+        }
+      }
+    },
+    {
+      "profile": "owner-b39a6b.json",
+      "profile_sha256": "a66a9b7d289f953c71cd41aae655418eb27e1a2f77209985ebdddd1775abc0af",
+      "command": "/tmp/gpui-dependency-allocation-binaries/b39a6b79c0/unicode_text_measure 1000",
+      "totals": {
+        "requested_bytes": 13006476,
+        "allocation_blocks": 42281,
+        "peak_live_bytes": 3446152,
+        "peak_live_blocks": 4288,
+        "end_live_bytes": 608,
+        "end_live_blocks": 2
+      },
+      "first_text_stack_frame": {
+        "<parley_engine::shape::shaper::Shaper>::shape_text::<core::iter::sources::from_fn::FromFn<parley::shape::shape_text<()>::{closure#2}>, parley::shape::FontSelector<()>>": {
+          "requested_bytes": 1326000,
+          "allocation_blocks": 6000
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::shape::shaped_text::ShapedRun>>::grow_one": {
+          "requested_bytes": 1152000,
+          "allocation_blocks": 2000
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::LineData>>::grow_one": {
+          "requested_bytes": 896896,
+          "allocation_blocks": 2002
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::RunData>>::grow_one": {
+          "requested_bytes": 640000,
+          "allocation_blocks": 2000
+        },
+        "<parley::builder::RangedBuilder<()>>::build::<&str>": {
+          "requested_bytes": 609422,
+          "allocation_blocks": 2008
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::shape::shaper::FontInstance>>::grow_one": {
+          "requested_bytes": 512000,
+          "allocation_blocks": 2000
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::LineItemData>>::grow_one": {
+          "requested_bytes": 320000,
+          "allocation_blocks": 2000
+        },
+        "parley::layout::style_metrics::resolve_style_metrics::<()>": {
+          "requested_bytes": 288000,
+          "allocation_blocks": 2000
+        },
+        "parley_engine::shape::shaper::shape_segment::<parley::shape::FontSelector<()>>::{closure#2}": {
+          "requested_bytes": 173904,
+          "allocation_blocks": 288
+        },
+        "parley::shape::shape_text::<()>": {
+          "requested_bytes": 128000,
+          "allocation_blocks": 2000
+        },
+        "<alloc::vec::Vec<smallvec::SmallVec<[parlance::tag::FontFeature; 8]>> as alloc::vec::spec_from_iter::SpecFromIter<smallvec::SmallVec<[parlance::tag::FontFeature; 8]>, core::iter::adapters::map::Map<core::slice::iter::Iter<parley::resolve::ResolvedStyle<()>>, parley::shape::shape_text<()>::{closure#1}>>>::from_iter": {
+          "requested_bytes": 112000,
+          "allocation_blocks": 2000
+        },
+        "parley_engine::analysis::analyze_text": {
+          "requested_bytes": 48288,
+          "allocation_blocks": 1504
+        },
+        "<parley::layout::line_break::LineBoxMetrics>::add_style": {
+          "requested_bytes": 16000,
+          "allocation_blocks": 2000
+        },
+        "<parley_engine::lru_cache::LruCache<parley_engine::shape::cache::ShapePlanId, harfrust::hb::ot_shape_plan::hb_ot_shape_plan_t>>::entry::<parley_engine::shape::cache::ShapePlanKey, parley_engine::shape::shaper::shape_segment<parley::shape::FontSelector<()>>::{closure#2}::{closure#2}>": {
+          "requested_bytes": 11648,
+          "allocation_blocks": 38
+        },
+        "<parley_engine::lru_cache::LruCache<parley_engine::shape::cache::ShapeDataKey, harfrust::hb::face::ShaperData>>::entry::<parley_engine::shape::cache::ShapeDataKey, parley_engine::shape::shaper::shape_segment<parley::shape::FontSelector<()>>::{closure#2}::{closure#0}>": {
+          "requested_bytes": 10720,
+          "allocation_blocks": 10
+        },
+        "<parley::layout::line_break::BreakerState as core::clone::Clone>::clone": {
+          "requested_bytes": 4000,
+          "allocation_blocks": 2000
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::lru_cache::Entry<parley_engine::shape::cache::ShapeDataKey, harfrust::hb::face::ShaperData>>>::grow_one": {
+          "requested_bytes": 3776,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::lru_cache::Entry<parley_engine::shape::cache::ShapePlanId, harfrust::hb::ot_shape_plan::hb_ot_shape_plan_t>>>::grow_one": {
+          "requested_bytes": 3712,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::collection::query::CachedFamily>>::grow_one": {
+          "requested_bytes": 1600,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley::resolve::RangedStyle<()>>>::grow_one": {
+          "requested_bytes": 1216,
+          "allocation_blocks": 2
+        },
+        "<fontique::family::FamilyInfo>::new::<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<fontique::font::FontInfo>>>": {
+          "requested_bytes": 816,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::font::FontInfo>>::grow_one": {
+          "requested_bytes": 704,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>))>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>), hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 488,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(alloc::sync::Arc<[u8]>, fontique::family_name::FamilyName)>>::reserve_rehash::<hashbrown::map::make_hasher<alloc::sync::Arc<[u8]>, fontique::family_name::FamilyName, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 360,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, fontique::family_name::FamilyName)>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, fontique::family_name::FamilyName, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 296,
+          "allocation_blocks": 2
+        },
+        "<alloc::vec::Vec<(fontique::family::FamilyId, alloc::vec::Vec<fontique::font::FontInfo>)> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<(fontique::family::FamilyId, alloc::vec::Vec<fontique::font::FontInfo>), core::iter::adapters::map::Map<hashbrown::map::IntoIter<fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>)>, <fontique::collection::CommonData>::register_fonts::{closure#1}>>>::from_iter": {
+          "requested_bytes": 256,
+          "allocation_blocks": 2
+        },
+        "<parley::resolve::ResolveContext>::resolve_font_family": {
+          "requested_bytes": 192,
+          "allocation_blocks": 4
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, core::option::Option<fontique::family::FamilyInfo>)>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, core::option::Option<fontique::family::FamilyInfo>, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 168,
+          "allocation_blocks": 2
+        },
+        "<smallvec::SmallVec<[fontique::font::AxisInfo; 1]>>::try_grow": {
+          "requested_bytes": 128,
+          "allocation_blocks": 4
+        },
+        "<fontique::family_name::FamilyNameMap>::get_or_insert": {
+          "requested_bytes": 128,
+          "allocation_blocks": 4
+        },
+        "<alloc::raw_vec::RawVec<fontique::family::FamilyId>>::grow_one": {
+          "requested_bytes": 64,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::shape::cluster::Char>>::grow_one": {
+          "requested_bytes": 64,
+          "allocation_blocks": 2
+        }
+      }
+    },
+    {
+      "profile": "owner-697c66.json",
+      "profile_sha256": "57eba4550c683fa10266485070c676fa7fb973c978723bc26287887c0746cbce",
+      "command": "/tmp/gpui-dependency-allocation-binaries/697c66c773/unicode_text_measure 1000",
+      "totals": {
+        "requested_bytes": 7145516,
+        "allocation_blocks": 20309,
+        "peak_live_bytes": 3446152,
+        "peak_live_blocks": 4288,
+        "end_live_bytes": 608,
+        "end_live_blocks": 2
+      },
+      "first_text_stack_frame": {
+        "parley_engine::shape::shaper::shape_segment::<parley::shape::FontSelector<()>>::{closure#2}": {
+          "requested_bytes": 173904,
+          "allocation_blocks": 288
+        },
+        "<alloc::vec::Vec<smallvec::SmallVec<[parlance::tag::FontFeature; 8]>> as alloc::vec::spec_from_iter::SpecFromIter<smallvec::SmallVec<[parlance::tag::FontFeature; 8]>, core::iter::adapters::map::Map<core::slice::iter::Iter<parley::resolve::ResolvedStyle<()>>, parley::shape::shape_text<()>::{closure#1}>>>::from_iter": {
+          "requested_bytes": 112000,
+          "allocation_blocks": 2000
+        },
+        "parley_engine::analysis::analyze_text": {
+          "requested_bytes": 48288,
+          "allocation_blocks": 1504
+        },
+        "<parley::layout::line_break::LineBoxMetrics>::add_style": {
+          "requested_bytes": 16000,
+          "allocation_blocks": 2000
+        },
+        "<parley_engine::lru_cache::LruCache<parley_engine::shape::cache::ShapePlanId, harfrust::hb::ot_shape_plan::hb_ot_shape_plan_t>>::entry::<parley_engine::shape::cache::ShapePlanKey, parley_engine::shape::shaper::shape_segment<parley::shape::FontSelector<()>>::{closure#2}::{closure#2}>": {
+          "requested_bytes": 11648,
+          "allocation_blocks": 38
+        },
+        "<parley_engine::lru_cache::LruCache<parley_engine::shape::cache::ShapeDataKey, harfrust::hb::face::ShaperData>>::entry::<parley_engine::shape::cache::ShapeDataKey, parley_engine::shape::shaper::shape_segment<parley::shape::FontSelector<()>>::{closure#2}::{closure#0}>": {
+          "requested_bytes": 10720,
+          "allocation_blocks": 10
+        },
+        "<parley::layout::line_break::BreakerState as core::clone::Clone>::clone": {
+          "requested_bytes": 4000,
+          "allocation_blocks": 2000
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::lru_cache::Entry<parley_engine::shape::cache::ShapeDataKey, harfrust::hb::face::ShaperData>>>::grow_one": {
+          "requested_bytes": 3776,
+          "allocation_blocks": 2
+        },
+        "<parley_engine::shape::shaper::Shaper>::shape_text::<core::iter::sources::from_fn::FromFn<parley::shape::shape_text<()>::{closure#2}>, parley::shape::FontSelector<()>>": {
+          "requested_bytes": 3744,
+          "allocation_blocks": 12
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::lru_cache::Entry<parley_engine::shape::cache::ShapePlanId, harfrust::hb::ot_shape_plan::hb_ot_shape_plan_t>>>::grow_one": {
+          "requested_bytes": 3712,
+          "allocation_blocks": 2
+        },
+        "<parley::builder::RangedBuilder<()>>::build_into::<&str>": {
+          "requested_bytes": 2030,
+          "allocation_blocks": 10
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::LineData>>::grow_one": {
+          "requested_bytes": 1792,
+          "allocation_blocks": 4
+        },
+        "<alloc::raw_vec::RawVec<fontique::collection::query::CachedFamily>>::grow_one": {
+          "requested_bytes": 1600,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley::resolve::RangedStyle<()>>>::grow_one": {
+          "requested_bytes": 1216,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::shape::shaped_text::ShapedRun>>::grow_one": {
+          "requested_bytes": 1152,
+          "allocation_blocks": 2
+        },
+        "<fontique::family::FamilyInfo>::new::<core::iter::adapters::cloned::Cloned<core::slice::iter::Iter<fontique::font::FontInfo>>>": {
+          "requested_bytes": 816,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::font::FontInfo>>::grow_one": {
+          "requested_bytes": 704,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::RunData>>::grow_one": {
+          "requested_bytes": 640,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::shape::shaper::FontInstance>>::grow_one": {
+          "requested_bytes": 512,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>))>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>), hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 488,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(alloc::sync::Arc<[u8]>, fontique::family_name::FamilyName)>>::reserve_rehash::<hashbrown::map::make_hasher<alloc::sync::Arc<[u8]>, fontique::family_name::FamilyName, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 360,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley::layout::data::LineItemData>>::grow_one": {
+          "requested_bytes": 320,
+          "allocation_blocks": 2
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, fontique::family_name::FamilyName)>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, fontique::family_name::FamilyName, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 296,
+          "allocation_blocks": 2
+        },
+        "parley::layout::style_metrics::resolve_style_metrics::<()>": {
+          "requested_bytes": 288,
+          "allocation_blocks": 2
+        },
+        "<alloc::vec::Vec<(fontique::family::FamilyId, alloc::vec::Vec<fontique::font::FontInfo>)> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<(fontique::family::FamilyId, alloc::vec::Vec<fontique::font::FontInfo>), core::iter::adapters::map::Map<hashbrown::map::IntoIter<fontique::family::FamilyId, (fontique::family_name::FamilyName, alloc::vec::Vec<fontique::font::FontInfo>)>, <fontique::collection::CommonData>::register_fonts::{closure#1}>>>::from_iter": {
+          "requested_bytes": 256,
+          "allocation_blocks": 2
+        },
+        "<parley::resolve::ResolveContext>::resolve_font_family": {
+          "requested_bytes": 192,
+          "allocation_blocks": 4
+        },
+        "<hashbrown::raw::RawTable<(fontique::family::FamilyId, core::option::Option<fontique::family::FamilyInfo>)>>::reserve_rehash::<hashbrown::map::make_hasher<fontique::family::FamilyId, core::option::Option<fontique::family::FamilyInfo>, hashbrown::hasher::DefaultHashBuilder>::{closure#0}>": {
+          "requested_bytes": 168,
+          "allocation_blocks": 2
+        },
+        "<smallvec::SmallVec<[fontique::font::AxisInfo; 1]>>::try_grow": {
+          "requested_bytes": 128,
+          "allocation_blocks": 4
+        },
+        "<fontique::family_name::FamilyNameMap>::get_or_insert": {
+          "requested_bytes": 128,
+          "allocation_blocks": 4
+        },
+        "parley::shape::shape_text::<()>": {
+          "requested_bytes": 128,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<fontique::family::FamilyId>>::grow_one": {
+          "requested_bytes": 64,
+          "allocation_blocks": 2
+        },
+        "<alloc::raw_vec::RawVec<parley_engine::shape::cluster::Char>>::grow_one": {
+          "requested_bytes": 64,
+          "allocation_blocks": 2
+        }
+      }
+    }
+  ]
+}

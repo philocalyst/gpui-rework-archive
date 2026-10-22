@@ -1,0 +1,70 @@
+[
+  {
+    "variant": "baseline",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "--bin",
+      "ordinary",
+      "--timings",
+      "--message-format=json"
+    ],
+    "clean_command": [
+      "cargo",
+      "clean",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "-p",
+      "gpui_gpu"
+    ],
+    "source_before_and_after": {
+      "reactivity/crates/gpu/Cargo.toml": "3abb2614fa2022fef34fc18bc1e083017cafa0699d45636e5bf989cb12d9d6c8",
+      "reactivity/crates/gpu/src/renderer.rs": "e8e4952234d622f1d4cb4dff2c28d02269507ab9fa1b1a49570b990ce95ed0bf",
+      "build.rs": null,
+      "shader.rs": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd"
+    },
+    "exit": 0,
+    "wall_ns": 11369645622,
+    "ordinary_sha256": "4cdc1c74227d58326352693b46e181157efbcb11c08c4e2361847b3909f7eea9"
+  },
+  {
+    "variant": "artifact",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "--bin",
+      "ordinary",
+      "--timings",
+      "--message-format=json"
+    ],
+    "clean_command": [
+      "cargo",
+      "clean",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "-p",
+      "gpui_gpu"
+    ],
+    "source_before_and_after": {
+      "reactivity/crates/gpu/Cargo.toml": "d296f9cdb9a22b00f5fcc39a53891ebb064f82a3a1bed80219271912ac763278",
+      "reactivity/crates/gpu/src/renderer.rs": "89140fde17e2c09db27567e8104e25f557ebe06b58c422d15066cf6eca721502",
+      "build.rs": "76ea0e291b499d3f62e3837b528dc60e65645863b8b32a581c260246c7ff4635",
+      "shader.rs": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd"
+    },
+    "exit": 0,
+    "wall_ns": 9939236257,
+    "ordinary_sha256": "18d15728d4c704730135f93443e414c1f4b9e22ec3f9e4342dcb1e6b874ed97f"
+  }
+]

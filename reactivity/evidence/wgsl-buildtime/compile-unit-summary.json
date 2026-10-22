@@ -1,0 +1,134 @@
+{
+  "baseline": [
+    {
+      "i": 30,
+      "name": "gpui_gpu",
+      "version": "0.1.0",
+      "mode": "todo",
+      "target": "",
+      "features": [
+        "default",
+        "simd"
+      ],
+      "start": 0.81,
+      "duration": 8.6,
+      "unblocked_units": [
+        28
+      ],
+      "unblocked_rmeta_units": [],
+      "sections": [
+        [
+          "frontend",
+          {
+            "start": 0.0,
+            "end": 2.31
+          }
+        ],
+        [
+          "codegen",
+          {
+            "start": 2.31,
+            "end": 8.6
+          }
+        ]
+      ]
+    },
+    {
+      "i": 28,
+      "name": "gpui-wgsl-control",
+      "version": "0.0.0",
+      "mode": "todo",
+      "target": " ordinary \"bin\"",
+      "features": [],
+      "start": 9.41,
+      "duration": 1.93,
+      "unblocked_units": [],
+      "unblocked_rmeta_units": [],
+      "sections": null
+    }
+  ],
+  "artifact": [
+    {
+      "i": 40,
+      "name": "gpui_gpu",
+      "version": "0.1.0",
+      "mode": "todo",
+      "target": " build-script",
+      "features": [
+        "default",
+        "simd"
+      ],
+      "start": 0.15,
+      "duration": 0.99,
+      "unblocked_units": [
+        41
+      ],
+      "unblocked_rmeta_units": [],
+      "sections": null
+    },
+    {
+      "i": 41,
+      "name": "gpui_gpu",
+      "version": "0.1.0",
+      "mode": "run-custom-build",
+      "target": " build-script (run)",
+      "features": [
+        "default",
+        "simd"
+      ],
+      "start": 1.14,
+      "duration": 0.03,
+      "unblocked_units": [
+        39
+      ],
+      "unblocked_rmeta_units": [],
+      "sections": null
+    },
+    {
+      "i": 39,
+      "name": "gpui_gpu",
+      "version": "0.1.0",
+      "mode": "todo",
+      "target": "",
+      "features": [
+        "default",
+        "simd"
+      ],
+      "start": 1.16,
+      "duration": 8.14,
+      "unblocked_units": [
+        37
+      ],
+      "unblocked_rmeta_units": [],
+      "sections": [
+        [
+          "frontend",
+          {
+            "start": 0.0,
+            "end": 1.89
+          }
+        ],
+        [
+          "codegen",
+          {
+            "start": 1.89,
+            "end": 8.14
+          }
+        ]
+      ]
+    },
+    {
+      "i": 37,
+      "name": "gpui-wgsl-control",
+      "version": "0.0.0",
+      "mode": "todo",
+      "target": " ordinary \"bin\"",
+      "features": [],
+      "start": 9.3,
+      "duration": 0.61,
+      "unblocked_units": [],
+      "unblocked_rmeta_units": [],
+      "sections": null
+    }
+  ]
+}

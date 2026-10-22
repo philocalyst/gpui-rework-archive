@@ -1,0 +1,1314 @@
+{
+  "initial_baseline_fresh_release_wall_from_cargo": "1m56s",
+  "initial_candidate_from_seeded_original_cache_wall_from_cargo": "19.50s",
+  "initial_build_walls_not_directly_comparable": true,
+  "new_host_dependency_or_build_artifacts": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#foldhash@0.2.0",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "foldhash",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/foldhash-0.2.0/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libfoldhash-11dcb39ac4fc098e.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libfoldhash-11dcb39ac4fc098e.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#hashbrown@0.17.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashbrown-0.17.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "hashbrown",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashbrown-0.17.1/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default-hasher",
+        "inline-more"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libhashbrown-418b3a222f59019f.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libhashbrown-418b3a222f59019f.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#equivalent@1.0.3",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/equivalent-1.0.3/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "equivalent",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/equivalent-1.0.3/src/lib.rs",
+        "edition": "2015",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libequivalent-504b80678558a69e.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libequivalent-504b80678558a69e.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#libm@0.2.16",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libm-0.2.16/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "libm",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libm-0.2.16/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "arch",
+        "default"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/liblibm-c5a767913affc224.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/liblibm-c5a767913affc224.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#indexmap@2.14.2",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/indexmap-2.14.2/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "indexmap",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/indexmap-2.14.2/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libindexmap-025ec0293af35fea.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libindexmap-025ec0293af35fea.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.21/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "thiserror",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.21/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libthiserror-360723e0f3a677e3.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libthiserror-360723e0f3a677e3.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "num_traits",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-traits-0.2.19/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "libm"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libnum_traits-fe5c4f35f4727e12.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libnum_traits-fe5c4f35f4727e12.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/naga-30.0.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "custom-build"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "build-script-build",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/naga-30.0.1/build.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "wgsl-in",
+        "wgsl-out"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/build/naga-be652110a9996c54/build-script-build"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#unicode-width@0.2.2",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-width-0.2.2/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "unicode_width",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-width-0.2.2/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "cjk",
+        "default"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libunicode_width-cca3ec58df81f959.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libunicode_width-cca3ec58df81f959.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.5",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "cfg_if",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cfg-if-1.0.5/src/lib.rs",
+        "edition": "2018",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libcfg_if-6f0d32411a9cb6de.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libcfg_if-6f0d32411a9cb6de.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#bit-vec@0.9.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bit-vec-0.9.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "bit_vec",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bit-vec-0.9.1/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#rustc-hash@1.1.0",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustc-hash-1.1.0/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "rustc_hash",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustc-hash-1.1.0/src/lib.rs",
+        "edition": "2015",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/librustc_hash-d32b5f284953c233.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/librustc_hash-d32b5f284953c233.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#naga-types@30.0.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/naga-types-30.0.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "naga_types",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/naga-types-30.0.1/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga_types-0ac1798a985e7738.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga_types-0ac1798a985e7738.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#bit-set@0.10.0",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bit-set-0.10.0/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "bit_set",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bit-set-0.10.0/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_set-1d4a04bdfefd859a.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_set-1d4a04bdfefd859a.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#codespan-reporting@0.13.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/codespan-reporting-0.13.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "codespan_reporting",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/codespan-reporting-0.13.1/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libcodespan_reporting-3b174f915e627651.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libcodespan_reporting-3b174f915e627651.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#log@0.4.34",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.34/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "log",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.34/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/liblog-7ebb8c9eb9c8faa5.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/liblog-7ebb8c9eb9c8faa5.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#once_cell@1.21.4",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/once_cell-1.21.4/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "once_cell",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/once_cell-1.21.4/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "alloc",
+        "race"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libonce_cell-838e81c8a3f24b32.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libonce_cell-838e81c8a3f24b32.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#arrayvec@0.7.8",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "arrayvec",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arrayvec-0.7.8/src/lib.rs",
+        "edition": "2018",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libarrayvec-2d96ee14effbddf6.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libarrayvec-2d96ee14effbddf6.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#bitflags@2.13.2",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "bitflags",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bitflags-2.13.2/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libbitflags-18dc3c0a146bf0f7.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libbitflags-18dc3c0a146bf0f7.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.8.63",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.8.63/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "zerocopy",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.8.63/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "derive",
+        "simd",
+        "zerocopy-derive"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libzerocopy-4fd63501e8c2d004.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libzerocopy-4fd63501e8c2d004.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#half@2.7.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-2.7.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "half",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/half-2.7.1/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "alloc",
+        "default",
+        "num-traits",
+        "std"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libhalf-9035fcde36b72199.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libhalf-9035fcde36b72199.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#glam@0.30.10",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/glam-0.30.10/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "glam",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/glam-0.30.10/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "std"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libglam-8e40648c565d633e.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libglam-8e40648c565d633e.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/naga-30.0.1/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "naga",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/naga-30.0.1/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "wgsl-in",
+        "wgsl-out"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga-1001b44ffe9d3ea9.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga-1001b44ffe9d3ea9.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs@0.1.0-beta.6",
+      "manifest_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wgsl-rs-0.1.0-beta.6/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "wgsl_rs",
+        "src_path": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wgsl-rs-0.1.0-beta.6/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "validation"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libwgsl_rs-6df8f3f39b8dffb2.rlib",
+        "/tmp/gpui-wgsl-artifact-target/release/deps/libwgsl_rs-6df8f3f39b8dffb2.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  ],
+  "host_dependency_artifact_files": [
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/build/naga-be652110a9996c54/build-script-build",
+      "bytes": 517584,
+      "sha256": "ab9293449e7ca6e210c9ccd04284ca2052acb6a2224043e3008db7f22e3d85ba"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libarrayvec-2d96ee14effbddf6.rlib",
+      "bytes": 239172,
+      "sha256": "25ca20b32241aa7d59fc5542e68b902fe017b988031f51063e76e0bbfe1b907b"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libarrayvec-2d96ee14effbddf6.rmeta",
+      "bytes": 236119,
+      "sha256": "99542bc5d8f07280e311396bcccb89095bcad1ed1e484859a150f173c066b153"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_set-1d4a04bdfefd859a.rlib",
+      "bytes": 100362,
+      "sha256": "a3dc871881ce50b3a5b33878b7fa625fd519904c6107a72b92ef9e138a3a45b2"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_set-1d4a04bdfefd859a.rmeta",
+      "bytes": 97461,
+      "sha256": "9a91e6990546c339510c27fca913e4e533d154cb82bc6ad4fd2a8dd5adefd652"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rlib",
+      "bytes": 231382,
+      "sha256": "c56197d547684a763ca25090f806c8c9f3c818792facf33068bc9840e8f2f861"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rmeta",
+      "bytes": 194438,
+      "sha256": "1ad58fca19a49767383dfaa5f5a7f7a0152ad4e018ee6c569885b86947dad547"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libbitflags-18dc3c0a146bf0f7.rlib",
+      "bytes": 282794,
+      "sha256": "44e40a1afd5bc448896c51060b8ca2442898a160d4d7de18a70abbe5fa223b79"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libbitflags-18dc3c0a146bf0f7.rmeta",
+      "bytes": 220186,
+      "sha256": "f144857be7a4985814cd109b33444c121d3eb56adb0f0a4e8ba5817c70397742"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libcfg_if-6f0d32411a9cb6de.rlib",
+      "bytes": 8050,
+      "sha256": "01db47a55324de1f5af2b74e6945750834824f8e6778edc865a567af04c39c04"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libcfg_if-6f0d32411a9cb6de.rmeta",
+      "bytes": 5837,
+      "sha256": "7478af1974c3628de0036092a7363b46e3cf4b0dea75419ddf736466df47da84"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libcodespan_reporting-3b174f915e627651.rlib",
+      "bytes": 825330,
+      "sha256": "13543a8bf05a78404c0b86ef8dd5d324667013f992cd15d729b68533e4270cd5"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libcodespan_reporting-3b174f915e627651.rmeta",
+      "bytes": 267389,
+      "sha256": "d767f7054c27e644ec490702618d3e832abd10e365627d80c8c963a2cc302242"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libequivalent-504b80678558a69e.rlib",
+      "bytes": 10690,
+      "sha256": "0edf73360a6f086dab828841e962b0b59b58dcefcf0635b58575bf891cfa4923"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libequivalent-504b80678558a69e.rmeta",
+      "bytes": 8450,
+      "sha256": "55eaa03a01dda89c3cd9f612eb7dc556a50a150278a5e6b7b6f56525248e5c3a"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libfoldhash-11dcb39ac4fc098e.rlib",
+      "bytes": 106974,
+      "sha256": "2e4ae1bc023445f505b56651d9bcfbcb554499ae35edb6386ef4543a1c8ec35f"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libfoldhash-11dcb39ac4fc098e.rmeta",
+      "bytes": 85103,
+      "sha256": "c3f27ded6bff62eaf93a8ea8f26adb8866303d21dce5f17f9e356320d03eade5"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libglam-8e40648c565d633e.rlib",
+      "bytes": 18798676,
+      "sha256": "2588d54c93c0b2dbb7efcff255b90bf2481753070edfdcd0dc99edda724308c8"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libglam-8e40648c565d633e.rmeta",
+      "bytes": 18470479,
+      "sha256": "600b68553f2a58cff45ec5d4f56150e7ec031e719252029063138b98d0c4c165"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libhalf-9035fcde36b72199.rlib",
+      "bytes": 922578,
+      "sha256": "f83b086504a5a97440124cd2930fca3bf79e5d3290a62976c0117aa4b15d0f7c"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libhalf-9035fcde36b72199.rmeta",
+      "bytes": 722540,
+      "sha256": "f4b7c3a3ebc2090c7347a2d1051c03c776a4f11b8b4d28f3ee1be5dd4b8d245c"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libhashbrown-418b3a222f59019f.rlib",
+      "bytes": 1239728,
+      "sha256": "88caf3c63cb2ff9ac1eb1464aac1f5ff70e7aff4ba8e96e278337c0ae79cbc77"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libhashbrown-418b3a222f59019f.rmeta",
+      "bytes": 1219206,
+      "sha256": "e12c75905d624696f7c689d60bf48da6428b1ca7360fd5185338f50ce3fbf138"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libindexmap-025ec0293af35fea.rlib",
+      "bytes": 1260312,
+      "sha256": "1120dfa9fc285ac16d45dde56e190e7624ec075647da36d2506ffa7fb741b442"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libindexmap-025ec0293af35fea.rmeta",
+      "bytes": 1253663,
+      "sha256": "04a15608db807b1c5409aeb4716d1eb18c1a809bef17970b9f7280f7aee3c9a7"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/liblibm-c5a767913affc224.rlib",
+      "bytes": 1980310,
+      "sha256": "c43a2f864d0f962b7f6df9ae5110f413d5d5681e29ca798d706fb22b38d18761"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/liblibm-c5a767913affc224.rmeta",
+      "bytes": 1079105,
+      "sha256": "2c6a7e4c95e38949b923d1b03221a3e14306c76dc9e5017214470d2a5f5b71aa"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/liblog-7ebb8c9eb9c8faa5.rlib",
+      "bytes": 239936,
+      "sha256": "077bd4a5d37259bd5e4e074949182cba08cb2ad90c3e996f88b12b57fe399d34"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/liblog-7ebb8c9eb9c8faa5.rmeta",
+      "bytes": 189378,
+      "sha256": "fa3ad2320e6595633744430b3f42ed2f52d200631a5737252afcb0a68e00ef4c"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga-1001b44ffe9d3ea9.rlib",
+      "bytes": 24422142,
+      "sha256": "5729de833382480995fbb69aeffbcb36a066da670cfb36cac8d84482e72b1f7f"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga-1001b44ffe9d3ea9.rmeta",
+      "bytes": 7505098,
+      "sha256": "a942132aa4f4b512c2fb523472c049a5dccb2592af0ffa367ba38977b88e5f40"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga_types-0ac1798a985e7738.rlib",
+      "bytes": 149944,
+      "sha256": "9c1718bbb8b349c2455581d1ae4aaaf41c05de8ecebe4f9209c9985fae81e789"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libnaga_types-0ac1798a985e7738.rmeta",
+      "bytes": 117104,
+      "sha256": "e9dd6f268af2e33278bb65c4e3db8f8740b7e9c073fbcf19acdf8f65562aab90"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libnum_traits-fe5c4f35f4727e12.rlib",
+      "bytes": 1828870,
+      "sha256": "f13abc79cb8bfa5dc6a85f1eab8337a8962d0adc294eef1e48b677add5e79367"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libnum_traits-fe5c4f35f4727e12.rmeta",
+      "bytes": 1772355,
+      "sha256": "e90bc64d79e32e6aacfdf9fa51d68c28b30a3957a9ccbc977276c3c1cd958056"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libonce_cell-838e81c8a3f24b32.rlib",
+      "bytes": 124448,
+      "sha256": "db44348fe2d61c9344d0d9ca3fbf23939fe5ec9c8438cc122fc2e64d941825ed"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libonce_cell-838e81c8a3f24b32.rmeta",
+      "bytes": 119112,
+      "sha256": "8d353f1b632c4c54bfb1c5170bf3a994822ad336417212bcc473d8db0f18c11b"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/librustc_hash-d32b5f284953c233.rlib",
+      "bytes": 14850,
+      "sha256": "acad63f2f5294e8056561f9a9f0b646668a3968d83ab597d9b18226962af897b"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/librustc_hash-d32b5f284953c233.rmeta",
+      "bytes": 12611,
+      "sha256": "90a7a5e47a4a2d762f951e7074fabc7334646f016226aad002dead63cb232b6a"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libthiserror-360723e0f3a677e3.rlib",
+      "bytes": 32674,
+      "sha256": "5e0dcfdee34af327022dae18153ced263e70164c81a66a5fc77d60d6d0bf4cfa"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libthiserror-360723e0f3a677e3.rmeta",
+      "bytes": 29016,
+      "sha256": "a562fc99895c515c3f6c541bac70b548863e2ce0639fc404ffb5b91e8aa3ae5c"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libunicode_width-cca3ec58df81f959.rlib",
+      "bytes": 891026,
+      "sha256": "115578e8cf2af1a82e3666133e4fc5ec6c0c991d4581698cf0bc210dab54e61e"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libunicode_width-cca3ec58df81f959.rmeta",
+      "bytes": 855012,
+      "sha256": "a1a5950f94aab6b35868b0abd0be102800bccc7acecb7a0e7f2796d503103dcf"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libwgsl_rs-6df8f3f39b8dffb2.rlib",
+      "bytes": 10378358,
+      "sha256": "ee15337e4add5d93f4f7a49a7746b63cb5f252c229939da0c92282c11815d5c9"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libwgsl_rs-6df8f3f39b8dffb2.rmeta",
+      "bytes": 4484578,
+      "sha256": "c152635898258b18e9a9fb26e84a2a69acda615a42da95228b7c26553599c7bf"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libzerocopy-4fd63501e8c2d004.rlib",
+      "bytes": 14709690,
+      "sha256": "ca7539a72ea21c06f2a89066ed7bad8f7bc4b8f8e07260baef35799c05d0df3b"
+    },
+    {
+      "path": "/tmp/gpui-wgsl-artifact-target/release/deps/libzerocopy-4fd63501e8c2d004.rmeta",
+      "bytes": 14542079,
+      "sha256": "d8bacddb47413a91a9a4d950435dd663e80a71d4a067df290b532552e5aa5670"
+    }
+  ],
+  "host_dependency_artifact_bytes_sum_including_rlib_and_rmeta": 132802199,
+  "ordinary_host_buildscript": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///root/gpui-wgsl-buildtime/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "manifest_path": "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/build.rs",
+      "edition": "2024",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "default",
+      "simd"
+    ],
+    "filenames": [
+      "/tmp/gpui-wgsl-artifact-target/release/build/gpui_gpu-8b2f70d380f5a1fe/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "ordinary_host_buildscript_file_bytes": 8249856,
+  "ordinary_host_buildscript_sha256": "5d2e2ae4e74574573ef73c90c1f65ab66d4fa46d15173930e590bf5d6b2168c8",
+  "warm_dependency_pair": [
+    {
+      "variant": "baseline",
+      "command": [
+        "cargo",
+        "build",
+        "--offline",
+        "--release",
+        "--manifest-path",
+        "/tmp/gpui-wgsl-control/Cargo.toml",
+        "--bin",
+        "ordinary",
+        "--timings",
+        "--message-format=json"
+      ],
+      "clean_command": [
+        "cargo",
+        "clean",
+        "--offline",
+        "--release",
+        "--manifest-path",
+        "/tmp/gpui-wgsl-control/Cargo.toml",
+        "-p",
+        "gpui_gpu"
+      ],
+      "source_before_and_after": {
+        "reactivity/crates/gpu/Cargo.toml": "3abb2614fa2022fef34fc18bc1e083017cafa0699d45636e5bf989cb12d9d6c8",
+        "reactivity/crates/gpu/src/renderer.rs": "e8e4952234d622f1d4cb4dff2c28d02269507ab9fa1b1a49570b990ce95ed0bf",
+        "build.rs": null,
+        "shader.rs": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd"
+      },
+      "exit": 0,
+      "wall_ns": 11369645622,
+      "ordinary_sha256": "4cdc1c74227d58326352693b46e181157efbcb11c08c4e2361847b3909f7eea9"
+    },
+    {
+      "variant": "artifact",
+      "command": [
+        "cargo",
+        "build",
+        "--offline",
+        "--release",
+        "--manifest-path",
+        "/tmp/gpui-wgsl-control/Cargo.toml",
+        "--bin",
+        "ordinary",
+        "--timings",
+        "--message-format=json"
+      ],
+      "clean_command": [
+        "cargo",
+        "clean",
+        "--offline",
+        "--release",
+        "--manifest-path",
+        "/tmp/gpui-wgsl-control/Cargo.toml",
+        "-p",
+        "gpui_gpu"
+      ],
+      "source_before_and_after": {
+        "reactivity/crates/gpu/Cargo.toml": "d296f9cdb9a22b00f5fcc39a53891ebb064f82a3a1bed80219271912ac763278",
+        "reactivity/crates/gpu/src/renderer.rs": "89140fde17e2c09db27567e8104e25f557ebe06b58c422d15066cf6eca721502",
+        "build.rs": "76ea0e291b499d3f62e3837b528dc60e65645863b8b32a581c260246c7ff4635",
+        "shader.rs": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd"
+      },
+      "exit": 0,
+      "wall_ns": 9939236257,
+      "ordinary_sha256": "18d15728d4c704730135f93443e414c1f4b9e22ec3f9e4342dcb1e6b874ed97f"
+    }
+  ],
+  "unit_timings": {
+    "baseline": [
+      {
+        "i": 30,
+        "name": "gpui_gpu",
+        "version": "0.1.0",
+        "mode": "todo",
+        "target": "",
+        "features": [
+          "default",
+          "simd"
+        ],
+        "start": 0.81,
+        "duration": 8.6,
+        "unblocked_units": [
+          28
+        ],
+        "unblocked_rmeta_units": [],
+        "sections": [
+          [
+            "frontend",
+            {
+              "start": 0.0,
+              "end": 2.31
+            }
+          ],
+          [
+            "codegen",
+            {
+              "start": 2.31,
+              "end": 8.6
+            }
+          ]
+        ]
+      },
+      {
+        "i": 28,
+        "name": "gpui-wgsl-control",
+        "version": "0.0.0",
+        "mode": "todo",
+        "target": " ordinary \"bin\"",
+        "features": [],
+        "start": 9.41,
+        "duration": 1.93,
+        "unblocked_units": [],
+        "unblocked_rmeta_units": [],
+        "sections": null
+      }
+    ],
+    "artifact": [
+      {
+        "i": 40,
+        "name": "gpui_gpu",
+        "version": "0.1.0",
+        "mode": "todo",
+        "target": " build-script",
+        "features": [
+          "default",
+          "simd"
+        ],
+        "start": 0.15,
+        "duration": 0.99,
+        "unblocked_units": [
+          41
+        ],
+        "unblocked_rmeta_units": [],
+        "sections": null
+      },
+      {
+        "i": 41,
+        "name": "gpui_gpu",
+        "version": "0.1.0",
+        "mode": "run-custom-build",
+        "target": " build-script (run)",
+        "features": [
+          "default",
+          "simd"
+        ],
+        "start": 1.14,
+        "duration": 0.03,
+        "unblocked_units": [
+          39
+        ],
+        "unblocked_rmeta_units": [],
+        "sections": null
+      },
+      {
+        "i": 39,
+        "name": "gpui_gpu",
+        "version": "0.1.0",
+        "mode": "todo",
+        "target": "",
+        "features": [
+          "default",
+          "simd"
+        ],
+        "start": 1.16,
+        "duration": 8.14,
+        "unblocked_units": [
+          37
+        ],
+        "unblocked_rmeta_units": [],
+        "sections": [
+          [
+            "frontend",
+            {
+              "start": 0.0,
+              "end": 1.89
+            }
+          ],
+          [
+            "codegen",
+            {
+              "start": 1.89,
+              "end": 8.14
+            }
+          ]
+        ]
+      },
+      {
+        "i": 37,
+        "name": "gpui-wgsl-control",
+        "version": "0.0.0",
+        "mode": "todo",
+        "target": " ordinary \"bin\"",
+        "features": [],
+        "start": 9.3,
+        "duration": 0.61,
+        "unblocked_units": [],
+        "unblocked_rmeta_units": [],
+        "sections": null
+      }
+    ]
+  },
+  "scope": "One crate-only clean rebuild pair with dependencies cached, two Cargo jobs, original then candidate. Both reproduce frozen executable hashes. Not a general compile-speed or cold-build claim."
+}

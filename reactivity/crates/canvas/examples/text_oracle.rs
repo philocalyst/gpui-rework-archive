@@ -1,4 +1,5 @@
-//! Exact full-word-analysis vs rendering-only feature oracle output.
+//! Structured glyph/source/caret oracle output. Historical Parley 0.11 profiles
+//! compared this output with and without the old word-analysis feature.
 use gpui_canvas::{CaretAffinity, FontFace, TextOffset, TextPosition};
 
 fn main() {

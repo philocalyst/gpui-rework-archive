@@ -250,8 +250,9 @@ pub(crate) struct Raster {
 }
 
 /// A scoped parser over immutable font bytes, reusable across measurement and
-/// painting. It owns parsed shaping tables, borrows the backing, and releases all
-/// table allocations on drop. Returned layouts do not borrow this parser.
+/// painting. It owns parsed shaping tables and reusable paragraph scratch,
+/// borrows the backing, and releases both on drop. Returned layouts do not
+/// borrow this parser.
 ///
 /// This separates read-only shaping from a service's mutable glyph cache without
 /// a self reference, permanent table cache or shared mutable lock. Each returned

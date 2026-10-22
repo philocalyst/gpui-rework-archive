@@ -1,0 +1,117 @@
+{
+  "source_commit": "8a157b3b47",
+  "artifacts": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///root/gpui-wgsl-buildtime/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_gpu",
+        "src_path": "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-wgsl-baseline-target/release/deps/libgpui_gpu-0cbf8678c0e8d8ff.rlib",
+        "/tmp/gpui-wgsl-baseline-target/release/deps/libgpui_gpu-0cbf8678c0e8d8ff.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-wgsl-control#0.0.0",
+      "manifest_path": "/tmp/gpui-wgsl-control/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "generation",
+        "src_path": "/tmp/gpui-wgsl-control/src/bin/generation.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-baseline-target/release/generation"
+      ],
+      "executable": "/tmp/gpui-wgsl-baseline-target/release/generation",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-wgsl-control#0.0.0",
+      "manifest_path": "/tmp/gpui-wgsl-control/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ordinary",
+        "src_path": "/tmp/gpui-wgsl-control/src/bin/ordinary.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-wgsl-baseline-target/release/ordinary"
+      ],
+      "executable": "/tmp/gpui-wgsl-baseline-target/release/ordinary",
+      "fresh": false
+    }
+  ],
+  "artifact_sha256": {
+    "/tmp/gpui-wgsl-baseline-target/release/deps/libgpui_gpu-0cbf8678c0e8d8ff.rlib": "504b14b1be2758f2e3828b48c910db7ce7b8cb84d4adfaab05942016c3f5f9a8",
+    "/tmp/gpui-wgsl-baseline-target/release/deps/libgpui_gpu-0cbf8678c0e8d8ff.rmeta": "aaaaab789d680d5f088a08cd7691f22fdc177a5d2c424b943184e575aa082fad",
+    "/tmp/gpui-wgsl-baseline-target/release/generation": "8e7d9edf14c78fba89282524c32ffc6b9ca4ff9c01338b0ddc569dccfb1d2da3",
+    "/tmp/gpui-wgsl-baseline-target/release/ordinary": "4cdc1c74227d58326352693b46e181157efbcb11c08c4e2361847b3909f7eea9"
+  },
+  "driver_sha256": {
+    "/tmp/gpui-wgsl-control/src/bin/generation.rs": "0f5602a3ca315837a12b964d7213bce0e139a0ba96be9891d3148f55eb28298b",
+    "/tmp/gpui-wgsl-control/src/bin/ordinary.rs": "d6e1b63cdce71d8bed5bdde0e00ec30aca8a13902bbc642c77c290ff0c913c8d"
+  },
+  "environment": {},
+  "ordinary_size": "/tmp/gpui-wgsl-baseline-target/release/ordinary  :\nsection                size      addr\n.interp                  83       736\n.note.ABI-tag            32       820\n.dynsym                2664       856\n.gnu.version            222      3520\n.gnu.version_r          384      3744\n.gnu.hash                28      4128\n.dynstr                1372      4156\n.rela.dyn            239688      5528\n.rela.plt                48    245216\n.rodata              507120    245376\n.gcc_except_table    285376    752496\n.eh_frame_hdr         62036   1037872\n.eh_frame            438100   1099912\n.text               4183223   1542112\n.init                    27   5725336\n.fini                    13   5725364\n.plt                     48   5725392\n.tdata                   32   5729536\n.tbss                  3240   5729568\n.fini_array               8   5729568\n.init_array              16   5729576\n.data.rel.ro         182936   5729592\n.dynamic                480   5912528\n.got                  13176   5913008\n.got.plt                 40   5926184\n.relro_padding          688   5926224\n.tm_clone_table           0   5930320\n.data                  2728   5930320\n.bss                    356   5933048\n.comment                157         0\nTotal               5924321\n\n\n"
+}

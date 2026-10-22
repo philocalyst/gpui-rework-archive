@@ -17,8 +17,9 @@ struct Entry {
 /// Transient lookup over one immutably borrowed, fully line-broken layout.
 ///
 /// Construction visits each visible cluster and covered source byte once.
-/// Source lookup and visual-prefix lookup are then constant time. Storage is
-/// 16 bytes per shaped cluster plus four bytes per source byte, released with
+/// Byte-to-entry and visual-prefix lookup are then constant time; resolving
+/// a stored path uses the engine's atom lookup. Storage is
+/// 16 bytes per source scalar of entry capacity plus four bytes per source byte, released with
 /// this index. No field is added to Layout, Run, Cluster or Cursor. Invalid or
 /// overlapping source ranges return None rather than publishing an index.
 pub struct CursorGeometry<'a, B: Brush> {
@@ -29,16 +30,14 @@ pub struct CursorGeometry<'a, B: Brush> {
 
 impl<'a, B: Brush> CursorGeometry<'a, B> {
     pub fn new(layout: &'a Layout<B>) -> Option<Self> {
-        if layout.data.clusters.len() > u32::MAX as usize || layout.len() > u32::MAX as usize {
+        if layout.data.shaped_text.characters().len() > u32::MAX as usize
+            || layout.len() > u32::MAX as usize
+        {
             return None;
         }
-        let missing = Entry {
-            path: ClusterPath::new(u32::MAX, u32::MAX, u32::MAX),
-            offset: 0.0,
-        };
         let mut result = Self {
             layout,
-            entries: vec![missing; layout.data.clusters.len()],
+            entries: Vec::with_capacity(layout.data.shaped_text.characters().len()),
             bytes: vec![u32::MAX; layout.data.text_len],
         };
         for line in layout.lines() {
@@ -49,15 +48,11 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                     LineItem::Run(run) => {
                         let mut offset = origin;
                         for cluster in run.visual_clusters() {
-                            let index = run.cluster_range().start + cluster.path().logical_index();
-                            let entry = result.entries.get_mut(index)?;
-                            if entry.path.line_index() != u32::MAX as usize {
-                                return None;
-                            }
-                            *entry = Entry {
+                            let index = result.entries.len();
+                            result.entries.push(Entry {
                                 path: cluster.path(),
                                 offset,
-                            };
+                            });
                             offset += cluster.advance();
                             // The upstream empty-layout metrics space is not
                             // document text and has no legal source byte.
@@ -101,7 +96,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
             self.cluster(cursor.index()),
         ];
         cursor.geometry_with(self.layout, width, clusters, |cluster| {
-            let index = cluster.run.cluster_range().start + cluster.path().logical_index();
+            let index = self.bytes[cluster.text_range().start] as usize;
             // Every cluster reachable through this borrowed layout's visual
             // neighbours was indexed above. The layout cannot mutate here.
             self.entries[index].offset

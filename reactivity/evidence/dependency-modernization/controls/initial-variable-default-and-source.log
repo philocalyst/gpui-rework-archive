@@ -1,0 +1,37 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running tests/unicode.rs (/tmp/gpui-dependencies-sol-target/debug/deps/unicode-76ab1272e5dcae0b)
+
+running 14 tests
+test missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback ... ok
+test original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact ... ok
+test bidi_visual_positions_match_explicit_mixed_direction_examples ... ok
+test line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it ... ok
+
+thread 'explicit_variable_face_uses_its_default_instance_for_shape_and_raster' (4161456) panicked at crates/canvas/tests/unicode.rs:267:50:
+called `Result::unwrap()` on an `Err` value: UnsupportedFontFormat
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test explicit_variable_face_uses_its_default_instance_for_shape_and_raster ... FAILED
+test grapheme_interiors_are_not_legal_byte_positions ... ok
+test every_bidi_grapheme_boundary_has_both_requested_destinations ... ok
+test mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage ... ok
+test wrapped_ligatures_never_cross_font_or_bidi_run_boundaries ... ok
+
+thread 'single_script_glyphs_match_independent_harfbuzz_implementation' (4161466) panicked at crates/canvas/tests/unicode.rs:282:9:
+assertion `left == right` failed: "नमस\u{94d}त\u{947}"
+  left: 6
+ right: 12
+test single_script_glyphs_match_independent_harfbuzz_implementation ... FAILED
+test fallback_layout_leases_survive_later_sets_and_cache_eviction ... ok
+test long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail ... ok
+test fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_bytes ... ok
+test mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range ... ok
+
+failures:
+
+failures:
+    explicit_variable_face_uses_its_default_instance_for_shape_and_raster
+    single_script_glyphs_match_independent_harfbuzz_implementation
+
+test result: FAILED. 12 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+error: test failed, to rerun pass `-p gpui_canvas --test unicode`

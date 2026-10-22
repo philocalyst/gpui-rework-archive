@@ -1,23 +1,40 @@
 // Copyright 2021 the Parley Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use crate::analysis::cluster::Whitespace;
 use crate::layout::Style;
 use crate::layout::data::BreakReason;
-use crate::layout::data::ClusterData;
-use crate::layout::glyph::Glyph;
 use crate::layout::layout::Layout;
 use crate::layout::line::{Line, LineItem};
 use crate::layout::run::Run;
 use crate::style::Brush;
+
 use core::ops::Range;
+use parley_engine::shape::Character;
+use parley_engine::{Atom, Glyph, Grapheme, shape::Whitespace};
 
 /// Atomic unit of text.
-#[derive(Copy, Clone)]
+///
+/// This spans a grapheme intersected with a [`Run`], which can be multiple characters of source
+/// text. See [UAX #29 § 3][uax-grapheme]. Grapheme edges are caret/selection/hit-testing edges.
+///
+/// Note a full grapheme as per UAX #29 § 3 can extend past a [`Run`]. In particular, it can extend
+/// past a line boundary and a font boundary. This type does not currently model that.
+///
+/// [uax-grapheme]: https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries
 pub struct Cluster<'a, B: Brush> {
-    pub(crate) path: ClusterPath,
     pub(crate) run: Run<'a, B>,
-    pub(crate) data: &'a ClusterData,
+    /// The atom containing this grapheme.
+    pub(crate) atom: Atom<'a>,
+    /// The grapheme.
+    pub(crate) grapheme: Grapheme,
+}
+
+// `Cluster` is `Copy` and `Clone` regardless of `B`.
+impl<B: Brush> Copy for Cluster<'_, B> {}
+impl<B: Brush> Clone for Cluster<'_, B> {
+    fn clone(&self) -> Self {
+        *self
+    }
 }
 
 /// Defines the visual side of the cluster for hit testing.
@@ -32,25 +49,12 @@ pub enum ClusterSide {
 }
 
 impl<'a, B: Brush> Cluster<'a, B> {
-    /// Returns the cluster for the given layout and byte index.
+    /// Returns the cluster for the given layout and byte index in the source text.
     pub fn from_byte_index(layout: &'a Layout<B>, byte_index: usize) -> Option<Self> {
-        let mut path = ClusterPath::default();
-        if let Some((line_index, line)) = layout.line_for_byte_index(byte_index) {
-            path.line_index = line_index as u32;
-            for run in line.runs() {
-                path.run_index = run.index;
-                if !run.text_range().contains(&byte_index) {
-                    continue;
-                }
-                for (cluster_index, cluster) in run.clusters().enumerate() {
-                    path.logical_index = cluster_index as u32;
-                    if cluster.text_range().contains(&byte_index) {
-                        return path.cluster(layout);
-                    }
-                }
-            }
-        }
-        None
+        let (_, line) = layout.line_for_byte_index(byte_index)?;
+        line.runs()
+            .find(|run| run.text_range().contains(&byte_index))?
+            .cluster_at_text_byte(byte_index)
     }
 
     /// Returns the cluster and side which is at the specified position in the given layout. If no cluster is
@@ -76,9 +80,9 @@ impl<'a, B: Brush> Cluster<'a, B> {
         y: f32,
         exact: bool,
     ) -> Option<(Self, ClusterSide)> {
-        let mut path = ClusterPath::default();
-        if let Some((line_index, line)) = layout.line_for_offset(y) {
-            path.line_index = line_index as u32;
+        let mut line_index = 0;
+        if let Some((index, line)) = layout.line_for_offset(y) {
+            line_index = index;
             let mut offset = line.metrics().offset + line.metrics().inline_min_coord;
             let last_run_index = line.len().saturating_sub(1);
             for item in line.items_nonpositioned() {
@@ -86,17 +90,12 @@ impl<'a, B: Brush> Cluster<'a, B> {
                     LineItem::Run(run) => {
                         let is_last_run = run.index as usize == last_run_index;
                         let run_advance = run.advance();
-                        path.run_index = run.index;
-                        path.logical_index = 0;
                         if x > offset + run_advance && (exact || !is_last_run) {
                             offset += run_advance;
                             continue;
                         }
-                        let last_cluster_index = run.cluster_range().len().saturating_sub(1);
-                        for (visual_index, cluster) in run.visual_clusters().enumerate() {
-                            let is_last_cluster = is_last_run && visual_index == last_cluster_index;
-                            path.logical_index =
-                                run.visual_to_logical(visual_index).unwrap_or_default() as u32;
+                        for cluster in run.visual_clusters() {
+                            let is_last_cluster = is_last_run && cluster.is_line_right_end_of_run();
                             let cluster_advance = cluster.advance();
                             let edge = offset;
                             offset += cluster_advance;
@@ -111,7 +110,7 @@ impl<'a, B: Brush> Cluster<'a, B> {
                             } else {
                                 ClusterSide::Right
                             };
-                            return Some((path.cluster(layout)?, side));
+                            return Some((cluster, side));
                         }
                     }
                     LineItem::InlineBox(inline_box) => {
@@ -121,7 +120,9 @@ impl<'a, B: Brush> Cluster<'a, B> {
             }
         }
         if y <= 0.0 && !exact {
-            Some((path.cluster(layout)?, ClusterSide::Left))
+            // Fall back to the first cluster of the line's first run.
+            let cluster = layout.get(line_index)?.item(0)?.run()?.clusters().next()?;
+            Some((cluster, ClusterSide::Left))
         } else {
             None
         }
@@ -134,29 +135,59 @@ impl<'a, B: Brush> Cluster<'a, B> {
 
     /// Returns the run that contains the cluster.
     pub fn run(&self) -> Run<'a, B> {
-        self.run.clone()
+        self.run
     }
 
-    /// Returns the path that contains the set of indices to reach the cluster
-    /// from a layout.
+    /// Returns the path to reach the cluster from a layout.
     pub fn path(&self) -> ClusterPath {
-        self.path
+        ClusterPath::new(
+            self.run.line_index,
+            self.run.index,
+            self.grapheme.char_range().start,
+        )
+    }
+
+    /// The first (logical) character of this cluster.
+    pub(crate) fn first_character(&self) -> &'a Character {
+        &self
+            .run
+            .full_slice()
+            .characters_in(self.grapheme.char_range())[0]
     }
 
     /// Returns the range of text that defines the cluster.
     pub fn text_range(&self) -> Range<usize> {
-        self.data.text_range(self.run.data)
+        self.run
+            .full_slice()
+            .text_byte_range(self.grapheme.char_range())
     }
 
-    /// Returns the first style that applies to the cluster. If the cluster contains multiple glyphs
-    /// then this style may not apply to all glyphs in the cluster (see the `DIVERGENT_STYLES` flag)
-    pub fn first_style(&self) -> &Style<B> {
-        &self.run.layout.styles()[usize::from(self.data.style_index)]
+    /// Returns the style of the character this cluster represents.
+    ///
+    /// All of the cluster's glyphs share this style.
+    ///
+    /// See also [`Self::style_index`].
+    pub fn style(&self) -> &'a Style<B> {
+        &self.run.layout.styles()[usize::from(self.style_index())]
+    }
+
+    /// Returns the style index of the character this cluster represents.
+    ///
+    /// All of the cluster's glyphs share this style.
+    ///
+    /// See also [`Self::style`].
+    pub fn style_index(&self) -> u16 {
+        self.first_character().style_index
     }
 
     /// Returns the advance of the cluster.
+    ///
+    /// If a shaped cluster crosses this grapheme cluster's boundaries (see
+    /// [`Self::is_ligature_continuation`]), the shaped cluster's advance is split evenly over the
+    /// clusters it overlaps.
     pub fn advance(&self) -> f32 {
-        self.data.advance
+        let spacing = self.run.line_spacing();
+        spacing.grapheme_advance(&self.atom, self.grapheme, self.is_rtl())
     }
 
     /// Returns `true` if this is a right-to-left cluster.
@@ -166,18 +197,17 @@ impl<'a, B: Brush> Cluster<'a, B> {
 
     /// Returns `true` if the cluster is the beginning of a ligature.
     pub fn is_ligature_start(&self) -> bool {
-        self.data.is_ligature_start()
+        self.grapheme.is_atom_start() && !self.grapheme.is_atom_end()
     }
 
     /// Returns `true` if the cluster is a ligature continuation.
     pub fn is_ligature_continuation(&self) -> bool {
-        self.data.is_ligature_component()
+        !self.grapheme.is_atom_start()
     }
 
     /// Returns `true` if the cluster is a word boundary.
-    #[cfg(feature = "word-boundaries")]
     pub fn is_word_boundary(&self) -> bool {
-        self.data.info.is_boundary()
+        self.first_character().flags.is_word_boundary()
     }
 
     /// Returns `true` if the cluster is a soft line break.
@@ -191,47 +221,61 @@ impl<'a, B: Brush> Cluster<'a, B> {
 
     /// Returns `true` if the cluster is a hard line break.
     pub fn is_hard_line_break(&self) -> bool {
-        self.data.info.whitespace() == Whitespace::Newline
+        self.first_character().whitespace == Whitespace::Newline
     }
 
     /// Returns `true` if the cluster is a space or no-break space.
     pub fn is_space_or_nbsp(&self) -> bool {
-        self.data.info.whitespace().is_space_or_nbsp()
+        self.first_character().whitespace.is_space_or_nbsp()
     }
 
     /// Returns `true` if the cluster is an emoji sequence.
     pub fn is_emoji(&self) -> bool {
-        self.data.info.is_emoji()
+        self.first_character().flags.is_emoji()
     }
 
     /// Returns an iterator over the glyphs in the cluster.
-    pub fn glyphs(&self) -> impl Iterator<Item = Glyph> + 'a + Clone {
-        if self.data.glyph_len == u32::MAX {
-            GlyphIter::Single(Some(Glyph {
-                id: self.data.glyph_offset,
-                style_index: self.data.style_index,
-                x: 0.,
-                y: 0.,
-                advance: self.data.advance,
-            }))
+    ///
+    /// For our purposes, the glyphs of a shaped cluster belong to its first (logical) grapheme
+    /// cluster: for a ligature, the ligature start yields all of the ligature's glyphs and the
+    /// continuations yield none.
+    pub fn glyphs(&self) -> impl Iterator<Item = Glyph> + Clone + use<'a, B> {
+        self.grapheme
+            .is_atom_start()
+            .then(|| self.run.glyphs_in(self.atom.shaped_clusters_range()))
+            .into_iter()
+            .flatten()
+    }
+
+    /// Whether this cluster is at the line-left end of the run.
+    fn is_line_left_end_of_run(&self) -> bool {
+        let chars = self.run.line_slice().char_range();
+        if self.is_rtl() {
+            self.grapheme.char_range().end == chars.end
         } else {
-            let start = self.run.data.glyph_start + self.data.glyph_offset as usize;
-            GlyphIter::Slice(
-                self.run.layout.data.glyphs[start..start + self.data.glyph_len as usize].iter(),
-            )
+            self.grapheme.char_range().start == chars.start
+        }
+    }
+
+    /// Whether this cluster is at the line-right end of the run.
+    fn is_line_right_end_of_run(&self) -> bool {
+        let chars = self.run.line_slice().char_range();
+        if self.is_rtl() {
+            self.grapheme.char_range().start == chars.start
+        } else {
+            self.grapheme.char_range().end == chars.end
         }
     }
 
     /// Returns `true` if this cluster is at the beginning of a line.
     pub fn is_start_of_line(&self) -> bool {
-        self.path.run_index == 0 && self.run.logical_to_visual(self.path.logical_index()) == Some(0)
+        self.run.index == 0 && self.is_line_left_end_of_run()
     }
 
     /// Returns `true` if this cluster is at the end of a line.
     pub fn is_end_of_line(&self) -> bool {
-        self.line().len().saturating_sub(1) == self.path.run_index()
-            && self.run.logical_to_visual(self.path.logical_index())
-                == Some(self.run.cluster_range().len().saturating_sub(1))
+        self.line().len().saturating_sub(1) == self.run.index as usize
+            && self.is_line_right_end_of_run()
     }
 
     /// If the cluster as at the end of the line, returns the reason
@@ -244,16 +288,23 @@ impl<'a, B: Brush> Cluster<'a, B> {
         }
     }
 
+    /// The cluster logically following this one within the same run, if any.
+    fn next_logical_in_run(&self) -> Option<Self> {
+        self.run
+            .cluster_containing_char(self.grapheme.char_range().end)
+    }
+
+    /// The cluster logically preceding this one within the same run, if any.
+    fn previous_logical_in_run(&self) -> Option<Self> {
+        self.run
+            .cluster_containing_char(self.grapheme.char_range().start.checked_sub(1)?)
+    }
+
     /// Returns the cluster that follows this one in logical order.
     pub fn next_logical(&self) -> Option<Self> {
-        if self.path.logical_index() + 1 < self.run.cluster_range().len() {
+        if let Some(next) = self.next_logical_in_run() {
             // Fast path: next cluster is in the same run
-            ClusterPath {
-                line_index: self.path.line_index,
-                run_index: self.path.run_index,
-                logical_index: self.path.logical_index + 1,
-            }
-            .cluster(self.run.layout)
+            Some(next)
         } else {
             let index = self.text_range().end;
             if index >= self.run.layout.data.text_len {
@@ -266,14 +317,9 @@ impl<'a, B: Brush> Cluster<'a, B> {
 
     /// Returns the cluster that precedes this one in logical order.
     pub fn previous_logical(&self) -> Option<Self> {
-        if self.path.logical_index > 0 {
+        if let Some(previous) = self.previous_logical_in_run() {
             // Fast path: previous cluster is in the same run
-            ClusterPath {
-                line_index: self.path.line_index,
-                run_index: self.path.run_index,
-                logical_index: self.path.logical_index - 1,
-            }
-            .cluster(self.run.layout)
+            Some(previous)
         } else {
             Self::from_byte_index(self.run.layout, self.text_range().start.checked_sub(1)?)
         }
@@ -281,28 +327,28 @@ impl<'a, B: Brush> Cluster<'a, B> {
 
     /// Returns the cluster that follows this one in visual order.
     pub fn next_visual(&self) -> Option<Self> {
-        let layout = self.run.layout;
-        let run = self.run.clone();
-        let visual_index = run.logical_to_visual(self.path.logical_index())?;
-        if let Some(cluster_index) = run.visual_to_logical(visual_index + 1) {
-            // Fast path: next visual cluster is in the same run
-            run.get(cluster_index)
+        // Fast path: next visual cluster is in the same run
+        let next = if self.is_rtl() {
+            self.previous_logical_in_run()
+        } else {
+            self.next_logical_in_run()
+        };
+        if let Some(next) = next {
+            Some(next)
         } else {
             // We just want to find the first line/run following this one that
             // contains any cluster.
-            let mut run_index = self.path.run_index() + 1;
-            for line_index in self.path.line_index()..layout.len() {
+            let layout = self.run.layout;
+            let mut run_index = self.run.index as usize + 1;
+            for line_index in self.run.line_index as usize..layout.len() {
                 let line = layout.get(line_index)?;
                 for run_index in run_index..line.len() {
-                    if let Some(run) = line.item(run_index).and_then(|item| item.run()) {
-                        if !run.cluster_range().is_empty() {
-                            return ClusterPath {
-                                line_index: line_index as u32,
-                                run_index: run_index as u32,
-                                logical_index: run.visual_to_logical(0)? as u32,
-                            }
-                            .cluster(layout);
-                        }
+                    if let Some(cluster) = line
+                        .item(run_index)
+                        .and_then(|item| item.run())
+                        .and_then(|run| run.visual_clusters().next())
+                    {
+                        return Some(cluster);
                     }
                 }
                 // Restart at first run on next line
@@ -314,37 +360,28 @@ impl<'a, B: Brush> Cluster<'a, B> {
 
     /// Returns the cluster that precedes this one in visual order.
     pub fn previous_visual(&self) -> Option<Self> {
-        let visual_index = self.run.logical_to_visual(self.path.logical_index())?;
-        if let Some(cluster_index) = visual_index
-            .checked_sub(1)
-            .and_then(|visual_index| self.run.visual_to_logical(visual_index))
-        {
-            // Fast path: previous visual cluster is in the same run
-            ClusterPath {
-                line_index: self.path.line_index,
-                run_index: self.path.run_index,
-                logical_index: cluster_index as u32,
-            }
-            .cluster(self.run.layout)
+        // Fast path: previous visual cluster is in the same run
+        let previous = if self.is_rtl() {
+            self.next_logical_in_run()
         } else {
-            // We just want to find the first line/run preceding this one that
-            // contains any cluster.
+            self.previous_logical_in_run()
+        };
+        if let Some(previous) = previous {
+            Some(previous)
+        } else {
+            // To find the first line/run preceding this one that contains any cluster.
             let layout = self.run.layout;
-            let mut run_index = Some(self.path.run_index());
-            for line_index in (0..=self.path.line_index()).rev() {
+            let mut run_index = Some(self.run.index as usize);
+            for line_index in (0..=self.run.line_index as usize).rev() {
                 let line = layout.get(line_index)?;
                 let first_run = run_index.unwrap_or(line.len());
                 for run_index in (0..first_run).rev() {
-                    if let Some(run) = line.item(run_index).and_then(|item| item.run()) {
-                        let range = run.cluster_range();
-                        if !range.is_empty() {
-                            return ClusterPath {
-                                line_index: line_index as u32,
-                                run_index: run_index as u32,
-                                logical_index: run.visual_to_logical(range.len() - 1)? as u32,
-                            }
-                            .cluster(layout);
-                        }
+                    if let Some(cluster) = line
+                        .item(run_index)
+                        .and_then(|item| item.run())
+                        .and_then(|run| run.visual_clusters_rev().next())
+                    {
+                        return Some(cluster);
                     }
                 }
                 run_index = None;
@@ -354,9 +391,8 @@ impl<'a, B: Brush> Cluster<'a, B> {
     }
 
     /// Returns the next cluster that is marked as a word boundary.
-    #[cfg(feature = "word-boundaries")]
     pub fn next_logical_word(&self) -> Option<Self> {
-        let mut cluster = self.clone();
+        let mut cluster = *self;
         while let Some(next) = cluster.next_logical() {
             if next.is_word_boundary() {
                 return Some(next);
@@ -367,9 +403,8 @@ impl<'a, B: Brush> Cluster<'a, B> {
     }
 
     /// Returns the next cluster that is marked as a word boundary.
-    #[cfg(feature = "word-boundaries")]
     pub fn next_visual_word(&self) -> Option<Self> {
-        let mut cluster = self.clone();
+        let mut cluster = *self;
         while let Some(next) = cluster.next_visual() {
             if next.is_word_boundary() {
                 return Some(next);
@@ -380,9 +415,8 @@ impl<'a, B: Brush> Cluster<'a, B> {
     }
 
     /// Returns the previous cluster that is marked as a word boundary.
-    #[cfg(feature = "word-boundaries")]
     pub fn previous_logical_word(&self) -> Option<Self> {
-        let mut cluster = self.clone();
+        let mut cluster = *self;
         while let Some(prev) = cluster.previous_logical() {
             if prev.is_word_boundary() {
                 return Some(prev);
@@ -393,9 +427,8 @@ impl<'a, B: Brush> Cluster<'a, B> {
     }
 
     /// Returns the previous cluster that is marked as a word boundary.
-    #[cfg(feature = "word-boundaries")]
     pub fn previous_visual_word(&self) -> Option<Self> {
-        let mut cluster = self.clone();
+        let mut cluster = *self;
         while let Some(prev) = cluster.previous_visual() {
             if prev.is_word_boundary() {
                 return Some(prev);
@@ -410,17 +443,21 @@ impl<'a, B: Brush> Cluster<'a, B> {
     /// This cost of this function is roughly linear in the number of clusters
     /// on the containing line.
     pub fn visual_offset(&self) -> Option<f32> {
-        let line = self.path.line(self.run.layout)?;
+        let line = self.line();
         let mut offset = line.metrics().offset;
-        for run_index in 0..=self.path.run_index() {
+        for run_index in 0..=self.run.index as usize {
             let item = line.item(run_index)?;
             match item {
                 LineItem::Run(run) => {
-                    if run_index != self.path.run_index() {
+                    if run_index != self.run.index as usize {
                         offset += run.advance();
                     } else {
-                        let visual_index = run.logical_to_visual(self.path.logical_index())?;
-                        for cluster in run.visual_clusters().take(visual_index) {
+                        for cluster in run.visual_clusters() {
+                            if cluster.grapheme.char_range().start
+                                == self.grapheme.char_range().start
+                            {
+                                break;
+                            }
                             offset += cluster.advance();
                         }
                     }
@@ -431,26 +468,6 @@ impl<'a, B: Brush> Cluster<'a, B> {
             }
         }
         Some(offset)
-    }
-
-    pub(crate) fn info(&self) -> &super::data::ClusterInfo {
-        &self.data.info
-    }
-
-    /// Returns the text length of the cluster in bytes.
-    ///
-    /// This is only used for tests, and is *not* part of the public API.
-    #[doc(hidden)]
-    pub fn text_len(&self) -> u8 {
-        self.data.text_len
-    }
-
-    /// Returns this cluster's original character.
-    ///
-    /// This is only used for tests, and is *not* part of the public API.
-    #[doc(hidden)]
-    pub fn source_char(&self) -> char {
-        self.data.info.source_char()
     }
 }
 
@@ -476,20 +493,26 @@ impl Affinity {
     }
 }
 
-/// Index based path to a cluster.
+/// Index-based path to a cluster.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
 pub struct ClusterPath {
     pub(crate) line_index: u32,
     pub(crate) run_index: u32,
-    pub(crate) logical_index: u32,
+    /// The index of the cluster's first logical character.
+    pub(crate) char_index: u32,
 }
 
 impl ClusterPath {
-    pub(crate) fn new(line_index: u32, run_index: u32, logical_index: u32) -> Self {
+    /// Creates a path from the index of a line within a layout, the index of a
+    /// run within that line, and the index of a grapheme cluster within that run.
+    ///
+    /// The path is not validated against any layout: use [`Self::cluster`] to
+    /// resolve it.
+    pub fn new(line_index: u32, run_index: u32, char_index: u32) -> Self {
         Self {
             line_index,
             run_index,
-            logical_index,
+            char_index,
         }
     }
 
@@ -504,11 +527,6 @@ impl ClusterPath {
         self.run_index as usize
     }
 
-    /// Returns the logical index of the cluster within the owning run.
-    pub fn logical_index(&self) -> usize {
-        self.logical_index as usize
-    }
-
     /// Returns the line for this path and the specified layout.
     pub fn line<'a, B: Brush>(&self, layout: &'a Layout<B>) -> Option<Line<'a, B>> {
         layout.get(self.line_index())
@@ -521,27 +539,7 @@ impl ClusterPath {
 
     /// Returns the cluster for this path and the specified layout.
     pub fn cluster<'a, B: Brush>(&self, layout: &'a Layout<B>) -> Option<Cluster<'a, B>> {
-        self.run(layout)?.get(self.logical_index())
-    }
-}
-
-#[derive(Clone)]
-enum GlyphIter<'a> {
-    Single(Option<Glyph>),
-    Slice(core::slice::Iter<'a, Glyph>),
-}
-
-impl Iterator for GlyphIter<'_> {
-    type Item = Glyph;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-            Self::Single(glyph) => glyph.take(),
-            Self::Slice(iter) => {
-                let glyph = *iter.next()?;
-                Some(glyph)
-            }
-        }
+        self.run(layout)?.cluster_containing_char(self.char_index)
     }
 }
 

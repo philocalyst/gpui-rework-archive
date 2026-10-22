@@ -1,0 +1,18 @@
+==71191== DHAT, a dynamic heap analysis tool
+==71191== Copyright (C) 2010-2024, and GNU GPL'd, by Mozilla Foundation et al.
+==71191== Using Valgrind-3.27.1 and LibVEX; rerun with -h for copyright info
+==71191== Command: /tmp/gpui-dependency-allocation-binaries/dc577564e5/unicode_text_measure 1000
+==71191== Parent PID: 71188
+==71191== 
+==71191== 
+==71191== Total:     12,197,358 bytes in 32,777 blocks
+==71191== At t-gmax: 3,446,152 bytes in 4,288 blocks
+==71191== At t-end:  608 bytes in 2 blocks
+==71191== Reads:     74,904,957 bytes
+==71191== Writes:    26,212,273 bytes
+==71191== 
+==71191== To view the resulting profile, open
+==71191==   file:///nix/store/px7wv2vfgzjagdqx2709qx5v9167gyj1-valgrind-3.27.1/libexec/valgrind/dh_view.html
+==71191== in a web browser, click on "Load...", and then select the file
+==71191==   /tmp/gpui-dependencies-sol/reactivity/evidence/dependency-modernization/dhat/owner-dc577.json
+==71191== The text at the bottom explains the abbreviations used in the output.

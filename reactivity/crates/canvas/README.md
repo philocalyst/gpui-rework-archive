@@ -1,8 +1,10 @@
 # gpui_canvas
 
 A real software text/canvas foundation independent of legacy GPUI. It shapes
-OpenType glyph IDs/positions with pinned Parley 0.11.1 / HarfRust 0.12.0 and
-rasterizes those same IDs on demand with pinned Swash 0.2.10 (Skrifa 0.44.0).
+OpenType glyph IDs/positions with pinned Parley/Parley Engine 0.12.0 and
+HarfRust 0.12.0, and rasterizes those same IDs on demand with pinned Swash
+0.2.10. Direct outline admission uses Skrifa 0.49.0; Swash retains its own
+compatible Skrifa 0.44 dependency. See [the migration ledger](evidence/parley-012.md).
 Full Noto Sans 2.015 and lazy Arabic/Hebrew fallback fonts with OFL licenses are
 bundled; `TextSystem::new` also accepts caller-supplied font bytes. Nothing reads
 an absolute asset path. [Font provenance](assets/README.md).
@@ -171,10 +173,10 @@ little or no benefit, and may lose to proof setup. Forty-eight real 16px labels
 at 640×480 cost about 31 ms on this baseline. That is useful correctness evidence,
 not an acceptable final text-performance target or a claim of GPUI completion.
 
-Current primary APIs: [Parley 0.11.1](https://docs.rs/parley/0.11.1/parley/),
+Current primary APIs: [Parley 0.12.0](https://docs.rs/parley/0.12.0/parley/),
 [HarfRust 0.12.0](https://docs.rs/harfrust/0.12.0/harfrust/),
 [Swash scaling](https://docs.rs/swash/latest/swash/scale/index.html),
-[Skrifa outline API](https://docs.rs/skrifa/0.44.0/skrifa/outline/).
+[Skrifa outline API](https://docs.rs/skrifa/0.49.0/skrifa/outline/).
 Rustybuzz 0.20.1 is now a dev-only independent shaping oracle.
 
 ## Lazy outline font lifetime and measured memory

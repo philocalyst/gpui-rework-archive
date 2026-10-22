@@ -3,19 +3,20 @@
 
 //! Context for layout.
 
+use core::ops::Range;
+
 use alloc::{vec, vec::Vec};
 
+use parley_engine::{Analysis, AnalysisDataSources, Analyzer, LineBreakConfig, Shaper};
+
 use super::FontContext;
-use super::builder::{RangedBuilder, StyleRunBuilder};
+use super::builder::{BuilderOptions, RangedBuilder, StyleRunBuilder};
 use super::resolve::tree::TreeStyleBuilder;
 use super::resolve::{RangedStyleBuilder, ResolveContext, ResolvedStyle, StyleRun};
 use super::style::{Brush, TextStyle};
 
-use crate::analysis::{AnalysisDataSources, CharInfo};
-use crate::bidi::BidiResolver;
 use crate::builder::TreeBuilder;
-use crate::inline_box::InlineBox;
-use crate::shape::ShapeContext;
+use crate::inline_box::LayoutInlineBox;
 
 /// Shared scratch space used when constructing text layouts.
 ///
@@ -24,16 +25,21 @@ pub struct LayoutContext<B: Brush = [u8; 4]> {
     pub(crate) rcx: ResolveContext,
     pub(crate) style_table: Vec<ResolvedStyle<B>>,
     pub(crate) style_runs: Vec<StyleRun>,
-    pub(crate) inline_boxes: Vec<InlineBox>,
-    pub(crate) bidi: BidiResolver,
+    pub(crate) inline_boxes: Vec<LayoutInlineBox>,
+
+    // Reusable text analysis
+    pub(crate) analyzer: Analyzer,
+    pub(crate) analysis: Analysis,
+    pub(crate) line_break: Vec<(Range<usize>, LineBreakConfig)>,
+    pub(crate) break_spaces: Vec<Range<usize>>,
 
     // Reusable style builders (to amortise allocations)
     pub(crate) ranged_style_builder: RangedStyleBuilder<B>,
     pub(crate) tree_style_builder: TreeStyleBuilder<B>,
 
-    // u16: style index for character
-    pub(crate) info: Vec<(CharInfo, u16)>,
-    pub(crate) scx: ShapeContext,
+    /// Style index for each character, parallel to [`Analysis::char_info`].
+    pub(crate) char_style_indices: Vec<u16>,
+    pub(crate) scx: Shaper,
 
     // Unicode analysis data sources (provided by icu)
     pub(crate) analysis_data_sources: AnalysisDataSources,
@@ -46,12 +52,15 @@ impl<B: Brush> LayoutContext<B> {
             style_table: vec![],
             style_runs: vec![],
             inline_boxes: vec![],
-            bidi: BidiResolver::new(),
+            analyzer: Analyzer::new(),
+            analysis: Analysis::new(),
+            line_break: Vec::new(),
+            break_spaces: Vec::new(),
             ranged_style_builder: RangedStyleBuilder::default(),
             tree_style_builder: TreeStyleBuilder::default(),
-            info: vec![],
+            char_style_indices: vec![],
             analysis_data_sources: AnalysisDataSources::new(),
-            scx: ShapeContext::default(),
+            scx: Shaper::default(),
         }
     }
 
@@ -100,11 +109,9 @@ impl<B: Brush> LayoutContext<B> {
         fcx.source_cache.prune(128, false);
 
         RangedBuilder {
-            scale,
-            quantize,
+            options: BuilderOptions::new(scale, quantize),
             lcx: self,
             fcx,
-            line_break_override: None,
         }
     }
 
@@ -128,13 +135,11 @@ impl<B: Brush> LayoutContext<B> {
         fcx.source_cache.prune(128, false);
 
         StyleRunBuilder {
-            scale,
-            quantize,
+            options: BuilderOptions::new(scale, quantize),
             len: text.len(),
             lcx: self,
             fcx,
             cursor: 0,
-            line_break_override: None,
         }
     }
 
@@ -172,11 +177,9 @@ impl<B: Brush> LayoutContext<B> {
         fcx.source_cache.prune(128, false);
 
         TreeBuilder {
-            scale,
-            quantize,
+            options: BuilderOptions::new(scale, quantize),
             lcx: self,
             fcx,
-            line_break_override: None,
         }
     }
 
@@ -185,8 +188,6 @@ impl<B: Brush> LayoutContext<B> {
         self.style_table.clear();
         self.style_runs.clear();
         self.inline_boxes.clear();
-        self.info.clear();
-        self.bidi.clear();
     }
 }
 

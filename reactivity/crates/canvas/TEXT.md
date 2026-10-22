@@ -1,7 +1,9 @@
 # Unicode paragraphs, one retained glyph layout
 
-Canvas now uses scoped Parley 0.11.1 / HarfRust 0.12.0 planning with pinned
-Fontique 0.11.1 and ICU4X 2.3.0 analysis/data. One planner session is borrowed
+Canvas now uses scoped Parley/Parley Engine 0.12.0 / HarfRust 0.12.0 planning with
+Fontique 0.12.0 and ICU4X 2.3.0 analysis/data. Direct outline admission uses
+Skrifa 0.49.0. [The migration ledger](evidence/parley-012.md) records dependency
+constraints and the rebased repairs. One planner session is borrowed
 for the complete runtime text pass. Fontique has `shared:false` and
 `system_fonts:false`; there is no system-font scan or persistent planner.
 Rustybuzz 0.20.1 is a dev-only independent shaping oracle. The production parser
@@ -213,7 +215,12 @@ instances and source hashes. `attribute-text-data.py` decodes the original Rust
 byte literals and finds the complete bytes in the ELF; it does not infer size
 from mangled names or assume every linked array is resident.
 
-The final rendering profile omits unused word-boundary analysis through a
+The following feature, payload and timing results are historical Parley 0.11.1
+captures. Parley 0.12 removed the local `word-boundaries` feature; current
+upstream word analysis remains enabled. These rows and feature commands do not
+describe or measure the current 0.12 binary.
+
+That earlier rendering profile omitted unused word-boundary analysis through a
 new default-on vendor feature. Parley's normal defaults and its `accesskit`
 feature retain word support. When disabled, its word-navigation/editor/selection
 APIs are unavailable at compile time. Canvas exposes none of those APIs. Bidi,

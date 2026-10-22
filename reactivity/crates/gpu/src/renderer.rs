@@ -12,6 +12,7 @@ pub use paint::{GpuPaintCommit, GpuPaintEdit, PaintBinding, PaintError, PaintRen
 pub use slots::{GpuSlotCommit, SlotError};
 
 const MAX_DRAWS: usize = 65_536;
+const SHADER_SOURCE: &str = include_str!(concat!(env!("OUT_DIR"), "/ui.wgsl"));
 const MAX_REFERENCES: usize = 4 * 1024 * 1024;
 const MAX_PIXELS: usize = 16 * 1024 * 1024;
 const MAX_ATLAS_SIDE: u32 = 2048;
@@ -378,13 +379,10 @@ impl Renderer {
         ) {
             return Err(Error::UnsupportedTarget(format));
         }
-        let source = crate::shader::ui::WGSL_SOURCE
-            .wgsl_source()
-            .map_err(|error| Error::Shader(error.to_string()))?;
         let errors = device.push_error_scope(wgpu::ErrorFilter::Validation);
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("GPUI tile compositor"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Owned(source)),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
         });
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("GPUI tile compositor"),
@@ -1258,8 +1256,11 @@ mod tests {
         assert_eq!(std::mem::size_of::<Correction>(), 32);
         assert_eq!(std::mem::offset_of!(Correction, y), 16);
         assert_eq!(std::mem::size_of::<Globals>(), 48);
-        let source = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
-        let module = wgpu::naga::front::wgsl::parse_str(&source).unwrap();
+        assert_eq!(
+            SHADER_SOURCE,
+            crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap()
+        );
+        let module = wgpu::naga::front::wgsl::parse_str(SHADER_SOURCE).unwrap();
         assert_eq!(
             module
                 .global_variables

@@ -3,72 +3,22 @@
 
 //! Test that the various builders produce the same results.
 
-use std::{borrow::Cow, path::PathBuf, sync::Arc};
+use std::{vec, vec::Vec};
 
-use fontique::{Collection, CollectionOptions, FontStyle, FontWeight, FontWidth, SourceCache};
-use parlance::FontFamilyName;
-use peniko::{Blob, color::palette};
+use fontique::{FontStyle, FontWeight, FontWidth};
+use peniko::color::palette;
 
-use super::utils::{ColorBrush, asserts::assert_eq_layout_data};
-use crate::{
-    FontContext, FontFamily, FontFeatures, FontVariations, Layout, LayoutContext, LineHeight,
-    OverflowWrap, RangedBuilder, StyleProperty, StyleRunBuilder, TextStyle, TextWrapMode,
-    TreeBuilder, WordBreak,
+use super::utils::{
+    ColorBrush,
+    asserts::assert_eq_layout_data,
+    fonts::{FONT_FAMILY_LIST, create_font_context},
 };
-
-// TODO: `FONT_FAMILY_LIST`, `load_fonts`, and `create_font_context` are
-// duplicated between this crate and `parley_test`. We can't move the builder
-// tests into `parley_test` because they use private APIs, but should eventually
-// figure out some way to reduce the duplication.
-const FONT_FAMILY_LIST: &[FontFamilyName<'_>] = &[
-    FontFamilyName::Named(Cow::Borrowed("Roboto")),
-    FontFamilyName::Named(Cow::Borrowed("Noto Kufi Arabic")),
-];
-
-pub(crate) fn load_fonts(
-    collection: &mut Collection,
-    font_dirs: impl Iterator<Item = PathBuf>,
-) -> std::io::Result<()> {
-    for dir in font_dirs {
-        let paths = std::fs::read_dir(dir)?;
-        for entry in paths {
-            let entry = entry?;
-            if !entry.metadata()?.is_file() {
-                continue;
-            }
-            let path = entry.path();
-            if path
-                .extension()
-                .and_then(|ext| ext.to_str())
-                .is_none_or(|ext| !["ttf", "otf", "ttc", "otc"].contains(&ext))
-            {
-                continue;
-            }
-            let font_data = std::fs::read(&path)?;
-            collection.register_fonts(Blob::new(Arc::new(font_data)), None);
-        }
-    }
-    Ok(())
-}
-
-fn create_font_context() -> FontContext {
-    let mut collection = Collection::new(CollectionOptions {
-        shared: false,
-        system_fonts: false,
-    });
-    load_fonts(&mut collection, parley_dev::font_dirs()).unwrap();
-    for font in FONT_FAMILY_LIST {
-        if let FontFamilyName::Named(font_name) = font {
-            collection
-                .family_id(font_name)
-                .unwrap_or_else(|| panic!("{font_name} font not found"));
-        }
-    }
-    FontContext {
-        collection,
-        source_cache: SourceCache::default(),
-    }
-}
+use crate::{
+    BaseDirection, BreakReason, FontContext, FontFamily, FontFeatures, FontVariations, Layout,
+    LayoutContext, LineBreak, LineHeight, OverflowWrap, RangedBuilder, StyleProperty,
+    StyleRunBuilder, TextStyle, TextWrapMode, TreeBuilder, VerticalAlign, WhiteSpaceCollapse,
+    WordBreak,
+};
 
 /// Set of options for [`build_layout_with_ranged`].
 struct RangedOptions<'a> {
@@ -128,6 +78,57 @@ fn build_layout_with_style_runs(
     layout
 }
 
+#[test]
+fn builders_apply_base_direction() {
+    let text = "123 / 456";
+    let mut fcx = create_font_context();
+    let mut lcx: LayoutContext<ColorBrush> = LayoutContext::new();
+
+    let mut ranged = lcx.ranged_builder(&mut fcx, text, 1.0, true);
+    ranged.push_default(FontFamily::from(FONT_FAMILY_LIST));
+    ranged.set_base_direction(BaseDirection::Rtl);
+    let mut ranged_layout = ranged.build(text);
+    ranged_layout.break_all_lines(None);
+    assert!(ranged_layout.is_rtl());
+    assert_eq!(
+        ranged_layout
+            .lines()
+            .flat_map(|line| line.runs())
+            .map(|run| run.text_range())
+            .collect::<Vec<_>>(),
+        [6..9, 3..6, 0..3]
+    );
+
+    let root_style = TextStyle {
+        font_family: FontFamily::from(FONT_FAMILY_LIST),
+        ..TextStyle::default()
+    };
+    let mut tree = lcx.tree_builder(&mut fcx, 1.0, true, &root_style);
+    tree.set_base_direction(BaseDirection::Rtl);
+    tree.push_text(text);
+    let (mut tree_layout, _) = tree.build();
+    tree_layout.break_all_lines(None);
+    assert!(tree_layout.is_rtl());
+    assert_eq_layout_data(
+        &ranged_layout.data,
+        &tree_layout.data,
+        "tree base direction",
+    );
+
+    let mut style_runs = lcx.style_run_builder(&mut fcx, text, 1.0, true);
+    style_runs.set_base_direction(BaseDirection::Rtl);
+    let style = style_runs.push_style(root_style);
+    style_runs.push_style_run(style, ..);
+    let mut style_run_layout = style_runs.build(text);
+    style_run_layout.break_all_lines(None);
+    assert!(style_run_layout.is_rtl());
+    assert_eq_layout_data(
+        &ranged_layout.data,
+        &style_run_layout.data,
+        "style-run base direction",
+    );
+}
+
 /// Computes layout in various ways to ensure they all produce the same result.
 ///
 /// ```text
@@ -151,7 +152,6 @@ fn assert_builders_produce_same_result<'b>(
     root_style: &TextStyle<'b, 'b, ColorBrush>,
     with_ranged_builder: impl Fn(&mut RangedBuilder<'_, ColorBrush>),
     with_tree_builder: impl Fn(&mut TreeBuilder<'_, ColorBrush>),
-    expect_empty: bool,
 ) {
     let mut fcx = create_font_context();
 
@@ -175,33 +175,17 @@ fn assert_builders_produce_same_result<'b>(
 
     // Source of truth - ranged builder from a clean layout context
     let layout_truth = build_layout_with_ranged(&mut fcx, &mut lcx_a, &ropts, &with_ranged_builder);
-    assert!(
-        layout_truth.data.runs.is_empty() == expect_empty,
-        "expected runs to exist for lcx_a_rb_one"
-    );
 
     // Testing idempotence of ranged builder creation
     let layout = build_layout_with_ranged(&mut fcx, &mut lcx_a, &ropts, &with_ranged_builder);
-    assert!(
-        layout.data.runs.is_empty() == expect_empty,
-        "expected runs to exist for lcx_a_rb_two"
-    );
     assert_eq_layout_data(&layout_truth.data, &layout.data, "lcx_a_rb_two");
 
     // Basic builder compatibility - tree builder from a clean layout context
     let layout = build_layout_with_tree(&mut fcx, &mut lcx_b, &topts, &with_tree_builder);
-    assert!(
-        layout.data.runs.is_empty() == expect_empty,
-        "expected runs to exist for lcx_b_tb_one"
-    );
     assert_eq_layout_data(&layout_truth.data, &layout.data, "lcx_b_tb_one");
 
     // Testing idempotence of tree builder creation
     let layout = build_layout_with_tree(&mut fcx, &mut lcx_b, &topts, &with_tree_builder);
-    assert!(
-        layout.data.runs.is_empty() == expect_empty,
-        "expected runs to exist for lcx_b_tb_two"
-    );
     assert_eq_layout_data(&layout_truth.data, &layout.data, "lcx_b_tb_two");
 
     // Priming a fresh layout context with ranged builder creation
@@ -209,10 +193,6 @@ fn assert_builders_produce_same_result<'b>(
 
     // Testing tree builder creation with a dirty layout context
     let layout = build_layout_with_tree(&mut fcx, &mut lcx_c, &topts, &with_tree_builder);
-    assert!(
-        layout.data.runs.is_empty() == expect_empty,
-        "expected runs to exist for lcx_c_tb_one"
-    );
     assert_eq_layout_data(&layout_truth.data, &layout.data, "lcx_c_tb_one");
 
     // Priming a fresh layout context with tree builder creation
@@ -220,10 +200,6 @@ fn assert_builders_produce_same_result<'b>(
 
     // Testing ranged builder creation with a dirty layout context
     let layout = build_layout_with_ranged(&mut fcx, &mut lcx_d, &ropts, &with_ranged_builder);
-    assert!(
-        layout.data.runs.is_empty() == expect_empty,
-        "expected runs to exist for lcx_d_rb_one"
-    );
     assert_eq_layout_data(&layout_truth.data, &layout.data, "lcx_d_rb_one");
 }
 
@@ -250,11 +226,16 @@ fn create_root_style() -> TextStyle<'static, 'static, ColorBrush> {
         strikethrough_size: Some(1.7),
         strikethrough_brush: Some(ColorBrush::new(palette::css::BEIGE)),
         line_height: LineHeight::Absolute(30.),
+        // Parent-relative, so it compounds through nested tree spans but not through ranged
+        // styles; keep it at the default so both builders agree.
+        vertical_align: VerticalAlign::BASELINE,
         word_spacing: 2.,
         letter_spacing: 1.5,
         word_break: WordBreak::BreakAll,
+        line_break: LineBreak::Loose,
         overflow_wrap: OverflowWrap::Anywhere,
         text_wrap_mode: TextWrapMode::Wrap,
+        white_space_collapse: WhiteSpaceCollapse::PreserveBreaks,
     }
 }
 
@@ -284,10 +265,15 @@ fn set_root_style(rb: &mut RangedBuilder<'_, ColorBrush>) {
         palette::css::BEIGE,
     ))));
     rb.push_default(LineHeight::Absolute(30.));
+    rb.push_default(VerticalAlign::BASELINE);
     rb.push_default(StyleProperty::WordSpacing(2.));
     rb.push_default(StyleProperty::LetterSpacing(1.5));
     rb.push_default(StyleProperty::WordBreak(WordBreak::BreakAll));
+    rb.push_default(StyleProperty::LineBreak(LineBreak::Loose));
     rb.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
+    rb.push_default(StyleProperty::WhiteSpaceCollapse(
+        WhiteSpaceCollapse::PreserveBreaks,
+    ));
 }
 
 /// Test that all the builders have the same default behavior.
@@ -317,7 +303,6 @@ fn builders_default() {
         &root_style,
         with_ranged_builder,
         with_tree_builder,
-        false,
     );
 }
 
@@ -462,7 +447,6 @@ fn builders_root_only() {
         &root_style,
         with_ranged_builder,
         with_tree_builder,
-        false,
     );
 }
 
@@ -475,7 +459,7 @@ fn builders_empty() {
     let max_advance = Some(50.);
     let root_style = create_root_style();
 
-    let with_ranged_builder = |_rb: &mut RangedBuilder<'_, ColorBrush>| {};
+    let with_ranged_builder = |rb: &mut RangedBuilder<'_, ColorBrush>| set_root_style(rb);
     let with_tree_builder = |_tb: &mut TreeBuilder<'_, ColorBrush>| {};
 
     assert_builders_produce_same_result(
@@ -486,7 +470,6 @@ fn builders_empty() {
         &root_style,
         with_ranged_builder,
         with_tree_builder,
-        true,
     );
 }
 
@@ -541,6 +524,149 @@ fn builders_mixed_styles() {
         &root_style,
         with_ranged_builder,
         with_tree_builder,
-        false,
     );
+}
+
+/// Check that reusing a [`Layout`] works, by overwriting a layout with
+/// [`RangedBuilder::build_into`].
+#[test]
+fn ranged_builder_reuse_layout() {
+    let mut fcx = create_font_context();
+    let mut lcx: LayoutContext<ColorBrush> = LayoutContext::new();
+
+    static FIRST_TEXT: &str = "Some first text.";
+    static SECOND_TEXT: &str = "Some second text.";
+    const MAX_ADVANCE: f32 = 50.;
+
+    let mut layout = Layout::new();
+
+    let mut builder = lcx.ranged_builder(&mut fcx, FIRST_TEXT, 1., false);
+    builder.push_default(FontFamily::from(FONT_FAMILY_LIST));
+    builder.build_into(&mut layout, FIRST_TEXT);
+    layout.break_all_lines(Some(MAX_ADVANCE));
+
+    let mut builder = lcx.ranged_builder(&mut fcx, SECOND_TEXT, 1., false);
+    builder.push_default(FontFamily::from(FONT_FAMILY_LIST));
+    builder.build_into(&mut layout, SECOND_TEXT);
+    layout.break_all_lines(Some(MAX_ADVANCE));
+
+    let mut builder = lcx.ranged_builder(&mut fcx, SECOND_TEXT, 1., false);
+    builder.push_default(FontFamily::from(FONT_FAMILY_LIST));
+    let mut expected = builder.build(SECOND_TEXT);
+    expected.break_all_lines(Some(MAX_ADVANCE));
+
+    assert_eq_layout_data(
+        &expected.data,
+        &layout.data,
+        "Expected reused layout to be identical to fresh layout",
+    );
+}
+
+#[test]
+fn builders_crlf_counts_as_single_line_break() {
+    let mut fcx = create_font_context();
+    let mut line_count = |text: &str| -> usize {
+        let mut lcx: LayoutContext<ColorBrush> = LayoutContext::new();
+        let ropts = RangedOptions {
+            scale: 1.0,
+            quantize: false,
+            max_advance: None,
+            text,
+        };
+        let layout = build_layout_with_ranged(&mut fcx, &mut lcx, &ropts, |rb| {
+            set_root_style(rb);
+        });
+        layout.lines().len()
+    };
+
+    let crlf = line_count("a\r\nb");
+    let lf = line_count("a\nb");
+    let cr = line_count("a\rb");
+
+    assert_eq!(crlf, 2, "CRLF should produce exactly two lines");
+    assert_eq!(lf, 2, "LF should produce exactly two lines");
+    assert_eq!(crlf, lf, "CRLF should match LF line count");
+    assert_eq!(crlf, cr, "CRLF, LF, and CR should match line count");
+
+    let double_crlf = line_count("a\r\n\r\nb");
+    let double_lf = line_count("a\n\nb");
+
+    assert_eq!(
+        double_crlf, 3,
+        "two CRLF breaks should produce one blank line, not extra blanks"
+    );
+    assert_eq!(
+        double_crlf, double_lf,
+        "two CRLF breaks should match two LF breaks"
+    );
+
+    let trailing_cr = line_count("a\r");
+    let trailing_lf = line_count("a\n");
+
+    assert_eq!(
+        trailing_cr, trailing_lf,
+        "trailing CR should match trailing LF line count"
+    );
+}
+
+/// ICU4X's line segmenter emits a soft break opportunity at the end of a
+/// complex-script (Thai, Khmer, Lao, ...) run even when the next character is a
+/// mandatory break, which must not shadow the hard break.
+/// See <https://github.com/linebender/parley/issues/768>.
+#[test]
+fn builders_newline_inside_complex_script_run_is_hard_break() {
+    let mut fcx = create_font_context();
+    let mut break_reasons = |text: &str| -> Vec<BreakReason> {
+        let mut lcx: LayoutContext<ColorBrush> = LayoutContext::new();
+        let ropts = RangedOptions {
+            scale: 1.0,
+            quantize: false,
+            max_advance: None,
+            text,
+        };
+        let layout = build_layout_with_ranged(&mut fcx, &mut lcx, &ropts, |rb| {
+            set_root_style(rb);
+            rb.push_default(StyleProperty::WordBreak(WordBreak::Normal));
+        });
+        layout.lines().map(|line| line.break_reason()).collect()
+    };
+
+    for text in [
+        "กก\nกก",
+        "ក្ម\nក្ម",
+        "ກກ\nກກ",
+        "กก\r\nกก",
+        "กก\u{2028}กก",
+        "aa\nbb",
+    ] {
+        assert_eq!(
+            break_reasons(text),
+            vec![BreakReason::Explicit, BreakReason::None],
+            "{text:?} should produce exactly two lines with an explicit break",
+        );
+    }
+}
+
+#[test]
+fn builders_empty_text_after_styled_layout_reuses_context() {
+    let mut fcx = FontContext::default();
+    let mut lcx: LayoutContext<ColorBrush> = LayoutContext::new();
+
+    let root = TextStyle::default();
+    let mut builder = lcx.tree_builder(&mut fcx, 1.0, true, &root);
+    builder.push_style_span(TextStyle {
+        font_size: 20.,
+        ..Default::default()
+    });
+    builder.push_text("a");
+    builder.pop_style_span();
+    let (layout, _) = builder.build();
+    assert_eq!(layout.styles().len(), 2);
+
+    // The empty layout is shaped with a substitute space, which must use the root style rather
+    // than a stale style index left over from the previous layout.
+    let builder = lcx.ranged_builder(&mut fcx, "", 1.0, true);
+    let mut layout = builder.build("");
+    layout.break_all_lines(None);
+    assert_eq!(layout.lines().count(), 1);
 }
