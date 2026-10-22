@@ -107,7 +107,11 @@ pub(super) struct Initialization {
     proved: AtomicBool,
     #[cfg(test)]
     renderer_started: AtomicBool,
-    #[cfg(test)]
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
     deferred: AtomicBool,
 }
 impl Initialization {
@@ -118,7 +122,11 @@ impl Initialization {
             proved: AtomicBool::new(false),
             #[cfg(test)]
             renderer_started: AtomicBool::new(false),
-            #[cfg(test)]
+            #[cfg(all(
+                test,
+                target_os = "linux",
+                any(feature = "x11", feature = "x11-minimal")
+            ))]
             deferred: AtomicBool::new(false),
         }
     }
