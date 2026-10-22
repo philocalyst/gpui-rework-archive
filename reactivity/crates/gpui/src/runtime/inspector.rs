@@ -595,5 +595,17 @@ mod tests {
             PANEL_NODES,
             runtime.texts.capacity()
         );
+        eprintln!("catalog_headers,El={},Style={},Presented={},Admission={},InspectorAction={}",
+            size_of::<El<'_>>(), size_of::<Style>(), size_of::<Presented>(),
+            size_of::<crate::element::Admission>(), size_of::<InspectorAction>());
+        let mut tool = tool;
+        tool.resize([800, 560]).unwrap();
+        let idle = allocation_counter::measure(|| {
+            for _ in 0..100 {
+                tool.resize([800, 560]).unwrap();
+            }
+        });
+        eprintln!("catalog_warm_inspector_idle,allocations={},total_bytes={},retained={}",
+            idle.count_total, idle.bytes_total, idle.bytes_current);
     }
 }
