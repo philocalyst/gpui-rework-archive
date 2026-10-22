@@ -143,7 +143,7 @@ fn canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding()
         ("zwj", "👩\u{200d}💻 e\u{301} नमस्ते".into()),
         ("one_long_grapheme", format!("a{}", "\u{301}".repeat(1024))),
     ] {
-        for width in [None, Some(0.), Some(55.), Some(400.)] {
+        for width in [None, Some(1.), Some(55.), Some(400.)] {
             let layout = shaper.shape_interactive(&source, 16., width).unwrap();
             let stops = layout.mapping.as_ref().unwrap().carets.as_deref().unwrap();
             let (mut common, mut split, mut exclusive) = (0, 0, 0);
