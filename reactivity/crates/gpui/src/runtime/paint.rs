@@ -8,8 +8,8 @@ pub(super) enum PatchOutcome {
 }
 /// Exactly one transition, never an accumulated change log. A coalesced native
 /// packet that does not match from rebuilds from the latest complete C bank.
-#[cfg(any(feature = "native", test))]
-#[cfg_attr(not(feature = "native"), allow(dead_code))]
+#[cfg(any(feature = "native-core", test))]
+#[cfg_attr(not(feature = "native-core"), allow(dead_code))]
 pub(crate) struct SlotTransition {
     pub(crate) from: PresentationToken,
     pub(crate) edits: [gpui_canvas::SlotEdit; 1],
@@ -51,7 +51,7 @@ impl<M: View + 'static> Runtime<M> {
             return Ok(false);
         };
         let damage = plan.commit();
-        #[cfg(feature = "native")]
+        #[cfg(feature = "native-core")]
         self.styles.record_slot_transition(
             self.latest_token.expect("complete predecessor has a token"),
             edits[0],
@@ -156,7 +156,7 @@ impl Prepared {
     }
 }
 
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub(crate) fn with_paint_scene<R>(
         &self,

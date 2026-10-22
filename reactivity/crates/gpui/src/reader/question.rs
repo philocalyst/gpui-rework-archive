@@ -627,7 +627,7 @@ where
         let own = self.start_pending();
         self.tail.start_questions() || own
     }
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &gpui_reactivity_host::native::Wake) {
         let _ = self.control().wake.set(wake.clone());
         self.control().signal();
@@ -712,7 +712,7 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         let own = self.lanes.start_questions();
         self.tail.start_questions() || own
     }
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &gpui_reactivity_host::native::Wake) {
         self.lanes.attach(wake);
         self.tail.attach(wake);

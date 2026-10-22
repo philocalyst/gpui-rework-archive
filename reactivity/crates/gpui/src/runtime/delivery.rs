@@ -221,7 +221,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         }
     }
 
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     pub(crate) fn runtime_epoch(&self) -> u64 {
         self.inner
             .as_ref()
@@ -229,7 +229,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .source_epoch
     }
 
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     pub(crate) fn attach_wake(&mut self, wake: &gpui_reactivity_host::native::Wake) {
         self.lanes.attach(wake);
     }

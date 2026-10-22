@@ -97,7 +97,7 @@ fn rect(rect: Rect) -> [f32; 4] {
 
 impl Serialize for Part<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let mut node = serializer.serialize_struct("Part", 17)?;
+        let mut node = serializer.serialize_struct("Part", 18)?;
         node.serialize_field("target", &self.target())?;
         node.serialize_field("parent", &self.parent())?;
         node.serialize_field("role", &self.role())?;
@@ -105,6 +105,7 @@ impl Serialize for Part<'_> {
         node.serialize_field("name", &self.name())?;
         node.serialize_field("description", &self.description())?;
         node.serialize_field("value", &self.value())?;
+        node.serialize_field("selection", &self.selection().map(Selection::from))?;
         node.serialize_field("focused", &self.focused())?;
         node.serialize_field("actions", &self.actions())?;
         node.serialize_field("bounds", &rect(self.bounds()))?;
@@ -119,5 +120,29 @@ impl Serialize for Part<'_> {
         node.serialize_field("viewport", &self.viewport())?;
         node.serialize_field("corner_radius", &self.corner_radius())?;
         node.end()
+    }
+}
+
+#[derive(Serialize)]
+struct Selection {
+    anchor: SelectionPosition,
+    focus: SelectionPosition,
+}
+#[derive(Serialize)]
+struct SelectionPosition {
+    byte: usize,
+    affinity: &'static str,
+}
+impl From<gpui_canvas::TextPosition> for SelectionPosition {
+    fn from(position: gpui_canvas::TextPosition) -> Self {
+        Self { byte: position.offset.byte(), affinity: match position.affinity {
+            gpui_canvas::CaretAffinity::Upstream => "upstream",
+            gpui_canvas::CaretAffinity::Downstream => "downstream",
+        } }
+    }
+}
+impl From<gpui_canvas::TextSelection> for Selection {
+    fn from(selection: gpui_canvas::TextSelection) -> Self {
+        Self { anchor: selection.anchor.into(), focus: selection.focus.into() }
     }
 }

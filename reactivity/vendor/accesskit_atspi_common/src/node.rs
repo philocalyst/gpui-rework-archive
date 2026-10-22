@@ -1239,6 +1239,26 @@ impl PlatformNode {
         })
     }
 
+    /// One explicit-range replacement request, never two queued actions.
+    pub fn replace_text(&self, start: i32, end: i32, value: &str) -> Result<bool> {
+        if start > end { return Err(Error::IndexOutOfRange); }
+        self.resolve_for_text_with_context(|node, tree, context| {
+            if node.is_read_only() || !node.data().supports_action(Action::ReplaceSelectedText) {
+                return Ok(false);
+            }
+            let selection = text_selection_from_offsets_exact(&node, start, end)
+                .ok_or(Error::IndexOutOfRange)?;
+            let (target_node, target_tree) = tree.state().locate_node(node.id()).ok_or(Error::Defunct)?;
+            context.do_action(ActionRequest {
+                action: Action::ReplaceSelectedText, target_tree, target_node,
+                data: Some(ActionData::ReplaceText(Box::new(accesskit::TextReplacement {
+                    selection, value: value.into(),
+                }))),
+            });
+            Ok(true)
+        })
+    }
+
     pub fn n_anchors(&self) -> Result<i32> {
         self.resolve(|node| if node.url().is_some() { Ok(1) } else { Ok(0) })
     }
@@ -1466,16 +1486,15 @@ impl PlatformNode {
 
     pub fn set_caret_offset(&self, offset: i32) -> Result<bool> {
         self.resolve_for_text_with_context(|node, tree, context| {
-            let offset = text_position_from_offset(&node, offset).ok_or(Error::IndexOutOfRange)?;
+            let selection = text_selection_from_offsets_exact(&node, offset, offset)
+                .ok_or(Error::IndexOutOfRange)?;
             let (target_node, target_tree) =
                 tree.state().locate_node(node.id()).ok_or(Error::Defunct)?;
             context.do_action(ActionRequest {
                 action: Action::SetTextSelection,
                 target_tree,
                 target_node,
-                data: Some(ActionData::SetTextSelection(
-                    offset.to_degenerate_range().to_text_selection(),
-                )),
+                data: Some(ActionData::SetTextSelection(selection)),
             });
             Ok(true)
         })
@@ -1618,7 +1637,7 @@ impl PlatformNode {
         }
 
         self.resolve_for_text_with_context(|node, tree, context| {
-            let range = text_range_from_offsets(&node, start_offset, end_offset)
+            let selection = text_selection_from_offsets_exact(&node, start_offset, end_offset)
                 .ok_or(Error::IndexOutOfRange)?;
             let (target_node, target_tree) =
                 tree.state().locate_node(node.id()).ok_or(Error::Defunct)?;
@@ -1626,7 +1645,7 @@ impl PlatformNode {
                 action: Action::SetTextSelection,
                 target_tree,
                 target_node,
-                data: Some(ActionData::SetTextSelection(range.to_text_selection())),
+                data: Some(ActionData::SetTextSelection(selection)),
             });
             Ok(true)
         })

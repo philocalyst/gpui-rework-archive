@@ -25,15 +25,17 @@ accesskit_winit = { version = "=0.34.1", default-features = false, features = ["
 [features]
 default = ["simd"]
 simd = ["gpui_canvas/simd", "gpui_gpu?/simd"]
-accessibility = ["native", "dep:accesskit", "dep:accesskit_winit"]
-native = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
-desktop = ["native", "accessibility"]
-x11 = ["x11-minimal", "accessibility"]
-wayland = ["wayland-minimal", "accessibility"]
+accessibility = ["native-core", "dep:accesskit", "dep:accesskit_winit"]
+native = ["native-core", "accessibility"]
+# Implementation transport; prefer native or explicit *-minimal diagnostics.
+native-core = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
+desktop = ["native"]
+x11 = ["x11-minimal", "native"]
+wayland = ["wayland-minimal", "native"]
 # Explicit AT-disabled transport diagnostics; ordinary shipped Linux profiles
 # above include the real AT-SPI adapter, not AccessKit's null Unix backend.
-x11-minimal = ["native", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
-wayland-minimal = ["native", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+x11-minimal = ["native-core", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
+wayland-minimal = ["native-core", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
 
 [dev-dependencies]
 triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
@@ -47,40 +49,40 @@ x11rb = { version = "=0.14.0", features = ["record", "shm", "request-parsing"] }
 
 [[example]]
 name = "workbench"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "empty"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "graphics"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "workspace"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "library"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "unicode"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "luna_bench"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "covers"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "panes"
-required-features = ["native"]
+required-features = ["native-core"]
 
 [[example]]
 name = "inspector"
-required-features = ["native"]
+required-features = ["native-core"]

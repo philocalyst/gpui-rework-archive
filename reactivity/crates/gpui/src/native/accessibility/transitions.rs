@@ -1,5 +1,10 @@
 //! Independent full Consumer trees are test oracles, never runtime state.
 use super::*;
+fn cohort<M: View + 'static>(win: &Win<M>) -> Cohort {
+    let mut cohort = Cohort::default();
+    cohort.refresh(win).unwrap();
+    cohort
+}
 use crate::property::{Contribution, TRANSFORM, WIDTH};
 use crate::{
     Affine, El, FieldId, Signal, Source, Sources, WindowOptions, button, column, div, text,
@@ -30,6 +35,7 @@ fn full<M: View + 'static>(win: &Win<M>) -> TreeUpdate {
         &win.accessibility_sheet().unwrap(),
         win.accessibility_state().unwrap(),
         "Oracle",
+        &cohort(win),
     )
 }
 fn acknowledge<M: View + 'static>(win: &mut Win<M>) {
@@ -50,7 +56,7 @@ fn apply<M: View + 'static>(
         None => assert!(delta.is_none(), "transition must use full fallback"),
     }
     let update = if let Some(indices) = delta {
-        project_sparse(&sheet, indices)
+        project_sparse(&sheet, indices, &cohort(win))
     } else {
         full(win)
     };
@@ -154,7 +160,7 @@ fn hundred_thousand_p_one_leaf_field_and_inspector_match_full_consumer() {
     .unwrap();
     apply(&win, base, &mut tree, Some(1));
     win.focus(target).unwrap();
-    let focus = focus_update(&win.accessibility_sheet().unwrap());
+    let focus = focus_update(&win.accessibility_sheet().unwrap(), &cohort(&win));
     assert!(focus.nodes.is_empty());
     tree.update_and_process_changes(focus, &mut Changes::default());
     assert_eq!(
@@ -539,22 +545,25 @@ fn sparse_transition_measurements() {
         assert_eq!(delta.len(), 1);
         let sheet = win.accessibility_sheet().unwrap();
         report("full_projection", count, true, || {
-            black_box(project(&sheet, state, "Oracle"));
+            black_box(project(&sheet, state, "Oracle", &cohort(&win)));
         });
         report("leaf_projection", count, true, || {
-            let update = project_sparse(&sheet, delta);
+            let update = project_sparse(&sheet, delta, &cohort(&win));
             assert_eq!(update.nodes.len(), 1);
             black_box(update);
         });
-        let mut tree = Tree::new(project(&sheet, state, "Oracle"), true);
+        let mut tree = Tree::new(project(&sheet, state, "Oracle", &cohort(&win)), true);
         report("full_projection_consumer", count, true, || {
             tree.update_and_process_changes(
-                project(&sheet, state, "Oracle"),
+                project(&sheet, state, "Oracle", &cohort(&win)),
                 &mut Changes::default(),
             );
         });
         report("leaf_projection_consumer", count, true, || {
-            tree.update_and_process_changes(project_sparse(&sheet, delta), &mut Changes::default());
+            tree.update_and_process_changes(
+                project_sparse(&sheet, delta, &cohort(&win)),
+                &mut Changes::default(),
+            );
         });
     }
 }

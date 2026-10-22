@@ -1,6 +1,6 @@
 //! Direct typed dimensions, color and Flex fields through the ordinary ports.
 use gpui::prelude::*;
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 #[path = "support/renderer.rs"]
 mod renderer;
 struct Panel {
@@ -61,7 +61,7 @@ impl View for Panel {
         .p(16)
     }
 }
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 fn main() -> Result<(), gpui::NativeError> {
     gpui::Application::run_window(renderer::configure(
         gpui::Window::document(Panel::new())
@@ -69,7 +69,7 @@ fn main() -> Result<(), gpui::NativeError> {
             .size(420, 300),
     ))
 }
-#[cfg(not(feature = "native"))]
+#[cfg(not(feature = "native-core"))]
 fn main() -> Result<(), gpui::Error> {
     let mut win = Win::with_size(Panel::new(), 420, 300)?;
     let preview = win.query().name("preview").one()?;

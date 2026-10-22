@@ -358,7 +358,7 @@ impl super::Value for Record {
 pub(in crate::runtime) struct Bound {
     records: super::Lane<Record>,
     pub(in crate::runtime) bank: Bank,
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     pub(in crate::runtime) transition: Option<super::super::paint::SlotTransition>,
 }
 impl Bound {
@@ -487,7 +487,7 @@ impl Builder {
         Bound {
             records: self.records.finish(),
             bank: self.discovery.bank,
-            #[cfg(feature = "native")]
+            #[cfg(feature = "native-core")]
             transition: None,
         }
     }

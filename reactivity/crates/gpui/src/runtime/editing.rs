@@ -11,6 +11,30 @@ pub(super) struct Editing {
     selection: TextSelection,
 }
 
+/// The two immutable presentation endpoints, not another logical editor. This
+/// remains available when a provider activates while a newer edit has failed.
+/// Nonzero identities are allocated by Sites; Option uses that existing niche.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) struct SelectionSnapshot {
+    identity: NonZeroU64,
+    selection: TextSelection,
+}
+#[derive(Default)]
+pub(super) struct FrozenSelection {
+    pub presented: Option<SelectionSnapshot>,
+    pub candidate: Option<SelectionSnapshot>,
+}
+impl SelectionSnapshot {
+    pub fn selection(self, identity: u64) -> Option<TextSelection> {
+        (self.identity.get() == identity).then_some(self.selection)
+    }
+}
+impl FrozenSelection {
+    pub fn unused(&self) -> bool {
+        self.presented.is_none() && self.candidate.is_none()
+    }
+}
+
 /// Stack-only post-admission intent. It is consumed after the source is frozen
 /// back into the live text lane and before a candidate scene is prepared.
 #[derive(Clone, Copy)]
@@ -52,6 +76,14 @@ impl<M: View + 'static> Runtime<M> {
         let index = self.by_identity.get(state.identity)?;
         self.editing_at(index)
             .map(|state| (state.identity, state.selection))
+    }
+
+    pub(super) fn selection_snapshot(&self) -> Option<SelectionSnapshot> {
+        self.active_selection()
+            .map(|(identity, selection)| SelectionSnapshot {
+                identity: NonZeroU64::new(identity).expect("Sites identities are nonzero"),
+                selection,
+            })
     }
 
     fn interaction_layout(&mut self, index: usize) -> Result<&TextLayout, Error> {
@@ -245,6 +277,21 @@ impl<M: View + 'static> Runtime<M> {
 }
 
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn accessibility_input(
+        &self,
+        target: Target,
+    ) -> Result<(FieldId, SharedText), Error> {
+        let runtime = self.runtime()?;
+        runtime.live()?;
+        runtime.current_presentation()?;
+        let index = runtime.input_index(target)?;
+        let site = runtime.nodes[index]
+            .text_slot()
+            .get(&runtime.texts)
+            .unwrap();
+        Ok((site.field.unwrap(), site.value.clone()))
+    }
     /// Current logical selection, or a collapsed caret at the input's end.
     /// This query uses current source authority and remains available after a
     /// presentation failure. It never returns geometry from an older frame.
@@ -625,6 +672,9 @@ mod tests {
         );
         if cfg!(target_pointer_width = "64") {
             assert_eq!(std::mem::size_of::<Editing>(), 40);
+            assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
+            assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
+            assert_eq!(std::mem::size_of::<FrozenSelection>(), 48);
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);
             assert_eq!(std::mem::size_of::<Node>(), 40);
             assert_eq!(std::mem::size_of::<TextSite>(), 80);

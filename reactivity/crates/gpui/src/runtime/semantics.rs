@@ -12,6 +12,8 @@ pub enum ActionKind {
     SetValue = 8,
     Scroll = 16,
     ScrollIntoView = 32,
+    SetTextSelection = 64,
+    ReplaceSelectedText = 128,
 }
 
 /// Owned routing identity and borrowed data; no platform callback can retain a
@@ -23,6 +25,14 @@ pub enum Action<'a> {
     Focus,
     Blur,
     SetValue(&'a str),
+    /// UTF-8 grapheme endpoints in the current input source.
+    SetTextSelection(gpui_canvas::TextSelection),
+    ReplaceSelectedText(&'a str),
+    /// One explicit current-source range edit, using the ordinary replace path.
+    ReplaceText {
+        selection: gpui_canvas::TextSelection,
+        value: &'a str,
+    },
     Scroll {
         direction: crate::ScrollDirection,
         unit: crate::ScrollUnit,
@@ -37,6 +47,10 @@ impl Action<'_> {
             Self::Focus => ActionKind::Focus,
             Self::Blur => ActionKind::Blur,
             Self::SetValue(_) => ActionKind::SetValue,
+            Self::SetTextSelection(_) => ActionKind::SetTextSelection,
+            Self::ReplaceSelectedText(_) | Self::ReplaceText { .. } => {
+                ActionKind::ReplaceSelectedText
+            }
             Self::Scroll { .. } | Self::ScrollTo(_) => ActionKind::Scroll,
             Self::ScrollIntoView => ActionKind::ScrollIntoView,
         }
@@ -59,6 +73,8 @@ impl Actions {
             ActionKind::SetValue,
             ActionKind::Scroll,
             ActionKind::ScrollIntoView,
+            ActionKind::SetTextSelection,
+            ActionKind::ReplaceSelectedText,
         ]
         .into_iter()
         .filter(move |&kind| self.contains(kind))
@@ -73,7 +89,10 @@ impl Actions {
         let focus = matches!(kind, NodeKind::Input | NodeKind::Button) || handler;
         let activation = u8::from(handler && kind != NodeKind::Input) * ActionKind::Activate as u8;
         let navigation = u8::from(focus) * (ActionKind::Focus as u8 | ActionKind::Blur as u8);
-        let value = u8::from(kind == NodeKind::Input) * ActionKind::SetValue as u8;
+        let value = u8::from(kind == NodeKind::Input)
+            * (ActionKind::SetValue as u8
+                | ActionKind::SetTextSelection as u8
+                | ActionKind::ReplaceSelectedText as u8);
         Self(
             activation
                 | navigation
@@ -167,6 +186,18 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 Ok(runtime.commit())
             }
             Action::SetValue(value) => runtime.set_input_value(target, value),
+            Action::SetTextSelection(selection) => {
+                runtime.current_presentation()?;
+                runtime.select_input(target, selection)
+            }
+            Action::ReplaceSelectedText(value) => {
+                runtime.current_presentation()?;
+                runtime.replace_input(target, None, value)
+            }
+            Action::ReplaceText { selection, value } => {
+                runtime.current_presentation()?;
+                runtime.replace_input(target, Some(selection), value)
+            }
         }
     }
 }

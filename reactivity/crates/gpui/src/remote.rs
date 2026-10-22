@@ -4,18 +4,18 @@ use crate::{
     reader::{Outcome, ReaderKey, ReaderValues, question::Change},
     source::Sources,
 };
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 use gpui_reactivity_host::native::Wake;
 use std::collections::VecDeque;
 use std::sync::mpsc::{self, Receiver, SyncSender, TrySendError};
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 use std::sync::{Arc, OnceLock};
 
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 struct Notification {
     wake: OnceLock<Wake>,
 }
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 impl Notification {
     fn signal(&self) {
         if let Some(wake) = self.wake.get() {
@@ -71,14 +71,14 @@ impl<T> std::fmt::Debug for SendError<T> {
 /// ```
 pub struct Remote<T> {
     sender: SyncSender<T>,
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     notification: Arc<Notification>,
 }
 impl<T> Clone for Remote<T> {
     fn clone(&self) -> Self {
         Self {
             sender: self.sender.clone(),
-            #[cfg(feature = "native")]
+            #[cfg(feature = "native-core")]
             notification: Arc::clone(&self.notification),
         }
     }
@@ -91,21 +91,21 @@ impl<T> Remote<T> {
     /// An attached native event proxy/OS may allocate separately when posting wakes.
     pub fn bounded(capacity: usize) -> (Self, Inbox<T>) {
         let (sender, receiver) = mpsc::sync_channel(capacity);
-        #[cfg(feature = "native")]
+        #[cfg(feature = "native-core")]
         let notification = Arc::new(Notification {
             wake: OnceLock::new(),
         });
         (
             Self {
                 sender,
-                #[cfg(feature = "native")]
+                #[cfg(feature = "native-core")]
                 notification: Arc::clone(&notification),
             },
             Inbox {
                 receiver: Some(receiver),
                 staging: VecDeque::with_capacity(capacity),
                 capacity,
-                #[cfg(feature = "native")]
+                #[cfg(feature = "native-core")]
                 notification,
             },
         )
@@ -113,7 +113,7 @@ impl<T> Remote<T> {
     pub fn try_send(&self, value: T) -> Result<(), SendError<T>> {
         match self.sender.try_send(value) {
             Ok(()) => {
-                #[cfg(feature = "native")]
+                #[cfg(feature = "native-core")]
                 self.notification.signal();
                 Ok(())
             }
@@ -133,7 +133,7 @@ pub struct Inbox<T> {
     receiver: Option<Receiver<T>>,
     staging: VecDeque<T>,
     capacity: usize,
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     notification: Arc<Notification>,
 }
 impl<T> Inbox<T> {
@@ -209,7 +209,7 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
         false
     }
     fn close(&mut self);
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &Wake);
     fn signal(&self);
 }
@@ -234,7 +234,7 @@ impl<M> LaneSet<M> for () {
     }
     fn apply(&mut self, _: &mut M, _: &mut usize) {}
     fn close(&mut self) {}
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     fn attach(&mut self, _: &Wake) {}
     fn signal(&self) {}
 }
@@ -309,7 +309,7 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
     fn start_questions(&mut self) -> bool {
         self.tail.start_questions()
     }
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &Wake) {
         // Attach once to this owner's event loop; surface suspend/resume does not
         // change its loop. Signal after attachment covers messages sent unbound.
@@ -318,7 +318,7 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
         self.tail.attach(wake);
     }
     fn signal(&self) {
-        #[cfg(feature = "native")]
+        #[cfg(feature = "native-core")]
         self.inbox.notification.signal();
         self.tail.signal();
     }
@@ -352,11 +352,11 @@ mod tests {
 
 #[cfg(test)]
 fn notification_size() -> usize {
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     {
         std::mem::size_of::<Notification>()
     }
-    #[cfg(not(feature = "native"))]
+    #[cfg(not(feature = "native-core"))]
     {
         0
     }

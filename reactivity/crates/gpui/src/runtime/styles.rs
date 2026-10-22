@@ -124,14 +124,14 @@ impl Styles {
         }
         false
     }
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     pub(super) fn slot_transition(&self) -> Option<&super::paint::SlotTransition> {
         match self {
             Self::Colors(values) => values.transition.as_ref(),
             _ => None,
         }
     }
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     pub(super) fn record_slot_transition(
         &mut self,
         from: super::PresentationToken,
@@ -146,7 +146,7 @@ impl Styles {
         });
     }
     pub(super) fn clear_slot_transition(&mut self) {
-        #[cfg(feature = "native")]
+        #[cfg(feature = "native-core")]
         if let Self::Colors(values) = self {
             values.transition = None;
         }
