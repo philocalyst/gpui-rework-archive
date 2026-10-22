@@ -231,8 +231,8 @@ impl accesskit::ActionHandler for Ingress {
                 };
                 Command::Scroll(id, direction, unit)
             }
-            // Unadvertised operations have no effect. Selection/IME and native
-            // virtual-item realization need additional runtime authority.
+            // Unadvertised operations have no effect. IME and native virtual-
+            // item realization need additional runtime authority.
             _ => return,
         };
         match self.0.sender.try_send(Queued {
@@ -318,6 +318,12 @@ impl Bridge {
         &mut self,
         owner: &mut Win<M, L>,
     ) -> Result<Applied, NativeError> {
+        // No request may act before this provider has published a cohort. Any
+        // queued pre-publication request is rejected by its older publication
+        // revision after sync; the namespace binding survives provider restarts.
+        if self.published.is_none() {
+            return Ok(std::array::from_fn(|_| None));
+        }
         drain_actions(&self.ingress, &self.receiver, &self.cohort, owner)
     }
     pub(super) fn sync<M: View + 'static, L: crate::remote::LaneSet<M>>(
@@ -328,6 +334,7 @@ impl Bridge {
         owner.accessibility_observe(active)?;
         if !active {
             self.cohort.clear();
+            self.published = None;
             self.refresh = Refresh::Immediate;
             return Ok(());
         }

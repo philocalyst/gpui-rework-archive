@@ -271,6 +271,18 @@ fn empty_static_text_does_not_qualify_another_owner() {
     let mut cohort = Cohort::default();
     cohort.refresh(&first).unwrap();
     let id = native_id(&first, &cohort, target(&first, 1));
+    let mut legacy = None;
+    first
+        .visit(|part| {
+            if part.target() == target(&first, 1) {
+                legacy = Some(NodeId(part.native_id() * 2));
+            }
+        })
+        .unwrap();
+    assert_eq!(
+        cohort.target(&first, legacy.unwrap()),
+        Err(Error::StaleTarget)
+    );
     assert_eq!(cohort.target(&second, id), Err(Error::StaleTarget));
     assert_eq!(cohort.refresh(&second), Err(Error::StaleTarget));
     assert!(cohort.target(&first, id).is_ok());
