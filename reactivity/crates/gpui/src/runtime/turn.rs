@@ -214,8 +214,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     }
     pub(super) fn activate(&mut self, target: Target) -> Result<Commit, Error> {
         self.live()?;
-        let identity = self.resolve(target)?;
-        let index = self.runtime.by_identity.required(identity);
+        let index = self.resolve_index(target)?;
         if self.runtime.nodes[index].kind() == NodeKind::Input {
             self.runtime.changed_nodes = 0;
             return Ok(self.commit());
@@ -255,8 +254,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         edit: impl FnOnce(&mut String),
     ) -> Result<Commit, Error> {
         self.live()?;
-        let identity = self.resolve(target)?;
-        let node = &self.runtime.nodes[self.runtime.by_identity.required(identity)];
+        let index = self.resolve_index(target)?;
+        let node = &self.runtime.nodes[index];
         if node.kind() != NodeKind::Input {
             return Err(Error::NotInput);
         }
@@ -264,9 +263,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .text_slot()
             .get(&self.runtime.texts)
             .and_then(|text| text.field)
-            .ok_or(Error::UnregisteredInput {
-                node: self.runtime.by_identity.required(identity),
-            })?;
+            .ok_or(Error::UnregisteredInput { node: index })?;
         let codec = self.runtime.fanout[&field].codec;
         let mut input = match catch_unwind(AssertUnwindSafe(|| {
             self.runtime

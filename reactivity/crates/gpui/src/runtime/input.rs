@@ -179,8 +179,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             }),
             Key::Enter => runtime.activate(target),
             Key::Space => {
-                let identity = runtime.resolve(target)?;
-                if runtime.nodes[runtime.by_identity.required(identity)].kind() == NodeKind::Input {
+                let index = runtime.resolve_index(target)?;
+                if runtime.nodes[index].kind() == NodeKind::Input {
                     runtime.edit_text(target, |value| value.push(' '))
                 } else {
                     runtime.activate(target)
@@ -193,15 +193,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 
 impl<M: View + 'static> Runtime<M> {
     fn focusable(&self, identity: u64) -> bool {
-        self.by_identity.get(identity).is_some_and(|index| {
-            let node = &self.nodes[index];
-            matches!(node.kind(), NodeKind::Input | NodeKind::Button) || node.handler.is_some()
-        })
+        self.by_identity
+            .get(identity)
+            .is_some_and(|index| self.nodes[index].focusable())
     }
     pub(super) fn focus(&mut self, target: Target) -> Result<Commit, Error> {
         self.live()?;
-        let identity = self.resolve(target)?;
-        if !self.focusable(identity) {
+        let index = self.resolve_index(target)?;
+        if !self.nodes[index].focusable() {
             return Err(Error::NotInteractive);
         }
         self.focused = Some(target);
@@ -210,9 +209,9 @@ impl<M: View + 'static> Runtime<M> {
     }
     pub(super) fn prune_focus(&mut self) {
         if self.focused.is_some_and(|target| {
-            self.resolve(target)
+            self.resolve_index(target)
                 .ok()
-                .is_none_or(|identity| !self.focusable(identity))
+                .is_none_or(|index| !self.nodes[index].focusable())
         }) {
             self.focused = None;
         }

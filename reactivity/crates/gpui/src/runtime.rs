@@ -568,6 +568,9 @@ struct Node {
 #[cfg(test)]
 mod style_ledger;
 impl Node {
+    fn focusable(&self) -> bool {
+        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.handler.is_some()
+    }
     #[inline]
     fn identity(&self) -> u64 {
         self.identity.get()
@@ -1246,8 +1249,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     fn style_property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
-        Ok(property.get(runtime.styles.get(runtime.by_identity.required(identity))))
+        let index = runtime.resolve_index(target)?;
+        Ok(property.get(runtime.styles.get(index)))
     }
     fn style_contribution<T>(
         &self,
@@ -1269,12 +1272,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let index = runtime.resolve_index(target)?;
+        let identity = runtime.nodes[index].identity();
         let epoch = runtime
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let index = runtime.by_identity.required(identity);
         let before = *runtime.styles.get(index);
         let after = runtime
             .overrides
@@ -1412,22 +1415,29 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn resolve(&self, target: Target) -> Result<u64, Error> {
-        self.sites
-            .resolve(target)
-            .filter(|identity| {
-                self.logical_valid
-                    && self.by_identity.get(*identity).is_some_and(|index| {
-                        !self.has_lists()
-                            || !self.in_list(index)
-                            || self
-                                .prepared
-                                .as_ref()
-                                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
-                                .iter()
-                                .any(|node| node.identity == *identity)
-                    })
-            })
-            .ok_or(Error::StaleTarget)
+        self.resolve_index(target)
+            .map(|index| self.nodes[index].identity())
+    }
+    /// Return the lookup already required for target admission. The index stays
+    /// inside the current owner borrow; it cannot outlive a description rebuild.
+    fn resolve_index(&self, target: Target) -> Result<usize, Error> {
+        if !self.logical_valid {
+            return Err(Error::StaleTarget);
+        }
+        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
+        let index = self.by_identity.get(identity).ok_or(Error::StaleTarget)?;
+        if self.has_lists()
+            && self.in_list(index)
+            && !self
+                .prepared
+                .as_ref()
+                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
+                .iter()
+                .any(|node| node.identity == identity)
+        {
+            return Err(Error::StaleTarget);
+        }
+        Ok(index)
     }
     fn current_presentation(&self) -> Result<(), Error> {
         if self.logical_valid
