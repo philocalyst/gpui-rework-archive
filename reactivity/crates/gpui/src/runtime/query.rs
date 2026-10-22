@@ -13,6 +13,8 @@ struct Context<'a> {
     sites: &'a Sites,
     nodes: &'a [Presented],
     focused: Option<Target>,
+    #[cfg(feature = "accessibility")]
+    focused_hint: Option<usize>,
     metadata: Option<&'a super::metadata::Sheet>,
     geometry: Option<&'a super::geometry::Geometry>,
     selection: Option<super::editing::SelectionSnapshot>,
@@ -23,6 +25,11 @@ impl<'a> Context<'a> {
             sites: &runtime.sites,
             nodes: &runtime.presented,
             focused: runtime.focused,
+            #[cfg(feature = "accessibility")]
+            focused_hint: runtime
+                .focused
+                .and_then(|target| runtime.sites.resolve(target))
+                .and_then(|identity| runtime.by_identity.get(identity)),
             selection: runtime
                 .metadata
                 .as_ref()
@@ -62,6 +69,19 @@ pub(crate) struct SemanticState {
 }
 #[cfg(feature = "accessibility")]
 impl SemanticSheet<'_> {
+    pub(crate) fn focused(&self) -> Option<Part<'_>> {
+        let identity = self.0.sites.resolve(self.0.focused?)?;
+        // The current logical index is only a hint. Lists compact P, and an
+        // eligible older P may differ from the current description. Certify
+        // membership by P identity before using it; otherwise search P itself.
+        let node = self
+            .0
+            .focused_hint
+            .and_then(|index| self.0.nodes.get(index))
+            .filter(|node| node.identity == identity)
+            .or_else(|| self.0.nodes.iter().find(|node| node.identity == identity))?;
+        Some(self.0.part(node))
+    }
     pub(crate) fn len(&self) -> usize {
         self.0.nodes.len()
     }
@@ -495,5 +515,37 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut count = 0;
         self.visit(|part| count += usize::from(predicate(part)))?;
         Ok(count)
+    }
+}
+
+#[cfg(all(test, feature = "accessibility"))]
+mod tests {
+    use super::*;
+    struct Buttons;
+    impl View for Buttons {
+        fn view(&self) -> crate::El<'_> {
+            crate::column((crate::button("first"), crate::button("second")))
+        }
+    }
+    #[test]
+    fn focus_hint_requires_acknowledged_identity_membership() {
+        let mut win = Win::demo(Buttons);
+        assert!(win.accessibility_sheet().unwrap().focused().is_none());
+        let second = win.button("second");
+        win.focus(second).unwrap();
+        let runtime = win.runtime().unwrap();
+        let mut context = Context::new(runtime);
+        assert_eq!(SemanticSheet(context).focused().unwrap().target(), second);
+        for hint in [None, Some(0), Some(usize::MAX)] {
+            context = Context::new(runtime);
+            context.focused_hint = hint;
+            assert_eq!(SemanticSheet(context).focused().unwrap().target(), second);
+        }
+        // A new/logically surviving target must not become native focus unless
+        // the acknowledged sheet actually contains it, regardless of the hint.
+        context = Context::new(runtime);
+        context.focused = Some(runtime.sites.target(u64::MAX / 4));
+        context.focused_hint = Some(1);
+        assert!(SemanticSheet(context).focused().is_none());
     }
 }
