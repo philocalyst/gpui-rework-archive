@@ -3,8 +3,13 @@ use gpui_canvas::{
     GlyphKey, GlyphMask, OutputProfile, PixelFormat, PreparedDraw, PreparedGroup,
     PreparedPlacement, PreparedScene, SdrMapping,
 };
-use std::{borrow::Cow, collections::HashMap};
+use std::{
+    borrow::Cow,
+    collections::HashMap,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 mod images;
+mod owned;
 mod paint;
 mod slots;
 pub use images::ImageStats;
@@ -28,7 +33,11 @@ pub enum Error {
     Shader(String),
     UnsupportedTarget(wgpu::TextureFormat),
     InvalidScene,
-    Precision { draw: usize },
+    /// The mutable state belongs to a different context, even on the same device.
+    IncompatibleContext,
+    Precision {
+        draw: usize,
+    },
     ResourceLimit,
     AtlasFull,
 }
@@ -326,14 +335,37 @@ impl Packet {
         self.size[0] & BANK_PACKET != 0
     }
 }
-/// GPU-owned caches and one fullscreen tile compositor. It consumes canonical
-/// scene records directly; no CPU image, MSAA image or float intermediate exists.
+/// An independently owned context and its mutable packet/resources.
+/// Use `GpuContext` and `RendererState` directly to share immutable GPU work.
 pub struct Renderer {
+    context: GpuContext,
+    state: RendererState,
+}
+
+/// One device/queue and one checked compositor pipeline for a fixed format.
+/// Borrow this owner for independent per-window `RendererState`s. There is no
+/// pipeline map, per-draw reference counting, or process-wide GPU cache.
+/// A different format requires a separate context. The queue must belong to
+/// the device, as with WGPU's ordinary safe resource-creation API.
+pub struct GpuContext {
     device: wgpu::Device,
     queue: wgpu::Queue,
     format: wgpu::TextureFormat,
     pipeline: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
+    id: ContextId,
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct ContextId(usize);
+// Identity generation only: no GPU resource is stored in this static.
+static NEXT_CONTEXT: AtomicUsize = AtomicUsize::new(1);
+
+/// Independent buffers, glyph atlas, images, scratch and retained packet.
+/// No context reference is retained. Resource leases remain safe if a context
+/// is dropped first, but rendering requires the original live context.
+/// After device loss, retire that context and all its states together.
+pub struct RendererState {
+    context_id: ContextId,
     globals: Buffer,
     draws: Buffer,
     tiles: Buffer,
@@ -352,7 +384,7 @@ pub struct Renderer {
     stats: Stats,
     packet: Option<Packet>,
 }
-impl Renderer {
+impl GpuContext {
     pub async fn request(
         adapter: &wgpu::Adapter,
         format: wgpu::TextureFormat,
@@ -409,22 +441,81 @@ impl Renderer {
             multiview_mask: None,
             cache: None,
         });
+        // A destroyed device can yield an invalid pipeline. Keep inferred
+        // layout validation in the same scope instead of panicking afterward.
+        let layout = pipeline.get_bind_group_layout(0);
         if let Some(error) = errors.pop().await {
             return Err(Error::Shader(error.to_string()));
         }
-        let layout = pipeline.get_bind_group_layout(0);
-        let globals = Buffer::new(&device, "globals", 48, true);
-        let draws = Buffer::new(&device, "draws", 16, false);
-        let tiles = Buffer::new(&device, "tiles", 8, false);
-        let indices = Buffer::new(&device, "indices", 4, false);
-        let corrections = Buffer::new(&device, "inverse residuals", 32, false);
-        let atlas = Atlas::new(&device, 1);
         Ok(Self {
             device,
             queue,
             format,
             pipeline,
             layout,
+            id: ContextId(
+                NEXT_CONTEXT
+                    .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+                        value.checked_add(1)
+                    })
+                    .expect("GPU context identity exhausted"),
+            ),
+        })
+    }
+    pub fn device(&self) -> &wgpu::Device {
+        &self.device
+    }
+    pub fn queue(&self) -> &wgpu::Queue {
+        &self.queue
+    }
+    pub fn format(&self) -> wgpu::TextureFormat {
+        self.format
+    }
+    fn submit(
+        &self,
+        target: &wgpu::TextureView,
+        bindings: &wgpu::BindGroup,
+    ) -> wgpu::SubmissionIndex {
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("GPUI frame"),
+            });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("GPUI frame"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: target,
+                    resolve_target: None,
+                    depth_slice: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&self.pipeline);
+            pass.set_bind_group(0, bindings, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        self.queue.submit([encoder.finish()])
+    }
+}
+impl RendererState {
+    pub fn new(context: &GpuContext) -> Self {
+        let device = &context.device;
+        let globals = Buffer::new(device, "globals", 48, true);
+        let draws = Buffer::new(device, "draws", 16, false);
+        let tiles = Buffer::new(device, "tiles", 8, false);
+        let indices = Buffer::new(device, "indices", 4, false);
+        let corrections = Buffer::new(device, "inverse residuals", 32, false);
+        let atlas = Atlas::new(device, 1);
+        Self {
+            context_id: context.id,
             globals,
             draws,
             tiles,
@@ -442,16 +533,13 @@ impl Renderer {
             grouped_records: true,
             stats: Stats::default(),
             packet: None,
-        })
+        }
     }
-    pub fn device(&self) -> &wgpu::Device {
-        &self.device
-    }
-    pub fn queue(&self) -> &wgpu::Queue {
-        &self.queue
-    }
-    pub fn format(&self) -> wgpu::TextureFormat {
-        self.format
+    fn check_context(&self, context: &GpuContext) -> Result<(), Error> {
+        if self.context_id != context.id {
+            return Err(Error::IncompatibleContext);
+        }
+        Ok(())
     }
     pub fn stats(&self) -> Stats {
         self.stats
@@ -476,20 +564,26 @@ impl Renderer {
 
     /// Validate and prepare this borrowed scene on every call. Public scene
     /// headers are mutable, so no identity or repeated borrow implies reuse.
-    /// A new attempt discards redraw eligibility even if admission fails.
+    /// A new attempt discards redraw eligibility even if scene admission fails.
+    /// A wrong context is rejected before mutation and preserves the packet.
+    /// The target must belong to this context's device; WGPU validates that
+    /// inherited precondition, which its public TextureView API cannot query.
     pub fn render(
         &mut self,
+        context: &GpuContext,
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.render_observed(scene, target, |_, _, _, _| {})
+        self.render_observed(context, scene, target, |_, _, _, _| {})
     }
     fn render_observed(
         &mut self,
+        context: &GpuContext,
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
         mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
     ) -> Result<wgpu::SubmissionIndex, Error> {
+        self.check_context(context)?;
         self.packet = None;
         scene
             .color_config
@@ -500,7 +594,7 @@ impl Renderer {
             .ok_or(Error::ResourceLimit)?;
         if target.texture().width() != scene.width
             || target.texture().height() != scene.height
-            || target.texture().format() != self.format
+            || target.texture().format() != context.format
         {
             return Err(Error::InvalidScene);
         }
@@ -520,7 +614,7 @@ impl Renderer {
         {
             return Err(Error::InvalidScene);
         }
-        let hdr = self.format == wgpu::TextureFormat::Rgba16Float;
+        let hdr = context.format == wgpu::TextureFormat::Rgba16Float;
         if hdr != (scene.color_config.format == PixelFormat::Rgba16Float) {
             return Err(Error::InvalidScene);
         }
@@ -635,14 +729,14 @@ impl Renderer {
             }
         }
         images::prepare(
-            &self.device,
-            &self.queue,
+            &context.device,
+            &context.queue,
             &mut self.draws,
             &mut self.images,
             self.records.len(),
             scene,
         )?;
-        let mask_bytes = self.prepare_atlas(scene, has_masks)?;
+        let mask_bytes = self.prepare_atlas(context, scene, has_masks)?;
         // Patch only resource coordinates after every draw has passed admission.
         // Metadata words/correction indices and private common addresses remain.
         let mut word = bank_words;
@@ -749,59 +843,62 @@ impl Renderer {
             clear: scene.clear,
             mapping: [exposure, 0.0, 0.0, 0.0],
         };
-        self.queue
+        context
+            .queue
             .write_buffer(&self.globals.handle, 0, bytemuck::bytes_of(&globals));
         self.draws.write(
-            &self.device,
-            &self.queue,
+            &context.device,
+            &context.queue,
             bytemuck::cast_slice(&self.records),
         );
         self.tiles.write(
-            &self.device,
-            &self.queue,
+            &context.device,
+            &context.queue,
             bytemuck::cast_slice(&self.ranges),
         );
         self.indices.write(
-            &self.device,
-            &self.queue,
+            &context.device,
+            &context.queue,
             bytemuck::cast_slice(&self.references),
         );
         self.corrections.write(
-            &self.device,
-            &self.queue,
+            &context.device,
+            &context.queue,
             bytemuck::cast_slice(&self.residuals),
         );
-        let bindings = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("GPUI scene"),
-            layout: &self.layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: self.globals.handle.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: self.draws.handle.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: self.tiles.handle.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 3,
-                    resource: self.indices.handle.as_entire_binding(),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 4,
-                    resource: wgpu::BindingResource::TextureView(&self.atlas.view),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 5,
-                    resource: self.corrections.handle.as_entire_binding(),
-                },
-            ],
-        });
-        let submitted = self.submit(target, &bindings);
+        let bindings = context
+            .device
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("GPUI scene"),
+                layout: &context.layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: self.globals.handle.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: self.draws.handle.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: self.tiles.handle.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 3,
+                        resource: self.indices.handle.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 4,
+                        resource: wgpu::BindingResource::TextureView(&self.atlas.view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 5,
+                        resource: self.corrections.handle.as_entire_binding(),
+                    },
+                ],
+            });
+        let submitted = context.submit(target, &bindings);
         self.packet = Some(Packet {
             bindings,
             size: [
@@ -863,17 +960,19 @@ impl Renderer {
     /// As with render, the target must be an admissible view on this device.
     pub fn redraw(
         &mut self,
+        context: &GpuContext,
         target: &wgpu::TextureView,
     ) -> Result<Option<wgpu::SubmissionIndex>, Error> {
+        self.check_context(context)?;
         let Some(packet) = &self.packet else {
             return Ok(None);
         };
         if [target.texture().width(), target.texture().height()] != packet.dimensions()
-            || target.texture().format() != self.format
+            || target.texture().format() != context.format
         {
             return Err(Error::InvalidScene);
         }
-        let submitted = self.submit(target, &packet.bindings);
+        let submitted = context.submit(target, &packet.bindings);
         self.stats.submissions = self.stats.submissions.saturating_add(1);
         self.stats.packet_reused = true;
         self.stats.validated_draws = 0;
@@ -887,39 +986,6 @@ impl Renderer {
         Ok(Some(submitted))
     }
 
-    fn submit(
-        &self,
-        target: &wgpu::TextureView,
-        bindings: &wgpu::BindGroup,
-    ) -> wgpu::SubmissionIndex {
-        let mut encoder = self
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("GPUI frame"),
-            });
-        {
-            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("GPUI frame"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: target,
-                    resolve_target: None,
-                    depth_slice: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
-                        store: wgpu::StoreOp::Store,
-                    },
-                })],
-                depth_stencil_attachment: None,
-                timestamp_writes: None,
-                occlusion_query_set: None,
-                multiview_mask: None,
-            });
-            pass.set_pipeline(&self.pipeline);
-            pass.set_bind_group(0, bindings, &[]);
-            pass.draw(0..3, 0..1);
-        }
-        self.queue.submit([encoder.finish()])
-    }
     fn correction(&mut self, inverse: [f64; 6], clip: gpui_canvas::Rect) -> u32 {
         let low = std::array::from_fn::<_, 8, _>(|i| match i {
             0..6 => (inverse[i] - f64::from(inverse[i] as f32)) as f32,
@@ -967,27 +1033,32 @@ impl Renderer {
         });
         Ok(total)
     }
-    fn prepare_atlas(&mut self, scene: PreparedScene<'_>, has_masks: bool) -> Result<usize, Error> {
+    fn prepare_atlas(
+        &mut self,
+        context: &GpuContext,
+        scene: PreparedScene<'_>,
+        has_masks: bool,
+    ) -> Result<usize, Error> {
         if !has_masks {
             if self.atlas.side != 1 || self.atlas.entries.capacity() != 0 {
                 // Submitted bind groups retain their texture leases in wgpu;
                 // replacing our cache cannot invalidate an in-flight frame.
-                self.atlas = Atlas::new(&self.device, 1);
+                self.atlas = Atlas::new(&context.device, 1);
             }
             return Ok(0);
         }
         let mut uploaded = 0;
         for mask in scene.masks() {
-            if let Some(bytes) = self.atlas.insert(&self.queue, mask) {
+            if let Some(bytes) = self.atlas.insert(&context.queue, mask) {
                 uploaded += bytes;
             } else {
                 let mut side = self.atlas.side.max(128);
                 loop {
                     side = (side * 2).min(MAX_ATLAS_SIDE);
-                    let mut next = Atlas::new(&self.device, side);
+                    let mut next = Atlas::new(&context.device, side);
                     let mut fits = true;
                     for mask in scene.masks() {
-                        if let Some(bytes) = next.insert(&self.queue, mask) {
+                        if let Some(bytes) = next.insert(&context.queue, mask) {
                             uploaded += bytes;
                         } else {
                             fits = false;
@@ -1235,6 +1306,15 @@ mod tests {
 
     #[test]
     fn packet_storage_ledger() {
+        eprintln!(
+            "ownership_storage,Renderer={},GpuContext={},RendererState={},ContextId={},IdentityStatic={},SlotGuard={}",
+            size_of::<Renderer>(),
+            size_of::<GpuContext>(),
+            size_of::<RendererState>(),
+            size_of::<ContextId>(),
+            size_of_val(&NEXT_CONTEXT),
+            size_of::<GpuSlotCommit<'_, '_, '_>>()
+        );
         eprintln!(
             "packet_storage,Renderer={},Stats={},Packet={},OptionPacket={},BindGroup={},Canvas={},PreparedScene={}",
             size_of::<Renderer>(),

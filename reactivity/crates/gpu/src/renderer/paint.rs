@@ -1,5 +1,5 @@
-//! Opt-in packet ownership for color-only writes. Plain Renderer has no map,
-//! generation field or additional allocation. This owner never lends it mutably.
+//! Opt-in packet ownership for color-only writes. Plain Renderer has no per-draw
+//! map or mapping allocation. This owner never lends it mutably.
 use super::*;
 use gpui_canvas::{PaintEdit, PaintIndex};
 use std::{num::NonZeroU32, ops::Deref};
@@ -91,7 +91,7 @@ impl PaintRenderer {
     ) -> Result<wgpu::SubmissionIndex, Error> {
         if requested.windows(2).any(|pair| pair[0] >= pair[1]) {
             self.sites.clear();
-            self.inner.packet = None;
+            self.inner.state.packet = None;
             return Err(Error::InvalidScene);
         }
         self.render_indices(scene, target, requested.iter().copied())
@@ -105,7 +105,7 @@ impl PaintRenderer {
         target: &wgpu::TextureView,
         requested: impl IntoIterator<Item = PaintIndex>,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.inner.packet = None;
+        self.inner.state.packet = None;
         self.sites.clear();
         let requested = requested.into_iter();
         let demand = requested.size_hint().0;
@@ -151,9 +151,11 @@ impl PaintRenderer {
         }
         let sites = &mut self.sites;
         let mut next = 0;
-        let result = self
-            .inner
-            .render_observed(scene, target, |ordinal, group, word, compact| {
+        let result = self.inner.state.render_observed(
+            &self.inner.context,
+            scene,
+            target,
+            |ordinal, group, word, compact| {
                 if let Some(site) = sites.get_mut(next)
                     && site.index.order() as usize == ordinal
                 {
@@ -167,7 +169,8 @@ impl PaintRenderer {
                         .is_some_and(|p| p.source.is_solid());
                     next += 1;
                 }
-            });
+            },
+        );
         if result.is_err() {
             self.sites.clear();
         }
@@ -177,7 +180,7 @@ impl PaintRenderer {
     /// Resolve once when installing a token-qualified source sink. Patch
     /// admission itself uses direct map indexing and does not search this Vec.
     pub fn binding(&self, index: PaintIndex) -> Option<PaintBinding> {
-        self.inner.packet.as_ref()?;
+        self.inner.state.packet.as_ref()?;
         self.sites
             .binary_search_by_key(&index, |s| s.index)
             .ok()
@@ -193,13 +196,13 @@ impl PaintRenderer {
         self.inner.redraw(target)
     }
     pub fn set_grouped_records(&mut self, enabled: bool) {
-        if self.inner.grouped_records != enabled {
+        if self.inner.state.grouped_records != enabled {
             self.sites.clear();
         }
         self.inner.set_grouped_records(enabled);
     }
     pub fn set_tile_proofs(&mut self, enabled: bool) {
-        if self.inner.tile_proofs != enabled {
+        if self.inner.state.tile_proofs != enabled {
             self.sites.clear();
         }
         self.inner.set_tile_proofs(enabled);
@@ -229,9 +232,14 @@ impl PaintRenderer {
         edits: EditsRef<'edits>,
         target: &'target wgpu::TextureView,
     ) -> Result<GpuPaintCommit<'owner, 'edits, 'target>, PaintError> {
-        let packet = self.inner.packet.as_ref().ok_or(PaintError::NoPacket)?;
+        let packet = self
+            .inner
+            .state
+            .packet
+            .as_ref()
+            .ok_or(PaintError::NoPacket)?;
         if [target.texture().width(), target.texture().height()] != packet.dimensions()
-            || target.texture().format() != self.inner.format
+            || target.texture().format() != self.inner.context.format
         {
             return Err(PaintError::InvalidTarget);
         }
@@ -254,7 +262,7 @@ impl PaintRenderer {
                 .word
                 .ok_or(PaintError::UnsupportedGroup { edit: i })?
                 .get() as usize;
-            let old = self.inner.records[word];
+            let old = self.inner.state.records[word];
             let color = paint.color();
             let next = color.map(f32::to_bits);
             if color[3] == 0.0 || old[3] != next[3] {
@@ -333,7 +341,8 @@ impl GpuPaintCommit<'_, '_, '_> {
         self.changed * 16
     }
     pub fn commit(self) -> wgpu::SubmissionIndex {
-        let inner = &mut self.owner.inner;
+        let context = &self.owner.inner.context;
+        let inner = &mut self.owner.inner.state;
         // If queue mutation or submit panics, no old packet can be replayed.
         let packet = inner
             .packet
@@ -351,13 +360,13 @@ impl GpuPaintCommit<'_, '_, '_> {
                 continue;
             }
             inner.records[word] = next;
-            inner.queue.write_buffer(
+            context.queue.write_buffer(
                 &inner.draws.handle,
                 (word * 16) as u64,
                 bytemuck::bytes_of(&next),
             );
         }
-        let submitted = inner.submit(self.target, &packet.bindings);
+        let submitted = context.submit(self.target, &packet.bindings);
         inner.packet = Some(packet);
         inner.stats.submissions = inner.stats.submissions.saturating_add(1);
         inner.stats.packet_reused = true;

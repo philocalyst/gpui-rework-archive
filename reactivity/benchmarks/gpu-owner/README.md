@@ -16,3 +16,10 @@ Instance/adapter discovery and Canvas/font/scene ownership are outside the measu
 `allocation-counter` measures Rust allocator requests on the calling thread only. It excludes driver C allocations, background worker allocation and GPU allocations. Values are net current-thread accounting, not process RSS or full GPU residency. Device polls do not establish that every background Rust destructor runs on this thread. No elapsed-time numbers are collected.
 
 Build with `--features counts` into a separate target directory for native live-object diagnostics. This changes WGPU instrumentation and is not used for default-feature allocation comparisons. Native counters measure live objects, not historical constructor calls. The fixture reports successful constructor calls separately: one device request per selected device, and one module/pipeline construction per successful renderer constructor, as established by the pinned constructor source. Temporary shader handles may already have been released before live counters are sampled.
+
+The added `shared` binary takes only the window count. It uses the same scenes, target creation, device descriptor, allocation phases and readback checks. Its owner contains one fixed-format `GpuContext` and a Vec of independent `RendererState`/target/view windows. The context header is included in the owner stack size, not hidden outside measurement. There is no additional context allocation. Ordinary `owned` remains a control after the refactor and includes its new combined header. Both paths use the same rendering implementation.
+
+```sh
+CARGO_TARGET_DIR=/tmp/gpui-shared-gpu-sol-target CARGO_BUILD_JOBS=2 cargo build --release --offline --manifest-path benchmarks/gpu-owner/Cargo.toml --bins
+/tmp/gpui-shared-gpu-sol-target/release/shared 8
+```

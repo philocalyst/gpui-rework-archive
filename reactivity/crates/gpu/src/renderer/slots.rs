@@ -44,6 +44,7 @@ fn row(records: &[Word], slot: PaintSlot) -> Option<(usize, u32)> {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SlotError {
     NoPacket,
+    IncompatibleContext,
     InvalidTarget,
     MissingSlot { edit: usize },
     NotShared { edit: usize },
@@ -57,23 +58,27 @@ impl std::fmt::Display for SlotError {
     }
 }
 impl std::error::Error for SlotError {}
-impl Renderer {
+impl RendererState {
     /// Validate positional writes against this renderer's last banked packet.
     /// These positions are not scene identities. A native owner additionally
     /// checks its exact preceding complete-C token before using this operation.
     /// A rejected edit leaves replay eligible; no record/queue mutation occurs.
     pub fn prepare_slots<'owner, 'edits, 'target>(
         &'owner mut self,
+        context: &'owner GpuContext,
         edits: &'edits [SlotEdit],
         target: &'target wgpu::TextureView,
     ) -> Result<GpuSlotCommit<'owner, 'edits, 'target>, SlotError> {
+        if self.context_id != context.id {
+            return Err(SlotError::IncompatibleContext);
+        }
         let packet = self
             .packet
             .as_ref()
             .filter(|packet| packet.banked())
             .ok_or(SlotError::NoPacket)?;
         if packet.dimensions() != [target.texture().width(), target.texture().height()]
-            || target.texture().format() != self.format
+            || target.texture().format() != context.format
         {
             return Err(SlotError::InvalidTarget);
         }
@@ -108,6 +113,7 @@ impl Renderer {
         }
         Ok(GpuSlotCommit {
             owner: self,
+            context,
             edits,
             target,
             changed,
@@ -116,7 +122,8 @@ impl Renderer {
 }
 #[must_use = "commit updates and submits; dropping leaves the packet unchanged"]
 pub struct GpuSlotCommit<'owner, 'edits, 'target> {
-    owner: &'owner mut Renderer,
+    owner: &'owner mut RendererState,
+    context: &'owner GpuContext,
     edits: &'edits [SlotEdit],
     target: &'target wgpu::TextureView,
     changed: usize,
@@ -139,13 +146,13 @@ impl GpuSlotCommit<'_, '_, '_> {
                 continue;
             }
             self.owner.records[word] = next;
-            self.owner.queue.write_buffer(
+            self.context.queue.write_buffer(
                 &self.owner.draws.handle,
                 (word * 16) as u64,
                 bytemuck::bytes_of(&next),
             );
         }
-        let submitted = self.owner.submit(self.target, &packet.bindings);
+        let submitted = self.context.submit(self.target, &packet.bindings);
         self.owner.packet = Some(packet);
         let stats = &mut self.owner.stats;
         stats.submissions = stats.submissions.saturating_add(1);

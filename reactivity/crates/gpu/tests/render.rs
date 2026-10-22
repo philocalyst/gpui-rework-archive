@@ -2786,3 +2786,203 @@ fn bank_patch_rejects_exceptional_opaque_proof_colors_then_full_render_recovers(
         }
     });
 }
+
+#[test]
+fn shared_context_keeps_packets_atlases_images_and_slots_independent() {
+    use gpui_canvas::{PaintColor, SlotEdit};
+    use gpui_gpu::{GpuContext, RendererState};
+    pollster::block_on(async {
+        let owner = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let context = owner.context();
+        let mut a = RendererState::new(context);
+        let mut b = RendererState::new(context);
+        let mut ca = Canvas::recording(64, 48, ColorConfig::default()).unwrap();
+        let mut cb = Canvas::recording(81, 59, ColorConfig::default()).unwrap();
+        let slots = bank_scene(&mut ca, [Color::WHITE, Color::BLACK], true).unwrap();
+        bank_scene(
+            &mut cb,
+            [Color::rgb(13, 31, 57), Color::rgb(41, 113, 211)],
+            true,
+        );
+        let ta = output_texture(&owner, &ca);
+        let tb = output_texture(&owner, &cb);
+        let va = ta.create_view(&Default::default());
+        let vb = tb.create_view(&Default::default());
+        a.render(context, ca.prepared_scene(), &va).unwrap();
+        b.render(context, cb.prepared_scene(), &vb).unwrap();
+        let before_b = read_texture(&owner, &tb);
+        assert!(b.stats().atlas_keys > 0);
+        assert_eq!(b.image_stats().unwrap().resources, 1);
+        for (&gpu, &cpu) in before_b.iter().zip(cb.pixels()) {
+            assert!((i16::from(gpu) - i16::from(cpu)).abs() <= 1);
+        }
+
+        // Even the same device/format has a distinct inferred pipeline layout.
+        let other = GpuContext::new(
+            context.device().clone(),
+            context.queue().clone(),
+            context.format(),
+        )
+        .await
+        .unwrap();
+        let foreign = renderer(context.format()).await;
+        let writes = [SlotEdit::new(
+            slots[0],
+            PaintColor::new(Color::rgb(67, 137, 211)),
+        )];
+        let stats = a.stats();
+        let before_a = read_texture(&owner, &ta);
+        for wrong in [&other, foreign.context()] {
+            assert!(matches!(
+                a.render(wrong, ca.prepared_scene(), &va),
+                Err(gpui_gpu::Error::IncompatibleContext)
+            ));
+            assert!(matches!(
+                a.redraw(wrong, &va),
+                Err(gpui_gpu::Error::IncompatibleContext)
+            ));
+            assert!(matches!(
+                a.prepare_slots(wrong, &writes, &va),
+                Err(gpui_gpu::SlotError::IncompatibleContext)
+            ));
+            assert_eq!(a.stats().submissions, stats.submissions);
+            assert_eq!(a.stats().instance_upload_bytes, stats.instance_upload_bytes);
+            assert_eq!(read_texture(&owner, &ta), before_a);
+        }
+        a.redraw(context, &va).unwrap().unwrap();
+        assert_eq!(read_texture(&owner, &ta), before_a);
+        ca.prepare_slots(&writes).unwrap().commit();
+        a.prepare_slots(context, &writes, &va).unwrap().commit();
+        for (&gpu, &cpu) in read_texture(&owner, &ta).iter().zip(ca.pixels()) {
+            assert!((i16::from(gpu) - i16::from(cpu)).abs() <= 1);
+        }
+        b.redraw(context, &vb).unwrap().unwrap();
+        assert_eq!(read_texture(&owner, &tb), before_b);
+
+        // Replacing one window's entire state neither invalidates nor uploads
+        // the survivor's packet, atlas or image cache.
+        a = RendererState::new(context);
+        assert!(a.redraw(context, &va).unwrap().is_none());
+        drop(a);
+        b.redraw(context, &vb).unwrap().unwrap();
+        assert_eq!(b.stats().mask_upload_bytes, 0);
+        assert_eq!(b.image_stats().unwrap().uploaded_bytes, 0);
+        assert_eq!(read_texture(&owner, &tb), before_b);
+        b.render(context, cb.prepared_scene(), &vb).unwrap();
+        assert_eq!(b.stats().mask_upload_bytes, 0);
+        assert_eq!(b.image_stats().unwrap().uploaded_bytes, 0);
+
+        let wrong_format = context.device().create_texture(&wgpu::TextureDescriptor {
+            label: Some("wrong-format shared target"),
+            size: tb.size(),
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Bgra8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+        let wrong_view = wrong_format.create_view(&Default::default());
+        assert!(matches!(
+            b.prepare_slots(context, &[], &wrong_view),
+            Err(gpui_gpu::SlotError::InvalidTarget)
+        ));
+        assert!(matches!(
+            b.redraw(context, &wrong_view),
+            Err(gpui_gpu::Error::InvalidScene)
+        ));
+        b.redraw(context, &vb).unwrap().unwrap();
+        assert_eq!(read_texture(&owner, &tb), before_b);
+        assert!(matches!(
+            b.render(context, cb.prepared_scene(), &wrong_view),
+            Err(gpui_gpu::Error::InvalidScene)
+        ));
+        assert!(b.redraw(context, &vb).unwrap().is_none());
+    });
+}
+
+#[test]
+fn shared_context_drop_and_real_destroy_never_rebind_old_state() {
+    use gpui_gpu::{GpuContext, RendererState};
+    pollster::block_on(async {
+        let owner = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let temporary = GpuContext::new(
+            owner.device().clone(),
+            owner.queue().clone(),
+            owner.format(),
+        )
+        .await
+        .unwrap();
+        let abandoned = RendererState::new(&temporary);
+        // WGPU's resource leases safely outlive the high-level context. This
+        // does not authorize rebinding them to a replacement inferred layout.
+        drop(temporary);
+        let mut abandoned = abandoned;
+        let mut canvas = Canvas::recording(8, 8, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        let target = output_texture(&owner, &canvas);
+        let view = target.create_view(&Default::default());
+        assert!(matches!(
+            abandoned.render(owner.context(), canvas.prepared_scene(), &view),
+            Err(gpui_gpu::Error::IncompatibleContext)
+        ));
+        drop(abandoned);
+
+        let destroyed = renderer(owner.format()).await;
+        let mut stale = RendererState::new(destroyed.context());
+        let destroyed_target = output_texture(&destroyed, &canvas);
+        stale
+            .render(
+                destroyed.context(),
+                canvas.prepared_scene(),
+                &destroyed_target.create_view(&Default::default()),
+            )
+            .unwrap();
+        let (send, receive) = std::sync::mpsc::channel();
+        destroyed
+            .device()
+            .set_device_lost_callback(move |reason, message| {
+                send.send((reason, message)).unwrap();
+            });
+        destroyed.device().destroy();
+        destroyed
+            .device()
+            .poll(wgpu::PollType::wait_indefinitely())
+            .unwrap();
+        let (reason, message) = receive
+            .recv_timeout(std::time::Duration::from_secs(5))
+            .unwrap();
+        eprintln!("actual destroy callback: {reason:?}, {message}");
+        assert!(matches!(
+            stale.render(owner.context(), canvas.prepared_scene(), &view),
+            Err(gpui_gpu::Error::IncompatibleContext)
+        ));
+        assert!(matches!(
+            stale.redraw(owner.context(), &view),
+            Err(gpui_gpu::Error::IncompatibleContext)
+        ));
+        assert!(matches!(
+            stale.prepare_slots(owner.context(), &[], &view),
+            Err(gpui_gpu::SlotError::IncompatibleContext)
+        ));
+        let invalid = GpuContext::new(
+            destroyed.device().clone(),
+            destroyed.queue().clone(),
+            owner.format(),
+        )
+        .await;
+        assert!(
+            invalid.is_err(),
+            "destroyed device must not create a usable context"
+        );
+        drop(stale);
+        let mut fresh = RendererState::new(owner.context());
+        fresh
+            .render(owner.context(), canvas.prepared_scene(), &view)
+            .unwrap();
+        owner
+            .device()
+            .poll(wgpu::PollType::wait_indefinitely())
+            .unwrap();
+    });
+}
