@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-lattice-new-fallback-common-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16680     4296
+.rela.plt               48    20976
+.rodata              25984    21024
+.gcc_except_table    45476    47008
+.eh_frame_hdr         4580    92484
+.eh_frame            22984    97064
+.text               278389   124144
+.init                   27   402536
+.fini                   13   402564
+.plt                    48   402592
+.tdata                  32   406736
+.tbss                 3168   406768
+.fini_array              8   406768
+.init_array             16   406776
+.data.rel.ro          8080   406792
+.dynamic               480   414872
+.got                  2432   415352
+.got.plt                40   417784
+.relro_padding        4064   417824
+.tm_clone_table          0   421920
+.data                 2504   421920
+.bss                   208   424424
+.comment               157        0
+Total               418966
+
+

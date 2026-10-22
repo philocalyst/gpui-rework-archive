@@ -1,0 +1,22 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-lattice-parity-old/Cargo.toml",
+    "--message-format=json"
+  ],
+  "executable": "/tmp/gpui-gamut-lattice-old-parity-frozen",
+  "sha256": "44cce8c4e47e7a649cb08fae5cc664d6da4efb1be0bf1eab61ae2c0713991550",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-consumer-target/release/deps/libgpui_canvas-25db6a29666cc0de.rlib",
+      "sha256": "dc9ba197acd05aa675c08ac38d8b5e04da7794684bb4ada0f1b36fb03eacdabb",
+      "bytes": 7093754
+    }
+  ],
+  "timing_qualified": false
+}

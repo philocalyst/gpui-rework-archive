@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-lattice-new-common-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16680     4296
+.rela.plt               48    20976
+.rodata              25976    21024
+.gcc_except_table    45076    47000
+.eh_frame_hdr         4580    92076
+.eh_frame            22976    96656
+.text               277653   123728
+.init                   27   401384
+.fini                   13   401412
+.plt                    48   401440
+.tdata                  32   405584
+.tbss                 3168   405616
+.fini_array              8   405616
+.init_array             16   405624
+.data.rel.ro          8080   405640
+.dynamic               480   413720
+.got                  2432   414200
+.got.plt                40   416632
+.relro_padding        1120   416672
+.tm_clone_table          0   420768
+.data                 2504   420768
+.bss                   208   423272
+.comment               157        0
+Total               414870
+
+

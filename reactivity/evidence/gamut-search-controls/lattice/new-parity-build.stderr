@@ -1,0 +1,6 @@
+   Compiling parley_engine v0.12.0 (/root/gpui-gamut-lattice/reactivity/vendor/parley_engine)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-gamut-lattice/reactivity/crates/core)
+   Compiling parley v0.12.0 (/root/gpui-gamut-lattice/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-gamut-lattice/reactivity/crates/canvas)
+   Compiling gamut_consumer v0.1.0 (/tmp/gpui-gamut-lattice-parity-new)
+    Finished `release` profile [optimized] target(s) in 6.49s

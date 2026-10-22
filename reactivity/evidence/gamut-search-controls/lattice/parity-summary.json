@@ -1,0 +1,49 @@
+{
+  "rows": 21190,
+  "new-parity": {
+    "differences": 1,
+    "rows": [
+      {
+        "old": {
+          "kind": "oracle",
+          "index": "969",
+          "profile": "Srgb",
+          "L_bits": "1065353215",
+          "h_bits": "1120276984",
+          "cap_bits": "872809930"
+        },
+        "new": {
+          "kind": "oracle",
+          "index": "969",
+          "profile": "Srgb",
+          "L_bits": "1065353215",
+          "h_bits": "1120276984",
+          "cap_bits": "872809929"
+        }
+      }
+    ]
+  },
+  "new-fallback-parity": {
+    "differences": 1,
+    "rows": [
+      {
+        "old": {
+          "kind": "oracle",
+          "index": "969",
+          "profile": "Srgb",
+          "L_bits": "1065353215",
+          "h_bits": "1120276984",
+          "cap_bits": "872809930"
+        },
+        "new": {
+          "kind": "oracle",
+          "index": "969",
+          "profile": "Srgb",
+          "L_bits": "1065353215",
+          "h_bits": "1120276984",
+          "cap_bits": "872809929"
+        }
+      }
+    ]
+  }
+}
