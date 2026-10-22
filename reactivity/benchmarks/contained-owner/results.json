@@ -1,0 +1,60 @@
+{
+  "baseline": "e5f848ca14433905185956495bd5f9c6ef0d51df",
+  "consumer_source": "58995b75eaab408f488141ef77ed2b0d9ad0abe0",
+  "target": "/tmp/gpui-contained-owner-spike-target",
+  "jobs": 2,
+  "features": [
+    "default",
+    "simd"
+  ],
+  "CARGO_ENCODED_RUSTFLAGS": "",
+  "source_sha256": {
+    "reactivity/Cargo.lock": "8100b5e0fb2911b7dc6f1207c90f4d56d8670c2fce90c5e71d879b9d6a066e82",
+    "reactivity/crates/gpui/examples/contained_owner_spike.rs": "32831088ab522b1b38469bafb3e6e849ce294a1c558d9c6e75997e0d4409840f",
+    "reactivity/crates/gpui/src/runtime.rs": "ef478e6d738a2056bea5049321e05a7ea2e6b984c0dcf81db74d6340bb91536e",
+    "reactivity/crates/gpui/src/runtime/turn.rs": "b6437ded1288015cfe005fb2779bab59031299541ccdd076107ea8cd0eac57e5",
+    "reactivity/crates/gpui/src/runtime/inspector.rs": "702e07a511216591a7f9acc84206b69ef3bf2bd9e1cbfb10c51b6d0ad8bbe62d",
+    "reactivity/crates/gpui/src/component.rs": "0a5372073d9a4de8e66115116679b3953905f366a83bdf5df95f7ac748254473",
+    "reactivity/crates/gpui/src/source.rs": "451c3b090d8a870e7f5d105b16aaa5a67513b9dea057ca74476e53f605586d69",
+    "reactivity/crates/gpui/src/element.rs": "1f5f37a7c3fa4ec47cc5b42b0d5f6362a77babb3461c330703e791b110cbb1c3",
+    "reactivity/crates/gpui/src/property.rs": "55374c57e51926337e2cc1b0ae6ba007f1d7a75e591c369d42f4d849ab85a898",
+    "reactivity/crates/gpui/src/reader/question.rs": "6e011c85363d4153b4b276ea56080766ecc73552329a74b076c8c016e7985473",
+    "reactivity/crates/gpui/src/reader/future.rs": "d2025b1474c1cac3b083577234d01ac0f42cc3a66dfdb33e26d577fad0ad56ff"
+  },
+  "artifact_sha256": {
+    "/tmp/gpui-contained-owner-spike-target/debug/examples/contained_owner_spike": "75030124a5c6827f87d65d320dad302c39ca2865820d5e494a7ff4451ccd048b",
+    "/tmp/gpui-contained-owner-spike-target/debug/deps/gpui-812eb2da5cb24682": "6a7aab6ae985cc2363f8bb4418cb2943a717356f931eccad0d7d2a29e623e507"
+  },
+  "archive_sha256": {
+    "gpui-1b60609261232fe3-example-contained_owner_spike.json": "e6ff0a5ce4dd18d07fd550a8dc7dde3faa133ac9ada1fdf44c70fdc4906efcdb",
+    "gpui-contained-owner-spike-replay.log": "11fca5a9ed41b89c9405e220a9fd6b471fdc9e7641b3d830bfafc04e615ae753",
+    "gpui-contained-owner-baseline-headers.log": "25c62cfa93261939060df1c5a085ab70956a4f5874ef06834dcfc4acb49753ab",
+    "gpui-contained-owner-baseline-headers-corrected.log": "118da07bff5613a86df049c2be8540078ee64c150643b898dc009bf94c5c68c5",
+    "gpui-contained-owner-spike-tokei.json": "1931030277a12cdb4fcd58af7cf5eef4e7355a6fd34aeb328c3b1f49b98f8c5b",
+    "gpui-812eb2da5cb24682-test-lib-gpui.json": "0fc1ebd06e2533409c39de2495ac69b87e1025a67218dc8aa7e1bffef754e8b0",
+    "PROPOSAL.md": "cdc48b30a82901ab06af728b6813b7e073019e5a5d55dbfd9715cc2fb317a106",
+    "gpui-contained-owner-spike-binary-replay.log": "9b9e10e521d693b988d9db360b6833f17ac31c7700b1b77f79a4a2491219a6a6",
+    "gpui-contained-owner-spike-clippy.log": "30a6d9a5f687d67fc1bd3f1f48d45850f79178202f29fd359c97ece181af04ee",
+    "gpui-contained-owner-toolchain.txt": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "gpui-868712d64e15df36-example-contained_owner_spike.json": "a99c53ba20ad6431412717aa4cf0d7b0a6fc72f4fb039d635cdd0ab82babb66a",
+    "gpui-contained-owner-baseline-catalog.log": "45c60ae118a6b19f3c9e2ca0ad954001579d240b0ba82198063d14cf52ebcbf6",
+    "gpui-contained-owner-spike-build.log": "345214a4476eef3c8ab132b662baf23afc7d6946ed62eda4ca61849eeaaa9b63"
+  },
+  "qualified": [
+    "ordinary consumer executable passed",
+    "strict Clippy example passed",
+    "existing private-header test passed1",
+    "existing catalog test passed1"
+  ],
+  "excluded": [
+    "initial short filter with --exact ran0 tests",
+    "unnecessary Cargo replay blocked on shared package cache and was cancelled before compilation; direct frozen executable replay passed"
+  ],
+  "not_claimed": [
+    "wired native Apply",
+    "contained Future lane mount",
+    "new Companion allocation total",
+    "new library API",
+    "performance timings"
+  ]
+}

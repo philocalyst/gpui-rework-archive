@@ -1,0 +1,97 @@
+   Compiling unicode-ident v1.0.27
+    Checking stable_deref_trait v1.2.1
+   Compiling proc-macro2 v1.0.107
+    Checking writeable v0.6.4
+    Checking once_cell v1.21.4
+    Checking litemap v0.8.3
+   Compiling quote v1.0.47
+    Checking serde_core v1.0.229
+   Compiling syn v3.0.9
+    Checking bitflags v2.13.2
+    Checking smallvec v1.16.3
+    Checking libc v0.2.191
+   Compiling synstructure v0.14.0
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking zerofrom v0.1.8
+   Compiling displaydoc v0.2.7
+    Checking yoke v0.8.3
+    Checking zerovec v0.11.8
+   Compiling bytemuck_derive v1.12.1
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking bytemuck v1.25.2
+    Checking font-types v0.12.7
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+   Compiling serde_derive v1.0.229
+    Checking icu_provider v2.3.1
+    Checking foldhash v0.2.0
+    Checking utf8_iter v1.0.4
+    Checking icu_collections v2.3.0
+    Checking read-fonts v0.41.0
+    Checking icu_properties_data v2.3.0
+    Checking icu_locale_fallback_data v2.3.0
+    Checking hashbrown v0.17.1
+    Checking icu_locale_fallback v2.3.0
+    Checking icu_properties v2.3.0
+    Checking icu_segmenter_data v2.3.0
+    Checking icu_normalizer_data v2.3.0
+    Checking serde v1.0.229
+    Checking read-fonts v0.46.0
+    Checking memmap2 v0.9.12
+    Checking linux-raw-sys v0.12.1
+    Checking parlance v0.1.1
+    Checking linebender_resource_handle v0.1.1
+    Checking fontique v0.12.0
+    Checking rustix v1.1.5
+    Checking icu_segmenter v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking parley_data v0.12.0
+    Checking harfrust v0.12.0
+    Checking skrifa v0.49.0
+    Checking parley_emoji v0.12.0
+    Checking parley_engine v0.12.0 (/root/gpui-inspector-contained-owner/reactivity/vendor/parley_engine)
+    Checking skrifa v0.44.0
+    Checking uuid v1.28.0
+    Checking yazi v0.2.1
+    Checking zeno v0.3.3
+    Checking pin-project-lite v0.2.17
+    Checking futures-core v0.3.34
+    Checking cephal v0.1.1 (/root/gpui-inspector-contained-owner/reactivity/vendor/cephal)
+   Compiling winnow v1.0.4
+   Compiling zbus_utils v6.0.0
+    Checking swash v0.2.10
+    Checking parley v0.12.0 (/root/gpui-inspector-contained-owner/reactivity/vendor/parley)
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/core)
+    Checking zmij v1.0.23
+   Compiling fearless_simd_macros v0.1.0
+    Checking socket2 v0.6.5
+    Checking itoa v1.0.18
+    Checking fearless_simd v1.1.0
+    Checking ttf-parser v0.25.1
+    Checking futures-io v0.3.34
+    Checking memchr v2.8.3
+    Checking serde_json v1.0.154
+    Checking zruntime v0.2.0
+    Checking gpui_canvas v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/canvas)
+   Compiling zbus_macros v6.0.0
+    Checking ordered-stream v0.2.0
+    Checking accesskit v0.25.1 (/root/gpui-inspector-contained-owner/reactivity/vendor/accesskit)
+    Checking gethostname v1.1.0
+    Checking zcheapstr v1.1.0
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/state)
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+    Checking x11rb-protocol v0.14.0
+    Checking arcstr v1.2.0
+    Checking hex v0.4.3
+    Checking endi v1.1.1
+    Checking zbus v6.0.0
+    Checking x11rb v0.14.0
+    Checking gpui v0.1.0 (/root/gpui-inspector-contained-owner/reactivity/crates/gpui)
+    Checking accesskit_consumer v0.39.1 (/root/gpui-inspector-contained-owner/reactivity/vendor/accesskit_consumer)
+    Checking allocation-counter v0.8.1
+    Checking triomphe v0.1.17
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 58.52s
