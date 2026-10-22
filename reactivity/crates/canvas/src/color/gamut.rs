@@ -1,6 +1,6 @@
 //! Designer unit-cube limits, separate from output mapping and composition.
 use super::*;
-use fearless_simd::{Simd, f64x4, prelude::*};
+use fearless_simd::{Simd, f64x4, mask64x4, prelude::*, u32x4};
 use fearless_simd_macros::simd;
 
 impl OutputProfile {
@@ -211,6 +211,20 @@ fn endpoint_error<S: Simd>(p: Polynomial<S>, t: f64x4<S>, radius: f64x4<S>) -> f
         + ((p.a.abs() * 3.0 * t + p.b.abs()) + p.a.abs() * radius) * radius * radius
 }
 
+// Positive f32 bits are used only to recognize convergence. Samples remain
+// f64 t values; clamping here describes the finite representable chroma domain.
+#[inline(always)]
+fn chroma_floor<S: Simd>(value: f64x4<S>, lightness: f64) -> u32x4<S> {
+    let value = (value * lightness).min(f32::MAX as f64);
+    let (low, high) = value.split();
+    let rounded = low.narrow(high);
+    let (low, high) = rounded.widen();
+    let down = low.combine(high).simd_gt(value).to_vector();
+    let (low, high) = down.split();
+    // Canonical true masks are -1, so adding their narrowed bits steps inward.
+    rounded.bitcast::<u32x4<S>>() + low.narrow(high).bitcast::<u32x4<S>>()
+}
+
 // Allowed is polynomial <=0. Each derivative interval is monotone, so an
 // outward endpoint brackets the first exit. Unresolved contacts block that
 // lane's later answers; their earliest possible t is returned separately.
@@ -222,7 +236,7 @@ fn first_exit<S: Simd>(
     p: Polynomial<S>,
     turns: [f64x4<S>; 2],
     bound: f64x4<S>,
-    iterations: usize,
+    lightness: f64,
 ) -> [f64x4<S>; 2] {
     let infinity = f64x4::splat(simd, f64::INFINITY);
     let mut result = p.d.simd_gt(0.0).select(f64x4::splat(simd, 0.0), infinity);
@@ -248,11 +262,21 @@ fn first_exit<S: Simd>(
         if active.to_bitmask() & 7 != 0 {
             let mut low = start;
             let mut high = end;
-            for _ in 0..iterations {
+            loop {
                 let middle = low + (high - low) * 0.5;
+                let same = chroma_floor(low, lightness)
+                    .simd_eq(chroma_floor(high, lightness))
+                    .to_bitmask();
+                let refining = active
+                    & !mask64x4::from_bitmask(simd, same)
+                    & middle.simd_gt(low)
+                    & middle.simd_lt(high);
+                if refining.to_bitmask() & 7 == 0 {
+                    break;
+                }
                 let outside = p.evaluate(middle).simd_gt(0.0);
-                high = (active & outside).select(middle, high);
-                low = (active & !outside).select(middle, low);
+                high = (refining & outside).select(middle, high);
+                low = (refining & !outside).select(middle, low);
             }
             result = active.select(low, result);
         }
@@ -275,19 +299,19 @@ fn limit<S: Simd>(simd: S, profile: OutputProfile, lightness: f32, hue: f32) -> 
     let bound = 1.0 + p.b.abs().max(p.c.abs()).max(p.d.abs()) / leading;
     let rgb = f64x4::from_fn(simd, |lane| if lane < 3 { 1.0 } else { 0.0 });
     let bound = rgb.simd_eq(1.0).select(bound, f64x4::splat(simd, 1.0));
-    let [lower, lower_unresolved] = first_exit(simd, p.lower(), turns, bound, 96);
+    let l = lightness as f64;
+    let [lower, lower_unresolved] = first_exit(simd, p.lower(), turns, bound, l);
     let lower: [f64; 4] = lower.into();
     let lower = lower[..3].iter().copied().fold(f64::INFINITY, f64::min);
     if !lower.is_finite() {
         return Err(Error::ColorOutOfRange);
     }
-    let l = lightness as f64;
     let [upper, upper_unresolved] = first_exit(
         simd,
         p.upper(1.0 / (l * l * l)),
         turns,
         f64x4::splat(simd, lower),
-        64,
+        l,
     );
     let upper: [f64; 4] = upper.into();
     let cap = upper[..3].iter().copied().fold(lower, f64::min);
@@ -300,6 +324,9 @@ fn limit<S: Simd>(simd: S, profile: OutputProfile, lightness: f32, hue: f32) -> 
         return Err(Error::ColorOutOfRange);
     }
     let mut chroma = limit as f32;
+    if chroma as f64 > limit {
+        chroma = chroma.next_down();
+    }
     // Narrowing and the composed coefficient matrix can differ by a few ulps
     // from the original path. Correct chroma only; never clip RGB or alter L/h.
     for _ in 0..64 {

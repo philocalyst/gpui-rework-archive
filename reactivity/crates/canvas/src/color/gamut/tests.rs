@@ -159,7 +159,7 @@ fn polynomial_cases<S: Simd>(simd: S) {
         p,
         critical_points(simd, p),
         f64x4::splat(simd, 10.0),
-        96,
+        1.0,
     );
     let r: [f64; 4] = r.into();
     let unresolved: [f64; 4] = unresolved.into();
@@ -186,7 +186,7 @@ fn nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign() {
         c: f64x4::splat(s, 781.0 / 256.0),
         d: f64x4::splat(s, -242.0 / 256.0),
     };
-    let [r, unresolved] = first_exit(s, p, critical_points(s, p), f64x4::splat(s, 4.0), 96);
+    let [r, unresolved] = first_exit(s, p, critical_points(s, p), f64x4::splat(s, 4.0), 1.0);
     let r: [f64; 4] = r.into();
     let unresolved: [f64; 4] = unresolved.into();
     assert_eq!(r[0], f64::INFINITY);
@@ -225,4 +225,45 @@ fn finite_input_sweep_keeps_exact_membership_and_a_nearby_outward_witness() {
             );
         }
     }
+}
+
+fn adaptive_boundaries<S: Simd>(s: S) {
+    let v = |x| f64x4::splat(s, x);
+    let min_l = f32::from_bits(1) as f64;
+    for (l, end, root, expected) in [
+        (1.0, 2.0, 1.0, 1.0_f32),
+        (min_l, 0.5, 0.25, 0.0),
+        (
+            min_l,
+            f32::MAX as f64 * 2.0 / min_l,
+            f32::MAX as f64 * 0.5 / min_l,
+            f32::MAX * 0.5,
+        ),
+    ] {
+        let p = Polynomial {
+            a: v(0.0),
+            b: v(0.0),
+            c: v(1.0),
+            d: v(-root),
+        };
+        let [inside, unknown] = first_exit(s, p, critical_points(s, p), v(end), l);
+        assert_eq!(unknown[0], f64::INFINITY);
+        assert_eq!(chroma_floor(inside, l)[0], expected.to_bits());
+    }
+    let ulp = 2.0_f64.powi(-23);
+    let p = Polynomial {
+        a: v(0.0),
+        b: v(-1.0),
+        c: v(2.0 + ulp),
+        d: v(-(1.0 + ulp / 4.0) * (1.0 + 3.0 * ulp / 4.0)),
+    };
+    let [inside, unknown] = first_exit(s, p, critical_points(s, p), v(2.0), 1.0);
+    assert_eq!(inside[0], f64::INFINITY);
+    assert_eq!(unknown[0], 0.0, "sub-ULP excursion remains non-admitted");
+}
+#[test]
+fn adaptive_floor_convergence_preserves_exact_roots_subnormals_and_uncertainty() {
+    adaptive_boundaries(fearless_simd::Fallback::new());
+    #[cfg(target_arch = "x86_64")]
+    adaptive_boundaries(fearless_simd::Level::new().as_sse2().unwrap());
 }
