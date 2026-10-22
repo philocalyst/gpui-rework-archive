@@ -118,6 +118,7 @@ def audit(metadata, cache, cache_path):
             disk = REPO / path
             scope = ("active workspace" if disk == ROOT / "Cargo.lock" else
                      "independent analysis tool workspace; outside production graph" if "/tools/" in path else
+                     "independent application workspace; outside UI-core graph" if "/ports/" in path else
                      "upstream development lock; root path patch uses workspace lock" if "/vendor/" in path else
                      "frozen evidence/benchmark lock; outside production graph")
             locks.append({"path": path, "sha256": sha256(disk), "scope": scope})

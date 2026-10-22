@@ -8,9 +8,11 @@ import argparse
 import hashlib
 import json
 import pathlib
+import posixpath
 import shutil
 import subprocess
 import tempfile
+import tomllib
 
 import inventory
 
@@ -29,15 +31,35 @@ def without_tests(text, ranges):
     return "".join(lines)
 
 
-def count(ref, original, helper, tokei):
+def build_scripts(commit, roots, available):
+    """Charge Cargo's host-side library work alongside its target-side source."""
+    scripts = set()
+    for root in roots:
+        directory = pathlib.PurePosixPath(root).parent
+        manifest = tomllib.loads(inventory.git(
+            "show", f"{commit}:{directory}/Cargo.toml", binary=True).decode())
+        build = manifest.get("package", {}).get("build", True)
+        if build is False:
+            continue
+        path = posixpath.normpath(str(directory / (build if isinstance(build, str) else "build.rs")))
+        if path in available:
+            scripts.add(path)
+        elif isinstance(build, str):
+            raise ValueError(f"declared library build script is missing from source inventory: {path}")
+    return scripts
+
+
+def count(ref, original, helper, tokei, src_only=False):
     commit = inventory.git("rev-parse", ref).strip()
     roots = (["crates/gpui/src/"] if original else
              [f"reactivity/crates/{name}/src/" for name in LIBRARIES])
-    sources = [(path, data, language) for path, data, language in inventory.read_sources(commit)
-               if path.startswith(tuple(roots))]
+    available = list(inventory.read_sources(commit))
+    scripts = set() if src_only else build_scripts(commit, roots, {p for p, _, _ in available})
+    sources = [(path, data, language) for path, data, language in available
+               if path.startswith(tuple(roots)) or path in scripts]
     analysis = inventory.rust_analysis(sources, helper)
     test_targets, crate_roots, manifests = inventory.cargo_targets(commit)
-    tests = inventory.resolve_modules(analysis, sources, test_targets, crate_roots)
+    tests = inventory.resolve_modules(analysis, sources, test_targets, crate_roots | scripts)
     entries = {}
     with tempfile.TemporaryDirectory(prefix="gpui-core-lines-") as temporary:
         staging = pathlib.Path(temporary)
@@ -64,9 +86,13 @@ def count(ref, original, helper, tokei):
                 # Tokei's Total includes fenced documentation examples. Only
                 # each actual source report's own code belongs to this ledger.
                 entries[path]["code_lines"] = report["stats"]["code"]
-    return {"source_commit": commit, "roots": roots,
+    build_lines = sum(entries[path]["code_lines"] for path in scripts)
+    total_lines = sum(row["code_lines"] for row in entries.values())
+    return {"source_commit": commit, "roots": roots, "build_scripts": sorted(scripts),
             "scope": "original GPUI crate" if original else "six shipping first-party libraries",
-            "core_non_test_code_lines": sum(row["code_lines"] for row in entries.values()),
+            "core_non_test_code_lines": total_lines,
+            "library_src_code_lines": total_lines - build_lines,
+            "library_build_code_lines": build_lines,
             "excluded": "tests, comments, blanks, documentation examples, labs, application examples, benchmarks, tools, evidence, vendors",
             "uncertainty": "Unexpanded macro and conditional-import ambiguities stay charged; inspect per-file diagnostics.",
             "tokei_version": subprocess.check_output([str(tokei), "--version"], text=True).strip(),
@@ -82,12 +108,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ref", default="HEAD")
     parser.add_argument("--original", action="store_true")
+    parser.add_argument("--src-only", action="store_true",
+                        help="reproduce the historical ledger that excluded library build scripts")
     parser.add_argument("--helper", type=pathlib.Path, required=True)
     parser.add_argument("--tokei", type=pathlib.Path, default=shutil.which("tokei"))
     args = parser.parse_args()
     if args.tokei is None:
         parser.error("provide --tokei /path/to/tokei")
-    print(json.dumps(count(args.ref, args.original, args.helper, pathlib.Path(args.tokei)), indent=2))
+    print(json.dumps(count(args.ref, args.original, args.helper, pathlib.Path(args.tokei), args.src_only), indent=2))
 
 
 if __name__ == "__main__":
