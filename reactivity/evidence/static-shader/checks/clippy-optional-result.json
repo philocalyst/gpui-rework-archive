@@ -1,0 +1,21 @@
+{
+  "name": "clippy-optional",
+  "command": [
+    "cargo",
+    "clippy",
+    "--offline",
+    "--locked",
+    "--release",
+    "-p",
+    "gpui_gpu",
+    "--all-targets",
+    "--features",
+    "vulkan-tests,offline-shader",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "environment_shell": "",
+  "exit": 0,
+  "log_sha256": "6435962a1077e18f233893b2aebfd8b61fa4e30bafaf57eccb628c1da84aee45"
+}

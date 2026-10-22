@@ -1,0 +1,243 @@
+{
+  "baseline": {
+    "source": "4a5bf18ec35012b090665fbabcb883cfb9ce4aa5",
+    "files": {
+      "reactivity/crates/gpu/src/renderer/artifact.rs": {
+        "physical": 77,
+        "bytes": 3153,
+        "sha256": "77f24709aad11b7efcbc1912e0b7d4038957f1355d8c6e3d676ddba2915a93b8",
+        "unclassified": [],
+        "non_test_comment_free_code": 52
+      },
+      "reactivity/vendor/wgpu-core/src/device/global.rs": {
+        "physical": 2058,
+        "bytes": 73920,
+        "sha256": "d46a998bda5604173e8f7dfd1608fe5b1a681fc56ab1efc028d3b9dffe3e2c29",
+        "unclassified": [],
+        "non_test_comment_free_code": 1564
+      },
+      "reactivity/vendor/wgpu-core/src/device/resource.rs": {
+        "physical": 5479,
+        "bytes": 218890,
+        "sha256": "3f80d00614d00e89ef57b5a6491eb3901383d576c4d8ad75b4a29d549b3752fc",
+        "unclassified": [],
+        "non_test_comment_free_code": 4525
+      },
+      "reactivity/vendor/wgpu-core/src/lock/ranked.rs": {
+        "physical": 443,
+        "bytes": 14195,
+        "sha256": "84d85cdaa44be6206d272dd0b501d07bc934dd60d09656de5aa88e4936c95254",
+        "unclassified": [],
+        "non_test_comment_free_code": 199
+      },
+      "reactivity/vendor/wgpu-hal/src/dx12/device.rs": {
+        "physical": 2691,
+        "bytes": 112754,
+        "sha256": "bc75bee4a6f052499e233ddbb1061159d2dd7c621675f0b81f2873931bddab0f",
+        "unclassified": [],
+        "non_test_comment_free_code": 2321
+      },
+      "reactivity/vendor/wgpu-hal/src/gles/device.rs": {
+        "physical": 1823,
+        "bytes": 71035,
+        "sha256": "d6919ff96a805da34c9eb9d05ac8f95f57df2a42a691f90bf1f36425b509b198",
+        "unclassified": [],
+        "non_test_comment_free_code": 1579
+      },
+      "reactivity/vendor/wgpu-hal/src/lib.rs": {
+        "physical": 3087,
+        "bytes": 117491,
+        "sha256": "ba36ea75de7d7daeb8665600631d653d4d03963f5ec12fd405458f991f5be27d",
+        "unclassified": [],
+        "non_test_comment_free_code": 1552
+      },
+      "reactivity/vendor/wgpu-hal/src/metal/device.rs": {
+        "physical": 2170,
+        "bytes": 95978,
+        "sha256": "a4766b4d735d177ede3a06042452ac1e21530879c8e7a773ec6e3339416cae5f",
+        "unclassified": [],
+        "non_test_comment_free_code": 1890
+      },
+      "reactivity/vendor/wgpu-hal/src/noop/mod.rs": {
+        "physical": 487,
+        "bytes": 15236,
+        "sha256": "709fe65d1d5708e9a8470e9616fb06494faac37f1e2f0a17d1f8fabbddb84ba5",
+        "unclassified": [],
+        "non_test_comment_free_code": 418
+      },
+      "reactivity/vendor/wgpu-hal/src/vulkan/device.rs": {
+        "physical": 3197,
+        "bytes": 125169,
+        "sha256": "8a8ff927f15fb9ebb6048c81fe87a5bbe844e7a122bc45d91fadffcef8c90aa7",
+        "unclassified": [],
+        "non_test_comment_free_code": 2621
+      },
+      "reactivity/vendor/wgpu-hal/src/vulkan/mod.rs": {
+        "physical": 1763,
+        "bytes": 61960,
+        "sha256": "de64a2813099084774ffccd7e47b54784e2efaf27ac24e131f00df3e21209e78",
+        "unclassified": [],
+        "non_test_comment_free_code": 1061
+      },
+      "reactivity/vendor/wgpu/src/backend/wgpu_core.rs": {
+        "physical": 4124,
+        "bytes": 129725,
+        "sha256": "c06a427083f36836877e49c57ad0d92b183c0aa095d3195c7578018ecf83d1ae",
+        "unclassified": [],
+        "non_test_comment_free_code": 3705
+      },
+      "reactivity/vendor/wgpu/src/shader_artifact.rs": {
+        "physical": 50,
+        "bytes": 2266,
+        "sha256": "a58e3477cf9edb771e94b79dda72c3d4ddc6374d2a09703008d644342dc49242",
+        "unclassified": [],
+        "non_test_comment_free_code": 33
+      }
+    }
+  },
+  "static": {
+    "source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+    "files": {
+      "reactivity/crates/gpu/src/renderer/artifact.rs": {
+        "physical": 72,
+        "bytes": 2970,
+        "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b",
+        "unclassified": [],
+        "non_test_comment_free_code": 47
+      },
+      "reactivity/vendor/wgpu-core/src/device/global.rs": {
+        "physical": 2114,
+        "bytes": 76214,
+        "sha256": "bdb01659c1ee814ba9671795c8e0a030181c905682b81f3414937887e16ad296",
+        "unclassified": [],
+        "non_test_comment_free_code": 1607
+      },
+      "reactivity/vendor/wgpu-core/src/device/resource.rs": {
+        "physical": 5508,
+        "bytes": 220219,
+        "sha256": "0e30e20e2a1c0c5d714ad4504e0a427d4cb825a830ccb0e73d0670fcd5caf437",
+        "unclassified": [],
+        "non_test_comment_free_code": 4550
+      },
+      "reactivity/vendor/wgpu-core/src/lock/ranked.rs": {
+        "physical": 443,
+        "bytes": 14194,
+        "sha256": "b47b8f7275d6eb8088fc41bc476bf1af37fc01491be52adf7148f7d96055b879",
+        "unclassified": [],
+        "non_test_comment_free_code": 199
+      },
+      "reactivity/vendor/wgpu-hal/src/dx12/device.rs": {
+        "physical": 2698,
+        "bytes": 113074,
+        "sha256": "b428f4d101a257c99a340355746ab5a185596cecd178de063a11dbc3ba5d8afb",
+        "unclassified": [],
+        "non_test_comment_free_code": 2328
+      },
+      "reactivity/vendor/wgpu-hal/src/gles/device.rs": {
+        "physical": 1830,
+        "bytes": 71383,
+        "sha256": "4da3fb4ee9145870270f52bbac95f42789f73bfaf0011c46e21883a3d28696e9",
+        "unclassified": [],
+        "non_test_comment_free_code": 1586
+      },
+      "reactivity/vendor/wgpu-hal/src/lib.rs": {
+        "physical": 3093,
+        "bytes": 117877,
+        "sha256": "8790870ab477ce10a05f75e670dd5f1d3d1db25adc8c8beae886f50acd12901e",
+        "unclassified": [],
+        "non_test_comment_free_code": 1556
+      },
+      "reactivity/vendor/wgpu-hal/src/metal/device.rs": {
+        "physical": 2177,
+        "bytes": 96298,
+        "sha256": "1803b3ba5a88e4891c1d9c1632884f7ececadb14c7f7b630d7d55802879eb0ac",
+        "unclassified": [],
+        "non_test_comment_free_code": 1897
+      },
+      "reactivity/vendor/wgpu-hal/src/noop/mod.rs": {
+        "physical": 493,
+        "bytes": 15492,
+        "sha256": "8c3ad9284398dd6aaa7da0b82bc3943dcf251073b935e5e138f7356f3f572b48",
+        "unclassified": [],
+        "non_test_comment_free_code": 424
+      },
+      "reactivity/vendor/wgpu-hal/src/vulkan/device.rs": {
+        "physical": 3207,
+        "bytes": 125728,
+        "sha256": "accf1be799da8f1b4282d2893377113f00169e966dda7f179f6b5e9f1223017b",
+        "unclassified": [],
+        "non_test_comment_free_code": 2631
+      },
+      "reactivity/vendor/wgpu-hal/src/vulkan/mod.rs": {
+        "physical": 1765,
+        "bytes": 62034,
+        "sha256": "73cdd286fe1bdcca51aad33f521999f469eb1a8acbe6f28c230685144e0b0d04",
+        "unclassified": [],
+        "non_test_comment_free_code": 1063
+      },
+      "reactivity/vendor/wgpu/src/backend/wgpu_core.rs": {
+        "physical": 4159,
+        "bytes": 130905,
+        "sha256": "6f1a9288924385fa383f70ea5e48226b48869f07186c9c79d62470ed9e1fc68b",
+        "unclassified": [],
+        "non_test_comment_free_code": 3737
+      },
+      "reactivity/vendor/wgpu/src/shader_artifact.rs": {
+        "physical": 87,
+        "bytes": 3816,
+        "sha256": "906852414b0a597f6b3aa2c40d05cad382ba40dd7b62043efea7edbd1761ef9f",
+        "unclassified": [],
+        "non_test_comment_free_code": 55
+      }
+    }
+  },
+  "authored_static_delta": {
+    "per_file": {
+      "reactivity/crates/gpu/src/renderer/artifact.rs": -5,
+      "reactivity/vendor/wgpu-core/src/device/global.rs": 43,
+      "reactivity/vendor/wgpu-core/src/device/resource.rs": 25,
+      "reactivity/vendor/wgpu-core/src/lock/ranked.rs": 0,
+      "reactivity/vendor/wgpu-hal/src/dx12/device.rs": 7,
+      "reactivity/vendor/wgpu-hal/src/gles/device.rs": 7,
+      "reactivity/vendor/wgpu-hal/src/lib.rs": 4,
+      "reactivity/vendor/wgpu-hal/src/metal/device.rs": 7,
+      "reactivity/vendor/wgpu-hal/src/noop/mod.rs": 6,
+      "reactivity/vendor/wgpu-hal/src/vulkan/device.rs": 10,
+      "reactivity/vendor/wgpu-hal/src/vulkan/mod.rs": 2,
+      "reactivity/vendor/wgpu/src/backend/wgpu_core.rs": 32,
+      "reactivity/vendor/wgpu/src/shader_artifact.rs": 22
+    },
+    "gpu": -5,
+    "vendor": 165,
+    "total": 160,
+    "scope": "All changed shipping Rust files, comments/blanks/Syn test syntax excluded. Manifest/provenance, test fixture/layer/generator/data separately retained. One upstream compatibility replacement has zero net lines, not zero authored change."
+  },
+  "published_core_import": {
+    "commit": "c27929d153",
+    "archive": {
+      "bytes": 386299,
+      "sha256": "14c018fce9b6270aa203c2fdd56f3cce996713534bd757e4ea58c8560b121f14"
+    },
+    "files": 86,
+    "bytes": 1960873,
+    "physical_lines_all_text_except_nonutf8": 53972,
+    "rust_physical_lines": 51703,
+    "note": "This upstream package is charged independently of authored deltas and was formerly a registry dependency. UPSTREAM.json adds a per-published-file hash record."
+  },
+  "independent_root_raii_delta": {
+    "commit": "4a5bf18ec3",
+    "upstream_root_commit": "ffb4b8f58035330f4034a6891ec87de6574195c0",
+    "non_test_comment_free_code_delta": -36,
+    "note": "Exact device.rs ownership patch; source policy query from the optional branch is preserved."
+  },
+  "tools": {
+    "inventory": {
+      "bytes": 2784400,
+      "sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea"
+    },
+    "tokei": {
+      "bytes": 6323656,
+      "sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712"
+    }
+  }
+}

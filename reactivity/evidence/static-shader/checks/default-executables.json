@@ -1,0 +1,17 @@
+{
+  "gpui_gpu": {
+    "source": "/tmp/gpui-static-shader-sol-target/release/deps/gpui_gpu-276e838f91ce456b",
+    "copy": "/tmp/gpui-static-frozen-bins/default/gpui_gpu",
+    "sha256": "53fa069bae4d137c073d0d948ba3f9f3a2b649ccc97bf2780d9f5211fe43ad92"
+  },
+  "presentation": {
+    "source": "/tmp/gpui-static-shader-sol-target/release/deps/presentation-76ab9f7a4314728d",
+    "copy": "/tmp/gpui-static-frozen-bins/default/presentation",
+    "sha256": "baf7437cd86ba43cc9575609eb00e5f07695de31e7fe33283287df67ad5618e2"
+  },
+  "render": {
+    "source": "/tmp/gpui-static-shader-sol-target/release/deps/render-b11d605f93bce01e",
+    "copy": "/tmp/gpui-static-frozen-bins/default/render",
+    "sha256": "84c819a85cea663a4a6d7288be2b11031c584b63d3bffd685890389cd71e9b43"
+  }
+}

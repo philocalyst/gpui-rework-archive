@@ -1,0 +1,26 @@
+{
+  "source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+  "all_tracked_source_bytes_unchanged": true,
+  "core_published_files_modified_only_as_documented": [
+    "Cargo.toml",
+    "src/device/global.rs",
+    "src/device/resource.rs",
+    "src/lock/ranked.rs"
+  ],
+  "primary_gates": 21,
+  "optional_vulkan_gpu_presentation": [
+    46,
+    10,
+    4
+  ],
+  "default_vulkan_gpu_presentation": [
+    45,
+    9,
+    4
+  ],
+  "independent_native_cases": 9,
+  "host_proof_tests": 4,
+  "native_x11_tests": 2,
+  "native_layer_excluded_from_heap": true,
+  "no_main_or_producer_edits_by_this_worktree": true
+}
