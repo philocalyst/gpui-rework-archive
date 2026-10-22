@@ -109,6 +109,10 @@ impl<'a> Part<'a> {
     pub(crate) fn text_lease(self) -> Option<&'a crate::shared_text::SharedText> {
         self.node.text.as_ref()
     }
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn native_parent_index(self) -> Option<usize> {
+        self.node.parent.index()
+    }
     /// Stable window-qualified identity, also used by input and inspector APIs.
     /// Merely reading a target does not grant it a particular action.
     pub fn target(self) -> Target {

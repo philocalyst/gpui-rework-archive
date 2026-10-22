@@ -284,7 +284,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub(crate) fn accessibility_input(
         &self,
         target: Target,
-    ) -> Result<(FieldId, SharedText), Error> {
+    ) -> Result<(FieldId, &SharedText), Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
         runtime.current_presentation()?;
@@ -293,7 +293,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .text_slot()
             .get(&runtime.texts)
             .unwrap();
-        Ok((site.field.unwrap(), site.value.clone()))
+        Ok((site.field.unwrap(), &site.value))
     }
     /// Current logical selection, or a collapsed caret at the input's end.
     /// This query uses current source authority and remains available after a

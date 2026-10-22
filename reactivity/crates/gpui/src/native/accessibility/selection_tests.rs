@@ -410,3 +410,68 @@ fn failed_newer_edit_and_cold_provider_keep_older_candidate_selection() {
     assert_ne!(repaired, id);
     assert!(cohort.target(&win, repaired).is_ok());
 }
+
+#[test]
+fn equal_text_field_rebind_survives_failed_prepare_and_older_ack() {
+    let mut model = Inputs::new("same");
+    model.b = Signal::new("same".into());
+    let mut win = Win::recording(model, WindowOptions::default()).unwrap();
+    ack(&mut win);
+    win.accessibility_observe(true).unwrap();
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let input = target(&win, 1);
+    let before_id = native_id(&win, &cohort, input);
+    let base = win.accessibility_state().unwrap();
+    let root = win.inspect().unwrap().nodes[0].target.unwrap();
+    win.set_property(
+        root,
+        crate::property::TRANSFORM,
+        crate::property::Contribution::Set(crate::Affine::translation(1., 0.)),
+    )
+    .unwrap();
+    let old = win.with_scene(|_, token| token).unwrap();
+    assert!(
+        win.set_property(
+            root,
+            crate::property::TRANSFORM,
+            crate::property::Contribution::Set(crate::Affine::scale(0., 1.))
+        )
+        .is_err()
+    );
+    assert!(win.update(|m| m.rebind = true).is_err());
+    win.presented(old).unwrap();
+    let old_state = win.accessibility_state().unwrap();
+    assert!(win.accessibility_delta(base, old_state).is_none());
+    cohort.refresh(&win).unwrap();
+    assert!(cohort.target(&win, before_id).is_err());
+    // Repair produces the current binding without changing any text bytes.
+    win.set_property(
+        root,
+        crate::property::TRANSFORM,
+        crate::property::Contribution::Set(crate::Affine::IDENTITY),
+    )
+    .unwrap();
+    ack(&mut win);
+    let rebound = win.accessibility_state().unwrap();
+    assert!(win.accessibility_delta(old_state, rebound).is_none());
+    cohort.refresh(&win).unwrap();
+    let id = native_id(&win, &cohort, input);
+    assert_ne!(id, before_id);
+    assert!(cohort.target(&win, id).is_ok());
+    win.set_semantic(
+        root,
+        crate::semantic::DESCRIPTION,
+        crate::property::Contribution::Set(Some("current binding".into())),
+    )
+    .unwrap();
+    let next = win.accessibility_state().unwrap();
+    assert_eq!(win.accessibility_delta(rebound, next).unwrap().len(), 1);
+    assert!(
+        !cohort
+            .update_delta(&win, win.accessibility_delta(rebound, next).unwrap())
+            .unwrap()
+            .root
+    );
+    assert_eq!(native_id(&win, &cohort, input), id);
+}

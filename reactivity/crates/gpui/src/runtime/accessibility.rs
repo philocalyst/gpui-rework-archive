@@ -28,6 +28,11 @@ pub(super) struct Observer {
     indices: Vec<u32>,
     exact: bool,
     pending: bool,
+    // A field rebind can preserve every displayed byte (including the shared
+    // empty string). No per-node binding history belongs in Presented. Require
+    // one native full publication covering the actual source/candidate barrier.
+    input_epoch: u64,
+    input_sequence: u64,
 }
 impl Observer {
     fn new(stamp: Stamp) -> Self {
@@ -37,6 +42,8 @@ impl Observer {
             indices: Vec::new(),
             exact: false,
             pending: false,
+            input_epoch: 0,
+            input_sequence: 0,
         }
     }
     pub(super) fn begin(&mut self, base: Stamp, size: [u32; 2]) -> Collect<'_> {
@@ -52,9 +59,21 @@ impl Observer {
     fn delta(&self, base: SemanticState, target: SemanticState, sites: &Sites) -> Option<&[u32]> {
         (!self.pending
             && self.exact
+            && base.epoch >= self.input_epoch
+            && base.token.map_or(0, |token| token.sequence.get()) >= self.input_sequence
             && self.base.matches(base, sites)
             && self.target.matches(target, sites))
         .then_some(self.indices.as_slice())
+    }
+    pub(super) fn input_rebound(&mut self, source: u64, covered: u64, next: NonZeroU64) {
+        if source > covered {
+            self.input_epoch = self.input_epoch.max(source);
+        } else {
+            // An eligible C may already cover this same S. Only a later C can
+            // contain the rebind. The ordinary presentation allocator checks
+            // next+1 before preparing; exhaustion never wraps this authority.
+            self.input_sequence = self.input_sequence.max(next.get());
+        }
     }
     pub(super) fn acknowledge(&mut self, stamp: Stamp) {
         // Any post-prepare mutation or superseded/failed collector loses sparse
@@ -280,5 +299,64 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .accessibility
             .as_ref()?
             .delta(base, target, &runtime.sites)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn input_authority_barrier_survives_failure_old_ack_and_same_source_rebind() {
+        let sites = Sites::new();
+        let stamp = |sequence, epoch| Stamp {
+            sequence: NonZeroU64::new(sequence),
+            epoch,
+            size: [100, 100],
+        };
+        let state = |stamp: Stamp| SemanticState {
+            token: stamp.sequence.map(|sequence| PresentationToken {
+                window: sites.namespace(),
+                sequence,
+            }),
+            epoch: stamp.epoch,
+            size: stamp.size,
+            valid: true,
+            focus: None,
+        };
+        // Both source-advanced admission and source-unchanged scroll/rebuild.
+        for source_advanced in [false, true] {
+            let p = stamp(1, 1);
+            let old_c = stamp(2, 2);
+            let rebound = stamp(3, if source_advanced { 3 } else { 2 });
+            let mut observer = Observer::new(p);
+            observer.begin(p, p.size).finish(old_c, 1, 1);
+            observer.input_rebound(rebound.epoch, 2, rebound.sequence.unwrap());
+            // Failed newer preparation followed by an eligible old C ACK must
+            // not erase the sticky source/candidate lower bound.
+            observer.begin(p, p.size).full();
+            observer.acknowledge(old_c);
+            observer.begin(old_c, old_c.size).finish(rebound, 1, 1);
+            observer.acknowledge(rebound);
+            assert!(
+                observer
+                    .delta(state(old_c), state(rebound), &sites)
+                    .is_none()
+            );
+            // A full publication at rebound covers the authority change; a
+            // subsequent exact transition resumes sparse work without reset.
+            let next = stamp(4, rebound.epoch);
+            observer.begin(rebound, rebound.size).finish(next, 1, 1);
+            observer.acknowledge(next);
+            assert_eq!(
+                observer.delta(state(rebound), state(next), &sites),
+                Some(&[][..])
+            );
+            // A later rebind cannot decrease either lower bound.
+            observer.input_rebound(1, 2, NonZeroU64::new(1).unwrap());
+            assert_eq!(
+                observer.delta(state(rebound), state(next), &sites),
+                Some(&[][..])
+            );
+        }
     }
 }

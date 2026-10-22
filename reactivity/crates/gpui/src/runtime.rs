@@ -1884,6 +1884,19 @@ impl<M: View + 'static> Runtime<M> {
                 node_changed = true;
             }
             let text = draft.text.as_ref().map(|text| text.borrowed_value());
+            #[cfg(feature = "accessibility")]
+            if node.kind() == NodeKind::Input
+                && site
+                    .as_ref()
+                    .is_some_and(|site| site.field != fields[index])
+                && let Some(observer) = &mut self.accessibility
+            {
+                observer.input_rebound(
+                    self.source_epoch,
+                    self.complete_epoch,
+                    self.next_presentation,
+                );
+            }
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
                 self.rebuild_layout |= site.is_some() != text.is_some();

@@ -327,18 +327,25 @@ impl Bridge {
         if !full && self.published.is_some_and(|old| old.focus == state.focus) {
             return Ok(());
         }
-        let rebound = full && self.cohort.refresh(owner)?;
-        let sheet = owner.accessibility_sheet()?;
-        let delta = (!self.needs_full && !rebound)
+        let delta = (full && !self.needs_full)
             .then(|| {
                 self.published
                     .and_then(|old| owner.accessibility_delta(old, state))
             })
             .flatten();
+        let relink = if let Some(indices) = delta {
+            self.cohort.update_delta(owner, indices)?
+        } else {
+            if full {
+                self.cohort.refresh(owner)?;
+            }
+            text::Relink::default()
+        };
+        let sheet = owner.accessibility_sheet()?;
         let mut updated = false;
         self.adapter.update_if_active(|| {
-            let update = if let Some(indices) = delta.filter(|_| full) {
-                project_sparse(&sheet, indices, &self.cohort)
+            let update = if let Some(indices) = delta.filter(|_| !relink.root) {
+                project_sparse(&sheet, indices, &relink.parents, &self.cohort)
             } else if full {
                 project(&sheet, state, &self.title, &self.cohort)
             } else {
@@ -619,11 +626,22 @@ fn projected_text(part: Part<'_>, node: &Node) -> Option<Node> {
 fn project_sparse(
     sheet: &crate::runtime::SemanticSheet<'_>,
     indices: &[u32],
+    parents: &[u32],
     cohort: &Cohort,
 ) -> TreeUpdate {
-    let count = indices
+    // Both frontiers are sorted/unique. Parents only relink changed native IDs;
+    // do not duplicate an existing replacement or clone unchanged input leases.
+    let selected = indices
         .iter()
-        .map(|&index| {
+        .chain(
+            parents
+                .iter()
+                .filter(|&&index| indices.binary_search(&index).is_err()),
+        )
+        .copied();
+    let count = selected
+        .clone()
+        .map(|index| {
             let part = sheet
                 .part_at(index as usize)
                 .expect("exact transition P index");
@@ -632,7 +650,7 @@ fn project_sparse(
         .sum();
     let mut update = focus_update(sheet, cohort);
     update.nodes = Vec::with_capacity(count);
-    for &index in indices {
+    for index in selected {
         let part = sheet
             .part_at(index as usize)
             .expect("exact transition P index");
