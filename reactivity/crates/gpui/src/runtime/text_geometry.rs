@@ -61,45 +61,8 @@ impl<'a> TextGeometry<'a> {
         if !local.is_empty() {
             return map.bounds(local);
         }
-        // The damage API intentionally discards empty rectangles. Text ranges
-        // also need zero-width semantic carets/advances, including under shear.
-        let points = [
-            Point {
-                x: local.x,
-                y: local.y,
-            },
-            Point {
-                x: local.x + local.width,
-                y: local.y,
-            },
-            Point {
-                x: local.x,
-                y: local.y + local.height,
-            },
-            Point {
-                x: local.x + local.width,
-                y: local.y + local.height,
-            },
-        ];
-        let mut bounds = [
-            f32::INFINITY,
-            f32::INFINITY,
-            f32::NEG_INFINITY,
-            f32::NEG_INFINITY,
-        ];
-        for point in points {
-            let point = map.to_window(point)?;
-            bounds[0] = bounds[0].min(point.x);
-            bounds[1] = bounds[1].min(point.y);
-            bounds[2] = bounds[2].max(point.x);
-            bounds[3] = bounds[3].max(point.y);
-        }
-        Some(Rect::new(
-            bounds[0],
-            bounds[1],
-            bounds[2] - bounds[0],
-            bounds[3] - bounds[1],
-        ))
+        // Damage drops empty rectangles; semantic carets/advances retain them.
+        map.continuous_bounds(local)
     }
     /// Continuous viewport clipping from this P, never current scroll state.
     /// This is semantic geometry, distinct from the raster sample clip.
