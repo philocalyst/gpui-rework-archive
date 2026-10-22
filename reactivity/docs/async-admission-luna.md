@@ -10,6 +10,10 @@ Waker or new cancellation Arc is approved. The Sol implementation is isolated;
 this report is not an integrated API or performance claim. GPUI commit links
 identify local unpublished source snapshots and may not resolve on GitHub.
 
+Later implementation review found a whole-chain close obligation; see the final
+section. Canceling one lane before its own destructors is insufficient when a
+different lane or outer Inbox destructor can unwind before reaching the tail.
+
 **Verdict.** The bounded first convenience should be an opt-in typed `Future` adapter layered on `Questions`, driven by an injected executor with a statically typed per-task cancellation handle. Do not retrofit a Waker or task slot into ordinary `Controller`/`Completion`. The adapter can keep the existing owned-input, request-stamp, last-value, one-slot mailbox and owner-barrier rules while removing the repetitive “freeze, enqueue closure, finish Completion” glue. Its essential new contract is cancellation that wakes or stops that exact task, with the existing physical credit held until the old future has actually been dropped and its terminal admitted. A poll-only `Cancellation` wrapper does not meet that contract.
 
 ## What is already there
@@ -133,3 +137,35 @@ This satisfies this code's **one-physical-`Completion` lease**: terminal publica
 One API correction for the injected seam: define `QuestionExecutor::spawn(&mut self, future)` rather than `&self`. The private starter already owns mutable executor state, so this lets deterministic/custom test executors keep a plain queue and counters without `RefCell`/`Cell`; pool handles that need sharing can hold their own shared state. This is opt-in and does not add state to ordinary question controllers.
 
 A concurrency caveat belongs with that boundary: the owner may admit the staged terminal on another thread after `Completion` signals but before the executor observes `Poll::Ready`. Dropping/canceling the associated handle in that interval must not reclaim or move the task allocation while its `poll` stack still borrows it; executor teardown has to serialize with the active poll and finish when that poll returns. This is compatible with the lease rule, but it is an explicit executor-handle requirement, not something `Pin::set` supplies.
+
+## Close the entire chain before user cleanup
+
+The isolated implementation at `a951113912` adds a static two-phase close after
+adversarial tests exposed the per-lane hole. First revoke question authority,
+release every controller owner lease, detach Inbox receivers, and request exact
+task cancellation throughout the chain. Move uniquely owned response payloads
+and detached receivers into a typed transient retirement value. Only after all
+lanes finish that phase may retirement and ordinary input/result/freezer cleanup
+run user destructors. This also covers quarantine and delivery failure paths
+through the existing shared `LaneSet::close` boundary.
+
+For a controller, `Arc::into_inner` either transfers unique ownership or releases
+this strong lease without dropping its inner value on this thread. Using
+`Arc::try_unwrap(...).ok()` would permit a racing last-cap drop to make response
+destruction occur during the cancellation phase. This distinction is documented
+by [Rust's Arc contract](https://doc.rust-lang.org/std/sync/struct.Arc.html#method.into_inner).
+Unique mailbox ownership then permits `Mutex::into_inner`, with no lock or
+shared-slot mutation. A still-running physical completion retains its existing
+teardown responsibility.
+
+No owner field, heap allocation, erased retirement container or new cancellation
+Arc is added. Retirement does occupy transient close stack space proportional
+to its concrete response types; measured inferred public consumers report 40
+bytes for a `u64` question and 4,128 for an inline 4,096-byte response. These are
+type sizes, additive across lanes, not maximum machine stack usage. The source
+and optimized ordinary-consumer costs still require final qualification before
+integration. Natural `QuestionLane::drop` keeps its existing unbounded generic
+form; the Future starter supplies its task RAII destructor. Task cancellation
+and handle destruction must remain prompt, nonblocking and nonpanicking, and
+serialize reclamation with any active poll. Arbitrary double-panic aborts remain
+outside the recovery contract.
