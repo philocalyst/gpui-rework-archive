@@ -1,0 +1,2 @@
+000000000050d090 000000000000010c t <gpui::runtime::styles::colours::Bank>::colors
+000000000050df40 0000000000000127 T <gpui::runtime::styles::colours::Bound>::get

@@ -1,0 +1,81 @@
+{
+  "base": "ef631b11a6",
+  "production_commit": "7687b3224682523bdb53b91b77209763b2bbc844",
+  "source_sha256": {
+    "reactivity/crates/gpui/src/runtime.rs": "5cde12ce35c82ad157d5e314098506960983c66c75f85b8037459916948e8361",
+    "reactivity/crates/gpui/src/runtime/styles.rs": "a1725a643a1d6969e1407f3af8339921f152284fe5a85f721f30373103ce0dea",
+    "reactivity/crates/gpui/src/runtime/styles/colours.rs": "ff3474cd6c6e4243fa6dddd66c36319c46ae57b85299c3a1bec64523e113d794"
+  },
+  "artifacts": [
+    {
+      "name": "paint_slot_storage",
+      "path": "/tmp/gpui-paint-slot-refinement-target/release/examples/paint_slot_storage",
+      "sha256": "ba16a0af3be63b8a4f87eb18048d000eee3f1b1308b63cd2dac202b72a10ad88",
+      "fixture_sha256": "2bdc2d82354aa40df7c3714b70ca1b7dd8616babfeaa2d4bdc94ce9553167675"
+    },
+    {
+      "name": "paint_slot_codegen",
+      "path": "/tmp/gpui-paint-slot-refinement-target/release/examples/paint_slot_codegen",
+      "sha256": "b93eb12f718d037318ad7607bed906f377b76e77d377336e2959dcd0f4570ff8",
+      "fixture_sha256": "a10121472c005032d56795be0a33d8e1f9468f622aea8de7795e0ad0b05063e8"
+    }
+  ],
+  "target": "/tmp/gpui-paint-slot-refinement-target",
+  "profile": "default release for allocation/codegen; x11,wayland for native and strict Clippy",
+  "jobs": 2,
+  "no_timing_capture": true,
+  "rust": "rustc 1.97.1 (8bab26f4f 2026-07-14), LLVM 22.1.6, x86_64-unknown-linux-gnu",
+  "source_note": "Final release rebuild followed all production edits. The final source commit also includes one later cfg(test)-only old-map reference test; it cannot affect either release artifact. The first dependency build overlapping edits is not an authoritative artifact.",
+  "commands": {
+    "release": "cargo build --manifest-path reactivity/Cargo.toml --release -p gpui --example paint_slot_codegen --example paint_slot_storage",
+    "allocation": "/tmp/gpui-paint-slot-refinement-target/release/examples/paint_slot_storage",
+    "codegen": "/tmp/gpui-paint-slot-refinement-target/release/examples/paint_slot_codegen",
+    "default": "cargo test --manifest-path reactivity/Cargo.toml -p gpui --lib --tests -- --test-threads=1",
+    "styles": "cargo test --manifest-path reactivity/Cargo.toml -p gpui --lib runtime::styles -- --test-threads=1 --nocapture",
+    "clippy": "cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --features x11,wayland --all-targets -- -D warnings",
+    "native": "DISPLAY=:94 cargo test --manifest-path reactivity/Cargo.toml -p gpui --features x11,wayland --lib native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection -- --ignored --exact --nocapture --test-threads=1"
+  },
+  "code_size": {
+    "property": {
+      "text": 7970906,
+      "data": 154888,
+      "bss": 2867,
+      "getter_bytes": 522,
+      "stack_reservation_bytes": 112,
+      "bound_get_bytes": 295,
+      "bank_colors_bytes": 268
+    },
+    "storage": {
+      "text": 7964617,
+      "data": 153832,
+      "bss": 5139
+    }
+  },
+  "header_changes": 0,
+  "dependencies_added": 0,
+  "local_unsafe_added": false,
+  "lookup_complexity": "One full capture sort; two per-node lower-bound searches during reconciliation; per-field BTreeMap retained.",
+  "gates": {
+    "owner-production-equivalent.txt": {
+      "passed": 365,
+      "ignored": 8,
+      "exit_code": 0,
+      "scope": "All production edits present; before addition of one cfg(test)-only old-map reference test. That final test is covered in styles-tests.txt. A full final-source rerun is in progress and will be attached separately."
+    },
+    "styles-tests.txt": {
+      "passed": 14,
+      "ignored": 0,
+      "exit_code": 0
+    },
+    "native.txt": {
+      "passed": 1,
+      "ignored": 0,
+      "exit_code": 0
+    },
+    "clippy.txt": {
+      "passed": 0,
+      "ignored": 0,
+      "exit_code": 0
+    }
+  }
+}

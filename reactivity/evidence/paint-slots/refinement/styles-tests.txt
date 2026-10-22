@@ -1,0 +1,42 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-paint-slot-refinement/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.67s
+     Running unittests src/lib.rs (/tmp/gpui-paint-slot-refinement-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 14 tests
+test runtime::styles::colours::admission_tests::more_than_canvas_bank_limit_distinct_source_ports_can_emit_no_commands ... ok
+test runtime::styles::colours::tests::default_authored_spaces_and_negative_zero_do_not_collapse ... ok
+test runtime::styles::colours::tests::equal_fields_are_distinct_and_masked_bases_follow_their_source ... ok
+test runtime::styles::colours::tests::existing_fanouts_freeze_one_sparse_port_allocation_and_both_fields ... ok
+test runtime::styles::colours::tests::source_update_has_one_owned_write_and_no_allocation ... color_bank_layout,Styles=40,Fanout=32,Layout=56,Record=72,Bound=88,Bank=48,Source=48,Slot=4,Pair=8,retained=4448
+ok
+test runtime::styles::colours::tests::sparse_port_storage_compares_exact_old_map_and_paired_payloads ... port_storage,nodes=1,dual=false,old_allocations=1,old_requested=232,old_live=232,new_allocations=1,new_requested=8,new_live=8,paired_payload=12
+port_storage,nodes=1,dual=true,old_allocations=1,old_requested=232,old_live=232,new_allocations=1,new_requested=16,new_live=16,paired_payload=12
+port_storage,nodes=16,dual=false,old_allocations=3,old_requested=792,old_live=792,new_allocations=1,new_requested=128,new_live=128,paired_payload=192
+port_storage,nodes=16,dual=true,old_allocations=5,old_requested=1256,old_live=1256,new_allocations=1,new_requested=256,new_live=256,paired_payload=192
+port_storage,nodes=4096,dual=false,old_allocations=681,old_requested=167208,old_live=167208,new_allocations=1,new_requested=32768,new_live=32768,paired_payload=49152
+port_storage,nodes=4096,dual=true,old_allocations=1365,old_requested=335400,old_live=335400,new_allocations=1,new_requested=65536,new_live=65536,paired_payload=49152
+ok
+test runtime::styles::tests::exact_comparison_covers_every_style_field ... ok
+test runtime::styles::tests::inspector_edits_densify_once_and_do_not_mutate_shared_peers ... ok
+test runtime::styles::tests::late_palette_overflow_and_late_nondefault_prefix_preserve_all_values ... ok
+test runtime::styles::tests::ordinary_property_reads_borrow_the_actual_style_once ... ok
+test runtime::styles::tests::rebuilt_lanes_keep_no_historical_style_palette ... ok
+test runtime::styles::tests::shared_values_preserve_author_channels_profiles_and_signed_zero ... ok
+test runtime::styles::tests::storage_modes_and_overflow_preserve_every_admitted_style ... ok
+test runtime::styles::tests::style_lane_allocation_ledger ... style_lane,default,nodes=4096,allocations=0,requested_bytes=0,live_bytes=0,peak_bytes=0
+style_lane,small,nodes=3,allocations=1,requested_bytes=264,live_bytes=264,peak_bytes=264
+style_lane,shared,nodes=4096,allocations=3,requested_bytes=7616,live_bytes=4800,peak_bytes=7616
+style_lane,unique,nodes=4096,allocations=3,requested_bytes=367360,live_bytes=360448,peak_bytes=367360
+ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 97 filtered out; finished in 0.39s
+
