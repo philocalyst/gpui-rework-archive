@@ -3032,11 +3032,16 @@ impl<M: View + 'static> Runtime<M> {
                 let index = presented.len() - 1;
                 observation.compare(
                     index,
-                    (self.presented.get(index), &presented[index]),
-                    (
-                        previous_geometry.bases(),
-                        geometry::Bases::new(&geometry_records),
-                    ),
+                    accessibility::ComparedRows {
+                        previous: self.presented.get(index).map(|row| accessibility::RowView {
+                            row,
+                            bases: previous_geometry.bases(),
+                        }),
+                        next: accessibility::RowView {
+                            row: &presented[index],
+                            bases: geometry::Bases::new(&geometry_records),
+                        },
+                    },
                     (self.metadata.as_deref(), selection_snapshot),
                     (
                         self.text.as_ref().and_then(|text| text.entry(index)),

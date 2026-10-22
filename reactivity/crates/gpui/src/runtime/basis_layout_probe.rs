@@ -49,6 +49,15 @@ fn proposal_basis_headers_and_owner_allocations() {
             );
         };
     }
+    #[cfg(feature = "accessibility")]
+    {
+        header!(accessibility::RowView<'_>);
+        header!(Option<accessibility::RowView<'_>>);
+        header!(accessibility::ComparedRows<'_, '_>);
+        assert_eq!(size_of::<accessibility::RowView<'_>>(), 24);
+        assert_eq!(size_of::<Option<accessibility::RowView<'_>>>(), 24);
+        assert_eq!(size_of::<accessibility::ComparedRows<'_, '_>>(), 48);
+    }
     header!(Presented);
     header!(Option<Presented>);
     header!(geometry::Placement);
@@ -172,7 +181,7 @@ fn basis_ordinary_window_allocation_cohorts() {
                 count: 1024,
                 case: 0,
             },
-            options.clone(),
+            options,
         )
         .unwrap(),
     );
@@ -197,7 +206,7 @@ fn basis_ordinary_window_allocation_cohorts() {
                         count,
                         case: case as u8,
                     },
-                    options.clone(),
+                    options,
                 )
                 .unwrap();
                 let token = win.with_scene(|_, token| token).unwrap();
