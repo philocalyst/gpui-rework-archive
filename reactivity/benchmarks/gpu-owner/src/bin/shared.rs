@@ -24,8 +24,9 @@ fn main() {
     let cold = allocation_counter::measure(|| {
         // Match the frozen same-device control's actual device descriptor.
         let (device, queue) = fixture::device(&adapter);
-        let context = pollster::block_on(GpuContext::new(device, queue, fixture::FORMAT)).unwrap();
+        // Reserve windows before pipeline construction, matching the control.
         let mut windows = Vec::with_capacity(n);
+        let context = pollster::block_on(GpuContext::new(device, queue, fixture::FORMAT)).unwrap();
         for canvas in &scenes {
             let state = RendererState::new(&context);
             let texture = fixture::target(context.device(), canvas);
