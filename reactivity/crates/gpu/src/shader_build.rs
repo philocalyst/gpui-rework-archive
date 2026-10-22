@@ -117,20 +117,21 @@ fn reflect(
             );
             members[0].ty
         } else {
-            assert_eq!(
-                output.binding,
-                if ep.stage == ShaderStage::Vertex {
-                    position
-                } else {
+            if ep.stage == ShaderStage::Vertex {
+                assert_eq!(output.binding, position);
+            } else {
+                // WGSL normalizes default interpolation; SPIR-V drops it on
+                // fragment outputs. Neither creates an inter-stage varying.
+                assert!(matches!(
+                    output.binding,
                     Some(naga::Binding::Location {
                         location: 0,
-                        interpolation: None,
-                        sampling: None,
                         blend_src: None,
                         per_primitive: false,
+                        ..
                     })
-                }
-            );
+                ));
+            }
             output.ty
         };
         vector(module, output_type, V::Quad, K::Float);
