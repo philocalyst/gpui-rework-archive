@@ -336,3 +336,112 @@ fn selection_reply_checks_the_same_contained_mutable_owner() {
     assert_eq!(win.activate(target), Err(Error::Poisoned));
     WRONG.store(false, Ordering::SeqCst);
 }
+#[test]
+fn every_closed_catalog_family_returns_canonical_value_and_equal_presence() {
+    struct Catalog {
+        id: PropertyId,
+        target: Option<Target>,
+        contribution: Option<Contribution<PropertyValue>>,
+        state: Option<PropertyState>,
+    }
+    impl Catalog {
+        fn inspect(&self, target: Target) -> Option<(Target, PropertyId)> {
+            Some((target, self.id))
+        }
+        fn edit(&self) -> Option<PropertyChange> {
+            Some((self.target?, self.id, self.contribution?))
+        }
+        fn reply(&mut self, result: Result<PropertyState, &Error>) {
+            let state = result.unwrap();
+            self.target = Some(state.target);
+            self.state = Some(state);
+        }
+    }
+    impl View for Catalog {
+        fn view(&self) -> El<'_> {
+            row((
+                button("Subject")
+                    .w(80)
+                    .h(32)
+                    .on_click(property_selection(Self::inspect, Self::reply)),
+                button("Apply").on_click(property_action(Self::edit, Self::reply)),
+            ))
+        }
+    }
+    for info in gpui::property::PROPERTIES {
+        let mut win = Win::with_size(
+            Catalog {
+                id: info.id,
+                target: None,
+                contribution: None,
+                state: None,
+            },
+            400,
+            200,
+        )
+        .unwrap();
+        let target = win.button("Subject");
+        win.activate(target).unwrap();
+        let inherited = win.root().unwrap().state.unwrap();
+        assert_eq!(inherited.contribution, Contribution::Inherit);
+        assert_eq!(
+            inherited.value,
+            win.property_value(target, info.id).unwrap()
+        );
+        win.update(|model| model.contribution = Some(Contribution::Set(inherited.value)))
+            .unwrap();
+        assert_eq!(win.activate(win.button("Apply")).unwrap().changed_nodes, 0);
+        let equal = win.root().unwrap().state.unwrap();
+        assert_eq!(equal.value, inherited.value);
+        assert_eq!(equal.contribution, Contribution::Set(inherited.value));
+        let changed = match inherited.value {
+            PropertyValue::Dimension(_) => PropertyValue::Dimension(Some(100.)),
+            PropertyValue::Number(value) => PropertyValue::Number(value + 1.),
+            PropertyValue::Color(_) => {
+                PropertyValue::Color(Color::oklch(0.7, 0.1, 40., 0.8).unwrap())
+            }
+            PropertyValue::Flow(_) => PropertyValue::Flow(Flow::Column),
+            PropertyValue::Transform(_) => PropertyValue::Transform(Affine {
+                b: 0.125,
+                tx: 2.,
+                ..Affine::IDENTITY
+            }),
+            PropertyValue::Align(_) => PropertyValue::Align(Align::Center),
+            PropertyValue::Justify(_) => PropertyValue::Justify(Justify::Center),
+            PropertyValue::Flag(value) => PropertyValue::Flag(!value),
+            _ => panic!("catalog family requires a new case"),
+        };
+        win.update(|model| model.contribution = Some(Contribution::Set(changed)))
+            .unwrap();
+        win.activate(win.button("Apply")).unwrap();
+        let state = win.root().unwrap().state.unwrap();
+        assert_eq!(state.value, changed, "{}", info.name);
+        assert_eq!(state.contribution, Contribution::Set(changed));
+        assert_eq!(state.value, win.property_value(target, info.id).unwrap());
+        win.update(|model| model.contribution = Some(Contribution::Inherit))
+            .unwrap();
+        win.activate(win.button("Apply")).unwrap();
+        assert_eq!(win.root().unwrap().state.unwrap(), inherited);
+        assert_eq!(win.activate(win.button("Apply")).unwrap().changed_nodes, 0);
+        assert_eq!(win.root().unwrap().state.unwrap(), inherited);
+    }
+}
+#[cfg(feature = "native-core")]
+#[test]
+fn public_consumer_headers_remain_explicit() {
+    println!(
+        "PROPERTY_PUBLIC_HEADERS Win={} OptionWin={} Window={} OptionWindow={} Companion={} ValueEntry={}",
+        size_of::<Win<Companion>>(),
+        size_of::<Option<Win<Companion>>>(),
+        size_of::<gpui::Window<Companion>>(),
+        size_of::<Option<gpui::Window<Companion>>>(),
+        size_of::<Companion>(),
+        size_of::<workbench::value_entry::ValueEntry>()
+    );
+    assert_eq!(size_of::<Win<Companion>>(), 8);
+    assert_eq!(size_of::<Option<Win<Companion>>>(), 16);
+    assert_eq!(size_of::<gpui::Window<Companion>>(), 208);
+    assert_eq!(size_of::<Option<gpui::Window<Companion>>>(), 208);
+    assert_eq!(size_of::<Companion>(), 136);
+    assert_eq!(size_of::<workbench::value_entry::ValueEntry>(), 104);
+}

@@ -375,6 +375,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 if let Some(contribution) = contribution {
                     property_changed = self.apply_property_value_at(index, id, contribution)?;
                 }
+                // Reads and writes share the closed PropertyId destination.
+                // Accepted edits leave the same typed Style/Geometry domain.
                 Ok(crate::PropertyState {
                     target,
                     id,
