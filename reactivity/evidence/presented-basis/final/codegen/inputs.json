@@ -1,0 +1,33 @@
+{
+  "source": "9c1dbdf1e0a8ca15be8624cb68d295db9fcb36b3",
+  "excerpt": "geometry.rs contiguous Placement through GeometryView, before Geometry #[derive(Default)]",
+  "files": {
+    "/tmp/gpui-presented-basis-asm/src/shipping_codec.rs": "73607679796d7b33f48bcb138f3daba65033a0ae778e798d9d9e04a4135b135f",
+    "/tmp/gpui-presented-basis-asm/libgpui_reactivity_core-x86_64.rlib": "1abffa98ced71f2a7e0266b0c43faddae80be54aa76d000dedc796b4e3ac73b1",
+    "/tmp/gpui-presented-basis-asm/libgpui_reactivity_core.rlib": "8434611a88901136dbeb19ec4f236f1a415dddce0b31e82fcd1445afd1265424",
+    "/tmp/gpui-presented-basis-target/aarch64-apple-darwin/debug/deps/libstd-82a9bcb33cb6b3d9.rmeta": "aa90d6a9c56e3f607a53e173936bc7bd6aab1f8edd6ed5f40643ce766b97c924"
+  },
+  "wrapper_code_lines": 23,
+  "core_cfg": "default features off, direct rustc; core source at source pin unchanged from base",
+  "flags": [
+    "--edition=2024",
+    "--crate-type lib",
+    "--emit asm",
+    "-C opt-level=3",
+    "-C debug-assertions=no"
+  ],
+  "targets": [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-apple-darwin"
+  ],
+  "limits": "Selected codec assembly only. No runtime/performance inference or whole-app stack claim. Core compiled to optimized rlib with same rustc/flags; A64 uses cached build-std metadata.",
+  "core_source_files_sha256": {
+    "reactivity/crates/core/src/damage.rs": "389a3f5fcabcd14ab25624c47f8dbdb27efbaddb5c9456709c7ba6547f10f0c3",
+    "reactivity/crates/core/src/geometry.rs": "1ef7c0cb4e1ab0cb70cbffcceaef85b94b318749795da89a1f9552a610ae63d4",
+    "reactivity/crates/core/src/inspect.rs": "c3be727cf2e2bd33246bb41ad91cfb811c33e35a39bad031f6d07363d7adeb38",
+    "reactivity/crates/core/src/layout.rs": "19e012b77be0881c0bba4c5fc075c1c893834492a511610aee17d8ca184fc29b",
+    "reactivity/crates/core/src/lib.rs": "0bdc1a07cdcb7b81f5264d012592a18620c4c8ae3b78013f89d0cb004f7b02df",
+    "reactivity/crates/core/src/spatial.rs": "b497392441478e55770ef33cc86b9ea211135e3e0a933779fed495a8a7f95060",
+    "reactivity/crates/core/src/tree.rs": "86688fad538bdfcb939441cb20868dced764d8293a30595e1cb3a37fa1d0a238"
+  }
+}
