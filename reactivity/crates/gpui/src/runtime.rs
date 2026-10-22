@@ -2820,15 +2820,17 @@ impl<M: View + 'static> Runtime<M> {
         {
             return None;
         }
-        let mut remaining = self.presented.len();
-        while remaining != 0 {
-            let index = remaining - 1;
-            let node = &self.presented[index];
+        let mut rows = self.presented.iter().enumerate().rev();
+        while let Some((index, node)) = rows.next() {
             if !node.hittable {
-                remaining -= node.parent.skip();
+                let skip = node.parent.skip();
+                // This row is consumed. nth discards the rest of the run in
+                // constant time without indexing the visible-path traversal.
+                if skip > 1 {
+                    rows.nth(skip - 2);
+                }
                 continue;
             }
-            remaining = index;
             if self.sheet_hit(index, point) {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
