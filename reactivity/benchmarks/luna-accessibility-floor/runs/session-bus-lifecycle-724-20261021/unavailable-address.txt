@@ -1,0 +1,30 @@
+case=unavailable-address
+pid=3568240
+address=unix:path=/tmp/no-such-a11y-bus
+alive_after_1s=yes
+--- status ---
+Name:	empty-x11
+VmRSS:	   11716 kB
+RssAnon:	    1660 kB
+RssFile:	   10056 kB
+Threads:	2
+--- smaps_rollup ---
+Rss:               11716 kB
+Pss:                9671 kB
+Pss_Anon:           1660 kB
+Pss_File:           8011 kB
+Shared_Clean:       2668 kB
+Private_Clean:      7388 kB
+Private_Dirty:      1660 kB
+--- task names ---
+3568240 empty-x11
+3568243 blocking-1
+--- executable VMAs ---
+Rss=1152kB Pss=1152kB 60996b8de000-60996c077000 r--p 00000000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+Rss=4120kB Pss=4120kB 60996c077000-60996cb0f000 r-xp 00798000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+Rss=460kB Pss=460kB 60996cb0f000-60996cb82000 r--p 0122f000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+Rss=12kB Pss=12kB 60996cb82000-60996cb85000 rw-p 012a1000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+--- X root children ---
+root_children 1
+0x200002 GPUI
+--- app stderr/stdout ---

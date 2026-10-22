@@ -67,9 +67,16 @@ llvmpipe/Xvfb do not establish native OS runtime or hardware performance.
 The earlier [combined style checks](evidence/reactive-style-ports/integration/checks.json)
 preserve the direct-style checkpoint and actual ordinary-scroll oracle at
 `b1fc101435`. Subsequent literal-builder controls found substantial codegen and
-mount-time regressions despite the corrected 12-byte Flex size. A separate
-literal-dispatch implementation is under review; storage parity alone is not
-an ergonomic or performance acceptance result.
+mount-time regressions despite the corrected 12-byte Flex size. Main
+`859274504e` now resolves literal assignment before source erasure using the
+same typed property schema. Its integrated checks pass 626 workspace cases/docs,
+strict accessible Linux and Apple/Windows desktop cross checks, and the actual
+X11 complete-image style oracle. The [frozen 582b controls](evidence/literal-dispatch/README.md)
+show fields/recipe builders about 80% faster than their matched modern baseline
+with identical allocation totals; the candidate remains
+114.6%/72.5% slower than the historical primitive fields/recipe controls. Direct caller bodies grow and element
+copies remain. The measured 582b classifier has since been simplified to a
+private boolean; its capture is not retagged as an integrated-source timing.
 
 Registered direct signals bind dimensions, colors, transforms, radius and flex
 fields through the existing typed source registry. One source freeze admits all
