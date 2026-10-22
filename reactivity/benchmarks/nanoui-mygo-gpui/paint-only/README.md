@@ -99,7 +99,9 @@ and NanoUI records must carry `status=pass`, `binary_sha256`, `fixture_sha256`,
 `source_commit`; the NanoUI record must also carry `build_config_sha256`
 matching the actual `build.zig`. The peer build manifest pins both peer binary
 paths and hashes, both source and fixture pins, and the reviewed NanoUI patch
-digest. Each GPUI build manifest carries `source_commit`, `source_tree`, exact
+digest, toolchain versions, and build command. The guard also checks the peer
+DejaVu font file path and SHA so the runtime font cannot silently change.
+Each GPUI build manifest carries `source_commit`, `source_tree`, exact
 `fixture_path`/`fixture_sha256`, binary path/hash, `profile=release`, the exact
 `cargo_features`, `workspace=reactivity/Cargo.toml`, and `locked=true`. Record
 the GPUI fixture SHAs, complete source commit/tree, Cargo feature set,

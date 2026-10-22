@@ -37,6 +37,8 @@ BASE=$(cd "$DIR/.." && pwd)
 MYGO_COMMIT=ea23ad2975a87db9b20efe6690ffedf88f4fe4f3
 NANOUI_COMMIT=dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
 NANOUI_PATCH_SHA=c698367086a8d17feeceae6f99d0abda2fce273f35c3e4f8f0e0a32fab586224
+PEER_FONT=/root/.local/share/fonts/luna-bench/DejaVuSans.ttf
+PEER_FONT_SHA=58568c88a01b80dfc056daca3eeafd434a0380df1a48dda53f0de0d716109bbd
 CONTROL_FIXTURE="$DIR/fixtures/gpui-paint-control.rs"
 DIRECT_FIXTURE="$DIR/fixtures/gpui-paint-direct.rs"
 GPUI_COMMIT=$LUNA_GPUI_EXPECTED_COMMIT
@@ -191,11 +193,16 @@ verify_pins() {
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_fixture_sha256=$mygo_fixture_sha"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_binary=$LUNA_MYGO_BINARY"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_binary_sha256=$LUNA_MYGO_SHA"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" 'mygo_toolchain=go1.27.1 linux/amd64'
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_build_command=go build -trimpath -o $LUNA_MYGO_BINARY ./examples/luna-bench"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_source_commit=$NANOUI_COMMIT"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_fixture_sha256=$nanoui_fixture_sha"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_binary=$LUNA_NANOUI_BINARY"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_binary_sha256=$LUNA_NANOUI_SHA"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" 'nanoui_toolchain=zig 0.17.0'
+  has_line "$LUNA_PEER_BUILD_MANIFEST" 'nanoui_build_command=zig build -Doptimize=ReleaseFast --prefix /tmp/luna-nanoui-pinned-output'
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_build_zig_patch_sha256=$NANOUI_PATCH_SHA"
+  sha_is "$PEER_FONT" "$PEER_FONT_SHA"
   verify_peer_source "$LUNA_MYGO_SOURCE_TREE" "$MYGO_COMMIT" "$BASE/fixtures/mygo-main.go" "$mygo_fixture_sha"
   verify_peer_source "$LUNA_NANOUI_SOURCE_TREE" "$NANOUI_COMMIT" "$BASE/fixtures/nanoui-main.zig" "$nanoui_fixture_sha" "$nanoui_build_config_sha"
   verify_source "$LUNA_GPUI_SOURCE_TREE" "$LUNA_GPUI_SOURCE_COMMIT"
@@ -257,6 +264,8 @@ unset LUNA_STAGES LUNA_PREFLIGHT LUNA_SCREENSHOT_PATH || true
   echo "mygo_source_commit=$MYGO_COMMIT"
   echo "mygo_fixture_sha256=$(sha256sum "$BASE/fixtures/mygo-main.go" | cut -d' ' -f1)"
   echo "nanoui_source_commit=$NANOUI_COMMIT"
+  echo "peer_font=$PEER_FONT"
+  echo "peer_font_sha256=$PEER_FONT_SHA"
   echo "mygo_source_tree=$LUNA_MYGO_SOURCE_TREE"
   echo "nanoui_source_tree=$LUNA_NANOUI_SOURCE_TREE"
   echo "nanoui_fixture_sha256=$(sha256sum "$BASE/fixtures/nanoui-main.zig" | cut -d' ' -f1)"
