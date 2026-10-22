@@ -41,6 +41,15 @@ against 29,367 at the unchanged-core baseline: +169. The two reusable support
 files add 198 non-test code lines and the original consumer spike adds 186:
 553 authored shipping/example lines together. This excludes evidence tooling
 and generated assembly; the separate all-source ledger charges those too.
+`qualification/all-source-summary.json` pins the complete physical-source
+inventory at archive `d2cabbce8d52feceb01d10bb4dedae4a9c776d78`: first-party
+non-test physical lines rise by128,928, comprising198 library lines,140 capture
+script lines,128,538 emitted assembly lines and52 conservatively unresolved
+prefix lines in two archived test-source copies. The unchanged inventory also
+classifies the two support files as test-only in their current import graph;
+their205 physical lines/198 code lines remain separately charged as reusable
+consumer source. The original spike's196 physical/186 code lines were already
+present in the58995 comparison baseline. Physical and code counts are distinct.
 
 ## Ordinary API and ownership
 

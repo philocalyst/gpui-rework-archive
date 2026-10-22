@@ -1,0 +1,78 @@
+{
+  "baseline_ref": "58995b75eaab408f488141ef77ed2b0d9ad0abe0",
+  "evidence_ref": "d2cabbce8d52feceb01d10bb4dedae4a9c776d78",
+  "method": "Inventory physical non-test source; independent core counter uses code lines. Keep these units separate. Generated assembly is conservatively charged as first-party benchmarks by the unchanged inventory tool.",
+  "baseline_totals": {
+    "all_active_non_test_lines": 327325,
+    "all_active_physical_source_lines": 396991,
+    "all_active_test_lines": 69666,
+    "all_repository_physical_source_lines": 661969,
+    "excluded_archived_physical_source_lines": 264978,
+    "first_party_including_generated_non_test_lines": 107344,
+    "first_party_non_test_lines": 67390,
+    "generated_non_test_lines": 39955,
+    "unclassified_files": 11,
+    "unclassified_files_non_test_lines_included": 5837,
+    "vendor_non_test_lines": 219980
+  },
+  "final_totals": {
+    "all_active_non_test_lines": 456253,
+    "all_active_physical_source_lines": 527545,
+    "all_active_test_lines": 71292,
+    "all_repository_physical_source_lines": 792523,
+    "excluded_archived_physical_source_lines": 264978,
+    "first_party_including_generated_non_test_lines": 236272,
+    "first_party_non_test_lines": 196318,
+    "generated_non_test_lines": 39955,
+    "unclassified_files": 13,
+    "unclassified_files_non_test_lines_included": 5889,
+    "vendor_non_test_lines": 219980
+  },
+  "delta_totals": {
+    "all_active_non_test_lines": 128928,
+    "all_active_physical_source_lines": 130554,
+    "all_active_test_lines": 1626,
+    "all_repository_physical_source_lines": 130554,
+    "excluded_archived_physical_source_lines": 0,
+    "first_party_including_generated_non_test_lines": 128928,
+    "first_party_non_test_lines": 128928,
+    "generated_non_test_lines": 0,
+    "unclassified_files": 2,
+    "unclassified_files_non_test_lines_included": 52,
+    "vendor_non_test_lines": 0
+  },
+  "delta_first_party_non_test_physical": 128928,
+  "components_physical": {
+    "shipping_library_delta": 198,
+    "capture_script": 140,
+    "captured_assembly": 128538,
+    "unresolved_module_prefixes_in_two_archived_test_source_copies": 52
+  },
+  "supplement_test_classified_reusable_demo_physical": 205,
+  "supplement_reason": "property_workbench.rs (79) and value_entry.rs (126) are currently imported only by tests; inventory correctly labels their current graph test-only. They remain authored reusable consumer code and are charged separately.",
+  "authored_code_ledger": {
+    "shipping_core_delta": 169,
+    "reusable_demo_support": 198,
+    "earlier_existing_consumer_spike": 186,
+    "shipping_plus_all_demo_code": 553,
+    "capture_script_tokei": {
+      "blanks": 7,
+      "code": 130,
+      "comments": 3,
+      "reports": [
+        {
+          "stats": {
+            "blanks": 7,
+            "code": 130,
+            "comments": 3,
+            "blobs": {}
+          },
+          "name": "reactivity/benchmarks/contained-owner/capture_release.py"
+        }
+      ],
+      "children": {},
+      "inaccurate": false
+    }
+  },
+  "limitations": "No source omitted because it is outside library/src. Raw assembly remains charged, not hidden under a newly invented generated-file exclusion."
+}
