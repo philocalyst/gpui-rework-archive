@@ -1,0 +1,2849 @@
+{
+  "default": {
+    "units": [
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#arrayvec@0.7.8",
+        "target": "arrayvec",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libarrayvec-2d96ee14effbddf6.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libarrayvec-2d96ee14effbddf6.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#ash@0.38.0+1.3.281",
+        "target": "build-script-build",
+        "features": [
+          "debug",
+          "default",
+          "libloading",
+          "loaded",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/ash-9d94dd4e9262fe0e/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#autocfg@1.5.1",
+        "target": "autocfg",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libautocfg-e894e4f922766fe0.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libautocfg-e894e4f922766fe0.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bit-set@0.10.0",
+        "target": "bit_set",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_set-1d4a04bdfefd859a.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_set-1d4a04bdfefd859a.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bit-vec@0.9.1",
+        "target": "bit_vec",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bitflags@2.13.2",
+        "target": "bitflags",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbitflags-18dc3c0a146bf0f7.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libbitflags-18dc3c0a146bf0f7.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bytemuck_derive@1.12.1",
+        "target": "bytemuck_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbytemuck_derive-609882d80646e047.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.5",
+        "target": "cfg_if",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_if-6f0d32411a9cb6de.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_if-6f0d32411a9cb6de.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#cfg_aliases@0.2.2",
+        "target": "cfg_aliases",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_aliases-b6cd500c58621c56.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_aliases-b6cd500c58621c56.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#codespan-reporting@0.13.1",
+        "target": "codespan_reporting",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcodespan_reporting-3b174f915e627651.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcodespan_reporting-3b174f915e627651.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#displaydoc@0.2.7",
+        "target": "displaydoc",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libdisplaydoc-f7c0cf01facf46e8.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#document-features@0.2.12",
+        "target": "document_features",
+        "features": [
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libdocument_features-348651f3d769cda4.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#either@1.19.0",
+        "target": "either",
+        "features": [
+          "std",
+          "use_std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libeither-11741564c2da6536.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libeither-11741564c2da6536.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#equivalent@1.0.3",
+        "target": "equivalent",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libequivalent-504b80678558a69e.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libequivalent-504b80678558a69e.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#fearless_simd_macros@0.1.0",
+        "target": "fearless_simd_macros",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libfearless_simd_macros-8ad9aeee2f59875e.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#foldhash@0.2.0",
+        "target": "foldhash",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libfoldhash-11dcb39ac4fc098e.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libfoldhash-11dcb39ac4fc098e.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#glam@0.30.10",
+        "target": "glam",
+        "features": [
+          "default",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libglam-8e40648c565d633e.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libglam-8e40648c565d633e.rmeta"
+        ]
+      },
+      {
+        "package": "path+file:///tmp/gpui-offline-shader-sol/reactivity/crates/gpu#gpui_gpu@0.1.0",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "simd"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/gpui_gpu-adaec1003f5e5cb7/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#half@2.7.1",
+        "target": "half",
+        "features": [
+          "alloc",
+          "default",
+          "num-traits",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libhalf-9035fcde36b72199.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libhalf-9035fcde36b72199.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#hashbrown@0.17.1",
+        "target": "hashbrown",
+        "features": [
+          "default-hasher",
+          "inline-more"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libhashbrown-418b3a222f59019f.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libhashbrown-418b3a222f59019f.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#heck@0.5.0",
+        "target": "heck",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libheck-39fce0ca7ad001a2.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libheck-39fce0ca7ad001a2.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_locale_fallback_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_locale_fallback_data-8493d8b08147bd69/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_normalizer_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_normalizer_data-3300858c355a55ae/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_properties_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_properties_data-4534f1ce1cf9c152/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_segmenter_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_segmenter_data-a7c66a5bbf0101f8/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#indexmap@2.14.2",
+        "target": "indexmap",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libindexmap-025ec0293af35fea.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libindexmap-025ec0293af35fea.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#itertools@0.14.0",
+        "target": "itertools",
+        "features": [
+          "default",
+          "use_alloc",
+          "use_std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libitertools-efc25d020af1c22c.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libitertools-efc25d020af1c22c.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#khronos-egl@6.0.0",
+        "target": "build-script-build",
+        "features": [
+          "1_0",
+          "1_1",
+          "1_2",
+          "1_3",
+          "1_4",
+          "1_5",
+          "default",
+          "dynamic",
+          "libloading"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/khronos-egl-6019b675435a6b51/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.191",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/libc-2c3a8862c67f81f4/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#libm@0.2.16",
+        "target": "libm",
+        "features": [
+          "arch",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/liblibm-c5a767913affc224.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/liblibm-c5a767913affc224.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#libm@0.2.16",
+        "target": "build-script-build",
+        "features": [
+          "arch",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/libm-5b381364bf457e41/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#litrs@1.0.1",
+        "target": "litrs",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/liblitrs-e4ea6ac1258f9b95.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/liblitrs-e4ea6ac1258f9b95.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#log@0.4.34",
+        "target": "log",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/liblog-7ebb8c9eb9c8faa5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/liblog-7ebb8c9eb9c8faa5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+        "target": "naga",
+        "features": [
+          "default",
+          "wgsl-in",
+          "wgsl-out"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga-1001b44ffe9d3ea9.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga-1001b44ffe9d3ea9.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "glsl-out",
+          "hlsl-out",
+          "spv-out",
+          "wgsl-in",
+          "wgsl-out"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/naga-8d3cca14d19c9271/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "wgsl-in",
+          "wgsl-out"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/naga-be652110a9996c54/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga-types@30.0.1",
+        "target": "naga_types",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga_types-0ac1798a985e7738.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga_types-0ac1798a985e7738.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19",
+        "target": "num_traits",
+        "features": [
+          "libm"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libnum_traits-fe5c4f35f4727e12.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libnum_traits-fe5c4f35f4727e12.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19",
+        "target": "build-script-build",
+        "features": [
+          "libm"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/num-traits-e526fc7ab7e1ba74/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#once_cell@1.21.4",
+        "target": "once_cell",
+        "features": [
+          "alloc",
+          "race"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libonce_cell-838e81c8a3f24b32.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libonce_cell-838e81c8a3f24b32.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#parking_lot_core@0.9.12",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/parking_lot_core-bb6035856ec77149/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#paste@1.0.15",
+        "target": "paste",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libpaste-4df2a90ac4c5f400.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#paste@1.0.15",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/paste-4e6cdfbcc30ddb37/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#pkg-config@0.3.34",
+        "target": "pkg_config",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libpkg_config-737d9b6294f0ba53.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libpkg_config-737d9b6294f0ba53.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107",
+        "target": "proc_macro2",
+        "features": [
+          "default",
+          "proc-macro",
+          "span-locations"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libproc_macro2-3f503d58993ee5e0.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libproc_macro2-3f503d58993ee5e0.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "proc-macro",
+          "span-locations"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/proc-macro2-714b0c1623fad22c/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47",
+        "target": "quote",
+        "features": [
+          "default",
+          "proc-macro"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libquote-aff98c41cf6d8550.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libquote-aff98c41cf6d8550.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "proc-macro"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/quote-6c2d045a4e1007d0/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#rustc-hash@1.1.0",
+        "target": "rustc_hash",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/librustc_hash-d32b5f284953c233.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/librustc_hash-d32b5f284953c233.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#snafu@0.8.9",
+        "target": "snafu",
+        "features": [
+          "alloc",
+          "default",
+          "rust_1_61",
+          "rust_1_65",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsnafu-b733b2d26addf8d6.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsnafu-b733b2d26addf8d6.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#snafu-derive@0.8.9",
+        "target": "snafu_derive",
+        "features": [
+          "rust_1_61"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsnafu_derive-3bed1db630b4dd71.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.119",
+        "target": "syn",
+        "features": [
+          "clone-impls",
+          "default",
+          "derive",
+          "extra-traits",
+          "full",
+          "parsing",
+          "printing",
+          "proc-macro",
+          "visit-mut"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-770a3f0461dd80fa.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-770a3f0461dd80fa.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#syn@3.0.9",
+        "target": "syn",
+        "features": [
+          "clone-impls",
+          "default",
+          "derive",
+          "extra-traits",
+          "fold",
+          "full",
+          "parsing",
+          "printing",
+          "proc-macro",
+          "visit"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-c8908aefcdd767b5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-c8908aefcdd767b5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#synstructure@0.14.0",
+        "target": "synstructure",
+        "features": [
+          "default",
+          "proc-macro"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsynstructure-cbb924c57fe82f05.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsynstructure-cbb924c57fe82f05.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21",
+        "target": "thiserror",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libthiserror-360723e0f3a677e3.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libthiserror-360723e0f3a677e3.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/thiserror-9aeda1f769ebd3ff/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.21",
+        "target": "thiserror_impl",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libthiserror_impl-622976bdc7787e59.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#unicode-ident@1.0.27",
+        "target": "unicode_ident",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_ident-18734f1bfded43d5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_ident-18734f1bfded43d5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#unicode-width@0.2.2",
+        "target": "unicode_width",
+        "features": [
+          "cjk",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_width-cca3ec58df81f959.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_width-cca3ec58df81f959.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wayland-sys@0.31.11",
+        "target": "build-script-build",
+        "features": [
+          "client",
+          "dlopen",
+          "egl",
+          "once_cell"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wayland-sys-7782d123b8371f24/build-script-build"
+        ]
+      },
+      {
+        "package": "path+file:///tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu#30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "dx12",
+          "gles",
+          "metal",
+          "std",
+          "vulkan",
+          "wgsl"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgpu-d9fa8c040dc4c237/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgpu-core@30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "dx12",
+          "gles",
+          "metal",
+          "portable-atomic",
+          "renderdoc",
+          "std",
+          "vulkan",
+          "wgpu-core-deps-windows-linux-android",
+          "wgsl"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgpu-core-5b3c20d04a461705/build-script-build"
+        ]
+      },
+      {
+        "package": "path+file:///tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu-hal#30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "dx12",
+          "gles",
+          "portable-atomic",
+          "renderdoc",
+          "vulkan"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgpu-hal-bc0de0c0b4b9d24f/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs@0.1.0-beta.6",
+        "target": "wgsl_rs",
+        "features": [
+          "validation"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs-6df8f3f39b8dffb2.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs-6df8f3f39b8dffb2.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs-ir@0.1.0-beta.6",
+        "target": "wgsl_rs_ir",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs-macros@0.1.0-beta.6",
+        "target": "wgsl_rs_macros",
+        "features": [
+          "validation"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs_macros-fd20f73dcfe3e2a8.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs-macros@0.1.0-beta.6",
+        "target": "build-script-build",
+        "features": [
+          "validation"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgsl-rs-macros-c3d008bfdc8cebcb/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#yoke-derive@0.8.4",
+        "target": "yoke_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libyoke_derive-60e4a67d093fcafa.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.8.63",
+        "target": "zerocopy",
+        "features": [
+          "derive",
+          "simd",
+          "zerocopy-derive"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerocopy-4fd63501e8c2d004.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libzerocopy-4fd63501e8c2d004.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.8.63",
+        "target": "build-script-build",
+        "features": [
+          "derive",
+          "simd",
+          "zerocopy-derive"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/zerocopy-8bf63dbc788acc4b/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerocopy-derive@0.8.63",
+        "target": "zerocopy_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerocopy_derive-2e0e1a26b0bcc627.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerofrom-derive@0.1.8",
+        "target": "zerofrom_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerofrom_derive-6a1207cd516e54c7.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerovec-derive@0.11.6",
+        "target": "zerovec_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerovec_derive-b57ec4273c03bfe8.so"
+        ]
+      }
+    ],
+    "files": {
+      "release/deps/libarrayvec-2d96ee14effbddf6.rlib": {
+        "bytes": 239172,
+        "sha256": "25ca20b32241aa7d59fc5542e68b902fe017b988031f51063e76e0bbfe1b907b"
+      },
+      "release/deps/libarrayvec-2d96ee14effbddf6.rmeta": {
+        "bytes": 236119,
+        "sha256": "99542bc5d8f07280e311396bcccb89095bcad1ed1e484859a150f173c066b153"
+      },
+      "release/build/ash-9d94dd4e9262fe0e/build-script-build": {
+        "bytes": 438584,
+        "sha256": "5aa8a84981222920c82e832184e2b9edc44214fef99c0ccd6b47297b95ed8c52"
+      },
+      "release/deps/libautocfg-e894e4f922766fe0.rlib": {
+        "bytes": 679378,
+        "sha256": "645eb67f6fb5e68cea51f4f7ae7c7be54d7afc95f5ff6cf99436ce02ac4b2895"
+      },
+      "release/deps/libautocfg-e894e4f922766fe0.rmeta": {
+        "bytes": 81512,
+        "sha256": "2a76ed1b1dfe845a7e70dce80592ddaf70a632306ac33c9fc6f9c6384769087e"
+      },
+      "release/deps/libbit_set-1d4a04bdfefd859a.rlib": {
+        "bytes": 100362,
+        "sha256": "a3dc871881ce50b3a5b33878b7fa625fd519904c6107a72b92ef9e138a3a45b2"
+      },
+      "release/deps/libbit_set-1d4a04bdfefd859a.rmeta": {
+        "bytes": 97461,
+        "sha256": "9a91e6990546c339510c27fca913e4e533d154cb82bc6ad4fd2a8dd5adefd652"
+      },
+      "release/deps/libbit_vec-aaef8e7aaa6b2e75.rlib": {
+        "bytes": 231382,
+        "sha256": "c56197d547684a763ca25090f806c8c9f3c818792facf33068bc9840e8f2f861"
+      },
+      "release/deps/libbit_vec-aaef8e7aaa6b2e75.rmeta": {
+        "bytes": 194438,
+        "sha256": "1ad58fca19a49767383dfaa5f5a7f7a0152ad4e018ee6c569885b86947dad547"
+      },
+      "release/deps/libbitflags-18dc3c0a146bf0f7.rlib": {
+        "bytes": 282794,
+        "sha256": "44e40a1afd5bc448896c51060b8ca2442898a160d4d7de18a70abbe5fa223b79"
+      },
+      "release/deps/libbitflags-18dc3c0a146bf0f7.rmeta": {
+        "bytes": 220186,
+        "sha256": "f144857be7a4985814cd109b33444c121d3eb56adb0f0a4e8ba5817c70397742"
+      },
+      "release/deps/libbytemuck_derive-609882d80646e047.so": {
+        "bytes": 3964320,
+        "sha256": "126290c11dbf330f9fca8082cec186bfe872c610ebe70347373507cf3904a8a4"
+      },
+      "release/deps/libcfg_if-6f0d32411a9cb6de.rlib": {
+        "bytes": 8050,
+        "sha256": "01db47a55324de1f5af2b74e6945750834824f8e6778edc865a567af04c39c04"
+      },
+      "release/deps/libcfg_if-6f0d32411a9cb6de.rmeta": {
+        "bytes": 5837,
+        "sha256": "7478af1974c3628de0036092a7363b46e3cf4b0dea75419ddf736466df47da84"
+      },
+      "release/deps/libcfg_aliases-b6cd500c58621c56.rlib": {
+        "bytes": 20212,
+        "sha256": "8552bc055a9a48c93117925a59089215d51b86170c1353f078ccde7d4555c343"
+      },
+      "release/deps/libcfg_aliases-b6cd500c58621c56.rmeta": {
+        "bytes": 17971,
+        "sha256": "8ce475ccc817ecd9ad630363ff1bbafdf889e54ec842d557893ed077905ba92b"
+      },
+      "release/deps/libcodespan_reporting-3b174f915e627651.rlib": {
+        "bytes": 825330,
+        "sha256": "13543a8bf05a78404c0b86ef8dd5d324667013f992cd15d729b68533e4270cd5"
+      },
+      "release/deps/libcodespan_reporting-3b174f915e627651.rmeta": {
+        "bytes": 267389,
+        "sha256": "d767f7054c27e644ec490702618d3e832abd10e365627d80c8c963a2cc302242"
+      },
+      "release/deps/libdisplaydoc-f7c0cf01facf46e8.so": {
+        "bytes": 3632400,
+        "sha256": "735b99e5a3c3e70d19f5eb8618a735cd4582031d854a167106fe28efc804f2f7"
+      },
+      "release/deps/libdocument_features-348651f3d769cda4.so": {
+        "bytes": 958760,
+        "sha256": "413f51b0544dc15893580eca9ba2970de2137df59a1550a0231d72ce9e67ea56"
+      },
+      "release/deps/libeither-11741564c2da6536.rlib": {
+        "bytes": 261050,
+        "sha256": "0bc8cc47bdda60135ad05f17094bf279b3230ef34bc0d55c37dd0f57e7300ff0"
+      },
+      "release/deps/libeither-11741564c2da6536.rmeta": {
+        "bytes": 258833,
+        "sha256": "73255a36dfb85467672d26dfdf1fb1132935d9346ba9e66f71e03d86ba43cc6b"
+      },
+      "release/deps/libequivalent-504b80678558a69e.rlib": {
+        "bytes": 10690,
+        "sha256": "0edf73360a6f086dab828841e962b0b59b58dcefcf0635b58575bf891cfa4923"
+      },
+      "release/deps/libequivalent-504b80678558a69e.rmeta": {
+        "bytes": 8450,
+        "sha256": "55eaa03a01dda89c3cd9f612eb7dc556a50a150278a5e6b7b6f56525248e5c3a"
+      },
+      "release/deps/libfearless_simd_macros-8ad9aeee2f59875e.so": {
+        "bytes": 3860888,
+        "sha256": "c49c68e5e6bf06e9b23e1f8755f887ff20730554b23c8e2c1ea409c604040f68"
+      },
+      "release/deps/libfoldhash-11dcb39ac4fc098e.rlib": {
+        "bytes": 106974,
+        "sha256": "2e4ae1bc023445f505b56651d9bcfbcb554499ae35edb6386ef4543a1c8ec35f"
+      },
+      "release/deps/libfoldhash-11dcb39ac4fc098e.rmeta": {
+        "bytes": 85103,
+        "sha256": "c3f27ded6bff62eaf93a8ea8f26adb8866303d21dce5f17f9e356320d03eade5"
+      },
+      "release/deps/libglam-8e40648c565d633e.rlib": {
+        "bytes": 18798676,
+        "sha256": "2588d54c93c0b2dbb7efcff255b90bf2481753070edfdcd0dc99edda724308c8"
+      },
+      "release/deps/libglam-8e40648c565d633e.rmeta": {
+        "bytes": 18470479,
+        "sha256": "600b68553f2a58cff45ec5d4f56150e7ec031e719252029063138b98d0c4c165"
+      },
+      "release/build/gpui_gpu-adaec1003f5e5cb7/build-script-build": {
+        "bytes": 8250080,
+        "sha256": "af59fbe7a3c11276a707cd4f85087ee6eb31d6883df045c8f49d015045310e94"
+      },
+      "release/deps/libhalf-9035fcde36b72199.rlib": {
+        "bytes": 922578,
+        "sha256": "f83b086504a5a97440124cd2930fca3bf79e5d3290a62976c0117aa4b15d0f7c"
+      },
+      "release/deps/libhalf-9035fcde36b72199.rmeta": {
+        "bytes": 722540,
+        "sha256": "f4b7c3a3ebc2090c7347a2d1051c03c776a4f11b8b4d28f3ee1be5dd4b8d245c"
+      },
+      "release/deps/libhashbrown-418b3a222f59019f.rlib": {
+        "bytes": 1239728,
+        "sha256": "88caf3c63cb2ff9ac1eb1464aac1f5ff70e7aff4ba8e96e278337c0ae79cbc77"
+      },
+      "release/deps/libhashbrown-418b3a222f59019f.rmeta": {
+        "bytes": 1219206,
+        "sha256": "e12c75905d624696f7c689d60bf48da6428b1ca7360fd5185338f50ce3fbf138"
+      },
+      "release/deps/libheck-39fce0ca7ad001a2.rlib": {
+        "bytes": 303564,
+        "sha256": "a33a41a3688251931722fd6a357e09dd54b2953008b18343fef3872087be6cc8"
+      },
+      "release/deps/libheck-39fce0ca7ad001a2.rmeta": {
+        "bytes": 78626,
+        "sha256": "e751339b4ea5d3bd8bf796cf4c75788da079d668d103950a0b4e2c162d0bd644"
+      },
+      "release/build/icu_locale_fallback_data-8493d8b08147bd69/build-script-build": {
+        "bytes": 449640,
+        "sha256": "0bb56e9647fbc9dd7213fa59d6838251dfb954e076031622f1f64785077482ea"
+      },
+      "release/build/icu_normalizer_data-3300858c355a55ae/build-script-build": {
+        "bytes": 449640,
+        "sha256": "14b61649e0f9564e0f9be6c52bb23fb40f6caa8e8419d7241fb659e089ee4b50"
+      },
+      "release/build/icu_properties_data-4534f1ce1cf9c152/build-script-build": {
+        "bytes": 449640,
+        "sha256": "2e42fc15765cfe629cfaa4835e83bf5bd9c12b210d944a1a0fa3dfd2870174c1"
+      },
+      "release/build/icu_segmenter_data-a7c66a5bbf0101f8/build-script-build": {
+        "bytes": 449640,
+        "sha256": "104d7080b095c15dcf11df07f9632a07963739f16b12f2c008ee290acf59819d"
+      },
+      "release/deps/libindexmap-025ec0293af35fea.rlib": {
+        "bytes": 1260312,
+        "sha256": "1120dfa9fc285ac16d45dde56e190e7624ec075647da36d2506ffa7fb741b442"
+      },
+      "release/deps/libindexmap-025ec0293af35fea.rmeta": {
+        "bytes": 1253663,
+        "sha256": "04a15608db807b1c5409aeb4716d1eb18c1a809bef17970b9f7280f7aee3c9a7"
+      },
+      "release/deps/libitertools-efc25d020af1c22c.rlib": {
+        "bytes": 2708516,
+        "sha256": "00c93431051bc0cf06b820faeffc8beac22a69b635ad5bb86e0802fdbc1d1123"
+      },
+      "release/deps/libitertools-efc25d020af1c22c.rmeta": {
+        "bytes": 2651379,
+        "sha256": "6022dc3227e48ffae8df76cc299c2d5b5a46de8342afe52f528811846a979a08"
+      },
+      "release/build/khronos-egl-6019b675435a6b51/build-script-build": {
+        "bytes": 438584,
+        "sha256": "9c912d862aaecadad49c2f5e5ec14554316cd03ae7bf0ebee39c600e1eadf61c"
+      },
+      "release/build/libc-2c3a8862c67f81f4/build-script-build": {
+        "bytes": 660360,
+        "sha256": "8c7f41da1ad16e20193308f724b5f95a18d0350042789afdd022afea6ac0f4b8"
+      },
+      "release/deps/liblibm-c5a767913affc224.rlib": {
+        "bytes": 1980310,
+        "sha256": "c43a2f864d0f962b7f6df9ae5110f413d5d5681e29ca798d706fb22b38d18761"
+      },
+      "release/deps/liblibm-c5a767913affc224.rmeta": {
+        "bytes": 1079105,
+        "sha256": "2c6a7e4c95e38949b923d1b03221a3e14306c76dc9e5017214470d2a5f5b71aa"
+      },
+      "release/build/libm-5b381364bf457e41/build-script-build": {
+        "bytes": 535264,
+        "sha256": "feb040799b7c72f08fc20c4abe5dae65589f1a6108e06dac0ef89f439ad86131"
+      },
+      "release/deps/liblitrs-e4ea6ac1258f9b95.rlib": {
+        "bytes": 1018842,
+        "sha256": "d642badc2d7799a17aae389750c0cd01bdba36567cec517d8fc010f3d6ad38a8"
+      },
+      "release/deps/liblitrs-e4ea6ac1258f9b95.rmeta": {
+        "bytes": 406810,
+        "sha256": "4cd6720039b6fb6e7a13622c2d38713d12ee05e41304b2430b14a8304503b87f"
+      },
+      "release/deps/liblog-7ebb8c9eb9c8faa5.rlib": {
+        "bytes": 239936,
+        "sha256": "077bd4a5d37259bd5e4e074949182cba08cb2ad90c3e996f88b12b57fe399d34"
+      },
+      "release/deps/liblog-7ebb8c9eb9c8faa5.rmeta": {
+        "bytes": 189378,
+        "sha256": "fa3ad2320e6595633744430b3f42ed2f52d200631a5737252afcb0a68e00ef4c"
+      },
+      "release/deps/libnaga-1001b44ffe9d3ea9.rlib": {
+        "bytes": 24422142,
+        "sha256": "1d4178c6f496f18b4c84eb6a3064b1ba57f823d6ba84c9f76d5d7b2196bc55c1"
+      },
+      "release/deps/libnaga-1001b44ffe9d3ea9.rmeta": {
+        "bytes": 7505098,
+        "sha256": "f9e9441ef85f31036f97d2de82a4aaf52858551fb87e30c2ddc43c8ec43f60a7"
+      },
+      "release/build/naga-8d3cca14d19c9271/build-script-build": {
+        "bytes": 517728,
+        "sha256": "821b00d23d346119665d844fbe8c41dff84906fe805fef988201afa86fb103f4"
+      },
+      "release/build/naga-be652110a9996c54/build-script-build": {
+        "bytes": 517584,
+        "sha256": "ab9293449e7ca6e210c9ccd04284ca2052acb6a2224043e3008db7f22e3d85ba"
+      },
+      "release/deps/libnaga_types-0ac1798a985e7738.rlib": {
+        "bytes": 149944,
+        "sha256": "9c1718bbb8b349c2455581d1ae4aaaf41c05de8ecebe4f9209c9985fae81e789"
+      },
+      "release/deps/libnaga_types-0ac1798a985e7738.rmeta": {
+        "bytes": 117104,
+        "sha256": "e9dd6f268af2e33278bb65c4e3db8f8740b7e9c073fbcf19acdf8f65562aab90"
+      },
+      "release/deps/libnum_traits-fe5c4f35f4727e12.rlib": {
+        "bytes": 1828870,
+        "sha256": "f13abc79cb8bfa5dc6a85f1eab8337a8962d0adc294eef1e48b677add5e79367"
+      },
+      "release/deps/libnum_traits-fe5c4f35f4727e12.rmeta": {
+        "bytes": 1772355,
+        "sha256": "e90bc64d79e32e6aacfdf9fa51d68c28b30a3957a9ccbc977276c3c1cd958056"
+      },
+      "release/build/num-traits-e526fc7ab7e1ba74/build-script-build": {
+        "bytes": 738832,
+        "sha256": "2c3deccac1b94098849d356dc841ae22e479148365fd7d5c49ed7e59eee05284"
+      },
+      "release/deps/libonce_cell-838e81c8a3f24b32.rlib": {
+        "bytes": 124448,
+        "sha256": "db44348fe2d61c9344d0d9ca3fbf23939fe5ec9c8438cc122fc2e64d941825ed"
+      },
+      "release/deps/libonce_cell-838e81c8a3f24b32.rmeta": {
+        "bytes": 119112,
+        "sha256": "8d353f1b632c4c54bfb1c5170bf3a994822ad336417212bcc473d8db0f18c11b"
+      },
+      "release/build/parking_lot_core-bb6035856ec77149/build-script-build": {
+        "bytes": 473648,
+        "sha256": "f0a2132832d39d25bcaec9f8db2056cbec977e26e7f3d873ff689110cebe9204"
+      },
+      "release/deps/libpaste-4df2a90ac4c5f400.so": {
+        "bytes": 732080,
+        "sha256": "932aa38541be4f8c4dc9abf8659423f0f88d1adc3bbb91ce025a9927aa533e3f"
+      },
+      "release/build/paste-4e6cdfbcc30ddb37/build-script-build": {
+        "bytes": 545488,
+        "sha256": "bb0cd1ff5d717f145997c080453c92fd531f330ed27e40e0c91902fa176b4856"
+      },
+      "release/deps/libpkg_config-737d9b6294f0ba53.rlib": {
+        "bytes": 966924,
+        "sha256": "12962a8553b5b2a00f2faf313e4b3e59455c87020fe26b69f18f7bc807ae5ca7"
+      },
+      "release/deps/libpkg_config-737d9b6294f0ba53.rmeta": {
+        "bytes": 70423,
+        "sha256": "35e12009678ddb0c71b6acfa0537c9b5baa4b4d0bb01506a7b9c06fd703cb531"
+      },
+      "release/deps/libproc_macro2-3f503d58993ee5e0.rlib": {
+        "bytes": 1525458,
+        "sha256": "8765c491ec0fcbbb06340f0f6a76eabacec5ec9757c6ebace6f6218e6ad1191f"
+      },
+      "release/deps/libproc_macro2-3f503d58993ee5e0.rmeta": {
+        "bytes": 392060,
+        "sha256": "c907cf0b4fec9a563494a6fd21711e8ad15b10b60618738c139e4f63bd5f4c16"
+      },
+      "release/build/proc-macro2-714b0c1623fad22c/build-script-build": {
+        "bytes": 605112,
+        "sha256": "3897ce74079b5d450a15637caf3a012049795a15ce787db1182ba678e5fbc11e"
+      },
+      "release/deps/libquote-aff98c41cf6d8550.rlib": {
+        "bytes": 509642,
+        "sha256": "7bd53b0a6093dd42209d879ce5e5d5a251806afd3d521b05984ff63310c599ad"
+      },
+      "release/deps/libquote-aff98c41cf6d8550.rmeta": {
+        "bytes": 270261,
+        "sha256": "b5ca22d81b924f6c435675a21ad9728ad17e3ac03867571b87e06368de16cd87"
+      },
+      "release/build/quote-6c2d045a4e1007d0/build-script-build": {
+        "bytes": 545056,
+        "sha256": "a70c771a9be63aeba671611d235651e01b99d9c827e90e516360427c39234811"
+      },
+      "release/deps/librustc_hash-d32b5f284953c233.rlib": {
+        "bytes": 14850,
+        "sha256": "acad63f2f5294e8056561f9a9f0b646668a3968d83ab597d9b18226962af897b"
+      },
+      "release/deps/librustc_hash-d32b5f284953c233.rmeta": {
+        "bytes": 12611,
+        "sha256": "90a7a5e47a4a2d762f951e7074fabc7334646f016226aad002dead63cb232b6a"
+      },
+      "release/deps/libsnafu-b733b2d26addf8d6.rlib": {
+        "bytes": 392116,
+        "sha256": "e794174c83209acb917957f30a48b381e97660d569666b93509bf250891b0435"
+      },
+      "release/deps/libsnafu-b733b2d26addf8d6.rmeta": {
+        "bytes": 196072,
+        "sha256": "7bf9b02e62cc01bec461ab33c1bd5aed346ccaa7c8baa63891f619155e50d0f1"
+      },
+      "release/deps/libsnafu_derive-3bed1db630b4dd71.so": {
+        "bytes": 4723008,
+        "sha256": "0e186e434e39ad5db8a7081c77b04e66bda4bd81b623203704d4d505c4216280"
+      },
+      "release/deps/libsyn-770a3f0461dd80fa.rlib": {
+        "bytes": 11814272,
+        "sha256": "1d395b37e40fda6a785e20185ec3b84dc0d3f354bb23c3dc47f1f6d815a4b722"
+      },
+      "release/deps/libsyn-770a3f0461dd80fa.rmeta": {
+        "bytes": 4192696,
+        "sha256": "9986acdb1f290235e1984c0159ab8bdd01129c3ec7e972eee1a793c335a9c8c9"
+      },
+      "release/deps/libsyn-c8908aefcdd767b5.rlib": {
+        "bytes": 12279842,
+        "sha256": "204b2a37f6508f848e34de94ae687240cbde9977e291d95dcc3c304a92e5ded5"
+      },
+      "release/deps/libsyn-c8908aefcdd767b5.rmeta": {
+        "bytes": 4660877,
+        "sha256": "d5b96d87e99031c65e658a952c0315f10708832cf79b107dee7ac8fb7f94942a"
+      },
+      "release/deps/libsynstructure-cbb924c57fe82f05.rlib": {
+        "bytes": 1459812,
+        "sha256": "78c801d8e19a558936b4a3dfe9e07e6864fe3142c11b09ce0d276a43350f398d"
+      },
+      "release/deps/libsynstructure-cbb924c57fe82f05.rmeta": {
+        "bytes": 235639,
+        "sha256": "b6c1ce5acb8481bf52ec4cee1a802c6e7ef7268352af4c0aee1193235a33ddd8"
+      },
+      "release/deps/libthiserror-360723e0f3a677e3.rlib": {
+        "bytes": 32682,
+        "sha256": "fecab3202a46cd4ed62b5e145222a4d32061d3b3194470118803a251f814038d"
+      },
+      "release/deps/libthiserror-360723e0f3a677e3.rmeta": {
+        "bytes": 29018,
+        "sha256": "485a9d9120864d55de54e28da24cd90ab69c6e8cb30dbaa32be6f07394d38b54"
+      },
+      "release/build/thiserror-9aeda1f769ebd3ff/build-script-build": {
+        "bytes": 624296,
+        "sha256": "484b1a4dd4623dced5cfadcc8b591e1cd88562ef83e5c6b1336acdd36f5c4175"
+      },
+      "release/deps/libthiserror_impl-622976bdc7787e59.so": {
+        "bytes": 4038280,
+        "sha256": "3a3f287aa7fcdd59f6f13ec819ed6956663409ea6c24a66fad33ac5f766bae46"
+      },
+      "release/deps/libunicode_ident-18734f1bfded43d5.rlib": {
+        "bytes": 52526,
+        "sha256": "568cc2883d106473f0ebb9b1ccb8e61d3320d92e4c0bcc0e609533bd405ce3e9"
+      },
+      "release/deps/libunicode_ident-18734f1bfded43d5.rmeta": {
+        "bytes": 34525,
+        "sha256": "58e056ccf177487f314b6a3d5dc10ab227a4b3df2a9e1947d03a3c5eb5485648"
+      },
+      "release/deps/libunicode_width-cca3ec58df81f959.rlib": {
+        "bytes": 891026,
+        "sha256": "115578e8cf2af1a82e3666133e4fc5ec6c0c991d4581698cf0bc210dab54e61e"
+      },
+      "release/deps/libunicode_width-cca3ec58df81f959.rmeta": {
+        "bytes": 855012,
+        "sha256": "a1a5950f94aab6b35868b0abd0be102800bccc7acecb7a0e7f2796d503103dcf"
+      },
+      "release/build/wayland-sys-7782d123b8371f24/build-script-build": {
+        "bytes": 878760,
+        "sha256": "b5f221d366405750d1fc2988324022add25d2c7a9024a593b110c50c5788e436"
+      },
+      "release/build/wgpu-d9fa8c040dc4c237/build-script-build": {
+        "bytes": 682104,
+        "sha256": "9ef4ddcb31e62a247a96a660e5d4829414ab8146feb0bd98d4d314d8fcf62711"
+      },
+      "release/build/wgpu-core-5b3c20d04a461705/build-script-build": {
+        "bytes": 577472,
+        "sha256": "ed7077bf7d8adf1f1c1d4bd32a3b1a581b97d8edbab4d3ccba5a7b3d52d2d478"
+      },
+      "release/build/wgpu-hal-bc0de0c0b4b9d24f/build-script-build": {
+        "bytes": 575296,
+        "sha256": "9690db60632b3c29a98efd9eab6945cc52a23d0e97117596e6fcfbc99cfefcb6"
+      },
+      "release/deps/libwgsl_rs-6df8f3f39b8dffb2.rlib": {
+        "bytes": 10378358,
+        "sha256": "fc04fce48f7a93783c806bff9cbdc152c0791be8e5cb48530151595c07fd9046"
+      },
+      "release/deps/libwgsl_rs-6df8f3f39b8dffb2.rmeta": {
+        "bytes": 4484578,
+        "sha256": "aec399733708efaedc027fa7e222df1ce3a208440d73b268e64683b363d883c3"
+      },
+      "release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rlib": {
+        "bytes": 3185618,
+        "sha256": "e1293b11a576265c0f0d42550bef96ac27b309d40625e4175d58ad83003ee6c3"
+      },
+      "release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rmeta": {
+        "bytes": 912469,
+        "sha256": "3bbbf8c005332b84e2e66d0fe14f0a670d34164f5e47c894724647eee0f9080d"
+      },
+      "release/deps/libwgsl_rs_macros-fd20f73dcfe3e2a8.so": {
+        "bytes": 8664952,
+        "sha256": "5bd18310f02dcdce1af67d4e7b36fc53a879c1cbe5b4483ee131bef95c2ff6dd"
+      },
+      "release/build/wgsl-rs-macros-c3d008bfdc8cebcb/build-script-build": {
+        "bytes": 554776,
+        "sha256": "f9993a1d960e5e2fffd60f67a2c4fc97aed4a0b48d4b5c7d03fe0006ce621723"
+      },
+      "release/deps/libyoke_derive-60e4a67d093fcafa.so": {
+        "bytes": 4311184,
+        "sha256": "17484bc2d50d3f3c2fa859decb415b1c4ee5cb0e0b50fc8e12f5e96132c63310"
+      },
+      "release/deps/libzerocopy-4fd63501e8c2d004.rlib": {
+        "bytes": 14709690,
+        "sha256": "ca7539a72ea21c06f2a89066ed7bad8f7bc4b8f8e07260baef35799c05d0df3b"
+      },
+      "release/deps/libzerocopy-4fd63501e8c2d004.rmeta": {
+        "bytes": 14542079,
+        "sha256": "d8bacddb47413a91a9a4d950435dd663e80a71d4a067df290b532552e5aa5670"
+      },
+      "release/build/zerocopy-8bf63dbc788acc4b/build-script-build": {
+        "bytes": 639216,
+        "sha256": "2daffb62f4e7b9f4d91ab1100a63ce745f66315e2822cfa12defc5d0e8363a0a"
+      },
+      "release/deps/libzerocopy_derive-2e0e1a26b0bcc627.so": {
+        "bytes": 4590072,
+        "sha256": "5ef085bb27c649a58ea527112a2e70ad153eeaca3934b5bd1badca3ce9703570"
+      },
+      "release/deps/libzerofrom_derive-6a1207cd516e54c7.so": {
+        "bytes": 4694544,
+        "sha256": "d1f9be7a6ee364ba6f875854f24ca0a4848b888f8893c15d11c763776e3513a2"
+      },
+      "release/deps/libzerovec_derive-b57ec4273c03bfe8.so": {
+        "bytes": 3928832,
+        "sha256": "c430cfb299733fc42200acb8725549009e88cab091cc279cdb83394f7bce0d30"
+      }
+    },
+    "logical_file_bytes": 252618670
+  },
+  "artifact": {
+    "units": [
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#arrayvec@0.7.8",
+        "target": "arrayvec",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libarrayvec-2d96ee14effbddf6.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libarrayvec-2d96ee14effbddf6.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#ash@0.38.0+1.3.281",
+        "target": "build-script-build",
+        "features": [
+          "debug",
+          "default",
+          "libloading",
+          "loaded",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/ash-9d94dd4e9262fe0e/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#autocfg@1.5.1",
+        "target": "autocfg",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libautocfg-e894e4f922766fe0.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libautocfg-e894e4f922766fe0.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bit-set@0.10.0",
+        "target": "bit_set",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_set-1d4a04bdfefd859a.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_set-1d4a04bdfefd859a.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bit-vec@0.9.1",
+        "target": "bit_vec",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libbit_vec-aaef8e7aaa6b2e75.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bitflags@2.13.2",
+        "target": "bitflags",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbitflags-18dc3c0a146bf0f7.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libbitflags-18dc3c0a146bf0f7.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#block-buffer@0.12.1",
+        "target": "block_buffer",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libblock_buffer-5d9cfe4ab3fb9069.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libblock_buffer-5d9cfe4ab3fb9069.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#bytemuck_derive@1.12.1",
+        "target": "bytemuck_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libbytemuck_derive-609882d80646e047.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#cfg-if@1.0.5",
+        "target": "cfg_if",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_if-6f0d32411a9cb6de.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_if-6f0d32411a9cb6de.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#cfg_aliases@0.2.2",
+        "target": "cfg_aliases",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_aliases-b6cd500c58621c56.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcfg_aliases-b6cd500c58621c56.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#codespan-reporting@0.13.1",
+        "target": "codespan_reporting",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcodespan_reporting-3b174f915e627651.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcodespan_reporting-3b174f915e627651.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#cpufeatures@0.3.1",
+        "target": "cpufeatures",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcpufeatures-8d4d3e24a9f6fc9c.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcpufeatures-8d4d3e24a9f6fc9c.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#crypto-common@0.2.2",
+        "target": "crypto_common",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libcrypto_common-f2f12043354212df.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libcrypto_common-f2f12043354212df.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#digest@0.11.3",
+        "target": "digest",
+        "features": [
+          "block-api",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libdigest-9f17676e4c7c625c.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libdigest-9f17676e4c7c625c.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#displaydoc@0.2.7",
+        "target": "displaydoc",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libdisplaydoc-f7c0cf01facf46e8.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#document-features@0.2.12",
+        "target": "document_features",
+        "features": [
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libdocument_features-348651f3d769cda4.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#either@1.19.0",
+        "target": "either",
+        "features": [
+          "std",
+          "use_std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libeither-11741564c2da6536.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libeither-11741564c2da6536.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#equivalent@1.0.3",
+        "target": "equivalent",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libequivalent-504b80678558a69e.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libequivalent-504b80678558a69e.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#fearless_simd_macros@0.1.0",
+        "target": "fearless_simd_macros",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libfearless_simd_macros-8ad9aeee2f59875e.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#fixedbitset@0.5.7",
+        "target": "fixedbitset",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libfixedbitset-f7e38d07e3f5d2a2.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libfixedbitset-f7e38d07e3f5d2a2.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#foldhash@0.1.5",
+        "target": "foldhash",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libfoldhash-90a663c0c3357dc6.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libfoldhash-90a663c0c3357dc6.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#foldhash@0.2.0",
+        "target": "foldhash",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libfoldhash-11dcb39ac4fc098e.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libfoldhash-11dcb39ac4fc098e.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#glam@0.30.10",
+        "target": "glam",
+        "features": [
+          "default",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libglam-8e40648c565d633e.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libglam-8e40648c565d633e.rmeta"
+        ]
+      },
+      {
+        "package": "path+file:///tmp/gpui-offline-shader-sol/reactivity/crates/gpu#gpui_gpu@0.1.0",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "offline-shader",
+          "simd"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/gpui_gpu-219984cf26922adc/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#half@2.7.1",
+        "target": "half",
+        "features": [
+          "alloc",
+          "default",
+          "num-traits",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libhalf-9035fcde36b72199.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libhalf-9035fcde36b72199.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#hashbrown@0.15.5",
+        "target": "hashbrown",
+        "features": [
+          "default-hasher",
+          "inline-more"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libhashbrown-0505ce2342c9c936.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libhashbrown-0505ce2342c9c936.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#hashbrown@0.17.1",
+        "target": "hashbrown",
+        "features": [
+          "default-hasher",
+          "inline-more"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libhashbrown-418b3a222f59019f.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libhashbrown-418b3a222f59019f.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#heck@0.5.0",
+        "target": "heck",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libheck-39fce0ca7ad001a2.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libheck-39fce0ca7ad001a2.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#hybrid-array@0.4.15",
+        "target": "hybrid_array",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libhybrid_array-fde492bc256f902a.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libhybrid_array-fde492bc256f902a.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_locale_fallback_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_locale_fallback_data-8493d8b08147bd69/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_normalizer_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_normalizer_data-3300858c355a55ae/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_properties_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_properties_data-4534f1ce1cf9c152/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#icu_segmenter_data@2.3.0",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/icu_segmenter_data-a7c66a5bbf0101f8/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#indexmap@2.14.2",
+        "target": "indexmap",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libindexmap-025ec0293af35fea.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libindexmap-025ec0293af35fea.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#itertools@0.14.0",
+        "target": "itertools",
+        "features": [
+          "default",
+          "use_alloc",
+          "use_std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libitertools-efc25d020af1c22c.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libitertools-efc25d020af1c22c.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#khronos-egl@6.0.0",
+        "target": "build-script-build",
+        "features": [
+          "1_0",
+          "1_1",
+          "1_2",
+          "1_3",
+          "1_4",
+          "1_5",
+          "default",
+          "dynamic",
+          "libloading"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/khronos-egl-6019b675435a6b51/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.191",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/libc-2c3a8862c67f81f4/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#libm@0.2.16",
+        "target": "libm",
+        "features": [
+          "arch",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/liblibm-c5a767913affc224.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/liblibm-c5a767913affc224.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#libm@0.2.16",
+        "target": "build-script-build",
+        "features": [
+          "arch",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/libm-5b381364bf457e41/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#litrs@1.0.1",
+        "target": "litrs",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/liblitrs-e4ea6ac1258f9b95.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/liblitrs-e4ea6ac1258f9b95.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#log@0.4.34",
+        "target": "log",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/liblog-7ebb8c9eb9c8faa5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/liblog-7ebb8c9eb9c8faa5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+        "target": "naga",
+        "features": [
+          "default",
+          "spv-in",
+          "spv-out",
+          "wgsl-in",
+          "wgsl-out"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga-53f9de91c6c0e4b2.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga-53f9de91c6c0e4b2.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "glsl-out",
+          "hlsl-out",
+          "spv-out",
+          "wgsl-in",
+          "wgsl-out"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/naga-8d3cca14d19c9271/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga@30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "spv-in",
+          "spv-out",
+          "wgsl-in",
+          "wgsl-out"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/naga-7e3315d3825140b1/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#naga-types@30.0.1",
+        "target": "naga_types",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga_types-0ac1798a985e7738.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libnaga_types-0ac1798a985e7738.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19",
+        "target": "num_traits",
+        "features": [
+          "libm"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libnum_traits-fe5c4f35f4727e12.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libnum_traits-fe5c4f35f4727e12.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#num-traits@0.2.19",
+        "target": "build-script-build",
+        "features": [
+          "libm"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/num-traits-e526fc7ab7e1ba74/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#once_cell@1.21.4",
+        "target": "once_cell",
+        "features": [
+          "alloc",
+          "race"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libonce_cell-838e81c8a3f24b32.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libonce_cell-838e81c8a3f24b32.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#parking_lot_core@0.9.12",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/parking_lot_core-bb6035856ec77149/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#paste@1.0.15",
+        "target": "paste",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libpaste-4df2a90ac4c5f400.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#paste@1.0.15",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/paste-4e6cdfbcc30ddb37/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#petgraph@0.8.3",
+        "target": "petgraph",
+        "features": [
+          "graphmap"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libpetgraph-e1f4e5f0445f260c.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libpetgraph-e1f4e5f0445f260c.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#pkg-config@0.3.34",
+        "target": "pkg_config",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libpkg_config-737d9b6294f0ba53.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libpkg_config-737d9b6294f0ba53.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107",
+        "target": "proc_macro2",
+        "features": [
+          "default",
+          "proc-macro",
+          "span-locations"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libproc_macro2-3f503d58993ee5e0.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libproc_macro2-3f503d58993ee5e0.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.107",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "proc-macro",
+          "span-locations"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/proc-macro2-714b0c1623fad22c/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47",
+        "target": "quote",
+        "features": [
+          "default",
+          "proc-macro"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libquote-aff98c41cf6d8550.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libquote-aff98c41cf6d8550.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.47",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "proc-macro"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/quote-6c2d045a4e1007d0/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#rustc-hash@1.1.0",
+        "target": "rustc_hash",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/librustc_hash-d32b5f284953c233.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/librustc_hash-d32b5f284953c233.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#sha2@0.11.1",
+        "target": "sha2",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsha2-c7b7dab5a45654cf.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsha2-c7b7dab5a45654cf.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#snafu@0.8.9",
+        "target": "snafu",
+        "features": [
+          "alloc",
+          "default",
+          "rust_1_61",
+          "rust_1_65",
+          "std"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsnafu-b733b2d26addf8d6.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsnafu-b733b2d26addf8d6.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#snafu-derive@0.8.9",
+        "target": "snafu_derive",
+        "features": [
+          "rust_1_61"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsnafu_derive-3bed1db630b4dd71.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#spirv@0.4.0+sdk-1.4.341.0",
+        "target": "spirv",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libspirv-c9e62a13c072175d.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libspirv-c9e62a13c072175d.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.119",
+        "target": "syn",
+        "features": [
+          "clone-impls",
+          "default",
+          "derive",
+          "extra-traits",
+          "full",
+          "parsing",
+          "printing",
+          "proc-macro",
+          "visit-mut"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-770a3f0461dd80fa.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-770a3f0461dd80fa.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#syn@3.0.9",
+        "target": "syn",
+        "features": [
+          "clone-impls",
+          "default",
+          "derive",
+          "extra-traits",
+          "fold",
+          "full",
+          "parsing",
+          "printing",
+          "proc-macro",
+          "visit"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-c8908aefcdd767b5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsyn-c8908aefcdd767b5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#synstructure@0.14.0",
+        "target": "synstructure",
+        "features": [
+          "default",
+          "proc-macro"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libsynstructure-cbb924c57fe82f05.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libsynstructure-cbb924c57fe82f05.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21",
+        "target": "thiserror",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libthiserror-360723e0f3a677e3.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libthiserror-360723e0f3a677e3.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#thiserror@2.0.21",
+        "target": "build-script-build",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/thiserror-9aeda1f769ebd3ff/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#thiserror-impl@2.0.21",
+        "target": "thiserror_impl",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libthiserror_impl-622976bdc7787e59.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#typenum@1.20.1",
+        "target": "typenum",
+        "features": [
+          "const-generics"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libtypenum-e8a215996e2ead4f.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libtypenum-e8a215996e2ead4f.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#unicode-ident@1.0.27",
+        "target": "unicode_ident",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_ident-18734f1bfded43d5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_ident-18734f1bfded43d5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#unicode-width@0.2.2",
+        "target": "unicode_width",
+        "features": [
+          "cjk",
+          "default"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_width-cca3ec58df81f959.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libunicode_width-cca3ec58df81f959.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wayland-sys@0.31.11",
+        "target": "build-script-build",
+        "features": [
+          "client",
+          "dlopen",
+          "egl",
+          "once_cell"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wayland-sys-7782d123b8371f24/build-script-build"
+        ]
+      },
+      {
+        "package": "path+file:///tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu#30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "dx12",
+          "gles",
+          "metal",
+          "shader-artifacts",
+          "std",
+          "vulkan",
+          "wgsl"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgpu-189d3338b84b3661/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgpu-core@30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "default",
+          "dx12",
+          "gles",
+          "metal",
+          "portable-atomic",
+          "renderdoc",
+          "std",
+          "vulkan",
+          "wgpu-core-deps-windows-linux-android",
+          "wgsl"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgpu-core-5b3c20d04a461705/build-script-build"
+        ]
+      },
+      {
+        "package": "path+file:///tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu-hal#30.0.1",
+        "target": "build-script-build",
+        "features": [
+          "dx12",
+          "gles",
+          "portable-atomic",
+          "renderdoc",
+          "vulkan"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgpu-hal-bc0de0c0b4b9d24f/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs@0.1.0-beta.6",
+        "target": "wgsl_rs",
+        "features": [
+          "validation"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs-b096ec84aea1689b.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs-b096ec84aea1689b.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs-ir@0.1.0-beta.6",
+        "target": "wgsl_rs_ir",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs-macros@0.1.0-beta.6",
+        "target": "wgsl_rs_macros",
+        "features": [
+          "validation"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libwgsl_rs_macros-fd20f73dcfe3e2a8.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#wgsl-rs-macros@0.1.0-beta.6",
+        "target": "build-script-build",
+        "features": [
+          "validation"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/wgsl-rs-macros-c3d008bfdc8cebcb/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#yoke-derive@0.8.4",
+        "target": "yoke_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libyoke_derive-60e4a67d093fcafa.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.8.63",
+        "target": "zerocopy",
+        "features": [
+          "derive",
+          "simd",
+          "zerocopy-derive"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerocopy-4fd63501e8c2d004.rlib",
+          "/tmp/gpui-offline-shader-target/release/deps/libzerocopy-4fd63501e8c2d004.rmeta"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.8.63",
+        "target": "build-script-build",
+        "features": [
+          "derive",
+          "simd",
+          "zerocopy-derive"
+        ],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/build/zerocopy-8bf63dbc788acc4b/build-script-build"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerocopy-derive@0.8.63",
+        "target": "zerocopy_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerocopy_derive-2e0e1a26b0bcc627.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerofrom-derive@0.1.8",
+        "target": "zerofrom_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerofrom_derive-6a1207cd516e54c7.so"
+        ]
+      },
+      {
+        "package": "registry+https://github.com/rust-lang/crates.io-index#zerovec-derive@0.11.6",
+        "target": "zerovec_derive",
+        "features": [],
+        "files": [
+          "/tmp/gpui-offline-shader-target/release/deps/libzerovec_derive-b57ec4273c03bfe8.so"
+        ]
+      }
+    ],
+    "files": {
+      "release/deps/libarrayvec-2d96ee14effbddf6.rlib": {
+        "bytes": 239172,
+        "sha256": "25ca20b32241aa7d59fc5542e68b902fe017b988031f51063e76e0bbfe1b907b"
+      },
+      "release/deps/libarrayvec-2d96ee14effbddf6.rmeta": {
+        "bytes": 236119,
+        "sha256": "99542bc5d8f07280e311396bcccb89095bcad1ed1e484859a150f173c066b153"
+      },
+      "release/build/ash-9d94dd4e9262fe0e/build-script-build": {
+        "bytes": 438584,
+        "sha256": "5aa8a84981222920c82e832184e2b9edc44214fef99c0ccd6b47297b95ed8c52"
+      },
+      "release/deps/libautocfg-e894e4f922766fe0.rlib": {
+        "bytes": 679378,
+        "sha256": "645eb67f6fb5e68cea51f4f7ae7c7be54d7afc95f5ff6cf99436ce02ac4b2895"
+      },
+      "release/deps/libautocfg-e894e4f922766fe0.rmeta": {
+        "bytes": 81512,
+        "sha256": "2a76ed1b1dfe845a7e70dce80592ddaf70a632306ac33c9fc6f9c6384769087e"
+      },
+      "release/deps/libbit_set-1d4a04bdfefd859a.rlib": {
+        "bytes": 100362,
+        "sha256": "a3dc871881ce50b3a5b33878b7fa625fd519904c6107a72b92ef9e138a3a45b2"
+      },
+      "release/deps/libbit_set-1d4a04bdfefd859a.rmeta": {
+        "bytes": 97461,
+        "sha256": "9a91e6990546c339510c27fca913e4e533d154cb82bc6ad4fd2a8dd5adefd652"
+      },
+      "release/deps/libbit_vec-aaef8e7aaa6b2e75.rlib": {
+        "bytes": 231382,
+        "sha256": "c56197d547684a763ca25090f806c8c9f3c818792facf33068bc9840e8f2f861"
+      },
+      "release/deps/libbit_vec-aaef8e7aaa6b2e75.rmeta": {
+        "bytes": 194438,
+        "sha256": "1ad58fca19a49767383dfaa5f5a7f7a0152ad4e018ee6c569885b86947dad547"
+      },
+      "release/deps/libbitflags-18dc3c0a146bf0f7.rlib": {
+        "bytes": 282794,
+        "sha256": "44e40a1afd5bc448896c51060b8ca2442898a160d4d7de18a70abbe5fa223b79"
+      },
+      "release/deps/libbitflags-18dc3c0a146bf0f7.rmeta": {
+        "bytes": 220186,
+        "sha256": "f144857be7a4985814cd109b33444c121d3eb56adb0f0a4e8ba5817c70397742"
+      },
+      "release/deps/libblock_buffer-5d9cfe4ab3fb9069.rlib": {
+        "bytes": 86942,
+        "sha256": "16bed1f9fc1f3fb7803f70c5d1fb6f99b80ac1d90a75db6e1545e33653668795"
+      },
+      "release/deps/libblock_buffer-5d9cfe4ab3fb9069.rmeta": {
+        "bytes": 83797,
+        "sha256": "cc39d194e22263498edc700ee9c756bdba9669ac4f7a0c26d7a7b763eabe6b2c"
+      },
+      "release/deps/libbytemuck_derive-609882d80646e047.so": {
+        "bytes": 3964320,
+        "sha256": "126290c11dbf330f9fca8082cec186bfe872c610ebe70347373507cf3904a8a4"
+      },
+      "release/deps/libcfg_if-6f0d32411a9cb6de.rlib": {
+        "bytes": 8050,
+        "sha256": "01db47a55324de1f5af2b74e6945750834824f8e6778edc865a567af04c39c04"
+      },
+      "release/deps/libcfg_if-6f0d32411a9cb6de.rmeta": {
+        "bytes": 5837,
+        "sha256": "7478af1974c3628de0036092a7363b46e3cf4b0dea75419ddf736466df47da84"
+      },
+      "release/deps/libcfg_aliases-b6cd500c58621c56.rlib": {
+        "bytes": 20212,
+        "sha256": "8552bc055a9a48c93117925a59089215d51b86170c1353f078ccde7d4555c343"
+      },
+      "release/deps/libcfg_aliases-b6cd500c58621c56.rmeta": {
+        "bytes": 17971,
+        "sha256": "8ce475ccc817ecd9ad630363ff1bbafdf889e54ec842d557893ed077905ba92b"
+      },
+      "release/deps/libcodespan_reporting-3b174f915e627651.rlib": {
+        "bytes": 825330,
+        "sha256": "13543a8bf05a78404c0b86ef8dd5d324667013f992cd15d729b68533e4270cd5"
+      },
+      "release/deps/libcodespan_reporting-3b174f915e627651.rmeta": {
+        "bytes": 267389,
+        "sha256": "d767f7054c27e644ec490702618d3e832abd10e365627d80c8c963a2cc302242"
+      },
+      "release/deps/libcpufeatures-8d4d3e24a9f6fc9c.rlib": {
+        "bytes": 45988,
+        "sha256": "489145b19fb03b6950360af807dcbff5d5e01fea9d1a6ee6bdd446c902c63247"
+      },
+      "release/deps/libcpufeatures-8d4d3e24a9f6fc9c.rmeta": {
+        "bytes": 43746,
+        "sha256": "29b3268bbe0a75de41fbfb59c05cdf52910e4b9c3650ec92c6984caa8dd3e5b6"
+      },
+      "release/deps/libcrypto_common-f2f12043354212df.rlib": {
+        "bytes": 1893516,
+        "sha256": "e90d8d9ecc382d9a77c87865497f082ccddbb1b0c5413feeebe789663f55eaed"
+      },
+      "release/deps/libcrypto_common-f2f12043354212df.rmeta": {
+        "bytes": 360003,
+        "sha256": "ecf70e9cf684ca1869de294fbb000742316db9503ce4c243868e2854528caa3d"
+      },
+      "release/deps/libdigest-9f17676e4c7c625c.rlib": {
+        "bytes": 213280,
+        "sha256": "38b3266f4c2c1ea5d0689bc66da52ae0947f42ded0cac4512dafa37ee3d42aea"
+      },
+      "release/deps/libdigest-9f17676e4c7c625c.rmeta": {
+        "bytes": 209475,
+        "sha256": "91913551c7426e8bde4695ed57538f9944b00777cef2d3d0e7af3e7fc8dd30cd"
+      },
+      "release/deps/libdisplaydoc-f7c0cf01facf46e8.so": {
+        "bytes": 3632400,
+        "sha256": "735b99e5a3c3e70d19f5eb8618a735cd4582031d854a167106fe28efc804f2f7"
+      },
+      "release/deps/libdocument_features-348651f3d769cda4.so": {
+        "bytes": 958760,
+        "sha256": "413f51b0544dc15893580eca9ba2970de2137df59a1550a0231d72ce9e67ea56"
+      },
+      "release/deps/libeither-11741564c2da6536.rlib": {
+        "bytes": 261050,
+        "sha256": "0bc8cc47bdda60135ad05f17094bf279b3230ef34bc0d55c37dd0f57e7300ff0"
+      },
+      "release/deps/libeither-11741564c2da6536.rmeta": {
+        "bytes": 258833,
+        "sha256": "73255a36dfb85467672d26dfdf1fb1132935d9346ba9e66f71e03d86ba43cc6b"
+      },
+      "release/deps/libequivalent-504b80678558a69e.rlib": {
+        "bytes": 10690,
+        "sha256": "0edf73360a6f086dab828841e962b0b59b58dcefcf0635b58575bf891cfa4923"
+      },
+      "release/deps/libequivalent-504b80678558a69e.rmeta": {
+        "bytes": 8450,
+        "sha256": "55eaa03a01dda89c3cd9f612eb7dc556a50a150278a5e6b7b6f56525248e5c3a"
+      },
+      "release/deps/libfearless_simd_macros-8ad9aeee2f59875e.so": {
+        "bytes": 3860888,
+        "sha256": "c49c68e5e6bf06e9b23e1f8755f887ff20730554b23c8e2c1ea409c604040f68"
+      },
+      "release/deps/libfixedbitset-f7e38d07e3f5d2a2.rlib": {
+        "bytes": 661346,
+        "sha256": "00949fd49c52acd3639447dec3654b20dd949462d69d4b3e78fcd4b99300a906"
+      },
+      "release/deps/libfixedbitset-f7e38d07e3f5d2a2.rmeta": {
+        "bytes": 460419,
+        "sha256": "773f585bb5b9044aca9b383e3e54ed4e17c8159e64da4a61fb5e27efa19cb42b"
+      },
+      "release/deps/libfoldhash-90a663c0c3357dc6.rlib": {
+        "bytes": 127790,
+        "sha256": "d518f58bc9fa90a175e4c167705e43a8f657bd027c2a2a8f12b9695052c3f31e"
+      },
+      "release/deps/libfoldhash-90a663c0c3357dc6.rmeta": {
+        "bytes": 82619,
+        "sha256": "e91bbf392238cccff314433d5a5fa1115292f1c835be5e1782c31208ccf9b464"
+      },
+      "release/deps/libfoldhash-11dcb39ac4fc098e.rlib": {
+        "bytes": 106974,
+        "sha256": "2e4ae1bc023445f505b56651d9bcfbcb554499ae35edb6386ef4543a1c8ec35f"
+      },
+      "release/deps/libfoldhash-11dcb39ac4fc098e.rmeta": {
+        "bytes": 85103,
+        "sha256": "c3f27ded6bff62eaf93a8ea8f26adb8866303d21dce5f17f9e356320d03eade5"
+      },
+      "release/deps/libglam-8e40648c565d633e.rlib": {
+        "bytes": 18798676,
+        "sha256": "2588d54c93c0b2dbb7efcff255b90bf2481753070edfdcd0dc99edda724308c8"
+      },
+      "release/deps/libglam-8e40648c565d633e.rmeta": {
+        "bytes": 18470479,
+        "sha256": "600b68553f2a58cff45ec5d4f56150e7ec031e719252029063138b98d0c4c165"
+      },
+      "release/build/gpui_gpu-219984cf26922adc/build-script-build": {
+        "bytes": 12012584,
+        "sha256": "8f876508996b86179f90de6bbdc44c483fb8c7e4d636d7dc5e906f8ba92c12b5"
+      },
+      "release/deps/libhalf-9035fcde36b72199.rlib": {
+        "bytes": 922578,
+        "sha256": "f83b086504a5a97440124cd2930fca3bf79e5d3290a62976c0117aa4b15d0f7c"
+      },
+      "release/deps/libhalf-9035fcde36b72199.rmeta": {
+        "bytes": 722540,
+        "sha256": "f4b7c3a3ebc2090c7347a2d1051c03c776a4f11b8b4d28f3ee1be5dd4b8d245c"
+      },
+      "release/deps/libhashbrown-0505ce2342c9c936.rlib": {
+        "bytes": 1135402,
+        "sha256": "620c1bd1a538f61b63d7bb1562935a06834abc8dafadb111f8d4db5585221dc1"
+      },
+      "release/deps/libhashbrown-0505ce2342c9c936.rmeta": {
+        "bytes": 1118926,
+        "sha256": "160efee5a2064fd666ffafe12dc83b8e0d6331944b10ff5cc05e617848b3b14d"
+      },
+      "release/deps/libhashbrown-418b3a222f59019f.rlib": {
+        "bytes": 1239728,
+        "sha256": "88caf3c63cb2ff9ac1eb1464aac1f5ff70e7aff4ba8e96e278337c0ae79cbc77"
+      },
+      "release/deps/libhashbrown-418b3a222f59019f.rmeta": {
+        "bytes": 1219206,
+        "sha256": "e12c75905d624696f7c689d60bf48da6428b1ca7360fd5185338f50ce3fbf138"
+      },
+      "release/deps/libheck-39fce0ca7ad001a2.rlib": {
+        "bytes": 303564,
+        "sha256": "a33a41a3688251931722fd6a357e09dd54b2953008b18343fef3872087be6cc8"
+      },
+      "release/deps/libheck-39fce0ca7ad001a2.rmeta": {
+        "bytes": 78626,
+        "sha256": "e751339b4ea5d3bd8bf796cf4c75788da079d668d103950a0b4e2c162d0bd644"
+      },
+      "release/deps/libhybrid_array-fde492bc256f902a.rlib": {
+        "bytes": 1211434,
+        "sha256": "f5980a42d1da9afa58b2fa485710f358dc3970b8d920bdca84d84e14bad586e7"
+      },
+      "release/deps/libhybrid_array-fde492bc256f902a.rmeta": {
+        "bytes": 1208208,
+        "sha256": "cf7f0abc9ba402b6d34ca2ab35d4c8287ed3fbc5f690c13253bb9b4290c14924"
+      },
+      "release/build/icu_locale_fallback_data-8493d8b08147bd69/build-script-build": {
+        "bytes": 449640,
+        "sha256": "0bb56e9647fbc9dd7213fa59d6838251dfb954e076031622f1f64785077482ea"
+      },
+      "release/build/icu_normalizer_data-3300858c355a55ae/build-script-build": {
+        "bytes": 449640,
+        "sha256": "14b61649e0f9564e0f9be6c52bb23fb40f6caa8e8419d7241fb659e089ee4b50"
+      },
+      "release/build/icu_properties_data-4534f1ce1cf9c152/build-script-build": {
+        "bytes": 449640,
+        "sha256": "2e42fc15765cfe629cfaa4835e83bf5bd9c12b210d944a1a0fa3dfd2870174c1"
+      },
+      "release/build/icu_segmenter_data-a7c66a5bbf0101f8/build-script-build": {
+        "bytes": 449640,
+        "sha256": "104d7080b095c15dcf11df07f9632a07963739f16b12f2c008ee290acf59819d"
+      },
+      "release/deps/libindexmap-025ec0293af35fea.rlib": {
+        "bytes": 1260312,
+        "sha256": "1120dfa9fc285ac16d45dde56e190e7624ec075647da36d2506ffa7fb741b442"
+      },
+      "release/deps/libindexmap-025ec0293af35fea.rmeta": {
+        "bytes": 1253663,
+        "sha256": "04a15608db807b1c5409aeb4716d1eb18c1a809bef17970b9f7280f7aee3c9a7"
+      },
+      "release/deps/libitertools-efc25d020af1c22c.rlib": {
+        "bytes": 2708516,
+        "sha256": "00c93431051bc0cf06b820faeffc8beac22a69b635ad5bb86e0802fdbc1d1123"
+      },
+      "release/deps/libitertools-efc25d020af1c22c.rmeta": {
+        "bytes": 2651379,
+        "sha256": "6022dc3227e48ffae8df76cc299c2d5b5a46de8342afe52f528811846a979a08"
+      },
+      "release/build/khronos-egl-6019b675435a6b51/build-script-build": {
+        "bytes": 438584,
+        "sha256": "9c912d862aaecadad49c2f5e5ec14554316cd03ae7bf0ebee39c600e1eadf61c"
+      },
+      "release/build/libc-2c3a8862c67f81f4/build-script-build": {
+        "bytes": 660360,
+        "sha256": "8c7f41da1ad16e20193308f724b5f95a18d0350042789afdd022afea6ac0f4b8"
+      },
+      "release/deps/liblibm-c5a767913affc224.rlib": {
+        "bytes": 1980310,
+        "sha256": "c43a2f864d0f962b7f6df9ae5110f413d5d5681e29ca798d706fb22b38d18761"
+      },
+      "release/deps/liblibm-c5a767913affc224.rmeta": {
+        "bytes": 1079105,
+        "sha256": "2c6a7e4c95e38949b923d1b03221a3e14306c76dc9e5017214470d2a5f5b71aa"
+      },
+      "release/build/libm-5b381364bf457e41/build-script-build": {
+        "bytes": 535264,
+        "sha256": "feb040799b7c72f08fc20c4abe5dae65589f1a6108e06dac0ef89f439ad86131"
+      },
+      "release/deps/liblitrs-e4ea6ac1258f9b95.rlib": {
+        "bytes": 1018842,
+        "sha256": "d642badc2d7799a17aae389750c0cd01bdba36567cec517d8fc010f3d6ad38a8"
+      },
+      "release/deps/liblitrs-e4ea6ac1258f9b95.rmeta": {
+        "bytes": 406810,
+        "sha256": "4cd6720039b6fb6e7a13622c2d38713d12ee05e41304b2430b14a8304503b87f"
+      },
+      "release/deps/liblog-7ebb8c9eb9c8faa5.rlib": {
+        "bytes": 239936,
+        "sha256": "077bd4a5d37259bd5e4e074949182cba08cb2ad90c3e996f88b12b57fe399d34"
+      },
+      "release/deps/liblog-7ebb8c9eb9c8faa5.rmeta": {
+        "bytes": 189378,
+        "sha256": "fa3ad2320e6595633744430b3f42ed2f52d200631a5737252afcb0a68e00ef4c"
+      },
+      "release/deps/libnaga-53f9de91c6c0e4b2.rlib": {
+        "bytes": 34588128,
+        "sha256": "0045a11064c7e44a23fb5c2c043c33ea9e16b412c8fc47b2ceefdca41385ad92"
+      },
+      "release/deps/libnaga-53f9de91c6c0e4b2.rmeta": {
+        "bytes": 9877379,
+        "sha256": "f7ba21c59edd978f09071b8cfd497fb12c91293545fb701a427cad0121557138"
+      },
+      "release/build/naga-8d3cca14d19c9271/build-script-build": {
+        "bytes": 517728,
+        "sha256": "821b00d23d346119665d844fbe8c41dff84906fe805fef988201afa86fb103f4"
+      },
+      "release/build/naga-7e3315d3825140b1/build-script-build": {
+        "bytes": 517728,
+        "sha256": "f2edfd108193a2000841068a4e346b59179503e2252decf45c736a1827e303f9"
+      },
+      "release/deps/libnaga_types-0ac1798a985e7738.rlib": {
+        "bytes": 149944,
+        "sha256": "9c1718bbb8b349c2455581d1ae4aaaf41c05de8ecebe4f9209c9985fae81e789"
+      },
+      "release/deps/libnaga_types-0ac1798a985e7738.rmeta": {
+        "bytes": 117104,
+        "sha256": "e9dd6f268af2e33278bb65c4e3db8f8740b7e9c073fbcf19acdf8f65562aab90"
+      },
+      "release/deps/libnum_traits-fe5c4f35f4727e12.rlib": {
+        "bytes": 1828870,
+        "sha256": "f13abc79cb8bfa5dc6a85f1eab8337a8962d0adc294eef1e48b677add5e79367"
+      },
+      "release/deps/libnum_traits-fe5c4f35f4727e12.rmeta": {
+        "bytes": 1772355,
+        "sha256": "e90bc64d79e32e6aacfdf9fa51d68c28b30a3957a9ccbc977276c3c1cd958056"
+      },
+      "release/build/num-traits-e526fc7ab7e1ba74/build-script-build": {
+        "bytes": 738832,
+        "sha256": "2c3deccac1b94098849d356dc841ae22e479148365fd7d5c49ed7e59eee05284"
+      },
+      "release/deps/libonce_cell-838e81c8a3f24b32.rlib": {
+        "bytes": 124448,
+        "sha256": "db44348fe2d61c9344d0d9ca3fbf23939fe5ec9c8438cc122fc2e64d941825ed"
+      },
+      "release/deps/libonce_cell-838e81c8a3f24b32.rmeta": {
+        "bytes": 119112,
+        "sha256": "8d353f1b632c4c54bfb1c5170bf3a994822ad336417212bcc473d8db0f18c11b"
+      },
+      "release/build/parking_lot_core-bb6035856ec77149/build-script-build": {
+        "bytes": 473648,
+        "sha256": "f0a2132832d39d25bcaec9f8db2056cbec977e26e7f3d873ff689110cebe9204"
+      },
+      "release/deps/libpaste-4df2a90ac4c5f400.so": {
+        "bytes": 732080,
+        "sha256": "932aa38541be4f8c4dc9abf8659423f0f88d1adc3bbb91ce025a9927aa533e3f"
+      },
+      "release/build/paste-4e6cdfbcc30ddb37/build-script-build": {
+        "bytes": 545488,
+        "sha256": "bb0cd1ff5d717f145997c080453c92fd531f330ed27e40e0c91902fa176b4856"
+      },
+      "release/deps/libpetgraph-e1f4e5f0445f260c.rlib": {
+        "bytes": 3302996,
+        "sha256": "0da77e877ef7d5cc53b46866ad3b5acbc3ede17798ff25f9f45eb574bf1880bb"
+      },
+      "release/deps/libpetgraph-e1f4e5f0445f260c.rmeta": {
+        "bytes": 2907631,
+        "sha256": "1cbcb311f0837d83302093fe3fd6d865ec7035959b150713b9dda4a46bd71e0a"
+      },
+      "release/deps/libpkg_config-737d9b6294f0ba53.rlib": {
+        "bytes": 966924,
+        "sha256": "12962a8553b5b2a00f2faf313e4b3e59455c87020fe26b69f18f7bc807ae5ca7"
+      },
+      "release/deps/libpkg_config-737d9b6294f0ba53.rmeta": {
+        "bytes": 70423,
+        "sha256": "35e12009678ddb0c71b6acfa0537c9b5baa4b4d0bb01506a7b9c06fd703cb531"
+      },
+      "release/deps/libproc_macro2-3f503d58993ee5e0.rlib": {
+        "bytes": 1525458,
+        "sha256": "8765c491ec0fcbbb06340f0f6a76eabacec5ec9757c6ebace6f6218e6ad1191f"
+      },
+      "release/deps/libproc_macro2-3f503d58993ee5e0.rmeta": {
+        "bytes": 392060,
+        "sha256": "c907cf0b4fec9a563494a6fd21711e8ad15b10b60618738c139e4f63bd5f4c16"
+      },
+      "release/build/proc-macro2-714b0c1623fad22c/build-script-build": {
+        "bytes": 605112,
+        "sha256": "3897ce74079b5d450a15637caf3a012049795a15ce787db1182ba678e5fbc11e"
+      },
+      "release/deps/libquote-aff98c41cf6d8550.rlib": {
+        "bytes": 509642,
+        "sha256": "7bd53b0a6093dd42209d879ce5e5d5a251806afd3d521b05984ff63310c599ad"
+      },
+      "release/deps/libquote-aff98c41cf6d8550.rmeta": {
+        "bytes": 270261,
+        "sha256": "b5ca22d81b924f6c435675a21ad9728ad17e3ac03867571b87e06368de16cd87"
+      },
+      "release/build/quote-6c2d045a4e1007d0/build-script-build": {
+        "bytes": 545056,
+        "sha256": "a70c771a9be63aeba671611d235651e01b99d9c827e90e516360427c39234811"
+      },
+      "release/deps/librustc_hash-d32b5f284953c233.rlib": {
+        "bytes": 14850,
+        "sha256": "acad63f2f5294e8056561f9a9f0b646668a3968d83ab597d9b18226962af897b"
+      },
+      "release/deps/librustc_hash-d32b5f284953c233.rmeta": {
+        "bytes": 12611,
+        "sha256": "90a7a5e47a4a2d762f951e7074fabc7334646f016226aad002dead63cb232b6a"
+      },
+      "release/deps/libsha2-c7b7dab5a45654cf.rlib": {
+        "bytes": 1022114,
+        "sha256": "7783c64c04b469e09d48f8da62af58ed8bebfcc5c3a6eaa0dc293afe89b2eed5"
+      },
+      "release/deps/libsha2-c7b7dab5a45654cf.rmeta": {
+        "bytes": 670414,
+        "sha256": "358b681c1efc0e6c6bcf2da472bf47fe279fe8db614837c2368f3d4c9618a82d"
+      },
+      "release/deps/libsnafu-b733b2d26addf8d6.rlib": {
+        "bytes": 392116,
+        "sha256": "e794174c83209acb917957f30a48b381e97660d569666b93509bf250891b0435"
+      },
+      "release/deps/libsnafu-b733b2d26addf8d6.rmeta": {
+        "bytes": 196072,
+        "sha256": "7bf9b02e62cc01bec461ab33c1bd5aed346ccaa7c8baa63891f619155e50d0f1"
+      },
+      "release/deps/libsnafu_derive-3bed1db630b4dd71.so": {
+        "bytes": 4723008,
+        "sha256": "0e186e434e39ad5db8a7081c77b04e66bda4bd81b623203704d4d505c4216280"
+      },
+      "release/deps/libspirv-c9e62a13c072175d.rlib": {
+        "bytes": 4982828,
+        "sha256": "fbe7b5e0716cd2b0cc62c274db295471d104f7cc64fd2b0abb2cb43a01864f36"
+      },
+      "release/deps/libspirv-c9e62a13c072175d.rmeta": {
+        "bytes": 3864339,
+        "sha256": "1350d1b54b4ed13226bd901e226e3dfdb2743086c88554ddace24839d9ca659c"
+      },
+      "release/deps/libsyn-770a3f0461dd80fa.rlib": {
+        "bytes": 11814272,
+        "sha256": "1d395b37e40fda6a785e20185ec3b84dc0d3f354bb23c3dc47f1f6d815a4b722"
+      },
+      "release/deps/libsyn-770a3f0461dd80fa.rmeta": {
+        "bytes": 4192696,
+        "sha256": "9986acdb1f290235e1984c0159ab8bdd01129c3ec7e972eee1a793c335a9c8c9"
+      },
+      "release/deps/libsyn-c8908aefcdd767b5.rlib": {
+        "bytes": 12279842,
+        "sha256": "204b2a37f6508f848e34de94ae687240cbde9977e291d95dcc3c304a92e5ded5"
+      },
+      "release/deps/libsyn-c8908aefcdd767b5.rmeta": {
+        "bytes": 4660877,
+        "sha256": "d5b96d87e99031c65e658a952c0315f10708832cf79b107dee7ac8fb7f94942a"
+      },
+      "release/deps/libsynstructure-cbb924c57fe82f05.rlib": {
+        "bytes": 1459812,
+        "sha256": "78c801d8e19a558936b4a3dfe9e07e6864fe3142c11b09ce0d276a43350f398d"
+      },
+      "release/deps/libsynstructure-cbb924c57fe82f05.rmeta": {
+        "bytes": 235639,
+        "sha256": "b6c1ce5acb8481bf52ec4cee1a802c6e7ef7268352af4c0aee1193235a33ddd8"
+      },
+      "release/deps/libthiserror-360723e0f3a677e3.rlib": {
+        "bytes": 32682,
+        "sha256": "fecab3202a46cd4ed62b5e145222a4d32061d3b3194470118803a251f814038d"
+      },
+      "release/deps/libthiserror-360723e0f3a677e3.rmeta": {
+        "bytes": 29018,
+        "sha256": "485a9d9120864d55de54e28da24cd90ab69c6e8cb30dbaa32be6f07394d38b54"
+      },
+      "release/build/thiserror-9aeda1f769ebd3ff/build-script-build": {
+        "bytes": 624296,
+        "sha256": "484b1a4dd4623dced5cfadcc8b591e1cd88562ef83e5c6b1336acdd36f5c4175"
+      },
+      "release/deps/libthiserror_impl-622976bdc7787e59.so": {
+        "bytes": 4038280,
+        "sha256": "3a3f287aa7fcdd59f6f13ec819ed6956663409ea6c24a66fad33ac5f766bae46"
+      },
+      "release/deps/libtypenum-e8a215996e2ead4f.rlib": {
+        "bytes": 3599824,
+        "sha256": "da880c4a8beff1834e6e33b7c2772c2bf2369ad8f561a4251ec1e0512d791f79"
+      },
+      "release/deps/libtypenum-e8a215996e2ead4f.rmeta": {
+        "bytes": 3592356,
+        "sha256": "5ad1859d2946aa165a506b34ec23b0565fc7485e8c1d5f2effc7e31fe54ecab2"
+      },
+      "release/deps/libunicode_ident-18734f1bfded43d5.rlib": {
+        "bytes": 52526,
+        "sha256": "568cc2883d106473f0ebb9b1ccb8e61d3320d92e4c0bcc0e609533bd405ce3e9"
+      },
+      "release/deps/libunicode_ident-18734f1bfded43d5.rmeta": {
+        "bytes": 34525,
+        "sha256": "58e056ccf177487f314b6a3d5dc10ab227a4b3df2a9e1947d03a3c5eb5485648"
+      },
+      "release/deps/libunicode_width-cca3ec58df81f959.rlib": {
+        "bytes": 891026,
+        "sha256": "115578e8cf2af1a82e3666133e4fc5ec6c0c991d4581698cf0bc210dab54e61e"
+      },
+      "release/deps/libunicode_width-cca3ec58df81f959.rmeta": {
+        "bytes": 855012,
+        "sha256": "a1a5950f94aab6b35868b0abd0be102800bccc7acecb7a0e7f2796d503103dcf"
+      },
+      "release/build/wayland-sys-7782d123b8371f24/build-script-build": {
+        "bytes": 878760,
+        "sha256": "b5f221d366405750d1fc2988324022add25d2c7a9024a593b110c50c5788e436"
+      },
+      "release/build/wgpu-189d3338b84b3661/build-script-build": {
+        "bytes": 682104,
+        "sha256": "203ab5ebfd24553dd8e23f9ac92fab9581e23ba212c7f056ab7ee93dcdcd80e4"
+      },
+      "release/build/wgpu-core-5b3c20d04a461705/build-script-build": {
+        "bytes": 577472,
+        "sha256": "ed7077bf7d8adf1f1c1d4bd32a3b1a581b97d8edbab4d3ccba5a7b3d52d2d478"
+      },
+      "release/build/wgpu-hal-bc0de0c0b4b9d24f/build-script-build": {
+        "bytes": 575296,
+        "sha256": "9690db60632b3c29a98efd9eab6945cc52a23d0e97117596e6fcfbc99cfefcb6"
+      },
+      "release/deps/libwgsl_rs-b096ec84aea1689b.rlib": {
+        "bytes": 10370598,
+        "sha256": "665b6347d4adc1b518bd06848d5881fa680ee116e66524d06ae21c01a5619349"
+      },
+      "release/deps/libwgsl_rs-b096ec84aea1689b.rmeta": {
+        "bytes": 4484507,
+        "sha256": "90f640762357a02ea96066c28432664cb954660488f11430c580973c12ab4ef1"
+      },
+      "release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rlib": {
+        "bytes": 3185618,
+        "sha256": "e1293b11a576265c0f0d42550bef96ac27b309d40625e4175d58ad83003ee6c3"
+      },
+      "release/deps/libwgsl_rs_ir-e1edf54ae15d22a5.rmeta": {
+        "bytes": 912469,
+        "sha256": "3bbbf8c005332b84e2e66d0fe14f0a670d34164f5e47c894724647eee0f9080d"
+      },
+      "release/deps/libwgsl_rs_macros-fd20f73dcfe3e2a8.so": {
+        "bytes": 8664952,
+        "sha256": "5bd18310f02dcdce1af67d4e7b36fc53a879c1cbe5b4483ee131bef95c2ff6dd"
+      },
+      "release/build/wgsl-rs-macros-c3d008bfdc8cebcb/build-script-build": {
+        "bytes": 554776,
+        "sha256": "f9993a1d960e5e2fffd60f67a2c4fc97aed4a0b48d4b5c7d03fe0006ce621723"
+      },
+      "release/deps/libyoke_derive-60e4a67d093fcafa.so": {
+        "bytes": 4311184,
+        "sha256": "17484bc2d50d3f3c2fa859decb415b1c4ee5cb0e0b50fc8e12f5e96132c63310"
+      },
+      "release/deps/libzerocopy-4fd63501e8c2d004.rlib": {
+        "bytes": 14709690,
+        "sha256": "ca7539a72ea21c06f2a89066ed7bad8f7bc4b8f8e07260baef35799c05d0df3b"
+      },
+      "release/deps/libzerocopy-4fd63501e8c2d004.rmeta": {
+        "bytes": 14542079,
+        "sha256": "d8bacddb47413a91a9a4d950435dd663e80a71d4a067df290b532552e5aa5670"
+      },
+      "release/build/zerocopy-8bf63dbc788acc4b/build-script-build": {
+        "bytes": 639216,
+        "sha256": "2daffb62f4e7b9f4d91ab1100a63ce745f66315e2822cfa12defc5d0e8363a0a"
+      },
+      "release/deps/libzerocopy_derive-2e0e1a26b0bcc627.so": {
+        "bytes": 4590072,
+        "sha256": "5ef085bb27c649a58ea527112a2e70ad153eeaca3934b5bd1badca3ce9703570"
+      },
+      "release/deps/libzerofrom_derive-6a1207cd516e54c7.so": {
+        "bytes": 4694544,
+        "sha256": "d1f9be7a6ee364ba6f875854f24ca0a4848b888f8893c15d11c763776e3513a2"
+      },
+      "release/deps/libzerovec_derive-b57ec4273c03bfe8.so": {
+        "bytes": 3928832,
+        "sha256": "c430cfb299733fc42200acb8725549009e88cab091cc279cdb83394f7bce0d30"
+      }
+    },
+    "logical_file_bytes": 301797147
+  },
+  "added_or_replaced_host_files": {
+    "release/deps/libblock_buffer-5d9cfe4ab3fb9069.rlib": {
+      "bytes": 86942,
+      "sha256": "16bed1f9fc1f3fb7803f70c5d1fb6f99b80ac1d90a75db6e1545e33653668795"
+    },
+    "release/deps/libblock_buffer-5d9cfe4ab3fb9069.rmeta": {
+      "bytes": 83797,
+      "sha256": "cc39d194e22263498edc700ee9c756bdba9669ac4f7a0c26d7a7b763eabe6b2c"
+    },
+    "release/deps/libcpufeatures-8d4d3e24a9f6fc9c.rlib": {
+      "bytes": 45988,
+      "sha256": "489145b19fb03b6950360af807dcbff5d5e01fea9d1a6ee6bdd446c902c63247"
+    },
+    "release/deps/libcpufeatures-8d4d3e24a9f6fc9c.rmeta": {
+      "bytes": 43746,
+      "sha256": "29b3268bbe0a75de41fbfb59c05cdf52910e4b9c3650ec92c6984caa8dd3e5b6"
+    },
+    "release/deps/libcrypto_common-f2f12043354212df.rlib": {
+      "bytes": 1893516,
+      "sha256": "e90d8d9ecc382d9a77c87865497f082ccddbb1b0c5413feeebe789663f55eaed"
+    },
+    "release/deps/libcrypto_common-f2f12043354212df.rmeta": {
+      "bytes": 360003,
+      "sha256": "ecf70e9cf684ca1869de294fbb000742316db9503ce4c243868e2854528caa3d"
+    },
+    "release/deps/libdigest-9f17676e4c7c625c.rlib": {
+      "bytes": 213280,
+      "sha256": "38b3266f4c2c1ea5d0689bc66da52ae0947f42ded0cac4512dafa37ee3d42aea"
+    },
+    "release/deps/libdigest-9f17676e4c7c625c.rmeta": {
+      "bytes": 209475,
+      "sha256": "91913551c7426e8bde4695ed57538f9944b00777cef2d3d0e7af3e7fc8dd30cd"
+    },
+    "release/deps/libfixedbitset-f7e38d07e3f5d2a2.rlib": {
+      "bytes": 661346,
+      "sha256": "00949fd49c52acd3639447dec3654b20dd949462d69d4b3e78fcd4b99300a906"
+    },
+    "release/deps/libfixedbitset-f7e38d07e3f5d2a2.rmeta": {
+      "bytes": 460419,
+      "sha256": "773f585bb5b9044aca9b383e3e54ed4e17c8159e64da4a61fb5e27efa19cb42b"
+    },
+    "release/deps/libfoldhash-90a663c0c3357dc6.rlib": {
+      "bytes": 127790,
+      "sha256": "d518f58bc9fa90a175e4c167705e43a8f657bd027c2a2a8f12b9695052c3f31e"
+    },
+    "release/deps/libfoldhash-90a663c0c3357dc6.rmeta": {
+      "bytes": 82619,
+      "sha256": "e91bbf392238cccff314433d5a5fa1115292f1c835be5e1782c31208ccf9b464"
+    },
+    "release/build/gpui_gpu-219984cf26922adc/build-script-build": {
+      "bytes": 12012584,
+      "sha256": "8f876508996b86179f90de6bbdc44c483fb8c7e4d636d7dc5e906f8ba92c12b5"
+    },
+    "release/deps/libhashbrown-0505ce2342c9c936.rlib": {
+      "bytes": 1135402,
+      "sha256": "620c1bd1a538f61b63d7bb1562935a06834abc8dafadb111f8d4db5585221dc1"
+    },
+    "release/deps/libhashbrown-0505ce2342c9c936.rmeta": {
+      "bytes": 1118926,
+      "sha256": "160efee5a2064fd666ffafe12dc83b8e0d6331944b10ff5cc05e617848b3b14d"
+    },
+    "release/deps/libhybrid_array-fde492bc256f902a.rlib": {
+      "bytes": 1211434,
+      "sha256": "f5980a42d1da9afa58b2fa485710f358dc3970b8d920bdca84d84e14bad586e7"
+    },
+    "release/deps/libhybrid_array-fde492bc256f902a.rmeta": {
+      "bytes": 1208208,
+      "sha256": "cf7f0abc9ba402b6d34ca2ab35d4c8287ed3fbc5f690c13253bb9b4290c14924"
+    },
+    "release/deps/libnaga-53f9de91c6c0e4b2.rlib": {
+      "bytes": 34588128,
+      "sha256": "0045a11064c7e44a23fb5c2c043c33ea9e16b412c8fc47b2ceefdca41385ad92"
+    },
+    "release/deps/libnaga-53f9de91c6c0e4b2.rmeta": {
+      "bytes": 9877379,
+      "sha256": "f7ba21c59edd978f09071b8cfd497fb12c91293545fb701a427cad0121557138"
+    },
+    "release/build/naga-7e3315d3825140b1/build-script-build": {
+      "bytes": 517728,
+      "sha256": "f2edfd108193a2000841068a4e346b59179503e2252decf45c736a1827e303f9"
+    },
+    "release/deps/libpetgraph-e1f4e5f0445f260c.rlib": {
+      "bytes": 3302996,
+      "sha256": "0da77e877ef7d5cc53b46866ad3b5acbc3ede17798ff25f9f45eb574bf1880bb"
+    },
+    "release/deps/libpetgraph-e1f4e5f0445f260c.rmeta": {
+      "bytes": 2907631,
+      "sha256": "1cbcb311f0837d83302093fe3fd6d865ec7035959b150713b9dda4a46bd71e0a"
+    },
+    "release/deps/libsha2-c7b7dab5a45654cf.rlib": {
+      "bytes": 1022114,
+      "sha256": "7783c64c04b469e09d48f8da62af58ed8bebfcc5c3a6eaa0dc293afe89b2eed5"
+    },
+    "release/deps/libsha2-c7b7dab5a45654cf.rmeta": {
+      "bytes": 670414,
+      "sha256": "358b681c1efc0e6c6bcf2da472bf47fe279fe8db614837c2368f3d4c9618a82d"
+    },
+    "release/deps/libspirv-c9e62a13c072175d.rlib": {
+      "bytes": 4982828,
+      "sha256": "fbe7b5e0716cd2b0cc62c274db295471d104f7cc64fd2b0abb2cb43a01864f36"
+    },
+    "release/deps/libspirv-c9e62a13c072175d.rmeta": {
+      "bytes": 3864339,
+      "sha256": "1350d1b54b4ed13226bd901e226e3dfdb2743086c88554ddace24839d9ca659c"
+    },
+    "release/deps/libtypenum-e8a215996e2ead4f.rlib": {
+      "bytes": 3599824,
+      "sha256": "da880c4a8beff1834e6e33b7c2772c2bf2369ad8f561a4251ec1e0512d791f79"
+    },
+    "release/deps/libtypenum-e8a215996e2ead4f.rmeta": {
+      "bytes": 3592356,
+      "sha256": "5ad1859d2946aa165a506b34ec23b0565fc7485e8c1d5f2effc7e31fe54ecab2"
+    },
+    "release/build/wgpu-189d3338b84b3661/build-script-build": {
+      "bytes": 682104,
+      "sha256": "203ab5ebfd24553dd8e23f9ac92fab9581e23ba212c7f056ab7ee93dcdcd80e4"
+    },
+    "release/deps/libwgsl_rs-b096ec84aea1689b.rlib": {
+      "bytes": 10370598,
+      "sha256": "665b6347d4adc1b518bd06848d5881fa680ee116e66524d06ae21c01a5619349"
+    },
+    "release/deps/libwgsl_rs-b096ec84aea1689b.rmeta": {
+      "bytes": 4484507,
+      "sha256": "90f640762357a02ea96066c28432664cb954660488f11430c580973c12ab4ef1"
+    }
+  },
+  "superseded_host_files": {
+    "release/build/gpui_gpu-adaec1003f5e5cb7/build-script-build": {
+      "bytes": 8250080,
+      "sha256": "af59fbe7a3c11276a707cd4f85087ee6eb31d6883df045c8f49d015045310e94"
+    },
+    "release/deps/libnaga-1001b44ffe9d3ea9.rlib": {
+      "bytes": 24422142,
+      "sha256": "1d4178c6f496f18b4c84eb6a3064b1ba57f823d6ba84c9f76d5d7b2196bc55c1"
+    },
+    "release/deps/libnaga-1001b44ffe9d3ea9.rmeta": {
+      "bytes": 7505098,
+      "sha256": "f9e9441ef85f31036f97d2de82a4aaf52858551fb87e30c2ddc43c8ec43f60a7"
+    },
+    "release/build/naga-be652110a9996c54/build-script-build": {
+      "bytes": 517584,
+      "sha256": "ab9293449e7ca6e210c9ccd04284ca2052acb6a2224043e3008db7f22e3d85ba"
+    },
+    "release/build/wgpu-d9fa8c040dc4c237/build-script-build": {
+      "bytes": 682104,
+      "sha256": "9ef4ddcb31e62a247a96a660e5d4829414ab8146feb0bd98d4d314d8fcf62711"
+    },
+    "release/deps/libwgsl_rs-6df8f3f39b8dffb2.rlib": {
+      "bytes": 10378358,
+      "sha256": "fc04fce48f7a93783c806bff9cbdc152c0791be8e5cb48530151595c07fd9046"
+    },
+    "release/deps/libwgsl_rs-6df8f3f39b8dffb2.rmeta": {
+      "bytes": 4484578,
+      "sha256": "aec399733708efaedc027fa7e222df1ce3a208440d73b268e64683b363d883c3"
+    }
+  },
+  "note": "Logical file sizes, including rlib/rmeta and host build executables; not physical disk/RSS. The feature closure includes all host ancestors, not just direct dependencies. Existing target artifacts and generated output are separate. No cold-build timing claim."
+}

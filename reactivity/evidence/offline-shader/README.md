@@ -1,5 +1,11 @@
 # Experimental first-constructor offline shader control
 
+This is the frozen `bea848dbe4` qualification, committed as `0a85e6aa8c`.
+The later host-only stage-interface proof refinement has separate source pins,
+costs and gates in [interface-refinement/README.md](interface-refinement/README.md).
+Its artifacts and linked fixture remain byte-identical; old measurements below
+retain their original source attribution.
+
 This opt-in `gpui_gpu/offline-shader` experiment removes runtime Naga frontend,
 interface reflection and SPIR-V generation from the admitted compositor
 constructor. It keeps checked owned WGSL for other devices and remains **off by

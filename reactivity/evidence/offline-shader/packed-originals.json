@@ -98,5 +98,13 @@
   "stage/proof-tests.txt": {
     "bytes": 1057,
     "sha256": "7b59cc8bbe62c88aac31382ba38ea08cb35b352cf9cc1c7f7d57069c42cafea9"
+  },
+  "interface-refinement/gpu-tests.txt": {
+    "bytes": 6182,
+    "sha256": "25ec6b5cf4b2a94aa6d2d81317703d1da1e258eda1897e5c10b915caa66528cc"
+  },
+  "interface-refinement/host-proof-tests.txt": {
+    "bytes": 1822,
+    "sha256": "59181e00af0e569179083fe34b3d4f971dab19f1066ca03c81dd4f5de4ab4b4e"
   }
 }

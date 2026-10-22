@@ -77,11 +77,12 @@ def source_lines():
     save("source-lines.json", rows)
 
 
-def host_cost():
+def host_cost(message_files=None):
     rows = {}
     for label in ("default", "artifact"):
         graph = json.loads(Path(f"/tmp/gpui-offline-{label}-unit-graph.json").read_text())
-        messages = [json.loads(s) for s in Path(f"/tmp/gpui-offline-{label}-artifacts.jsonl").read_text().splitlines()]
+        messages_path = (message_files or {}).get(label, f"/tmp/gpui-offline-{label}-artifacts.jsonl")
+        messages = [json.loads(s) for s in Path(messages_path).read_text().splitlines()]
         units = graph["units"]
         # run-custom-build units also have target metadata edges; they are not
         # host compiler dependencies. Start from executable compilation only.
@@ -184,7 +185,8 @@ def artifacts():
     save("artifact-and-linked-bytes.json", rows)
 
 
-source_lines()
-host_cost()
-dhat()
-artifacts()
+if __name__ == "__main__":
+    source_lines()
+    host_cost()
+    dhat()
+    artifacts()
