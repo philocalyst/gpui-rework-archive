@@ -222,7 +222,7 @@ fn visual_line_transitions_do_not_rehit_collapsed_line_tops() {
         }
         assert_eq!(
             fixture.map.caret_line(TextPosition {
-                offset: TextOffset::new(usize::MAX.min(u32::MAX as usize)).unwrap(),
+                offset: TextOffset::new(u32::MAX as usize).unwrap(),
                 affinity: CaretAffinity::Downstream
             }),
             None
