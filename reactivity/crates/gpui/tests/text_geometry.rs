@@ -21,7 +21,9 @@ impl View for Page {
         ))
     }
 }
-fn capture(win: &Win<Page>) -> Vec<(String, Rect, Vec<(usize, usize, Rect, usize)>)> {
+type Unit = (usize, usize, Rect, usize);
+type Paragraph = (String, Rect, Vec<Unit>);
+fn capture(win: &Win<Page>) -> Vec<Paragraph> {
     let mut values = Vec::new();
     win.visit(|part| {
         if let Some(text) = part.text() {
