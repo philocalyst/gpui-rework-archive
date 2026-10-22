@@ -388,3 +388,16 @@ pub(super) fn text_run(value: &str) -> Node {
     })));
     node
 }
+
+#[cfg(test)]
+#[test]
+fn native_input_authority_memory_budget() {
+    assert_eq!(size_of::<Input>(), 40);
+    // Production Cohort40 plus three test-only usize work counters24.
+    assert_eq!(size_of::<Cohort>(), 64);
+    eprintln!(
+        "NATIVE_TEXT_AUTHORITY input={} cohort_production={}",
+        size_of::<Input>(),
+        size_of::<Cohort>() - 3 * size_of::<usize>()
+    );
+}

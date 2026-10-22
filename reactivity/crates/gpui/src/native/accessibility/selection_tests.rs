@@ -9,6 +9,29 @@ use accesskit::{
 use accesskit_consumer::Tree;
 
 const LIST: ListId = ListId::new(1);
+#[test]
+fn native_text_transport_memory_budget() {
+    assert_eq!(size_of::<Command>(), 32);
+    assert_eq!(size_of::<Queued>(), 48);
+    assert_eq!(size_of::<Ingress>(), 8);
+    assert_eq!(size_of::<accesskit::ActionData>(), 40);
+    assert_eq!(size_of::<accesskit::TextReplacement>(), 48);
+    eprintln!(
+        "NATIVE_TEXT_MEMORY shared={} command={} queued={} ingress={} replacement={}",
+        size_of::<Shared>(),
+        size_of::<Command>(),
+        size_of::<Queued>(),
+        size_of::<Ingress>(),
+        size_of::<accesskit::TextReplacement>()
+    );
+    let mut transport = None;
+    let allocation = allocation_counter::measure(|| transport = Some(Ingress::channel(None)));
+    eprintln!(
+        "NATIVE_TEXT_INGRESS allocations={} retained={} peak={}",
+        allocation.count_total, allocation.bytes_current, allocation.bytes_max
+    );
+    drop(transport);
+}
 struct Inputs {
     a: Signal<String>,
     b: Signal<String>,
