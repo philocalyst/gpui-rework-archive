@@ -16,13 +16,30 @@ struct RunBits {
     glyphs: Vec<GlyphBits>,
 }
 #[derive(Debug, PartialEq)]
+enum ItemBits {
+    Run(RunBits),
+    Box {
+        id: u64,
+        kind: parley::InlineBoxKind,
+        geometry: [u32; 4],
+        baseline: Option<u32>,
+    },
+}
+#[derive(Debug, PartialEq)]
 struct LineBits {
     source: std::ops::Range<usize>,
     metrics: [u32; 12],
-    runs: Vec<RunBits>,
+    items: Vec<ItemBits>,
 }
-fn snapshot(layout: &parley::Layout<()>) -> Vec<LineBits> {
-    layout
+fn snapshot(layout: &parley::Layout<()>) -> ([u32; 4], Vec<LineBits>) {
+    let dimensions = [
+        layout.width(),
+        layout.full_width(),
+        layout.height(),
+        layout.layout_max_advance(),
+    ]
+    .map(f32::to_bits);
+    let lines = layout
         .lines()
         .map(|line| {
             let m = line.metrics();
@@ -43,13 +60,16 @@ fn snapshot(layout: &parley::Layout<()>) -> Vec<LineBits> {
                     m.content_block_max_coord,
                 ]
                 .map(f32::to_bits),
-                runs: line
+                items: line
                     .items()
-                    .filter_map(|item| {
-                        let PositionedLayoutItem::GlyphRun(run) = item else {
-                            return None;
-                        };
-                        Some(RunBits {
+                    .map(|item| match item {
+                        PositionedLayoutItem::InlineBox(item) => ItemBits::Box {
+                            id: item.id,
+                            kind: item.kind,
+                            geometry: [item.x, item.y, item.width, item.height].map(f32::to_bits),
+                            baseline: item.baseline.map(f32::to_bits),
+                        },
+                        PositionedLayoutItem::GlyphRun(run) => ItemBits::Run(RunBits {
                             source: run.run().text_range(),
                             rtl: run.run().is_rtl(),
                             glyphs: run
@@ -61,12 +81,13 @@ fn snapshot(layout: &parley::Layout<()>) -> Vec<LineBits> {
                                     position: [glyph.x, glyph.y, glyph.advance].map(f32::to_bits),
                                 })
                                 .collect(),
-                        })
+                        }),
                     })
                     .collect(),
             }
         })
-        .collect()
+        .collect();
+    (dimensions, lines)
 }
 fn fonts() -> FontContext {
     // Independent immutable test font bytes; never touches the GPUI bundled
