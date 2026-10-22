@@ -1,7 +1,6 @@
 use crate::{
     FontContext, FontFamilyName, InlineBox, InlineBoxKind, Layout, LayoutContext, OverflowWrap,
-    StyleProperty,
-    layout::data::LayoutItemKind,
+    StyleProperty, layout::data::LayoutItemKind,
 };
 use alloc::{collections::BTreeMap, sync::Arc, vec, vec::Vec};
 use fontique::{Blob, Collection, CollectionOptions, FontInfoOverride, SourceCache};
@@ -19,16 +18,21 @@ fn fonts() -> FontContext {
         ("Arabic", &include_bytes!("../../fonts/arabic.ttf")[..]),
         ("Hebrew", &include_bytes!("../../fonts/hebrew.ttf")[..]),
     ] {
-        assert!(!fonts.collection.register_fonts(
-            Blob::new(Arc::new(bytes)),
-            Some(FontInfoOverride {
-                family_name: Some(name),
-                width: Some(Default::default()),
-                style: Some(Default::default()),
-                weight: Some(Default::default()),
-                axes: None,
-            }),
-        ).is_empty());
+        assert!(
+            !fonts
+                .collection
+                .register_fonts(
+                    Blob::new(Arc::new(bytes)),
+                    Some(FontInfoOverride {
+                        family_name: Some(name),
+                        width: Some(Default::default()),
+                        style: Some(Default::default()),
+                        weight: Some(Default::default()),
+                        axes: None,
+                    }),
+                )
+                .is_empty()
+        );
     }
     fonts
 }
@@ -53,9 +57,10 @@ fn check(layout: &Layout<()>, source: &str, census: &mut Census) {
     for (line_index, line) in layout.lines().enumerate() {
         census.lines += 1;
         let items = &layout.data.line_items[line.data.item_range.clone()];
-        let ids = items.iter().filter_map(|item| {
-            (item.kind == LayoutItemKind::TextRun).then_some(item.index)
-        }).collect::<Vec<_>>();
+        let ids = items
+            .iter()
+            .filter_map(|item| (item.kind == LayoutItemKind::TextRun).then_some(item.index))
+            .collect::<Vec<_>>();
         census.boxes += items.len() - ids.len();
         if ids.is_empty() {
             continue;
@@ -67,11 +72,18 @@ fn check(layout: &Layout<()>, source: &str, census: &mut Census) {
         census.max_span = census.max_span.max(span);
         // Source shaping emits every text run once; commit_line can omit only
         // edge runs. Removing either edge does not create an interior ID hole.
-        assert_eq!(span, ids.len(), "source={source:?} line={line_index} ids={ids:?}");
+        assert_eq!(
+            span,
+            ids.len(),
+            "source={source:?} line={line_index} ids={ids:?}"
+        );
         let mut slots = vec![None; span];
         for (position, item) in items.iter().enumerate() {
             if item.kind == LayoutItemKind::TextRun {
-                assert!(slots[item.index - min].replace(position).is_none(), "duplicate run");
+                assert!(
+                    slots[item.index - min].replace(position).is_none(),
+                    "duplicate run"
+                );
             }
         }
         for (relative, position) in slots.into_iter().enumerate() {
@@ -80,7 +92,11 @@ fn check(layout: &Layout<()>, source: &str, census: &mut Census) {
             assert_eq!(item.index, min + relative);
             census.split_runs += usize::from(seen_runs.insert(item.index, line_index).is_some());
             let run = line.item(position).unwrap().run().unwrap();
-            assert_eq!(run.index(), position, "public index is visual item position");
+            assert_eq!(
+                run.index(),
+                position,
+                "public index is visual item position"
+            );
             let clusters = run.clusters().collect::<Vec<_>>();
             if clusters.is_empty() {
                 census.empty_runs += 1;
@@ -92,7 +108,10 @@ fn check(layout: &Layout<()>, source: &str, census: &mut Census) {
                 let range = cluster.text_range();
                 assert!(range.start <= range.end && range.end <= source.len());
                 if !range.is_empty() {
-                    assert!(range.start >= previous_end, "overlap/decrease: source={source:?} line={line_index} range={range:?} previous={previous_end}");
+                    assert!(
+                        range.start >= previous_end,
+                        "overlap/decrease: source={source:?} line={line_index} range={range:?} previous={previous_end}"
+                    );
                     previous_end = range.end;
                 }
             }
@@ -107,10 +126,17 @@ fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
     let families = ["primary", "Arabic", "Hebrew"].map(|s| FontFamilyName::Named(s.into()));
     let mut census = Census::default();
     for source in [
-        "", "\n", "\n\n", "a\r\n\u{2028}b\n", "abc אבג 123 العربية xyz\n",
-        "אבג 123 xyz العربية\u{2028}", "a\u{2067}אבג 12\u{2069} z",
-        "office ffi fi abc אבג xyz", "a\u{301}\u{200d}ع\u{651} e\u{301} b",
-        "a    b    אבג     العربية      z\n", "a\tאבג\t12\txyz\n",
+        "",
+        "\n",
+        "\n\n",
+        "a\r\n\u{2028}b\n",
+        "abc אבג 123 العربية xyz\n",
+        "אבג 123 xyz العربية\u{2028}",
+        "a\u{2067}אבג 12\u{2069} z",
+        "office ffi fi abc אבג xyz",
+        "a\u{301}\u{200d}ع\u{651} e\u{301} b",
+        "a    b    אבג     العربية      z\n",
+        "a\tאבג\t12\txyz\n",
     ] {
         for width in [None, Some(0.), Some(1.), Some(12.), Some(31.), Some(80.)] {
             for styles in [0, 1, 2] {
@@ -121,7 +147,10 @@ fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
                     builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
                     for (index, (start, ch)) in source.char_indices().enumerate() {
                         if styles == 2 || (styles == 1 && index % 3 == 0) {
-                            builder.push(StyleProperty::FontSize(17. + (index % 2) as f32), start..start + ch.len_utf8());
+                            builder.push(
+                                StyleProperty::FontSize(17. + (index % 2) as f32),
+                                start..start + ch.len_utf8(),
+                            );
                         }
                     }
                     if boxes {
@@ -129,7 +158,11 @@ fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
                             builder.push_inline_box(InlineBox {
                                 id: id as u64,
                                 index,
-                                kind: if id == 0 { InlineBoxKind::InFlow } else { InlineBoxKind::OutOfFlow },
+                                kind: if id == 0 {
+                                    InlineBoxKind::InFlow
+                                } else {
+                                    InlineBoxKind::OutOfFlow
+                                },
                                 width: 3.125,
                                 height: 13.75,
                                 baseline: None,
@@ -146,8 +179,14 @@ fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
     }
     assert!(census.reordered > 0, "bidi permutation must be exercised");
     assert!(census.split_runs > 0, "line-scoped slices must recur");
-    assert!(census.empty_runs > 0, "empty/synthetic runs must be exercised");
-    assert!(census.empty_edges > 0, "empty run at source-order line edge");
+    assert!(
+        census.empty_runs > 0,
+        "empty/synthetic runs must be exercised"
+    );
+    assert!(
+        census.empty_edges > 0,
+        "empty run at source-order line edge"
+    );
     assert!(census.boxes > 0, "box indices must not enter text-run span");
     std::println!("span_census,{census:?}");
 }
