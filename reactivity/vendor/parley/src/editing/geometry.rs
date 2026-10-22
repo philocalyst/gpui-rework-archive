@@ -8,6 +8,7 @@ use crate::layout::{Affinity, Cluster, ClusterPath, Layout, Line, LineItem};
 use crate::style::Brush;
 use alloc::{vec, vec::Vec};
 use core::ops::ControlFlow;
+use parley_engine::shape::Whitespace;
 
 #[derive(Clone, Copy)]
 struct Entry {
@@ -144,11 +145,14 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                 }
                 let run = line.item(slot.item as usize)?.run()?;
                 let mut run_count = 0;
-                for cluster in run.clusters() {
+                let full = run.full_slice();
+                // Only source ranges/counts are needed for checked admission.
+                // Layout's internal grapheme/atom invariants remain trusted.
+                for grapheme in run.line_slice().graphemes_start() {
                     // The old index explicitly exempts the empty layout's
                     // synthetic metrics space from source/entry validation.
                     if layout.data.text_len != 0 {
-                        let range = cluster.text_range();
+                        let range = full.text_byte_range(grapheme.char_range());
                         if range.start > range.end || range.end > layout.data.text_len {
                             return None;
                         }
@@ -430,41 +434,58 @@ fn visit_source_pairs<B: Brush, E>(
             let mut prefix = slot.origin;
             rtl.clear();
             if run.is_rtl() {
-                for cluster in run.visual_clusters() {
+                run.try_for_each_caret_cluster(true, |run, atom, grapheme| {
                     rtl.push(prefix);
-                    prefix += cluster.advance();
-                }
+                    prefix += run
+                        .line_spacing()
+                        .grapheme_advance(atom, grapheme, run.is_rtl());
+                    ControlFlow::<E>::Continue(())
+                })?;
             }
             let mut previous_end = 0;
             let mut previous_offset = 0.;
             let mut previous_shared = false;
-            for (logical_index, cluster) in run.clusters().enumerate() {
-                let range = cluster.text_range();
+            let full = run.full_slice();
+            let mut logical_index = 0;
+            let flow = run.try_for_each_caret_cluster(false, |run, atom, grapheme| {
+                let range = full.text_byte_range(grapheme.char_range());
                 let offset = if run.is_rtl() {
                     rtl[rtl.len() - logical_index - 1]
                 } else {
                     let offset = prefix;
-                    prefix += cluster.advance();
+                    prefix += run
+                        .line_spacing()
+                        .grapheme_advance(atom, grapheme, run.is_rtl());
                     offset
                 };
+                logical_index += 1;
                 // Empty ranges, including the empty layout's metrics space,
                 // never own a byte in the original random-access byte map.
                 if range.is_empty() || layout.data.text_len == 0 {
                     previous_shared = false;
-                    continue;
+                    return ControlFlow::Continue(());
                 }
                 let current = Entry {
-                    path: cluster.path(),
+                    path: ClusterPath::new(run.line_index, run.index, grapheme.char_range().start),
                     offset,
                 };
                 while let Some(&byte) = offsets.peek().filter(|&&byte| byte < range.end) {
                     if last_request.is_some_and(|previous| byte < previous) {
-                        return visit_direct(layout, offsets, width, visit);
+                        // Break can complete successfully after draining the
+                        // remaining requests through the direct fallback.
+                        return ControlFlow::Break(visit_direct(
+                            layout,
+                            offsets.by_ref(),
+                            width,
+                            visit,
+                        ));
                     }
                     offsets.next();
                     last_request = Some(byte);
                     let pair = if byte == range.start {
-                        if previous_shared && previous_end == byte && !cluster.is_hard_line_break()
+                        if previous_shared
+                            && previous_end == byte
+                            && grapheme.whitespace() != Whitespace::Newline
                         {
                             let bounds = line_cursor_rect(
                                 &line,
@@ -502,13 +523,17 @@ fn visit_source_pairs<B: Brush, E>(
                             None,
                         )
                     };
-                    visit(byte, pair)?;
+                    visit(byte, pair).map_break(ControlFlow::Break)?;
                 }
                 previous_end = range.end;
                 previous_offset = offset;
-                previous_shared = !range.is_empty() && !cluster.is_hard_line_break();
+                previous_shared = !range.is_empty() && grapheme.whitespace() != Whitespace::Newline;
                 previous_owner = Some(current);
                 previous_owner_end = range.end;
+                ControlFlow::Continue(())
+            });
+            if let ControlFlow::Break(completion) = flow {
+                return completion;
             }
         }
     }

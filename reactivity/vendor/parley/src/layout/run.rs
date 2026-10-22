@@ -8,11 +8,11 @@ use crate::layout::layout::Layout;
 use crate::layout::spacing::{EffectiveSpacing, Gaps, Justification};
 use crate::style::Brush;
 
-use core::ops::Range;
+use core::ops::{ControlFlow, Range};
 use fontique::Synthesis;
 use parley_engine::{
-    Atom, Atoms, FontMetrics, Glyph, Graphemes, NormalizedCoord, ShapedClusterGlyphs, ShapedRun,
-    ShapedSlice,
+    Atom, Atoms, FontMetrics, Glyph, Grapheme, Graphemes, NormalizedCoord, ShapedClusterGlyphs,
+    ShapedRun, ShapedSlice,
 };
 
 /// Sequence of clusters with a single font and style.
@@ -204,6 +204,23 @@ impl<'a, B: Brush> Run<'a, B> {
     /// Returns an iterator over the clusters in visual order.
     pub fn visual_clusters(&self) -> impl Iterator<Item = Cluster<'a, B>> + Clone + use<'a, B> {
         Clusters::new(*self, self.is_rtl())
+    }
+
+    // The callback borrows the cursor's current atom and run; it cannot retain
+    // those stack references. Public iteration still yields owned Clusters.
+    pub(crate) fn try_for_each_caret_cluster<E>(
+        &self,
+        rev: bool,
+        mut visit: impl FnMut(&Run<'a, B>, &Atom<'a>, Grapheme) -> ControlFlow<E>,
+    ) -> ControlFlow<E> {
+        let mut clusters = Clusters::new(*self, rev);
+        while let Some(grapheme) = clusters.advance_cursor() {
+            let atom = clusters.atom.as_ref().expect(
+                "The first call to `next` should always be an atom edge, so this should always be set at this point.",
+            );
+            visit(&clusters.run, atom, grapheme)?;
+        }
+        ControlFlow::Continue(())
     }
 
     /// Original source ranges for the visual glyphs of this line-scoped run.
@@ -428,10 +445,8 @@ impl<B: Brush> Clone for Clusters<'_, B> {
     }
 }
 
-impl<'a, B: Brush> Iterator for Clusters<'a, B> {
-    type Item = Cluster<'a, B>;
-
-    fn next(&mut self) -> Option<Self::Item> {
+impl<B: Brush> Clusters<'_, B> {
+    fn advance_cursor(&mut self) -> Option<Grapheme> {
         let grapheme = if self.rev {
             self.graphemes.prev()?
         } else {
@@ -449,6 +464,15 @@ impl<'a, B: Brush> Iterator for Clusters<'a, B> {
                 self.atoms.next()
             };
         }
+        Some(grapheme)
+    }
+}
+
+impl<'a, B: Brush> Iterator for Clusters<'a, B> {
+    type Item = Cluster<'a, B>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let grapheme = self.advance_cursor()?;
         let atom = self.atom.expect(
             "The first call to `next` should always be an atom edge, so this should always be set at this point.",
         );
