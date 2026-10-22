@@ -204,10 +204,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.focused = None;
             return Err(error);
         }
-        if result == Ok(PatchOutcome::Complete) {
+        if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() {
             return Ok(self.commit());
         }
-        if result == Ok(PatchOutcome::Metadata) {
+        if result == Ok(PatchOutcome::Metadata) && !self.inspector_enabled() {
             return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
         }
         self.present()
@@ -223,6 +223,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .handler
             .as_ref()
             .ok_or(Error::NotInteractive)?;
+        if let Some(action) = handler.window_action() {
+            return self.window_action(action);
+        }
         let exact = match catch_unwind(AssertUnwindSafe(|| {
             handler.validate(&self.runtime.model, &self.runtime.sources)
         })) {

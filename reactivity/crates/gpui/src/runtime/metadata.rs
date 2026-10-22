@@ -191,6 +191,7 @@ impl Sheet {
 }
 #[derive(Default)]
 pub(super) struct Metadata {
+    pub inspector: Option<Box<super::inspector::Inspector>>,
     pub base: Vec<Declared>,
     pub overrides: BTreeMap<u64, [Contribution<Option<SharedText>>; 2]>,
     pub presented: Sheet,
@@ -221,7 +222,8 @@ impl Metadata {
                 .is_some_and(|sheet| !sheet.is_empty())
     }
     pub fn unused(&self) -> bool {
-        self.geometry.is_none()
+        self.inspector.is_none()
+            && self.geometry.is_none()
             && self.paint.is_none()
             && self.base.is_empty()
             && self.overrides.is_empty()

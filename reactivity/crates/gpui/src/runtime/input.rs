@@ -100,18 +100,27 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             return Ok(runtime.commit());
         }
         runtime.current_presentation()?;
-        let hit = session
-            .position
-            .and_then(|point| runtime.hit(point))
-            .map(|identity| runtime.sites.target(identity));
+        let picking = runtime.inspector_picking();
+        let hit = session.position.and_then(|point| {
+            if picking {
+                runtime.inspector_pick(point)
+            } else {
+                runtime
+                    .hit(point)
+                    .map(|identity| runtime.sites.target(identity))
+            }
+        });
         if matches!(event, PointerEvent::Press) {
-            if let Some(target) = hit {
+            if let Some(target) = hit.filter(|_| !picking) {
                 runtime.focus(target)?;
             } else {
                 runtime.focused = None;
             }
             session.pressed = hit;
         } else if let Some(target) = pressed.filter(|target| Some(*target) == hit) {
+            if picking {
+                return runtime.inspector_select(target);
+            }
             return runtime.activate(target);
         }
         Ok(runtime.commit())

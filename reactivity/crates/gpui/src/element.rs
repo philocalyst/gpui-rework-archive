@@ -58,6 +58,9 @@ impl NodeKind {
 pub(crate) struct Handler(Box<dyn Route>);
 
 trait Route {
+    fn window_action(&self) -> Option<crate::runtime::inspector::WindowAction> {
+        None
+    }
     fn validate(&self, receiver: &dyn Any, sources: &dyn Any)
     -> Result<Option<FieldId>, BindError>;
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
@@ -67,6 +70,12 @@ trait Route {
 }
 
 impl Handler {
+    pub(crate) fn window_action(&self) -> Option<crate::runtime::inspector::WindowAction> {
+        self.0.window_action()
+    }
+    pub(crate) fn window(action: crate::runtime::inspector::WindowAction) -> Self {
+        Self(Box::new(action))
+    }
     pub(crate) fn validate(
         &self,
         receiver: &dyn Any,
@@ -400,6 +409,11 @@ impl<'a> El<'a> {
             "this element does not accept children"
         );
         children.append(&mut self.children);
+        self
+    }
+
+    pub(crate) fn on_window(mut self, action: crate::runtime::inspector::WindowAction) -> Self {
+        self.on_click = Some(Handler::window(action));
         self
     }
 
@@ -1014,6 +1028,18 @@ tuples!(A SA a,B SB b,C SC c,D SD d,E SE e);
 tuples!(A SA a,B SB b,C SC c,D SD d,E SE e,F SF f);
 tuples!(A SA a,B SB b,C SC c,D SD d,E SE e,F SF f,G SG g);
 tuples!(A SA a,B SB b,C SC c,D SD d,E SE e,F SF f,G SG g,H SH h);
+
+impl Route for crate::runtime::inspector::WindowAction {
+    fn window_action(&self) -> Option<Self> {
+        Some(*self)
+    }
+    fn validate(&self, _: &dyn Any, _: &dyn Any) -> Result<Option<FieldId>, BindError> {
+        Ok(None)
+    }
+    fn invoke(&self, _: &mut dyn Any) -> Result<(), BindError> {
+        unreachable!("window effects dispatch before model routes")
+    }
+}
 
 #[cfg(test)]
 mod tests {
