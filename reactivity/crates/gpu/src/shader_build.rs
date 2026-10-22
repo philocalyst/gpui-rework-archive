@@ -45,23 +45,21 @@ fn structure(module: &Module, ty: naga::Handle<naga::Type>, kinds: &[naga::Scala
 }
 /// Recheck source and independently reparsed output, including dynamic strides,
 /// read-only storage and the complete stage/resource interface.
-fn reflect(module: &Module, info: &naga::valid::ModuleInfo) -> Vec<(u32, u64, &'static str)> {
+fn reflect(
+    module: &Module,
+    info: &naga::valid::ModuleInfo,
+    expected: &[(&str, ShaderStage)],
+) -> Vec<(u32, u64, &'static str)> {
     use naga::{ImageClass, ImageDimension, ScalarKind as K, VectorSize as V};
     assert!(module.overrides.is_empty());
-    assert_eq!(module.entry_points.len(), 2);
+    assert_eq!(module.entry_points.len(), expected.len());
     let mut stages = module
         .entry_points
         .iter()
         .map(|ep| (ep.name.as_str(), ep.stage))
         .collect::<Vec<_>>();
     stages.sort_by_key(|v| v.0);
-    assert_eq!(
-        stages,
-        [
-            ("fragment", ShaderStage::Fragment),
-            ("vertex", ShaderStage::Vertex)
-        ]
-    );
+    assert_eq!(stages, expected);
     let mut result = Vec::new();
     for (handle, global) in module.global_variables.iter() {
         assert_ne!(global.space, AddressSpace::WorkGroup);
@@ -149,15 +147,20 @@ fn reflect(module: &Module, info: &naga::valid::ModuleInfo) -> Vec<(u32, u64, &'
         ));
     }
     result.sort_by_key(|b| b.0);
+    let expected_bindings: &[u32] = if expected == [("vertex", ShaderStage::Vertex)] {
+        &[]
+    } else {
+        &[0, 1, 2, 3, 4, 5]
+    };
     assert_eq!(
         result.iter().map(|b| b.0).collect::<Vec<_>>(),
-        [0, 1, 2, 3, 4, 5]
+        expected_bindings
     );
     result
 }
 /// Walk only the framing/capability/descriptor decorations needed by the ABI
 /// proof; Naga and spirv-val separately parse and validate the complete module.
-fn decorations(words: &[u32], capabilities: &[naga::back::spv::Capability]) {
+fn decorations(words: &[u32], capabilities: &[naga::back::spv::Capability], expected: &[u32]) {
     assert_eq!(&words[..2], &[0x07230203, 0x00010000]);
     let mut descriptors = BTreeMap::<u32, [Option<u32>; 2]>::new();
     let mut at = 5;
@@ -205,7 +208,7 @@ fn decorations(words: &[u32], capabilities: &[naga::back::spv::Capability]) {
         })
         .collect::<Vec<_>>();
     bindings.sort();
-    assert_eq!(bindings, [0, 1, 2, 3, 4, 5]);
+    assert_eq!(bindings, expected);
 }
 fn validate(module: &Module) -> naga::valid::ModuleInfo {
     naga::valid::Validator::new(
@@ -259,7 +262,14 @@ pub fn generate(source: &str, out: &Path) {
             _ => unreachable!(),
         }
     }
-    let bindings = reflect(&module, &info);
+    let bindings = reflect(
+        &module,
+        &info,
+        &[
+            ("fragment", ShaderStage::Fragment),
+            ("vertex", ShaderStage::Vertex),
+        ],
+    );
     let layout_json = format!(
         "[{}]",
         bindings
@@ -271,7 +281,7 @@ pub fn generate(source: &str, out: &Path) {
             .join(",")
     );
     let mut rust = String::from(
-        "// Generated from the exact typed WGSL; immutable private bundle.\npub const REVISION:u32=1;\npub const BINDINGS:[wgpu::BindGroupLayoutEntry;6]=[\n",
+        "// Generated from the exact typed WGSL; immutable private bundle.\npub const REVISION:u32=2;\npub const BINDINGS:[wgpu::BindGroupLayoutEntry;6]=[\n",
     );
     for (binding, size, kind) in &bindings {
         let ty = match *kind {
@@ -308,6 +318,7 @@ pub fn generate(source: &str, out: &Path) {
         })
         .collect();
     let mut artifacts = Vec::new();
+    let mut vertex_words = None;
     for variant in 0..4 {
         let policy = |bit| {
             if variant & bit != 0 {
@@ -338,49 +349,87 @@ pub fn generate(source: &str, out: &Path) {
             mesh_shader_primitive_indices_clamp: true,
             emit_int_div_checks: true,
         };
-        let words = spv::write_vec(&module, &info, &options, None).expect("write guarded SPIR-V");
-        decorations(&words, &caps);
-        let bytes = words
-            .iter()
-            .flat_map(|w| w.to_le_bytes())
-            .collect::<Vec<_>>();
-        let parsed = naga::front::spv::parse_u8_slice(
-            &bytes,
-            &naga::front::spv::Options {
-                adjust_coordinate_space: false,
-                strict_capabilities: true,
-                block_ctx_dump_prefix: None,
-            },
-        )
-        .expect("strict SPIR-V reparse");
-        assert_eq!(reflect(&parsed, &validate(&parsed)), bindings);
-        let path = out.join(format!("ui-{variant}.spv"));
-        std::fs::write(&path, &bytes).expect("write SPIR-V artifact");
-        let valid = Command::new(&tool)
-            .args(["--target-env", "vulkan1.0"])
-            .arg(&path)
-            .output()
-            .expect("run spirv-val");
-        assert!(
-            valid.status.success(),
-            "spirv-val: {}",
-            String::from_utf8_lossy(&valid.stderr)
-        );
-        artifacts.push(format!("{{\"variant\":{variant},\"buffer_restrict\":{},\"image_restrict\":{},\"bytes\":{},\"sha256\":\"{}\"}}",variant&2!=0,variant&1!=0,bytes.len(),hash(&bytes)));
-        writeln!(rust, "static P{variant}:[u32;{}]=[", words.len()).unwrap();
-        for chunk in words.chunks(8) {
-            for word in chunk {
-                write!(rust, "0x{word:08x},").unwrap();
+        for (entry, stage) in [
+            ("vertex", ShaderStage::Vertex),
+            ("fragment", ShaderStage::Fragment),
+        ] {
+            let words = spv::write_vec(
+                &module,
+                &info,
+                &options,
+                Some(&spv::PipelineOptions {
+                    entry_point: entry.into(),
+                    shader_stage: stage,
+                }),
+            )
+            .expect("write guarded single-entry SPIR-V");
+            let expected: &[u32] = if stage == ShaderStage::Vertex {
+                &[]
+            } else {
+                &[0, 1, 2, 3, 4, 5]
+            };
+            decorations(&words, &caps, expected);
+            let bytes = words
+                .iter()
+                .flat_map(|w| w.to_le_bytes())
+                .collect::<Vec<_>>();
+            let parsed = naga::front::spv::parse_u8_slice(
+                &bytes,
+                &naga::front::spv::Options {
+                    adjust_coordinate_space: false,
+                    strict_capabilities: true,
+                    block_ctx_dump_prefix: None,
+                },
+            )
+            .expect("strict single-entry SPIR-V reparse");
+            let reflected = reflect(&parsed, &validate(&parsed), &[(entry, stage)]);
+            assert_eq!(reflected.iter().map(|b| b.0).collect::<Vec<_>>(), expected);
+            if stage == ShaderStage::Fragment {
+                assert_eq!(reflected, bindings);
             }
-            rust.push('\n');
+            let path = out.join(format!("ui-{variant}-{entry}.spv"));
+            std::fs::write(&path, &bytes).expect("write stage artifact");
+            let valid = Command::new(&tool)
+                .args(["--target-env", "vulkan1.0"])
+                .arg(&path)
+                .output()
+                .expect("run spirv-val");
+            assert!(
+                valid.status.success(),
+                "spirv-val: {}",
+                String::from_utf8_lossy(&valid.stderr)
+            );
+            artifacts.push(format!("{{\"variant\":{variant},\"entry\":\"{entry}\",\"buffer_restrict\":{},\"image_restrict\":{},\"bytes\":{},\"sha256\":\"{}\"}}",variant&2!=0,variant&1!=0,bytes.len(),hash(&bytes)));
+            if stage == ShaderStage::Vertex {
+                if let Some(first) = &vertex_words {
+                    assert_eq!(
+                        &words, first,
+                        "dedup requires all four vertex artifacts equal"
+                    );
+                    continue;
+                }
+                vertex_words = Some(words.clone());
+            }
+            let name = if stage == ShaderStage::Vertex {
+                "VERTEX".into()
+            } else {
+                format!("P{variant}")
+            };
+            writeln!(rust, "pub static {name}:[u32;{}]=[", words.len()).unwrap();
+            for chunk in words.chunks(8) {
+                for word in chunk {
+                    write!(rust, "0x{word:08x},").unwrap();
+                }
+                rust.push('\n');
+            }
+            rust.push_str("];\n");
         }
-        rust.push_str("];\n");
     }
     rust.push_str("pub static WORDS:[&[u32];4]=[&P0,&P1,&P2,&P3];\n");
     std::fs::write(out.join("ui-artifacts.rs"), rust)
         .expect("write aligned word arrays and layout");
     let manifest = format!(
-        "{{\n\"revision\":1,\"naga\":\"30.0.1\",\"target_env\":\"vulkan1.0\",\"spirv_version\":\"1.0\",\n\"typed_rust_sha256\":\"{}\",\"wgsl_sha256\":\"{}\",\"layout_sha256\":\"{}\",\n\"spirv_val\":{:?},\"layout\":{},\n\"entry_points\":[\"vertex\",\"fragment\"],\"index\":\"Restrict\",\"binding_array\":\"Unchecked\",\"force_loop_bounding\":true,\"emit_int_div_checks\":true,\"adjust_coordinate_space\":false,\"force_point_size\":true,\"extensions\":[\"SPV_KHR_storage_buffer_storage_class\"],\"workgroup_init\":\"Polyfill\",\"fake_missing_bindings\":false,\"capabilities\":{:?},\n\"artifacts\":[{}]\n}}\n",
+        "{{\n\"revision\":2,\"naga\":\"30.0.1\",\"target_env\":\"vulkan1.0\",\"spirv_version\":\"1.0\",\n\"typed_rust_sha256\":\"{}\",\"wgsl_sha256\":\"{}\",\"layout_sha256\":\"{}\",\n\"spirv_val\":{:?},\"layout\":{},\n\"entry_points\":[\"vertex\",\"fragment\"],\"entry_strategy\":\"separate-single-entry-modules\",\"index\":\"Restrict\",\"binding_array\":\"Unchecked\",\"force_loop_bounding\":true,\"emit_int_div_checks\":true,\"adjust_coordinate_space\":false,\"force_point_size\":true,\"extensions\":[\"SPV_KHR_storage_buffer_storage_class\"],\"workgroup_init\":\"Polyfill\",\"fake_missing_bindings\":false,\"capabilities\":{:?},\n\"artifacts\":[{}]\n}}\n",
         hash(&std::fs::read("src/shader.rs").unwrap()),
         hash(source.as_bytes()),
         hash(layout_json.as_bytes()),

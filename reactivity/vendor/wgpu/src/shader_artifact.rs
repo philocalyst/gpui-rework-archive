@@ -1,15 +1,15 @@
 //! Experimental admission for offline shader artifacts, not a validity certificate.
 use crate::*;
 
-/// Revision-one artifact policy. Obtain it from the exact target Device.
+/// Revision-two artifact policy. Obtain it from the exact target Device.
 /// The artifact must independently prove its interface, guards and validity.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Profile(u8);
 impl Profile {
-    /// Contract revision: SPIR-V 1.0, local indices restricted, loops and integer
+    /// Contract revision: one entry per module, SPIR-V 1.0, local indices restricted, loops and integer
     /// division checked, no coordinate-space adjustment or binding arrays.
     pub const fn revision(self) -> u32 {
-        1
+        2
     }
     /// Variant bits: bit 1 requires buffer guards; bit 0 requires image guards.
     /// A clear bit means the actual device code generator relies on enabled

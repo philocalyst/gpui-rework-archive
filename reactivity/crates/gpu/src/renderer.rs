@@ -422,11 +422,14 @@ impl GpuContext {
         #[cfg(not(feature = "offline-shader"))]
         let artifact = None::<(
             wgpu::ShaderModule,
+            wgpu::ShaderModule,
             wgpu::BindGroupLayout,
             wgpu::PipelineLayout,
         )>;
         let (module, explicit) = match artifact {
-            Some((module, layout, pipeline_layout)) => (module, Some((layout, pipeline_layout))),
+            Some((module, fragment, layout, pipeline_layout)) => {
+                (module, Some((fragment, layout, pipeline_layout)))
+            }
             None => (
                 device.create_shader_module(wgpu::ShaderModuleDescriptor {
                     label: Some("GPUI tile compositor"),
@@ -439,7 +442,7 @@ impl GpuContext {
             label: Some("GPUI tile compositor"),
             layout: explicit
                 .as_ref()
-                .map(|(_, pipeline_layout)| pipeline_layout),
+                .map(|(_, _, pipeline_layout)| pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &module,
                 entry_point: Some("vertex"),
@@ -450,7 +453,10 @@ impl GpuContext {
             depth_stencil: None,
             multisample: Default::default(),
             fragment: Some(wgpu::FragmentState {
-                module: &module,
+                module: explicit
+                    .as_ref()
+                    .map(|(fragment, _, _)| fragment)
+                    .unwrap_or(&module),
                 entry_point: Some("fragment"),
                 compilation_options: Default::default(),
                 targets: &[Some(wgpu::ColorTargetState {
@@ -468,7 +474,7 @@ impl GpuContext {
         // uses explicit layouts. Sharing a BGL across contexts/formats would
         // invalidate the state/context identity certificate.
         let layout = explicit
-            .map(|(layout, _)| layout)
+            .map(|(_, layout, _)| layout)
             .unwrap_or_else(|| pipeline.get_bind_group_layout(0));
         let error = errors.pop().await;
         #[cfg(feature = "offline-shader")]

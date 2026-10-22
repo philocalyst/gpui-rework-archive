@@ -3,7 +3,7 @@ use super::*;
 mod bundle {
     include!(concat!(env!("OUT_DIR"), "/ui-artifacts.rs"));
 }
-const ENTRIES: [wgpu::PassthroughShaderEntryPoint<'static>; 2] = [
+static ENTRIES: [wgpu::PassthroughShaderEntryPoint<'static>; 2] = [
     wgpu::PassthroughShaderEntryPoint {
         name: Cow::Borrowed("vertex"),
         workgroup_size: (0, 0, 0),
@@ -16,6 +16,7 @@ const ENTRIES: [wgpu::PassthroughShaderEntryPoint<'static>; 2] = [
 pub(super) fn create(
     device: &wgpu::Device,
 ) -> Option<(
+    wgpu::ShaderModule,
     wgpu::ShaderModule,
     wgpu::BindGroupLayout,
     wgpu::PipelineLayout,
@@ -45,13 +46,16 @@ pub(super) fn create(
     // emitted because the admitted backend uses a negative-height viewport.
     // No external bytes, caller-selected profile or reusable foreign BGL enter.
     // Runtime shader/pipeline errors remain in the caller's error scopes.
-    let module = unsafe {
+    let module = |words: &'static [u32],
+                  entries: &'static [wgpu::PassthroughShaderEntryPoint<'static>]| unsafe {
         device.create_shader_module_passthrough(wgpu::ShaderModuleDescriptorPassthrough {
             label: Some("GPUI offline compositor"),
-            entry_points: Cow::Borrowed(&ENTRIES),
+            entry_points: Cow::Borrowed(entries),
             spirv: Some(Cow::Borrowed(words)),
             ..Default::default()
         })
     };
-    Some((module, layout, pipeline_layout))
+    let vertex = module(&bundle::VERTEX, &ENTRIES[..1]);
+    let fragment = module(words, &ENTRIES[1..]);
+    Some((vertex, fragment, layout, pipeline_layout))
 }

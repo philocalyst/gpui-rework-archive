@@ -284,16 +284,14 @@ impl MemoryProperties {
 }
 
 impl super::Device {
-    /// Effective guards for revision-one offline SPIR-V artifacts. None keeps
+    /// Effective guards for revision-two offline SPIR-V artifacts. None keeps
     /// the checked compiler path when this device's policy is not represented.
     pub fn shader_artifact_checks(&self) -> Option<[bool; 2]> {
         use naga::{back::spv::WriterFlags, proc::BoundsCheckPolicy as Policy};
         let options = &self.naga_options;
-        if self
-            .shared
-            .workarounds
-            .contains(super::Workarounds::SEPARATE_ENTRY_POINTS)
-            || options.bounds_check_policies.index != Policy::Restrict
+        // Every artifact module has exactly one entry, preserving the effective
+        // SEPARATE_ENTRY_POINTS workaround without changing device policy.
+        if options.bounds_check_policies.index != Policy::Restrict
             || options.bounds_check_policies.binding_array != Policy::Unchecked
             || !options.force_loop_bounding
             || !options.emit_int_div_checks
