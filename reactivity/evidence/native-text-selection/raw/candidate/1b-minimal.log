@@ -1,0 +1,7 @@
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-accessibility-selection/reactivity/crates/core)
+    Checking winit v0.30.13 (/root/gpui-accessibility-selection/reactivity/vendor/winit)
+    Checking gpui_canvas v0.1.0 (/root/gpui-accessibility-selection/reactivity/crates/canvas)
+    Checking gpui_gpu v0.1.0 (/root/gpui-accessibility-selection/reactivity/crates/gpu)
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-accessibility-selection/reactivity/crates/host)
+    Checking gpui v0.1.0 (/root/gpui-accessibility-selection/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 16.35s
