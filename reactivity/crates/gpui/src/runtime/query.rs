@@ -51,7 +51,7 @@ impl<'a> Context<'a> {
     }
     fn part(&self, index: usize) -> Part<'_> {
         Part {
-            index: index as u32,
+            index,
             context: self,
         }
     }
@@ -131,12 +131,12 @@ impl SemanticSheet<'_> {
 /// println!("{saved:?}");
 /// ```
 pub struct Part<'a> {
-    index: u32,
+    index: usize,
     context: &'a Context<'a>,
 }
 impl<'a> Part<'a> {
     fn node(self) -> &'a Presented {
-        &self.context.nodes[self.index as usize]
+        &self.context.nodes[self.index]
     }
 
     #[cfg(feature = "accessibility")]
@@ -151,7 +151,7 @@ impl<'a> Part<'a> {
     pub(crate) fn text_geometry_lease(
         self,
     ) -> Option<&'a std::sync::Arc<gpui_canvas::TextGeometry>> {
-        Some(&self.context.text?.entry(self.index as usize)?.map)
+        Some(&self.context.text?.entry(self.index)?.map)
     }
     #[cfg(feature = "accessibility")]
     pub(crate) fn native_parent_index(self) -> Option<usize> {
@@ -159,6 +159,7 @@ impl<'a> Part<'a> {
     }
     /// Stable window-qualified identity, also used by input and inspector APIs.
     /// Merely reading a target does not grant it a particular action.
+    #[inline]
     pub fn target(self) -> Target {
         self.context.sites.target(self.node().identity)
     }
@@ -193,14 +194,14 @@ impl<'a> Part<'a> {
             self.context
                 .metadata
                 .is_some_and(|metadata| !metadata.viewports.is_empty()),
-            self.index as usize,
+            self.index,
             point,
         )
     }
     /// Exact text geometry and origin from this acknowledged presentation.
     /// Available while native accessibility is inactive and across failed L/C.
     pub fn text_geometry(self) -> Option<super::text_geometry::TextGeometry<'a>> {
-        let entry = self.context.text?.entry(self.index as usize)?;
+        let entry = self.context.text?.entry(self.index)?;
         Some(super::text_geometry::TextGeometry {
             part: self,
             map: &entry.map,
@@ -218,7 +219,7 @@ impl<'a> Part<'a> {
             return viewport;
         }
         let mut clip = viewport;
-        let mut index = Some(self.index as usize);
+        let mut index = Some(self.index);
         while let Some(row) = index {
             let node = &self.context.nodes[row];
             if matches!(
@@ -568,7 +569,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         sheet(runtime)?;
         let context = Context::new(runtime);
-        for index in 0..runtime.presented.len() {
+        for index in 0..context.nodes.len() {
             visitor(context.part(index));
         }
         Ok(())

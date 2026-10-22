@@ -1,0 +1,10 @@
+{
+  "integration_base": "cc0f7aa526",
+  "producer_source": "6654378606c052bb39c9338e85441e98b5b86835",
+  "producer_evidence": "aa204f6768",
+  "source_file": "reactivity/crates/gpui/src/runtime/query.rs",
+  "source_sha256": "9a79d2abdb2d0e1ad590c8a7c6d6b34f47e6edcb1f000c3579519f81ff04618d",
+  "exact_source_match": true,
+  "verified_evidence_files": 35,
+  "qualification": "Producer default-feature tests, strict Clippy and matched release assembly; current main combined gates remain separate."
+}
