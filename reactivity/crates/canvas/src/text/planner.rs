@@ -379,6 +379,11 @@ impl<'font> Planner<'font> {
                 });
             }
         }
+        // The immutable map cannot append stops after publication. Charge the
+        // trim separately from stop-field compression and query changes.
+        if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
+            stops.shrink_to_fit();
+        }
         Ok(TextLayout {
             width,
             height,
