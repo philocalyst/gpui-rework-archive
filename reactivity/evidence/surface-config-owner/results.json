@@ -1,0 +1,71 @@
+[
+  {
+    "case": "baseline-header",
+    "command": [
+      "/tmp/gpui-compact-static-main-gates/gpui-frozen",
+      "--exact",
+      "native::tests::packet_gpu_header_ledger",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "63362ec4c4437b186f9c131416accb62b2ce6dde241b554528e07f542f2b3feb"
+  },
+  {
+    "case": "candidate-header",
+    "command": [
+      "/tmp/gpui-surface-config-gates/gpui-frozen",
+      "--exact",
+      "native::tests::packet_gpu_header_ledger",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "bf75726c131f85619862355b7360d57e6bb0e20372c4bff4af38218ee636b3e6"
+  },
+  {
+    "case": "todo",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-surface-config-gates/gpui-frozen",
+      "--exact",
+      "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "79a0dcfe9670dbc6be422278dd38f51f88da93b9cdccc068da0ae63a0bf3c7cb"
+  },
+  {
+    "case": "early-reject-close",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-surface-config-gates/gpui-frozen",
+      "--exact",
+      "native::upgrade_tests::automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_window",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "c89939864a5d67a2178f271e0d60237313458fc90898a50f2f4a6a03f9bb401e"
+  },
+  {
+    "case": "blank-handoff",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-surface-config-gates/gpui-frozen",
+      "--exact",
+      "native::upgrade_tests::automatic_blank_stays_cold_across_resize_resume_then_upgrades_after_complex_cpu_frame",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "fc04edfdf8e4378ccb76c0d955da252ab6a3cd9da2eba08cf47b7d4bfc87ab62"
+  }
+]
