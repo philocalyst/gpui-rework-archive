@@ -181,3 +181,28 @@ fn pool_memory_measurement() {
     drop(pool);
     println!("immediate_after_drop={}", status());
 }
+
+#[test]
+fn tallest_admitted_canvas_keeps_sample_storage_on_leaf_worker_stacks() {
+    let pool = RenderPool::new(2).unwrap().with_min_work(0);
+    let mut serial = Canvas::recording(1, 16384, ColorConfig::default()).unwrap();
+    let mut parallel = Canvas::recording(1, 16384, ColorConfig::default()).unwrap();
+    for canvas in [&mut serial, &mut parallel] {
+        canvas.clear(Color::WHITE);
+        canvas
+            .fill_rect(
+                Rect::new(0.0, 0.0, 1.0, 16384.0),
+                Affine::IDENTITY,
+                Rect::new(0.0, 0.0, 1.0, 16384.0),
+                Color::rgba(30, 80, 120, 128),
+            )
+            .unwrap();
+    }
+    assert_eq!(parallel.pixels_with(&pool), serial.pixels());
+    assert_eq!(parallel.stats().output_bands, 1024);
+    assert_eq!(
+        parallel.stats().tile_references,
+        serial.stats().tile_references
+    );
+    assert_eq!(parallel.stats().sample_tests, serial.stats().sample_tests);
+}

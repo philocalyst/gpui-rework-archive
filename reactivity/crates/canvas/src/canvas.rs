@@ -6,7 +6,7 @@ use crate::{
 use std::{collections::HashMap, sync::Arc};
 
 mod bins;
-use bins::{Membership, RasterScratch};
+use bins::RasterScratch;
 mod glyph_axis;
 mod image_axis;
 mod paint;
@@ -1497,28 +1497,39 @@ impl Canvas {
             bins_reused,
             ..RenderStats::default()
         };
-        let (raster, cuts) = raster.rows(tile_bounds);
+        let (raster_bounds, offsets, members) = raster.rows(tile_bounds);
         let frame = Frame {
             width: self.width,
             height: self.height,
             clear: self.clear,
             commands: &self.commands,
-            raster,
+            raster_bounds,
             tile_proofs: self.tile_proofs,
             tile_bounds,
         };
         let rendered = if let Some(words) = external {
-            schedule.render(frame, BgrxEncoder(self.color_config.encoder()), words, cuts)
+            schedule.render(
+                frame,
+                BgrxEncoder(self.color_config.encoder()),
+                words,
+                offsets,
+                members,
+            )
         } else {
             match self.color_config.format {
-                crate::PixelFormat::Rgba8Premultiplied => {
-                    schedule.render(frame, self.color_config.encoder(), &mut self.pixels, cuts)
-                }
+                crate::PixelFormat::Rgba8Premultiplied => schedule.render(
+                    frame,
+                    self.color_config.encoder(),
+                    &mut self.pixels,
+                    offsets,
+                    members,
+                ),
                 crate::PixelFormat::Rgba16Float => schedule.render(
                     frame,
                     self.color_config.half_encoder(),
                     &mut self.pixels,
-                    cuts,
+                    offsets,
+                    members,
                 ),
             }
         };
@@ -1549,7 +1560,7 @@ struct Frame<'a> {
     height: usize,
     clear: [f32; 4],
     commands: &'a DisplayList,
-    raster: &'a Membership,
+    raster_bounds: [u16; 4],
     tile_proofs: bool,
     tile_bounds: [usize; 4],
 }
@@ -1587,7 +1598,8 @@ trait RenderSchedule {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
-        cuts: &mut [u32],
+        offsets: &[u32],
+        members: &mut [u32],
     ) -> RenderStats;
 }
 struct Serial;
@@ -1597,16 +1609,10 @@ impl RenderSchedule for Serial {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
-        cuts: &mut [u32],
+        offsets: &[u32],
+        members: &mut [u32],
     ) -> RenderStats {
-        pixels
-            .chunks_mut(TILE * frame.width * W::ELEMENTS)
-            .enumerate()
-            .skip(frame.tile_bounds[1])
-            .take(frame.tile_bounds[3] - frame.tile_bounds[1])
-            .zip(cuts.chunks_mut(frame.raster.columns()))
-            .map(|((index, band), cuts)| render_band(frame, writer, index, band, cuts))
-            .fold(RenderStats::default(), combine_stats)
+        render_region(frame, writer, pixels, offsets, members, false)
     }
 }
 fn combine_stats(mut left: RenderStats, right: RenderStats) -> RenderStats {
@@ -1676,9 +1682,9 @@ impl RenderSchedule for RenderPool {
         frame: Frame<'_>,
         writer: W,
         pixels: &mut [W::Element],
-        cuts: &mut [u32],
+        offsets: &[u32],
+        members: &mut [u32],
     ) -> RenderStats {
-        use rayon::prelude::*;
         // Estimate distinguishes a proven uniform viewport fill from sampled
         // edges/text. It chooses scheduling only and cannot affect the pixels.
         let pixel_bounds = [
@@ -1704,30 +1710,103 @@ impl RenderSchedule for RenderPool {
             },
         );
         if work < self.min_work || frame.height <= TILE {
-            return Serial.render(frame, writer, pixels, cuts);
+            return Serial.render(frame, writer, pixels, offsets, members);
         }
-        let mut stats = self.pool.install(|| {
-            pixels
-                .par_chunks_mut(TILE * frame.width * W::ELEMENTS)
-                .enumerate()
-                .skip(frame.tile_bounds[1])
-                .take(frame.tile_bounds[3] - frame.tile_bounds[1])
-                .zip(cuts.par_chunks_mut(frame.raster.columns()))
-                .map(|((index, band), cuts)| render_band(frame, writer, index, band, cuts))
-                .reduce(RenderStats::default, combine_stats)
-        });
+        let mut stats = self
+            .pool
+            .install(|| render_region(frame, writer, pixels, offsets, members, true));
         stats.parallel = true;
         stats
     }
 }
 
+/// Every reference span is contiguous across physical rows, including empty
+/// tiles. Splitting at an offset boundary grants each worker exclusive access
+/// to its cache words and matching output bands, without a temporary collection.
+fn render_region<W: PixelWriter>(
+    frame: Frame<'_>,
+    writer: W,
+    pixels: &mut [W::Element],
+    offsets: &[u32],
+    members: &mut [u32],
+    parallel: bool,
+) -> RenderStats {
+    let stride = frame.width * W::ELEMENTS;
+    let first = frame.tile_bounds[1] * TILE * stride;
+    let end = (frame.tile_bounds[3] * TILE).min(frame.height) * stride;
+    render_rows(
+        frame,
+        writer,
+        &mut pixels[first..end],
+        offsets,
+        members,
+        parallel,
+    )
+}
+fn render_rows<W: PixelWriter>(
+    frame: Frame<'_>,
+    writer: W,
+    pixels: &mut [W::Element],
+    offsets: &[u32],
+    members: &mut [u32],
+    parallel: bool,
+) -> RenderStats {
+    let rows = frame.tile_bounds[3] - frame.tile_bounds[1];
+    if rows == 1 {
+        return render_band(frame, writer, pixels, offsets, members);
+    }
+    let middle = frame.tile_bounds[1] + rows / 2;
+    let columns = usize::from(frame.raster_bounds[2] - frame.raster_bounds[0]);
+    let boundary = (rows / 2) * columns;
+    let (left_members, right_members) =
+        members.split_at_mut((offsets[boundary] - offsets[0]) as usize);
+    let (left_pixels, right_pixels) =
+        pixels.split_at_mut((rows / 2) * TILE * frame.width * W::ELEMENTS);
+    let mut left = frame;
+    left.tile_bounds[3] = middle;
+    let mut right = frame;
+    right.tile_bounds[1] = middle;
+    let mut render_left = move || {
+        render_rows(
+            left,
+            writer,
+            left_pixels,
+            &offsets[..=boundary],
+            left_members,
+            parallel,
+        )
+    };
+    let mut render_right = move || {
+        render_rows(
+            right,
+            writer,
+            right_pixels,
+            &offsets[boundary..],
+            right_members,
+            parallel,
+        )
+    };
+    #[cfg(feature = "parallel")]
+    let (left, right) = if parallel {
+        rayon::join(render_left, render_right)
+    } else {
+        (render_left(), render_right())
+    };
+    #[cfg(not(feature = "parallel"))]
+    let (left, right) = (render_left(), render_right());
+    combine_stats(left, right)
+}
+
+// Keep the large sample tile only on leaf stacks, never on recursive frames.
+#[inline(never)]
 fn render_band<W: PixelWriter>(
     frame: Frame<'_>,
     writer: W,
-    band_index: usize,
     pixels: &mut [W::Element],
-    cuts: &mut [u32],
+    offsets: &[u32],
+    members: &mut [u32],
 ) -> RenderStats {
+    let band_index = frame.tile_bounds[1];
     let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
     let mut samples = Samples::new();
@@ -1739,34 +1818,44 @@ fn render_band<W: PixelWriter>(
     // so HDR positive/negative zeros remain distinct; this is not quantization.
     let mut encoded_color = frame.clear.map(f32::to_bits);
     let mut encoded_bytes = clear;
-    let first = frame.tile_bounds[0] - frame.raster.left();
-    for (column, cut) in cuts[first..first + columns].iter_mut().enumerate() {
-        let ordered = frame.raster.tile(frame.tile_bounds[0] + column, band_index);
+    let first = frame.tile_bounds[0] - usize::from(frame.raster_bounds[0]);
+    let base = offsets[0];
+    for column in 0..columns {
+        let tile = first + column;
+        let ordered =
+            &mut members[(offsets[tile] - base) as usize..(offsets[tile + 1] - base) as usize];
         stats.tile_references += ordered.len();
         let left = (frame.tile_bounds[0] + column) * TILE;
         let top = band_index * TILE;
         let right = (left + TILE).min(frame.width);
         let bottom = (top + TILE).min(frame.height);
         let start = if frame.tile_proofs {
-            if *cut == u32::MAX {
-                *cut = ordered
+            if let Some(cut) = bins::cached_cut(ordered) {
+                cut
+            } else {
+                let cut = ordered
                     .iter()
-                    .rposition(|index| {
-                        let command = frame.commands.get(frame.commands.order[*index as usize]);
+                    .rposition(|&word| {
+                        let command = frame
+                            .commands
+                            .get(frame.commands.order[bins::ordinal(word)]);
                         command.color[3] == 1.0
                             && matches!(command.source, BorrowedSource::Rect)
                             && full_tile(&command, left, top, right, bottom)
                     })
-                    .unwrap_or(0) as u32;
+                    .unwrap_or(0);
+                bins::cache_cut(ordered, cut);
+                cut
             }
-            *cut as usize
         } else {
             0
         };
         stats.skipped_command_tiles += start;
         let mut uniform = Some(frame.clear);
         for &index in &ordered[start..] {
-            let command = frame.commands.get(frame.commands.order[index as usize]);
+            let command = frame
+                .commands
+                .get(frame.commands.order[bins::ordinal(index)]);
             let full = frame.tile_proofs
                 && matches!(command.source, BorrowedSource::Rect)
                 && full_tile(&command, left, top, right, bottom);
