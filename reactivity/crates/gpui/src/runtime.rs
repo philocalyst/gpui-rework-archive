@@ -400,6 +400,12 @@ mod parent_tests {
             size_of::<TextSite>(),
             size_of::<Option<TextSite>>()
         );
+        println!(
+            "GEOMETRY_RUNTIME system={} option_system={} prepared={}",
+            size_of::<TextSystem>(),
+            size_of::<Option<TextSystem>>(),
+            size_of::<Prepared>()
+        );
     }
 
     #[test]

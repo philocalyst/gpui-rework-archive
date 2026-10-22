@@ -20,6 +20,8 @@ use swash::{
 mod layout;
 mod paragraph;
 mod planner;
+#[cfg(test)]
+mod geometry_ledger;
 use layout::Details;
 pub use layout::{
     CaretAffinity, GlyphRun, TextDirection, TextLine, TextOffset, TextPosition, TextSelection,
