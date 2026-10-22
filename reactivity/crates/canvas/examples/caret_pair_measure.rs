@@ -6,7 +6,7 @@ fn source(case: &str) -> String {
     match case {
         "tiny" => "Count".into(),
         "label" => "Counter value: 123".into(),
-        "latin" => "office abcdef 123 xyz ".repeat(1_500),
+        "latin" => "office abcdef 123 xyz ".repeat(1_400),
         "rtl" => "אבגדה 123 العربية ".repeat(900),
         "mixed" => "abc אבג 123 xyz a\u{301}b\u{200d}c ".repeat(900),
         "paragraphs" => "a\u{2028}bc\r\ndef\n".repeat(900),
@@ -57,6 +57,10 @@ fn main() {
     let rounds: usize = rounds.parse().unwrap();
     assert!(rounds > 0);
     let source = source(case);
+    assert!(
+        source.len() <= 32 * 1024,
+        "fixture exceeds the text admission limit"
+    );
     let face = FontFace::bundled().unwrap();
     // Prime global font discovery/leases equally. Cold means a fresh scoped
     // Planner, not a cold process, cold file cache or first native window.
