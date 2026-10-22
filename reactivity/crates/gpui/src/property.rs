@@ -716,6 +716,9 @@ mod tests {
             "property_declaration_bytes={}",
             std::mem::size_of::<Declaration<f32, Style>>()
         );
+        eprintln!("catalog_baseline,info={},value={},contribution={},declaration={},catalog_reference_bytes={}",
+            size_of::<PropertyInfo>(), size_of::<PropertyValue>(), size_of::<Contribution<PropertyValue>>(),
+            size_of::<Declaration<f32, Style>>(), size_of_val(PROPERTIES));
         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
         assert_eq!(PROPERTIES.len(), 13);
         for (index, info) in PROPERTIES.iter().enumerate() {
