@@ -13,6 +13,9 @@ mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
 pub use rounded::rounded_rect_contains;
+// Initialization reads are confined to this tile; the existing mixed mask
+// certifies which complete sample rows have been written.
+#[allow(unsafe_code)]
 mod samples;
 use glyph_axis::GlyphAxis;
 use samples::Samples;

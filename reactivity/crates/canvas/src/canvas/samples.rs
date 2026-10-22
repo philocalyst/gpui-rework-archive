@@ -2,19 +2,22 @@
 //! promotes a pixel to sixteen independently composited colors. No averaging
 //! occurs before all commands have painted, preserving overlap correlation.
 use super::{TILE, blend, sample_mean};
+use std::mem::MaybeUninit;
 
 const PIXELS: usize = TILE * TILE;
 
 pub(super) struct Samples {
     uniform: [[f32; 4]; PIXELS],
-    samples: [[f32; 4]; PIXELS * 16],
+    // A set mixed bit certifies that all sixteen colors of that pixel are
+    // initialized. Collapsing resets the certificate before reusing the row.
+    samples: [MaybeUninit<[[f32; 4]; 16]>; PIXELS],
     mixed: [u64; PIXELS / 64],
 }
 impl Samples {
     pub(super) fn new() -> Self {
         Self {
             uniform: [[0.0; 4]; PIXELS],
-            samples: [[0.0; 4]; PIXELS * 16],
+            samples: [MaybeUninit::uninit(); PIXELS],
             mixed: [0; PIXELS / 64],
         }
     }
@@ -24,7 +27,7 @@ impl Samples {
             self.uniform.fill(color);
             self.mixed.fill(0);
         } else {
-            self.samples.fill(color);
+            self.samples.fill(MaybeUninit::new([color; 16]));
             self.mixed.fill(u64::MAX);
         }
     }
@@ -40,13 +43,8 @@ impl Samples {
                 }
                 return;
             }
-            self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
-            self.mixed[pixel / 64] |= bit;
         }
-        for (sample, coverage) in self.samples[pixel * 16..pixel * 16 + 16]
-            .iter_mut()
-            .zip(coverage)
-        {
+        for (sample, coverage) in self.pixel_samples(pixel).iter_mut().zip(coverage) {
             if coverage > 0.0 {
                 blend(sample, color, coverage);
             }
@@ -66,17 +64,25 @@ impl Samples {
                 }
                 return;
             }
-            self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
-            self.mixed[pixel / 64] |= bit;
         }
-        for (sample, source) in self.samples[pixel * 16..pixel * 16 + 16]
-            .iter_mut()
-            .zip(sources)
-        {
+        for (sample, source) in self.pixel_samples(pixel).iter_mut().zip(sources) {
             if let Some(source) = source {
                 blend(sample, source, 1.0);
             }
         }
+    }
+
+    #[inline]
+    fn pixel_samples(&mut self, pixel: usize) -> &mut [[f32; 4]; 16] {
+        let bit = 1 << (pixel % 64);
+        if self.mixed[pixel / 64] & bit == 0 {
+            self.samples[pixel].write([self.uniform[pixel]; 16]);
+            self.mixed[pixel / 64] |= bit;
+        }
+        // SAFETY: a set bit certifies a completely initialized row. This
+        // method writes all sixteen colors before publishing a missing bit;
+        // noncollapsed reset also writes every row before setting its bits.
+        unsafe { self.samples[pixel].assume_init_mut() }
     }
 
     #[inline]
@@ -86,11 +92,8 @@ impl Samples {
             // the signed-zero rule of the reference's first-sample seed.
             self.uniform[pixel]
         } else {
-            sample_mean(
-                self.samples[pixel * 16..pixel * 16 + 16]
-                    .try_into()
-                    .unwrap(),
-            )
+            // SAFETY: this branch observes the initialized-row certificate.
+            sample_mean(unsafe { self.samples[pixel].assume_init_ref() })
         }
     }
 }
@@ -151,6 +154,54 @@ mod tests {
                 assert_eq!(
                     tile.color(20).map(f32::to_bits),
                     sample_mean(&[clear; 16]).map(f32::to_bits)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn fresh_rows_and_repeated_collapse_promote_every_pixel_exactly() {
+        let mut tile = Samples::new();
+        let mut reference = [[[0.0; 4]; 16]; PIXELS];
+        for pixel in 0..PIXELS {
+            assert_eq!(tile.color(pixel), [0.0; 4]);
+        }
+        for cycle in 0..8 {
+            let clear = [0.5, -0.0, 7.0, 0.75];
+            if cycle != 0 {
+                tile.reset(clear, cycle % 2 == 0);
+                reference.fill([clear; 16]);
+            }
+            // Odd multiplication permutes all pixels, crossing each mask word
+            // boundary and touching both ends of the sample-storage array.
+            for ordinal in 0..PIXELS {
+                let pixel = (ordinal * 193) % PIXELS;
+                let color = [-0.0, 0.125, 1.5, 0.5];
+                let sources = std::array::from_fn(|sample| {
+                    (!(sample + pixel + cycle).is_multiple_of(3)).then_some(color)
+                });
+                tile.blend_sources(pixel, sources);
+                for (destination, source) in reference[pixel].iter_mut().zip(sources) {
+                    if let Some(source) = source {
+                        blend(destination, source, 1.0);
+                    }
+                }
+                let coverage = std::array::from_fn(|sample| ((sample + pixel) % 5) as f32 * 0.25);
+                tile.blend(pixel, color, coverage);
+                for (destination, coverage) in reference[pixel].iter_mut().zip(coverage) {
+                    if coverage > 0.0 {
+                        blend(destination, color, coverage);
+                    }
+                }
+                assert_eq!(
+                    tile.color(pixel).map(f32::to_bits),
+                    sample_mean(&reference[pixel]).map(f32::to_bits)
+                );
+            }
+            for (pixel, expected) in reference.iter().enumerate() {
+                assert_eq!(
+                    tile.color(pixel).map(f32::to_bits),
+                    sample_mean(expected).map(f32::to_bits)
                 );
             }
         }
