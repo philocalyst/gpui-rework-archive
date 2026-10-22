@@ -71,49 +71,66 @@ fn borrowed_spacing_and_completion_match_ordinary_cursors() {
                 for alignment in [Alignment::Start, Alignment::Justify] {
                     layout.align(alignment, AlignmentOptions::default());
                     for width in [-0., 1., -1., 1e20] {
-                        let requests = (0..=source.len())
+                        let ordered = (0..=source.len())
                             .chain([source.len(), 0, source.len(), usize::MAX, 0])
                             .collect::<Vec<_>>();
-                        let mut received = Vec::new();
-                        assert_eq!(
-                            CursorGeometry::try_for_each_pair(
-                                &layout,
-                                requests.iter().copied(),
-                                width,
-                                |byte, pair| {
-                                    let upstream =
-                                        Cursor::from_byte_index(&layout, byte, Affinity::Upstream);
-                                    let expected = (upstream.index() == byte).then(|| {
-                                        [
-                                            upstream.geometry(&layout, width),
-                                            Cursor::from_byte_index(
-                                                &layout,
-                                                byte,
-                                                Affinity::Downstream,
-                                            )
-                                            .geometry(&layout, width),
-                                        ]
-                                    });
-                                    assert_eq!(
-                                        pair.map(|p| p.map(bits)),
-                                        expected.map(|p| p.map(bits))
-                                    );
-                                    received.push(byte);
-                                    ControlFlow::<()>::Continue(())
-                                }
-                            ),
-                            Some(ControlFlow::Continue(())),
-                        );
-                        assert_eq!(received, requests);
-                        let mut called = 0;
-                        assert_eq!(
-                            CursorGeometry::try_for_each_pair(&layout, requests, width, |_, _| {
-                                called += 1;
-                                ControlFlow::Break("stop")
-                            }),
-                            Some(ControlFlow::Break("stop")),
-                        );
-                        assert_eq!(called, 1);
+                        let decreasing = vec![source.len() / 2, 0, source.len(), usize::MAX, 0];
+                        for requests in [ordered, decreasing] {
+                            let mut received = Vec::new();
+                            assert_eq!(
+                                CursorGeometry::try_for_each_pair(
+                                    &layout,
+                                    requests.iter().copied(),
+                                    width,
+                                    |byte, pair| {
+                                        let upstream = Cursor::from_byte_index(
+                                            &layout,
+                                            byte,
+                                            Affinity::Upstream,
+                                        );
+                                        let expected = (upstream.index() == byte).then(|| {
+                                            [
+                                                upstream.geometry(&layout, width),
+                                                Cursor::from_byte_index(
+                                                    &layout,
+                                                    byte,
+                                                    Affinity::Downstream,
+                                                )
+                                                .geometry(&layout, width),
+                                            ]
+                                        });
+                                        assert_eq!(
+                                            pair.map(|p| p.map(bits)),
+                                            expected.map(|p| p.map(bits))
+                                        );
+                                        received.push(byte);
+                                        ControlFlow::<()>::Continue(())
+                                    }
+                                ),
+                                Some(ControlFlow::Continue(())),
+                            );
+                            assert_eq!(received, requests);
+                            for stop in [1, 2, requests.len()] {
+                                let mut called = 0;
+                                assert_eq!(
+                                    CursorGeometry::try_for_each_pair(
+                                        &layout,
+                                        requests.iter().copied(),
+                                        width,
+                                        |_, _| {
+                                            called += 1;
+                                            if called == stop {
+                                                ControlFlow::Break("stop")
+                                            } else {
+                                                ControlFlow::Continue(())
+                                            }
+                                        }
+                                    ),
+                                    Some(ControlFlow::Break("stop")),
+                                );
+                                assert_eq!(called, stop);
+                            }
+                        }
                     }
                 }
             }
