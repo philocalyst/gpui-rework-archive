@@ -17,6 +17,8 @@ use zbus::{
     zvariant::OwnedObjectPath,
 };
 
+mod lifecycle;
+
 const TITLE: &str = "GPUI native AT-SPI Todo proof";
 const CONTENT: &str = "Read Ω א ع through AT-SPI";
 const HEADING: &str = "Task collection";
@@ -72,17 +74,24 @@ enum Evidence {
     Edited,
     Invoked,
     Reactivated,
+    Destroyed,
 }
 fn client(
     deadline: Instant,
     evidence: mpsc::SyncSender<Result<Evidence, String>>,
     gate: mpsc::Receiver<()>,
     wake: Wake,
+    lifecycle: bool,
 ) {
     let run = || -> Result<(), Box<dyn std::error::Error>> {
         let session = zbus::blocking::connection::Builder::session()?
             .method_timeout(Duration::from_secs(3))
             .build()?;
+        let mut fixture = if lifecycle {
+            Some(lifecycle::Fixture::start(&session)?)
+        } else {
+            None
+        };
         let status = Proxy::new(&session, "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Status")?;
         status.set_property("IsEnabled", true)?;
         assert!(status.get_property::<bool>("IsEnabled")?);
@@ -164,7 +173,47 @@ fn client(
         });
         status.set_property("IsEnabled", true)?;
         wait_for(deadline, || named(&bus, roots()?, CONTENT));
+        if let Some(fixture) = fixture.as_mut() {
+            let before = wait_for(deadline, || named(&bus, roots()?, TITLE));
+            fixture.replace()?;
+            let after = wait_for(deadline, || {
+                let window = named(&bus, roots()?, TITLE)?;
+                (window.0 != before.0).then_some(window)
+            });
+            wait_for(deadline, || named(&bus, vec![after.clone()], CONTENT));
+            fixture.stale_old_properties(&session)?;
+            // Keep querying the new actual provider while old-owner signals are
+            // processed; a transient stale-owner retirement loses this address.
+            for _ in 0..20 {
+                assert_eq!(
+                    proxy(&bus, &after, "org.a11y.atspi.Accessible")?
+                        .get_property::<String>("Name")?,
+                    TITLE
+                );
+                thread::sleep(Duration::from_millis(5));
+            }
+            assert!(named(&bus, vec![after.clone()], CONTENT).is_some());
+            eprintln!(
+                "GPUI_NATIVE_LIFECYCLE full tree restored; stale old-owner properties ignored"
+            );
+        }
         notify(Evidence::Reactivated);
+        if lifecycle {
+            gate.recv_timeout(deadline.saturating_duration_since(Instant::now()))?;
+            wait_for(deadline, || {
+                let mut found = false;
+                for root in roots()? {
+                    let children: Vec<Address> = proxy(&bus, &root, "org.a11y.atspi.Accessible")
+                        .ok()?
+                        .call("GetChildren", &())
+                        .ok()?;
+                    found |= !children.is_empty();
+                }
+                (!found).then_some(())
+            });
+            eprintln!("GPUI_NATIVE_LIFECYCLE NativeAdapter destroy removed provider window");
+            notify(Evidence::Destroyed);
+        }
         Ok(())
     };
     if let Err(error) = run() {
@@ -185,6 +234,7 @@ struct Script {
     after_invoke_frames: u64,
     before_threads: usize,
     complete: bool,
+    lifecycle: bool,
 }
 impl Script {
     fn step(&mut self, event_loop: &ActiveEventLoop) {
@@ -215,7 +265,10 @@ impl Script {
             let gate = self.gate_receiver.take().unwrap();
             let wake = self.host.wake.clone().unwrap();
             let deadline = self.deadline;
-            self.client = Some(thread::spawn(move || client(deadline, sender, gate, wake)));
+            let lifecycle = self.lifecycle;
+            self.client = Some(thread::spawn(move || {
+                client(deadline, sender, gate, wake, lifecycle)
+            }));
         }
         for event in self.receiver.try_iter() {
             let evidence = event.expect("actual AT-SPI client failed");
@@ -277,6 +330,16 @@ impl Script {
                     assert_eq!(owner.counters().source_operations, 3);
                     assert_eq!(self.host.presented_frames, self.after_invoke_frames);
                     assert!(owner.contains_text(CONTENT).unwrap());
+                    if self.lifecycle {
+                        self.host.accessibility.take();
+                        self.gate.send(()).unwrap();
+                    } else {
+                        self.complete = true;
+                        event_loop.exit();
+                    }
+                }
+                Evidence::Destroyed => {
+                    assert!(self.host.accessibility.is_none());
                     self.complete = true;
                     event_loop.exit();
                 }
@@ -302,6 +365,16 @@ impl Host for Script {
 #[test]
 #[ignore = "requires X11 and an isolated session bus with org.a11y.Bus/AT-SPI registry"]
 fn native_atspi_todo_activation_edit_invoke_and_reactivation() {
+    run_native_script(false);
+}
+
+#[test]
+#[ignore = "requires X11 and an isolated session bus initially lacking org.a11y.Bus"]
+fn native_atspi_late_service_owner_replacement_and_destroy() {
+    run_native_script(true);
+}
+
+fn run_native_script(lifecycle: bool) {
     let event_loop = EventLoop::builder()
         .with_x11()
         .with_any_thread(true)
@@ -326,6 +399,7 @@ fn native_atspi_todo_activation_edit_invoke_and_reactivation() {
         after_invoke_frames: 0,
         before_threads: 0,
         complete: false,
+        lifecycle,
     };
     let (mut driver, wake) = Driver::new(&event_loop, host);
     driver.host_mut().host.wake = Some(wake);

@@ -1,0 +1,23 @@
+   Compiling accesskit_unix_monitor_control v0.24.0 (/tmp/gpui-a11y-monitor-control/reactivity/vendor/accesskit_unix)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.34s
+     Running tests/service_lifecycle.rs (gpui-a11y-target/debug/deps/service_lifecycle-63a8e49cbdb50ff2)
+
+running 1 test
+PROVIDER waiting_full_tree activation=1
+PROVIDER waiting_full_tree activation=2
+PROVIDER waiting_full_tree activation=3
+PROVIDER waiting_full_tree activation=4
+
+thread 'late_service_initial_true_disable_reenable_and_live_owner_replacement' (3902420) panicked at tests/service_lifecycle.rs:211:10:
+application Embed: Timeout
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test late_service_initial_true_disable_reenable_and_live_owner_replacement ... FAILED
+
+failures:
+
+failures:
+    late_service_initial_true_disable_reenable_and_live_owner_replacement
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.97s
+
+error: test failed, to rerun pass `--test service_lifecycle`
