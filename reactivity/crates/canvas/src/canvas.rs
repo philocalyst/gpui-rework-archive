@@ -1742,22 +1742,34 @@ fn render_region<W: PixelWriter>(
     let stride = frame.width * W::ELEMENTS;
     let first = frame.tile_bounds[1] * TILE * stride;
     let end = (frame.tile_bounds[3] * TILE).min(frame.height) * stride;
-    render_rows(
-        frame,
-        writer,
-        &mut pixels[first..end],
-        offsets,
-        members,
-        parallel,
-    )
+    let pixels = &mut pixels[first..end];
+    #[cfg(feature = "parallel")]
+    if parallel {
+        return render_rows(frame, writer, pixels, offsets, members);
+    }
+    #[cfg(not(feature = "parallel"))]
+    let _ = parallel;
+    let columns = usize::from(frame.raster_bounds[2] - frame.raster_bounds[0]);
+    let mut remaining = members;
+    let mut stats = RenderStats::default();
+    for (row, pixels) in pixels.chunks_mut(TILE * stride).enumerate() {
+        let offsets = &offsets[row * columns..=(row + 1) * columns];
+        let (members, tail) = remaining.split_at_mut((offsets[columns] - offsets[0]) as usize);
+        remaining = tail;
+        let mut band = frame;
+        band.tile_bounds[1] += row;
+        band.tile_bounds[3] = band.tile_bounds[1] + 1;
+        stats = combine_stats(stats, render_band(band, writer, pixels, offsets, members));
+    }
+    stats
 }
+#[cfg(feature = "parallel")]
 fn render_rows<W: PixelWriter>(
     frame: Frame<'_>,
     writer: W,
     pixels: &mut [W::Element],
     offsets: &[u32],
     members: &mut [u32],
-    parallel: bool,
 ) -> RenderStats {
     let rows = frame.tile_bounds[3] - frame.tile_bounds[1];
     if rows == 1 {
@@ -1774,34 +1786,25 @@ fn render_rows<W: PixelWriter>(
     left.tile_bounds[3] = middle;
     let mut right = frame;
     right.tile_bounds[1] = middle;
-    let mut render_left = move || {
+    let render_left = move || {
         render_rows(
             left,
             writer,
             left_pixels,
             &offsets[..=boundary],
             left_members,
-            parallel,
         )
     };
-    let mut render_right = move || {
+    let render_right = move || {
         render_rows(
             right,
             writer,
             right_pixels,
             &offsets[boundary..],
             right_members,
-            parallel,
         )
     };
-    #[cfg(feature = "parallel")]
-    let (left, right) = if parallel {
-        rayon::join(render_left, render_right)
-    } else {
-        (render_left(), render_right())
-    };
-    #[cfg(not(feature = "parallel"))]
-    let (left, right) = (render_left(), render_right());
+    let (left, right) = rayon::join(render_left, render_right);
     combine_stats(left, right)
 }
 
