@@ -356,17 +356,33 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let before = self.source_epoch;
         let mut property_changed = None;
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
-            let Some((target, id, contribution)) = handler.proposal(&self.runtime.model)? else {
+            let own_target = self.sites.target(self.runtime.nodes[index].identity());
+            let Some(request) = handler.proposal(&self.runtime.model, own_target)? else {
                 self.runtime.changed_nodes = 0;
                 return Ok(false);
+            };
+            let (target, id, contribution) = match request {
+                crate::element::PropertyRequest::Inspect(target, id) => (target, id, None),
+                crate::element::PropertyRequest::Edit((target, id, contribution)) => {
+                    (target, id, Some(contribution))
+                }
             };
             let epoch = self
                 .source_epoch
                 .checked_add(1)
                 .ok_or(Error::EpochExhausted)?;
-            let result = self
-                .resolve_index(target)
-                .and_then(|index| self.apply_property_value_at(index, id, contribution));
+            let result = self.resolve_index(target).and_then(|index| {
+                if let Some(contribution) = contribution {
+                    property_changed = self.apply_property_value_at(index, id, contribution)?;
+                }
+                Ok(crate::PropertyState {
+                    target,
+                    id,
+                    value: self.property_value_at(index, id)?,
+                    contribution: self
+                        .property_contribution_at(self.runtime.nodes[index].identity(), id),
+                })
+            });
             if let Err(error) = &result
                 && !matches!(error, Error::StaleTarget | Error::Property(_))
             {
@@ -377,8 +393,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             // may still change the tool's ordinary model error/status state.
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
-            handler.applied_logically(&mut self.runtime.model, result.as_ref().map(|_| ()))?;
-            property_changed = result.ok().flatten();
+            handler.applied_logically(&mut self.runtime.model, result.as_ref())?;
             Ok(true)
         }));
         self.runtime.nodes[index].handler = Some(handler);

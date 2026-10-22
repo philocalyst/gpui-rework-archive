@@ -86,8 +86,24 @@ trait Route {
 // Borrowed only for this opt-in vtable call. Ordinary invoke keeps its original
 // ABI; neither this phase nor its output is retained in a route or runtime.
 enum PropertyPhase<'a> {
-    Propose(&'a dyn Any, &'a mut Option<PropertyChange>),
-    Reply(&'a mut dyn Any, Result<(), &'a crate::Error>),
+    Propose(&'a dyn Any, crate::Target, &'a mut Option<PropertyRequest>),
+    Reply(&'a mut dyn Any, Result<&'a PropertyState, &'a crate::Error>),
+}
+
+pub(crate) enum PropertyRequest {
+    Inspect(crate::Target, PropertyId),
+    Edit(PropertyChange),
+}
+
+/// Canonical logical state captured immediately before the mutable reply.
+/// Later source edits, preparation and presentation may produce newer state.
+/// This owned snapshot confers no revision or presentation authority.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PropertyState {
+    pub target: crate::Target,
+    pub id: PropertyId,
+    pub value: crate::property::PropertyValue,
+    pub contribution: crate::property::Contribution<crate::property::PropertyValue>,
 }
 
 /// One owned contribution interpreted against the current logical target.
@@ -101,19 +117,43 @@ pub type PropertyChange = (
 /// Build an ordinary click route for an opt-in property editor.
 /// `proposal` reads the current owner. None performs no property operation.
 /// The result method receives canonical rejection or logical acceptance after
-/// the proposal borrow ends. Acceptance does not promise preparation or ACK:
-/// those follow through the ordinary window publication/error path.
+/// the proposal borrow ends. Accepted state is captured after the edit and
+/// before the reply; source edits in the reply may produce newer state later.
+/// Acceptance does not promise preparation or ACK: those follow through the
+/// ordinary window publication/error path.
 pub fn property_action<M: 'static, F, R>(
     proposal: F,
     applied_logically: R,
 ) -> impl IntoHandler<M, shape::Property>
 where
     F: Fn(&M) -> Option<PropertyChange> + 'static,
-    R: Fn(&mut M, Result<(), &crate::Error>) + 'static,
+    R: Fn(&mut M, Result<PropertyState, &crate::Error>) + 'static,
 {
     PropertyRoute {
-        proposal,
+        proposal: move |model: &M, _| proposal(model).map(PropertyRequest::Edit),
         applied_logically,
+        model: PhantomData,
+    }
+}
+
+/// Select or refresh a property through current logical state. The proposal's
+/// second argument is this activation site's own Target, resolved on the stack.
+/// It can return that target or another previously selected target. None is idle.
+/// Installing this with `on_click` replaces that site's previous click action;
+/// it does not intercept descendants or add picking or event bubbling.
+pub fn property_selection<M: 'static, F, R>(
+    proposal: F,
+    selected: R,
+) -> impl IntoHandler<M, shape::Property>
+where
+    F: Fn(&M, crate::Target) -> Option<(crate::Target, PropertyId)> + 'static,
+    R: Fn(&mut M, Result<PropertyState, &crate::Error>) + 'static,
+{
+    PropertyRoute {
+        proposal: move |model: &M, target| {
+            proposal(model, target).map(|(target, id)| PropertyRequest::Inspect(target, id))
+        },
+        applied_logically: selected,
         model: PhantomData,
     }
 }
@@ -124,8 +164,8 @@ struct PropertyRoute<M, F, R> {
 }
 impl<M: 'static, F, R> Route for PropertyRoute<M, F, R>
 where
-    F: Fn(&M) -> Option<PropertyChange>,
-    R: Fn(&mut M, Result<(), &crate::Error>),
+    F: Fn(&M, crate::Target) -> Option<PropertyRequest>,
+    R: Fn(&mut M, Result<PropertyState, &crate::Error>),
 {
     fn admit(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Admission, BindError> {
         receiver
@@ -138,17 +178,17 @@ where
     }
     fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
         match phase {
-            PropertyPhase::Propose(receiver, output) => {
+            PropertyPhase::Propose(receiver, target, output) => {
                 let receiver = receiver
                     .downcast_ref::<M>()
                     .ok_or(BindError::ReceiverMismatch)?;
-                *output = (self.proposal)(receiver);
+                *output = (self.proposal)(receiver, target);
             }
             PropertyPhase::Reply(receiver, result) => {
                 let receiver = receiver
                     .downcast_mut::<M>()
                     .ok_or(BindError::ReceiverMismatch)?;
-                (self.applied_logically)(receiver, result);
+                (self.applied_logically)(receiver, result.copied());
             }
         }
         Ok(())
@@ -182,16 +222,20 @@ impl Handler {
         self.0.invoke(receiver)
     }
 
-    pub(crate) fn proposal(&self, receiver: &dyn Any) -> Result<Option<PropertyChange>, BindError> {
+    pub(crate) fn proposal(
+        &self,
+        receiver: &dyn Any,
+        target: crate::Target,
+    ) -> Result<Option<PropertyRequest>, BindError> {
         let mut output = None;
         self.0
-            .property(PropertyPhase::Propose(receiver, &mut output))?;
+            .property(PropertyPhase::Propose(receiver, target, &mut output))?;
         Ok(output)
     }
     pub(crate) fn applied_logically(
         &self,
         receiver: &mut dyn Any,
-        result: Result<(), &crate::Error>,
+        result: Result<&PropertyState, &crate::Error>,
     ) -> Result<(), BindError> {
         self.0.property(PropertyPhase::Reply(receiver, result))
     }
@@ -258,12 +302,13 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
     }
     fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
         match phase {
-            PropertyPhase::Propose(receiver, output) => {
+            PropertyPhase::Propose(receiver, target, output) => {
                 let parent = receiver
                     .downcast_ref::<P>()
                     .ok_or(BindError::ReceiverMismatch)?;
                 self.handler.0.property(PropertyPhase::Propose(
                     (self.component.read)(parent),
+                    target,
                     output,
                 ))
             }
@@ -1050,8 +1095,8 @@ impl<M, T, F> sealed::Handler<M, shape::Field> for FieldAction<M, T, F> {}
 impl<M, F, R> sealed::Handler<M, shape::Property> for PropertyRoute<M, F, R> {}
 impl<M: 'static, F, R> IntoHandler<M, shape::Property> for PropertyRoute<M, F, R>
 where
-    F: Fn(&M) -> Option<PropertyChange> + 'static,
-    R: Fn(&mut M, Result<(), &crate::Error>) + 'static,
+    F: Fn(&M, crate::Target) -> Option<PropertyRequest> + 'static,
+    R: Fn(&mut M, Result<PropertyState, &crate::Error>) + 'static,
 {
     fn install(self, mut element: El<'_>) -> El<'_> {
         element.on_click = Some(Handler(Box::new(self)));
@@ -1312,7 +1357,27 @@ mod tests {
             handler.admit(&model, &Sources::<Model>::new()),
             Ok(Admission::Property)
         ));
-        assert!(handler.proposal(&model).unwrap().is_none());
+        let target = crate::identity::Sites::new().target(1);
+        assert!(handler.proposal(&model, target).unwrap().is_none());
+        assert_eq!(size_of::<PropertyState>(), 80);
+        assert_eq!(size_of::<Result<PropertyState, &crate::Error>>(), 80);
+        assert_eq!(size_of::<PropertyRequest>(), 48);
+        assert_eq!(size_of::<Option<PropertyRequest>>(), 48);
+        assert_eq!(size_of::<PropertyPhase<'_>>(), 40);
+        let selection = property_selection(
+            |_: &Model, target| Some((target, PropertyId::Width)),
+            |_: &mut Model, _| {},
+        );
+        assert_eq!(size_of_val(&selection), 0);
+        eprintln!(
+            "property_state_headers,State={},Result={},Request={},OptionRequest={},Phase={},SelectionCapture={}",
+            size_of::<PropertyState>(),
+            size_of::<Result<PropertyState, &crate::Error>>(),
+            size_of::<PropertyRequest>(),
+            size_of::<Option<PropertyRequest>>(),
+            size_of::<PropertyPhase<'_>>(),
+            size_of_val(&selection),
+        );
     }
 
     #[test]
