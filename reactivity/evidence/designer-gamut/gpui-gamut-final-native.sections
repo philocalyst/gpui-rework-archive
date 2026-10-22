@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-final-native-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16680     4296
+.rela.plt               48    20976
+.rodata              25944    21024
+.gcc_except_table    45112    46968
+.eh_frame_hdr         4580    92080
+.eh_frame            22976    96664
+.text               277333   123744
+.init                   27   401080
+.fini                   13   401108
+.plt                    48   401136
+.tdata                  32   405280
+.tbss                 3168   405312
+.fini_array              8   405312
+.init_array             16   405320
+.data.rel.ro          8080   405336
+.dynamic               480   413416
+.got                  2432   413896
+.got.plt                40   416328
+.relro_padding        1424   416368
+.tm_clone_table          0   420464
+.data                 2504   420464
+.bss                   208   422968
+.comment               157        0
+Total               414858
+
+

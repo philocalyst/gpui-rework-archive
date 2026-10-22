@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-bare-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1704      856
+.gnu.version           142     2560
+.gnu.version_r         352     2704
+.gnu.hash               28     3056
+.dynstr               1116     3084
+.rela.dyn            16488     4200
+.rela.plt               48    20688
+.rodata              25328    20736
+.gcc_except_table    45112    46064
+.eh_frame_hdr         4492    91176
+.eh_frame            22592    95672
+.text               271989   122368
+.init                   27   394360
+.fini                   13   394388
+.plt                    48   394416
+.tdata                  32   398560
+.tbss                 3168   398592
+.fini_array              8   398592
+.init_array             16   398600
+.data.rel.ro          8032   398616
+.dynamic               480   406648
+.got                  2392   407128
+.got.plt                40   409520
+.relro_padding          40   409560
+.tm_clone_table          0   413656
+.data                 2496   413656
+.bss                   202   416152
+.comment               157        0
+Total               406657
+
+

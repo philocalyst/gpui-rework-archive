@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-consumer-fallback-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1704      856
+.gnu.version           142     2560
+.gnu.version_r         352     2704
+.gnu.hash               28     3056
+.dynstr               1116     3084
+.rela.dyn            16488     4200
+.rela.plt               48    20688
+.rodata              25368    20736
+.gcc_except_table    45472    46104
+.eh_frame_hdr         4500    91576
+.eh_frame            22600    96080
+.text               273125   122784
+.init                   27   395912
+.fini                   13   395940
+.plt                    48   395968
+.tdata                  32   400112
+.tbss                 3168   400144
+.fini_array              8   400144
+.init_array             16   400152
+.data.rel.ro          8032   400168
+.dynamic               480   408200
+.got                  2392   408680
+.got.plt                40   411072
+.relro_padding        2584   411112
+.tm_clone_table          0   415208
+.data                 2496   415208
+.bss                   202   417704
+.comment               157        0
+Total               410753
+
+

@@ -1,0 +1,1404 @@
+[
+  {
+    "variant": "consumer",
+    "binary_path": "/tmp/gpui-gamut-consumer-frozen",
+    "sha256": "19ba9d7eb8d2149b48c324f92eae8ffca445e041a139da65cf8bb728cfe02fa3",
+    "file_bytes": 562072,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1704,
+      ".gnu.version": 142,
+      ".gnu.version_r": 352,
+      ".gnu.hash": 28,
+      ".dynstr": 1116,
+      ".rela.dyn": 16488,
+      ".rela.plt": 48,
+      ".rodata": 25344,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4500,
+      ".eh_frame": 22600,
+      ".text": 272149,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8032,
+      ".dynamic": 480,
+      ".got": 2392,
+      ".got.plt": 40,
+      ".relro_padding": 3944,
+      ".tm_clone_table": 0,
+      ".data": 2496,
+      ".bss": 202,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 124,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 632,
+        "packed_instructions": {
+          "cmpltpd": 6,
+          "xorpd": 17,
+          "andnpd": 29,
+          "divpd": 8,
+          "minpd": 3,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 4,
+          "cmpeqpd": 8,
+          "sqrtpd": 2,
+          "movapd": 157,
+          "unpcklpd": 10,
+          "maxpd": 10,
+          "andpd": 47,
+          "movupd": 4,
+          "orpd": 27,
+          "addpd": 25,
+          "cmplepd": 4,
+          "cmpneqpd": 10,
+          "mulpd": 40
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x2a0,%rsp"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::gamut::first_exit::__FearlessDispatch>::call::entry::<fearless_simd::generated::sse2::Sse2, gpui_canvas::color::gamut::Polynomial<fearless_simd::generated::sse2::Sse2>, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::sse2::Sse2>; 2], fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::sse2::Sse2>, usize, gpui_canvas::color::gamut::first_exit<fearless_simd::generated::sse2::Sse2>::{closure#0}, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::sse2::Sse2>; 2]>",
+        "instruction_count": 568,
+        "packed_instructions": {
+          "cmpltpd": 20,
+          "xorpd": 14,
+          "andnpd": 18,
+          "minpd": 2,
+          "subpd": 6,
+          "cmpeqpd": 7,
+          "movapd": 206,
+          "maxpd": 4,
+          "andpd": 54,
+          "orpd": 16,
+          "addpd": 64,
+          "movmskpd": 4,
+          "cmplepd": 2,
+          "mulpd": 66
+        },
+        "prologue": [
+          "push   %rbp",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x3e0,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "consumer-fallback",
+    "binary_path": "/tmp/gpui-gamut-consumer-fallback-frozen",
+    "sha256": "ef2ed18bf503fdb1e799ad7371ecf8447d6e707a5e0387d2d0500f54c0f6b233",
+    "file_bytes": 563824,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1704,
+      ".gnu.version": 142,
+      ".gnu.version_r": 352,
+      ".gnu.hash": 28,
+      ".dynstr": 1116,
+      ".rela.dyn": 16488,
+      ".rela.plt": 48,
+      ".rodata": 25368,
+      ".gcc_except_table": 45472,
+      ".eh_frame_hdr": 4500,
+      ".eh_frame": 22600,
+      ".text": 273125,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8032,
+      ".dynamic": 480,
+      ".got": 2392,
+      ".got.plt": 40,
+      ".relro_padding": 2584,
+      ".tm_clone_table": 0,
+      ".data": 2496,
+      ".bss": 202,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 131,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::gamut::first_exit::__FearlessDispatch>::call::<fearless_simd::generated::fallback::Fallback, fearless_simd::generated::fallback::Fallback, gpui_canvas::color::gamut::Polynomial<fearless_simd::generated::fallback::Fallback>, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::fallback::Fallback>; 2], fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::fallback::Fallback>, usize, gpui_canvas::color::gamut::first_exit<fearless_simd::generated::fallback::Fallback>::{closure#0}, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::fallback::Fallback>; 2]>",
+        "instruction_count": 719,
+        "packed_instructions": {
+          "cmpltpd": 13,
+          "cmpunordpd": 3,
+          "xorpd": 16,
+          "andnpd": 20,
+          "cmpordpd": 1,
+          "minpd": 2,
+          "subpd": 6,
+          "unpckhpd": 3,
+          "cmpeqpd": 7,
+          "movapd": 234,
+          "cmpnltpd": 7,
+          "unpcklpd": 3,
+          "maxpd": 4,
+          "andpd": 47,
+          "orpd": 22,
+          "addpd": 64,
+          "shufpd": 7,
+          "movmskpd": 1,
+          "cmplepd": 2,
+          "cmpneqpd": 1,
+          "mulpd": 66
+        },
+        "prologue": [
+          "push   %rbp",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x460,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::fallback::Fallback>",
+        "instruction_count": 681,
+        "packed_instructions": {
+          "divpd": 7,
+          "unpckhpd": 1,
+          "unpcklpd": 9,
+          "maxpd": 6,
+          "addpd": 20,
+          "cmplepd": 4,
+          "cmpltpd": 1,
+          "cmpeqpd": 4,
+          "sqrtpd": 1,
+          "movapd": 149,
+          "movupd": 1,
+          "cmpneqpd": 4,
+          "movlpd": 1,
+          "andnpd": 27,
+          "subpd": 3,
+          "orpd": 27,
+          "movmskpd": 1,
+          "xorpd": 23,
+          "cmpunordpd": 7,
+          "minpd": 3,
+          "cmpnltpd": 5,
+          "andpd": 43,
+          "shufpd": 6,
+          "mulpd": 34
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x260,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "floor",
+    "binary_path": "/tmp/gpui-gamut-floor-frozen",
+    "sha256": "703edbf4e49797bcab5a30749cab22151e734af2207596e1fb999514bbd55d9b",
+    "file_bytes": 558864,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16560,
+      ".rela.plt": 48,
+      ".rodata": 25432,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4540,
+      ".eh_frame": 22744,
+      ".text": 267893,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8008,
+      ".dynamic": 480,
+      ".got": 2416,
+      ".got.plt": 40,
+      ".relro_padding": 3656,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": []
+  },
+  {
+    "variant": "original",
+    "binary_path": "/tmp/gpui-gamut-original-frozen",
+    "sha256": "4cd20f6c9a1eb82b77dc37b637f19283532ccdd30f3184aa0d441cedcf93eb75",
+    "file_bytes": 559584,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16560,
+      ".rela.plt": 48,
+      ".rodata": 25432,
+      ".gcc_except_table": 45452,
+      ".eh_frame_hdr": 4540,
+      ".eh_frame": 22744,
+      ".text": 267893,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8008,
+      ".dynamic": 480,
+      ".got": 2416,
+      ".got.plt": 40,
+      ".relro_padding": 3320,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": []
+  },
+  {
+    "variant": "bare",
+    "binary_path": "/tmp/gpui-gamut-bare-frozen",
+    "sha256": "434deb00526af72a5ca8842d565d3b2ada533277a88b77f410e1ac2179f018fc",
+    "file_bytes": 561616,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1704,
+      ".gnu.version": 142,
+      ".gnu.version_r": 352,
+      ".gnu.hash": 28,
+      ".dynstr": 1116,
+      ".rela.dyn": 16488,
+      ".rela.plt": 48,
+      ".rodata": 25328,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4492,
+      ".eh_frame": 22592,
+      ".text": 271989,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8032,
+      ".dynamic": 480,
+      ".got": 2392,
+      ".got.plt": 40,
+      ".relro_padding": 40,
+      ".tm_clone_table": 0,
+      ".data": 2496,
+      ".bss": 202,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 124,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 1220,
+        "packed_instructions": {
+          "cmpltpd": 34,
+          "xorpd": 48,
+          "andnpd": 77,
+          "divpd": 8,
+          "minpd": 10,
+          "movhpd": 1,
+          "unpckhpd": 4,
+          "subpd": 52,
+          "cmpeqpd": 18,
+          "sqrtpd": 2,
+          "movapd": 357,
+          "unpcklpd": 10,
+          "maxpd": 10,
+          "andpd": 99,
+          "movupd": 4,
+          "orpd": 61,
+          "addpd": 71,
+          "movmskpd": 12,
+          "cmplepd": 2,
+          "cmpneqpd": 10,
+          "mulpd": 122
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x1a0,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "expansion",
+    "binary_path": "/tmp/gpui-gamut-expansion-frozen",
+    "sha256": "fe8b5506764f07ef5f9fb76f7022a122e9bb0388f3b5cf8fa8a247b79b83cecb",
+    "file_bytes": 562112,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1704,
+      ".gnu.version": 142,
+      ".gnu.version_r": 352,
+      ".gnu.hash": 28,
+      ".dynstr": 1116,
+      ".rela.dyn": 16512,
+      ".rela.plt": 48,
+      ".rodata": 25440,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4508,
+      ".eh_frame": 22656,
+      ".text": 271941,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8056,
+      ".dynamic": 480,
+      ".got": 2392,
+      ".got.plt": 40,
+      ".relro_padding": 3936,
+      ".tm_clone_table": 0,
+      ".data": 2496,
+      ".bss": 202,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 124,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::first_exit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 297,
+        "packed_instructions": {
+          "cmpltpd": 6,
+          "xorpd": 8,
+          "andnpd": 12,
+          "minpd": 4,
+          "subpd": 2,
+          "cmpeqpd": 2,
+          "movapd": 120,
+          "andpd": 24,
+          "orpd": 8,
+          "addpd": 20,
+          "movmskpd": 4,
+          "cmplepd": 2,
+          "mulpd": 22
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x340,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::exact_endpoint_sign::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 335,
+        "packed_instructions": {
+          "xorpd": 1,
+          "andnpd": 4,
+          "subpd": 38,
+          "movapd": 86,
+          "andpd": 6,
+          "orpd": 4,
+          "addpd": 18,
+          "cmpneqpd": 6,
+          "mulpd": 14
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x620,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 593,
+        "packed_instructions": {
+          "cmpltpd": 6,
+          "xorpd": 23,
+          "andnpd": 27,
+          "divpd": 8,
+          "minpd": 2,
+          "movhpd": 1,
+          "unpckhpd": 4,
+          "subpd": 4,
+          "cmpeqpd": 8,
+          "sqrtpd": 2,
+          "movapd": 143,
+          "unpcklpd": 10,
+          "maxpd": 10,
+          "andpd": 41,
+          "movupd": 4,
+          "orpd": 27,
+          "addpd": 23,
+          "cmplepd": 2,
+          "cmpneqpd": 10,
+          "mulpd": 38
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x240,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "final-native",
+    "binary_path": "/tmp/gpui-gamut-final-native-frozen",
+    "sha256": "0bd80d6c498da0868c6befe26f634c518f7f00a0cf121e92acecae9fa8e8a630",
+    "file_bytes": 569976,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16680,
+      ".rela.plt": 48,
+      ".rodata": 25944,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4580,
+      ".eh_frame": 22976,
+      ".text": 277333,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8080,
+      ".dynamic": 480,
+      ".got": 2432,
+      ".got.plt": 40,
+      ".relro_padding": 1424,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 124,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 632,
+        "packed_instructions": {
+          "cmpltpd": 6,
+          "xorpd": 17,
+          "andnpd": 29,
+          "divpd": 8,
+          "minpd": 3,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 4,
+          "cmpeqpd": 8,
+          "sqrtpd": 2,
+          "movapd": 157,
+          "unpcklpd": 10,
+          "maxpd": 10,
+          "andpd": 47,
+          "movupd": 4,
+          "orpd": 27,
+          "addpd": 25,
+          "cmplepd": 4,
+          "cmpneqpd": 10,
+          "mulpd": 40
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x2a0,%rsp"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::gamut::first_exit::__FearlessDispatch>::call::entry::<fearless_simd::generated::sse2::Sse2, gpui_canvas::color::gamut::Polynomial<fearless_simd::generated::sse2::Sse2>, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::sse2::Sse2>; 2], fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::sse2::Sse2>, usize, gpui_canvas::color::gamut::first_exit<fearless_simd::generated::sse2::Sse2>::{closure#0}, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::sse2::Sse2>; 2]>",
+        "instruction_count": 556,
+        "packed_instructions": {
+          "cmpltpd": 20,
+          "xorpd": 13,
+          "andnpd": 16,
+          "minpd": 2,
+          "subpd": 8,
+          "cmpeqpd": 7,
+          "movapd": 202,
+          "maxpd": 2,
+          "andpd": 54,
+          "orpd": 14,
+          "addpd": 66,
+          "movmskpd": 4,
+          "cmplepd": 2,
+          "mulpd": 66
+        },
+        "prologue": [
+          "push   %rbp",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x3c0,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "final-fallback",
+    "binary_path": "/tmp/gpui-gamut-final-fallback-frozen",
+    "sha256": "9444bf84dccd273a338b9133db1676856c84aeb08fe278c3fe390f58ddd7b8eb",
+    "file_bytes": 571536,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16680,
+      ".rela.plt": 48,
+      ".rodata": 25968,
+      ".gcc_except_table": 45472,
+      ".eh_frame_hdr": 4580,
+      ".eh_frame": 22984,
+      ".text": 278117,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8080,
+      ".dynamic": 480,
+      ".got": 2432,
+      ".got.plt": 40,
+      ".relro_padding": 256,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 131,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::gamut::first_exit::__FearlessDispatch>::call::<fearless_simd::generated::fallback::Fallback, fearless_simd::generated::fallback::Fallback, gpui_canvas::color::gamut::Polynomial<fearless_simd::generated::fallback::Fallback>, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::fallback::Fallback>; 2], fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::fallback::Fallback>, usize, gpui_canvas::color::gamut::first_exit<fearless_simd::generated::fallback::Fallback>::{closure#0}, [fearless_simd::generated::simd_types::f64x4<fearless_simd::generated::fallback::Fallback>; 2]>",
+        "instruction_count": 684,
+        "packed_instructions": {
+          "cmpltpd": 14,
+          "cmpunordpd": 4,
+          "xorpd": 15,
+          "andnpd": 19,
+          "cmpordpd": 1,
+          "minpd": 2,
+          "unpckhpd": 4,
+          "subpd": 8,
+          "cmpeqpd": 7,
+          "movapd": 224,
+          "cmpnltpd": 6,
+          "unpcklpd": 2,
+          "maxpd": 2,
+          "andpd": 48,
+          "orpd": 23,
+          "addpd": 66,
+          "shufpd": 8,
+          "cmplepd": 2,
+          "cmpneqpd": 1,
+          "mulpd": 66
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x440,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::fallback::Fallback>",
+        "instruction_count": 681,
+        "packed_instructions": {
+          "divpd": 7,
+          "unpckhpd": 1,
+          "unpcklpd": 9,
+          "maxpd": 6,
+          "addpd": 20,
+          "cmplepd": 4,
+          "cmpltpd": 1,
+          "cmpeqpd": 4,
+          "sqrtpd": 1,
+          "movapd": 149,
+          "movupd": 1,
+          "cmpneqpd": 4,
+          "movlpd": 1,
+          "andnpd": 27,
+          "subpd": 3,
+          "orpd": 27,
+          "movmskpd": 1,
+          "xorpd": 23,
+          "cmpunordpd": 7,
+          "minpd": 3,
+          "cmpnltpd": 5,
+          "andpd": 43,
+          "shufpd": 6,
+          "mulpd": 34
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x260,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "final-floor",
+    "binary_path": "/tmp/gpui-gamut-final-floor-frozen",
+    "sha256": "2b911c88447f498f73dc89664255168620476a987e923c27fd594818dad0c566",
+    "file_bytes": 558864,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16560,
+      ".rela.plt": 48,
+      ".rodata": 25432,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4540,
+      ".eh_frame": 22744,
+      ".text": 267893,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8008,
+      ".dynamic": 480,
+      ".got": 2416,
+      ".got.plt": 40,
+      ".relro_padding": 3656,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": []
+  },
+  {
+    "variant": "original-common",
+    "binary_path": "/tmp/gpui-gamut-original-common-frozen",
+    "sha256": "4b3052432f4e63c923904c619d32ea9ee949dc5087c5cefc4c8b66ef0fe995c6",
+    "file_bytes": 559584,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16560,
+      ".rela.plt": 48,
+      ".rodata": 25432,
+      ".gcc_except_table": 45452,
+      ".eh_frame_hdr": 4540,
+      ".eh_frame": 22744,
+      ".text": 267893,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8008,
+      ".dynamic": 480,
+      ".got": 2416,
+      ".got.plt": 40,
+      ".relro_padding": 3320,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": []
+  },
+  {
+    "variant": "bare-common",
+    "binary_path": "/tmp/gpui-gamut-bare-common-frozen",
+    "sha256": "bdb5129a32c3f03119a281bdc14a9d1c31189d577513a06c6f2fea4c5334fe0d",
+    "file_bytes": 569600,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16680,
+      ".rela.plt": 48,
+      ".rodata": 25928,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4572,
+      ".eh_frame": 22968,
+      ".text": 277253,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8080,
+      ".dynamic": 480,
+      ".got": 2432,
+      ".got.plt": 40,
+      ".relro_padding": 1536,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 124,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 1220,
+        "packed_instructions": {
+          "cmpltpd": 34,
+          "xorpd": 48,
+          "andnpd": 77,
+          "divpd": 8,
+          "minpd": 10,
+          "movhpd": 1,
+          "unpckhpd": 4,
+          "subpd": 52,
+          "cmpeqpd": 18,
+          "sqrtpd": 2,
+          "movapd": 357,
+          "unpcklpd": 10,
+          "maxpd": 10,
+          "andpd": 99,
+          "movupd": 4,
+          "orpd": 61,
+          "addpd": 71,
+          "movmskpd": 12,
+          "cmplepd": 2,
+          "cmpneqpd": 10,
+          "mulpd": 122
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x1a0,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "expansion-common",
+    "binary_path": "/tmp/gpui-gamut-expansion-common-frozen",
+    "sha256": "6309c07802bbf24af89c2486954409ef04ce478b205be6fc4b2a56cb01e7271c",
+    "file_bytes": 570096,
+    "sections": {
+      ".interp": 83,
+      ".note.ABI-tag": 32,
+      ".dynsym": 1752,
+      ".gnu.version": 146,
+      ".gnu.version_r": 368,
+      ".gnu.hash": 28,
+      ".dynstr": 1139,
+      ".rela.dyn": 16704,
+      ".rela.plt": 48,
+      ".rodata": 26040,
+      ".gcc_except_table": 45112,
+      ".eh_frame_hdr": 4588,
+      ".eh_frame": 23032,
+      ".text": 277205,
+      ".init": 27,
+      ".fini": 13,
+      ".plt": 48,
+      ".tdata": 32,
+      ".tbss": 3168,
+      ".fini_array": 8,
+      ".init_array": 16,
+      ".data.rel.ro": 8104,
+      ".dynamic": 480,
+      ".got": 2432,
+      ".got.plt": 40,
+      ".relro_padding": 1336,
+      ".tm_clone_table": 0,
+      ".data": 2504,
+      ".bss": 208,
+      ".comment": 157
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::color::OutputProfile>::max_chroma",
+        "instruction_count": 57,
+        "packed_instructions": {
+          "xorpd": 2,
+          "andnpd": 1,
+          "movapd": 1,
+          "andpd": 1,
+          "orpd": 1
+        },
+        "prologue": [
+          "and    $0x7fffffff,%ecx",
+          "and    $0x7fffffff,%edx"
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::color::Color>::fit_chroma",
+        "instruction_count": 124,
+        "packed_instructions": {},
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r12",
+          "push   %rbx",
+          "sub    $0x30,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::first_exit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 297,
+        "packed_instructions": {
+          "cmpltpd": 6,
+          "xorpd": 8,
+          "andnpd": 12,
+          "minpd": 4,
+          "subpd": 2,
+          "cmpeqpd": 2,
+          "movapd": 120,
+          "andpd": 24,
+          "orpd": 8,
+          "addpd": 20,
+          "movmskpd": 4,
+          "cmplepd": 2,
+          "mulpd": 22
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x340,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::exact_endpoint_sign::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 335,
+        "packed_instructions": {
+          "xorpd": 1,
+          "andnpd": 4,
+          "subpd": 38,
+          "movapd": 86,
+          "andpd": 6,
+          "orpd": 4,
+          "addpd": 18,
+          "cmpneqpd": 6,
+          "mulpd": 14
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x620,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::limit::<fearless_simd::generated::sse2::Sse2>",
+        "instruction_count": 593,
+        "packed_instructions": {
+          "cmpltpd": 6,
+          "xorpd": 23,
+          "andnpd": 27,
+          "divpd": 8,
+          "minpd": 2,
+          "movhpd": 1,
+          "unpckhpd": 4,
+          "subpd": 4,
+          "cmpeqpd": 8,
+          "sqrtpd": 2,
+          "movapd": 143,
+          "unpcklpd": 10,
+          "maxpd": 10,
+          "andpd": 41,
+          "movupd": 4,
+          "orpd": 27,
+          "addpd": 23,
+          "cmplepd": 2,
+          "cmpneqpd": 10,
+          "mulpd": 38
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %r15",
+          "push   %r14",
+          "push   %r13",
+          "push   %r12",
+          "push   %rbx",
+          "and    $0xffffffffffffffe0,%rsp",
+          "sub    $0x240,%rsp"
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::color::gamut::in_gamut",
+        "instruction_count": 357,
+        "packed_instructions": {
+          "cvtps2pd": 2,
+          "xorpd": 5,
+          "movhpd": 1,
+          "unpckhpd": 5,
+          "subpd": 3,
+          "movapd": 31,
+          "unpcklpd": 9,
+          "andpd": 3,
+          "orpd": 1,
+          "addpd": 9,
+          "shufpd": 4,
+          "mulpd": 19
+        },
+        "prologue": [
+          "push   %rbp",
+          "push   %rbx",
+          "sub    $0x68,%rsp"
+        ]
+      }
+    ]
+  }
+]
