@@ -1,9 +1,10 @@
 //! Frozen byte/x records. The common map infers affinity only when every source
 //! group was exactly [both] or [upstream, downstream]; otherwise retain masks.
-use super::{Carets, CommonStop, Stop, Stops};
+use super::{CaretBuilder, Carets, CommonStop, Stop, Stops};
 use std::ops::Range;
 
 impl Carets {
+    #[cfg(test)]
     pub(in crate::text) fn freeze(stops: Vec<Stop>) -> Self {
         if stops
             .chunk_by(|a, b| a.byte == b.byte)
@@ -37,6 +38,52 @@ impl Carets {
         match self {
             Self::Common(stops) => std::mem::size_of_val(&**stops),
             Self::General(stops) => std::mem::size_of_val(&**stops),
+        }
+    }
+}
+impl CaretBuilder {
+    pub(in crate::text) fn new() -> Self {
+        Self::Common(Vec::new())
+    }
+    // One complete producer byte group, after Rect validation/equality merging.
+    // The first exceptional group promotes the whole common prefix exactly once.
+    pub(in crate::text) fn push(&mut self, first: Stop, second: Option<Stop>) {
+        match self {
+            Self::Common(stops) => {
+                let canonical = match second {
+                    None => first.affinities == 3,
+                    Some(second) => {
+                        first.affinities == 1 && second.affinities == 2 && first.byte == second.byte
+                    }
+                };
+                if canonical {
+                    stops.push(CommonStop {
+                        byte: first.byte,
+                        x: first.x,
+                    });
+                    if let Some(second) = second {
+                        stops.push(CommonStop {
+                            byte: second.byte,
+                            x: second.x,
+                        });
+                    }
+                } else {
+                    let mut general: Vec<_> = Stops::Common(stops).iter().collect();
+                    general.push(first);
+                    general.extend(second);
+                    *self = Self::General(general);
+                }
+            }
+            Self::General(stops) => {
+                stops.push(first);
+                stops.extend(second);
+            }
+        }
+    }
+    pub(in crate::text) fn freeze(self) -> Carets {
+        match self {
+            Self::Common(stops) => Carets::Common(stops.into_boxed_slice()),
+            Self::General(stops) => Carets::General(stops.into_boxed_slice()),
         }
     }
 }
@@ -180,5 +227,51 @@ mod tests {
             },
         );
         assert!(matches!(Carets::freeze(unexpected), Carets::General(_)));
+    }
+
+    #[test]
+    fn direct_builder_promotes_the_complete_prefix_and_preserves_later_groups() {
+        for affinities in [3, 1, 2, 0] {
+            let source = [
+                Stop {
+                    byte: 0,
+                    x: -0.,
+                    affinities: 3,
+                },
+                Stop {
+                    byte: 9,
+                    x: 1.,
+                    affinities: 1,
+                },
+                Stop {
+                    byte: 9,
+                    x: -f32::MIN_POSITIVE,
+                    affinities: 2,
+                },
+                Stop {
+                    byte: 20,
+                    x: 2.,
+                    affinities,
+                },
+                Stop {
+                    byte: u32::MAX,
+                    x: f32::MAX,
+                    affinities: 3,
+                },
+            ];
+            let mut builder = CaretBuilder::new();
+            for group in source.chunk_by(|a, b| a.byte == b.byte) {
+                builder.push(group[0], group.get(1).copied());
+            }
+            let encoded = builder.freeze();
+            assert_eq!(matches!(encoded, Carets::Common(_)), affinities == 3);
+            for (a, b) in source.iter().zip(encoded.stops().iter()) {
+                assert_eq!(
+                    (a.byte, a.x.to_bits(), a.affinities),
+                    (b.byte, b.x.to_bits(), b.affinities)
+                );
+            }
+            assert_eq!(encoded.stops().len(), source.len());
+        }
     }
 }

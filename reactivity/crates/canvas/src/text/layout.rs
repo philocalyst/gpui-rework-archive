@@ -113,6 +113,10 @@ pub(super) enum Carets {
     Common(Box<[CommonStop]>),
     General(Box<[Stop]>),
 }
+pub(super) enum CaretBuilder {
+    Common(Vec<CommonStop>),
+    General(Vec<Stop>),
+}
 #[derive(Clone, Copy)]
 pub(super) enum Stops<'a> {
     Common(&'a [CommonStop]),

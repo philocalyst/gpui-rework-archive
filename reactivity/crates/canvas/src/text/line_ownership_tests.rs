@@ -26,7 +26,7 @@ fn lower(source: &str, line_height: f32) -> Fixture {
         cursors: Vec::new(),
     };
     let mut height = 0.;
-    let mut stops = Vec::new();
+    let mut stops = CaretBuilder::new();
     for paragraph in paragraph::ranges(source) {
         let content = &source[paragraph.content.clone()];
         let mut builder = planner
@@ -147,7 +147,7 @@ fn lower(source: &str, line_height: f32) -> Fixture {
         }
         height += planned.height();
     }
-    fixture.map.carets = Some(Carets::freeze(stops));
+    fixture.map.carets = Some(stops.freeze());
     fixture
 }
 

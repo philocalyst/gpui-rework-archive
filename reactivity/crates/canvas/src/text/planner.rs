@@ -1,6 +1,6 @@
 //! Scoped Unicode planning. Parley layouts and the mutable font database stay
 //! within the planning pass; outputs own only Canvas glyphs and interaction data.
-use super::layout::{Carets, Details, Line, Run, Stop, TextDirection};
+use super::layout::{CaretBuilder, Details, Line, Run, Stop, TextDirection};
 use super::*;
 use fontique::{Blob, Collection, CollectionOptions, FontInfoOverride, SourceCache};
 use icu_properties::{CodePointSetData, props::DefaultIgnorableCodePoint};
@@ -178,7 +178,7 @@ impl<'font> Planner<'font> {
         }
         let mut glyphs = Vec::new();
         let mut details: Option<Details> = None;
-        let mut carets = interactive.then(Vec::new);
+        let mut carets = interactive.then(CaretBuilder::new);
         let mut width = 0.0f32;
         let mut height = 0.0f32;
         let mut baseline = 0.0f32;
@@ -381,7 +381,7 @@ impl<'font> Planner<'font> {
             }
         }
         if let Some(details) = &mut details {
-            details.carets = carets.map(Carets::freeze);
+            details.carets = carets.map(CaretBuilder::freeze);
         }
         Ok(TextLayout {
             width,
@@ -433,7 +433,7 @@ fn freeze_line(
     })
 }
 fn append_carets(
-    stops: &mut Vec<Stop>,
+    stops: &mut CaretBuilder,
     planned: &parley::Layout<()>,
     content: &str,
     source: usize,
@@ -481,20 +481,24 @@ fn append_carets(
         }
         let global = (source + byte) as u32;
         if pair[0].is_some() && pair[0] == pair[1] {
-            stops.push(Stop {
-                byte: global,
-                x: pair[0].unwrap().x,
-                affinities: 3,
-            });
+            stops.push(
+                Stop {
+                    byte: global,
+                    x: pair[0].unwrap().x,
+                    affinities: 3,
+                },
+                None,
+            );
         } else {
-            for (i, bounds) in pair.into_iter().enumerate() {
-                if let Some(bounds) = bounds {
-                    stops.push(Stop {
-                        byte: global,
-                        x: bounds.x,
-                        affinities: 1 << i,
-                    });
-                }
+            let mut group = pair.into_iter().enumerate().filter_map(|(index, bounds)| {
+                bounds.map(|bounds| Stop {
+                    byte: global,
+                    x: bounds.x,
+                    affinities: 1 << index,
+                })
+            });
+            if let Some(first) = group.next() {
+                stops.push(first, group.next());
             }
         }
     }

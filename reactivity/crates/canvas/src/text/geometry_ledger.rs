@@ -1,5 +1,5 @@
 //! Matched ownership/materialization accounting, not a timing benchmark.
-use super::layout::{Carets, CommonStop, Stops};
+use super::layout::{CaretBuilder, Carets, CommonStop, Stops};
 use super::*;
 
 #[test]
@@ -7,7 +7,7 @@ fn scoped_geometry_allocation_and_payload_ledger() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let font = FontFace::bundled().unwrap();
     println!(
-        "GEOMETRY_HEADERS layout={} details={} stop={} run={} line={} system={} caret_owner={} stop_view={} common_stop={}",
+        "GEOMETRY_HEADERS layout={} details={} stop={} run={} line={} system={} caret_owner={} stop_view={} common_stop={} builder={}",
         size_of::<TextLayout>(),
         size_of::<Details>(),
         size_of::<layout::Stop>(),
@@ -16,7 +16,8 @@ fn scoped_geometry_allocation_and_payload_ledger() {
         size_of::<TextSystem>(),
         size_of::<Option<Carets>>(),
         size_of::<Stops<'_>>(),
-        size_of::<CommonStop>()
+        size_of::<CommonStop>(),
+        size_of::<CaretBuilder>()
     );
     for (name, value, width) in [
         ("empty", String::new(), None),
