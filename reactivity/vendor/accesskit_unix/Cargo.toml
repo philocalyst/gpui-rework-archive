@@ -54,6 +54,7 @@ version = "0.25.1"
 
 [dependencies.accesskit_atspi_common]
 version = "0.21.0"
+path = "../accesskit_atspi_common"
 
 [dependencies.async-channel]
 version = "2.1.1"

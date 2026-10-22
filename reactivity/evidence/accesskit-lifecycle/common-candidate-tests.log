@@ -1,0 +1,28 @@
+   Compiling accesskit_atspi_common v0.21.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_atspi_common)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.46s
+     Running unittests src/lib.rs (gpui-a11y-target/debug/deps/accesskit_atspi_common-74bf4648cbc19c3d)
+
+running 7 tests
+test adapter::tests::filter_transition_out_of_tree_emits_removed ... ok
+test adapter::tests::no_cache_events_on_construction ... ok
+test adapter::tests::add_node_emits_one_added ... ok
+test adapter::tests::filter_transition_into_tree_emits_added ... ok
+test adapter::tests::remove_node_emits_removed_for_same_id ... ok
+test adapter::tests::subtree_add_emits_added_per_node ... ok
+test adapter::tests::subtree_remove_emits_removed_per_node ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/adapter_order.rs (gpui-a11y-target/debug/deps/adapter_order-3f7407e9ffb92745)
+
+running 2 tests
+test out_of_order_actual_native_children_keep_their_append_ordinals ... ok
+test removing_out_of_order_actual_adapter_releases_native_tree ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests accesskit_atspi_common
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

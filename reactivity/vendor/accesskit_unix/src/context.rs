@@ -116,10 +116,12 @@ fn activate_adapter(entry: &mut AdapterEntry) {
     }
 }
 
-fn deactivate_adapter(entry: &mut AdapterEntry) {
-    let mut state = entry.state.lock().unwrap();
+// Returns whether there was an active or pending generation to retire. All
+// callback sends, including AdapterImpl::drop, finish under this same mutex.
+fn deactivate_adapter_state(state: &Mutex<AdapterState>) -> bool {
+    let mut state = state.lock().unwrap();
     match &*state {
-        AdapterState::Inactive { .. } => (),
+        AdapterState::Inactive { .. } => false,
         AdapterState::Pending {
             is_window_focused,
             root_window_bounds,
@@ -130,8 +132,7 @@ fn deactivate_adapter(entry: &mut AdapterEntry) {
                 root_window_bounds: *root_window_bounds,
                 action_handler: Arc::clone(action_handler),
             };
-            drop(state);
-            entry.deactivation_handler.deactivate_accessibility();
+            true
         }
         AdapterState::Active(r#impl) => {
             *state = AdapterState::Inactive {
@@ -139,10 +140,45 @@ fn deactivate_adapter(entry: &mut AdapterEntry) {
                 root_window_bounds: r#impl.root_window_bounds(),
                 action_handler: r#impl.wrapped_action_handler(),
             };
-            drop(state);
-            entry.deactivation_handler.deactivate_accessibility();
+            true
         }
     }
+}
+
+fn deactivate_adapter(entry: &mut AdapterEntry) {
+    if deactivate_adapter_state(&entry.state) {
+        entry.deactivation_handler.deactivate_accessibility();
+    }
+}
+
+// Keep the original total order between control and tree messages. There is no
+// event epoch or second generation channel. Retiring under each state mutex
+// waits for every old synchronous Callback send before the worker appends Fence.
+async fn retire_bus<S>(
+    atspi_bus: &mut Option<Bus>,
+    adapters: &mut Vec<AdapterEntry>,
+    sender: &Sender<Message>,
+    messages: &mut S,
+) -> zbus::Result<()>
+where
+    S: futures_lite::Stream<Item = Message> + Unpin,
+{
+    *atspi_bus = None;
+    sync_adapters(adapters, atspi_bus);
+    #[cfg(not(feature = "tokio"))]
+    let sent = sender.try_send(Message::Fence).is_ok();
+    #[cfg(feature = "tokio")]
+    let sent = sender.send(Message::Fence).is_ok();
+    assert!(sent, "the accessibility worker owns the live receiver");
+    while let Some(message) = futures_lite::StreamExt::next(messages).await {
+        match message {
+            Message::Fence => return Ok(()),
+            // Add/Remove remain ordered; the absent Bus drops obsolete tree,
+            // interface and cache payloads. New adapters stay inactive here.
+            message => process_adapter_message(atspi_bus, adapters, message).await?,
+        }
+    }
+    unreachable!("the worker's own fence must be in its live FIFO")
 }
 
 const STATUS_SERVICE: &str = "org.a11y.Bus";
@@ -165,11 +201,18 @@ async fn status_changes(
     let Some(owner) = owner else { return Ok(None) };
     // A well-known-name proxy can retain the previous owner's property cache.
     // Keep both properties and GetAddress bound to this exact unique owner.
-    let status = StatusProxy::builder(session_bus)
-        .destination(owner.clone())?
-        .build()
-        .await?;
-    Ok(Some(status.receive_is_enabled_changed().await))
+    let status = map_or_ignoring_recoverable_error(
+        StatusProxy::builder(session_bus)
+            .destination(owner.clone())?
+            .build()
+            .await,
+        None,
+        Some,
+    )?;
+    match status {
+        Some(status) => Ok(Some(status.receive_is_enabled_changed().await)),
+        None => Ok(None),
+    }
 }
 
 async fn next_status_change(
@@ -227,7 +270,10 @@ async fn run_event_loop(
     let mut adapters: Vec<AdapterEntry> = Vec::new();
 
     enum Wake {
-        OwnerChanged,
+        OwnerChanged {
+            old: Option<String>,
+            new: Option<String>,
+        },
         Status(zbus::Result<bool>),
         Message(Option<Message>),
         Closed,
@@ -242,7 +288,16 @@ async fn run_event_loop(
             pin!(change);
             select! {
                 signal = owners.next() => {
-                    if signal.is_some() { Wake::OwnerChanged } else { Wake::Closed }
+                    match signal {
+                        Some(signal) => {
+                            let args = signal.args()?;
+                            Wake::OwnerChanged {
+                                old: args.old_owner().as_ref().map(|name| name.as_str().to_owned()),
+                                new: args.new_owner().as_ref().map(|name| name.as_str().to_owned()),
+                            }
+                        }
+                        None => Wake::Closed,
+                    }
                 }
                 change = change => {
                     Wake::Status(match change {
@@ -254,19 +309,43 @@ async fn run_event_loop(
             }
         };
         match wake {
-            Wake::OwnerChanged => {
+            Wake::OwnerChanged { old, new } => {
                 // The subscription and initial snapshot overlap. Always reconcile
                 // queued signals with the bus, rather than replaying a stale owner.
                 let next_owner = status_owner(&dbus).await?;
-                if next_owner != owner {
-                    atspi_bus = None;
-                    sync_adapters(&mut adapters, &atspi_bus);
+                // A->B->A can leave the snapshot unchanged while the worker
+                // was busy. The old/current owner still lost a generation;
+                // reconstruct once rather than retaining its former Bus/tree.
+                let current = owner.as_ref().map(|name| name.as_str());
+                let lost_current = old.as_deref() == current && new.as_deref() != current;
+                if next_owner != owner || lost_current {
+                    // Retire the old property observer before creating another
+                    // owner's proxy/cache; no queued old property is reused.
+                    drop(changes.take());
+                    retire_bus(
+                        &mut atspi_bus,
+                        &mut adapters,
+                        &get_or_init_messages(),
+                        &mut messages,
+                    )
+                    .await?;
                     owner = next_owner;
                     changes = status_changes(&session_bus, &owner).await?;
                 }
             }
             Wake::Status(enabled) => {
-                if enabled? {
+                let enabled = match enabled {
+                    Ok(enabled) => enabled,
+                    Err(error) if zbus_error_is_unrecoverable(&error) => return Err(error),
+                    Err(_) => {
+                        // The unique owner can disappear while its GetAll is
+                        // in flight. Retire its status stream, but keep the name
+                        // monitor/worker alive for the queued replacement.
+                        changes = None;
+                        false
+                    }
+                };
+                if enabled {
                     if atspi_bus.is_none() {
                         if let Some(owner) = &owner {
                             atspi_bus = map_or_ignoring_recoverable_error(
@@ -278,8 +357,13 @@ async fn run_event_loop(
                         }
                     }
                 } else {
-                    atspi_bus = None;
-                    sync_adapters(&mut adapters, &atspi_bus);
+                    retire_bus(
+                        &mut atspi_bus,
+                        &mut adapters,
+                        &get_or_init_messages(),
+                        &mut messages,
+                    )
+                    .await?;
                 }
             }
             Wake::Message(Some(message)) => {
@@ -296,6 +380,7 @@ async fn process_adapter_message(
     message: Message,
 ) -> zbus::Result<()> {
     match message {
+        Message::Fence => unreachable!("only retire_bus consumes a worker fence"),
         Message::AddAdapter {
             id,
             activation_handler,
@@ -314,8 +399,16 @@ async fn process_adapter_message(
             }
         }
         Message::RemoveAdapter { id } => {
-            if let Ok(index) = adapters.binary_search_by(|entry| entry.id.cmp(&id)) {
-                adapters.remove(index);
+            // IDs are allocated before AddAdapter is enqueued. Concurrent
+            // callers can enqueue them in a different order; retain FIFO child
+            // order and find the requested adapter without a sorted-ID premise.
+            if let Some(index) = adapters.iter().position(|entry| entry.id == id) {
+                let entry = adapters.remove(index);
+                // Adapter::drop can still own the final state Arc when its
+                // RemoveAdapter reaches us. Retire now, so that delayed Arc drop
+                // cannot produce an old callback behind a subsequent fence.
+                // Destroy, as upstream, does not call the deactivation handler.
+                deactivate_adapter_state(&entry.state);
             }
         }
         Message::RegisterInterfaces { node, interfaces } => {
@@ -396,3 +489,7 @@ fn lifecycle_type_layout() {
         std::mem::size_of::<AdapterEntry>(),
     );
 }
+
+#[cfg(all(test, not(feature = "tokio")))]
+#[path = "context_tests.rs"]
+mod tests;

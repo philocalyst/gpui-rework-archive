@@ -25,6 +25,10 @@ pub(crate) struct Callback {
 impl Callback {
     pub(crate) fn new() -> Self {
         let messages = get_or_init_messages();
+        Self::with_messages(messages)
+    }
+
+    pub(crate) fn with_messages(messages: Sender<Message>) -> Self {
         Self { messages }
     }
 
@@ -156,6 +160,19 @@ impl Adapter {
         adapter
     }
 
+    #[cfg(test)]
+    pub(crate) fn with_state_for_test(
+        id: usize,
+        messages: Sender<Message>,
+        state: Arc<Mutex<AdapterState>>,
+    ) -> Self {
+        Self {
+            id,
+            messages,
+            state,
+        }
+    }
+
     pub(crate) fn send_message(&self, message: Message) {
         #[cfg(not(feature = "tokio"))]
         let _ = self.messages.try_send(message);
@@ -206,7 +223,7 @@ impl Adapter {
                 let r#impl = AdapterImpl::with_wrapped_action_handler(
                     self.id,
                     get_or_init_app_context(),
-                    Callback::new(),
+                    Callback::with_messages(self.messages.clone()),
                     initial_state,
                     *is_window_focused,
                     *root_window_bounds,
@@ -244,6 +261,8 @@ impl Drop for Adapter {
 }
 
 pub(crate) enum Message {
+    // Only the worker emits/consumes this after retiring callback producers.
+    Fence,
     AddAdapter {
         id: usize,
         activation_handler: Box<dyn ActivationHandler + Send>,

@@ -1,0 +1,14 @@
+   Compiling accesskit_unix v0.24.0 (/tmp/gpui-a11y-monitor-control/reactivity/vendor/accesskit_unix)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.47s
+     Running tests/service_lifecycle.rs (gpui-a11y-target/debug/deps/service_lifecycle-4b95487a29a24dd6)
+
+running 1 test
+PROVIDER waiting_full_tree activation=1
+PROVIDER waiting_full_tree activation=2
+PROVIDER waiting_full_tree activation=3
+PROVIDER waiting_full_tree activation=4
+PROVIDER waiting_full_tree activation=5
+actual Adapter protocol: late initial-true -> action/update -> disable/re-enable -> blocked old registration/cache backlog + Pending + transient Add/Remove -> live true/true replacement -> stale-owner ignored -> blocked B/A/B owner cycle -> failed status owner recovery -> destroy
+test late_service_initial_true_disable_reenable_and_live_owner_replacement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.33s

@@ -1,0 +1,20 @@
+Upstream: accesskit_atspi_common0.21.0, crate checksum
+52c182f9c282ac9c5638d876d551d15e5f7d397ec263349a0c6a2b61595dd5e4.
+VCS:ce8164ba92995cfa86005b6259115e08c8244253, adapters/atspi-common.
+Registry sources preserve their copyright notices; license files come from
+that same VCS commit's repository root (shared with accesskit_unix).
+
+AppContext appends adapters in actual initial-tree completion order. Pending
+completion and concurrent creation can differ from ID order. adapter_index now
+returns Option<usize> from linear position, retaining append/desktop-child
+order. Removal and the two native index/cache callers use that actual position.
+No storage, field, retained tree/cache, synchronization primitive or allocation
+was added. Lookup costs O(number of windows), without a sorted-ID premise.
+
+Tests use actual Adapter/PlatformRoot to prove parent/cache indices and removal
+releasing the native tree for IDs9,3,7. The Unix protocol fixture additionally
+forces reverse Pending completion, concurrent public Adapter creation,
+reactivation, tagged removal preserving survivor order, and complete destroy.
+The registry control fails the parent-index and retained-child assertions.
+This is correctness evidence and contains no byte/RSS/startup improvement claim.
+See ../accesskit_unix/GPUI-PATCHES.md and ../../evidence/accesskit-lifecycle.

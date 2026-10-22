@@ -1,0 +1,25 @@
+
+running 1 test
+OWNER current=None old=None new=Some(":1.3") snapshot=Some(OwnedUniqueName(":1.3"))
+STATUS owner=Some(OwnedUniqueName(":1.3")) value=Ok(true)
+STATUS owner=Some(OwnedUniqueName(":1.3")) value=Ok(false)
+STATUS owner=Some(OwnedUniqueName(":1.3")) value=Ok(true)
+OWNER current=Some(":1.3") old=Some(":1.3") new=Some(":1.6") snapshot=Some(OwnedUniqueName(":1.6"))
+STATUS owner=Some(OwnedUniqueName(":1.6")) value=Ok(true)
+OWNER current=Some(":1.6") old=Some(":1.6") new=Some(":1.3") snapshot=Some(OwnedUniqueName(":1.3"))
+STATUS owner=Some(OwnedUniqueName(":1.3")) value=Ok(true)
+OWNER current=Some(":1.3") old=Some(":1.3") new=None snapshot=None
+
+thread 'late_service_initial_true_disable_reenable_and_live_owner_replacement' (3807859) panicked at tests/service_lifecycle.rs:391:5:
+assertion `left == right` failed: old unique owner disconnect
+  left: 4
+ right: 3
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test late_service_initial_true_disable_reenable_and_live_owner_replacement ... FAILED
+
+failures:
+
+failures:
+    late_service_initial_true_disable_reenable_and_live_owner_replacement
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.04s

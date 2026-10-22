@@ -31,6 +31,8 @@ const STATUS_PATH: &str = "/org/a11y/bus";
 
 struct Daemon(Child);
 impl Daemon {
+    // Synchronous test setup owns the private daemon through kill/wait at drop.
+    #[allow(clippy::disallowed_methods)]
     fn start() -> (Self, String) {
         let mut child = Command::new("dbus-daemon")
             .args(["--session", "--nofork", "--nopidfile", "--print-address=1"])
@@ -53,12 +55,20 @@ impl Drop for Daemon {
 
 struct Status {
     is_enabled: bool,
+    failed_reads: Option<Arc<AtomicUsize>>,
 }
 #[zbus::interface(name = "org.a11y.Status")]
 impl Status {
     #[zbus(property)]
-    fn is_enabled(&self) -> bool {
-        self.is_enabled
+    fn is_enabled(&self) -> zbus::fdo::Result<bool> {
+        if let Some(count) = &self.failed_reads {
+            count.fetch_add(1, Ordering::SeqCst);
+            Err(zbus::fdo::Error::Failed(
+                "fixture status owner unavailable".to_owned(),
+            ))
+        } else {
+            Ok(self.is_enabled)
+        }
     }
     #[zbus(property)]
     fn set_is_enabled(&mut self, value: bool) {
@@ -84,6 +94,14 @@ impl Registry {
     }
 }
 fn service(address: &str, enabled: bool, replace: bool) -> Connection {
+    service_status(address, enabled, replace, None)
+}
+fn service_status(
+    address: &str,
+    enabled: bool,
+    replace: bool,
+    failed_reads: Option<Arc<AtomicUsize>>,
+) -> Connection {
     Builder::address(address)
         .unwrap()
         .allow_name_replacements(true)
@@ -94,6 +112,7 @@ fn service(address: &str, enabled: bool, replace: bool) -> Connection {
             STATUS_PATH,
             Status {
                 is_enabled: enabled,
+                failed_reads,
             },
         )
         .unwrap()
@@ -148,6 +167,75 @@ impl ActionHandler for Handlers {
         self.0.actions.fetch_add(1, Ordering::SeqCst);
     }
 }
+// Blocks the worker in an actual second Adapter's initial-tree callback while
+// the first Adapter queues old RegisterInterfaces/EmitCacheAdd payloads.
+struct GatedActivation {
+    gate: Option<(mpsc::Sender<()>, mpsc::Receiver<()>)>,
+    counts: Arc<Counts>,
+}
+impl ActivationHandler for GatedActivation {
+    fn request_initial_tree(&mut self) -> Option<TreeUpdate> {
+        self.counts.activated.fetch_add(1, Ordering::SeqCst);
+        if let Some((entered, release)) = self.gate.take() {
+            entered.send(()).unwrap();
+            release.recv_timeout(Duration::from_secs(8)).unwrap();
+        }
+        None
+    }
+}
+
+struct TaggedActivation {
+    tag: usize,
+    counts: Arc<Counts>,
+}
+impl ActivationHandler for TaggedActivation {
+    fn request_initial_tree(&mut self) -> Option<TreeUpdate> {
+        self.counts.activated.fetch_add(1, Ordering::SeqCst);
+        Some(tree(self.tag, "press"))
+    }
+}
+fn new_pending_adapter() -> (Adapter, Arc<Counts>) {
+    let counts = Arc::new(Counts::default());
+    let handlers = Handlers(counts.clone());
+    let adapter = Adapter::new(
+        GatedActivation {
+            gate: None,
+            counts: counts.clone(),
+        },
+        handlers.clone(),
+        handlers,
+    );
+    (adapter, counts)
+}
+fn window_names(client: &Connection, root: &Address) -> Option<Vec<(Address, String)>> {
+    children(client, root)
+        .ok()?
+        .into_iter()
+        .map(|node| {
+            let name = proxy(client, &node, "org.a11y.atspi.Accessible")
+                .get_property::<String>("Name")
+                .ok()?;
+            Some((node, name))
+        })
+        .collect()
+}
+fn assert_windows(client: &Connection, root: &Address, expected: &[String]) {
+    let windows = wait_for("exact desktop children", || {
+        let windows = window_names(client, root)?;
+        let names = windows
+            .iter()
+            .map(|(_, name)| name.as_str())
+            .collect::<Vec<_>>();
+        (names == expected.iter().map(String::as_str).collect::<Vec<_>>()).then_some(windows)
+    });
+    for (index, (node, _)) in windows.iter().enumerate() {
+        let actual: i32 = proxy(client, node, "org.a11y.atspi.Accessible")
+            .call("GetIndexInParent", &())
+            .unwrap();
+        assert_eq!(actual, index as i32, "native desktop child ordinal");
+    }
+}
+
 fn wait_for<T>(label: &str, mut predicate: impl FnMut() -> Option<T>) -> T {
     let deadline = Instant::now() + Duration::from_secs(8);
     loop {
@@ -169,6 +257,7 @@ fn published(
     embeds: &mpsc::Receiver<Address>,
     generation: usize,
 ) -> (Address, Address) {
+    println!("PROVIDER waiting_full_tree activation={generation}");
     let root = embeds
         .recv_timeout(Duration::from_secs(8))
         .expect("application Embed");
@@ -254,9 +343,67 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     let (_second_root, second_button) = published(&client, &embeds, 2);
     invoke(&client, &second_button, &counts, 2);
 
+    let (entered_tx, entered_rx) = mpsc::channel();
+    let (release_tx, release_rx) = mpsc::channel();
+    let pending_counts = Arc::new(Counts::default());
+    let pending_handlers = Handlers(pending_counts.clone());
+    let pending_adapter = Adapter::new(
+        GatedActivation {
+            gate: Some((entered_tx, release_rx)),
+            counts: pending_counts.clone(),
+        },
+        pending_handlers.clone(),
+        pending_handlers,
+    );
+    entered_rx.recv_timeout(Duration::from_secs(8)).unwrap();
+    // These obsolete node IDs must have no interface on the replacement Bus.
+    // The worker is blocked, so all registrations/cache additions are queued
+    // before the owner replacement, rather than merely racing an idle monitor.
+    const LAST_OBSOLETE: u64 = 1026;
+    adapter.update_if_active(|| {
+        let mut update = tree(2, "press");
+        update.nodes[0]
+            .1
+            .set_children((2..=LAST_OBSOLETE).map(NodeId).collect::<Vec<_>>());
+        for id in 3..=LAST_OBSOLETE {
+            let mut node = Node::new(Role::Button);
+            node.set_label(format!("obsolete {id}"));
+            update.nodes.push((NodeId(id), node));
+        }
+        update
+    });
+    // Controls are queued alongside that backlog while Bus construction cannot
+    // progress. The transient adapter must leave no replacement desktop child.
+    let transient_handlers = Handlers(Arc::new(Counts::default()));
+    let transient = Adapter::new(
+        transient_handlers.clone(),
+        transient_handlers.clone(),
+        transient_handlers,
+    );
+    drop(transient);
     // Direct true->true replacement while old unique owner stays connected.
     let replacement = service(&address, true, true);
+    release_tx.send(()).unwrap();
     let (new_root, new_button) = published(&client, &embeds, 3);
+    assert_eq!(children(&client, &new_root).unwrap().len(), 1);
+    assert_eq!(pending_counts.activated.load(Ordering::SeqCst), 2);
+    assert_eq!(pending_counts.deactivated.load(Ordering::SeqCst), 1);
+    let node_prefix = second_button.1.as_str().rsplit_once('/').unwrap().0;
+    for id in 3..=LAST_OBSOLETE {
+        let stale: Address = (
+            new_root.0.clone(),
+            format!("{node_prefix}/{}", u128::from(id) << 64)
+                .try_into()
+                .unwrap(),
+        );
+        let xml = proxy(&client, &stale, "org.freedesktop.DBus.Introspectable")
+            .call::<_, _, String>("Introspect", &());
+        assert!(
+            !xml.is_ok_and(|xml| xml.contains("org.a11y.atspi.Accessible")),
+            "obsolete registration {id} crossed into replacement Bus"
+        );
+    }
+    drop(pending_adapter);
     assert_ne!(
         old_root.0, new_root.0,
         "replacement must own a fresh AT-SPI connection"
@@ -277,20 +424,232 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
         2,
         "stale old-owner properties"
     );
+    // Force B->A->B entirely while the worker is blocked. A fresh owner
+    // snapshot is still B, but the queued loss of B must retire its generation.
+    let (entered_tx, entered_rx) = mpsc::channel();
+    let (release_tx, release_rx) = mpsc::channel();
+    let gate_counts = Arc::new(Counts::default());
+    let gate_handlers = Handlers(gate_counts.clone());
+    let gate_adapter = Adapter::new(
+        GatedActivation {
+            gate: Some((entered_tx, release_rx)),
+            counts: gate_counts,
+        },
+        gate_handlers.clone(),
+        gate_handlers,
+    );
+    entered_rx.recv_timeout(Duration::from_secs(8)).unwrap();
+    let flags = zbus::fdo::RequestNameFlags::AllowReplacement
+        | zbus::fdo::RequestNameFlags::ReplaceExisting
+        | zbus::fdo::RequestNameFlags::DoNotQueue;
+    // Use the actual DBus.RequestName call here. zbus's convenience method
+    // can return AlreadyOwner from its local cache before NameLost is handled,
+    // which would silently fail to create the required B->A->B schedule.
+    for service in [&old_service, &replacement] {
+        let dbus = Proxy::new(
+            service,
+            "org.freedesktop.DBus",
+            "/org/freedesktop/DBus",
+            "org.freedesktop.DBus",
+        )
+        .unwrap();
+        let reply: u32 = dbus
+            .call("RequestName", &("org.a11y.Bus", flags.bits()))
+            .unwrap();
+        assert_eq!(
+            reply, 1,
+            "fixture must actually replace the well-known owner"
+        );
+    }
+    let actual_owner: String = Proxy::new(
+        &client,
+        "org.freedesktop.DBus",
+        "/org/freedesktop/DBus",
+        "org.freedesktop.DBus",
+    )
+    .unwrap()
+    .call("GetNameOwner", &("org.a11y.Bus",))
+    .unwrap();
+    assert_eq!(actual_owner, replacement.unique_name().unwrap().as_str());
+    release_tx.send(()).unwrap();
+    let (cycle_root, cycle_button) = published(&client, &embeds, 4);
+    assert_ne!(
+        cycle_root.0, new_root.0,
+        "snapshot-equal owner cycle must reconstruct Bus"
+    );
+    invoke(&client, &cycle_button, &counts, 4);
+    assert_eq!(counts.deactivated.load(Ordering::SeqCst), 3);
+    drop(gate_adapter);
+    let new_root = cycle_root;
     drop(old_service);
     thread::sleep(Duration::from_millis(100));
     assert_eq!(
         counts.deactivated.load(Ordering::SeqCst),
-        2,
+        3,
         "old unique owner disconnect"
     );
 
+    // A property cache/GetAll failure must not kill the process-global worker.
+    // A subsequent unique owner still gets a fresh full tree and real action.
+    let failed_reads = Arc::new(AtomicUsize::new(0));
+    let _broken = service_status(&address, true, true, Some(failed_reads.clone()));
+    wait_for("broken owner's GetAll", || {
+        (failed_reads.load(Ordering::SeqCst) > 0).then_some(())
+    });
+    thread::sleep(Duration::from_millis(100));
+    assert_eq!(counts.deactivated.load(Ordering::SeqCst), 4);
+    let _restored = service(&address, true, true);
+    let (restored_root, restored_button) = published(&client, &embeds, 5);
+    assert_ne!(restored_root.0, new_root.0);
+    invoke(&client, &restored_button, &counts, 5);
+
+    // Initial tree completion order can differ from creation/Add order even
+    // without concurrent construction. Keep actual append/desktop ordinals.
+    let (mut low, low_counts) = new_pending_adapter();
+    let (mut high, high_counts) = new_pending_adapter();
+    wait_for("two Pending activations", || {
+        (low_counts.activated.load(Ordering::SeqCst) == 1
+            && high_counts.activated.load(Ordering::SeqCst) == 1)
+            .then_some(())
+    });
+    high.update_if_active(|| tree(22, "press"));
+    low.update_if_active(|| tree(21, "press"));
+    assert_windows(
+        &client,
+        &restored_root,
+        &[
+            "generation 5".into(),
+            "generation 22".into(),
+            "generation 21".into(),
+        ],
+    );
+    set_enabled(&client, "org.a11y.Bus", false);
+    wait_for("all Active generations retired", || {
+        (counts.deactivated.load(Ordering::SeqCst) == 5
+            && low_counts.deactivated.load(Ordering::SeqCst) == 1
+            && high_counts.deactivated.load(Ordering::SeqCst) == 1)
+            .then_some(())
+    });
+    set_enabled(&client, "org.a11y.Bus", true);
+    let (reactivated_root, reactivated_button) = published(&client, &embeds, 6);
+    wait_for("two reactivated Pending states", || {
+        (low_counts.activated.load(Ordering::SeqCst) == 2
+            && high_counts.activated.load(Ordering::SeqCst) == 2)
+            .then_some(())
+    });
+    high.update_if_active(|| tree(22, "press"));
+    low.update_if_active(|| tree(21, "press"));
+    assert_windows(
+        &client,
+        &reactivated_root,
+        &[
+            "generation 6".into(),
+            "generation 22".into(),
+            "generation 21".into(),
+        ],
+    );
+    drop(high);
+    assert_windows(
+        &client,
+        &reactivated_root,
+        &["generation 6".into(), "generation 21".into()],
+    );
+    drop(low);
+    assert_windows(&client, &reactivated_root, &["generation 6".into()]);
+
+    invoke(&client, &reactivated_button, &counts, 6);
+
+    // Race actual public Adapter creation on four callers, then remove a
+    // particular tagged adapter and preserve the remaining desktop-child order.
+    let start = Arc::new(std::sync::Barrier::new(5));
+    let creators = (0..4)
+        .map(|tag| {
+            let start = start.clone();
+            thread::spawn(move || {
+                let counts = Arc::new(Counts::default());
+                let handlers = Handlers(counts.clone());
+                start.wait();
+                let adapter = Adapter::new(
+                    TaggedActivation {
+                        tag: 100 + tag,
+                        counts: counts.clone(),
+                    },
+                    handlers.clone(),
+                    handlers,
+                );
+                (adapter, counts)
+            })
+        })
+        .collect::<Vec<_>>();
+    start.wait();
+    let mut concurrent = creators
+        .into_iter()
+        .map(|creator| creator.join().unwrap())
+        .collect::<Vec<_>>();
+    wait_for("all concurrent actual adapters active", || {
+        concurrent
+            .iter()
+            .all(|(_, counts)| counts.activated.load(Ordering::SeqCst) == 1)
+            .then_some(())
+    });
+    let order = wait_for("all concurrent native children", || {
+        let windows = window_names(&client, &reactivated_root)?;
+        (windows.len() == 5).then(|| {
+            windows
+                .into_iter()
+                .map(|(_, name)| name)
+                .collect::<Vec<_>>()
+        })
+    });
+    assert_windows(&client, &reactivated_root, &order);
+    set_enabled(&client, "org.a11y.Bus", false);
+    wait_for("concurrent adapter deactivation", || {
+        (counts.deactivated.load(Ordering::SeqCst) == 6
+            && concurrent
+                .iter()
+                .all(|(_, counts)| counts.deactivated.load(Ordering::SeqCst) == 1))
+        .then_some(())
+    });
+    set_enabled(&client, "org.a11y.Bus", true);
+    let (reactivated_root, reactivated_button) = published(&client, &embeds, 7);
+    wait_for("concurrent adapter reactivation", || {
+        concurrent
+            .iter()
+            .all(|(_, counts)| counts.activated.load(Ordering::SeqCst) == 2)
+            .then_some(())
+    });
+    let order = order
+        .into_iter()
+        .map(|name| {
+            if name == "generation 6" {
+                "generation 7".into()
+            } else {
+                name
+            }
+        })
+        .collect::<Vec<_>>();
+    assert_windows(&client, &reactivated_root, &order);
+    drop(concurrent.remove(1)); // creator tag101, independently of actual Add order
+    let remaining = order
+        .into_iter()
+        .filter(|name| name != "generation 101")
+        .collect::<Vec<_>>();
+    assert_eq!(remaining.len(), 4);
+    assert_windows(&client, &reactivated_root, &remaining);
+    drop(concurrent);
+    assert_windows(&client, &reactivated_root, &["generation 7".into()]);
+    invoke(&client, &reactivated_button, &counts, 7);
+    assert_eq!(counts.activated.load(Ordering::SeqCst), 7);
+    assert_eq!(counts.deactivated.load(Ordering::SeqCst), 6);
     drop(adapter);
     wait_for("adapter destroy removes native window", || {
-        children(&client, &new_root).ok()?.is_empty().then_some(())
+        children(&client, &reactivated_root)
+            .ok()?
+            .is_empty()
+            .then_some(())
     });
     drop(replacement);
     println!(
-        "actual Adapter protocol: late initial-true -> action/update -> disable/re-enable -> live true/true replacement -> stale-owner ignored -> destroy"
+        "actual Adapter protocol: late initial-true -> action/update -> disable/re-enable -> blocked old registration/cache backlog + Pending + transient Add/Remove -> live true/true replacement -> stale-owner ignored -> blocked B/A/B owner cycle -> failed status owner recovery -> reverse Pending + reactivation + concurrent adapters/desktop ordinals -> destroy"
     );
 }
