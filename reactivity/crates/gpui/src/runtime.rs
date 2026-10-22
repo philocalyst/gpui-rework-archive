@@ -2034,6 +2034,10 @@ impl<M: View + 'static> Runtime<M> {
         self.list_rows = list_rows;
         self.nodes = nodes;
         self.styles = styles.finish();
+        // A replacement source bank has no authority over the preceding
+        // Canvas slots, even if every effective value and binding is equal.
+        // Rebuild the complete commands before admitting another slot patch.
+        self.dirty |= matches!(self.styles, styles::Styles::Colors(_));
         self.texts = texts;
         for (field, slot) in color_fields {
             let entry = fanout.get_mut(&field).expect("registered color fanout");
