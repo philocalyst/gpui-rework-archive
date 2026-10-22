@@ -1,8 +1,5 @@
 //! Compound input publishes one coherent candidate, including caret visibility.
-use gpui::{
-    Action, BindError, CaretAffinity, Error, Key, TextOffset, TextPosition, TextSelection,
-    prelude::*,
-};
+use gpui::{Action, BindError, Error, Key, TextSelection, prelude::*};
 
 struct Page {
     value: Signal<String>,
@@ -75,14 +72,7 @@ impl View for Page {
     }
 }
 fn range(anchor: usize, focus: usize) -> TextSelection {
-    let position = |byte| TextPosition {
-        offset: TextOffset::new(byte).unwrap(),
-        affinity: CaretAffinity::Downstream,
-    };
-    TextSelection {
-        anchor: position(anchor),
-        focus: position(focus),
-    }
+    TextSelection::from_bytes(anchor, focus).unwrap()
 }
 fn focused() -> Win<Page> {
     let mut win = Win::demo(Page::default());

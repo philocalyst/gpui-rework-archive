@@ -1,19 +1,27 @@
 //! Selection and source repair use the ordinary exclusive production owner.
-use gpui::{
-    Action, CaretAffinity as A, Error, Key, TextOffset, TextPosition, TextSelection, WindowOptions,
-    prelude::*,
-};
+use gpui::{Action, CaretAffinity as A, Error, Key, TextSelection, WindowOptions, prelude::*};
 
-fn position(byte: usize) -> TextPosition {
-    TextPosition {
-        offset: TextOffset::new(byte).unwrap(),
-        affinity: A::Downstream,
-    }
-}
 fn range(anchor: usize, focus: usize) -> TextSelection {
-    TextSelection {
-        anchor: position(anchor),
-        focus: position(focus),
+    TextSelection::from_bytes(anchor, focus).unwrap()
+}
+
+#[test]
+fn byte_selection_construction_preserves_direction_and_checks_representation() {
+    const REVERSE: TextSelection = TextSelection::from_bytes(7, 0).unwrap();
+    const CARET: TextSelection = TextSelection::caret(7).unwrap();
+    assert_eq!(
+        (REVERSE.anchor.offset.byte(), REVERSE.focus.offset.byte()),
+        (7, 0)
+    );
+    assert_eq!(CARET.anchor, CARET.focus);
+    assert_eq!(CARET.anchor, REVERSE.anchor);
+    assert_eq!(CARET.focus.affinity, A::Downstream);
+    #[cfg(target_pointer_width = "64")]
+    {
+        let outside = u32::MAX as usize + 1;
+        assert!(TextSelection::from_bytes(outside, 0).is_none());
+        assert!(TextSelection::from_bytes(0, outside).is_none());
+        assert!(TextSelection::caret(outside).is_none());
     }
 }
 

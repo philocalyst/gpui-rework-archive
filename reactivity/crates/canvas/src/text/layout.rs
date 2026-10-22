@@ -8,10 +8,14 @@ mod interaction;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TextOffset(u32);
 impl TextOffset {
-    pub fn new(byte: usize) -> Option<Self> {
-        u32::try_from(byte).ok().map(Self)
+    pub const fn new(byte: usize) -> Option<Self> {
+        if byte > u32::MAX as usize {
+            None
+        } else {
+            Some(Self(byte as u32))
+        }
     }
-    pub fn byte(self) -> usize {
+    pub const fn byte(self) -> usize {
         self.0 as usize
     }
 }
@@ -29,6 +33,30 @@ pub struct TextPosition {
 pub struct TextSelection {
     pub anchor: TextPosition,
     pub focus: TextPosition,
+}
+impl TextSelection {
+    /// Directed UTF-8 byte endpoints, both with downstream affinity. Returns
+    /// None only for an unrepresentable offset; the editor validates these
+    /// endpoints against its current text and grapheme boundaries when applied.
+    pub const fn from_bytes(anchor: usize, focus: usize) -> Option<Self> {
+        let (Some(anchor), Some(focus)) = (TextOffset::new(anchor), TextOffset::new(focus)) else {
+            return None;
+        };
+        Some(Self {
+            anchor: TextPosition {
+                offset: anchor,
+                affinity: CaretAffinity::Downstream,
+            },
+            focus: TextPosition {
+                offset: focus,
+                affinity: CaretAffinity::Downstream,
+            },
+        })
+    }
+    /// A collapsed downstream caret, with the same admission as `from_bytes`.
+    pub const fn caret(byte: usize) -> Option<Self> {
+        Self::from_bytes(byte, byte)
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextDirection {
