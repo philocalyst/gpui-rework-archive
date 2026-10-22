@@ -67,7 +67,7 @@ fn source_runs<B: Brush>(line: &Line<'_, B>, slots: &mut Vec<RunSlot>) -> Option
             if slots[item.index - min].item != u32::MAX {
                 return None;
             }
-            slots[item.index - min].item = position as u32;
+            slots[item.index - min].item = u32::try_from(position).ok()?;
         }
     }
     Some(min)
