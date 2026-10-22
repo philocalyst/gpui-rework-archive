@@ -76,14 +76,18 @@ The selected 12-byte map's separate query controls charge +3.1% long local and
 +4.8% whole-selection time against trimmed 24-byte records; the 8-byte alternative
 is unadopted. These are measured complete-owner results and qualified tradeoffs.
 
-The later [surface owner removal](evidence/surface-config-owner/README.md) and
-[controlled checkbox](evidence/typed-checkbox/README.md) are integrated from
-separately qualified producer sources. GpuSurface shrinks 1,072→1,008 bytes on
-the matched 64-bit native build; this is no RSS claim. Checkbox identity/focus,
-acknowledged state, sparse/full payload equivalence and actual native checked
-state/action events pass. Their main combined qualification is in progress;
-these producer results do not retag the earlier combined source. The transform
-factorization and contained inspector editor remain isolated work.
+The later [combined checkbox/surface campaign](evidence/checkbox-config-main/README.md)
+pins source `f490974fdc`: 542 GPUI cases/docs (28 ignored), strict all-target
+checks, formatting, Apple/Windows desktop/parallel/optional-shader compilation,
+nine Hummingbird and five external catalog cases pass. Actual native GPU,
+Registry Unicode geometry/edit/lifecycle, checkbox role/action/state events,
+Future wake and cold blank-to-GPU handoff pass. All 2,014 source guards,
+executable digests and owned-process cleanup checks hold.
+[Surface owner removal](evidence/surface-config-owner/README.md) measures
+GpuSurface 1,072→1,008 bytes at its separate 64-bit producer pin, with no RSS
+claim. [Checkbox identity/focus and sparse/full payload evidence](evidence/typed-checkbox/README.md)
+retains its own producer pins. The transform factorization and contained
+inspector editor remain isolated work.
 
 The [combined text/Future/native campaign](evidence/text-main-integration/README.md)
 pins main source `007f10ccbd`: 529 GPUI cases/docs (27 ignored), strict checks,
