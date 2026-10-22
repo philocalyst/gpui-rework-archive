@@ -70,6 +70,71 @@ fn reflect(
         .collect::<Vec<_>>();
     stages.sort_by_key(|v| v.0);
     assert_eq!(stages, expected);
+    // Check both source and reparsed SPIR-V, including scalar class/width.
+    // No user varyings/depth output may make HAL's other stage options relevant.
+    for ep in &module.entry_points {
+        assert_eq!(ep.function.arguments.len(), 1);
+        let argument = &ep.function.arguments[0];
+        let output = ep.function.result.as_ref().unwrap();
+        let position = Some(naga::Binding::BuiltIn(naga::BuiltIn::Position {
+            invariant: false,
+        }));
+        match ep.stage {
+            ShaderStage::Vertex => {
+                assert_eq!(
+                    argument.binding,
+                    Some(naga::Binding::BuiltIn(naga::BuiltIn::VertexIndex))
+                );
+                assert_eq!(
+                    module.types[argument.ty].inner,
+                    TypeInner::Scalar(naga::Scalar::U32)
+                );
+            }
+            ShaderStage::Fragment => {
+                assert_eq!(argument.binding, position);
+                vector(module, argument.ty, V::Quad, K::Float);
+            }
+            _ => unreachable!(),
+        }
+        let output_type = if ep.stage == ShaderStage::Vertex && output.binding.is_none() {
+            // FORCE_POINT_SIZE adds this exact builtin to the SPIR-V vertex
+            // result; the source instead returns Position directly.
+            let TypeInner::Struct { members, span } = &module.types[output.ty].inner else {
+                panic!("vertex result interface")
+            };
+            assert_eq!(*span, 32);
+            assert_eq!(members.len(), 2);
+            assert_eq!(members[0].offset, 0);
+            assert_eq!(members[0].binding, position);
+            assert_eq!(members[1].offset, 16);
+            assert_eq!(
+                members[1].binding,
+                Some(naga::Binding::BuiltIn(naga::BuiltIn::PointSize))
+            );
+            assert_eq!(
+                module.types[members[1].ty].inner,
+                TypeInner::Scalar(naga::Scalar::F32)
+            );
+            members[0].ty
+        } else {
+            assert_eq!(
+                output.binding,
+                if ep.stage == ShaderStage::Vertex {
+                    position
+                } else {
+                    Some(naga::Binding::Location {
+                        location: 0,
+                        interpolation: None,
+                        sampling: None,
+                        blend_src: None,
+                        per_primitive: false,
+                    })
+                }
+            );
+            output.ty
+        };
+        vector(module, output_type, V::Quad, K::Float);
+    }
     let mut result = Vec::new();
     for (handle, global) in module.global_variables.iter() {
         assert_ne!(global.space, AddressSpace::WorkGroup);
@@ -247,35 +312,6 @@ pub fn generate(source: &str, out: &Path) {
     let version = String::from_utf8(version.stdout).unwrap();
     let module = naga::front::wgsl::parse_str(source).expect("parse exact typed ui.wgsl");
     let info = validate(&module);
-    // No user varyings, depth output, or workgroup/override state can make the
-    // platform's label, depth-clamp or workgroup-init choices relevant here.
-    for ep in &module.entry_points {
-        assert_eq!(ep.function.arguments.len(), 1);
-        let result = ep.function.result.as_ref().unwrap();
-        match ep.stage {
-            ShaderStage::Vertex => {
-                assert!(matches!(
-                    ep.function.arguments[0].binding,
-                    Some(naga::Binding::BuiltIn(naga::BuiltIn::VertexIndex))
-                ));
-                assert!(matches!(
-                    result.binding,
-                    Some(naga::Binding::BuiltIn(naga::BuiltIn::Position { .. }))
-                ));
-            }
-            ShaderStage::Fragment => {
-                assert!(matches!(
-                    ep.function.arguments[0].binding,
-                    Some(naga::Binding::BuiltIn(naga::BuiltIn::Position { .. }))
-                ));
-                assert!(matches!(
-                    result.binding,
-                    Some(naga::Binding::Location { location: 0, .. })
-                ));
-            }
-            _ => unreachable!(),
-        }
-    }
     let bindings = reflect(
         &module,
         &info,
@@ -472,6 +508,29 @@ mod tests {
     use super::*;
     fn source() -> String {
         std::fs::read_to_string(std::env::var_os("GPUI_PROOF_WGSL").unwrap()).unwrap()
+    }
+    #[test]
+    fn valid_integer_or_narrow_fragment_output_cannot_pass_stage_interface_proof() {
+        let source = source();
+        let (prefix, _) = source.split_once("@fragment fn fragment(").unwrap();
+        for (ty, value) in [("vec4u", "vec4u(0u)"), ("vec2f", "vec2f(0.0)")] {
+            let changed = format!(
+                "{prefix}@fragment fn fragment(@builtin(position) p: vec4f) -> @location(0) {ty} {{ return {value}; }}"
+            );
+            let module = naga::front::wgsl::parse_str(&changed).unwrap();
+            let info = validate(&module); // The control is valid Naga, not a type-error rejection.
+            assert!(
+                std::panic::catch_unwind(|| reflect(
+                    &module,
+                    &info,
+                    &[
+                        ("fragment", ShaderStage::Fragment),
+                        ("vertex", ShaderStage::Vertex)
+                    ]
+                ))
+                .is_err()
+            );
+        }
     }
     #[test]
     fn changed_binding_cannot_keep_the_generated_host_layout() {
