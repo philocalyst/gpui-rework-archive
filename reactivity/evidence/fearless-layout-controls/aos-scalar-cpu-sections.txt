@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-aos-scalar-bench-target/release/examples/cpu  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1968       856
+.gnu.version            164      2824
+.gnu.version_r          400      2988
+.gnu.hash                28      3392
+.dynstr                1219      3420
+.rela.dyn            153792      4640
+.rela.plt                48    158432
+.gcc_except_table     36416    158480
+.rodata             4446448    194896
+.eh_frame_hdr         24236   4641344
+.eh_frame            159120   4665584
+.text               2281495   4828800
+.init                    27   7110296
+.fini                    13   7110324
+.plt                     48   7110352
+.tdata                   32   7114496
+.tbss                    72   7114528
+.fini_array               8   7114528
+.init_array              16   7114536
+.data.rel.ro         114248   7114552
+.dynamic                480   7228800
+.got                  10648   7229280
+.got.plt                 40   7239928
+.relro_padding         1760   7239968
+.tm_clone_table           0   7244064
+.data                  5664   7244064
+.bss                    283   7249728
+.comment                157         0
+Total               7238945
+
+

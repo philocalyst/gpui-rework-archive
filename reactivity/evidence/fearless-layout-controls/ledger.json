@@ -1,0 +1,37 @@
+{
+  "foundation_source": "2bebb1ce58",
+  "aos_source": "8e29a3d7f3",
+  "soa_source": "d4166fd673",
+  "decision": "Reject adopting either wide-batch layout from these measurements. Proceed with a new candidate from the shared foundation that targets coordinate membership and compact source presence. No whole-application SIMD performance win is claimed from these layouts.",
+  "controls": "Five isolated Cargo target directories, each with an explicit Canvas clean then fresh=false library/examples builds. Source, rlib, and executable hashes checked before/after the complete timing window; executable hashes checked before/after each process. Root coordinated the 18.19s quiet window after all agents reported idle. Three interleaved rounds, 1260 rows, exact image hashes and CPU structural stats match.",
+  "invalid_capture": "paired-timing-invalid-shared-alias.tar.gz is excluded from every layout or performance conclusion. Shared target unqualified example aliases were overwritten by other worktrees; identity audit showed two labels had identical executable hashes. Rebuilt all controls in isolated target dirs, retaining the failed capture and repair provenance.",
+  "valid_findings": "SoA improves only uncompressed full-overlap controls to about0.565x baseline time; AoS about0.75x. Ordinary proof-enabled flat/opaque/labels remain roughly0.98-1.00x. Both layouts regress transformed primitives around1.08x and whole images materially: AoS roughly1.14-1.40x and SoA1.14-1.46x. No-proof labels roughly1.14-1.15x. See exact raw medians/ratios; small differences near1 are not asserted wins.",
+  "limitations": [
+    "Three process rounds and eight warmed image frames/process; these are host CPU canvas controls, not independent application/user interaction measurements.",
+    "Root requests a separate original-versus-foundation normal/Fallback comparison before promoting the foundation; that result is still pending.",
+    "No AVX512/NEON execution is claimed. All supported host kernel backends pass exact working-bit/full-scene tests; SoA Apple/MSVC normal/Fallback type checks pass.",
+    "Image helpers and exact sample reduction are included in complete timing costs; microkernel arithmetic is not used to excuse whole-image regressions."
+  ],
+  "linked": {
+    "baseline": {
+      "text_bytes": 2293975,
+      "binary_sha256": "0fcdbddebad74cfbcbbb811aede9dee08bafc093b84f1f07bffaf478ed752a46"
+    },
+    "aos": {
+      "text_bytes": 2294311,
+      "binary_sha256": "ca36048cef2dc09949ff5871c22240050b411bc1a4b158658f901ae245efe0ec"
+    },
+    "soa": {
+      "text_bytes": 2305351,
+      "binary_sha256": "deee030fc3f2c49c472e24472583ae673cb6dd0b13b6cbc2c2916e6bd5d22ec4"
+    },
+    "aos-scalar": {
+      "text_bytes": 2281495,
+      "binary_sha256": "ab09611eb020c904e5650c06fb8832301c8b83d17d306be0a47f1b2090c48d70"
+    },
+    "soa-scalar": {
+      "text_bytes": 2305879,
+      "binary_sha256": "2812bcd2a0704cba5a1ed4a880d2d15f076f2829b1b14bc3948ad128323ee21d"
+    }
+  }
+}

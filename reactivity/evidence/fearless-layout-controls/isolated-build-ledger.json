@@ -1,0 +1,190 @@
+[
+  {
+    "name": "baseline",
+    "source": "/tmp/gpui-fearless-baseline",
+    "source_commit": "05af5841e15cdddd9f0bce62b9f35ccc9966c312",
+    "simd": false,
+    "target": "/tmp/gpui-fearless-baseline-bench-target",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "/tmp/gpui-fearless-baseline/reactivity/Cargo.toml",
+      "-p",
+      "gpui_canvas",
+      "--release",
+      "--example",
+      "cpu",
+      "--example",
+      "image_axis",
+      "--message-format=json",
+      "--no-default-features"
+    ],
+    "artifact_files": {
+      "/tmp/gpui-fearless-baseline-bench-target/release/deps/libgpui_canvas-857fc8a82b4eccac.rlib": "95f302eb0cc7664e86be4010c89db6674241749cc5d97f59be0ea499283465ba",
+      "/tmp/gpui-fearless-baseline-bench-target/release/examples/image_axis": "dd8c42b785b373103617f716021374f3bc0940dd561cf07283969352b4ac3396",
+      "/tmp/gpui-fearless-baseline-bench-target/release/examples/cpu": "0fcdbddebad74cfbcbbb811aede9dee08bafc093b84f1f07bffaf478ed752a46"
+    },
+    "source_files": {
+      "/tmp/gpui-fearless-baseline/reactivity/crates/canvas/src/canvas.rs": "ae47de684852b8f15a000870b14f70a30594bc3ba7f50a290be3a436b82437b7",
+      "/tmp/gpui-fearless-baseline/reactivity/crates/canvas/src/canvas/samples.rs": "52b67f7bbf1bc4cde6f275e2c4e6d3f25c3fde15093f2391e8f1bf1a8ddf24eb",
+      "/tmp/gpui-fearless-baseline/reactivity/crates/canvas/src/canvas/image_axis.rs": "58a628d2d45334cc61cef73631e93f3dfa46884160bb0a3150f8c3a486f1d838",
+      "/tmp/gpui-fearless-baseline/reactivity/crates/canvas/examples/cpu.rs": "2c6116a1c30d3cb704adbcd5903c170e5bcebe4d3fa708418263ec6a0a5fc233",
+      "/tmp/gpui-fearless-baseline/reactivity/crates/canvas/examples/image_axis.rs": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+      "/tmp/gpui-fearless-baseline/reactivity/crates/canvas/Cargo.toml": "298a962a38b905bdeb7af776ce5ab0b3a9ea8893b65714e8d0f6b5329a7860d3"
+    },
+    "build_json_sha256": "52c0ce8984ccbcf25b7b0c6040ab5335fcb39a8cc50c641d355376e2bf698a77"
+  },
+  {
+    "name": "aos",
+    "source": "/tmp/gpui-fearless-aos-source",
+    "source_commit": "8e29a3d7f3647dfece69d65b335dce74ce65ce1d",
+    "simd": true,
+    "target": "/tmp/gpui-fearless-aos-bench-target",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "/tmp/gpui-fearless-aos-source/reactivity/Cargo.toml",
+      "-p",
+      "gpui_canvas",
+      "--release",
+      "--example",
+      "cpu",
+      "--example",
+      "image_axis",
+      "--message-format=json"
+    ],
+    "artifact_files": {
+      "/tmp/gpui-fearless-aos-bench-target/release/deps/libgpui_canvas-65d605dcc898d573.rlib": "fa6d0899e1b7bd710b9fcc71f620538f0d3793f1cffba90255081ae51a2a99d3",
+      "/tmp/gpui-fearless-aos-bench-target/release/examples/image_axis": "9fa3a2c800e091ada51d2746a8383f1452e64678e38ef67f879422936b591185",
+      "/tmp/gpui-fearless-aos-bench-target/release/examples/cpu": "ca36048cef2dc09949ff5871c22240050b411bc1a4b158658f901ae245efe0ec"
+    },
+    "source_files": {
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/src/canvas.rs": "d0526f80a2ebc1ee00290cad410c0cfc1d50e657539320ca57d51e7022c3009f",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/src/canvas/samples.rs": "10bc809963bdee9728eaccbce85dfcff505c50cc8d297c6fe5b1923693651884",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/src/canvas/image_axis.rs": "05594d1fcc15e0eb61fce54a0728bf8c562cd9a51939076c658441bd2f74e93a",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/examples/cpu.rs": "2c6116a1c30d3cb704adbcd5903c170e5bcebe4d3fa708418263ec6a0a5fc233",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/examples/image_axis.rs": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/Cargo.toml": "67ec4744b575f100dc7fc05a86d0182effb4eb2fb3b35f555e359ccd7cdda708"
+    },
+    "build_json_sha256": "725a9a0520aa0ae4f1dc9175ee84929601cb2cde3f45035f3c42aab979850a19"
+  },
+  {
+    "name": "soa",
+    "source": "/root/gpui-fearless-pipeline",
+    "source_commit": "d4166fd67330c1eb9b042bcc3a7b0cfad1b78e0d",
+    "simd": true,
+    "target": "/tmp/gpui-fearless-soa-bench-target",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "/root/gpui-fearless-pipeline/reactivity/Cargo.toml",
+      "-p",
+      "gpui_canvas",
+      "--release",
+      "--example",
+      "cpu",
+      "--example",
+      "image_axis",
+      "--message-format=json"
+    ],
+    "artifact_files": {
+      "/tmp/gpui-fearless-soa-bench-target/release/deps/libgpui_canvas-65d605dcc898d573.rlib": "64647524b5e619b3eee48e09580ca216fb081b46acd3b7b65dc4712cbbbd32eb",
+      "/tmp/gpui-fearless-soa-bench-target/release/examples/image_axis": "a91518d54e5a7611c42ad616e7b1eedfd09d56806ed8d0114ad9441bf6bb4b81",
+      "/tmp/gpui-fearless-soa-bench-target/release/examples/cpu": "deee030fc3f2c49c472e24472583ae673cb6dd0b13b6cbc2c2916e6bd5d22ec4"
+    },
+    "source_files": {
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/src/canvas.rs": "1b9c1ebf9fccb967c5bcf6defd52b9b60de581f45288f0a1dbd3be505bba5e3d",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/src/canvas/samples.rs": "f2cceef1775b2c3c64ee02bbc14b89e77d0248a2dbd2a1375a9333e9159b7cf6",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/src/canvas/image_axis.rs": "05594d1fcc15e0eb61fce54a0728bf8c562cd9a51939076c658441bd2f74e93a",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/examples/cpu.rs": "2c6116a1c30d3cb704adbcd5903c170e5bcebe4d3fa708418263ec6a0a5fc233",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/examples/image_axis.rs": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/Cargo.toml": "67ec4744b575f100dc7fc05a86d0182effb4eb2fb3b35f555e359ccd7cdda708"
+    },
+    "build_json_sha256": "08744de4ffd9d54c632b8f2eabf2141bb5245332580e788f9b25b5ce7ad78047"
+  },
+  {
+    "name": "aos-scalar",
+    "source": "/tmp/gpui-fearless-aos-source",
+    "source_commit": "8e29a3d7f3647dfece69d65b335dce74ce65ce1d",
+    "simd": false,
+    "target": "/tmp/gpui-fearless-aos-scalar-bench-target",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "/tmp/gpui-fearless-aos-source/reactivity/Cargo.toml",
+      "-p",
+      "gpui_canvas",
+      "--release",
+      "--example",
+      "cpu",
+      "--example",
+      "image_axis",
+      "--message-format=json",
+      "--no-default-features"
+    ],
+    "artifact_files": {
+      "/tmp/gpui-fearless-aos-scalar-bench-target/release/deps/libgpui_canvas-bab852eace98713b.rlib": "c52f5c7a55a0931e4562fa8f1c56ad58e6f458413ecc292ac015d5f06d88d312",
+      "/tmp/gpui-fearless-aos-scalar-bench-target/release/examples/image_axis": "ab2d4588d78ed06af5c2fb382332fcdad4309289578fabffab84a5bdfdff708f",
+      "/tmp/gpui-fearless-aos-scalar-bench-target/release/examples/cpu": "ab09611eb020c904e5650c06fb8832301c8b83d17d306be0a47f1b2090c48d70"
+    },
+    "source_files": {
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/src/canvas.rs": "d0526f80a2ebc1ee00290cad410c0cfc1d50e657539320ca57d51e7022c3009f",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/src/canvas/samples.rs": "10bc809963bdee9728eaccbce85dfcff505c50cc8d297c6fe5b1923693651884",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/src/canvas/image_axis.rs": "05594d1fcc15e0eb61fce54a0728bf8c562cd9a51939076c658441bd2f74e93a",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/examples/cpu.rs": "2c6116a1c30d3cb704adbcd5903c170e5bcebe4d3fa708418263ec6a0a5fc233",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/examples/image_axis.rs": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+      "/tmp/gpui-fearless-aos-source/reactivity/crates/canvas/Cargo.toml": "67ec4744b575f100dc7fc05a86d0182effb4eb2fb3b35f555e359ccd7cdda708"
+    },
+    "build_json_sha256": "39d2c17c401bf5bd08443fcf1ee87705ed1c25d3e79b12d3dbd1beb52df52cb9"
+  },
+  {
+    "name": "soa-scalar",
+    "source": "/root/gpui-fearless-pipeline",
+    "source_commit": "d4166fd67330c1eb9b042bcc3a7b0cfad1b78e0d",
+    "simd": false,
+    "target": "/tmp/gpui-fearless-soa-scalar-bench-target",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "/root/gpui-fearless-pipeline/reactivity/Cargo.toml",
+      "-p",
+      "gpui_canvas",
+      "--release",
+      "--example",
+      "cpu",
+      "--example",
+      "image_axis",
+      "--message-format=json",
+      "--no-default-features"
+    ],
+    "artifact_files": {
+      "/tmp/gpui-fearless-soa-scalar-bench-target/release/deps/libgpui_canvas-bab852eace98713b.rlib": "acb155a3ec400877879b9050c7ec1d7119654b23441f32fd8caa88e9fdcd4c05",
+      "/tmp/gpui-fearless-soa-scalar-bench-target/release/examples/image_axis": "a33edfbfb8b734b8683b2055cc71882f572d85f1b345bb479cac8bf3968ce0aa",
+      "/tmp/gpui-fearless-soa-scalar-bench-target/release/examples/cpu": "2812bcd2a0704cba5a1ed4a880d2d15f076f2829b1b14bc3948ad128323ee21d"
+    },
+    "source_files": {
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/src/canvas.rs": "1b9c1ebf9fccb967c5bcf6defd52b9b60de581f45288f0a1dbd3be505bba5e3d",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/src/canvas/samples.rs": "f2cceef1775b2c3c64ee02bbc14b89e77d0248a2dbd2a1375a9333e9159b7cf6",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/src/canvas/image_axis.rs": "05594d1fcc15e0eb61fce54a0728bf8c562cd9a51939076c658441bd2f74e93a",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/examples/cpu.rs": "2c6116a1c30d3cb704adbcd5903c170e5bcebe4d3fa708418263ec6a0a5fc233",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/examples/image_axis.rs": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+      "/root/gpui-fearless-pipeline/reactivity/crates/canvas/Cargo.toml": "67ec4744b575f100dc7fc05a86d0182effb4eb2fb3b35f555e359ccd7cdda708"
+    },
+    "build_json_sha256": "dbff425a3ba1b8d8d4cde54764d29f0c799b1215d597fe4d044e90b4ee412672"
+  }
+]

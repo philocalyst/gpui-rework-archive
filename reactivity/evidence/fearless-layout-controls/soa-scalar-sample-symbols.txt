@@ -1,0 +1,21 @@
+00000000004a70b0 0000000000000006 T gpui_canvas::canvas::render_band::<gpui_canvas::canvas::BgrxEncoder>
+00000000004a70c0 0000000000000006 T gpui_canvas::canvas::render_band::<gpui_canvas::color::OutputEncoder>
+00000000004a70d0 0000000000000006 T gpui_canvas::canvas::render_band::<gpui_canvas::color::HalfFloatEncoder>
+00000000004d52f0 0000000000000077 t <[f32; 4]>::try_map::<core::ops::try_trait::NeverShortCircuit<[f32; 16]>, <core::ops::try_trait::NeverShortCircuit<[f32; 16]>>::wrap_mut_1<f32, <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::fallback::Fallback>>::blend_mask::{closure#0}>::{closure#0}>
+00000000004d52f0 0000000000000077 t <[f32; 4]>::try_map::<core::ops::try_trait::NeverShortCircuit<[f32; 16]>, <core::ops::try_trait::NeverShortCircuit<[f32; 16]>>::wrap_mut_1<f32, <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::fallback::Fallback>>::blend_sources::{closure#2}>::{closure#0}>
+00000000004d52f0 0000000000000077 t <[f32; 4]>::try_map::<core::ops::try_trait::NeverShortCircuit<[f32; 16]>, <core::ops::try_trait::NeverShortCircuit<[f32; 16]>>::wrap_mut_1<f32, <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::fallback::Fallback>>::blend::{closure#1}>::{closure#0}>
+00000000004d52f0 0000000000000077 t <[f32; 4]>::try_map::<core::ops::try_trait::NeverShortCircuit<[f32; 16]>, <core::ops::try_trait::NeverShortCircuit<[f32; 16]>>::wrap_mut_1<f32, <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::fallback::Fallback>>::reset::{closure#0}>::{closure#0}>
+00000000004b14f0 00000000000000e9 T gpui_canvas::canvas::render_image_command::<fearless_simd::generated::fallback::Fallback>
+00000000004b19d0 0000000000000317 t <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::fallback::Fallback>>::color
+00000000004b6210 000000000000034b t <gpui_canvas::canvas::image_axis::Column>::fill::<gpui_canvas::canvas::render_image_command<fearless_simd::generated::fallback::Fallback>::{closure#0}>
+00000000004a86b0 00000000000003b2 T gpui_canvas::canvas::render_image::<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_cached_image<fearless_simd::generated::fallback::Fallback>::{closure#0}::{closure#1}>
+00000000004a82d0 00000000000003e0 T gpui_canvas::canvas::render_image::<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_image_command<fearless_simd::generated::fallback::Fallback>::{closure#1}>
+00000000004a7e30 0000000000000495 T gpui_canvas::canvas::render_image::<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_shaped_image<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_rounded_image<fearless_simd::generated::fallback::Fallback>::{closure#0}::{closure#0}>::{closure#0}>
+00000000004e6aa0 00000000000004ad t gpui_canvas::canvas::samples::blend_mask::<fearless_simd::generated::fallback::Fallback>
+00000000004a7960 00000000000004d0 T gpui_canvas::canvas::render_image::<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_shaped_image<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_rounded_image<fearless_simd::generated::fallback::Fallback>::{closure#1}>::{closure#0}>
+00000000004b6560 00000000000008ac T gpui_canvas::canvas::image_axis::render::<fearless_simd::generated::fallback::Fallback, gpui_canvas::canvas::render_image_command<fearless_simd::generated::fallback::Fallback>::{closure#0}>
+00000000004e82e0 0000000000000a2d t <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::fallback::Fallback>>::blend_sources
+00000000004e6f50 0000000000000be1 t gpui_canvas::canvas::samples::blend_coverage::<fearless_simd::generated::fallback::Fallback>
+00000000004ae980 0000000000002a39 T gpui_canvas::canvas::render_band_impl::<gpui_canvas::color::HalfFloatEncoder, fearless_simd::generated::fallback::Fallback>
+00000000004a8a70 0000000000002f21 T gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::fallback::Fallback>
+00000000004ab9a0 0000000000002fd3 T gpui_canvas::canvas::render_band_impl::<gpui_canvas::color::OutputEncoder, fearless_simd::generated::fallback::Fallback>
