@@ -8,6 +8,18 @@
     {
       "path": "src/tree/cache/mod.rs",
       "description": "Add readonly NodeCache::allocated_bytes payload accounting and its cold/inner/spill/reset regression; cache equations and policy unchanged."
+    },
+    {
+      "path": "src/tree/traits.rs",
+      "description": "Add default CacheAccess hidden-layout proof hooks delegating to existing NodeCache behavior, allowing an adapter to use its existing flag storage under the same invalidation contract."
+    },
+    {
+      "path": "src/compute/mod.rs",
+      "description": "Route hidden subtree proof reads/writes through CacheAccess hooks; traversal, nonempty-container and non-speculative marking policy unchanged."
+    },
+    {
+      "path": "tests/observe.rs",
+      "description": "Verify default host cache marker allocation, invalidation, leaf and speculative behavior remain unchanged."
     }
   ],
   "note": "Complete git source archive replaces published0.1.1; package version unchanged. No upstream performance result is asserted for the GPUI adapter."

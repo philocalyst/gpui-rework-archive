@@ -383,11 +383,11 @@ fn block_observing<T: LayoutTree + CacheAccess + ?Sized>(tree: &mut T, f: impl F
 
 /// Zeroes the subtree's layout; never cached. Below a node whose subtree is already zeroed, with
 /// nothing stored, cleared or edited in it since, nothing is visited again (see
-/// [`crate::tree::NodeCache::is_hidden`]).
+/// [`CacheAccess::is_hidden_layout`]).
 pub fn compute_hidden_layout<T: LayoutTree + CacheAccess + ?Sized>(tree: &mut T, node: NodeId) -> LayoutOutput {
     // Parents write a hidden child's layout before asking for it, so the node's own is rewritten.
     tree.set_unrounded_layout(node, &Layout::with_order(0));
-    if tree.cache(node).is_hidden() {
+    if tree.is_hidden_layout(node) {
         #[cfg(feature = "stats")]
         stats::bump(&stats::HIDDEN_KEPT);
         return LayoutOutput::HIDDEN;
@@ -400,7 +400,7 @@ pub fn compute_hidden_layout<T: LayoutTree + CacheAccess + ?Sized>(tree: &mut T,
     }
     // Leaves cost less to zero again than to mark.
     if tree.speculation() == 0 && !children.is_empty() {
-        tree.cache_mut(node).mark_hidden();
+        tree.mark_hidden_layout(node);
     }
     LayoutOutput::HIDDEN
 }

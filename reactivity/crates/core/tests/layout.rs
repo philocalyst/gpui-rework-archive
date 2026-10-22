@@ -540,3 +540,6 @@ fn new_hidden_siblings_do_not_share_subtree_zeroing_marks() {
 
 #[path = "layout/oof.rs"]
 pub(crate) mod oof;
+
+#[path = "layout/hidden.rs"]
+mod hidden;
