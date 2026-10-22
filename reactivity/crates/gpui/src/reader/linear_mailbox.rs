@@ -89,6 +89,11 @@ impl<P> Mailbox<P> {
         // ownership, without locking or touching a concurrent writer.
         self.closed.store(true, Ordering::Release);
     }
+    pub(super) fn into_payload(self) -> Option<P> {
+        self.slot
+            .into_inner()
+            .unwrap_or_else(|poison| poison.into_inner())
+    }
     #[cfg(test)]
     pub(super) fn unlocked(&self) -> bool {
         self.slot.try_lock().is_ok()

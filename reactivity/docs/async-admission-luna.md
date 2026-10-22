@@ -6,8 +6,9 @@ prompt-executor-drop sketch is a rejected control, retained for the review
 record. `spawn` takes `&mut self`. Preserve the current owner-lease release before
 user destructors: a FutureStarter RAII destructor can cancel its exact task while
 QuestionLane's generic Drop remains unchanged. No per-ordinary-question task,
-Waker or new cancellation Arc is approved. The Sol implementation is isolated;
-this report is not an integrated API or performance claim. GPUI commit links
+Waker or new cancellation Arc is approved. The Sol implementation is integrated
+from `a951113912`; its [API and evidence](future-questions.md) are separate from
+the research proposals below. GPUI commit links
 identify local unpublished source snapshots and may not resolve on GitHub.
 
 Later implementation review found a whole-chain close obligation; see the final
@@ -140,7 +141,7 @@ A concurrency caveat belongs with that boundary: the owner may admit the staged 
 
 ## Close the entire chain before user cleanup
 
-The isolated implementation at `a951113912` adds a static two-phase close after
+The implementation at `a951113912` adds a static two-phase close after
 adversarial tests exposed the per-lane hole. First revoke question authority,
 release every controller owner lease, detach Inbox receivers, and request exact
 task cancellation throughout the chain. Move uniquely owned response payloads

@@ -1,10 +1,12 @@
 # Shipping core code ledger
 
-Current frozen source `8158386886`: **28,405** non-test code lines including
+Current frozen source `a951113912`: **28,659** non-test code lines including
 13 build-script lines; original GPUI `41a42eb96d6c04e5e71f3577d12934d4de569b20`:
 **56,922** including 28 build-script lines. The current per-file snapshot is in
-[the blank Auto refinement evidence](../auto-blank-cold/checks/core-lines.json.gz).
-Source 6d77 measured 28,403 and preceding 8ea measured 27,696 under the same rule. No feature-equivalence
+[the Future adapter evidence](../future-adapter/candidate-core-lines.json).
+The adapter adds 254 first-party shipping lines; its pin-project-lite source bill
+is reported separately. Source 815838 measured 28,405, 6d77 measured 28,403 and
+preceding 8ea measured 27,696 under the same rule. No feature-equivalence
 or future final-size claim follows from this comparison.
 
 Historical source `8350157374` measured **26,069** under `src`; original GPUI

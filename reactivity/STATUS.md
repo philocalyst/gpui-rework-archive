@@ -62,6 +62,18 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [typed Future adapter](evidence/future-adapter/README.md) is integrated from
+source `a951113912`: 516 public/library/doc cases, 12 headless reader cases,
+nine current-source Loom mailbox cases, exact native Future and ordinary-credit
+wakes, strict all-target checks and Apple/Windows compilation pass at that pin.
+Whole-chain close cancels tasks before response/queue/capture destructors run.
+Ordinary Controller/Completion/lane layouts and allocation controls are unchanged;
+the adapter adds 254 first-party shipping code lines plus a new normal dependency
+edge to the already locked pin-project-lite 0.2.17. Transient typed close storage
+and executor-owned storage are charged in the evidence. Streams and optimistic
+commit/rollback remain separate work. Consumer lock corrections and independent
+main changes are recorded without retagging the producer gates.
+
 The [Vulkan stage ownership repair](evidence/vulkan-stage-ownership/README.md)
 qualifies isolated source `52701c8cc7`: 44 real Vulkan pixel cases, eight GPU
 units, four presentation cases, scoped lifetime/error/unwind regression, strict
@@ -124,8 +136,8 @@ shader artifacts and [acknowledged text geometry](docs/acknowledged-text-geometr
 remain isolated implementation slices; their provisional results are not current
 shipping measurements.
 
-The [source ledger](evidence/core-lines/README.md) counts 28,405 non-test library
-code lines at `8158386886`, including 13 build-script lines, versus original
+The [source ledger](evidence/core-lines/README.md) counts 28,659 non-test library
+code lines at `a951113912`, including 13 build-script lines, versus original
 GPUI's 56,922 including 28 build-script lines. These are pinned actual counts,
 not a current-feature-equivalence or predicted final-size claim. Dependencies,
 local vendor patches, tools, app ports and fixtures retain their separate scopes.

@@ -338,6 +338,7 @@ dependencies = [
  "gpui_reactivity_core",
  "gpui_reactivity_state",
  "icu_segmenter",
+ "pin-project-lite",
  "serde",
  "serde_json",
 ]

@@ -1,4 +1,5 @@
 //! Concrete question slots are consed into the existing static lane chain.
+use super::future::FutureStarter;
 use super::inputs::{Availability, QuestionInputs};
 use super::*;
 use crate::{
@@ -7,6 +8,24 @@ use crate::{
     remote::{LaneSet, Stage, sealed},
 };
 use gpui_reactivity_state::{OwnerRegistry, OwnerScope, RequestGate};
+use std::future::Future;
+
+pub(super) trait Starter<I, T, E> {
+    fn start(&mut self, input: I, completion: Completion<T, E>) -> Result<(), StartError>;
+    fn cancel(&mut self) {}
+    fn retire(&mut self) {}
+}
+#[doc(hidden)]
+#[repr(transparent)]
+pub struct SyncStarter<S>(S);
+impl<I, T, E, S> Starter<I, T, E> for SyncStarter<S>
+where
+    S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
+{
+    fn start(&mut self, input: I, completion: Completion<T, E>) -> Result<(), StartError> {
+        (self.0)(input, completion)
+    }
+}
 
 #[doc(hidden)]
 #[derive(Clone, Copy)]
@@ -72,6 +91,103 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
         F,
         S,
     >(
+        self,
+        inputs: A,
+        freeze: F,
+        start: S,
+    ) -> Result<
+        (
+            Questions<M, QuestionLane<M, A, I, T, E, F, SyncStarter<S>, L>>,
+            Reader<T>,
+        ),
+        QuestionFault,
+    >
+    where
+        F: for<'a> Fn(A::Borrowed<'a>) -> I,
+        S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
+    {
+        self.question_with(inputs, freeze, SyncStarter(start))
+    }
+
+    /// Ask one bounded Future question using an explicitly owned executor.
+    /// `freeze` borrows declared inputs only on the owner; `make` promptly
+    /// creates an owned Send future. No model/source/Reader borrow crosses await.
+    /// The executor runs the future; GPUI catches poll panics as WorkerPanicked
+    /// and factory/spawn panics as ExecutorPanicked. Domain Err retains the prior
+    /// value, as do Pending and Fault projections on ordinary questions.
+    ///
+    /// Superseding inputs cancels the exact old task, including a never-waking
+    /// Pending future. The newest frozen input waits for actual future teardown
+    /// and terminal admission before starting. Close requests cancellation
+    /// without joining. See QuestionExecutor and QuestionTask for obligations.
+    ///
+    /// ```
+    /// use gpui::{Questions, QuestionExecutor, Source};
+    /// fn declare<M: 'static, X: QuestionExecutor>(source: Source<M, String>, executor: X) {
+    ///     let (questions, answer) = Questions::new().question_future(
+    ///         source, Clone::clone, executor,
+    ///         |query| async move { Ok::<_, std::convert::Infallible>(query.len()) },
+    ///     ).unwrap();
+    ///     // Bind questions to a Win/Window; put only the inert answer in the model.
+    ///     let _ = (questions, answer);
+    /// }
+    /// ```
+    /// ```compile_fail
+    /// use gpui::{Questions, QuestionExecutor, Source};
+    /// fn borrowed<M: 'static, X: QuestionExecutor>(source: Source<M, String>, executor: X) {
+    ///     let _ = Questions::new().question_future(source, |s| s.as_str(), executor,
+    ///         |s| async move { Ok::<_, std::convert::Infallible>(s.len()) });
+    /// }
+    /// ```
+    /// ```compile_fail
+    /// use gpui::{Questions, QuestionExecutor, Source};
+    /// fn borrowed_capture<M: 'static, X: QuestionExecutor>(source: Source<M, String>, executor: X, service: &str) {
+    ///     let _ = Questions::new().question_future(source, Clone::clone, executor,
+    ///         |query| async move { Ok::<_, std::convert::Infallible>(format!("{service}{query}")) });
+    /// }
+    /// ```
+    /// ```compile_fail
+    /// use gpui::{Questions, QuestionExecutor, Source};
+    /// fn foreign_source<M: 'static, X: QuestionExecutor>(source: Source<M, String>, executor: X) {
+    ///     let _ = Questions::<()>::new().question_future(source, Clone::clone, executor,
+    ///         |query| async move { Ok::<_, std::convert::Infallible>(query) });
+    /// }
+    /// ```
+    #[allow(
+        clippy::type_complexity,
+        reason = "The inferred lane stores the executor and factory statically."
+    )]
+    pub fn question_future<A, I, T, E, F, X, Make, Fut>(
+        self,
+        inputs: A,
+        freeze: F,
+        executor: X,
+        make: Make,
+    ) -> Result<
+        (
+            Questions<M, QuestionLane<M, A, I, T, E, F, FutureStarter<X, Make>, L>>,
+            Reader<T>,
+        ),
+        QuestionFault,
+    >
+    where
+        A: QuestionInputs<M>,
+        I: Send + 'static,
+        T: Send + 'static,
+        E: std::error::Error + Send + 'static,
+        F: for<'a> Fn(A::Borrowed<'a>) -> I,
+        X: QuestionExecutor,
+        Make: FnMut(I) -> Fut,
+        Fut: Future<Output = Result<T, E>> + Send + 'static,
+    {
+        self.question_with(inputs, freeze, FutureStarter::new(executor, make))
+    }
+
+    #[allow(
+        clippy::type_complexity,
+        reason = "Private shared construction preserves the public closure inference bounds."
+    )]
+    fn question_with<A, I, T, E, F, S>(
         mut self,
         inputs: A,
         freeze: F,
@@ -84,8 +200,12 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
         QuestionFault,
     >
     where
+        A: QuestionInputs<M>,
+        I: Send + 'static,
+        T: Send + 'static,
+        E: std::error::Error + Send + 'static,
         F: for<'a> Fn(A::Borrowed<'a>) -> I,
-        S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
+        S: Starter<I, T, E>,
     {
         self.next_site = self
             .next_site
@@ -209,6 +329,12 @@ pub struct QuestionLane<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> {
     cursor: usize,
     stats: QuestionStats,
 }
+/// Only the transient close stack owns these responses; never an owner field.
+#[doc(hidden)]
+pub struct RetiredQuestion<T, E, L> {
+    _response: Option<Message<T, E>>,
+    _tail: L,
+}
 impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> QuestionLane<M, A, I, T, E, F, S, L> {
     #[inline]
     fn control(&self) -> &Arc<Controller<T, E>> {
@@ -292,6 +418,10 @@ impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> sealed::Sealed
 {
 }
 
+#[allow(
+    private_bounds,
+    reason = "Only private operational methods use the private starter seam."
+)]
 impl<
     M: 'static,
     A: QuestionInputs<M>,
@@ -304,7 +434,7 @@ impl<
 > QuestionLane<M, A, I, T, E, F, S, L>
 where
     F: for<'a> Fn(A::Borrowed<'a>) -> I,
-    S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
+    S: Starter<I, T, E>,
 {
     fn fault(&mut self, error: QuestionFault) {
         if matches!(
@@ -318,6 +448,7 @@ where
         self.stats.framework_faults = self.stats.framework_faults.saturating_add(1);
         self.control().current.store(0, Ordering::Release);
         self.gate.cancel();
+        self.start.as_mut().expect("live question").cancel();
         self.pending = None;
         let previous = self.state.take_previous();
         self.state = State::Fault(StoredFault::Framework(error), previous);
@@ -337,7 +468,10 @@ where
         };
         self.stats.dispatched = self.stats.dispatched.saturating_add(1);
         match catch_unwind(AssertUnwindSafe(|| {
-            (self.start.as_mut().expect("live question"))(work.input, completion)
+            self.start
+                .as_mut()
+                .expect("live question")
+                .start(work.input, completion)
         })) {
             Ok(Ok(())) => false,
             Ok(Err(error)) => {
@@ -483,6 +617,7 @@ where
             },
             Ordering::Release,
         );
+        self.start.as_mut().expect("live question").cancel();
         if matches!(self.state, State::Pending(_)) {
             self.stats.superseded = self.stats.superseded.saturating_add(1);
         }
@@ -520,10 +655,11 @@ impl<
 > LaneSet<M> for QuestionLane<M, A, I, T, E, F, S, L>
 where
     F: for<'a> Fn(A::Borrowed<'a>) -> I,
-    S: FnMut(I, Completion<T, E>) -> Result<(), StartError>,
+    S: Starter<I, T, E>,
 {
     const EMPTY: bool = false;
     const QUESTIONS: bool = true;
+    type Retired = RetiredQuestion<T, E, L::Retired>;
     fn count(&self) -> usize {
         1 + self.tail.count()
     }
@@ -587,6 +723,7 @@ where
                 .running_ticket
                 .take()
                 .expect("terminal belongs to one launched cap");
+            self.start.as_mut().expect("live question").retire();
             self.control().mailbox.retire();
             if ticket == self.ticket && matches!(self.state, State::Pending(_)) {
                 let failure = match terminal {
@@ -608,20 +745,34 @@ where
         }
         Ok(())
     }
-    fn close(&mut self) {
+    fn cancel_questions(&mut self) -> Self::Retired {
         self.gate.revoke();
         // Relinquish the owner lease before running input/result destructors.
         // A still-running physical cap owns any deferred response reclamation.
-        if let Some(controller) = self.controller.take() {
+        let response = self.controller.take().and_then(|controller| {
             controller.current.store(0, Ordering::Release);
             controller.mailbox.close();
+            // Atomically release this Arc or take unique ownership. Unlike
+            // try_unwrap followed by dropping Err(Arc), this has no last-cap
+            // race that could run a response destructor in this phase.
+            Arc::into_inner(controller).and_then(|controller| controller.mailbox.into_payload())
+        });
+        if let Some(start) = &mut self.start {
+            start.cancel();
+            start.retire();
         }
+        RetiredQuestion {
+            _response: response,
+            _tail: self.tail.cancel_questions(),
+        }
+    }
+    fn clear(&mut self) {
         self.staged_terminal = None;
         self.pending = None;
         self.state = State::Empty;
         self.freeze.take();
         self.start.take();
-        self.tail.close();
+        self.tail.clear();
     }
     fn start_questions(&mut self) -> bool {
         let own = self.start_pending();
@@ -661,6 +812,7 @@ impl<Q, L> sealed::Sealed for QuestionSet<Q, L> {}
 impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
     const EMPTY: bool = false;
     const QUESTIONS: bool = true;
+    type Retired = (Q::Retired, L::Retired);
     fn count(&self) -> usize {
         self.lanes.count() + self.tail.count()
     }
@@ -701,12 +853,15 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         let tail = self.tail.apply_questions(model, sources, applied);
         own.and(tail)
     }
-    fn close(&mut self) {
+    fn cancel_questions(&mut self) -> Self::Retired {
         if let Some(scope) = &mut self.scope {
             scope.revoke();
         }
-        self.lanes.close();
-        self.tail.close();
+        (self.lanes.cancel_questions(), self.tail.cancel_questions())
+    }
+    fn clear(&mut self) {
+        self.lanes.clear();
+        self.tail.clear();
     }
     fn start_questions(&mut self) -> bool {
         let own = self.lanes.start_questions();
@@ -734,6 +889,84 @@ mod tests {
     }
     const VALUE: Source<Model, u32> =
         Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    #[test]
+    fn close_and_natural_drop_release_owner_lease_before_synchronous_task_cancellation() {
+        use std::{
+            pin::Pin,
+            sync::{Weak, atomic::AtomicUsize},
+            task::{Context, Poll},
+        };
+        struct Task(Option<Pin<Box<dyn Future<Output = ()> + Send>>>);
+        impl QuestionTask for Task {
+            fn cancel(&mut self) {
+                self.0.take();
+            }
+        }
+        struct Executor;
+        impl QuestionExecutor for Executor {
+            type Task = Task;
+            fn spawn<F: Future<Output = ()> + Send + 'static>(
+                &mut self,
+                future: F,
+            ) -> Result<Task, StartError> {
+                Ok(Task(Some(Box::pin(future))))
+            }
+        }
+        struct CheckDrop {
+            controller: Weak<Controller<u32, Infallible>>,
+            drops: Arc<AtomicUsize>,
+        }
+        impl Future for CheckDrop {
+            type Output = Result<u32, Infallible>;
+            fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
+                Poll::Pending
+            }
+        }
+        impl Drop for CheckDrop {
+            fn drop(&mut self) {
+                assert_eq!(
+                    self.controller.strong_count(),
+                    1,
+                    "only physical Completion retains the response lease"
+                );
+                self.drops.fetch_add(1, Ordering::SeqCst);
+            }
+        }
+        for close in [false, true] {
+            let controller = Arc::new(std::sync::Mutex::new(
+                None::<Weak<Controller<u32, Infallible>>>,
+            ));
+            let capture = controller.clone();
+            let drops = Arc::new(AtomicUsize::new(0));
+            let observed = drops.clone();
+            let (mut plan, _) = Questions::new()
+                .question_future(
+                    VALUE,
+                    |v| *v,
+                    Executor,
+                    move |_| CheckDrop {
+                        controller: capture.lock().unwrap().as_ref().unwrap().clone(),
+                        drops: observed.clone(),
+                    },
+                )
+                .unwrap();
+            *controller.lock().unwrap() = Some(Arc::downgrade(plan.lanes.control()));
+            let model = Model {
+                value: crate::Signal::new(1),
+                other: crate::Signal::new(2),
+            };
+            let sources = Sources::new().direct(VALUE);
+            plan.lanes
+                .refresh_self(&model, &sources, Change::Mount)
+                .unwrap();
+            plan.lanes.start_pending();
+            if close {
+                plan.lanes.close();
+            }
+            drop(plan);
+            assert_eq!(drops.load(Ordering::SeqCst), 1);
+        }
+    }
     #[test]
     fn version_exhaustion_faults_instead_of_leaving_unstartable_pending_work() {
         let (mut plan, reader) = Questions::new()

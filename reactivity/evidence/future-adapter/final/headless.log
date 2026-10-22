@@ -1,0 +1,34 @@
+   Compiling gpui v0.1.0 (/root/gpui-future-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.09s
+     Running unittests src/lib.rs (/root/gpui-future-target/debug/deps/gpui-96d73ed412e3a72d)
+
+running 12 tests
+test reader::future::tests::future_wrapper_has_no_result_slot_or_poll_allocation ... future_wrapper,small_future=0,wrapper=64,completion=40,output=4096,poll_allocations=0
+ok
+test reader::inputs::tests::earlier_key_validation_rejects_foreign_equal_and_later_sites ... ok
+test reader::question::tests::a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever ... ok
+test reader::question::tests::binding_rejection_retires_the_staged_terminal_before_returning_error ... ok
+test reader::question::tests::close_and_natural_drop_release_owner_lease_before_synchronous_task_cancellation ... ok
+test reader::question::tests::input_family_owner_record_ledger ... owner_record,State_u64_infallible=24,Work_u64=40,Source_version=8,Reader_version=16,QuestionInfo=96
+ok
+test reader::question::tests::version_exhaustion_faults_instead_of_leaving_unstartable_pending_work ... ok
+test reader::tests::absent_plan_and_static_producer_projection_allocation_ledger ... question_plan,allocations=2,requested=120,projection_allocations=2,projection_requested=88,Reader=16,Completion=40,Version=32,Controller=64,El=176
+plan_bytes=328
+bound_lane_bytes=320
+ok
+test reader::tests::cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it ... borrowed_cancellation_bytes=16,allocations=0,controller_leases_during_compute=2
+ok
+test reader::tests::close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic ... 
+thread 'reader::tests::close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic' (876117) panicked at crates/gpui/src/reader.rs:480:17:
+payload drop panic outside mailbox mutex
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ok
+test reader::tests::closed_completion_returns_the_same_owned_result ... ok
+test reader::tests::input_family_storage_and_allocation_ledger ... family=one_source,plan=328,inputs=40,versions=4,optional_versions=8,allocations=2,requested=120
+family=two_sources,plan=368,inputs=80,versions=8,optional_versions=12,allocations=2,requested=120
+family=three_nested,plan=416,inputs=120,versions=12,optional_versions=16,allocations=2,requested=120
+family=reader_and_source,total_plan=656,incremental_allocations=1,incremental_requested=80,reader_versions=16
+ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 124 filtered out; finished in 0.00s
+

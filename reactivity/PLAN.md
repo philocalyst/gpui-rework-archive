@@ -60,15 +60,14 @@ source admission. Designer color still needs shared batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut
 primitive and tagged HDR storage.
 
-The [Solid/Ripple review](docs/async-graph-luna.md) identifies compositional
-Future/stream/optimistic adapters as the remaining async ergonomics work; retain
-the existing frozen inputs, cancellation hints, stale-result admission and
-previous-value projections. The [typed Future admission audit](docs/async-admission-luna.md)
-selects an injected exact-task cancel handle and clearing the pinned Future
-before terminal publication, with no task state added to ordinary controllers.
-A Future adapter must wake or retire an obsolete
-Pending task before reusing its physical completion credit; poll-only cancellation
-cannot satisfy that lifecycle. The [portable presenter review](docs/portable-presenter-luna.md)
+The [Solid/Ripple review](docs/async-graph-luna.md) identifies streams and explicit
+optimistic commit/rollback as remaining async ergonomics work. The integrated
+[typed Future adapter](docs/future-questions.md) preserves frozen inputs, stale
+admission and previous-value projections. Its injected exact-task cancellation
+and pinned Future teardown preserve physical completion credit, with no task
+state in ordinary controllers. Continue with actual application consumers before
+adding a stream policy or optimistic overlay; neither follows automatically from
+a terminal-answer Future. The [portable presenter review](docs/portable-presenter-luna.md)
 and [color derivation](docs/color-formulation-luna.md) are proposals with explicit
 source-review corrections, not implemented performance results.
 
