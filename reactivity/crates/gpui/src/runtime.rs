@@ -2348,6 +2348,9 @@ impl<M: View + 'static> Runtime<M> {
             self.presentation_size = prepared.dimensions();
             if !prepared.keeps_rows() {
                 self.presented = prepared.nodes;
+                if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.selection.as_mut()) {
+                    frozen.presented = frozen.candidate;
+                }
             }
             self.presentation_scale_factor = prepared.scale_factor;
         }
@@ -2363,6 +2366,11 @@ impl<M: View + 'static> Runtime<M> {
             if geometry.unused() {
                 metadata.geometry = None;
             }
+        }
+        if let Some(metadata) = &mut self.metadata
+            && metadata.selection.as_ref().is_some_and(|frozen| frozen.unused())
+        {
+            metadata.selection = None;
         }
         if self.metadata.as_deref().is_some_and(Metadata::unused) {
             self.metadata = None;
@@ -2418,6 +2426,7 @@ impl<M: View + 'static> Runtime<M> {
         let font = self.text.as_ref().map(|text| text.font_face().clone());
         let mut shaper = font.as_ref().map(|font| font.shaper());
         let active_selection = self.active_selection();
+        let selection_snapshot = self.selection_snapshot();
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -2857,6 +2866,7 @@ impl<M: View + 'static> Runtime<M> {
                     self.presented.get(index),
                     &presented[index],
                     self.metadata.as_deref(),
+                    selection_snapshot,
                     viewport_geometry.info(
                         node.identity(),
                         [f64::from(rect.width), f64::from(rect.height)],
@@ -2960,6 +2970,12 @@ impl<M: View + 'static> Runtime<M> {
             self.images.as_mut().unwrap().prepare(sequence, leases);
         }
         self.styles.clear_slot_transition();
+        if let Some(metadata) = &mut self.metadata {
+            if selection_snapshot.is_some() || metadata.selection.is_some() {
+                metadata.selection.get_or_insert_with(Default::default).candidate =
+                    selection_snapshot;
+            }
+        }
         self.prepared = Some(Prepared {
             size: prepared_size,
             scale_factor,

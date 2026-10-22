@@ -15,6 +15,7 @@ struct Context<'a> {
     focused: Option<Target>,
     metadata: Option<&'a super::metadata::Sheet>,
     geometry: Option<&'a super::geometry::Geometry>,
+    selection: Option<super::editing::SelectionSnapshot>,
 }
 impl<'a> Context<'a> {
     fn new<M>(runtime: &'a Runtime<M>) -> Self {
@@ -22,6 +23,8 @@ impl<'a> Context<'a> {
             sites: &runtime.sites,
             nodes: &runtime.presented,
             focused: runtime.focused,
+            selection: runtime.metadata.as_ref().and_then(|m| m.selection.as_ref())
+                .and_then(|frozen| frozen.presented),
             geometry: runtime
                 .metadata
                 .as_ref()
@@ -179,6 +182,20 @@ impl<'a> Part<'a> {
         (self.node.kind == super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
+    }
+    /// Selection in the acknowledged input text, independent of newer logical
+    /// edits or an unacknowledged candidate. Other parts have no selection.
+    pub fn selection(self) -> Option<gpui_canvas::TextSelection> {
+        let value = self.value()?;
+        if let Some(selection) = self.context.selection
+            .and_then(|snapshot| snapshot.selection(self.node.identity)) {
+            return Some(selection);
+        }
+        let caret = gpui_canvas::TextPosition {
+            offset: gpui_canvas::TextOffset::new(value.len())?,
+            affinity: gpui_canvas::CaretAffinity::Downstream,
+        };
+        Some(gpui_canvas::TextSelection { anchor: caret, focus: caret })
     }
     /// Physical viewport-clipped bounds of the acknowledged presentation.
     /// Uniform local radius from this acknowledged sheet, independent of a

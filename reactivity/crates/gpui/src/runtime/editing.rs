@@ -11,6 +11,30 @@ pub(super) struct Editing {
     selection: TextSelection,
 }
 
+/// The two immutable presentation endpoints, not another logical editor. This
+/// remains available when a provider activates while a newer edit has failed.
+/// Nonzero identities are allocated by Sites; Option uses that existing niche.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) struct SelectionSnapshot {
+    identity: NonZeroU64,
+    selection: TextSelection,
+}
+#[derive(Default)]
+pub(super) struct FrozenSelection {
+    pub presented: Option<SelectionSnapshot>,
+    pub candidate: Option<SelectionSnapshot>,
+}
+impl SelectionSnapshot {
+    pub fn selection(self, identity: u64) -> Option<TextSelection> {
+        (self.identity.get() == identity).then_some(self.selection)
+    }
+}
+impl FrozenSelection {
+    pub fn unused(&self) -> bool {
+        self.presented.is_none() && self.candidate.is_none()
+    }
+}
+
 /// Stack-only post-admission intent. It is consumed after the source is frozen
 /// back into the live text lane and before a candidate scene is prepared.
 #[derive(Clone, Copy)]
@@ -52,6 +76,13 @@ impl<M: View + 'static> Runtime<M> {
         let index = self.by_identity.get(state.identity)?;
         self.editing_at(index)
             .map(|state| (state.identity, state.selection))
+    }
+
+    pub(super) fn selection_snapshot(&self) -> Option<SelectionSnapshot> {
+        self.active_selection().map(|(identity, selection)| SelectionSnapshot {
+            identity: NonZeroU64::new(identity).expect("Sites identities are nonzero"),
+            selection,
+        })
     }
 
     fn interaction_layout(&mut self, index: usize) -> Result<&TextLayout, Error> {

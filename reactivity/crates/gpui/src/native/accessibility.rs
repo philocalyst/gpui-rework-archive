@@ -450,6 +450,9 @@ fn projected_node(part: Part<'_>) -> Node {
             ActionKind::Focus => accesskit::Action::Focus,
             ActionKind::Blur => accesskit::Action::Blur,
             ActionKind::SetValue => accesskit::Action::SetValue,
+            // Native range actions require a source-qualified TextRun cohort;
+            // they are enabled by that projection, never by a bare action bit.
+            ActionKind::SetTextSelection | ActionKind::ReplaceSelectedText => continue,
         });
     }
     node
