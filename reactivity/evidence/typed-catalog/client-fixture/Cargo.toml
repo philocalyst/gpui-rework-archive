@@ -15,6 +15,7 @@ filter-chip = { path = "libraries/filter-chip" }
 [patch.crates-io]
 wgpu = { path = "../../../vendor/wgpu" }
 wgpu-hal = { path = "../../../vendor/wgpu-hal" }
+wgpu-core = { path = "../../../vendor/wgpu-core" }
 parley = { path = "../../../vendor/parley" }
 parley_engine = { path = "../../../vendor/parley_engine" }
 winit = { path = "../../../vendor/winit" }
