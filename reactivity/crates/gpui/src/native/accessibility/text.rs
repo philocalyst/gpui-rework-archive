@@ -110,7 +110,9 @@ impl Cohort {
                 .ok()
                 .filter(|(_, current)| std::ptr::eq::<str>(lease.as_ref(), current.as_ref()))
                 .map(|(field, _)| field);
-            let runs = runs(value).count() as u32;
+            // P text was admitted by Canvas (MAX_TEXT = 32 KiB); even an
+            // all-newline input plus terminal empty run fits u32 exactly.
+            let runs = u32::try_from(runs(value).count()).expect("admitted Canvas input bound");
             let previous = self.input(part.native_id()).filter(|old| {
                 old.field == field && std::ptr::eq::<str>(old.value.as_ref(), lease.as_ref())
             });
@@ -168,7 +170,11 @@ impl Cohort {
         if previous.field == field && std::ptr::eq::<str>(previous.value.as_ref(), lease.as_ref()) {
             Ok(None)
         } else {
-            Ok(Some((index, field, runs(value).count() as u32)))
+            Ok(Some((
+                index,
+                field,
+                u32::try_from(runs(value).count()).expect("admitted Canvas input bound"),
+            )))
         }
     }
     /// An exact semantic frontier needs no full-sheet discovery or new table.
@@ -262,14 +268,13 @@ impl Cohort {
             if id.0 == 0 || id.0 & 1 != 0 {
                 return Err(Error::StaleTarget);
             }
-            let target = owner.accessibility_target(id.0 / 2)?;
-            // Inputs are never authorized by the old logical-ID namespace.
-            let mut input = false;
-            owner.visit(|part| input |= part.target() == target && part.value().is_some())?;
-            if input {
+            // All P inputs, including unqualified ones, belong to this sorted
+            // cohort. Identity reuse includes NodeKind, so an old low-ID static
+            // target cannot become an input after a kind replacement.
+            if self.input(id.0 / 2).is_some() {
                 return Err(Error::StaleTarget);
             }
-            return Ok(target);
+            return owner.accessibility_target(id.0 / 2);
         }
         let input = self
             .inputs
@@ -376,7 +381,8 @@ pub(super) fn text_run(value: &str) -> Node {
     let mut boundaries = GraphemeClusterSegmenter::new().segment_str(value);
     let mut previous = boundaries.next().unwrap_or(0);
     assert!(node.set_text_character_lengths(boundaries.map(|boundary| {
-        let length = (boundary - previous) as u32;
+        // This is a slice of Canvas-admitted P text (at most 32 KiB).
+        let length = u32::try_from(boundary - previous).expect("admitted Canvas input bound");
         previous = boundary;
         length
     })));
