@@ -1,0 +1,13 @@
+{
+  "source": "db73d4f1cca7f173f98ab835176de2908c464156",
+  "host_proof": 4,
+  "vulkan": 46,
+  "gpu_units": 10,
+  "presentation": 4,
+  "strict_gpu_all_targets": true,
+  "artifacts_and_linked_fixture_identical": true,
+  "gpu_src_and_build_code_delta_after_bea": 33,
+  "total_authored_shipping_delta_from_original_control": 649,
+  "new_unsafe_sites": 0,
+  "additional_hardware_qualification": false
+}

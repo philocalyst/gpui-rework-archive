@@ -1,0 +1,169 @@
+{
+  "baseline": {
+    "ref": "6bbb661465ea210d7492e83a35e3f3db31809750",
+    "files": {
+      "reactivity/crates/gpu/build.rs": {
+        "physical": 15,
+        "sha256": "76ea0e291b499d3f62e3837b528dc60e65645863b8b32a581c260246c7ff4635",
+        "unclassified": [],
+        "non_test_comment_free_code": 13
+      },
+      "reactivity/crates/gpu/src/lib.rs": {
+        "physical": 9,
+        "sha256": "43dd39cda94d4c2428d0938a6de6dd8b6954003d77ae600ffeddac135ea00f1c",
+        "unclassified": [],
+        "non_test_comment_free_code": 8
+      },
+      "reactivity/crates/gpu/src/renderer.rs": {
+        "physical": 1484,
+        "sha256": "568ed8ba6d8e1172268066b9f349dcd48b3234061272e3c308d5463443bf8d4d",
+        "unclassified": [],
+        "non_test_comment_free_code": 1183
+      },
+      "reactivity/crates/gpu/src/renderer/images.rs": {
+        "physical": 180,
+        "sha256": "368e1bf78865e679c422dc0c6aeb8ba1b9038c02672fc0356864609b9d1cb932",
+        "unclassified": [],
+        "non_test_comment_free_code": 171
+      },
+      "reactivity/crates/gpu/src/renderer/owned.rs": {
+        "physical": 74,
+        "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e",
+        "unclassified": [],
+        "non_test_comment_free_code": 68
+      },
+      "reactivity/crates/gpu/src/renderer/paint.rs": {
+        "physical": 407,
+        "sha256": "47bfb85fddfe86d39092fdfa08fb48827b3c39a033367983a337ae6e2c73b604",
+        "unclassified": [],
+        "non_test_comment_free_code": 337
+      },
+      "reactivity/crates/gpu/src/renderer/slots.rs": {
+        "physical": 170,
+        "sha256": "06d1cbd9dc55f5d0c9a9d1715b57103f9b4b61cc1e4a08418466e66b1a300bed",
+        "unclassified": [],
+        "non_test_comment_free_code": 158
+      },
+      "reactivity/crates/gpu/src/shader.rs": {
+        "physical": 527,
+        "sha256": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd",
+        "unclassified": [],
+        "non_test_comment_free_code": 483
+      },
+      "reactivity/vendor/wgpu-hal/src/vulkan/device.rs": {
+        "physical": 3116,
+        "sha256": "357f69123ff9b1f00c0b5b28f59f2ecf9f35912f9b946192c1233ecced20aa18",
+        "unclassified": [],
+        "non_test_comment_free_code": 2627
+      },
+      "reactivity/vendor/wgpu/src/lib.rs": {
+        "physical": 357,
+        "sha256": "30c946063f6b308fe19b523093d5ec92e79b7a33ecc379b7722bbb98b3554bbc",
+        "unclassified": [],
+        "non_test_comment_free_code": 92
+      }
+    },
+    "gpu_src_and_build": 2421,
+    "vendor_changed_files": 2719
+  },
+  "final": {
+    "ref": "0981fdccae9ddb015a678195770e28085ed9182f",
+    "files": {
+      "reactivity/crates/gpu/build.rs": {
+        "physical": 21,
+        "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+        "unclassified": [],
+        "non_test_comment_free_code": 18
+      },
+      "reactivity/crates/gpu/src/lib.rs": {
+        "physical": 10,
+        "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74",
+        "unclassified": [],
+        "non_test_comment_free_code": 9
+      },
+      "reactivity/crates/gpu/src/renderer.rs": {
+        "physical": 1619,
+        "sha256": "a5903d52cdc625cc37f71b231b038f3946ae1cf84df0e8f97c62189b634db95d",
+        "unclassified": [],
+        "non_test_comment_free_code": 1222
+      },
+      "reactivity/crates/gpu/src/renderer/artifact.rs": {
+        "physical": 77,
+        "sha256": "77f24709aad11b7efcbc1912e0b7d4038957f1355d8c6e3d676ddba2915a93b8",
+        "unclassified": [],
+        "non_test_comment_free_code": 52
+      },
+      "reactivity/crates/gpu/src/renderer/images.rs": {
+        "physical": 180,
+        "sha256": "368e1bf78865e679c422dc0c6aeb8ba1b9038c02672fc0356864609b9d1cb932",
+        "unclassified": [],
+        "non_test_comment_free_code": 171
+      },
+      "reactivity/crates/gpu/src/renderer/owned.rs": {
+        "physical": 74,
+        "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e",
+        "unclassified": [],
+        "non_test_comment_free_code": 68
+      },
+      "reactivity/crates/gpu/src/renderer/paint.rs": {
+        "physical": 407,
+        "sha256": "47bfb85fddfe86d39092fdfa08fb48827b3c39a033367983a337ae6e2c73b604",
+        "unclassified": [],
+        "non_test_comment_free_code": 337
+      },
+      "reactivity/crates/gpu/src/renderer/slots.rs": {
+        "physical": 170,
+        "sha256": "06d1cbd9dc55f5d0c9a9d1715b57103f9b4b61cc1e4a08418466e66b1a300bed",
+        "unclassified": [],
+        "non_test_comment_free_code": 158
+      },
+      "reactivity/crates/gpu/src/shader.rs": {
+        "physical": 527,
+        "sha256": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd",
+        "unclassified": [],
+        "non_test_comment_free_code": 483
+      },
+      "reactivity/crates/gpu/src/shader_build.rs": {
+        "physical": 539,
+        "sha256": "088e0fdb65d1b0f73b57f305591437743123aac5cc970788e14a01aeb9b2eefe",
+        "unclassified": [],
+        "non_test_comment_free_code": 454
+      },
+      "reactivity/vendor/wgpu-hal/src/vulkan/device.rs": {
+        "physical": 3151,
+        "sha256": "d7299f311de4f41db3471fee96a8284445d534417f426253f835e179915e8f4a",
+        "unclassified": [],
+        "non_test_comment_free_code": 2657
+      },
+      "reactivity/vendor/wgpu/src/lib.rs": {
+        "physical": 359,
+        "sha256": "9da12f5d242324bf24109438e76904da830d8008f78a3f12210bdd6160ccd3c4",
+        "unclassified": [],
+        "non_test_comment_free_code": 94
+      },
+      "reactivity/vendor/wgpu/src/shader_artifact.rs": {
+        "physical": 50,
+        "sha256": "a58e3477cf9edb771e94b79dda72c3d4ddc6374d2a09703008d644342dc49242",
+        "unclassified": [],
+        "non_test_comment_free_code": 33
+      }
+    },
+    "gpu_src_and_build": 2972,
+    "vendor_changed_files": 2784
+  },
+  "delta": {
+    "gpu_src_and_build": 551,
+    "vendor_changed_files": 65
+  },
+  "tools": {
+    "tokei": {
+      "bytes": 6323656,
+      "sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712"
+    },
+    "helper": {
+      "bytes": 2784400,
+      "sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea"
+    },
+    "scope": "GPU/src + GPU/build.rs; vendor authored deltas charged separately. Known Syn test syntax/comments/blanks excluded; feature and host helper included."
+  }
+}

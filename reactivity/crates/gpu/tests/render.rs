@@ -3069,3 +3069,135 @@ fn layout_equality_names_the_instance_and_preserves_clone_order_hash() {
         assert_eq!(clone, clone.clone());
     });
 }
+
+#[cfg(feature = "offline-shader")]
+#[test]
+fn artifact_missing_feature_falls_back_and_admitted_pipeline_errors_propagate() {
+    pollster::block_on(async {
+        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+        desc.backends = wgpu::Backends::VULKAN;
+        let instance = wgpu::Instance::new(desc);
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                force_fallback_adapter: true,
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+        let optional = adapter.shader_artifact_features();
+        assert!(optional.contains(wgpu::Features::PASSTHROUGH_SHADERS));
+        for enabled in [false, true] {
+            for storage_limit in [3, 4] {
+                let (device, queue) = adapter
+                    .request_device(&wgpu::DeviceDescriptor {
+                        required_features: if enabled {
+                            optional
+                        } else {
+                            wgpu::Features::empty()
+                        },
+                        required_limits: wgpu::Limits {
+                            max_storage_buffers_per_shader_stage: storage_limit,
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    })
+                    .await
+                    .unwrap();
+                let profile = device.shader_artifact_profile();
+                eprintln!(
+                    "artifact_admission,enabled={enabled},storage_limit={storage_limit},profile={profile:?}"
+                );
+                assert_eq!(profile.is_some(), enabled);
+                if let Some(profile) = profile {
+                    assert_eq!(profile.revision(), 2);
+                    assert!(profile.variant() < 4);
+                }
+                let result =
+                    gpui_gpu::GpuContext::new(device, queue, wgpu::TextureFormat::Rgba8UnormSrgb)
+                        .await;
+                if storage_limit == 3 {
+                    assert!(
+                        matches!(result, Err(gpui_gpu::Error::Shader(_))),
+                        "pipeline errors must not become successful fallback"
+                    );
+                } else {
+                    assert!(result.is_ok());
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges() {
+    pollster::block_on(async {
+        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+        desc.backends = wgpu::Backends::VULKAN;
+        let instance = wgpu::Instance::new(desc);
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                force_fallback_adapter: true,
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+        let (device, queue) = adapter
+            .request_device(&wgpu::DeviceDescriptor {
+                required_features: adapter.features() & wgpu::Features::PASSTHROUGH_SHADERS,
+                required_limits: wgpu::Limits {
+                    max_texture_dimension_2d: 16_384,
+                    ..Default::default()
+                },
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+        let mut owner = Renderer::new(device, queue, wgpu::TextureFormat::Rgba8UnormSrgb)
+            .await
+            .unwrap();
+        for (width, height) in [(1, 1), (17, 19), (16_384, 1), (1, 16_384)] {
+            let mut canvas = Canvas::recording(width, height, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            let clip = Rect::new(0., 0., width as f32, height as f32);
+            for (x, y, color) in [
+                (0, 0, Color::rgb(255, 0, 0)),
+                (width - 1, 0, Color::rgb(0, 255, 0)),
+                (0, height - 1, Color::rgb(0, 0, 255)),
+                (width - 1, height - 1, Color::rgb(255, 255, 0)),
+            ] {
+                canvas
+                    .fill_rect(
+                        Rect::new(x as f32, y as f32, 1., 1.),
+                        Affine::IDENTITY,
+                        clip,
+                        color,
+                    )
+                    .unwrap();
+            }
+            if width == 16_384 || height == 16_384 {
+                // The existing conservative precision budget declines geometry
+                // on this extent. Preserve that rejection, then test max-extent
+                // clear/CSR addressing without weakening the geometry contract.
+                let target = output_texture(&owner, &canvas);
+                assert!(matches!(
+                    owner.render(
+                        canvas.prepared_scene(),
+                        &target.create_view(&Default::default())
+                    ),
+                    Err(gpui_gpu::Error::Precision { .. })
+                ));
+                canvas = Canvas::recording(width, height, ColorConfig::default()).unwrap();
+                canvas.clear(Color::rgb(23, 47, 89));
+            }
+            let actual = readback(&mut owner, &canvas);
+            assert_eq!(actual, canvas.pixels(), "target {width}x{height}");
+            let mut invalid = canvas.prepared_scene();
+            invalid.width = invalid.width.saturating_add(1);
+            let target = output_texture(&owner, &canvas);
+            assert!(matches!(
+                owner.render(invalid, &target.create_view(&Default::default())),
+                Err(gpui_gpu::Error::InvalidScene)
+            ));
+        }
+    });
+}

@@ -1,0 +1,12 @@
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/gpu)
+    Checking snafu v0.8.9
+    Checking wgsl-rs-ir v0.1.0-beta.6
+    Checking ttf-parser v0.25.1
+    Checking glam v0.30.10
+    Checking fearless_simd v1.1.0
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/core)
+    Checking wgsl-rs v0.1.0-beta.6
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/canvas)
+    Checking wgpu v30.0.1 (/tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu)
+    Checking pollster v1.0.1
+    Finished `release` profile [optimized] target(s) in 10.14s

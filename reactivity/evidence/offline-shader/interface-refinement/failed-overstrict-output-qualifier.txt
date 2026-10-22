@@ -1,0 +1,18 @@
+   Compiling wgpu v30.0.1 (/tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/gpu)
+error: failed to run custom build command for `gpui_gpu v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/gpu)`
+
+Caused by:
+  process didn't exit successfully: `/tmp/gpui-offline-shader-target/release/build/gpui_gpu-219984cf26922adc/build-script-build` (exit status: 101)
+  --- stdout
+  cargo::rerun-if-changed=src
+  cargo::rerun-if-env-changed=GPUI_SPIRV_VAL
+
+  --- stderr
+
+  thread 'main' (869751) panicked at /tmp/gpui-offline-shader-sol/reactivity/crates/gpu/src/shader_build.rs:120:13:
+  assertion `left == right` failed
+    left: Some(Location { location: 0, interpolation: Some(Perspective), sampling: Some(Center), blend_src: None, per_primitive: false })
+   right: Some(Location { location: 0, interpolation: None, sampling: None, blend_src: None, per_primitive: false })
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

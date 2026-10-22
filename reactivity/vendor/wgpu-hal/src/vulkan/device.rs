@@ -294,6 +294,41 @@ impl MemoryProperties {
 }
 
 impl super::Device {
+    /// Effective guards for revision-two offline SPIR-V artifacts. None keeps
+    /// the checked compiler path when this device's policy is not represented.
+    pub fn shader_artifact_checks(&self) -> Option<[bool; 2]> {
+        use naga::{back::spv::WriterFlags, proc::BoundsCheckPolicy as Policy};
+        let options = &self.naga_options;
+        // Every artifact module has exactly one entry, preserving the effective
+        // SEPARATE_ENTRY_POINTS workaround without changing device policy.
+        if options.bounds_check_policies.index != Policy::Restrict
+            || options.bounds_check_policies.binding_array != Policy::Unchecked
+            || !options.force_loop_bounding
+            || !options.emit_int_div_checks
+            || (options.lang_version < (1, 3)
+                && !self
+                    .shared
+                    .enabled_extensions
+                    .contains(&ash::khr::storage_buffer_storage_class::NAME))
+            || !options.flags.contains(WriterFlags::FORCE_POINT_SIZE)
+            || options.fake_missing_bindings
+            || options.flags.contains(WriterFlags::ADJUST_COORDINATE_SPACE)
+        {
+            return None;
+        }
+        let checked = |policy| match policy {
+            Policy::Restrict => Some(true),
+            Policy::Unchecked => Some(false),
+            _ => None,
+        };
+        Some([
+            checked(options.bounds_check_policies.buffer)?,
+            checked(options.bounds_check_policies.image_load)?,
+        ])
+    }
+}
+
+impl super::Device {
     /// # Safety
     ///
     /// - `vk_image` must be created respecting `desc`

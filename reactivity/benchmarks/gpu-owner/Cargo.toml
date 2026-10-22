@@ -8,6 +8,7 @@ publish = false
 
 [features]
 counts = ["wgpu/counters"]
+offline-shader = ["gpui_gpu/offline-shader"]
 
 [dependencies]
 gpui_gpu = { path = "../../crates/gpu" }
@@ -21,3 +22,8 @@ wgpu = { path = "../../vendor/wgpu" }
 wgpu-hal = { path = "../../vendor/wgpu-hal" }
 parley = { path = "../../vendor/parley" }
 parley_engine = { path = "../../vendor/parley_engine" }
+
+[[bin]]
+name = "admission"
+path = "src/bin/admission.rs"
+required-features = ["offline-shader"]

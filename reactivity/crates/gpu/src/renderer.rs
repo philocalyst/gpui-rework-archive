@@ -4,6 +4,9 @@ use gpui_canvas::{
     PreparedPlacement, PreparedScene, SdrMapping,
 };
 use std::{borrow::Cow, collections::HashMap};
+#[cfg(feature = "offline-shader")]
+#[allow(unsafe_code)]
+mod artifact;
 mod images;
 mod owned;
 mod paint;
@@ -347,7 +350,7 @@ pub struct Renderer {
     state: RendererState,
 }
 
-/// One device/queue and one checked compositor pipeline for a fixed format.
+/// One device/queue and one compositor pipeline for a fixed format.
 /// Borrow this owner for independent per-window `RendererState`s. There is no
 /// pipeline map, per-draw reference counting, or process-wide GPU cache.
 /// A different format requires a separate context. The queue must belong to
@@ -395,6 +398,8 @@ impl GpuContext {
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("GPUI"),
+                #[cfg(feature = "offline-shader")]
+                required_features: adapter.shader_artifact_features(),
                 ..Default::default()
             })
             .await
@@ -407,14 +412,37 @@ impl GpuContext {
         format: wgpu::TextureFormat,
     ) -> Result<Self, Error> {
         validate_format(format)?;
+        #[cfg(feature = "offline-shader")]
+        let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
+        #[cfg(feature = "offline-shader")]
+        let memory = device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
         let errors = device.push_error_scope(wgpu::ErrorFilter::Validation);
-        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("GPUI tile compositor"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
-        });
+        #[cfg(feature = "offline-shader")]
+        let artifact = artifact::create(&device);
+        #[cfg(not(feature = "offline-shader"))]
+        let artifact = None::<(
+            wgpu::ShaderModule,
+            wgpu::ShaderModule,
+            wgpu::BindGroupLayout,
+            wgpu::PipelineLayout,
+        )>;
+        let (module, explicit) = match artifact {
+            Some((module, fragment, layout, pipeline_layout)) => {
+                (module, Some((fragment, layout, pipeline_layout)))
+            }
+            None => (
+                device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("GPUI tile compositor"),
+                    source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
+                }),
+                None,
+            ),
+        };
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("GPUI tile compositor"),
-            layout: None,
+            layout: explicit
+                .as_ref()
+                .map(|(_, _, pipeline_layout)| pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &module,
                 entry_point: Some("vertex"),
@@ -425,7 +453,10 @@ impl GpuContext {
             depth_stencil: None,
             multisample: Default::default(),
             fragment: Some(wgpu::FragmentState {
-                module: &module,
+                module: explicit
+                    .as_ref()
+                    .map(|(fragment, _, _)| fragment)
+                    .unwrap_or(&module),
                 entry_point: Some("fragment"),
                 compilation_options: Default::default(),
                 targets: &[Some(wgpu::ColorTargetState {
@@ -442,8 +473,19 @@ impl GpuContext {
         // Each context must mint a fresh layout handle, including if this ever
         // uses explicit layouts. Sharing a BGL across contexts/formats would
         // invalidate the state/context identity certificate.
+        // Keep this checked pipeline lookup on the explicit route too: after
+        // device loss creation errors can be ignored by WGPU's scopes, while
+        // this rejects the invalid pipeline instead of returning a dead owner.
+        drop(explicit);
         let layout = pipeline.get_bind_group_layout(0);
-        if let Some(error) = errors.pop().await {
+        let error = errors.pop().await;
+        #[cfg(feature = "offline-shader")]
+        let error = {
+            let memory = memory.pop().await;
+            let internal = internal.pop().await;
+            error.or(memory).or(internal)
+        };
+        if let Some(error) = error {
             return Err(Error::Shader(error.to_string()));
         }
         Ok(Self {
@@ -1480,5 +1522,98 @@ mod tests {
             }
         }
         assert!(accepted > 20, "exercise nontrivial successful certificates");
+    }
+    #[cfg(feature = "vulkan-tests")]
+    #[test]
+    fn packet_reference_cap_and_atlas_last_row_admission() {
+        pollster::block_on(async {
+            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+            desc.backends = wgpu::Backends::VULKAN;
+            let instance = wgpu::Instance::new(desc);
+            let adapter = instance
+                .request_adapter(&wgpu::RequestAdapterOptions {
+                    force_fallback_adapter: true,
+                    ..Default::default()
+                })
+                .await
+                .unwrap();
+            let context = GpuContext::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+                .await
+                .unwrap();
+            let mut state = RendererState::new(&context);
+            state.ranges.resize(1, [0, 0]);
+            state.cursors.resize(1, 0);
+            let draw = PreparedDraw {
+                local_rect: Rect::new(0., 0., 1., 1.),
+                inverse: [1., 0., 0., 1., 0., 0.],
+                clip: Rect::new(0., 0., 1., 1.),
+                bounds: Rect::new(0., 0., 1., 1.),
+                color: [1.; 4],
+                source: gpui_canvas::PreparedSource::Solid,
+            };
+            assert_eq!(
+                state
+                    .bin_draw(draw, [0.; 2], 0, MAX_DRAWS - 1, 1, 1, 1, MAX_REFERENCES - 1)
+                    .unwrap(),
+                MAX_REFERENCES
+            );
+            let before = (state.ranges.clone(), state.cursors.clone());
+            for previous in [MAX_REFERENCES, usize::MAX] {
+                assert!(matches!(
+                    state.bin_draw(draw, [0.; 2], 0, 0, 1, 1, 1, previous),
+                    Err(Error::ResourceLimit)
+                ));
+                assert_eq!((&state.ranges, &state.cursors), (&before.0, &before.1));
+            }
+            assert_eq!(
+                tile_bounds(65_535, 1024, 16_384, 1024),
+                [16_368, 1008, 16_384, 1024]
+            );
+            let mut fonts = gpui_canvas::TextSystem::bundled().unwrap();
+            let run = fonts.shape("X", 18., None).unwrap();
+            let mut canvas = gpui_canvas::Canvas::recording(32, 32, Default::default()).unwrap();
+            canvas
+                .draw_text(
+                    &mut fonts,
+                    &run,
+                    gpui_canvas::Point { x: 0., y: 0. },
+                    gpui_canvas::Affine::IDENTITY,
+                    Rect::new(0., 0., 32., 32.),
+                    gpui_canvas::Color::BLACK,
+                )
+                .unwrap();
+            let key = canvas.prepared_scene().masks().next().unwrap().key;
+            let coverage = vec![255; MAX_ATLAS_SIDE as usize];
+            let mask = GlyphMask {
+                key,
+                width: MAX_ATLAS_SIDE as usize,
+                height: 1,
+                coverage: &coverage,
+            };
+            let mut atlas = Atlas::new(context.device(), MAX_ATLAS_SIDE);
+            atlas.x = 1;
+            atlas.y = MAX_ATLAS_SIDE - 1;
+            atlas.row_height = 1;
+            assert!(atlas.insert(context.queue(), mask).is_none());
+            assert_eq!(
+                (atlas.x, atlas.y, atlas.row_height, atlas.entries.len()),
+                (1, MAX_ATLAS_SIDE - 1, 1, 0)
+            );
+            atlas.x = 0;
+            atlas.row_height = 0;
+            assert_eq!(
+                atlas.insert(context.queue(), mask),
+                Some(MAX_ATLAS_SIDE as usize)
+            );
+            let tile = atlas.entries[&key];
+            assert_eq!(
+                (tile.x, tile.y, tile.width, tile.height),
+                (0, MAX_ATLAS_SIDE - 1, MAX_ATLAS_SIDE, 1)
+            );
+            context
+                .device()
+                .poll(wgpu::PollType::wait_indefinitely())
+                .unwrap();
+        });
     }
 }

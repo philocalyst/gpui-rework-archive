@@ -1,0 +1,22 @@
+{
+  "reactivity/Cargo.lock": "1f375135bf26cb2048607afd74c77a07ed10bf6de3c5cac962ec78ac63c613ac",
+  "reactivity/benchmarks/gpu-owner/Cargo.lock": "8f3a9660b05a6646aad1af635cfaee2f8397205127c0c0f2b59bd035d927ccaf",
+  "reactivity/benchmarks/gpu-owner/Cargo.toml": "68af16452da3427870b9d8227fc37685279140e72e7a3a72eabf7065b59cfcb3",
+  "reactivity/benchmarks/gpu-owner/src/bin/admission.rs": "57382d3c7545a3c42e9cadda1517578426fd1acdb4cb1372d90f12a0b1f94532",
+  "reactivity/benchmarks/gpu-owner/src/bin/artifact-lifetime.rs": "dd8554778df73b3367d5adc9f4cade65fc6df80a98e056387fd65b3bb24c6620",
+  "reactivity/benchmarks/gpu-owner/src/bin/driver-retained.rs": "5ab906d702a2e7b1532ad588b694efc6f0def7aefac04a4028a8cbd19e657070",
+  "reactivity/crates/gpu/Cargo.toml": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222",
+  "reactivity/crates/gpu/build.rs": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+  "reactivity/crates/gpu/src/lib.rs": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74",
+  "reactivity/crates/gpu/src/renderer.rs": "a5903d52cdc625cc37f71b231b038f3946ae1cf84df0e8f97c62189b634db95d",
+  "reactivity/crates/gpu/src/renderer/artifact.rs": "77f24709aad11b7efcbc1912e0b7d4038957f1355d8c6e3d676ddba2915a93b8",
+  "reactivity/crates/gpu/src/shader_build.rs": "088e0fdb65d1b0f73b57f305591437743123aac5cc970788e14a01aeb9b2eefe",
+  "reactivity/crates/gpu/tests/render.rs": "18273a92e96c788006ba5837054fc852661829b7dc35e1077304216cf34bb8dd",
+  "reactivity/docs/offline-shader-proof-luna.md": "642fe2c946839ceed76da91dd060c4b975c0033f250ec221701ada77724f87f2",
+  "reactivity/vendor/wgpu-hal/GPUI-PATCHES.md": "6af3bb04421aa5528cfe1922e9b3df4446e02b8828c18ad64d10d2b3c0750386",
+  "reactivity/vendor/wgpu-hal/src/vulkan/device.rs": "d7299f311de4f41db3471fee96a8284445d534417f426253f835e179915e8f4a",
+  "reactivity/vendor/wgpu/Cargo.toml": "b993d51fcc877b487f66ff4cc0414177631cee93bba4ac4ecb20a7f1131b5077",
+  "reactivity/vendor/wgpu/GPUI-PATCHES.md": "4ba2d1b695ced177b583b71043c8fbeb97d39e891923482b715db611709f9036",
+  "reactivity/vendor/wgpu/src/lib.rs": "9da12f5d242324bf24109438e76904da830d8008f78a3f12210bdd6160ccd3c4",
+  "reactivity/vendor/wgpu/src/shader_artifact.rs": "a58e3477cf9edb771e94b79dda72c3d4ddc6374d2a09703008d644342dc49242"
+}

@@ -1,5 +1,6 @@
 //! GPU rendering consumes the same admitted scene as the CPU reference.
-#![forbid(unsafe_code)]
+#![cfg_attr(not(feature = "offline-shader"), forbid(unsafe_code))]
+#![cfg_attr(feature = "offline-shader", deny(unsafe_code))]
 mod renderer;
 pub mod shader;
 pub use renderer::{

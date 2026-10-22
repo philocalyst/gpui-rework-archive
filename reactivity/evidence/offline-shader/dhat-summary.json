@@ -1,0 +1,255 @@
+{
+  "baseline.json": {
+    "command": "/tmp/gpui-offline-shader-controls/baseline/first renderer",
+    "whole_process": {
+      "tb": 115155943,
+      "tbk": 96220,
+      "gb": 43146914,
+      "gbk": 12842,
+      "eb": 297259,
+      "ebk": 2760
+    },
+    "subsets": {
+      "constructor_frames": {
+        "sites": 5110,
+        "tb": 40837094,
+        "tbk": 40198,
+        "gb": 9110772,
+        "gbk": 5443,
+        "eb": 0,
+        "ebk": 0
+      },
+      "native_module": {
+        "sites": 2,
+        "tb": 34360,
+        "tbk": 2,
+        "gb": 34360,
+        "gbk": 2,
+        "eb": 0,
+        "ebk": 0
+      },
+      "constructor_naga": {
+        "sites": 2245,
+        "tb": 1859197,
+        "tbk": 7454,
+        "gb": 358524,
+        "gbk": 866,
+        "eb": 0,
+        "ebk": 0
+      }
+    },
+    "mesa_disk_shader_cache": "inherited/uncontrolled",
+    "exit_lifetime": "ordinary destructor teardown"
+  },
+  "bea848dbe4.json": {
+    "command": "/tmp/gpui-offline-shader-controls/bea848dbe4/first renderer",
+    "whole_process": {
+      "tb": 98999359,
+      "tbk": 54586,
+      "gb": 42759735,
+      "gbk": 11658,
+      "eb": 296675,
+      "ebk": 2753
+    },
+    "subsets": {
+      "constructor_frames": {
+        "sites": 2865,
+        "tb": 38971491,
+        "tbk": 32738,
+        "gb": 8753432,
+        "gbk": 4580,
+        "eb": 0,
+        "ebk": 0
+      },
+      "native_module": {
+        "sites": 2,
+        "tb": 34380,
+        "tbk": 2,
+        "gb": 34380,
+        "gbk": 2,
+        "eb": 0,
+        "ebk": 0
+      },
+      "constructor_naga": {
+        "sites": 0,
+        "tb": 0,
+        "tbk": 0,
+        "gb": 0,
+        "gbk": 0,
+        "eb": 0,
+        "ebk": 0
+      }
+    },
+    "mesa_disk_shader_cache": "inherited/uncontrolled",
+    "exit_lifetime": "ordinary destructor teardown"
+  },
+  "retained-artifact.json": {
+    "command": "/tmp/gpui-offline-shader-target/release/driver-retained",
+    "whole_process": {
+      "tb": 98997542,
+      "tbk": 54562,
+      "gb": 42758865,
+      "gbk": 11656,
+      "eb": 41950927,
+      "ebk": 8501
+    },
+    "subsets": {
+      "constructor_frames": {
+        "sites": 2973,
+        "tb": 40550723,
+        "tbk": 32982,
+        "gb": 8948104,
+        "gbk": 4631,
+        "eb": 8316611,
+        "ebk": 2310
+      },
+      "native_module": {
+        "sites": 2,
+        "tb": 34380,
+        "tbk": 2,
+        "gb": 34380,
+        "gbk": 2,
+        "eb": 34380,
+        "ebk": 2
+      },
+      "constructor_naga": {
+        "sites": 0,
+        "tb": 0,
+        "tbk": 0,
+        "gb": 0,
+        "gbk": 0,
+        "eb": 0,
+        "ebk": 0
+      }
+    },
+    "mesa_disk_shader_cache": "inherited/uncontrolled",
+    "exit_lifetime": "owners deliberately retained"
+  },
+  "retained-cache-disabled-artifact.json": {
+    "command": "/tmp/gpui-offline-shader-controls/bea848dbe4/driver-retained-artifact",
+    "whole_process": {
+      "tb": 112547233,
+      "tbk": 88273,
+      "gb": 42784266,
+      "gbk": 11966,
+      "eb": 41953519,
+      "ebk": 8523
+    },
+    "subsets": {
+      "constructor_frames": {
+        "sites": 2973,
+        "tb": 40550723,
+        "tbk": 32982,
+        "gb": 8948104,
+        "gbk": 4631,
+        "eb": 8316611,
+        "ebk": 2310
+      },
+      "native_module": {
+        "sites": 2,
+        "tb": 34380,
+        "tbk": 2,
+        "gb": 34380,
+        "gbk": 2,
+        "eb": 34380,
+        "ebk": 2
+      },
+      "constructor_naga": {
+        "sites": 0,
+        "tb": 0,
+        "tbk": 0,
+        "gb": 0,
+        "gbk": 0,
+        "eb": 0,
+        "ebk": 0
+      }
+    },
+    "mesa_disk_shader_cache": "disabled",
+    "exit_lifetime": "owners deliberately retained"
+  },
+  "retained-cache-disabled-default.json": {
+    "command": "/tmp/gpui-offline-shader-controls/bea848dbe4/driver-retained-default",
+    "whole_process": {
+      "tb": 114691548,
+      "tbk": 95992,
+      "gb": 43141606,
+      "gbk": 12829,
+      "eb": 42276551,
+      "ebk": 9385
+    },
+    "subsets": {
+      "constructor_frames": {
+        "sites": 4656,
+        "tb": 42720222,
+        "tbk": 40741,
+        "gb": 9305444,
+        "gbk": 5494,
+        "eb": 8639643,
+        "ebk": 3172
+      },
+      "native_module": {
+        "sites": 2,
+        "tb": 34360,
+        "tbk": 2,
+        "gb": 34360,
+        "gbk": 2,
+        "eb": 0,
+        "ebk": 0
+      },
+      "constructor_naga": {
+        "sites": 1685,
+        "tb": 2163093,
+        "tbk": 7753,
+        "gb": 358524,
+        "gbk": 866,
+        "eb": 358524,
+        "ebk": 866
+      }
+    },
+    "mesa_disk_shader_cache": "disabled",
+    "exit_lifetime": "owners deliberately retained"
+  },
+  "retained-default.json": {
+    "command": "/tmp/gpui-offline-shader-target/release/driver-retained",
+    "whole_process": {
+      "tb": 101167041,
+      "tbk": 62321,
+      "gb": 43116205,
+      "gbk": 12519,
+      "eb": 42273959,
+      "ebk": 9363
+    },
+    "subsets": {
+      "constructor_frames": {
+        "sites": 4656,
+        "tb": 42720222,
+        "tbk": 40741,
+        "gb": 9305444,
+        "gbk": 5494,
+        "eb": 8639643,
+        "ebk": 3172
+      },
+      "native_module": {
+        "sites": 2,
+        "tb": 34360,
+        "tbk": 2,
+        "gb": 34360,
+        "gbk": 2,
+        "eb": 0,
+        "ebk": 0
+      },
+      "constructor_naga": {
+        "sites": 1685,
+        "tb": 2163093,
+        "tbk": 7753,
+        "gb": 358524,
+        "gbk": 866,
+        "eb": 358524,
+        "ebk": 866
+      }
+    },
+    "mesa_disk_shader_cache": "inherited/uncontrolled",
+    "exit_lifetime": "owners deliberately retained"
+  },
+  "note": "DHAT3.27.1 malloc/realloc heap: tb/tbk total bytes/blocks, gb/gbk live at process global peak, eb/ebk live at process exit. Subsets require matching stack frames, so truncated deep stacks can be omitted. Do not sum per-site individual maxima. first controls drop owners; driver-retained deliberately exits before destructors. Includes driver host heap, excludes GPU memory, mappings, RSS and device memory."
+}
