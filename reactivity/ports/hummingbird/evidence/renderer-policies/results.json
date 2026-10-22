@@ -1,0 +1,140 @@
+[
+  {
+    "case": "headless",
+    "command": [
+      "/tmp/gpui-hummingbird-renderer-gates/hummingbird-frozen",
+      "--headless"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "111b4d0afb990a7cc0251e6f71c768213dc148f95b854d918c6db4091b419fbf"
+  },
+  {
+    "case": "native-cpu",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-hummingbird-renderer-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-hummingbird-renderer-gates/native-cpu.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "cpu"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "native-gpu",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-hummingbird-renderer-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-hummingbird-renderer-gates/native-gpu.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "gpu"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "native-auto",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-hummingbird-renderer-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-hummingbird-renderer-gates/native-auto.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "auto"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "application-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "ports/hummingbird/Cargo.toml",
+      "--features",
+      "native"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "edbf5d197678c8fe870645b422f403a3a01154f16c61c7565a9f5547bc22c943"
+  },
+  {
+    "case": "application-strict",
+    "command": [
+      "cargo",
+      "clippy",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "ports/hummingbird/Cargo.toml",
+      "--features",
+      "native",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "a0891c35025cb34d7d68a3662b6dc61d24a0d79d913facb75adfb66a3a3ebe46"
+  },
+  {
+    "case": "future-public",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--no-default-features",
+      "--test",
+      "question_futures"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "b6871c1b9b28a8d1278783771b5294ad86acb3aa97bb9cdef460b8a1c60a9ac8"
+  }
+]

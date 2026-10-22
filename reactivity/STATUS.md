@@ -62,6 +62,15 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [combined Hummingbird renderer checks](ports/hummingbird/evidence/renderer-policies/README.md)
+pin source `c73144892c`: the shared executable passes its headless transcript and
+actual X11/AT-SPI CPU, GPU and Auto transcripts. Each native run presents eight
+acknowledged frames. Explicit GPU uses llvmpipe; Auto remains software under this
+host's ordinary admission rules. Nine application tests, 17 public Future tests,
+five external catalog cases, strict application Clippy and the borrowed-search
+driver's locked compilation pass. These checks include the integrated Future
+adapter and Vulkan stage ownership repair without retagging earlier campaigns.
+
 The [typed Future adapter](evidence/future-adapter/README.md) is integrated from
 source `a951113912`: 516 public/library/doc cases, 12 headless reader cases,
 nine current-source Loom mailbox cases, exact native Future and ordinary-credit

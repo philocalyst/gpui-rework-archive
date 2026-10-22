@@ -1,0 +1,48 @@
+{
+  "source_head": "c73144892c189ffe90a2a6ca20b3bfd4d15e9231",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///root/gpui-ce3/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "manifest_path": "/root/gpui-ce3/reactivity/ports/hummingbird/Cargo.toml",
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "hummingbird-gpui-port",
+      "src_path": "/root/gpui-ce3/reactivity/ports/hummingbird/src/main.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native"
+    ],
+    "filenames": [
+      "/root/gpui-ce3/reactivity/target/debug/hummingbird-gpui-port"
+    ],
+    "executable": "/root/gpui-ce3/reactivity/target/debug/hummingbird-gpui-port",
+    "fresh": false
+  },
+  "binary_sha256": "cbc471244f37ec3b61e81d79f6025e68b3522d1f4f2358bc24fd3b5d4576d56c",
+  "guard_driver_sha256": "baade27a145baec8cdca7ddf390eadc39f6922c66afcb79da8cb7d88f91d5e35",
+  "source_unchanged": true,
+  "owned_displays_stopped": true,
+  "limits": "Actual private X11/AT-SPI protocol plus SQLite/Nucleo public-owner transcript; llvmpipe execution is not hardware timing, startup, RSS, native HDR or foreign-platform runtime evidence.",
+  "displays": [
+    ":152",
+    ":152",
+    ":152"
+  ]
+}

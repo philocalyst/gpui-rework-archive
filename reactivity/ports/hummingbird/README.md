@@ -25,6 +25,10 @@ GPU presentation. The native feature includes Linux X11/AT-SPI.
 It renders through the same `Library: View`, `ItemSource`, typed
 `Questions`, source fields and Inbox receiver as the headless transcript. There
 is no second UI renderer, entity compatibility layer or test dispatcher.
+The [combined renderer qualification](evidence/renderer-policies/README.md)
+executes this same application through CPU, GPU and Auto, including real X11
+input and AT-SPI actions. Its llvmpipe results establish behavior, not hardware
+performance or a full-player claim.
 
 The default in-memory database applies all 39 real pinned migrations before
 inserting Hummingbird's original three-track/artist/album/liked fixture, plus six
