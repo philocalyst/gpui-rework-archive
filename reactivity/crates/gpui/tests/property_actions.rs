@@ -56,6 +56,28 @@ fn draft(win: &mut Win<Companion>, source: &str) {
     win.replace(target, TextSelection::from_bytes(0, end).unwrap(), source)
         .unwrap();
 }
+
+#[test]
+fn empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit() {
+    let mut win = mounted();
+    let target = win.button("Library button");
+    select(&mut win, target, PropertyId::Width);
+    let input = win.find_input().unwrap();
+    let end = win.root().unwrap().editor.draft.len();
+    let preceding = win
+        .replace(input, TextSelection::from_bytes(0, end).unwrap(), "bad syntax")
+        .unwrap();
+    assert!(preceding.changed_nodes > 0);
+    let status = win.root().unwrap().editor.status.clone();
+    win.reset_counters().unwrap();
+    let result = win.activate(win.button("Apply")).unwrap();
+    assert_eq!(result.source_epoch, preceding.source_epoch);
+    assert_eq!(win.counters().source_operations, 0);
+    assert_eq!(win.counters().paint_passes, 0);
+    assert_eq!(win.root().unwrap().editor.status, status);
+    assert_eq!(result.changed_nodes, 0);
+}
+
 #[test]
 fn actual_contained_apply_rejects_and_recovers_without_losing_the_route() {
     let mut win = mounted();
