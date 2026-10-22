@@ -69,7 +69,7 @@ impl RendererState {
         edits: &'edits [SlotEdit],
         target: &'target wgpu::TextureView,
     ) -> Result<GpuSlotCommit<'owner, 'edits, 'target>, SlotError> {
-        if self.context_id != context.id {
+        if self.layout != context.layout {
             return Err(SlotError::IncompatibleContext);
         }
         let packet = self

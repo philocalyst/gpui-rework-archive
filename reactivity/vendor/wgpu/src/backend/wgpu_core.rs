@@ -752,7 +752,14 @@ crate::cmp::impl_eq_ord_hash_proxy!(CoreAdapter => .id);
 crate::cmp::impl_eq_ord_hash_proxy!(CoreDevice => .id);
 crate::cmp::impl_eq_ord_hash_proxy!(CoreQueue => .id);
 crate::cmp::impl_eq_ord_hash_proxy!(CoreShaderModule => .id);
-crate::cmp::impl_eq_ord_hash_proxy!(CoreBindGroupLayout => .id);
+impl CoreBindGroupLayout {
+    // IDs are local to a Global. Both it and this registered ID stay alive
+    // until the last cloned handle drops, so this key cannot suffer ABA.
+    fn identity(&self) -> (&ContextWgpuCore, wgc::id::BindGroupLayoutId) {
+        (&self.context, self.id)
+    }
+}
+crate::cmp::impl_eq_ord_hash_proxy!(CoreBindGroupLayout => .identity());
 crate::cmp::impl_eq_ord_hash_proxy!(CoreBindGroup => .id);
 crate::cmp::impl_eq_ord_hash_proxy!(CoreTextureView => .id);
 crate::cmp::impl_eq_ord_hash_proxy!(CoreSampler => .id);

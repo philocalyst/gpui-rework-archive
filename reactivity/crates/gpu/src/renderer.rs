@@ -3,11 +3,7 @@ use gpui_canvas::{
     GlyphKey, GlyphMask, OutputProfile, PixelFormat, PreparedDraw, PreparedGroup,
     PreparedPlacement, PreparedScene, SdrMapping,
 };
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{borrow::Cow, collections::HashMap};
 mod images;
 mod owned;
 mod paint;
@@ -362,29 +358,16 @@ pub struct GpuContext {
     format: wgpu::TextureFormat,
     pipeline: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
-    id: ContextId,
 }
-#[derive(Clone, Copy, PartialEq, Eq)]
-struct ContextId(usize);
-impl ContextId {
-    fn next(source: &AtomicUsize) -> Result<Self, Error> {
-        source
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
-                value.checked_add(1)
-            })
-            .map(Self)
-            .map_err(|_| Error::ResourceLimit)
-    }
-}
-// Identity generation only: no GPU resource is stored in this static.
-static NEXT_CONTEXT: AtomicUsize = AtomicUsize::new(1);
-
 /// Independent buffers, glyph atlas, images, scratch and retained packet.
 /// No context reference is retained. Resource leases remain safe if a context
 /// is dropped first, but rendering requires the original live context.
+/// One retained layout handle certifies the originating context. It is cloned
+/// once at construction and released on drop; frame methods only borrow it.
+/// Dropping a context first retains its layout until these states are dropped.
 /// After device loss, retire that context and all its states together.
 pub struct RendererState {
-    context_id: ContextId,
+    layout: wgpu::BindGroupLayout,
     globals: Buffer,
     draws: Buffer,
     tiles: Buffer,
@@ -456,6 +439,9 @@ impl GpuContext {
         });
         // A destroyed device can yield an invalid pipeline. Keep inferred
         // layout validation in the same scope instead of panicking afterward.
+        // Each context must mint a fresh layout handle, including if this ever
+        // uses explicit layouts. Sharing a BGL across contexts/formats would
+        // invalidate the state/context identity certificate.
         let layout = pipeline.get_bind_group_layout(0);
         if let Some(error) = errors.pop().await {
             return Err(Error::Shader(error.to_string()));
@@ -466,7 +452,6 @@ impl GpuContext {
             format,
             pipeline,
             layout,
-            id: ContextId::next(&NEXT_CONTEXT)?,
         })
     }
     pub fn device(&self) -> &wgpu::Device {
@@ -526,7 +511,7 @@ impl RendererState {
         let corrections = Buffer::new(device, "inverse residuals", 32, false);
         let atlas = Atlas::new(device, 1);
         Self {
-            context_id: context.id,
+            layout: context.layout.clone(),
             globals,
             draws,
             tiles,
@@ -547,7 +532,7 @@ impl RendererState {
         }
     }
     fn check_context(&self, context: &GpuContext) -> Result<(), Error> {
-        if self.context_id != context.id {
+        if self.layout != context.layout {
             return Err(Error::IncompatibleContext);
         }
         Ok(())
@@ -1316,25 +1301,13 @@ mod tests {
     use gpui_canvas::Rect;
 
     #[test]
-    fn context_identity_exhaustion_is_an_error_without_wraparound() {
-        let source = AtomicUsize::new(usize::MAX - 1);
-        assert_eq!(ContextId::next(&source).unwrap().0, usize::MAX - 1);
-        assert!(matches!(
-            ContextId::next(&source),
-            Err(Error::ResourceLimit)
-        ));
-        assert_eq!(source.load(Ordering::Relaxed), usize::MAX);
-    }
-
-    #[test]
     fn packet_storage_ledger() {
         eprintln!(
-            "ownership_storage,Renderer={},GpuContext={},RendererState={},ContextId={},IdentityStatic={},SlotGuard={}",
+            "ownership_storage,Renderer={},GpuContext={},RendererState={},LayoutLease={},SlotGuard={}",
             size_of::<Renderer>(),
             size_of::<GpuContext>(),
             size_of::<RendererState>(),
-            size_of::<ContextId>(),
-            size_of_val(&NEXT_CONTEXT),
+            size_of::<wgpu::BindGroupLayout>(),
             size_of::<GpuSlotCommit<'_, '_, '_>>()
         );
         eprintln!(

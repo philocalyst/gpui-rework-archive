@@ -2825,6 +2825,13 @@ fn shared_context_keeps_packets_atlases_images_and_slots_independent() {
         )
         .await
         .unwrap();
+        let other_format = GpuContext::new(
+            context.device().clone(),
+            context.queue().clone(),
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+        )
+        .await
+        .unwrap();
         let foreign = renderer(context.format()).await;
         let writes = [SlotEdit::new(
             slots[0],
@@ -2832,7 +2839,7 @@ fn shared_context_keeps_packets_atlases_images_and_slots_independent() {
         )];
         let stats = a.stats();
         let before_a = read_texture(&owner, &ta);
-        for wrong in [&other, foreign.context()] {
+        for wrong in [&other, &other_format, foreign.context()] {
             assert!(matches!(
                 a.render(wrong, ca.prepared_scene(), &va),
                 Err(gpui_gpu::Error::IncompatibleContext)
@@ -3023,5 +3030,42 @@ fn unsupported_context_format_does_not_request_a_device() {
             before, after,
             "unsupported format must leave all device/resource registries untouched"
         );
+    });
+}
+
+#[test]
+fn layout_equality_names_the_instance_and_preserves_clone_order_hash() {
+    use std::{
+        collections::hash_map::DefaultHasher,
+        hash::{Hash, Hasher},
+    };
+    fn hash(layout: &wgpu::BindGroupLayout) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        layout.hash(&mut hasher);
+        hasher.finish()
+    }
+    pollster::block_on(async {
+        let a = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let b = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let desc = wgpu::BindGroupLayoutDescriptor {
+            label: Some("identity control"),
+            entries: &[],
+        };
+        let first = a.device().create_bind_group_layout(&desc);
+        let second = b.device().create_bind_group_layout(&desc);
+        // Core's derived Debug exposes its local ID but formats both contexts
+        // identically. Freeze a real collision in those IDs across instances.
+        eprintln!("first={first:?}; second={second:?}");
+        assert_eq!(format!("{first:?}"), format!("{second:?}"));
+        assert_ne!(first, second);
+        assert_ne!(first.cmp(&second), std::cmp::Ordering::Equal);
+        let clone = first.clone();
+        assert_eq!(first, clone);
+        assert_eq!(first.cmp(&clone), std::cmp::Ordering::Equal);
+        assert_eq!(hash(&first), hash(&clone));
+        drop(first);
+        let replacement = a.device().create_bind_group_layout(&desc);
+        assert_ne!(clone, replacement);
+        assert_eq!(clone, clone.clone());
     });
 }

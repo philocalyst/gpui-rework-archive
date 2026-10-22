@@ -55,3 +55,17 @@ The proof is tied to one live surface/adapter cohort. Configure still validates
 the current dimensions; no proof survives target recreation or device loss.
 The consumer commits ownership only after successfully presenting its current
 frame. Neither this helper nor cheap admission acknowledges a frame.
+
+## Bind-group-layout equality across instances
+
+`src/backend/wgpu_core.rs` keys CoreBindGroupLayout Eq/Ord/Hash by its existing
+retained ContextWgpuCore plus registered layout ID, rather than the instance-local
+ID alone. ContextWgpuCore already compares/hashes its Global Arc address. Both
+Global and registry ID remain occupied until the last Core handle clone drops;
+registry removal then advances the ID generation before reuse. WebGPU and Custom
+keep their existing identity semantics; no public API or dispatch branch is added.
+This changes equality/order/hash only for Core layouts from different instances.
+The GPU consumer requires one fresh inferred (or future explicit) layout per
+context, never one shared across contexts/formats. State holds one clone until
+drop, potentially extending layout lifetime past context drop, with no clone per
+draw. Published archive/checksums remain unchanged; this is an authored delta.
