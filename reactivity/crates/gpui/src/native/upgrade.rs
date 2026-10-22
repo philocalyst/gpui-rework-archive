@@ -380,7 +380,6 @@ impl Upgrade {
                     }
                 };
                 let errors = DeviceErrors::install(renderer.device(), wake);
-                let size = window.inner_size();
                 Progress::Ready(Ready {
                     instance,
                     gpu: Box::new(GpuSurface {
@@ -388,10 +387,6 @@ impl Upgrade {
                         renderer,
                         errors,
                         packet_token: None,
-                        config: super::surface_config(
-                            [size.width.max(1), size.height.max(1)],
-                            FORMAT,
-                        ),
                     }),
                 })
             }
