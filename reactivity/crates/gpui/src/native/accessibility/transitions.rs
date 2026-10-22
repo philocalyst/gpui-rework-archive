@@ -273,7 +273,7 @@ fn missed_epochs_topology_cap_deactivation_and_resize_are_full() {
     win.update(|m| m.enabled = false).unwrap();
     let base = apply(&win, base, &mut tree, None);
     let (_, observer, capacity, used) = win.accessibility_storage();
-    assert_eq!(observer, 80);
+    assert_eq!(observer, 96); // Includes the two sticky input-authority bounds.
     assert!(capacity <= 4096 * 4);
     assert_eq!(used, 0);
     win.update(|m| m.count -= 1).unwrap();
