@@ -1115,3 +1115,163 @@ fn selection_and_placement_keep_native_run_arrays_while_wrap_retires_them() {
         base = state;
     }
 }
+
+#[test]
+fn checkbox_state_native_click_and_sparse_updates_match_full_acknowledged_tree() {
+    use accesskit::{ActionHandler, ActivationHandler};
+    struct Check {
+        value: bool,
+        calls: u32,
+        broken: bool,
+    }
+    impl Check {
+        fn toggle(&mut self) {
+            self.value = !self.value;
+            self.calls += 1;
+        }
+    }
+    impl View for Check {
+        fn view(&self) -> El<'_> {
+            crate::checkbox("Keep choice", self.value)
+                .name("Choice")
+                .description("Retain this preference")
+                .w(100)
+                .h(24)
+                .on_click(Self::toggle)
+                .transform(if self.broken {
+                    Affine::scale(0., 1.)
+                } else {
+                    Affine::IDENTITY
+                })
+        }
+    }
+    let mut win = Win::recording(
+        Check {
+            value: false,
+            calls: 0,
+            broken: false,
+        },
+        WindowOptions::default(),
+    )
+    .unwrap();
+    acknowledge(&mut win);
+    let target = win.role(Role::CheckBox).one().unwrap();
+    let mut published = cohort(&win);
+    let native_id = published.id(win.accessibility_sheet().unwrap().part_at(0).unwrap());
+    let sheet = win.accessibility_sheet().unwrap();
+    let state = win.accessibility_state().unwrap();
+    let mut held = None;
+    let full_cost = allocation_counter::measure(|| {
+        held = Some(project(&sheet, state, "Oracle", &published));
+    });
+    let full_nodes = held.take().unwrap().nodes.len();
+    let sparse_cost = allocation_counter::measure(|| {
+        held = Some(project_sparse(&sheet, &[0], &[], &published, None));
+    });
+    let sparse_nodes = held.take().unwrap().nodes.len();
+    println!(
+        "CHECKBOX_NATIVE_ALLOCATION full_nodes={full_nodes} full_allocations={} full_requested={} full_retained={} full_peak={} sparse_nodes={sparse_nodes} sparse_allocations={} sparse_requested={} sparse_retained={} sparse_peak={}",
+        full_cost.count_total,
+        full_cost.bytes_total,
+        full_cost.bytes_current,
+        full_cost.bytes_max,
+        sparse_cost.count_total,
+        sparse_cost.bytes_total,
+        sparse_cost.bytes_current,
+        sparse_cost.bytes_max
+    );
+    let mut tree = Tree::new(full(&win), true);
+    let node = tree
+        .state()
+        .node_by_tree_local_id(native_id, TreeId::ROOT)
+        .unwrap();
+    assert_eq!(node.data().role(), accesskit::Role::CheckBox);
+    assert_eq!(node.data().toggled(), Some(accesskit::Toggled::False));
+    assert_eq!(node.data().label(), Some("Choice"));
+    assert_eq!(node.data().description(), Some("Retain this preference"));
+    assert!(node.data().value().is_none());
+    assert!(node.data().supports_action(accesskit::Action::Click));
+    assert!(node.data().supports_action(accesskit::Action::Focus));
+    let children = node.children().collect::<Vec<_>>();
+    assert_eq!(
+        children.len(),
+        1,
+        "leaf label has one synthetic text carrier"
+    );
+    assert_eq!(children[0].data().role(), accesskit::Role::Label);
+    assert_eq!(children[0].document_range().text(), "Keep choice");
+    assert!(!children[0].data().supports_action(accesskit::Action::Click));
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    win.accessibility_observe(true).unwrap();
+    let mut base = win.accessibility_state().unwrap();
+    for expected in [true, false] {
+        let previous = full(&win);
+        ingress.do_action(ActionRequest {
+            action: accesskit::Action::Click,
+            target_tree: TreeId::ROOT,
+            target_node: native_id,
+            data: None,
+        });
+        assert_eq!(
+            win.root().unwrap().value,
+            !expected,
+            "foreign callback only enqueues"
+        );
+        let results = drain_actions(&ingress, &receiver, &published, &mut win).unwrap();
+        assert_eq!(
+            results.into_iter().flatten().filter(Result::is_ok).count(),
+            1
+        );
+        assert_eq!(full(&win), previous, "pending P stays unchanged");
+        acknowledge(&mut win);
+        published.refresh(&win).unwrap();
+        base = apply(&win, base, &mut tree, Some(1));
+        assert_eq!(win.role(Role::CheckBox).one().unwrap(), target);
+        let node = tree
+            .state()
+            .node_by_tree_local_id(native_id, TreeId::ROOT)
+            .unwrap();
+        assert_eq!(
+            node.data().toggled(),
+            Some(if expected {
+                accesskit::Toggled::True
+            } else {
+                accesskit::Toggled::False
+            })
+        );
+    }
+    assert_eq!(win.root().unwrap().calls, 2);
+    win.focus(target).unwrap();
+    let focused = focus_update(&win.accessibility_sheet().unwrap(), &published);
+    assert!(focused.nodes.is_empty());
+    tree.update_and_process_changes(focused, &mut Changes::default());
+    assert_eq!(
+        tree.state().focus_id_in_tree(),
+        tree.state()
+            .node_by_tree_local_id(native_id, TreeId::ROOT)
+            .unwrap()
+            .id()
+    );
+    base = win.accessibility_state().unwrap();
+    // Failed C must not expose the newer bool through either sparse or full projection.
+    assert!(
+        win.update(|m| {
+            m.value = true;
+            m.broken = true;
+        })
+        .is_err()
+    );
+    assert_eq!(base, win.accessibility_state().unwrap());
+    assert_eq!(
+        tree.state()
+            .node_by_tree_local_id(native_id, TreeId::ROOT)
+            .unwrap()
+            .data()
+            .toggled(),
+        Some(accesskit::Toggled::False)
+    );
+    win.update(|m| m.broken = false).unwrap();
+    acknowledge(&mut win);
+    apply(&win, base, &mut tree, Some(1));
+}

@@ -5,6 +5,12 @@ use gpui::{Application, NativeError, Window, prelude::*};
 mod renderer;
 struct Example {
     count: u32,
+    show_details: bool,
+}
+impl Example {
+    fn toggle_details(&mut self) {
+        self.show_details = !self.show_details;
+    }
 }
 impl View for Example {
     fn view(&self) -> El<'_> {
@@ -25,6 +31,21 @@ impl View for Example {
             .gap(8)
             .rounded(12.0)
             .bg(rgb(0x334155)),
+            checkbox("Show card details", self.show_details)
+                .p(12)
+                .bg(if self.show_details {
+                    rgb(0x1d4ed8)
+                } else {
+                    rgb(0x475569)
+                })
+                .fg(rgb(0xf8fafc))
+                .on_click(Self::toggle_details),
+            text(if self.show_details {
+                "Details are visible"
+            } else {
+                "Details are hidden"
+            })
+            .fg(rgb(0xcbd5e1)),
             column((
                 text("Second card").fg(rgb(0xf8fafc)),
                 text("Independent typed contributions")
@@ -50,15 +71,32 @@ impl View for Example {
 }
 fn main() -> Result<(), NativeError> {
     Application::run_window(renderer::configure(
-        Window::document(Example { count: 0 })
-            .title("GPUI Inspector")
-            .size(1000, 640)
-            .inspector()
-            .on_presented(|frame| {
-                println!(
-                    "inspector-presented {:?} {} {}",
-                    frame.renderer, frame.source_epoch, frame.presentation_epoch
-                )
-            }),
+        Window::document(Example {
+            count: 0,
+            show_details: false,
+        })
+        .title("GPUI Inspector")
+        .size(1000, 640)
+        .inspector()
+        .on_presented(|frame| {
+            println!(
+                "inspector-presented {:?} {} {}",
+                frame.renderer, frame.source_epoch, frame.presentation_epoch
+            )
+        }),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Example;
+    #[test]
+    fn checkbox_example_model_layout() {
+        println!(
+            "CHECKBOX_EXAMPLE_MODEL size={} align={}",
+            std::mem::size_of::<Example>(),
+            std::mem::align_of::<Example>()
+        );
+        assert_eq!(std::mem::size_of::<Example>(), 8);
+    }
 }

@@ -1026,3 +1026,37 @@ fn native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi(
     assert!(receiver.try_recv().is_err());
     assert_eq!(win.snapshot().unwrap().source_epoch, 0);
 }
+
+#[test]
+fn checkbox_native_carrier_sizes() {
+    use std::mem::size_of;
+    macro_rules! carrier {
+        ($ty:ty) => {
+            println!(
+                "CHECKBOX_NATIVE_CARRIER {} size={} align={}",
+                stringify!($ty),
+                size_of::<$ty>(),
+                std::mem::align_of::<$ty>()
+            );
+        };
+    }
+    carrier!(Bridge);
+    carrier!(State);
+    carrier!(Option<State>);
+    carrier!(Queued);
+    carrier!(Command);
+    carrier!(Node);
+    carrier!(Cohort);
+    carrier!(text::Relink);
+    println!(
+        "CHECKBOX_NATIVE_LAYOUT bridge_test={} state={} option_state={} queued={} command={} node={} cohort_test={} relink={}",
+        size_of::<Bridge>(),
+        size_of::<State>(),
+        size_of::<Option<State>>(),
+        size_of::<Queued>(),
+        size_of::<Command>(),
+        size_of::<Node>(),
+        size_of::<Cohort>(),
+        size_of::<text::Relink>()
+    );
+}

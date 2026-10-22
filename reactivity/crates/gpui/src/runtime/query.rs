@@ -182,6 +182,15 @@ impl<'a> Part<'a> {
     pub fn role(self) -> Role {
         self.node().kind.role()
     }
+    /// The two-state checkbox value from the acknowledged presentation.
+    /// Other roles have no checked state. Activation does not change it until
+    /// the model describes a new value and that presentation is acknowledged.
+    pub fn checked(self) -> Option<bool> {
+        match self.node().kind {
+            super::NodeKind::CheckBox(checked) => Some(checked),
+            _ => None,
+        }
+    }
     pub fn text(self) -> Option<&'a str> {
         self.node().text.as_deref()
     }
