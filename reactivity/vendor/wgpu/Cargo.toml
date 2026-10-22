@@ -46,6 +46,7 @@ targets = [
 ignored = ["cfg_aliases"]
 
 [features]
+shader-artifacts = []
 angle = ["wgpu-core?/angle"]
 counters = ["wgpu-core?/counters"]
 custom = []

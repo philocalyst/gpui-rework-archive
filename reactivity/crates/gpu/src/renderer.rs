@@ -4,6 +4,9 @@ use gpui_canvas::{
     PreparedPlacement, PreparedScene, SdrMapping,
 };
 use std::{borrow::Cow, collections::HashMap};
+#[cfg(feature = "offline-shader")]
+#[allow(unsafe_code)]
+mod artifact;
 mod images;
 mod owned;
 mod paint;
@@ -347,7 +350,7 @@ pub struct Renderer {
     state: RendererState,
 }
 
-/// One device/queue and one checked compositor pipeline for a fixed format.
+/// One device/queue and one compositor pipeline for a fixed format.
 /// Borrow this owner for independent per-window `RendererState`s. There is no
 /// pipeline map, per-draw reference counting, or process-wide GPU cache.
 /// A different format requires a separate context. The queue must belong to
@@ -395,6 +398,8 @@ impl GpuContext {
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("GPUI"),
+                #[cfg(feature = "offline-shader")]
+                required_features: adapter.shader_artifact_features(),
                 ..Default::default()
             })
             .await
@@ -407,14 +412,34 @@ impl GpuContext {
         format: wgpu::TextureFormat,
     ) -> Result<Self, Error> {
         validate_format(format)?;
+        #[cfg(feature = "offline-shader")]
+        let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
+        #[cfg(feature = "offline-shader")]
+        let memory = device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
         let errors = device.push_error_scope(wgpu::ErrorFilter::Validation);
-        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("GPUI tile compositor"),
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
-        });
+        #[cfg(feature = "offline-shader")]
+        let artifact = artifact::create(&device);
+        #[cfg(not(feature = "offline-shader"))]
+        let artifact = None::<(
+            wgpu::ShaderModule,
+            wgpu::BindGroupLayout,
+            wgpu::PipelineLayout,
+        )>;
+        let (module, explicit) = match artifact {
+            Some((module, layout, pipeline_layout)) => (module, Some((layout, pipeline_layout))),
+            None => (
+                device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("GPUI tile compositor"),
+                    source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
+                }),
+                None,
+            ),
+        };
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("GPUI tile compositor"),
-            layout: None,
+            layout: explicit
+                .as_ref()
+                .map(|(_, pipeline_layout)| pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &module,
                 entry_point: Some("vertex"),
@@ -442,8 +467,17 @@ impl GpuContext {
         // Each context must mint a fresh layout handle, including if this ever
         // uses explicit layouts. Sharing a BGL across contexts/formats would
         // invalidate the state/context identity certificate.
-        let layout = pipeline.get_bind_group_layout(0);
-        if let Some(error) = errors.pop().await {
+        let layout = explicit
+            .map(|(layout, _)| layout)
+            .unwrap_or_else(|| pipeline.get_bind_group_layout(0));
+        let error = errors.pop().await;
+        #[cfg(feature = "offline-shader")]
+        let error = {
+            let memory = memory.pop().await;
+            let internal = internal.pop().await;
+            error.or(memory).or(internal)
+        };
+        if let Some(error) = error {
             return Err(Error::Shader(error.to_string()));
         }
         Ok(Self {

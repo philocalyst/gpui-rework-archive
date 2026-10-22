@@ -261,6 +261,8 @@ mod cmp;
 mod dispatch;
 mod macros;
 pub mod util;
+#[cfg(feature = "shader-artifacts")]
+pub mod shader_artifact;
 #[cfg(wgpu_core)]
 pub mod presentation;
 
