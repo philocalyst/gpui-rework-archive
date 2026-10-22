@@ -74,7 +74,8 @@
   },
   "strict_default_all_targets_clippy": true,
   "files_sha256": {
-    "README.md": "e7b3d528c8e00c811021bb32f58a87f310229f770a7312c60216e26641e7494b",
+    "README.md": "8032b489dc1c6a6c26dd670311c84ba1338f4b9b7be41c93039c27c9d6defa92",
+    "all-source-inventory.json": "537cffd7bbacb7bd3705d6fceca9db100ff5f092e3243e3a7264d9a2a53eeba2",
     "core-lines.json": "88922b4d83dbf03d86f0c8a3849c623d745071c144d7f1e68816543f91a7e368",
     "gpui-final.log": "e3549c56f71edddf6b4e672ae8eef9c1e85325b82b50d86117900009e3d515fb",
     "gpui-text-map-12-canvas-full.log": "abf6eded26bf48f941abc8e6cc4854e28aabb36f2494a0183509a996ece364bc",

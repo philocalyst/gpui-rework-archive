@@ -89,3 +89,10 @@ rejected public width0 (InvalidWidth), and bundled fonts reject the emoji woman
 uses admitted1px widths, reports emoji rejection explicitly, and exercises
 Latin/Arabic ZWJ text. It does not claim a shaped emoji map or universal affinity
 shape proof; the8B proposal must keep a whole-map general fallback.
+
+Full physical non-test inventory at evidence2db is330,218 active lines:
+70,246 first-party +39,955 generated +220,017 vendor. It includes captured
+assembly and measurement/helper scripts, not just library code; the raw inventory
+and provenance are included. This independent branch does not include the later
+producer-diagnostic archive0d, so totals must not be added to another branch's
+ledger. Root integration must recount the actual combined source.
