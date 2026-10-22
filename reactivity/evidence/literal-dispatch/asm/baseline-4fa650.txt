@@ -1,0 +1,218 @@
+
+/tmp/gpui-literal-dispatch-base-target/release/examples/literal_startup:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004fa650 <<gpui::element::El>::property_operand::<f64>>:
+  4fa650:	55                   	push   %rbp
+  4fa651:	41 57                	push   %r15
+  4fa653:	41 56                	push   %r14
+  4fa655:	41 54                	push   %r12
+  4fa657:	53                   	push   %rbx
+  4fa658:	48 81 ec 80 00 00 00 	sub    $0x80,%rsp
+  4fa65f:	89 d5                	mov    %edx,%ebp
+  4fa661:	48 89 f3             	mov    %rsi,%rbx
+  4fa664:	49 89 fe             	mov    %rdi,%r14
+  4fa667:	48 8b 11             	mov    (%rcx),%rdx
+  4fa66a:	48 8b 49 08          	mov    0x8(%rcx),%rcx
+  4fa66e:	48 85 d2             	test   %rdx,%rdx
+  4fa671:	0f 84 be 00 00 00    	je     4fa735 <<gpui::element::El>::property_operand::<f64>+0xe5>
+  4fa677:	48 8b bb a0 00 00 00 	mov    0xa0(%rbx),%rdi
+  4fa67e:	48 85 ff             	test   %rdi,%rdi
+  4fa681:	0f 85 86 00 00 00    	jne    4fa70d <<gpui::element::El>::property_operand::<f64>+0xbd>
+  4fa687:	49 89 d7             	mov    %rdx,%r15
+  4fa68a:	49 89 cc             	mov    %rcx,%r12
+  4fa68d:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+  4fa694:	00 00
+  4fa696:	48 c7 44 24 18 08 00 	movq   $0x8,0x18(%rsp)
+  4fa69d:	00 00
+  4fa69f:	0f 57 c0             	xorps  %xmm0,%xmm0
+  4fa6a2:	0f 11 44 24 20       	movups %xmm0,0x20(%rsp)
+  4fa6a7:	0f 11 44 24 2d       	movups %xmm0,0x2d(%rsp)
+  4fa6ac:	48 b8 03 00 00 00 00 	movabs $0x8000000000000003,%rax
+  4fa6b3:	00 00 80
+  4fa6b6:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  4fa6bb:	ff 15 67 36 2d 00    	call   *0x2d3667(%rip)        # 7cdd28 <_DYNAMIC+0x260>
+  4fa6c1:	bf 38 00 00 00       	mov    $0x38,%edi
+  4fa6c6:	be 08 00 00 00       	mov    $0x8,%esi
+  4fa6cb:	ff 15 37 36 2d 00    	call   *0x2d3637(%rip)        # 7cdd08 <_DYNAMIC+0x240>
+  4fa6d1:	48 85 c0             	test   %rax,%rax
+  4fa6d4:	0f 84 3e 02 00 00    	je     4fa918 <<gpui::element::El>::property_operand::<f64>+0x2c8>
+  4fa6da:	48 89 c7             	mov    %rax,%rdi
+  4fa6dd:	48 8b 44 24 38       	mov    0x38(%rsp),%rax
+  4fa6e2:	48 89 47 30          	mov    %rax,0x30(%rdi)
+  4fa6e6:	0f 10 44 24 08       	movups 0x8(%rsp),%xmm0
+  4fa6eb:	0f 10 4c 24 18       	movups 0x18(%rsp),%xmm1
+  4fa6f0:	0f 10 54 24 28       	movups 0x28(%rsp),%xmm2
+  4fa6f5:	0f 11 57 20          	movups %xmm2,0x20(%rdi)
+  4fa6f9:	0f 11 4f 10          	movups %xmm1,0x10(%rdi)
+  4fa6fd:	0f 11 07             	movups %xmm0,(%rdi)
+  4fa700:	48 89 bb a0 00 00 00 	mov    %rdi,0xa0(%rbx)
+  4fa707:	4c 89 e1             	mov    %r12,%rcx
+  4fa70a:	4c 89 fa             	mov    %r15,%rdx
+  4fa70d:	89 ee                	mov    %ebp,%esi
+  4fa70f:	ff 15 63 3a 2d 00    	call   *0x2d3a63(%rip)        # 7ce178 <_DYNAMIC+0x6b0>
+  4fa715:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4fa71a:	4c 89 f7             	mov    %r14,%rdi
+  4fa71d:	48 89 de             	mov    %rbx,%rsi
+  4fa720:	48 81 c4 80 00 00 00 	add    $0x80,%rsp
+  4fa727:	5b                   	pop    %rbx
+  4fa728:	41 5c                	pop    %r12
+  4fa72a:	41 5e                	pop    %r14
+  4fa72c:	41 5f                	pop    %r15
+  4fa72e:	5d                   	pop    %rbp
+  4fa72f:	ff 25 03 36 2d 00    	jmp    *0x2d3603(%rip)        # 7cdd38 <memcpy@GLIBC_2.14>
+  4fa735:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+  4fa73a:	c7 44 24 08 00 00 00 	movl   $0x0,0x8(%rsp)
+  4fa741:	00
+  4fa742:	48 8d 7c 24 44       	lea    0x44(%rsp),%rdi
+  4fa747:	4c 8d 7c 24 08       	lea    0x8(%rsp),%r15
+  4fa74c:	4c 89 fe             	mov    %r15,%rsi
+  4fa74f:	89 ea                	mov    %ebp,%edx
+  4fa751:	ff 15 09 3a 2d 00    	call   *0x2d3a09(%rip)        # 7ce160 <_DYNAMIC+0x698>
+  4fa757:	80 7c 24 44 ff       	cmpb   $0xff,0x44(%rsp)
+  4fa75c:	0f 84 8f 01 00 00    	je     4fa8f1 <<gpui::element::El>::property_operand::<f64>+0x2a1>
+  4fa762:	0f 10 44 24 44       	movups 0x44(%rsp),%xmm0
+  4fa767:	0f 10 4c 24 50       	movups 0x50(%rsp),%xmm1
+  4fa76c:	0f 11 4c 24 6c       	movups %xmm1,0x6c(%rsp)
+  4fa771:	0f 29 44 24 60       	movaps %xmm0,0x60(%rsp)
+  4fa776:	48 8b bb a0 00 00 00 	mov    0xa0(%rbx),%rdi
+  4fa77d:	48 85 ff             	test   %rdi,%rdi
+  4fa780:	74 08                	je     4fa78a <<gpui::element::El>::property_operand::<f64>+0x13a>
+  4fa782:	89 ee                	mov    %ebp,%esi
+  4fa784:	ff 15 f6 39 2d 00    	call   *0x2d39f6(%rip)        # 7ce180 <_DYNAMIC+0x6b8>
+  4fa78a:	0f b7 c5             	movzwl %bp,%eax
+  4fa78d:	48 8d 0d 14 27 2b 00 	lea    0x2b2714(%rip),%rcx        # 7acea8 <anon.1d5289307f0dd854b8c3ddc905d0856c.14.llvm.1175825284840303753+0xf8>
+  4fa794:	48 8b 44 c1 f8       	mov    -0x8(%rcx,%rax,8),%rax
+  4fa799:	80 78 12 01          	cmpb   $0x1,0x12(%rax)
+  4fa79d:	0f 85 af 00 00 00    	jne    4fa852 <<gpui::element::El>::property_operand::<f64>+0x202>
+  4fa7a3:	80 7c 24 60 01       	cmpb   $0x1,0x60(%rsp)
+  4fa7a8:	0f 85 7c 01 00 00    	jne    4fa92a <<gpui::element::El>::property_operand::<f64>+0x2da>
+  4fa7ae:	f3 0f 10 44 24 64    	movss  0x64(%rsp),%xmm0
+  4fa7b4:	48 8b bb a0 00 00 00 	mov    0xa0(%rbx),%rdi
+  4fa7bb:	48 85 ff             	test   %rdi,%rdi
+  4fa7be:	0f 85 86 00 00 00    	jne    4fa84a <<gpui::element::El>::property_operand::<f64>+0x1fa>
+  4fa7c4:	f3 0f 11 44 24 40    	movss  %xmm0,0x40(%rsp)
+  4fa7ca:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+  4fa7d1:	00 00
+  4fa7d3:	48 c7 44 24 18 08 00 	movq   $0x8,0x18(%rsp)
+  4fa7da:	00 00
+  4fa7dc:	0f 57 c0             	xorps  %xmm0,%xmm0
+  4fa7df:	0f 11 44 24 20       	movups %xmm0,0x20(%rsp)
+  4fa7e4:	0f 11 44 24 2d       	movups %xmm0,0x2d(%rsp)
+  4fa7e9:	48 b8 03 00 00 00 00 	movabs $0x8000000000000003,%rax
+  4fa7f0:	00 00 80
+  4fa7f3:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  4fa7f8:	ff 15 2a 35 2d 00    	call   *0x2d352a(%rip)        # 7cdd28 <_DYNAMIC+0x260>
+  4fa7fe:	bf 38 00 00 00       	mov    $0x38,%edi
+  4fa803:	be 08 00 00 00       	mov    $0x8,%esi
+  4fa808:	ff 15 fa 34 2d 00    	call   *0x2d34fa(%rip)        # 7cdd08 <_DYNAMIC+0x240>
+  4fa80e:	48 85 c0             	test   %rax,%rax
+  4fa811:	0f 84 74 01 00 00    	je     4fa98b <<gpui::element::El>::property_operand::<f64>+0x33b>
+  4fa817:	48 89 c7             	mov    %rax,%rdi
+  4fa81a:	48 8b 44 24 38       	mov    0x38(%rsp),%rax
+  4fa81f:	48 89 47 30          	mov    %rax,0x30(%rdi)
+  4fa823:	0f 10 44 24 08       	movups 0x8(%rsp),%xmm0
+  4fa828:	0f 10 4c 24 18       	movups 0x18(%rsp),%xmm1
+  4fa82d:	0f 10 54 24 28       	movups 0x28(%rsp),%xmm2
+  4fa832:	0f 11 57 20          	movups %xmm2,0x20(%rdi)
+  4fa836:	0f 11 4f 10          	movups %xmm1,0x10(%rdi)
+  4fa83a:	0f 11 07             	movups %xmm0,(%rdi)
+  4fa83d:	48 89 bb a0 00 00 00 	mov    %rdi,0xa0(%rbx)
+  4fa844:	f3 0f 10 44 24 40    	movss  0x40(%rsp),%xmm0
+  4fa84a:	ff 15 48 39 2d 00    	call   *0x2d3948(%rip)        # 7ce198 <_DYNAMIC+0x6d0>
+  4fa850:	eb 1a                	jmp    4fa86c <<gpui::element::El>::property_operand::<f64>+0x21c>
+  4fa852:	48 8d 73 30          	lea    0x30(%rbx),%rsi
+  4fa856:	48 8d 54 24 60       	lea    0x60(%rsp),%rdx
+  4fa85b:	89 ef                	mov    %ebp,%edi
+  4fa85d:	ff 15 05 39 2d 00    	call   *0x2d3905(%rip)        # 7ce168 <_DYNAMIC+0x6a0>
+  4fa863:	66 85 c0             	test   %ax,%ax
+  4fa866:	0f 85 d9 00 00 00    	jne    4fa945 <<gpui::element::El>::property_operand::<f64>+0x2f5>
+  4fa86c:	4c 8b bb a0 00 00 00 	mov    0xa0(%rbx),%r15
+  4fa873:	4d 85 ff             	test   %r15,%r15
+  4fa876:	0f 84 99 fe ff ff    	je     4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa87c:	48 b8 03 00 00 00 00 	movabs $0x8000000000000003,%rax
+  4fa883:	00 00 80
+  4fa886:	49 39 07             	cmp    %rax,(%r15)
+  4fa889:	0f 85 86 fe ff ff    	jne    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa88f:	49 83 7f 20 00       	cmpq   $0x0,0x20(%r15)
+  4fa894:	0f 85 7b fe ff ff    	jne    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa89a:	49 83 7f 18 00       	cmpq   $0x0,0x18(%r15)
+  4fa89f:	0f 85 70 fe ff ff    	jne    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa8a5:	49 83 7f 28 00       	cmpq   $0x0,0x28(%r15)
+  4fa8aa:	0f 85 65 fe ff ff    	jne    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa8b0:	41 83 7f 30 00       	cmpl   $0x0,0x30(%r15)
+  4fa8b5:	0f 85 5a fe ff ff    	jne    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa8bb:	41 80 7f 34 00       	cmpb   $0x0,0x34(%r15)
+  4fa8c0:	0f 85 4f fe ff ff    	jne    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa8c6:	4c 89 ff             	mov    %r15,%rdi
+  4fa8c9:	e8 52 1a 00 00       	call   4fc320 <core::ptr::drop_glue::<gpui::semantic::ElementExtra>>
+  4fa8ce:	be 38 00 00 00       	mov    $0x38,%esi
+  4fa8d3:	ba 08 00 00 00       	mov    $0x8,%edx
+  4fa8d8:	4c 89 ff             	mov    %r15,%rdi
+  4fa8db:	ff 15 2f 34 2d 00    	call   *0x2d342f(%rip)        # 7cdd10 <_DYNAMIC+0x248>
+  4fa8e1:	48 c7 83 a0 00 00 00 	movq   $0x0,0xa0(%rbx)
+  4fa8e8:	00 00 00 00
+  4fa8ec:	e9 24 fe ff ff       	jmp    4fa715 <<gpui::element::El>::property_operand::<f64>+0xc5>
+  4fa8f1:	0f b7 44 24 4a       	movzwl 0x4a(%rsp),%eax
+  4fa8f6:	66 89 44 24 0c       	mov    %ax,0xc(%rsp)
+  4fa8fb:	8b 44 24 46          	mov    0x46(%rsp),%eax
+  4fa8ff:	89 44 24 08          	mov    %eax,0x8(%rsp)
+  4fa903:	4c 8d 05 46 24 2b 00 	lea    0x2b2446(%rip),%r8        # 7acd50 <anon.e063706430665a4b0414174ee2e468bf.19.llvm.12181571741293309915+0x1b0>
+  4fa90a:	be 1e 00 00 00       	mov    $0x1e,%esi
+  4fa90f:	48 8d 3d 82 e4 b4 ff 	lea    -0x4b1b7e(%rip),%rdi        # 48d98 <anon.e063706430665a4b0414174ee2e468bf.0.llvm.12181571741293309915+0x400>
+  4fa916:	eb 61                	jmp    4fa979 <<gpui::element::El>::property_operand::<f64>+0x329>
+  4fa918:	bf 08 00 00 00       	mov    $0x8,%edi
+  4fa91d:	be 38 00 00 00       	mov    $0x38,%esi
+  4fa922:	ff 15 18 34 2d 00    	call   *0x2d3418(%rip)        # 7cdd40 <_DYNAMIC+0x278>
+  4fa928:	eb 71                	jmp    4fa99b <<gpui::element::El>::property_operand::<f64>+0x34b>
+  4fa92a:	48 8d 3d 3f e4 b4 ff 	lea    -0x4b1bc1(%rip),%rdi        # 48d70 <anon.e063706430665a4b0414174ee2e468bf.0.llvm.12181571741293309915+0x3d8>
+  4fa931:	48 8d 15 48 24 2b 00 	lea    0x2b2448(%rip),%rdx        # 7acd80 <anon.e063706430665a4b0414174ee2e468bf.19.llvm.12181571741293309915+0x1e0>
+  4fa938:	be 28 00 00 00       	mov    $0x28,%esi
+  4fa93d:	ff 15 05 34 2d 00    	call   *0x2d3405(%rip)        # 7cdd48 <_DYNAMIC+0x280>
+  4fa943:	eb 56                	jmp    4fa99b <<gpui::element::El>::property_operand::<f64>+0x34b>
+  4fa945:	89 c1                	mov    %eax,%ecx
+  4fa947:	c1 e9 10             	shr    $0x10,%ecx
+  4fa94a:	48 89 c2             	mov    %rax,%rdx
+  4fa94d:	48 c1 ea 18          	shr    $0x18,%rdx
+  4fa951:	66 89 44 24 08       	mov    %ax,0x8(%rsp)
+  4fa956:	88 4c 24 0a          	mov    %cl,0xa(%rsp)
+  4fa95a:	66 89 54 24 0b       	mov    %dx,0xb(%rsp)
+  4fa95f:	c1 ea 10             	shr    $0x10,%edx
+  4fa962:	88 54 24 0d          	mov    %dl,0xd(%rsp)
+  4fa966:	4c 8d 05 fb 23 2b 00 	lea    0x2b23fb(%rip),%r8        # 7acd68 <anon.e063706430665a4b0414174ee2e468bf.19.llvm.12181571741293309915+0x1c8>
+  4fa96d:	be 1a 00 00 00       	mov    $0x1a,%esi
+  4fa972:	48 8d 3d 3d e4 b4 ff 	lea    -0x4b1bc3(%rip),%rdi        # 48db6 <anon.e063706430665a4b0414174ee2e468bf.0.llvm.12181571741293309915+0x41e>
+  4fa979:	48 8d 0d 60 24 2b 00 	lea    0x2b2460(%rip),%rcx        # 7acde0 <anon.1d5289307f0dd854b8c3ddc905d0856c.14.llvm.1175825284840303753+0x30>
+  4fa980:	4c 89 fa             	mov    %r15,%rdx
+  4fa983:	ff 15 87 34 2d 00    	call   *0x2d3487(%rip)        # 7cde10 <_DYNAMIC+0x348>
+  4fa989:	eb 10                	jmp    4fa99b <<gpui::element::El>::property_operand::<f64>+0x34b>
+  4fa98b:	bf 08 00 00 00       	mov    $0x8,%edi
+  4fa990:	be 38 00 00 00       	mov    $0x38,%esi
+  4fa995:	ff 15 a5 33 2d 00    	call   *0x2d33a5(%rip)        # 7cdd40 <_DYNAMIC+0x278>
+  4fa99b:	0f 0b                	ud2
+  4fa99d:	49 89 c6             	mov    %rax,%r14
+  4fa9a0:	be 38 00 00 00       	mov    $0x38,%esi
+  4fa9a5:	ba 08 00 00 00       	mov    $0x8,%edx
+  4fa9aa:	4c 89 ff             	mov    %r15,%rdi
+  4fa9ad:	ff 15 5d 33 2d 00    	call   *0x2d335d(%rip)        # 7cdd10 <_DYNAMIC+0x248>
+  4fa9b3:	48 c7 83 a0 00 00 00 	movq   $0x0,0xa0(%rbx)
+  4fa9ba:	00 00 00 00
+  4fa9be:	eb 2d                	jmp    4fa9ed <<gpui::element::El>::property_operand::<f64>+0x39d>
+  4fa9c0:	49 89 c6             	mov    %rax,%r14
+  4fa9c3:	48 8d 7c 24 08       	lea    0x8(%rsp),%rdi
+  4fa9c8:	e8 53 19 00 00       	call   4fc320 <core::ptr::drop_glue::<gpui::semantic::ElementExtra>>
+  4fa9cd:	eb 1e                	jmp    4fa9ed <<gpui::element::El>::property_operand::<f64>+0x39d>
+  4fa9cf:	ff 15 8b 33 2d 00    	call   *0x2d338b(%rip)        # 7cdd60 <_DYNAMIC+0x298>
+  4fa9d5:	49 89 c6             	mov    %rax,%r14
+  4fa9d8:	48 8d 7c 24 08       	lea    0x8(%rsp),%rdi
+  4fa9dd:	e8 3e 19 00 00       	call   4fc320 <core::ptr::drop_glue::<gpui::semantic::ElementExtra>>
+  4fa9e2:	eb 09                	jmp    4fa9ed <<gpui::element::El>::property_operand::<f64>+0x39d>
+  4fa9e4:	ff 15 76 33 2d 00    	call   *0x2d3376(%rip)        # 7cdd60 <_DYNAMIC+0x298>
+  4fa9ea:	49 89 c6             	mov    %rax,%r14
+  4fa9ed:	48 89 df             	mov    %rbx,%rdi
+  4fa9f0:	e8 2b 16 00 00       	call   4fc020 <core::ptr::drop_glue::<gpui::element::El>>
+  4fa9f5:	4c 89 f7             	mov    %r14,%rdi
+  4fa9f8:	e8 e3 ff 2a 00       	call   7aa9e0 <_Unwind_Resume@plt>
+  4fa9fd:	ff 15 5d 33 2d 00    	call   *0x2d335d(%rip)        # 7cdd60 <_DYNAMIC+0x298>

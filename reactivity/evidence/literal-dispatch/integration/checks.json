@@ -1,0 +1,37 @@
+{
+  "source": "859274504ef2ac171766b629824be3cd36cb0aaf",
+  "description": "Integration simplifies the private classifier to a boolean. Frozen108-row timings still belong to582bca7cd0 only.",
+  "checks": [
+    {
+      "name": "workspace",
+      "log": "integration/workspace.log",
+      "sha256": "b55cc388b615690f18fc5fa1c3eba8553ab5a77446ef84e493ea4e10b6425194",
+      "result": "PASS"
+    },
+    {
+      "name": "clippy",
+      "log": "integration/clippy.log",
+      "sha256": "8f3f51267a236c73989bc66b58c22174e6916b051e0008abce047037b68c840e",
+      "result": "PASS"
+    },
+    {
+      "name": "apple",
+      "log": "integration/apple.log",
+      "sha256": "2b3ebf75028a38b3d9b259c13c0cf1f04868bef5023ef8269574aca013b6e0ee",
+      "result": "PASS"
+    },
+    {
+      "name": "windows",
+      "log": "integration/windows.log",
+      "sha256": "03274c6193a3f92c77e44e2a92cd80be3b568c5aa51f442d21b228d70ef8e2ac",
+      "result": "PASS"
+    },
+    {
+      "name": "native-style",
+      "log": "integration/native-style.log",
+      "sha256": "cf3f6dfc389265807e7b06facdc740a611d54d2955b0663db6e42c1723a00a5a",
+      "result": "PASS"
+    }
+  ],
+  "independent_raw_review": "108 cost rows;36 distributions;all matched allocation/net/peak fields identical"
+}

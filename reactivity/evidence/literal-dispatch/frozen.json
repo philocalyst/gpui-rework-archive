@@ -1,0 +1,59 @@
+{
+  "runner": "fdc5ba625dd465c8948ceb2e940192469549a79acca6c5cc2294cc29fbe89d39",
+  "fixture": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056",
+  "variants": {
+    "f019": {
+      "source": {
+        "reactivity/crates/gpui/src/element.rs": "83655f843f40042c4740ece58d6efdf6c982c7b8ebbf708f03a6cd4430207cc3",
+        "reactivity/crates/gpui/src/property.rs": "e2305092295e0aa7485b159fce686898ea741c6d6cca41e6b857b6d36f32bc53",
+        "reactivity/crates/gpui/src/style.rs": "752f6499a62ddee8fb6cd05303937409c1c850f6cf82913c8a3b2833dbf5dc5b",
+        "reactivity/crates/core/src/geometry.rs": "524531dae1febcb0b88274eda502c7f0bcb65b5737bd4ceb72e2e9f5cd432742",
+        "reactivity/Cargo.lock": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a",
+        "reactivity/crates/gpui/examples/literal_startup.rs": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056"
+      },
+      "files": {
+        "/tmp/gpui-style-startup-base-build.jsonl": "6b026eadd2fbd901a67f77cdea3e395546705b57c4cf9836d72ab34da4b7d7b4",
+        "/tmp/gpui-style-startup-base-target/release/examples/literal_startup": "f9ff59e1ad050a4a68ae8e87173a889d7fcf31f9ebcd452cb4e5a52109ce533a",
+        "/tmp/gpui-style-startup-base-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "7b7900319ec79b2870458513e02206c9ef29ba92865fbf3a95cd821a76eccbea",
+        "/tmp/gpui-style-startup-base-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "60f56ffbf1b9092ade9a909981edf7b669b8253fcb95359749d97de161252743"
+      },
+      "binary": "/tmp/gpui-style-startup-base-target/release/examples/literal_startup"
+    },
+    "baseline": {
+      "source": {
+        "reactivity/crates/gpui/src/element.rs": "f1ee45bf7a055d8ad0692dcab9568ea509136b24b67f3cf2de917058d87e280d",
+        "reactivity/crates/gpui/src/property.rs": "4bba965ed7149950d5eed8118bd7c23652806fd34da44b0ebb8ce65b6a5b0cc8",
+        "reactivity/crates/gpui/src/style.rs": "8da807ae343219c7db87df5e19e895800768503d07d59aad25db663d5707b687",
+        "reactivity/crates/core/src/geometry.rs": "524531dae1febcb0b88274eda502c7f0bcb65b5737bd4ceb72e2e9f5cd432742",
+        "reactivity/Cargo.lock": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a",
+        "reactivity/crates/gpui/examples/literal_startup.rs": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056",
+        "reactivity/crates/gpui/src/style_port.rs": "ac7fbbdba36cc2138c4df713964843be9ca900fe55ffff29c4b3b66b1cf2fdc9"
+      },
+      "files": {
+        "/tmp/gpui-literal-dispatch-base-build.jsonl": "555c2d1fc9f91a85e1c9f7579f37686f5cc4a00ce35d6f1170447eb49bfbeffd",
+        "/tmp/gpui-literal-dispatch-base-target/release/examples/literal_startup": "ff9df76158969787ed8971388dda9543d5e6fb7c18c0df98ada85f0bcda59d91",
+        "/tmp/gpui-literal-dispatch-base-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "c71a7016c0d201b5bdca463237eeb24905e4d2ff1bda9d7bb8b152e737ae4cef",
+        "/tmp/gpui-literal-dispatch-base-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "517c514bebe0cc48c1d5f2596740d5752a5f43c31dc5c878bedd0b7cb8159105"
+      },
+      "binary": "/tmp/gpui-literal-dispatch-base-target/release/examples/literal_startup"
+    },
+    "candidate": {
+      "source": {
+        "reactivity/crates/gpui/src/element.rs": "3a104021c12fba8a2304d1c791eb72fcd033ebf24104789bb800d55c4087aca9",
+        "reactivity/crates/gpui/src/property.rs": "61022f9dfefe7e94e2d350ab7acefdf24a0cc8e88340e897a82447cc542201ad",
+        "reactivity/crates/gpui/src/style.rs": "96d911bd372565a53c3debbc44075f358bc3089d407e2d3fa7cb9ef3f1b13110",
+        "reactivity/crates/core/src/geometry.rs": "de1dfe9edda615687dcca17e97f0082695abfac10885f7d631186674903e023d",
+        "reactivity/Cargo.lock": "329a03477b4385ed28be54118ea2a01427f6c3f6829d0ab74f69082e20547c4a",
+        "reactivity/crates/gpui/examples/literal_startup.rs": "000653d4c100365e1af7d8936e2771bfb05f8d6b880fc0401b5ad769a82cb056",
+        "reactivity/crates/gpui/src/style_port.rs": "1f6248ffeae67206ae246c9fa288d8b864c242d140f53f8a4c21f71322b27a3b"
+      },
+      "files": {
+        "/tmp/gpui-literal-dispatch-final-build.jsonl": "bf1b2f25dede78468e8f909026dc209d337bbad4e1847fcf35783199e71757dc",
+        "/tmp/gpui-literal-dispatch-target/release/examples/literal_startup": "8180b8164deb06b7441e359acddb433ffff15e3b21448eb22d7833fe94aec46f",
+        "/tmp/gpui-literal-dispatch-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "c8b22e2673209a4614b0c2110b0e186b887c35961ed195576da07d8a86244607",
+        "/tmp/gpui-literal-dispatch-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "2556521e8a87f8ecdf3dcbc4a6eef6ade6b17097e3f294e7c739e7e1155d584a"
+      },
+      "binary": "/tmp/gpui-literal-dispatch-target/release/examples/literal_startup"
+    }
+  }
+}
