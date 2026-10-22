@@ -1,0 +1,17 @@
+
+running 1 test
+
+thread 'equal_coarse_description_rebinds_the_complete_canvas_before_exact_color_edits' (3934631) panicked at reactivity/crates/gpui/tests/paint_slot_rebind.rs:54:9:
+assertion `left == right` failed: mode 0
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test equal_coarse_description_rebinds_the_complete_canvas_before_exact_color_edits ... FAILED
+
+failures:
+
+failures:
+    equal_coarse_description_rebinds_the_complete_canvas_before_exact_color_edits
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

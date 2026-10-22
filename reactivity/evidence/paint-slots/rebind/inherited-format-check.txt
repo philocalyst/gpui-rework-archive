@@ -1,0 +1,83 @@
+Diff in /root/gpui-paint-slot-rebind/reactivity/crates/gpui/examples/paint_slot_storage.rs:19:
+         column((0..self.count).map(|index| {
+             // All nodes overlap: command storage scales with the whole owner,
+             // rather than disappearing after the first viewport's children.
+-            let el = div()
+-                .size(1)
+-                .transform(Affine {
+-                    a: if self.mode == 4 {
+-                        1.0 + index as f32 / 8192.0
+-                    } else {
+-                        1.0
+-                    },
+-                    ty: -(index as f32),
+-                    ..Affine::IDENTITY
+-                });
++            let el = div().size(1).transform(Affine {
++                a: if self.mode == 4 {
++                    1.0 + index as f32 / 8192.0
++                } else {
++                    1.0
++                },
++                ty: -(index as f32),
++                ..Affine::IDENTITY
++            });
+             match self.mode {
+                 0 => el,
+                 1 => el.bg(Color::BLACK),
+Diff in /root/gpui-paint-slot-rebind/reactivity/crates/gpui/src/native/paint_tests.rs:126:
+                 wgpu::TextureFormat::Rgba16Float,
+             ))
+             .unwrap();
+-            Some(std::mem::replace(
+-                &mut gpu.renderer,
+-                renderer,
+-            ))
++            Some(std::mem::replace(&mut gpu.renderer, renderer))
+         } else {
+             None
+         };
+Diff in /root/gpui-paint-slot-rebind/reactivity/crates/gpui/tests/paint_slot_rebind.rs:2:
+ 
+ struct Panel(Signal<Color>);
+ impl Panel {
+-    const COLOR: Source<Self, Color> =
+-        Source::new(FieldId::new(1), "color", |model| &model.0, |model| &mut model.0);
++    const COLOR: Source<Self, Color> = Source::new(
++        FieldId::new(1),
++        "color",
++        |model| &model.0,
++        |model| &mut model.0,
++    );
+ }
+ impl View for Panel {
+     fn sources() -> Sources<Self> {
+Diff in /root/gpui-paint-slot-rebind/reactivity/crates/gpui/tests/paint_slot_rebind.rs:23:
+ 
+ #[test]
+ fn equal_coarse_description_rebinds_the_complete_canvas_before_exact_color_edits() {
+-    let expected = pixels(
+-        &mut Win::with_size(Panel(Signal::new(Color::WHITE)), 16, 16).unwrap(),
+-    );
++    let expected = pixels(&mut Win::with_size(Panel(Signal::new(Color::WHITE)), 16, 16).unwrap());
+     for mode in 0..4 {
+         let mut win = if mode == 0 {
+             Win::with_size(Panel(Signal::new(Color::BLACK)), 16, 16).unwrap()
+Diff in /root/gpui-paint-slot-rebind/reactivity/crates/gpui/tests/paint_slot_rebind.rs:69:
+             acknowledge(&mut win);
+         }
+         let target = win.query().name("panel").one().unwrap();
+-        assert!(win.property(target, BACKGROUND).unwrap().same_authoring(Color::WHITE));
+-        assert_eq!(win.snapshot().unwrap().presentation_epoch, commit.source_epoch);
++        assert!(
++            win.property(target, BACKGROUND)
++                .unwrap()
++                .same_authoring(Color::WHITE)
++        );
++        assert_eq!(
++            win.snapshot().unwrap().presentation_epoch,
++            commit.source_epoch
++        );
+     }
+ }
+ 

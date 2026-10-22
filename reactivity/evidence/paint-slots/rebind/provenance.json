@@ -1,0 +1,46 @@
+{
+  "source_commit": "570b4d9274",
+  "base": "fb6e7db21c",
+  "frozen_refinement_source": "7687b3224682523bdb53b91b77209763b2bbc844",
+  "target": "/tmp/gpui-paint-slot-refinement-target",
+  "target_note": "Only this agent uses the target. Debug checks are sequential after the refinement final gate. Release refinement artifacts are unchanged and frozen separately; there is no paired timing campaign.",
+  "jobs": 2,
+  "headers_added": 0,
+  "dependencies_added": 0,
+  "local_unsafe_added": false,
+  "timings": false,
+  "source_sha256": {
+    "reactivity/crates/gpui/src/runtime.rs": "429e10dc97917d9571628f5f094e22a0d0056b802123620b3b18f5ae3baea946",
+    "reactivity/crates/gpui/tests/paint_slot_rebind.rs": "112a19d44d85ef9d568c85c83c7f01f00e338e4ae9505307a5f666ba4c22dd12"
+  },
+  "commands": {
+    "public.txt": "cargo test --manifest-path reactivity/Cargo.toml -p gpui --test paint_slot_rebind --test paint_slots --test paint_patch --test presentation -- --nocapture --test-threads=1",
+    "clippy.txt": "cargo clippy --manifest-path reactivity/Cargo.toml -p gpui --features x11,wayland --all-targets -- -D warnings",
+    "native.txt": "DISPLAY=:111 cargo test --manifest-path reactivity/Cargo.toml -p gpui --features x11,wayland --lib native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection -- --ignored --exact --nocapture --test-threads=1"
+  },
+  "gates": {
+    "public.txt": {
+      "exit_code": 0,
+      "passed": 18,
+      "ignored": 0
+    },
+    "clippy.txt": {
+      "exit_code": 0,
+      "passed": 0,
+      "ignored": 0
+    },
+    "native.txt": {
+      "passed": 1,
+      "ignored": 0,
+      "filtered": 155,
+      "exit_code": 0
+    }
+  },
+  "native_environment": {
+    "display": ":111",
+    "xvfb": "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+    "arguments": ":111 -screen 0 1024x768x24 -nolisten tcp",
+    "env_file": "/tmp/gpui-native-env.sh",
+    "note": "Private Xvfb created solely for this run; stopped afterward. Software Vulkan correctness, no hardware or latency claim."
+  }
+}

@@ -1,0 +1,25 @@
+   Compiling wgpu-hal v29.0.4 (/root/gpui-paint-slot-rebind/reactivity/vendor/wgpu-hal)
+   Compiling winit v0.30.13 (/root/gpui-paint-slot-rebind/reactivity/vendor/winit)
+    Checking cephal v0.1.1 (/root/gpui-paint-slot-rebind/reactivity/vendor/cephal)
+    Checking wgpu-core-deps-windows-linux-android v29.0.4
+    Checking wgpu-core v29.0.4
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-paint-slot-rebind/reactivity/crates/core)
+    Checking parley v0.11.1 (/root/gpui-paint-slot-rebind/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking gpui_canvas v0.1.0 (/root/gpui-paint-slot-rebind/reactivity/crates/canvas)
+    Checking wgpu v29.0.4
+    Checking accesskit_winit v0.34.1
+    Checking softbuffer v0.4.8 (/root/gpui-paint-slot-rebind/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-paint-slot-rebind/reactivity/crates/host)
+    Checking gpui_gpu v0.1.0 (/root/gpui-paint-slot-rebind/reactivity/crates/gpu)
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-paint-slot-rebind/reactivity/crates/state)
+    Checking gpui v0.1.0 (/root/gpui-paint-slot-rebind/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3m 00s
