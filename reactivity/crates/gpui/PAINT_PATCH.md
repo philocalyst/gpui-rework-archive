@@ -90,3 +90,11 @@ nonnegative colors. An initially overstrong exact CPU-byte assertion failed at
 rounded partial coverage and is retained in the evidence; no production numeric
 behavior was changed to accommodate it. This is not a universal cross-device
 CPU/GPU byte-parity claim.
+
+Sparse semantic relabelling is qualified by the preceding complete-C stamp,
+including actual completed size. An existing collector may retain its indices
+only when its target equals that exact stamp. An empty delta is created only
+when preceding C already equals base P. Late observer activation or lost
+collection otherwise requires full projection, even when node counts happen to
+match. No-effective-change updates extend a pending collector's epoch without
+acknowledging it or discarding its earlier full-candidate indices.

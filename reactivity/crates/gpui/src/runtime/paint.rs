@@ -182,6 +182,15 @@ impl<M: View + 'static> Runtime<M> {
         eligible: bool,
         changed: bool,
     ) -> Result<bool, Error> {
+        #[cfg(feature = "accessibility")]
+        let previous = accessibility::Stamp {
+            sequence: self.latest_token.map(|token| token.sequence),
+            epoch: self.complete_epoch,
+            size: self.prepared.as_ref().map_or(
+                [self.canvas.width(), self.canvas.height()],
+                Prepared::dimensions,
+            ),
+        };
         let mut edits = plan.edits;
         let state = self
             .metadata
@@ -196,16 +205,22 @@ impl<M: View + 'static> Runtime<M> {
         if !changed {
             edits.clear();
             state.scratch = edits;
+            #[cfg(feature = "accessibility")]
+            let base = self.semantic_stamp();
+            let acknowledged = self.prepared.is_none() && self.presentation_valid;
             self.complete_epoch = self.source_epoch;
-            if self.prepared.is_none() && self.presentation_valid {
-                #[cfg(feature = "accessibility")]
-                let base = self.semantic_stamp();
+            if acknowledged {
                 self.presentation_epoch = self.source_epoch;
-                #[cfg(feature = "accessibility")]
-                {
-                    let target = self.semantic_stamp();
-                    if let Some(observer) = &mut self.accessibility {
-                        observer.relabel(base, target);
+            }
+            #[cfg(feature = "accessibility")]
+            {
+                let target = accessibility::Stamp {
+                    epoch: self.source_epoch,
+                    ..previous
+                };
+                if let Some(observer) = &mut self.accessibility {
+                    observer.relabel(base, previous, target);
+                    if acknowledged {
                         observer.acknowledge(target);
                     }
                 }
@@ -259,10 +274,11 @@ impl<M: View + 'static> Runtime<M> {
             if let Some(observer) = &mut self.accessibility {
                 observer.relabel(
                     base,
+                    previous,
                     accessibility::Stamp {
                         sequence: Some(sequence),
                         epoch: self.source_epoch,
-                        size: self.requested_size,
+                        size: previous.size,
                     },
                 );
             }
