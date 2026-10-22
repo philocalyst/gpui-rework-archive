@@ -344,6 +344,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.after_source_with_editing(exact, editing)
     }
 
+    #[inline(never)]
     fn activate_property(&mut self, index: usize, editing: EditingIntent) -> Result<Commit, Error> {
         // The request and reply cannot change retained nodes: they borrow only
         // M, and the shared property mutation touches only style/geometry.
