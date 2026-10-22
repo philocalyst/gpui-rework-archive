@@ -31,3 +31,10 @@ its explicit default font instances through Fontique's metadata override.
 The removed 0.11 word-boundaries feature is not recreated: current upstream
 analysis/editor behavior stays enabled. Old feature-comparison measurements
 remain historical and do not describe this 0.12 binary.
+
+Consuming-batch checkpoint elimination: break_remaining calls the same private
+line-break body without snapshotting prev_state. Its consumed iterator cannot
+call revert after the batch, and the body/finish never reads prev_state. Public
+break_next keeps the original checkpoint/revert contract. A shared readiness
+check preserves done/invalid-width behavior; no retained flag, duplicate break
+algorithm, generic boolean specialization or additional cache is introduced.

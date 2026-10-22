@@ -752,3 +752,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "line_break_tests.rs"]
+mod line_break_tests;
