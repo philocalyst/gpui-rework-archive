@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/capture-cephal-hidden.py", line 42, in <module>
+    for key in ['retained','total','peak','cache_heap']:assert row[key]-control[key]==-360000,(key,row,control)
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('peak', {'rep': 0, 'mode': 'hidden', 'variant': 'flags', 'stage': 'compute', 'retained': 287256, 'total': 386936, 'peak': 302720, 'calls': 36, 'caches': 1, 'cache_heap': 360, 'computed': 1, 'cached': 0, 'measured': 0, 'changed': 1999}, {'rep': 0, 'mode': 'hidden', 'variant': 'baseline', 'stage': 'compute', 'retained': 647256, 'total': 746936, 'peak': 655576, 'calls': 1036, 'caches': 1001, 'cache_heap': 360360, 'computed': 1, 'cached': 0, 'measured': 0, 'changed': 1999})
