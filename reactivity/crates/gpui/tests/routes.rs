@@ -448,3 +448,23 @@ fn selection_request_and_reply_panics_restore_dense_and_sparse_routes_until_clos
         }
     }
 }
+
+#[test]
+fn unmatched_retirement_panic_keeps_next_captures_owned_but_quarantined_until_close() {
+    let drops = Arc::new(AtomicUsize::new(0));
+    let mut win = Win::demo(captures(&drops, 4, true));
+    let target = win.button("capture 0");
+    assert_eq!(
+        win.update(|m| {
+            m.panic = false;
+            m.count = 1;
+        }),
+        Err(Error::OwnerPanicked)
+    );
+    // Shape rejection leaves all four old handlers for retirement at scope
+    // exit, after the next logical tree and its one handler were installed.
+    assert_eq!(drops.load(Ordering::SeqCst), 4);
+    assert_eq!(win.activate(target), Err(Error::Poisoned));
+    win.close();
+    assert_eq!(drops.load(Ordering::SeqCst), 5);
+}
