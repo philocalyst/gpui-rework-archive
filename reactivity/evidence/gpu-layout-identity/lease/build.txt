@@ -1,0 +1,4 @@
+   Compiling wgpu v30.0.1 (/tmp/gpui-layout-identity-sol/reactivity/vendor/wgpu)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/gpu)
+   Compiling gpui-gpu-owner-fixture v0.0.0 (/tmp/gpui-layout-identity-sol/reactivity/benchmarks/gpu-owner)
+    Finished `release` profile [optimized] target(s) in 58.77s

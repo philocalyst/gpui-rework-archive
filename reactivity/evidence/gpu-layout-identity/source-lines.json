@@ -1,0 +1,53 @@
+{
+  "numeric": {
+    "source": "f0d8d8f2188413531541feddafcfeaad757937ec",
+    "gpu": {
+      "physical": 2878,
+      "test_lines": 229,
+      "non_test_physical": 2649,
+      "code": 2427
+    },
+    "vendor_patch_file": {
+      "physical": 4117,
+      "test_lines": 0,
+      "non_test_physical": 4117,
+      "code": 3700
+    }
+  },
+  "lease": {
+    "source": "15c30db1a91c343f69cd0642b36095807d3e16cb",
+    "gpu": {
+      "physical": 2851,
+      "test_lines": 217,
+      "non_test_physical": 2634,
+      "code": 2408
+    },
+    "vendor_patch_file": {
+      "physical": 4124,
+      "test_lines": 0,
+      "non_test_physical": 4124,
+      "code": 3705
+    }
+  },
+  "delta": {
+    "gpu": {
+      "physical": -27,
+      "test_lines": -12,
+      "non_test_physical": -15,
+      "code": -19
+    },
+    "vendor_patch_file": {
+      "physical": 7,
+      "test_lines": 0,
+      "non_test_physical": 7,
+      "code": 5
+    },
+    "summed_code": -14
+  },
+  "tools": {
+    "helper_sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea",
+    "python_sha256": "d5b2a0b4afddc0eda26f3ce7b199f48200606080a496f96a4696cd9c411ab81c",
+    "tokei": "/nix/store/4m90mv0fyihsdrnidw8gkgmx6zvd5vqm-tokei-15.0.0/bin/tokei",
+    "version": "tokei 15.0.0 compiled with serialization support: json, cbor, yaml"
+  }
+}

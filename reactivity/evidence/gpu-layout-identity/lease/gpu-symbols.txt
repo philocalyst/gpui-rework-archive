@@ -1,0 +1,54 @@
+0000000000843120 0000000000000145 t <core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>
+0000000000829bb0 00000000000002b5 t <std::thread::local::LocalKey<core::task::wake::Waker>>::with::<pollster::block_on<<gpui_gpu::renderer::Renderer>::new::{closure#0}>::{closure#0}, core::result::Result<gpui_gpu::renderer::Renderer, gpui_gpu::renderer::Error>>
+0000000000829e70 00000000000008f5 t <std::thread::local::LocalKey<core::task::wake::Waker>>::with::<pollster::block_on<<gpui_gpu::renderer::Renderer>::request::{closure#0}>::{closure#0}, core::result::Result<gpui_gpu::renderer::Renderer, gpui_gpu::renderer::Error>>
+000000000084c310 0000000000000642 T <hashbrown::raw::RawTable<(gpui_canvas::text::GlyphKey, gpui_gpu::renderer::Tile)>>::reserve_rehash::<hashbrown::map::make_hasher<gpui_canvas::text::GlyphKey, gpui_gpu::renderer::Tile, std::hash::random::RandomState>::{closure#0}>
+000000000084c960 000000000000059d T <hashbrown::raw::RawTable<(gpui_canvas::image::ImageKey, gpui_gpu::renderer::images::Entry)>>::reserve_rehash::<hashbrown::map::make_hasher<gpui_canvas::image::ImageKey, gpui_gpu::renderer::images::Entry, std::hash::random::RandomState>::{closure#0}>
+0000000000849e60 0000000000000069 t core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui_gpu::renderer::images::Images>>>
+0000000000827d50 0000000000000069 t core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui_gpu::renderer::images::Images>>>
+0000000000825290 0000000000000087 t core::ptr::drop_glue::<<gpui_gpu::renderer::Renderer>::new::{closure#0}>
+0000000000825320 00000000000000d0 t core::ptr::drop_glue::<<gpui_gpu::renderer::Renderer>::request::{closure#0}>
+000000000082ad30 00000000000001e0 t core::ptr::drop_glue::<<gpui_gpu::renderer::GpuContext>::new::{closure#0}>
+00000000008253f0 00000000000001e0 t core::ptr::drop_glue::<<gpui_gpu::renderer::GpuContext>::new::{closure#0}>
+000000000082af10 0000000000000040 t core::ptr::drop_glue::<<gpui_gpu::renderer::GpuContext>::request::{closure#0}>
+000000000082af50 00000000000000bf t core::ptr::drop_glue::<gpui_gpu::renderer::GpuContext>
+0000000000828360 00000000000004e5 t core::ptr::drop_glue::<gpui_gpu::renderer::RendererState>
+0000000000843330 00000000000000d2 t core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>
+0000000000828850 00000000000000d2 t core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>
+00000000008255d0 0000000000000024 t core::ptr::drop_glue::<gpui_gpu::renderer::Error>
+0000000000828930 000000000000001e t core::ptr::drop_glue::<gpui_gpu::renderer::Error>
+0000000000843410 0000000000000067 t core::ptr::drop_glue::<gpui_gpu::renderer::Buffer>
+000000000084a0f0 0000000000000067 t core::ptr::drop_glue::<gpui_gpu::renderer::Buffer>
+0000000000828950 0000000000000067 t core::ptr::drop_glue::<gpui_gpu::renderer::Buffer>
+00000000008289c0 00000000000000f8 t core::ptr::drop_glue::<gpui_gpu::renderer::Renderer>
+000000000084a160 0000000000000051 t core::ptr::drop_glue::<gpui_gpu::renderer::images::Images>
+0000000000843fe0 0000000000000263 t gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>
+000000000084d530 000000000000012f t <core::iter::adapters::copied::Copied<core::slice::iter::Iter<gpui_canvas::image::ImageKey>> as core::iter::traits::iterator::Iterator>::eq_by::<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<core::option::Iter<alloc::boxed::Box<gpui_canvas::canvas::ImageResources>>, core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::image::Image>, <gpui_canvas::image::Image>::view>, <gpui_canvas::canvas::PreparedScene>::images::{closure#0}>, gpui_gpu::renderer::images::prepare::{closure#0}>, <core::iter::adapters::copied::Copied<core::slice::iter::Iter<gpui_canvas::image::ImageKey>> as core::iter::traits::iterator::Iterator>::eq<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<core::option::Iter<alloc::boxed::Box<gpui_canvas::canvas::ImageResources>>, core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::image::Image>, <gpui_canvas::image::Image>::view>, <gpui_canvas::canvas::PreparedScene>::images::{closure#0}>, gpui_gpu::renderer::images::prepare::{closure#0}>>::{closure#0}>
+0000000000844250 0000000000000141 t <gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>
+000000000082b9f0 000000000000062d t <gpui_gpu::renderer::GpuContext>::new::{closure#0}
+000000000084a280 00000000000000f6 t <gpui_gpu::renderer::images::Images>::metadata
+00000000008445e0 000000000000012f t <gpui_gpu::renderer::Buffer>::write
+0000000000844710 00000000000002c2 t <gpui_gpu::renderer::Atlas>::new
+00000000008449e0 0000000000000260 t <gpui_gpu::renderer::Atlas>::insert
+000000000084b1b0 00000000000001e9 t <hashbrown::map::HashMap<gpui_canvas::text::GlyphKey, gpui_gpu::renderer::Tile, std::hash::random::RandomState>>::insert
+000000000084b3a0 00000000000001ac t <hashbrown::map::HashMap<gpui_canvas::image::ImageKey, gpui_gpu::renderer::images::Entry, std::hash::random::RandomState>>::insert
+0000000000844c40 00000000000001d5 t <gpui_gpu::renderer::GpuContext>::submit
+000000000084b8b0 0000000000000064 T <alloc::raw_vec::RawVec<gpui_gpu::renderer::Correction>>::grow_one
+0000000000844e20 00000000000003d5 t <gpui_gpu::renderer::RendererState>::correction
+0000000000845200 0000000000000297 t <gpui_gpu::renderer::RendererState>::prepare_atlas
+00000000008454a0 00000000000005f7 T <gpui_gpu::renderer::RendererState>::new
+0000000000845aa0 000000000000014e T <gpui_gpu::renderer::RendererState>::redraw
+0000000000845bf0 0000000000002482 T <gpui_gpu::renderer::RendererState>::render
+0000000000848080 0000000000001058 t <gpui_gpu::renderer::RendererState>::bin_draw
+00000000008490e0 0000000000000044 t gpui_gpu::renderer::compact_group
+0000000000849130 0000000000000640 t gpui_gpu::renderer::validate_draw
+000000000084d660 0000000000000039 t gpui_gpu::renderer::slots::color_word
+000000000084d6a0 0000000000000205 t gpui_gpu::renderer::slots::write_prefix
+000000000084a5f0 0000000000000a58 t gpui_gpu::renderer::images::prepare
+0000000000828ee0 00000000000000ad t <&gpui_gpu::renderer::images::ImageStats as core::fmt::Debug>::fmt
+0000000000826820 0000000000000130 t <gpui_gpu::renderer::Error as core::fmt::Debug>::fmt
+00000000008296b0 0000000000000130 t <gpui_gpu::renderer::Error as core::fmt::Debug>::fmt
+0000000000826950 0000000000000047 t <core::option::Option<gpui_gpu::renderer::images::ImageStats> as core::fmt::Debug>::fmt
+000000000084d0b0 000000000000002f t <hashbrown::raw::RawTable<(gpui_canvas::text::GlyphKey, gpui_gpu::renderer::Tile)> as core::ops::drop::Drop>::drop
+0000000000826c70 000000000000002f t <hashbrown::raw::RawTable<(gpui_canvas::text::GlyphKey, gpui_gpu::renderer::Tile)> as core::ops::drop::Drop>::drop
+0000000000826ca0 000000000000002f t <hashbrown::raw::RawTable<(gpui_canvas::image::ImageKey, gpui_gpu::renderer::images::Entry)> as core::ops::drop::Drop>::drop
+0000000000826cd0 000000000000024b t <gpui_gpu::renderer::Stats as core::fmt::Debug>::fmt

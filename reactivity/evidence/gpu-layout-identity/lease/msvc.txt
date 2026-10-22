@@ -1,0 +1,17 @@
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-layout-identity-sol/reactivity/vendor/wgpu-hal)
+    Checking parley_engine v0.12.0 (/tmp/gpui-layout-identity-sol/reactivity/vendor/parley_engine)
+   Compiling winit v0.30.13 (/tmp/gpui-layout-identity-sol/reactivity/vendor/winit)
+    Checking cephal v0.1.1 (/tmp/gpui-layout-identity-sol/reactivity/vendor/cephal)
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/core)
+   Compiling wgpu v30.0.1 (/tmp/gpui-layout-identity-sol/reactivity/vendor/wgpu)
+    Checking parley v0.12.0 (/tmp/gpui-layout-identity-sol/reactivity/vendor/parley)
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking wgpu-core v30.0.1
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/gpu)
+    Checking softbuffer v0.4.8 (/tmp/gpui-layout-identity-sol/reactivity/vendor/softbuffer)
+    Checking accesskit_winit v0.34.1
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/state)
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/host)
+    Checking gpui v0.1.0 (/tmp/gpui-layout-identity-sol/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 23.67s
