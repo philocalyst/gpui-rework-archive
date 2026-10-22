@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-evidence/scalar-normal-consumer  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1920       856
+.gnu.version            160      2776
+.gnu.version_r          384      2936
+.gnu.hash                28      3320
+.dynstr                1187      3348
+.rela.dyn            166392      4536
+.rela.plt                48    170928
+.gcc_except_table     36452    170976
+.rodata             4451624    207440
+.eh_frame_hdr         24140   4659064
+.eh_frame            159368   4683208
+.text               2269975   4846672
+.init                    27   7116648
+.fini                    13   7116676
+.plt                     48   7116704
+.tdata                   32   7120848
+.tbss                  3192   7120880
+.fini_array               8   7120880
+.init_array              16   7120888
+.data.rel.ro         125208   7120904
+.dynamic                480   7246112
+.got                  10704   7246592
+.got.plt                 40   7257296
+.relro_padding          776   7257336
+.tm_clone_table           0   7261432
+.data                  5672   7261432
+.bss                    283   7267104
+.comment                157         0
+Total               7258449
+
+

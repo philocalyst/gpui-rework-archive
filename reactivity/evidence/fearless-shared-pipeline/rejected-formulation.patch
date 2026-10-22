@@ -1,0 +1,11 @@
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -1831,7 +1831,7 @@
+     // RGBA occupies four f32 lanes on every backend. Wider ISA dispatch would
+     // clone the complete raster pipeline without widening this kernel. Use the
+     // guaranteed target baseline, avoiding CPU detection and startup state.
+-    dispatch!(Level::baseline(), simd => render_band_impl(simd, frame, writer, pixels, offsets, members))
++    dispatch!(Level::new(), simd => render_band_impl(simd, frame, writer, pixels, offsets, members))
+ }
+ 
+ // Geometry helpers remain shared; the leaf sample pipeline carries the selected

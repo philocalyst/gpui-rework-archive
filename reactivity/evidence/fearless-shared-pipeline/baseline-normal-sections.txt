@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-evidence/baseline-normal-consumer  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1920       856
+.gnu.version            160      2776
+.gnu.version_r          384      2936
+.gnu.hash                28      3320
+.dynstr                1187      3348
+.rela.dyn            166008      4536
+.rela.plt                48    170544
+.gcc_except_table     36484    170592
+.rodata             4451608    207088
+.eh_frame_hdr         24092   4658696
+.eh_frame            159088   4682792
+.text               2266423   4845984
+.init                    27   7112408
+.fini                    13   7112436
+.plt                     48   7112464
+.tdata                   32   7116608
+.tbss                  3192   7116640
+.fini_array               8   7116640
+.init_array              16   7116648
+.data.rel.ro         125208   7116664
+.dynamic                480   7241872
+.got                  10576   7242352
+.got.plt                 40   7252928
+.relro_padding         1048   7252968
+.tm_clone_table           0   7257064
+.data                  5672   7257064
+.bss                    283   7262736
+.comment                157         0
+Total               7254345
+
+

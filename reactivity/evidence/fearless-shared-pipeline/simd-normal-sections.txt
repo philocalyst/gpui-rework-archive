@@ -1,0 +1,35 @@
+/tmp/gpui-fearless-evidence/simd-normal-consumer  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                1920       856
+.gnu.version            160      2776
+.gnu.version_r          384      2936
+.gnu.hash                28      3320
+.dynstr                1187      3348
+.rela.dyn            166368      4536
+.rela.plt                48    170904
+.gcc_except_table     36168    170952
+.rodata             4451560    207120
+.eh_frame_hdr         23972   4658680
+.eh_frame            157968   4682656
+.text               2262615   4844720
+.init                    27   7107336
+.fini                    13   7107364
+.plt                     48   7107392
+.tdata                   32   7111536
+.tbss                  3192   7111568
+.fini_array               8   7111568
+.init_array              16   7111576
+.data.rel.ro         125208   7111592
+.dynamic                480   7236800
+.got                  10696   7237280
+.got.plt                 40   7247976
+.relro_padding         1904   7248016
+.tm_clone_table           0   7252112
+.data                  5672   7252112
+.bss                    283   7257784
+.comment                157         0
+Total               7250269
+
+

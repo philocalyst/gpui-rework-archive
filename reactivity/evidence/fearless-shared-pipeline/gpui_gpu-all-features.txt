@@ -1,0 +1,286 @@
+gpui_gpu v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/gpu) [default,simd,vulkan-tests]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics]
+bytemuck_derive v1.12.1 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations]
+unicode-ident v1.0.27 []
+quote v1.0.47 [default,proc-macro]
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit]
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+unicode-ident v1.0.27 []
+gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd]
+fearless_simd v1.1.0 [default,force_support_fallback,std]
+fearless_simd_macros v0.1.0 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+fontique v0.11.1 [std]
+hashbrown v0.17.1 [default-hasher,raw-entry]
+foldhash v0.2.0 []
+linebender_resource_handle v0.1.1 []
+memmap2 v0.9.11 []
+libc v0.2.191 [default,std]
+parlance v0.1.1 [std]
+read-fonts v0.41.0 [experimental_font_api,std]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+font-types v0.12.7 [bytemuck,std]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+once_cell v1.21.4 [alloc,default,race,std]
+smallvec v1.16.3 [union]
+gpui_reactivity_core v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/core) [default]
+icu_properties v2.3.0 [compiled_data]
+displaydoc v0.2.7 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+icu_collections v2.3.0 []
+displaydoc v0.2.7 (proc-macro) [] (*)
+potential_utf v0.1.6 [alloc,writeable,zerovec]
+writeable v0.6.4 [alloc]
+zerovec v0.11.8 [alloc,derive,yoke]
+yoke v0.8.3 [alloc,derive,zerofrom]
+stable_deref_trait v1.2.1 [alloc]
+yoke-derive v0.8.4 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+synstructure v0.14.0 [default,proc-macro]
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+zerofrom v0.1.8 [alloc,derive]
+zerofrom-derive v0.1.8 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+synstructure v0.14.0 [default,proc-macro] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerovec-derive v0.11.6 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+utf8_iter v1.0.4 []
+yoke v0.8.3 [alloc,derive,zerofrom] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_locale_core v2.3.0 [alloc,zerovec]
+displaydoc v0.2.7 (proc-macro) [] (*)
+litemap v0.8.3 [alloc]
+tinystr v0.8.4 [alloc,zerovec]
+displaydoc v0.2.7 (proc-macro) [] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+writeable v0.6.4 [alloc]
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_properties_data v2.3.0 []
+icu_provider v2.3.1 [alloc,baked]
+displaydoc v0.2.7 (proc-macro) [] (*)
+icu_locale_core v2.3.0 [alloc,zerovec] (*)
+stable_deref_trait v1.2.1 [alloc]
+writeable v0.6.4 [alloc]
+yoke v0.8.3 [alloc,derive,zerofrom] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerotrie v0.2.5 [alloc,yoke,zerofrom]
+displaydoc v0.2.7 (proc-macro) [] (*)
+yoke v0.8.3 [alloc,derive,zerofrom] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+zerotrie v0.2.5 [alloc,yoke,zerofrom] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_segmenter v2.3.0 [compiled_data]
+icu_collections v2.3.0 [] (*)
+icu_locale_fallback v2.3.0 [compiled_data]
+icu_locale_core v2.3.0 [alloc,zerovec] (*)
+icu_locale_fallback_data v2.3.0 []
+icu_provider v2.3.1 [alloc,baked] (*)
+potential_utf v0.1.6 [alloc,writeable,zerovec] (*)
+tinystr v0.8.4 [alloc,zerovec] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_provider v2.3.1 [alloc,baked] (*)
+icu_segmenter_data v2.3.0 []
+potential_utf v0.1.6 [alloc,writeable,zerovec] (*)
+smallvec v1.16.3 [union]
+utf8_iter v1.0.4 []
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+parley v0.11.1 (/root/gpui-fearless-pipeline/reactivity/vendor/parley) [complex-scripts,std]
+fontique v0.11.1 [std] (*)
+harfrust v0.12.0 [std]
+bitflags v2.13.2 []
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+read-fonts v0.41.0 [experimental_font_api,std] (*)
+smallvec v1.16.3 [union]
+hashbrown v0.17.1 [default-hasher,raw-entry] (*)
+icu_normalizer v2.3.0 [compiled_data]
+icu_collections v2.3.0 [] (*)
+icu_normalizer_data v2.3.0 []
+icu_provider v2.3.1 [alloc,baked] (*)
+smallvec v1.16.3 [union]
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_properties v2.3.0 [compiled_data] (*)
+icu_segmenter v2.3.0 [compiled_data] (*)
+linebender_resource_handle v0.1.1 []
+parlance v0.1.1 [std]
+parley_data v0.11.1 [baked]
+icu_properties v2.3.0 [compiled_data] (*)
+skrifa v0.44.0 [autohint_shaping,default,std]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+read-fonts v0.41.0 [experimental_font_api,std] (*)
+skrifa v0.44.0 [autohint_shaping,default,std] (*)
+swash v0.2.10 [default,render,scale,std]
+skrifa v0.44.0 [autohint_shaping,default,std] (*)
+yazi v0.2.1 [std]
+zeno v0.3.3 [eval,std]
+ttf-parser v0.25.1 [apple-layout,default,glyph-names,opentype-layout,std,variable-fonts]
+wgpu v29.0.4 [dx12,gles,metal,std,vulkan,wgsl]
+arrayvec v0.7.8 []
+bitflags v2.13.2 []
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+cfg-if v1.0.5 []
+document-features v0.2.12 (proc-macro) [default]
+litrs v1.0.1 []
+hashbrown v0.16.1 [allocator-api2,default,default-hasher,equivalent,inline-more,raw-entry]
+allocator-api2 v0.2.21 [alloc]
+equivalent v1.0.3 []
+foldhash v0.2.0 []
+log v0.4.34 []
+profiling v1.0.18 []
+raw-window-handle v0.6.2 [alloc,std]
+smallvec v1.16.3 [union]
+static_assertions v1.1.0 []
+wgpu-core v29.0.4 [default,dx12,gles,metal,portable-atomic,renderdoc,std,vulkan,wgpu-core-deps-windows-linux-android,wgsl]
+arrayvec v0.7.8 []
+bit-set v0.9.1 []
+bit-vec v0.9.1 []
+bit-vec v0.9.1 []
+bitflags v2.13.2 []
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+document-features v0.2.12 (proc-macro) [default] (*)
+hashbrown v0.16.1 [allocator-api2,default,default-hasher,equivalent,inline-more,raw-entry] (*)
+indexmap v2.14.2 []
+equivalent v1.0.3 []
+hashbrown v0.17.1 [default-hasher,raw-entry] (*)
+log v0.4.34 []
+naga v29.0.4 [default,glsl-out,hlsl-out,spv-out,wgsl-in,wgsl-out]
+arrayvec v0.7.8 []
+bit-set v0.9.1 [] (*)
+bitflags v2.13.2 []
+cfg-if v1.0.5 []
+codespan-reporting v0.13.1 []
+unicode-width v0.2.2 [cjk,default]
+half v2.7.1 [alloc,default,num-traits,std]
+cfg-if v1.0.5 []
+num-traits v0.2.19 [libm]
+libm v0.2.16 [arch,default]
+zerocopy v0.8.63 [derive,simd,zerocopy-derive]
+zerocopy-derive v0.8.63 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v2.0.119 [clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,visit-mut]
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+unicode-ident v1.0.27 []
+hashbrown v0.16.1 [allocator-api2,default,default-hasher,equivalent,inline-more,raw-entry] (*)
+hexf-parse v0.2.1 []
+indexmap v2.14.2 [] (*)
+libm v0.2.16 [arch,default]
+log v0.4.34 []
+num-traits v0.2.19 [libm] (*)
+once_cell v1.21.4 [alloc,default,race,std]
+rustc-hash v1.1.0 []
+spirv v0.4.0+sdk-1.4.341.0 []
+bitflags v2.13.2 []
+thiserror v2.0.21 []
+thiserror-impl v2.0.21 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+unicode-ident v1.0.27 []
+once_cell v1.21.4 [alloc,default,race,std]
+parking_lot v0.12.5 [default]
+lock_api v0.4.14 [atomic_usize,default]
+scopeguard v1.2.0 []
+parking_lot_core v0.9.12 []
+cfg-if v1.0.5 []
+libc v0.2.191 [default,std]
+smallvec v1.16.3 [union]
+profiling v1.0.18 []
+raw-window-handle v0.6.2 [alloc,std]
+rustc-hash v1.1.0 []
+smallvec v1.16.3 [union]
+thiserror v2.0.21 [] (*)
+wgpu-core-deps-windows-linux-android v29.0.4 [dx12,gles,renderdoc,vulkan]
+wgpu-hal v29.0.4 (/root/gpui-fearless-pipeline/reactivity/vendor/wgpu-hal) [dx12,gles,portable-atomic,renderdoc,vulkan]
+arrayvec v0.7.8 []
+ash v0.38.0+1.3.281 [debug,default,libloading,loaded,std]
+libloading v0.8.9 []
+cfg-if v1.0.5 []
+bitflags v2.13.2 []
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+cfg-if v1.0.5 []
+glow v0.17.0 []
+gpu-allocator v0.28.0 [d3d12,hashbrown,vulkan]
+ash v0.38.0+1.3.281 [debug,default,libloading,loaded,std] (*)
+hashbrown v0.16.1 [allocator-api2,default,default-hasher,equivalent,inline-more,raw-entry] (*)
+log v0.4.34 []
+presser v0.3.1 []
+thiserror v2.0.21 [] (*)
+gpu-descriptor v0.3.2 [default,std]
+bitflags v2.13.2 []
+gpu-descriptor-types v0.2.0 []
+bitflags v2.13.2 []
+hashbrown v0.15.5 [default-hasher]
+foldhash v0.1.5 []
+hashbrown v0.16.1 [allocator-api2,default,default-hasher,equivalent,inline-more,raw-entry] (*)
+khronos-egl v6.0.0 [1_0,1_1,1_2,1_3,1_4,1_5,default,dynamic,libloading]
+libc v0.2.191 [default,std]
+libloading v0.8.9 [] (*)
+libc v0.2.191 [default,std]
+libloading v0.8.9 [] (*)
+log v0.4.34 []
+naga v29.0.4 [default,glsl-out,hlsl-out,spv-out,wgsl-in,wgsl-out] (*)
+ordered-float v5.5.0 []
+num-traits v0.2.19 [libm] (*)
+parking_lot v0.12.5 [default] (*)
+profiling v1.0.18 []
+raw-window-handle v0.6.2 [alloc,std]
+renderdoc-sys v1.1.0 []
+smallvec v1.16.3 [union]
+thiserror v2.0.21 [] (*)
+wayland-sys v0.31.11 [client,dlopen,egl,once_cell]
+dlib v0.5.3 []
+libloading v0.8.9 [] (*)
+log v0.4.34 []
+once_cell v1.21.4 [alloc,default,race,std]
+wgpu-naga-bridge v29.0.4 []
+naga v29.0.4 [default,glsl-out,hlsl-out,spv-out,wgsl-in,wgsl-out] (*)
+wgpu-types v29.0.4 [std,web]
+bitflags v2.13.2 []
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+log v0.4.34 []
+raw-window-handle v0.6.2 [alloc,std]
+wgpu-types v29.0.4 [std,web] (*)
+wgpu-hal v29.0.4 (/root/gpui-fearless-pipeline/reactivity/vendor/wgpu-hal) [dx12,gles,portable-atomic,renderdoc,vulkan] (*)
+wgpu-naga-bridge v29.0.4 [] (*)
+wgpu-types v29.0.4 [std,web] (*)
+wgpu-hal v29.0.4 (/root/gpui-fearless-pipeline/reactivity/vendor/wgpu-hal) [dx12,gles,portable-atomic,renderdoc,vulkan] (*)
+wgpu-types v29.0.4 [std,web] (*)
+wgsl-rs v0.1.0-beta.1 [validation]
+glam v0.30.10 [default,std]
+half v2.7.1 [alloc,default,num-traits,std] (*)
+naga v29.0.4 [default,glsl-out,hlsl-out,spv-out,wgsl-in,wgsl-out] (*)
+paste v1.0.15 (proc-macro) []
+snafu v0.8.9 [alloc,default,rust_1_61,rust_1_65,std]
+snafu-derive v0.8.9 (proc-macro) [rust_1_61]
+heck v0.5.0 []
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v2.0.119 [clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,visit-mut] (*)
+wgsl-rs-ir v0.1.0-beta.6 []
+wgsl-rs-macros v0.1.0-beta.6 (proc-macro) [validation]
+itertools v0.14.0 [default,use_alloc,use_std]
+either v1.19.0 [std,use_std]
+proc-macro2 v1.0.107 [default,proc-macro,span-locations] (*)
+quote v1.0.47 [default,proc-macro] (*)
+snafu v0.8.9 [alloc,default,rust_1_61,rust_1_65,std] (*)
+syn v2.0.119 [clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,visit-mut] (*)
+wgsl-rs-ir v0.1.0-beta.6 []

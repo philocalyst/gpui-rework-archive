@@ -1,0 +1,15 @@
+00000000004a2e00 0000000000000006 T gpui_canvas::canvas::render_band::<gpui_canvas::canvas::BgrxEncoder>
+00000000004a2e10 0000000000000006 T gpui_canvas::canvas::render_band::<gpui_canvas::color::OutputEncoder>
+00000000004a2e20 0000000000000006 T gpui_canvas::canvas::render_band::<gpui_canvas::color::HalfFloatEncoder>
+00000000004aada0 00000000000000e9 T gpui_canvas::canvas::render_image_command::<fearless_simd::generated::sse2::Sse2>
+00000000004ab5c0 00000000000001b8 t <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::avx2::Avx2>>::color
+00000000004db7b0 000000000000034b t <gpui_canvas::canvas::image_axis::Column>::fill::<gpui_canvas::canvas::render_image_command<fearless_simd::generated::avx2::Avx2>::{closure#0}>
+00000000004a4400 00000000000003b2 T gpui_canvas::canvas::render_image::<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_cached_image<fearless_simd::generated::sse2::Sse2>::{closure#0}::{closure#1}>
+00000000004a4020 00000000000003e0 T gpui_canvas::canvas::render_image::<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_image_command<fearless_simd::generated::sse2::Sse2>::{closure#1}>
+00000000004a3b80 0000000000000495 T gpui_canvas::canvas::render_image::<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_shaped_image<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_rounded_image<fearless_simd::generated::sse2::Sse2>::{closure#0}::{closure#0}>::{closure#0}>
+00000000004a36b0 00000000000004d0 T gpui_canvas::canvas::render_image::<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_shaped_image<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_rounded_image<fearless_simd::generated::sse2::Sse2>::{closure#1}>::{closure#0}>
+00000000004ed720 00000000000004d7 t <gpui_canvas::canvas::samples::Samples<fearless_simd::generated::sse2::Sse2>>::blend_sources
+00000000004dc0c0 00000000000008ac T gpui_canvas::canvas::image_axis::render::<fearless_simd::generated::sse2::Sse2, gpui_canvas::canvas::render_image_command<fearless_simd::generated::sse2::Sse2>::{closure#0}>
+00000000004a8e90 0000000000001dda T gpui_canvas::canvas::render_band_impl::<gpui_canvas::color::HalfFloatEncoder, fearless_simd::generated::sse2::Sse2>
+00000000004a47c0 000000000000232b T gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>
+00000000004a6af0 0000000000002395 T gpui_canvas::canvas::render_band_impl::<gpui_canvas::color::OutputEncoder, fearless_simd::generated::sse2::Sse2>

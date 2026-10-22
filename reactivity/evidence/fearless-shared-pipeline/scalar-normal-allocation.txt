@@ -1,0 +1,4 @@
+blank header=488 construction=0:0 first=3:2328 warm=0:0 output=2244 hash=0
+scene hdr=false first=4:2420 warm=0:0 output=2244 hash=499157962732124355
+bgrx hash=2849523654730688597
+scene hdr=true first=4:4664 warm=0:0 output=4488 hash=14405816020435947149

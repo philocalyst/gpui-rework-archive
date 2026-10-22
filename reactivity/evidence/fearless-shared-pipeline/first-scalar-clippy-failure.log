@@ -1,0 +1,46 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas)
+error: parameter is only used in recursion
+    --> crates/canvas/src/canvas.rs:1764:5
+     |
+1764 |     parallel: bool,
+     |     ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_parallel`
+     |
+note: parameter used here
+    --> crates/canvas/src/canvas.rs:1788:13
+     |
+1788 |             parallel,
+     |             ^^^^^^^^
+...
+1798 |             parallel,
+     |             ^^^^^^^^
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#only_used_in_recursion
+     = note: `-D clippy::only-used-in-recursion` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::only_used_in_recursion)]`
+
+error: could not compile `gpui_canvas` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: the loop variable `channel` is used to index `dst`
+   --> crates/canvas/src/canvas/simd_tests.rs:112:48
+    |
+112 | ...                   for channel in 0..4 {
+    |                                      ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+help: consider using an iterator and enumerate()
+    |
+112 -                                 for channel in 0..4 {
+112 +                                 for (channel, <item>) in dst.iter_mut().enumerate().take(4) {
+    |
+
+error: could not compile `gpui_canvas` (lib test) due to 2 previous errors

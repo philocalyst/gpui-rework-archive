@@ -1,0 +1,149 @@
+gpui v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/gpui) []
+arcstr v1.2.0 [std]
+cephal v0.1.1 (/root/gpui-fearless-pipeline/reactivity/vendor/cephal) [block,default,flex,grid]
+gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) []
+fearless_simd v1.1.0 [default,force_support_fallback,std]
+fearless_simd_macros v0.1.0 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro]
+unicode-ident v1.0.27 []
+quote v1.0.47 [default,proc-macro]
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit]
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+unicode-ident v1.0.27 []
+fontique v0.11.1 [std]
+hashbrown v0.17.1 [default-hasher,raw-entry]
+foldhash v0.2.0 []
+linebender_resource_handle v0.1.1 []
+memmap2 v0.9.11 []
+libc v0.2.191 [default,std]
+parlance v0.1.1 [std]
+read-fonts v0.41.0 [experimental_font_api,std]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics]
+bytemuck_derive v1.12.1 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+font-types v0.12.7 [bytemuck,std]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+once_cell v1.21.4 [alloc,race]
+smallvec v1.16.3 []
+gpui_reactivity_core v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/core) [default,layout]
+cephal v0.1.1 (/root/gpui-fearless-pipeline/reactivity/vendor/cephal) [block,default,flex,grid]
+icu_properties v2.3.0 [compiled_data]
+displaydoc v0.2.7 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+icu_collections v2.3.0 []
+displaydoc v0.2.7 (proc-macro) [] (*)
+potential_utf v0.1.6 [alloc,writeable,zerovec]
+writeable v0.6.4 [alloc]
+zerovec v0.11.8 [alloc,derive,yoke]
+yoke v0.8.3 [alloc,derive,zerofrom]
+stable_deref_trait v1.2.1 [alloc]
+yoke-derive v0.8.4 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+synstructure v0.14.0 [default,proc-macro]
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+zerofrom v0.1.8 [alloc,derive]
+zerofrom-derive v0.1.8 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+synstructure v0.14.0 [default,proc-macro] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerovec-derive v0.11.6 (proc-macro) []
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+utf8_iter v1.0.4 []
+yoke v0.8.3 [alloc,derive,zerofrom] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_locale_core v2.3.0 [alloc,zerovec]
+displaydoc v0.2.7 (proc-macro) [] (*)
+litemap v0.8.3 [alloc]
+tinystr v0.8.4 [alloc,zerovec]
+displaydoc v0.2.7 (proc-macro) [] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+writeable v0.6.4 [alloc]
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_properties_data v2.3.0 []
+icu_provider v2.3.1 [alloc,baked]
+displaydoc v0.2.7 (proc-macro) [] (*)
+icu_locale_core v2.3.0 [alloc,zerovec] (*)
+stable_deref_trait v1.2.1 [alloc]
+writeable v0.6.4 [alloc]
+yoke v0.8.3 [alloc,derive,zerofrom] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerotrie v0.2.5 [alloc,yoke,zerofrom]
+displaydoc v0.2.7 (proc-macro) [] (*)
+yoke v0.8.3 [alloc,derive,zerofrom] (*)
+zerofrom v0.1.8 [alloc,derive] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+zerotrie v0.2.5 [alloc,yoke,zerofrom] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_segmenter v2.3.0 [compiled_data]
+icu_collections v2.3.0 [] (*)
+icu_locale_fallback v2.3.0 [compiled_data]
+icu_locale_core v2.3.0 [alloc,zerovec] (*)
+icu_locale_fallback_data v2.3.0 []
+icu_provider v2.3.1 [alloc,baked] (*)
+potential_utf v0.1.6 [alloc,writeable,zerovec] (*)
+tinystr v0.8.4 [alloc,zerovec] (*)
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_provider v2.3.1 [alloc,baked] (*)
+icu_segmenter_data v2.3.0 []
+potential_utf v0.1.6 [alloc,writeable,zerovec] (*)
+smallvec v1.16.3 []
+utf8_iter v1.0.4 []
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+parley v0.11.1 (/root/gpui-fearless-pipeline/reactivity/vendor/parley) [complex-scripts,std]
+fontique v0.11.1 [std] (*)
+harfrust v0.12.0 [std]
+bitflags v2.13.2 []
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+read-fonts v0.41.0 [experimental_font_api,std] (*)
+smallvec v1.16.3 []
+hashbrown v0.17.1 [default-hasher,raw-entry] (*)
+icu_normalizer v2.3.0 [compiled_data]
+icu_collections v2.3.0 [] (*)
+icu_normalizer_data v2.3.0 []
+icu_provider v2.3.1 [alloc,baked] (*)
+smallvec v1.16.3 []
+zerovec v0.11.8 [alloc,derive,yoke] (*)
+icu_properties v2.3.0 [compiled_data] (*)
+icu_segmenter v2.3.0 [compiled_data] (*)
+linebender_resource_handle v0.1.1 []
+parlance v0.1.1 [std]
+parley_data v0.11.1 [baked]
+icu_properties v2.3.0 [compiled_data] (*)
+skrifa v0.44.0 [autohint_shaping,default,std]
+bytemuck v1.25.2 [bytemuck_derive,derive,extern_crate_alloc,min_const_generics] (*)
+read-fonts v0.41.0 [experimental_font_api,std] (*)
+skrifa v0.44.0 [autohint_shaping,default,std] (*)
+swash v0.2.10 [default,render,scale,std]
+skrifa v0.44.0 [autohint_shaping,default,std] (*)
+yazi v0.2.1 [std]
+zeno v0.3.3 [eval,std]
+ttf-parser v0.25.1 [apple-layout,default,glyph-names,opentype-layout,std,variable-fonts]
+gpui_reactivity_core v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/core) [default,layout] (*)
+gpui_reactivity_state v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/state) [default,serde]
+serde v1.0.229 [default,derive,serde_derive,std]
+serde_core v1.0.229 [result,std]
+serde_derive v1.0.229 (proc-macro) [default]
+proc-macro2 v1.0.107 [default,proc-macro] (*)
+quote v1.0.47 [default,proc-macro] (*)
+syn v3.0.9 [clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,visit] (*)
+serde v1.0.229 [default,derive,serde_derive,std] (*)
+serde_json v1.0.154 [default,std]
+itoa v1.0.18 []
+memchr v2.8.3 [alloc,std]
+serde_core v1.0.229 [result,std]
+zmij v1.0.23 []

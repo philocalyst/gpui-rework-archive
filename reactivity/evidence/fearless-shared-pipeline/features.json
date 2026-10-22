@@ -1,0 +1,214 @@
+[
+  {
+    "package": "gpui",
+    "policy": "scalar",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "canvas_simd": false,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) []"
+    ]
+  },
+  {
+    "package": "gpui",
+    "policy": "default",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none"
+    ],
+    "exit_code": 0,
+    "canvas_simd": true,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd]"
+    ]
+  },
+  {
+    "package": "gpui",
+    "policy": "all",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none",
+      "--all-features"
+    ],
+    "exit_code": 0,
+    "canvas_simd": true,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd]",
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd] (*)"
+    ]
+  },
+  {
+    "package": "gpui",
+    "policy": "scalar-native",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none",
+      "--no-default-features",
+      "--features",
+      "native"
+    ],
+    "exit_code": 0,
+    "canvas_simd": false,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) []",
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [] (*)"
+    ]
+  },
+  {
+    "package": "gpui",
+    "policy": "simd-native",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none",
+      "--features",
+      "native"
+    ],
+    "exit_code": 0,
+    "canvas_simd": true,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd]",
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd] (*)"
+    ]
+  },
+  {
+    "package": "gpui_gpu",
+    "policy": "scalar",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui_gpu",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "canvas_simd": false,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) []"
+    ]
+  },
+  {
+    "package": "gpui_gpu",
+    "policy": "default",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui_gpu",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none"
+    ],
+    "exit_code": 0,
+    "canvas_simd": true,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd]"
+    ]
+  },
+  {
+    "package": "gpui_gpu",
+    "policy": "all",
+    "command": [
+      "cargo",
+      "tree",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "-p",
+      "gpui_gpu",
+      "-e",
+      "normal",
+      "-f",
+      "{p} [{f}]",
+      "--prefix",
+      "none",
+      "--all-features"
+    ],
+    "exit_code": 0,
+    "canvas_simd": true,
+    "canvas_lines": [
+      "gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas) [simd]"
+    ]
+  }
+]

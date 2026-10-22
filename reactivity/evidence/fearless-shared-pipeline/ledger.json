@@ -1,0 +1,83 @@
+{
+  "source_commit": "2bebb1ce58",
+  "baseline_commit": "05af5841e15cdddd9f0bce62b9f35ccc9966c312",
+  "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "primary_sources": [
+    "https://docs.rs/fearless_simd/1.1.0/fearless_simd/",
+    "https://docs.rs/fearless_simd_macros/0.1.0/fearless_simd_macros/attr.simd.html",
+    "https://github.com/linebender/fearless_simd"
+  ],
+  "dependencies": {
+    "fearless_simd": "=1.1.0",
+    "fearless_simd_macros": "=0.1.0"
+  },
+  "host_execution": [
+    "Fallback",
+    "SSE2",
+    "SSE4.2",
+    "AVX2"
+  ],
+  "not_executed": [
+    "AVX512 unavailable on this host",
+    "NEON and Windows are cross-checked, not run"
+  ],
+  "policy": "Positive default simd propagated canvas -> gpu -> gpui. --no-default-features selects the same generic Fallback equation. Guaranteed baseline selection eliminates runtime CPU detection; wider ISA sample batching is separate future work.",
+  "normal_consumer_text_bytes": {
+    "baseline": 2266423,
+    "simd": 2262615,
+    "scalar": 2269975
+  },
+  "normal_consumer_text_delta_bytes": {
+    "simd": -3808,
+    "scalar": 3552
+  },
+  "rejected_example_text_bytes": {
+    "baseline": 371511,
+    "all_levels": 518455,
+    "delta": 146944
+  },
+  "rejected_example_feature_caveat": "image_axis is an example, so dev-dependency feature unification made Fallback available in the rejected five-backend build. Final standalone consumer does not build canvas dev-dependencies. rejected-formulation.patch reproduces the discarded Level::new selector from the frozen source checkpoint; source kernels and geometry are otherwise shared with that formulation. Test source added after the first rejected build does not contribute linked example code.",
+  "storage_bytes": {
+    "Canvas_baseline": 488,
+    "Canvas_simd": 488,
+    "Canvas_scalar": 488,
+    "Samples_all_tokens": 69664,
+    "backend_token_all_tokens": 0
+  },
+  "allocations": "All three consumers match exactly: recording construction0/0B; blank first3/2328B; scene first4/2420B SDR or4/4664B HDR; warm redraw0/0B. See raw logs for hashes.",
+  "assembly": "Linked SIMD consumer has SSE2 mulps/addps; relevant sample bodies contain no FMA instructions. Scalar may also be LLVM-autovectorized; no speed win is claimed. SIMD consumer contains no Fallback sample body or detect_x86_level symbol.",
+  "tests": {
+    "simd": {
+      "passed": 145,
+      "ignored": 4,
+      "failed": 0
+    },
+    "scalar": {
+      "passed": 145,
+      "ignored": 4,
+      "failed": 0
+    }
+  },
+  "limitations": [
+    "No timing runs. Root coordinates a quiet window for later timing.",
+    "The full-scene unit oracle independently composes sixteen colors and reduces sequentially but reuses primitive point samplers and encoders; integration tests independently validate those using analytic/published-color/glyph/image oracles.",
+    "The first full debug run was intentionally interrupted after discovering unrestricted test-thread scheduling; release suites use two test threads. Raw interruption log preserved.",
+    "Initial full-scene test called a recording-only Canvas before allocating pixels; repaired test setup. Clippy first found a test-only indexed loop and pre-existing recursion-only parameter warning in nonparallel policy; both corrected."
+  ],
+  "binary_sha256": {
+    "baseline": "316dfa056393b643edb5a1ecb59f4302c46a7ff2ee76437e39481edd28a004e6",
+    "simd": "37e2c048f60cd1f8fe65d4cff8fbd358ce2116052405a6ea30a8c88ec677fd6d",
+    "scalar": "0727a396468e2b1fbdc4d887fdc009082a556bcdba1446394d78d118bbc3d84a"
+  },
+  "cross_checks": {
+    "targets": [
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ],
+    "policies": [
+      "simd default",
+      "no-default-features Fallback"
+    ],
+    "scope": "gpui_canvas --all-targets cargo check using Rust std rebuilt with -Zbuild-std=std,panic_abort and RUSTC_BOOTSTRAP=1; all four passed. No execution or cross-linked instructions claimed."
+  }
+}

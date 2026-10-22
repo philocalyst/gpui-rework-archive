@@ -1,0 +1,50 @@
+    Checking libm v0.2.16
+    Checking crossbeam-utils v0.8.23
+    Checking crossbeam-epoch v0.9.21
+    Checking crossbeam-deque v0.8.8
+    Checking rayon-core v1.13.0
+    Checking core_maths v0.1.1
+    Checking ttf-parser v0.25.1
+    Checking foldhash v0.1.5
+    Checking equivalent v1.0.3
+    Checking either v1.19.0
+    Checking allocator-api2 v0.2.21
+    Checking hashbrown v0.15.5
+    Checking rayon v1.12.0
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/core)
+    Checking unicode-properties v0.1.4
+    Checking fearless_simd v1.1.0
+    Checking unicode-ccc v0.4.0
+    Checking unicode-bidi-mirroring v0.4.0
+    Checking log v0.4.34
+    Checking unicode-script v0.5.8
+    Checking rustybuzz v0.20.1
+    Checking fontdue v0.9.4
+    Checking allocation-counter v0.8.1
+    Checking gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas)
+error: the loop variable `channel` is used to index `dst`
+   --> crates/canvas/src/canvas/simd_tests.rs:112:48
+    |
+112 | ...                   for channel in 0..4 {
+    |                                      ^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#needless_range_loop
+    = note: `-D clippy::needless-range-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_range_loop)]`
+help: consider using an iterator and enumerate()
+    |
+112 -                                 for channel in 0..4 {
+112 +                                 for (channel, <item>) in dst.iter_mut().enumerate().take(4) {
+    |
+
+error: could not compile `gpui_canvas` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,36 @@
+   Compiling crossbeam-utils v0.8.23
+   Compiling crossbeam-epoch v0.9.21
+   Compiling crossbeam-deque v0.8.8
+   Compiling rayon-core v1.13.0
+   Compiling either v1.19.0
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling rayon v1.12.0
+   Compiling gpui_canvas v0.1.0 (/root/gpui-fearless-pipeline/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 10.88s
+     Running unittests src/lib.rs (/tmp/gpui-fearless-pipeline-target/release/deps/gpui_canvas-c5c1060f5bfc6f61)
+
+running 2 tests
+
+thread 'canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition' (3977248) panicked at crates/canvas/src/canvas/simd_tests.rs:33:32:
+range end index 2112 out of range for slice of length 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition ... FAILED
+executed supported backends up to Avx2(Avx2 { _private: () })
+test canvas::samples::backend_tests::every_supported_backend_preserves_working_sample_bits_and_storage_size ... ok
+
+failures:
+
+failures:
+    canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 38 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p gpui_canvas --lib`
