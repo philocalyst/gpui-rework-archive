@@ -59,6 +59,7 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
                             planner.layout.align(alignment, AlignmentOptions::default());
                             let geometry = CursorGeometry::new(&planner.layout).unwrap();
                             assert_lowered_stops(&planner.layout, source);
+                            assert_stream(&planner.layout, source);
                             for byte in (0..=source.len()).chain([usize::MAX]) {
                                 for width in [-0., 1., -1., 1e20] {
                                     let direct = [Affinity::Upstream, Affinity::Downstream].map(
@@ -101,6 +102,57 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
         "wrap/bidi/run affinity exceptions must occur"
     );
     eprintln!("cursor_pairs,accepted={accepted},snapped={snapped},distinct={distinct}");
+}
+
+fn assert_stream(layout: &parley::Layout<()>, source: &str) {
+    use core::ops::ControlFlow;
+    for width in [-0., 1., -1., 1e20] {
+        let ordered = (0..=source.len())
+            .flat_map(|byte| [byte, byte])
+            .chain([usize::MAX])
+            .collect::<Vec<_>>();
+        let decreasing = vec![
+            source.len() / 2,
+            0,
+            source.len(),
+            0,
+            usize::MAX,
+            source.len(),
+        ];
+        for requests in [ordered, decreasing] {
+            let mut called = 0;
+            let result = CursorGeometry::try_for_each_pair(
+                layout,
+                requests.iter().copied(),
+                width,
+                |byte, actual| {
+                    assert_eq!(byte, requests[called]);
+                    called += 1;
+                    let expected = [Affinity::Upstream, Affinity::Downstream].map(|affinity| {
+                        let cursor = Cursor::from_byte_index(layout, byte, affinity);
+                        (cursor.index() == byte).then(|| bits(cursor.geometry(layout, width)))
+                    });
+                    assert_eq!(
+                        actual.map(|pair| pair.map(bits)),
+                        expected[0].zip(expected[1]).map(|(a, b)| [a, b]),
+                        "stream full bbox: source={source:?}, byte={byte}, width={width}"
+                    );
+                    ControlFlow::<()>::Continue(())
+                },
+            );
+            assert_eq!(result, Some(ControlFlow::Continue(())));
+            assert_eq!(called, requests.len());
+        }
+    }
+    let mut called = 0;
+    assert_eq!(
+        CursorGeometry::try_for_each_pair(layout, 0..=source.len(), 1., |_, _| {
+            called += 1;
+            ControlFlow::Break("caller error")
+        }),
+        Some(ControlFlow::Break("caller error"))
+    );
+    assert_eq!(called, 1);
 }
 
 fn assert_lowered_stops(layout: &parley::Layout<()>, source: &str) {

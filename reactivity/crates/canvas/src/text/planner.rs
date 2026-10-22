@@ -441,23 +441,7 @@ fn append_carets(
     height: f32,
 ) -> Result<(), Error> {
     let segmenter = GraphemeClusterSegmenter::new();
-    // A fixed small number of direct queries is linear in source
-    // length and avoids an index for e.g. one huge grapheme. Bulk
-    // maps use constant-time source/prefix lookup per destination.
-    let geometry = if segmenter.segment_str(content).nth(8).is_some() {
-        Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
-    } else {
-        None
-    };
-    for byte in segmenter.segment_str(content) {
-        let indexed_pair = if let Some(index) = &geometry {
-            let Some(pair) = index.geometries_at(byte, 1.) else {
-                continue;
-            };
-            Some(pair)
-        } else {
-            None
-        };
+    let mut append = |byte, indexed_pair: Option<[parley::BoundingBox; 2]>| {
         let mut pair = [None, None];
         for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
             .into_iter()
@@ -504,8 +488,36 @@ fn append_carets(
                 }
             }
         }
+        Ok(())
+    };
+    // Keep the bounded direct path for tiny labels and single huge graphemes.
+    // Bulk requests share one complete font/range preflight, then stream in
+    // source order without the random index's per-scalar/per-byte arrays.
+    if segmenter.segment_str(content).nth(8).is_some() {
+        use core::ops::ControlFlow;
+        let result = CursorGeometry::try_for_each_pair(
+            planned,
+            segmenter.segment_str(content),
+            1.,
+            |byte, pair| match pair {
+                Some(pair) => match append(byte, Some(pair)) {
+                    Ok(()) => ControlFlow::Continue(()),
+                    Err(error) => ControlFlow::Break(error),
+                },
+                None => ControlFlow::Continue(()),
+            },
+        )
+        .ok_or(Error::InvalidFont)?;
+        match result {
+            ControlFlow::Continue(()) => Ok(()),
+            ControlFlow::Break(error) => Err(error),
+        }
+    } else {
+        for byte in segmenter.segment_str(content) {
+            append(byte, None)?;
+        }
+        Ok(())
     }
-    Ok(())
 }
 #[cfg(test)]
 #[path = "cursor_pair_tests.rs"]
