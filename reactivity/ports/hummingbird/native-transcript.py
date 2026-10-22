@@ -27,6 +27,7 @@ def main():
     parser.add_argument("--atspi-launcher", type=pathlib.Path, required=True)
     parser.add_argument("--output", type=pathlib.Path, required=True)
     parser.add_argument("--display", default=":127")
+    parser.add_argument("--renderer", choices=["auto", "cpu", "gpu"], default="cpu")
     args = parser.parse_args()
     if not os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
         raise SystemExit("Run inside dbus-run-session; this probe requires its own session bus")
@@ -69,7 +70,7 @@ def main():
                 address = wait(discover, deadline, "private accessibility bus")
                 # Only the new private session's status service is changed.
                 bus(session, "set-property", "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Status", "IsEnabled", "b", "true")
-                processes.append(subprocess.Popen([str(binary), "--native"], env=env, stdout=log, stderr=log))
+                processes.append(subprocess.Popen([str(binary), "--native", "--renderer", args.renderer], env=env, stdout=log, stderr=log))
 
                 def tree():
                     queue = [("org.a11y.atspi.Registry", "/org/a11y/atspi/accessible/root")]
@@ -134,7 +135,13 @@ def main():
                 output = native_log.read_text()
                 frames = [line.split(",")[1:] for line in output.splitlines() if line.startswith("HUMMINGBIRD_PRESENT,")]
                 assert frames and all(source == presented for _, source, presented in frames), frames
+                kinds = {kind for kind, _, _ in frames}
+                assert kinds <= {"ReferenceCpu", "Gpu"}, kinds
+                expected = {"cpu": "ReferenceCpu", "gpu": "Gpu"}.get(args.renderer)
+                if expected is not None:
+                    assert kinds == {expected}, (args.renderer, kinds)
                 args.output.write_text(json.dumps({"method": "Ordinary Window/shared View; private Xvfb+AT-SPI2, actual X11 keyboard and AT-SPI edits/actions; acknowledged accessible labels, stable row action across SQL resort. No timing measurement.",
+                                                   "requested_renderer": args.renderer,
                                                    "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                                                    "events": events, "presented_frames": frames, "native_log": output}, indent=2) + "\n")
                 captured = True

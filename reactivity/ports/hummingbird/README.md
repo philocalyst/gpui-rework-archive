@@ -11,13 +11,18 @@ Run from this standalone workspace:
 ```sh
 cargo run --locked -- --headless
 cargo run --locked --features native -- --native
+cargo run --locked --features native -- --native --renderer gpu
+cargo run --locked --features native -- --native --renderer cpu
 cargo run --locked --features native -- --native --database /path/to/library.db
 cargo test --locked --all-targets
 cargo clippy --locked --all-targets --features native -- -D warnings
 ```
 
-Native currently selects GPUI's reference CPU renderer and Linux X11/AT-SPI
-feature. It renders through the same `Library: View`, `ItemSource`, typed
+Native uses GPUI's Auto renderer policy by default; `--renderer auto|cpu|gpu`
+selects the ordinary public policy. Auto presents software first and admits
+hardware through the library's portable rules; explicit GPU requires successful
+GPU presentation. The native feature includes Linux X11/AT-SPI.
+It renders through the same `Library: View`, `ItemSource`, typed
 `Questions`, source fields and Inbox receiver as the headless transcript. There
 is no second UI renderer, entity compatibility layer or test dispatcher.
 
@@ -136,7 +141,10 @@ work, and source byte limits. Shutdown is exercised through the public owner.
 
 `native-transcript.py` is an external client of an ordinary launched Window.
 Run it inside a fresh `dbus-run-session`, supplying explicit Xvfb, xdotool and
-AT-SPI launcher paths. It owns its display/processes, uses only memory-backed
+AT-SPI launcher paths. Its `--renderer cpu|gpu|auto` option drives that same app
+CLI and checks the actual submitted renderer and matching source/presentation
+epochs. The transcript defaults to explicit CPU for its reference control.
+It owns its display/processes, uses only memory-backed
 private-session accessibility settings, and cleans up its children. It checks
 initial rows, actual AT-SPI Play, stable native row action after SQL resort,
 real X11 keyboard search, Unicode EditableText and SQLite-backed ID44 play.
