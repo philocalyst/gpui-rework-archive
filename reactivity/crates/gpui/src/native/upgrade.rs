@@ -1,20 +1,21 @@
-//! Owned hardware initialization. Native surface creation happens only after
-//! the worker has a compiled renderer, inside the final redraw admission.
-//! Dropping this receiver cancels admission; workers
-//! never own a window, view, source, presentation token, or CPU surface.
+//! Owned initialization follows vendor target-admission capabilities. X11
+//! proves an unconfigured target before device/pipeline work; Metal attaches its
+//! layer only during final event-thread redraw. A worker may retain an X11
+//! window lease, never a view, source, presentation token, or CPU surface.
 use super::{DeviceErrors, GpuSurface, NativeWindow, Renderer, Wake, wgpu};
 use std::{
     panic::{AssertUnwindSafe, catch_unwind},
     sync::{
         Arc,
+        atomic::{AtomicBool, Ordering},
         mpsc::{self, Receiver, SyncSender, TryRecvError},
     },
-    thread::{self, JoinHandle},
+    thread,
 };
 
-const BACKENDS: wgpu::Backends = wgpu::Backends::VULKAN
-    .union(wgpu::Backends::METAL)
-    .union(wgpu::Backends::DX12);
+use wgpu::presentation::{
+    PresentationAdmission, PresentationPlan, PresentationRequirements, SurfacePreparation,
+};
 
 #[derive(Clone, Copy, Default)]
 pub(super) struct Policy {
@@ -29,29 +30,18 @@ pub(super) struct Policy {
     pub(super) defer_renderer: bool,
     #[cfg(test)]
     pub(super) force_probe: bool,
+    #[cfg(test)]
+    pub(super) requirements: Option<PresentationRequirements>,
 }
 impl Policy {
-    /// Auto needs both a usable GPU and a reversible native presentation path.
-    /// Explicit GPU does not use this opportunistic policy.
-    pub(super) fn should_probe(self) -> bool {
-        // DXGI flip presentation permanently excludes GDI on the same HWND,
-        // even after swapchain destruction. Softbuffer uses GDI, so admitting
-        // this upgrade would break our checked software fallback. Keep Auto
-        // software until the Windows host has a distinct presentation surface.
-        if cfg!(target_os = "windows") {
-            return false;
-        }
-        #[cfg(test)]
-        if self.allow_cpu || self.force_probe {
-            return true;
-        }
-        #[cfg(target_os = "linux")]
-        {
-            linux_device_hint()
-        }
-        #[cfg(not(target_os = "linux"))]
-        {
-            true
+    fn plan(self, admission: PresentationAdmission) -> Option<PresentationPlan> {
+        match admission {
+            PresentationAdmission::Candidate(plan) => Some(plan),
+            #[cfg(test)]
+            PresentationAdmission::NoDeviceHint(plan) if self.allow_cpu || self.force_probe => {
+                Some(plan)
+            }
+            _ => None,
         }
     }
     fn accepts(self, kind: wgpu::DeviceType) -> bool {
@@ -69,42 +59,85 @@ impl Policy {
     }
 }
 
-// A render node (or Nvidia/WSL device) is the normal unprivileged hardware
-// path on Linux. This deliberately does not claim to detect remote/custom ICDs;
-// such deployments can select explicit Gpu. Reevaluate on each resume.
-#[cfg(target_os = "linux")]
-fn linux_device_hint() -> bool {
-    use std::{io::ErrorKind, path::Path};
-    for node in ["/dev/nvidiactl", "/dev/dxg"] {
-        match Path::new(node).metadata() {
-            Ok(_) => return true,
-            Err(error) if error.kind() == ErrorKind::NotFound => {}
-            Err(_) => return true,
-        }
-    }
-    match std::fs::read_dir("/dev/dri") {
-        Ok(entries) => entries.into_iter().any(|entry| match entry {
-            Ok(entry) => entry
-                .file_name()
-                .to_str()
-                .is_none_or(|name| name.starts_with("renderD")),
-            Err(_) => true,
-        }),
-        Err(error) => error.kind() != ErrorKind::NotFound,
+// One exact configuration is validated before requesting a device where the
+// vendor permits early target creation. Explicit GPU retains its negotiated path.
+pub(super) fn requirements() -> PresentationRequirements {
+    PresentationRequirements {
+        format: FORMAT,
+        color_space: wgpu::SurfaceColorSpace::Srgb,
+        alpha_mode: wgpu::CompositeAlphaMode::Opaque,
+        present_mode: wgpu::PresentMode::Fifo,
     }
 }
-
-// Auto compiles one common surface format before touching the native view.
-// If that format is unavailable, explicit GPU retains its negotiated path and
-// opportunistic Auto simply keeps the already working CPU presenter.
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8UnormSrgb;
 enum Message {
-    Renderer {
-        instance: wgpu::Instance,
-        adapter: wgpu::Adapter,
-        renderer: Box<Renderer>,
-    },
+    Renderer(Box<Candidate>),
     Unavailable(String),
+}
+struct Candidate {
+    instance: wgpu::Instance,
+    adapter: wgpu::Adapter,
+    renderer: Renderer,
+    surface: Option<wgpu::Surface<'static>>,
+}
+impl Candidate {
+    fn boxed(self) -> Box<Self> {
+        #[cfg(not(test))]
+        {
+            Box::new(self)
+        }
+        #[cfg(test)]
+        {
+            let mut candidate = None;
+            let allocation = allocation_counter::measure(|| candidate = Some(Box::new(self)));
+            eprintln!(
+                "GPUI_AUTO_CANDIDATE,requests={},requested={},retained={},peak={}",
+                allocation.count_total,
+                allocation.bytes_total,
+                allocation.bytes_current,
+                allocation.bytes_max
+            );
+            candidate.unwrap()
+        }
+    }
+}
+pub(super) struct Initialization {
+    cancelled: AtomicBool,
+    #[cfg(test)]
+    proved: AtomicBool,
+    #[cfg(test)]
+    renderer_started: AtomicBool,
+    #[cfg(test)]
+    deferred: AtomicBool,
+}
+impl Initialization {
+    fn new() -> Self {
+        Self {
+            cancelled: AtomicBool::new(false),
+            #[cfg(test)]
+            proved: AtomicBool::new(false),
+            #[cfg(test)]
+            renderer_started: AtomicBool::new(false),
+            #[cfg(test)]
+            deferred: AtomicBool::new(false),
+        }
+    }
+}
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+impl Initialization {
+    pub(super) fn proved(&self) -> bool {
+        self.proved.load(Ordering::Acquire)
+    }
+    pub(super) fn renderer_started(&self) -> bool {
+        self.renderer_started.load(Ordering::Acquire)
+    }
+    pub(super) fn waiting_for_renderer(&self) -> bool {
+        self.deferred.load(Ordering::Acquire)
+    }
 }
 pub(super) struct Ready {
     pub(super) instance: wgpu::Instance,
@@ -118,17 +151,35 @@ pub(super) enum Progress {
 
 pub(super) struct Upgrade {
     messages: Receiver<Message>,
+    initialization: Arc<Initialization>,
     #[cfg(all(
         test,
         target_os = "linux",
         any(feature = "x11", feature = "x11-minimal")
     ))]
     release: Option<SyncSender<()>>,
-    // Dropping a JoinHandle detaches; cancellation never joins on the UI thread.
-    _worker: JoinHandle<()>,
 }
 impl Upgrade {
-    pub(super) fn start(policy: Policy, wake: Option<Wake>) -> std::io::Result<Self> {
+    pub(super) fn start(
+        policy: Policy,
+        window: &Arc<NativeWindow>,
+        wake: Option<Wake>,
+    ) -> std::io::Result<Option<Self>> {
+        let admission = wgpu::presentation::automatic_surface_admission(window.as_ref())
+            .map_err(std::io::Error::other)?;
+        let Some(plan) = policy.plan(admission) else {
+            return Ok(None);
+        };
+        // Only the vendor-classified early path owns a native lease off-thread.
+        // No AppKit/UIKit target is sent to this worker.
+        let target = (plan.surface_preparation == SurfacePreparation::BeforeDevice)
+            .then(|| Arc::clone(window));
+        #[cfg(test)]
+        let required = policy.requirements.unwrap_or_else(requirements);
+        #[cfg(not(test))]
+        let required = requirements();
+        let initialization = Arc::new(Initialization::new());
+        let cancellation = Arc::clone(&initialization);
         let (send, messages) = mpsc::sync_channel(1);
         #[cfg(all(
             test,
@@ -140,24 +191,56 @@ impl Upgrade {
             .name("gpui-hardware-init".into())
             .spawn(move || {
                 let result = catch_unwind(AssertUnwindSafe(|| {
+                    if cancellation.cancelled.load(Ordering::Acquire) {
+                        return;
+                    }
                     let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-                        backends: BACKENDS,
+                        backends: plan.backends,
                         ..wgpu::InstanceDescriptor::new_without_display_handle()
                     });
-                    let adapter = match pollster::block_on(instance.request_adapter(
-                        &wgpu::RequestAdapterOptions {
-                            power_preference: wgpu::PowerPreference::HighPerformance,
-                            compatible_surface: None,
-                            force_fallback_adapter: false,
-                            apply_limit_buckets: false,
-                        },
-                    )) {
-                        Ok(adapter) => adapter,
+                    let options = wgpu::RequestAdapterOptions {
+                        power_preference: wgpu::PowerPreference::HighPerformance,
+                        compatible_surface: None,
+                        force_fallback_adapter: false,
+                        apply_limit_buckets: false,
+                    };
+                    let prepared = if let Some(target) = target {
+                        // Safe WGPU creation retains the Arc until after backend
+                        // surface destruction. This surface is never configured
+                        // on the worker and cannot cover a software frame.
+                        instance
+                            .create_surface(target)
+                            .map_err(|error| error.to_string())
+                            .and_then(|surface| {
+                                pollster::block_on(
+                                    instance
+                                        .request_presentation_adapter(surface, &options, required),
+                                )
+                                .map_err(|error| error.to_string())
+                            })
+                            .map(|prepared| {
+                                let (surface, adapter) = prepared.into_parts();
+                                (adapter, Some(surface))
+                            })
+                    } else {
+                        // Metal still prepares headlessly; creating its layer
+                        // now would cover CPU pixels while compilation is pending.
+                        pollster::block_on(instance.request_adapter(&options))
+                            .map(|adapter| (adapter, None))
+                            .map_err(|error| error.to_string())
+                    };
+                    let (adapter, surface) = match prepared {
+                        Ok(prepared) => prepared,
                         Err(error) => {
-                            deliver(&send, Message::Unavailable(error.to_string()), &wake);
+                            deliver(&send, Message::Unavailable(error), &wake);
                             return;
                         }
                     };
+                    #[cfg(test)]
+                    cancellation.proved.store(true, Ordering::Release);
+                    if cancellation.cancelled.load(Ordering::Acquire) {
+                        return;
+                    }
                     // CPU-only adapters never request a device, compile a pipeline,
                     // or JIT the reference shader in production Auto policy.
                     if !policy.accepts(adapter.get_info().device_type) {
@@ -173,18 +256,32 @@ impl Upgrade {
                         target_os = "linux",
                         any(feature = "x11", feature = "x11-minimal")
                     ))]
-                    if policy.defer_renderer && receive.recv().is_err() {
+                    if policy.defer_renderer {
+                        cancellation.deferred.store(true, Ordering::Release);
+                        if receive.recv().is_err() {
+                            return;
+                        }
+                    }
+                    if cancellation.cancelled.load(Ordering::Acquire) {
                         return;
                     }
+                    #[cfg(test)]
+                    cancellation.renderer_started.store(true, Ordering::Release);
                     let message = match pollster::block_on(Renderer::request(&adapter, FORMAT)) {
-                        Ok(renderer) => Message::Renderer {
-                            instance,
-                            adapter,
-                            renderer: Box::new(renderer),
-                        },
+                        Ok(renderer) => Message::Renderer(
+                            Candidate {
+                                instance,
+                                adapter,
+                                renderer,
+                                surface,
+                            }
+                            .boxed(),
+                        ),
                         Err(error) => Message::Unavailable(error.to_string()),
                     };
-                    deliver(&send, message, &wake);
+                    if !cancellation.cancelled.load(Ordering::Acquire) {
+                        deliver(&send, message, &wake);
+                    }
                 }));
                 if result.is_err() {
                     deliver(
@@ -194,16 +291,19 @@ impl Upgrade {
                     );
                 }
             })?;
-        Ok(Self {
+        // Admission never joins or queries the worker. Detach immediately rather
+        // than retaining a JoinHandle/result packet in every native host cohort.
+        drop(worker);
+        Ok(Some(Self {
             messages,
-            _worker: worker,
+            initialization,
             #[cfg(all(
                 test,
                 target_os = "linux",
                 any(feature = "x11", feature = "x11-minimal")
             ))]
             release: Some(release),
-        })
+        }))
     }
     // Deterministically mutate a real native owner before allowing real device
     // and pipeline initialization. No renderer or presentation is mocked.
@@ -217,9 +317,28 @@ impl Upgrade {
             let _ = release.try_send(());
         }
     }
-    /// Called only from Redraw on the event-loop thread. Surface creation and
-    /// capability verification happen here after device/pipeline compilation.
-    /// No CAMetalLayer is attached while worker initialization remains pending.
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
+    pub(super) fn initialization(&self) -> Arc<Initialization> {
+        Arc::clone(&self.initialization)
+    }
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
+    pub(super) fn hold_renderer(&self) -> SyncSender<()> {
+        self.release
+            .as_ref()
+            .expect("unreleased renderer gate")
+            .clone()
+    }
+    /// Called only from Redraw on the event-loop thread. The delayed target
+    /// path creates and proves its surface here, after renderer preparation.
+    /// No CAMetalLayer is attached while initialization remains pending.
     pub(super) fn poll(&mut self, window: &Arc<NativeWindow>, wake: Option<Wake>) -> Progress {
         let message = match self.messages.try_recv() {
             Ok(message) => message,
@@ -230,29 +349,35 @@ impl Upgrade {
         };
         match message {
             Message::Unavailable(reason) => Progress::Unavailable(reason),
-            Message::Renderer {
-                instance,
-                adapter,
-                renderer,
-            } => {
-                let handle = match instance.create_surface(Arc::clone(window)) {
-                    Ok(handle) => handle,
-                    Err(error) => return Progress::Unavailable(error.to_string()),
+            Message::Renderer(candidate) => {
+                let Candidate {
+                    instance,
+                    adapter,
+                    renderer,
+                    surface,
+                } = *candidate;
+                let handle = match surface {
+                    Some(surface) => surface,
+                    None => {
+                        let handle = match instance.create_surface(Arc::clone(window)) {
+                            Ok(handle) => handle,
+                            Err(error) => return Progress::Unavailable(error.to_string()),
+                        };
+                        if let Err(error) =
+                            requirements().validate(&handle.get_capabilities(&adapter))
+                        {
+                            return Progress::Unavailable(error.to_string());
+                        }
+                        handle
+                    }
                 };
-                let caps = handle.get_capabilities(&adapter);
-                if !caps.formats.contains(&FORMAT) {
-                    return Progress::Unavailable("prepared BGRA sRGB format unsupported".into());
-                }
-                if !caps.alpha_modes.contains(&wgpu::CompositeAlphaMode::Opaque) {
-                    return Progress::Unavailable("no opaque surface mode".into());
-                }
                 let errors = DeviceErrors::install(renderer.device(), wake);
                 let size = window.inner_size();
                 Progress::Ready(Ready {
                     instance,
                     gpu: Box::new(GpuSurface {
                         handle,
-                        renderer: *renderer,
+                        renderer,
                         errors,
                         packet_token: None,
                         config: super::surface_config(
@@ -263,6 +388,13 @@ impl Upgrade {
                 })
             }
         }
+    }
+}
+impl Drop for Upgrade {
+    fn drop(&mut self) {
+        // A blocked driver call is not interruptible. Its result can only drop;
+        // cancellation never waits or admits a late target into another owner.
+        self.initialization.cancelled.store(true, Ordering::Release);
     }
 }
 fn deliver(send: &SyncSender<Message>, message: Message, wake: &Option<Wake>) -> bool {
@@ -279,11 +411,91 @@ fn deliver(send: &SyncSender<Message>, message: Message, wake: &Option<Wake>) ->
 mod tests {
     use super::*;
     #[test]
-    fn production_policy_rejects_cpu_before_renderer_phase_and_excludes_gl() {
+    fn initialization_cohort_ledger() {
+        // A layout comparison with the prior actual message payload; this does
+        // not estimate process/driver memory from Rust headers.
+        #[allow(dead_code)]
+        enum PreviousMessage {
+            Renderer {
+                instance: wgpu::Instance,
+                adapter: wgpu::Adapter,
+                renderer: Box<Renderer>,
+            },
+            Unavailable(String),
+        }
+        #[allow(dead_code)]
+        struct PreviousUpgrade {
+            messages: Receiver<PreviousMessage>,
+            worker: thread::JoinHandle<()>,
+            #[cfg(all(target_os = "linux", any(feature = "x11", feature = "x11-minimal")))]
+            release: Option<SyncSender<()>>,
+        }
+        let mut retained = None;
+        let allocation = allocation_counter::measure(|| {
+            retained = Some(Arc::new(Initialization::new()));
+        });
+        let mut old_channel = None;
+        let old_queue = allocation_counter::measure(|| {
+            old_channel = Some(mpsc::sync_channel::<PreviousMessage>(1));
+        });
+        let mut channel = None;
+        let queue = allocation_counter::measure(|| {
+            channel = Some(mpsc::sync_channel::<Message>(1));
+        });
+        eprintln!(
+            "GPUI_AUTO_COHORT,old_message={},message={},renderer={},candidate={},surface={},optional_surface={},old_upgrade={},upgrade={},production_flag={},flag_requests={},flag_requested={},flag_retained={},flag_peak={}",
+            size_of::<PreviousMessage>(),
+            size_of::<Message>(),
+            size_of::<Renderer>(),
+            size_of::<Candidate>(),
+            size_of::<wgpu::Surface<'static>>(),
+            size_of::<Option<wgpu::Surface<'static>>>(),
+            size_of::<PreviousUpgrade>(),
+            size_of::<Upgrade>(),
+            size_of::<AtomicBool>(),
+            allocation.count_total,
+            allocation.bytes_total,
+            allocation.bytes_current,
+            allocation.bytes_max
+        );
+        eprintln!(
+            "GPUI_AUTO_QUEUE,old_requests={},old_requested={},old_retained={},old_peak={},requests={},requested={},retained={},peak={}",
+            old_queue.count_total,
+            old_queue.bytes_total,
+            old_queue.bytes_current,
+            old_queue.bytes_max,
+            queue.count_total,
+            queue.bytes_total,
+            queue.bytes_current,
+            queue.bytes_max
+        );
+        drop((old_channel, channel));
+        drop(retained);
+    }
+    #[test]
+    fn production_policy_rejects_cpu_before_renderer_phase_and_cheap_missing_hint() {
         assert!(!Policy::default().accepts(wgpu::DeviceType::Cpu));
         assert!(Policy::default().accepts(wgpu::DeviceType::DiscreteGpu));
         assert!(Policy::default().accepts(wgpu::DeviceType::IntegratedGpu));
-        assert!(!BACKENDS.contains(wgpu::Backends::GL));
+        let plan = PresentationPlan {
+            backends: wgpu::Backends::VULKAN,
+            surface_preparation: SurfacePreparation::BeforeDevice,
+        };
+        assert!(
+            Policy::default()
+                .plan(PresentationAdmission::NoDeviceHint(plan))
+                .is_none()
+        );
+        assert!(
+            Policy::default()
+                .plan(PresentationAdmission::SoftwareRecoveryUnavailable)
+                .is_none()
+        );
+        assert!(
+            Policy::default()
+                .plan(PresentationAdmission::Unknown)
+                .is_none()
+        );
         assert!(
             Policy {
                 allow_cpu: true,

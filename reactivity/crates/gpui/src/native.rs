@@ -32,6 +32,12 @@ use crate::{
 mod accessibility;
 mod destination;
 mod upgrade;
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod upgrade_tests;
 
 #[cfg(all(
     test,
@@ -524,6 +530,25 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         self.graphics = Some(Graphics::ReferenceCpu(surface, SurfaceDamage::default()));
         self.resize([size.width, size.height])
     }
+    fn retire_window(&mut self) {
+        // A cancelled worker may retain an unconfigured native target while a
+        // driver call finishes. Hide promptly before dropping this UI lease;
+        // never let that retained target keep a closed owner visibly alive.
+        if let Some(window) = &self.window {
+            window.set_visible(false);
+        }
+        self.upgrade = None;
+        #[cfg(feature = "accessibility")]
+        {
+            self.accessibility = None;
+        }
+        if let Some(owner) = &mut self.owner {
+            owner.close();
+        }
+        self.graphics = None;
+        self.instance = None;
+        self.window = None;
+    }
     fn resize(&mut self, size: [u32; 2]) -> Result<(), NativeError> {
         self.destination.invalidate();
         self.pointer = PointerSession::default();
@@ -724,15 +749,17 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             return;
         }
         self.upgrade_attempted = true;
-        if !self.upgrade_policy.should_probe() {
-            #[cfg(test)]
-            {
-                self.upgrade_rejection = Some("no local hardware render device".into());
-            }
+        let Some(window) = self.window.as_ref() else {
             return;
-        }
-        match upgrade::Upgrade::start(self.upgrade_policy, self.wake.clone()) {
-            Ok(upgrade) => self.upgrade = Some(upgrade),
+        };
+        match upgrade::Upgrade::start(self.upgrade_policy, window, self.wake.clone()) {
+            Ok(Some(upgrade)) => self.upgrade = Some(upgrade),
+            Ok(None) => {
+                #[cfg(test)]
+                {
+                    self.upgrade_rejection = Some("no automatic presentation candidate".into());
+                }
+            }
             Err(error) => eprintln!(
                 "GPUI keeps software rendering: cannot start hardware initializer: {error}"
             ),
@@ -948,10 +975,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         }
         match event {
             WindowEvent::CloseRequested => {
-                #[cfg(feature = "accessibility")]
-                {
-                    self.accessibility = None;
-                }
+                self.retire_window();
                 event_loop.exit();
             }
             WindowEvent::Resized(size) => self.resize([size.width, size.height])?,
@@ -1139,6 +1163,9 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             Callback::Suspended => {
                 self.destination.invalidate();
                 self.pointer = PointerSession::default();
+                if let Some(window) = &self.window {
+                    window.set_visible(false);
+                }
                 // Dropping both bounded channel endpoints cancels this admission
                 // generation; a late worker can only drop its owned resources.
                 self.upgrade = None;
@@ -1153,13 +1180,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                     .map_err(NativeError::from)
             }
             Callback::Exiting => {
-                #[cfg(feature = "accessibility")]
-                {
-                    self.accessibility = None;
-                }
-                if let Some(owner) = &mut self.owner {
-                    owner.close();
-                }
+                self.retire_window();
                 Ok(())
             }
             Callback::Window { id, event }

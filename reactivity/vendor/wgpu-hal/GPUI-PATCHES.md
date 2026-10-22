@@ -20,3 +20,12 @@ presentation tests, and Apple AArch64/Windows MSVC desktop all-target compile
 checks pass. Cross-compilation does not execute the AppKit harness; it still
 requires macOS through the existing presenter test package. See
 `../../evidence/wgpu30-upgrade/` for source hashes and unaltered logs.
+
+`src/presentation.rs` additionally owns cheap automatic presentation admission:
+Linux render-device filesystem hints, backend masks, target preparation order,
+and the Win32 same-HWND GDI recovery exclusion. The query never constructs a
+graphics instance or loads a driver. Xlib/Xcb use Vulkan with early worker-safe
+unconfigured surface proof; Metal and Wayland keep late target creation. Wayland
+needs a qualified unmap/reconfigure lifecycle before a worker may retain its
+window through an uninterruptible driver call. The paired WGPU boundary and
+remaining platform limits are documented in `../wgpu/GPUI-PATCHES.md`.

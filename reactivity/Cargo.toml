@@ -1,6 +1,6 @@
 [workspace]
 members = ["crates/*"]
-exclude = ["vendor/winit", "vendor/cephal", "vendor/wgpu-hal", "vendor/softbuffer", "vendor/parley", "vendor/parley_engine", "vendor/accesskit_unix", "vendor/accesskit_atspi_common"]
+exclude = ["vendor/winit", "vendor/cephal", "vendor/wgpu", "vendor/wgpu-hal", "vendor/softbuffer", "vendor/parley", "vendor/parley_engine", "vendor/accesskit_unix", "vendor/accesskit_atspi_common"]
 resolver = "3"
 
 [workspace.package]
@@ -8,6 +8,7 @@ edition = "2024"
 license = "Apache-2.0"
 
 [patch.crates-io]
+wgpu = { path = "vendor/wgpu" }
 parley = { path = "vendor/parley" }
 parley_engine = { path = "vendor/parley_engine" }
 winit = { path = "vendor/winit" }
