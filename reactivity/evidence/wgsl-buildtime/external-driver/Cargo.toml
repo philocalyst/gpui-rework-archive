@@ -1,0 +1,15 @@
+[package]
+name = "gpui-wgsl-control"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+gpui_gpu = { path = "/root/gpui-wgsl-buildtime/reactivity/crates/gpu" }
+pollster = "=0.4.0"
+allocation-counter = "=0.8.1"
+[patch.crates-io]
+parley = { path = "/root/gpui-wgsl-buildtime/reactivity/vendor/parley" }
+winit = { path = "/root/gpui-wgsl-buildtime/reactivity/vendor/winit" }
+wgpu-hal = { path = "/root/gpui-wgsl-buildtime/reactivity/vendor/wgpu-hal" }
+softbuffer = { path = "/root/gpui-wgsl-buildtime/reactivity/vendor/softbuffer" }
+accesskit_unix = { path = "/root/gpui-wgsl-buildtime/reactivity/vendor/accesskit_unix" }
+accesskit_atspi_common = { path = "/root/gpui-wgsl-buildtime/reactivity/vendor/accesskit_atspi_common" }
