@@ -1,0 +1,38 @@
+{
+  "source_commit": "05690b91d40a4f3451a22256b9413395cb6903c3",
+  "base_style": "fb2f56387a02b98ac0ae0729032f48a16e62b9b8",
+  "substrate_equivalent_commit": "76a6627e15",
+  "source_hashes": {
+    "reactivity/crates/gpu/src/renderer/paint.rs": "28ac40e6eb65cb4fe43ff1bb211ce1f31d483efce145f9a719b5022ece653f2e",
+    "reactivity/crates/gpu/tests/render.rs": "7c9a7fd3656fc863d64baa37c3be9ff04e8d491472b21b90a1a920c9181868bd",
+    "reactivity/crates/gpui/PAINT_PATCH.md": "1405807ac08a47e7e6d16ee6512d7d1bb16545f508a09396787329e71e403384",
+    "reactivity/crates/gpui/src/native.rs": "810e68320d2e9a8ce652b310622084615727ebaf2e585859c8c30771cac2e4ce",
+    "reactivity/crates/gpui/src/native/accessibility/transitions.rs": "193706906e665817b57847c62fa7edeb41e7adbe9a92e862ba456fba63ca7602",
+    "reactivity/crates/gpui/src/native/paint_tests.rs": "2daa35ddcf32fee4114f6451ddfedef611c2a5459defa8b6a18b5b39bc7e6062",
+    "reactivity/crates/gpui/src/native/upgrade.rs": "43862020b39251ddbfe3de482c07354096a83f14a92a29b424a15551849ab423",
+    "reactivity/crates/gpui/src/runtime.rs": "db0a6e0392411e98891be9e406aa26abe554b5f94bf29781c83e3d809d15c3d0",
+    "reactivity/crates/gpui/src/runtime/accessibility.rs": "4285e0061e98699932cd55b21a350a82725ea7fd9bfaedea2e9dcdfd3fc6f2af",
+    "reactivity/crates/gpui/src/runtime/metadata.rs": "a1c345ab3182315d12fe4c51bf2a118ae54c25db095cfb9ce6a901a5804bc8e0",
+    "reactivity/crates/gpui/src/runtime/paint.rs": "4a7d44b0765dd893e633af615404a1755ed08acc4bb92eb344cd3973787e7ef8",
+    "reactivity/crates/gpui/src/runtime/turn.rs": "34560d26a9d2ecf89c894ae7671460b54e48df1d2ec51df669ac3d00fe32640f",
+    "reactivity/crates/gpui/tests/paint_patch.rs": "306c57c67246c3e7d73fb9e624852c69e005db26c2c66b811d08438bc9a1cf65"
+  },
+  "artifact_hashes": {
+    "/tmp/gpui-paint-coupling-target/debug/deps/paint_patch-45dc0bfc23d096ee.s": "3b4e3499fb33e7cf716a571e3d4affd8e25a4faba6516430a2c9330b70228305",
+    "/tmp/gpui-paint-coupling-target/debug/deps/paint_patch-45dc0bfc23d096ee": "ad696eba2d7b64c5c14803687371ec63671aa7de6c6a3c469f0183afe6aa06a3"
+  },
+  "codegen_profile": "public test consumer opt-level=3, debug-assertions=no, dependency dev profile, no LTO; no timing",
+  "codegen_index_call_sites_after": 0,
+  "codegen_begin_call_sites_after": 2,
+  "actual_backend": "Mesa llvmpipe Vulkan CPU adapter; Xvfb :108 private 1280x1024x24; no hardware performance claim",
+  "counts": {
+    "gpui_default_tests_docs": 368,
+    "actual_vulkan_tests": 37,
+    "gpu_unit_tests": 8,
+    "gpu_compilefail_doc": 1,
+    "public_paint_tests": 5,
+    "consumer_transition_tests": 1,
+    "native_script_policies": 5
+  },
+  "timing_campaign": false
+}
