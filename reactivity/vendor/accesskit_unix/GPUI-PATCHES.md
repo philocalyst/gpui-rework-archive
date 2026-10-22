@@ -114,3 +114,11 @@ failure was a fixture bug: zbus's convenience RequestName can return a cached
 AlreadyOwner before NameLost is processed. The corrected fixture uses raw
 DBus.RequestName and asserts the authoritative owner before releasing the gate.
 The instrumented failure trace is retained under evidence/accesskit-lifecycle.
+
+Separate stream-end follow-up: `next_status_change` clears the owning Option
+when its property stream ends, so the existing false wake retires once and the
+next poll parks. zbus5.19 only returns stream end when caching is disabled;
+default cached peer/cache-task disappearance does not terminate PropertyStream.
+The real uncached-proxy helper/no-spin/late-owner regression is deliberately
+separate from the actual Adapter protocol and earlier NativeAdapter proof.
+See `stream-parking-*` evidence; d5fc source pins and gates remain preserved.

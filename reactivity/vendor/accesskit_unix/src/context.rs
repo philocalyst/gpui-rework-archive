@@ -218,10 +218,16 @@ async fn status_changes(
 async fn next_status_change(
     changes: &mut Option<PropertyStream<'static, bool>>,
 ) -> Option<PropertyChanged<'static, bool>> {
-    match changes {
+    let change = match changes {
         Some(changes) => futures_lite::StreamExt::next(changes).await,
         None => std::future::pending().await,
+    };
+    if change.is_none() {
+        // An ended stream must retire once, then leave the name monitor and
+        // controls to wake us. Re-polling it would repeatedly enqueue Fence.
+        *changes = None;
     }
+    change
 }
 
 fn sync_adapters(adapters: &mut [AdapterEntry], atspi_bus: &Option<Bus>) {

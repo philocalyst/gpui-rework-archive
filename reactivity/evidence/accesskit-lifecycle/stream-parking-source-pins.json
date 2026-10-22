@@ -1,0 +1,17 @@
+{
+  "parent": "d5fc64a872ff2a8925140eb18eefd30bf4ae33b4",
+  "source_sha256": {
+    "vendor/accesskit_unix/src/context.rs": "6dca0ead057f6c50dd5c7f878d0c33a3a4e44309d63f3671122f8891dd571b46",
+    "vendor/accesskit_unix/src/context_tests.rs": "7b5a4d8ed9e1ac9a05c8bfd33525313cedae978f16b32b59cbeadc72708c3e95",
+    "vendor/accesskit_unix/Cargo.toml": "e046eb9e0b1d8fa61838f3e6005523ccf7681d349af2dee9e2fd64c67489b242",
+    "vendor/accesskit_unix/Cargo.lock": "d6c5c4aa19b5363517e69066c8495a72b8079499c9ef57a87e41fff5c1c7d7e2"
+  },
+  "dependency_review": {
+    "zbus": "5.19.0",
+    "source_file": "src/proxy/mod.rs",
+    "sha256": "bb296d58f0aec24efa0069fbac4d04be2eee9ac3d5354e284a40f0253f9f4488",
+    "termination": "PropertyStream::poll_next returns None only for absent immutable proxy property cache (CacheProperties::No); default cached owner loss does not terminate it."
+  },
+  "proof": "Real uncached StatusProxy end -> parked helper; one actual Pending state retirement; 16 Pending polls with no extra FIFO entries; subscribed real late NameOwnerChanged -> cached initial true. Actual Adapter regression rerun separately.",
+  "historical_gates": "source-pins.json and stage2/native/workspace logs retain d5fc coverage; no new native/workspace/cross claim."
+}

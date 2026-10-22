@@ -417,3 +417,115 @@ fn controls_accepted_after_fence_remain_for_next_worker_pass() {
     ));
     assert!(rx.is_empty());
 }
+
+#[test]
+fn uncached_property_stream_parks_after_end_and_accepts_a_late_owner() {
+    use std::{
+        io::{BufRead, BufReader},
+        process::{Child, Command, Stdio},
+    };
+    use zbus::{blocking, proxy::CacheProperties};
+
+    struct Daemon(Child);
+    impl Drop for Daemon {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+    struct Enabled;
+    #[zbus::interface(name = "org.a11y.Status")]
+    impl Enabled {
+        #[zbus(property)]
+        fn is_enabled(&self) -> bool {
+            true
+        }
+    }
+    // Owned synchronous setup of a private protocol service, as in the public
+    // Adapter integration fixture. No process-wide session environment edits.
+    #[allow(clippy::disallowed_methods)]
+    fn daemon() -> (Daemon, String) {
+        let mut child = Command::new("dbus-daemon")
+            .args(["--session", "--nofork", "--nopidfile", "--print-address=1"])
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let mut address = String::new();
+        BufReader::new(child.stdout.take().unwrap())
+            .read_line(&mut address)
+            .unwrap();
+        (Daemon(child), address.trim().to_owned())
+    }
+    let (_daemon, address) = daemon();
+    let client = blocking::connection::Builder::address(address.as_str())
+        .unwrap()
+        .build()
+        .unwrap();
+    block_on(async {
+        let connection = client.inner();
+        let dbus = DBusProxy::new(connection).await.unwrap();
+        let mut owners = dbus
+            .receive_name_owner_changed_with_args(&[(0, STATUS_SERVICE)])
+            .await
+            .unwrap();
+        assert!(status_owner(&dbus).await.unwrap().is_none());
+
+        // zbus 5.19 ends PropertyStream only for a proxy with no cache. Its
+        // default cached stream does not end when a peer/cache task disappears.
+        let uncached = StatusProxy::builder(connection)
+            .destination(client.unique_name().unwrap().to_owned())
+            .unwrap()
+            .cache_properties(CacheProperties::No)
+            .build()
+            .await
+            .unwrap();
+        let mut changes = Some(uncached.receive_is_enabled_changed().await);
+        assert!(next_status_change(&mut changes).await.is_none());
+        assert!(changes.is_none());
+        // Mirror the worker's one false/retirement transition, using an actual
+        // Pending state. Repeated polls cannot yield another retirement wake.
+        let (tx, rx) = async_channel::unbounded();
+        let mut messages = Box::pin(rx.clone());
+        let (entry, retired) = entry(106, state(true));
+        let mut adapters = vec![entry];
+        retire_bus(&mut None, &mut adapters, &tx, &mut messages)
+            .await
+            .unwrap();
+        for _ in 0..16 {
+            assert!(next_status_change(&mut changes).now_or_never().is_none());
+            assert!(rx.is_empty());
+        }
+        assert_eq!(retired.load(Ordering::SeqCst), 1);
+
+        // Parking the property branch leaves the independently subscribed
+        // NameOwnerChanged path live; a real late owner supplies initial true.
+        let service = blocking::connection::Builder::address(address.as_str())
+            .unwrap()
+            .name(STATUS_SERVICE)
+            .unwrap()
+            .serve_at("/org/a11y/bus", Enabled)
+            .unwrap()
+            .build()
+            .unwrap();
+        let signal = owners.next().await.unwrap();
+        assert_eq!(
+            signal
+                .args()
+                .unwrap()
+                .new_owner()
+                .as_ref()
+                .map(|name| name.as_str()),
+            service.unique_name().map(|name| name.as_str())
+        );
+        let owner = status_owner(&dbus).await.unwrap();
+        changes = status_changes(connection, &owner).await.unwrap();
+        assert!(
+            next_status_change(&mut changes)
+                .await
+                .unwrap()
+                .get()
+                .await
+                .unwrap()
+        );
+    });
+}

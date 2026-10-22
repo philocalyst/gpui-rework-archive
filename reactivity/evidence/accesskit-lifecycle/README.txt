@@ -82,3 +82,24 @@ manifest's package-name change and chosen saved fixture. Keep its package ID
 separate from the candidate. The common/upstream-Unix controls use registry-only
 dependencies from their saved manifests/locks. Build jobs2, own CARGO_TARGET_DIR;
 see toolchain.txt. Native gates used coordinated :94 and private D-Bus sessions.
+
+Separate stream-end parking follow-up after d5fc64a872:
+next_status_change now clears its owned Option on stream end. The first end
+retires once through the existing false wake; later polls are Pending, leaving
+the independent owner monitor live. In zbus5.19 PropertyStream::poll_next returns
+None only when the proxy has CacheProperties::No. The default cached proxy keeps
+Some cache permanently: peer/cache-task termination does not end this stream.
+This is defensive stream-end handling, not an observed default owner-loss spin.
+
+stream-parking-provider.log reruns the final Unix units and actual Adapter
+protocol on the follow-up source. Its added helper test uses a real private
+D-Bus connection and real CacheProperties::No StatusProxy, observes None, one
+actual Pending-state retirement,16 Pending polls/no extra FIFO entries, then a
+real late NameOwnerChanged and a new cached StatusProxy initial true. This test
+proves the monitor/helper path, not a default cached stream ending on disconnect
+or an additional NativeAdapter execution. stream-parking-clippy.log and
+stream-parking-fmt.log cover final vendor source. stream-parking-units.log keeps
+an initial compile-only fixture type mismatch, fixed before final gates.
+source-pins.json preserves the d5fc source/gates; stream-parking-source-pins.json
+pins the separate follow-up source. Earlier native/workspace gates remain d5fc
+results and are not silently relabelled as a new full campaign.
