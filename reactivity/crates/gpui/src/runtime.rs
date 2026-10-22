@@ -4346,3 +4346,6 @@ mod style_port_tests {
 
 #[cfg(test)]
 mod basis_layout_probe;
+
+#[cfg(test)]
+mod basis_lifecycle_tests;

@@ -216,3 +216,49 @@ fn basis_ordinary_window_allocation_cohorts() {
         }
     }
 }
+
+#[allow(dead_code)]
+struct InlineBasisProposal {
+    identity: u64,
+    parent: PresentedLink,
+    kind: NodeKind,
+    text: Option<SharedText>,
+    placement: geometry::Placement,
+    basis: [u32; 2],
+    bounds: Rect,
+    hittable: bool,
+    actions: Actions,
+}
+#[test]
+fn inline_basis_proposal_uses_existing_row_padding() {
+    let field_bytes = size_of::<u64>()
+        + size_of::<PresentedLink>()
+        + size_of::<NodeKind>()
+        + size_of::<Option<SharedText>>()
+        + size_of::<geometry::Placement>()
+        + size_of::<geometry::BasisKey>()
+        + size_of::<Rect>()
+        + size_of::<bool>()
+        + size_of::<Actions>();
+    println!(
+        "BASIS_INLINE_PROPOSAL actual_row={} actual_field_bytes={field_bytes} padding={} proposed_row={} proposed_align={}",
+        size_of::<Presented>(),
+        size_of::<Presented>() - field_bytes,
+        size_of::<InlineBasisProposal>(),
+        std::mem::align_of::<InlineBasisProposal>()
+    );
+    assert_eq!(size_of::<Presented>(), 64);
+    assert_eq!(size_of::<InlineBasisProposal>(), 64);
+    println!(
+        "BASIS_INLINE_OFFSETS identity={} parent={} kind={} text={} placement={} basis={} bounds={} hittable={} actions={}",
+        std::mem::offset_of!(Presented, identity),
+        std::mem::offset_of!(Presented, parent),
+        std::mem::offset_of!(Presented, kind),
+        std::mem::offset_of!(Presented, text),
+        std::mem::offset_of!(Presented, placement),
+        std::mem::offset_of!(Presented, basis),
+        std::mem::offset_of!(Presented, bounds),
+        std::mem::offset_of!(Presented, hittable),
+        std::mem::offset_of!(Presented, actions)
+    );
+}

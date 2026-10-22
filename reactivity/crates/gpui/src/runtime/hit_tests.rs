@@ -82,7 +82,7 @@ fn exhaustive<M: View + 'static>(runtime: &Runtime<M>, point: Point) -> Option<u
 }
 fn compare<M: View + 'static>(win: &Win<M>) {
     let runtime = win.runtime().unwrap();
-    assert_eq!(size_of::<Presented>(), 80);
+    assert_eq!(size_of::<Presented>(), 64);
     let step = if runtime.presented.len() > 5000 {
         16
     } else {
