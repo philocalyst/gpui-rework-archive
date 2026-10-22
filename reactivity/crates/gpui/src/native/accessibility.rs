@@ -247,12 +247,30 @@ impl accesskit::ActionHandler for Ingress {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Refresh {
+    Sparse,
+    Immediate,
+    // P was publishable but its source actions were not qualified. Preserve
+    // no-work idle; the next actual stamp transition must rediscover authority,
+    // even when its exact semantic frontier is empty after same-byte repair.
+    AfterTransition,
+}
+impl Refresh {
+    fn published(qualified: bool) -> Self {
+        if qualified {
+            Self::Sparse
+        } else {
+            Self::AfterTransition
+        }
+    }
+}
 pub(super) struct Bridge {
     adapter: Adapter,
     receiver: Receiver<Queued>,
     ingress: Ingress,
     published: Option<State>,
-    needs_full: bool,
+    refresh: Refresh,
     title: String,
     cohort: Cohort,
     #[cfg(test)]
@@ -284,7 +302,7 @@ impl Bridge {
             receiver,
             ingress,
             published: None,
-            needs_full: true,
+            refresh: Refresh::Immediate,
             // Winit's X11 title() is an empty-string stub, so use the authored
             // opening title rather than querying it back from the platform.
             title,
@@ -310,7 +328,7 @@ impl Bridge {
         owner.accessibility_observe(active)?;
         if !active {
             self.cohort.clear();
-            self.needs_full = true;
+            self.refresh = Refresh::Immediate;
             return Ok(());
         }
         let state = owner.accessibility_state()?;
@@ -318,16 +336,16 @@ impl Bridge {
             return Ok(());
         }
         if self.ingress.0.initial.swap(false, Ordering::AcqRel) {
-            self.needs_full = true;
+            self.refresh = Refresh::Immediate;
         }
-        let full = self.needs_full
+        let full = self.refresh == Refresh::Immediate
             || self.published.is_none_or(|old| {
                 old.token != state.token || old.epoch != state.epoch || old.size != state.size
             });
         if !full && self.published.is_some_and(|old| old.focus == state.focus) {
             return Ok(());
         }
-        let delta = (full && !self.needs_full)
+        let delta = (full && self.refresh == Refresh::Sparse)
             .then(|| {
                 self.published
                     .and_then(|old| owner.accessibility_delta(old, state))
@@ -340,6 +358,13 @@ impl Bridge {
                 self.cohort.refresh(owner)?;
             }
             text::Relink::default()
+        };
+        let qualified = if delta.is_some() {
+            relink.qualified
+        } else if full {
+            self.cohort.qualified()
+        } else {
+            self.refresh == Refresh::Sparse
         };
         let sheet = owner.accessibility_sheet()?;
         let mut updated = false;
@@ -370,7 +395,7 @@ impl Bridge {
                 return Err(NativeError::AccessibilityOverloaded);
             }
             self.published = Some(state);
-            self.needs_full = false;
+            self.refresh = Refresh::published(qualified);
         }
         Ok(())
     }

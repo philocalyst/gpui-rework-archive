@@ -26,10 +26,19 @@ pub(super) struct Cohort {
     #[cfg(test)]
     pub source_clones: usize,
 }
-#[derive(Default)]
 pub(super) struct Relink {
     pub parents: Vec<u32>,
     pub root: bool,
+    pub qualified: bool,
+}
+impl Default for Relink {
+    fn default() -> Self {
+        Self {
+            parents: Vec::new(),
+            root: false,
+            qualified: true,
+        }
+    }
 }
 impl Default for Cohort {
     fn default() -> Self {
@@ -47,6 +56,9 @@ impl Default for Cohort {
     }
 }
 impl Cohort {
+    pub fn qualified(&self) -> bool {
+        self.inputs.iter().all(|input| input.field.is_some())
+    }
     #[cfg(test)]
     pub fn storage(&self) -> (usize, usize, usize) {
         (
@@ -172,19 +184,20 @@ impl Cohort {
         }
         let sheet = owner.accessibility_sheet()?;
         let mut end = self.next;
+        let mut relink = Relink::default();
         for &index in indices {
             #[cfg(test)]
             {
                 self.sparse_visits += 1;
             }
             let part = sheet.part_at(index as usize).ok_or(Error::StaleTarget)?;
-            if let Some((_, _, count)) = self.replacement(owner, part)? {
+            if let Some((_, field, count)) = self.replacement(owner, part)? {
+                relink.qualified &= field.is_some();
                 end = end
                     .checked_add(1 + u64::from(count))
                     .ok_or(Error::ResourceLimit)?;
             }
         }
-        let mut relink = Relink::default();
         if end == self.next {
             return Ok(relink);
         }
