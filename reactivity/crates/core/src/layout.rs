@@ -8,9 +8,9 @@
 //!
 //! On x86_64 at Cephal `20c4c494`, Style is 288 bytes, Layout is 92 bytes,
 //! and NodeCache is an 8-byte handle to lazily allocated private cache storage.
-//! This adapter still boxes that handle; `storage` counts its known lane and
-//! outer-box payload only, excluding vendor cache inners/spills and style metadata.
-//! Neither the handle size nor that partial ledger is a complete memory claim.
+//! Handles live directly in the cache lane. `storage` counts their actual vendor
+//! cache inners and spill payloads, excluding allocator overhead and style metadata.
+//! This payload ledger is not a complete memory or RSS claim.
 //! Pending edits use a sparse ordered set; compute rebuilds a temporary scheduler
 //! and filters pending changes by forest root in O(pending changes * depth).
 //! A clean call with no pending edits does no tree traversal. Pixel rounding,
@@ -66,15 +66,15 @@ pub struct LayoutStats {
     pub changed_layout_writes: u64,
 }
 
-/// Known payload only. Vendor style-table metadata and cache spill allocations
-/// are private to Cephal and are not included in these byte counts.
+/// Known lane and cache heap payload only. Excludes allocator overhead and
+/// vendor style-table metadata; this is not an RSS measurement.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LayoutStorage {
     pub slots: usize,
     pub active_styles: usize,
     pub allocated_caches: usize,
     pub lane_capacity_bytes: usize,
-    pub cache_inline_bytes: usize,
+    pub cache_heap_bytes: usize,
 }
 
 /// Retained flex/block/grid layout using the core Tree as its sole topology.
@@ -88,8 +88,7 @@ pub struct LayoutTree {
     depths: Vec<u32>,
     child_counts: Vec<u32>,
     flags: Vec<u8>,
-    caches: Vec<Option<Box<NodeCache>>>,
-    empty_cache: NodeCache,
+    caches: Vec<NodeCache>,
     styles: StyleTable,
     measures: BTreeMap<NodeId, MeasureFn>,
     // Only full generational core capabilities survive between computes. A
@@ -121,7 +120,6 @@ impl LayoutTree {
             child_counts: Vec::new(),
             flags: Vec::new(),
             caches: Vec::new(),
-            empty_cache: NodeCache::new(),
             styles: StyleTable::new(),
             measures: BTreeMap::new(),
             pending: BTreeSet::new(),
@@ -171,14 +169,14 @@ impl LayoutTree {
         self.depths.resize(slots, 0);
         self.child_counts.resize(slots, 0);
         self.flags.resize(slots, 0);
-        self.caches.resize_with(slots, || None);
+        self.caches.resize_with(slots, NodeCache::new);
         let index = self.tree.slot(node);
         self.style_ids[index] = self.styles.intern(style);
         self.layouts[index] = Layout::ZERO;
         self.depths[index] = parent.map_or(0, |id| self.depths[self.tree.slot(id)] + 1);
         self.child_counts[index] = 0;
         self.flags[index] = 0;
-        self.caches[index] = None;
+        self.caches[index] = NodeCache::new();
         if let Some(parent) = parent {
             self.child_counts[self.tree.slot(parent)] += 1;
             self.mark_dirty(parent)?;
@@ -224,7 +222,7 @@ impl LayoutTree {
         }
         // A node becoming cheap no longer needs its old content-query cache.
         if self.is_cheap(node) {
-            self.caches[index] = None;
+            self.caches[index] = NodeCache::new();
         }
         self.mark_dirty(node)?;
         Ok(true)
@@ -249,7 +247,7 @@ impl LayoutTree {
             self.styles.release(self.style_ids[index]);
             self.style_ids[index] = NO_STYLE;
             self.layouts[index] = Layout::ZERO;
-            self.caches[index] = None;
+            self.caches[index] = NodeCache::new();
             self.flags[index] = 0;
             self.pending.remove(&id);
             self.viewports.remove(&id);
@@ -260,7 +258,7 @@ impl LayoutTree {
             let index = self.tree.slot(parent);
             self.child_counts[index] -= 1;
             if self.is_cheap(parent) {
-                self.caches[index] = None;
+                self.caches[index] = NodeCache::new();
             }
             self.mark_dirty(parent)?;
         }
@@ -296,7 +294,7 @@ impl LayoutTree {
         if let Some(old) = old_parent {
             let index = self.tree.slot(old);
             if self.is_cheap(old) {
-                self.caches[index] = None;
+                self.caches[index] = NodeCache::new();
             }
             self.mark_dirty(old)?;
         }
@@ -368,7 +366,7 @@ impl LayoutTree {
         } else {
             // Cache-entry generations influence eviction detection. Never reuse
             // a generation while an old entry can still carry that stamp.
-            for cache in self.caches.iter_mut().flatten() {
+            for cache in &mut self.caches {
                 cache.clear();
             }
             self.generation = 1;
@@ -391,9 +389,7 @@ impl LayoutTree {
             scheduler.run(&mut engine, engine_root, changed);
             if changed {
                 let slot = engine.owner.tree.slot(root);
-                if let Some(cache) = &mut engine.owner.caches[slot] {
-                    cache.clear();
-                }
+                engine.owner.caches[slot].clear();
             }
             cephal::compute::compute_root_layout(&mut engine, engine_root, viewport);
         }
@@ -402,7 +398,11 @@ impl LayoutTree {
         Ok(true)
     }
     pub fn storage(&self) -> LayoutStorage {
-        let allocated_caches = self.caches.iter().filter(|c| c.is_some()).count();
+        let allocated_caches = self
+            .caches
+            .iter()
+            .filter(|c| c.allocated_bytes() != 0)
+            .count();
         LayoutStorage {
             slots: self.tree.slot_count(),
             active_styles: self.styles.len(),
@@ -412,8 +412,8 @@ impl LayoutTree {
                 + self.depths.capacity() * 4
                 + self.child_counts.capacity() * 4
                 + self.flags.capacity()
-                + self.caches.capacity() * std::mem::size_of::<Option<Box<NodeCache>>>(),
-            cache_inline_bytes: allocated_caches * std::mem::size_of::<NodeCache>(),
+                + self.caches.capacity() * std::mem::size_of::<NodeCache>(),
+            cache_heap_bytes: self.caches.iter().map(NodeCache::allocated_bytes).sum(),
         }
     }
     /// Named grid lines/areas use the same interned names as their styles.
@@ -483,9 +483,6 @@ impl Engine<'_, '_> {
     }
     fn slot(&self, node: EngineId) -> usize {
         self.owner.tree.slot(self.node(node))
-    }
-    fn skips_cache(&self, node: NodeId) -> bool {
-        self.owner.is_cheap(node) || self.owner.style(node).unwrap().generates_no_box()
     }
 }
 struct Children<'a> {
@@ -618,16 +615,11 @@ impl EngineTree for Engine<'_, '_> {
 }
 impl CacheAccess for Engine<'_, '_> {
     fn cache(&self, node: EngineId) -> &NodeCache {
-        self.owner.caches[self.slot(node)]
-            .as_deref()
-            .unwrap_or(&self.owner.empty_cache)
+        &self.owner.caches[self.slot(node)]
     }
     fn cache_mut(&mut self, node: EngineId) -> &mut NodeCache {
         let slot = self.slot(node);
-        if self.owner.caches[slot].is_none() && self.skips_cache(self.node(node)) {
-            return &mut self.owner.empty_cache;
-        }
-        self.owner.caches[slot].get_or_insert_with(|| Box::new(NodeCache::new()))
+        &mut self.owner.caches[slot]
     }
     fn generation(&self) -> u32 {
         self.owner.generation

@@ -115,6 +115,17 @@ impl NodeCache {
         Self(None)
     }
 
+    /// Allocated cache payload, excluding this handle and allocator overhead.
+    ///
+    /// Includes the private inner and its spill even after `clear` retains them.
+    /// A never-allocated cache reports zero. This is not an RSS measurement.
+    pub fn allocated_bytes(&self) -> usize {
+        self.0.as_deref().map_or(0, |inner| {
+            core::mem::size_of::<Inner>()
+                + inner.spill.as_ref().map_or(0, |_| core::mem::size_of::<Slots<SPILL_SIZE_ENTRIES>>())
+        })
+    }
+
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.0.as_deref().is_none_or(|c| c.final_entry.is_none() && c.len == 0)
@@ -381,6 +392,25 @@ mod tests {
             vertical_margins_are_collapsible: Line::FALSE,
             context_key: 0,
         }
+    }
+
+    #[test]
+    fn allocated_payload_counts_cold_inner_and_retained_spill() {
+        let mut cache = NodeCache::new();
+        assert_eq!(cache.allocated_bytes(), 0);
+        for width in 0..=INLINE_SIZE_ENTRIES {
+            let question = input(RunMode::ComputeSize, Some(width as f32), AvailableSpace::Definite(40.0), RequestedAxis::Both);
+            cache.store(&question, LayoutOutput::HIDDEN, 1);
+            let expected = core::mem::size_of::<Inner>()
+                + if width < INLINE_SIZE_ENTRIES { 0 } else { core::mem::size_of::<Slots<SPILL_SIZE_ENTRIES>>() };
+            assert_eq!(cache.allocated_bytes(), expected);
+        }
+        let retained = cache.allocated_bytes();
+        cache.clear();
+        assert!(cache.is_empty());
+        assert_eq!(cache.allocated_bytes(), retained);
+        cache = NodeCache::new();
+        assert_eq!(cache.allocated_bytes(), 0);
     }
 
     #[test]
