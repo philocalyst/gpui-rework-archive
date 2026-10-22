@@ -426,7 +426,8 @@ impl TextGeometry {
     fn move_visual(&self, position: TextPosition, right: bool) -> Option<TextPosition> {
         let bounds = self.caret_bounds(position)?;
         let map = self;
-        let line = map.caret_line(position)?;
+        // The successful bounds lookup above already validated byte/affinity.
+        let line = map.source_line(position);
         let mut best = None;
         let mut distance = f32::INFINITY;
         for interval in map
