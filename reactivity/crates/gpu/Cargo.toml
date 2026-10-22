@@ -25,6 +25,9 @@ wgpu = { version = "=30.0.1", default-features = false, features = ["std", "wgsl
 wgsl-rs = { version = "=0.1.0-beta.6", default-features = false, features = ["validation"] }
 bytemuck = { version = "=1.25.2", features = ["derive"] }
 
+[build-dependencies]
+wgsl-rs = { version = "=0.1.0-beta.6", default-features = false, features = ["validation"] }
+
 [dev-dependencies]
 pollster = "=0.4.0"
 
