@@ -537,3 +537,6 @@ fn new_hidden_siblings_do_not_share_subtree_zeroing_marks() {
     assert_cold(&tree, root, viewport(200.0));
     assert_eq!(tree.layout(moved).unwrap().size, cephal::Size::ZERO);
 }
+
+#[path = "layout/oof.rs"]
+pub(crate) mod oof;

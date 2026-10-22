@@ -14,11 +14,10 @@
 //! Pending edits use a sparse ordered set; compute rebuilds a temporary scheduler
 //! and filters pending changes by forest root in O(pending changes * depth).
 //! A clean call with no pending edits does no tree traversal. Pixel rounding,
-//! detailed grid diagnostics, parallel layout and absolute-position shortcuts
-//! are not implemented by this adapter; normal flex/block/grid algorithms and
-//! direct-parent absolute placement still run through Cephal's serial unrounded
-//! compute path. Non-parent containing blocks require the new absolute-context
-//! trait storage, which this adapter does not yet retain.
+//! detailed grid diagnostics, parallel layout and retained placement shortcuts
+//! are not implemented by this adapter. Flex/block/grid and out-of-flow layout
+//! use Cephal's serial unrounded path. Out-of-flow contexts are retained cold;
+//! placement answers are recomputed rather than kept across passes.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -27,7 +26,8 @@ use cephal::owned::StyleTable;
 use cephal::schedule::{Incremental, Scheduler};
 use cephal::style::{CalcId, CalcOp, CalcTable, Ident};
 use cephal::tree::{
-    AnswerSource, CacheAccess, IdentSuffix, LayoutInput, LayoutOutput, LayoutTree as EngineTree,
+    AbsoluteContext, AnswerSource, CacheAccess, IdentSuffix, LayoutInput, LayoutOutput,
+    LayoutTree as EngineTree,
 };
 pub use cephal::{AvailableSpace, Layout, MeasureInput, MeasureOutput, Size, Style};
 use cephal::{NodeCache, NodeId as EngineId};
@@ -75,6 +75,8 @@ pub struct LayoutStorage {
     pub allocated_caches: usize,
     pub lane_capacity_bytes: usize,
     pub cache_heap_bytes: usize,
+    /// Cold containers with out-of-flow records; their payload is separate from cache_heap_bytes.
+    pub absolute_contexts: usize,
 }
 
 /// Retained flex/block/grid layout using the core Tree as its sole topology.
@@ -89,6 +91,9 @@ pub struct LayoutTree {
     child_counts: Vec<u32>,
     flags: Vec<u8>,
     caches: Vec<NodeCache>,
+    // Box keeps the cold map header off empty trees: one owner word, no per-node lane.
+    #[allow(clippy::box_collection)]
+    absolute_contexts: Option<Box<BTreeMap<NodeId, AbsoluteContext>>>,
     styles: StyleTable,
     measures: BTreeMap<NodeId, MeasureFn>,
     // Only full generational core capabilities survive between computes. A
@@ -120,6 +125,7 @@ impl LayoutTree {
             child_counts: Vec::new(),
             flags: Vec::new(),
             caches: Vec::new(),
+            absolute_contexts: None,
             styles: StyleTable::new(),
             measures: BTreeMap::new(),
             pending: BTreeSet::new(),
@@ -178,6 +184,7 @@ impl LayoutTree {
         self.flags[index] = 0;
         self.caches[index] = NodeCache::new();
         if let Some(parent) = parent {
+            self.invalidate_absolute_above(parent);
             self.child_counts[self.tree.slot(parent)] += 1;
             self.mark_dirty(parent)?;
         } else {
@@ -242,6 +249,7 @@ impl LayoutTree {
     pub fn remove(&mut self, node: NodeId) -> Result<usize, LayoutError> {
         self.tree.index(node)?;
         let parent = self.tree.parent(node)?;
+        self.invalidate_absolute_above(node);
         for id in self.tree.subtree(node)? {
             let index = self.tree.slot(id);
             self.styles.release(self.style_ids[index]);
@@ -252,7 +260,11 @@ impl LayoutTree {
             self.pending.remove(&id);
             self.viewports.remove(&id);
             self.measures.remove(&id);
+            if let Some(contexts) = &mut self.absolute_contexts {
+                contexts.remove(&id);
+            }
         }
+        self.release_empty_absolute_contexts();
         let removed = self.tree.remove(node)?;
         if let Some(parent) = parent {
             let index = self.tree.slot(parent);
@@ -271,6 +283,12 @@ impl LayoutTree {
             return Ok(false);
         }
         let old_depth = self.depths[self.tree.slot(node)];
+        if let Some(old) = old_parent {
+            self.invalidate_absolute_above(old);
+        }
+        if let Some(new) = parent {
+            self.invalidate_absolute_above(new);
+        }
         self.tree.reparent(node, parent)?;
         self.viewports.remove(&node);
         if old_parent != parent {
@@ -393,6 +411,7 @@ impl LayoutTree {
             }
             cephal::compute::compute_root_layout(&mut engine, engine_root, viewport);
         }
+        self.release_empty_absolute_contexts();
         self.viewports.insert(root, viewport);
         self.poisoned = false;
         Ok(true)
@@ -414,6 +433,10 @@ impl LayoutTree {
                 + self.flags.capacity()
                 + self.caches.capacity() * std::mem::size_of::<NodeCache>(),
             cache_heap_bytes: self.caches.iter().map(NodeCache::allocated_bytes).sum(),
+            absolute_contexts: self
+                .absolute_contexts
+                .as_ref()
+                .map_or(0, |records| records.len()),
         }
     }
     /// Named grid lines/areas use the same interned names as their styles.
@@ -453,6 +476,40 @@ impl LayoutTree {
             return Err(LayoutError::InvalidCalc);
         }
         Ok(self.calc.register(program))
+    }
+    // An ancestor's record can name a removed or moved descendant. Rebuild only
+    // recorded holders on the affected path before any engine id can retire;
+    // off-path records and cached answers remain valid.
+    fn invalidate_absolute_above(&mut self, mut node: NodeId) {
+        if self.absolute_contexts.is_none() {
+            return;
+        }
+        loop {
+            if self
+                .absolute_contexts
+                .as_mut()
+                .unwrap()
+                .remove(&node)
+                .is_some()
+            {
+                self.caches[self.tree.slot(node)].clear();
+                self.pending.insert(node);
+            }
+            let Some(parent) = self.tree.parent(node).unwrap() else {
+                break;
+            };
+            node = parent;
+        }
+        self.release_empty_absolute_contexts();
+    }
+    fn release_empty_absolute_contexts(&mut self) {
+        if self
+            .absolute_contexts
+            .as_ref()
+            .is_some_and(|records| records.is_empty())
+        {
+            self.absolute_contexts = None;
+        }
     }
     fn is_cheap(&self, node: NodeId) -> bool {
         self.child_counts[self.tree.slot(node)] == 0 && !self.measures.contains_key(&node)
@@ -591,6 +648,35 @@ impl EngineTree for Engine<'_, '_> {
     fn unrounded_layout(&self, node: EngineId) -> Option<Layout> {
         Some(self.owner.layouts[self.slot(node)])
     }
+    fn set_absolute_context(&mut self, node: EngineId, context: AbsoluteContext) {
+        if self.owner.speculation == 0 {
+            let node = self.node(node);
+            self.owner
+                .absolute_contexts
+                .get_or_insert_with(|| Box::new(BTreeMap::new()))
+                .insert(node, context);
+        }
+    }
+    fn clear_absolute_context(&mut self, node: EngineId) {
+        if self.owner.speculation != 0 || self.owner.absolute_contexts.is_none() {
+            return;
+        }
+        let node = self.node(node);
+        self.owner.absolute_contexts.as_mut().unwrap().remove(&node);
+    }
+    fn absolute_context(&self, node: EngineId) -> Option<&AbsoluteContext> {
+        self.owner.absolute_contexts.as_ref()?.get(&self.node(node))
+    }
+    fn take_absolute_context(&mut self, node: EngineId) -> Option<AbsoluteContext> {
+        if self.owner.speculation != 0 {
+            return None;
+        }
+        let node = self.node(node);
+        self.owner.absolute_contexts.as_mut()?.remove(&node)
+    }
+    fn keeps_placements(&self) -> bool {
+        false
+    }
     fn compute_child_layout(
         &mut self,
         node: EngineId,
@@ -675,5 +761,93 @@ mod tests {
         assert_eq!(tree.generation(), 1);
         assert_eq!(tree.layout(root).unwrap().size.width, 100.0);
         assert!(!tree.compute(root, available).unwrap());
+    }
+    #[test]
+    fn oof_records_remain_live_through_rollover_and_reused_slots() {
+        use cephal::style::{Dimension, LengthPercentageAuto, Position};
+        let mut tree = LayoutTree::new();
+        let root = tree
+            .insert(
+                None,
+                NodeKind::Element,
+                Style {
+                    position: Position::Relative,
+                    ..Style::DEFAULT
+                },
+            )
+            .unwrap();
+        let bridge = tree
+            .insert(Some(root), NodeKind::Element, Style::DEFAULT)
+            .unwrap();
+        let style = Style {
+            position: Position::Absolute,
+            size: Size {
+                width: Dimension::length(20.0),
+                height: Dimension::length(12.0),
+            },
+            inset: cephal::Rect {
+                left: LengthPercentageAuto::length(13.0),
+                top: LengthPercentageAuto::length(17.0),
+                ..cephal::Rect::splat(LengthPercentageAuto::AUTO)
+            },
+            ..Style::DEFAULT
+        };
+        let leaf = tree
+            .insert(Some(bridge), NodeKind::Element, style.clone())
+            .unwrap();
+        let available = Size {
+            width: AvailableSpace::Definite(200.0),
+            height: AvailableSpace::Definite(100.0),
+        };
+        tree.compute(root, available).unwrap();
+        assert!(tree.storage().absolute_contexts >= 2);
+        tree.generation = u32::MAX;
+        tree.mark_dirty(leaf).unwrap();
+        tree.compute(root, available).unwrap();
+        assert_eq!(tree.generation(), 1);
+        let slot = tree.tree.slot(leaf);
+        tree.remove(leaf).unwrap();
+        let replacement = tree.insert(Some(bridge), NodeKind::Element, style).unwrap();
+        assert_eq!(tree.tree.slot(replacement), slot);
+        assert_ne!(replacement, leaf);
+        tree.compute(root, available).unwrap();
+        for (&holder, context) in tree.absolute_contexts.as_ref().unwrap().iter() {
+            assert!(tree.tree.contains(holder));
+            for entry in context.entries.iter().chain(&context.surfaced) {
+                let node = match *entry {
+                    cephal::tree::OofEntry::Seed { node, .. }
+                    | cephal::tree::OofEntry::Through { node, .. } => node,
+                };
+                assert!(
+                    tree.tree
+                        .contains(tree.tree.node_for_layout_key(node.raw()))
+                );
+            }
+            assert!(context.placed.is_empty());
+            assert!(context.viewport.is_empty());
+        }
+    }
+
+    #[test]
+    fn speculative_oof_writes_cannot_allocate_or_replace_real_records() {
+        let mut owner = LayoutTree::new();
+        let node = owner
+            .insert(None, NodeKind::Element, Style::DEFAULT)
+            .unwrap();
+        let key = EngineId::new(owner.tree.layout_key(node));
+        let mut engine = Engine {
+            owner: &mut owner,
+            observed: 0,
+            measure: None,
+        };
+        engine.set_speculation(1);
+        engine.set_absolute_context(key, AbsoluteContext::default());
+        assert!(engine.owner.absolute_contexts.is_none());
+        engine.set_speculation(0);
+        engine.set_absolute_context(key, AbsoluteContext::default());
+        engine.set_speculation(1);
+        engine.clear_absolute_context(key);
+        assert!(engine.take_absolute_context(key).is_none());
+        assert!(engine.absolute_context(key).is_some());
     }
 }
