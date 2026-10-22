@@ -84,6 +84,15 @@ control. The [intrinsic measurement audit](docs/intrinsic-text-measure-luna.md)
 selects a possible existing Parley scalar metric scan, guarded by explicit
 Cephal axis/run-mode authority and unchanged glyph/error admission. Do not
 replace height-bearing measurement or infer MaxContent/full-width equivalence.
+The [scoped text audit](docs/scoped-parallel-text-next-luna.md) finds redundant
+source/geometry queries before thread scheduling: resolve both affinities from
+one neighbour pair and reuse the exact f32 boundary recurrence only for proved
+visual adjacency in one run/line. Keep bidi/wrap/hard-break fallbacks and the
+small-string direct path. The isolated implementation must pass packed-output,
+branch-census, allocation and optimized-assembly/performance gates before
+adoption. Parallel planners duplicate font and paragraph scratch; scheduling
+and variable-output merge storage require separate measured justification.
+
 
 Typed reflection must also support arbitrary inspector value entry and contained
 component/tool owners without mirroring application membership or bypassing
