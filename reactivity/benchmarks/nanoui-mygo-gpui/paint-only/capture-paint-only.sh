@@ -23,15 +23,20 @@ BASE=$(cd "$DIR/.." && pwd)
 : "${LUNA_DIRECT_FIXTURE_SHA:?set reviewed direct fixture SHA-256}"
 : "${LUNA_GPUI_CONTROL_RECORD:?set control build and pixel-preflight record}"
 : "${LUNA_GPUI_DIRECT_RECORD:?set direct build and pixel-preflight record}"
+: "${LUNA_GPUI_CONTROL_BUILD_MANIFEST:?set immutable control build manifest}"
+: "${LUNA_GPUI_DIRECT_BUILD_MANIFEST:?set immutable direct build manifest}"
 : "${LUNA_MYGO_SOURCE_TREE:?set pinned MyGo comparator checkout}"
 : "${LUNA_NANOUI_SOURCE_TREE:?set pinned NanoUI comparator checkout}"
 : "${LUNA_MYGO_RECORD:?set MyGo binary and preflight record}"
 : "${LUNA_NANOUI_RECORD:?set NanoUI binary and preflight record}"
+: "${LUNA_PEER_BUILD_MANIFEST:?set pinned MyGo/NanoUI build manifest}"
+: "${LUNA_GPUI_FEATURE_SET:?set the exact reviewed Cargo feature set from both builds}"
 : "${LUNA_RUNTIME_BACKEND_STATUS:?record reviewed actual backend selected by each app}"
 : "${LUNA_SESSION_A11Y_STATUS:?record reviewed active session accessibility status}"
 
 MYGO_COMMIT=ea23ad2975a87db9b20efe6690ffedf88f4fe4f3
 NANOUI_COMMIT=dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
+NANOUI_PATCH_SHA=c698367086a8d17feeceae6f99d0abda2fce273f35c3e4f8f0e0a32fab586224
 CONTROL_FIXTURE="$DIR/fixtures/gpui-paint-control.rs"
 DIRECT_FIXTURE="$DIR/fixtures/gpui-paint-direct.rs"
 GPUI_COMMIT=$LUNA_GPUI_EXPECTED_COMMIT
@@ -70,6 +75,22 @@ record_ok() {
   has_line "$record" "binary_sha256=$sha"
   has_line "$record" "fixture_sha256=$fixture"
   has_line "$record" "source_commit=$source"
+  has_line "$record" 'workloads=eager-0,eager-1000,eager-10000,virtual-250000'
+  has_line "$record" 'checks=observer-preflight,800x600-client,exact-marker,button-and-row-ink,one-click-exact-marker-transition'
+}
+gpui_build_manifest_ok() {
+  local manifest=$1 binary=$2 sha=$3 fixture=$4 fixture_sha=$5
+  [[ -f "$manifest" ]] || { echo "missing immutable build manifest $manifest" >&2; return 1; }
+  has_line "$manifest" "source_commit=$GPUI_COMMIT"
+  has_line "$manifest" "source_tree=$LUNA_GPUI_SOURCE_TREE"
+  has_line "$manifest" "fixture_path=$fixture"
+  has_line "$manifest" "fixture_sha256=$fixture_sha"
+  has_line "$manifest" "binary=$binary"
+  has_line "$manifest" "binary_sha256=$sha"
+  has_line "$manifest" 'profile=release'
+  has_line "$manifest" "cargo_features=$LUNA_GPUI_FEATURE_SET"
+  has_line "$manifest" 'workspace=reactivity/Cargo.toml'
+  has_line "$manifest" 'locked=true'
 }
 
 verify_source() {
@@ -126,6 +147,11 @@ verify_peer_source() {
     [[ "$changed" == build.zig ]] || {
       echo "unexpected tracked NanoUI source/config changes: ${changed:-<none>}" >&2; return 1;
     }
+    local patch_sha
+    patch_sha=$(git -C "$top" diff --binary "$commit" -- build.zig | sha256sum | cut -d' ' -f1)
+    [[ "$patch_sha" == "$NANOUI_PATCH_SHA" ]] || {
+      echo "NanoUI build.zig patch differs from the reviewed example filter" >&2; return 1;
+    }
   else
     repo_fixture=examples/luna-bench/main.go
     git -C "$top" diff --quiet "$commit" -- || {
@@ -148,6 +174,7 @@ verify_pins() {
   mygo_fixture_sha=$(sha256sum "$BASE/fixtures/mygo-main.go" | cut -d' ' -f1)
   nanoui_fixture_sha=$(sha256sum "$BASE/fixtures/nanoui-main.zig" | cut -d' ' -f1)
   nanoui_build_config_sha=$(awk -F= '$1=="build_config_sha256"{print $2}' "$LUNA_NANOUI_RECORD")
+  [[ -n "$nanoui_build_config_sha" ]] || { echo 'NanoUI preflight record lacks build_config_sha256' >&2; return 1; }
   sha_is "$LUNA_GPUI_CONTROL_BINARY" "$LUNA_GPUI_CONTROL_SHA"
   sha_is "$LUNA_GPUI_DIRECT_BINARY" "$LUNA_GPUI_DIRECT_SHA"
   sha_is "$LUNA_MYGO_BINARY" "$LUNA_MYGO_SHA"
@@ -157,10 +184,28 @@ verify_pins() {
   record_ok "$LUNA_GPUI_DIRECT_RECORD" "$LUNA_GPUI_DIRECT_SHA" "$DIRECT_FIXTURE_SHA" "$GPUI_COMMIT"
   record_ok "$LUNA_MYGO_RECORD" "$LUNA_MYGO_SHA" "$mygo_fixture_sha" "$MYGO_COMMIT"
   record_ok "$LUNA_NANOUI_RECORD" "$LUNA_NANOUI_SHA" "$nanoui_fixture_sha" "$NANOUI_COMMIT"
-  has_line "$LUNA_NANOUI_RECORD" "build_config_sha256=$nanoui_build_config_sha"
+  [[ $(sha256sum "$LUNA_NANOUI_SOURCE_TREE/build.zig" | cut -d' ' -f1) == "$nanoui_build_config_sha" ]] || {
+    echo 'NanoUI record build_config_sha256 does not match the actual build.zig' >&2; return 1;
+  }
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_source_commit=$MYGO_COMMIT"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_fixture_sha256=$mygo_fixture_sha"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_binary=$LUNA_MYGO_BINARY"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_binary_sha256=$LUNA_MYGO_SHA"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_source_commit=$NANOUI_COMMIT"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_fixture_sha256=$nanoui_fixture_sha"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_binary=$LUNA_NANOUI_BINARY"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_binary_sha256=$LUNA_NANOUI_SHA"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_build_zig_patch_sha256=$NANOUI_PATCH_SHA"
   verify_peer_source "$LUNA_MYGO_SOURCE_TREE" "$MYGO_COMMIT" "$BASE/fixtures/mygo-main.go" "$mygo_fixture_sha"
   verify_peer_source "$LUNA_NANOUI_SOURCE_TREE" "$NANOUI_COMMIT" "$BASE/fixtures/nanoui-main.zig" "$nanoui_fixture_sha" "$nanoui_build_config_sha"
   verify_source "$LUNA_GPUI_SOURCE_TREE" "$LUNA_GPUI_SOURCE_COMMIT"
+  gpui_build_manifest_ok "$LUNA_GPUI_CONTROL_BUILD_MANIFEST" "$LUNA_GPUI_CONTROL_BINARY" \
+    "$LUNA_GPUI_CONTROL_SHA" "$CONTROL_FIXTURE" "$CONTROL_FIXTURE_SHA"
+  gpui_build_manifest_ok "$LUNA_GPUI_DIRECT_BUILD_MANIFEST" "$LUNA_GPUI_DIRECT_BINARY" \
+    "$LUNA_GPUI_DIRECT_SHA" "$DIRECT_FIXTURE" "$DIRECT_FIXTURE_SHA"
+  [[ "$LUNA_GPUI_CONTROL_SHA" != "$LUNA_GPUI_DIRECT_SHA" ]] || {
+    echo 'control and direct binaries are identical; refusing an uninformative paired run' >&2; return 1;
+  }
 }
 
 [[ "$LUNA_GPUI_EXPECTED_COMMIT" == "$LUNA_GPUI_SOURCE_COMMIT" ]] || {
@@ -205,22 +250,36 @@ unset LUNA_STAGES LUNA_PREFLIGHT LUNA_SCREENSHOT_PATH || true
   echo 'observer_endpoint=X11 drawable exact marker-pixel readback after XDamage'
   echo 'profile=native-default (GPUI Auto; peer native defaults)'
   echo "gpui_source_commit=$LUNA_GPUI_SOURCE_COMMIT"
+  echo "gpui_source_tree=$LUNA_GPUI_SOURCE_TREE"
+  echo "gpui_cargo_features=$LUNA_GPUI_FEATURE_SET"
   echo "gpui_control_fixture_sha256=$CONTROL_FIXTURE_SHA"
   echo "gpui_direct_fixture_sha256=$DIRECT_FIXTURE_SHA"
   echo "mygo_source_commit=$MYGO_COMMIT"
   echo "mygo_fixture_sha256=$(sha256sum "$BASE/fixtures/mygo-main.go" | cut -d' ' -f1)"
   echo "nanoui_source_commit=$NANOUI_COMMIT"
+  echo "mygo_source_tree=$LUNA_MYGO_SOURCE_TREE"
+  echo "nanoui_source_tree=$LUNA_NANOUI_SOURCE_TREE"
   echo "nanoui_fixture_sha256=$(sha256sum "$BASE/fixtures/nanoui-main.zig" | cut -d' ' -f1)"
   echo "nanoui_build_config_sha256=$(awk -F= '$1=="build_config_sha256"{print $2}' "$LUNA_NANOUI_RECORD")"
   echo "gpui_control_binary_sha256=$LUNA_GPUI_CONTROL_SHA"
   echo "gpui_direct_binary_sha256=$LUNA_GPUI_DIRECT_SHA"
+  echo "gpui_control_binary=$LUNA_GPUI_CONTROL_BINARY"
+  echo "gpui_direct_binary=$LUNA_GPUI_DIRECT_BINARY"
   echo "mygo_binary_sha256=$LUNA_MYGO_SHA"
   echo "nanoui_binary_sha256=$LUNA_NANOUI_SHA"
+  echo "mygo_binary=$LUNA_MYGO_BINARY"
+  echo "nanoui_binary=$LUNA_NANOUI_BINARY"
   echo "observer_binary_sha256=$LUNA_OBSERVER_SHA"
   echo "runtime_backend_status=$LUNA_RUNTIME_BACKEND_STATUS"
   echo "session_accessibility_status=$LUNA_SESSION_A11Y_STATUS"
   echo "gpui_control_record_sha256=$(sha256sum "$LUNA_GPUI_CONTROL_RECORD" | cut -d' ' -f1)"
   echo "gpui_direct_record_sha256=$(sha256sum "$LUNA_GPUI_DIRECT_RECORD" | cut -d' ' -f1)"
+  echo "gpui_control_build_manifest_sha256=$(sha256sum "$LUNA_GPUI_CONTROL_BUILD_MANIFEST" | cut -d' ' -f1)"
+  echo "gpui_direct_build_manifest_sha256=$(sha256sum "$LUNA_GPUI_DIRECT_BUILD_MANIFEST" | cut -d' ' -f1)"
+  echo "peer_build_manifest_sha256=$(sha256sum "$LUNA_PEER_BUILD_MANIFEST" | cut -d' ' -f1)"
+  echo "gpui_control_build_manifest=$LUNA_GPUI_CONTROL_BUILD_MANIFEST"
+  echo "gpui_direct_build_manifest=$LUNA_GPUI_DIRECT_BUILD_MANIFEST"
+  echo "peer_build_manifest=$LUNA_PEER_BUILD_MANIFEST"
   echo "mygo_record_sha256=$(sha256sum "$LUNA_MYGO_RECORD" | cut -d' ' -f1)"
   echo "nanoui_record_sha256=$(sha256sum "$LUNA_NANOUI_RECORD" | cut -d' ' -f1)"
   echo "starts=$LUNA_STARTS"

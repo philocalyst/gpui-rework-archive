@@ -56,14 +56,18 @@ owner rerun there, report it; do not label that cell as a zero-work patch.
 ## Planned cells and protocol
 
 Run eager 0, 1,000, and 10,000 rows plus virtual 250,000 rows for the GPUI
-control, GPUI direct-port candidate, MyGo, and NanoUI: 16 cells. Before any
-capture, require per-binary SHA-256 guards, exact peer source pins, exact GPUI
-source/build manifests, fixture hashes, reviewed 800×600 pixel screenshots,
-visible title/text checks, the marker's exact red/green pixels, and row-count
-preflight. `capture-paint-only.sh` supports a guard-only pass and validates
-every cell before creating output or launching the observer. Captures remain
-blocked until the integration build exists and a reviewer has checked the
-preflight records.
+control, GPUI direct-port candidate, MyGo, and NanoUI: 16 cells. The GPUI pair
+is the within-framework attribution; MyGo and NanoUI provide native full-frame
+context. Before any capture, require per-binary SHA-256 guards, exact peer
+source pins, exact GPUI source/build manifests, fixture hashes, reviewed
+800×600 pixel screenshots, visible title/text checks, the marker's exact
+red/green pixels, and row-count preflight for all four workloads, including
+eager 10,000. The guard pins the exact NanoUI `build.zig` patch SHA, requires
+separate GPUI build manifests from the same source tree and feature set, and
+rejects identical control/direct binary hashes. `capture-paint-only.sh`
+supports a guard-only pass and validates every cell before creating output or
+launching the observer. Captures remain blocked until the integration build
+exists and a reviewer has checked all preflight records.
 
 Use 100 fresh starts and 10 click transitions per start, giving 1,000 click
 samples per cell; take the existing five 750 ms idle samples only as a small
@@ -74,6 +78,16 @@ framework; this means GPUI `Auto`, MyGo's default Linux surface choice, and
 NanoUI's GTK/Cairo CPU surface, not renderer equivalence. Keep these backend
 differences in the report.
 
+The full run contains 1,600 fresh process launches, 16,000 marker clicks, and
+60 seconds of deliberate idle sampling, before application startup, rendering,
+and X-server acknowledgement time. Reserve a 15-minute quiet window; a
+reasonable planning estimate is 8–12 minutes, based on the previous 0/1K/
+virtual run rather than timed eager-10K results. The observer has a 25-second
+initial-pixel deadline and a 5-second exact-marker deadline per click. The
+shell runner has no separate global timeout: a timeout fails the cell and
+leaves a partial raw file, which must remain an incomplete campaign rather
+than be merged with a later attempt.
+
 When the GPUI source-port integration lands, build both examples from the
 same immutable production source tree and lockfile into separate targets.
 Inject each fixture only as the two example files recorded in its build
@@ -82,8 +96,13 @@ source/configuration. It also checks exact MyGo and NanoUI commits, the only
 allowed injected peer example files, and the NanoUI `build.zig` SHA because
 that pinned source needs an example-list edit to build the fixture. The MyGo
 and NanoUI records must carry `status=pass`, `binary_sha256`, `fixture_sha256`,
-`source_commit`; the NanoUI record must also carry `build_config_sha256`.
-Record the GPUI fixture SHAs, complete source commit/tree, Cargo feature set,
+`source_commit`; the NanoUI record must also carry `build_config_sha256`
+matching the actual `build.zig`. The peer build manifest pins both peer binary
+paths and hashes, both source and fixture pins, and the reviewed NanoUI patch
+digest. Each GPUI build manifest carries `source_commit`, `source_tree`, exact
+`fixture_path`/`fixture_sha256`, binary path/hash, `profile=release`, the exact
+`cargo_features`, `workspace=reactivity/Cargo.toml`, and `locked=true`. Record
+the GPUI fixture SHAs, complete source commit/tree, Cargo feature set,
 executable SHAs, peer fixture/source SHAs, observer SHA, preflight record,
 and selected renderer/session accessibility status. The wrapper supplies
 explicit binary paths and enables the existing `run-one.sh` SHA guard; that
@@ -91,7 +110,8 @@ guard alone does not force a path. `LUNA_GUARD_ONLY=1` validates all 16 cells
 without making an output directory or starting the observer.
 
 Pass the full variable set named at the top of `capture-paint-only.sh` via
-the shell environment. In particular, select `LUNA_GPUI_SOURCE_TREE` as the
+the shell environment, including both GPUI build-manifest paths and the peer
+build-manifest path. In particular, select `LUNA_GPUI_SOURCE_TREE` as the
 `reactivity` subdirectory inside the cleanroom worktree (its Git top level is
 the parent), point both GPUI binaries at immutable files, and provide the
 reviewed build/preflight record paths. Set `LUNA_DISPLAY` to the private
