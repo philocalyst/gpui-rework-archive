@@ -56,7 +56,7 @@ fn apply<M: View + 'static>(
         None => assert!(delta.is_none(), "transition must use full fallback"),
     }
     let update = if let Some(indices) = delta {
-        project_sparse(&sheet, indices, &cohort(win))
+        project_sparse(&sheet, indices, &[], &cohort(win))
     } else {
         full(win)
     };
@@ -548,7 +548,7 @@ fn sparse_transition_measurements() {
             black_box(project(&sheet, state, "Oracle", &cohort(&win)));
         });
         report("leaf_projection", count, true, || {
-            let update = project_sparse(&sheet, delta, &cohort(&win));
+            let update = project_sparse(&sheet, delta, &[], &cohort(&win));
             assert_eq!(update.nodes.len(), 1);
             black_box(update);
         });
@@ -561,7 +561,7 @@ fn sparse_transition_measurements() {
         });
         report("leaf_projection_consumer", count, true, || {
             tree.update_and_process_changes(
-                project_sparse(&sheet, delta, &cohort(&win)),
+                project_sparse(&sheet, delta, &[], &cohort(&win)),
                 &mut Changes::default(),
             );
         });
@@ -875,5 +875,123 @@ fn observer_enabled_after_full_candidate_never_invents_empty_paint_delta() {
         .unwrap();
         acknowledge(&mut win);
         apply(&win, base, &mut tree, None);
+    }
+}
+
+struct SparseInputs {
+    value: Signal<String>,
+    color: Signal<crate::Color>,
+}
+impl SparseInputs {
+    const VALUE: Source<Self, String> =
+        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    const COLOR: Source<Self, crate::Color> =
+        Source::new(FieldId::new(2), "color", |m| &m.color, |m| &mut m.color);
+}
+impl View for SparseInputs {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::VALUE).direct(Self::COLOR)
+    }
+    fn view(&self) -> El<'_> {
+        column((0..999).map(|i| {
+            if i == 500 {
+                text_input(&self.value).w(100).h(20)
+            } else {
+                div().w(1).h(1)
+            }
+        }))
+        .w(120)
+        .bg(&self.color)
+    }
+}
+#[test]
+fn thousand_node_paint_and_one_input_edit_keep_cohort_frontier_bounded() {
+    let mut win = Win::with_size(
+        SparseInputs {
+            value: Signal::new("before".into()),
+            color: Signal::new(crate::Color::BLACK),
+        },
+        120,
+        1200,
+    )
+    .unwrap();
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let storage = cohort.storage();
+    let visits = cohort.full_visits;
+    let clones = cohort.source_clones;
+    assert_eq!(visits, 2000);
+    let mut base = win.accessibility_state().unwrap();
+    let mut tree = Tree::new(
+        project(&win.accessibility_sheet().unwrap(), base, "Sparse", &cohort),
+        true,
+    );
+    win.accessibility_observe(true).unwrap();
+    win.set(SparseInputs::COLOR, crate::Color::WHITE).unwrap();
+    let state = win.accessibility_state().unwrap();
+    let indices = win.accessibility_delta(base, state).unwrap();
+    assert!(indices.is_empty());
+    let allocation = allocation_counter::measure(|| {
+        let relink = cohort.update_delta(&win, indices).unwrap();
+        assert!(relink.parents.is_empty() && !relink.root);
+    });
+    assert_eq!(allocation.count_total, 0);
+    assert_eq!(cohort.storage(), storage);
+    assert_eq!(
+        (
+            cohort.full_visits,
+            cohort.source_clones,
+            cohort.sparse_visits
+        ),
+        (visits, clones, 0)
+    );
+    base = state;
+    win.set(SparseInputs::VALUE, "after!".into()).unwrap();
+    let state = win.accessibility_state().unwrap();
+    let indices = win.accessibility_delta(base, state).unwrap();
+    assert_eq!(indices.len(), 1);
+    let mut relink = None;
+    let allocation =
+        allocation_counter::measure(|| relink = Some(cohort.update_delta(&win, indices).unwrap()));
+    let relink = relink.unwrap();
+    // One small immediate-parent frontier allocation; the input table survives.
+    assert_eq!(allocation.count_total, 1);
+    assert_eq!(cohort.storage(), storage);
+    assert_eq!(
+        (
+            cohort.full_visits,
+            cohort.source_clones,
+            cohort.sparse_visits
+        ),
+        (visits, clones + 1, 2)
+    );
+    assert_eq!(relink.parents.len(), 1);
+    let update = project_sparse(
+        &win.accessibility_sheet().unwrap(),
+        indices,
+        &relink.parents,
+        &cohort,
+    );
+    assert_eq!(update.nodes.len(), 3);
+    tree.update_and_process_changes(update, &mut Changes::default());
+    let full = project(
+        &win.accessibility_sheet().unwrap(),
+        state,
+        "Sparse",
+        &cohort,
+    );
+    let ids = full.nodes.iter().map(|(id, _)| *id).collect::<Vec<_>>();
+    let oracle = Tree::new(full, true);
+    for id in ids {
+        let actual = tree
+            .state()
+            .node_by_tree_local_id(id, TreeId::ROOT)
+            .unwrap();
+        let expected = oracle
+            .state()
+            .node_by_tree_local_id(id, TreeId::ROOT)
+            .unwrap();
+        assert_eq!(actual.data(), expected.data());
+        assert_eq!(actual.parent_id(), expected.parent_id());
     }
 }

@@ -149,6 +149,7 @@ impl Node {
             let units = bytes.len();
             // Append once, after the prefix is complete; never shift it at an
             // escape. Free the construction scratch after freezing one payload.
+            bytes.reserve_exact(overflows.len());
             bytes.extend_from_slice(&overflows);
             PropertyValue::ExtendedCharacterLengths(ExtendedCharacterLengths {
                 units,

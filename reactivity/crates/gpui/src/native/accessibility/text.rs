@@ -19,6 +19,17 @@ pub(super) struct Cohort {
     inputs: Vec<Input>,
     next: u64,
     window: Option<std::num::NonZeroU64>,
+    #[cfg(test)]
+    pub full_visits: usize,
+    #[cfg(test)]
+    pub sparse_visits: usize,
+    #[cfg(test)]
+    pub source_clones: usize,
+}
+#[derive(Default)]
+pub(super) struct Relink {
+    pub parents: Vec<u32>,
+    pub root: bool,
 }
 impl Default for Cohort {
     fn default() -> Self {
@@ -26,10 +37,24 @@ impl Default for Cohort {
             inputs: Vec::new(),
             next: INPUT_IDS,
             window: None,
+            #[cfg(test)]
+            full_visits: 0,
+            #[cfg(test)]
+            sparse_visits: 0,
+            #[cfg(test)]
+            source_clones: 0,
         }
     }
 }
 impl Cohort {
+    #[cfg(test)]
+    pub fn storage(&self) -> (usize, usize, usize) {
+        (
+            self.inputs.as_ptr() as usize,
+            self.inputs.capacity(),
+            self.inputs.len(),
+        )
+    }
     pub fn clear(&mut self) {
         self.inputs = Vec::new();
     }
@@ -48,12 +73,22 @@ impl Cohort {
         }
         let sheet = owner.accessibility_sheet()?;
         let mut count = 0;
-        sheet.visit(|part| count += usize::from(part.value().is_some()));
+        sheet.visit(|part| {
+            #[cfg(test)]
+            {
+                self.full_visits += 1;
+            }
+            count += usize::from(part.value().is_some());
+        });
         let mut inputs = Vec::with_capacity(count);
         let mut next = self.next;
         let mut changed = count != self.inputs.len();
         let mut exhausted = false;
         sheet.visit(|part| {
+            #[cfg(test)]
+            {
+                self.full_visits += 1;
+            }
             let Some(value) = part.value() else {
                 return;
             };
@@ -93,7 +128,100 @@ impl Cohort {
         self.inputs = inputs;
         self.next = next;
         self.window = Some(window);
+        #[cfg(test)]
+        {
+            self.source_clones += count;
+        }
         Ok(changed)
+    }
+    fn replacement<M: View + 'static, L: crate::remote::LaneSet<M>>(
+        &self,
+        owner: &Win<M, L>,
+        part: Part<'_>,
+    ) -> Result<Option<(usize, Option<FieldId>, u32)>, Error> {
+        let Some(value) = part.value() else {
+            return Ok(None);
+        };
+        let index = self
+            .inputs
+            .binary_search_by_key(&part.native_id(), |input| input.identity)
+            .map_err(|_| Error::StaleTarget)?;
+        let lease = part.text_lease().unwrap();
+        let field = owner
+            .accessibility_input(part.target())
+            .ok()
+            .filter(|(_, current)| std::ptr::eq::<str>(lease.as_ref(), current.as_ref()))
+            .map(|(field, _)| field);
+        let previous = &self.inputs[index];
+        if previous.field == field && std::ptr::eq::<str>(previous.value.as_ref(), lease.as_ref()) {
+            Ok(None)
+        } else {
+            Ok(Some((index, field, runs(value).count() as u32)))
+        }
+    }
+    /// An exact semantic frontier needs no full-sheet discovery or new table.
+    /// Preflight ID capacity before mutating; only a real retirement needs the
+    /// second bounded pass and an immediate-parent relink in native output.
+    pub fn update_delta<M: View + 'static, L: crate::remote::LaneSet<M>>(
+        &mut self,
+        owner: &Win<M, L>,
+        indices: &[u32],
+    ) -> Result<Relink, Error> {
+        if self.window != Some(owner.accessibility_namespace()?) {
+            return Err(Error::StaleTarget);
+        }
+        let sheet = owner.accessibility_sheet()?;
+        let mut end = self.next;
+        for &index in indices {
+            #[cfg(test)]
+            {
+                self.sparse_visits += 1;
+            }
+            let part = sheet.part_at(index as usize).ok_or(Error::StaleTarget)?;
+            if let Some((_, _, count)) = self.replacement(owner, part)? {
+                end = end
+                    .checked_add(1 + u64::from(count))
+                    .ok_or(Error::ResourceLimit)?;
+            }
+        }
+        let mut relink = Relink::default();
+        if end == self.next {
+            return Ok(relink);
+        }
+        for &index in indices {
+            #[cfg(test)]
+            {
+                self.sparse_visits += 1;
+            }
+            let part = sheet.part_at(index as usize).unwrap();
+            if let Some((slot, field, runs)) = self.replacement(owner, part)? {
+                let base = self.next;
+                self.next = self
+                    .next
+                    .checked_add(1 + u64::from(runs))
+                    .expect("preflight checked the same frozen frontier");
+                self.inputs[slot] = Input {
+                    identity: part.native_id(),
+                    field,
+                    value: part.text_lease().unwrap().clone(),
+                    base,
+                    runs,
+                };
+                #[cfg(test)]
+                {
+                    self.source_clones += 1;
+                }
+                if let Some(parent) = part.native_parent_index() {
+                    relink.parents.push(parent as u32);
+                } else {
+                    relink.root = true;
+                }
+            }
+        }
+        debug_assert_eq!(self.next, end);
+        relink.parents.sort_unstable();
+        relink.parents.dedup();
+        Ok(relink)
     }
     fn input(&self, identity: u64) -> Option<&Input> {
         self.inputs
