@@ -110,6 +110,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         exact: Option<FieldId>,
         edit: impl FnOnce(&mut M, &Sources<M>, &mut L) -> Result<(), Error>,
     ) -> Result<Commit, Error> {
+        self.operation_with_selection(exact, edit, None)
+    }
+    pub(super) fn operation_with_selection(
+        &mut self,
+        exact: Option<FieldId>,
+        edit: impl FnOnce(&mut M, &Sources<M>, &mut L) -> Result<(), Error>,
+        selection: Option<SelectionIntent>,
+    ) -> Result<Commit, Error> {
         self.live()?;
         let epoch = self
             .source_epoch
@@ -127,9 +135,16 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.runtime.source_epoch = epoch;
         self.runtime.counters.source_operations += 1;
         self.runtime.changed_nodes = 0;
-        self.after_source(exact)
+        self.after_source_with_selection(exact, selection)
     }
     fn after_source(&mut self, exact: Option<FieldId>) -> Result<Commit, Error> {
+        self.after_source_with_selection(exact, None)
+    }
+    fn after_source_with_selection(
+        &mut self,
+        exact: Option<FieldId>,
+        selection: Option<SelectionIntent>,
+    ) -> Result<Commit, Error> {
         let questions_changed = match catch_unwind(AssertUnwindSafe(|| {
             self.lanes.refresh(
                 &self.runtime.model,
@@ -139,6 +154,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         })) {
             Ok(Ok(changed)) => changed,
             Ok(Err(error)) => {
+                self.runtime.clear_editing();
                 self.runtime.logical_valid = false;
                 self.runtime.focused = None;
                 return Err(error);
@@ -148,12 +164,20 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 return Err(Error::OwnerPanicked);
             }
         };
-        self.after_admission(exact, questions_changed)
+        self.after_admission_with_selection(exact, questions_changed, selection)
     }
     pub(super) fn after_admission(
         &mut self,
         exact: Option<FieldId>,
         questions_changed: bool,
+    ) -> Result<Commit, Error> {
+        self.after_admission_with_selection(exact, questions_changed, None)
+    }
+    fn after_admission_with_selection(
+        &mut self,
+        exact: Option<FieldId>,
+        questions_changed: bool,
+        selection: Option<SelectionIntent>,
     ) -> Result<Commit, Error> {
         let exact = match exact {
             Some(field)
@@ -200,14 +224,16 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             }
         };
         if let Err(error) = result {
+            self.runtime.clear_editing();
             self.runtime.logical_valid = false;
             self.runtime.focused = None;
             return Err(error);
         }
-        if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() {
+        let selection_changed = self.runtime.reconcile_editing(selection)?;
+        if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() && !selection_changed {
             return Ok(self.commit());
         }
-        if result == Ok(PatchOutcome::Metadata) && !self.inspector_enabled() {
+        if result == Ok(PatchOutcome::Metadata) && !self.inspector_enabled() && !selection_changed {
             return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
         }
         self.present()
@@ -251,40 +277,5 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.runtime.counters.source_operations += 1;
         self.runtime.changed_nodes = 0;
         self.after_source(exact)
-    }
-    pub(super) fn edit_text(
-        &mut self,
-        target: Target,
-        edit: impl FnOnce(&mut String),
-    ) -> Result<Commit, Error> {
-        self.live()?;
-        let index = self.resolve_index(target)?;
-        let node = &self.runtime.nodes[index];
-        if node.kind() != NodeKind::Input {
-            return Err(Error::NotInput);
-        }
-        let field = node
-            .text_slot()
-            .get(&self.runtime.texts)
-            .and_then(|text| text.field)
-            .ok_or(Error::UnregisteredInput { node: index })?;
-        let codec = self.runtime.fanout[&field].codec();
-        let mut input = match catch_unwind(AssertUnwindSafe(|| {
-            self.runtime
-                .sources
-                .read_text(&self.runtime.model, field, codec)
-                .map(|text| text.into_owned())
-        })) {
-            Ok(result) => result?,
-            Err(_) => {
-                self.poison();
-                return Err(Error::OwnerPanicked);
-            }
-        };
-        edit(&mut input);
-        self.operation(Some(field), move |model, sources| {
-            sources.write_text(model, field, input, codec)?;
-            Ok(())
-        })
     }
 }

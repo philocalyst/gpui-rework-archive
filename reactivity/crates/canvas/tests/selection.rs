@@ -26,6 +26,73 @@ fn rectangles(layout: &gpui_canvas::TextLayout, range: TextSelection) -> Vec<(Re
     result
 }
 
+#[test]
+fn discarding_interaction_keeps_glyph_storage_source_runs_and_lines() {
+    let font = FontFace::bundled().unwrap();
+    for (text, width) in [
+        ("office e\u{301}", None),
+        ("abc אבג\r\nxyz", Some(45.)),
+        ("", None),
+    ] {
+        let mut layout = font.shaper().shape_interactive(text, 18., width).unwrap();
+        let pointer = layout.glyphs().as_ptr();
+        let glyphs = layout
+            .glyphs()
+            .iter()
+            .map(|g| (g.id, g.cluster, g.x, g.baseline))
+            .collect::<Vec<_>>();
+        let lines = layout
+            .lines()
+            .map(|line| (line.text_range(), line.bounds(), line.baseline()))
+            .collect::<Vec<_>>();
+        let runs = layout
+            .runs()
+            .filter(|run| !run.glyphs().is_empty())
+            .map(|run| {
+                (
+                    run.text_range(),
+                    run.direction(),
+                    run.line(),
+                    run.glyphs().len(),
+                )
+            })
+            .collect::<Vec<_>>();
+        assert!(layout.caret_bounds(position(0, A::Downstream)).is_some());
+        layout.discard_interaction();
+        assert!(layout.caret_bounds(position(0, A::Downstream)).is_none());
+        assert_eq!(layout.text_len(), text.len());
+        assert_eq!(layout.glyphs().as_ptr(), pointer);
+        assert_eq!(
+            layout
+                .glyphs()
+                .iter()
+                .map(|g| (g.id, g.cluster, g.x, g.baseline))
+                .collect::<Vec<_>>(),
+            glyphs
+        );
+        assert_eq!(
+            layout
+                .lines()
+                .map(|line| (line.text_range(), line.bounds(), line.baseline()))
+                .collect::<Vec<_>>(),
+            lines
+        );
+        assert_eq!(
+            layout
+                .runs()
+                .filter(|run| !run.glyphs().is_empty())
+                .map(|run| (
+                    run.text_range(),
+                    run.direction(),
+                    run.line(),
+                    run.glyphs().len()
+                ))
+                .collect::<Vec<_>>(),
+            runs
+        );
+    }
+}
+
 // Compare unions, not callback segmentation: Parley walks visual runs while
 // Canvas streams source intervals. Sampling every unique edge interval detects
 // both holes and duplicate coverage without depending on either segmentation.

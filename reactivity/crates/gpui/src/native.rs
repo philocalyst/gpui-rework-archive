@@ -900,6 +900,12 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         };
         let key = match key {
             NativeKey::Named(NamedKey::Backspace) => Key::Backspace,
+            NativeKey::Named(NamedKey::ArrowLeft) => Key::Left {
+                extend: self.modifiers.shift_key(),
+            },
+            NativeKey::Named(NamedKey::ArrowRight) => Key::Right {
+                extend: self.modifiers.shift_key(),
+            },
             NativeKey::Named(NamedKey::Enter) => Key::Enter,
             NativeKey::Named(NamedKey::Space) => Key::Space,
             NativeKey::Named(NamedKey::Tab) if self.modifiers.shift_key() => Key::ReverseTab,
@@ -918,11 +924,11 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         };
         let result = owner.pointer_event(&mut self.pointer, event);
         match result {
-            Ok(_)
+            Ok(commit)
                 if matches!(
                     event,
                     PointerEvent::Move(_) | PointerEvent::Leave | PointerEvent::Cancel
-                ) =>
+                ) && commit.changed_nodes == 0 =>
             {
                 Ok(())
             }
@@ -977,7 +983,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             WindowEvent::Focused(false) => {
                 self.pointer = PointerSession::default();
                 if let Some(owner) = &mut self.owner {
-                    owner.clear_focus()?;
+                    let result = owner.clear_focus();
+                    self.input_result(result)?;
                 }
                 self.modifiers = ModifiersState::empty();
             }
@@ -1229,6 +1236,7 @@ mod tests {
         edited_during_upgrade: bool,
         cancelled_generation: bool,
         exposure_submissions: Option<u64>,
+        selection_stage: u8,
     }
     fn exercise_window_packet_namespaces(gpu: &mut GpuSurface) {
         struct Fill(crate::Color);
@@ -1421,6 +1429,95 @@ mod tests {
                         .unwrap();
                 }
                 1 => {
+                    // Each step waits for the actual native presentation above.
+                    // Exercise the production modifier adapter, range painting
+                    // and replacement through the same input path as the host.
+                    if self.selection_stage == 0 {
+                        self.host.modifiers = ModifiersState::SHIFT;
+                        self.host
+                            .key_input(&NativeKey::Named(NamedKey::ArrowLeft), None)
+                            .unwrap();
+                        self.host.modifiers = ModifiersState::empty();
+                        let owner = self.host.owner.as_ref().unwrap();
+                        let selection = owner.selection(owner.input()).unwrap();
+                        assert_eq!(selection.anchor.offset.byte(), 13);
+                        assert_eq!(selection.focus.offset.byte(), 12);
+                        self.selection_stage = 1;
+                        return;
+                    }
+                    if self.selection_stage == 1 {
+                        if let Some(Graphics::ReferenceCpu(surface, _)) = &mut self.host.graphics {
+                            let expected = self
+                                .host
+                                .owner
+                                .as_mut()
+                                .unwrap()
+                                .with_pixels(|pixels, _, _| {
+                                    pixels
+                                        .chunks_exact(4)
+                                        .map(|p| {
+                                            (u32::from(p[0]) << 16)
+                                                | (u32::from(p[1]) << 8)
+                                                | u32::from(p[2])
+                                        })
+                                        .collect::<Vec<_>>()
+                                })
+                                .unwrap();
+                            assert_eq!(surface.fetch().unwrap(), expected);
+                        }
+                        self.host
+                            .key_input(&NativeKey::Character("I".into()), Some("I"))
+                            .unwrap();
+                        let owner = self.host.owner.as_ref().unwrap();
+                        let selection = owner.selection(owner.input()).unwrap();
+                        assert_eq!(selection.anchor.offset.byte(), 13);
+                        assert_eq!(selection.focus.offset.byte(), 13);
+                        assert!(owner.contains_text("Ship new GPUI").unwrap());
+                        self.selection_stage = 2;
+                        return;
+                    }
+                    if self.selection_stage == 2 || self.selection_stage == 3 {
+                        let input = owner.input();
+                        let bounds = sheet
+                            .nodes
+                            .iter()
+                            .find(|node| node.target == Some(input))
+                            .unwrap()
+                            .rect();
+                        let x = if self.selection_stage == 2 {
+                            bounds.x + 1.
+                        } else {
+                            bounds.x + bounds.width - 1.
+                        };
+                        self.host
+                            .pointer_input(PointerEvent::Move(Point {
+                                x,
+                                y: bounds.y + bounds.height * 0.5,
+                            }))
+                            .unwrap();
+                        if self.selection_stage == 2 {
+                            self.host.pointer_input(PointerEvent::Press).unwrap();
+                            let owner = self.host.owner.as_ref().unwrap();
+                            assert_eq!(owner.focused().unwrap(), Some(input));
+                            assert_eq!(owner.selection(input).unwrap().anchor.offset.byte(), 0);
+                        }
+                        self.selection_stage += 1;
+                        return;
+                    }
+                    if self.selection_stage == 4 {
+                        let selection = owner.selection(owner.input()).unwrap();
+                        assert_eq!(selection.anchor.offset.byte(), 0);
+                        assert_eq!(selection.focus.offset.byte(), 13);
+                        self.host.pointer_input(PointerEvent::Release).unwrap();
+                        self.host
+                            .key_input(
+                                &NativeKey::Character("Ship new GPUI".into()),
+                                Some("Ship new GPUI"),
+                            )
+                            .unwrap();
+                        self.selection_stage = 5;
+                        return;
+                    }
                     let target = owner.button("Add");
                     let bounds = sheet
                         .nodes
@@ -1448,6 +1545,16 @@ mod tests {
                             }))
                             .unwrap();
                         self.host.pointer_input(PointerEvent::Press).unwrap();
+                        // Press can publish removal of the input's focused
+                        // caret. The invalidated samples below must be idle.
+                        let source_epoch = self
+                            .host
+                            .owner
+                            .as_ref()
+                            .unwrap()
+                            .snapshot()
+                            .unwrap()
+                            .source_epoch;
                         self.host.window_event(event_loop, &invalidation).unwrap();
                         assert_eq!(self.host.pointer.position(), None);
                         // Resize detaches coordinate authority. Exercise a
@@ -1470,7 +1577,7 @@ mod tests {
                                 .snapshot()
                                 .unwrap()
                                 .source_epoch,
-                            sheet.source_epoch
+                            source_epoch
                         );
                     }
                     self.host
@@ -1807,6 +1914,7 @@ mod tests {
                 edited_during_upgrade: false,
                 cancelled_generation: false,
                 exposure_submissions: None,
+                selection_stage: 0,
             };
             let (mut driver, wake) = Driver::new(&event_loop, script);
             driver.host_mut().host.wake = Some(wake);

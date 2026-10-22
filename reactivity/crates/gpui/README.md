@@ -39,6 +39,10 @@ Direct typed style sources and borrowed Flex fields use the same public ports;
 see [style inputs and limits](STYLE_PORTS.md). The `reactive_styles` example also
 runs headlessly with no native feature.
 
+Inputs support [grapheme-safe selection and replacement](TEXT_SELECTION.md),
+pointer dragging, visual arrows with Shift extension, and actual selection and
+caret painting through the ordinary window and native input paths.
+
 Linux can instead enable `wayland`; macOS/Windows use `desktop`.
 These normal desktop profiles include the real native AccessKit adapter.
 `native`, `x11-minimal` and `wayland-minimal` are explicitly AT-disabled transport

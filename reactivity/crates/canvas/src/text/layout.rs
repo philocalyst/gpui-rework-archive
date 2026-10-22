@@ -179,4 +179,36 @@ impl TextLayout {
         self.caret_bounds(selection.anchor).is_some()
             && self.caret_bounds(selection.focus).is_some()
     }
+
+    /// Release opt-in caret geometry while preserving the canonical glyphs,
+    /// fonts and placement. Single primary-font LTR metadata is folded back
+    /// into the ordinary compact layout when its tail fits the existing slot.
+    pub fn discard_interaction(&mut self) {
+        let Some(map) = &mut self.mapping else {
+            return;
+        };
+        map.carets = None;
+        let simple = map.lines.len() == 1
+            && map.runs.len() <= 1
+            && map.runs.iter().all(|run| {
+                run.font == FontSlot(0)
+                    && run.direction == TextDirection::LeftToRight
+                    && run.start == 0
+                    && run.end == map.len
+            });
+        if simple {
+            let encoded = match self.glyphs.last_mut() {
+                Some(last) => map
+                    .len
+                    .checked_sub(last.cluster)
+                    .and_then(|tail| u8::try_from(tail).ok())
+                    .map(|tail| last.simple_tail_bytes = tail)
+                    .is_some(),
+                None => map.len == 0,
+            };
+            if encoded {
+                self.mapping = None;
+            }
+        }
+    }
 }
