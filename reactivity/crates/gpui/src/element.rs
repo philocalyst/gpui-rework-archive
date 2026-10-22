@@ -57,12 +57,12 @@ impl NodeKind {
 /// Ordinary method items are zero-sized captures, so their Box needs no allocation.
 pub(crate) struct Handler(Box<dyn Route>);
 
+pub(crate) enum Admission {
+    Model { exact: Option<FieldId> },
+    Window(crate::runtime::inspector::WindowAction),
+}
 trait Route {
-    fn window_action(&self) -> Option<crate::runtime::inspector::WindowAction> {
-        None
-    }
-    fn validate(&self, receiver: &dyn Any, sources: &dyn Any)
-    -> Result<Option<FieldId>, BindError>;
+    fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError>;
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
     fn owner_scope(&self, _receiver: &dyn Any, _sources: &dyn Any) -> Result<u32, BindError> {
         Ok(0)
@@ -70,18 +70,27 @@ trait Route {
 }
 
 impl Handler {
-    pub(crate) fn window_action(&self) -> Option<crate::runtime::inspector::WindowAction> {
-        self.0.window_action()
-    }
     pub(crate) fn window(action: crate::runtime::inspector::WindowAction) -> Self {
         Self(Box::new(action))
     }
+    pub(crate) fn admit(
+        &self,
+        receiver: &dyn Any,
+        sources: &dyn Any,
+    ) -> Result<Admission, BindError> {
+        self.0.admit(receiver, sources)
+    }
+    // Component projections admit only model-relative actions. A window effect
+    // has no child receiver and cannot acquire authority from a projector.
     pub(crate) fn validate(
         &self,
         receiver: &dyn Any,
         sources: &dyn Any,
     ) -> Result<Option<FieldId>, BindError> {
-        self.0.validate(receiver, sources)
+        match self.admit(receiver, sources)? {
+            Admission::Model { exact } => Ok(exact),
+            Admission::Window(_) => Err(BindError::ReceiverMismatch),
+        }
     }
 
     pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
@@ -124,11 +133,7 @@ struct ComponentRoute<P, C> {
     handler: Handler,
 }
 impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
-    fn validate(
-        &self,
-        receiver: &dyn Any,
-        sources: &dyn Any,
-    ) -> Result<Option<FieldId>, BindError> {
+    fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError> {
         let parent = receiver
             .downcast_ref::<P>()
             .ok_or(BindError::ReceiverMismatch)?;
@@ -137,6 +142,7 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
             .ok_or(BindError::ReceiverMismatch)?;
         self.component
             .validate_handler(parent, sources, &self.handler)
+            .map(|exact| Admission::Model { exact })
     }
     fn owner_scope(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<u32, BindError> {
         let parent = receiver
@@ -163,9 +169,9 @@ struct MethodRoute<M, F> {
 }
 
 impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
-    fn validate(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Option<FieldId>, BindError> {
+    fn admit(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Admission, BindError> {
         if receiver.is::<M>() {
-            Ok(None)
+            Ok(Admission::Model { exact: None })
         } else {
             Err(BindError::ReceiverMismatch)
         }
@@ -186,11 +192,7 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
 // exclusive projector agreement before exposing a mutable value to the callback.
 // The runtime must validate before exact-source admission.
 impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
-    fn validate(
-        &self,
-        receiver: &dyn Any,
-        sources: &dyn Any,
-    ) -> Result<Option<FieldId>, BindError> {
+    fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError> {
         let receiver = receiver
             .downcast_ref::<M>()
             .ok_or(BindError::ReceiverMismatch)?;
@@ -198,7 +200,9 @@ impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
             .downcast_ref::<Sources<M>>()
             .ok_or(BindError::ReceiverMismatch)?;
         self.validate_registered(receiver, sources)?;
-        Ok(Some(self.field_id()))
+        Ok(Admission::Model {
+            exact: Some(self.field_id()),
+        })
     }
 
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
@@ -1030,11 +1034,8 @@ tuples!(A SA a,B SB b,C SC c,D SD d,E SE e,F SF f,G SG g);
 tuples!(A SA a,B SB b,C SC c,D SD d,E SE e,F SF f,G SG g,H SH h);
 
 impl Route for crate::runtime::inspector::WindowAction {
-    fn window_action(&self) -> Option<Self> {
-        Some(*self)
-    }
-    fn validate(&self, _: &dyn Any, _: &dyn Any) -> Result<Option<FieldId>, BindError> {
-        Ok(None)
+    fn admit(&self, _: &dyn Any, _: &dyn Any) -> Result<Admission, BindError> {
+        Ok(Admission::Window(*self))
     }
     fn invoke(&self, _: &mut dyn Any) -> Result<(), BindError> {
         unreachable!("window effects dispatch before model routes")
@@ -1117,6 +1118,21 @@ mod tests {
     }
     const COUNT: Source<Model, u32> =
         Source::new(FieldId::new(1), "count", |m| &m.count, |m| &mut m.count);
+
+    #[test]
+    fn window_admission_cannot_be_projected_into_a_component_receiver() {
+        let route = Handler::window(crate::runtime::inspector::WindowAction::Inspector(
+            crate::runtime::inspector::InspectorAction::Pick,
+        ));
+        assert!(matches!(
+            route.admit(&(), &Sources::<()>::new()),
+            Ok(Admission::Window(_))
+        ));
+        assert_eq!(
+            route.validate(&(), &Sources::<()>::new()),
+            Err(BindError::ReceiverMismatch)
+        );
+    }
 
     #[test]
     fn method_items_keep_zero_sized_callback_and_receiver_check() {

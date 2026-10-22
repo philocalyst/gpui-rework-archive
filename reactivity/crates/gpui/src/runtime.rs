@@ -1591,7 +1591,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             component_scopes.push(component_scope);
             if let Some(handler) = &node.on_click {
-                handler.validate(&self.model, &self.sources)?;
+                handler.admit(&self.model, &self.sources)?;
             }
             let field = match node.text.as_ref().and_then(|text| text.signal()) {
                 Some(signal) => self.sources.resolve(&self.model, signal)?,
@@ -2467,11 +2467,21 @@ impl<M: View + 'static> Runtime<M> {
             .accessibility
             .as_mut()
             .map(|observer| observer.begin(base_stamp, size));
+        let inspector_display = self.inspector_display();
+        let inspector_boundary = inspector_display
+            .as_ref()
+            .map_or(usize::MAX, |captions| captions.panel);
         let mut paint_bindings = paint::Build::new(&self.fanout);
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
+            if index == inspector_boundary {
+                inspector_display
+                    .as_ref()
+                    .unwrap()
+                    .refresh(&presented, &mut self.texts);
+            }
             let layout = self.layout.layout(self.layout_nodes[index])?;
             let has_children = self
                 .nodes

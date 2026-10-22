@@ -19,18 +19,25 @@ its predecessor's authority. Pointer selection requires a current acknowledged
 presentation and consumes failed releases. Logical keyboard activation remains
 available after a preparation failure, using the same repair path as other
 controls. Inspector edits call the very same typed style setter as
-`Win::set_property`; validation and source admission are shared.
+`Win::set_property`; validation and source admission are shared. Closed window
+effects share the existing route-admission call with model/field actions, so
+ordinary activation adds no virtual call. Component projections explicitly reject
+window effects.
 
 The panel distinguishes current logical properties and computed local layout from
 acknowledged displayed bounds and total transform. Displayed geometry carries its
-presentation epoch. It can lag the logical epoch during pending or failed
-presentation; the UI does not label an old displayed rectangle as current logical
-geometry.
+prepared source epoch. Preparation refreshes these two fixed-size caption slots
+from the actual candidate application rows at the application/panel paint boundary.
+The captions acknowledge with that same scene; pending or failed preparation
+leaves the old displayed text and geometry frozen together. They need no second
+frame or source operation to catch up.
 
 The shell is installed only at initial mount and retains the application's parent
 path. The private panel has a fixed 17-node description. Its few ordinary text
 slots are refreshed from the selection; panel root and offsets are rediscovered
-inside the current cohort after every description. No application snapshot,
+inside the current cohort after every description. The typed Caption schema owns
+initial labels, offsets, and expected node kinds; compile-time range/uniqueness
+checks and a constructed-panel test verify every slot. No application snapshot,
 shadow tree, node registry, AnyMap, shared owner, or interior-mutability wrapper is
 retained. Updating these text slots does not rerun the application's `View`.
 Native resizing updates the private shell's dimensions, preserving app dimensions.
@@ -63,8 +70,8 @@ At the pre-bank source baseline `131c6123f5`, the 64-bit X11-minimal test report
 panel's ordinary text lane has 14 live slots and capacity 14. These are source-
 and fixture-qualified allocation-counter observations, not a per-window constant.
 
-The change adds 533 non-test Rust physical lines, including comments and blanks:
-370 in the inspector module, 64 in the native example, and net 99 in the route,
+The change adds 631 non-test Rust physical lines, including comments and blanks:
+456 in the inspector module, 64 in the native example, and net 111 in the route,
 mount, input, metadata, and turn hooks. Existing production prefixes are counted
 before their embedded `#[cfg(test)] mod tests`; test-only modules and integration
 tests are excluded. The shared style setter moves without adding a second setter.

@@ -316,3 +316,90 @@ fn inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base
     assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
     assert!(win.bounds(win.button("Set tint")).unwrap().x > 700.0);
 }
+
+#[test]
+fn inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame() {
+    let mut win = inspected(true);
+    acknowledge(&mut win);
+    let target = card(&win);
+    win.inspector_select(target).unwrap();
+    acknowledge(&mut win);
+    let before = win.snapshot().unwrap();
+    let old_captions: Vec<_> = before
+        .nodes
+        .iter()
+        .filter_map(|n| n.text.as_ref())
+        .filter(|t| t.starts_with("Displayed "))
+        .cloned()
+        .collect();
+    win.click(win.button("Width +20")).unwrap();
+    win.set_property(
+        target,
+        TRANSFORM,
+        Contribution::Set(Affine::translation(30.0, 0.0)),
+    )
+    .unwrap();
+    let pending = win.snapshot().unwrap();
+    assert_eq!(pending.presentation_epoch, before.presentation_epoch);
+    let pending_captions: Vec<_> = pending
+        .nodes
+        .iter()
+        .filter_map(|n| n.text.as_ref())
+        .filter(|t| t.starts_with("Displayed "))
+        .cloned()
+        .collect();
+    assert_eq!(
+        pending_captions, old_captions,
+        "pending preparation cannot mutate old P captions"
+    );
+    acknowledge(&mut win);
+    let shown = win.snapshot().unwrap();
+    let mut geometry = None;
+    win.visit(|part| {
+        if part.target() == target {
+            geometry = Some((part.bounds(), part.transform().unwrap()));
+        }
+    })
+    .unwrap();
+    let (bounds, transform) = geometry.unwrap();
+    let bounds_label = format!(
+        "Displayed bounds @{}\n{:.1}, {:.1}  {:.1} × {:.1}",
+        shown.presentation_epoch, bounds.x, bounds.y, bounds.width, bounds.height
+    );
+    let transform_label = format!(
+        "Displayed transform @{}\n{:.1} {:.1} {:.1} {:.1} {:.1} {:.1}",
+        shown.presentation_epoch,
+        transform.a,
+        transform.b,
+        transform.c,
+        transform.d,
+        transform.tx,
+        transform.ty
+    );
+    assert!(
+        shown
+            .nodes
+            .iter()
+            .any(|n| n.text.as_deref() == Some(bounds_label.as_str()))
+    );
+    assert!(
+        shown
+            .nodes
+            .iter()
+            .any(|n| n.text.as_deref() == Some(transform_label.as_str()))
+    );
+    assert!(
+        bounds.width >= 100.0 && (bounds.width - 100.0).abs() < 1e-3,
+        "conservative bounds round outward"
+    );
+    assert_eq!(transform.tx, 30.0);
+    win.reset_counters().unwrap();
+    win.settle().unwrap();
+    assert_eq!(
+        win.counters().presentations,
+        0,
+        "caption coherence requires no extra frame"
+    );
+    assert_eq!(win.counters().owner_reruns, 0);
+    assert_eq!(win.counters().paint_passes, 0);
+}

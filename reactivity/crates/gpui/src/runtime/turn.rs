@@ -223,17 +223,18 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .handler
             .as_ref()
             .ok_or(Error::NotInteractive)?;
-        if let Some(action) = handler.window_action() {
-            return self.window_action(action);
-        }
-        let exact = match catch_unwind(AssertUnwindSafe(|| {
-            handler.validate(&self.runtime.model, &self.runtime.sources)
+        let admission = match catch_unwind(AssertUnwindSafe(|| {
+            handler.admit(&self.runtime.model, &self.runtime.sources)
         })) {
             Ok(result) => result?,
             Err(_) => {
                 self.poison();
                 return Err(Error::OwnerPanicked);
             }
+        };
+        let exact = match admission {
+            crate::element::Admission::Model { exact } => exact,
+            crate::element::Admission::Window(action) => return self.window_action(action),
         };
         let epoch = self
             .source_epoch

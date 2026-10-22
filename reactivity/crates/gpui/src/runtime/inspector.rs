@@ -26,13 +26,71 @@ pub(crate) enum InspectorAction {
 }
 // This fixed tree is an explicit private contract. Offsets are used only after
 // discovering the current panel root in this description's logical cohort.
-const SELECTED: usize = 3;
-const DIMENSIONS: usize = 4;
-const WIDTH_VALUE: usize = 5;
-const BACKGROUND_VALUE: usize = 10;
-const PRESENTED_BOUNDS: usize = 15;
-const PRESENTED_TRANSFORM: usize = 16;
 const PANEL_NODES: usize = 17;
+#[derive(Clone, Copy, Debug)]
+enum Caption {
+    Pick,
+    Selection,
+    Layout,
+    Width,
+    Background,
+    Bounds,
+    Transform,
+}
+impl Caption {
+    const ALL: [Self; 7] = [
+        Self::Pick,
+        Self::Selection,
+        Self::Layout,
+        Self::Width,
+        Self::Background,
+        Self::Bounds,
+        Self::Transform,
+    ];
+    const fn offset(self) -> usize {
+        match self {
+            Self::Pick => 2,
+            Self::Selection => 3,
+            Self::Layout => 4,
+            Self::Width => 5,
+            Self::Background => 10,
+            Self::Bounds => 15,
+            Self::Transform => 16,
+        }
+    }
+    const fn initial(self) -> &'static str {
+        match self {
+            Self::Pick => "Pick element",
+            Self::Selection => "Select an application element",
+            Self::Layout => "Layout: —",
+            Self::Width => "Width: —",
+            Self::Background => "Background: —",
+            Self::Bounds => "Presented bounds: —",
+            Self::Transform => "Presented transform: —",
+        }
+    }
+    const fn kind(self) -> NodeKind {
+        match self {
+            Self::Pick => NodeKind::Button,
+            _ => NodeKind::Text,
+        }
+    }
+}
+const _: () = {
+    let mut i = 0;
+    while i < Caption::ALL.len() {
+        assert!(Caption::ALL[i].offset() < PANEL_NODES);
+        let mut j = 0;
+        while j < i {
+            assert!(Caption::ALL[i].offset() != Caption::ALL[j].offset());
+            j += 1;
+        }
+        i += 1;
+    }
+};
+fn caption(field: Caption) -> El<'static> {
+    line(field.initial())
+}
 fn line(value: &'static str) -> El<'static> {
     text(value).w(296).h(36).font_size(12).fg(rgb(0xcbd5e1))
 }
@@ -50,25 +108,25 @@ fn panel(height: f32) -> El<'static> {
     column(
         [
             line("GPUI Inspector"),
-            control("Pick element", Pick),
-            line("Select an application element"),
-            line("Layout: —"),
-            line("Width: —"),
+            control(Caption::Pick.initial(), Pick),
+            caption(Caption::Selection),
+            caption(Caption::Layout),
+            caption(Caption::Width),
             row((
                 control("Width +20", WidthGrow),
                 control("Auto", WidthAuto),
                 control("Inherit width", WidthInherit),
             ))
             .gap(4),
-            line("Background: —"),
+            caption(Caption::Background),
             row((
                 control("Set tint", BackgroundSet),
                 control("Inherit tint", BackgroundInherit),
             ))
             .gap(4),
             control("Select parent", Parent),
-            line("Presented bounds: —"),
-            line("Presented transform: —"),
+            caption(Caption::Bounds),
+            caption(Caption::Transform),
         ]
         .into_iter(),
     )
@@ -124,6 +182,20 @@ impl<M: View + 'static> Runtime<M> {
         }
         None
     }
+    pub(super) fn inspector_display(&self) -> Option<DisplayCaptions> {
+        let panel = self.inspector_panel()?;
+        let target = self.metadata.as_ref()?.inspector.as_ref()?.selected?;
+        let selected = self.inspector_app_index(target).ok()?;
+        Some(DisplayCaptions {
+            panel,
+            identity: self.nodes[selected].identity(),
+            epoch: self.source_epoch,
+            slots: [
+                self.nodes[panel + Caption::Bounds.offset()].text_slot(),
+                self.nodes[panel + Caption::Transform.offset()].text_slot(),
+            ],
+        })
+    }
     pub(super) fn refresh_inspector(&mut self, laid_out: bool) -> Result<(), Error> {
         let Some(panel) = self.inspector_panel() else {
             return Ok(());
@@ -157,11 +229,11 @@ impl<M: View + 'static> Runtime<M> {
             .unwrap()
             .selected = selected;
         let mut values = vec![(
-            2,
+            Caption::Pick,
             if picking {
                 "Picking: click application".into()
             } else {
-                "Pick element".into()
+                Caption::Pick.initial().into()
             },
         )];
         if let Some(target) = selected {
@@ -172,16 +244,19 @@ impl<M: View + 'static> Runtime<M> {
             let width_presence = self.overrides.get(self.nodes[index].identity(), WIDTH);
             let background_presence = self.overrides.get(self.nodes[index].identity(), BACKGROUND);
             values.push((
-                SELECTED,
+                Caption::Selection,
                 format!(
                     "Selected: {:?} #{}",
                     self.nodes[index].kind().role(),
                     self.nodes[index].identity()
                 ),
             ));
-            values.push((WIDTH_VALUE, format!("Width: {width:?}\n{width_presence:?}")));
             values.push((
-                BACKGROUND_VALUE,
+                Caption::Width,
+                format!("Width: {width:?}\n{width_presence:?}"),
+            ));
+            values.push((
+                Caption::Background,
                 format!(
                     "Background: {:.2?}\n{}",
                     background.channels(),
@@ -192,39 +267,10 @@ impl<M: View + 'static> Runtime<M> {
                     }
                 ),
             ));
-            if let Some(node) = self
-                .presented
-                .iter()
-                .find(|n| n.identity == self.nodes[index].identity())
-            {
-                let b = node.bounds;
-                values.push((
-                    PRESENTED_BOUNDS,
-                    format!(
-                        "Displayed bounds @{}\n{:.1}, {:.1}  {:.1} × {:.1}",
-                        self.presentation_epoch, b.x, b.y, b.width, b.height
-                    ),
-                ));
-                values.push((
-                    PRESENTED_TRANSFORM,
-                    match node.transform.get() {
-                        Some(m) => format!(
-                            "Displayed transform @{}\n{:.1} {:.1} {:.1} {:.1} {:.1} {:.1}",
-                            self.presentation_epoch, m.a, m.b, m.c, m.d, m.tx, m.ty
-                        ),
-                        None => "Displayed transform: unavailable".into(),
-                    },
-                ));
-            } else {
-                values.extend([
-                    (PRESENTED_BOUNDS, "Not yet displayed".into()),
-                    (PRESENTED_TRANSFORM, "Displayed transform: —".into()),
-                ]);
-            }
             if laid_out {
                 let layout = self.layout.layout(self.layout_nodes[index])?;
                 values.push((
-                    DIMENSIONS,
+                    Caption::Layout,
                     format!(
                         "Layout: {:.1} × {:.1}\nlogical epoch {}",
                         layout.size.width, layout.size.height, self.source_epoch
@@ -232,17 +278,16 @@ impl<M: View + 'static> Runtime<M> {
                 ));
             }
         } else {
-            values.extend([
-                (SELECTED, "Select an application element".into()),
-                (DIMENSIONS, "Layout: —".into()),
-                (WIDTH_VALUE, "Width: —".into()),
-                (BACKGROUND_VALUE, "Background: —".into()),
-                (PRESENTED_BOUNDS, "Presented bounds: —".into()),
-                (PRESENTED_TRANSFORM, "Presented transform: —".into()),
-            ]);
+            values.extend(
+                Caption::ALL
+                    .into_iter()
+                    .filter(|field| !matches!(field, Caption::Pick))
+                    .map(|field| (field, field.initial().to_owned())),
+            );
         }
-        for (offset, value) in values {
-            let slot = self.nodes[panel + offset].text_slot();
+        for (field, value) in values {
+            debug_assert_eq!(self.nodes[panel + field.offset()].kind(), field.kind());
+            let slot = self.nodes[panel + field.offset()].text_slot();
             let text = slot
                 .get_mut(&mut self.texts)
                 .expect("fixed inspector text slot");
@@ -253,6 +298,47 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         Ok(())
+    }
+}
+// Preparation-local projection of two existing UI text slots. App rows precede
+// the panel, so their actual candidate geometry is complete at this boundary.
+// This neither retains another sheet nor borrows the previous presentation.
+pub(super) struct DisplayCaptions {
+    pub panel: usize,
+    identity: u64,
+    epoch: u64,
+    slots: [TextSlot; 2],
+}
+impl DisplayCaptions {
+    pub fn refresh(&self, candidate: &[Presented], texts: &mut [Option<TextSite>]) {
+        let values = if let Some(node) = candidate.iter().find(|n| n.identity == self.identity) {
+            let b = node.bounds;
+            [
+                format!(
+                    "Displayed bounds @{}\n{:.1}, {:.1}  {:.1} × {:.1}",
+                    self.epoch, b.x, b.y, b.width, b.height
+                ),
+                match node.transform.get() {
+                    Some(m) => format!(
+                        "Displayed transform @{}\n{:.1} {:.1} {:.1} {:.1} {:.1} {:.1}",
+                        self.epoch, m.a, m.b, m.c, m.d, m.tx, m.ty
+                    ),
+                    None => format!("Displayed transform @{}: unavailable", self.epoch),
+                },
+            ]
+        } else {
+            [
+                format!("Not displayed @{}", self.epoch),
+                format!("Displayed transform @{}: —", self.epoch),
+            ]
+        };
+        for (slot, value) in self.slots.into_iter().zip(values) {
+            let text = slot.get_mut(texts).expect("checked inspector caption");
+            if text.value.as_ref() != value {
+                text.value = value.into();
+                text.shaped = None;
+            }
+        }
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
@@ -372,6 +458,24 @@ pub(super) fn description<M: View>(model: &M, enabled: bool, size: [u32; 2], sca
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn every_typed_caption_matches_its_constructed_panel_slot() {
+        let nodes = panel(560.0).flatten();
+        assert_eq!(nodes.len(), PANEL_NODES);
+        for field in Caption::ALL {
+            let node = &nodes[field.offset()];
+            if matches!(field, Caption::Bounds | Caption::Transform) {
+                assert_eq!(WIDTH.get(&node.style), Some(296.0));
+                assert_eq!(crate::property::HEIGHT.get(&node.style), Some(36.0));
+            }
+            assert_eq!(node.kind, field.kind(), "{field:?}");
+            assert_eq!(
+                node.text.as_ref().unwrap().borrowed_value(),
+                field.initial(),
+                "{field:?}"
+            );
+        }
+    }
     #[test]
     fn plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage() {
         struct Empty;
