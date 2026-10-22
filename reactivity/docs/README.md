@@ -13,11 +13,13 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Typed Future admission](async-admission-luna.md) | Injected exact-task cancellation, pinned Future teardown before completion, unchanged ordinary controller storage and adversarial lifecycle traces |
 | [Static shader lifecycle](native-shader-lifecycle-luna.md) | Vendor-owned static SPIR-V recipes, scoped Vulkan module ownership, Core trace/error routing and separately gated inline-stage research |
 | [Portable presenter boundary](portable-presenter-luna.md) | Vendor-owned hints/target proof/leases, source-review corrections and cross-platform fallback limits |
+| [Remaining portable graphics owner](portable-graphics-boundary-next-luna.md) | Current vendor boundary, redundant configuration removal, backend leases and explicit legacy gaps |
 | [Graphics work elimination](graphics-work-elimination-luna.md) | Device-owned resources, shader artifact safety, backend preservation contracts and separately gated first-window experiments |
 | [Offline shader proof](offline-shader-proof-luna.md) | Exact six-binding ABI, Vulkan artifact generation, enabled robustness policies, host bounds and unsafe admission gates; proposed, not implemented |
 | [Typed reflection and composition](typed-reflection-composition-luna.md) | Closed property traversal, shared validators, component-library controls and inspector ownership budgets |
 | [Production API gaps](production-gaps-luna.md) | Concrete accessible editor actions, typed reflection/inspector and designer color operations |
 | [Color formulation](color-formulation-luna.md) | SIMD-shaped fixed-lightness/hue cubic gamut limits, numerical proof obligations and separate CSS mapping semantics |
+| [Designer palette interpolation](designer-color-next-luna.md) | Explicit domains, alpha/hue semantics, shared SIMD setup/sampling and corrected primary-basis equivalence |
 | [Platform](research-platform.md) | Pinned Winit/Cephal, memory, threads and buffer release |
 | [Frontier](frontier-research.md) | Succinct/shared trees, dynamic products, local support and incremental algebra |
 | [Semantics](semantic-review.md) | Source/outcome/presentation transaction cuts and rollback limits |

@@ -32,7 +32,7 @@ services; a synthetic scale fixture cannot stand in for those application contra
 Portable WGPU/HAL target admission, source-qualified native range editing and
 selective nonparent containing blocks over Cephal `perf/cold-layout` are now
 [integrated together](evidence/native-text-integration/README.md). Remaining
-work includes early Metal/Wayland target proof, accessible text geometry and
+work includes early Metal/Wayland target proof, native HDR negotiation and
 the complete editor/lifecycle contracts. Preserve software-first startup and
 acknowledged semantic/scene authority. SIMD uses one
 fearless_simd formulation and fallback, with assembly and measured controls.
@@ -41,25 +41,31 @@ now cover immutable device/pipeline ownership with independent renderer states,
 the shared typed property catalog and all 13 native inspector controls, and
 SIMD-shaped fixed-lightness/hue gamut limits. Preserve the measured single-window
 header/layout-lease costs alongside multiwindow savings. Native Application
-multiwindow sharing still needs integration. The active graphics slice generates
-and proves per-entry shader artifacts behind vendor-owned admission; its optional
-unsafe path must preserve exact enabled guards and driver workarounds before any
-adoption. No hardware performance gate is inferred from llvmpipe.
+multiwindow sharing still needs integration. Optional per-entry shader artifacts
+and static recipes are now integrated behind vendor-owned admission, with exact
+enabled guards, native lifetime/error proof and a checked WGSL fallback. The
+[combined campaign](evidence/compact-static-main/README.md) exercises real native
+applications and Vulkan readbacks; no hardware performance gate is inferred from
+llvmpipe. Build-host/tool/static-word costs remain explicitly charged.
 
 The [native shader lifecycle audit](docs/native-shader-lifecycle-luna.md) selects
 static SPIR-V recipes with temporary Vulkan 1.0 modules under the existing stage
-guard. An isolated Sol slice must preserve reusable Raw ownership, exact device
-profile admission, Core error scopes, trace/replay, repeated/concurrent pipeline
-creation and ordinary feature-off behavior. Prove native module lifetime and
-the full authored/vendor/binary bill before integration. Maintenance5 inline
+guard. The [integrated optional slice](evidence/static-shader/README.md) preserves reusable
+Raw ownership, exact device admission, Core error scopes, active trace and
+repeated/concurrent pipeline creation. Replay retains ordinary Raw ownership and
+was source-audited rather than executed. Native lifetime/heap and the full
+authored/vendor/binary bill remain qualified at the frozen producer source. Maintenance5 inline
 stages require separate queried/enabled state and pointer-lifetime proof; the
 first static recipe does not depend on that extension.
 
 The [acknowledged geometry baseline](benchmarks/acknowledged-text-geometry/README.md)
 now preserves exact old P/C maps for ordinary queries and native wrapped/bidi
 runs, including late activation after failed newer shaping. Continue with
-source-derived compact stops, safe borrowed-index checks and construction stack
-attribution before an arena. Charge all headers, old epochs, native arrays,
+source-derived compact stops and inherited transform factorization before an
+arena. The [selected 12-byte maps](benchmarks/acknowledged-text-geometry/map-controls/ADOPTION.md),
+safe borrowed-index checks, consuming-break work cut and intrinsic interaction-map
+suppression now have combined source qualification. Preserve the actual query
+tradeoffs and losing 8-byte control, not just retained-memory savings. Charge all headers, old epochs, native arrays,
 source/binary growth and tiny-label regressions; keep bit-exact producer width,
 signed-zero alias geometry, legal graphemes, source-affinity line ownership and
 provider retirement as invariant gates. Glyph/font payloads must remain outside
