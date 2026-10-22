@@ -69,6 +69,20 @@ def normal_edges(node):
     return [dep for dep in node["deps"] if any(k["kind"] in (None, "build") for k in dep["dep_kinds"])]
 
 
+def lock_scope(path):
+    if path == "reactivity/Cargo.lock":
+        return "active workspace"
+    if "/evidence/" in path or "/benchmarks/" in path:
+        return "frozen evidence/benchmark lock; outside production graph"
+    if "/vendor/" in path:
+        return "upstream development lock; root path patch uses workspace lock"
+    if "/tools/" in path:
+        return "independent analysis tool workspace; outside production graph"
+    if "/ports/" in path:
+        return "independent application workspace; outside UI-core graph"
+    return "other workspace; inspect its manifest before assigning production scope"
+
+
 def audit(metadata, cache, cache_path):
     packages = {p["id"]: p for p in metadata["packages"]}
     nodes = {n["id"]: n for n in metadata["resolve"]["nodes"]}
@@ -116,12 +130,7 @@ def audit(metadata, cache, cache_path):
     for path in git("ls-files").splitlines():
         if path.startswith("reactivity/") and path.endswith("Cargo.lock"):
             disk = REPO / path
-            scope = ("active workspace" if disk == ROOT / "Cargo.lock" else
-                     "independent analysis tool workspace; outside production graph" if "/tools/" in path else
-                     "independent application workspace; outside UI-core graph" if "/ports/" in path else
-                     "upstream development lock; root path patch uses workspace lock" if "/vendor/" in path else
-                     "frozen evidence/benchmark lock; outside production graph")
-            locks.append({"path": path, "sha256": sha256(disk), "scope": scope})
+            locks.append({"path": path, "sha256": sha256(disk), "scope": lock_scope(path)})
     return {"captured_at_utc": datetime.datetime.now(datetime.UTC).isoformat(),
             "source_head": git("rev-parse", "HEAD").strip(),
             "working_status_porcelain": git("status", "--porcelain=v1").splitlines(),

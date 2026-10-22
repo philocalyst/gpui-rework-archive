@@ -113,6 +113,8 @@ def category(path, scope):
         return "archived_legacy", "archived_inputs"
     if "vendor" in parts or "third_party" in parts or "third-party" in parts:
         return "vendor", "vendor"
+    if parts[0] == "ports" and "upstream" in parts:
+        return "vendor", "upstream_reference"
     if "examples" in parts:
         return "first_party", "examples"
     if "benchmarks" in parts or "benches" in parts:
@@ -123,7 +125,7 @@ def category(path, scope):
         return "first_party", "tools"
     if parts[0] == "crates":
         return "first_party", "labs" if parts[1].endswith("-lab") else "libraries"
-    if parts[0] in {"apps", "applications"}:
+    if parts[0] in {"apps", "applications", "ports"}:
         return "first_party", "applications"
     return "first_party", "other_support"
 

@@ -12,6 +12,14 @@ SPEC.loader.exec_module(audit)
 
 
 class DependencyAuditTests(unittest.TestCase):
+    def test_nested_port_evidence_is_not_an_active_application_lock(self):
+        self.assertEqual(audit.lock_scope("reactivity/Cargo.lock"), "active workspace")
+        self.assertIn("application workspace", audit.lock_scope("reactivity/ports/hummingbird/Cargo.lock"))
+        self.assertIn("frozen evidence", audit.lock_scope("reactivity/ports/hummingbird/evidence/search/driver/Cargo.lock"))
+        self.assertIn("upstream development", audit.lock_scope("reactivity/vendor/wgpu/Cargo.lock"))
+        self.assertIn("analysis tool", audit.lock_scope("reactivity/tools/inventory-rust/Cargo.lock"))
+        self.assertIn("inspect its manifest", audit.lock_scope("reactivity/new-scope/Cargo.lock"))
+
     def test_stable_semver_handles_later_old_major_and_build_metadata(self):
         versions = ["0.3.5+spec-1.1.0", "0.4.0", "1.0.0-alpha.1"]
         response = {"crate": {"newest_version": versions[0]}, "versions": [

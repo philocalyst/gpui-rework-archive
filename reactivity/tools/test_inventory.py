@@ -110,6 +110,9 @@ class InventoryTests(unittest.TestCase):
             "reactivity/benchmarks/fixtures/main.go": ("first_party", "benchmarks"),
             "reactivity/tools/inventory.py": ("first_party", "tools"),
             "reactivity/vendor/winit/src/a.rs": ("vendor", "vendor"),
+            "reactivity/ports/hummingbird/src/app.rs": ("first_party", "applications"),
+            "reactivity/ports/hummingbird/upstream/track_query.rs": ("vendor", "upstream_reference"),
+            "reactivity/ports/hummingbird/evidence/driver/src/main.rs": ("first_party", "evidence_support"),
             "reactivity/docs/inputs/final/a.rs": ("archived_legacy", "archived_inputs"),
             "crates/gpui/src/lib.rs": ("archived_legacy", "legacy_checkout"),
         }
