@@ -1,0 +1,689 @@
+{
+  "shipping_source": "79199bda9153d577d0252fbb746296fe18da2e84",
+  "complete_test_source": "d77d3b92822797857059ff6073e6c4e3ef2f7909",
+  "base": "09680e2a313dbf6ecb25e92c8243cd7c2bb75ba3",
+  "features": "GPUI desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache; Canvas simd+parallel",
+  "runtime_platform": "Linux x86_64 X11/AT-SPI actual; Apple/MSVC compile-only",
+  "gates": {
+    "gpui-text-map-8-fused-canvas-full.log": {
+      "passed": 194,
+      "ignored": 4
+    },
+    "gpui-text-map-8-fused-gpui-full.log": {
+      "passed": 506,
+      "ignored": 25
+    },
+    "gpui-text-map-8-fused-oracle.log": {
+      "passed": 4,
+      "ignored": 0
+    },
+    "gpui-text-map-8-fused-selection.log": {
+      "passed": 10,
+      "ignored": 0
+    },
+    "gpui-text-map-12-line-reuse-oracle.log": {
+      "passed": 4,
+      "ignored": 0
+    },
+    "gpui-text-map-12-line-reuse-selection.log": {
+      "passed": 10,
+      "ignored": 0
+    },
+    "gpui-text-map-12-query-selection-unfiltered.log": {
+      "passed": 10,
+      "ignored": 0
+    }
+  },
+  "full_gate_executables_sha256": {
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/gpui_canvas-376332b3f9f05e5a": "53cc636ad8279c062f42ec2cbac0423dcf7a78b8dac4e75d53d4ae16e81a5e6f",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/bins-a70bf93fcc60298b": "f1ad8535cbcdc8198d2ec9494a854c100193d129ecda8cc2e885a24559ca7737",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/color-3d4694502c1635e0": "6bac0d742ceafdfc839874ac6c398862572dd3cbf12ba6fc30c36f0d20362920",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/color_authoring-3842d1db197fb909": "32a5b2723ea4568c1944bbe5e7d61c10b758e8f71b99b99ea812633dd9b3fa5b",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/color_packing-a85f20cf2da02e9b": "18fd7c3f06245873cc6c02627b410528a68efdc49b5a17f1962a970e102aa144",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/damage-72b9587abddff32b": "c8938c38216ed18b38f033ae50457b748470fb6e8341eef7550dcec8e54892f0",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/dpi-6830117d9e197b3d": "2fb14e4a735b8796591ae87bc276c3100f2ff7e2142fa10d76c3a13609d43ed1",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/external-7eacfa4e3c785e9d": "ca610a36cc2782a0abae91ac8baeb85ce3e6c77c4ab721b843c0a79a6d87632e",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/font_quality-f451f7b5a3f37cea": "650e30baee222ebb25152491cb085fac02162d253ca72eb528979676a976a24d",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/font_sharing-ef56752573dc4e55": "dc60f0576a587dbbe9e8ec89c25f3ce565fa6968d3656f038a1aae695e977cdd",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/grouped-bf1735d5c550db0c": "0b48475a7085e9abaa6fa200a08ced8f2d7980cdc3211f692894b551d0e71509",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/hdr-c71803f21389a198": "bcbf7d0a5c261f2a3da87bc1e70cf8351b658248d9fee2980d5f2a54ca689a13",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/images-a46c29289880f3fe": "0c3faf6a8d55d337952539b4ad91010c8bf269af67e8f7abff13e6d02569b6a0",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/literal_cow-439c638ef1d1e61f": "826c52d526490b34cf2899d54ff77bfc06b6a015e49b5073fef7cf4b63cb0b8e",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/oklch-dd144a74ccc2d018": "b4f5f55063dc321c721bf50b5d4fb1d6a0d147ee4f0d6ce3f366a54b7250e310",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/paint-d8bc96079cdb2e4b": "5d7892d6b107b43a017c1225b2388286f6d0b3b0bcabf18503ab017f6fad2283",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/parallel-f9bf06a1cc58c283": "428d689aa2a079ce11d7a546b0af3ed50e44572be338bf4ecdacfc867cd6811e",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/prepared_scene-dcc33a42b7d1f2ce": "9a97a91d4f113bb31922fb2d12a06131d1a85dd77fbd1a52defaed827bfe2c40",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/render-4298b681a649ce07": "e532a6d01dbd48f4372b5adbfe5c0f2171669ce9b0a180dbfc4ce4de5a2d049d",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/rounded-628ea8dd3a2cd133": "d72cd66e189dba4068d449f226a6d9024a07aa10c4214a406f299a9d652e8796",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/sample_clip-3971249e401f1b98": "a977cae2457882fddc2af4f32877831a14f92cfcf34be0d23018eb7f6c5d1531",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/sample_storage-030a9301eebc3b4b": "5713e9e80fcebb00f845dfb8bcf3ddec16973d49f686dc8dc07bd82fd06db0cd",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/selection-b96018e68b4eb96e": "db196f11101e9ed3812a423ccb8c11f6d0a61d37408ea22723238af35a185421",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/shaping-9690a130ead34ac2": "9e92865d1fb11a58a43872f071c478a8d404ff222220ef05f22b3fec97cc21a0",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/slots-86a5738c4046291d": "9a41bd3bb705a670c405fd11ccc37925bed8a8cf3fa8eef69caa0ce02fb38a30",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/solid-ed488c64b4fc3569": "83ddcdf7d30a9a6f83ddb54d59bd8e3a42123ba561f9666cf9a77d5588c11de5",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/unicode-8593be1a4846ddd9": "cfaa502c1dc248ede9821f7d6c10204c224ad35f5399b7c58fce89bef6f6c996",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/gpui-eb8c91baf4d69df3": "1300feaf32f54b94dd3b4beaf496841ee1e6f1b3ea4cfff83916f2dfcffa4145",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/acceptance-db7b53453b9df77b": "af98f19fbdf29a0b3aaec61ac43b5134e4b37b3194f6561a84b611b73e1fd51c",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/application-b63f9a1ea44dad6d": "fbc78d6be484823a91f9d0d214f0eb5a56e102a8710a8c0ec1f387cf51537ef4",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/color_packing-48f19882f25befaf": "80ddc739c5b4b6d71c4887231a806d5221f2cb204a0406d26e736b43d45257e2",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/components-70b6955c82dc2972": "7dc286dfb8eb2877b99711852867e999696f19cc6730b21f4765cfd6082c81f1",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/dpi-f36db68b79ef0e00": "df0c9e4564c0f2208a7182c608dd7ec708d05f48614684bca55877cd1d4aabbd",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/field_identity-f8631a91bccf9b59": "cb1e4b97f6abed7ba282b61c1090ec206b1bd537a42fb09cf839eb047db8cce7",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/flex-d3093eedb80d4569": "6b60f16d84a4246fa939a299f8f1e4f65dcf23d186f96451fd813cf46ad1fff1",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/focus-6dc5223af3b8e451": "ed10c272f9ba96177b2311e3170df3b29c59a919da5d5ee9a888d4f913794e53",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/identity_recovery-f09aceee403f5460": "58ffedbe6e774613e4dd619422e7715eb27926c4100e34840efa9930697fe0cb",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/images-4751999c566a2b94": "eaab31b19d6e6ac5247bcde9e705043d6efff76b311bdab51284fe8c920621d4",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/immutable_text-b64fab54304ead42": "1767c4856ea7fc9174b2b6948f834c6714f5c3eb7aa74098872bf6f1a943ef26",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/inspector-868634e0e65169db": "f0c84f41f0142352637e6950517b11a36593c9818942cf6e9435f693c357d59e",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/library-0741b26ac70b5fb1": "f4df43d9850901abcad7f16a46fa504d89448c57377b2441eb42f94543136132",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/lists-27b2e47037b58943": "ed1bd23ce8b2ac496b87076dff4f6f4781c5db3423142cd456fc577a04c57e3f",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/literal_dispatch-433fbdc7e5df155a": "390892c218d6473313c84c9c2ab63358c8cd4b3cf72ca619800b56d2dbd0229b",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/paint_patch-f1ac830170c8f12d": "9f7e29658450e1d122737862fd040b7a35510e0dd7b69e6caf8b2440930b8aec",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/paint_slot_rebind-629e6edeaa30bf31": "bac01d449c2624d1f05c72149c01a42734172b911c89312ae7abe2afe69cab72",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/paint_slots-a141cc8791f8df77": "fce5fc3724339decfbf055300c91c90327d5ba74f236929ce7e8a0705ec26ed0",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/pointer-7c2cb56f5409ae2f": "742f79759f15b13bbe244d5d40b12d720083ab3a5d3ca2c7fb53539508d1fb8e",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/ports-3e46f443ef780c84": "e19ebae8f8ab232bcc706cece65a722b848a2c5085a49407b93f2bd265986b73",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/presentation-aa71b22a7bd4ada4": "610811572a30831556f569791062d8d75c92992b1772b0e32f669b33c21ad5a0",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/queries-5df7835c4f5a096d": "89879587f8a8bd6b015eb89d31a52f70cb952d3d0d190983177122aa08479ed5",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/question_cost-35230b70a190f319": "e8fd450668b15c9f2a52f0aaeffa6298a073ff8c7b07b3fb1d918376655329c4",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/question_input_cost-6278ea4753687848": "ddab95db90ad669c40e3c5fc36b4cb596c79645f67f1b93ee010b056c7ae4ea9",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/question_inputs-37609da43e9fda24": "35ffd3bee6f78bade4ece56ed21b02674bb88e0d2a118719002b1d5541da2ed6",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/question_mailbox-67c3ef30f585fef4": "72a9c2d4b832e283a54610ae5c6c3c8806eec07e4e269abb2c239ed13971c3fe",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/question_storage-b379a6cbbaedd8e7": "4350a49a90dccf27010461c296bb9a8950f7e2f3667cea70f4a169ac14b40456",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/questions-1581381e21783143": "d3ee2dbbb1e91331e55474faa03fd6e0a17ec5015e29ed698b9fbea129fc275f",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/remote-7d6746b9b9dd0aa2": "1b3e05cc59e7685cd0f66f2dbe6eca54afcf619ab28fad8fabecbcc609f7893d",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/retained_styles-b0b799ae11a20f7e": "102b453f8a7b0bddcf1698e084c9c15e3e177f399e4bd766bc48730e6a86f130",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/rounded-6791a218abee2535": "11c9748f81ffce2b48b12532fda9c851478d264863df5f13c34a8444ff8b7859",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/routes-d646efa0a0b804cb": "eebcc7b94d1b05b586316e7f187b5b78b3e4b94ea88e0cefc7ca891e77411862",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/runtime-c55a4d3582243dc4": "267b0c5e650efe17f0a2dd36ad489721b89e3803de60065486126793d48c5467",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/scroll-4632bc3a2596e7c9": "cf081310f9fde7649971e3654ef056a9015b8c1c524c06bc2d28622a8796fffe",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/search_library-06d24d65dc30f723": "400e532498f61773c1ebd6ab655febe65d83df0622c997fbbf93ba76fdc70abc",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/semantic_metadata-19879c7f6d61a1c2": "de96c238778955742bbc38920875b0ee663ae9ce148276275abc13584b4224e3",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/semantic_serialization-0302846b73b55a34": "25a53b90b00e8bedba76ad72ac3fb5e3e40415a2ded939cfd0416548b90c3c25",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/semantics-690000bf824d26fc": "9c9079e12c108f8c19d19fdc855484eb5affe1ae0e412a716409567915d65d20",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/style_ports-ccdc9d52a7a43bf1": "8fcd0d35594cfb09f0ff43e07fa403c8ef3b2888617efedcf27085fb2086994a",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/text_cache-dcfcbfb2e9808d01": "9e33913fa098127b36ca8e5b50f724d777423fa6ea4a34c7657087c6aeebe22b",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/text_geometry-1debcfcadc0f8453": "5f5ca38b2ba2cdba2a5a23ff53acf9008a7017a301957eeaa01f198495beb4a9",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/text_selection-b8314da378959b0e": "4426cef69495020fe3ce01031f8c7604ced2b671a18b16a4905221a9333df5a0",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/text_selection_compound-bea9696405b1cc88": "5deb3607fad63c259161f67ca5d567d806e55b6d5dc8a28c9b99ec7baad7fd02",
+    "/tmp/gpui-text-map-8-fused-target/debug/deps/unicode_text-5043330da332f582": "abe907dd5eaff8672344aa0049ec1677035711308c33a505b265402e1ee90dc7"
+  },
+  "cross": {
+    "aarch64-apple-darwin": {
+      "log": "gpui-text-map-8-fused-apple.log",
+      "command": "source /tmp/gpui-native-env.sh; unset CARGO_ENCODED_RUSTFLAGS RUSTFLAGS; CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/gpui-text-map-8-fused-target RUSTC_BOOTSTRAP=1 cargo check --offline --locked --manifest-path /root/gpui-text-map-8-fused/reactivity/Cargo.toml -p gpui --features desktop,gpui_canvas/parallel --all-targets --target aarch64-apple-darwin -Zbuild-std=std,panic_abort --jobs 2",
+      "cwd": "/root/gpui-text-map-8-fused",
+      "config_sha256": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295",
+      "fingerprints": [
+        {
+          "rustc": 12019306335353385202,
+          "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\"]",
+          "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+          "target": 13433137496993833081,
+          "profile": 2330448797067240312,
+          "path": 8373320921053062204,
+          "deps": [
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              15065922307139850777
+            ],
+            [
+              1001648224152866569,
+              "arcstr",
+              false,
+              11198311735499010586
+            ],
+            [
+              1386638231207903518,
+              "test",
+              true,
+              5988700281863165121
+            ],
+            [
+              1940408237737794595,
+              "accesskit_winit",
+              false,
+              12218313020028286205
+            ],
+            [
+              3750483387937644717,
+              "pollster",
+              false,
+              1327898406757168393
+            ],
+            [
+              3778966308548958430,
+              "std",
+              true,
+              6253408828184949774
+            ],
+            [
+              4590322165379248138,
+              "gpui_reactivity_host",
+              false,
+              18281057484255282532
+            ],
+            [
+              5283411439217056619,
+              "core",
+              true,
+              4711418921979188925
+            ],
+            [
+              6491792180230419711,
+              "panic_abort",
+              true,
+              12031065843000651273
+            ],
+            [
+              6557439603276904804,
+              "serde",
+              false,
+              10993323370052310008
+            ],
+            [
+              7648903741785607723,
+              "compiler_builtins",
+              true,
+              15171898199652259600
+            ],
+            [
+              8160210889872729633,
+              "serde_json",
+              false,
+              3564960667891401038
+            ],
+            [
+              8676817272026490959,
+              "accesskit",
+              false,
+              7749845384110356374
+            ],
+            [
+              8991190325997472044,
+              "gpui_gpu",
+              false,
+              17166678999680758245
+            ],
+            [
+              11671159878170094075,
+              "gpui_reactivity_state",
+              false,
+              5045482139860996979
+            ],
+            [
+              11905275778120334160,
+              "softbuffer",
+              false,
+              2042957158619975755
+            ],
+            [
+              12292871154985835666,
+              "alloc",
+              true,
+              9372266246650984919
+            ],
+            [
+              13316223584457521750,
+              "cephal",
+              false,
+              16785928022616159725
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              14849396779505370840
+            ],
+            [
+              16004514561570924261,
+              "proc_macro",
+              true,
+              3612617210297948472
+            ],
+            [
+              16203338811130749637,
+              "panic_unwind",
+              true,
+              13181856990345569968
+            ],
+            [
+              17032968227276897852,
+              "gpui_canvas",
+              false,
+              15299116564080244810
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "aarch64-apple-darwin/debug/.fingerprint/gpui-433aff1da944de17/dep-lib-gpui",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [
+            "-C",
+            "symbol-mangling-version=v0",
+            "--cfg",
+            "tokio_unstable"
+          ],
+          "config": 9396254390672932401,
+          "compile_kind": 551198452465029181
+        }
+      ]
+    },
+    "x86_64-pc-windows-msvc": {
+      "log": "gpui-text-map-8-fused-msvc.log",
+      "command": "source /tmp/gpui-native-env.sh; unset CARGO_ENCODED_RUSTFLAGS RUSTFLAGS; CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/tmp/gpui-text-map-8-fused-target RUSTC_BOOTSTRAP=1 cargo check --offline --locked --manifest-path /root/gpui-text-map-8-fused/reactivity/Cargo.toml -p gpui --features desktop,gpui_canvas/parallel --all-targets --target x86_64-pc-windows-msvc -Zbuild-std=std,panic_abort --jobs 2",
+      "cwd": "/root/gpui-text-map-8-fused",
+      "config_sha256": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295",
+      "fingerprints": [
+        {
+          "rustc": 12019306335353385202,
+          "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\"]",
+          "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+          "target": 13433137496993833081,
+          "profile": 17672942494452627365,
+          "path": 8373320921053062204,
+          "deps": [
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              171211245589269715
+            ],
+            [
+              1001648224152866569,
+              "arcstr",
+              false,
+              11958371386334940268
+            ],
+            [
+              1386638231207903518,
+              "test",
+              true,
+              10419339591469041407
+            ],
+            [
+              1940408237737794595,
+              "accesskit_winit",
+              false,
+              3846594255506684834
+            ],
+            [
+              3750483387937644717,
+              "pollster",
+              false,
+              11255718749063586486
+            ],
+            [
+              3778966308548958430,
+              "std",
+              true,
+              14366942892819440638
+            ],
+            [
+              4590322165379248138,
+              "gpui_reactivity_host",
+              false,
+              18322468035789240126
+            ],
+            [
+              5283411439217056619,
+              "core",
+              true,
+              13937958533358113116
+            ],
+            [
+              6491792180230419711,
+              "panic_abort",
+              true,
+              11162516522201884119
+            ],
+            [
+              6557439603276904804,
+              "serde",
+              false,
+              8542135791053651026
+            ],
+            [
+              7648903741785607723,
+              "compiler_builtins",
+              true,
+              6059542134591568899
+            ],
+            [
+              8160210889872729633,
+              "serde_json",
+              false,
+              12058596664556779779
+            ],
+            [
+              8676817272026490959,
+              "accesskit",
+              false,
+              17931628644983510059
+            ],
+            [
+              8991190325997472044,
+              "gpui_gpu",
+              false,
+              4952379808982244762
+            ],
+            [
+              11671159878170094075,
+              "gpui_reactivity_state",
+              false,
+              16555337444682242500
+            ],
+            [
+              11905275778120334160,
+              "softbuffer",
+              false,
+              8759178061286122768
+            ],
+            [
+              12292871154985835666,
+              "alloc",
+              true,
+              12310412264206608622
+            ],
+            [
+              13316223584457521750,
+              "cephal",
+              false,
+              8488290405815120144
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              11346037428806905858
+            ],
+            [
+              16004514561570924261,
+              "proc_macro",
+              true,
+              13398876970815676198
+            ],
+            [
+              16203338811130749637,
+              "panic_unwind",
+              true,
+              13488760404788596460
+            ],
+            [
+              17032968227276897852,
+              "gpui_canvas",
+              false,
+              5620309792142439843
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "x86_64-pc-windows-msvc/debug/.fingerprint/gpui-9120168d102cf782/dep-lib-gpui",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [
+            "--cfg",
+            "windows_slim_errors",
+            "-C",
+            "target-feature=+crt-static"
+          ],
+          "config": 9396254390672932401,
+          "compile_kind": 9161124489350129226
+        }
+      ]
+    }
+  },
+  "strict_all_targets_full_features": true,
+  "source_files_sha256": {
+    "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+    "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+    ".cargo/config.toml": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295",
+    "reactivity/crates/canvas/src/text/layout.rs": "eacf785e7ad02d71b064e3e190290db0b7694a88a49b4ac7adb9f908e4bf15c5",
+    "reactivity/crates/canvas/src/text/layout/carets.rs": "7b7561ef748d8cc06a85bae609806b2ad1aa3aef132781db51cb5b7d4ff97500",
+    "reactivity/crates/canvas/src/text/layout/interaction.rs": "73bda3db7253eae80dcc7c086f021f5aa16cbe03eaaae17c261fbc98e3d1980a",
+    "reactivity/crates/canvas/src/text/planner.rs": "d72ef891a29feeaf47a4ca6dbed7d5c629e02f255cb08e46e00e24cbfc48611f",
+    "reactivity/crates/canvas/src/text/line_ownership_tests.rs": "55a7af583946abb1267ff69614027865d47566ee17759d056fc73fe436b27ab1",
+    "reactivity/crates/canvas/src/text/geometry_ledger.rs": "6a88609175bb7503654bcc278d841046b8c62d2761b125ebf351dde4c4598d5c",
+    "reactivity/vendor/parley/src/layout/line_break.rs": "2545bced43ff30bae565e9650c663cd73d4e8004a9cadbfda0604e3424f5c6f5"
+  },
+  "files_sha256": {
+    "12-reuse-core-lines.json": "2dc66ce3575486e7184dc3f25a474a078508d6fbf02cee74fe3702968da9a966",
+    "README.md": "d73d22abb12faa068d57070685f4702e46577a117ef92b1673c21e75ad2fcc5e",
+    "all-source-inventory.json": "d11c97b61db6a532b7533b81428488c9740363f28df0c56b13160a8405d447d7",
+    "capture-map-query-final.py": "ea6e45e81011e653db05c458647b7fb7a169a5b91b3cf676a81b01baba7a3355",
+    "capture-map-query-refinements.py": "202554401f5766d04696dafca359730d41c93489c5ffbbccbfe61c4e2fbe936e",
+    "construction-controls/converted/gpui-final.log": "5ddcd758a874c46de7692f89b603e1ba8745d78b48ad7a5c997dec47d8d3a57f",
+    "construction-controls/converted/gpui-text-map-8-canvas-ledger.log": "9044479bd4e9ac0dc2953c188432b77effa3c1605d58e37554fb088d1f2ec7a5",
+    "construction-controls/converted/gpui-text-map-8-owner-ledger.log": "38374eb994cb8688648a8341d4f52a049ea90329c677ecf0c664271815eb1e01",
+    "construction-controls/converted/gpui_canvas-final.log": "dd389f3518f69c9d793222557d5e38bf442dcdf541efebd90af713d55b049231",
+    "construction-controls/direct/gpui-final.log": "a9841a587bdb50cac2e0246dc3bb95f0a937981e713a4a2de7c0b4557cfe8b78",
+    "construction-controls/direct/gpui-text-map-8-direct-canvas-ledger.log": "24097011757ab08a295139cf70e4b8482b6563929803ffc31a00ce1e0f23e69d",
+    "construction-controls/direct/gpui-text-map-8-direct-owner-ledger.log": "6d2ac7ac293a6744ba5451665c7895a4ed55d0cf5cd10f1e3a831f77d2a93dff",
+    "construction-controls/direct/gpui_canvas-final.log": "61f7e0d74c097c9778ddf9e130036ece83402228531ad39fb4656db4070aac5a",
+    "construction-controls/results.json": "64270f0499b1e5e098ae2f701c112a699e50974fcc4fa4af97eee43765a329da",
+    "core-lines.json": "06cf19352bd541d11752eeb0cef201f98d02ab6aa106f35fa8a657e4056366c9",
+    "freeze-map-8-controls.py": "4cdd0ba8ca065c67c1144670bfa04c6187ce43ba48bf7d53fdf8e51ce573cec7",
+    "gpui-text-map-12-line-reuse-oracle.log": "d805aaafb53a003795fedea1f373fa6b4bd1ddc3bdf5d5e81a228252889f7dfa",
+    "gpui-text-map-12-line-reuse-release-build.log": "fc4dabb18ed902e46f69da17931edca00c3c2c650701f8686853f1e864ecce76",
+    "gpui-text-map-12-line-reuse-selection.log": "1f4ff88f1cbc85eb66a3b87175a34227b272f78ce938f0b6a8f488673a94aa26",
+    "gpui-text-map-12-query-release-build.log": "bce908472c2dd959f98467933489d89dce092e81a029c9c82f529d6a18c6a7b4",
+    "gpui-text-map-12-query-release-tests.log": "6c376aaa120d9d8a12705362c2a046da49b4c6f757362ae014c869cbea395128",
+    "gpui-text-map-12-query-selection-unfiltered.log": "df50c1860be8d5337bb66c8805f9c5f8e9b176bc577551131576a344345117ef",
+    "gpui-text-map-8-canvas-ledger.log": "9044479bd4e9ac0dc2953c188432b77effa3c1605d58e37554fb088d1f2ec7a5",
+    "gpui-text-map-8-codec.log": "2fce6769f45746900ef27ca0ea8ba9670b8beba1e113d34eed643d69c22e990d",
+    "gpui-text-map-8-direct-canvas-full.log": "83d4a6d9f272fbc1a95484744e96c7430c8fb94497f75703c5fe69e1434365d2",
+    "gpui-text-map-8-direct-canvas-ledger.log": "24097011757ab08a295139cf70e4b8482b6563929803ffc31a00ce1e0f23e69d",
+    "gpui-text-map-8-direct-owner-ledger.log": "6d2ac7ac293a6744ba5451665c7895a4ed55d0cf5cd10f1e3a831f77d2a93dff",
+    "gpui-text-map-8-direct-release-build.log": "0bc27456a6cd33aa5417959a2854a18066c7f68f8b2d1611ad31bbed2adf538a",
+    "gpui-text-map-8-direct-strict.log": "356bd7823f611c67f8bd67927bf89b903f9f3caa117dbdf7426018169e628de4",
+    "gpui-text-map-8-direct-text-tests.log": "ecd991af3b7e3e5f61f378e668c33a7fc51ef7b9580c494bb62f33c4937cd370",
+    "gpui-text-map-8-fused-apple.log": "ba8950c4ff023f18409ca208a2a42a127ba428186d470ebe130ebcda9f2a123d",
+    "gpui-text-map-8-fused-canvas-full.log": "1f25ab7d7bee7ea60629426aff231dab8e99621868927706a86aa477ee04795b",
+    "gpui-text-map-8-fused-gpui-full.log": "e7b8c35e67e49d54729d877112037f6ee84262c84c7b4a1eed81b3e7dd9565af",
+    "gpui-text-map-8-fused-msvc.log": "8e85973723682402c042286399ac2c3a051abf15063eb2c5c75ede94f0a023be",
+    "gpui-text-map-8-fused-native-harness-error.log": "46e9bc6d0bef02e24b65add1d5032cf049f1564bc1100271d6f2eb1a29fa4b55",
+    "gpui-text-map-8-fused-native-runner.log": "b3e64af4cdb768b2e8b0eae170e68771fbede8c47321ce391289c61fefce3c6a",
+    "gpui-text-map-8-fused-native-runner.py": "ceedada456de4bba16c590a0dc1000abe10db6f47558d6238d4b5da60dfc9372",
+    "gpui-text-map-8-fused-oracle.log": "620f66d890254bd8fa4a34fbdde72e854abf33424561541f7d4851d084d97612",
+    "gpui-text-map-8-fused-release-build.log": "1d1f4691cebf6ddbc1ad096b81812bfc32e0742c832307feba4e32232e8d860d",
+    "gpui-text-map-8-fused-selection.log": "4ff3bb32edc1bd6f0c2a4d3d2673f5f06ab58ef04a04f899ee5fe2fd476fe028",
+    "gpui-text-map-8-fused-strict.log": "7316a8d397393043b56563a1f3fb94e828eee73041068b58d867cb57e8274225",
+    "gpui-text-map-8-oracle.log": "073cd0cb6dfdd8c8e7ef298c1c4344d813d70df0bcbcf0effd346d4c43aa9cce",
+    "gpui-text-map-8-owner-ledger.log": "38374eb994cb8688648a8341d4f52a049ea90329c677ecf0c664271815eb1e01",
+    "native/actual-registry.log": "c8f376361e8e3515c6621faab064f2527e58bf8ca346fcf07d87fca9d5fd80f8",
+    "native/canvas-artifact.json": "303fc28e52b8bf5ac0a491287662f851e683005c340ea249bcbba25725a15ddf",
+    "native/canvas-ledger.log": "2b33c57e33ed79a1ce8f18c5ae0f4b84c560f450c0409fea2da003d0353a1def",
+    "native/cohort-header.log": "cea2a6efba2310bc309325a4c084956201cd320a048149adf967bd47dfd68241",
+    "native/epochs.log": "0f773b0f34e4bb09a243820a4131245e1899e7dc317ad419a016aab841253ded",
+    "native/headers.log": "6a78b07fbc3d7bcab735cad9fcef755225df4ba4905e8fa8c3c91b7a2bdbd69f",
+    "native/late-service-owner-replacement.log": "145183afdc6ac0b6d699c19302ff8beb674319f494285275251c44871f56ba42",
+    "native/native-allocations.log": "8b97679043ad2c8fca664ed2818cea1648d58381a50508598fd131a5313f7486",
+    "native/plain.log": "2ffc7fe791ba8176202915a04cf1361f3646bbb04741295eabc146d1d7f21498",
+    "native/results.json": "1bb7e8c377bb6f3fbd48d8dc3586f0cab8dac93e128467a11c4dc696838451b8",
+    "native/xvfb.log": "7dadbb57588eba0b94caef05c8fb7938d2f840fa6f3c5fa250f7c7726bc9ecbe",
+    "query-final/12reuse/00.asm": "94f6a9e11a1ad3d1da1ea4c4fbdae2d155ddc1564a1ab4659813994f033045d2",
+    "query-final/12reuse/01.asm": "f5e28275320b53a46b91a9a9d5ec7fbedf07c0685fbe7fff67abfe92db864195",
+    "query-final/12reuse/02.asm": "de979bb3b7ca7fd5c9d643638885c499675dfc596c98b8ab81eb82a0cc4a452f",
+    "query-final/12reuse/03.asm": "e5ee84ba0efc47e038ce6fe19be698bf27954442c5ea05a985ffca0f0f00f0a0",
+    "query-final/12reuse/04.asm": "68dc9cfe9f9fa85b9be3fb21f42813c45b3b6c8b294bfa6368ebc9884ba2248c",
+    "query-final/12reuse/05.asm": "d71785f854205eb49727aceaa0bdeb3360d11da57f9b7ec0611b1ad4a93e265d",
+    "query-final/12reuse/06.asm": "55e2859023def678228c840d01ad4e35c268043fef4f10b2ba51647846ce9dff",
+    "query-final/12reuse/07.asm": "8df5a4da0d124ff70d860865336c96e110158f05bb6114b5b01f588f17bfdc3e",
+    "query-final/12reuse/08.asm": "56529ac2fc5444fcf3a792dc6d3285873abcc7744223194aabf486bc43b7451b",
+    "query-final/12reuse/09.asm": "5d48edaa737423798cf15deec39a4b6f5bc8177efdf6ecdaeedc3d187b14c82e",
+    "query-final/12reuse/10.asm": "918224437afc9d2a1712b97756a9c2e26a62b0b39fe970be40c84b56d6cf4edc",
+    "query-final/12reuse/11.asm": "918224437afc9d2a1712b97756a9c2e26a62b0b39fe970be40c84b56d6cf4edc",
+    "query-final/12reuse/12.asm": "59c429ae11dd60332f9481ddc2abb47c0b0e560099d5d2c0aaaee0d7a1ecef32",
+    "query-final/12reuse/13.asm": "a112e4f1cb08bdba95ab149ada19152b1a7ca752e894b4bbafdd9e1e1bfef848",
+    "query-final/12reuse/14.asm": "e80c900315bc3790a2e0c326c9511c5d42ccc5c3e309b178c2009416d19a9658",
+    "query-final/12reuse/15.asm": "73f07ec00ba5b9c04f1ab23ca1053d06911568cff448a11316b57386c2fc3e55",
+    "query-final/12reuse/16.asm": "70be5b2c72adcfde81ff576ce07cbe3c04455723b68920789a7bbc1c7f3f4343",
+    "query-final/12reuse/17.asm": "0bc111b948825ed8f167c89c57be408fa5a957af97bdf10467357140746ccfe5",
+    "query-final/12reuse/18.asm": "eb531e4f683a5d2ec8d76d111288778f0f7b36b59e66651ead1dc4d53d9ff5e8",
+    "query-final/12reuse/19.asm": "e2795eb2112f260a1f09c3c5e1824d2916301c7e2f840d4ca5de6554c5f4c813",
+    "query-final/12reuse/20.asm": "e709770b68f314443a11fc27f80413ba993dd972c1a0b3031180a29b52b79284",
+    "query-final/12reuse/size.txt": "662e91d176ef4497e93b67f307b788ba8fdf3db2fdd787b1daac014d7b34a4fa",
+    "query-final/12reuse/symbols.json": "8c8785215e6d4d2989e4644bf86b374927b5299e15bf02a9ed1d5d06398b3f2c",
+    "query-final/24trim/00.asm": "1fe6d056b094720e180d0d14ff708d87d8dfe94a938b116c1b724bede71fddd6",
+    "query-final/24trim/01.asm": "7250a12fbef105b9237ec5c806af157850061aae1bc637201a0bc8d7cdf3dd92",
+    "query-final/24trim/02.asm": "d7d20d777d2c73b8d57ec320d87615b43217909877b83b632b11b4b413946808",
+    "query-final/24trim/03.asm": "4c892ce8ea0a7f67dcb9d665f8e98369ed4a134f6324ef77038f6f87a69a4a4a",
+    "query-final/24trim/04.asm": "68c4640710c02d68052ec3d0ea9d07c391164da3dfa2d956e89b3743ed8887cc",
+    "query-final/24trim/05.asm": "a4b74499041ddf5b1dff9bb615e5f680caf428c797861d76966ac242acf044e0",
+    "query-final/24trim/06.asm": "c2786c8a2d2c26e191a8014ad37a9d3b7ec5358abd7058ab15706945762a1431",
+    "query-final/24trim/07.asm": "7ca19e3aa51374e27c957a5a0fbbfa3c8b526e448744ba7120a9b463c8aa4b9d",
+    "query-final/24trim/08.asm": "a5f4ca81d217a23503d9b78146617f095146002a7637b4878cd5c49b87898359",
+    "query-final/24trim/09.asm": "0a3bf8208a42a057903fae45c8fb38a348e356ac943cb701e0daaccb0b5b3c87",
+    "query-final/24trim/10.asm": "0a3bf8208a42a057903fae45c8fb38a348e356ac943cb701e0daaccb0b5b3c87",
+    "query-final/24trim/11.asm": "0a3bf8208a42a057903fae45c8fb38a348e356ac943cb701e0daaccb0b5b3c87",
+    "query-final/24trim/12.asm": "ad35257b271c34ce0ded29abdc210183788255260002c26013a5cb9652189781",
+    "query-final/24trim/13.asm": "6ba438a6738c99f198fc2ac482c1797712be1666651a4ae43e0314a9f2675101",
+    "query-final/24trim/14.asm": "040282260cc4d95abdc07f416018d59347d8caa49cd894968a57363c2c730d3a",
+    "query-final/24trim/15.asm": "7b50e6d754ff4575e24f016b345f9a43a4edfc36b9c7df9429646dadd6a1fd2a",
+    "query-final/24trim/16.asm": "4886734d4f6cff7884ce74f67faedff805c86c80cd00559c99dc22ee48f2f104",
+    "query-final/24trim/17.asm": "a5f53617f30bf6223ea86260e2ea8a147a923a3036d5f717c72038e3845256e4",
+    "query-final/24trim/18.asm": "2caa6acbc3c2548ab533bb1264506fe99a55edf6a424bbc618fa89c33145dcab",
+    "query-final/24trim/19.asm": "0e00ada999c4a89a1eea38c78f306cefe46fcbdd5aa408ed7ce1ab32339c546c",
+    "query-final/24trim/size.txt": "c6e34f5c04a98506d206655c41f059dfc2023c76341530d1c5c8af0de160ceba",
+    "query-final/24trim/symbols.json": "a985a5631b3f941a48a7d1dfc77759a22b2a8203aee33eb57cef0e666d43c30e",
+    "query-final/8fused/00.asm": "8a8059b825ddec4ce78ac7b6c6421b1c15258bb815d31691e84cc3698a8635a9",
+    "query-final/8fused/01.asm": "f0c31f6c2c43bc7044bab75735f78e0976e4a3c949d952c1a399b48e670a098a",
+    "query-final/8fused/02.asm": "2111ebe4d25dab1a59bebb9ce3c9a77d73cb708ceb660b5c578e82d5b650ca97",
+    "query-final/8fused/03.asm": "ffdb0f400f28357a787531860988ff1b9075d356c59567a61301e8769be06078",
+    "query-final/8fused/04.asm": "f03ef8f3c42b856b9584ffae0a0e5957962a87e0f5e31c4165a16decff45f9f7",
+    "query-final/8fused/05.asm": "27f5366e575320a278285b2b2dfa8bf21b09999f46f3378fceb309178f72890c",
+    "query-final/8fused/06.asm": "f98b391d3a2a79b0b391adf976bf38ae5223d0db333ae0b5e2d43b754876a7eb",
+    "query-final/8fused/07.asm": "20e70791234125494987d5275b6205e1d653f0c1978384b5226c71d6d651d9e9",
+    "query-final/8fused/08.asm": "1963ebfad53592a81f2af6d6a2b074e96ab4024a078715cde6d1ec5d96c66535",
+    "query-final/8fused/09.asm": "fc0c753f0d2d6a5705271e71b763a22847a49190d8aab4425aae4b4ecd12677f",
+    "query-final/8fused/10.asm": "8b4bc7c4813a0583a62b18db7ad1afb22831cbcefb61e7dee6d4be24bd27b337",
+    "query-final/8fused/11.asm": "410ef9a217d984dacf21e2d2d86d7a60762118444d31fc4c88a07995d8f99c51",
+    "query-final/8fused/12.asm": "765687e95254465f6dfd60afd654c3d23ac202809a7a9fbdfbad173d75534c59",
+    "query-final/8fused/13.asm": "132605765d5b0153462623f173e77f2eed73c72fef2c327620ced2841e6d11cb",
+    "query-final/8fused/14.asm": "17768efe8a1f97da8ca9af99818a6995fe453463fa8f38fe405659214e9a4a69",
+    "query-final/8fused/15.asm": "0be2a1a78fee5f018c6ec06398d3c761a8ba31b6de38571a97da6bb00254bec3",
+    "query-final/8fused/16.asm": "0be2a1a78fee5f018c6ec06398d3c761a8ba31b6de38571a97da6bb00254bec3",
+    "query-final/8fused/17.asm": "9011516597335b22f3c4c3c3e0c1a755a4a2ff6a63eb90edb82ecdfa818090dd",
+    "query-final/8fused/18.asm": "cc0af71c4488e9d017649f1de94b17567f35cb5a132bfe6802e859b30f21843e",
+    "query-final/8fused/19.asm": "111405965fd1da0a91084d37c7726ab1bce82b809299e5b12403a1425f2c5cfe",
+    "query-final/8fused/20.asm": "d117eea008c6aa71540f1865d937fb6535be30940767c87406a70d57ffed1b6a",
+    "query-final/8fused/21.asm": "cd8395fcc938a865f63005017c642492142c2e1ed3eb327e36bffeeae55f03d8",
+    "query-final/8fused/22.asm": "35eef2dcf860e3d2042756a64efade1aab6f937c13c7738cbab89c0af2c44007",
+    "query-final/8fused/23.asm": "de858633dedfa17b143de09b0a39a3b697572d1283a9e639ebe4fb2752c7ad5a",
+    "query-final/8fused/24.asm": "3c8ac5fa2ca541341e71d716b3798aec50565ed00598ffc4c3834c8b8c6a603a",
+    "query-final/8fused/25.asm": "e1ecb0ff5c649913cbd406e8e01b9d02242590a2b75c67641a9be07cc52a3fd4",
+    "query-final/8fused/26.asm": "3bb2918b04daf023cd3c570b54de33869d33aa1f4ecc2e7fe5bdd4a16be9c165",
+    "query-final/8fused/27.asm": "4735298198985d4d1aa83f2ead84ee2a0360d0ddbee9eb139edea28d0fcc9ba9",
+    "query-final/8fused/28.asm": "2747007c5de0c63ee7e17fa7f407920329b55d93d1c268475367efbafabf5837",
+    "query-final/8fused/29.asm": "8c669005e140f4277f23929ae7b868aa496784f4e11d15edcdf894f3feef9972",
+    "query-final/8fused/30.asm": "85adbdc5b73c8be03971b9fe1390d71f3fc9c7c07d77f35b711028f7e465d3ac",
+    "query-final/8fused/31.asm": "b4ffd2f7dc920781c65bdf61359f336f3ee4743cbcfe1f0f2aca5fe7ccf80c1f",
+    "query-final/8fused/32.asm": "9c5c5427fb29a083acff31c122a6c0ad151c17babeb7aa05cce3133d83b312e0",
+    "query-final/8fused/size.txt": "e5f51092cc500b6413a606117c8ed5f7fb685c1d476e1c17d890ebe04f076dc3",
+    "query-final/8fused/symbols.json": "84cc54aa4f3c79fc60af1be609134128fe5383f64d0164b057671d6baa2d4194",
+    "query-final/artifacts.json": "42dabf70d4d4dd2ed4ffe3c1efa4acf224a83b268df614916d0f8ac4f9df2139",
+    "query-final/capture.log": "3735aeb3cd01d84260a14073ed1238f52f10fe09e3c3a5d6e5da030434dea907",
+    "query-final/queries.csv": "10c7767bcc85d285a6eb1c6453fe4805b4e44c44409a462262086a3efd9e9a8b",
+    "query-final/summary.json": "8f3f4204fd278cbd60dface8ebf308c87beec81177131b79ac1b58a4ecf96336",
+    "query-refinements/12checked/00.asm": "201f3fbbb0f0d54f41e75068d542eb94b9ed05e5a1e0e26e82ffc6265038f568",
+    "query-refinements/12checked/01.asm": "ad933b8b3e825e8e43cb47155bfc7650b9aa243fe00678ea010e931e40bcaf4d",
+    "query-refinements/12checked/02.asm": "77164a5cceb71c4f76092f028adae9200d44ec50d7b7ff183fca4a2995226bf0",
+    "query-refinements/12checked/03.asm": "0d4fff75ead4501a21e1e0661c9d463c9e5f1f831b2ff8bd734a26ba5210691f",
+    "query-refinements/12checked/04.asm": "e288d81de1c7d147138e9b616a3da9b282cfbd98960469c9f79f9aab94937aa3",
+    "query-refinements/12checked/05.asm": "07c13bc0314d44dd7c6426a15e19a1cb6539c38b7352458c2d57771e9b6e33fe",
+    "query-refinements/12checked/06.asm": "01f98c3165628e390825ece8e99fd9e7f2d2a0a0019747b33dc96b835a69a4a6",
+    "query-refinements/12checked/07.asm": "83d7b01cd1310ad9ee0def798d09eb9a24b63c4b114c817a14e8f82553257b51",
+    "query-refinements/12checked/08.asm": "192055ab4285304f8ba272ff61d69ae2f657ba1aff38cae39eb285905c5aaa0d",
+    "query-refinements/12checked/09.asm": "97cccb28c472f3f349a797d88fd8cac6e53905e35c19908a1bc502e13f6ee092",
+    "query-refinements/12checked/10.asm": "1d3dc95c7c69560a6066b1562a1d9d353d65eedcb7cbd7ab27ace09f52b4aa7b",
+    "query-refinements/12checked/11.asm": "1d3dc95c7c69560a6066b1562a1d9d353d65eedcb7cbd7ab27ace09f52b4aa7b",
+    "query-refinements/12checked/12.asm": "b40ed7d01961eec5de0a6ffd7e430e10d4dee411d68ddeb0938c83638db4fbd6",
+    "query-refinements/12checked/13.asm": "74f739e025e12b21d12bbc6bba569fe60f5223a4339d3c476b68fb722059e613",
+    "query-refinements/12checked/14.asm": "4d7b7768f37dc28b50e3c26c925f7925ca1f4d5f8894610e1ee2a6f083e34111",
+    "query-refinements/12checked/15.asm": "4216b4a0185901f2260bc48ebcf53b2635e8aa39128a1d7eb0d06bad4582cdbf",
+    "query-refinements/12checked/16.asm": "34afdac5497ab3c5ea03c9d80b6a97863f822b906683bd87144a3a7240bff2e8",
+    "query-refinements/12checked/17.asm": "b18535436dad363780935130c7ea4810cc8b2f2632e34091976a4b9ec47cce1e",
+    "query-refinements/12checked/18.asm": "3983216f576193000dec697c29b0bf75704d0b9e239562ea216fdf55fd048646",
+    "query-refinements/12checked/19.asm": "6ee4e0adf9e246c4abc799bde1a0073dbc3f0d68ec54d4c6cada98ebe17074a6",
+    "query-refinements/12checked/20.asm": "68ed1eff893354ad4a31089d06cf37268988b1acf315400f46a2aba448e55d18",
+    "query-refinements/12checked/size.txt": "392c0db88435e9240d189ed184a580fd1306a73e427bd5b734d19e3ee7a1858e",
+    "query-refinements/12checked/symbols.json": "1aae84dba4aada73a12627431392d3d4ce7b185ebbe0dcab5641df2eae1f5168",
+    "query-refinements/24trim/00.asm": "b0dcef86a4acbb42a1991a67cdbab9e80acfaa3bdad0ad723af303b7d368e3bd",
+    "query-refinements/24trim/01.asm": "6d38e1cd996a58e4f0318f446018e06ba3741c898d062e1c67c942ea7b3ce66d",
+    "query-refinements/24trim/02.asm": "2dc62209348bc90ccd02a79a834cbd36ad5bf9f567743e3ab979414ecba80e64",
+    "query-refinements/24trim/03.asm": "f19bfb9307d63ea4d5398c74f8679865ff4947263d83a4ee0332a8827ed347a5",
+    "query-refinements/24trim/04.asm": "08534ff5ea402babfad8bb94257903d79c8f4494ec30cb190c6dc6cbaf1987b3",
+    "query-refinements/24trim/05.asm": "3d7eef4d10123229e7f0fe4a04023998719274b843670a72cd16bcd241e18bf0",
+    "query-refinements/24trim/06.asm": "1b0f20c04de3295b78b2f696778d28370091ebe91b3961a9f5a71acc4856aa94",
+    "query-refinements/24trim/07.asm": "15e7035d3dc917d793027ee9b78264f77b71f95c4e789e61b87f6b6a5f7d04d9",
+    "query-refinements/24trim/08.asm": "5f7281cdc9fe9b76c8b6d5cb4ca803663046561255ff9a2264708751a0caed6e",
+    "query-refinements/24trim/09.asm": "9e4f045713ed95db0391ac3f071e997257c3da7c53f986aeb7ee6cd7d99f60b4",
+    "query-refinements/24trim/10.asm": "9e4f045713ed95db0391ac3f071e997257c3da7c53f986aeb7ee6cd7d99f60b4",
+    "query-refinements/24trim/11.asm": "9e4f045713ed95db0391ac3f071e997257c3da7c53f986aeb7ee6cd7d99f60b4",
+    "query-refinements/24trim/12.asm": "7d4d9a7ab03774537805fbfabe6b497195d3b4fcbced02b766d9b629ad14ed64",
+    "query-refinements/24trim/13.asm": "2deb63218a2d702d983452626f038edb17022551b0e5900a36609623b1798570",
+    "query-refinements/24trim/14.asm": "869cd80b087d56370be21a3dc02911bf7e9d6dace63a7a6a34bddf776203dc5c",
+    "query-refinements/24trim/15.asm": "85b7d3daded74b70b690205d82b944149fe372a01d1a0e511c0f47e4ea59f3e6",
+    "query-refinements/24trim/16.asm": "3edb4a5094fe3cd1e531b3fc3487ada57b6d25f923134568d94016ac3cc3cf7a",
+    "query-refinements/24trim/17.asm": "42c6f305487b657e6f1954c2cc0bfad70c685b5c3d74a40cf10776ccb4e38e6a",
+    "query-refinements/24trim/18.asm": "5e7a0fc60e04e8f71d99271c84d49a4509ac65e35f384ef5deb3cee8751786ba",
+    "query-refinements/24trim/19.asm": "fb04ed57327651430ab38f5b03ec996965719a04ee40d780c3b20e82943f3765",
+    "query-refinements/24trim/size.txt": "32e032859b8cbbadb5a0992ff157ecd1aa2f106f56dc260baa97285a99cb8e6c",
+    "query-refinements/24trim/symbols.json": "a985a5631b3f941a48a7d1dfc77759a22b2a8203aee33eb57cef0e666d43c30e",
+    "query-refinements/8direct/00.asm": "58bae5b1d0212fe4fb0a47b750acfeee43bdc42f942a80ad49b8ca0682973572",
+    "query-refinements/8direct/01.asm": "7a9166bfdbfff7cafabab37688a25245bd64615466311520a2443393e2c2723b",
+    "query-refinements/8direct/02.asm": "4f4c6fea843568534f49831789f3fb99da2f63427af1a3f343838d960076ecf1",
+    "query-refinements/8direct/03.asm": "cdd4113c3648b457f4922e215efd94d9ab00ae1dade6ecdf03d2c3f581a960c7",
+    "query-refinements/8direct/04.asm": "9f48f7e2e55a0bda4f981ef058ad6e2e9c1f9c05099e79bcc7684845c34fd9ca",
+    "query-refinements/8direct/05.asm": "1db292e1a54d06a7d8d485b45687dab52f5c6453d8e517c9e5661af16011c021",
+    "query-refinements/8direct/06.asm": "90e81b4629d73266ba367ffcab5e89cd44d28c83e0787bbf91085261d7e8797c",
+    "query-refinements/8direct/07.asm": "6d8f366e3182cde5ac04e1ebb72f15e3aa17a2cd1adb9c489dc3fcde4041557c",
+    "query-refinements/8direct/08.asm": "cd2d0f14c938ca143e43fb4f635d505d39a5823f0a0301b6168f812d46ecbd47",
+    "query-refinements/8direct/09.asm": "533c633a560eeb26f4bf4648f2b5153651857c6aadb708c037c0fbadb8bd8316",
+    "query-refinements/8direct/10.asm": "f3e0e9e6bd0e792c1ff8e92f9cfa8f7e08ecb0f09e32354e2676e71060bb30a9",
+    "query-refinements/8direct/11.asm": "f8da3073b0ded1e6bdf53b1eee97b6e6e9353282d5a642800889d7cf843aadd1",
+    "query-refinements/8direct/12.asm": "009c2aa070af8a573177ca7322f4816226b318961510e4ab7caadd291538cd20",
+    "query-refinements/8direct/13.asm": "881a51d42bdd6d9268ad6485159c4579b78238791d3c861cf7193c375b6ae7cb",
+    "query-refinements/8direct/14.asm": "02e9e98833b8ef2a9b0f9006e9bdbd3d6301203c07c02087bea4f6b090f5de10",
+    "query-refinements/8direct/15.asm": "b568c3d700665b0dd87324c8c035ca35822f25033bdbb6054fb613d207f6f0c8",
+    "query-refinements/8direct/16.asm": "b568c3d700665b0dd87324c8c035ca35822f25033bdbb6054fb613d207f6f0c8",
+    "query-refinements/8direct/17.asm": "39c96fc67dcafb13e06df088ed9055c9971bd1fa62e4cd09f18f72cfe47985fe",
+    "query-refinements/8direct/18.asm": "56a54747b8f9cb6039b547090d8a17f81015e9abce3c2188dc54aa0639040a04",
+    "query-refinements/8direct/19.asm": "4233895982f0c44b5ebc288884b24f36de5152bda2074af113f04b2802187538",
+    "query-refinements/8direct/20.asm": "954d5a5c111d090b2a11b153112eaa63e6aac4a6ac094f9525b93cc6f2a230f7",
+    "query-refinements/8direct/21.asm": "0ff59b80f837c346b966c32d21e1df698aa5cbbca3dcfe606dc5e1a43bb4b742",
+    "query-refinements/8direct/22.asm": "28e14e72e364937f1d8fc879da505324d2fc95a158ade04e693bb113c35048ad",
+    "query-refinements/8direct/23.asm": "a44e5628d81fb10b45ba0e03639d2c60d9fb217f5d09517507ee61175e343cff",
+    "query-refinements/8direct/24.asm": "2e9a412deb88cd0ce30665a7c245c33bd53f88eae2073ff253c04a2e78d62509",
+    "query-refinements/8direct/25.asm": "a074f7614cfd3fd44174d5097ae7bb235b968144f827858717df0c43727e44c9",
+    "query-refinements/8direct/26.asm": "566e785f0003ed116707583c949bc1dc4ea6f09962aed438eb92e073cd7073eb",
+    "query-refinements/8direct/27.asm": "0801260245c48a5454676b3d86b06ed5e904af94f31f345c2a31c35990f9215b",
+    "query-refinements/8direct/28.asm": "6102768e72b01962b99ca98a45f1e52a050e23369c7dc44c9f3911eb3c658ae1",
+    "query-refinements/8direct/29.asm": "d5385c1ea33142aeff5d811635b15843a07edfc854b4d551606cf84d72966a74",
+    "query-refinements/8direct/30.asm": "d4d8583777a8753515b25cfb5044475f6cd82967139b92d5a4df1f6edb6d669a",
+    "query-refinements/8direct/31.asm": "eb73dd731c3bee2586fb6d340f982c73b496df8fb5ecdb13267fbabe1204d79d",
+    "query-refinements/8direct/32.asm": "f9f5b2ad38e3ffe4387efd946dc1fbd1f561cabd024b9cf18767edd732feb786",
+    "query-refinements/8direct/33.asm": "c3ae1b9501828ab72350e1a1b02abe4ddf86dbc10b92a0ae1f1ca613b732d979",
+    "query-refinements/8direct/size.txt": "f15697d34176148eaf974a7ed6aa4f390176f782e3265a07ba6e5614418b12df",
+    "query-refinements/8direct/symbols.json": "6207d011f7e762ff59829e190bd6bad7ea6e59fc12ac89a10b9198e280b5d2cd",
+    "query-refinements/artifacts.json": "5637d68fd21c5c9625d540816fdf153e6c5d2cbc6612fc3b12d20c7ba060ec33",
+    "query-refinements/capture.log": "a5b59ca165ab003d6ca5e75636ce023a9f3f4a3582feb4c8af02459211c66c08",
+    "query-refinements/queries.csv": "00479f5cd91b7db46849dcd0efe87b31762aeba9b8b0f675b971ed3609f6def2",
+    "query-refinements/summary.json": "3158453e9f71636ac4676e0def50939076e05b9b194cc5179239549a274f00d0",
+    "rejected-head-alias-inventory.json": "3e987b86ced27d61ec19c04342794fe2664ccc399ee60a1a5b6448bca8bea306",
+    "time-caret-map-final.py": "6165ebd04356c1c6ba154abf11fa039e4eddad6419cdceb4fd2dddb02b149dea",
+    "time-caret-map-refinements.py": "544490f656f28d2a662e351fc29e1215f00d54c3400263973e95b5d0e7b31c1e"
+  },
+  "all_source_inventory_ref": "d645fb9149614e5270e7bec1238075eaab391bff",
+  "shipping_code_lines": 29289,
+  "alternative_12_reuse_shipping_code_lines": 29140
+}

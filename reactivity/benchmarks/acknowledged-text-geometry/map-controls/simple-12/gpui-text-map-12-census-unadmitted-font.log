@@ -1,0 +1,43 @@
+   Compiling gpui_canvas v0.1.0 (/root/gpui-text-map-12/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+     Running unittests src/lib.rs (/tmp/gpui-text-map-12-compact-target/debug/deps/gpui_canvas-3c502a0c35f4b432)
+
+running 1 test
+CARET_GROUPS case=empty width=None bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(1.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(55.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(400.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=None bytes=32768 stops=32769 common=32769 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(1.0) bytes=32768 stops=65536 common=2 split=32767 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(55.0) bytes=32768 stops=38230 common=27308 split=5461 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(400.0) bytes=32768 stops=33513 common=32025 split=744 exclusive=0
+CARET_GROUPS case=ligatures width=None bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=ligatures width=Some(1.0) bytes=17 stops=24 common=8 split=8 exclusive=0
+CARET_GROUPS case=ligatures width=Some(55.0) bytes=17 stops=18 common=14 split=2 exclusive=0
+CARET_GROUPS case=ligatures width=Some(400.0) bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=None bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(1.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(55.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(400.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=bidi width=None bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=bidi width=Some(1.0) bytes=33 stops=44 common=4 split=20 exclusive=0
+CARET_GROUPS case=bidi width=Some(55.0) bytes=33 stops=30 common=18 split=6 exclusive=0
+CARET_GROUPS case=bidi width=Some(400.0) bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=isolates width=None bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(1.0) bytes=29 stops=31 common=7 split=12 exclusive=0
+CARET_GROUPS case=isolates width=Some(55.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(400.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+
+thread 'text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding' (1133045) panicked at crates/canvas/src/text/geometry_ledger.rs:147:72:
+called `Result::unwrap()` on an `Err` value: MissingGlyph('👩')
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding ... FAILED
+
+failures:
+
+failures:
+    text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 65 filtered out; finished in 2.17s
+
+error: test failed, to rerun pass `-p gpui_canvas --lib`

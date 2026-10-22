@@ -1,0 +1,365 @@
+{
+  "24trim": {
+    "source": "32e8ee128494e452927cf12632fb2f866c7171a5",
+    "target": "/tmp/gpui-text-map-capacity-target",
+    "features": "default simd",
+    "profile": "release defaults",
+    "binary": "/tmp/gpui-text-map-query-final/24trim/selection_queries",
+    "sha256": "8e55981657240c93cd3bc1f25a95771fe235e0ed56de1c0a84a2fd74b1f7179a",
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "47a07d31cfe582f8db7a004567885819da7581106b6dce5c1f11ba9997ea8f5d",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "39cad80b565f5d0b582bb22a0a6f4bfa26b38e03984f0b2ebcd953e2513e83f2",
+      "reactivity/crates/canvas/src/text/planner.rs": "154bb7537db003608e2fcbf67ab73be07d0051a73021aee3d0342a3b995fb2eb",
+      "reactivity/crates/canvas/examples/selection_queries.rs": "4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7"
+    },
+    "fingerprint": {
+      "rustc": 12019306335353385202,
+      "features": "[\"default\", \"simd\"]",
+      "declared_features": "[\"default\", \"parallel\", \"simd\"]",
+      "target": 8552115839692637013,
+      "profile": 2040997289075261528,
+      "path": 8056495035637685411,
+      "deps": [
+        [
+          410453506447154829,
+          "fontdue",
+          false,
+          11726360499091070621
+        ],
+        [
+          535147103364023206,
+          "icu_segmenter",
+          false,
+          8895364502192023243
+        ],
+        [
+          6404845030892936583,
+          "parley",
+          false,
+          4265765659891541539
+        ],
+        [
+          8871500050509493793,
+          "fontique",
+          false,
+          1441323309009864774
+        ],
+        [
+          9412299524993436968,
+          "icu_properties",
+          false,
+          17980407498888851703
+        ],
+        [
+          10096717065774937424,
+          "fearless_simd_macros",
+          false,
+          8488432904642416246
+        ],
+        [
+          10434485102629434171,
+          "ttf_parser",
+          false,
+          6627988852707256412
+        ],
+        [
+          11048071599106839258,
+          "allocation_counter",
+          false,
+          14377779078634819521
+        ],
+        [
+          11427131187500083948,
+          "swash",
+          false,
+          17447053376743071001
+        ],
+        [
+          13385949152760668073,
+          "skrifa",
+          false,
+          18175160164051329072
+        ],
+        [
+          13672653153045154758,
+          "gpui_reactivity_core",
+          false,
+          11426704677569999764
+        ],
+        [
+          16960864593395472219,
+          "rustybuzz",
+          false,
+          4110872305936981955
+        ],
+        [
+          17032968227276897852,
+          "gpui_canvas",
+          false,
+          1885598639738102712
+        ],
+        [
+          17419650685976310124,
+          "fearless_simd",
+          false,
+          4253113330799623663
+        ]
+      ],
+      "local": [
+        {
+          "CheckDepInfo": {
+            "dep_info": "release/.fingerprint/gpui_canvas-3c11bca4def80820/dep-example-selection_queries",
+            "checksum": false
+          }
+        }
+      ],
+      "rustflags": [],
+      "config": 9396254390672932401,
+      "compile_kind": 0
+    }
+  },
+  "12reuse": {
+    "source": "eeeeccd9a58116e9684a2eb320905a24b3c8d63e",
+    "target": "/tmp/gpui-text-map-12-line-reuse-target",
+    "features": "default simd",
+    "profile": "release defaults",
+    "binary": "/tmp/gpui-text-map-query-final/12reuse/selection_queries",
+    "sha256": "87ddd3f30b598d8bffc3358ba2c570cec7c0ee259b4d87da9436590cb7b5a411",
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "b3d9bd51258094df047e5e7d2a5379b01dcbc9d7dfcb44834dff0dc495ed908e",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "cb7fedc8a64bc38d4e4a49d6a7bd1151fd6908a4dc75d45e3b83fb714a637638",
+      "reactivity/crates/canvas/src/text/planner.rs": "0a49d5e31f389ade564ac6df2050b2f08d987c0e7dd017f9da266ce4cf5fe1ea",
+      "reactivity/crates/canvas/examples/selection_queries.rs": "4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7"
+    },
+    "fingerprint": {
+      "rustc": 12019306335353385202,
+      "features": "[\"default\", \"simd\"]",
+      "declared_features": "[\"default\", \"parallel\", \"simd\"]",
+      "target": 8552115839692637013,
+      "profile": 2040997289075261528,
+      "path": 8056495035637685411,
+      "deps": [
+        [
+          410453506447154829,
+          "fontdue",
+          false,
+          11726360499091070621
+        ],
+        [
+          535147103364023206,
+          "icu_segmenter",
+          false,
+          8895364502192023243
+        ],
+        [
+          6404845030892936583,
+          "parley",
+          false,
+          4265765659891541539
+        ],
+        [
+          8871500050509493793,
+          "fontique",
+          false,
+          1441323309009864774
+        ],
+        [
+          9412299524993436968,
+          "icu_properties",
+          false,
+          17980407498888851703
+        ],
+        [
+          10096717065774937424,
+          "fearless_simd_macros",
+          false,
+          8488432904642416246
+        ],
+        [
+          10434485102629434171,
+          "ttf_parser",
+          false,
+          6627988852707256412
+        ],
+        [
+          11048071599106839258,
+          "allocation_counter",
+          false,
+          14377779078634819521
+        ],
+        [
+          11427131187500083948,
+          "swash",
+          false,
+          17447053376743071001
+        ],
+        [
+          13385949152760668073,
+          "skrifa",
+          false,
+          18175160164051329072
+        ],
+        [
+          13672653153045154758,
+          "gpui_reactivity_core",
+          false,
+          11426704677569999764
+        ],
+        [
+          16960864593395472219,
+          "rustybuzz",
+          false,
+          4110872305936981955
+        ],
+        [
+          17032968227276897852,
+          "gpui_canvas",
+          false,
+          1885598639738102712
+        ],
+        [
+          17419650685976310124,
+          "fearless_simd",
+          false,
+          4253113330799623663
+        ]
+      ],
+      "local": [
+        {
+          "CheckDepInfo": {
+            "dep_info": "release/.fingerprint/gpui_canvas-3c11bca4def80820/dep-example-selection_queries",
+            "checksum": false
+          }
+        }
+      ],
+      "rustflags": [],
+      "config": 9396254390672932401,
+      "compile_kind": 0
+    }
+  },
+  "8fused": {
+    "source": "d77d3b92822797857059ff6073e6c4e3ef2f7909",
+    "target": "/tmp/gpui-text-map-8-fused-target",
+    "features": "default simd",
+    "profile": "release defaults",
+    "binary": "/tmp/gpui-text-map-query-final/8fused/selection_queries",
+    "sha256": "dc077d9dc153bdc14b8449c1356e9d76ad966e4e06d13180a4709582b70a6019",
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "eacf785e7ad02d71b064e3e190290db0b7694a88a49b4ac7adb9f908e4bf15c5",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "73bda3db7253eae80dcc7c086f021f5aa16cbe03eaaae17c261fbc98e3d1980a",
+      "reactivity/crates/canvas/src/text/planner.rs": "d72ef891a29feeaf47a4ca6dbed7d5c629e02f255cb08e46e00e24cbfc48611f",
+      "reactivity/crates/canvas/examples/selection_queries.rs": "4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7"
+    },
+    "fingerprint": {
+      "rustc": 12019306335353385202,
+      "features": "[\"default\", \"simd\"]",
+      "declared_features": "[\"default\", \"parallel\", \"simd\"]",
+      "target": 8552115839692637013,
+      "profile": 2040997289075261528,
+      "path": 8056495035637685411,
+      "deps": [
+        [
+          410453506447154829,
+          "fontdue",
+          false,
+          11726360499091070621
+        ],
+        [
+          535147103364023206,
+          "icu_segmenter",
+          false,
+          8895364502192023243
+        ],
+        [
+          6404845030892936583,
+          "parley",
+          false,
+          4265765659891541539
+        ],
+        [
+          8871500050509493793,
+          "fontique",
+          false,
+          1441323309009864774
+        ],
+        [
+          9412299524993436968,
+          "icu_properties",
+          false,
+          17980407498888851703
+        ],
+        [
+          10096717065774937424,
+          "fearless_simd_macros",
+          false,
+          8488432904642416246
+        ],
+        [
+          10434485102629434171,
+          "ttf_parser",
+          false,
+          6627988852707256412
+        ],
+        [
+          11048071599106839258,
+          "allocation_counter",
+          false,
+          14377779078634819521
+        ],
+        [
+          11427131187500083948,
+          "swash",
+          false,
+          17447053376743071001
+        ],
+        [
+          13385949152760668073,
+          "skrifa",
+          false,
+          18175160164051329072
+        ],
+        [
+          13672653153045154758,
+          "gpui_reactivity_core",
+          false,
+          11426704677569999764
+        ],
+        [
+          16960864593395472219,
+          "rustybuzz",
+          false,
+          4110872305936981955
+        ],
+        [
+          17032968227276897852,
+          "gpui_canvas",
+          false,
+          1885598639738102712
+        ],
+        [
+          17419650685976310124,
+          "fearless_simd",
+          false,
+          4253113330799623663
+        ]
+      ],
+      "local": [
+        {
+          "CheckDepInfo": {
+            "dep_info": "release/.fingerprint/gpui_canvas-3c11bca4def80820/dep-example-selection_queries",
+            "checksum": false
+          }
+        }
+      ],
+      "rustflags": [],
+      "config": 9396254390672932401,
+      "compile_kind": 0
+    }
+  }
+}

@@ -1,0 +1,490 @@
+{
+  "converted": {
+    "source": "068497ed7e17cde8ced7c5c85d81bb8146b2daa1",
+    "configuration": "cwd /root, no rustflags, default simd, test profile",
+    "executables": {
+      "gpui": {
+        "path": "/tmp/gpui-text-map-8-controls/converted/gpui",
+        "sha256": "9669b192d7cb97b9ef8496be1e062ad0ef7eb7b06dadd433fb273c586a04d348",
+        "command": [
+          "/tmp/gpui-text-map-8-controls/converted/gpui",
+          "--exact",
+          "runtime::text_geometry::tests::acknowledged_geometry_owner_epoch_and_allocation_ledger",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "fingerprint": {
+          "rustc": 12019306335353385202,
+          "features": "[\"default\", \"simd\"]",
+          "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+          "target": 13433137496993833081,
+          "profile": 1722584277633009122,
+          "path": 8373320921053062204,
+          "deps": [
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              15844599515134855215
+            ],
+            [
+              1001648224152866569,
+              "arcstr",
+              false,
+              13769763344448808657
+            ],
+            [
+              4295957145130622623,
+              "zbus",
+              false,
+              16667559302071214571
+            ],
+            [
+              6359120849577304855,
+              "x11rb",
+              false,
+              1661777925463489056
+            ],
+            [
+              6557439603276904804,
+              "serde",
+              false,
+              6262495323071950020
+            ],
+            [
+              8160210889872729633,
+              "serde_json",
+              false,
+              18299403665279195733
+            ],
+            [
+              11048071599106839258,
+              "allocation_counter",
+              false,
+              10234812100649264418
+            ],
+            [
+              11671159878170094075,
+              "gpui_reactivity_state",
+              false,
+              1956965360139467576
+            ],
+            [
+              13316223584457521750,
+              "cephal",
+              false,
+              10834142700374903475
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              3867407105249395930
+            ],
+            [
+              14670221084672822999,
+              "triomphe",
+              false,
+              16987542324369189632
+            ],
+            [
+              17032968227276897852,
+              "gpui_canvas",
+              false,
+              10501004832522073820
+            ],
+            [
+              17400412893666519160,
+              "zruntime",
+              false,
+              3538160140347914145
+            ],
+            [
+              17719763280398284109,
+              "accesskit_consumer",
+              false,
+              5548306974855318006
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "debug/.fingerprint/gpui-14b4e80656d8b5c6/dep-test-lib-gpui",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [],
+          "config": 9396254390672932401,
+          "compile_kind": 0
+        },
+        "log": "gpui-final.log",
+        "log_sha256": "5ddcd758a874c46de7692f89b603e1ba8745d78b48ad7a5c997dec47d8d3a57f"
+      },
+      "gpui_canvas": {
+        "path": "/tmp/gpui-text-map-8-controls/converted/gpui_canvas",
+        "sha256": "5e75f0a96627d9bd0540fd54f5e667ef0ef9eab4bd3a3d8271ec5142f0bf3f17",
+        "command": [
+          "/tmp/gpui-text-map-8-controls/converted/gpui_canvas",
+          "--exact",
+          "text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "fingerprint": {
+          "rustc": 12019306335353385202,
+          "features": "[\"default\", \"simd\"]",
+          "declared_features": "[\"default\", \"parallel\", \"simd\"]",
+          "target": 5739438808144768532,
+          "profile": 1722584277633009122,
+          "path": 5941417894067501904,
+          "deps": [
+            [
+              410453506447154829,
+              "fontdue",
+              false,
+              11811460975633662249
+            ],
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              3970106736105846662
+            ],
+            [
+              6404845030892936583,
+              "parley",
+              false,
+              10111883010469436200
+            ],
+            [
+              8871500050509493793,
+              "fontique",
+              false,
+              554443713724793493
+            ],
+            [
+              9412299524993436968,
+              "icu_properties",
+              false,
+              9521612112600324155
+            ],
+            [
+              10096717065774937424,
+              "fearless_simd_macros",
+              false,
+              2080726546870328888
+            ],
+            [
+              10434485102629434171,
+              "ttf_parser",
+              false,
+              12638532314682530770
+            ],
+            [
+              11048071599106839258,
+              "allocation_counter",
+              false,
+              10234812100649264418
+            ],
+            [
+              11427131187500083948,
+              "swash",
+              false,
+              5418064050107807093
+            ],
+            [
+              13385949152760668073,
+              "skrifa",
+              false,
+              1666175899269629804
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              499774331513145002
+            ],
+            [
+              16960864593395472219,
+              "rustybuzz",
+              false,
+              6638556757830465476
+            ],
+            [
+              17419650685976310124,
+              "fearless_simd",
+              false,
+              14574583472721680113
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "debug/.fingerprint/gpui_canvas-791e5fbc7d1e8576/dep-test-lib-gpui_canvas",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [],
+          "config": 9396254390672932401,
+          "compile_kind": 0
+        },
+        "log": "gpui_canvas-final.log",
+        "log_sha256": "dd389f3518f69c9d793222557d5e38bf442dcdf541efebd90af713d55b049231"
+      }
+    },
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "863a06502aec64868adc583826207574cbf479aa75af21ae1393ef8faee52155",
+      "reactivity/crates/canvas/src/text/layout/carets.rs": "129d9600faf67a0860646252662ece8ed8b7b68f73d4a988cf4c336de8bc4598",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "49239be22b47d065a2a8a7dd3b336ab806c52b1f2b9765f1437ba73f132dc94c",
+      "reactivity/crates/canvas/src/text/planner.rs": "f1e61247d28d205ddba8204e5286b898c5ced83fc40376fd9acbe55cfe364849"
+    }
+  },
+  "direct": {
+    "source": "f515b1dcfc6a229aa994526c07a5de98bd8afcf8",
+    "configuration": "cwd /root, no rustflags, default simd, test profile",
+    "executables": {
+      "gpui": {
+        "path": "/tmp/gpui-text-map-8-controls/direct/gpui",
+        "sha256": "87fe827184afde69dd6f0e59f360a7a378e1f61ef624ea36dbf44c0ca8628db0",
+        "command": [
+          "/tmp/gpui-text-map-8-controls/direct/gpui",
+          "--exact",
+          "runtime::text_geometry::tests::acknowledged_geometry_owner_epoch_and_allocation_ledger",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "fingerprint": {
+          "rustc": 12019306335353385202,
+          "features": "[\"default\", \"simd\"]",
+          "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+          "target": 13433137496993833081,
+          "profile": 1722584277633009122,
+          "path": 8373320921053062204,
+          "deps": [
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              15844599515134855215
+            ],
+            [
+              1001648224152866569,
+              "arcstr",
+              false,
+              13769763344448808657
+            ],
+            [
+              4295957145130622623,
+              "zbus",
+              false,
+              16667559302071214571
+            ],
+            [
+              6359120849577304855,
+              "x11rb",
+              false,
+              1661777925463489056
+            ],
+            [
+              6557439603276904804,
+              "serde",
+              false,
+              6262495323071950020
+            ],
+            [
+              8160210889872729633,
+              "serde_json",
+              false,
+              18299403665279195733
+            ],
+            [
+              11048071599106839258,
+              "allocation_counter",
+              false,
+              10234812100649264418
+            ],
+            [
+              11671159878170094075,
+              "gpui_reactivity_state",
+              false,
+              1956965360139467576
+            ],
+            [
+              13316223584457521750,
+              "cephal",
+              false,
+              10834142700374903475
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              3867407105249395930
+            ],
+            [
+              14670221084672822999,
+              "triomphe",
+              false,
+              16987542324369189632
+            ],
+            [
+              17032968227276897852,
+              "gpui_canvas",
+              false,
+              10501004832522073820
+            ],
+            [
+              17400412893666519160,
+              "zruntime",
+              false,
+              3538160140347914145
+            ],
+            [
+              17719763280398284109,
+              "accesskit_consumer",
+              false,
+              5548306974855318006
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "debug/.fingerprint/gpui-14b4e80656d8b5c6/dep-test-lib-gpui",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [],
+          "config": 9396254390672932401,
+          "compile_kind": 0
+        },
+        "log": "gpui-final.log",
+        "log_sha256": "a9841a587bdb50cac2e0246dc3bb95f0a937981e713a4a2de7c0b4557cfe8b78"
+      },
+      "gpui_canvas": {
+        "path": "/tmp/gpui-text-map-8-controls/direct/gpui_canvas",
+        "sha256": "8c35e4a2255a40ef70135ce5b1872ae754f34d7932afcab8cca23cb531a81f6f",
+        "command": [
+          "/tmp/gpui-text-map-8-controls/direct/gpui_canvas",
+          "--exact",
+          "text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "fingerprint": {
+          "rustc": 12019306335353385202,
+          "features": "[\"default\", \"simd\"]",
+          "declared_features": "[\"default\", \"parallel\", \"simd\"]",
+          "target": 5739438808144768532,
+          "profile": 1722584277633009122,
+          "path": 5941417894067501904,
+          "deps": [
+            [
+              410453506447154829,
+              "fontdue",
+              false,
+              11811460975633662249
+            ],
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              3970106736105846662
+            ],
+            [
+              6404845030892936583,
+              "parley",
+              false,
+              10111883010469436200
+            ],
+            [
+              8871500050509493793,
+              "fontique",
+              false,
+              554443713724793493
+            ],
+            [
+              9412299524993436968,
+              "icu_properties",
+              false,
+              9521612112600324155
+            ],
+            [
+              10096717065774937424,
+              "fearless_simd_macros",
+              false,
+              2080726546870328888
+            ],
+            [
+              10434485102629434171,
+              "ttf_parser",
+              false,
+              12638532314682530770
+            ],
+            [
+              11048071599106839258,
+              "allocation_counter",
+              false,
+              10234812100649264418
+            ],
+            [
+              11427131187500083948,
+              "swash",
+              false,
+              5418064050107807093
+            ],
+            [
+              13385949152760668073,
+              "skrifa",
+              false,
+              1666175899269629804
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              499774331513145002
+            ],
+            [
+              16960864593395472219,
+              "rustybuzz",
+              false,
+              6638556757830465476
+            ],
+            [
+              17419650685976310124,
+              "fearless_simd",
+              false,
+              14574583472721680113
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "debug/.fingerprint/gpui_canvas-791e5fbc7d1e8576/dep-test-lib-gpui_canvas",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [],
+          "config": 9396254390672932401,
+          "compile_kind": 0
+        },
+        "log": "gpui_canvas-final.log",
+        "log_sha256": "61f7e0d74c097c9778ddf9e130036ece83402228531ad39fb4656db4070aac5a"
+      }
+    },
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "1bef788172ce54ff65b1baa09de89fe89d1b70eb811e6e82bad516ad9ecdf022",
+      "reactivity/crates/canvas/src/text/layout/carets.rs": "7b7561ef748d8cc06a85bae609806b2ad1aa3aef132781db51cb5b7d4ff97500",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "49239be22b47d065a2a8a7dd3b336ab806c52b1f2b9765f1437ba73f132dc94c",
+      "reactivity/crates/canvas/src/text/planner.rs": "d72ef891a29feeaf47a4ca6dbed7d5c629e02f255cb08e46e00e24cbfc48611f"
+    }
+  }
+}
