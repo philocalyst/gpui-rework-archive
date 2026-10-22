@@ -79,3 +79,10 @@ ledgers are rerun from the guarded immutable binaries at
 also records the executable digests of the full public gates. The shipping
 first-party core stays 29,110 code lines including 13 build lines; producer/vendor
 and archived diagnostic code are outside that scope and separately charged.
+
+The full physical non-test inventory at evidence pin e06f088917 is 325,941
+active lines: 65,969 first-party, 39,955 generated and 220,017 vendor. It charges
+all archived client/assembly/interposer support as well as shipping sources;
+it is a different metric from the 29,110-code-line shipping core. The Parley
+batch production delta adds ten net physical vendor lines. Raw all-source
+inventory/provenance is included, not inferred from library-only counts.
