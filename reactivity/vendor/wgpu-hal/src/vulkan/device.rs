@@ -252,19 +252,16 @@ impl super::DeviceShared {
 struct CompiledStage<'a> {
     create_info: vk::PipelineShaderStageCreateInfo<'static>,
     _entry_point: CString,
-    _temporary_module: Option<TemporaryShaderModule<'a>>,
+    temporary_owner: Option<&'a ash::Device>,
 }
 
-struct TemporaryShaderModule<'a> {
-    device: &'a ash::Device,
-    raw: vk::ShaderModule,
-}
-
-impl Drop for TemporaryShaderModule<'_> {
+impl Drop for CompiledStage<'_> {
     fn drop(&mut self) {
-        // This guard uniquely owns a stage-local module, and its device borrow
-        // outlives cleanup on success, a later stage's error, or a driver error.
-        unsafe { self.device.destroy_shader_module(self.raw, None) };
+        if let Some(device) = self.temporary_owner {
+            // create_info already names the uniquely owned stage-local module.
+            // Borrow its device until success/error/unwind cleanup completes.
+            unsafe { device.destroy_shader_module(self.create_info.module, None) };
+        }
     }
 }
 
@@ -816,12 +813,9 @@ impl super::Device {
         Ok(CompiledStage {
             create_info,
             _entry_point: entry_point,
-            _temporary_module: match *stage.module {
+            temporary_owner: match *stage.module {
                 super::ShaderModule::Raw(_) => None,
-                super::ShaderModule::Intermediate { .. } => Some(TemporaryShaderModule {
-                    device: &self.shared.raw,
-                    raw: vk_module,
-                }),
+                super::ShaderModule::Intermediate { .. } => Some(&self.shared.raw),
             },
         })
     }
@@ -3102,17 +3096,26 @@ mod stage_ownership_tests {
 
     fn stage(device: &ash::Device, raw: u64, temporary: bool) -> CompiledStage<'_> {
         CompiledStage {
-            create_info: vk::PipelineShaderStageCreateInfo::default(),
+            create_info: vk::PipelineShaderStageCreateInfo::default()
+                .module(vk::ShaderModule::from_raw(raw)),
             _entry_point: CString::new("main").unwrap(),
-            _temporary_module: temporary.then(|| TemporaryShaderModule {
-                device,
-                raw: vk::ShaderModule::from_raw(raw),
-            }),
+            temporary_owner: temporary.then_some(device),
         }
     }
 
     #[test]
     fn stage_temporaries_retire_on_success_error_and_unwind_without_owning_raw_modules() {
+        struct PreviousStage {
+            _info: vk::PipelineShaderStageCreateInfo<'static>,
+            _entry: CString,
+            _module: Option<vk::ShaderModule>,
+        }
+        assert!(mem::size_of::<CompiledStage<'_>>() <= mem::size_of::<PreviousStage>());
+        std::println!(
+            "compiled_stage_bytes: previous={} borrowed_owner={}",
+            mem::size_of::<PreviousStage>(),
+            mem::size_of::<CompiledStage<'_>>()
+        );
         // Only the exact destroy function can be called on this fake device;
         // ash installs panic stubs for the intentionally absent functions.
         let device = unsafe {
