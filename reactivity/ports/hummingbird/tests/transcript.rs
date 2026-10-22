@@ -22,8 +22,17 @@ fn dropping_the_public_owner_cancels_work_and_service_shutdown_revokes_cloned_ha
         .unwrap();
     drop(owner);
     worker.finish().unwrap();
-    // Retaining an otherwise inert service handle must not prevent shutdown.
-    drop(handle);
+    // Retaining an otherwise inert service handle must not prevent shutdown;
+    // a fresh ordinary owner sees actual Closed starter faults from that handle.
+    let (model, questions) = connect(handle).unwrap();
+    let results = model.results;
+    let owner =
+        gpui::Win::with_questions(model, questions, gpui::WindowOptions::default()).unwrap();
+    assert_eq!(
+        owner.question_status(results).unwrap(),
+        gpui::QuestionStatus::Fault
+    );
+    assert!(owner.contains_text("Closed").unwrap());
 }
 
 #[test]

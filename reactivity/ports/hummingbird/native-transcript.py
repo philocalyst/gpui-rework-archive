@@ -115,7 +115,7 @@ def main():
                 subprocess.run([str(args.xdotool), "mousemove", str(extents[0] + 12), str(extents[1] + extents[3] // 2), "click", "1"], env=env, check=True)
                 subprocess.run([str(args.xdotool), "type", "--clearmodifiers", "--delay", "1", "cafe"], env=env, check=True)
                 find("3 recordings for ‘cafe’ — Longest first")
-                events.append({"stage": "x11_text_edit", "query": "cafe", "matched_ids": [13, 11, 21]})
+                events.append({"stage": "x11_text_edit", "query": "cafe", "visible_result_count": 3})
 
                 # Second edit traverses the actual native EditableText method.
                 assert bus(address, "call", search[1], search[2], "org.a11y.atspi.EditableText", "SetTextContents", "s", "μαρ") == [True]

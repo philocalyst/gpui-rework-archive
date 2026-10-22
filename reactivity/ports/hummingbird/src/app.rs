@@ -74,12 +74,16 @@ pub fn connect(
     let search = handle.clone();
     let (questions, results) = Questions::new().question(
         ((Library::QUERY, Library::SORT), Library::VERSION),
-        |((query, sort), version)| SearchInput {
-            query: query.clone(),
-            sort: *sort,
-            version: *version,
+        |((query, sort), version)| SearchInput::freeze(query, *sort, *version),
+        move |input, completion: gpui::Completion<SearchPage, crate::search::SourceError>| {
+            match input {
+                Ok(input) => search.search(input, completion),
+                Err(error) => {
+                    let _ = completion.complete(Err(error));
+                    Ok(())
+                }
+            }
         },
-        move |input, completion| search.search(input, completion),
     )?;
     let (questions, playback) = questions.question(
         Library::SELECTED,

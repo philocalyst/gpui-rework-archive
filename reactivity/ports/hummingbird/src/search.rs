@@ -38,6 +38,19 @@ pub struct SearchInput {
     pub sort: Sort,
     pub version: Version,
 }
+pub const MAX_QUERY_BYTES: usize = 1024;
+impl SearchInput {
+    pub fn freeze(query: &str, sort: Sort, version: Version) -> Result<Self, SourceError> {
+        if query.len() > MAX_QUERY_BYTES {
+            return Err(SourceError::QueryTooLong);
+        }
+        Ok(Self {
+            query: query.to_owned(),
+            sort,
+            version,
+        })
+    }
+}
 #[derive(Debug)]
 pub enum SourceError {
     Sqlite(rusqlite::Error),
@@ -107,7 +120,7 @@ impl Searcher {
         if cancelled() {
             return None;
         }
-        if input.query.len() > 1024 {
+        if input.query.len() > MAX_QUERY_BYTES {
             return Some(Err(SourceError::QueryTooLong));
         }
         let query = match input.sort {
