@@ -206,14 +206,19 @@ impl Geometry {
         // Bases are already stable direct indices. Append only published radii;
         // the logical column is sorted, so the suffix keeps binary-search order.
         column.reserve_exact(self.current.len());
-        column.extend(self.current.iter().filter_map(|(identity, style)| {
-            (style.corner_radius.to_bits() != 0 && include(*identity)).then(|| {
-                Record::from_radius(Radius {
-                    identity: *identity,
-                    value: style.corner_radius,
+        column.extend(
+            self.current
+                .iter()
+                .filter(|(identity, style)| {
+                    style.corner_radius.to_bits() != 0 && include(*identity)
                 })
-            })
-        }));
+                .map(|(identity, style)| {
+                    Record::from_radius(Radius {
+                        identity: *identity,
+                        value: style.corner_radius,
+                    })
+                }),
+        );
         column
     }
     pub fn prepare(&mut self, column: Vec<Record>) {

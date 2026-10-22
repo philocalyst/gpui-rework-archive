@@ -260,3 +260,53 @@ fn custom_candidate_survives_failed_default_lowering_without_a_custom_p_owner() 
     assert_eq!(projection(&win).map, expected(Affine::IDENTITY, 1.0));
     assert!(win.runtime().unwrap().metadata.is_none());
 }
+
+#[test]
+fn unavailable_parent_map_does_not_reject_a_finite_admitted_child() {
+    struct Recover;
+    impl View for Recover {
+        fn view(&self) -> crate::El<'_> {
+            crate::div()
+                .size(16)
+                .transform(Affine::scale(f32::MAX, f32::MAX))
+                .child(
+                    crate::div()
+                        .size(8)
+                        .bg(Color::BLACK)
+                        .transform(Affine::scale(f32::MIN_POSITIVE, f32::MIN_POSITIVE))
+                        .on_click(|_: &mut Self| {}),
+                )
+        }
+    }
+    // DPI makes the parent's f64 composition overflow when narrowed to f32.
+    // Its child compensates before narrowing and remains admitted as before.
+    let mut win = Win::recording_scaled(
+        Recover,
+        WindowOptions {
+            size: [128, 128],
+            ..Default::default()
+        },
+        2.0,
+    )
+    .unwrap();
+    let token = win.with_scene(|_, token| token).unwrap();
+    win.presented(token).unwrap();
+    let mut rows = Vec::new();
+    win.visit(|part| rows.push((part.target(), part.transform())))
+        .unwrap();
+    assert_eq!(rows.len(), 2);
+    assert!(rows[0].1.is_none());
+    let child = rows[1].1.unwrap();
+    assert!(child.is_finite() && child.is_invertible());
+    let expected = CoordinateSpace::new(Affine::scale(2.0, 2.0))
+        .compose(Affine::scale(f32::MAX, f32::MAX))
+        .compose(Affine::scale(f32::MIN_POSITIVE, f32::MIN_POSITIVE));
+    assert_eq!(
+        bits(child),
+        expected
+            .coefficients()
+            .map(|coefficient| (coefficient as f32).to_bits())
+    );
+    let point = child.apply(Point { x: 4.0, y: 4.0 }).unwrap();
+    assert_eq!(win.hit_target(point).unwrap(), Some(rows[1].0));
+}
