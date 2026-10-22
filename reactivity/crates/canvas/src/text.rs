@@ -589,14 +589,18 @@ impl OutlinePen for BoundsPen {
 }
 
 #[cfg(test)]
+pub(crate) static BUNDLED_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+#[cfg(test)]
 mod font_tests {
     use super::*;
     use std::sync::Barrier;
 
-    // This is the only unit test using the process-global bundled registry.
+    // Unit tests sharing the process-global registry hold BUNDLED_TEST_LOCK.
     // Integration tests run in separate binaries with independent statics.
     #[test]
     fn bundled_concurrency_release_remint_and_poison_recovery() {
+        let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
         fn send_sync<T: Send + Sync>() {}
         send_sync::<CacheKey>();
         send_sync::<FontFace>();

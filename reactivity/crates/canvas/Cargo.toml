@@ -5,10 +5,14 @@ edition.workspace = true
 license.workspace = true
 
 [features]
-default = []
+default = ["simd"]
 parallel = ["dep:rayon"]
+# Omit this feature to instantiate the same raster pipeline with Fallback.
+simd = []
 
 [dependencies]
+fearless_simd = { version = "=1.1.0", features = ["force_support_fallback"] }
+fearless_simd_macros = "=0.1.0"
 gpui_reactivity_core = { path = "../core" }
 ttf-parser = "=0.25.1"
 swash = "=0.2.10"

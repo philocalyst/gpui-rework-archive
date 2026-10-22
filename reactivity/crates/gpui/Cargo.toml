@@ -10,11 +10,11 @@ publish = false
 arcstr = { version = "=1.2.0", default-features = false, features = ["std"] }
 gpui_reactivity_core = { path = "../core", features = ["layout"] }
 gpui_reactivity_state = { path = "../state", features = ["serde"] }
-gpui_canvas = { path = "../canvas" }
+gpui_canvas = { path = "../canvas", default-features = false }
 cephal = { path = "../../vendor/cephal", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-gpui_gpu = { path = "../gpu", optional = true }
+gpui_gpu = { path = "../gpu", default-features = false, optional = true }
 gpui_reactivity_host = { path = "../host", optional = true }
 pollster = { version = "=0.4.0", optional = true }
 softbuffer = { version = "=0.4.8", default-features = false, optional = true }
@@ -22,7 +22,8 @@ accesskit = { version = "=0.25.1", optional = true }
 accesskit_winit = { version = "=0.34.1", default-features = false, features = ["accesskit_unix", "async-io", "rwh_06"], optional = true }
 
 [features]
-default = []
+default = ["simd"]
+simd = ["gpui_canvas/simd", "gpui_gpu?/simd"]
 accessibility = ["native", "dep:accesskit", "dep:accesskit_winit"]
 native = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
 desktop = ["native", "accessibility"]

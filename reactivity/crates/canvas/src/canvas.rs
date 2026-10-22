@@ -3,6 +3,11 @@ use crate::{
     Affine, Color, ColorConfig, DamageRegion, Error, Image, ImageKey, ImageSampling, ImageView,
     Point, Rect, TextLayout, TextSystem,
 };
+#[cfg(any(feature = "simd", test))]
+use fearless_simd::Level;
+use fearless_simd::Simd;
+#[cfg(feature = "simd")]
+use fearless_simd::dispatch;
 use std::{collections::HashMap, sync::Arc};
 
 mod columns;
@@ -14,11 +19,14 @@ mod bins;
 use bins::RasterScratch;
 mod glyph_axis;
 mod image_axis;
+mod mask_kernel;
 mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
 pub use rounded::rounded_rect_contains;
 mod samples;
+#[cfg(test)]
+mod simd_tests;
 use glyph_axis::GlyphAxis;
 use samples::Samples;
 
@@ -2035,7 +2043,7 @@ fn render_rows<W: PixelWriter>(
     pixels: &mut [W::Element],
     offsets: &[u32],
     members: &mut [u32],
-    parallel: bool,
+    _parallel: bool,
 ) -> RenderStats {
     let rows = frame.tile_bounds[3] - frame.tile_bounds[1];
     if rows == 1 {
@@ -2059,7 +2067,7 @@ fn render_rows<W: PixelWriter>(
             left_pixels,
             &offsets[..=boundary],
             left_members,
-            parallel,
+            _parallel,
         )
     };
     let mut render_right = move || {
@@ -2069,11 +2077,11 @@ fn render_rows<W: PixelWriter>(
             right_pixels,
             &offsets[boundary..],
             right_members,
-            parallel,
+            _parallel,
         )
     };
     #[cfg(feature = "parallel")]
-    let (left, right) = if parallel {
+    let (left, right) = if _parallel {
         rayon::join(render_left, render_right)
     } else {
         (render_left(), render_right())
@@ -2086,6 +2094,33 @@ fn render_rows<W: PixelWriter>(
 // Keep the large sample tile only on leaf stacks, never on recursive frames.
 #[inline(never)]
 fn render_band<W: PixelWriter>(
+    frame: Frame<'_>,
+    writer: W,
+    pixels: &mut [W::Element],
+    offsets: &[u32],
+    members: &mut [u32],
+) -> RenderStats {
+    #[cfg(not(feature = "simd"))]
+    return render_band_impl(
+        fearless_simd::Fallback::new(),
+        frame,
+        writer,
+        pixels,
+        offsets,
+        members,
+    );
+    #[cfg(feature = "simd")]
+    // Four f64 lattice sites share a geometry kernel. Use the guaranteed
+    // target baseline, avoiding CPU detection and retained startup state.
+    // Additional ISA variants must earn their complete raster-body cost.
+    dispatch!(Level::baseline(), simd => render_band_impl(simd, frame, writer, pixels, offsets, members))
+}
+
+// Each band carries its geometry token. The original array-shaped blend and
+// image pipeline stays shared, allowing LLVM to vectorize its four RGBA lanes.
+#[inline(never)]
+fn render_band_impl<W: PixelWriter, S: Simd>(
+    simd: S,
     frame: Frame<'_>,
     writer: W,
     pixels: &mut [W::Element],
@@ -2192,20 +2227,31 @@ fn render_band<W: PixelWriter>(
             }
             for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
                 for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
-                    let coverages = if full {
-                        [1.0; 16]
+                    let pixel = (y - top) * TILE + x - left;
+                    if full {
+                        samples.blend_mask(pixel, command.color, u16::MAX);
                     } else if let Some(axis) = &axis {
                         stats.boundary_pixels += 1;
                         let mask = (axis.x[x - left] * 0x1111) & axis.y[y - top];
-                        std::array::from_fn(|i| ((mask >> i) & 1) as f32)
+                        samples.blend_mask(pixel, command.color, mask);
                     } else if let Some(axis) = &glyph_axis {
                         stats.boundary_pixels += 1;
-                        axis.coverage(x - left, y - top)
+                        samples.blend(pixel, command.color, axis.coverage(x - left, y - top));
                     } else {
                         stats.boundary_pixels += 1;
-                        sample(&command, x, y, &mut stats)
-                    };
-                    samples.blend((y - top) * TILE + x - left, command.color, coverages);
+                        if matches!(
+                            command.source,
+                            BorrowedSource::Rect | BorrowedSource::Rounded(_)
+                        ) {
+                            samples.blend_mask(
+                                pixel,
+                                command.color,
+                                mask_kernel::coverage(simd, &command, x, y, &mut stats),
+                            );
+                        } else {
+                            samples.blend(pixel, command.color, sample(&command, x, y, &mut stats));
+                        }
+                    }
                 }
             }
         }
@@ -2218,25 +2264,43 @@ fn render_band<W: PixelWriter>(
         {
             writer.write(color, &mut uniform_bytes[..W::ELEMENTS]);
         }
+        if uniform_color.is_some() {
+            write_uniform_tile::<W>(pixels, frame.width, left, right, &uniform_bytes);
+            continue;
+        }
         for y in top..bottom {
             for x in left..right {
                 let offset = ((y - top) * frame.width + x) * W::ELEMENTS;
                 let destination = &mut pixels[offset..offset + W::ELEMENTS];
-                if uniform_color.is_some() {
-                    destination.copy_from_slice(&uniform_bytes[..W::ELEMENTS]);
-                } else {
-                    let color = samples.color((y - top) * TILE + x - left);
-                    let bits = color.map(f32::to_bits);
-                    if bits != encoded_color {
-                        writer.write(color, &mut encoded_bytes[..W::ELEMENTS]);
-                        encoded_color = bits;
-                    }
-                    destination.copy_from_slice(&encoded_bytes[..W::ELEMENTS]);
+                let color = samples.color((y - top) * TILE + x - left);
+                let bits = color.map(f32::to_bits);
+                if bits != encoded_color {
+                    writer.write(color, &mut encoded_bytes[..W::ELEMENTS]);
+                    encoded_color = bits;
                 }
+                destination.copy_from_slice(&encoded_bytes[..W::ELEMENTS]);
             }
         }
     }
     stats
+}
+
+// Keep the encoded uniform-row loop's few live values separate from the large
+// raster band. One checked row span owns the output bounds; sample reduction and
+// color-cache state never enter this path. All writers and SIMD policies share it.
+#[inline(never)]
+fn write_uniform_tile<W: PixelWriter>(
+    pixels: &mut [W::Element],
+    width: usize,
+    left: usize,
+    right: usize,
+    encoded: &[W::Element; 8],
+) {
+    for row in pixels.chunks_exact_mut(width * W::ELEMENTS) {
+        for pixel in row[left * W::ELEMENTS..right * W::ELEMENTS].chunks_exact_mut(W::ELEMENTS) {
+            pixel.copy_from_slice(&encoded[..W::ELEMENTS]);
+        }
+    }
 }
 
 // Keep image dispatch and its typed closures out of the common raster loop.
