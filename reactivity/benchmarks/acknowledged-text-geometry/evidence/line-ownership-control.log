@@ -1,0 +1,26 @@
+   Compiling gpui_canvas v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.66s
+     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui_canvas-3c502a0c35f4b432)
+
+running 2 tests
+
+thread 'text::planner::line_ownership_tests::duplicate_empty_source_starts_do_not_capture_the_following_glyph_units' (900890) panicked at crates/canvas/src/text/line_ownership_tests.rs:64:83:
+called `Result::unwrap()` on an `Err` value: InvalidFont
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test text::planner::line_ownership_tests::duplicate_empty_source_starts_do_not_capture_the_following_glyph_units ... FAILED
+
+thread 'text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership' (900891) panicked at crates/canvas/src/text/line_ownership_tests.rs:169:17:
+assertion `left == right` failed: "abcdef ghijkl mnopqr" height=0 range=0..1
+  left: 6
+ right: 0
+test text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership ... FAILED
+
+failures:
+
+failures:
+    text::planner::line_ownership_tests::duplicate_empty_source_starts_do_not_capture_the_following_glyph_units
+    text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p gpui_canvas --lib`

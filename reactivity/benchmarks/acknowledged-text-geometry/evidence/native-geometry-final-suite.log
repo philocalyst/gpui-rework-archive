@@ -1,0 +1,74 @@
+   Compiling accesskit_consumer v0.39.1 (/root/gpui-acknowledged-text-geometry/reactivity/vendor/accesskit_consumer)
+   Compiling accesskit_atspi_common v0.21.0 (/root/gpui-acknowledged-text-geometry/reactivity/vendor/accesskit_atspi_common)
+   Compiling accesskit_unix v0.24.0 (/root/gpui-acknowledged-text-geometry/reactivity/vendor/accesskit_unix)
+   Compiling accesskit_winit v0.34.1
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 38s
+     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui-570045ec564061e7)
+
+running 48 tests
+test native::accessibility::geometry_tests::failed_new_l_and_old_c_ack_never_reinterpret_native_p_geometry ... ok
+test native::accessibility::geometry_tests::native_geometry_projection_allocation_ledger ... NATIVE_GEOMETRY case=label_short cohort_alloc=1 cohort_retained=56 nodes=4 runs=2 units=15 output_alloc=24 output_requested=2237 output_retained=1813 output_peak=1964 consumer_alloc=31 consumer_requested=6372 consumer_retained=4244 consumer_peak=4244
+NATIVE_GEOMETRY case=renamed_short cohort_alloc=1 cohort_retained=56 nodes=5 runs=2 units=15 output_alloc=27 output_requested=2572 output_retained=2148 output_peak=2267 consumer_alloc=35 consumer_requested=6659 consumer_retained=4243 consumer_peak=4243
+NATIVE_GEOMETRY case=input_short cohort_alloc=1 cohort_retained=56 nodes=4 runs=2 units=15 output_alloc=26 output_requested=2589 output_retained=2005 output_peak=2156 consumer_alloc=32 consumer_requested=6444 consumer_retained=4316 consumer_peak=4316
+NATIVE_GEOMETRY case=input_32k cohort_alloc=1 cohort_retained=56 nodes=765 runs=763 units=32768 output_alloc=6885 output_requested=906623 output_retained=733455 output_peak=733606 consumer_alloc=3860 consumer_requested=1425711 consumer_retained=809407 consumer_peak=809407
+ok
+test native::accessibility::geometry_tests::nonpainted_unplaced_text_preserves_content_without_inventing_window_geometry ... ok
+test native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers ... 
+thread 'native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers' (772385) panicked at crates/gpui/src/element.rs:408:9:
+this element does not accept children
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers' (772385) panicked at crates/gpui/src/element.rs:408:9:
+this element does not accept children
+ok
+test native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units ... ok
+test native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents ... ignored, requires X11 and DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/gpui-no-session-bus
+test native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy ... ignored, requires X11 and an isolated session bus initially lacking org.a11y.Bus
+test native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation ... ignored, requires X11 and an isolated session bus with org.a11y.Bus/AT-SPI registry
+test native::accessibility::selection_tests::cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair ... ok
+test native::accessibility::selection_tests::empty_static_text_does_not_qualify_another_owner ... ok
+test native::accessibility::selection_tests::equal_text_field_rebind_survives_failed_prepare_and_older_ack ... ok
+test native::accessibility::selection_tests::failed_newer_edit_and_cold_provider_keep_older_candidate_selection ... ok
+test native::accessibility::selection_tests::independent_inputs_list_rebind_and_provider_restart_do_not_reuse_authority ... ok
+test native::accessibility::selection_tests::input_root_survives_wrap_and_font_changes_but_old_run_positions_retire ... ok
+test native::accessibility::selection_tests::long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip ... ok
+test native::accessibility::selection_tests::native_selection_and_atomic_replacement_use_acknowledged_grapheme_source ... ok
+test native::accessibility::selection_tests::native_text_transport_memory_budget ... NATIVE_TEXT_MEMORY shared=72 command=32 queued=48 ingress=8 replacement=48
+NATIVE_TEXT_INGRESS allocations=3 retained=4312 peak=4312
+ok
+test native::accessibility::tests::consumer_validates_topology_names_values_full_geometry_and_live_focus ... ok
+test native::accessibility::tests::idle_state_and_focus_transport_do_not_allocate ... ok
+test native::accessibility::tests::library_projects_bounded_frozen_count_positions_and_never_resurrects_ids ... ok
+test native::accessibility::tests::native_callbacks_are_inert_bounded_and_activation_bypasses_saturation ... ok
+test native::accessibility::tests::native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi ... ok
+test native::accessibility::tests::native_text_boundaries_keep_crlf_together_and_cover_every_utf8_byte ... ok
+test native::accessibility::tests::owner_budget_fifo_old_live_targets_and_revocation ... ok
+test native::accessibility::tests::projection_ledger ... ignored, explicit projection allocation/timing ledger; run alone in release mode
+test native::accessibility::tests::projection_uses_old_p_during_pending_edit_and_failed_preparation ... ok
+test native::accessibility::tests::renamed_static_text_preserves_content_and_explicit_none_then_inherits ... ok
+test native::accessibility::tests::root_and_synthetic_ids_cannot_invoke_real_sites ... ok
+test native::accessibility::tests::scalar_text_run_has_exact_utf8_lengths_and_no_fabricated_selection ... ok
+test native::accessibility::tests::scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions ... ok
+test native::accessibility::tests::semantic_only_change_advances_p_epoch_at_the_same_scene_token ... ok
+test native::accessibility::tests::unsupported_foreign_tree_and_utf8_byte_limit ... ok
+test native::accessibility::text::native_input_authority_memory_budget ... NATIVE_TEXT_AUTHORITY input=56 cohort_production=40
+ok
+test native::accessibility::transitions::clipped_logical_index_hint_is_verified_before_sparse_use ... ok
+test native::accessibility::transitions::exact_window_stamp_empty_recovery_and_observer_storage_are_bounded ... ok
+test native::accessibility::transitions::hundred_thousand_p_one_leaf_field_and_inspector_match_full_consumer ... ok
+test native::accessibility::transitions::list_scroll_same_source_epoch_and_reindex_match_full_oracle ... ok
+test native::accessibility::transitions::missed_epochs_topology_cap_deactivation_and_resize_are_full ... ok
+test native::accessibility::transitions::nonleaf_replacements_keep_all_ordered_children_and_geometry ... ok
+test native::accessibility::transitions::observer_enabled_after_full_candidate_never_invents_empty_paint_delta ... ok
+test native::accessibility::transitions::paint_complete_transitions_preserve_pending_full_rows_and_zero_node_deltas ... ok
+test native::accessibility::transitions::pending_complete_coverage_noop_preserves_exact_consumer_transition ... ok
+test native::accessibility::transitions::pending_metadata_and_failed_newer_prepare_keep_old_p_and_fallback ... ok
+test native::accessibility::transitions::selection_and_placement_keep_native_run_arrays_while_wrap_retires_them ... ok
+test native::accessibility::transitions::sparse_transition_measurements ... ignored, serialized release timing; writes CSV rows to stdout
+test native::accessibility::transitions::synthetic_shape_changes_and_value_children_match_full ... ok
+test native::accessibility::transitions::thousand_node_paint_and_one_input_edit_keep_cohort_frontier_bounded ... ok
+test native::accessibility::transitions::virtual_focus_revocation_and_reappearance_match_full_consumer ... ok
+
+test result: ok. 43 passed; 0 failed; 5 ignored; 0 measured; 155 filtered out; finished in 8.27s
+

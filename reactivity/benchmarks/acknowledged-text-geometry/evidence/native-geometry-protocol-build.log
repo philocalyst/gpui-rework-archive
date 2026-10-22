@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.24s
+  Executable unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui-570045ec564061e7)
