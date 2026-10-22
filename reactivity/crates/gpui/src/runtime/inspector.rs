@@ -477,14 +477,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     .with(index, |style| WIDTH.get(style))
                     .unwrap_or(0.0)
                     + 20.0;
-                self.set_style_property(target, WIDTH, Contribution::Set(Some(width)))
+                self.set_property(target, WIDTH, Contribution::Set(Some(width)))
             }
-            WidthAuto => self.set_style_property(target, WIDTH, Contribution::Set(None)),
-            WidthInherit => self.set_style_property(target, WIDTH, Contribution::Inherit),
+            WidthAuto => self.set_property(target, WIDTH, Contribution::Set(None)),
+            WidthInherit => self.set_property(target, WIDTH, Contribution::Inherit),
             BackgroundSet => {
-                self.set_style_property(target, BACKGROUND, Contribution::Set(rgb(0x0d9488)))
+                self.set_property(target, BACKGROUND, Contribution::Set(rgb(0x0d9488)))
             }
-            BackgroundInherit => self.set_style_property(target, BACKGROUND, Contribution::Inherit),
+            BackgroundInherit => self.set_property(target, BACKGROUND, Contribution::Inherit),
         }
     }
 }
@@ -595,9 +595,14 @@ mod tests {
             PANEL_NODES,
             runtime.texts.capacity()
         );
-        eprintln!("catalog_headers,El={},Style={},Presented={},Admission={},InspectorAction={}",
-            size_of::<El<'_>>(), size_of::<Style>(), size_of::<Presented>(),
-            size_of::<crate::element::Admission>(), size_of::<InspectorAction>());
+        eprintln!(
+            "catalog_headers,El={},Style={},Presented={},Admission={},InspectorAction={}",
+            size_of::<El<'_>>(),
+            size_of::<Style>(),
+            size_of::<Presented>(),
+            size_of::<crate::element::Admission>(),
+            size_of::<InspectorAction>()
+        );
         let mut tool = tool;
         tool.resize([800, 560]).unwrap();
         let idle = allocation_counter::measure(|| {
@@ -605,7 +610,9 @@ mod tests {
                 tool.resize([800, 560]).unwrap();
             }
         });
-        eprintln!("catalog_warm_inspector_idle,allocations={},total_bytes={},retained={}",
-            idle.count_total, idle.bytes_total, idle.bytes_current);
+        eprintln!(
+            "catalog_warm_inspector_idle,allocations={},total_bytes={},retained={}",
+            idle.count_total, idle.bytes_total, idle.bytes_current
+        );
     }
 }

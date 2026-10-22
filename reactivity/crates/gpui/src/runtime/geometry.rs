@@ -11,6 +11,13 @@ pub(super) struct Geometry {
     candidate: Option<Vec<(u64, GeometryStyle)>>,
 }
 impl Geometry {
+    pub(super) fn contribution(
+        &self,
+        identity: u64,
+        id: crate::property::PropertyId,
+    ) -> Contribution<crate::property::PropertyValue> {
+        self.overrides.contribution(identity, id)
+    }
     pub fn frozen_radius(&self, identity: u64) -> f32 {
         self.presented
             .binary_search_by_key(&identity, |entry| entry.0)
@@ -171,22 +178,16 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> Win<M, L> {
                 g.overrides.get(identity, property)
             }))
     }
-    pub(super) fn set_geometry_property<T: PartialEq>(
+}
+impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
+    pub(super) fn set_geometry_value(
         &mut self,
-        target: Target,
-        property: Property<T, GeometryStyle>,
-        contribution: Contribution<T>,
-    ) -> Result<Commit, Error> {
-        let mut runtime = self.runtime_mut()?;
-        runtime.live()?;
-        let identity = runtime.resolve(target)?;
-        let epoch = runtime
-            .source_epoch
-            .checked_add(1)
-            .ok_or(Error::EpochExhausted)?;
-        if let Contribution::Set(value) = &contribution {
-            property.validate(value)?;
-        }
+        index: usize,
+        id: crate::property::PropertyId,
+        contribution: Contribution<crate::property::PropertyValue>,
+    ) -> Result<(), Error> {
+        let runtime = self;
+        let identity = runtime.nodes[index].identity();
         let before = runtime
             .metadata
             .as_ref()
@@ -196,13 +197,11 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> Win<M, L> {
         let geometry = metadata.geometry.get_or_insert_with(Default::default);
         let after = geometry
             .overrides
-            .set(identity, before, property, contribution)?;
+            .set_value(identity, before, id, contribution)?;
         geometry.store(identity, after);
         if geometry.unused() {
             metadata.geometry = None;
         }
-        runtime.source_epoch = epoch;
-        runtime.counters.source_operations += 1;
         let changed = !crate::property::CORNER_RADIUS
             .same_authoring(&before.corner_radius, &after.corner_radius);
         runtime.changed_nodes = usize::from(changed);
@@ -210,7 +209,7 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> Win<M, L> {
         if runtime.metadata.as_deref().is_some_and(Metadata::unused) {
             runtime.metadata = None;
         }
-        runtime.present()
+        Ok(())
     }
 }
 

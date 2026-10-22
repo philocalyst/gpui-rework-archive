@@ -17,6 +17,7 @@ pub enum Impact {
 /// Stable explicit IDs within GPUI's style schema; never Rust field positions.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u16)]
+#[non_exhaustive]
 pub enum PropertyId {
     Width = 1,
     Height = 2,
@@ -34,6 +35,7 @@ pub enum PropertyId {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum ValueKind {
     Dimension,
     Number,
@@ -284,6 +286,14 @@ impl<T, D: PropertyDomain> fmt::Debug for Property<T, D> {
     }
 }
 impl<T, D: PropertyDomain> Property<T, D> {
+    pub(crate) fn erase(self, value: T) -> Result<PropertyValue, PropertyError>
+    where
+        T: PartialEq,
+    {
+        let mut destination = D::default();
+        self.set(&mut destination, value)?;
+        D::get_erased(self.id(), &destination)
+    }
     pub const fn info(self) -> &'static PropertyInfo {
         &self.0.info
     }
@@ -469,8 +479,11 @@ static RADIUS_DECL: Declaration<f32, GeometryStyle> = Declaration {
 pub const CORNER_RADIUS: Property<f32, GeometryStyle> = Property(&RADIUS_DECL);
 
 /// Closed inspector seam. No boxed erased values, type IDs or external setters.
+/// New schema families may be added; external tools should retain an unsupported
+/// read-only row for unfamiliar kinds. IDs are not a versioned preset format.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum PropertyValue {
+#[non_exhaustive]
+pub enum PropertyValue {
     Dimension(Option<f32>),
     Number(f32),
     Color(Color),
@@ -481,7 +494,7 @@ pub(crate) enum PropertyValue {
     Flag(bool),
 }
 impl PropertyValue {
-    pub(crate) fn kind(self) -> ValueKind {
+    pub fn kind(self) -> ValueKind {
         match self {
             Self::Dimension(_) => ValueKind::Dimension,
             Self::Number(_) => ValueKind::Number,
@@ -492,6 +505,14 @@ impl PropertyValue {
             Self::Justify(_) => ValueKind::Justify,
             Self::Flag(_) => ValueKind::Flag,
         }
+    }
+}
+impl PropertyId {
+    pub(crate) fn value<D: PropertyDomain>(
+        self,
+        destination: &D,
+    ) -> Result<PropertyValue, PropertyError> {
+        D::get_erased(self, destination)
     }
 }
 /// Cold per-window state, keyed by a runtime-validated logical node identity.
@@ -506,6 +527,17 @@ struct Overlay<D> {
     values: BTreeMap<PropertyId, PropertyValue>,
 }
 impl<D: PropertyDomain> Overrides<D> {
+    pub(crate) fn contribution(
+        &self,
+        identity: u64,
+        id: PropertyId,
+    ) -> Contribution<PropertyValue> {
+        self.entries
+            .get(&identity)
+            .and_then(|overlay| overlay.values.get(&id))
+            .copied()
+            .map_or(Contribution::Inherit, Contribution::Set)
+    }
     pub(crate) fn get<T>(&self, identity: u64, property: Property<T, D>) -> Contribution<T> {
         let Some(overlay) = self.entries.get(&identity) else {
             return Contribution::Inherit;
@@ -518,6 +550,7 @@ impl<D: PropertyDomain> Overrides<D> {
         Contribution::Set(property.get(&style))
     }
 
+    #[cfg(test)]
     pub(crate) fn set<T: PartialEq>(
         &mut self,
         identity: u64,
@@ -526,6 +559,19 @@ impl<D: PropertyDomain> Overrides<D> {
         contribution: Contribution<T>,
     ) -> Result<D, PropertyError> {
         let id = property.id();
+        let value = match contribution {
+            Contribution::Inherit => Contribution::Inherit,
+            Contribution::Set(value) => Contribution::Set(property.erase(value)?),
+        };
+        self.set_value(identity, current, id, value)
+    }
+    pub(crate) fn set_value(
+        &mut self,
+        identity: u64,
+        current: D,
+        id: PropertyId,
+        contribution: Contribution<PropertyValue>,
+    ) -> Result<D, PropertyError> {
         match contribution {
             Contribution::Inherit => {
                 let Some(overlay) = self.entries.get(&identity) else {
@@ -541,11 +587,8 @@ impl<D: PropertyDomain> Overrides<D> {
                 Ok(resolved)
             }
             Contribution::Set(value) => {
-                // Stage typed validation/conversion and complete resolution
-                // before touching either map, including the stored base.
-                let mut converted = current;
-                property.set(&mut converted, value)?;
-                let value = D::get_erased(id, &converted)?;
+                // Complete validated resolution before touching either map,
+                // including the stored base. Typed and catalog fronts share it.
                 let mut resolved = self.entries.get(&identity).map_or(current, |overlay| {
                     apply_except(overlay.base, &overlay.values, Some(id))
                 });
@@ -716,9 +759,14 @@ mod tests {
             "property_declaration_bytes={}",
             std::mem::size_of::<Declaration<f32, Style>>()
         );
-        eprintln!("catalog_baseline,info={},value={},contribution={},declaration={},catalog_reference_bytes={}",
-            size_of::<PropertyInfo>(), size_of::<PropertyValue>(), size_of::<Contribution<PropertyValue>>(),
-            size_of::<Declaration<f32, Style>>(), size_of_val(PROPERTIES));
+        eprintln!(
+            "catalog_baseline,info={},value={},contribution={},declaration={},catalog_reference_bytes={}",
+            size_of::<PropertyInfo>(),
+            size_of::<PropertyValue>(),
+            size_of::<Contribution<PropertyValue>>(),
+            size_of::<Declaration<f32, Style>>(),
+            size_of_val(PROPERTIES)
+        );
         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
         assert_eq!(PROPERTIES.len(), 13);
         for (index, info) in PROPERTIES.iter().enumerate() {
