@@ -34,6 +34,8 @@ static PRIMARY_BYTES: [u8; 2_049_096] = *include_bytes!("../assets/NotoSans.ttf"
 static ARABIC_BYTES: [u8; 240_456] = *include_bytes!("../assets/arabic/NotoSansArabic-Regular.ttf");
 static HEBREW_BYTES: [u8; 26_900] = *include_bytes!("../assets/hebrew/NotoSansHebrew-Regular.ttf");
 static NEXT_FONT: AtomicU64 = AtomicU64::new(1);
+#[cfg(test)]
+static BUNDLED_PARSES: AtomicU64 = AtomicU64::new(0);
 static BUNDLED_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
 static ARABIC_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
 static HEBREW_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
@@ -120,6 +122,10 @@ impl FontFace {
         let id = NEXT_FONT
             .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
             .map_err(|_| Error::ResourceLimit)?;
+        #[cfg(test)]
+        if bundled {
+            BUNDLED_PARSES.fetch_add(1, Ordering::Relaxed);
+        }
         Ok(Self(Arc::new(FontData {
             bytes,
             raster_key,
@@ -606,7 +612,7 @@ mod font_tests {
         send_sync::<CacheKey>();
         send_sync::<FontFace>();
         send_sync::<TextSystem>();
-        let before = NEXT_FONT.load(Ordering::Relaxed);
+        let before = BUNDLED_PARSES.load(Ordering::Relaxed);
         let barrier = Arc::new(Barrier::new(9));
         let jobs: Vec<_> = (0..8)
             .map(|_| {
@@ -620,9 +626,10 @@ mod font_tests {
         barrier.wait();
         let faces: Vec<_> = jobs.into_iter().map(|job| job.join().unwrap()).collect();
         assert!(faces.iter().all(|face| face.same_face(&faces[0])));
-        // Every successful parse mints exactly one ID, so this checks that the
-        // concurrent cold calls did not speculatively parse and discard copies.
-        assert_eq!(NEXT_FONT.load(Ordering::Relaxed), before + 1);
+        // Count primary bundled parses alone: unrelated caller-supplied and
+        // fallback faces may mint IDs concurrently in other tests. Cold calls
+        // must still avoid speculatively parsing and discarding copies.
+        assert_eq!(BUNDLED_PARSES.load(Ordering::Relaxed), before + 1);
         assert!(matches!(faces[0].0.bytes, Cow::Borrowed(_)));
         let weak = Arc::downgrade(&faces[0].0);
         let old_id = faces[0].0.id;
