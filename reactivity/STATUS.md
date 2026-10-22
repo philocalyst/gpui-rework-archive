@@ -7,7 +7,7 @@ describe the intended complete system; this page records what is connected now.
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
-| Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, focus/keyboard, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time and replay remain |
+| Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, shared native pointer/focus/keyboard input, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay, touch/capture/drag and hover callbacks remain |
 | Accessibility | Native AccessKit in ordinary desktop profiles, bounded exact acknowledged transitions, lazy active projection, revalidated actions; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; selection/IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
@@ -16,7 +16,7 @@ describe the intended complete system; this page records what is connected now.
 | Layout and text | Cephal with literal typed flex alignment/distribution/wrapping, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Reactive style/recipe inputs, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
-| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets and explicit admitted-packet replay | Replay still draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
+| GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, admitted-packet replay and opt-in transactional color patches | Source-to-packet color coupling remains; replay/patch draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
 | Native | Winit windows, software-first startup, owned background GPU preparation, checked handoff/recovery, DPI, suspend/recreate and observed X11 destination invalidation | Unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
 | Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and 250K Library, including explicit worker search and restored domain inputs | Library sends play requests but has no audio/database integration; full Hummingbird port remains |
@@ -36,7 +36,7 @@ pointer. Candidate metadata and list positions become queryable only with their
 acknowledged P. Semantic-only changes can publish at the same scene token without
 painting, while an unresolved visual edit keeps the preceding coherent metadata.
 Focus and normalized
-keyboard operations use the production dispatcher, including stale-sheet and
+pointer/keyboard operations use the production dispatcher, including stale-sheet and
 owner-quarantine rules. [Native accessibility](crates/gpui/ACCESSIBILITY.md) shares
 these identities, focus, geometry and action authority. It adds no GPUI-side
 AccessKit tree mirror or historical ID map; the native adapter retains its own
@@ -52,6 +52,22 @@ These are exact retained layouts, not whole-window memory figures; layout/font/s
 storage and native services remain separately owned.
 
 ## Current verification
+
+The [pointer protocol checks](evidence/pointer-protocol/checks.json) pin
+`c6db932473` (integrated as `3bbacbe3b1`). Nine public pointer cases plus the focus
+and presentation suites pass 27 cases. Native units, actual X11 Todo/scroll,
+strict Linux Clippy and actual Apple/Windows desktop cross-checks pass. The
+32-byte caller-owned session replaces the native host's existing fields;
+Runtime/Node/Presented and the same-feature NativeHost size do not grow.
+
+The [paint substrate](evidence/paint-patch/README.md) at `ab51133c84` (integrated
+as `d4d63170ba`) passes 129 Canvas cases/docs, eight GPU units, 36 actual Vulkan
+readbacks and a GPU borrow compile-fail doc. Canvas and ordinary Renderer remain
+552/872 bytes. An opt-in wrapper adds 24 bytes and 12 bytes per active site;
+three changed groups upload 48 color bytes while reusing admitted bins/resources.
+It still draws the full target, and CPU raster still rebuilds CSR bins. This
+establishes the public transactional primitives; automatic GPUI source coupling
+is a separate implementation gate.
 
 The [combined graphics/scroll checks](evidence/graphics-scroll-integration/checks.json)
 pin implementation `f01947e679`: **568 workspace cases/doctests**, 115 accessible

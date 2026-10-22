@@ -6,6 +6,16 @@ local hit indexes. A cached group's motion may preserve all local pixels. A
 fully hidden region may require no pixel work. Reaching those cases directly
 removes more work than choosing a faster universal raster kernel.
 
+The current [transactional paint substrate](docs/paint-patch.md) implements one
+such boundary: checked ordered color edits preserve command geometry, masks,
+resources and unchanged-alpha tile certificates. Exclusive borrowed guards admit
+the whole batch before mutation. An opt-in GPU owner records only requested
+groups in the existing preparation walk, then patches color words while retaining
+its admitted bins and bindings. Ordinary Canvas/Renderer headers do not grow.
+Automatic GPUI source coupling and preserved GPU target repair remain separate
+gates; the current patch still draws the complete target. See the source-pinned
+[evidence](evidence/paint-patch/README.md) for exact costs and readback oracles.
+
 Pixels still have to reach the display. SDF, analytic curves, sparse strips,
 compute rendering and native retained composition are different ways to represent
 and evaluate the scene before that point. The proposed backend contract admits

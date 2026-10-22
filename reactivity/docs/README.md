@@ -23,6 +23,8 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Reader/cohort implementation seam](reader-cohort-implementation-luna.md) | Typed Library question, exact input-version admission, source replacement and bounded completion ownership; Salsa/Bevy/Adapton comparisons |
 | [Direct reactive style ports](style-ports-luna.md) | Proposed typed sink/fanout integration, numeric promotion, sparse override bases, packed destinations and exact publication/impact gates |
 | [Pointer/gesture authority](pointer-gesture-authority-luna.md) | Proposed shared native/test reducer, source and presentation stamps, origin/cancellation contracts and repeated hit work |
+| [Paint-only source path](paint-only-command-patch-luna.md) | Source/complete-scene/presented cuts, sparse color edits, pending geometry, queue ordering and retained-renderer precedents |
+| [Transactional paint substrate](paint-patch.md) | Implemented Canvas/GPU borrowed guards, positional locators, support/opacity proofs, active storage and remaining runtime coupling |
 | [Field and immutable text ownership](text-ownership-luna.md) | Checked source namespace, thin text leases, exact Triomphe allocation comparison and dependency costs |
 | [Lossless color packing](color-packing-luna.md) | Word-aligned Oklch, bounded Linear sRGB exponent codec and exact 16-byte author colors without narrowing HDR admission |
 | [Style representation](style-core-representation-luna.md) | Actual allocator costs for sparse overrides, exact dimension encoding, authored/derived layout separation and conditional sharing |
