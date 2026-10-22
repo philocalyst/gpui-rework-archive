@@ -89,6 +89,10 @@ when a caller mutates its public width/height header. It is a transient borrowed
 view, and is still a real ABI/copy cost. Native Renderer remains 872 bytes;
 GpuSurface is 1,056 bytes, replacing the former 24-byte positional wrapper.
 These native sizes are also reported with their feature profile in the log.
+Through the implementation/refinement pin, `src/` files change by +2,599/−520
+lines, including their inline test modules. Separate tests and the first public
+fixture change by +747/−1. These are file-diff counts, not a shipping-code LOC
+estimate. No dependency or first-party unsafe block is added.
 
 Before Vec capacity, the fully unique CPU inline case costs 56 + 48 + 24 = 128
 bytes versus 108 previously. The 20-byte excess per draw is not amortized by
