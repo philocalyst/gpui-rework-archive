@@ -3659,7 +3659,7 @@ mod style_port_tests {
             size_of::<Runtime<()>>(),
             size_of::<Fanout>(),
             size_of::<Destination>(),
-            size_of::<crate::Flex<'_>>()
+            size_of::<crate::Flex>()
         );
         assert_eq!(size_of::<Node>(), 40);
         assert_eq!(size_of::<Presented>(), 80);

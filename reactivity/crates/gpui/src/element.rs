@@ -502,22 +502,8 @@ impl<'a> El<'a> {
     pub fn wrap(self, wrap: impl IntoProp<'a, bool>) -> Self {
         self.property_operand(crate::property::PropertyId::Wrap, wrap.into_prop())
     }
-    pub fn layout(mut self, recipe: impl std::borrow::Borrow<Flex<'a>>) -> Self {
-        let recipe = recipe.borrow();
-        self = self.flow(recipe.flow);
-        if let Some(gap) = recipe.gap {
-            self = self.gap(gap);
-        }
-        if let Some(align) = recipe.align {
-            self = self.align(align);
-        }
-        if let Some(justify) = recipe.justify {
-            self = self.justify(justify);
-        }
-        if let Some(wrap) = recipe.wrap {
-            self = self.wrap(wrap);
-        }
-        self
+    pub fn layout(self, recipe: impl crate::FlexRecipe<'a>) -> Self {
+        recipe.apply_to(self)
     }
     pub fn flex(self) -> Self {
         self.layout(Flex::row())

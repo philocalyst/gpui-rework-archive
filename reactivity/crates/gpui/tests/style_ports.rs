@@ -578,3 +578,47 @@ fn borrowed_flex_fields_and_flow_publish_through_the_closed_typed_schema() {
     assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().source_reads, 5);
 }
+
+#[test]
+fn large_integer_lengths_preserve_the_inherited_f019_narrowing_oracle() {
+    // The immediate f019 baseline used IntoLength -> f64 -> f32. These values
+    // straddle f32 midpoints after f64 has erased the low bit; direct integer
+    // casts differ. This source-port change deliberately preserves that policy.
+    let unsigned = (1_u64 << 63) + (1_u64 << 39) + 1;
+    let signed = (1_i64 << 62) + (1_i64 << 38) + 1;
+    macro_rules! check {
+        ($value:expr,$ty:ty) => {{
+            let value: $ty = $value;
+            let expected = (value as f64) as f32;
+            assert_ne!(expected.to_bits(), (value as f32).to_bits());
+            struct Literal($ty);
+            impl View for Literal {
+                fn view(&self) -> El<'_> {
+                    div().w(self.0).h(1)
+                }
+            }
+            struct Bound(Signal<$ty>);
+            impl View for Bound {
+                fn view(&self) -> El<'_> {
+                    div().w(&self.0).h(1)
+                }
+            }
+            let literal = Win::with_size(Literal(value), 4, 4).unwrap();
+            let bound = Win::with_size(Bound(Signal::new(value)), 4, 4).unwrap();
+            for (literal, actual) in [
+                (true, {
+                    let target = literal.inspect().unwrap().nodes[0].target.unwrap();
+                    literal.property(target, WIDTH).unwrap().unwrap()
+                }),
+                (false, {
+                    let target = bound.inspect().unwrap().nodes[0].target.unwrap();
+                    bound.property(target, WIDTH).unwrap().unwrap()
+                }),
+            ] {
+                assert_eq!(actual.to_bits(), expected.to_bits(), "literal={literal}");
+            }
+        }};
+    }
+    check!(unsigned, u64);
+    check!(signed, i64);
+}

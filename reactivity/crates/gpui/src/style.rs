@@ -78,6 +78,7 @@ impl Default for Style {
 
 mod sealed {
     pub trait Length {}
+    pub trait Recipe {}
 }
 
 /// Literal lengths accept ordinary integer and floating-point Rust values.
@@ -97,17 +98,17 @@ macro_rules! lengths {
 }
 lengths!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 
-/// A typed flow recipe; it finishes on the same concrete element currency.
+/// A Copy flow recipe storing original operands, not erased bindings. Numeric
+/// gap types are inferred; use `Flex<i32>` when naming an integer-gap recipe.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Flex<'a> {
-    pub(crate) flow: Flow,
-    pub(crate) gap: Option<crate::style_port::PropInput<'a, f64>>,
-    pub(crate) align: Option<crate::style_port::PropInput<'a, Align>>,
-    pub(crate) justify: Option<crate::style_port::PropInput<'a, Justify>>,
-    pub(crate) wrap: Option<crate::style_port::PropInput<'a, bool>>,
+pub struct Flex<G = f32, A = Align, J = Justify, W = bool> {
+    flow: Flow,
+    gap: Option<G>,
+    align: Option<A>,
+    justify: Option<J>,
+    wrap: Option<W>,
 }
-
-impl<'a> Flex<'a> {
+impl Flex {
     pub const fn row() -> Self {
         Self {
             flow: Flow::Row,
@@ -126,20 +127,148 @@ impl<'a> Flex<'a> {
             wrap: None,
         }
     }
-    pub fn gap(mut self, gap: impl crate::style_port::IntoProp<'a, f64>) -> Self {
-        self.gap = Some(gap.into_prop());
-        self
+}
+impl<G: Copy, A: Copy, J: Copy, W: Copy> Flex<G, A, J, W> {
+    pub const fn gap<'a, Next: Copy + crate::IntoProp<'a, f64>>(
+        self,
+        gap: Next,
+    ) -> Flex<Next, A, J, W> {
+        Flex {
+            flow: self.flow,
+            gap: Some(gap),
+            align: self.align,
+            justify: self.justify,
+            wrap: self.wrap,
+        }
     }
-    pub fn align(mut self, align: impl crate::style_port::IntoProp<'a, Align>) -> Self {
-        self.align = Some(align.into_prop());
-        self
+    pub const fn align<'a, Next: Copy + crate::IntoProp<'a, Align>>(
+        self,
+        align: Next,
+    ) -> Flex<G, Next, J, W> {
+        Flex {
+            flow: self.flow,
+            gap: self.gap,
+            align: Some(align),
+            justify: self.justify,
+            wrap: self.wrap,
+        }
     }
-    pub fn justify(mut self, justify: impl crate::style_port::IntoProp<'a, Justify>) -> Self {
-        self.justify = Some(justify.into_prop());
-        self
+    pub const fn justify<'a, Next: Copy + crate::IntoProp<'a, Justify>>(
+        self,
+        justify: Next,
+    ) -> Flex<G, A, Next, W> {
+        Flex {
+            flow: self.flow,
+            gap: self.gap,
+            align: self.align,
+            justify: Some(justify),
+            wrap: self.wrap,
+        }
     }
-    pub fn wrap(mut self, wrap: impl crate::style_port::IntoProp<'a, bool>) -> Self {
-        self.wrap = Some(wrap.into_prop());
-        self
+    pub const fn wrap<'a, Next: Copy + crate::IntoProp<'a, bool>>(
+        self,
+        wrap: Next,
+    ) -> Flex<G, A, J, Next> {
+        Flex {
+            flow: self.flow,
+            gap: self.gap,
+            align: self.align,
+            justify: self.justify,
+            wrap: Some(wrap),
+        }
+    }
+}
+impl<G, A, J, W> sealed::Recipe for Flex<G, A, J, W> {}
+impl<G, A, J, W> sealed::Recipe for &Flex<G, A, J, W> {}
+
+/// Closed lowering for typed flow recipes. Applications cannot install recipe
+/// callbacks; borrowed forms copy the same original operands into ordinary ports.
+#[doc(hidden)]
+pub trait FlexRecipe<'a>: sealed::Recipe {
+    fn apply_to(self, element: crate::El<'a>) -> crate::El<'a>;
+}
+impl<'a, G, A, J, W> FlexRecipe<'a> for Flex<G, A, J, W>
+where
+    G: Copy + crate::IntoProp<'a, f64>,
+    A: Copy + crate::IntoProp<'a, Align>,
+    J: Copy + crate::IntoProp<'a, Justify>,
+    W: Copy + crate::IntoProp<'a, bool>,
+{
+    fn apply_to(self, mut element: crate::El<'a>) -> crate::El<'a> {
+        element = element.flow(self.flow);
+        if let Some(gap) = self.gap {
+            element = element.gap(gap);
+        }
+        if let Some(align) = self.align {
+            element = element.align(align);
+        }
+        if let Some(justify) = self.justify {
+            element = element.justify(justify);
+        }
+        if let Some(wrap) = self.wrap {
+            element = element.wrap(wrap);
+        }
+        element
+    }
+}
+impl<'a, G, A, J, W> FlexRecipe<'a> for &Flex<G, A, J, W>
+where
+    Flex<G, A, J, W>: Copy + FlexRecipe<'a>,
+{
+    fn apply_to(self, element: crate::El<'a>) -> crate::El<'a> {
+        (*self).apply_to(element)
+    }
+}
+
+#[cfg(test)]
+mod recipe_tests {
+    use super::*;
+    use crate::{Signal, div};
+    const TOOLBAR: Flex = Flex::row()
+        .gap(8.0)
+        .align(Align::Center)
+        .justify(Justify::End)
+        .wrap(true);
+    const INTEGER_GAP: Flex<i32> = Flex::column().gap(8).align(Align::Start).wrap(false);
+    #[test]
+    fn stable_const_recipes_store_raw_values_with_the_original_literal_floor() {
+        assert_eq!(size_of::<Flex>(), 12);
+        assert_eq!(size_of::<Flex<i32>>(), 12);
+        let draft = div().layout(TOOLBAR).flatten();
+        assert_eq!(draft[0].style.gap, 8.0);
+        assert_eq!(draft[0].style.align, Align::Center);
+        assert!(draft[0].style.wrap);
+        let draft = div().layout(INTEGER_GAP).flatten();
+        assert_eq!(draft[0].style.flow, Flow::Column);
+        assert_eq!(draft[0].style.gap, 8.0);
+        assert!(!draft[0].style.wrap);
+    }
+    #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)] // borrowed recipe conformance
+    fn dynamic_recipe_stores_only_thin_references_and_lowers_without_recipe_allocation() {
+        let gap = Signal::new(8_u64);
+        let align = Signal::new(Align::Center);
+        let justify = Signal::new(Justify::End);
+        let wrap = Signal::new(true);
+        let mut recipe = None;
+        let count = allocation_counter::measure(|| {
+            recipe = Some(
+                Flex::row()
+                    .gap(&gap)
+                    .align(&align)
+                    .justify(&justify)
+                    .wrap(&wrap),
+            )
+        });
+        assert_eq!(count.count_total, 0);
+        let recipe = recipe.unwrap();
+        assert_eq!(size_of_val(&recipe), 40);
+        fn copy<T: Copy>(_: T) {}
+        copy(recipe);
+        let draft = div().layout(&recipe).flatten();
+        assert_eq!(draft[0].style.gap, 8.0);
+        assert_eq!(draft[0].style.align, Align::Center);
+        assert_eq!(draft[0].style.justify, Justify::End);
+        assert!(draft[0].style.wrap);
     }
 }

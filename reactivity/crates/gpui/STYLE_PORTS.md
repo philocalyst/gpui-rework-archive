@@ -46,17 +46,31 @@ and pixels stay authoritative, and a later valid owner turn can recover.
 Paint changes skip layout; layout sinks mark layout dirty, and font-size also
 retires shaping. Geometry sinks use the existing frozen geometry cohort. Ordinary
 retained trees need no View rerun for these exact edits. Mixed virtual-list windows
-currently conservatively re-describe on effective style changes because realization
-still depends on authored layout and visibility. Presentation still walks and
+skip description for Paint-only style publications. Layout or geometry sinks
+conservatively re-describe once because realization still depends on authored
+layout and visibility. Presentation still walks and
 records the retained scene; this feature does not claim sublinear painting or zero
 accessibility traversal.
 
-`Flex::row()` and `Flex::column()` remain const. The generic borrowed field methods
-are not const on stable Rust 1.97: const trait implementations/calls remain unstable.
-The documented const `.gap(8)` recipe law is therefore still a known gap, not a
-nightly requirement hidden in the build. `const ROW: Flex = Flex::row()` works;
-stored literal recipe fields use `Flex<'static>`. Borrowed recipes carry their
-operand lifetime and remain Copy.
+`Flex::row()`, `Flex::column()` and the four field builders are const on stable
+Rust. Recipes store original Copy operands; the sealed lowering converts only
+present fields when `El::layout` consumes or copies the recipe. No const trait
+call is required. Default literal recipes retain their original12B size and need
+no lifetime annotation. For named constants, the default gap type is f32:
+
+```rust
+# use gpui::prelude::*;
+const TOOLBAR: Flex = Flex::row().gap(8.0).align(Align::Center).wrap(true);
+const INTEGER_GAP: Flex<i32> = Flex::row().gap(8);
+```
+
+Inline `.layout(Flex::row().gap(8).wrap(&self.wrap))` infers the operand types.
+A recipe with four borrowed signals stores four thin references (40B with flow),
+remains Copy and allocates nothing. Explicit `const TOOLBAR: Flex = ...gap(8)`
+needs either8.0 or the integer generic annotation above; that exact default-typed
+integer spelling is not silently claimed to compile. Whole `Signal<Flex>` remains
+deferred. Numeric narrowing preserves the immediate f019 literal policy,
+including inherited integer→f64→f32 double rounding at large midpoint values.
 
 Literal style inputs allocate no cold payload. Dynamic inputs share one normalized
 cold decoration box with radius, scrolling and names; a closed leaf payload means
