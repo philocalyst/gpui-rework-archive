@@ -69,6 +69,12 @@ supports a guard-only pass and validates every cell before creating output or
 launching the observer. Captures remain blocked until the integration build
 exists and a reviewer has checked all preflight records.
 
+`preflight-paint-only.sh` is the correctness-only driver for the 16 launch
+checks. It creates one screenshot and log per variant/workload, emits records
+with `status=awaiting-manual-review`, and hashes the artifacts. Review every
+image and log before changing those records to `status=pass`; the capture guard
+rejects records that still await review.
+
 Use 100 fresh starts and 10 click transitions per start, giving 1,000 click
 samples per cell; take the existing five 750 ms idle samples only as a small
 memory diagnostic. Preserve raw nanoseconds, errors and order. Rotate the four

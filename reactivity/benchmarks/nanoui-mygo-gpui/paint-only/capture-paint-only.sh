@@ -43,6 +43,7 @@ MYGO_FIXTURE_PIN=d05239655152b3354bacededa984d4f2ad8c4e1519ef30940e7f19cc55d7150
 NANOUI_FIXTURE_PIN=46061d578913885f42ca2e38bce6ad6714f47de70a36608bbeb673d9e822df1c
 PEER_FONT=/root/.local/share/fonts/luna-bench/DejaVuSans.ttf
 PEER_FONT_SHA=58568c88a01b80dfc056daca3eeafd434a0380df1a48dda53f0de0d716109bbd
+OBSERVER_PIN=b4f84c80caa854d974643a2c20823537601a04745a7bcf320be356732b42f88b
 CONTROL_FIXTURE="$DIR/fixtures/gpui-paint-control.rs"
 DIRECT_FIXTURE="$DIR/fixtures/gpui-paint-direct.rs"
 GPUI_COMMIT=$LUNA_GPUI_EXPECTED_COMMIT
@@ -60,6 +61,9 @@ DISPLAY_NUMBER=${LUNA_DISPLAY#:}
 DISPLAY_NUMBER=${DISPLAY_NUMBER%%.*}
 [[ -S "/tmp/.X11-unix/X$DISPLAY_NUMBER" ]] || {
   echo "no X11 socket for $LUNA_DISPLAY" >&2; exit 2;
+}
+[[ "$LUNA_OBSERVER_SHA" == "$OBSERVER_PIN" ]] || {
+  echo 'observer hash differs from the reviewed X11 observer build' >&2; exit 2;
 }
 [[ "$LUNA_OBSERVER_BINARY" == "$OBSERVER_PATH" ]] || {
   echo "observer path must be $OBSERVER_PATH" >&2; exit 2;
@@ -197,12 +201,16 @@ verify_pins() {
     echo 'NanoUI record build_config_sha256 does not match the actual build.zig' >&2; return 1;
   }
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_source_commit=$MYGO_COMMIT"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_source_worktree=$LUNA_MYGO_SOURCE_TREE"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" 'mygo_fixture=reactivity/benchmarks/nanoui-mygo-gpui/fixtures/mygo-main.go'
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_fixture_sha256=$mygo_fixture_sha"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_binary=$LUNA_MYGO_BINARY"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_binary_sha256=$LUNA_MYGO_SHA"
   has_line "$LUNA_PEER_BUILD_MANIFEST" 'mygo_toolchain=go1.27.1 linux/amd64'
   has_line "$LUNA_PEER_BUILD_MANIFEST" "mygo_build_command=go build -trimpath -o $LUNA_MYGO_BINARY ./examples/luna-bench"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_source_commit=$NANOUI_COMMIT"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_source_worktree=$LUNA_NANOUI_SOURCE_TREE"
+  has_line "$LUNA_PEER_BUILD_MANIFEST" 'nanoui_fixture=reactivity/benchmarks/nanoui-mygo-gpui/fixtures/nanoui-main.zig'
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_fixture_sha256=$nanoui_fixture_sha"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_binary=$LUNA_NANOUI_BINARY"
   has_line "$LUNA_PEER_BUILD_MANIFEST" "nanoui_binary_sha256=$LUNA_NANOUI_SHA"
