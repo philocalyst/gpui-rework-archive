@@ -76,14 +76,73 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         Some(result)
     }
 
-    fn cluster(&self, byte: usize) -> Option<Cluster<'a, B>> {
+    fn indexed_cluster(&self, byte: usize) -> Option<(usize, Cluster<'a, B>)> {
         let index = *self.bytes.get(byte)? as usize;
-        self.entries.get(index)?.path.cluster(self.layout)
+        Some((index, self.entries.get(index)?.path.cluster(self.layout)?))
+    }
+
+    fn cluster(&self, byte: usize) -> Option<Cluster<'a, B>> {
+        self.indexed_cluster(byte).map(|(_, cluster)| cluster)
     }
 
     /// The same snapping and endpoint/affinity policy as Cursor::from_byte_index.
     pub fn cursor(&self, byte: usize, affinity: Affinity) -> Cursor {
         Cursor::from_source_cluster(self.layout, affinity, self.cluster(byte))
+    }
+
+    /// Both affinities at an exact source boundary, upstream first.
+    /// Returns None when ordinary cursor construction would snap away from byte.
+    /// Shared source neighbours are resolved once. Within one run, adjacent
+    /// visual entries also share the exact f32 boundary recurrence, so their
+    /// two rectangles need only one geometry evaluation.
+    pub fn geometries_at(&self, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
+        let next = self.indexed_cluster(byte);
+        let upstream = Cursor::from_source_cluster(
+            self.layout,
+            Affinity::Upstream,
+            next.map(|(_, cluster)| cluster),
+        );
+        if upstream.index() != byte {
+            return None;
+        }
+        let downstream = Cursor::from_source_cluster(
+            self.layout,
+            Affinity::Downstream,
+            next.map(|(_, cluster)| cluster),
+        );
+        let previous = byte.checked_sub(1).and_then(|b| self.indexed_cluster(b));
+        let clusters = [previous.map(|(_, c)| c), next.map(|(_, c)| c)];
+        let same_edge = upstream == downstream
+            || previous.zip(next).is_some_and(|((pi, p), (ni, n))| {
+                let [pp, np] = [self.entries[pi].path, self.entries[ni].path];
+                p.text_range().end == byte
+                    && n.text_range().start == byte
+                    && pp.line_index == np.line_index
+                    && pp.run_index == np.run_index
+                    && p.is_rtl() == n.is_rtl()
+                    && !p.is_hard_line_break()
+                    && !n.is_hard_line_break()
+                    && if p.is_rtl() {
+                        ni.checked_add(1) == Some(pi)
+                    } else {
+                        pi.checked_add(1) == Some(ni)
+                    }
+            });
+        let geometry = |cursor: Cursor| {
+            cursor.geometry_with(self.layout, width, clusters, |cluster| {
+                let index = self.bytes[cluster.text_range().start] as usize;
+                self.entries[index].offset
+            })
+        };
+        let first = geometry(upstream);
+        Some([
+            first,
+            if same_edge {
+                first
+            } else {
+                geometry(downstream)
+            },
+        ])
     }
 
     /// The existing Cursor geometry policy, using cached source/prefix lookups.

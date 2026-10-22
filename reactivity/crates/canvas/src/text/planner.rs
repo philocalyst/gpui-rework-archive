@@ -450,35 +450,33 @@ fn append_carets(
         None
     };
     for byte in segmenter.segment_str(content) {
-        let mut pair = [None, None];
-        for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
-            .into_iter()
-            .enumerate()
-        {
-            let cursor = geometry.as_ref().map_or_else(
-                || Cursor::from_byte_index(planned, byte, affinity),
-                |index| index.cursor(byte, affinity),
-            );
-            if cursor.index() != byte {
+        let pair = if let Some(index) = &geometry {
+            let Some(pair) = index.geometries_at(byte, 1.) else {
                 continue;
-            }
-            let r = geometry.as_ref().map_or_else(
-                || cursor.geometry(planned, 1.),
-                |index| index.geometry(cursor, 1.),
-            );
-            let bounds = Rect::new(
-                r.x0 as f32,
-                (f64::from(height) + r.y0) as f32,
-                (r.x1 - r.x0) as f32,
-                (r.y1 - r.y0) as f32,
-            );
-            if ![bounds.x, bounds.y, bounds.width, bounds.height]
+            };
+            pair.map(Some)
+        } else {
+            [Affinity::Upstream, Affinity::Downstream].map(|affinity| {
+                let cursor = Cursor::from_byte_index(planned, byte, affinity);
+                (cursor.index() == byte).then(|| cursor.geometry(planned, 1.))
+            })
+        };
+        let pair = pair.map(|geometry| {
+            geometry.map(|r| {
+                Rect::new(
+                    r.x0 as f32,
+                    (f64::from(height) + r.y0) as f32,
+                    (r.x1 - r.x0) as f32,
+                    (r.y1 - r.y0) as f32,
+                )
+            })
+        });
+        if pair.iter().flatten().any(|bounds| {
+            ![bounds.x, bounds.y, bounds.width, bounds.height]
                 .into_iter()
                 .all(f32::is_finite)
-            {
-                return Err(Error::InvalidGeometry);
-            }
-            pair[index] = Some(bounds);
+        }) {
+            return Err(Error::InvalidGeometry);
         }
         let global = (source + byte) as u32;
         if pair[0].is_some() && pair[0] == pair[1] {
@@ -501,6 +499,9 @@ fn append_carets(
     }
     Ok(())
 }
+#[cfg(test)]
+#[path = "cursor_pair_tests.rs"]
+mod cursor_pair_tests;
 #[cfg(test)]
 #[path = "line_ownership_tests.rs"]
 mod line_ownership_tests;
