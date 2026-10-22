@@ -1,6 +1,6 @@
 [workspace]
 members = ["crates/*"]
-exclude = ["vendor/winit", "vendor/cephal", "vendor/wgpu-hal", "vendor/softbuffer", "vendor/parley", "vendor/parley_engine", "vendor/accesskit_unix", "vendor/accesskit_atspi_common"]
+exclude = ["vendor/winit", "vendor/cephal", "vendor/wgpu-hal", "vendor/softbuffer", "vendor/parley", "vendor/parley_engine", "vendor/accesskit", "vendor/accesskit_consumer", "vendor/accesskit_unix", "vendor/accesskit_atspi_common"]
 resolver = "3"
 
 [workspace.package]
@@ -15,3 +15,5 @@ wgpu-hal = { path = "vendor/wgpu-hal" }
 softbuffer = { path = "vendor/softbuffer" }
 accesskit_unix = { path = "vendor/accesskit_unix" }
 accesskit_atspi_common = { path = "vendor/accesskit_atspi_common" }
+accesskit = { path = "vendor/accesskit" }
+accesskit_consumer = { path = "vendor/accesskit_consumer" }

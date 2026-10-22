@@ -17,6 +17,86 @@ fn range(anchor: usize, focus: usize) -> TextSelection {
     }
 }
 
+#[test]
+fn semantic_range_actions_share_ordinary_editing_and_preserve_reverse_endpoints() {
+    let mut semantic = Win::demo(Page::new("e\u{301}\r\nאבג"));
+    let mut ordinary = Win::demo(Page::new("e\u{301}\r\nאבג"));
+    let input = semantic.input();
+    semantic
+        .perform(input, Action::SetTextSelection(range(7, 3)))
+        .unwrap();
+    ordinary.select(ordinary.input(), range(7, 3)).unwrap();
+    semantic
+        .visit(|part| {
+            if part.target() == input {
+                assert_eq!(part.selection(), Some(range(7, 3)));
+            }
+        })
+        .unwrap();
+    semantic
+        .perform(input, Action::ReplaceSelectedText("x"))
+        .unwrap();
+    ordinary.type_text(ordinary.input(), "x").unwrap();
+    assert_eq!(
+        semantic.root().unwrap().value.as_str(),
+        ordinary.root().unwrap().value.as_str()
+    );
+    assert_eq!(
+        semantic.selection(input).unwrap(),
+        ordinary.selection(ordinary.input()).unwrap()
+    );
+    assert_eq!(
+        semantic.scene_digest().unwrap(),
+        ordinary.scene_digest().unwrap()
+    );
+    let old = semantic.snapshot().unwrap();
+    assert_eq!(
+        semantic.perform(input, Action::SetTextSelection(range(1, 3))),
+        Err(Error::InvalidSelection)
+    );
+    assert_eq!(semantic.snapshot().unwrap(), old);
+}
+
+#[test]
+fn acknowledged_selection_does_not_follow_pending_failed_or_repair_edits() {
+    let mut win = Win::recording(Page::new("ab"), WindowOptions::default()).unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let input = win.input();
+    let frozen = |win: &Win<Page>| {
+        let mut result = None;
+        win.visit(|part| {
+            if part.target() == input {
+                result = Some((part.value().unwrap().to_owned(), part.selection().unwrap()));
+            }
+        })
+        .unwrap();
+        result.unwrap()
+    };
+    win.perform(input, Action::SetTextSelection(range(0, 1)))
+        .unwrap();
+    assert_eq!(win.selection(input).unwrap(), range(0, 1));
+    assert_eq!(frozen(&win), ("ab".into(), range(2, 2)));
+    assert_eq!(
+        win.perform(input, Action::ReplaceSelectedText("x")),
+        Err(Error::PresentationStale)
+    );
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(frozen(&win), ("ab".into(), range(0, 1)));
+    assert!(matches!(
+        win.perform(input, Action::ReplaceSelectedText("漢")),
+        Err(Error::Canvas(_))
+    ));
+    assert_eq!(win.selection(input).unwrap(), range(3, 3));
+    assert_eq!(frozen(&win), ("ab".into(), range(0, 1)));
+    win.replace(input, range(0, 3), "a").unwrap();
+    assert_eq!(frozen(&win), ("ab".into(), range(0, 1)));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert_eq!(frozen(&win), ("ab".into(), range(1, 1)));
+}
+
 struct Page {
     value: Signal<String>,
     other: Signal<String>,

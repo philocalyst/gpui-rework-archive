@@ -1,4 +1,9 @@
 use super::*;
+fn cohort<M: View + 'static>(win: &Win<M>) -> Cohort {
+    let mut cohort = Cohort::default();
+    cohort.refresh(win).unwrap();
+    cohort
+}
 use crate::{
     Affine, El, FieldId, Signal, Source, Sources, WindowOptions, button, column, div, text,
     text_input,
@@ -52,13 +57,14 @@ fn projection<M: View + 'static>(win: &Win<M>) -> TreeUpdate {
         &win.accessibility_sheet().unwrap(),
         win.accessibility_state().unwrap(),
         "Test document",
+        &cohort(win),
     )
 }
 fn id<M: View + 'static>(win: &Win<M>, target: Target) -> NodeId {
     let mut found = None;
     win.visit(|part| {
         if part.target() == target {
-            found = Some(NodeId(part.native_id() * 2));
+            found = Some(cohort(win).id(part));
         }
     })
     .unwrap();
@@ -121,13 +127,11 @@ fn consumer_validates_topology_names_values_full_geometry_and_live_focus() {
     assert!(node.data().transform().is_none());
     assert!(node.data().supports_action(accesskit::Action::SetValue));
     assert!(
-        !node
-            .data()
+        node.data()
             .supports_action(accesskit::Action::SetTextSelection)
     );
     assert!(
-        !node
-            .data()
+        node.data()
             .supports_action(accesskit::Action::ReplaceSelectedText)
     );
     assert_eq!(
@@ -140,7 +144,7 @@ fn consumer_validates_topology_names_values_full_geometry_and_live_focus() {
     );
     let before = win.counters();
     win.focus(input).unwrap();
-    let focus = focus_update(&win.accessibility_sheet().unwrap());
+    let focus = focus_update(&win.accessibility_sheet().unwrap(), &cohort(&win));
     assert!(focus.nodes.is_empty());
     assert_eq!(focus.focus, input_id);
     let mut changes = Changes::default();
@@ -153,7 +157,7 @@ fn consumer_validates_topology_names_values_full_geometry_and_live_focus() {
     assert_eq!(win.counters(), before);
     win.clear_focus().unwrap();
     tree.update_and_process_changes(
-        focus_update(&win.accessibility_sheet().unwrap()),
+        focus_update(&win.accessibility_sheet().unwrap(), &cohort(&win)),
         &mut changes,
     );
     assert_eq!(
@@ -186,7 +190,7 @@ fn scalar_text_run_has_exact_utf8_lengths_and_no_fabricated_selection() {
         input.set_value(value);
         input.push_child(NodeId(3));
         input.add_action(accesskit::Action::SetValue);
-        let run = text_run(value);
+        let run = super::text::text_run(value);
         assert_eq!(run.character_lengths(), lengths);
         assert!(run.character_positions().is_none());
         let tree = Tree::new(
@@ -224,7 +228,7 @@ fn native_text_boundaries_keep_crlf_together_and_cover_every_utf8_byte() {
         ("\r\r\n", &[1, 2][..]),
         ("\n\r", &[1, 1][..]),
     ] {
-        let run = text_run(value);
+        let run = super::text::text_run(value);
         assert_eq!(run.character_lengths(), lengths, "{value:?}");
         let mut offset = 0;
         for &length in run.character_lengths() {
@@ -251,20 +255,30 @@ fn projection_uses_old_p_during_pending_edit_and_failed_preparation() {
     let first = win.with_scene(|_, token| token).unwrap();
     win.presented(first).unwrap();
     assert_eq!(win.accessibility_state().unwrap().token, Some(first));
-    let old = projection(&win);
+    let mut published = cohort(&win);
+    let project_p = |win: &Win<Page>, cohort: &Cohort| {
+        project(
+            &win.accessibility_sheet().unwrap(),
+            win.accessibility_state().unwrap(),
+            "Test document",
+            cohort,
+        )
+    };
+    let old = project_p(&win, &published);
     win.set(Page::VALUE, "next".to_owned()).unwrap();
-    assert_eq!(projection(&win), old);
+    assert_eq!(project_p(&win, &published), old);
     let second = win.with_scene(|_, token| token).unwrap();
     assert_ne!(first, second);
     assert_eq!(win.accessibility_state().unwrap().token, Some(first));
     win.presented(second).unwrap();
     assert_eq!(win.accessibility_state().unwrap().token, Some(second));
-    let expected = projection(&win);
+    published.refresh(&win).unwrap();
+    let expected = project_p(&win, &published);
     assert_ne!(expected, old);
     // The unsupported scalar commits S; neither failed candidate text nor its
     // geometry may appear in AccessKit's coherent preceding sheet.
     assert!(win.set(Page::VALUE, "next\u{1f680}".to_owned()).is_err());
-    assert_eq!(projection(&win), expected);
+    assert_eq!(project_p(&win, &published), expected);
     assert_eq!(win.accessibility_state().unwrap().token, Some(second));
 }
 
@@ -284,7 +298,7 @@ fn native_callbacks_are_inert_bounded_and_activation_bypasses_saturation() {
     assert!(ingress.0.initial.load(Ordering::Acquire));
     ingress.do_action(request(accesskit::Action::Click, button, None));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win),
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win),
         Err(NativeError::AccessibilityOverloaded)
     ));
     assert_eq!(win.root().unwrap().clicks, 0);
@@ -303,7 +317,7 @@ fn owner_budget_fifo_old_live_targets_and_revocation() {
     for _ in 0..APPLY_BUDGET + 1 {
         ingress.do_action(request(accesskit::Action::Click, button, None));
     }
-    let results = drain_actions(&ingress, &receiver, &mut win).unwrap();
+    let results = drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap();
     assert_eq!(
         results.into_iter().flatten().filter(Result::is_ok).count(),
         APPLY_BUDGET
@@ -312,7 +326,7 @@ fn owner_budget_fifo_old_live_targets_and_revocation() {
     // Position-free action still reaches this surviving site in old P while a
     // later prepared frame waits; it is not rejected by an arbitrary epoch gate.
     assert_eq!(
-        drain_actions(&ingress, &receiver, &mut win)
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win)
             .unwrap()
             .into_iter()
             .flatten()
@@ -320,6 +334,8 @@ fn owner_budget_fifo_old_live_targets_and_revocation() {
             .count(),
         1
     );
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
     ingress.do_action(request(
         accesskit::Action::SetValue,
         input,
@@ -330,11 +346,25 @@ fn owner_budget_fifo_old_live_targets_and_revocation() {
         input,
         Some(ActionData::Value("last".into())),
     ));
-    drain_actions(&ingress, &receiver, &mut win).unwrap();
+    let results = drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap();
+    assert!(results[0].as_ref().unwrap().is_ok());
+    assert!(
+        results[1].as_ref().unwrap().is_err(),
+        "second edit retains the old input lease"
+    );
+    assert_eq!(&**win.root().unwrap().value, "first");
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    ingress.do_action(request(
+        accesskit::Action::SetValue,
+        input,
+        Some(ActionData::Value("last".into())),
+    ));
+    drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap();
     assert_eq!(&**win.root().unwrap().value, "last");
     win.update(|m| m.show = false).unwrap();
     ingress.do_action(request(accesskit::Action::Click, button, None));
-    let results = drain_actions(&ingress, &receiver, &mut win).unwrap();
+    let results = drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap();
     assert!(matches!(results[0], Some(Err(Error::StaleTarget))));
     ingress.do_action(request(
         accesskit::Action::SetValue,
@@ -345,13 +375,13 @@ fn owner_budget_fifo_old_live_targets_and_revocation() {
     // An accepted command belongs to this activation session. Deactivation
     // cancels it even if reactivation happens before the owner can drain.
     ingress.request_initial_tree();
-    drain_actions(&ingress, &receiver, &mut win).unwrap();
+    drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap();
     assert_eq!(&**win.root().unwrap().value, "last");
     ingress.request_initial_tree();
     win.close();
     ingress.do_action(request(accesskit::Action::Click, button, None));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &Cohort::default(), &mut win).unwrap()[0],
         Some(Err(Error::Closed))
     ));
 }
@@ -393,12 +423,13 @@ fn unsupported_foreign_tree_and_utf8_byte_limit() {
 fn idle_state_and_focus_transport_do_not_allocate() {
     let (mut ingress, receiver) = Ingress::channel(None);
     let mut win = Win::demo(Page::new());
+    let published = cohort(&win);
     let measured = allocation_counter::measure(|| {
         for _ in 0..1000 {
             let _ = win.accessibility_state().unwrap();
             ingress.request_initial_tree();
             ingress.deactivate_accessibility();
-            drain_actions(&ingress, &receiver, &mut win).unwrap();
+            drain_actions(&ingress, &receiver, &published, &mut win).unwrap();
         }
     });
     assert_eq!(measured.count_total, 0);
@@ -539,7 +570,7 @@ fn root_and_synthetic_ids_cannot_invoke_real_sites() {
     for native in [ROOT, NodeId(input.0 + 1), NodeId(u64::MAX)] {
         ingress.do_action(request(accesskit::Action::Click, native, None));
     }
-    let applied = drain_actions(&ingress, &receiver, &mut win).unwrap();
+    let applied = drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap();
     assert!(
         applied
             .into_iter()
@@ -633,7 +664,7 @@ fn renamed_static_text_preserves_content_and_explicit_none_then_inherits() {
     ingress.request_initial_tree();
     ingress.do_action(request(accesskit::Action::Click, child, None));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Err(Error::StaleTarget))
     ));
     struct Plain;
@@ -795,7 +826,7 @@ fn scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions() {
         Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Page)),
     ));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Ok(_))
     ));
     assert_eq!(
@@ -831,7 +862,7 @@ fn scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions() {
     );
     ingress.do_action(request(accesskit::Action::ScrollIntoView, child_id, None));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Ok(_))
     ));
     win.presented(win.with_scene(|_, token| token).unwrap())
@@ -846,7 +877,7 @@ fn scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions() {
         })),
     ));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Ok(_))
     ));
     win.presented(win.with_scene(|_, token| token).unwrap())
@@ -912,7 +943,7 @@ fn native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi(
         })),
     ));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Ok(_))
     ));
     win.presented(win.with_scene(|_, token| token).unwrap())
@@ -938,7 +969,7 @@ fn native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi(
         Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Page)),
     ));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Ok(_))
     ));
     win.presented(win.with_scene(|_, token| token).unwrap())
@@ -950,7 +981,7 @@ fn native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi(
         Some(ActionData::ScrollUnit(accesskit::ScrollUnit::Item)),
     ));
     assert!(matches!(
-        drain_actions(&ingress, &receiver, &mut win).unwrap()[0],
+        drain_actions(&ingress, &receiver, &cohort(&win), &mut win).unwrap()[0],
         Some(Ok(_))
     ));
     win.presented(win.with_scene(|_, token| token).unwrap())

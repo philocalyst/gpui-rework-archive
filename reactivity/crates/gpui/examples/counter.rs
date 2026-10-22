@@ -1,6 +1,6 @@
 //! The ordinary runtime/input/layout/font/raster path, without a native adapter.
 use gpui::prelude::*;
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 #[path = "support/renderer.rs"]
 mod renderer;
 
@@ -27,7 +27,7 @@ impl View for Counter {
         .gap(8)
     }
 }
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 fn main() -> Result<(), gpui::NativeError> {
     gpui::Application::run_window(renderer::configure(
         gpui::Window::document(Counter {
@@ -37,7 +37,7 @@ fn main() -> Result<(), gpui::NativeError> {
         .size(360, 240),
     ))
 }
-#[cfg(not(feature = "native"))]
+#[cfg(not(feature = "native-core"))]
 fn main() -> Result<(), gpui::Error> {
     let mut win = Win::with_size(
         Counter {

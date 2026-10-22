@@ -42,6 +42,23 @@ async fn descendants(bus: &Connection, root: Address) -> zbus::Result<Vec<Addres
     }
     Ok(result)
 }
+async fn editable_input(bus: &Connection, window: &Address) -> Option<Address> {
+    for node in descendants(bus, window.clone()).await.ok()? {
+        let interfaces: Vec<String> = proxy(bus, &node, "org.a11y.atspi.Accessible")
+            .await
+            .ok()?
+            .call("GetInterfaces", &())
+            .await
+            .ok()?;
+        if interfaces
+            .iter()
+            .any(|name| name == "org.a11y.atspi.EditableText")
+        {
+            return Some(node);
+        }
+    }
+    None
+}
 async fn wait_for<T>(
     runtime: &SharedRuntime,
     deadline: Instant,
@@ -166,7 +183,7 @@ async fn run_client(
             break;
         }
     }
-    let input = input.ok_or("no native EditableText interface")?;
+    let mut input = input.ok_or("no native EditableText interface")?;
     let notify = |item| {
         evidence.try_send(Ok(item)).unwrap();
         wake.signal();
@@ -199,16 +216,122 @@ async fn run_client(
             .call::<_, _, bool>("SetTextContents", &(CONTENT,))
             .await?
     );
-    wait_for(runtime, deadline, async || {
+    let stale_input = input.clone();
+    input = wait_for(runtime, deadline, async || {
+        let input = editable_input(&bus, &window).await?;
         let value: String = proxy(&bus, &input, "org.a11y.atspi.Text")
             .await
             .ok()?
             .call("GetText", &(0i32, -1i32))
             .await
             .ok()?;
-        (value == CONTENT).then_some(())
+        (value == CONTENT).then_some(input)
     })
     .await;
+    assert_ne!(
+        input, stale_input,
+        "native input identity retires with its source lease"
+    );
+    assert!(
+        proxy(&bus, &stale_input, "org.a11y.atspi.EditableText")
+            .await?
+            .call::<_, _, bool>("SetTextContents", &("stale overwrite",))
+            .await
+            .is_err()
+    );
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.Text")
+            .await?
+            .call::<_, _, bool>("SetSelection", &(0i32, 4i32, 0i32))
+            .await?
+    );
+    wait_for(runtime, deadline, async || {
+        let p = proxy(&bus, &input, "org.a11y.atspi.Text").await.ok()?;
+        let range: (i32, i32) = p.call("GetSelection", &(0i32,)).await.ok()?;
+        let caret: i32 = p.get_property("CaretOffset").await.ok()?;
+        (range == (0, 4) && caret == 0).then_some(())
+    })
+    .await;
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.Text")
+            .await?
+            .call::<_, _, bool>("SetCaretOffset", &(2i32,))
+            .await?
+    );
+    wait_for(runtime, deadline, async || {
+        let caret: i32 = proxy(&bus, &input, "org.a11y.atspi.Text")
+            .await
+            .ok()?
+            .get_property("CaretOffset")
+            .await
+            .ok()?;
+        (caret == 2).then_some(())
+    })
+    .await;
+    const INSERT: &str = "e\u{301}\r\nאב";
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.EditableText")
+            .await?
+            .call::<_, _, bool>("InsertText", &(4i32, INSERT, INSERT.len() as i32))
+            .await?
+    );
+    let inserted = format!("{}{INSERT}{}", &CONTENT[..4], &CONTENT[4..]);
+    input = wait_for(runtime, deadline, async || {
+        let input = editable_input(&bus, &window).await?;
+        let p = proxy(&bus, &input, "org.a11y.atspi.Text").await.ok()?;
+        let value: String = p.call("GetText", &(0i32, -1i32)).await.ok()?;
+        let caret: i32 = p.get_property("CaretOffset").await.ok()?;
+        (value == inserted && caret == 10).then_some(input)
+    })
+    .await;
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.Text")
+            .await?
+            .call::<_, _, bool>("SetCaretOffset", &(5i32,))
+            .await
+            .is_err(),
+        "inside combining grapheme"
+    );
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.EditableText")
+            .await?
+            .call::<_, _, bool>("DeleteText", &(10i32, 4i32))
+            .await
+            .is_err(),
+        "reversed explicit deletion"
+    );
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.EditableText")
+            .await?
+            .call::<_, _, bool>("InsertText", &(0i32, "é", 1i32))
+            .await
+            .is_err(),
+        "UTF-8 split prefix"
+    );
+    assert!(
+        proxy(&bus, &input, "org.a11y.atspi.EditableText")
+            .await?
+            .call::<_, _, bool>("DeleteText", &(4i32, 10i32))
+            .await?
+    );
+    input = wait_for(runtime, deadline, async || {
+        let input = editable_input(&bus, &window).await?;
+        let p = proxy(&bus, &input, "org.a11y.atspi.Text").await.ok()?;
+        let value: String = p.call("GetText", &(0i32, -1i32)).await.ok()?;
+        let caret: i32 = p.get_property("CaretOffset").await.ok()?;
+        (value == CONTENT && caret == 4).then_some(input)
+    })
+    .await;
+    assert_eq!(
+        proxy(&bus, &input, "org.a11y.atspi.Text")
+            .await?
+            .call::<_, _, i32>("GetNSelections", &())
+            .await?,
+        0
+    );
+    eprintln!(
+        "AT-SPI transcript: reversed selection(4→0), caret2, InsertText UTF8=9/USV=6, caret10, invalid interior/reversed/UTF8 rejected, DeleteText(4..10), caret4; content restored"
+    );
     notify(Evidence::Edited);
     gate.recv().await?;
     let add = named(&bus, vec![window.clone()], "Add")
@@ -392,7 +515,7 @@ impl Script {
                         serde_json::from_str(&owner.source_json().unwrap()).unwrap();
                     assert_eq!(data["draft"], CONTENT);
                     assert!(owner.accessibility_state().unwrap().token.is_some());
-                    assert_eq!(owner.accessibility_state().unwrap().epoch, 2);
+                    assert_eq!(owner.accessibility_state().unwrap().epoch, 6);
                     self.gate.try_send(()).unwrap();
                 }
                 Evidence::Invoked => {
@@ -402,14 +525,14 @@ impl Script {
                     assert_eq!(data["todos"][0]["title"], CONTENT);
                     assert_eq!(data["todos"].as_array().unwrap().len(), 1);
                     assert!(owner.contains_text(CONTENT).unwrap());
-                    assert_eq!(owner.accessibility_state().unwrap().epoch, 3);
-                    assert_eq!(owner.counters().source_operations, 3);
+                    assert_eq!(owner.accessibility_state().unwrap().epoch, 7);
+                    assert_eq!(owner.counters().source_operations, 7);
                     self.after_invoke_frames = self.host.presented_frames;
                     self.gate.try_send(()).unwrap();
                 }
                 Evidence::Reactivated => {
-                    assert_eq!(owner.accessibility_state().unwrap().epoch, 3);
-                    assert_eq!(owner.counters().source_operations, 3);
+                    assert_eq!(owner.accessibility_state().unwrap().epoch, 7);
+                    assert_eq!(owner.counters().source_operations, 7);
                     assert_eq!(self.host.presented_frames, self.after_invoke_frames);
                     assert!(owner.contains_text(CONTENT).unwrap());
                     if self.lifecycle {

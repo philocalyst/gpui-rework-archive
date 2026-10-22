@@ -118,6 +118,7 @@ impl Collect<'_> {
         previous: Option<&Presented>,
         next: &Presented,
         metadata: Option<&Metadata>,
+        selection: Option<editing::SelectionSnapshot>,
         list: Option<scroll::ViewportInfo>,
         row: Option<&ListRow>,
     ) {
@@ -152,6 +153,11 @@ impl Collect<'_> {
         if previous.kind != next.kind
             || previous.actions != next.actions
             || previous.text.as_deref() != next.text.as_deref()
+            || metadata
+                .and_then(|m| m.selection.as_ref())
+                .and_then(|frozen| frozen.presented)
+                .and_then(|snapshot| snapshot.selection(previous.identity))
+                != selection.and_then(|snapshot| snapshot.selection(next.identity))
             || old_name != new_name
             || old_description != new_description
             || rect_bits(previous.rect) != rect_bits(next.rect)

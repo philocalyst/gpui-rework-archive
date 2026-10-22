@@ -64,6 +64,24 @@ pub(crate) fn text_position_from_offset<'a>(
     node.text_position_from_global_usv_index(index)
 }
 
+/// Editing offsets are USVs, but must denote an actual selectable boundary.
+/// The general consumer conversion floors interior units for navigation; an
+/// explicit edit must not silently edit a different range after that flooring.
+pub(crate) fn text_selection_from_offsets_exact(
+    node: &NodeRef, start: i32, end: i32,
+) -> Option<accesskit::TextSelection> {
+    let anchor = text_position_from_offset(node, start)?;
+    let focus = text_position_from_offset(node, end)?;
+    if anchor.to_global_usv_index() != usize::try_from(start).ok()?
+        || focus.to_global_usv_index() != usize::try_from(end).ok()? {
+        return None;
+    }
+    Some(accesskit::TextSelection {
+        anchor: anchor.to_degenerate_range().to_text_selection().anchor,
+        focus: focus.to_degenerate_range().to_text_selection().focus,
+    })
+}
+
 pub(crate) fn text_range_from_offset<'a>(
     node: &'a NodeRef,
     offset: i32,

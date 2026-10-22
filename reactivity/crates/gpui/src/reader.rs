@@ -248,7 +248,7 @@ const PANICKED: u8 = 5;
 pub(crate) struct Controller<T, E> {
     mailbox: Mailbox<Message<T, E>>,
     current: AtomicU64,
-    #[cfg(feature = "native")]
+    #[cfg(feature = "native-core")]
     wake: std::sync::OnceLock<gpui_reactivity_host::native::Wake>,
 }
 impl<T, E> Controller<T, E> {
@@ -256,12 +256,12 @@ impl<T, E> Controller<T, E> {
         Self {
             mailbox: Mailbox::new(),
             current: AtomicU64::new(0),
-            #[cfg(feature = "native")]
+            #[cfg(feature = "native-core")]
             wake: std::sync::OnceLock::new(),
         }
     }
     fn signal(&self) {
-        #[cfg(feature = "native")]
+        #[cfg(feature = "native-core")]
         if let Some(wake) = self.wake.get() {
             wake.signal();
         }

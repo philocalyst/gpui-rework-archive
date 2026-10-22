@@ -15,7 +15,7 @@ mod element;
 mod identity;
 mod image;
 mod list;
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 mod native;
 pub mod property;
 mod reader;
@@ -43,7 +43,7 @@ pub use gpui_reactivity_state::{Handoff, Signal};
 pub use identity::Target;
 pub use image::image;
 pub use list::{ItemKey, ItemSource, ListError, ListId, ListViewport, uniform_list};
-#[cfg(feature = "native")]
+#[cfg(feature = "native-core")]
 pub use native::{NativeError, PresentedFrame, RendererKind, RendererPolicy, Window};
 pub use reader::{
     Cancellation, CompleteError, Completion, Failure, InputVersion, QuestionFault, QuestionInfo,

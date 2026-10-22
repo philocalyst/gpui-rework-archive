@@ -11,6 +11,9 @@ use std::sync::{
     mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError},
 };
 
+mod text;
+use text::Cohort;
+
 const ROOT: NodeId = NodeId(0);
 const CAPACITY: usize = 64;
 const APPLY_BUDGET: usize = 16;
@@ -22,21 +25,43 @@ enum Command {
     Focus(NodeId),
     Blur(NodeId),
     SetValue(NodeId, Box<str>),
+    SetTextSelection(NodeId, Box<accesskit::TextSelection>),
+    ReplaceText(NodeId, Box<accesskit::TextReplacement>),
+    ReplaceSelectedText(NodeId, Box<str>),
     Scroll(NodeId, crate::ScrollDirection, crate::ScrollUnit),
     ScrollTo(NodeId, crate::ScrollOffset),
     ScrollIntoView(NodeId),
 }
 struct Queued {
     session: u64,
+    publication: u64,
     command: Command,
 }
 impl Command {
-    fn operation(&self) -> (NodeId, Action<'_>) {
-        match self {
+    fn operation<'a>(&'a self, cohort: &Cohort) -> Result<(NodeId, Action<'a>), Error> {
+        Ok(match self {
             Self::Activate(id) => (*id, Action::Activate),
             Self::Focus(id) => (*id, Action::Focus),
             Self::Blur(id) => (*id, Action::Blur),
             Self::SetValue(id, value) => (*id, Action::SetValue(value)),
+            Self::SetTextSelection(id, selection) => (
+                *id,
+                Action::SetTextSelection(
+                    cohort
+                        .selection(*id, **selection)
+                        .ok_or(Error::InvalidSelection)?,
+                ),
+            ),
+            Self::ReplaceText(id, replacement) => (
+                *id,
+                Action::ReplaceText {
+                    selection: cohort
+                        .selection(*id, replacement.selection)
+                        .ok_or(Error::InvalidSelection)?,
+                    value: &replacement.value,
+                },
+            ),
+            Self::ReplaceSelectedText(id, value) => (*id, Action::ReplaceSelectedText(value)),
             Self::Scroll(id, direction, unit) => (
                 *id,
                 Action::Scroll {
@@ -46,7 +71,7 @@ impl Command {
             ),
             Self::ScrollTo(id, offset) => (*id, Action::ScrollTo(*offset)),
             Self::ScrollIntoView(id) => (*id, Action::ScrollIntoView),
-        }
+        })
     }
 }
 
@@ -59,6 +84,7 @@ struct Shared {
     // never on a new presentation; old live position-free targets remain valid.
     session: AtomicU64,
     initial: AtomicBool,
+    publication: AtomicU64,
 }
 impl Shared {
     fn set_active(&self, active: bool) {
@@ -99,6 +125,7 @@ impl Ingress {
                 overflow: AtomicBool::new(false),
                 session: AtomicU64::new(0),
                 initial: AtomicBool::new(false),
+                publication: AtomicU64::new(0),
             })),
             receiver,
         )
@@ -136,12 +163,33 @@ impl accesskit::ActionHandler for Ingress {
             (accesskit::Action::Click, None) => Command::Activate(id),
             (accesskit::Action::Focus, None) => Command::Focus(id),
             (accesskit::Action::Blur, None) => Command::Blur(id),
-            (accesskit::Action::SetValue, Some(ActionData::Value(value))) => {
+            (
+                action @ (accesskit::Action::SetValue | accesskit::Action::ReplaceSelectedText),
+                Some(ActionData::Value(value)),
+            ) => {
                 if value.len() > MAX_VALUE_BYTES {
                     self.0.overload();
                     return;
                 }
-                Command::SetValue(id, value)
+                if action == accesskit::Action::SetValue {
+                    Command::SetValue(id, value)
+                } else {
+                    Command::ReplaceSelectedText(id, value)
+                }
+            }
+            (
+                accesskit::Action::SetTextSelection,
+                Some(ActionData::SetTextSelection(selection)),
+            ) => Command::SetTextSelection(id, Box::new(selection)),
+            (
+                accesskit::Action::ReplaceSelectedText,
+                Some(ActionData::ReplaceText(replacement)),
+            ) => {
+                if replacement.value.len() > MAX_VALUE_BYTES {
+                    self.0.overload();
+                    return;
+                }
+                Command::ReplaceText(id, replacement)
             }
             (accesskit::Action::ScrollIntoView, None | Some(ActionData::ScrollHint(_))) => {
                 Command::ScrollIntoView(id)
@@ -187,7 +235,11 @@ impl accesskit::ActionHandler for Ingress {
             // virtual-item realization need additional runtime authority.
             _ => return,
         };
-        match self.0.sender.try_send(Queued { session, command }) {
+        match self.0.sender.try_send(Queued {
+            session,
+            publication: self.0.publication.load(Ordering::Acquire),
+            command,
+        }) {
             Ok(()) => self.0.signal(),
             Err(TrySendError::Full(_)) => self.0.overload(),
             Err(TrySendError::Disconnected(_)) => {}
@@ -202,6 +254,7 @@ pub(super) struct Bridge {
     published: Option<State>,
     needs_full: bool,
     title: String,
+    cohort: Cohort,
     #[cfg(test)]
     conversions: usize,
 }
@@ -235,6 +288,7 @@ impl Bridge {
             // Winit's X11 title() is an empty-string stub, so use the authored
             // opening title rather than querying it back from the platform.
             title,
+            cohort: Cohort::default(),
             #[cfg(test)]
             conversions: 0,
         }
@@ -246,13 +300,19 @@ impl Bridge {
         &mut self,
         owner: &mut Win<M, L>,
     ) -> Result<Applied, NativeError> {
-        drain_actions(&self.ingress, &self.receiver, owner)
+        drain_actions(&self.ingress, &self.receiver, &self.cohort, owner)
     }
     pub(super) fn sync<M: View + 'static, L: crate::remote::LaneSet<M>>(
         &mut self,
         owner: &mut Win<M, L>,
     ) -> Result<(), NativeError> {
-        owner.accessibility_observe(self.ingress.0.session.load(Ordering::Acquire) & 1 != 0)?;
+        let active = self.ingress.0.session.load(Ordering::Acquire) & 1 != 0;
+        owner.accessibility_observe(active)?;
+        if !active {
+            self.cohort.clear();
+            self.needs_full = true;
+            return Ok(());
+        }
         let state = owner.accessibility_state()?;
         if !state.valid {
             return Ok(());
@@ -267,8 +327,9 @@ impl Bridge {
         if !full && self.published.is_some_and(|old| old.focus == state.focus) {
             return Ok(());
         }
+        let rebound = full && self.cohort.refresh(owner)?;
         let sheet = owner.accessibility_sheet()?;
-        let delta = (!self.needs_full)
+        let delta = (!self.needs_full && !rebound)
             .then(|| {
                 self.published
                     .and_then(|old| owner.accessibility_delta(old, state))
@@ -277,11 +338,11 @@ impl Bridge {
         let mut updated = false;
         self.adapter.update_if_active(|| {
             let update = if let Some(indices) = delta.filter(|_| full) {
-                project_sparse(&sheet, indices)
+                project_sparse(&sheet, indices, &self.cohort)
             } else if full {
-                project(&sheet, state, &self.title)
+                project(&sheet, state, &self.title, &self.cohort)
             } else {
-                focus_update(&sheet)
+                focus_update(&sheet, &self.cohort)
             };
             #[cfg(test)]
             {
@@ -291,6 +352,16 @@ impl Bridge {
             update
         });
         if updated {
+            if self
+                .ingress
+                .0
+                .publication
+                .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
+                .is_err()
+            {
+                self.ingress.0.overload();
+                return Err(NativeError::AccessibilityOverloaded);
+            }
             self.published = Some(state);
             self.needs_full = false;
         }
@@ -301,6 +372,7 @@ impl Bridge {
 fn drain_actions<M: View + 'static, L: crate::remote::LaneSet<M>>(
     ingress: &Ingress,
     receiver: &Receiver<Queued>,
+    cohort: &Cohort,
     owner: &mut Win<M, L>,
 ) -> Result<Applied, NativeError> {
     if ingress.0.overflow.load(Ordering::Acquire) {
@@ -316,15 +388,17 @@ fn drain_actions<M: View + 'static, L: crate::remote::LaneSet<M>>(
         if queued.session != ingress.0.session.load(Ordering::Acquire) {
             continue;
         }
-        let (id, action) = queued.command.operation();
-        *result = Some(if id.0 == 0 || id.0 & 1 != 0 {
-            Err(Error::StaleTarget)
-        } else {
-            owner.accessibility_target(id.0 / 2).and_then(|target| {
-                let action = local_scroll_action(owner, target, action)?;
-                owner.perform(target, action)
-            })
-        });
+        *result = Some((|| {
+            let (id, action) = queued.command.operation(cohort)?;
+            if id.0 >= (1 << 63)
+                && queued.publication != ingress.0.publication.load(Ordering::Acquire)
+            {
+                return Err(Error::StaleTarget);
+            }
+            let target = cohort.target(owner, id)?;
+            let action = local_scroll_action(owner, target, action)?;
+            owner.perform(target, action)
+        })());
     }
     ingress.0.signal();
     Ok(results)
@@ -450,16 +524,19 @@ fn projected_node(part: Part<'_>) -> Node {
             ActionKind::Focus => accesskit::Action::Focus,
             ActionKind::Blur => accesskit::Action::Blur,
             ActionKind::SetValue => accesskit::Action::SetValue,
+            // Native range actions require a source-qualified TextRun cohort;
+            // they are enabled by that projection, never by a bare action bit.
+            ActionKind::SetTextSelection | ActionKind::ReplaceSelectedText => continue,
         });
     }
     node
 }
 
-fn focus_update(sheet: &crate::runtime::SemanticSheet<'_>) -> TreeUpdate {
+fn focus_update(sheet: &crate::runtime::SemanticSheet<'_>, cohort: &Cohort) -> TreeUpdate {
     let mut focus = ROOT;
     sheet.visit(|part| {
         if part.focused() {
-            focus = NodeId(part.native_id() * 2);
+            focus = cohort.id(part);
         }
     });
     TreeUpdate {
@@ -470,7 +547,12 @@ fn focus_update(sheet: &crate::runtime::SemanticSheet<'_>) -> TreeUpdate {
     }
 }
 
-fn project(sheet: &crate::runtime::SemanticSheet<'_>, state: State, title: &str) -> TreeUpdate {
+fn project(
+    sheet: &crate::runtime::SemanticSheet<'_>,
+    state: State,
+    title: &str,
+    cohort: &Cohort,
+) -> TreeUpdate {
     let mut root = Node::new(accesskit::Role::Window);
     root.set_label(title);
     root.set_clips_children();
@@ -485,7 +567,7 @@ fn project(sheet: &crate::runtime::SemanticSheet<'_>, state: State, title: &str)
     // a lone input/renamed-label child at the end of a large ordinary tree.
     let mut count = 1 + sheet.len();
     sheet.visit(|part| {
-        count += usize::from(part.value().is_some() || renamed_text(part));
+        count += cohort.text_count(part);
     });
     let mut nodes = Vec::with_capacity(count);
     nodes.push((ROOT, root));
@@ -498,23 +580,15 @@ fn project(sheet: &crate::runtime::SemanticSheet<'_>, state: State, title: &str)
             ancestors.pop();
         }
         let parent = ancestors.last().map_or(0, |&(_, index)| index);
-        let id = NodeId(part.native_id() * 2);
+        let id = cohort.id(part);
         nodes[parent].1.push_child(id);
         if part.focused() {
             focus = id;
         }
-        ancestors.push((part.target(), nodes.len()));
         let mut node = projected_node(part);
-        let text = projected_text(part, &node);
-        let text = text.map(|text| {
-            let text_id = NodeId(id.0 + 1);
-            node.push_child(text_id);
-            (text_id, text)
-        });
+        cohort.append(part, &mut node, &mut nodes);
+        ancestors.push((part.target(), nodes.len()));
         nodes.push((id, node));
-        if let Some(text) = text {
-            nodes.push(text);
-        }
     });
     let mut tree = TreeInfo::new(ROOT);
     tree.toolkit_name = Some("GPUI".into());
@@ -538,39 +612,37 @@ fn projected_text(part: Part<'_>, node: &Node) -> Option<Node> {
         }
         Some(label)
     } else {
-        part.value().map(text_run)
+        None
     }
 }
 
-fn project_sparse(sheet: &crate::runtime::SemanticSheet<'_>, indices: &[u32]) -> TreeUpdate {
+fn project_sparse(
+    sheet: &crate::runtime::SemanticSheet<'_>,
+    indices: &[u32],
+    cohort: &Cohort,
+) -> TreeUpdate {
     let count = indices
         .iter()
         .map(|&index| {
             let part = sheet
                 .part_at(index as usize)
                 .expect("exact transition P index");
-            1 + usize::from(part.value().is_some() || renamed_text(part))
+            1 + cohort.text_count(part)
         })
         .sum();
-    let mut update = focus_update(sheet);
+    let mut update = focus_update(sheet, cohort);
     update.nodes = Vec::with_capacity(count);
     for &index in indices {
         let part = sheet
             .part_at(index as usize)
             .expect("exact transition P index");
-        let id = NodeId(part.native_id() * 2);
+        let id = cohort.id(part);
         let mut node = projected_node(part);
-        let text = projected_text(part, &node);
-        if text.is_some() {
-            node.push_child(NodeId(id.0 + 1));
-        }
+        cohort.append(part, &mut node, &mut update.nodes);
         for child in sheet.children(index as usize) {
-            node.push_child(NodeId(child.native_id() * 2));
+            node.push_child(cohort.id(child));
         }
         update.nodes.push((id, node));
-        if let Some(text) = text {
-            update.nodes.push((NodeId(id.0 + 1), text));
-        }
     }
     update
 }
@@ -579,32 +651,12 @@ fn renamed_text(part: Part<'_>) -> bool {
     part.role() == Role::Text && part.name() != part.text()
 }
 
-fn text_run(value: &str) -> Node {
-    let mut node = Node::new(accesskit::Role::TextRun);
-    node.set_value(value);
-    // The editor currently uses scalars, not graphemes. AccessKit additionally
-    // requires a CRLF line ending to be one character with two UTF-8 bytes.
-    // This supplies text boundaries, never glyph metrics or selection support.
-    let mut chars = value.chars();
-    node.set_character_lengths(
-        std::iter::from_fn(|| {
-            let c = chars.next()?;
-            Some(if c == '\r' && chars.as_str().starts_with('\n') {
-                chars.next();
-                2
-            } else {
-                c.len_utf8() as u8
-            })
-        })
-        .collect::<Vec<_>>(),
-    );
-    node
-}
-
 #[cfg(all(test, feature = "x11", target_os = "linux"))]
 mod linux_tests;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod selection_tests;
 #[cfg(test)]
 mod transitions;

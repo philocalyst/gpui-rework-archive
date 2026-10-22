@@ -15,6 +15,7 @@ struct Context<'a> {
     focused: Option<Target>,
     metadata: Option<&'a super::metadata::Sheet>,
     geometry: Option<&'a super::geometry::Geometry>,
+    selection: Option<super::editing::SelectionSnapshot>,
 }
 impl<'a> Context<'a> {
     fn new<M>(runtime: &'a Runtime<M>) -> Self {
@@ -22,6 +23,11 @@ impl<'a> Context<'a> {
             sites: &runtime.sites,
             nodes: &runtime.presented,
             focused: runtime.focused,
+            selection: runtime
+                .metadata
+                .as_ref()
+                .and_then(|m| m.selection.as_ref())
+                .and_then(|frozen| frozen.presented),
             geometry: runtime
                 .metadata
                 .as_ref()
@@ -98,6 +104,10 @@ impl<'a> Part<'a> {
     #[cfg(feature = "accessibility")]
     pub(crate) fn native_id(self) -> u64 {
         self.node.identity
+    }
+    #[cfg(feature = "accessibility")]
+    pub(crate) fn text_lease(self) -> Option<&'a crate::shared_text::SharedText> {
+        self.node.text.as_ref()
     }
     /// Stable window-qualified identity, also used by input and inspector APIs.
     /// Merely reading a target does not grant it a particular action.
@@ -179,6 +189,26 @@ impl<'a> Part<'a> {
         (self.node.kind == super::NodeKind::Input)
             .then(|| self.text())
             .flatten()
+    }
+    /// Selection in the acknowledged input text, independent of newer logical
+    /// edits or an unacknowledged candidate. Other parts have no selection.
+    pub fn selection(self) -> Option<gpui_canvas::TextSelection> {
+        let value = self.value()?;
+        if let Some(selection) = self
+            .context
+            .selection
+            .and_then(|snapshot| snapshot.selection(self.node.identity))
+        {
+            return Some(selection);
+        }
+        let caret = gpui_canvas::TextPosition {
+            offset: gpui_canvas::TextOffset::new(value.len())?,
+            affinity: gpui_canvas::CaretAffinity::Downstream,
+        };
+        Some(gpui_canvas::TextSelection {
+            anchor: caret,
+            focus: caret,
+        })
     }
     /// Physical viewport-clipped bounds of the acknowledged presentation.
     /// Uniform local radius from this acknowledged sheet, independent of a
@@ -342,7 +372,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub(crate) fn accessibility_sheet(&self) -> Result<SemanticSheet<'_>, Error> {
         let runtime = self.runtime()?;
         sheet(runtime)?;
-        if runtime.next_identity > u64::MAX / 2 {
+        if runtime.next_identity > u64::MAX / 4 {
             return Err(Error::ResourceLimit);
         }
         Ok(SemanticSheet(Context::new(runtime)))
@@ -353,7 +383,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.live()?;
         // Native even IDs name sites; odd IDs name projected text children.
         // Keep this projection's finite namespace explicit and checked.
-        if runtime.next_identity > u64::MAX / 2 {
+        if runtime.next_identity > u64::MAX / 4 {
             return Err(Error::ResourceLimit);
         }
         Ok(SemanticState {
