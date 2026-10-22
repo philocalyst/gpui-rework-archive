@@ -4,7 +4,7 @@
 //! different qualified fields remain distinct even when their colors compare
 //! equal. Literal values may share exact authoring bits; implicit defaults need
 //! neither a slot allocation nor a source registration.
-use super::super::{FieldId, Style};
+use super::super::{Destination, Fanout, FieldId, Style};
 use crate::{Affine, Align, Color, Flow, Justify};
 use gpui_canvas::{PaintColor, PaintSlot};
 use std::collections::BTreeMap;
@@ -154,17 +154,17 @@ pub(in crate::runtime) struct Change {
 pub(in crate::runtime) struct Discovery {
     pub(in crate::runtime) bank: Bank,
     fields: BTreeMap<FieldId, Slot>,
-    ports: BTreeMap<(usize, bool), Slot>,
+    ports: Vec<Binding>,
+}
+// Reuse the checked destination encoding instead of introducing another packed
+// node/port format. This vector is transient and contains only registered colors.
+struct Binding {
+    destination: Destination,
+    slot: Slot,
 }
 impl Discovery {
-    pub(in crate::runtime) fn bind(
-        &mut self,
-        field: FieldId,
-        node: usize,
-        foreground: bool,
-        value: Color,
-    ) {
-        let slot = *self.fields.entry(field).or_insert_with(|| {
+    pub(in crate::runtime) fn register(&mut self, field: FieldId, value: Color) -> Slot {
+        *self.fields.entry(field).or_insert_with(|| {
             let slot = Slot::source(self.bank.sources.len());
             self.bank.sources.push(SourceColor {
                 field,
@@ -174,34 +174,87 @@ impl Discovery {
                 users: 0,
             });
             slot
-        });
-        self.ports.insert((node, foreground), slot);
+        })
+    }
+    /// Fanout already owns every resolved typed destination. Freeze only its
+    /// color subset into one exactly sized sparse allocation, then sort once.
+    pub(in crate::runtime) fn capture(&mut self, fanout: &BTreeMap<FieldId, Fanout>) {
+        debug_assert!(self.ports.is_empty());
+        let count = self
+            .fields
+            .keys()
+            .map(|id| fanout[id].destinations().len())
+            .sum();
+        let mut ports = Vec::with_capacity(count);
+        for (&field, &slot) in &self.fields {
+            ports.extend(
+                fanout[&field]
+                    .destinations()
+                    .iter()
+                    .map(|&destination| Binding { destination, slot }),
+            );
+        }
+        ports.sort_unstable_by_key(|binding| binding.destination.packed());
+        debug_assert!(
+            ports
+                .windows(2)
+                .all(|pair| pair[0].destination.packed() < pair[1].destination.packed())
+        );
+        self.ports = ports;
+    }
+    fn bindings(&self, node: usize) -> [Option<Slot>; 2] {
+        let first = self
+            .ports
+            .partition_point(|binding| binding.destination.node() < node);
+        let mut slots = [None; 2];
+        for binding in self.ports[first..]
+            .iter()
+            .take_while(|binding| binding.destination.node() == node)
+        {
+            let port = match binding.destination.property() {
+                Some(crate::property::PropertyId::Foreground) => 0,
+                Some(crate::property::PropertyId::Background) => 1,
+                _ => unreachable!("registered color fanout contains only FG/BG"),
+            };
+            slots[port] = Some(binding.slot);
+        }
+        slots
+    }
+    #[cfg(test)]
+    fn bind(&mut self, field: FieldId, node: usize, foreground: bool, value: Color) {
+        let slot = self.register(field, value);
+        let destination = Destination::style(
+            node,
+            if foreground {
+                crate::property::PropertyId::Foreground
+            } else {
+                crate::property::PropertyId::Background
+            },
+        );
+        // Unit producers mirror flattened node-major order; production freezes
+        // the existing field-major fanouts with capture instead.
+        assert!(
+            self.ports
+                .last()
+                .is_none_or(|old| old.destination.packed() < destination.packed())
+        );
+        self.ports.push(Binding { destination, slot });
     }
     pub(in crate::runtime) fn is_empty(&self) -> bool {
         self.fields.is_empty()
     }
     pub(in crate::runtime) fn binding_fields(&self, node: usize) -> [Option<FieldId>; 2] {
-        [true, false].map(|foreground| {
-            self.ports
-                .get(&(node, foreground))
-                .map(|slot| self.bank.sources[slot.source_index().unwrap()].field)
-        })
+        self.bindings(node)
+            .map(|slot| slot.map(|slot| self.bank.sources[slot.source_index().unwrap()].field))
     }
     pub(in crate::runtime) fn fields(&self) -> impl Iterator<Item = (FieldId, Slot)> + '_ {
         self.fields.iter().map(|(&field, &slot)| (field, slot))
     }
     pub(in crate::runtime) fn declaration(&mut self, node: usize, style: &Style) -> Pair {
+        let [foreground, background] = self.bindings(node);
         Pair {
-            fg: self
-                .ports
-                .get(&(node, true))
-                .copied()
-                .unwrap_or_else(|| self.bank.literal(style.fg)),
-            bg: self
-                .ports
-                .get(&(node, false))
-                .copied()
-                .unwrap_or_else(|| self.bank.literal(style.bg)),
+            fg: foreground.unwrap_or_else(|| self.bank.literal(style.fg)),
+            bg: background.unwrap_or_else(|| self.bank.literal(style.bg)),
         }
     }
 }
@@ -444,6 +497,104 @@ impl Builder {
 mod tests {
     use super::*;
     use crate::property::PropertyId;
+
+    #[test]
+    fn existing_fanouts_freeze_one_sparse_port_allocation_and_both_fields() {
+        assert_eq!(size_of::<Binding>(), 8);
+        let mut discovery = Discovery::default();
+        let foreground = FieldId::new(1);
+        let background = FieldId::new(2);
+        discovery.register(foreground, Color::BLACK);
+        discovery.register(background, Color::WHITE);
+        let mut fanout = BTreeMap::new();
+        for (field, property) in [
+            (foreground, PropertyId::Foreground),
+            (background, PropertyId::Background),
+        ] {
+            let entry = fanout.entry(field).or_insert_with(|| {
+                Fanout::new(super::super::super::TextCodec::for_style::<Color>())
+            });
+            for node in (0..4096).rev() {
+                entry
+                    .destinations_mut()
+                    .push(Destination::style(node * 2, property));
+            }
+        }
+        let allocation = allocation_counter::measure(|| discovery.capture(&fanout));
+        assert_eq!(allocation.count_total, 1);
+        assert_eq!(allocation.bytes_total, (8192 * size_of::<Binding>()) as u64);
+        assert_eq!(discovery.ports.capacity(), 8192);
+        for node in 0..8192 {
+            assert_eq!(
+                discovery.binding_fields(node),
+                if node % 2 == 0 {
+                    [Some(foreground), Some(background)]
+                } else {
+                    [None; 2]
+                }
+            );
+        }
+        let mut empty = Discovery::default();
+        let allocation = allocation_counter::measure(|| empty.capture(&fanout));
+        assert_eq!((allocation.count_total, allocation.bytes_total), (0, 0));
+        assert!(empty.ports.is_empty());
+    }
+
+    #[test]
+    fn sparse_port_storage_compares_exact_old_map_and_paired_payloads() {
+        for nodes in [1, 16, 4096] {
+            for dual in [false, true] {
+                let mut discovery = Discovery::default();
+                let field = FieldId::new(1);
+                let slot = discovery.register(field, Color::BLACK);
+                let mut fanout = BTreeMap::new();
+                let entry = fanout.entry(field).or_insert_with(|| {
+                    Fanout::new(super::super::super::TextCodec::for_style::<Color>())
+                });
+                for node in 0..nodes {
+                    entry
+                        .destinations_mut()
+                        .push(Destination::style(node * 2, PropertyId::Foreground));
+                    if dual {
+                        entry
+                            .destinations_mut()
+                            .push(Destination::style(node * 2, PropertyId::Background));
+                    }
+                }
+                // This is the old key/value type and node-major insertion
+                // order, not an estimate of BTree node overhead.
+                let mut old: BTreeMap<(usize, bool), Slot> = BTreeMap::new();
+                let old_cost = allocation_counter::measure(|| {
+                    for node in 0..nodes {
+                        old.insert((node * 2, true), slot);
+                        if dual {
+                            old.insert((node * 2, false), slot);
+                        }
+                    }
+                });
+                let new_cost = allocation_counter::measure(|| discovery.capture(&fanout));
+                let ports = nodes * if dual { 2 } else { 1 };
+                assert_eq!(new_cost.count_total, 1);
+                assert_eq!(new_cost.bytes_total, (ports * size_of::<Binding>()) as u64);
+                for node in 0..nodes * 2 {
+                    assert_eq!(
+                        discovery.bindings(node),
+                        [true, false].map(|port| old.get(&(node, port)).copied())
+                    );
+                }
+                eprintln!(
+                    "port_storage,nodes={nodes},dual={dual},old_allocations={},old_requested={},old_live={},new_allocations={},new_requested={},new_live={},paired_payload={}",
+                    old_cost.count_total,
+                    old_cost.bytes_total,
+                    old_cost.bytes_current,
+                    new_cost.count_total,
+                    new_cost.bytes_total,
+                    new_cost.bytes_current,
+                    nodes * size_of::<[u32; 3]>()
+                );
+            }
+        }
+    }
 
     #[test]
     fn equal_fields_are_distinct_and_masked_bases_follow_their_source() {

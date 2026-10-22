@@ -1283,7 +1283,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         runtime.live()?;
         let identity = runtime.resolve(target)?;
-        Ok(property.get(&runtime.styles.get(runtime.by_identity[&identity])))
+        Ok(runtime
+            .styles
+            .with(runtime.by_identity[&identity], |style| property.get(style)))
     }
     fn style_contribution<T>(
         &self,
@@ -1638,12 +1640,7 @@ impl<M: View + 'static> Runtime<M> {
                 ) {
                     let foreground = draft.property == PropertyId::Foreground;
                     let style = drafts[draft.node as usize].style;
-                    color_discovery.bind(
-                        field,
-                        draft.node as usize,
-                        foreground,
-                        if foreground { style.fg } else { style.bg },
-                    );
+                    color_discovery.register(field, if foreground { style.fg } else { style.bg });
                 }
                 fanout
                     .entry(field)
@@ -1694,6 +1691,7 @@ impl<M: View + 'static> Runtime<M> {
                 .destinations_mut()
                 .sort_unstable_by_key(|destination| destination.packed());
         }
+        color_discovery.capture(&fanout);
         let old_styles = std::mem::take(&mut self.styles);
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()

@@ -66,6 +66,17 @@ pub(super) enum Styles {
     Colors(Box<colours::Bound>),
 }
 impl Styles {
+    /// Borrow ordinary lanes directly. Only a source-colored record needs a
+    /// temporary resolved value; the callback cannot retain a borrow of it.
+    #[inline]
+    pub(super) fn with<R>(&self, index: usize, read: impl FnOnce(&Style) -> R) -> R {
+        match self {
+            Self::Default => read(&Style::DEFAULT),
+            Self::Dense(values) => read(&values[index]),
+            Self::Shared { palette, indices } => read(&palette[usize::from(indices[index])]),
+            Self::Colors(values) => read(&values.get(index)),
+        }
+    }
     #[inline]
     pub(super) fn get(&self, index: usize) -> Style {
         match self {
@@ -321,6 +332,30 @@ pub(super) fn exact_eq(a: &Style, b: &Style) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ordinary_property_reads_borrow_the_actual_style_once() {
+        let dense = Styles::Dense(vec![Style::DEFAULT]);
+        let Styles::Dense(values) = &dense else {
+            unreachable!()
+        };
+        let mut calls = 0;
+        dense.with(0, |style| {
+            calls += 1;
+            assert!(std::ptr::eq(style, &values[0]));
+        });
+        assert_eq!(calls, 1);
+
+        let shared = Styles::Shared {
+            palette: vec![Style::DEFAULT].into_boxed_slice(),
+            indices: vec![0].into_boxed_slice(),
+        };
+        let Styles::Shared { palette, .. } = &shared else {
+            unreachable!()
+        };
+        shared.with(0, |style| assert!(std::ptr::eq(style, &palette[0])));
+        Styles::Default.with(0, |style| assert!(exact_eq(style, &Style::DEFAULT)));
+    }
     use crate::{Align, Color, Flow, Justify};
 
     fn build(values: impl IntoIterator<Item = Style>, count: usize) -> Styles {
