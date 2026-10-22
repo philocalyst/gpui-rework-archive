@@ -22,9 +22,10 @@ tar -xzf producer.tar.gz -C /tmp/contained-property-evidence
 
 Independent integration review found an uncovered counter case: with a no-op
 result method, a real property edit can be omitted from `Commit.changed_nodes`
-by the following coarse description. Main qualification is paused while a
-public regression and exact counting fix are developed. This does not invalidate
-the recorded producer test executions or establish combined correctness.
+by the following coarse description. The exact identity-union correction is now
+integrated at `1d5bc3061c`, where all 11 public regression cases pass. Its producer
+archive is `evidence/property-change-union/`. Broad combined qualification remains
+pending. These later findings do not retag the recorded producer executions.
 
 The public mounting/picking seam remains open: the native fixture initializes
 its selected Target through an ordinary Win inside a private host fixture.

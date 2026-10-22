@@ -1,0 +1,10 @@
+   Compiling gpui v0.1.0 (/root/gpui-property-change-union/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.57s
+     Running tests/property_change_union.rs (/tmp/gpui-property-change-union-target/debug/deps/property_change_union-680166c1c38d8092)
+
+running 2 tests
+test set_with_no_model_reply_counts_the_property_destination ... ok
+test inherit_with_no_model_reply_counts_the_property_destination ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

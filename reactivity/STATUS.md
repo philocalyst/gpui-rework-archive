@@ -12,7 +12,7 @@ describe the intended complete system; this page records what is connected now.
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
-| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components can propose property edits through ordinary typed click methods | Property edit count reconciliation is under repair; public mounted-target selection/current-value refresh, arbitrary built-in entry, complete theme cascade and user-defined component schemas remain |
+| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components can propose property edits through ordinary typed click methods; edit counts join description changes by exact identity | Public mounted-target selection/current-value refresh, arbitrary built-in entry, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
@@ -68,8 +68,8 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Latest integrated source `f0bd5335ae` combines cached-edge caret lowering,
-compact presentation rows and contained property actions. The
+Latest integrated source `1d5bc3061c` combines cached-edge caret lowering,
+compact presentation rows, contained property actions and their exact count fix. The
 [four-way text controls](benchmarks/caret-pair-controls/cached-edge/README.md)
 qualify their isolated pins: final versus original medians are about 40% lower
 for long Latin shaping, 17% for RTL and 23% for mixed text, with identical heap
@@ -83,8 +83,11 @@ The [basis archive](evidence/presented-basis/final/README.md) and
 exact producer default/native/strict/cross and actual AT/Apply qualifications.
 Independent merged-source review then found a public `Commit.changed_nodes`
 undercount for property actions with no-op replies. The combined main campaign
-was interrupted rather than certified; a public failing control and exact
-identity-union fix are in progress. No combined-main success is claimed here.
+was interrupted rather than certified. The
+[identity-union correction](evidence/property-change-union/README.md) is now
+integrated; all 11 public regression cases also pass on main `1d5bc3061c`.
+The full 524-case producer result retains its earlier source pin. Combined
+native/desktop qualification remains pending; no broad main success is claimed.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),

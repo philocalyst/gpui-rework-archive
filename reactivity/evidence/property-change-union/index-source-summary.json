@@ -1,0 +1,21 @@
+{
+  "baseline": "f0bd5335ae",
+  "source": "42a5aed2c2e5df98cbb0c558e29687fe23840f98",
+  "shipping_code_delta": 30,
+  "all_source_physical_delta": {
+    "all_active_non_test_lines": 33,
+    "all_active_physical_source_lines": 453,
+    "all_active_test_lines": 420,
+    "all_repository_physical_source_lines": 453,
+    "excluded_archived_physical_source_lines": 0,
+    "first_party_including_generated_non_test_lines": 33,
+    "first_party_non_test_lines": 33,
+    "generated_non_test_lines": 0,
+    "unclassified_files": 0,
+    "unclassified_files_non_test_lines_included": 0,
+    "vendor_non_test_lines": 0
+  },
+  "new_retained_fields": 0,
+  "additional_count_allocations": 0,
+  "allocation_proof": "Only the existing old Vec/identity index and one stack Option<NonZeroU64>; no new allocator/storage call or retained declaration. No matched performance claim."
+}

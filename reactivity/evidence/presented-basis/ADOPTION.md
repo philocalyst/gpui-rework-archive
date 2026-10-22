@@ -11,4 +11,6 @@ The following property-action integration shares the logical mutation kernel
 with ordinary setters. Combined-main tests are separate; integration is not a
 claim that an earlier executable tested those added interactions. The independent
 interaction audit found no P/C basis authority defect, but identified a property
-edit counter case under active repair. No combined campaign is claimed complete.
+edit counter case. Main `1d5bc3061c` integrates the exact turn-local correction
+and passes its 11 public regression cases. No broad combined campaign is claimed
+complete; the producer source qualifications remain unchanged.

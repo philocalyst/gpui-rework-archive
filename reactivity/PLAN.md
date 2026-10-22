@@ -112,10 +112,13 @@ Typed reflection must also support arbitrary inspector value entry and contained
 component/tool owners without mirroring application membership or bypassing
 source admission. [Contained property actions](benchmarks/contained-owner/README.md)
 are integrated, with one canonical logical kernel and a typed result method
-before the normal source barrier. A merged-source audit found an edit-count
-undercount; fix it with an exact turn-local identity union before combined
-qualification. Public mounted-target selection and canonical current-value
-refresh still require a cohesive API seam. Designer color still needs shared
+before the normal source barrier. The merged-source edit-count gap is corrected
+by an [exact turn-local identity union](evidence/property-change-union/README.md),
+including overlap, retirement and scope-rejected replacement; main's public
+11-case regression passes. Combined native/desktop qualification remains pending.
+Public mounted-target selection and canonical current-value refresh are being
+implemented through the existing route exchange, without adopting a Win or
+adding initializer storage. Designer color still needs shared
 batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut
 primitive and tagged HDR storage.
@@ -130,6 +133,13 @@ adding a stream policy or optimistic overlay; neither follows automatically from
 a terminal-answer Future. The [portable presenter review](docs/portable-presenter-luna.md)
 and [color derivation](docs/color-formulation-luna.md) are proposals with explicit
 source-review corrections, not implemented performance results.
+
+The [2026-10-22 upstream audit](docs/upstream-dependencies-luna.md) verifies the
+named dependency families at their latest stable release versions, including
+Parley/Engine/Fontique 0.12 and fearless_simd 1.1. Cephal remains the requested
+`perf/cold-layout` snapshot, not a verified live branch head. HarfRust transitives
+remain constrained by the current Engine APIs; refreshing those requires its
+own shaper migration and parity checks rather than an unqualified version bump.
 
 ## Input contracts and evidence
 

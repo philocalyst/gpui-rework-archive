@@ -1,0 +1,141 @@
+{
+  "source": "42a5aed2c2e5df98cbb0c558e29687fe23840f98",
+  "binary": "/tmp/gpui-property-change-union-index-qualified-bin",
+  "sha256": "9a324e252ef43e7ca29d1bdd04d2338f98efa636d79be36e21259859d60b2b0e",
+  "source_sha256": {
+    "reactivity/crates/gpui/src/runtime.rs": "6ecf4943a5883e4d82396df76013ea551ee5ba014c7e79c52d15aea430e77d7c",
+    "reactivity/crates/gpui/src/runtime/turn.rs": "0a62e15b58527dfb774938b3c3caf03548eb1c5fe1e9b73e60ed96d6075c55a0",
+    "reactivity/crates/gpui/src/runtime/geometry.rs": "b7f08d06979f3630f72fec63b778187949c52cd6938a197d2f88d1e390389b32",
+    "reactivity/crates/gpui/tests/property_change_union.rs": "1f6675a37198eb966b095ee3dc1126d25b4384d7873ecf7d8775234ed7640ee1",
+    "reactivity/Cargo.toml": "d03d32db802e06ee9d17bd33f59733be7d74109e7bf918635e3e9b00cdc330f4",
+    "reactivity/Cargo.lock": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22",
+    "reactivity/crates/gpui/Cargo.toml": "d38b762ff72b2903f87f3c4b95315e790bbdc6fa7707f19014eccbbd0dee661a",
+    ".cargo/config.toml": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295"
+  },
+  "fingerprint": {
+    "rustc": 12019306335353385202,
+    "features": "[\"default\", \"simd\"]",
+    "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+    "target": 11433646310882401047,
+    "profile": 1722584277633009122,
+    "path": 3061617895151207477,
+    "deps": [
+      [
+        535147103364023206,
+        "icu_segmenter",
+        false,
+        15844599515134855215
+      ],
+      [
+        1001648224152866569,
+        "arcstr",
+        false,
+        13769763344448808657
+      ],
+      [
+        2251399859588827949,
+        "pin_project_lite",
+        false,
+        18149132658175354002
+      ],
+      [
+        4295957145130622623,
+        "zbus",
+        false,
+        16667559302071214571
+      ],
+      [
+        5686200050580704112,
+        "gpui",
+        false,
+        16945653092762409880
+      ],
+      [
+        6359120849577304855,
+        "x11rb",
+        false,
+        1661777925463489056
+      ],
+      [
+        6557439603276904804,
+        "serde",
+        false,
+        6262495323071950020
+      ],
+      [
+        8160210889872729633,
+        "serde_json",
+        false,
+        18299403665279195733
+      ],
+      [
+        11048071599106839258,
+        "allocation_counter",
+        false,
+        10234812100649264418
+      ],
+      [
+        11671159878170094075,
+        "gpui_reactivity_state",
+        false,
+        1956965360139467576
+      ],
+      [
+        13316223584457521750,
+        "cephal",
+        false,
+        10834142700374903475
+      ],
+      [
+        13672653153045154758,
+        "gpui_reactivity_core",
+        false,
+        3867407105249395930
+      ],
+      [
+        14670221084672822999,
+        "triomphe",
+        false,
+        16987542324369189632
+      ],
+      [
+        17032968227276897852,
+        "gpui_canvas",
+        false,
+        10501004832522073820
+      ],
+      [
+        17400412893666519160,
+        "zruntime",
+        false,
+        3538160140347914145
+      ],
+      [
+        17719763280398284109,
+        "accesskit_consumer",
+        false,
+        5548306974855318006
+      ]
+    ],
+    "local": [
+      {
+        "CheckDepInfo": {
+          "dep_info": "debug/.fingerprint/gpui-680166c1c38d8092/dep-test-integration-test-property_change_union",
+          "checksum": false
+        }
+      }
+    ],
+    "rustflags": [],
+    "config": 9396254390672932401,
+    "compile_kind": 0
+  },
+  "tests": {
+    "union_passed": 11,
+    "strict_all_targets": "PASS",
+    "gpui_format": "PASS"
+  },
+  "earlier_full_suite": "c3/568 only;524 pass/8 ignored; not retagged to this formulation",
+  "guard": "git diff --exit-code exact pin before and after complete targeted-test/Clippy/fmt chain; post-campaign bytes additionally equal pinned Git blobs",
+  "jobs": 2,
+  "host_encoded_rustflags": ""
+}
