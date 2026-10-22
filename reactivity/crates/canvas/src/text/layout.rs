@@ -298,7 +298,6 @@ impl TextGeometry {
     /// Validates both endpoints in this layout's current interaction map.
     /// It is not a document-revision token or an editor mutation.
     pub fn validates_selection(&self, selection: TextSelection) -> bool {
-        self.caret_stop(selection.anchor).is_some()
-            && self.caret_stop(selection.focus).is_some()
+        self.caret_stop(selection.anchor).is_some() && self.caret_stop(selection.focus).is_some()
     }
 }

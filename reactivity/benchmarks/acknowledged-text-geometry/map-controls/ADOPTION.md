@@ -1,6 +1,6 @@
 # Root integration choice
 
-Root adopts the Canvas-only 12-byte known-line-reuse source `eeeeccd9a58116e9684a2eb320905a24b3c8d63e`, after the separate B/font-lock/consuming-break controls. Five changed Canvas source/test files match that source exactly. Root also has its independent intrinsic interaction-map suppression and Future/shader/native changes; no branch-local gate is retagged as combined main.
+Root adopts the Canvas-only 12-byte known-line-reuse source `eeeeccd9a58116e9684a2eb320905a24b3c8d63e`, after the separate B/font-lock/consuming-break controls. Five changed Canvas source/test files matched that source at integration. A subsequent rustfmt-only normalization joins one boolean expression in layout.rs; no semantic change is intended. Root also has its independent intrinsic interaction-map suppression and Future/shader/native changes; no branch-local gate is retagged as combined main.
 
 The 12-byte alternative adds 30 shipping core lines versus 179 for the fully qualified 8-byte branch. In the matched query control, long local/whole selection costs are +3.1%/+4.8% versus trimmed 24-byte records; the 8-byte variant costs +7.2%/+9.4% and has larger first-hit/motion and linked-code overhead. Root selects the smaller, simpler checked borrowing formulation while retaining all 8-byte construction and query evidence as an experiment, not an integrated feature. The 12-byte scoped ASCII retention was 975,732 bytes versus 2,146,440 for growing 24-byte maps (same producer baseline); final combined costs must be measured directly, not summed.
 
