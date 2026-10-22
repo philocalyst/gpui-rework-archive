@@ -13,6 +13,7 @@ parser.add_argument("--repo", type=pathlib.Path, required=True)
 parser.add_argument("--ref", required=True)
 parser.add_argument("--output", type=pathlib.Path, required=True)
 parser.add_argument("--stream", action="store_true", help="include the batch admission tests")
+parser.add_argument("--cost", action="store_true", help="include allocation-only producer controls")
 args = parser.parse_args()
 git = ["git", "-c", f"safe.directory={args.repo}", "-C", str(args.repo)]
 pin = subprocess.check_output(git + ["rev-parse", args.ref], text=True).strip()
@@ -36,12 +37,19 @@ shutil.copy2(pathlib.Path(__file__).with_name("span_tests.rs"), args.output / "s
 if args.stream:
     (args.output / "src/tests/mod.rs").write_text("mod span_tests;\nmod stream_tests;\n")
     shutil.copy2(pathlib.Path(__file__).with_name("stream_tests.rs"), args.output / "src/tests/stream_tests.rs")
+if args.cost:
+    with (args.output / "src/tests/mod.rs").open("a") as module:
+        module.write("mod cost_tests;\n")
+    shutil.copy2(pathlib.Path(__file__).with_name("cost_tests.rs"), args.output / "src/tests/cost_tests.rs")
 manifest = args.output / "Cargo.toml"
 sections = re.split(r"(?=^\[)", manifest.read_text(), flags=re.MULTILINE)
 manifest.write_text("".join(s for s in sections if not re.match(
     r"\[(?:dev-dependencies[.\]]|target\..*\.dev-dependencies[.\]])", s
 )).replace('    "peniko/libm",\n', '').replace('    "peniko/std",\n', '')
     + '\n[patch.crates-io]\nparley_engine = { path = "' + str(args.repo / "reactivity/vendor/parley_engine") + '" }\n')
+if args.cost:
+    with manifest.open("a") as output:
+        output.write('\n[dev-dependencies]\nallocation-counter = "=0.8.1"\n')
 lock = subprocess.check_output(git + ["show", f"{pin}:reactivity/Cargo.lock"])
 (args.output / "Cargo.lock").write_bytes(lock)
 hashes["reactivity/Cargo.lock"] = hashlib.sha256(lock).hexdigest()
