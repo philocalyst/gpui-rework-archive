@@ -1,0 +1,23 @@
+{
+  "name": "owners-default-build",
+  "command": [
+    "cargo",
+    "build",
+    "--offline",
+    "--locked",
+    "--release",
+    "--manifest-path",
+    "benchmarks/gpu-owner/Cargo.toml",
+    "--bin",
+    "first",
+    "--bin",
+    "driver-retained",
+    "--message-format=json",
+    "--features",
+    "counts"
+  ],
+  "environment_shell": "",
+  "exit": 0,
+  "log_sha256": "54070b43d12a288c4c9e3cbc00917f3033d154b60e3e130866b6bfd56818e7de",
+  "json_sha256": "acd101ee9d4ae737bb833b9d21105df0151f02bd4706035f21483d36fdbad433"
+}

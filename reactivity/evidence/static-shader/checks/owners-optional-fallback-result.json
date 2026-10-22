@@ -1,0 +1,11 @@
+{
+  "name": "owners-optional-fallback",
+  "command": [
+    "/tmp/gpui-static-frozen-bins/owners-optional/first",
+    "renderer",
+    "no-feature"
+  ],
+  "environment_shell": "",
+  "exit": 0,
+  "log_sha256": "7bba0f5ca7e966dbff373b27a8668fbe071e72ea39d7cc9e81ff54746aec48c6"
+}

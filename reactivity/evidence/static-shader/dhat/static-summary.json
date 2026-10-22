@@ -1,0 +1,66 @@
+{
+  "case": "static",
+  "provenance": {
+    "source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+    "build_record": "/tmp/gpui-static-shader-sol/reactivity/evidence/static-shader/checks/owners-optional-build.jsonl"
+  },
+  "binary": {
+    "path": "/tmp/gpui-static-frozen-bins/owners-optional/driver-retained",
+    "bytes": 6995464,
+    "sha256": "fe82898a194656b908107bc0da2e01f50c64ef47e58047864a444332e1e9ea1d"
+  },
+  "command": [
+    "/nix/store/px7wv2vfgzjagdqx2709qx5v9167gyj1-valgrind-3.27.1/bin/valgrind",
+    "--tool=dhat",
+    "--num-callers=60",
+    "--dhat-out-file=/tmp/gpui-static-shader-sol/reactivity/evidence/static-shader/dhat/static.json",
+    "/tmp/gpui-static-frozen-bins/owners-optional/driver-retained"
+  ],
+  "tool_sha256": "8fb44efcc7a1722dacfc0495fec749b4848b2f86bea7c80c44bf66d890c71f59",
+  "exit": 0,
+  "mesa_disk_shader_cache": "disabled",
+  "explicit_native_test_layer": "disabled and absent from profile frames",
+  "lifetime": "Renderer/Device/Queue/Adapter/Instance remain alive at deliberate process exit",
+  "whole_process": {
+    "tb": 112492769,
+    "tbk": 88161,
+    "gb": 42784266,
+    "gbk": 11966,
+    "eb": 41919139,
+    "ebk": 8521
+  },
+  "subsets": {
+    "constructor": {
+      "sites": 2973,
+      "tb": 40550723,
+      "tbk": 32982,
+      "gb": 8948104,
+      "gbk": 4631,
+      "eb": 8282231,
+      "ebk": 2308
+    },
+    "native_module": {
+      "sites": 2,
+      "tb": 34380,
+      "tbk": 2,
+      "gb": 34380,
+      "gbk": 2,
+      "eb": 0,
+      "ebk": 0
+    },
+    "constructor_naga": {
+      "sites": 0,
+      "tb": 0,
+      "tbk": 0,
+      "gb": 0,
+      "gbk": 0,
+      "eb": 0,
+      "ebk": 0
+    }
+  },
+  "profile_sha256": "adefb0de459df6d42ae15ffdf8cbf84345726f17acfb037fedbd62e3291c44b1",
+  "profile_bytes": 10133257,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "aaa5881c803e3176cd6cdefb254beff0baa3fcd3b55d3238aeb2a79c5c692d08",
+  "note": "DHAT malloc/realloc host heap, no mappings/RSS/GPU/device memory. gb at whole-process global peak; never sum individual-site maxima. Deep truncated stacks may omit subset allocations. Not a leak test; ordinary destructor fixture is separate."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "owners-default-renderer",
+  "command": [
+    "/tmp/gpui-static-frozen-bins/owners-default/first",
+    "renderer"
+  ],
+  "environment_shell": "",
+  "exit": 0,
+  "log_sha256": "b24dcd8e7d8bf4ce7d1402ba108de46d6f2d832488cd9e521baa30b7332de2eb"
+}
