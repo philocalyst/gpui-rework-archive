@@ -2,7 +2,7 @@
 //! promotes a pixel to sixteen independently composited colors. No averaging
 //! occurs before all commands have painted, preserving overlap correlation.
 use super::{TILE, sample_mean};
-use fearless_simd::{Simd, f32x4, prelude::*};
+use fearless_simd::{Simd, f32x4, f32x16, mask32x16, prelude::*};
 use fearless_simd_macros::simd;
 
 const PIXELS: usize = TILE * TILE;
@@ -55,6 +55,29 @@ impl<S: Simd> Samples<S> {
         );
     }
 
+    /// Binary primitive coverage stays compact until the vector predicate.
+    #[inline]
+    pub(super) fn blend_mask(&mut self, pixel: usize, color: [f32; 4], mask: u16) {
+        if mask == 0 {
+            return;
+        }
+        let bit = 1 << (pixel % 64);
+        if self.mixed[pixel / 64] & bit == 0 {
+            if mask == u16::MAX {
+                blend_one(self.simd, &mut self.uniform[pixel], color, 1.0);
+                return;
+            }
+            self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
+            self.mixed[pixel / 64] |= bit;
+        }
+        blend_mask(
+            self.simd,
+            &mut self.samples[pixel * 16..pixel * 16 + 16],
+            color,
+            mask,
+        );
+    }
+
     pub(super) fn blend_sources(&mut self, pixel: usize, sources: [Option<[f32; 4]>; 16]) {
         let bit = 1 << (pixel % 64);
         if self.mixed[pixel / 64] & bit == 0 {
@@ -94,40 +117,108 @@ impl<S: Simd> Samples<S> {
     }
 }
 
-// RGBA is already a four-f32 contiguous AoS record. These safe loads/stores do
-// not require 16-byte alignment, never read another sample, and have no tail.
-// Keep the original scalar alpha multiplication and separate multiplies/add:
-// neither reassociation nor fused multiply-add is part of this equation.
+// Each batch contains four consecutive AoS RGBA samples. Safe slice loads
+// require no vector alignment, and sixteen samples divide into four exact
+// batches. No geometry, sample gather, image transpose, or tail buffer is used.
 #[inline(always)]
-fn source_over<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
-    let alpha = src[3] * coverage;
-    let source = f32x4::from_slice(simd, &src) * coverage;
-    let backdrop = f32x4::from_slice(simd, dst) * (1.0 - alpha);
-    (source + backdrop).store_slice(dst);
+fn source_over<S: Simd, V: SimdFloat<S, Element = f32>>(
+    simd: S,
+    dst: V,
+    src: V,
+    alpha: V,
+    coverage: V,
+) -> V {
+    let alpha = alpha * coverage;
+    let source = src * coverage;
+    let backdrop = dst * (V::splat(simd, 1.0) - alpha);
+    source + backdrop
 }
 
 #[simd]
 fn blend_one<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
-    source_over(simd, dst, src, coverage);
+    source_over(
+        simd,
+        f32x4::from_slice(simd, dst),
+        f32x4::from_slice(simd, &src),
+        f32x4::splat(simd, src[3]),
+        f32x4::splat(simd, coverage),
+    )
+    .store_slice(dst);
+}
+
+// Each low mask bit controls the four channels of one sample. The table is
+// exactly32bytes; the vector predicate can become an AVX-512 mask register.
+const CHANNEL_MASKS: [u16; 16] = [
+    0x0000, 0x000f, 0x00f0, 0x00ff, 0x0f00, 0x0f0f, 0x0ff0, 0x0fff, 0xf000, 0xf00f, 0xf0f0, 0xf0ff,
+    0xff00, 0xff0f, 0xfff0, 0xffff,
+];
+
+#[simd]
+fn blend_mask<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], mut mask: u16) {
+    let source = f32x16::block_splat(f32x4::from_slice(simd, &src));
+    let alpha = f32x16::splat(simd, src[3]);
+    let coverage = f32x16::splat(simd, 1.0);
+    for destination in dst.as_flattened_mut().chunks_exact_mut(16) {
+        let bits = mask & 15;
+        mask >>= 4;
+        if bits == 0 {
+            continue;
+        }
+        let old = f32x16::from_slice(simd, destination);
+        let painted = source_over(simd, old, source, alpha, coverage);
+        // Selecting the old bits is essential: evaluating a zero-coverage
+        // blend instead can erase negative zero or create a spurious NaN.
+        mask32x16::from_bitmask(simd, u64::from(CHANNEL_MASKS[usize::from(bits)]))
+            .select(painted, old)
+            .store_slice(destination);
+    }
 }
 
 #[simd]
 fn blend_coverage<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], coverage: [f32; 16]) {
-    for (sample, coverage) in dst.iter_mut().zip(coverage) {
-        // Do not blend zero coverage: multiplication by zero can change HDR
-        // signed zeros, and evaluating an absent sample can create NaNs.
-        if coverage > 0.0 {
-            source_over(simd, sample, src, coverage);
-        }
+    let source = f32x16::block_splat(f32x4::from_slice(simd, &src));
+    let alpha = f32x16::splat(simd, src[3]);
+    for (destination, coverage) in dst
+        .as_flattened_mut()
+        .chunks_exact_mut(16)
+        .zip(coverage.chunks_exact(4))
+    {
+        let coverage = f32x16::from_fn(simd, |lane| coverage[lane / 4]);
+        let old = f32x16::from_slice(simd, destination);
+        let painted = source_over(simd, old, source, alpha, coverage);
+        coverage
+            .simd_gt(0.0)
+            .select(painted, old)
+            .store_slice(destination);
     }
 }
 
 #[simd]
 fn blend_sources<S: Simd>(simd: S, dst: &mut [[f32; 4]], sources: [Option<[f32; 4]>; 16]) {
-    for (sample, source) in dst.iter_mut().zip(sources) {
-        if let Some(source) = source {
-            source_over(simd, sample, source, 1.0);
+    for (destination, sources) in dst
+        .as_flattened_mut()
+        .chunks_exact_mut(16)
+        .zip(sources.chunks_exact(4))
+    {
+        let mut present = 0;
+        let colors: [[f32; 4]; 4] = std::array::from_fn(|index| {
+            if let Some(source) = sources[index] {
+                present |= 1 << index;
+                source
+            } else {
+                [0.0; 4]
+            }
+        });
+        if present == 0 {
+            continue;
         }
+        let source = f32x16::from_slice(simd, colors.as_flattened());
+        let alpha = f32x16::from_fn(simd, |lane| colors[lane / 4][3]);
+        let old = f32x16::from_slice(simd, destination);
+        let painted = source_over(simd, old, source, alpha, f32x16::splat(simd, 1.0));
+        mask32x16::from_bitmask(simd, u64::from(CHANNEL_MASKS[present]))
+            .select(painted, old)
+            .store_slice(destination);
     }
 }
 
@@ -282,6 +373,34 @@ mod backend_tests {
                         );
                     }
                 }
+            }
+        }
+        // Every binary coverage mask, including all16tail samples, must
+        // preserve the exact old bits in absent lanes after SIMD selection.
+        let clear = [-0.0, f32::from_bits(1), -f32::from_bits(1), 0.75];
+        let source = [1.5, -0.125, 0.25, 0.5];
+        for mask in 0..=u16::MAX {
+            tile.reset(clear, true);
+            tile.blend_mask(255, source, mask);
+            expected.fill(clear);
+            for (index, sample) in expected.iter_mut().enumerate() {
+                if mask & (1 << index) != 0 {
+                    reference(sample, source, 1.0);
+                }
+            }
+            assert_eq!(
+                tile.color(255).map(f32::to_bits),
+                sample_mean(&expected).map(f32::to_bits)
+            );
+            if mask != 0 && mask != u16::MAX {
+                assert!(
+                    tile.samples[255 * 16..256 * 16]
+                        .iter()
+                        .zip(expected)
+                        .all(|(a, b)| a.map(f32::to_bits) == b.map(f32::to_bits)),
+                    "{:?}, mask={mask:x}",
+                    simd.level()
+                );
             }
         }
         // Backend tokens are zero-sized. Sample storage has exactly the prior

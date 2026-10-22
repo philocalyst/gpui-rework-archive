@@ -1943,20 +1943,31 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
             }
             for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
                 for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
-                    let coverages = if full {
-                        [1.0; 16]
+                    let pixel = (y - top) * TILE + x - left;
+                    if full {
+                        samples.blend_mask(pixel, command.color, u16::MAX);
                     } else if let Some(axis) = &axis {
                         stats.boundary_pixels += 1;
                         let mask = (axis.x[x - left] * 0x1111) & axis.y[y - top];
-                        std::array::from_fn(|i| ((mask >> i) & 1) as f32)
+                        samples.blend_mask(pixel, command.color, mask);
                     } else if let Some(axis) = &glyph_axis {
                         stats.boundary_pixels += 1;
-                        axis.coverage(x - left, y - top)
+                        samples.blend(pixel, command.color, axis.coverage(x - left, y - top));
                     } else {
                         stats.boundary_pixels += 1;
-                        sample(&command, x, y, &mut stats)
-                    };
-                    samples.blend((y - top) * TILE + x - left, command.color, coverages);
+                        if matches!(
+                            command.source,
+                            BorrowedSource::Rect | BorrowedSource::Rounded(_)
+                        ) {
+                            samples.blend_mask(
+                                pixel,
+                                command.color,
+                                sample_mask(&command, x, y, &mut stats),
+                            );
+                        } else {
+                            samples.blend(pixel, command.color, sample(&command, x, y, &mut stats));
+                        }
+                    }
                 }
             }
         }
@@ -2389,6 +2400,39 @@ impl AxisCoverage {
         (any[0] != 0 && any[1] != 0).then_some(result)
     }
 }
+// Rectangles and rounded/SDF membership are binary. Build the same correlated
+// sixteen sites directly into a mask instead of materializing sixteen floats.
+fn sample_mask(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderStats) -> u16 {
+    let mut mask = 0;
+    for (sy, oy) in SAMPLES.into_iter().enumerate() {
+        for (sx, ox) in SAMPLES.into_iter().enumerate() {
+            stats.sample_tests += 1;
+            let wx = x as f64 + ox;
+            let wy = y as f64 + oy;
+            if wx < command.clip.x as f64
+                || wy < command.clip.y as f64
+                || wx >= command.clip.x as f64 + command.clip.width as f64
+                || wy >= command.clip.y as f64 + command.clip.height as f64
+            {
+                continue;
+            }
+            let (lx, ly) = command.map.local(wx, wy);
+            let inside = match command.source {
+                BorrowedSource::Rect => {
+                    lx >= command.rect.x as f64
+                        && ly >= command.rect.y as f64
+                        && lx < command.rect.x as f64 + command.rect.width as f64
+                        && ly < command.rect.y as f64 + command.rect.height as f64
+                }
+                BorrowedSource::Rounded(radius) => rounded::contains(command.rect, radius, lx, ly),
+                _ => unreachable!("binary coverage is only used for primitives"),
+            };
+            mask |= u16::from(inside) << (sy * 4 + sx);
+        }
+    }
+    mask
+}
+
 fn sample(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderStats) -> [f32; 16] {
     let r = command.rect;
     let clip = command.clip;
