@@ -456,7 +456,9 @@
     "reactivity/vendor/parley/src/layout/line_break.rs": "2545bced43ff30bae565e9650c663cd73d4e8004a9cadbfda0604e3424f5c6f5"
   },
   "files_sha256": {
-    "README.md": "9be11af4e12e75e619939cfe113dcd3bf82261700251cdc063c67800705c1d4d",
+    "12-reuse-core-lines.json": "2dc66ce3575486e7184dc3f25a474a078508d6fbf02cee74fe3702968da9a966",
+    "README.md": "d73d22abb12faa068d57070685f4702e46577a117ef92b1673c21e75ad2fcc5e",
+    "all-source-inventory.json": "d11c97b61db6a532b7533b81428488c9740363f28df0c56b13160a8405d447d7",
     "capture-map-query-final.py": "ea6e45e81011e653db05c458647b7fb7a169a5b91b3cf676a81b01baba7a3355",
     "capture-map-query-refinements.py": "202554401f5766d04696dafca359730d41c93489c5ffbbccbfe61c4e2fbe936e",
     "construction-controls/converted/gpui-final.log": "5ddcd758a874c46de7692f89b603e1ba8745d78b48ad7a5c997dec47d8d3a57f",
@@ -677,7 +679,11 @@
     "query-refinements/capture.log": "a5b59ca165ab003d6ca5e75636ce023a9f3f4a3582feb4c8af02459211c66c08",
     "query-refinements/queries.csv": "00479f5cd91b7db46849dcd0efe87b31762aeba9b8b0f675b971ed3609f6def2",
     "query-refinements/summary.json": "3158453e9f71636ac4676e0def50939076e05b9b194cc5179239549a274f00d0",
+    "rejected-head-alias-inventory.json": "3e987b86ced27d61ec19c04342794fe2664ccc399ee60a1a5b6448bca8bea306",
     "time-caret-map-final.py": "6165ebd04356c1c6ba154abf11fa039e4eddad6419cdceb4fd2dddb02b149dea",
     "time-caret-map-refinements.py": "544490f656f28d2a662e351fc29e1215f00d54c3400263973e95b5d0e7b31c1e"
-  }
+  },
+  "all_source_inventory_ref": "d645fb9149614e5270e7bec1238075eaab391bff",
+  "shipping_code_lines": 29289,
+  "alternative_12_reuse_shipping_code_lines": 29140
 }

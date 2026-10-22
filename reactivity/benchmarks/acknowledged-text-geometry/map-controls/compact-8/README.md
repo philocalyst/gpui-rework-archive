@@ -153,9 +153,23 @@ introduced by compact maps. Existing A/B and producer archives are carried here
 unchanged as historical evidence, not relabeled as d77 gates.
 
 The shipping core is29,289 code lines including13build lines (+179 versus the
-B/consuming-break base29,110);12B alternative29,126 is separately available.
+B/consuming-break base29,110); the initial12B field control is29,126 and
+the measured12B known-line-reuse alternative is29,140, separately available.
 Full physical source inventory including all captured assembly/helpers is charged
 separately. No owner-local arena, shared-line template/rank codec or additional
 per-node state is implemented. The reusable contained-owner inspector text-entry
 adapter remains the next parked product scope, not silently replaced by step
 buttons or included in this text-geometry batch.
+
+
+Full physical non-test inventory at evidence d645fb9149614e5270e7bec1238075eaab391bff
+is346,933 active lines:86,961 first-party +39,955 generated +220,017 vendor.
+It includes all historical control archives now carried on this branch, captured
+assembly and committed measurement/helper scripts; it is a different measure
+from29,289 shipping code lines. Raw all-source inventory/provenance is included.
+The first counter invocation used HEAD, which the main-repository-owned tool
+resolved to unrelated mainf9fe; that output is explicitly rejected/preserved.
+The credited run uses the exact d645 hash, never that HEAD alias. Data-only JSON
+counter followups and prose do not add programming source to this inventory.
+Root integration must recount its actual combined source rather than sum branch
+ledgers or assume this older pinned library graph equals current main.
