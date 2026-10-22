@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-expansion-common-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16704     4296
+.rela.plt               48    21000
+.rodata              26040    21056
+.gcc_except_table    45112    47096
+.eh_frame_hdr         4588    92208
+.eh_frame            23032    96800
+.text               277205   123936
+.init                   27   401144
+.fini                   13   401172
+.plt                    48   401200
+.tdata                  32   405344
+.tbss                 3168   405376
+.fini_array              8   405376
+.init_array             16   405384
+.data.rel.ro          8104   405400
+.dynamic               480   413504
+.got                  2432   413984
+.got.plt                40   416416
+.relro_padding        1336   416456
+.tm_clone_table          0   420552
+.data                 2504   420552
+.bss                   208   423056
+.comment               157        0
+Total               414850
+
+

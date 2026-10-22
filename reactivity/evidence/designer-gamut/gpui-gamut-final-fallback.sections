@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-final-fallback-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16680     4296
+.rela.plt               48    20976
+.rodata              25968    21024
+.gcc_except_table    45472    46992
+.eh_frame_hdr         4580    92464
+.eh_frame            22984    97048
+.text               278117   124128
+.init                   27   402248
+.fini                   13   402276
+.plt                    48   402304
+.tdata                  32   406448
+.tbss                 3168   406480
+.fini_array              8   406480
+.init_array             16   406488
+.data.rel.ro          8080   406504
+.dynamic               480   414584
+.got                  2432   415064
+.got.plt                40   417496
+.relro_padding         256   417536
+.tm_clone_table          0   421632
+.data                 2504   421632
+.bss                   208   424136
+.comment               157        0
+Total               414866
+
+

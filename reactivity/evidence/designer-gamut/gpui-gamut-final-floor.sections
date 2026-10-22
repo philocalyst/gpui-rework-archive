@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-final-floor-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16560     4296
+.rela.plt               48    20856
+.rodata              25432    20912
+.gcc_except_table    45112    46344
+.eh_frame_hdr         4540    91456
+.eh_frame            22744    96000
+.text               267893   122848
+.init                   27   390744
+.fini                   13   390772
+.plt                    48   390800
+.tdata                  32   394944
+.tbss                 3168   394976
+.fini_array              8   394976
+.init_array             16   394984
+.data.rel.ro          8008   395000
+.dynamic               480   403008
+.got                  2416   403488
+.got.plt                40   405904
+.relro_padding        3656   405944
+.tm_clone_table          0   410040
+.data                 2504   410040
+.bss                   208   412544
+.comment               157        0
+Total               406658
+
+

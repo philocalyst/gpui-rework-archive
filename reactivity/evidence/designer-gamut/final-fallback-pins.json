@@ -1,0 +1,29 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-consumer/Cargo.toml",
+    "--message-format=json",
+    "--no-default-features",
+    "--features",
+    "primitive"
+  ],
+  "env": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_TARGET_DIR": "/tmp/gpui-gamut-consumer-fallback-target"
+  },
+  "executable": "/tmp/gpui-gamut-final-fallback-frozen",
+  "sha256": "9444bf84dccd273a338b9133db1676856c84aeb08fe278c3fe390f58ddd7b8eb",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-consumer-fallback-target/release/deps/libgpui_canvas-271f145d718131d3.rlib",
+      "sha256": "21b77053835802585b56f51709c92cc047636ca0b83213c2da3bfafba4b82967",
+      "bytes": 6971958
+    }
+  ],
+  "timing_qualified": false
+}

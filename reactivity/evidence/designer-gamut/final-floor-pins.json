@@ -1,0 +1,26 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-floor-consumer/Cargo.toml",
+    "--message-format=json"
+  ],
+  "env": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_TARGET_DIR": "/tmp/gpui-gamut-floor-target"
+  },
+  "executable": "/tmp/gpui-gamut-final-floor-frozen",
+  "sha256": "2b911c88447f498f73dc89664255168620476a987e923c27fd594818dad0c566",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-floor-target/release/deps/libgpui_canvas-25db6a29666cc0de.rlib",
+      "sha256": "dc9ba197acd05aa675c08ac38d8b5e04da7794684bb4ada0f1b36fb03eacdabb",
+      "bytes": 7093754
+    }
+  ],
+  "timing_qualified": false
+}

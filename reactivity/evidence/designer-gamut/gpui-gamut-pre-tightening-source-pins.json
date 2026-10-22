@@ -1,0 +1,9 @@
+{
+  "/root/gpui-designer-gamut/reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+  "/root/gpui-designer-gamut/reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+  "/root/gpui-designer-gamut/reactivity/crates/canvas/Cargo.toml": "eb41eb188e3e047c7393bf109c5b9675985582fa08b44332670a80db59310ebd",
+  "/root/gpui-designer-gamut/reactivity/crates/canvas/src/color.rs": "35848adc117fe5215bc80e921912c665c5b485c45538fee4777018e49df08cfb",
+  "/root/gpui-designer-gamut/reactivity/crates/canvas/src/color/gamut.rs": "b86e6fd8f5ac3f19126becfaf83d174879953af3ae4637f325a3c07f0f732884",
+  "/root/gpui-designer-gamut/reactivity/crates/canvas/src/color/gamut/tests.rs": "396c44067cec80ef897a5c1402b7ecfcb48b83d99a1c7e540455a88de454737a",
+  "/root/gpui-designer-gamut/reactivity/crates/canvas/tests/fixtures/gamut_limits.csv": "b93285544c9d661d4424513a5e8d5417a1032f2876196adac4857c0e41d771dc"
+}
