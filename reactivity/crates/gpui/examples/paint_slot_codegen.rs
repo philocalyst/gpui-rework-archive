@@ -56,6 +56,8 @@ fn main() {
             },
         )
         .unwrap();
+        let token = owner.with_scene(|_, token| token).unwrap();
+        owner.presented(token).unwrap();
         let target = owner.inspect().unwrap().nodes[0].target.unwrap();
         std::hint::black_box(background(&owner, target).unwrap());
         publish(&mut owner, std::hint::black_box(Color::WHITE));
