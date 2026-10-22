@@ -1,4 +1,4 @@
-status=awaiting-manual-review
+status=pass
 preflight_id=paint-only-5f4-private109-20261022
 display=:109
 workloads=eager-0,eager-1000,eager-10000,virtual-250000
@@ -24,3 +24,6 @@ gpui_feature_set=x11
 observer_sha256=b4f84c80caa854d974643a2c20823537601a04745a7bcf320be356732b42f88b
 peer_font_sha256=58568c88a01b80dfc056daca3eeafd434a0380df1a48dda53f0de0d716109bbd
 evidence_dir=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/paint-only/preflights/paint-only-5f4-private109-20261022
+reviewer=root
+review_scope=all four GPUI control/direct PPM pairs byte-identical; root inspected GPUI-direct eager-10000, MyGo eager-10000, and NanoUI virtual-250000 lossless images; correctness logs accepted for all 16 cells
+performance_samples=none; all preflight launch/click times excluded

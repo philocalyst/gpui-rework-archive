@@ -2,8 +2,8 @@
 
 This is a follow-up to the accepted native-default GPUI 724/current paired
 capture. It measures one pointer action whose only visible state change is an
-opaque marker color. It is not a generic framework ranking and it has not been
-timed. The existing marker fixtures already implement the same user-visible
+opaque marker color. It is not a generic framework ranking. The fixed
+16-cell campaign is complete; see [`results/paint-only-5f4-peer-16cell-20261022/`](results/paint-only-5f4-peer-16cell-20261022/README.md). The existing marker fixtures already implement the same user-visible
 transition for NanoUI and MyGo; this directory adds a matched GPUI control and
 the direct registered style-port candidate.
 
@@ -66,8 +66,7 @@ eager 10,000. The guard pins the exact NanoUI `build.zig` patch SHA, requires
 separate GPUI build manifests from the same source tree and feature set, and
 rejects identical control/direct binary hashes. `capture-paint-only.sh`
 supports a guard-only pass and validates every cell before creating output or
-launching the observer. Captures remain blocked until the integration build
-exists and a reviewer has checked all preflight records.
+launching the observer. The integration build and reviewed preflight records are frozen for the completed campaign.
 
 `preflight-paint-only.sh` is the correctness-only driver for the 16 launch
 checks. It creates one screenshot and log per variant/workload, emits records
@@ -182,7 +181,4 @@ they are not scanout measurements. `x11` makes the GPUI accessibility bridge
 available, but the preflight does not demonstrate an active assistive
 technology client or live session-bus activation.
 
-All records remain `status=awaiting-manual-review`. The one-start/one-click
-durations printed by the observer are excluded correctness diagnostics, not
-performance results. The planned repeated 16-cell timing campaign remains
-unrun pending review and a separately coordinated quiet window.
+The four preflight records are `status=pass`; their one-start/one-click durations are excluded correctness diagnostics. The repeated campaign completed with all 16 cells and exact sample counts; see the result report for distributions and limits.

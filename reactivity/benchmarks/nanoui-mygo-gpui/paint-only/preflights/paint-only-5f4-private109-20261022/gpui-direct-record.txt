@@ -1,4 +1,4 @@
-status=awaiting-manual-review
+status=pass
 source_commit=5f4db5f2886e6d72aefd585d21dd6543774f1393
 binary_sha256=02dfd8ab05c8f49054012ff0331e9d60751c53577dfe53d36cb719ec46926d27
 fixture_sha256=a8c994a4a5e2f83770fd24e135ab457e924d6e544ed4c68ce5a4b4bb28324354
@@ -10,3 +10,4 @@ checks=observer-preflight,800x600-client,exact-marker,button-and-row-ink,one-cli
 preflight_dir=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/paint-only/preflights/paint-only-5f4-private109-20261022
 evidence_manifest=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/paint-only/preflights/paint-only-5f4-private109-20261022/evidence.sha256
 evidence_manifest_sha256=085de75b96acd47050dc742b4b47226e32c22e7b9f6342a9247ba7f4c5339ea2
+reviewed_scope=root independently compared all four control/direct GPUI PPM pairs byte-for-byte; logs and marker transitions accepted
