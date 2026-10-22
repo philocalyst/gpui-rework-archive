@@ -55,6 +55,28 @@ impl<S: Simd> Samples<S> {
         );
     }
 
+    #[inline]
+    pub(super) fn blend_mask(&mut self, pixel: usize, color: [f32; 4], mask: u16) {
+        if mask == 0 {
+            return;
+        }
+        let bit = 1 << (pixel % 64);
+        if self.mixed[pixel / 64] & bit == 0 {
+            if mask == u16::MAX {
+                blend_one(self.simd, &mut self.uniform[pixel], color, 1.0);
+                return;
+            }
+            self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
+            self.mixed[pixel / 64] |= bit;
+        }
+        blend_mask(
+            self.simd,
+            &mut self.samples[pixel * 16..pixel * 16 + 16],
+            color,
+            mask,
+        );
+    }
+
     pub(super) fn blend_sources(&mut self, pixel: usize, sources: [Option<[f32; 4]>; 16]) {
         let bit = 1 << (pixel % 64);
         if self.mixed[pixel / 64] & bit == 0 {
@@ -109,6 +131,21 @@ fn source_over<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f3
 #[simd]
 fn blend_one<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
     source_over(simd, dst, src, coverage);
+}
+
+#[simd]
+fn blend_mask<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], mut mask: u16) {
+    if mask == u16::MAX {
+        for sample in dst {
+            source_over(simd, sample, src, 1.0);
+        }
+    } else {
+        while mask != 0 {
+            let sample = mask.trailing_zeros() as usize;
+            source_over(simd, &mut dst[sample], src, 1.0);
+            mask &= mask - 1;
+        }
+    }
 }
 
 // Borrow fixed sample blocks across target-feature entries, so their SIMD
@@ -282,6 +319,34 @@ mod backend_tests {
                             tile.color(255).map(f32::to_bits),
                             sample_mean(&expected).map(f32::to_bits)
                         );
+                    }
+                }
+            }
+        }
+        // Every binary mask preserves absent sample bits, including -0, while
+        // covered transparent samples still execute the source-over equation.
+        for collapse in [false, true] {
+            let clear = [-0.0, f32::from_bits(1), -2.5, 0.0];
+            let source = [0.0, -0.0, f32::from_bits(1), 0.0];
+            for mask in 0..=u16::MAX {
+                tile.reset(clear, collapse);
+                tile.blend_mask(255, source, mask);
+                expected.fill(clear);
+                for (index, sample) in expected.iter_mut().enumerate() {
+                    if mask & (1 << index) != 0 {
+                        reference(sample, source, 1.0);
+                    }
+                }
+                assert_eq!(
+                    tile.color(255).map(f32::to_bits),
+                    sample_mean(&expected).map(f32::to_bits),
+                    "{:?}, mask={mask:#06x}, collapse={collapse}",
+                    simd.level()
+                );
+                if tile.mixed[255 / 64] & (1 << (255 % 64)) != 0 {
+                    for (actual, expected) in tile.samples[255 * 16..256 * 16].iter().zip(expected)
+                    {
+                        assert_eq!(actual.map(f32::to_bits), expected.map(f32::to_bits));
                     }
                 }
             }

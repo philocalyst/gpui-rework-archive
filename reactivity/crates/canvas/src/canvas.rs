@@ -14,6 +14,7 @@ mod bins;
 use bins::RasterScratch;
 mod glyph_axis;
 mod image_axis;
+mod mask_kernel;
 mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
@@ -1943,20 +1944,31 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
             }
             for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
                 for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
-                    let coverages = if full {
-                        [1.0; 16]
+                    let pixel = (y - top) * TILE + x - left;
+                    if full {
+                        samples.blend_mask(pixel, command.color, u16::MAX);
                     } else if let Some(axis) = &axis {
                         stats.boundary_pixels += 1;
                         let mask = (axis.x[x - left] * 0x1111) & axis.y[y - top];
-                        std::array::from_fn(|i| ((mask >> i) & 1) as f32)
+                        samples.blend_mask(pixel, command.color, mask);
                     } else if let Some(axis) = &glyph_axis {
                         stats.boundary_pixels += 1;
-                        axis.coverage(x - left, y - top)
+                        samples.blend(pixel, command.color, axis.coverage(x - left, y - top));
                     } else {
                         stats.boundary_pixels += 1;
-                        sample(&command, x, y, &mut stats)
-                    };
-                    samples.blend((y - top) * TILE + x - left, command.color, coverages);
+                        if matches!(
+                            command.source,
+                            BorrowedSource::Rect | BorrowedSource::Rounded(_)
+                        ) {
+                            samples.blend_mask(
+                                pixel,
+                                command.color,
+                                mask_kernel::coverage(simd, &command, x, y, &mut stats),
+                            );
+                        } else {
+                            samples.blend(pixel, command.color, sample(&command, x, y, &mut stats));
+                        }
+                    }
                 }
             }
         }
