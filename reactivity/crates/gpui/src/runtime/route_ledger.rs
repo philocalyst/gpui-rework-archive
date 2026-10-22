@@ -119,6 +119,48 @@ fn complete_owner_route_requests() {
             }
         }
     }
+    for routes in [0, 164, 8192] {
+        for update in [false, true] {
+            let name = format!("n16384_h{routes}_capturefalse_update{update}");
+            owner(
+                &name,
+                Cohort {
+                    nodes: 16384,
+                    routes,
+                    captured: false,
+                    generation: 0,
+                    total: 0,
+                },
+                |win| {
+                    if update {
+                        win.update(|m| m.generation += 1).unwrap();
+                    }
+                },
+            );
+        }
+    }
+    for (before, after) in [(100, 1), (1, 100), (100, 0), (0, 100)] {
+        for captured in [false, true] {
+            let name = format!("n100_h{before}_to{after}_capture{captured}");
+            owner(
+                &name,
+                Cohort {
+                    nodes: 100,
+                    routes: before,
+                    captured,
+                    generation: 0,
+                    total: 0,
+                },
+                |win| {
+                    win.update(|m| {
+                        m.generation += 1;
+                        m.routes = after;
+                    })
+                    .unwrap();
+                },
+            );
+        }
+    }
     owner("workspace_mount", workspace::Workspace::default(), |_| {});
     owner("workspace_rotate", workspace::Workspace::default(), |win| {
         win.activate(win.button("Rotate")).unwrap();
