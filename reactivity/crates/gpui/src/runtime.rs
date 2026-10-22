@@ -564,6 +564,8 @@ struct Node {
     handler: Option<Handler>,
 }
 #[cfg(test)]
+mod hit_tests;
+#[cfg(test)]
 mod style_ledger;
 impl Node {
     #[inline]
@@ -599,6 +601,26 @@ struct Fanout {
     codec: TextCodec,
     destinations: Vec<Destination>,
 }
+/// Original hit eligibility plus a saturated run of impossible hits ending
+/// here. The byte replaces a bool; an empty bound never contains a point.
+#[derive(Clone, Copy)]
+struct Hit(u8);
+impl Hit {
+    fn new(eligible: bool, bounds: Rect, previous: Option<&Presented>) -> Self {
+        let run = if !eligible || bounds.is_empty() {
+            previous.map_or(1, |node| ((node.hit.0 >> 1) + 1).min(127))
+        } else {
+            0
+        };
+        Self((run << 1) | u8::from(eligible))
+    }
+    fn eligible(self) -> bool {
+        self.0 & 1 != 0
+    }
+    fn skip(self) -> usize {
+        usize::from(self.0 >> 1)
+    }
+}
 struct Presented {
     identity: u64,
     parent: Parent,
@@ -607,7 +629,7 @@ struct Presented {
     rect: Rect,
     transform: PresentedTransform,
     bounds: Rect,
-    hittable: bool,
+    hit: Hit,
     actions: Actions,
 }
 struct Prepared {
@@ -2608,6 +2630,14 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
+            let hit = Hit::new(
+                node.text_slot().0 != u32::MAX
+                    || style.bg.alpha() > 0.0
+                    || node.handler.is_some()
+                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image),
+                bounds,
+                presented.last(),
+            );
             presented.push(Presented {
                 identity: node.identity(),
                 parent: published_parent,
@@ -2619,10 +2649,7 @@ impl<M: View + 'static> Runtime<M> {
                 rect,
                 transform: PresentedTransform::new(transform),
                 bounds,
-                hittable: node.text_slot().0 != u32::MAX
-                    || style.bg.alpha() > 0.0
-                    || node.handler.is_some()
-                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image),
+                hit,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
                     node.parent.index().is_some_and(|parent| {
                         clip_membership.get(parent).is_some_and(|flags| *flags != 0)
@@ -2781,8 +2808,16 @@ impl<M: View + 'static> Runtime<M> {
         {
             return None;
         }
-        for (index, node) in self.presented.iter().enumerate().rev() {
-            if node.hittable && self.sheet_hit(index, point) {
+        let mut remaining = self.presented.len();
+        while remaining != 0 {
+            let index = remaining - 1;
+            let node = &self.presented[index];
+            if node.hit.skip() != 0 {
+                remaining -= node.hit.skip();
+                continue;
+            }
+            remaining = index;
+            if self.sheet_hit(index, point) {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
