@@ -78,6 +78,75 @@ fn close(actual: accesskit::Rect, expected: crate::Rect) {
         );
     }
 }
+
+#[test]
+fn native_caret_runs_match_canonical_line_at_wraps_and_hard_separators() {
+    use gpui_canvas::{CaretAffinity, TextPosition, TextSelection};
+    use icu_segmenter::GraphemeClusterSegmenter;
+    for source in [
+        "",
+        "\r\n\r\n",
+        "a\r\n\r\nב\r\n",
+        "\u{2028}\u{2028}",
+        "a\u{2028}\u{2028}ב\u{2028}",
+        "office café אבג wrapped words repeated words",
+    ] {
+        let mut win = Win::demo(Page {
+            value: Signal::new(source.into()),
+            broken: false,
+        });
+        let target = win.role(Role::TextInput).one().unwrap();
+        for byte in GraphemeClusterSegmenter::new().segment_str(source) {
+            for affinity in [CaretAffinity::Upstream, CaretAffinity::Downstream] {
+                let position = TextPosition {
+                    offset: gpui_canvas::TextOffset::new(byte).unwrap(),
+                    affinity,
+                };
+                win.select(
+                    target,
+                    TextSelection {
+                        anchor: position,
+                        focus: position,
+                    },
+                )
+                .unwrap();
+                let mut cohort = Cohort::default();
+                cohort.refresh(&win).unwrap();
+                let tree = project_tree(&win, &cohort);
+                let input = tree
+                    .state()
+                    .node_by_tree_local_id(input_id(&win, &cohort), TreeId::ROOT)
+                    .unwrap();
+                let native = input
+                    .text_selection_focus()
+                    .unwrap()
+                    .to_degenerate_range()
+                    .bounding_boxes();
+                win.visit(|part| {
+                    if part.target() != target {
+                        return;
+                    }
+                    let geometry = part.text_geometry().unwrap();
+                    let caret = geometry.layout().caret_bounds(position).unwrap();
+                    let expected = geometry.visible_bounds(crate::Rect::new(
+                        caret.x,
+                        caret.y,
+                        0.,
+                        caret.height,
+                    ));
+                    match expected {
+                        Some(expected) => {
+                            assert_eq!(native.len(), 1, "{source:?} {position:?}");
+                            close(native[0], expected);
+                        }
+                        None => assert!(native.is_empty(), "{source:?} {position:?}"),
+                    }
+                })
+                .unwrap();
+            }
+        }
+    }
+}
 #[test]
 fn wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units() {
     let long_grapheme = format!("a{}", "\u{301}".repeat(200));

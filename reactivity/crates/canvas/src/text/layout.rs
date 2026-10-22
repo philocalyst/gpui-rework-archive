@@ -131,6 +131,8 @@ impl<'a> GlyphRun<'a> {
 #[derive(Clone, Copy, Debug)]
 pub struct TextLine(Line);
 impl TextLine {
+    /// Source content, excluding hard line/paragraph separators. Glyph runs and
+    /// the document retain the separators and their source byte ranges.
     pub fn text_range(self) -> Range<TextOffset> {
         TextOffset(self.0.start)..TextOffset(self.0.end)
     }
@@ -264,6 +266,13 @@ impl TextGeometry {
             .take_while(|stop| stop.byte == position.offset.0)
             .find(|stop| stop.affinities & mask != 0)
             .map(|stop| stop.bounds)
+    }
+    /// Source line owning this legal caret, including its requested affinity.
+    /// Soft-wrap aliases can own different lines. After a hard separator both
+    /// affinities belong to the following line, even when caret tops coincide.
+    pub fn caret_line(&self, position: TextPosition) -> Option<usize> {
+        self.caret_bounds(position)?;
+        Some(self.source_line(position))
     }
     /// Validates both endpoints in this layout's current interaction map.
     /// It is not a document-revision token or an editor mutation.

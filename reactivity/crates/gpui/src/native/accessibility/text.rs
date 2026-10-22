@@ -464,7 +464,18 @@ impl Input {
     fn native_position(&self, position: TextPosition) -> accesskit::TextPosition {
         let byte = position.offset.byte();
         let value = self.value.as_ref().expect("only inputs publish selections");
-        let mut runs = self.geometry.runs().enumerate().peekable();
+        let line = self
+            .geometry
+            .caret_line(position)
+            .expect("P selection uses a legal canonical caret");
+        // A hard separator's end belongs to the following line even with
+        // upstream affinity. Run-end equality alone cannot establish ownership.
+        let mut runs = self
+            .geometry
+            .runs()
+            .enumerate()
+            .filter(|(_, run)| run.line() == line)
+            .peekable();
         while let Some((index, run)) = runs.next() {
             let range = run.text_range();
             if byte < range.end.byte()

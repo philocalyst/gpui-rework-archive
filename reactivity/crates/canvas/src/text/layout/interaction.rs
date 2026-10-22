@@ -45,6 +45,22 @@ impl TextGrapheme {
 }
 
 impl Details {
+    // Source-ordered boundaries remain authoritative when caret tops overlap.
+    // End excludes hard separators: upstream at a soft wrap stays on the old
+    // line, while the end of a hard separator advances across the source gap.
+    pub(super) fn source_line(&self, position: TextPosition) -> usize {
+        let byte = position.offset.0;
+        match position.affinity {
+            CaretAffinity::Upstream if byte != 0 => self
+                .lines
+                .partition_point(|line| line.end < byte)
+                .min(self.lines.len() - 1),
+            _ => self
+                .lines
+                .partition_point(|line| line.start <= byte)
+                .saturating_sub(1),
+        }
+    }
     fn line_at(&self, y: f32) -> usize {
         self.lines
             .partition_point(|line| line.top <= y)
@@ -90,8 +106,11 @@ impl Details {
             .filter_map(move |(a, b)| {
                 let start = a.iter().find(|stop| stop.affinities & 2 != 0)?;
                 let end = b.iter().find(|stop| stop.affinities & 1 != 0)?;
-                let line = self.line_at(start.bounds.y);
-                let hard_break = start.bounds.y != end.bounds.y;
+                let line = self.source_line(TextPosition {
+                    offset: TextOffset(start.byte),
+                    affinity: CaretAffinity::Downstream,
+                });
+                let hard_break = end.byte > self.lines[line].end;
                 let left = start.bounds.x.min(end.bounds.x);
                 let direction = if !hard_break && start.bounds.x != end.bounds.x {
                     if start.bounds.x < end.bounds.x {
@@ -262,9 +281,12 @@ impl TextGeometry {
         if !point.x.is_finite() || !point.y.is_finite() {
             return None;
         }
+        self.position_on_line(self.line_at(point.y), point.x)
+    }
+
+    fn position_on_line(&self, line: usize, x: f32) -> Option<TextPosition> {
         let map = self;
         map.carets.as_ref()?;
-        let line = map.line_at(point.y);
         let stops = map.line_tail(line);
         let mut before: Option<(f32, TextPosition)> = None;
         let mut after: Option<(f32, TextPosition)> = None;
@@ -292,17 +314,17 @@ impl TextGeometry {
             };
             // Compare edges before subtracting. At distant finite points every
             // f32 distance can round to the same value, losing visual order.
-            if point.x < left {
+            if x < left {
                 if after.is_none_or(|(edge, _)| left < edge) {
                     after = Some((left, at_left));
                 }
-            } else if point.x > right {
+            } else if x > right {
                 if before.is_none_or(|(edge, _)| right > edge) {
                     before = Some((right, at_right));
                 }
             } else {
                 let middle = (f64::from(left) + f64::from(right)) * 0.5;
-                return Some(if f64::from(point.x) > middle {
+                return Some(if f64::from(x) > middle {
                     at_right
                 } else {
                     at_left
@@ -312,7 +334,7 @@ impl TextGeometry {
         let best = match (before, after) {
             (Some((left, a)), Some((right, b))) => {
                 let middle = (f64::from(left) + f64::from(right)) * 0.5;
-                Some(if f64::from(point.x) > middle { b } else { a })
+                Some(if f64::from(x) > middle { b } else { a })
             }
             (Some((_, position)), None) | (None, Some((_, position))) => Some(position),
             (None, None) => None,
@@ -322,14 +344,22 @@ impl TextGeometry {
             stops
                 .iter()
                 .take_while(|stop| stop.byte <= map.lines[line].end)
-                .find(|stop| map.line_at(stop.bounds.y) == line)
-                .map(|stop| TextPosition {
-                    offset: TextOffset(stop.byte),
-                    affinity: if stop.affinities & 2 != 0 {
-                        CaretAffinity::Downstream
-                    } else {
-                        CaretAffinity::Upstream
-                    },
+                .find_map(|stop| {
+                    [CaretAffinity::Downstream, CaretAffinity::Upstream]
+                        .into_iter()
+                        .find_map(|affinity| {
+                            let mask = if affinity == CaretAffinity::Downstream {
+                                2
+                            } else {
+                                1
+                            };
+                            let position = TextPosition {
+                                offset: TextOffset(stop.byte),
+                                affinity,
+                            };
+                            (stop.affinities & mask != 0 && map.source_line(position) == line)
+                                .then_some(position)
+                        })
                 })
         })
     }
@@ -400,7 +430,7 @@ impl TextGeometry {
     fn move_visual(&self, position: TextPosition, right: bool) -> Option<TextPosition> {
         let bounds = self.caret_bounds(position)?;
         let map = self;
-        let line = map.line_at(bounds.y);
+        let line = map.caret_line(position)?;
         let mut best = None;
         let mut distance = f32::INFINITY;
         for interval in map
@@ -427,11 +457,8 @@ impl TextGeometry {
         } else {
             line.checked_sub(1)
         };
-        if let Some(next) = next_line.and_then(|index| map.lines.get(index)) {
-            return self.position_at(Point {
-                x: if right { -f32::MAX } else { f32::MAX },
-                y: next.top,
-            });
+        if let Some(next) = next_line.filter(|index| *index < map.lines.len()) {
+            return self.position_on_line(next, if right { -f32::MAX } else { f32::MAX });
         }
         Some(position)
     }

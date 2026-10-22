@@ -245,24 +245,8 @@ impl<'font> Planner<'font> {
             for (line_index, line) in planned.lines().enumerate() {
                 let global_line = details.as_ref().map_or(line_index, |d| d.lines.len());
                 if let Some(d) = &mut details {
-                    let m = line.metrics();
-                    let range = if content.is_empty() {
-                        0..0
-                    } else {
-                        line.text_range()
-                    };
-                    if content.get(range.clone()).is_none() {
-                        return Err(Error::InvalidFont);
-                    }
-                    d.lines.push(Line {
-                        start: (paragraph.content.start + range.start) as u32,
-                        end: (paragraph.content.start + range.end) as u32,
-                        top: height + m.block_min_coord.min(m.content_block_min_coord),
-                        height: m.block_max_coord.max(m.content_block_max_coord)
-                            - m.block_min_coord.min(m.content_block_min_coord),
-                        baseline: height + m.baseline,
-                        width: if content.is_empty() { 0. } else { m.advance },
-                    });
+                    d.lines
+                        .push(freeze_line(line, content, paragraph.content.start, height)?);
                 }
                 for item in line.items() {
                     let PositionedLayoutItem::GlyphRun(run) = item else {
@@ -351,65 +335,7 @@ impl<'font> Planner<'font> {
                 }
             }
             if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
-                let segmenter = GraphemeClusterSegmenter::new();
-                // A fixed small number of direct queries is linear in source
-                // length and avoids an index for e.g. one huge grapheme. Bulk
-                // maps use constant-time source/prefix lookup per destination.
-                let geometry = if segmenter.segment_str(content).count() > 8 {
-                    Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
-                } else {
-                    None
-                };
-                for byte in segmenter.segment_str(content) {
-                    let mut pair = [None, None];
-                    for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
-                        .into_iter()
-                        .enumerate()
-                    {
-                        let cursor = geometry.as_ref().map_or_else(
-                            || Cursor::from_byte_index(planned, byte, affinity),
-                            |index| index.cursor(byte, affinity),
-                        );
-                        if cursor.index() != byte {
-                            continue;
-                        }
-                        let r = geometry.as_ref().map_or_else(
-                            || cursor.geometry(planned, 1.),
-                            |index| index.geometry(cursor, 1.),
-                        );
-                        let bounds = Rect::new(
-                            r.x0 as f32,
-                            (f64::from(height) + r.y0) as f32,
-                            (r.x1 - r.x0) as f32,
-                            (r.y1 - r.y0) as f32,
-                        );
-                        if ![bounds.x, bounds.y, bounds.width, bounds.height]
-                            .into_iter()
-                            .all(f32::is_finite)
-                        {
-                            return Err(Error::InvalidGeometry);
-                        }
-                        pair[index] = Some(bounds);
-                    }
-                    let global = (paragraph.content.start + byte) as u32;
-                    if pair[0].is_some() && pair[0] == pair[1] {
-                        stops.push(Stop {
-                            byte: global,
-                            bounds: pair[0].unwrap(),
-                            affinities: 3,
-                        });
-                    } else {
-                        for (i, bounds) in pair.into_iter().enumerate() {
-                            if let Some(bounds) = bounds {
-                                stops.push(Stop {
-                                    byte: global,
-                                    bounds,
-                                    affinities: 1 << i,
-                                });
-                            }
-                        }
-                    }
-                }
+                append_carets(stops, planned, content, paragraph.content.start, height)?;
             }
             height += planned.height();
         }
@@ -464,6 +390,115 @@ impl<'font> Planner<'font> {
         })
     }
 }
+
+fn freeze_line(
+    line: parley::layout::Line<'_, ()>,
+    content: &str,
+    source: usize,
+    height: f32,
+) -> Result<Line, Error> {
+    let m = line.metrics();
+    let mut range = if content.is_empty() {
+        0..0
+    } else {
+        line.text_range()
+    };
+    // In-paragraph mandatory breaks (e.g. U+2028) have the same content-only
+    // contract as paragraph separators. Use actual producer cluster authority.
+    if line.break_reason() == parley::layout::BreakReason::Explicit
+        && let Some(start) = line
+            .runs()
+            .flat_map(|run| run.visual_clusters())
+            .filter(|cluster| cluster.is_hard_line_break())
+            .map(|cluster| cluster.text_range().start)
+            .min()
+    {
+        range.end = range.end.min(start);
+    }
+    if content.get(range.clone()).is_none() {
+        return Err(Error::InvalidFont);
+    }
+    Ok(Line {
+        start: (source + range.start) as u32,
+        end: (source + range.end) as u32,
+        top: height + m.block_min_coord.min(m.content_block_min_coord),
+        height: m.block_max_coord.max(m.content_block_max_coord)
+            - m.block_min_coord.min(m.content_block_min_coord),
+        baseline: height + m.baseline,
+        width: if content.is_empty() { 0. } else { m.advance },
+    })
+}
+fn append_carets(
+    stops: &mut Vec<Stop>,
+    planned: &parley::Layout<()>,
+    content: &str,
+    source: usize,
+    height: f32,
+) -> Result<(), Error> {
+    let segmenter = GraphemeClusterSegmenter::new();
+    // A fixed small number of direct queries is linear in source
+    // length and avoids an index for e.g. one huge grapheme. Bulk
+    // maps use constant-time source/prefix lookup per destination.
+    let geometry = if segmenter.segment_str(content).count() > 8 {
+        Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
+    } else {
+        None
+    };
+    for byte in segmenter.segment_str(content) {
+        let mut pair = [None, None];
+        for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
+            .into_iter()
+            .enumerate()
+        {
+            let cursor = geometry.as_ref().map_or_else(
+                || Cursor::from_byte_index(planned, byte, affinity),
+                |index| index.cursor(byte, affinity),
+            );
+            if cursor.index() != byte {
+                continue;
+            }
+            let r = geometry.as_ref().map_or_else(
+                || cursor.geometry(planned, 1.),
+                |index| index.geometry(cursor, 1.),
+            );
+            let bounds = Rect::new(
+                r.x0 as f32,
+                (f64::from(height) + r.y0) as f32,
+                (r.x1 - r.x0) as f32,
+                (r.y1 - r.y0) as f32,
+            );
+            if ![bounds.x, bounds.y, bounds.width, bounds.height]
+                .into_iter()
+                .all(f32::is_finite)
+            {
+                return Err(Error::InvalidGeometry);
+            }
+            pair[index] = Some(bounds);
+        }
+        let global = (source + byte) as u32;
+        if pair[0].is_some() && pair[0] == pair[1] {
+            stops.push(Stop {
+                byte: global,
+                bounds: pair[0].unwrap(),
+                affinities: 3,
+            });
+        } else {
+            for (i, bounds) in pair.into_iter().enumerate() {
+                if let Some(bounds) = bounds {
+                    stops.push(Stop {
+                        byte: global,
+                        bounds,
+                        affinities: 1 << i,
+                    });
+                }
+            }
+        }
+    }
+    Ok(())
+}
+#[cfg(test)]
+#[path = "line_ownership_tests.rs"]
+mod line_ownership_tests;
 
 fn register_font(
     fonts: &mut FontContext,
