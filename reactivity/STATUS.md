@@ -8,7 +8,7 @@ describe the intended complete system; this page records what is connected now.
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
 | Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, shared native pointer/focus/keyboard input, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay, touch/capture/drag and hover callbacks remain |
-| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, source-qualified selection and atomic range edits, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
+| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, controlled checkbox role/state/actions, source-qualified selection and atomic range edits, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
@@ -16,7 +16,7 @@ describe the intended complete system; this page records what is connected now.
 | Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
-| GPU | Vendored WGPU/HAL 30, build-time typed wgsl-rs generation/validation, shared device/pipeline context with independent renderer states and retained layout authority; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; offline shader admission, native HDR negotiation, other primitives and hardware/backend conformance remain |
+| GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
 | Native | Vendor-owned backend hints and target proof; Winit software-first windows, no Auto GPU initialization for certified fills, background GPU preparation for general scenes, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
 | Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library port with shared native/headless View, typed workers and database-backed playback requests | Hummingbird audio/scanner/navigation/queue/artwork/media services and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
@@ -62,6 +62,29 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
+pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),
+strict all-target checks, formatting, nine Hummingbird cases, five external
+catalog cases, headless and actual native CPU/GPU/Auto transcripts, plus actual
+Registry Unicode geometry/edit/lifecycle, Future wake and cold-blank handoff pass.
+GPU is llvmpipe and Auto stays CPU. Exact source/executable guards and owned
+process cleanup pass; this is no hardware, timing, RSS or foreign-OS runtime claim.
+The full-feature 32 KiB first-C owner changes from 33,912 to 383 allocations and
+2,262,492 to 1,091,784 retained requested bytes. Old-P/new-C adds 482,136 bytes;
+plain remains 21 allocations/5,588 retained bytes and warm idle allocates zero.
+The selected 12-byte map's separate query controls charge +3.1% long local and
++4.8% whole-selection time against trimmed 24-byte records; the 8-byte alternative
+is unadopted. These are measured complete-owner results and qualified tradeoffs.
+
+The later [surface owner removal](evidence/surface-config-owner/README.md) and
+[controlled checkbox](evidence/typed-checkbox/README.md) are integrated from
+separately qualified producer sources. GpuSurface shrinks 1,072→1,008 bytes on
+the matched 64-bit native build; this is no RSS claim. Checkbox identity/focus,
+acknowledged state, sparse/full payload equivalence and actual native checked
+state/action events pass. Their main combined qualification is in progress;
+these producer results do not retag the earlier combined source. The transform
+factorization and contained inspector editor remain isolated work.
+
 The [combined text/Future/native campaign](evidence/text-main-integration/README.md)
 pins main source `007f10ccbd`: 529 GPUI cases/docs (27 ignored), strict checks,
 formatting, nine Hummingbird cases, five external catalog cases and the shared
@@ -81,9 +104,9 @@ own lines even with overlapping caret tops. Ordinary headers stay unchanged
 except Runtime, which shrinks 64 B. The full-feature plain owner is 5,588 B;
 the inspector grows to 82,694 B. A 32 KiB paragraph retains about 1.62 MB of map
 capacity and adds about 1.65 MB per old epoch; construction costs and the indexed
-Part bounds checks are explicitly charged. Compact maps and safe query controls
-remain separate experiments. Combined main qualification follows separately;
-the producer tests retain their original source pins.
+Part bounds checks are explicitly charged. The later compact/query work is now
+integrated through the combined source below; these baseline numbers and producer
+tests retain their original source pins.
 
 The [combined Hummingbird renderer checks](ports/hummingbird/evidence/renderer-policies/README.md)
 pin source `c73144892c`: the shared executable passes its headless transcript and
@@ -163,12 +186,13 @@ The external native driver reacquires text authority after an edit; its stale-ID
 failure is preserved. Full original framework parity is
 still missing; the [feature audit](docs/feature-parity.md) is a delivery map,
 not a narrowed 1.0 target. Shared GPU resources, typed catalog controls and
-designer gamut operations are integrated in the latest combined freeze. Offline
-shader artifacts remain isolated; acknowledged text geometry is now integrated
-from its separately qualified correctness baseline described above.
+designer gamut operations are integrated. Optional offline shader artifacts and
+static recipes, compact acknowledged geometry, consuming line breaking and
+intrinsic interaction-map suppression are integrated through the later combined
+source above. Each producer archive retains its own qualification pin.
 
-The [source ledger](evidence/core-lines/README.md) counts 29,365 non-test library
-code lines at `007f10ccbd`, including 13 build-script lines, versus original
+The [source ledger](evidence/core-lines/README.md) counts 30,007 non-test library
+code lines at `f490974fdc`, including 18 build-script lines, versus original
 GPUI's 56,922 including 28 build-script lines. These are pinned actual counts,
 not a current-feature-equivalence or predicted final-size claim. Dependencies,
 local vendor patches, tools, app ports and fixtures retain their separate scopes.

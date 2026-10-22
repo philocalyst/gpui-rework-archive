@@ -70,6 +70,14 @@ source/binary growth and tiny-label regressions; keep bit-exact producer width,
 signed-zero alias geometry, legal graphemes, source-affinity line ownership and
 provider retirement as invariant gates. Glyph/font payloads must remain outside
 historical geometry.
+The [transform audit](docs/presented-transform-factorization-luna.md) identifies
+two redundant local-origin words per Presented row. The isolated successor
+keeps translation and size explicit and factors exact linear bases into the
+existing geometry epoch streams. A finite-basis prefix and tagged radius suffix
+may reuse the existing two Vec owners without new headers. This requires exact
+P/C scale, omitted-ancestor, signed-zero, failed-candidate and KEEP proofs;
+tiny custom-only owners and dense unique bases must be charged. Neither a
+64-byte row nor an end-to-end gain is accepted until measured.
 The [compression audit](docs/text-map-compression-luna.md) prices source-domain
 rank planes and exact repeated-line templates after a bitwise compact-stop
 control. The [intrinsic measurement audit](docs/intrinsic-text-measure-luna.md)

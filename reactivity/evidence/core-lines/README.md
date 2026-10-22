@@ -1,14 +1,24 @@
 # Shipping core code ledger
 
-Current frozen source `007f10ccbd`: **29,365** non-test code lines including
-13 build-script lines; original GPUI `41a42eb96d6c04e5e71f3577d12934d4de569b20`:
-**56,922** including 28 build-script lines. The current per-file snapshot is in
-[the current text integration snapshot](../text-main-integration/core-lines.json).
-The Future adapter adds 254 first-party shipping lines and acknowledged text
-geometry adds 706; pin-project-lite and local vendor changes are charged
-separately. Source a951 measured 28,659. Source 815838 measured 28,405, 6d77 measured 28,403 and
-preceding 8ea measured 27,696 under the same rule. No feature-equivalence
-or future final-size claim follows from this comparison.
+Current frozen source `f490974fdc1ff440762a01fedc4d2b4a6c40417c`:
+**30,007** non-test code lines, including 18 build-script lines. Original GPUI
+`41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,922**, including 28 build-script
+lines. [The exact current snapshot](f490974fdc.json) records every counted file.
+Comments, tests, blanks, examples, vendors and support tools are excluded; host
+shader proof/generator source inside the shipping library remains charged.
+
+The [combined text/static source ebfdb2](../compact-static-main/core-lines.json)
+measures 29,975. The integrated surface descriptor removal subtracts six and the
+controlled checkbox adds 38. These measured source deltas do not establish
+feature equivalence, future final size, or permission to compress readable code.
+All imported vendor code, patches, static shader words and helpers retain their
+separate costs in the producer archives.
+
+Earlier source `007f10ccbd` measures 29,365 (13 build-script lines); a951 measures
+28,659; 815838 measures 28,405; 6d77 measures 28,403; 8ea measures 27,696 under
+the same rule. The Future adapter adds 254 first-party shipping lines and the
+initial acknowledged text geometry adds 706; pin-project-lite and local vendor
+changes are charged separately.
 
 Historical source `8350157374` measured **26,069** under `src`; original GPUI
 measured **56,894** under `src`.

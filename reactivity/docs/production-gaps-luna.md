@@ -32,10 +32,9 @@ The typed catalog now exposes all 13 properties/eight value families through
 ordinary validated transactions and native inspector controls. Arbitrary value
 entry, contained tooling owners, custom component schemas and theme cascade
 remain. Designer gamut fitting is integrated; palette/mix/contrast still remain.
-The [next control audit](accessibility-checkbox-luna.md) selects checked state,
-role and existing activation/focus routes as a bounded production slice, with
-stable identity across toggles. It is an isolated implementation until its
-source and native gates are adopted. IME/clipboard, relationships, virtual-item
+The [controlled checkbox](../evidence/typed-checkbox/README.md) now integrates
+checked state, role and existing activation/focus routes, with stable identity
+across toggles and separately pinned native action/event evidence. IME/clipboard, relationships, virtual-item
 realization and UIA/VoiceOver runtime coverage are still incomplete.
 
 ## Accessibility and native feature profile
