@@ -72,6 +72,10 @@ impl Draw {
         assert!(limits.max_buffer_size <= u32::MAX as u64);
 
         let module = create_validation_module(device, instance_flags)?;
+        let module = super::Pending::new(module, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_shader_module(resource) };
+        });
 
         let metadata_bind_group_layout = create_bind_group_layout(
             device,
@@ -83,6 +87,11 @@ impl Draw {
                 instance_flags,
             ),
         )?;
+        let metadata_bind_group_layout =
+            super::Pending::new(metadata_bind_group_layout, |resource| {
+                // SAFETY: This unpublished resource has no remaining dependents.
+                unsafe { device.destroy_bind_group_layout(resource) };
+            });
         let src_bind_group_layout = create_bind_group_layout(
             device,
             true,
@@ -93,6 +102,10 @@ impl Draw {
                 instance_flags,
             ),
         )?;
+        let src_bind_group_layout = super::Pending::new(src_bind_group_layout, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_bind_group_layout(resource) };
+        });
         let dst_bind_group_layout = create_bind_group_layout(
             device,
             false,
@@ -103,6 +116,10 @@ impl Draw {
                 instance_flags,
             ),
         )?;
+        let dst_bind_group_layout = super::Pending::new(dst_bind_group_layout, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_bind_group_layout(resource) };
+        });
 
         let pipeline_layout_desc = hal::PipelineLayoutDescriptor {
             label: hal_label(
@@ -122,6 +139,10 @@ impl Draw {
                 .create_pipeline_layout(&pipeline_layout_desc)
                 .map_err(DeviceError::from_hal)?
         };
+        let pipeline_layout = super::Pending::new(pipeline_layout, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_pipeline_layout(resource) };
+        });
 
         let supports_indirect_first_instance =
             required_features.contains(wgt::Features::INDIRECT_FIRST_INSTANCE);
@@ -134,14 +155,18 @@ impl Draw {
             write_d3d12_special_constants,
             instance_flags,
         )?;
+        let pipeline = super::Pending::new(pipeline, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_compute_pipeline(resource) };
+        });
 
         Ok(Self {
-            module,
-            metadata_bind_group_layout,
-            src_bind_group_layout,
-            dst_bind_group_layout,
-            pipeline_layout,
-            pipeline,
+            module: module.commit(),
+            metadata_bind_group_layout: metadata_bind_group_layout.commit(),
+            src_bind_group_layout: src_bind_group_layout.commit(),
+            dst_bind_group_layout: dst_bind_group_layout.commit(),
+            pipeline_layout: pipeline_layout.commit(),
+            pipeline: pipeline.commit(),
 
             free_indirect_entries: Mutex::new(rank::BUFFER_POOL, Vec::new()),
             free_metadata_entries: Mutex::new(rank::BUFFER_POOL, Vec::new()),
@@ -748,6 +773,10 @@ fn create_buffer_and_bind_group(
         memory_flags: hal::MemoryFlags::empty(),
     };
     let buffer = unsafe { device.create_buffer(&buffer_desc) }?;
+    let buffer = super::Pending::new(buffer, |buffer| {
+        // SAFETY: No group was published for this buffer.
+        unsafe { device.destroy_buffer(buffer) };
+    });
     let bind_group_desc = hal::BindGroupDescriptor {
         label: bind_group_label,
         layout: bind_group_layout,
@@ -768,7 +797,10 @@ fn create_buffer_and_bind_group(
         external_textures: &[],
     };
     let bind_group = unsafe { device.create_bind_group(&bind_group_desc) }?;
-    Ok(BufferPoolEntry { buffer, bind_group })
+    Ok(BufferPoolEntry {
+        buffer: buffer.commit(),
+        bind_group,
+    })
 }
 
 #[derive(Clone)]
@@ -786,10 +818,12 @@ pub(crate) struct DrawResources {
 
 impl Drop for DrawResources {
     fn drop(&mut self) {
-        if let Some(ref indirect_validation) = self.device.indirect_validation {
+        if let Some(indirect_validation) = self.device.ready_indirect_validation() {
             let indirect_draw_validation = &indirect_validation.draw;
             indirect_draw_validation.release_dst_entries(self.dst_entries.drain(..));
             indirect_draw_validation.release_metadata_entries(self.metadata_entries.drain(..));
+        } else {
+            debug_assert!(self.dst_entries.is_empty() && self.metadata_entries.is_empty());
         }
     }
 }
@@ -828,7 +862,11 @@ impl DrawResources {
         size: u64,
         current_entry: &mut Option<CurrentEntry>,
     ) -> Result<(usize, u64), DeviceError> {
-        let indirect_draw_validation = &self.device.indirect_validation.as_ref().unwrap().draw;
+        let indirect_draw_validation = &self
+            .device
+            .ready_indirect_validation()
+            .expect("successful INDIRECT buffer initializes validation")
+            .draw;
         let ensure_entry = |index: usize| {
             if self.dst_entries.len() <= index {
                 let entry = indirect_draw_validation
@@ -846,7 +884,11 @@ impl DrawResources {
         size: u64,
         current_entry: &mut Option<CurrentEntry>,
     ) -> Result<(usize, u64), DeviceError> {
-        let indirect_draw_validation = &self.device.indirect_validation.as_ref().unwrap().draw;
+        let indirect_draw_validation = &self
+            .device
+            .ready_indirect_validation()
+            .expect("successful INDIRECT buffer initializes validation")
+            .draw;
         let ensure_entry = |index: usize| {
             if self.metadata_entries.len() <= index {
                 let entry = indirect_draw_validation

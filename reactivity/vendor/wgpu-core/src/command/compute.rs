@@ -1079,6 +1079,11 @@ fn dispatch_workgroups_indirect(
     );
 
     if let Some(ref indirect_validation) = state.pass.base.device.indirect_validation {
+        let indirect_validation = indirect_validation
+            .get()
+            .expect("successful INDIRECT buffer initializes validation")
+            .as_ref()
+            .expect("successful INDIRECT buffer requires validation");
         let params = indirect_validation.dispatch.params(
             &state.pass.base.device.limits,
             offset,

@@ -2747,7 +2747,7 @@ pub(super) fn encode_render_pass(
             parent_state.snatch_guard,
         );
 
-        if let Some(ref indirect_validation) = device.indirect_validation {
+        if let Some(indirect_validation) = device.ready_indirect_validation() {
             indirect_validation
                 .draw
                 .inject_validation_pass(

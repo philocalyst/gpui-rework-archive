@@ -129,6 +129,10 @@ impl Dispatch {
                     }
                 }
             })?;
+        let module = super::Pending::new(module, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_shader_module(resource) };
+        });
 
         let dst_bind_group_layout_desc = hal::BindGroupLayoutDescriptor {
             label: hal_label(
@@ -152,6 +156,10 @@ impl Dispatch {
                 .create_bind_group_layout(&dst_bind_group_layout_desc)
                 .map_err(DeviceError::from_hal)?
         };
+        let dst_bind_group_layout = super::Pending::new(dst_bind_group_layout, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_bind_group_layout(resource) };
+        });
 
         let src_bind_group_layout_desc = hal::BindGroupLayoutDescriptor {
             label: hal_label(
@@ -175,6 +183,10 @@ impl Dispatch {
                 .create_bind_group_layout(&src_bind_group_layout_desc)
                 .map_err(DeviceError::from_hal)?
         };
+        let src_bind_group_layout = super::Pending::new(src_bind_group_layout, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_bind_group_layout(resource) };
+        });
 
         let pipeline_layout_desc = hal::PipelineLayoutDescriptor {
             label: hal_label(
@@ -193,6 +205,10 @@ impl Dispatch {
                 .create_pipeline_layout(&pipeline_layout_desc)
                 .map_err(DeviceError::from_hal)?
         };
+        let pipeline_layout = super::Pending::new(pipeline_layout, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_pipeline_layout(resource) };
+        });
 
         let pipeline_desc = hal::ComputePipelineDescriptor {
             label: hal_label(
@@ -223,6 +239,10 @@ impl Dispatch {
                     CreateComputePipelineError::PipelineConstants(error)
                 }
             })?;
+        let pipeline = super::Pending::new(pipeline, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_compute_pipeline(resource) };
+        });
 
         let dst_buffer_desc = hal::BufferDescriptor {
             label: hal_label(
@@ -235,6 +255,10 @@ impl Dispatch {
         };
         let dst_buffer =
             unsafe { device.create_buffer(&dst_buffer_desc) }.map_err(DeviceError::from_hal)?;
+        let dst_buffer = super::Pending::new(dst_buffer, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_buffer(resource) };
+        });
 
         let dst_bind_group_desc = hal::BindGroupDescriptor {
             label: hal_label(
@@ -263,15 +287,19 @@ impl Dispatch {
                 .create_bind_group(&dst_bind_group_desc)
                 .map_err(DeviceError::from_hal)
         }?;
+        let dst_bind_group = super::Pending::new(dst_bind_group, |resource| {
+            // SAFETY: This unpublished resource has no remaining dependents.
+            unsafe { device.destroy_bind_group(resource) };
+        });
 
         Ok(Self {
-            module,
-            dst_bind_group_layout,
-            src_bind_group_layout,
-            pipeline_layout,
-            pipeline,
-            dst_buffer,
-            dst_bind_group,
+            module: module.commit(),
+            dst_bind_group_layout: dst_bind_group_layout.commit(),
+            src_bind_group_layout: src_bind_group_layout.commit(),
+            pipeline_layout: pipeline_layout.commit(),
+            pipeline: pipeline.commit(),
+            dst_buffer: dst_buffer.commit(),
+            dst_bind_group: dst_bind_group.commit(),
         })
     }
 

@@ -273,7 +273,10 @@ pub struct Device {
     pub(crate) instance_flags: wgt::InstanceFlags,
     pub(crate) deferred_destroy: Mutex<Vec<DeferredDestroy>>,
     pub(crate) usage_scopes: UsageScopePool,
-    pub(crate) indirect_validation: Option<crate::indirect_validation::IndirectValidation>,
+    // The outer Option is validation policy, independent of first use.
+    pub(crate) indirect_validation: Option<
+        OnceCellOrLock<Result<Box<crate::indirect_validation::IndirectValidation>, DeviceError>>,
+    >,
     // Optional so that we can late-initialize this after the queue is created.
     pub(crate) timestamp_normalizer:
         OnceCellOrLock<crate::timestamp_normalization::TimestampNormalizer>,
@@ -318,7 +321,11 @@ impl Drop for Device {
             unsafe { ManuallyDrop::take(&mut self.default_external_texture_params_buffer) };
         // SAFETY: We are in the Drop impl and we don't use self.fence anymore after this point.
         let fence = unsafe { ManuallyDrop::take(&mut self.fence) };
-        if let Some(indirect_validation) = self.indirect_validation.take() {
+        if let Some(Ok(indirect_validation)) = self
+            .indirect_validation
+            .take()
+            .and_then(|cell| cell.into_inner())
+        {
             indirect_validation.dispose(self.raw.as_ref());
         }
         if let Some(timestamp_normalizer) = self.timestamp_normalizer.take() {
@@ -505,17 +512,7 @@ impl Device {
             )
             && limits.max_storage_buffers_per_shader_stage >= 2;
 
-        let indirect_validation = if enable_indirect_validation {
-            Some(crate::indirect_validation::IndirectValidation::new(
-                raw_device.as_ref(),
-                &desc.required_limits,
-                &desc.required_features,
-                instance_flags,
-                adapter.backend(),
-            )?)
-        } else {
-            None
-        };
+        let indirect_validation = enable_indirect_validation.then(OnceCellOrLock::new);
 
         Ok(Self {
             raw: raw_device,
@@ -1103,25 +1100,33 @@ impl Device {
         let buffer = unsafe { self.raw().create_buffer(&hal_desc) }
             .map_err(|e| self.handle_hal_error_with_nonfatal_oom(e))?;
 
-        let timestamp_normalization_bind_group = Snatchable::new(unsafe {
+        let buffer = crate::indirect_validation::Pending::new(buffer, |buffer| {
+            // SAFETY: The unpublished buffer has no remaining users.
+            unsafe { self.raw().destroy_buffer(buffer) };
+        });
+        let timestamp_normalization_bind_group = unsafe {
             // SAFETY: The size passed here must not overflow the buffer.
             self.timestamp_normalizer
                 .get()
                 .unwrap()
                 .create_normalization_bind_group(
                     self,
-                    &*buffer,
+                    buffer.as_ref(),
                     desc.label.as_deref(),
                     wgt::BufferSize::new(hal_desc.size).unwrap(),
                     desc.usage,
                 )
-        }?);
+        }?;
+        let timestamp_normalization_bind_group =
+            crate::indirect_validation::Pending::new(timestamp_normalization_bind_group, |group| {
+                group.dispose(self.raw());
+            });
 
         let indirect_validation_bind_groups =
             self.create_indirect_validation_bind_groups(buffer.as_ref(), desc.size, desc.usage)?;
 
         let buffer = Buffer {
-            raw: Snatchable::new(buffer),
+            raw: Snatchable::new(buffer.commit()),
             device: self.clone(),
             usage: desc.usage,
             size: desc.size,
@@ -1133,7 +1138,9 @@ impl Device {
             label: desc.label.to_string(),
             tracking_data: TrackingData::new(self.tracker_indices.buffers.clone()),
             bind_groups: Mutex::new(rank::BUFFER_BIND_GROUPS, WeakVec::new()),
-            timestamp_normalization_bind_group,
+            timestamp_normalization_bind_group: Snatchable::new(
+                timestamp_normalization_bind_group.commit(),
+            ),
             indirect_validation_bind_groups,
         };
 
@@ -1284,6 +1291,19 @@ impl Device {
         hal_buffer: Box<dyn hal::DynBuffer>,
         desc: &resource::BufferDescriptor,
     ) -> (Fallible<Buffer>, Option<resource::CreateBufferError>) {
+        // Account for the transferred handle before any fallible setup; failure
+        // destroys it using the same ownership contract as a successful import.
+        unsafe { self.raw().add_raw_buffer(&*hal_buffer) };
+        let hal_buffer = crate::indirect_validation::Pending::new(hal_buffer, |buffer| {
+            // SAFETY: The transferred buffer has no remaining users.
+            unsafe { self.raw().destroy_buffer(buffer) };
+        });
+        if let Err(error) = self.check_is_valid() {
+            return (
+                Fallible::Invalid(Arc::new(desc.label.to_string())),
+                Some(error.into()),
+            );
+        }
         let timestamp_normalization_bind_group = unsafe {
             match self
                 .timestamp_normalizer
@@ -1291,12 +1311,12 @@ impl Device {
                 .unwrap()
                 .create_normalization_bind_group(
                     self,
-                    &*hal_buffer,
+                    hal_buffer.as_ref(),
                     desc.label.as_deref(),
                     wgt::BufferSize::new(desc.size).unwrap(),
                     desc.usage,
                 ) {
-                Ok(bg) => Snatchable::new(bg),
+                Ok(bg) => bg,
                 Err(e) => {
                     return (
                         Fallible::Invalid(Arc::new(desc.label.to_string())),
@@ -1306,6 +1326,10 @@ impl Device {
             }
         };
 
+        let timestamp_normalization_bind_group =
+            crate::indirect_validation::Pending::new(timestamp_normalization_bind_group, |group| {
+                group.dispose(self.raw());
+            });
         let indirect_validation_bind_groups = match self.create_indirect_validation_bind_groups(
             hal_buffer.as_ref(),
             desc.size,
@@ -1315,10 +1339,8 @@ impl Device {
             Err(e) => return (Fallible::Invalid(Arc::new(desc.label.to_string())), Some(e)),
         };
 
-        unsafe { self.raw().add_raw_buffer(&*hal_buffer) };
-
         let buffer = Buffer {
-            raw: Snatchable::new(hal_buffer),
+            raw: Snatchable::new(hal_buffer.commit()),
             device: self.clone(),
             usage: desc.usage,
             size: desc.size,
@@ -1330,7 +1352,9 @@ impl Device {
             label: desc.label.to_string(),
             tracking_data: TrackingData::new(self.tracker_indices.buffers.clone()),
             bind_groups: Mutex::new(rank::BUFFER_BIND_GROUPS, WeakVec::new()),
-            timestamp_normalization_bind_group,
+            timestamp_normalization_bind_group: Snatchable::new(
+                timestamp_normalization_bind_group.commit(),
+            ),
             indirect_validation_bind_groups,
         };
 
@@ -1342,6 +1366,17 @@ impl Device {
             .insert_single(&buffer, wgt::BufferUses::empty());
 
         (Fallible::Valid(buffer), None)
+    }
+
+    pub(crate) fn ready_indirect_validation(
+        &self,
+    ) -> Option<&crate::indirect_validation::IndirectValidation> {
+        self.indirect_validation
+            .as_ref()?
+            .get()?
+            .as_ref()
+            .ok()
+            .map(Box::as_ref)
     }
 
     fn create_indirect_validation_bind_groups(
@@ -1359,13 +1394,40 @@ impl Device {
             return Ok(Snatchable::empty());
         };
 
+        // Cache failure as well as success: setup remains fail-closed and is
+        // attempted once per device, at the first INDIRECT buffer creation.
+        let indirect_validation = indirect_validation.get_or_init(|| {
+            crate::indirect_validation::IndirectValidation::new(
+                self.raw(),
+                &self.limits,
+                &self.features,
+                self.instance_flags,
+                self.adapter.backend(),
+            )
+            .map(Box::new)
+        });
+        let indirect_validation = match indirect_validation {
+            Ok(validation) => validation,
+            Err(error) => {
+                // Publish the sticky error before invoking user code: a lost
+                // callback may reenter buffer creation on this device.
+                self.lose("Indirect validation setup failed");
+                return Err(error.clone().into());
+            }
+        };
+
         let bind_groups = crate::indirect_validation::BindGroups::new(
             indirect_validation,
             self,
             buffer_size,
             raw_buffer,
         )
-        .map_err(resource::CreateBufferError::IndirectValidationBindGroup)?;
+        .map_err(|error| {
+            if matches!(error, DeviceError::Lost) {
+                self.lose("Indirect validation bind group setup failed");
+            }
+            resource::CreateBufferError::IndirectValidationBindGroup(error)
+        })?;
 
         if let Some(bind_groups) = bind_groups {
             Ok(Snatchable::new(bind_groups))
@@ -5449,7 +5511,8 @@ impl Device {
         self.valid.store(false, Ordering::Release);
 
         // 1) Resolve the GPUDevice device.lost promise.
-        if let Some(device_lost_closure) = self.device_lost_closure.lock().take() {
+        let device_lost_closure = self.device_lost_closure.lock().take();
+        if let Some(device_lost_closure) = device_lost_closure {
             device_lost_closure(DeviceLostReason::Unknown, message.to_string());
         }
 

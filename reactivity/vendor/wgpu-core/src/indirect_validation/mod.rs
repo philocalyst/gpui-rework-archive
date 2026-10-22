@@ -9,6 +9,43 @@ mod dispatch;
 mod draw;
 mod utils;
 
+/// Owns a HAL acquisition until it is committed to its final owner. HAL resources
+/// require explicit destruction; dropping their boxes alone does not release them.
+/// Stack order releases dependent acquisitions before the objects they reference,
+/// including when a later HAL call returns an error or unwinds.
+pub(crate) struct Pending<T, F: FnOnce(T)> {
+    value: Option<T>,
+    cleanup: Option<F>,
+}
+
+impl<T, F: FnOnce(T)> Pending<T, F> {
+    pub(crate) fn new(value: T, cleanup: F) -> Self {
+        Self {
+            value: Some(value),
+            cleanup: Some(cleanup),
+        }
+    }
+
+    pub(crate) fn commit(mut self) -> T {
+        self.value.take().unwrap()
+    }
+}
+
+impl<T, F: FnOnce(T)> core::ops::Deref for Pending<T, F> {
+    type Target = T;
+    fn deref(&self) -> &T {
+        self.value.as_ref().unwrap()
+    }
+}
+
+impl<T, F: FnOnce(T)> Drop for Pending<T, F> {
+    fn drop(&mut self) {
+        if let Some(value) = self.value.take() {
+            self.cleanup.take().unwrap()(value);
+        }
+    }
+}
+
 pub(crate) use dispatch::Dispatch;
 pub(crate) use draw::{Draw, DrawBatcher, DrawResources};
 
@@ -43,6 +80,7 @@ impl IndirectValidation {
                 return Err(DeviceError::Lost);
             }
         };
+        let dispatch = Pending::new(dispatch, |dispatch: Dispatch| dispatch.dispose(device));
         let draw = match Draw::new(
             device,
             required_features,
@@ -56,7 +94,10 @@ impl IndirectValidation {
                 return Err(DeviceError::Lost);
             }
         };
-        Ok(Self { dispatch, draw })
+        Ok(Self {
+            dispatch: dispatch.commit(),
+            draw,
+        })
     }
 
     pub(crate) fn dispose(self, device: &dyn hal::DynDevice) {
@@ -88,6 +129,12 @@ impl BindGroups {
             buffer,
             device.instance_flags,
         )?;
+        let dispatch = Pending::new(dispatch, |group| {
+            if let Some(group) = group {
+                // SAFETY: This unpublished group has no remaining users.
+                unsafe { device.raw().destroy_bind_group(group) };
+            }
+        });
         let draw = indirect_validation.draw.create_src_bind_group(
             device.raw(),
             &device.adapter.limits(),
@@ -96,7 +143,7 @@ impl BindGroups {
             device.instance_flags,
         )?;
 
-        match (dispatch, draw) {
+        match (dispatch.commit(), draw) {
             (None, None) => Ok(None),
             (None, Some(_)) => unreachable!(),
             (Some(_), None) => unreachable!(),

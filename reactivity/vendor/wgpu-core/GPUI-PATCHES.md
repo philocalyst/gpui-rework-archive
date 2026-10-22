@@ -29,3 +29,30 @@ Vendoring makes an upstream `expect(unused)` on MutexGuard::saved visible to the
 workspace compiler's unfulfilled_lint_expectations warning (registry dependencies
 were lint-capped). It becomes `allow(unused)` without changing the field, Drop,
 locking or runtime behavior. This one-line compiler compatibility delta is charged.
+
+# Lazy indirect validation
+
+The existing enabled-policy Option now contains the existing cross-platform
+OnceCellOrLock alias and a cached Result<Box<IndirectValidation>, DeviceError>.
+Device construction records policy without constructing the internal dispatch or
+draw validation shaders/pipelines. The first normal or imported INDIRECT buffer
+initializes them; successful buffers still require their validation groups.
+Pipeline-layout INDIRECT_BUILTIN_UPDATE remains keyed to policy before first use.
+Execution reads only initialized state, and Device/DrawResources destruction never
+initializes it. This keeps Naga and all backend validation paths available.
+
+Initialization failure moves from device request to first INDIRECT buffer creation.
+The existing constructor's Lost mapping is retained, cached, and delivered through
+the live device's loss callback after the cell initializer has returned. The loss
+callback runs after its mutex is released, allowing user reentry. A lost per-buffer
+group allocation also delivers device loss while retaining its existing buffer
+error wrapper; per-buffer OOM remains recoverable.
+
+A stack-only Pending guard explicitly destroys unpublished HAL acquisitions in
+reverse dependency order on error or Rust unwind. It covers both constructors,
+Dispatch-success/Draw-failure, the first of two source groups, draw pool buffers,
+and normal/imported user buffers plus preceding timestamp groups. Import takes
+ownership by value; its HAL accounting is entered before fallible setup so failure
+can destroy the transferred wrapper exactly once. Backend ownership semantics
+remain in HAL. Qualification, baseline counts, and scope limits are recorded
+separately in reactivity/evidence/lazy-indirect.
