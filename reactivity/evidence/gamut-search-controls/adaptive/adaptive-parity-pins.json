@@ -1,0 +1,22 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-adaptive-parity-new/Cargo.toml",
+    "--message-format=json"
+  ],
+  "executable": "/tmp/gpui-gamut-adaptive-adaptive-parity-frozen",
+  "sha256": "a3928d11f740f243c4cc72691ea36e68a0579bc647d58e35995452ba11e89293",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-adaptive-consumer-target/release/deps/libgpui_canvas-0db151b05c6cc42c.rlib",
+      "sha256": "1b284d00eae1cf51f04cd7b5456adef6175a42f938805735d78ab527674f9b5e",
+      "bytes": 7150850
+    }
+  ],
+  "timing_qualified": false
+}
