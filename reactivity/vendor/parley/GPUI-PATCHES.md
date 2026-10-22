@@ -31,3 +31,9 @@ its explicit default font instances through Fontique's metadata override.
 The removed 0.11 word-boundaries feature is not recreated: current upstream
 analysis/editor behavior stays enabled. Old feature-comparison measurements
 remain historical and do not describe this 0.12 binary.
+
+Checkpoint reuse control: BreakerState's Clone::clone_from reuses its contributed
+style-index and subtree-history Vec capacities. clone() keeps a deep independent
+copy. No fields, cache, source limits or line-break algorithm change. This is a
+separate control against consuming-batch checkpoint elimination; its temporary
+maximum-capacity retention must be charged rather than assumed free.

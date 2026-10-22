@@ -576,7 +576,6 @@ pub struct BoxBreakData {
     pub advance: f32,
 }
 
-#[derive(Clone)]
 /// The mutable state of the line breaker.
 ///
 /// This is exposed so that callers using [`BreakLines`] directly can inspect and
@@ -630,6 +629,48 @@ pub struct BreakerState {
     prev_boundary: Option<PrevBoundaryState>,
     /// Saved breaker state for the last emergency line-breaking opportunity
     emergency_boundary: Option<PrevBoundaryState>,
+}
+
+// Reuse saved checkpoint buffers. Clone preserves the prior deep-copy contract.
+impl Clone for BreakerState {
+    fn clone(&self) -> Self {
+        Self {
+            items: self.items,
+            lines: self.lines,
+            item_idx: self.item_idx,
+            run_idx: self.run_idx,
+            cluster_idx: self.cluster_idx,
+            line_x: self.line_x,
+            line_y: self.line_y,
+            layout_max_advance: self.layout_max_advance,
+            line_max_advance: self.line_max_advance,
+            line_max_height: self.line_max_height,
+            line: self.line.clone(),
+            contributed: self.contributed.clone(),
+            subtrees: self.subtrees.clone(),
+            prev_boundary: self.prev_boundary.clone(),
+            emergency_boundary: self.emergency_boundary.clone(),
+        }
+    }
+    fn clone_from(&mut self, source: &Self) {
+        self.items = source.items;
+        self.lines = source.lines;
+        self.item_idx = source.item_idx;
+        self.run_idx = source.run_idx;
+        self.cluster_idx = source.cluster_idx;
+        self.line_x = source.line_x;
+        self.line_y = source.line_y;
+        self.layout_max_advance = source.layout_max_advance;
+        self.line_max_advance = source.line_max_advance;
+        self.line_max_height = source.line_max_height;
+        self.line.clone_from(&source.line);
+        self.contributed.clone_from(&source.contributed);
+        self.subtrees.entries.clone_from(&source.subtrees.entries);
+        self.subtrees.frozen_count = source.subtrees.frozen_count;
+        self.prev_boundary.clone_from(&source.prev_boundary);
+        self.emergency_boundary
+            .clone_from(&source.emergency_boundary);
+    }
 }
 
 impl Default for BreakerState {
