@@ -938,11 +938,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         validate_scale(options.size, scale_factor)?;
         let sources =
             catch_unwind(AssertUnwindSafe(M::sources)).map_err(|_| Error::OwnerPanicked)?;
-        let canvas = if automatic_presentation {
-            Canvas::with_color_config(options.size[0], options.size[1], options.colors)?
-        } else {
-            Canvas::recording(options.size[0], options.size[1], options.colors)?
-        };
+        let canvas = Canvas::recording(options.size[0], options.size[1], options.colors)?;
         // These constructors run while PendingMount still owns the model and
         // receiver order, including checked process-namespace exhaustion.
         let sites = Sites::new();
@@ -1432,8 +1428,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .ok_or(Error::MissingElement)?;
         Ok(runtime.sites.target(identity))
     }
-    /// CPU diagnostic rendering of the latest coherent commands. In recording
-    /// mode this explicitly allocates the optional image, but never acknowledges
+    /// CPU diagnostic rendering of the latest coherent commands. The first call
+    /// after mount/resize allocates the optional image. It never acknowledges
     /// native presentation. Optional image allocation failures return Canvas errors.
     pub fn with_pixels<R>(&mut self, read: impl FnOnce(&[u8], u32, u32) -> R) -> Result<R, Error> {
         let mut runtime = self.runtime_mut()?;
@@ -2421,11 +2417,11 @@ impl<M: View + 'static> Runtime<M> {
         let scale_factor = self.requested_scale_factor;
         // A failed resize must retain the old coherent candidate's commands.
         let mut replacement = if size != [self.canvas.width(), self.canvas.height()] {
-            Some(if self.automatic_presentation {
-                Canvas::with_color_config(size[0], size[1], self.canvas.color_config())?
-            } else {
-                Canvas::recording(size[0], size[1], self.canvas.color_config())?
-            })
+            Some(Canvas::recording(
+                size[0],
+                size[1],
+                self.canvas.color_config(),
+            )?)
         } else {
             None
         };
@@ -3185,6 +3181,47 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
 mod tests {
     use super::*;
     use crate::{div, text};
+
+    #[test]
+    fn headless_acknowledgement_defers_pixels_and_diagnostics_follow_edits_and_resize() {
+        struct Block(Color);
+        impl View for Block {
+            fn view(&self) -> crate::El<'_> {
+                div().size(32).bg(self.0)
+            }
+        }
+        let mut win = Win::with_size(Block(Color::rgb(255, 0, 0)), 8, 8).unwrap();
+        assert!(win.snapshot().unwrap().presentation_valid);
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 0);
+        let before = win.snapshot().unwrap().presentation_epoch;
+        win.with_pixels(|pixels, width, height| {
+            assert_eq!([width, height], [8, 8]);
+            assert_eq!(pixels.len(), 8 * 8 * 4);
+            assert!(pixels.chunks_exact(4).all(|p| p == [255, 0, 0, 255]));
+        })
+        .unwrap();
+        assert_eq!(win.snapshot().unwrap().presentation_epoch, before);
+
+        win.update(|block| block.0 = Color::rgb(0, 0, 255)).unwrap();
+        let snapshot = win.snapshot().unwrap();
+        assert_eq!(snapshot.source_epoch, snapshot.presentation_epoch);
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 1);
+        win.with_pixels(|pixels, _, _| {
+            assert!(pixels.chunks_exact(4).all(|p| p == [0, 0, 255, 255]));
+        })
+        .unwrap();
+        win.resize([16, 8]).unwrap();
+        assert!(win.snapshot().unwrap().presentation_valid);
+        assert_eq!(win.runtime().unwrap().canvas.output_bytes(), 0);
+        assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 0);
+        win.with_pixels(|pixels, width, height| {
+            assert_eq!([width, height], [16, 8]);
+            assert_eq!(pixels.len(), 16 * 8 * 4);
+            assert!(pixels.chunks_exact(4).all(|p| p == [0, 0, 255, 255]));
+        })
+        .unwrap();
+    }
 
     #[test]
     fn native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels() {
