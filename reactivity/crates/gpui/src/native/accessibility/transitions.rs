@@ -698,3 +698,72 @@ fn virtual_focus_revocation_and_reappearance_match_full_consumer() {
             .is_none()
     );
 }
+
+struct PaintPage {
+    color: Signal<crate::Color>,
+    map: Signal<Affine>,
+}
+impl PaintPage {
+    const COLOR: Source<Self, crate::Color> =
+        Source::new(FieldId::new(1), "color", |m| &m.color, |m| &mut m.color);
+    const MAP: Source<Self, Affine> =
+        Source::new(FieldId::new(2), "map", |m| &m.map, |m| &mut m.map);
+}
+impl View for PaintPage {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::COLOR).direct(Self::MAP)
+    }
+    fn view(&self) -> El<'_> {
+        div().size(100).transform(&self.map).child(
+            button("Paint")
+                .size(40)
+                .bg(&self.color)
+                .on_click(|_: &mut Self| {}),
+        )
+    }
+}
+#[test]
+fn paint_complete_transitions_preserve_pending_full_rows_and_zero_node_deltas() {
+    let mut win = Win::recording(
+        PaintPage {
+            color: Signal::new(crate::Color::BLACK),
+            map: Signal::new(Affine::IDENTITY),
+        },
+        WindowOptions {
+            size: [120, 120],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    acknowledge(&mut win);
+    let target = win.button("Paint");
+    win.focus(target).unwrap();
+    let mut base = win.accessibility_state().unwrap();
+    let mut tree = Tree::new(full(&win), true);
+    win.accessibility_observe(true).unwrap();
+    for color in [crate::rgb(0x102030), crate::rgb(0x405060)] {
+        win.set(PaintPage::COLOR, color).unwrap();
+        assert_eq!(win.accessibility_state().unwrap(), base);
+    }
+    acknowledge(&mut win);
+    base = apply(&win, base, &mut tree, Some(0));
+    assert_eq!(win.focused().unwrap(), Some(target));
+    win.set(PaintPage::MAP, Affine::translation(5.0, 0.0))
+        .unwrap();
+    win.set(PaintPage::COLOR, crate::rgb(0x708090)).unwrap();
+    acknowledge(&mut win);
+    let next = win.accessibility_state().unwrap();
+    let count = win.accessibility_delta(base, next).unwrap().len();
+    assert!(count > 0);
+    base = apply(&win, base, &mut tree, Some(count));
+    win.set(PaintPage::MAP, Affine::translation(8.0, 0.0))
+        .unwrap();
+    let good = win.with_scene(|_, token| token).unwrap();
+    assert!(win.set(PaintPage::MAP, Affine::scale(0.0, 1.0)).is_err());
+    assert!(win.set(PaintPage::COLOR, crate::rgb(0xa0b0c0)).is_err());
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), good);
+    win.presented(good).unwrap();
+    // Failed collection invalidates sparse trust; the complete older sheet is
+    // still consumable through the independent full fallback.
+    apply(&win, base, &mut tree, None);
+}

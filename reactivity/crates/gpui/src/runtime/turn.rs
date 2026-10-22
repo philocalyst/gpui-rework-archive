@@ -182,7 +182,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     // windows still need their list realization boundary.
                     if realize && self.dirty {
                         self.describe(false)?;
-                        Ok(false)
+                        Ok(PatchOutcome::Visual)
                     } else {
                         Ok(semantic)
                     }
@@ -196,7 +196,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             }
             None => {
                 self.runtime.counters.coarse_updates += 1;
-                self.describe(false).map(|()| false)
+                self.describe(false).map(|()| PatchOutcome::Visual)
             }
         };
         if let Err(error) = result {
@@ -204,7 +204,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.focused = None;
             return Err(error);
         }
-        if result == Ok(true) {
+        if result == Ok(PatchOutcome::Complete) {
+            return Ok(self.commit());
+        }
+        if result == Ok(PatchOutcome::Metadata) {
             return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
         }
         self.present()

@@ -89,50 +89,88 @@ impl PaintRenderer {
         target: &wgpu::TextureView,
         requested: &[PaintIndex],
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.sites.clear();
+        if requested.windows(2).any(|pair| pair[0] >= pair[1]) {
+            self.sites.clear();
+            self.inner.packet = None;
+            return Err(Error::InvalidScene);
+        }
+        self.render_indices(scene, target, requested.iter().copied())
+    }
+
+    /// Capture an unordered positional set in the existing map, without a
+    /// second index array. Sorting and duplicate checks occur at full prepare.
+    pub fn render_indices(
+        &mut self,
+        scene: PreparedScene<'_>,
+        target: &wgpu::TextureView,
+        requested: impl IntoIterator<Item = PaintIndex>,
+    ) -> Result<wgpu::SubmissionIndex, Error> {
         self.inner.packet = None;
-        // Keep reuse bounded by current demand rather than a historical peak.
-        // This is full-scene preparation, never part of the O(k) patch path.
-        if requested.is_empty() || self.sites.capacity() > requested.len().saturating_mul(4) {
+        self.sites.clear();
+        let requested = requested.into_iter();
+        let demand = requested.size_hint().0;
+        if demand != 0 && self.sites.capacity() > demand.saturating_mul(4) {
             self.sites = Vec::new();
         }
+        self.sites
+            .try_reserve_exact(demand)
+            .map_err(|_| Error::ResourceLimit)?;
+        for index in requested {
+            self.sites
+                .try_reserve(1)
+                .map_err(|_| Error::ResourceLimit)?;
+            self.sites.push(Site {
+                index,
+                word: None,
+                rectangle: false,
+            });
+        }
+        if self.sites.is_empty() {
+            self.sites = Vec::new();
+        } else if self.sites.capacity() > self.sites.len().saturating_mul(4) {
+            self.sites.shrink_to_fit();
+        }
+        self.render_mapped(scene, target)
+    }
+
+    fn render_mapped(
+        &mut self,
+        scene: PreparedScene<'_>,
+        target: &wgpu::TextureView,
+    ) -> Result<wgpu::SubmissionIndex, Error> {
+        self.sites.sort_unstable_by_key(|site| site.index);
         let mut previous = None;
-        for &index in requested {
-            if previous.is_some_and(|p| p >= index)
-                || scene.paint_index(index.order()) != Some(index)
+        for site in &self.sites {
+            if previous.is_some_and(|index| index == site.index)
+                || scene.paint_index(site.index.order()) != Some(site.index)
             {
+                self.sites.clear();
                 return Err(Error::InvalidScene);
             }
-            previous = Some(index);
+            previous = Some(site.index);
         }
-        self.sites
-            .try_reserve_exact(requested.len())
-            .map_err(|_| Error::ResourceLimit)?;
         let sites = &mut self.sites;
         let mut next = 0;
         let result = self
             .inner
             .render_observed(scene, target, |ordinal, group, word, compact| {
-                if let Some(&index) = requested.get(next)
-                    && index.order() as usize == ordinal
+                if let Some(site) = sites.get_mut(next)
+                    && site.index.order() as usize == ordinal
                 {
-                    sites.push(Site {
-                        index,
-                        word: (compact || group.placements().len() == 1)
-                            .then(|| NonZeroU32::new((word + if compact { 3 } else { 4 }) as u32))
-                            .flatten(),
-                        rectangle: group
-                            .placements()
-                            .next()
-                            .is_some_and(|p| p.source.is_solid()),
-                    });
+                    site.word = (compact || group.placements().len() == 1)
+                        .then(|| NonZeroU32::new((word + if compact { 3 } else { 4 }) as u32))
+                        .flatten();
+                    site.rectangle = group
+                        .placements()
+                        .next()
+                        .is_some_and(|p| p.source.is_solid());
                     next += 1;
                 }
             });
         if result.is_err() {
             self.sites.clear();
         }
-        debug_assert!(result.is_err() || next == requested.len());
+        debug_assert!(result.is_err() || next == self.sites.len());
         result
     }
     /// Resolve once when installing a token-qualified source sink. Patch
@@ -173,6 +211,23 @@ impl PaintRenderer {
         edits: &'edits [GpuPaintEdit],
         target: &'target wgpu::TextureView,
     ) -> Result<GpuPaintCommit<'owner, 'edits, 'target>, PaintError> {
+        self.prepare_edits(EditsRef::Bound(edits), target)
+    }
+
+    /// Borrow owner-converted colors directly. Positional map lookup costs
+    /// O(log bound groups) per edit, without another retained staging array.
+    pub fn prepare_paint_indexed<'owner, 'edits, 'target>(
+        &'owner mut self,
+        edits: &'edits [PaintEdit],
+        target: &'target wgpu::TextureView,
+    ) -> Result<GpuPaintCommit<'owner, 'edits, 'target>, PaintError> {
+        self.prepare_edits(EditsRef::Indexed(edits), target)
+    }
+    fn prepare_edits<'owner, 'edits, 'target>(
+        &'owner mut self,
+        edits: EditsRef<'edits>,
+        target: &'target wgpu::TextureView,
+    ) -> Result<GpuPaintCommit<'owner, 'edits, 'target>, PaintError> {
         let packet = self.inner.packet.as_ref().ok_or(PaintError::NoPacket)?;
         if [target.texture().width(), target.texture().height()] != packet.size
             || target.texture().format() != self.inner.format
@@ -181,22 +236,25 @@ impl PaintRenderer {
         }
         let mut previous = None;
         let mut changed = 0;
-        for (i, edit) in edits.iter().enumerate() {
-            if previous.is_some_and(|b| b >= edit.binding) {
+        for i in 0..edits.len() {
+            let (binding, paint) = edits
+                .get(i, &self.sites)
+                .ok_or(PaintError::InvalidBinding { edit: i })?;
+            if previous.is_some_and(|b| b >= binding) {
                 return Err(PaintError::Unordered { edit: i });
             }
-            previous = Some(edit.binding);
+            previous = Some(binding);
             let site = self
                 .sites
-                .get(edit.binding.0 as usize)
-                .filter(|s| s.index == edit.paint.index())
+                .get(binding)
+                .filter(|s| s.index == paint.index())
                 .ok_or(PaintError::InvalidBinding { edit: i })?;
             let word = site
                 .word
                 .ok_or(PaintError::UnsupportedGroup { edit: i })?
                 .get() as usize;
             let old = self.inner.records[word];
-            let color = edit.paint.color();
+            let color = paint.color();
             let next = color.map(f32::to_bits);
             if color[3] == 0.0 || old[3] != next[3] {
                 return Err(PaintError::AlphaChanged { edit: i });
@@ -221,6 +279,32 @@ impl PaintRenderer {
     }
 }
 
+#[derive(Clone, Copy)]
+enum EditsRef<'a> {
+    Bound(&'a [GpuPaintEdit]),
+    Indexed(&'a [PaintEdit]),
+}
+impl EditsRef<'_> {
+    fn len(self) -> usize {
+        match self {
+            Self::Bound(e) => e.len(),
+            Self::Indexed(e) => e.len(),
+        }
+    }
+    fn get(self, index: usize, sites: &[Site]) -> Option<(usize, PaintEdit)> {
+        match self {
+            Self::Bound(edits) => edits.get(index).map(|e| (e.binding.0 as usize, e.paint)),
+            Self::Indexed(edits) => {
+                let paint = *edits.get(index)?;
+                let binding = sites
+                    .binary_search_by_key(&paint.index(), |site| site.index)
+                    .ok()?;
+                Some((binding, paint))
+            }
+        }
+    }
+}
+
 /// A fully prevalidated packet edit. Drop changes nothing. Commit revokes
 /// replay before writing, updates only color words, then clears/draws/submits
 /// the entire target. It does not acknowledge native presentation.
@@ -236,7 +320,7 @@ impl PaintRenderer {
 #[must_use = "call commit to update and submit the packet; dropping changes nothing"]
 pub struct GpuPaintCommit<'owner, 'edits, 'target> {
     owner: &'owner mut PaintRenderer,
-    edits: &'edits [GpuPaintEdit],
+    edits: EditsRef<'edits>,
     target: &'target wgpu::TextureView,
     changed: usize,
 }
@@ -254,10 +338,14 @@ impl GpuPaintCommit<'_, '_, '_> {
             .packet
             .take()
             .expect("guard holds the admitted packet");
-        for edit in self.edits {
-            let site = &self.owner.sites[edit.binding.0 as usize];
+        for i in 0..self.edits.len() {
+            let (binding, paint) = self
+                .edits
+                .get(i, &self.owner.sites)
+                .expect("validated frozen map");
+            let site = &self.owner.sites[binding];
             let word = site.word.expect("validated color word").get() as usize;
-            let next = edit.paint.color().map(f32::to_bits);
+            let next = paint.color().map(f32::to_bits);
             if inner.records[word] == next {
                 continue;
             }

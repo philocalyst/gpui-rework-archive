@@ -251,7 +251,7 @@ impl Upgrade {
                     instance,
                     gpu: Box::new(GpuSurface {
                         handle,
-                        renderer: *renderer,
+                        renderer: super::PaintRenderer::new(*renderer),
                         errors,
                         packet_token: None,
                         config: super::surface_config(

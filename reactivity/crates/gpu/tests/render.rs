@@ -2177,7 +2177,16 @@ fn paint_packets_queue_a_patch_b_patch_c_before_readback_and_match_full_rebuilds
                     })
                     .collect();
                 let view = target.create_view(&Default::default());
-                let plan = gpu.prepare_paint(&edits, &view).unwrap();
+                let indexed: Vec<_> = indices
+                    .iter()
+                    .zip(colors[i])
+                    .map(|(&index, color)| PaintEdit::new(index, color))
+                    .collect();
+                let plan = if i == 1 {
+                    gpu.prepare_paint(&edits, &view).unwrap()
+                } else {
+                    gpu.prepare_paint_indexed(&indexed, &view).unwrap()
+                };
                 assert_eq!(plan.changed_groups(), 3);
                 assert_eq!(plan.upload_bytes(), 48);
                 plan.commit();
@@ -2362,5 +2371,78 @@ fn paint_modes_foreign_ordinals_and_attempted_full_failures_revoke_mapping() {
         );
         assert!(gpu.binding(sites[0]).is_some());
         assert!(gpu.redraw(&view).unwrap().is_some());
+    });
+}
+
+#[test]
+fn separate_identical_color_calls_keep_independent_positional_groups() {
+    use gpui_canvas::PaintEdit;
+    use gpui_gpu::PaintRenderer;
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut gpu = PaintRenderer::new(renderer(format).await);
+            let initial = Color::rgba(100, 50, 25, 128);
+            let rect = Rect::new(2.0, 3.0, 20.0, 17.0);
+            let clip = Rect::new(0.0, 0.0, 32.0, 24.0);
+            let build = |colors: [Color; 2]| {
+                let mut canvas = Canvas::recording(32, 24, config).unwrap();
+                canvas.clear(Color::WHITE);
+                let mut indices = Vec::new();
+                for color in colors {
+                    let cursor = canvas.paint_cursor();
+                    canvas
+                        .fill_rect(rect, Affine::IDENTITY, clip, color)
+                        .unwrap();
+                    indices.push(canvas.paint_index(cursor).unwrap());
+                }
+                (canvas, indices)
+            };
+            let (mut canvas, indices) = build([initial; 2]);
+            assert_eq!(canvas.prepared_scene().groups().len(), 2);
+            let target = output_texture(&gpu, &canvas);
+            let view = target.create_view(&Default::default());
+            gpu.render_indices(
+                canvas.prepared_scene(),
+                &view,
+                indices.iter().rev().copied(),
+            )
+            .unwrap();
+            for colors in [
+                [Color::rgba(20, 150, 60, 128), initial],
+                [initial, Color::rgba(30, 70, 180, 128)],
+                [initial; 2],
+            ] {
+                let edits: Vec<_> = indices
+                    .iter()
+                    .zip(colors)
+                    .map(|(&index, color)| PaintEdit::new(index, color))
+                    .collect();
+                canvas.prepare_paint(&edits).unwrap().commit();
+                gpu.prepare_paint_indexed(&edits, &view).unwrap().commit();
+                let actual = read_texture(&gpu, &target);
+                let (mut expected, _) = build(colors);
+                assert_eq!(canvas.pixels(), expected.pixels());
+                let expected_target = output_texture(&gpu, &expected);
+                let mut full = Renderer::new(gpu.device().clone(), gpu.queue().clone(), format)
+                    .await
+                    .unwrap();
+                full.render(
+                    expected.prepared_scene(),
+                    &expected_target.create_view(&Default::default()),
+                )
+                .unwrap();
+                assert_eq!(actual, read_texture(&full, &expected_target));
+            }
+        }
     });
 }

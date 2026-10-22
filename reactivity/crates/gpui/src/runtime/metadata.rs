@@ -196,6 +196,7 @@ pub(super) struct Metadata {
     pub presented: Sheet,
     pub candidate: Option<Sheet>,
     pub geometry: Option<Box<super::geometry::Geometry>>,
+    pub paint: Option<Box<super::paint::PaintState>>,
 }
 impl Metadata {
     pub fn base(&self, identity: u64) -> Option<&Declared> {
@@ -210,8 +211,18 @@ impl Metadata {
             .ok()
             .map(|i| &mut self.base[i])
     }
+    pub(super) fn has_semantics(&self) -> bool {
+        !self.base.is_empty()
+            || !self.overrides.is_empty()
+            || !self.presented.is_empty()
+            || self
+                .candidate
+                .as_ref()
+                .is_some_and(|sheet| !sheet.is_empty())
+    }
     pub fn unused(&self) -> bool {
         self.geometry.is_none()
+            && self.paint.is_none()
             && self.base.is_empty()
             && self.overrides.is_empty()
             && self.candidate.is_none()
@@ -305,7 +316,7 @@ impl<M: View + 'static> Runtime<M> {
                 let nodes = self
                     .prepared
                     .as_ref()
-                    .map_or(self.presented.as_slice(), |p| &p.nodes);
+                    .map_or(self.presented.as_slice(), |p| p.rows(&self.presented));
                 self.freeze_metadata(nodes)
             })
             .flatten();
@@ -389,7 +400,7 @@ impl<M: View + 'static> Runtime<M> {
             let nodes = self
                 .prepared
                 .as_ref()
-                .map_or(self.presented.as_slice(), |p| &p.nodes);
+                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented));
             if matches!(publish, Publish::All) {
                 if let Some(sheet) = frozen
                     && let Some(metadata) = &mut self.metadata
