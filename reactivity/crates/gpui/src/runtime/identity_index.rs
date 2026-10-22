@@ -1,12 +1,22 @@
 //! Exact logical identity lookup, rebuilt only with a complete description.
 //!
 //! Fresh and unchanged preorder descriptions commonly have consecutive IDs in
-//! node order. Their index needs no allocation. Other orders retain one sorted
-//! entry per live node; no historical identity survives in this index.
+//! node order. Their index needs no allocation. A few consecutive runs retain
+//! only their affine mapping; other orders retain a sorted entry per live node.
+//! No historical identity survives in this index.
 
 pub(super) enum IdentityIndex {
     Contiguous { first: u64, len: usize },
+    Runs(Box<[Run]>),
     Indexed(Box<[Entry]>),
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub(super) struct Run {
+    first_id: u64,
+    first_index: u32,
+    len: u32,
 }
 
 // Every access copies the fields by value. Packed alignment reduces the fallback
@@ -31,12 +41,46 @@ impl IdentityIndex {
         let Some(first) = ids.clone().next() else {
             return Self::default();
         };
-        if ids
-            .clone()
-            .enumerate()
-            .all(|(index, identity)| identity.checked_sub(first) == Some(index as u64))
-        {
+        let mut run_count = 1;
+        let mut previous = first;
+        for identity in ids.clone().skip(1) {
+            run_count += usize::from(previous.checked_add(1) != Some(identity));
+            previous = identity;
+        }
+        if run_count == 1 {
             return Self::Contiguous { first, len };
+        }
+        if run_count * std::mem::size_of::<Run>() < len * std::mem::size_of::<Entry>() {
+            let mut runs = Vec::with_capacity(run_count);
+            let mut current = Run {
+                first_id: first,
+                first_index: 0,
+                len: 1,
+            };
+            for (index, identity) in ids.skip(1).enumerate() {
+                if current.first_id.checked_add(u64::from(current.len)) == Some(identity) {
+                    current.len += 1;
+                } else {
+                    runs.push(current);
+                    current = Run {
+                        first_id: identity,
+                        first_index: (index + 1) as u32,
+                        len: 1,
+                    };
+                }
+            }
+            runs.push(current);
+            runs.sort_unstable_by_key(|run| run.first_id);
+            assert!(
+                runs.windows(2).all(|pair| {
+                    pair[1]
+                        .first_id
+                        .checked_sub(pair[0].first_id)
+                        .is_some_and(|distance| distance >= u64::from(pair[0].len))
+                }),
+                "distinct admitted logical identities"
+            );
+            return Self::Runs(runs.into_boxed_slice());
         }
         let mut entries: Vec<_> = ids
             .enumerate()
@@ -61,6 +105,14 @@ impl IdentityIndex {
             Self::Contiguous { first, len } => {
                 let index = identity.checked_sub(*first)?;
                 (index < *len as u64).then_some(index as usize)
+            }
+            Self::Runs(runs) => {
+                let next = runs.partition_point(|run| run.first_id <= identity);
+                let run = &runs[next.checked_sub(1)?];
+                // Comparing displacement avoids an overflowing exclusive end
+                // for a run whose last admitted identity is u64::MAX.
+                let delta = identity - run.first_id;
+                (delta < u64::from(run.len)).then(|| run.first_index as usize + delta as usize)
             }
             Self::Indexed(entries) => entries
                 .binary_search_by_key(&identity, |entry| entry.identity)
@@ -95,6 +147,7 @@ mod tests {
             size_of::<BTreeMap<u64, usize>>()
         );
         assert_eq!(size_of::<Entry>(), 12);
+        assert_eq!(size_of::<Run>(), 16);
         assert_eq!(align_of::<Entry>(), 4);
     }
 
@@ -196,6 +249,118 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn sparse_edits_and_moved_subtrees_use_exact_affine_runs() {
+        for ids in [
+            (10..20).chain(100..105).chain(20..30).collect::<Vec<_>>(),
+            (u64::MAX - 4..=u64::MAX).chain(1..9).collect(),
+            (30..40).chain(10..20).chain(20..30).collect(),
+        ] {
+            let old: BTreeMap<_, _> = ids
+                .iter()
+                .copied()
+                .enumerate()
+                .map(|(i, id)| (id, i))
+                .collect();
+            let mut index = IdentityIndex::default();
+            let allocation = allocation_counter::measure(|| {
+                index = IdentityIndex::from_ids(ids.iter().copied())
+            });
+            let IdentityIndex::Runs(runs) = &index else {
+                panic!("expected compact runs")
+            };
+            assert_eq!(allocation.count_total, 1);
+            assert_eq!(allocation.bytes_current, (runs.len() * 16) as i64);
+            assert_eq!(allocation.bytes_total, allocation.bytes_current as u64);
+            assert!(runs.len() * 16 < ids.len() * 12);
+            for id in ids
+                .iter()
+                .copied()
+                .chain(0..200)
+                .chain([u64::MAX - 5, u64::MAX])
+            {
+                assert_eq!(index.get(id), old.get(&id).copied());
+            }
+        }
+    }
+
+    #[test]
+    fn chunk_permutations_and_holes_match_the_previous_map() {
+        for width in [1, 2, 3, 8, 17] {
+            for step in (1..16).step_by(2) {
+                let ids: Vec<_> = (0..16)
+                    .flat_map(|block| {
+                        let start = 100 + ((block * step) % 16) * width * 2;
+                        start..start + width
+                    })
+                    .collect();
+                let old: BTreeMap<_, _> = ids
+                    .iter()
+                    .copied()
+                    .enumerate()
+                    .map(|(i, id)| (id, i))
+                    .collect();
+                let index = IdentityIndex::from_ids(ids.iter().copied());
+                for identity in 0..100 + 32 * width {
+                    assert_eq!(index.get(identity), old.get(&identity).copied());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn a_large_replaced_child_run_retains_only_two_mappings() {
+        let ids: Vec<_> = std::iter::once(1).chain(65_538..131_075).collect();
+        let mut index = IdentityIndex::default();
+        let allocation =
+            allocation_counter::measure(|| index = IdentityIndex::from_ids(ids.iter().copied()));
+        assert_eq!(allocation.count_total, 1);
+        assert_eq!(allocation.bytes_total, 32);
+        let IdentityIndex::Runs(runs) = &index else {
+            panic!("expected two runs")
+        };
+        assert_eq!(runs.len(), 2);
+        assert_eq!(index.required(1), 0);
+        assert_eq!(index.get(2), None);
+        assert_eq!(index.get(65_537), None);
+        assert_eq!(index.required(65_538), 1);
+        assert_eq!(index.required(131_074), 65_537);
+        assert_eq!(index.get(131_075), None);
+    }
+
+    #[test]
+    fn dense_reordering_does_not_allocate_an_unprofitable_run_table() {
+        for ids in [
+            (1..65).rev().collect::<Vec<_>>(),
+            (2..66).step_by(2).chain((1..65).step_by(2)).collect(),
+            vec![1, 2, 4, 6], // A byte-size tie keeps the entry table.
+            vec![1, 3],
+        ] {
+            let index = IdentityIndex::from_ids(ids.iter().copied());
+            let old: BTreeMap<_, _> = ids
+                .iter()
+                .copied()
+                .enumerate()
+                .map(|(i, id)| (id, i))
+                .collect();
+            for &id in &ids {
+                assert_eq!(index.get(id), old.get(&id).copied());
+            }
+            if let IdentityIndex::Runs(runs) = index {
+                assert!(runs.len() * 16 < ids.len() * 12);
+            } else {
+                assert!(matches!(index, IdentityIndex::Indexed(_)));
+            }
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "distinct admitted logical identities")]
+    fn overlapping_runs_reject_duplicate_identity_admission() {
+        let ids: Vec<_> = (1..20).chain(10..30).collect();
+        IdentityIndex::from_ids(ids.iter().copied());
     }
 
     #[test]
