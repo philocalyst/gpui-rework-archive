@@ -5,6 +5,13 @@ The `first/` artifacts record that implementation before the separately requeste
 compact generic-Flex refinement. These are untimed functional/requested-allocation
 checks; there is no latency, throughput, RSS or OS-memory claim.
 
+The [combined integration gates](integration/checks.json) pin `b1fc101435`
+after the pointer protocol and paint substrate were integrated: 609 workspace
+cases/doctests, 126 accessible native units, strict Linux/macOS/Windows desktop
+checks, and actual X11 reactive-style/Todo/scroll pixel oracles pass. macOS and
+Windows checks are cross-compilation only. The reports below preserve each
+isolated implementation and the first recipe's measured regression.
+
 The implementation uses the existing owner-relative field registry and static
 property schema. A source freezes once per exact publication; all text/style
 sinks are admitted before any destination/base edit. Dynamic inspector bases

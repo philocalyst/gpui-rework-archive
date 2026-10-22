@@ -13,7 +13,7 @@ describe the intended complete system; this page records what is connected now.
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and reflection catalog, sparse Set/Inherit style, geometry and semantic overrides, shared transform/hit/paint geometry | Native inspector UI, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal with literal typed flex alignment/distribution/wrapping, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | Reactive style/recipe inputs, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal with typed literal/direct-Signal dimensions and flex recipes, scoped Parley/HarfRust paragraphs, bounded fallback leases, optional typed caret geometry, lazy Swash masks and physical-density rasterization | General Reader/Motion recipe algebra, native selection/IME, grapheme editing, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, local CSR bins and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Actual Rust-authored wgsl-rs shader, four-binding grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, admitted-packet replay and opt-in transactional color patches | Source-to-packet color coupling remains; replay/patch draws the full target; native HDR negotiation, other primitives and hardware/backend conformance remain |
@@ -52,6 +52,24 @@ These are exact retained layouts, not whole-window memory figures; layout/font/s
 storage and native services remain separately owned.
 
 ## Current verification
+
+The [combined style checks](evidence/reactive-style-ports/integration/checks.json)
+pin implementation `b1fc101435`: **609 workspace cases/doctests**, 126 native
+unit cases, strict accessible X11/Wayland/parallel/Vulkan all-target Clippy,
+formatting and exact headers pass. Actual X11 reactive-style, Todo and scroll
+scripts pass complete server-pixel oracles. Strict desktop all-target Clippy
+also passes for Apple aarch64 and Windows MSVC; those are cross-compilation
+checks. These counts overlap other campaigns.
+
+Registered direct signals bind dimensions, colors, transforms, radius and flex
+fields through the existing typed source registry. One source freeze admits all
+sinks before mutation, and inspector masks preserve an advancing lower base.
+The [compact recipe](evidence/reactive-style-ports/compact-flex/README.md)
+keeps literal Flex at its measured 12-byte baseline; four borrowed signal
+operands occupy 40 bytes without recipe allocation. Ordinary owner/node/style
+headers and the plain owner allocation floor are unchanged. The initial
+104-byte recipe and its correction remain recorded. This is the direct Signal
+surface; it does not implement the full proposed reactive expression algebra.
 
 The [pointer protocol checks](evidence/pointer-protocol/checks.json) pin
 `c6db932473` (integrated as `3bbacbe3b1`). Nine public pointer cases plus the focus
@@ -144,7 +162,8 @@ script across renderer policies pass. Apple aarch64 and Windows MSVC desktop
 all-target Clippy also passes; those checks remain cross-compilation only.
 The three new style fields fit existing padding: Style remains 88 B, El 176 B,
 Node 40 B, Presented 80 B and Runtime 2,384 B on the measured 64-bit build.
-This is a literal layout surface; direct reactive style ports are still pending.
+This earlier gate covers literal layout. Direct signal ports and compact typed
+recipes are connected by the later style campaign above.
 
 The [semantic streaming checks](evidence/semantic-stream/checks.json) at source
 `c894ff7c41` pass **298 default GPUI cases/doctests**, strict accessible native
