@@ -1,0 +1,11 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.26s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-1369131ef757ea8e)
+
+running 2 tests
+test runtime::input::focus_release_tests::failed_focus_preparation_and_epoch_exhaustion_leave_no_pressed_authority ... ok
+test runtime::input::focus_release_tests::private_press_proof_uses_the_existing_session_header ... POINTER_LAYOUT point=8 option_point=12 target=16 pressed=24 option_pressed=24 session=32 session_align=8 runtime=1864 win=8
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 152 filtered out; finished in 0.01s
+

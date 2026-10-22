@@ -1,0 +1,86 @@
+   Compiling syn v3.0.9
+   Compiling rustix v1.1.5
+   Compiling synstructure v0.14.0
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerofrom v0.1.8
+   Compiling displaydoc v0.2.7
+   Compiling yoke v0.8.3
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerovec v0.11.8
+   Compiling tinystr v0.8.4
+   Compiling bytemuck v1.25.2
+   Compiling icu_locale_core v2.3.0
+   Compiling font-types v0.12.7
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling icu_provider v2.3.1
+   Compiling icu_collections v2.3.0
+   Compiling read-fonts v0.41.0
+   Compiling serde_derive v1.0.229
+   Compiling serde v1.0.229
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling fontique v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling skrifa v0.49.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling icu_normalizer v2.3.0
+   Compiling parley_engine v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley_engine)
+   Compiling skrifa v0.44.0
+   Compiling cephal v0.1.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/cephal)
+   Compiling swash v0.2.10
+   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley)
+   Compiling zbus_utils v6.0.0
+   Compiling fearless_simd_macros v0.1.0
+   Compiling socket2 v0.6.5
+   Compiling memchr v2.8.3
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/canvas)
+   Compiling serde_json v1.0.154
+   Compiling zbus_macros v6.0.0
+   Compiling zruntime v0.2.0
+   Compiling accesskit v0.25.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit)
+   Compiling zcheapstr v1.1.0
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/state)
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling gethostname v1.1.0
+   Compiling x11rb-protocol v0.14.0
+   Compiling zbus v6.0.0
+   Compiling x11rb v0.14.0
+   Compiling gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_consumer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 49.27s
+     Running tests/pointer.rs (/tmp/gpui-presented-basis-target/debug/deps/pointer-484e6e4a991dfb2a)
+
+running 9 tests
+test a_fresh_hit_on_a_new_acknowledged_sheet_can_activate_the_surviving_target ... ok
+test failed_prepare_or_removed_target_never_replays_a_press ... ok
+test leave_nonfinite_cancel_and_wheel_consume_a_gesture_without_blurring ... ok
+test pending_geometry_rejects_and_consumes_release_before_later_acknowledgement ... ok
+test press_focuses_and_release_rechecks_the_same_live_hit_once ... ok
+test repeated_input_clicks_allocate_nothing_after_selection_activation ... ok
+test semantic_only_publication_keeps_the_current_gesture_usable ... ok
+test session_cannot_transfer_a_press_between_window_namespaces ... ok
+test wheel_uses_the_ordinary_two_axis_scroll_router ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/pointer_focus.rs (/tmp/gpui-presented-basis-target/debug/deps/pointer_focus-b3a630a8b74cb497)
+
+running 8 tests
+test absent_point_encoding_preserves_finite_bits_and_public_debug_shape ... ok
+test ack_before_release_uses_the_ordinary_current_sheet ... ok
+test built_in_inspector_requires_ack_because_epoch_captions_can_change_layout ... ok
+test equal_viewport_and_fresh_hit_inside_own_focus_paint_keep_the_gesture ... ok
+test focus_proof_never_crosses_window_namespaces ... ok
+test intervening_model_noop_semantic_geometry_replacement_and_failure_revoke_focus_proof ... ok
+test own_focus_candidate_does_not_lose_rapid_release_or_publish_unacknowledged_state ... ok
+test viewport_aba_and_surface_loss_revoke_the_exact_focus_candidate ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
