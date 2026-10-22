@@ -2,6 +2,25 @@
 
 Audited source: `/root/gpui-ce3/reactivity` at `36921e2c42efe8569889d16a27295d8ee7b790a2`. Findings below distinguish existing behavior from proposed parity work; they are not generic checklists.
 
+## Disposition after the combined native text integration
+
+The [8ea8b9d76a campaign](../evidence/native-text-integration/README.md)
+now qualifies source-directed selection and atomic selected/ranged replacement,
+real AT-SPI Unicode range edits and stale-provider retirement, plus the actual
+Apple/Windows adapters at compile time. Ordinary `native`, `desktop`, X11 and
+Wayland profiles now include accessibility; only explicitly named minimal/native-core
+profiles omit it. The negative capability assertions cited below are historical.
+Wrapped run/character/caret geometry, magnifiers, IME/clipboard, native foreign-OS
+execution and the remaining editor/platform contracts are still gaps.
+
+The [typed catalog/composition review](typed-reflection-composition-luna.md)
+and [color derivation](color-formulation-luna.md) drive separate active Sol
+spikes. The catalog already owns validation, impact and exact authoring equality;
+its tool facade must reuse them. The color primitive targets a neutral-connected
+fixed-L/h unit-cube chroma boundary, explicitly distinct from CSS local-MINDE.
+Neither slice supplies a complete inherited theme, arbitrary inspector text entry,
+palette interpolation or contrast API merely by exposing its first primitive.
+
 ## Accessibility and native feature profile
 
 **Strengths to preserve.** The native layer has a real AccessKit Winit integration, owner-thread command application, session/closed checks, bounded ingress, and lifecycle handling. Ingress tests cover deactivation revoking queued work and closure; Linux test code exercises late AT-SPI service creation, registry owner replacement and destroy. These are meaningful foundations. Feature selection is explicit: default is `simd` only; `desktop`, `x11`, and `wayland` include `accessibility`, while `native`, `x11-minimal`, and `wayland-minimal` can build without it ([Cargo.toml lines 25–36](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/Cargo.toml#L25-L36)). README explains the intended normal versus diagnostic profiles, so this is not an undisclosed default omission.
