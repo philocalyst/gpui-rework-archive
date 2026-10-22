@@ -1,0 +1,16 @@
+[package]
+name = "hummingbird-search-probe"
+version = "0.0.0"
+edition = "2024"
+[workspace]
+[dependencies]
+hummingbird-gpui-port = { path = "/root/gpui-ce3/reactivity/ports/hummingbird" }
+allocation-counter = "=0.8.1"
+[patch.crates-io]
+parley = { path = "/root/gpui-ce3/reactivity/vendor/parley" }
+parley_engine = { path = "/root/gpui-ce3/reactivity/vendor/parley_engine" }
+winit = { path = "/root/gpui-ce3/reactivity/vendor/winit" }
+wgpu-hal = { path = "/root/gpui-ce3/reactivity/vendor/wgpu-hal" }
+softbuffer = { path = "/root/gpui-ce3/reactivity/vendor/softbuffer" }
+accesskit_unix = { path = "/root/gpui-ce3/reactivity/vendor/accesskit_unix" }
+accesskit_atspi_common = { path = "/root/gpui-ce3/reactivity/vendor/accesskit_atspi_common" }
