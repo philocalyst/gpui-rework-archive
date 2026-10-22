@@ -133,6 +133,7 @@ fn lower(source: &str, line_height: f32) -> Fixture {
 
 #[test]
 fn wrapped_zero_and_small_line_heights_keep_producer_source_ownership() {
+    let _registry = super::super::BUNDLED_TEST_LOCK.lock().unwrap();
     for source in [
         "",
         "abcdef ghijkl mnopqr",
@@ -178,6 +179,7 @@ fn wrapped_zero_and_small_line_heights_keep_producer_source_ownership() {
 
 #[test]
 fn mandatory_break_lines_exclude_separators_but_runs_cover_document() {
+    let _registry = super::super::BUNDLED_TEST_LOCK.lock().unwrap();
     for (source, expected) in [
         ("a\u{2028}\u{2028}ב\u{2028}", vec![0..1, 4..4, 7..9, 12..12]),
         ("\u{2028}\u{2028}", vec![0..0, 3..3, 6..6]),
@@ -208,6 +210,7 @@ fn mandatory_break_lines_exclude_separators_but_runs_cover_document() {
 
 #[test]
 fn visual_line_transitions_do_not_rehit_collapsed_line_tops() {
+    let _registry = super::super::BUNDLED_TEST_LOCK.lock().unwrap();
     for height in [0., 1., 4.] {
         let fixture = lower("abcdefghijklmnop", height);
         for (line, row) in fixture.map.lines.iter().enumerate().skip(1) {
