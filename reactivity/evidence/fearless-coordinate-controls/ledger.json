@@ -1,0 +1,401 @@
+{
+  "source": "9b4e03cd38e96d2c56c3140996898125007d0d17",
+  "status": "Geometry gains qualified on host SSE2/Fallback; image regressions prevent adoption of this complete source. Subsequent geometry-only control restores original RGBA/image code. No AVX512/Apple/Windows execution claimed.",
+  "mask_kernel_linked_bytes": 1373,
+  "mask_kernel_stack_bytes": 328,
+  "linked_text_bytes": {
+    "baseline_cpu": 2293975,
+    "coordinate_cpu": 2306391,
+    "baseline_image_axis": 371511,
+    "coordinate_image_axis": 386679
+  },
+  "correctness": {
+    "default_full_release_passed": 146,
+    "fallback_full_release_passed": 146,
+    "ignored_each": 4,
+    "exhaustive_binary_masks": "all65536 in both collapse modes; exact working bits and reduction",
+    "host_backends": "Fallback/SSE2/SSE4.2/AVX2"
+  },
+  "summary": [
+    {
+      "kind": "cpu",
+      "case": "alpha_overlap",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 9816.833,
+        "abi": 8815.881,
+        "coordinate": 4422.751,
+        "abi-scalar": 9394.584,
+        "coordinate-scalar": 3175.912
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.8980371775704037,
+        "coordinate": 0.4505272728995186,
+        "abi-scalar": 0.9569872483315138,
+        "coordinate-scalar": 0.32351696315909617
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "alpha_overlap",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 51.652,
+        "abi": 51.211,
+        "coordinate": 51.141,
+        "abi-scalar": 50.851,
+        "coordinate-scalar": 51.051
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.9914620924649578,
+        "coordinate": 0.9901068690466971,
+        "abi-scalar": 0.9844923720281886,
+        "coordinate-scalar": 0.9883644389375048
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "boundary_dense",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 5.749,
+        "abi": 6.096,
+        "coordinate": 4.867,
+        "abi-scalar": 6.062,
+        "coordinate-scalar": 5.144
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0603583231866411,
+        "coordinate": 0.8465820142633502,
+        "abi-scalar": 1.0544442511741174,
+        "coordinate-scalar": 0.8947643068359715
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "boundary_dense",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 4.243,
+        "abi": 4.47,
+        "coordinate": 3.345,
+        "abi-scalar": 4.512,
+        "coordinate-scalar": 3.624
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0534998821588497,
+        "coordinate": 0.788357294367193,
+        "abi-scalar": 1.0633985387697382,
+        "coordinate-scalar": 0.8541126561395239
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "flat",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 9576.697,
+        "abi": 9033.106,
+        "coordinate": 6437.626,
+        "abi-scalar": 9419.854,
+        "coordinate-scalar": 5735.93
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.9432381540316039,
+        "coordinate": 0.6722177803056733,
+        "abi-scalar": 0.9836224326612818,
+        "coordinate-scalar": 0.598946588787345
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "flat",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 191.745,
+        "abi": 185.864,
+        "coordinate": 189.704,
+        "abi-scalar": 186.064,
+        "coordinate-scalar": 189.094
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.969329056820256,
+        "coordinate": 0.9893556546454927,
+        "abi-scalar": 0.9703721087903204,
+        "coordinate-scalar": 0.9861743461367962
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "labels",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 8058.743,
+        "abi": 8270.049,
+        "coordinate": 8046.163,
+        "abi-scalar": 8205.237,
+        "coordinate-scalar": 8067.263
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0262207145704982,
+        "coordinate": 0.9984389625032092,
+        "abi-scalar": 1.018178269241245,
+        "coordinate-scalar": 1.0010572368420236
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "labels",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 5732.691,
+        "abi": 5625.498,
+        "coordinate": 5452.644,
+        "abi-scalar": 5642.548,
+        "coordinate-scalar": 5596.868
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.9813014516219346,
+        "coordinate": 0.9511491200205977,
+        "abi-scalar": 0.9842756220420741,
+        "coordinate-scalar": 0.9763072874501697
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "opaque_overlap",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 9815.604,
+        "abi": 8775.3,
+        "coordinate": 4431.641,
+        "abi-scalar": 9419.515,
+        "coordinate-scalar": 3182.022
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.8940152842351831,
+        "coordinate": 0.45148938363854124,
+        "abi-scalar": 0.9596470069493431,
+        "coordinate-scalar": 0.3241799485798327
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "opaque_overlap",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 19.951,
+        "abi": 19.981,
+        "coordinate": 19.961,
+        "abi-scalar": 19.81,
+        "coordinate-scalar": 20.16
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0015036840258633,
+        "coordinate": 1.000501228008621,
+        "abi-scalar": 0.9929326850784421,
+        "coordinate-scalar": 1.0104756653801814
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "sheared",
+      "proofs": "false",
+      "median_microseconds": {
+        "baseline": 3405.658,
+        "abi": 3623.122,
+        "coordinate": 2616.209,
+        "abi-scalar": 3680.404,
+        "coordinate-scalar": 2854.325
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0638537398646606,
+        "coordinate": 0.7681948686568058,
+        "abi-scalar": 1.0806733970351692,
+        "coordinate-scalar": 0.8381126349151911
+      }
+    },
+    {
+      "kind": "cpu",
+      "case": "sheared",
+      "proofs": "true",
+      "median_microseconds": {
+        "baseline": 2371.304,
+        "abi": 2508.357,
+        "coordinate": 1741.129,
+        "abi-scalar": 2569.928,
+        "coordinate-scalar": 1995.865
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0577964697904612,
+        "coordinate": 0.7342495943160388,
+        "abi-scalar": 1.0837615084358647,
+        "coordinate-scalar": 0.8416740325154429
+      }
+    },
+    {
+      "kind": "images",
+      "case": "hdr",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 5128.4619999999995,
+        "abi": 5388.728,
+        "coordinate": 5422.523,
+        "abi-scalar": 5183.0435,
+        "coordinate-scalar": 5203.393
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0507493279661624,
+        "coordinate": 1.0573390228883437,
+        "abi-scalar": 1.0106428593991728,
+        "coordinate-scalar": 1.0146108131443696
+      }
+    },
+    {
+      "kind": "images",
+      "case": "nearest",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 3405.4525,
+        "abi": 3469.654,
+        "coordinate": 3518.5855,
+        "abi-scalar": 3468.5635,
+        "coordinate-scalar": 3479.3590000000004
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0188525607096268,
+        "coordinate": 1.0332211358108798,
+        "abi-scalar": 1.0185323389476142,
+        "coordinate-scalar": 1.0217024022505088
+      }
+    },
+    {
+      "kind": "images",
+      "case": "one",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 6662.602,
+        "abi": 6697.0779999999995,
+        "coordinate": 6795.404500000001,
+        "abi-scalar": 6693.867,
+        "coordinate-scalar": 6659.0365
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0051745549261384,
+        "coordinate": 1.0199325278622378,
+        "abi-scalar": 1.0046926110849785,
+        "coordinate-scalar": 0.9994648487182636
+      }
+    },
+    {
+      "kind": "images",
+      "case": "p3",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 7696.585,
+        "abi": 8228.6425,
+        "coordinate": 8186.3415,
+        "abi-scalar": 8221.502,
+        "coordinate-scalar": 7746.646
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0691290357996437,
+        "coordinate": 1.0636329618915403,
+        "abi-scalar": 1.0682012866745447,
+        "coordinate-scalar": 1.0065043132766025
+      }
+    },
+    {
+      "kind": "images",
+      "case": "premul",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 7581.0830000000005,
+        "abi": 8336.015,
+        "coordinate": 8238.592499999999,
+        "abi-scalar": 7996.621999999999,
+        "coordinate-scalar": 7738.821
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0995810229224503,
+        "coordinate": 1.0867302864247756,
+        "abi-scalar": 1.0548126171419043,
+        "coordinate-scalar": 1.0208067897423099
+      }
+    },
+    {
+      "kind": "images",
+      "case": "shared48",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 24112.294,
+        "abi": 24944.163,
+        "coordinate": 24995.499499999998,
+        "abi-scalar": 24304.8085,
+        "coordinate-scalar": 24235.0965
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.0344997867063166,
+        "coordinate": 1.0366288458493413,
+        "abi-scalar": 1.0079840806519693,
+        "coordinate-scalar": 1.0050929413850045
+      }
+    },
+    {
+      "kind": "images",
+      "case": "shear",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 35426.5565,
+        "abi": 39862.108,
+        "coordinate": 40145.099,
+        "abi-scalar": 38950.992,
+        "coordinate-scalar": 38825.944
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 1.1252041388781324,
+        "coordinate": 1.1331922423789624,
+        "abi-scalar": 1.0994856923223684,
+        "coordinate-scalar": 1.0959559109280068
+      }
+    },
+    {
+      "kind": "images",
+      "case": "tiny",
+      "proofs": "",
+      "median_microseconds": {
+        "baseline": 58.245999999999995,
+        "abi": 58.066,
+        "coordinate": 59.926,
+        "abi-scalar": 57.9015,
+        "coordinate-scalar": 56.866
+      },
+      "ratio_to_baseline": {
+        "baseline": 1.0,
+        "abi": 0.99690965903238,
+        "coordinate": 1.0288431823644544,
+        "abi-scalar": 0.9940854307591939,
+        "coordinate-scalar": 0.9763073859149127
+      }
+    }
+  ]
+}
