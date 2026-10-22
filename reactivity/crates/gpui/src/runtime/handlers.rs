@@ -13,12 +13,12 @@ enum Column<D, S> {
     Sparse(S),
 }
 
-pub(super) struct HandlerSites(Column<Box<[Option<Handler>]>, Box<[RouteSite]>>);
+pub(super) struct HandlerSites(Option<Box<Column<Box<[Option<Handler>]>, Box<[RouteSite]>>>>);
 pub(super) struct Builder(Column<Vec<Option<Handler>>, Vec<RouteSite>>);
 
 impl Default for HandlerSites {
     fn default() -> Self {
-        Self(Column::Sparse(Box::default()))
+        Self(None)
     }
 }
 
@@ -31,13 +31,13 @@ const _: () = {
         assert!(size_of::<Node>() == 24);
         assert!(size_of::<Option<Handler>>() == 16);
         assert!(size_of::<RouteSite>() == 24);
-        assert!(size_of::<HandlerSites>() == 24);
+        assert!(size_of::<HandlerSites>() == 8);
     }
 };
 
 impl HandlerSites {
     pub(super) fn get(&self, node: usize) -> Option<&Handler> {
-        match &self.0 {
+        match self.0.as_deref()? {
             Column::Dense(slots) => slots[node].as_ref(),
             Column::Sparse(sites) => sites
                 .binary_search_by_key(&(node as u32), |site| site.node)
@@ -46,7 +46,7 @@ impl HandlerSites {
         }
     }
     pub(super) fn get_mut(&mut self, node: usize) -> &mut Option<Handler> {
-        match &mut self.0 {
+        match self.0.as_deref_mut().expect("installed route column") {
             Column::Dense(slots) => &mut slots[node],
             Column::Sparse(sites) => {
                 let index = sites
@@ -59,7 +59,13 @@ impl HandlerSites {
     // Called only after Siblings has read every old ordinal. Every consumed
     // row resets its ordinal before publication; retired rows are never reused.
     pub(super) fn index_old(&self, nodes: &mut [Node]) {
-        match &self.0 {
+        let Some(column) = self.0.as_deref() else {
+            for node in nodes {
+                node.ordinal = u32::MAX;
+            }
+            return;
+        };
+        match column {
             Column::Dense(slots) => {
                 debug_assert_eq!(slots.len(), nodes.len());
                 for (index, node) in nodes.iter_mut().enumerate() {
@@ -80,7 +86,7 @@ impl HandlerSites {
         if slot == u32::MAX {
             return None;
         }
-        match &mut self.0 {
+        match self.0.as_deref_mut().expect("old route column") {
             Column::Dense(slots) => slots[slot as usize].take(),
             Column::Sparse(sites) => sites[slot as usize].handler.take(),
         }
@@ -115,10 +121,15 @@ impl Builder {
         }
     }
     pub(super) fn finish(self) -> HandlerSites {
-        HandlerSites(match self.0 {
+        let column = match self.0 {
             Column::Dense(slots) => Column::Dense(slots.into_boxed_slice()),
             Column::Sparse(sites) => Column::Sparse(sites.into_boxed_slice()),
-        })
+        };
+        let empty = match &column {
+            Column::Dense(slots) => slots.is_empty(),
+            Column::Sparse(sites) => sites.is_empty(),
+        };
+        HandlerSites((!empty).then(|| Box::new(column)))
     }
 }
 
@@ -145,7 +156,8 @@ mod tests {
             for routes in 0..=nodes {
                 let mut sites = build(nodes, routes);
                 assert_eq!(
-                    matches!(sites.0, Column::Sparse(_)),
+                    matches!(sites.0.as_deref(), Some(Column::Sparse(_)))
+                        || (nodes > 0 && routes == 0),
                     routes * 24 < nodes * 16
                 );
                 for node in 0..nodes {
