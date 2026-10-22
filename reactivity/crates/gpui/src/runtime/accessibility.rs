@@ -134,14 +134,14 @@ impl Collect<'_> {
     pub(super) fn compare(
         &mut self,
         index: usize,
-        previous: Option<&Presented>,
-        next: &Presented,
+        rows: (Option<&Presented>, &Presented),
         state: (Option<&Metadata>, Option<editing::SelectionSnapshot>),
         text: (Option<&text_geometry::Entry>, Option<&text_geometry::Entry>),
         list: Option<scroll::ViewportInfo>,
         row: Option<&ListRow>,
     ) {
         let (metadata, selection) = state;
+        let (previous, next) = rows;
         if !self.exact {
             return;
         }

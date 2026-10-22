@@ -2945,8 +2945,7 @@ impl<M: View + 'static> Runtime<M> {
                 let index = presented.len() - 1;
                 observation.compare(
                     index,
-                    self.presented.get(index),
-                    &presented[index],
+                    (self.presented.get(index), &presented[index]),
                     (self.metadata.as_deref(), selection_snapshot),
                     (
                         self.text.as_ref().and_then(|text| text.entry(index)),
@@ -3075,10 +3074,10 @@ impl<M: View + 'static> Runtime<M> {
         self.latest_token = Some(token);
         self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;
-        if self.texts.is_empty() {
-            if let Some(text) = &mut self.text {
-                text.system = None;
-            }
+        if self.texts.is_empty()
+            && let Some(text) = &mut self.text
+        {
+            text.system = None;
         }
         self.dirty = false;
         self.rebuild_layout = false;
