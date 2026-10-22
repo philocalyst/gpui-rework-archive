@@ -110,6 +110,23 @@ impl Observer {
     }
 }
 
+/// A borrowed row carries the resolver for the same immutable sheet.
+#[derive(Clone, Copy)]
+pub(super) struct RowView<'a> {
+    pub row: &'a Presented,
+    pub bases: geometry::Bases<'a>,
+}
+impl RowView<'_> {
+    fn transform(self) -> Option<Affine> {
+        self.row.transform(self.bases)
+    }
+}
+/// Temporary call state, never retained by the observer or per node.
+pub(super) struct ComparedRows<'p, 'c> {
+    pub previous: Option<RowView<'p>>,
+    pub next: RowView<'c>,
+}
+
 pub(super) struct Collect<'a> {
     observer: &'a mut Observer,
     exact: bool,
@@ -134,21 +151,22 @@ impl Collect<'_> {
     pub(super) fn compare(
         &mut self,
         index: usize,
-        rows: (Option<&Presented>, &Presented),
+        rows: ComparedRows<'_, '_>,
         state: (Option<&Metadata>, Option<editing::SelectionSnapshot>),
         text: (Option<&text_geometry::Entry>, Option<&text_geometry::Entry>),
         list: Option<scroll::ViewportInfo>,
         row: Option<&ListRow>,
     ) {
         let (metadata, selection) = state;
-        let (previous, next) = rows;
         if !self.exact {
             return;
         }
-        let Some(previous) = previous else {
+        let Some(previous_view) = rows.previous else {
             self.full();
             return;
         };
+        let previous = previous_view.row;
+        let next = rows.next.row;
         if previous.identity != next.identity || previous.parent.index() != next.parent.index() {
             self.full();
             return;
@@ -190,8 +208,8 @@ impl Collect<'_> {
                 != selection.and_then(|snapshot| snapshot.selection(next.identity))
             || old_name != new_name
             || old_description != new_description
-            || rect_bits(previous.rect) != rect_bits(next.rect)
-            || map_bits(previous.transform.get()) != map_bits(next.transform.get())
+            || rect_bits(previous.local_rect()) != rect_bits(next.local_rect())
+            || map_bits(previous_view.transform()) != map_bits(rows.next.transform())
             || frozen
                 .and_then(|m| m.list(previous.identity))
                 .map(|l| l.count)

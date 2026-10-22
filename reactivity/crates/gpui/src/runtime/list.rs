@@ -353,12 +353,19 @@ impl<M: View + 'static> Runtime<M> {
             .map(|state| state.id)
             .ok_or(ListError::NotList.into())
     }
+    #[cfg(test)]
     pub(super) fn sheet_hit(&self, index: usize, point: Point) -> bool {
+        self.sheet_hit_with_geometry(index, point, self.presented_geometry())
+    }
+    pub(super) fn sheet_hit_with_geometry(
+        &self,
+        index: usize,
+        point: Point,
+        geometry: geometry::GeometryView<'_>,
+    ) -> bool {
         super::query::contains_point(
             &self.presented,
-            self.metadata
-                .as_ref()
-                .and_then(|metadata| metadata.geometry.as_deref()),
+            geometry,
             self.metadata
                 .as_ref()
                 .is_some_and(|metadata| !metadata.presented.viewports.is_empty()),

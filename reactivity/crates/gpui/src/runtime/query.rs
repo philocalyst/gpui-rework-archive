@@ -18,7 +18,7 @@ struct Context<'a> {
     #[cfg(feature = "accessibility")]
     focused_hint: Option<usize>,
     metadata: Option<&'a super::metadata::Sheet>,
-    geometry: Option<&'a super::geometry::Geometry>,
+    geometry: super::geometry::GeometryView<'a>,
     selection: Option<super::editing::SelectionSnapshot>,
 }
 impl<'a> Context<'a> {
@@ -39,10 +39,7 @@ impl<'a> Context<'a> {
                 .as_ref()
                 .and_then(|m| m.editing.as_ref())
                 .and_then(|frozen| frozen.presented),
-            geometry: runtime
-                .metadata
-                .as_ref()
-                .and_then(|m| m.geometry.as_deref()),
+            geometry: runtime.presented_geometry(),
             metadata: runtime
                 .metadata
                 .as_ref()
@@ -236,10 +233,9 @@ impl<'a> Part<'a> {
                 super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
             ) {
                 clip = node
-                    .transform
-                    .get()
+                    .transform(self.context.geometry.bases())
                     .and_then(|map| {
-                        gpui_reactivity_core::CoordinateSpace::new(map).bounds(node.rect)
+                        gpui_reactivity_core::CoordinateSpace::new(map).bounds(node.local_rect())
                     })
                     .map_or(Rect::default(), |bounds| clip.intersection(bounds));
             }
@@ -325,30 +321,30 @@ impl<'a> Part<'a> {
     /// Uniform local radius from this acknowledged sheet, independent of a
     /// newer logical inspector edit or an unacknowledged visual candidate.
     pub fn corner_radius(self) -> f32 {
-        self.context
-            .geometry
-            .map_or(0.0, |g| g.frozen_radius(self.node().identity))
+        self.context.geometry.radius(self.node().identity)
     }
     pub fn bounds(self) -> Rect {
         self.node().bounds
     }
     /// The canonical local rectangle before window/viewport clipping.
     pub fn local_bounds(self) -> Rect {
-        self.node().rect
+        self.node().local_rect()
     }
     /// Absolute node-local to window-physical transform, already including
     /// ancestors and DPI. Applying it again as a parent transform is incorrect.
     pub fn transform(self) -> Option<crate::Affine> {
-        self.node().transform.get()
+        self.node().transform(self.context.geometry.bases())
     }
     /// Conservative full window-physical bounds, derived only when requested.
     /// Native adapters add the window-to-screen mapping. This differs from
     /// `bounds()` for partially clipped elements and must not be used as a hit
     /// predicate. No second full rectangle is retained per semantic node.
     pub fn unclipped_bounds(self) -> Option<Rect> {
-        self.node().transform.get().and_then(|map| {
-            gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node().rect)
-        })
+        self.node()
+            .transform(self.context.geometry.bases())
+            .and_then(|map| {
+                gpui_reactivity_core::CoordinateSpace::new(map).bounds(self.node().local_rect())
+            })
     }
 }
 
@@ -545,7 +541,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .presented
             .get(index)
             .filter(|node| node.identity == identity)
-            .and_then(|node| node.transform.get())
+            .and_then(|node| node.transform(runtime.presented_geometry().bases()))
             .ok_or(Error::StaleTarget)
     }
     pub fn query(&self) -> Query<'_, M> {
@@ -640,7 +636,7 @@ mod tests {
 // Every clip/shape belongs to P; current logical viewports cannot skip checks.
 pub(super) fn contains_point(
     nodes: &[Presented],
-    geometry: Option<&super::geometry::Geometry>,
+    geometry: super::geometry::GeometryView<'_>,
     has_viewports: bool,
     index: usize,
     point: crate::Point,
@@ -648,12 +644,13 @@ pub(super) fn contains_point(
     use gpui_reactivity_core::CoordinateSpace;
     let node = &nodes[index];
     if !node.bounds.contains(point)
-        || !node.transform.get().is_some_and(|map| {
-            let radius = geometry.map_or(0., |geometry| geometry.frozen_radius(node.identity));
+        || !node.transform(geometry.bases()).is_some_and(|map| {
+            let radius = geometry.radius(node.identity);
             if radius == 0. {
-                CoordinateSpace::new(map).hit(node.rect, point)
+                CoordinateSpace::new(map).hit(node.local_rect(), point)
             } else {
-                gpui_canvas::rounded_rect_contains(node.rect, radius, map, point).unwrap_or(false)
+                gpui_canvas::rounded_rect_contains(node.local_rect(), radius, map, point)
+                    .unwrap_or(false)
             }
         })
     {
@@ -670,13 +667,31 @@ pub(super) fn contains_point(
             node.kind,
             super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
         ) && !node
-            .transform
-            .get()
-            .is_some_and(|map| CoordinateSpace::new(map).hit(node.rect, point))
+            .transform(geometry.bases())
+            .is_some_and(|map| CoordinateSpace::new(map).hit(node.local_rect(), point))
         {
             return false;
         }
         parent = node.parent.index();
     }
     true
+}
+
+#[cfg(test)]
+mod geometry_layout_tests {
+    use super::*;
+    #[test]
+    fn basis_borrowed_geometry_context_layout_is_explicit() {
+        println!(
+            "BASIS_QUERY_LAYOUT context={} context_align={} part={} geometry_view={} bases={}",
+            size_of::<Context<'_>>(),
+            std::mem::align_of::<Context<'_>>(),
+            size_of::<Part<'_>>(),
+            size_of::<super::super::geometry::GeometryView<'_>>(),
+            size_of::<super::super::geometry::Bases<'_>>()
+        );
+        assert_eq!(size_of::<Part<'_>>(), 16);
+        assert_eq!(size_of::<super::super::geometry::GeometryView<'_>>(), 24);
+        assert_eq!(size_of::<super::super::geometry::Bases<'_>>(), 16);
+    }
 }

@@ -3,14 +3,195 @@
 use super::*;
 use crate::property::{GeometryStyle, Overrides};
 
+/// The local rectangle always starts at +0,+0. Its former origin words carry
+/// the admitted map's exact translation instead; clipped bounds are independent.
+#[derive(Clone, Copy)]
+pub(super) struct Placement {
+    pub translation: Point,
+    pub size: [f32; 2],
+}
+impl Placement {
+    pub fn new(size: [f32; 2], map: Option<Affine>) -> Self {
+        Self {
+            translation: map.map_or(Point { x: 0.0, y: 0.0 }, |map| Point {
+                x: map.tx,
+                y: map.ty,
+            }),
+            size,
+        }
+    }
+    pub fn local_rect(self) -> Rect {
+        Rect::new(0.0, 0.0, self.size[0], self.size[1])
+    }
+}
+
+/// Exact finite basis bits, including signed zeros. This never recomposes or
+/// renarrows an admitted map; equality is equality of all four stored words.
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Basis([u32; 4]);
+impl Basis {
+    fn from_map(map: Affine) -> Self {
+        Self([map.a, map.b, map.c, map.d].map(f32::to_bits))
+    }
+    fn map(self, translation: Point) -> Affine {
+        let [a, b, c, d] = self.0.map(f32::from_bits);
+        Affine {
+            a,
+            b,
+            c,
+            d,
+            tx: translation.x,
+            ty: translation.y,
+        }
+    }
+}
+struct Radius {
+    identity: u64,
+    value: f32,
+}
+
+/// One safe, private 16-byte geometry stream: finite basis records precede
+/// radius records. A basis has passed the existing finite-map admission, so
+/// its first word cannot equal the reserved NaN radius marker. All payloads
+/// remain ordinary u32 values; no enum/float representation is reinterpreted.
+#[derive(Clone, Copy)]
+pub(super) struct Record([u32; 4]);
+impl Record {
+    const RADIUS: u32 = 0x7fc0_0000;
+
+    fn from_basis(basis: Basis) -> Self {
+        debug_assert!(
+            basis
+                .0
+                .into_iter()
+                .all(|word| f32::from_bits(word).is_finite())
+        );
+        Self(basis.0)
+    }
+    fn from_radius(radius: Radius) -> Self {
+        Self([
+            Self::RADIUS,
+            radius.value.to_bits(),
+            radius.identity as u32,
+            (radius.identity >> 32) as u32,
+        ])
+    }
+    fn is_basis(&self) -> bool {
+        self.0[0] != Self::RADIUS
+    }
+    fn basis(self) -> Basis {
+        debug_assert!(self.is_basis());
+        Basis(self.0)
+    }
+    fn radius(self) -> Radius {
+        debug_assert!(!self.is_basis());
+        Radius {
+            identity: u64::from(self.0[2]) | (u64::from(self.0[3]) << 32),
+            value: f32::from_bits(self.0[1]),
+        }
+    }
+}
+
+/// Exact diagonal coefficients fit inline when both off-diagonal words are +0.
+/// Finite admitted a cannot equal either reserved NaN tag. General bases use a
+/// direct index in their own sheet's stream; no sibling interning is performed.
+#[derive(Clone, Copy)]
+pub(super) struct MapBasis([u32; 2]);
+const _: () = assert!(MAX_NODES < u32::MAX as usize);
+impl MapBasis {
+    const POOLED: u32 = 0x7fc0_0001;
+    const INVALID: u32 = 0x7fc0_0002;
+
+    pub fn record(map: Option<Affine>, parent: Option<Self>, records: &mut Vec<Record>) -> Self {
+        debug_assert!(map.is_none_or(|map| map.is_finite() && map.is_invertible()));
+        let Some(map) = map else {
+            return Self([Self::INVALID, 0]);
+        };
+        let basis = Basis::from_map(map);
+        if map.b.to_bits() == 0 && map.c.to_bits() == 0 {
+            return Self([map.a.to_bits(), map.d.to_bits()]);
+        }
+        if let Some(parent) = parent
+            && Bases::new(records).get(parent) == Some(basis)
+        {
+            return parent;
+        }
+        // Only emitted rows append bases, before any radius suffix exists.
+        assert!(
+            records.len() < MAX_NODES,
+            "basis belongs to the admitted sheet"
+        );
+        let index = records.len() as u32;
+        records.push(Record::from_basis(basis));
+        Self([Self::POOLED, index])
+    }
+}
+
+/// Borrowed basis prefix. During lowering this is the still-local C vector;
+/// acknowledged queries obtain it from a once-split immutable Geometry view.
+#[derive(Clone, Copy)]
+pub(super) struct Bases<'a> {
+    records: &'a [Record],
+}
+impl<'a> Bases<'a> {
+    pub fn new(records: &'a [Record]) -> Self {
+        Self { records }
+    }
+    fn get(self, basis: MapBasis) -> Option<Basis> {
+        match basis.0 {
+            [MapBasis::INVALID, _] => None,
+            [MapBasis::POOLED, index] => Some(self.records[index as usize].basis()),
+            [a, d] => Some(Basis([a, 0, 0, d])),
+        }
+    }
+    pub fn transform(self, key: MapBasis, placement: Placement) -> Option<Affine> {
+        self.get(key).map(|basis| basis.map(placement.translation))
+    }
+}
+
+/// One borrowed split per query/hit view, never a split or allocation per row.
+#[derive(Clone, Copy)]
+pub(super) struct GeometryView<'a> {
+    records: &'a [Record],
+    radius_start: usize,
+}
+impl<'a> GeometryView<'a> {
+    pub fn empty() -> Self {
+        Self {
+            records: &[],
+            radius_start: 0,
+        }
+    }
+    fn new(records: &'a [Record]) -> Self {
+        Self {
+            records,
+            radius_start: records.partition_point(Record::is_basis),
+        }
+    }
+    pub fn bases(self) -> Bases<'a> {
+        Bases::new(&self.records[..self.radius_start])
+    }
+    pub fn radius(self, identity: u64) -> f32 {
+        let radii = &self.records[self.radius_start..];
+        radii
+            .binary_search_by_key(&identity, |record| record.radius().identity)
+            .ok()
+            .map_or(0.0, |index| radii[index].radius().value)
+    }
+}
+
 #[derive(Default)]
 pub(super) struct Geometry {
     current: Vec<(u64, GeometryStyle)>,
     overrides: Overrides<GeometryStyle>,
-    presented: Vec<(u64, GeometryStyle)>,
-    candidate: Option<Vec<(u64, GeometryStyle)>>,
+    presented: Vec<Record>,
+    candidate: Option<Vec<Record>>,
 }
 impl Geometry {
+    #[cfg(test)]
+    pub(super) fn record_storage(&self) -> (usize, usize) {
+        (self.presented.len(), self.presented.capacity())
+    }
     pub(super) fn contribution(
         &self,
         identity: u64,
@@ -18,24 +199,29 @@ impl Geometry {
     ) -> Contribution<crate::property::PropertyValue> {
         self.overrides.contribution(identity, id)
     }
-    pub fn frozen_radius(&self, identity: u64) -> f32 {
-        self.presented
-            .binary_search_by_key(&identity, |entry| entry.0)
-            .ok()
-            .map_or(0.0, |i| self.presented[i].1.corner_radius)
+    pub fn view(&self) -> GeometryView<'_> {
+        GeometryView::new(&self.presented)
     }
-    pub fn freeze(&self, include: impl Fn(u64) -> bool) -> Vec<(u64, GeometryStyle)> {
-        // The logical column is already sorted. Iterate only opted-in sites;
-        // list clipping consults the caller's existing publication scratch.
-        let mut column = Vec::with_capacity(self.current.len());
+    pub fn freeze(&self, mut column: Vec<Record>, include: impl Fn(u64) -> bool) -> Vec<Record> {
+        // Bases are already stable direct indices. Append only published radii;
+        // the logical column is sorted, so the suffix keeps binary-search order.
+        column.reserve_exact(self.current.len());
         column.extend(
-            self.current.iter().copied().filter(|(identity, style)| {
-                style.corner_radius.to_bits() != 0 && include(*identity)
-            }),
+            self.current
+                .iter()
+                .filter(|(identity, style)| {
+                    style.corner_radius.to_bits() != 0 && include(*identity)
+                })
+                .map(|(identity, style)| {
+                    Record::from_radius(Radius {
+                        identity: *identity,
+                        value: style.corner_radius,
+                    })
+                }),
         );
         column
     }
-    pub fn prepare(&mut self, column: Vec<(u64, GeometryStyle)>) {
+    pub fn prepare(&mut self, column: Vec<Record>) {
         self.candidate = Some(column);
     }
     pub fn acknowledge(&mut self) {
@@ -351,12 +537,13 @@ mod tests {
                 .unwrap();
             assert!(!geometry.presented.is_empty());
             assert!(geometry.presented.len() <= 2);
-            for (identity, _) in &geometry.presented {
+            for record in &geometry.presented {
+                let identity = record.radius().identity;
                 assert!(
                     runtime
                         .presented
                         .iter()
-                        .any(|node| node.identity == *identity)
+                        .any(|node| node.identity == identity)
                 );
             }
         }
@@ -370,5 +557,288 @@ mod tests {
                 .geometry
                 .is_none()
         );
+    }
+}
+
+#[cfg(test)]
+mod basis_tests {
+    use super::*;
+
+    fn bits(map: Affine) -> [u32; 6] {
+        [map.a, map.b, map.c, map.d, map.tx, map.ty].map(f32::to_bits)
+    }
+    #[test]
+    fn exact_admitted_maps_and_zero_origin_extent_survive_factorization() {
+        assert_eq!(size_of::<MapBasis>(), 8);
+        assert_eq!(size_of::<Placement>(), 16);
+        assert_eq!(size_of::<Record>(), 16);
+        let mut records = Vec::new();
+        let absent = MapBasis::record(None, None, &mut records);
+        assert!(
+            Bases::new(&records)
+                .transform(absent, Placement::new([0.0, -0.0], None))
+                .is_none()
+        );
+        for map in [
+            Affine::IDENTITY,
+            Affine {
+                a: -0.0,
+                b: 1.0,
+                c: -1.0,
+                d: 0.0,
+                tx: -0.0,
+                ty: 0.0,
+            },
+            Affine::scale(-2.0, 0.25),
+            Affine::translation(f32::MAX, -f32::MAX),
+            Affine {
+                a: f32::from_bits(1),
+                d: f32::MAX,
+                ..Affine::IDENTITY
+            },
+            Affine {
+                b: -0.0,
+                c: -0.0,
+                ..Affine::IDENTITY
+            },
+        ] {
+            let placement = Placement::new([-0.0, f32::MIN_POSITIVE], Some(map));
+            let key = MapBasis::record(Some(map), None, &mut records);
+            let actual = Bases::new(&records).transform(key, placement).unwrap();
+            assert_eq!(bits(actual), bits(map));
+            let local = placement.local_rect();
+            assert_eq!(
+                [local.x, local.y, local.width, local.height].map(f32::to_bits),
+                [0, 0, (-0.0f32).to_bits(), f32::MIN_POSITIVE.to_bits()]
+            );
+        }
+    }
+    #[test]
+    fn parent_reuse_requires_every_basis_bit_and_keys_are_sheet_local() {
+        let mut records = Vec::new();
+        let map = Affine {
+            a: 1.5,
+            b: 0.125,
+            ..Affine::IDENTITY
+        };
+        let parent = MapBasis::record(Some(map), None, &mut records);
+        let translated = Affine {
+            tx: 7.0,
+            ty: -0.0,
+            ..map
+        };
+        let child = MapBasis::record(Some(translated), Some(parent), &mut records);
+        assert_eq!(parent.0, child.0);
+        assert_eq!(records.len(), 1);
+        let changed = Affine { c: -0.0, ..map };
+        let signed = MapBasis::record(Some(changed), Some(parent), &mut records);
+        assert_ne!(signed.0, parent.0);
+        let default = MapBasis::record(Some(Affine::IDENTITY), None, &mut records);
+        assert_eq!(default.0, [1.0f32.to_bits(); 2]);
+        let dpi_two = MapBasis::record(Some(Affine::scale(2.0, 2.0)), None, &mut records);
+        assert_ne!(default.0, dpi_two.0);
+        assert!(Bases::new(&records).get(default) == Some(Basis::from_map(Affine::IDENTITY)));
+        let sibling = MapBasis::record(Some(map), None, &mut records);
+        assert_ne!(sibling.0, parent.0); // No sibling interner or hash pass.
+    }
+    #[test]
+    fn finite_diagonals_are_inline_but_signed_off_diagonal_zeros_are_pooled() {
+        let mut records = Vec::new();
+        for map in [
+            Affine::scale(-2.0, 0.25),
+            Affine::scale(f32::from_bits(1), f32::MAX),
+        ] {
+            let encoded = MapBasis::record(Some(map), None, &mut records);
+            assert!(records.is_empty());
+            assert_eq!(
+                bits(
+                    Bases::new(&records)
+                        .transform(encoded, Placement::new([1.0; 2], Some(map)))
+                        .unwrap()
+                ),
+                bits(map)
+            );
+        }
+        for map in [
+            Affine {
+                b: -0.0,
+                ..Affine::IDENTITY
+            },
+            Affine {
+                c: -0.0,
+                ..Affine::IDENTITY
+            },
+        ] {
+            let encoded = MapBasis::record(Some(map), None, &mut records);
+            assert_eq!(encoded.0[0], MapBasis::POOLED);
+            assert_eq!(
+                bits(
+                    Bases::new(&records)
+                        .transform(encoded, Placement::new([1.0; 2], Some(map)))
+                        .unwrap()
+                ),
+                bits(map)
+            );
+        }
+        let mut other = Vec::new();
+        let alternate = Affine {
+            b: 0.5,
+            ..Affine::IDENTITY
+        };
+        let key = MapBasis::record(Some(alternate), None, &mut other);
+        assert_eq!(key.0, [MapBasis::POOLED, 0]);
+        assert!(Bases::new(&records).get(key) != Bases::new(&other).get(key));
+    }
+    #[test]
+    fn mixed_stream_keeps_full_radius_identity_and_empty_candidate_clears_p() {
+        let mut geometry = Geometry::default();
+        let mut records = Vec::new();
+        let map = Affine {
+            a: 1.5,
+            b: 0.25,
+            ..Affine::IDENTITY
+        };
+        let key = MapBasis::record(Some(map), None, &mut records);
+        for (identity, value) in [(1, -0.0), (u64::MAX, 3.5)] {
+            geometry.store(
+                identity,
+                GeometryStyle {
+                    corner_radius: value,
+                },
+            );
+        }
+        geometry.prepare(geometry.freeze(records, |_| true));
+        assert!(geometry.view().records.is_empty());
+        geometry.acknowledge();
+        let view = geometry.view();
+        assert_eq!(view.radius_start, 1);
+        assert_eq!(view.radius(1).to_bits(), (-0.0f32).to_bits());
+        assert_eq!(view.radius(u64::MAX), 3.5);
+        assert_eq!(view.radius(2), 0.0);
+        assert!(view.bases().get(key) == Some(Basis::from_map(map)));
+        geometry.acknowledge(); // KEEP has no candidate and preserves P.
+        assert_eq!(geometry.view().radius_start, 1);
+        geometry.prepare(Vec::new());
+        geometry.acknowledge();
+        assert!(geometry.view().records.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod virtual_basis_tests {
+    use super::*;
+    use crate::{El, ItemKey, ItemSource, ListId, uniform_list};
+    struct Rows;
+    impl ItemSource for Rows {
+        fn len(&self) -> usize {
+            10_000
+        }
+        fn key(&self, index: usize) -> ItemKey {
+            ItemKey::new(index as u64)
+        }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            (key.get() < 10_000).then_some(key.get() as usize)
+        }
+        fn row(&self, index: usize) -> El<'_> {
+            crate::div()
+                .w(64)
+                .h(16)
+                .rounded(4.0)
+                .bg(Color::BLACK)
+                .name(index.to_string())
+                .transform(Affine {
+                    a: 1.0 + (index % 128) as f32 / 256.0,
+                    b: 0.125,
+                    ..Affine::IDENTITY
+                })
+        }
+    }
+    const LIST: ListId = ListId::new(0xb4515);
+    impl View for Rows {
+        fn view(&self) -> El<'_> {
+            uniform_list(LIST, self, 16).w(64).h(64)
+        }
+    }
+    fn published_rows(win: &Win<Rows>) -> Vec<(String, [u32; 4])> {
+        let mut rows = Vec::new();
+        let mut targets = Vec::new();
+        let mut parents = Vec::new();
+        win.visit(|part| {
+            targets.push(part.target());
+            if let Some(parent) = part.parent() {
+                parents.push(parent);
+            }
+            if let Some(name) = part.name()
+                && let Ok(index) = name.parse::<usize>()
+            {
+                let map = part.transform().unwrap();
+                let actual = [map.a, map.b, map.c, map.d].map(f32::to_bits);
+                assert_eq!(
+                    actual,
+                    [1.0 + (index % 128) as f32 / 256.0, 0.125, 0.0, 1.0].map(f32::to_bits)
+                );
+                assert_eq!(part.corner_radius(), 4.0);
+                rows.push((name.to_owned(), actual));
+            }
+        })
+        .unwrap();
+        assert!(parents.into_iter().all(|parent| targets.contains(&parent)));
+        rows
+    }
+    #[test]
+    fn omitted_virtual_geometry_has_no_basis_key_and_radius_capacity_is_charged() {
+        let mut win = Win::recording(
+            Rows,
+            WindowOptions {
+                size: [64, 16],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        let before = published_rows(&win);
+        assert!(!before.is_empty());
+        let runtime = win.runtime().unwrap();
+        let geometry = runtime
+            .metadata
+            .as_ref()
+            .unwrap()
+            .geometry
+            .as_ref()
+            .unwrap();
+        let view = geometry.view();
+        assert_eq!(view.radius_start, before.len());
+        assert_eq!(geometry.presented.len() - view.radius_start, before.len());
+        assert!(geometry.current.len() > before.len());
+        assert!(runtime.nodes.len() > runtime.presented.len());
+        println!(
+            "BASIS_VIRTUAL_RADIUS logical_rows={} published_rows={} published_custom={} logical_radii={} published_radii={} record_capacity={} retained_record_bytes={}",
+            runtime.nodes.len(),
+            runtime.presented.len(),
+            before.len(),
+            geometry.current.len(),
+            geometry.presented.len() - view.radius_start,
+            geometry.presented.capacity(),
+            geometry.presented.capacity() * size_of::<Record>()
+        );
+        // List-local realization is larger than the physical window. Omitted
+        // descendants append no basis; the inherited radius reserve remains.
+        let list = win.list(LIST).unwrap();
+        win.scroll_to_index(list, 500).unwrap();
+        assert_eq!(published_rows(&win), before);
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        let after = published_rows(&win);
+        assert_ne!(after, before);
+        let runtime = win.runtime().unwrap();
+        let geometry = runtime
+            .metadata
+            .as_ref()
+            .unwrap()
+            .geometry
+            .as_ref()
+            .unwrap();
+        assert_eq!(geometry.view().radius_start, after.len());
     }
 }

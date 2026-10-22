@@ -723,3 +723,63 @@ fn color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly()
     click_control(&mut win, "Decrease").unwrap();
     assert!(!win.contains_text("Last edit rejected:").unwrap());
 }
+
+#[test]
+fn basis_inspector_captions_resolve_partial_candidate_pool_and_scale() {
+    let mut win = inspected(true);
+    acknowledge(&mut win);
+    let target = card(&win);
+    win.inspector_select(target).unwrap();
+    acknowledge(&mut win);
+    for (scale, map) in [
+        (
+            1.0,
+            Affine {
+                a: 1.25,
+                b: 0.125,
+                tx: 30.0,
+                ..Affine::IDENTITY
+            },
+        ),
+        (
+            2.0,
+            Affine {
+                a: 1.5,
+                c: -0.25,
+                tx: 20.0,
+                ..Affine::IDENTITY
+            },
+        ),
+        (1.0, Affine::scale(-1.25, 1.5)),
+    ] {
+        let before = win.snapshot().unwrap();
+        win.set_property(target, TRANSFORM, Contribution::Set(map))
+            .unwrap();
+        win.resize_scaled([800, 560], scale).unwrap();
+        assert_eq!(win.snapshot().unwrap().nodes, before.nodes);
+        acknowledge(&mut win);
+        let shown = win.snapshot().unwrap();
+        let mut map = None;
+        win.visit(|part| {
+            if part.target() == target {
+                map = part.transform();
+            }
+        })
+        .unwrap();
+        let map = map.unwrap();
+        let label = format!(
+            "Displayed transform @{}\n{:.1} {:.1} {:.1} {:.1} {:.1} {:.1}",
+            shown.presentation_epoch, map.a, map.b, map.c, map.d, map.tx, map.ty
+        );
+        assert!(
+            shown
+                .nodes
+                .iter()
+                .any(|node| node.text.as_deref() == Some(label.as_str())),
+            "caption must use the same C pool and admitted DPI coefficients"
+        );
+        win.reset_counters().unwrap();
+        win.settle().unwrap();
+        assert_eq!(win.counters().presentations, 0);
+    }
+}
