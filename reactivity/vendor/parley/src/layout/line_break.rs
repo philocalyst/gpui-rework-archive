@@ -1026,20 +1026,27 @@ impl<'a, B: Brush> BreakLines<'a, B> {
     /// Computes the next line in the paragraph. Returns the advance and size
     /// (width and height for horizontal layouts) of the line.
     pub fn break_next(&mut self) -> Option<YieldData> {
-        assert!(
-            self.state.layout_max_advance == f32::INFINITY
-                || self.state.line_max_advance - self.state.layout_max_advance < 1.0
-        );
-
-        // Maintain iterator state
-        if self.done {
+        if !self.ready() {
             return None;
         }
         match &mut self.prev_state {
             Some(prev_state) => prev_state.clone_from(&self.state),
             None => self.prev_state = Some(self.state.clone()),
         }
+        self.break_next_inner()
+    }
 
+    fn ready(&self) -> bool {
+        assert!(
+            self.state.layout_max_advance == f32::INFINITY
+                || self.state.line_max_advance - self.state.layout_max_advance < 1.0
+        );
+        !self.done
+    }
+
+    // The consuming batch path cannot observe/revert a previous checkpoint.
+    // Keep one line-break body; incremental callers save their checkpoint above.
+    fn break_next_inner(&mut self) -> Option<YieldData> {
         // HACK: ignore max_advance for empty layouts
         // Prevents crash when width is too small (https://github.com/linebender/parley/issues/186)
         let max_advance =
@@ -1432,7 +1439,10 @@ impl<'a, B: Brush> BreakLines<'a, B> {
     pub fn break_remaining(mut self, max_advance: f32) {
         self.state.layout_max_advance = max_advance;
         self.state.line_max_advance = max_advance;
-        while let Some(yield_data) = self.break_next() {
+        while self.ready() {
+            let Some(yield_data) = self.break_next_inner() else {
+                break;
+            };
             // When `break_next` encounters a `CustomOutOfFlow`, it yields a `YieldData::InlineBoxBreak`
             // without advancing the item iteration past the box. This allows embedders to implement custom
             // placement logic to place the box. However, it means that we must also handle placing the box
