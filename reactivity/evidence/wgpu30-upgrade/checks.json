@@ -1,0 +1,157 @@
+{
+  "parent": "dc577564e5",
+  "versions": {
+    "wgpu": "30.0.1",
+    "wgpu-hal": "30.0.1",
+    "wgsl-rs": "0.1.0-beta.6",
+    "naga": [
+      "30.0.1"
+    ]
+  },
+  "source_sha256": {
+    "Cargo.lock": "50859e5f4fd04fb23805b7953b2005ba414b490a10eccaa2722a43495453c61e",
+    "crates/gpu/Cargo.toml": "50fe8ad5d6097aa9495df8a937acec66d0387c603a5832626b3a647fe3e845d5",
+    "crates/gpu/tests/render.rs": "ba0f449b565dce922d04bee31ab3c74884b23c4d248c64058fec1ed6f23df816",
+    "crates/gpui/src/native.rs": "301ffc17cf341eabb7c366d3428c2c92f40b4e4947f8e8fb4a904536d3b2e528",
+    "crates/gpui/src/native/paint_tests.rs": "185ff8b175cf17e45737eeaad1379d29b939622ab38384b52243bdcbfaeb6cc4",
+    "crates/gpui/src/native/upgrade.rs": "9ac972447d3acca13734070dfa59918711f76320f2b971821e5674e519dab1bf",
+    "vendor/wgpu-hal/.cargo_vcs_info.json": "15b627ed300f5fa6aadd08f0371b6b16fa4c90edb58063d8665ab04356a74a5f",
+    "vendor/wgpu-hal/Cargo.lock": "c4da0b85155fcc10a596cfc7deb55a7e5c6ae2c8cbbdb80a7e7bf083f9e7b74c",
+    "vendor/wgpu-hal/Cargo.toml": "fa10a1defc604a6570bf6662259ae0cfdc6cdf8debfc64c35156f7566861dfa8",
+    "vendor/wgpu-hal/build.rs": "001414f5b7dcdbebb18939ef47ab03a36aaf98d92deb4b40af61ab8c9e440bf6",
+    "vendor/wgpu-hal/examples/halmark/main.rs": "1ebefa4c0c93891e73a7de19680671cfd8cc7a30f8d2b2f4240818b4f209aac0",
+    "vendor/wgpu-hal/examples/ray-traced-triangle/main.rs": "ff7e2d54be361867bb55127209cfe0ec76e4c6e48e6c7466a3db0312dff77b7f",
+    "vendor/wgpu-hal/src/auxil/dxgi/conv.rs": "c2cdc3d1a6ae34f88432e36227558a3f54fcec39fea1ceb4862b74d4d94405f4",
+    "vendor/wgpu-hal/src/auxil/dxgi/mod.rs": "34bebcabd5e740fc5afdec52cff845c41953b283da84e6a6c2d15f88efd17b51",
+    "vendor/wgpu-hal/src/auxil/dxgi/time.rs": "d4cb85205f93a1c00f4ad7d6f7bec2bd18746b5724adcb4cf62c7d392680cca2",
+    "vendor/wgpu-hal/src/auxil/mod.rs": "8fcac93db5e23a097da636b64619991c151f282d3747c4dd13dddb37b54648dd",
+    "vendor/wgpu-hal/src/dx12/adapter.rs": "3a49d6fa30f43916752916003ffd4de9379d6e2ec91d6a9b3ca156922a994894",
+    "vendor/wgpu-hal/src/dx12/command.rs": "e63ba5aeb666d783e430b907f6563d09cfb97780d540d0f21957dd41f3490735",
+    "vendor/wgpu-hal/src/dx12/conv.rs": "2676420e6e1d2aa6386b923c8224aa63a199210c19dd611ee8059de41df0e6de",
+    "vendor/wgpu-hal/src/dx12/device.rs": "bc75bee4a6f052499e233ddbb1061159d2dd7c621675f0b81f2873931bddab0f",
+    "vendor/wgpu-hal/src/dx12/instance.rs": "88da287d2ff2bfa4098d54c03193a711b584bcdccee2713a93fdac015ceae7f4",
+    "vendor/wgpu-hal/src/dx12/mod.rs": "aea978a714e2427df87458bcb36d66f9195cff6ad521c5bab2ca2806a56d94dc",
+    "vendor/wgpu-hal/src/dx12/shader_compilation.rs": "e5f91338615badb72398a3853675865f1cf74ecd91948efcdd6aa44d5785e378",
+    "vendor/wgpu-hal/src/dx12/view.rs": "2ba4e4889de11c7f0b1ffbd0301462b424f055f959d84e92ca9f9402754fbd83",
+    "vendor/wgpu-hal/src/dynamic/adapter.rs": "df93d7856ec0c7c42ff6eb65435a16cc918c5d3b4f718ebcd6c695423ab9ca41",
+    "vendor/wgpu-hal/src/dynamic/command.rs": "ee53aa6abd98a6bd82ccb9613d1ac779067cd1e87f2ceb3eb0f1f59fa2abd569",
+    "vendor/wgpu-hal/src/dynamic/device.rs": "4ae7d802fc593d1c3f0fbf4b1caf5649a3970f9ef03819be7a5cbb504dbac719",
+    "vendor/wgpu-hal/src/dynamic/instance.rs": "c5c9f1d3089c0b508c3619aceecaf99234e77af833cf124de792ca3ea8a56f70",
+    "vendor/wgpu-hal/src/dynamic/mod.rs": "8a447369289290fed459e7fb333e51f8ba22adacfea45362b07d4f193d1dd94f",
+    "vendor/wgpu-hal/src/dynamic/queue.rs": "c993c79029b182d21b48006e37715c1083817258764356c9b131b0637e7e8c86",
+    "vendor/wgpu-hal/src/gles/adapter.rs": "469fb40d3b8f791957767bd0884f69a511d021886116b14c7e8a4c200f052fd0",
+    "vendor/wgpu-hal/src/gles/command.rs": "9b53ea51473766e11c78d5fab081695b5a443e067127ccf31e6d7c5a37cc309a",
+    "vendor/wgpu-hal/src/gles/device.rs": "d6919ff96a805da34c9eb9d05ac8f95f57df2a42a691f90bf1f36425b509b198",
+    "vendor/wgpu-hal/src/gles/egl.rs": "25ef4629921f6b87daa559f62f3a6132f766451e4e3674cdec62e9d8ecac2627",
+    "vendor/wgpu-hal/src/gles/fence.rs": "f63e9c7cc71a1b65d66e6b8e6153c0d855e6b166ca2d521cdd9c4bfc9d67313c",
+    "vendor/wgpu-hal/src/gles/mod.rs": "505b231099410c5acd2dc8f940792006dbe4dc14df7cf4b8e527244ce2ff5210",
+    "vendor/wgpu-hal/src/gles/queue.rs": "1186a5d89160db28d827f3f8c46ec6a12cf9e0e829514bced433fbf4b84340fe",
+    "vendor/wgpu-hal/src/gles/web.rs": "90f15af538aa2d67e6a3518d39b5e6f763efba8b39e43c3c8106603d1a1b0d48",
+    "vendor/wgpu-hal/src/gles/wgl.rs": "2a02d9370c69a121cfbc91a24d902c0ad2af2cc464c0b64c181ee9b55b4b1041",
+    "vendor/wgpu-hal/src/lib.rs": "686411c88cff8f64394ae5a54ed4cbaaad41a38bd77eea9dddb764b00fd60627",
+    "vendor/wgpu-hal/src/metal/adapter.rs": "50ae470024e8d0aa4f031f4d503aa73bfa8ecac69c4496f1080a07fdfc8a10c3",
+    "vendor/wgpu-hal/src/metal/command.rs": "291547df7aad7e691f459ec5a8b91fc7126c7723a2c0604a5ad0f2f95b38ea94",
+    "vendor/wgpu-hal/src/metal/conv.rs": "fb7e365642e50c23432eab53e8355356ae2037162e4093b779207818dd2ec67d",
+    "vendor/wgpu-hal/src/metal/device.rs": "a4766b4d735d177ede3a06042452ac1e21530879c8e7a773ec6e3339416cae5f",
+    "vendor/wgpu-hal/src/metal/mod.rs": "5419bc8b78ca3ce5989280421dbbfc6f6582460c039fb8baec1358247e1f23bf",
+    "vendor/wgpu-hal/src/metal/surface.rs": "8a632382bc67c01a41a9baa18a16ec6a637345557f7a8f422219066a3baa68cd",
+    "vendor/wgpu-hal/src/noop/command.rs": "858948feef6b328e2333aedc051dfb4bba4d25e6c7b47ac481d4161a3410b473",
+    "vendor/wgpu-hal/src/noop/mod.rs": "709fe65d1d5708e9a8470e9616fb06494faac37f1e2f0a17d1f8fabbddb84ba5",
+    "vendor/wgpu-hal/src/validation_canary.rs": "d96300c6005a02e0c5d411cf065837e50c0c37957cb88de89fafec43032fa08a",
+    "vendor/wgpu-hal/src/vulkan/adapter.rs": "1f897cd265879ec3e68efcf09fac52d8f32068184781eab9cf48acaf74820485",
+    "vendor/wgpu-hal/src/vulkan/command.rs": "562877b666133bf5de6961569a4aca34cb5e9f2224b2efe6cefec20dc99e6c93",
+    "vendor/wgpu-hal/src/vulkan/conv.rs": "6930e077c055c6766c5ccb311abf4afa557afcd0d157466131ae62534ccdb30a",
+    "vendor/wgpu-hal/src/vulkan/device.rs": "357f69123ff9b1f00c0b5b28f59f2ecf9f35912f9b946192c1233ecced20aa18",
+    "vendor/wgpu-hal/src/vulkan/drm.rs": "b071e1092164bf7c9952f33aff26ad8d74789f233516ac986ac63b2e6a0a0210",
+    "vendor/wgpu-hal/src/vulkan/instance.rs": "e10b91b2c0bff2293cbcf0e99e7b30da95f8dc0deb9ac51af16261cbe7a54537",
+    "vendor/wgpu-hal/src/vulkan/mod.rs": "de64a2813099084774ffccd7e47b54784e2efaf27ac24e131f00df3e21209e78",
+    "vendor/wgpu-hal/src/vulkan/semaphore_list.rs": "919c7dfd5864fa2f2ebb478268aa8bfe8a540ca759efb777066fa1f7216a6f9e",
+    "vendor/wgpu-hal/src/vulkan/swapchain/mod.rs": "68dc4eb82e3d9aa9d0a0343c430777f9c0a2870314da8806b96ca8a8cd8df0c6",
+    "vendor/wgpu-hal/src/vulkan/swapchain/native.rs": "9a0be6f9bda9e160d9fea944d661467bb5017018b7a0612d20d47fd3eb2f26f9",
+    "vendor/wgpu-hal/GPUI-PATCHES.md": "b8323c0211ccda2dec25a9a13b8d07dbc2a74cc75f3492e1dd4f95195f7d7fe6"
+  },
+  "gates": {
+    "linux-check": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "clippy": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "vulkan": {
+      "groups": 1,
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    "apple-cross": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "windows-cross": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native-todo": {
+      "groups": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native-inspector": {
+      "groups": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "initial-api-errors": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "initial-adapter-name-error": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "initial-test-feature-error": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "initial-target-setup-error": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "resolve": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "wgsl-resolve": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "cross": "RUSTC_BOOTSTRAP=1 cargo check --offline --locked -p gpui --features desktop,gpui_canvas/parallel --all-targets --target TARGET -Zbuild-std=std,panic_abort --jobs2; Apple AArch64 and Windows MSVC; compile only",
+  "native": "private Xvfb :120 and Mesa llvmpipe; owned display stopped; actual server pixels and ordinary renderer policies",
+  "timing_memory_claim": "none",
+  "surface": "opaque sRGB8 unchanged; explicit SurfaceColorSpace::Srgb; native HDR negotiation remains outside this change"
+}

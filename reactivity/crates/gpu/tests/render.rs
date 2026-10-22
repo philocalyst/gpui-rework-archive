@@ -206,7 +206,7 @@ fn read_texture(renderer: &Renderer, texture: &wgpu::Texture) -> Vec<u8> {
         .poll(wgpu::PollType::wait_indefinitely())
         .unwrap();
     receive.recv().unwrap().unwrap();
-    let mapped = buffer.get_mapped_range(..);
+    let mapped = buffer.get_mapped_range(..).unwrap();
     let mut output = Vec::with_capacity((width * height * bytes) as usize);
     for row in mapped.chunks_exact(stride as usize) {
         output.extend_from_slice(&row[..(width * bytes) as usize]);
