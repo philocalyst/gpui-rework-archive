@@ -86,7 +86,7 @@ fn paint_geometry_and_layout_ports_use_existing_typed_properties_without_view_wo
     win.set(Panel::COLOR, Color::WHITE).unwrap();
     assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
     assert_eq!(win.counters().source_reads, 1);
-    assert_eq!(win.counters().destination_compares, 2);
+    assert_eq!(win.counters().destination_compares, 0);
     assert_eq!(win.counters().layout_runs, 0);
     assert_eq!(win.counters().owner_reruns, 0);
     win.set(Panel::RADIUS, 8.0).unwrap();

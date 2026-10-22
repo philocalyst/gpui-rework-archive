@@ -1,10 +1,59 @@
 //! Current-owner resolved styles. A sheet never borrows this mutable lane.
 use super::Style;
+mod colours;
+pub(super) use colours::{Change as ColorChange, Discovery as ColorDiscovery, Slot as ColorSlot};
 
 const PALETTE_LIMIT: usize = 32;
 const SMALL_OWNER: usize = 8;
 const _: () = assert!(PALETTE_LIMIT <= u8::MAX as usize);
 
+trait Value: Copy {
+    const DEFAULT: Self;
+    fn same(&self, other: &Self) -> bool;
+}
+impl Value for Style {
+    const DEFAULT: Self = Style::DEFAULT;
+    fn same(&self, other: &Self) -> bool {
+        exact_eq(self, other)
+    }
+}
+enum Lane<T> {
+    Default,
+    Dense(Vec<T>),
+    Shared {
+        palette: Box<[T]>,
+        indices: Box<[u8]>,
+    },
+}
+impl<T: Value> Lane<T> {
+    #[inline]
+    fn get(&self, index: usize) -> T {
+        match self {
+            Self::Default => T::DEFAULT,
+            Self::Dense(values) => values[index],
+            Self::Shared { palette, indices } => palette[usize::from(indices[index])],
+        }
+    }
+    #[cfg(test)]
+    fn bytes(&self) -> usize {
+        match self {
+            Self::Default => 0,
+            Self::Dense(values) => values.capacity() * size_of::<T>(),
+            Self::Shared { palette, indices } => {
+                size_of_val(palette.as_ref()) + size_of_val(indices.as_ref())
+            }
+        }
+    }
+    fn set(&mut self, index: usize, value: T, count: usize) {
+        if !matches!(self, Self::Dense(_)) {
+            *self = Self::Dense((0..count).map(|index| self.get(index)).collect());
+        }
+        let Self::Dense(values) = self else {
+            unreachable!()
+        };
+        values[index] = value;
+    }
+}
 #[derive(Default)]
 pub(super) enum Styles {
     #[default]
@@ -14,69 +63,151 @@ pub(super) enum Styles {
         palette: Box<[Style]>,
         indices: Box<[u8]>,
     },
+    Colors(Box<colours::Bound>),
 }
-
 impl Styles {
+    /// Borrow ordinary lanes directly. Only a source-colored record needs a
+    /// temporary resolved value; the callback cannot retain a borrow of it.
     #[inline]
-    pub(super) fn get(&self, index: usize) -> &Style {
+    pub(super) fn with<R>(&self, index: usize, read: impl FnOnce(&Style) -> R) -> R {
         match self {
-            Self::Default => &Style::DEFAULT,
-            Self::Dense(values) => &values[index],
-            Self::Shared { palette, indices } => &palette[usize::from(indices[index])],
+            Self::Default => read(&Style::DEFAULT),
+            Self::Dense(values) => read(&values[index]),
+            Self::Shared { palette, indices } => read(&palette[usize::from(indices[index])]),
+            Self::Colors(values) => read(&values.get(index)),
         }
     }
-
-    // Inspector contributions are independent mutations. Densify once rather
-    // than keep dead palette entries or a second mutable interning protocol.
+    #[inline]
+    pub(super) fn get(&self, index: usize) -> Style {
+        match self {
+            Self::Default => Style::DEFAULT,
+            Self::Dense(values) => values[index],
+            Self::Shared { palette, indices } => palette[usize::from(indices[index])],
+            Self::Colors(values) => values.get(index),
+        }
+    }
     pub(super) fn set(&mut self, index: usize, value: Style, count: usize) {
+        if let Self::Colors(values) = self {
+            values.set(index, value, count);
+            return;
+        }
         if !matches!(self, Self::Dense(_)) {
-            *self = Self::Dense((0..count).map(|index| *self.get(index)).collect());
+            *self = Self::Dense((0..count).map(|index| self.get(index)).collect());
         }
         let Self::Dense(values) = self else {
             unreachable!()
         };
         values[index] = value;
     }
+    pub(super) fn binding_fields(&self, index: usize) -> [Option<super::FieldId>; 2] {
+        match self {
+            Self::Colors(values) => values.binding_fields(index),
+            _ => [None; 2],
+        }
+    }
+    pub(super) fn declared_colors(&self, index: usize) -> Option<(crate::Color, crate::Color)> {
+        match self {
+            Self::Colors(values) => Some(values.declared_colors(index)),
+            _ => None,
+        }
+    }
+    pub(super) fn color_contribution(
+        &mut self,
+        index: usize,
+        id: crate::property::PropertyId,
+        value: Style,
+        explicit: bool,
+        count: usize,
+    ) -> bool {
+        if let Self::Colors(values) = self {
+            return values.contribution(index, id, value, explicit, count);
+        }
+        false
+    }
+    #[cfg(feature = "native")]
+    pub(super) fn slot_transition(&self) -> Option<&super::paint::SlotTransition> {
+        match self {
+            Self::Colors(values) => values.transition.as_ref(),
+            _ => None,
+        }
+    }
+    #[cfg(feature = "native")]
+    pub(super) fn record_slot_transition(
+        &mut self,
+        from: super::PresentationToken,
+        edit: gpui_canvas::SlotEdit,
+    ) {
+        let Self::Colors(values) = self else {
+            unreachable!("bound source has slot owner")
+        };
+        values.transition = Some(super::paint::SlotTransition {
+            from,
+            edits: [edit],
+        });
+    }
+    pub(super) fn clear_slot_transition(&mut self) {
+        #[cfg(feature = "native")]
+        if let Self::Colors(values) = self {
+            values.transition = None;
+        }
+    }
+    pub(super) fn reset_canvas_slots(&mut self) {
+        if let Self::Colors(values) = self {
+            values.reset_canvas_slots();
+        }
+    }
+    pub(super) fn shared_paint(
+        &mut self,
+        index: usize,
+        foreground: bool,
+    ) -> Option<(gpui_canvas::PaintColor, &mut Option<gpui_canvas::PaintSlot>)> {
+        match self {
+            Self::Colors(values) => values.shared_paint(index, foreground),
+            _ => None,
+        }
+    }
+    pub(super) fn update_color(
+        &mut self,
+        slot: ColorSlot,
+        color: crate::Color,
+    ) -> Option<ColorChange> {
+        let Self::Colors(values) = self else {
+            unreachable!("source color has retained bank")
+        };
+        values.bank.update(slot, color)
+    }
 }
 
-enum Building {
+enum Building<T> {
     Default,
-    Dense(Vec<Style>),
-    Shared {
-        palette: Vec<Style>,
-        indices: Vec<u8>,
-    },
+    Dense(Vec<T>),
+    Shared { palette: Vec<T>, indices: Vec<u8> },
 }
-
-pub(super) struct Builder {
+struct LaneBuilder<T> {
     count: usize,
     total: usize,
-    mode: Building,
+    mode: Building<T>,
 }
-
-impl Builder {
-    pub(super) fn new(total: usize) -> Self {
+impl<T: Value> LaneBuilder<T> {
+    fn new(total: usize) -> Self {
         Self {
             count: 0,
             total,
             mode: Building::Default,
         }
     }
-
-    // Runtime is instantiated in downstream applications too. Keep this
-    // per-node helper available to their optimizer, not just our unit harness.
     #[inline]
-    pub(super) fn push(&mut self, style: &Style) {
-        if matches!(self.mode, Building::Default) && !exact_eq(style, &Style::DEFAULT) {
+    fn push(&mut self, value: T) {
+        if matches!(self.mode, Building::Default) && !value.same(&T::DEFAULT) {
             self.mode = if self.total <= SMALL_OWNER {
                 let mut values = Vec::with_capacity(self.total);
-                values.resize(self.count, Style::default());
+                values.resize(self.count, T::DEFAULT);
                 Building::Dense(values)
             } else {
                 let mut palette = Vec::with_capacity(PALETTE_LIMIT);
                 let mut indices = Vec::with_capacity(self.total);
                 if self.count != 0 {
-                    palette.push(Style::default());
+                    palette.push(T::DEFAULT);
                     indices.resize(self.count, 0);
                 }
                 Building::Shared { palette, indices }
@@ -84,36 +215,33 @@ impl Builder {
         }
         match &mut self.mode {
             Building::Default => {}
-            Building::Dense(values) => values.push(*style),
+            Building::Dense(values) => values.push(value),
             Building::Shared { palette, indices } => {
-                if let Some(index) = palette.iter().position(|value| exact_eq(value, style)) {
+                if let Some(index) = palette.iter().position(|old| old.same(&value)) {
                     indices.push(index as u8);
                 } else if palette.len() < PALETTE_LIMIT {
                     indices.push(palette.len() as u8);
-                    palette.push(*style);
+                    palette.push(value);
                 } else {
                     let mut values = dense(palette, indices, self.total);
-                    values.push(*style);
+                    values.push(value);
                     self.mode = Building::Dense(values);
                 }
             }
         }
         self.count += 1;
     }
-
-    pub(super) fn finish(self) -> Styles {
+    fn finish(self) -> Lane<T> {
         debug_assert_eq!(self.count, self.total);
         match self.mode {
-            Building::Default => Styles::Default,
-            Building::Dense(values) => Styles::Dense(values),
+            Building::Default => Lane::Default,
+            Building::Dense(values) => Lane::Dense(values),
             Building::Shared { palette, indices } => {
-                // Require a material saving; nearly unique small trees use a
-                // direct lane, with no selector load during layout or paint.
-                let shared = palette.len() * size_of::<Style>() + indices.len();
-                if shared * 4 >= self.total * size_of::<Style>() * 3 {
-                    Styles::Dense(dense(&palette, &indices, self.total))
+                let shared = palette.len() * size_of::<T>() + indices.len();
+                if shared * 4 >= self.total * size_of::<T>() * 3 {
+                    Lane::Dense(dense(&palette, &indices, self.total))
                 } else {
-                    Styles::Shared {
+                    Lane::Shared {
                         palette: palette.into_boxed_slice(),
                         indices: indices.into_boxed_slice(),
                     }
@@ -122,11 +250,64 @@ impl Builder {
         }
     }
 }
-
-fn dense(palette: &[Style], indices: &[u8], capacity: usize) -> Vec<Style> {
+fn dense<T: Value>(palette: &[T], indices: &[u8], capacity: usize) -> Vec<T> {
     let mut values = Vec::with_capacity(capacity);
     values.extend(indices.iter().map(|&index| palette[usize::from(index)]));
     values
+}
+
+enum BuildingStyles {
+    Plain(LaneBuilder<Style>),
+    Colors(colours::Builder),
+}
+pub(super) struct Builder {
+    mode: BuildingStyles,
+}
+impl Builder {
+    pub(super) fn new(total: usize) -> Self {
+        Self {
+            mode: BuildingStyles::Plain(LaneBuilder::new(total)),
+        }
+    }
+    pub(super) fn with_colors(total: usize, discovery: ColorDiscovery) -> Self {
+        if discovery.is_empty() {
+            Self::new(total)
+        } else {
+            Self {
+                mode: BuildingStyles::Colors(colours::Builder::new(total, discovery)),
+            }
+        }
+    }
+    #[cfg(test)]
+    #[inline]
+    pub(super) fn push(&mut self, style: &Style) {
+        match &mut self.mode {
+            BuildingStyles::Plain(values) => values.push(*style),
+            BuildingStyles::Colors(_) => unreachable!("bound declaration required"),
+        }
+    }
+    pub(super) fn binding_fields(&self, index: usize) -> [Option<super::FieldId>; 2] {
+        match &self.mode {
+            BuildingStyles::Colors(values) => values.binding_fields(index),
+            _ => [None; 2],
+        }
+    }
+    pub(super) fn declaration(&mut self, index: usize, declared: Style, resolved: Style, mask: u8) {
+        match &mut self.mode {
+            BuildingStyles::Plain(values) => values.push(resolved),
+            BuildingStyles::Colors(values) => values.push(index, declared, resolved, mask),
+        }
+    }
+    pub(super) fn finish(self) -> Styles {
+        match self.mode {
+            BuildingStyles::Plain(values) => match values.finish() {
+                Lane::Default => Styles::Default,
+                Lane::Dense(values) => Styles::Dense(values),
+                Lane::Shared { palette, indices } => Styles::Shared { palette, indices },
+            },
+            BuildingStyles::Colors(values) => Styles::Colors(Box::new(values.finish())),
+        }
+    }
 }
 
 // Numerical equality intentionally treats signed zero as equal. Interning has
@@ -151,6 +332,30 @@ pub(super) fn exact_eq(a: &Style, b: &Style) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ordinary_property_reads_borrow_the_actual_style_once() {
+        let dense = Styles::Dense(vec![Style::DEFAULT]);
+        let Styles::Dense(values) = &dense else {
+            unreachable!()
+        };
+        let mut calls = 0;
+        dense.with(0, |style| {
+            calls += 1;
+            assert!(std::ptr::eq(style, &values[0]));
+        });
+        assert_eq!(calls, 1);
+
+        let shared = Styles::Shared {
+            palette: vec![Style::DEFAULT].into_boxed_slice(),
+            indices: vec![0].into_boxed_slice(),
+        };
+        let Styles::Shared { palette, .. } = &shared else {
+            unreachable!()
+        };
+        shared.with(0, |style| assert!(std::ptr::eq(style, &palette[0])));
+        Styles::Default.with(0, |style| assert!(exact_eq(style, &Style::DEFAULT)));
+    }
     use crate::{Align, Color, Flow, Justify};
 
     fn build(values: impl IntoIterator<Item = Style>, count: usize) -> Styles {
@@ -184,7 +389,7 @@ mod tests {
             let lane = build((0..count).map(numbered), count);
             assert!(matches!(lane, Styles::Dense(_)));
             for index in 0..count {
-                assert!(exact_eq(lane.get(index), &numbered(index)));
+                assert!(exact_eq(&lane.get(index), &numbered(index)));
             }
         }
     }
@@ -206,7 +411,7 @@ mod tests {
         assert_eq!(palette.len(), values.len());
         assert_eq!(indices.len(), 512);
         for index in 0..512 {
-            assert!(exact_eq(lane.get(index), &values[index % values.len()]));
+            assert!(exact_eq(&lane.get(index), &values[index % values.len()]));
         }
     }
 
@@ -216,9 +421,9 @@ mod tests {
             build([Style::default(); 128], 128),
             build((0..128).map(|i| numbered(i % 2)), 128),
         ] {
-            let old = *lane.get(17);
+            let old = lane.get(17);
             lane.set(16, numbered(99), 128);
-            assert!(exact_eq(lane.get(17), &old));
+            assert!(exact_eq(&lane.get(17), &old));
             let Styles::Dense(values) = &lane else {
                 unreachable!()
             };
@@ -228,7 +433,7 @@ mod tests {
                 unreachable!()
             };
             assert_eq!(pointer, values.as_ptr());
-            assert!(exact_eq(lane.get(16), &numbered(100)));
+            assert!(exact_eq(&lane.get(16), &numbered(100)));
         }
     }
 
@@ -254,7 +459,7 @@ mod tests {
         let lane = build((0..count).map(value), count);
         assert!(matches!(lane, Styles::Dense(_)));
         for index in 0..count {
-            assert!(exact_eq(lane.get(index), &value(index)));
+            assert!(exact_eq(&lane.get(index), &value(index)));
         }
         let value = |index| {
             if index == count - 1 {
@@ -266,7 +471,7 @@ mod tests {
         let lane = build((0..count).map(value), count);
         assert!(matches!(lane, Styles::Shared { .. }));
         for index in 0..count {
-            assert!(exact_eq(lane.get(index), &value(index)));
+            assert!(exact_eq(&lane.get(index), &value(index)));
         }
     }
 
@@ -320,6 +525,7 @@ mod tests {
             let bytes = match lane.as_ref().unwrap() {
                 Styles::Default => 0,
                 Styles::Dense(values) => values.capacity() * size_of::<Style>(),
+                Styles::Colors(values) => values.bytes(),
                 Styles::Shared { palette, indices } => {
                     size_of_val(palette.as_ref()) + size_of_val(indices.as_ref())
                 }

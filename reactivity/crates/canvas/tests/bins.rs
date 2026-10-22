@@ -1,6 +1,6 @@
 use gpui_canvas::{
-    Affine, AlphaMode, Canvas, Color, ColorConfig, DamageRegion, Image, ImageSampling, PaintEdit,
-    PaintIndex, Point, Rect, TextLayout, TextSystem,
+    Affine, AlphaMode, Canvas, Color, ColorConfig, DamageRegion, Image, ImageSampling, PaintColor,
+    PaintEdit, PaintIndex, Point, Rect, SlotEdit, TextLayout, TextSystem,
 };
 
 const CLIP: Rect = Rect::new(0.0, 0.0, 64.0, 48.0);
@@ -88,6 +88,42 @@ fn exceptional_paint_retires_cached_cuts_only_after_commit_and_reuses_geometry()
         assert_eq!(
             canvas.stats().skipped_command_tiles,
             usize::from(value == 1.0)
+        );
+    }
+}
+
+#[test]
+fn shared_colors_revoke_cached_cuts_without_touching_geometry_or_allocating() {
+    let mut canvas = hdr_opaque_scene(true, -1.0);
+    let rect = Rect::new(0.0, 0.0, 16.0, 16.0);
+    let slot = canvas.paint_slot(PaintColor::new(Color::WHITE)).unwrap();
+    canvas
+        .fill_rect_slot(rect, Affine::IDENTITY, rect, slot)
+        .unwrap();
+    canvas.pixels();
+    assert_eq!(canvas.stats().skipped_command_tiles, 2);
+    let bins = canvas.stats().bin_bytes;
+    for red in [-0.0, -f32::from_bits(1), 1.0, -0.0] {
+        let color = Color::linear_srgb(red, 0.0, 0.0, 1.0).unwrap();
+        let edits = [SlotEdit::new(slot, PaintColor::new(color))];
+        let before = canvas.pixels().to_vec();
+        {
+            let _uncommitted = canvas.prepare_slots(&edits).unwrap();
+        }
+        assert_eq!(canvas.pixels(), before);
+        assert!(canvas.prepare_slots(&[edits[0], edits[0]]).is_err());
+        assert_eq!(canvas.pixels(), before);
+        let cost = allocation_counter::measure(|| {
+            canvas.prepare_slots(&edits).unwrap().commit();
+        });
+        assert_eq!((cost.count_total, cost.bytes_total), (0, 0));
+        let mut scalar = hdr_opaque_scene(false, red);
+        assert_eq!(canvas.pixels(), scalar.pixels());
+        assert!(canvas.stats().bins_reused);
+        assert_eq!(canvas.stats().bin_bytes, bins);
+        assert_eq!(
+            canvas.stats().skipped_command_tiles,
+            if red == 1.0 { 2 } else { 1 }
         );
     }
 }

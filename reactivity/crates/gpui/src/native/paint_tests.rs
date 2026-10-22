@@ -126,10 +126,7 @@ pub(super) fn run(gpu: &mut GpuSurface) {
                 wgpu::TextureFormat::Rgba16Float,
             ))
             .unwrap();
-            Some(std::mem::replace(
-                &mut gpu.renderer,
-                PaintRenderer::new(renderer),
-            ))
+            Some(std::mem::replace(&mut gpu.renderer, renderer))
         } else {
             None
         };

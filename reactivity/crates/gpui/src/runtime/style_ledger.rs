@@ -70,13 +70,13 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
         .nodes
         .iter()
         .enumerate()
-        .map(|(index, _)| style_key(*runtime.styles.get(index), true))
+        .map(|(index, _)| style_key(runtime.styles.get(index), true))
         .collect::<BTreeSet<_>>();
     let sans_transform = runtime
         .nodes
         .iter()
         .enumerate()
-        .map(|(index, _)| style_key(*runtime.styles.get(index), false))
+        .map(|(index, _)| style_key(runtime.styles.get(index), false))
         .collect::<BTreeSet<_>>();
     let authored = runtime
         .nodes
@@ -89,7 +89,7 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
         .iter()
         .enumerate()
         .filter(|(index, _)| {
-            style_key(*runtime.styles.get(*index), true) == style_key(Style::default(), true)
+            style_key(runtime.styles.get(*index), true) == style_key(Style::default(), true)
         })
         .count();
     let maps = runtime
@@ -109,6 +109,7 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
         .count();
     let (mode, style_bytes) = match &runtime.styles {
         styles::Styles::Default => ("default", 0),
+        styles::Styles::Colors(values) => ("source-colors", values.bytes()),
         styles::Styles::Dense(values) => ("dense", values.capacity() * size_of::<Style>()),
         styles::Styles::Shared { palette, indices } => (
             "shared",

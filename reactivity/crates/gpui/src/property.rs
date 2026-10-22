@@ -609,6 +609,17 @@ impl<D: PropertyDomain> Overrides<D> {
     }
 }
 
+impl Overrides<Style> {
+    /// Source colors are retained relationships. Refresh the two lower values
+    /// only when an inspector actually addresses this node, not on publication.
+    pub(crate) fn refresh_color_base(&mut self, identity: u64, colors: (Color, Color)) {
+        if let Some(overlay) = self.entries.get_mut(&identity) {
+            overlay.base.fg = colors.0;
+            overlay.base.bg = colors.1;
+        }
+    }
+}
+
 fn apply_except<D: PropertyDomain>(
     mut style: D,
     values: &BTreeMap<PropertyId, PropertyValue>,
