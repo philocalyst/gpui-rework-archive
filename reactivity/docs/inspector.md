@@ -98,5 +98,14 @@ tests, strict accessible all-target Clippy, two schema/storage tests, and native
 control/server-pixel test pass. The native script first activates all six
 controls with no selection, then picks, edits, and restores the actual app.
 It runs on private Xvfb, so this verifies native delivery and presentation rather
-than physical display timing. Caption formatting still allocates temporary
-strings during refresh; eliminating that work is a separate next refinement.
+than physical display timing.
+
+Idle logical-caption refresh streams formatted fragments against the existing
+UTF-8 lease. It neither collects caption updates nor allocates scratch strings
+when the values match. Changed values alone allocate replacement text and
+invalidate shaping. The ordinary public `Win::settle` allocation regression
+observed 1,280 allocations over 128 idle calls before the refinement and zero
+afterward, both with and without selection. Public caption/property/lifecycle
+tests and strict accessible all-target Clippy pass. Candidate displayed geometry
+still formats its changed captions during preparation, with the same scene.
+See `evidence/inspector-idle-refresh/` for the failing control and source pins.

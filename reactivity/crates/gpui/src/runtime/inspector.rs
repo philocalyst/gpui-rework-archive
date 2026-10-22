@@ -4,6 +4,26 @@
 use super::*;
 use crate::property::{BACKGROUND, WIDTH};
 use crate::{El, button, column, div, rgb, row, text};
+use std::fmt;
+
+// Compare formatted fragments directly with the existing UTF-8 lease. Changed
+// captions allocate once for formatting; idle refreshes need no scratch string.
+struct CaptionText<'a>(&'a str);
+impl fmt::Write for CaptionText<'_> {
+    fn write_str(&mut self, part: &str) -> fmt::Result {
+        self.0 = self.0.strip_prefix(part).ok_or(fmt::Error)?;
+        Ok(())
+    }
+}
+fn replace_caption(text: &mut TextSite, value: fmt::Arguments<'_>) -> bool {
+    let mut remaining = CaptionText(&text.value);
+    if fmt::write(&mut remaining, value).is_ok() && remaining.0.is_empty() {
+        return false;
+    }
+    text.value = fmt::format(value).into();
+    text.shaped = None;
+    true
+}
 
 #[derive(Default)]
 pub(super) struct Inspector {
@@ -226,14 +246,18 @@ impl<M: View + 'static> Runtime<M> {
             .as_mut()
             .unwrap()
             .selected = selected;
-        let mut values = vec![(
+        self.refresh_caption(
+            panel,
             Caption::Pick,
-            if picking {
-                "Picking: click application".into()
-            } else {
-                Caption::Pick.initial().into()
-            },
-        )];
+            format_args!(
+                "{}",
+                if picking {
+                    "Picking: click application"
+                } else {
+                    Caption::Pick.initial()
+                }
+            ),
+        );
         if let Some(target) = selected {
             let index = self.inspector_app_index(target)?;
             let (width, background) = self
@@ -241,21 +265,24 @@ impl<M: View + 'static> Runtime<M> {
                 .with(index, |style| (WIDTH.get(style), BACKGROUND.get(style)));
             let width_presence = self.overrides.get(self.nodes[index].identity(), WIDTH);
             let background_presence = self.overrides.get(self.nodes[index].identity(), BACKGROUND);
-            values.push((
+            self.refresh_caption(
+                panel,
                 Caption::Selection,
-                format!(
+                format_args!(
                     "Selected: {:?} #{}",
                     self.nodes[index].kind().role(),
                     self.nodes[index].identity()
                 ),
-            ));
-            values.push((
+            );
+            self.refresh_caption(
+                panel,
                 Caption::Width,
-                format!("Width: {width:?}\n{width_presence:?}"),
-            ));
-            values.push((
+                format_args!("Width: {width:?}\n{width_presence:?}"),
+            );
+            self.refresh_caption(
+                panel,
                 Caption::Background,
-                format!(
+                format_args!(
                     "Background: {:.2?}\n{}",
                     background.channels(),
                     if matches!(background_presence, Contribution::Inherit) {
@@ -264,38 +291,35 @@ impl<M: View + 'static> Runtime<M> {
                         "Set"
                     }
                 ),
-            ));
+            );
             if laid_out {
-                let layout = self.layout.layout(self.layout_nodes[index])?;
-                values.push((
+                let size = self.layout.layout(self.layout_nodes[index])?.size;
+                let epoch = self.source_epoch;
+                self.refresh_caption(
+                    panel,
                     Caption::Layout,
-                    format!(
+                    format_args!(
                         "Layout: {:.1} × {:.1}\nlogical epoch {}",
-                        layout.size.width, layout.size.height, self.source_epoch
+                        size.width, size.height, epoch
                     ),
-                ));
+                );
             }
         } else {
-            values.extend(
-                Caption::ALL
-                    .into_iter()
-                    .filter(|field| !matches!(field, Caption::Pick))
-                    .map(|field| (field, field.initial().to_owned())),
-            );
-        }
-        for (field, value) in values {
-            debug_assert_eq!(self.nodes[panel + field.offset()].kind(), field.kind());
-            let slot = self.nodes[panel + field.offset()].text_slot();
-            let text = slot
-                .get_mut(&mut self.texts)
-                .expect("fixed inspector text slot");
-            if text.value.as_ref() != value {
-                text.value = value.into();
-                text.shaped = None;
-                self.dirty = true;
+            for field in Caption::ALL {
+                if !matches!(field, Caption::Pick) {
+                    self.refresh_caption(panel, field, format_args!("{}", field.initial()));
+                }
             }
         }
         Ok(())
+    }
+    fn refresh_caption(&mut self, panel: usize, field: Caption, value: fmt::Arguments<'_>) {
+        debug_assert_eq!(self.nodes[panel + field.offset()].kind(), field.kind());
+        let slot = self.nodes[panel + field.offset()].text_slot();
+        let text = slot
+            .get_mut(&mut self.texts)
+            .expect("fixed inspector text slot");
+        self.dirty |= replace_caption(text, value);
     }
 }
 // Preparation-local projection of two existing UI text slots. App rows precede

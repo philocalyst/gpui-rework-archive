@@ -1,0 +1,14 @@
+{
+  "parent": "bc82d66f56",
+  "source_sha256": {
+    "crates/gpui/src/runtime/inspector.rs": "eae34f123935dff012b70511ce9f55904615b43f5040588b996806213057aca5",
+    "crates/gpui/tests/inspector.rs": "20e7ec0653c06ec9c9defdf0c241bf3629f6b5160d18c6744348fc93e1ae6598"
+  },
+  "public_tests_passed": 11,
+  "clippy": "strict x11/accessibility/parallel alltargets",
+  "idle_calls": 128,
+  "before_no_selection_allocations": 1280,
+  "after_allocations_both_selection_states": 0,
+  "timing_claim": "none",
+  "control": "parent production plus the same added ordinary-API allocation test"
+}

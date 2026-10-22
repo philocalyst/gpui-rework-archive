@@ -14,6 +14,33 @@ impl View for Panel {
 }
 
 #[test]
+fn idle_inspector_refreshes_allocate_nothing_with_or_without_selection() {
+    struct Content;
+    impl View for Content {
+        fn view(&self) -> El<'_> {
+            div().w(80).h(20).name("inspected")
+        }
+    }
+    let mut window = Win::with_inspector(Content, gpui::WindowOptions::default()).unwrap();
+    let target = window.query().name("inspected").one().unwrap();
+    for selected in [false, true] {
+        if selected {
+            window.inspector_select(target).unwrap();
+        }
+        window.settle().unwrap();
+        window.reset_counters().unwrap();
+        let cost = allocation_counter::measure(|| {
+            for _ in 0..128 {
+                assert_eq!(window.settle().unwrap().changed_nodes, 0);
+            }
+        });
+        assert_eq!(cost.count_total, 0, "selected={selected}: {cost:?}");
+        assert_eq!(window.counters().paint_passes, 0);
+        assert_eq!(window.counters().source_operations, 0);
+    }
+}
+
+#[test]
 fn typed_inspection_preserves_presence_and_reveals_updated_component_defaults() {
     let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     assert!(window.snapshot().unwrap().nodes[0].target.is_none());
