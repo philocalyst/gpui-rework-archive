@@ -372,7 +372,7 @@ fn coherent_checked_candidate_survives_newer_failed_preparation() {
 fn a_literal_checkbox_and_method_route_add_no_constructor_allocation() {
     let cost = allocation_counter::measure(|| {
         let control = checkbox("Keep", false).on_click(Page::toggle);
-        std::hint::black_box(control);
+        let _ = std::hint::black_box(control);
     });
     assert_eq!(cost.count_total, 0);
     assert_eq!(cost.bytes_total, 0);
