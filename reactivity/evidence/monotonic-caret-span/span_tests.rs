@@ -41,6 +41,7 @@ struct Census {
     split_runs: usize,
     empty_runs: usize,
     empty_edges: usize,
+    empty_among_other_runs: usize,
     boxes: usize,
     max_span: usize,
 }
@@ -84,6 +85,7 @@ fn check(layout: &Layout<()>, source: &str, census: &mut Census) {
             if clusters.is_empty() {
                 census.empty_runs += 1;
                 census.empty_edges += usize::from(relative == 0 || relative + 1 == span);
+                census.empty_among_other_runs += usize::from(span > 1);
                 assert!(item.text_range.is_empty());
             }
             for cluster in clusters {
@@ -145,6 +147,7 @@ fn producer_line_run_span_survives_bidi_split_and_empty_edges() {
     assert!(census.reordered > 0, "bidi permutation must be exercised");
     assert!(census.split_runs > 0, "line-scoped slices must recur");
     assert!(census.empty_runs > 0, "empty/synthetic runs must be exercised");
+    assert!(census.empty_edges > 0, "empty run at source-order line edge");
     assert!(census.boxes > 0, "box indices must not enter text-run span");
     std::println!("span_census,{census:?}");
 }

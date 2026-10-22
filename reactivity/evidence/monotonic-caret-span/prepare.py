@@ -36,8 +36,19 @@ manifest = args.output / "Cargo.toml"
 sections = re.split(r"(?=^\[)", manifest.read_text(), flags=re.MULTILINE)
 manifest.write_text("".join(s for s in sections if not re.match(
     r"\[(?:dev-dependencies[.\]]|target\..*\.dev-dependencies[.\]])", s
-)) + '\n[patch.crates-io]\nparley_engine = { path = "' + str(args.repo / "reactivity/vendor/parley_engine") + '" }\n')
-shutil.copy2(args.repo / "reactivity/Cargo.lock", args.output / "Cargo.lock")
+)).replace('    "peniko/libm",\n', '').replace('    "peniko/std",\n', '')
+    + '\n[patch.crates-io]\nparley_engine = { path = "' + str(args.repo / "reactivity/vendor/parley_engine") + '" }\n')
+lock = subprocess.check_output(git + ["show", f"{pin}:reactivity/Cargo.lock"])
+(args.output / "Cargo.lock").write_bytes(lock)
+hashes["reactivity/Cargo.lock"] = hashlib.sha256(lock).hexdigest()
+engine = "reactivity/vendor/parley_engine/"
+for path in subprocess.check_output(
+    git + ["ls-tree", "-r", "--name-only", pin, "--", engine], text=True
+).splitlines():
+    expected = subprocess.check_output(git + ["show", f"{pin}:{path}"])
+    if (args.repo / path).read_bytes() != expected:
+        raise RuntimeError(f"Engine dependency differs from source pin: {path}")
+    hashes[path] = hashlib.sha256(expected).hexdigest()
 fonts = args.output / "fonts"
 fonts.mkdir()
 for source, name in [
@@ -53,7 +64,7 @@ for source, name in [
     "source": pin,
     "copied_source_sha256": hashes,
     "test_module": "src/tests/mod.rs replaced; src/tests/span_tests.rs added",
-    "manifest": "dev-dependencies removed; existing vendored Engine selected",
+    "manifest": "unused dev-dependencies and their peniko feature references removed; existing vendored Engine selected",
     "production_source_mutated": False,
     "test_sha256": hashlib.sha256((args.output / "src/tests/span_tests.rs").read_bytes()).hexdigest(),
 }, indent=2) + "\n")
