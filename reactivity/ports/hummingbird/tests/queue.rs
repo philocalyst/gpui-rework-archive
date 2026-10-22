@@ -252,3 +252,53 @@ fn empty_and_invalid_operations_do_not_mint_history() {
     );
     assert_eq!(queue.current(), before);
 }
+
+#[test]
+fn navigation_matches_the_executed_pinned_manager_and_explicit_legacy_bugs_are_corrected() {
+    fn navigation(queue: &Queue, result: Navigation) -> String {
+        match result {
+            Navigation::Changed(key) => format!(
+                "changed:{}",
+                queue.entry(key).unwrap().track.track_id.unwrap()
+            ),
+            Navigation::Repeat(key) => format!(
+                "repeat:{}",
+                queue.entry(key).unwrap().track.track_id.unwrap()
+            ),
+            Navigation::End => "end".into(),
+        }
+    }
+    let fixture = include_str!("../upstream/queue-navigation.txt");
+    let mut queue = queue(&[1, 2, 3]);
+    let mut trace = Vec::new();
+    let result = queue.next(false, &available, &mut draw);
+    trace.push(format!("next={}", navigation(&queue, result)));
+    queue.set_repeat(Repeat::One);
+    let result = queue.next(false, &available, &mut draw);
+    trace.push(format!("repeat_one={}", navigation(&queue, result)));
+    let result = queue.next(true, &available, &mut draw);
+    trace.push(format!("manual_next={}", navigation(&queue, result)));
+    let result = queue.next(true, &available, &mut draw);
+    trace.push(format!("manual_end={}", navigation(&queue, result)));
+    queue.set_repeat(Repeat::All);
+    let result = queue.next(false, &available, &mut draw);
+    trace.push(format!("wrap_next={}", navigation(&queue, result)));
+    let result = queue.previous(&available, &mut draw);
+    trace.push(format!("wrap_previous={}", navigation(&queue, result)));
+    let missing = queue.at(1).unwrap().key;
+    trace.push(format!(
+        "missing_jump={}",
+        queue.jump(missing, &available).unwrap() == Navigation::End
+    ));
+    assert_eq!(trace, fixture.lines().take(7).collect::<Vec<_>>());
+    assert_eq!(
+        fixture.lines().skip(7).collect::<Vec<_>>(),
+        [
+            "legacy_remove_without_current=true",
+            "legacy_unshuffle_current=Some(0)",
+            "legacy_duplicate_current=Some(0)",
+        ]
+    );
+    // The three old outcomes are genuine compatibility negatives, not the
+    // replacement's desired behavior; focused tests above prove their fixes.
+}

@@ -8,6 +8,8 @@ pub const UNDO_LIMIT: usize = 30;
 pub const LARGE_CHANGE: usize = 4096;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+/// Data identity within one queue. Cross-service authority additionally needs
+/// its controller's session/occurrence PlanStamp.
 pub struct EntryKey(NonZeroU64);
 impl EntryKey {
     pub fn get(self) -> u64 {
@@ -224,6 +226,7 @@ impl Queue {
             .checked_add(count)
             .ok_or(QueueError::KeyExhausted)?;
         let mut keys = Vec::with_capacity(tracks.len());
+        self.sheet.entries.reserve(tracks.len());
         for (index, track) in tracks.into_iter().enumerate() {
             let key = EntryKey(
                 NonZeroU64::new(self.next_key + index as u64 + 1)
@@ -451,18 +454,12 @@ impl Queue {
                 original,
                 before,
             } => {
-                for (index, entry) in entries {
-                    self.sheet.order.insert(index, entry.key);
-                    let position = self
-                        .sheet
-                        .entries
-                        .binary_search_by_key(&entry.key, |entry| entry.key)
-                        .unwrap_err();
-                    self.sheet.entries.insert(position, entry);
-                }
-                for (index, key) in original {
-                    self.sheet.original.insert(index, key);
-                }
+                restore_keys(&mut self.sheet.order, &entries, |entry| entry.key);
+                restore_keys(&mut self.sheet.original, &original, |key| *key);
+                self.sheet
+                    .entries
+                    .extend(entries.into_iter().map(|(_, entry)| entry));
+                self.sheet.entries.sort_unstable_by_key(|entry| entry.key);
                 before
             }
             Undo::Moved { positions, before } => {
@@ -471,9 +468,7 @@ impl Queue {
                 self.sheet
                     .order
                     .retain(|key| keys.binary_search(key).is_err());
-                for (index, key) in positions {
-                    self.sheet.order.insert(index, key);
-                }
+                restore_keys(&mut self.sheet.order, &positions, |key| *key);
                 before
             }
             Undo::Shuffled { before } => {
@@ -616,4 +611,36 @@ fn shuffle(keys: &mut [EntryKey], draw: &mut impl FnMut(usize) -> usize) {
         let other = draw(index + 1) % (index + 1);
         keys.swap(index, other);
     }
+}
+
+/// Restore removed positions in one backwards pass. Entry keys are Copy, and
+/// every destination is at or above its unread source: growing the vector does
+/// not overwrite a key still needed by this merge. The temporary fill key never
+/// escapes this exclusively borrowed sheet. Payload owners stay coupled to
+/// their keys in the history; this helper borrows them without cloning leases.
+fn restore_keys<T>(
+    order: &mut Vec<EntryKey>,
+    positions: &[(usize, T)],
+    key: impl Fn(&T) -> EntryKey,
+) {
+    let Some((_, first)) = positions.first() else {
+        return;
+    };
+    let mut source = order.len();
+    order.resize(source + positions.len(), key(first));
+    let mut removed = positions.iter().rev().peekable();
+    for destination in (0..order.len()).rev() {
+        if removed
+            .peek()
+            .is_some_and(|(index, _)| *index == destination)
+        {
+            let (_, value) = removed.next().unwrap();
+            order[destination] = key(value);
+        } else {
+            source -= 1;
+            order[destination] = order[source];
+        }
+    }
+    debug_assert_eq!(source, 0);
+    debug_assert!(removed.next().is_none());
 }

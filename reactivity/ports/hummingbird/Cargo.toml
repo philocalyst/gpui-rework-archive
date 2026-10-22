@@ -19,6 +19,9 @@ nucleo-matcher = "=0.3.1"
 triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
 fastrand = "=2.5.0"
 
+[dev-dependencies]
+allocation-counter = "=0.8.1"
+
 [patch.crates-io]
 parley = { path = "../../vendor/parley" }
 parley_engine = { path = "../../vendor/parley_engine" }

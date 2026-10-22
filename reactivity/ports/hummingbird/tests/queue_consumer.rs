@@ -8,6 +8,56 @@ use hummingbird_gpui_port::{
 use std::time::Duration;
 
 #[test]
+fn reconstructed_public_queue_has_a_new_list_domain_and_rejects_old_decoder_eos() {
+    use hummingbird_gpui_port::{
+        queue::{Track, TrackRef},
+        queue_view::QueueScreen,
+    };
+    let track = TrackRef::new(Track {
+        path: "/prepared/file.flac".into(),
+        track_id: None,
+        album_id: None,
+        title: "Prepared file".into(),
+        available_when_prepared: true,
+    });
+    let mut screen = QueueScreen::new(gpui::ListId::new(4000)).unwrap();
+    screen.enqueue(track.clone());
+    let old_eos = screen.playback().plan().unwrap().end_of_stream();
+    let (sender, inbox) = gpui::Remote::bounded(2);
+    let mut owner = Win::with_size(screen, 720, 420)
+        .unwrap()
+        .with_inbox(inbox, QueueScreen::receive_end_of_stream)
+        .unwrap();
+    let old_target = owner.query().name("Select queue entry 1").one().unwrap();
+    owner
+        .update(|screen| {
+            *screen = QueueScreen::new(gpui::ListId::new(4001)).unwrap();
+            screen.enqueue(track);
+        })
+        .unwrap();
+    let new_target = owner.query().name("Select queue entry 1").one().unwrap();
+    assert_ne!(old_target, new_target);
+    assert_eq!(owner.activate(old_target), Err(Error::StaleTarget));
+    let stamp = owner
+        .with_model(|screen| screen.playback().plan().unwrap().stamp())
+        .unwrap();
+    sender.try_send(old_eos).unwrap();
+    owner.deliver_ready(2).unwrap();
+    assert_eq!(
+        owner
+            .with_model(|screen| screen.playback().plan().unwrap().stamp())
+            .unwrap(),
+        stamp
+    );
+    assert_eq!(
+        owner
+            .with_model(|screen| screen.playback().queue().len())
+            .unwrap(),
+        1
+    );
+}
+
+#[test]
 fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_source_admission() {
     let path = std::env::temp_dir().join(format!(
         "hummingbird-queue-{}-{}.flac",
@@ -58,6 +108,7 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
                 &queue.at(0).unwrap().track,
                 &queue.at(2).unwrap().track
             ));
+            assert_eq!(queue.at(0).unwrap().track.title, "Καλημέρα");
             (
                 keys,
                 model.queue.playback().plan().unwrap().stamp(),

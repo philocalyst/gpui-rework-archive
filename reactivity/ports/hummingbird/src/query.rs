@@ -63,6 +63,10 @@ pub struct TrackQueryForSearch {
 pub struct TrackQueryForPlayback {
     query: TrackQuery,
 }
+#[derive(Clone, Debug)]
+pub struct TrackQueryForQueue {
+    query: TrackQuery,
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TrackSearchRow {
     pub id: i64,
@@ -76,12 +80,20 @@ pub struct TrackPlaybackRow {
     pub album_id: Option<i64>,
     pub location: PathBuf,
 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TrackQueueRow {
+    pub id: i64,
+    pub album_id: Option<i64>,
+    pub location: PathBuf,
+    pub title: String,
+}
 
 #[derive(Clone, Copy)]
 enum TrackProjection {
     Id,
     Search,
     Playback,
+    Queue,
 }
 
 pub fn tracks() -> TrackQuery {
@@ -153,6 +165,11 @@ impl TrackQuery {
     pub fn for_playback(self) -> TrackQueryForPlayback {
         TrackQueryForPlayback { query: self }
     }
+    /// Queue metadata comes from the same filtered statement, including its
+    /// actual title. The original three-column playback projection stays intact.
+    pub fn for_queue(self) -> TrackQueryForQueue {
+        TrackQueryForQueue { query: self }
+    }
     pub fn fetch_ids(self, connection: &Connection) -> Result<Vec<i64>> {
         let query = self.build(TrackProjection::Id);
         connection
@@ -176,6 +193,7 @@ impl TrackQuery {
             TrackProjection::Id => "track.id",
             TrackProjection::Search => "track.id, track.title, track.artist_names, track.album_id",
             TrackProjection::Playback => "track.id, track.album_id, track.location",
+            TrackProjection::Queue => "track.id, track.album_id, track.location, track.title",
         });
         query.push(" FROM track");
         if needs_album {
@@ -280,6 +298,22 @@ impl TrackQueryForPlayback {
                     id: row.get(0)?,
                     album_id: row.get(1)?,
                     location: PathBuf::from(row.get::<_, String>(2)?),
+                })
+            })?
+            .collect()
+    }
+}
+impl TrackQueryForQueue {
+    pub fn fetch_rows(self, connection: &Connection) -> Result<Vec<TrackQueueRow>> {
+        let query = self.query.build(TrackProjection::Queue);
+        connection
+            .prepare(&query.sql)?
+            .query_map(params_from_iter(query.bindings), |row| {
+                Ok(TrackQueueRow {
+                    id: row.get(0)?,
+                    album_id: row.get(1)?,
+                    location: PathBuf::from(row.get::<_, String>(2)?),
+                    title: row.get(3)?,
                 })
             })?
             .collect()

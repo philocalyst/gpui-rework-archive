@@ -110,7 +110,7 @@ impl Worker {
                                         None => Ok(None),
                                         Some(id) => tracks()
                                             .by_id(id)
-                                            .for_playback()
+                                            .for_queue()
                                             .fetch_rows(database.connection())
                                             .map_err(SourceError::from)
                                             .and_then(|mut rows| {
@@ -130,7 +130,7 @@ impl Worker {
                                                     path: row.location,
                                                     track_id: Some(row.id),
                                                     album_id: row.album_id,
-                                                    title: format!("Recording {}", row.id),
+                                                    title: row.title,
                                                     available_when_prepared,
                                                 })
                                             }),

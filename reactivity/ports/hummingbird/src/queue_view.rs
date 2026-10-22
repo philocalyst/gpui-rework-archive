@@ -2,7 +2,7 @@
 //! operations until modified-click/drag metadata has a portable public route.
 use crate::{
     queue::{EntryKey, QueueError, Repeat, Track, TrackRef},
-    queue_playback::PlaybackQueue,
+    queue_playback::{EndOfStream, PlaybackQueue},
 };
 use gpui::prelude::*;
 
@@ -42,8 +42,20 @@ impl QueueScreen {
         &self.selected
     }
     pub fn enqueue(&mut self, track: TrackRef) {
-        let result = self.playback.append(vec![track], &available, &mut draw);
+        self.enqueue_many(vec![track]);
+    }
+    pub fn enqueue_many(&mut self, tracks: Vec<TrackRef>) {
+        let result = self.playback.append(tracks, &available, &mut draw);
         self.changed(result.map(|_| ()));
+    }
+    /// The application may bind this to its real decoder's typed Inbox. The
+    /// queue UI itself never fabricates EOS or installs an audio side effect.
+    pub fn receive_end_of_stream(&mut self, event: EndOfStream) {
+        match self.playback.end_of_stream(event, &available, &mut draw) {
+            Ok(true) => self.changed(Ok(())),
+            Ok(false) => {}
+            Err(error) => self.changed(Err(error)),
+        }
     }
     fn changed(&mut self, result: Result<(), QueueError>) {
         match result {
