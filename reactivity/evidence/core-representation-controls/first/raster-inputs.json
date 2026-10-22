@@ -1,0 +1,38 @@
+[
+  {
+    "label": "parent",
+    "worktree": "/root/gpui-hit-parent",
+    "source": "de18f040c98dbfc32d33bd1e51515bbf11bce53b",
+    "binary": "/tmp/gpui-core-controls-artifacts/bin_phase-parent-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+    "binary_sha256": "7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+    "fixture_sha256": "16215182484f263853dcce8ec5b344f0cd2bd587fb34edf530b012e21a790650",
+    "features": [
+      "default"
+    ],
+    "profile": "release"
+  },
+  {
+    "label": "cuts",
+    "worktree": "/root/gpui-raster-cuts",
+    "source": "d50ba094b59af1c536b0b2f3cc3cab526e92b45c",
+    "binary": "/tmp/gpui-core-controls-artifacts/bin_phase-cuts-a867beb12ec675b359e8e754677fb865a573841a6cf36a80b7c67b5d719dfc7d",
+    "binary_sha256": "a867beb12ec675b359e8e754677fb865a573841a6cf36a80b7c67b5d719dfc7d",
+    "fixture_sha256": "16215182484f263853dcce8ec5b344f0cd2bd587fb34edf530b012e21a790650",
+    "features": [
+      "default"
+    ],
+    "profile": "release"
+  },
+  {
+    "label": "narrow",
+    "worktree": "/root/gpui-raster-narrow",
+    "source": "25d851b380f7ed4765416a5afaa8cbbc924a81a3",
+    "binary": "/tmp/gpui-core-controls-artifacts/bin_phase-narrow-5fe3f3193ce0234da4e475289d8a108b65a44be9263273ba9509e012aee59ed3",
+    "binary_sha256": "5fe3f3193ce0234da4e475289d8a108b65a44be9263273ba9509e012aee59ed3",
+    "fixture_sha256": "16215182484f263853dcce8ec5b344f0cd2bd587fb34edf530b012e21a790650",
+    "features": [
+      "default"
+    ],
+    "profile": "release"
+  }
+]

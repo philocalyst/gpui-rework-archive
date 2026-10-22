@@ -1,0 +1,9 @@
+{
+  "canvas-release.log": "c90d5d4d70e59abb0e70f33f428f7268b7b82a8b2d708ef0119c5909cdda8361",
+  "clippy.log": "7ca794c4b6479c1fa1970c9f13943c1cbab3859e82ad58d2f4f0b4180750931a",
+  "layouts.log": "a277c1351d9bf5d195b519f5bf0f0266b488605825e124ffae3d677ab24b938f",
+  "linked-excerpts.asm": "5f560a4b63b127dceaa1596a402b3aa0590f8dbd4602a47d86231ef83b5fbc0e",
+  "threshold/canvas-release.log": "a1e1f1a8ba3f7c41a77e91b56d0e97cf75a1c63e6b85a16241bc7eef59cbd13f",
+  "threshold/clippy.log": "49ece8cb12fd4aff8bc80a742e5a4c7ac0ce5dced396b1adfbb994207f346def",
+  "threshold/serial-check.log": "26954633db799f1acc588026c574c5a0da3229c43949047f45db1c5f6b01c5e1"
+}

@@ -1,0 +1,10 @@
+{
+  "source": "c9344bd",
+  "command": "CARGO_BUILD_JOBS=2 cargo test --locked --offline --workspace",
+  "passed": 637,
+  "failed": 0,
+  "ignored": 11,
+  "groups": 105,
+  "raw_log_sha256": "28bfb57cd794c511b9dc6ce2f09c1b5009cee4939e6d4489ec5da473626c18ad",
+  "timings": "Historical pinned sources only; integrated c934 timing is unmeasured."
+}

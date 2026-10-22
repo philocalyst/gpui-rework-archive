@@ -1,0 +1,137 @@
+[
+  {
+    "repeat": 1,
+    "label": "parent",
+    "log": "1-parent.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-parent-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 254528953,
+    "log_sha256": "2c6b9071a486402abcbe6826ee0b1d0b7e8ff0dc1712a0d98abfcfbe71151b81"
+  },
+  {
+    "repeat": 1,
+    "label": "cuts",
+    "log": "1-cuts.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-cuts-a867beb12ec675b359e8e754677fb865a573841a6cf36a80b7c67b5d719dfc7d",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 249428068,
+    "log_sha256": "67ece0a32a6361c879694b9e0f81f6be8c3d5301326bf032c8ba814794c53d97"
+  },
+  {
+    "repeat": 1,
+    "label": "narrow",
+    "log": "1-narrow.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-narrow-5fe3f3193ce0234da4e475289d8a108b65a44be9263273ba9509e012aee59ed3",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 258523163,
+    "log_sha256": "16f1c3e7c09039e1da9181ce4c165564a07a0494ebbb4f3b5b1730568cbf0c99"
+  },
+  {
+    "repeat": 2,
+    "label": "narrow",
+    "log": "2-narrow.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-narrow-5fe3f3193ce0234da4e475289d8a108b65a44be9263273ba9509e012aee59ed3",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 245428458,
+    "log_sha256": "9ea4ccb7cf8ce106f5dd95e1d7be0cc679ff8b89e2e81c890be7cd80c975347a"
+  },
+  {
+    "repeat": 2,
+    "label": "cuts",
+    "log": "2-cuts.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-cuts-a867beb12ec675b359e8e754677fb865a573841a6cf36a80b7c67b5d719dfc7d",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 249118511,
+    "log_sha256": "0eb7319189b6cfe317598d22ee574589dd9da62ef47b4e96532720fc5b4890c4"
+  },
+  {
+    "repeat": 2,
+    "label": "parent",
+    "log": "2-parent.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-parent-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 238963522,
+    "log_sha256": "84ba15e8d10b8460575ff6f267d88d887aa319c39871e15cec774f8da7f37009"
+  },
+  {
+    "repeat": 3,
+    "label": "parent",
+    "log": "3-parent.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-parent-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 234958111,
+    "log_sha256": "337513aa184833a39e7c730cd0f48c649aca2ed2161405a426976b132d7a7b68"
+  },
+  {
+    "repeat": 3,
+    "label": "cuts",
+    "log": "3-cuts.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-cuts-a867beb12ec675b359e8e754677fb865a573841a6cf36a80b7c67b5d719dfc7d",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 238272176,
+    "log_sha256": "e9e023a3a9b19ef1423e8deceff4c3819f36de320db36de92f77e927509f8e3f"
+  },
+  {
+    "repeat": 3,
+    "label": "narrow",
+    "log": "3-narrow.log",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/bin_phase-narrow-5fe3f3193ce0234da4e475289d8a108b65a44be9263273ba9509e012aee59ed3",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 234756137,
+    "log_sha256": "c464078cbf7b282221093fe5b9dd4663844841208c900c1d81464fbd78686c8b"
+  }
+]

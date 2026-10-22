@@ -1,11 +1,14 @@
 //! One authoritative CPU scratch owner, allocated only when rasterizing.
 use super::{DisplayList, TILE};
 
+// Admission bounds regional CSR references and every painter ordinal.
+const _: () = assert!(super::MAX_REFERENCES < u32::MAX as usize);
+const _: () = assert!(super::MAX_COMMANDS <= u16::MAX as usize + 1);
+
 #[derive(Default)]
 pub(super) struct RasterScratch {
-    offsets: Vec<usize>,
+    offsets: Vec<u32>,
     indices: Vec<u32>,
-    cursor: Vec<usize>,
     // Canvas axes are at most 16384px: tile endpoints fit in 0..=1024.
     // All-zero bounds cannot describe a nonempty render, so also mean invalid.
     bounds: [u16; 4],
@@ -15,38 +18,33 @@ impl RasterScratch {
         self.bounds = [0; 4];
     }
     pub(super) fn bytes(&self) -> usize {
-        self.offsets.capacity() * size_of::<usize>()
-            + self.cursor.capacity() * size_of::<usize>()
-            + self.indices.capacity() * size_of::<u32>()
+        (self.offsets.capacity() + self.indices.capacity()) * size_of::<u32>()
     }
-    /// Physical tile lookup uses the cached origin/stride, independently of
-    /// the requested subrectangle that controls worker and output traversal.
-    #[inline]
-    pub(super) fn tile(&self, x: usize, y: usize) -> &[u32] {
-        let [left, top, right, bottom] = self.bounds.map(usize::from);
-        debug_assert!(x >= left && x < right && y >= top && y < bottom);
-        let tile = (y - top) * (right - left) + x - left;
-        &self.indices[self.offsets[tile]..self.offsets[tile + 1]]
+    /// Borrow contiguous physical rows. Recursive workers split both membership
+    /// and output at the same row boundary; only immutable offsets overlap.
+    pub(super) fn rows(&mut self, bounds: [usize; 4]) -> ([u16; 4], &[u32], &mut [u32]) {
+        let stride = usize::from(self.bounds[2] - self.bounds[0]);
+        let first = (bounds[1] - usize::from(self.bounds[1])) * stride;
+        let end = (bounds[3] - usize::from(self.bounds[1])) * stride;
+        let offsets = &self.offsets[first..=end];
+        (
+            self.bounds,
+            offsets,
+            &mut self.indices[offsets[0] as usize..offsets[end - first] as usize],
+        )
     }
-    /// Retain unpruned command membership, never color/occlusion certificates.
-    /// The scene owner invalidates this at each structural commit; admitted
-    /// color patches leave geometry, order and resource membership unchanged.
+    /// Unpruned membership survives exact-alpha paint patches. Structural
+    /// mutation invalidates membership and its embedded cuts before publication.
     pub(super) fn prepare(&mut self, commands: &DisplayList, bounds: [usize; 4]) -> bool {
         debug_assert!(bounds[0] < bounds[2] && bounds[1] < bounds[3]);
         debug_assert!(bounds.iter().all(|&edge| edge <= 16_384 / TILE));
         let key = bounds.map(|edge| edge as u16);
-        // Any subrectangle uses the same unpruned membership. In particular,
-        // a full raster primes every later regional repair until structural
-        // invalidation. Never enlarge a first regional request speculatively.
-        if key[0] >= self.bounds[0]
-            && key[1] >= self.bounds[1]
-            && key[2] <= self.bounds[2]
-            && key[3] <= self.bounds[3]
+        let cached = self.bounds;
+        if key[0] >= cached[0] && key[1] >= cached[1] && key[2] <= cached[2] && key[3] <= cached[3]
         {
             return true;
         }
-        // Invalidate before any allocation: catching an allocation panic must
-        // not make a partially rebuilt CSR appear reusable.
+        // Allocation failure cannot publish a partially rebuilt CSR.
         self.invalidate();
         let tiles = (bounds[2] - bounds[0]) * (bounds[3] - bounds[1]);
         self.offsets.clear();
@@ -57,19 +55,44 @@ impl RasterScratch {
         for i in 1..self.offsets.len() {
             self.offsets[i] += self.offsets[i - 1];
         }
+        let total = self.offsets[tiles];
         self.indices.clear();
-        self.indices.resize(*self.offsets.last().unwrap(), 0);
-        // Counting cursor is O(tile count), never O(pixel count).
-        self.cursor.clear();
-        self.cursor.extend_from_slice(&self.offsets[..tiles]);
-        for (index, command_bounds) in commands.ordered_bounds().enumerate() {
+        self.indices.resize(total as usize, 0);
+        // Decrement cumulative ends while visiting painters backwards. This
+        // fills each tile in ascending order without a separate cursor array.
+        for (index, command_bounds) in commands.ordered_bounds().enumerate().rev() {
             visit_tiles(command_bounds, bounds, |tile| {
-                self.indices[self.cursor[tile]] = index as u32;
-                self.cursor[tile] += 1;
+                self.offsets[tile + 1] -= 1;
+                self.indices[self.offsets[tile + 1] as usize] = index as u32;
             });
         }
+        // Each former end now holds that tile's start, including empty tiles.
+        self.offsets.copy_within(1.., 0);
+        self.offsets[tiles] = total;
         self.bounds = key;
         false
+    }
+}
+
+/// Only the first member's high half stores a lazy cut + 1. Zero is unknown;
+/// low halves always retain the admitted painter ordinal. A cut of 65535
+/// cannot be encoded and is conservatively recomputed on the next raster.
+#[inline]
+pub(super) fn ordinal(word: u32) -> usize {
+    word as u16 as usize
+}
+#[inline]
+pub(super) fn cached_cut(members: &[u32]) -> Option<usize> {
+    members
+        .first()
+        .and_then(|word| (word >> 16).checked_sub(1))
+        .map(|cut| cut as usize)
+}
+pub(super) fn cache_cut(members: &mut [u32], cut: usize) {
+    if cut < u16::MAX as usize
+        && let Some(first) = members.first_mut()
+    {
+        *first = u32::from(*first as u16) | (((cut + 1) as u32) << 16);
     }
 }
 
@@ -178,12 +201,183 @@ mod tests {
                         .collect();
                     let tile = (ty - bounds[1]) * columns + tx - bounds[0];
                     assert_eq!(
-                        &scratch.indices[scratch.offsets[tile]..scratch.offsets[tile + 1]],
+                        &scratch.indices
+                            [scratch.offsets[tile] as usize..scratch.offsets[tile + 1] as usize],
                         members
                     );
                 }
             }
         }
+    }
+
+    fn cuts(canvas: &Canvas) -> Vec<Option<usize>> {
+        let scratch = canvas.raster.as_ref().unwrap();
+        scratch
+            .offsets
+            .windows(2)
+            .map(|span| cached_cut(&scratch.indices[span[0] as usize..span[1] as usize]))
+            .collect()
+    }
+
+    #[test]
+    fn opaque_certificates_follow_physical_tiles_and_exact_alpha() {
+        use crate::{Affine, Color, DamageRegion, PaintEdit, Rect};
+        let clip = Rect::new(0.0, 0.0, 64.0, 48.0);
+        let mut canvas = Canvas::recording(64, 48, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        // Every tile has opaque command 0. Only (1, 1) has opaque command 2.
+        for (rect, color) in [
+            (clip, Color::BLACK),
+            (clip, Color::rgba(255, 0, 0, 128)),
+            (Rect::new(16.0, 16.0, 16.0, 16.0), Color::WHITE),
+            (clip, Color::rgba(0, 255, 0, 128)),
+        ] {
+            canvas
+                .fill_rect(rect, Affine::IDENTITY, clip, color)
+                .unwrap();
+        }
+        let index = canvas.paint_index(2).unwrap();
+        let mut words = [0; 64 * 48];
+        // A proof-disabled raster constructs membership but no certificates.
+        canvas.set_tile_proofs(false);
+        canvas.render_bgrx(&mut words).unwrap();
+        assert!(cuts(&canvas).iter().all(Option::is_none));
+        canvas.set_tile_proofs(true);
+        let damage = DamageRegion::checked_canvas_bounds([16, 16, 32, 32]);
+        canvas.render_bgrx_region(&mut words, damage).unwrap();
+        let cached = cuts(&canvas);
+        for (tile, &cut) in cached.iter().enumerate() {
+            assert_eq!(cut, if tile == 5 { Some(2) } else { None });
+        }
+        let edits = [PaintEdit::new(index, Color::rgb(30, 70, 140))];
+        drop(canvas.prepare_paint(&edits).unwrap());
+        assert_eq!(cuts(&canvas)[5], Some(2));
+        canvas.prepare_paint(&edits).unwrap().commit();
+        canvas.render_bgrx_region(&mut words, damage).unwrap();
+        assert_eq!(cuts(&canvas)[5], Some(2));
+        let edits = [PaintEdit::new(index, Color::rgba(30, 70, 140, 128))];
+        assert!(canvas.prepare_paint(&edits).is_err());
+        assert_eq!(cuts(&canvas)[5], Some(2));
+        canvas.render_bgrx(&mut words).unwrap();
+        let cached = cuts(&canvas);
+        for (tile, &cut) in cached.iter().enumerate() {
+            assert_eq!(cut, if tile == 5 { Some(2) } else { Some(0) });
+        }
+        // Re-evaluate with the existing exhaustive path as an independent
+        // oracle; proof mode changes do not revoke same-geometry certificates.
+        let expected = words;
+        canvas.set_tile_proofs(false);
+        canvas.render_bgrx(&mut words).unwrap();
+        assert_eq!(words, expected);
+        canvas.set_tile_proofs(true);
+        canvas.clear(Color::WHITE);
+        canvas.render_bgrx(&mut words).unwrap();
+        assert!(words.iter().all(|&pixel| pixel == 0x00ff_ffff));
+        assert!(cuts(&canvas).iter().all(Option::is_none));
+    }
+
+    #[test]
+    fn admitted_reference_and_command_limits_fit_narrow_membership_and_cuts() {
+        use crate::{Affine, Color, PaintEdit, Rect};
+        let clip = Rect::new(0.0, 0.0, 128.0, 128.0);
+        let mut canvas = Canvas::recording(128, 128, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        // 65,536 commands x64 physical tiles reaches the admitted 4M limit.
+        for _ in 0..super::super::MAX_COMMANDS {
+            canvas
+                .fill_rect(clip, Affine::IDENTITY, clip, Color::BLACK)
+                .unwrap();
+        }
+        let mut words = [0; 128 * 128];
+        canvas.render_bgrx(&mut words).unwrap();
+        let scratch = canvas.raster.as_ref().unwrap();
+        assert_eq!(
+            scratch.offsets.last().copied(),
+            Some(super::super::MAX_REFERENCES as u32)
+        );
+        assert!(cuts(&canvas).iter().all(Option::is_none));
+        for members in scratch.offsets.windows(2) {
+            let members = &scratch.indices[members[0] as usize..members[1] as usize];
+            assert_eq!(members.len(), super::super::MAX_COMMANDS);
+            assert!(
+                members
+                    .iter()
+                    .copied()
+                    .map(ordinal)
+                    .eq(0..super::super::MAX_COMMANDS)
+            );
+        }
+        let index = canvas
+            .paint_index((super::super::MAX_COMMANDS - 1) as u32)
+            .unwrap();
+        let edits = [PaintEdit::new(index, Color::WHITE)];
+        canvas.prepare_paint(&edits).unwrap().commit();
+        canvas.render_bgrx(&mut words).unwrap();
+        assert!(words.iter().all(|&word| word == 0x00ff_ffff));
+        assert!(canvas.stats().bins_reused);
+        assert_eq!(canvas.stats().skipped_command_tiles, 64 * 65535);
+        // The largest encodable cut occupies all high bits. The final
+        // translucent command must still read its unmodified low ordinal.
+        canvas.clear(Color::WHITE);
+        for _ in 0..super::super::MAX_COMMANDS - 1 {
+            canvas
+                .fill_rect(clip, Affine::IDENTITY, clip, Color::WHITE)
+                .unwrap();
+        }
+        canvas
+            .fill_rect(clip, Affine::IDENTITY, clip, Color::rgba(0, 0, 0, 128))
+            .unwrap();
+        canvas.render_bgrx(&mut words).unwrap();
+        assert!(cuts(&canvas).iter().all(|&cut| cut == Some(65534)));
+        let mut oracle = Canvas::recording(128, 128, ColorConfig::default()).unwrap();
+        oracle.clear(Color::WHITE);
+        oracle.set_tile_proofs(false);
+        oracle
+            .fill_rect(clip, Affine::IDENTITY, clip, Color::rgba(0, 0, 0, 128))
+            .unwrap();
+        let mut expected = [0; 128 * 128];
+        oracle.render_bgrx(&mut expected).unwrap();
+        assert_eq!(words, expected);
+        canvas.render_bgrx(&mut words).unwrap();
+        assert_eq!(words, expected);
+        assert_eq!(canvas.stats().skipped_command_tiles, 64 * 65534);
+    }
+
+    #[test]
+    fn embedded_cut_preserves_a_nonzero_first_painter_and_no_opaque_prefix() {
+        use crate::{Affine, Color, Rect};
+        let clip = Rect::new(0.0, 0.0, 48.0, 16.0);
+        let mut canvas = Canvas::recording(48, 16, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        canvas
+            .fill_rect(
+                Rect::new(1.0, 1.0, 11.0, 11.0),
+                Affine::IDENTITY,
+                clip,
+                Color::BLACK,
+            )
+            .unwrap();
+        canvas
+            .fill_rect(
+                Rect::new(20.0, 1.0, 8.0, 11.0),
+                Affine::IDENTITY,
+                clip,
+                Color::rgba(255, 0, 0, 128),
+            )
+            .unwrap();
+        let mut expected = [0; 48 * 16];
+        canvas.set_tile_proofs(false);
+        canvas.render_bgrx(&mut expected).unwrap();
+        let mut words = [0; 48 * 16];
+        canvas.set_tile_proofs(true);
+        canvas.render_bgrx(&mut words).unwrap();
+        assert_eq!(words, expected);
+        assert_eq!(cuts(&canvas), [Some(0), Some(0), None]);
+        let scratch = canvas.raster.as_ref().unwrap();
+        assert_eq!(ordinal(scratch.indices[scratch.offsets[1] as usize]), 1);
+        canvas.set_tile_proofs(false);
+        canvas.render_bgrx(&mut words).unwrap();
+        assert_eq!(words, expected);
     }
 
     #[test]
@@ -221,8 +415,10 @@ mod tests {
         );
         #[cfg(target_pointer_width = "64")]
         {
+            assert_eq!((first.count_total, first.bytes_total), (2, 76));
+            assert_eq!(canvas.bin_bytes(), 20);
             assert_eq!(size_of::<Canvas>(), 488);
-            assert_eq!(size_of::<RasterScratch>(), 80);
+            assert_eq!(size_of::<RasterScratch>(), 56);
             assert_eq!(size_of::<super::super::RenderStats>(), 96);
             assert_eq!(size_of::<super::super::Frame<'_>>(), 88);
             assert_eq!(

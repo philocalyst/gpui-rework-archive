@@ -1,0 +1,25 @@
+{
+  "manifest_sha256": "cf5bf63af0f3934449a302b429ccc08682e688a2c5d1ce810dd5fe810c6f33a4",
+  "platform": "Linux-6.18.54-x86_64-with-glibc2.42",
+  "cpu": "\t: AMD Ryzen 7 3700X 8-Core Processor",
+  "available_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "capture_cpu": 0,
+  "started_utc": "2026-10-22T03:03:03Z"
+}

@@ -566,8 +566,13 @@ struct Node {
     handler: Option<Handler>,
 }
 #[cfg(test)]
+mod hit_tests;
+#[cfg(test)]
 mod style_ledger;
 impl Node {
+    fn focusable(&self) -> bool {
+        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.handler.is_some()
+    }
     #[inline]
     fn identity(&self) -> u64 {
         self.identity.get()
@@ -601,9 +606,36 @@ struct Fanout {
     codec: TextCodec,
     destinations: Vec<Destination>,
 }
+/// A presented parent uses 17 bits; the remaining 15 store a conservative
+/// run of impossible hits ending at this row. Neither part changes identity.
+#[derive(Clone, Copy)]
+struct PresentedLink(u32);
+impl PresentedLink {
+    const PARENT_BITS: u32 = 17;
+    const PARENT_MASK: u32 = (1 << Self::PARENT_BITS) - 1;
+    const MAX_SKIP: usize = (u32::MAX >> Self::PARENT_BITS) as usize;
+    fn new(parent: Parent, impossible: bool, previous: Option<Self>) -> Self {
+        let run = if impossible {
+            previous
+                .map_or(1, |link| link.skip() + 1)
+                .min(Self::MAX_SKIP)
+        } else {
+            0
+        };
+        Self((parent.0 & Self::PARENT_MASK) | ((run as u32) << Self::PARENT_BITS))
+    }
+    fn index(self) -> Option<usize> {
+        let parent = self.0 & Self::PARENT_MASK;
+        (parent != Self::PARENT_MASK).then_some(parent as usize)
+    }
+    fn skip(self) -> usize {
+        (self.0 >> Self::PARENT_BITS) as usize
+    }
+}
+const _: () = assert!(MAX_NODES < (1 << PresentedLink::PARENT_BITS));
 struct Presented {
     identity: u64,
-    parent: Parent,
+    parent: PresentedLink,
     kind: NodeKind,
     text: Option<SharedText>,
     rect: Rect,
@@ -1246,8 +1278,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     fn style_property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
-        Ok(property.get(runtime.styles.get(runtime.by_identity.required(identity))))
+        let index = runtime.resolve_index(target)?;
+        Ok(property.get(runtime.styles.get(index)))
     }
     fn style_contribution<T>(
         &self,
@@ -1269,12 +1301,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     ) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
-        let identity = runtime.resolve(target)?;
+        let index = runtime.resolve_index(target)?;
+        let identity = runtime.nodes[index].identity();
         let epoch = runtime
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let index = runtime.by_identity.required(identity);
         let before = *runtime.styles.get(index);
         let after = runtime
             .overrides
@@ -1412,22 +1444,29 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn resolve(&self, target: Target) -> Result<u64, Error> {
-        self.sites
-            .resolve(target)
-            .filter(|identity| {
-                self.logical_valid
-                    && self.by_identity.get(*identity).is_some_and(|index| {
-                        !self.has_lists()
-                            || !self.in_list(index)
-                            || self
-                                .prepared
-                                .as_ref()
-                                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
-                                .iter()
-                                .any(|node| node.identity == *identity)
-                    })
-            })
-            .ok_or(Error::StaleTarget)
+        self.resolve_index(target)
+            .map(|index| self.nodes[index].identity())
+    }
+    /// Return the lookup already required for target admission. The index stays
+    /// inside the current owner borrow; it cannot outlive a description rebuild.
+    fn resolve_index(&self, target: Target) -> Result<usize, Error> {
+        if !self.logical_valid {
+            return Err(Error::StaleTarget);
+        }
+        let identity = self.sites.resolve(target).ok_or(Error::StaleTarget)?;
+        let index = self.by_identity.get(identity).ok_or(Error::StaleTarget)?;
+        if self.has_lists()
+            && self.in_list(index)
+            && !self
+                .prepared
+                .as_ref()
+                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
+                .iter()
+                .any(|node| node.identity == identity)
+        {
+            return Err(Error::StaleTarget);
+        }
+        Ok(index)
     }
     fn current_presentation(&self) -> Result<(), Error> {
         if self.logical_valid
@@ -2605,9 +2644,22 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
+            // Empty bounds can never pass sheet_hit, including wheel routing.
+            // Keep the existing byte as the common-path candidate test; loading
+            // and decoding the parent word is needed only to skip a cold run.
+            let hittable = !bounds.is_empty()
+                && (node.text_slot().0 != u32::MAX
+                    || style.bg.alpha() > 0.0
+                    || node.handler.is_some()
+                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image));
+            let link = PresentedLink::new(
+                published_parent,
+                !hittable,
+                presented.last().map(|node: &Presented| node.parent),
+            );
             presented.push(Presented {
                 identity: node.identity(),
-                parent: published_parent,
+                parent: link,
                 kind: node.kind(),
                 text: node
                     .text_slot()
@@ -2616,10 +2668,7 @@ impl<M: View + 'static> Runtime<M> {
                 rect,
                 transform: PresentedTransform::new(transform),
                 bounds,
-                hittable: node.text_slot().0 != u32::MAX
-                    || style.bg.alpha() > 0.0
-                    || node.handler.is_some()
-                    || matches!(node.kind(), NodeKind::Input | NodeKind::Image),
+                hittable,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
                     node.parent.index().is_some_and(|parent| {
                         clip_membership.get(parent).is_some_and(|flags| *flags != 0)
@@ -2778,8 +2827,18 @@ impl<M: View + 'static> Runtime<M> {
         {
             return None;
         }
-        for (index, node) in self.presented.iter().enumerate().rev() {
-            if node.hittable && self.sheet_hit(index, point) {
+        let mut rows = self.presented.iter().enumerate().rev();
+        while let Some((index, node)) = rows.next() {
+            if !node.hittable {
+                let skip = node.parent.skip();
+                // This row is consumed. nth discards the rest of the run in
+                // constant time without indexing the visible-path traversal.
+                if skip > 1 {
+                    rows.nth(skip - 2);
+                }
+                continue;
+            }
+            if self.sheet_hit(index, point) {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
