@@ -97,10 +97,14 @@ fn rect(rect: Rect) -> [f32; 4] {
 
 impl Serialize for Part<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let mut node = serializer.serialize_struct("Part", 18)?;
+        let mut node =
+            serializer.serialize_struct("Part", 18 + usize::from(self.checked().is_some()))?;
         node.serialize_field("target", &self.target())?;
         node.serialize_field("parent", &self.parent())?;
         node.serialize_field("role", &self.role())?;
+        if let Some(checked) = self.checked() {
+            node.serialize_field("checked", &checked)?;
+        }
         node.serialize_field("text", &self.text())?;
         node.serialize_field("name", &self.name())?;
         node.serialize_field("description", &self.description())?;

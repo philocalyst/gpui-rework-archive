@@ -31,7 +31,8 @@ mod style_port;
 pub use application::{Application, DemoApplication};
 pub use component::Component;
 pub use element::{
-    ChildSeq, El, Element, IntoHandler, Role, button, column, div, label, row, text, text_input,
+    ChildSeq, El, Element, IntoHandler, Role, button, checkbox, column, div, label, row, text,
+    text_input,
 };
 pub use gpui_canvas::{
     AlphaMode, CaretAffinity, ColorConfig, ColorSpace, Image, ImageKey, ImagePixels, ImageProfile,
@@ -89,7 +90,7 @@ pub mod prelude {
         Action, ActionKind, Affine, Align, AlphaMode, Axis, Color, Component, El, Element, FieldId,
         Flex, Flow, Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource,
         Justify, Key, ListId, Point, PointerEvent, PointerSession, Rect, Remote, ScrollDelta,
-        ScrollOffset, Signal, Source, Sources, Target, View, Win, button, column, div, image,
-        label, oklch, rgb, row, text, text_input, uniform_list,
+        ScrollOffset, Signal, Source, Sources, Target, View, Win, button, checkbox, column, div,
+        image, label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }

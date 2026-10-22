@@ -421,6 +421,8 @@ mod parent_tests {
             NodeKind::List,
             NodeKind::ListItem,
             NodeKind::Scroll,
+            NodeKind::CheckBox(false),
+            NodeKind::CheckBox(true),
         ] {
             let empty = Content::new(kind, TextSlot::NONE);
             assert_eq!(empty.kind(), kind);
@@ -432,6 +434,93 @@ mod parent_tests {
                 assert_ne!(content.0, empty.0);
             }
         }
+    }
+
+    #[test]
+    fn content_preserves_all_image_resources_and_both_sampling_modes() {
+        for resource in 0..MAX_NODES as u32 {
+            for sampling in [crate::ImageSampling::Linear, crate::ImageSampling::Nearest] {
+                let content = Content::image(image::ImageUse { resource, sampling });
+                assert_eq!(content.kind(), NodeKind::Image);
+                assert_eq!(content.text_slot().0, u32::MAX);
+                let image = content.image_use().unwrap();
+                assert_eq!(image.resource, resource);
+                assert_eq!(image.sampling, sampling);
+            }
+        }
+        assert!(
+            Content::new(NodeKind::Image, TextSlot::NONE)
+                .image_use()
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn checkbox_state_preserves_carrier_layouts() {
+        macro_rules! carrier {
+            ($ty:ty) => {
+                println!(
+                    "CHECKBOX_CARRIER {} size={} align={}",
+                    stringify!($ty),
+                    size_of::<$ty>(),
+                    std::mem::align_of::<$ty>()
+                );
+            };
+        }
+        carrier!(NodeKind);
+        carrier!(Option<NodeKind>);
+        carrier!(Content);
+        carrier!(Node);
+        carrier!(Option<Node>);
+        carrier!(Presented);
+        carrier!(Option<Presented>);
+        carrier!(Prepared);
+        carrier!(Option<Prepared>);
+        carrier!(crate::El<'_>);
+        carrier!(Option<crate::El<'_>>);
+        carrier!(crate::element::DraftNode<'_>);
+        carrier!(Option<crate::element::DraftNode<'_>>);
+        carrier!((Option<u64>, u32, NodeKind));
+        carrier!((Option<u64>, crate::ItemKey, NodeKind));
+        carrier!((Option<u64>, crate::ListId, NodeKind));
+        carrier!(Runtime<()>);
+        carrier!(crate::Role);
+        carrier!(Option<crate::Role>);
+        carrier!(crate::Part<'_>);
+        carrier!(Actions);
+        assert_eq!(size_of::<NodeKind>(), 1);
+        assert_eq!(size_of::<Option<NodeKind>>(), 1);
+        assert_eq!(size_of::<Content>(), 4);
+        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Option<Node>>(), 40);
+        assert_eq!(size_of::<Presented>(), 80);
+        assert_eq!(size_of::<Prepared>(), 40);
+        assert_eq!(size_of::<crate::El<'_>>(), 176);
+        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
+        println!(
+            "CHECKBOX_WRAPPERS option_el={} option_draft={} option_presented={} option_prepared={} ordinal_key={} keyed_key={} runtime={} role={} option_role={}",
+            size_of::<Option<crate::El<'_>>>(),
+            size_of::<Option<crate::element::DraftNode<'_>>>(),
+            size_of::<Option<Presented>>(),
+            size_of::<Option<Prepared>>(),
+            size_of::<(Option<u64>, u32, NodeKind)>(),
+            size_of::<(Option<u64>, crate::ItemKey, NodeKind)>(),
+            size_of::<Runtime<()>>(),
+            size_of::<crate::Role>(),
+            size_of::<Option<crate::Role>>()
+        );
+        println!(
+            "CHECKBOX_LAYOUT kind={} option_kind={} content={} node={} option_node={} presented={} prepared={} el={} draft={}",
+            size_of::<NodeKind>(),
+            size_of::<Option<NodeKind>>(),
+            size_of::<Content>(),
+            size_of::<Node>(),
+            size_of::<Option<Node>>(),
+            size_of::<Presented>(),
+            size_of::<Prepared>(),
+            size_of::<crate::El<'_>>(),
+            size_of::<crate::element::DraftNode<'_>>()
+        );
     }
 
     #[test]
@@ -497,11 +586,11 @@ impl TextSlot {
     }
 }
 /// A closed kind and an optional admitted text-lane index fit in one word.
-/// Zero in the upper bits means no text; the lower three bits hold one of the
-/// eight explicitly encoded kinds. No Rust enum representation is reinterpreted.
+/// Zero in the upper bits means no text; the lower four bits encode the kind
+/// including the checkbox state. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES <= (u32::MAX >> 3) as usize);
+const _: () = assert!(MAX_NODES * 2 <= (u32::MAX >> 4) as usize);
 impl Content {
     #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
@@ -514,6 +603,7 @@ impl Content {
             NodeKind::ListItem => 5,
             NodeKind::Image => 6,
             NodeKind::Scroll => 7,
+            NodeKind::CheckBox(checked) => 8 + u32::from(checked),
         };
         let text = if text.0 == u32::MAX {
             0
@@ -524,11 +614,11 @@ impl Content {
             );
             text.0 + 1
         };
-        Self((text << 3) | kind)
+        Self((text << 4) | kind)
     }
     #[inline]
     fn kind(self) -> NodeKind {
-        match self.0 & 7 {
+        match self.0 & 15 {
             0 => NodeKind::Div,
             1 => NodeKind::Text,
             2 => NodeKind::Input,
@@ -537,7 +627,9 @@ impl Content {
             5 => NodeKind::ListItem,
             6 => NodeKind::Image,
             7 => NodeKind::Scroll,
-            _ => unreachable!("three-bit kind"),
+            8 => NodeKind::CheckBox(false),
+            9 => NodeKind::CheckBox(true),
+            _ => unreachable!("explicitly encoded kind"),
         }
     }
     #[inline]
@@ -545,16 +637,16 @@ impl Content {
         if self.kind() == NodeKind::Image {
             return TextSlot::NONE;
         }
-        let text = self.0 >> 3;
+        let text = self.0 >> 4;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
     fn image(image: image::ImageUse) -> Self {
         assert!((image.resource as usize) < MAX_NODES);
         let value = image.resource * 2 + u32::from(image.sampling == crate::ImageSampling::Nearest);
-        Self(((value + 1) << 3) | 6)
+        Self(((value + 1) << 4) | 6)
     }
     fn image_use(self) -> Option<image::ImageUse> {
-        let value = self.0 >> 3;
+        let value = self.0 >> 4;
         if self.kind() != NodeKind::Image || value == 0 {
             return None;
         }
@@ -1804,16 +1896,16 @@ impl<M: View + 'static> Runtime<M> {
                 .index()
                 .map(|parent| old[parent].as_ref().unwrap().identity());
             *old_counts.entry(parent).or_default() += 1;
-            sites.insert((parent, node.ordinal, node.kind()), index);
+            sites.insert((parent, node.ordinal, node.kind().site_kind()), index);
             if let Some(row) = self
                 .list_rows
                 .get(&node.identity())
                 .filter(|row| row.visible)
             {
-                keyed_rows.insert((parent, row.key, node.kind()), index);
+                keyed_rows.insert((parent, row.key, node.kind().site_kind()), index);
             }
             if let Some(&id) = old_list_ids.get(&node.identity()) {
-                keyed_lists.insert((parent, id, node.kind()), index);
+                keyed_lists.insert((parent, id, node.kind().site_kind()), index);
             }
         }
         let old_ids = old
@@ -1841,15 +1933,15 @@ impl<M: View + 'static> Runtime<M> {
                     == new_counts[ordinal_slot];
             let previous_index = if let Some((_, row)) = row_indices.get(&index) {
                 reuse_identities
-                    .then(|| keyed_rows.get(&(parent_identity, row.key, draft.kind)))
+                    .then(|| keyed_rows.get(&(parent_identity, row.key, draft.kind.site_kind())))
                     .flatten()
             } else if let Some(&id) = list_indices.get(&index) {
                 reuse_identities
-                    .then(|| keyed_lists.get(&(parent_identity, id, draft.kind)))
+                    .then(|| keyed_lists.get(&(parent_identity, id, draft.kind.site_kind())))
                     .flatten()
             } else {
                 run_survives
-                    .then(|| sites.get(&(parent_identity, ordinal, draft.kind)))
+                    .then(|| sites.get(&(parent_identity, ordinal, draft.kind.site_kind())))
                     .flatten()
             };
             let previous = previous_index
@@ -1902,6 +1994,11 @@ impl<M: View + 'static> Runtime<M> {
             });
             if previous_image != next_key {
                 self.layout_dirty.insert(node.identity());
+                self.dirty = true;
+                node_changed = true;
+            }
+            if node.kind() != draft.kind {
+                // State belongs to the next presentation, not the mount identity.
                 self.dirty = true;
                 node_changed = true;
             }
@@ -1989,7 +2086,7 @@ impl<M: View + 'static> Runtime<M> {
             node.content = if let Some(image) = next_image {
                 Content::image(image)
             } else {
-                Content::new(node.kind(), text_slot)
+                Content::new(draft.kind, text_slot)
             };
             changed += usize::from(node_changed);
             nodes.push(node);

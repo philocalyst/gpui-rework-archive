@@ -24,6 +24,7 @@ pub(crate) enum NodeKind {
     ListItem,
     Image,
     Scroll,
+    CheckBox(bool),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
@@ -36,9 +37,17 @@ pub enum Role {
     ListItem,
     Image,
     ScrollView,
+    CheckBox,
 }
 
 impl NodeKind {
+    /// State changes preserve the mount site, target and installed route.
+    pub(crate) const fn site_kind(self) -> Self {
+        match self {
+            Self::CheckBox(_) => Self::CheckBox(false),
+            kind => kind,
+        }
+    }
     pub(crate) const fn role(self) -> Role {
         match self {
             Self::Div => Role::Generic,
@@ -49,6 +58,7 @@ impl NodeKind {
             Self::ListItem => Role::ListItem,
             Self::Image => Role::Image,
             Self::Scroll => Role::ScrollView,
+            Self::CheckBox(_) => Role::CheckBox,
         }
     }
 }
@@ -860,6 +870,18 @@ pub fn label<'a>(text: impl IntoText<'a>) -> El<'a> {
 }
 pub fn button<'a>(text: impl IntoText<'a>) -> El<'a> {
     El::new(NodeKind::Button, Some(text.into_text()))
+}
+
+/// A controlled two-state checkbox with a visual label and semantic checked state.
+/// The model owns `checked`; activation only invokes the installed `on_click`
+/// route. Pointer release, Space, Enter and assistive Click share that route.
+/// Supply a nonempty label or an explicit accessible `name`.
+/// Enter follows the ordinary control activation policy. Without a handler the
+/// state remains readable, but the checkbox is neither actionable nor focusable.
+/// Style the label/control with the ordinary element properties; this does not
+/// install a platform widget or draw a check mark.
+pub fn checkbox<'a>(label: impl IntoText<'a>, checked: bool) -> El<'a> {
+    El::new(NodeKind::CheckBox(checked), Some(label.into_text()))
 }
 /// A two-way text port accepts a writable String signal, never a snapshot.
 /// Mounting additionally requires a registered owner-relative source projection.

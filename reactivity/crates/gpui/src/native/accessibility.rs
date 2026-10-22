@@ -498,6 +498,7 @@ fn projected_node(part: Part<'_>) -> Node {
         Role::Text => accesskit::Role::Label,
         Role::TextInput => accesskit::Role::TextInput,
         Role::Button => accesskit::Role::Button,
+        Role::CheckBox => accesskit::Role::CheckBox,
         Role::List => accesskit::Role::List,
         Role::ListItem => accesskit::Role::ListItem,
         Role::Image => accesskit::Role::Image,
@@ -512,6 +513,13 @@ fn projected_node(part: Part<'_>) -> Node {
         }
     } else if let Some(name) = part.name() {
         node.set_label(name);
+    }
+    if let Some(checked) = part.checked() {
+        node.set_toggled(if checked {
+            accesskit::Toggled::True
+        } else {
+            accesskit::Toggled::False
+        });
     }
     if let Some(value) = part.value() {
         node.set_value(value);
