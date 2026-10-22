@@ -336,8 +336,9 @@ impl<M: View + 'static> Runtime<M> {
         self.inspector_panel()?;
         // Unlike activation, picking selects the foremost actual shape, even
         // when it has no handler. The same rounded/clip hit kernel admits it.
+        let geometry = self.presented_geometry();
         for (index, node) in self.presented.iter().enumerate().rev() {
-            if !node.hittable || !self.sheet_hit(index, point) {
+            if !node.hittable || !self.sheet_hit_with_geometry(index, point, geometry) {
                 continue;
             }
             let target = self.sites.target(node.identity);
@@ -519,6 +520,7 @@ impl DisplayCaptions {
     pub fn refresh(
         &self,
         candidate: &[Presented],
+        bases: geometry::Bases<'_>,
         texts: &mut [Option<TextSite>],
         layout: &mut LayoutTree,
         layout_nodes: &[NodeId],
@@ -530,7 +532,7 @@ impl DisplayCaptions {
                     "Displayed bounds @{}\n{:.1}, {:.1}  {:.1} × {:.1}",
                     self.epoch, b.x, b.y, b.width, b.height
                 ),
-                match node.transform.get() {
+                match node.transform(bases) {
                     Some(m) => format!(
                         "Displayed transform @{}\n{:.1} {:.1} {:.1} {:.1} {:.1} {:.1}",
                         self.epoch, m.a, m.b, m.c, m.d, m.tx, m.ty

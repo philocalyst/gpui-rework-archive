@@ -360,7 +360,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .presented
             .iter()
             .find(|node| node.identity == identity)
-            .and_then(|node| node.transform.get())
+            .and_then(|node| node.transform(self.presented_geometry().bases()))
             .ok_or(Error::NotHittable)?;
         let local = CoordinateSpace::new(transform)
             .to_local(point)

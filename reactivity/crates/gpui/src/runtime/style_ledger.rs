@@ -92,10 +92,11 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
             style_key(runtime.styles.get(*index), true) == style_key(Style::default(), true)
         })
         .count();
+    let geometry = runtime.presented_geometry();
     let maps = runtime
         .presented
         .iter()
-        .filter_map(|node| node.transform.get())
+        .filter_map(|node| node.transform(geometry.bases()))
         .map(affine_key)
         .collect::<BTreeSet<_>>();
     let linear = maps
@@ -105,7 +106,7 @@ fn ledger<M: View + 'static>(name: &str, win: &Win<M>) {
     let none = runtime
         .presented
         .iter()
-        .filter(|node| node.transform.get().is_none())
+        .filter(|node| node.transform(geometry.bases()).is_none())
         .count();
     let (mode, style_bytes) = match &runtime.styles {
         styles::Styles::Default => ("default", 0),

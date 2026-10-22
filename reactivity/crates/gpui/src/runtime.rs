@@ -331,23 +331,6 @@ impl Parent {
         (self.0 != u32::MAX).then_some(self.0 as usize)
     }
 }
-/// Finite admitted maps cannot contain NaN, so one NaN coefficient represents
-/// an absent map without the extra discriminant of `Option<Affine>`. This is
-/// plain float storage: no invalid Rust values or unchecked reads are involved.
-#[derive(Clone, Copy)]
-struct PresentedTransform(Affine);
-impl PresentedTransform {
-    fn new(transform: Option<Affine>) -> Self {
-        debug_assert!(transform.is_none_or(|map| map.is_finite() && map.is_invertible()));
-        Self(transform.unwrap_or(Affine {
-            a: f32::NAN,
-            ..Affine::IDENTITY
-        }))
-    }
-    fn get(self) -> Option<Affine> {
-        (!self.0.a.is_nan()).then_some(self.0)
-    }
-}
 #[cfg(test)]
 mod parent_tests {
     use super::*;
@@ -389,7 +372,7 @@ mod parent_tests {
         println!(
             "Parent={} Map={} Node={} Presented={}",
             size_of::<Parent>(),
-            size_of::<PresentedTransform>(),
+            size_of::<geometry::BasisKey>(),
             size_of::<Node>(),
             size_of::<Presented>()
         );
@@ -493,7 +476,7 @@ mod parent_tests {
         assert_eq!(size_of::<Content>(), 4);
         assert_eq!(size_of::<Node>(), 40);
         assert_eq!(size_of::<Option<Node>>(), 40);
-        assert_eq!(size_of::<Presented>(), 80);
+        assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
@@ -527,31 +510,6 @@ mod parent_tests {
     #[should_panic(expected = "text belongs to the admitted description")]
     fn content_rejects_the_first_unadmitted_text_index() {
         Content::new(NodeKind::Text, TextSlot(MAX_NODES as u32));
-    }
-
-    #[test]
-    fn compact_map_preserves_finite_admitted_coefficients() {
-        assert_eq!(size_of::<PresentedTransform>(), size_of::<Affine>());
-        assert_eq!(PresentedTransform::new(None).get(), None);
-        for map in [
-            Affine::IDENTITY,
-            Affine {
-                a: -0.0,
-                b: 1.0,
-                c: -1.0,
-                d: 0.0,
-                tx: -0.0,
-                ty: 0.0,
-            },
-            Affine::scale(-2.0, 0.25),
-            Affine::translation(f32::MAX, -f32::MAX),
-        ] {
-            let actual = PresentedTransform::new(Some(map)).get().unwrap();
-            assert_eq!(
-                [actual.a, actual.b, actual.c, actual.d, actual.tx, actual.ty].map(f32::to_bits),
-                [map.a, map.b, map.c, map.d, map.tx, map.ty].map(f32::to_bits),
-            );
-        }
     }
 }
 /// Text values, their source binding and their width cache share one owned
@@ -795,12 +753,32 @@ struct Presented {
     parent: PresentedLink,
     kind: NodeKind,
     text: Option<SharedText>,
-    rect: Rect,
-    transform: PresentedTransform,
+    placement: geometry::Placement,
+    basis: geometry::BasisKey,
     bounds: Rect,
     hittable: bool,
     actions: Actions,
 }
+impl Presented {
+    fn local_rect(&self) -> Rect {
+        self.placement.local_rect()
+    }
+    fn transform(&self, bases: geometry::Bases<'_>) -> Option<Affine> {
+        bases.transform(self.basis, self.placement)
+    }
+}
+impl<M> Runtime<M> {
+    fn presented_geometry(&self) -> geometry::GeometryView<'_> {
+        self.metadata
+            .as_ref()
+            .and_then(|m| m.geometry.as_deref())
+            .map_or_else(
+                || geometry::GeometryView::empty(self.presentation_scale_factor),
+                |geometry| geometry.view(self.presentation_scale_factor),
+            )
+    }
+}
+
 struct Prepared {
     // Successful Canvas admission bounds each axis to 16,384. Packing the
     // extents leaves room for damage without growing this 64-bit header.
@@ -1273,12 +1251,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .find(|node| node.identity == identity)
             .ok_or(Error::StaleTarget)?;
         let point = node
-            .transform
-            .get()
+            .transform(runtime.presented_geometry().bases())
             .and_then(|map| {
                 map.apply(Point {
-                    x: node.rect.width * 0.5,
-                    y: node.rect.height * 0.5,
+                    x: node.placement.size[0] * 0.5,
+                    y: node.placement.size[1] * 0.5,
                 })
             })
             .filter(|point| node.bounds.contains(*point))
@@ -1369,6 +1346,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     fn snapshot_with_targets(&self, all_targets: bool) -> Result<Snapshot, Error> {
         let runtime = self.runtime()?;
         let mut nodes = Vec::with_capacity(runtime.presented.len());
+        let geometry = runtime.presented_geometry();
         for index in 0..runtime.presented.len() {
             let node = &runtime.presented[index];
             let identity = node.identity;
@@ -1397,8 +1375,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     node.bounds.height,
                 ],
                 transform: node
-                    .transform
-                    .get()
+                    .transform(geometry.bases())
                     .map(|map| [map.a, map.b, map.c, map.d, map.tx, map.ty]),
                 target,
             };
@@ -2706,6 +2683,7 @@ impl<M: View + 'static> Runtime<M> {
         self.refresh_inspector(true)?;
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
+        let mut geometry_records = Vec::new();
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
         let list_mode = !self.viewports.is_empty();
         let list_capacity = if list_mode { self.nodes.len() } else { 0 };
@@ -2729,6 +2707,15 @@ impl<M: View + 'static> Runtime<M> {
         let base_stamp = self.semantic_stamp();
         let inspector_display = self.inspector_display();
         #[cfg(feature = "accessibility")]
+        let previous_geometry = self
+            .metadata
+            .as_ref()
+            .and_then(|m| m.geometry.as_deref())
+            .map_or_else(
+                || geometry::GeometryView::empty(self.presentation_scale_factor),
+                |geometry| geometry.view(self.presentation_scale_factor),
+            );
+        #[cfg(feature = "accessibility")]
         let mut observation = self
             .accessibility
             .as_mut()
@@ -2744,6 +2731,7 @@ impl<M: View + 'static> Runtime<M> {
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
                     &presented,
+                    geometry::Bases::new(scale_factor, &geometry_records),
                     &mut self.texts,
                     &mut self.layout,
                     &self.layout_nodes,
@@ -3022,6 +3010,12 @@ impl<M: View + 'static> Runtime<M> {
                     map,
                 });
             }
+            let basis = geometry::BasisKey::record(
+                transform,
+                published_parent.index().map(|index| presented[index].basis),
+                scale_factor,
+                &mut geometry_records,
+            );
             presented.push(Presented {
                 identity: node.identity(),
                 parent: link,
@@ -3030,8 +3024,8 @@ impl<M: View + 'static> Runtime<M> {
                     .text_slot()
                     .get(&self.texts)
                     .map(|text| text.value.clone()),
-                rect,
-                transform: PresentedTransform::new(transform),
+                placement: geometry::Placement::new([rect.width, rect.height], transform),
+                basis,
                 bounds,
                 hittable,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
@@ -3046,6 +3040,10 @@ impl<M: View + 'static> Runtime<M> {
                 observation.compare(
                     index,
                     (self.presented.get(index), &presented[index]),
+                    (
+                        previous_geometry.bases(),
+                        geometry::Bases::new(scale_factor, &geometry_records),
+                    ),
                     (self.metadata.as_deref(), selection_snapshot),
                     (
                         self.text.as_ref().and_then(|text| text.entry(index)),
@@ -3094,7 +3092,7 @@ impl<M: View + 'static> Runtime<M> {
             .as_ref()
             .and_then(|m| m.geometry.as_ref())
             .map(|geometry| {
-                geometry.freeze(|identity| {
+                geometry.freeze(std::mem::take(&mut geometry_records), |identity| {
                     !list_mode
                         || logical_indices
                             .get(identity)
@@ -3103,7 +3101,8 @@ impl<M: View + 'static> Runtime<M> {
                             .and_then(|index| presented.get(index))
                             .is_some_and(|node| node.identity == identity)
                 })
-            });
+            })
+            .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
         let damage = if self.automatic_presentation {
             // Automatic headless acknowledgement retains no external surface
             // to repair. Do not compare commands for an unused capability.
@@ -3145,11 +3144,9 @@ impl<M: View + 'static> Runtime<M> {
         }
         if let Some(column) = geometry_sheet {
             self.metadata
-                .as_mut()
-                .unwrap()
+                .get_or_insert_with(Default::default)
                 .geometry
-                .as_mut()
-                .unwrap()
+                .get_or_insert_with(Default::default)
                 .prepare(column);
         }
         if let Some(leases) = image_leases {
@@ -3199,6 +3196,7 @@ impl<M: View + 'static> Runtime<M> {
         {
             return None;
         }
+        let geometry = self.presented_geometry();
         let mut rows = self.presented.iter().enumerate().rev();
         while let Some((index, node)) = rows.next() {
             if !node.hittable {
@@ -3210,7 +3208,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 continue;
             }
-            if self.sheet_hit(index, point) {
+            if self.sheet_hit_with_geometry(index, point, geometry) {
                 let mut cursor = Some(index);
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
@@ -3943,7 +3941,7 @@ mod semantic_storage_ledger {
         // baseline improvements; semantic columns add no hot-node fields.
         assert_eq!(size_of::<Node>(), 40);
         assert_eq!(size_of::<Prepared>(), 40);
-        assert_eq!(size_of::<Presented>(), 80);
+        assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<metadata::Row>(), 24);
@@ -4337,7 +4335,7 @@ mod style_port_tests {
             size_of::<crate::Flex>()
         );
         assert_eq!(size_of::<Node>(), 40);
-        assert_eq!(size_of::<Presented>(), 80);
+        assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
         assert_eq!(size_of::<Style>(), 88);
@@ -4345,3 +4343,6 @@ mod style_port_tests {
         assert_eq!(size_of::<Destination>(), 4);
     }
 }
+
+#[cfg(test)]
+mod basis_layout_probe;

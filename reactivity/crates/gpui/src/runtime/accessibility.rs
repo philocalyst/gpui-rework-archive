@@ -135,6 +135,7 @@ impl Collect<'_> {
         &mut self,
         index: usize,
         rows: (Option<&Presented>, &Presented),
+        bases: (geometry::Bases<'_>, geometry::Bases<'_>),
         state: (Option<&Metadata>, Option<editing::SelectionSnapshot>),
         text: (Option<&text_geometry::Entry>, Option<&text_geometry::Entry>),
         list: Option<scroll::ViewportInfo>,
@@ -190,8 +191,8 @@ impl Collect<'_> {
                 != selection.and_then(|snapshot| snapshot.selection(next.identity))
             || old_name != new_name
             || old_description != new_description
-            || rect_bits(previous.rect) != rect_bits(next.rect)
-            || map_bits(previous.transform.get()) != map_bits(next.transform.get())
+            || rect_bits(previous.local_rect()) != rect_bits(next.local_rect())
+            || map_bits(previous.transform(bases.0)) != map_bits(next.transform(bases.1))
             || frozen
                 .and_then(|m| m.list(previous.identity))
                 .map(|l| l.count)

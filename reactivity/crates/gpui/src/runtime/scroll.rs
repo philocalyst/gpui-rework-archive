@@ -154,7 +154,10 @@ impl ViewportColumn {
                 .filter(|node| node.identity == identity)?;
             return Some(list_info(
                 *row,
-                [f64::from(node.rect.width), f64::from(node.rect.height)],
+                [
+                    f64::from(node.placement.size[0]),
+                    f64::from(node.placement.size[1]),
+                ],
             ));
         }
         let row = find(self.scrolls(), identity, |row| row.identity)?;
@@ -163,7 +166,10 @@ impl ViewportColumn {
             .filter(|node| node.identity == identity)?;
         Some(scroll_info(
             *row,
-            [f64::from(node.rect.width), f64::from(node.rect.height)],
+            [
+                f64::from(node.placement.size[0]),
+                f64::from(node.placement.size[1]),
+            ],
         ))
     }
     #[cfg(feature = "accessibility")]
@@ -474,6 +480,7 @@ struct Context<'a> {
     nodes: &'a [Presented],
     sheet: &'a metadata::Sheet,
     scale: f64,
+    geometry: geometry::GeometryView<'a>,
 }
 struct Changes<'a> {
     context: Context<'a>,
@@ -518,7 +525,7 @@ impl Iterator for Changes<'_> {
                         continue;
                     };
                     let viewport = value.scroll();
-                    let map = node.transform.get()?; // P viewport admission guarantees an invertible axis map.
+                    let map = node.transform(self.context.geometry.bases())?; // P viewport admission guarantees an invertible axis map.
                     let mut offset = viewport.offset;
                     for (axis, coefficient, low, high, current) in [
                         (
@@ -565,7 +572,7 @@ impl Iterator for Changes<'_> {
                         continue;
                     };
                     let viewport = value.scroll();
-                    let map = node.transform.get()?;
+                    let map = node.transform(self.context.geometry.bases())?;
                     let mut requested = viewport.offset;
                     for (axis, coefficient, translation, size, current) in [
                         (
@@ -676,6 +683,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 nodes: &state.presented,
                 sheet: &metadata.presented,
                 scale: f64::from(state.presentation_scale_factor),
+                geometry: metadata.geometry.as_deref().map_or_else(
+                    || geometry::GeometryView::empty(state.presentation_scale_factor),
+                    |geometry| geometry.view(state.presentation_scale_factor),
+                ),
             };
             for (_, offset, list) in plan.iter(context) {
                 count += 1;
@@ -747,6 +758,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         {
             return Err(Error::NotHittable);
         }
+        let geometry = runtime.presented_geometry();
         let cursor = runtime
             .presented
             .iter()
@@ -754,7 +766,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .rev()
             .find(|(index, node)| {
                 (node.hittable || matches!(node.kind, NodeKind::List | NodeKind::Scroll))
-                    && runtime.sheet_hit(*index, point)
+                    && runtime.sheet_hit_with_geometry(*index, point, geometry)
             })
             .map(|(index, _)| index)
             .ok_or(Error::NotHittable)?;
@@ -792,10 +804,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .ok_or(Error::StaleTarget)?;
         let node = &runtime.presented[index];
         let map = node
-            .transform
-            .get()
+            .transform(runtime.presented_geometry().bases())
             .ok_or(ScrollError::UnsupportedTransform)?;
-        let edges = bounds64(CoordinateSpace::new(map), node.rect)?;
+        let edges = bounds64(CoordinateSpace::new(map), node.local_rect())?;
         self.apply_scroll_plan(ScrollPlan::Into {
             cursor: node.parent.index(),
             edges,
@@ -851,6 +862,7 @@ mod tests {
             nodes: &runtime.presented,
             sheet: &runtime.metadata.as_ref().unwrap().presented,
             scale: 1.0,
+            geometry: runtime.presented_geometry(),
         };
         let plan = ScrollPlan::Wheel {
             cursor: Some(runtime.presented.len() - 1),
