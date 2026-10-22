@@ -73,7 +73,7 @@ pub struct TextGeometry {
     pub(super) font_size: f32,
     pub(super) runs: Vec<Run>,
     pub(super) lines: Vec<Line>,
-    pub(super) carets: Option<Vec<Stop>>,
+    pub(super) carets: Option<Carets>,
 }
 pub(super) type Details = TextGeometry;
 
@@ -103,6 +103,22 @@ pub(super) struct Stop {
     // 1 upstream, 2 downstream, 3 either. Equal geometry is retained once.
     pub affinities: u8,
 }
+#[derive(Clone, Copy, Debug)]
+pub(super) struct CommonStop {
+    byte: u32,
+    x: f32,
+}
+#[derive(Clone, Debug)]
+pub(super) enum Carets {
+    Common(Box<[CommonStop]>),
+    General(Box<[Stop]>),
+}
+#[derive(Clone, Copy)]
+pub(super) enum Stops<'a> {
+    Common(&'a [CommonStop]),
+    General(&'a [Stop]),
+}
+mod carets;
 #[derive(Clone, Copy)]
 pub struct GlyphRun<'a> {
     layout: &'a TextLayout,
@@ -255,17 +271,18 @@ impl TextGeometry {
     /// bytes (including CRLF/combining interiors) produce None, never a snap.
     pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
         let map = self;
-        let stops = map.carets.as_ref()?;
+        let stops = map.carets.as_ref()?.stops();
         let mask = match position.affinity {
             CaretAffinity::Upstream => 1,
             CaretAffinity::Downstream => 2,
         };
-        let first = stops.partition_point(|stop| stop.byte < position.offset.0);
-        stops[first..]
+        let first = stops.before(position.offset.0);
+        stops
+            .slice(first..stops.len())
             .iter()
             .take_while(|stop| stop.byte == position.offset.0)
             .find(|stop| stop.affinities & mask != 0)
-            .map(|stop| self.stop_bounds(stop))
+            .map(|stop| self.stop_bounds(&stop))
     }
     fn stop_bounds(&self, stop: &Stop) -> Rect {
         // Equal producer rectangles retain upstream bits, even when the two

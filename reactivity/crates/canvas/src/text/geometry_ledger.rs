@@ -1,4 +1,5 @@
 //! Matched ownership/materialization accounting, not a timing benchmark.
+use super::layout::{Carets, CommonStop, Stops};
 use super::*;
 
 #[test]
@@ -6,13 +7,16 @@ fn scoped_geometry_allocation_and_payload_ledger() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let font = FontFace::bundled().unwrap();
     println!(
-        "GEOMETRY_HEADERS layout={} details={} stop={} run={} line={} system={}",
+        "GEOMETRY_HEADERS layout={} details={} stop={} run={} line={} system={} caret_owner={} stop_view={} common_stop={}",
         size_of::<TextLayout>(),
         size_of::<Details>(),
         size_of::<layout::Stop>(),
         size_of::<layout::Run>(),
         size_of::<layout::Line>(),
-        size_of::<TextSystem>()
+        size_of::<TextSystem>(),
+        size_of::<Option<Carets>>(),
+        size_of::<Stops<'_>>(),
+        size_of::<CommonStop>()
     );
     for (name, value, width) in [
         ("empty", String::new(), None),
@@ -45,13 +49,10 @@ fn scoped_geometry_allocation_and_payload_ledger() {
             let shape = retained.unwrap();
             let (runs, lines, stops, capacity) =
                 shape.mapping.as_ref().map_or((0, 0, 0, 0), |map| {
-                    let stops = map.carets.as_deref().map_or(0, <[_]>::len);
+                    let stops = map.carets.as_ref().map_or(0, |carets| carets.stops().len());
                     let capacity = map.runs.capacity() * size_of::<layout::Run>()
                         + map.lines.capacity() * size_of::<layout::Line>()
-                        + map
-                            .carets
-                            .as_ref()
-                            .map_or(0, |stops| stops.capacity() * size_of::<layout::Stop>());
+                        + map.carets.as_ref().map_or(0, Carets::payload_bytes);
                     (map.runs.len(), map.lines.len(), stops, capacity)
                 });
             println!(
@@ -153,18 +154,20 @@ fn canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding()
                 }
                 Err(error) => panic!("{name} {width:?}: {error:?}"),
             };
-            let stops = layout.mapping.as_ref().unwrap().carets.as_deref().unwrap();
+            let carets = layout.mapping.as_ref().unwrap().carets.as_ref().unwrap();
+            let stops = carets.stops();
             let (mut common, mut split, mut exclusive) = (0, 0, 0);
-            for group in stops.chunk_by(|a, b| a.byte == b.byte) {
-                match group {
-                    [only] if only.affinities == 3 => common += 1,
-                    [upstream, downstream]
-                        if upstream.affinities == 1 && downstream.affinities == 2 =>
-                    {
-                        split += 1
-                    }
-                    [only] if only.affinities == 1 || only.affinities == 2 => exclusive += 1,
-                    _ => panic!("unexpected producer group {name} {width:?}: {group:?}"),
+            for group in stops.groups() {
+                let first = group.get(0).unwrap();
+                match (
+                    group.len(),
+                    first.affinities,
+                    group.get(1).map(|s| s.affinities),
+                ) {
+                    (1, 3, _) => common += 1,
+                    (2, 1, Some(2)) => split += 1,
+                    (1, 1 | 2, _) => exclusive += 1,
+                    _ => panic!("unexpected decoded group {name} {width:?}: {first:?}"),
                 }
             }
             println!(

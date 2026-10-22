@@ -20,12 +20,13 @@ fn lower(source: &str, line_height: f32) -> Fixture {
             font_size: 16.,
             runs: Vec::new(),
             lines: Vec::new(),
-            carets: Some(Vec::new()),
+            carets: None,
         },
         units: Vec::new(),
         cursors: Vec::new(),
     };
     let mut height = 0.;
+    let mut stops = Vec::new();
     for paragraph in paragraph::ranges(source) {
         let content = &source[paragraph.content.clone()];
         let mut builder = planner
@@ -68,7 +69,7 @@ fn lower(source: &str, line_height: f32) -> Fixture {
             }
         }
         append_carets(
-            fixture.map.carets.as_mut().unwrap(),
+            &mut stops,
             planned,
             content,
             paragraph.content.start,
@@ -146,6 +147,7 @@ fn lower(source: &str, line_height: f32) -> Fixture {
         }
         height += planned.height();
     }
+    fixture.map.carets = Some(Carets::freeze(stops));
     fixture
 }
 

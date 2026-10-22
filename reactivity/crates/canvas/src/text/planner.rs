@@ -1,6 +1,6 @@
 //! Scoped Unicode planning. Parley layouts and the mutable font database stay
 //! within the planning pass; outputs own only Canvas glyphs and interaction data.
-use super::layout::{Details, Line, Run, Stop, TextDirection};
+use super::layout::{Carets, Details, Line, Run, Stop, TextDirection};
 use super::*;
 use fontique::{Blob, Collection, CollectionOptions, FontInfoOverride, SourceCache};
 use icu_properties::{CodePointSetData, props::DefaultIgnorableCodePoint};
@@ -178,6 +178,7 @@ impl<'font> Planner<'font> {
         }
         let mut glyphs = Vec::new();
         let mut details: Option<Details> = None;
+        let mut carets = interactive.then(Vec::new);
         let mut width = 0.0f32;
         let mut height = 0.0f32;
         let mut baseline = 0.0f32;
@@ -208,7 +209,7 @@ impl<'font> Planner<'font> {
                     font_size: size,
                     runs: Vec::new(),
                     lines: Vec::new(),
-                    carets: interactive.then(Vec::new),
+                    carets: None,
                 });
             }
             let count = planned
@@ -334,7 +335,7 @@ impl<'font> Planner<'font> {
                     }
                 }
             }
-            if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
+            if let Some(stops) = &mut carets {
                 append_carets(stops, planned, content, paragraph.content.start, height)?;
             }
             height += planned.height();
@@ -379,10 +380,8 @@ impl<'font> Planner<'font> {
                 });
             }
         }
-        // The immutable map cannot append stops after publication. Charge the
-        // trim separately from stop-field compression and query changes.
-        if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
-            stops.shrink_to_fit();
+        if let Some(details) = &mut details {
+            details.carets = carets.map(Carets::freeze);
         }
         Ok(TextLayout {
             width,

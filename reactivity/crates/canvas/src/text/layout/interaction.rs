@@ -68,38 +68,30 @@ impl Details {
     }
 
     /// Inclusive endpoint groups for a validated selection source range.
-    fn stops(&self, start: u32, end: u32) -> &[Stop] {
-        let stops = self.carets.as_deref().unwrap_or_default();
-        let first = if start == 0 {
-            0
-        } else {
-            stops.partition_point(|stop| stop.byte < start)
-        };
-        let last = stops.partition_point(|stop| stop.byte <= end);
-        &stops[first..last]
+    fn stops(&self, start: u32, end: u32) -> Stops<'_> {
+        let stops = self.carets.as_ref().map_or(Stops::empty(), Carets::stops);
+        let first = if start == 0 { 0 } else { stops.before(start) };
+        let last = stops.through(end);
+        stops.slice(first..last)
     }
 
     /// Source suffix whose interval starts stop lazily at the line's end byte.
     /// Zipping with the next group includes the far side of an atomic separator.
     /// At a soft wrap the same extra pair belongs to the next line and filters
     /// out by source-affinity ownership. No upper-bound scan precedes a hit.
-    fn line_tail(&self, line: usize) -> &[Stop] {
-        let stops = self.carets.as_deref().unwrap_or_default();
+    fn line_tail(&self, line: usize) -> Stops<'_> {
+        let stops = self.carets.as_ref().map_or(Stops::empty(), Carets::stops);
         let start = self.lines[line].start;
-        let first = if start == 0 {
-            0
-        } else {
-            stops.partition_point(|stop| stop.byte < start)
-        };
-        &stops[first..]
+        let first = if start == 0 { 0 } else { stops.before(start) };
+        stops.slice(first..stops.len())
     }
 
     fn intervals<'a>(
         &'a self,
-        stops: &'a [Stop],
+        stops: Stops<'a>,
         marker_width: f32,
     ) -> impl Iterator<Item = Interval> + 'a {
-        let groups = stops.chunk_by(|a, b| a.byte == b.byte);
+        let groups = stops.groups();
         groups
             .clone()
             .zip(groups.skip(1))
@@ -111,7 +103,7 @@ impl Details {
                     affinity: CaretAffinity::Downstream,
                 });
                 let hard_break = end.byte > self.lines[line].end;
-                let bounds = self.stop_bounds(start);
+                let bounds = self.stop_bounds(&start);
                 let left = start.x.min(end.x);
                 let direction = if !hard_break && start.x != end.x {
                     if start.x < end.x {
@@ -166,7 +158,7 @@ impl TextGeometry {
     /// Nothing is retained or allocated. Requires interactive shaping.
     pub fn graphemes(&self) -> impl Iterator<Item = TextGrapheme> + '_ {
         self.intervals(
-            self.carets.as_deref().unwrap_or_default(),
+            self.carets.as_ref().map_or(Stops::empty(), Carets::stops),
             self.font_size * 0.25,
         )
     }
@@ -179,9 +171,9 @@ impl TextGeometry {
         if range.start > range.end {
             return None;
         }
-        let stops = self.carets.as_deref()?;
+        let stops = self.carets.as_ref()?.stops();
         for offset in [range.start, range.end] {
-            let index = stops.partition_point(|stop| stop.byte < offset.0);
+            let index = stops.before(offset.0);
             if stops.get(index).is_none_or(|stop| stop.byte != offset.0) {
                 return None;
             }
@@ -205,9 +197,9 @@ impl TextGeometry {
     /// Advance at an exact grapheme start; interiors and the terminal caret
     /// have no grapheme. The byte lookup reuses the existing sorted stops.
     pub fn grapheme(&self, start: TextOffset) -> Option<TextGrapheme> {
-        let stops = self.carets.as_deref()?;
-        let first = stops.partition_point(|stop| stop.byte < start.0);
-        self.intervals(&stops[first..], self.font_size * 0.25)
+        let stops = self.carets.as_ref()?.stops();
+        let first = stops.before(start.0);
+        self.intervals(stops.slice(first..stops.len()), self.font_size * 0.25)
             .next()
             .filter(|unit| unit.start.offset == start)
     }
@@ -505,12 +497,13 @@ mod tests {
                     width: 2.,
                 })
                 .collect(),
-            carets: Some(Vec::new()),
+            carets: None,
         };
         map.lines[0].end = 2;
         map.lines[1].start = 2;
         map.lines[1].end = 4;
         map.lines[2].start = 6;
+        let mut stops = Vec::new();
         for byte in (0..=10_000).filter(|&byte| byte != 5) {
             let mut stop = Stop {
                 byte,
@@ -519,12 +512,13 @@ mod tests {
             };
             if byte == 2 {
                 stop.affinities = 1;
-                map.carets.as_mut().unwrap().push(stop);
+                stops.push(stop);
                 stop.affinities = 2;
             }
-            map.carets.as_mut().unwrap().push(stop);
+            stops.push(stop);
         }
-        let all = map.carets.as_deref().unwrap();
+        map.carets = Some(Carets::freeze(stops));
+        let all = map.carets.as_ref().unwrap().stops();
         for line in [0, 1, 2, 999, 2_499] {
             let owned = |interval: Interval| {
                 (
