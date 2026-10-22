@@ -92,7 +92,7 @@ fn reflect(
                 assert_eq!(size, 48);
                 "uniform"
             }
-            1 | 2 | 3 | 5 => {
+            1..=3 | 5 => {
                 assert_eq!(
                     global.space,
                     AddressSpace::Storage {
@@ -200,7 +200,7 @@ fn decorations(words: &[u32], capabilities: &[naga::back::spv::Capability], expe
             }
             71 if operands.len() == 3 => {
                 // OpDecorate; Binding=33, DescriptorSet=34
-                if let 33 | 34 = operands[1] {
+                if let 33..=34 = operands[1] {
                     let slot = &mut descriptors.entry(operands[0]).or_default()
                         [(operands[1] - 33) as usize];
                     assert!(slot.replace(operands[2]).is_none());
@@ -228,6 +228,10 @@ fn validate(module: &Module) -> naga::valid::ModuleInfo {
     .validate(module)
     .expect("validate compositor module")
 }
+#[allow(
+    clippy::disallowed_methods,
+    reason = "Host build must finish external SPIR-V validation before admitting its generated artifacts"
+)]
 pub fn generate(source: &str, out: &Path) {
     use naga::{
         back::spv,
@@ -355,9 +359,18 @@ pub fn generate(source: &str, out: &Path) {
             ("vertex", ShaderStage::Vertex),
             ("fragment", ShaderStage::Fragment),
         ] {
-            let words = spv::write_vec(
+            // Match HAL compile_stage's selected-entry compaction and empty
+            // pipeline constants. No source override is allowed by reflection.
+            let (stage_module, stage_info) = naga::back::pipeline_constants::process_overrides(
                 &module,
                 &info,
+                Some((stage, entry)),
+                &Default::default(),
+            )
+            .expect("compact the exact stage as HAL does");
+            let words = spv::write_vec(
+                &stage_module,
+                &stage_info,
                 &options,
                 Some(&spv::PipelineOptions {
                     entry_point: entry.into(),
@@ -431,7 +444,18 @@ pub fn generate(source: &str, out: &Path) {
     std::fs::write(out.join("ui-artifacts.rs"), rust)
         .expect("write aligned word arrays and layout");
     let manifest = format!(
-        "{{\n\"revision\":2,\"naga\":\"30.0.1\",\"target_env\":\"vulkan1.0\",\"spirv_version\":\"1.0\",\n\"typed_rust_sha256\":\"{}\",\"wgsl_sha256\":\"{}\",\"layout_sha256\":\"{}\",\n\"spirv_val\":{:?},\"layout\":{},\n\"entry_points\":[\"vertex\",\"fragment\"],\"entry_strategy\":\"separate-single-entry-modules\",\"index\":\"Restrict\",\"binding_array\":\"Unchecked\",\"force_loop_bounding\":true,\"emit_int_div_checks\":true,\"adjust_coordinate_space\":false,\"force_point_size\":true,\"extensions\":[\"SPV_KHR_storage_buffer_storage_class\"],\"workgroup_init\":\"Polyfill\",\"fake_missing_bindings\":false,\"capabilities\":{:?},\n\"artifacts\":[{}]\n}}\n",
+        r#"{{
+  "revision":2, "naga":"30.0.1", "target_env":"vulkan1.0", "spirv_version":"1.0",
+  "typed_rust_sha256":"{}", "wgsl_sha256":"{}", "layout_sha256":"{}",
+  "spirv_val":{:?}, "layout":{},
+  "entry_points":["vertex","fragment"], "entry_strategy":"separate-single-entry-modules",
+  "index":"Restrict", "binding_array":"Unchecked", "force_loop_bounding":true,
+  "emit_int_div_checks":true, "adjust_coordinate_space":false, "force_point_size":true,
+  "allowed_extensions":["SPV_KHR_storage_buffer_storage_class"],
+  "workgroup_init":"Polyfill", "fake_missing_bindings":false, "allowed_capabilities":{:?},
+  "artifacts":[{}]
+}}
+"#,
         hash(&std::fs::read("src/shader.rs").unwrap()),
         hash(source.as_bytes()),
         hash(layout_json.as_bytes()),
