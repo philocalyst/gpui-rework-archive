@@ -1,0 +1,227 @@
+[
+  {
+    "repeat": 1,
+    "label": "parent",
+    "log": "1-parent.log",
+    "command": [
+      "/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 306775887,
+    "log_sha256": "2cc52e8cfdbc4228e9104cfd660d4b830e0bed619cf0437f2c47819f37866cc1"
+  },
+  {
+    "repeat": 1,
+    "label": "lazy",
+    "log": "1-lazy.log",
+    "command": [
+      "/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 262909875,
+    "log_sha256": "d8c24e495756002765dc3914d0d5401ff47ff4d8bf2b03240694c11598e66a39"
+  },
+  {
+    "repeat": 1,
+    "label": "inline",
+    "log": "1-inline.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/inline-a22a9b21125d7aab88b97a97fd0982a3854cd16e015fa3363d7eb85b40ffd3ce",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 244348518,
+    "log_sha256": "79713ddaa1329dce3d883f89552ed2887328fbab4a549739353445420f934426"
+  },
+  {
+    "repeat": 1,
+    "label": "bounds",
+    "log": "1-bounds.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/bounds-457d085b3ddb0948ff40e6a6a1e2796ed96906c51b22ccc8b2fd21fbc09a7af8",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 237334415,
+    "log_sha256": "e40ab355cb92bf0c429c8183389a81f9908281e585ad10ec3be83fcd7c536d84"
+  },
+  {
+    "repeat": 1,
+    "label": "subset",
+    "log": "1-subset.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/subset-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 234617025,
+    "log_sha256": "214fba526630760857019e8162b7ae3a490974e3133827f2af621d2f14b45634"
+  },
+  {
+    "repeat": 2,
+    "label": "subset",
+    "log": "2-subset.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/subset-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 235132076,
+    "log_sha256": "b0cb1d4dc980fb8160ac7fead9c5f33cd15027d1d238933a849043664c0f0669"
+  },
+  {
+    "repeat": 2,
+    "label": "bounds",
+    "log": "2-bounds.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/bounds-457d085b3ddb0948ff40e6a6a1e2796ed96906c51b22ccc8b2fd21fbc09a7af8",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 237026858,
+    "log_sha256": "12326f534933f0d38ac7733c7dfa607140060dbaf16f9faaa58b0e09b04aee6d"
+  },
+  {
+    "repeat": 2,
+    "label": "inline",
+    "log": "2-inline.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/inline-a22a9b21125d7aab88b97a97fd0982a3854cd16e015fa3363d7eb85b40ffd3ce",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 244636575,
+    "log_sha256": "468fb4e7bc7225d970893f2443bbc2a9b08db488277aeda602b18e813010d866"
+  },
+  {
+    "repeat": 2,
+    "label": "lazy",
+    "log": "2-lazy.log",
+    "command": [
+      "/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 247025538,
+    "log_sha256": "66371aa568a6e3e724a38d8ba3725693c113df209d3fd5b528c2c2be855dc89c"
+  },
+  {
+    "repeat": 2,
+    "label": "parent",
+    "log": "2-parent.log",
+    "command": [
+      "/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 291496183,
+    "log_sha256": "31c738db2bacea9a1458ecefd88d123c2bac5a8500a42ac4c5f9d751e6d63bfe"
+  },
+  {
+    "repeat": 3,
+    "label": "parent",
+    "log": "3-parent.log",
+    "command": [
+      "/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 293668920,
+    "log_sha256": "b4afa410dbdf2f6f2d200321357e1cd98c8bf9c4e1bf58e2ea7afae2aa103c6b"
+  },
+  {
+    "repeat": 3,
+    "label": "lazy",
+    "log": "3-lazy.log",
+    "command": [
+      "/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 246216640,
+    "log_sha256": "20cab3dae1eab31c633da6bf3d84dad439b816e7df3c633e85314eb29b23b474"
+  },
+  {
+    "repeat": 3,
+    "label": "inline",
+    "log": "3-inline.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/inline-a22a9b21125d7aab88b97a97fd0982a3854cd16e015fa3363d7eb85b40ffd3ce",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 244835250,
+    "log_sha256": "c8a055f03cb2a0afc3bd78b2afe1c857d41e8731b02150c2d6d6bef93df84f47"
+  },
+  {
+    "repeat": 3,
+    "label": "bounds",
+    "log": "3-bounds.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/bounds-457d085b3ddb0948ff40e6a6a1e2796ed96906c51b22ccc8b2fd21fbc09a7af8",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 237594230,
+    "log_sha256": "e2390fe69378e7719a8e557e69eb6da2b07e69a935e15e2cb97312791d224b1e"
+  },
+  {
+    "repeat": 3,
+    "label": "subset",
+    "log": "3-subset.log",
+    "command": [
+      "/tmp/gpui-bin-miss-artifacts/subset-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de",
+      "--ignored",
+      "--exact",
+      "bin_phase_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "elapsed_ns": 235245399,
+    "log_sha256": "93ed9a60f88ffc8d8e961166040ae98d63cd60f8840e880c2f0df4bb1a55d693"
+  }
+]

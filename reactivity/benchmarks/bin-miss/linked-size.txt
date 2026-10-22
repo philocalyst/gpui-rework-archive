@@ -1,0 +1,6 @@
+   text	   data	    bss	    dec	    hex	filename
+ 948460	  44528	   6523	 999511	  f4057	/tmp/gpui-bin-phase-parent-target/release/deps/bin_phase-d773cf8873bbe22b
+ 948944	  44696	   5859	 999499	  f404b	/tmp/gpui-lazy-bins-target/release/deps/bin_phase-d773cf8873bbe22b
+ 948452	  44504	   6547	 999503	  f404f	/tmp/gpui-bin-miss-artifacts/bounds-457d085b3ddb0948ff40e6a6a1e2796ed96906c51b22ccc8b2fd21fbc09a7af8
+ 948740	  44624	   6139	 999503	  f404f	/tmp/gpui-bin-miss-artifacts/inline-a22a9b21125d7aab88b97a97fd0982a3854cd16e015fa3363d7eb85b40ffd3ce
+ 948788	  44504	   6211	 999503	  f404f	/tmp/gpui-bin-miss-artifacts/subset-7a94cb136a993e1a535332d17901b00336dce182a216184f06849274703270de

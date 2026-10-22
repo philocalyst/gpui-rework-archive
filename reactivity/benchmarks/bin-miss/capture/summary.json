@@ -1,0 +1,821 @@
+{
+  "recording_only": {
+    "parent": {
+      "median_ns": 35,
+      "min_ns": 34,
+      "max_ns": 37,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": 6.060606060606055
+    },
+    "lazy": {
+      "median_ns": 33,
+      "min_ns": 33,
+      "max_ns": 35,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.714285714285716,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 33,
+      "min_ns": 32,
+      "max_ns": 34,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.714285714285716,
+      "versus_lazy_percent": 0.0
+    },
+    "bounds": {
+      "median_ns": 33,
+      "min_ns": 33,
+      "max_ns": 33,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.714285714285716,
+      "versus_lazy_percent": 0.0
+    },
+    "subset": {
+      "median_ns": 33,
+      "min_ns": 31,
+      "max_ns": 33,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.714285714285716,
+      "versus_lazy_percent": 0.0
+    }
+  },
+  "first_blank_cpu": {
+    "parent": {
+      "median_ns": 3456,
+      "min_ns": 3444,
+      "max_ns": 3678,
+      "samples": 3,
+      "requests": [
+        4000,
+        4000,
+        4000
+      ],
+      "requested_bytes": [
+        400000,
+        400000,
+        400000
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": -3.409726103968702
+    },
+    "lazy": {
+      "median_ns": 3578,
+      "min_ns": 3424,
+      "max_ns": 3628,
+      "samples": 3,
+      "requests": [
+        6000,
+        6000,
+        6000
+      ],
+      "requested_bytes": [
+        560000,
+        560000,
+        560000
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 3.530092592592582,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 3418,
+      "min_ns": 3397,
+      "max_ns": 3443,
+      "samples": 3,
+      "requests": [
+        6000,
+        6000,
+        6000
+      ],
+      "requested_bytes": [
+        560000,
+        560000,
+        560000
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -1.099537037037035,
+      "versus_lazy_percent": -4.4717719396310756
+    },
+    "bounds": {
+      "median_ns": 3414,
+      "min_ns": 3391,
+      "max_ns": 3422,
+      "samples": 3,
+      "requests": [
+        6000,
+        6000,
+        6000
+      ],
+      "requested_bytes": [
+        560000,
+        560000,
+        560000
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -1.215277777777779,
+      "versus_lazy_percent": -4.583566238121861
+    },
+    "subset": {
+      "median_ns": 3423,
+      "min_ns": 3411,
+      "max_ns": 3436,
+      "samples": 3,
+      "requests": [
+        6000,
+        6000,
+        6000
+      ],
+      "requested_bytes": [
+        560000,
+        560000,
+        560000
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -0.954861111111116,
+      "versus_lazy_percent": -4.332029066517606
+    }
+  },
+  "first_panel_scene": {
+    "parent": {
+      "median_ns": 2726671,
+      "min_ns": 2717110,
+      "max_ns": 2868127,
+      "samples": 3,
+      "requests": [
+        288,
+        288,
+        288
+      ],
+      "requested_bytes": [
+        9016000,
+        9016000,
+        9016000
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": -0.33572673415559473
+    },
+    "lazy": {
+      "median_ns": 2735856,
+      "min_ns": 2665724,
+      "max_ns": 2864552,
+      "samples": 3,
+      "requests": [
+        296,
+        296,
+        296
+      ],
+      "requested_bytes": [
+        9016640,
+        9016640,
+        9016640
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.33685765536068946,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 2758528,
+      "min_ns": 2695117,
+      "max_ns": 2769902,
+      "samples": 3,
+      "requests": [
+        296,
+        296,
+        296
+      ],
+      "requested_bytes": [
+        9016640,
+        9016640,
+        9016640
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 1.168347776464418,
+      "versus_lazy_percent": 0.8286985864753182
+    },
+    "bounds": {
+      "median_ns": 2659464,
+      "min_ns": 2655582,
+      "max_ns": 2668361,
+      "samples": 3,
+      "requests": [
+        296,
+        296,
+        296
+      ],
+      "requested_bytes": [
+        9016640,
+        9016640,
+        9016640
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -2.464800483813412,
+      "versus_lazy_percent": -2.7922522238012504
+    },
+    "subset": {
+      "median_ns": 2688806,
+      "min_ns": 2667602,
+      "max_ns": 2689310,
+      "samples": 3,
+      "requests": [
+        296,
+        296,
+        296
+      ],
+      "requested_bytes": [
+        9016640,
+        9016640,
+        9016640
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -1.3886897245762309,
+      "versus_lazy_percent": -1.7197542560719592
+    }
+  },
+  "same_tile_color_repair": {
+    "parent": {
+      "median_ns": 42522,
+      "min_ns": 42497,
+      "max_ns": 44337,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": 1338.4979702300407
+    },
+    "lazy": {
+      "median_ns": 2956,
+      "min_ns": 2938,
+      "max_ns": 3138,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -93.04830440713042,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 3026,
+      "min_ns": 3023,
+      "max_ns": 3065,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -92.88368374018155,
+      "versus_lazy_percent": 2.3680649526387043
+    },
+    "bounds": {
+      "median_ns": 2967,
+      "min_ns": 2965,
+      "max_ns": 2996,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -93.02243544518132,
+      "versus_lazy_percent": 0.3721244925575018
+    },
+    "subset": {
+      "median_ns": 2951,
+      "min_ns": 2951,
+      "max_ns": 2964,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -93.06006302619821,
+      "versus_lazy_percent": -0.1691474966170503
+    }
+  },
+  "alternating_tile_color_repair": {
+    "parent": {
+      "median_ns": 42561,
+      "min_ns": 42354,
+      "max_ns": 43972,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": -50.37196828358209
+    },
+    "lazy": {
+      "median_ns": 85760,
+      "min_ns": 85400,
+      "max_ns": 90768,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 101.49902492892555,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 40884,
+      "min_ns": 40742,
+      "max_ns": 41510,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -3.9402269683513125,
+      "versus_lazy_percent": -52.32742537313433
+    },
+    "bounds": {
+      "median_ns": 21240,
+      "min_ns": 21009,
+      "max_ns": 21510,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -50.095157538591664,
+      "versus_lazy_percent": -75.23320895522389
+    },
+    "subset": {
+      "median_ns": 2740,
+      "min_ns": 2702,
+      "max_ns": 2758,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -93.56218133972416,
+      "versus_lazy_percent": -96.80503731343283
+    }
+  },
+  "full_color_raster": {
+    "parent": {
+      "median_ns": 2060451,
+      "min_ns": 2040374,
+      "max_ns": 2151731,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": 11.308884232225935
+    },
+    "lazy": {
+      "median_ns": 1851111,
+      "min_ns": 1847068,
+      "max_ns": 1948465,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -10.159911592170845,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 1981000,
+      "min_ns": 1975883,
+      "max_ns": 1981951,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -3.85600045815212,
+      "versus_lazy_percent": 7.016813146267298
+    },
+    "bounds": {
+      "median_ns": 1884655,
+      "min_ns": 1883338,
+      "max_ns": 1892559,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -8.531918497455171,
+      "versus_lazy_percent": 1.8121009491056883
+    },
+    "subset": {
+      "median_ns": 1889093,
+      "min_ns": 1886941,
+      "max_ns": 1889341,
+      "samples": 3,
+      "requests": [
+        0,
+        0,
+        0
+      ],
+      "requested_bytes": [
+        0,
+        0,
+        0
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -8.316528759965658,
+      "versus_lazy_percent": 2.0518488626559916
+    }
+  },
+  "full_geometry_replacement": {
+    "parent": {
+      "median_ns": 12912285,
+      "min_ns": 12758190,
+      "max_ns": 13463046,
+      "samples": 3,
+      "requests": [
+        396,
+        396,
+        396
+      ],
+      "requested_bytes": [
+        11004672,
+        11004672,
+        11004672
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": 0.0,
+      "versus_lazy_percent": 5.499893987692772
+    },
+    "lazy": {
+      "median_ns": 12239145,
+      "min_ns": 12237150,
+      "max_ns": 13173545,
+      "samples": 3,
+      "requests": [
+        396,
+        396,
+        396
+      ],
+      "requested_bytes": [
+        11004672,
+        11004672,
+        11004672
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.2131748950708605,
+      "versus_lazy_percent": 0.0
+    },
+    "inline": {
+      "median_ns": 12280766,
+      "min_ns": 12278505,
+      "max_ns": 12280808,
+      "samples": 3,
+      "requests": [
+        396,
+        396,
+        396
+      ],
+      "requested_bytes": [
+        11004672,
+        11004672,
+        11004672
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -4.890838453457313,
+      "versus_lazy_percent": 0.3400646041859856
+    },
+    "bounds": {
+      "median_ns": 12166157,
+      "min_ns": 12150474,
+      "max_ns": 12168410,
+      "samples": 3,
+      "requests": [
+        396,
+        396,
+        396
+      ],
+      "requested_bytes": [
+        11004672,
+        11004672,
+        11004672
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.778435032993778,
+      "versus_lazy_percent": -0.5963488462633615
+    },
+    "subset": {
+      "median_ns": 12143543,
+      "min_ns": 12124405,
+      "max_ns": 12161393,
+      "samples": 3,
+      "requests": [
+        396,
+        396,
+        396
+      ],
+      "requested_bytes": [
+        11004672,
+        11004672,
+        11004672
+      ],
+      "live_bytes": [
+        0,
+        0,
+        0
+      ],
+      "versus_parent_percent": -5.953570572520661,
+      "versus_lazy_percent": -0.7811166547990078
+    }
+  }
+}

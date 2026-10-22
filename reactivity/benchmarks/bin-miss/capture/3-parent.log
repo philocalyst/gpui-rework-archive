@@ -1,0 +1,21 @@
+
+running 1 test
+test bin_phase_probe ... layout,Canvas=552
+phase,recording_only,iterations=20000,total_ns=699485,ns_each=34,requests=0,requested_bytes=0,live_bytes=0
+phase,first_blank_cpu,iterations=2000,total_ns=6888871,ns_each=3444,requests=4000,requested_bytes=400000,live_bytes=0
+digest,first_blank_cpu,11175028648043448101
+phase,first_panel_scene,iterations=8,total_ns=21736887,ns_each=2717110,requests=288,requested_bytes=9016000,live_bytes=0
+digest,first_panel_scene,14141068554809778981
+phase,same_tile_color_repair,iterations=1000,total_ns=42497783,ns_each=42497,requests=0,requested_bytes=0,live_bytes=0
+digest,same_tile_color_repair,1916662591152382501
+phase,alternating_tile_color_repair,iterations=128,total_ns=5421329,ns_each=42354,requests=0,requested_bytes=0,live_bytes=0
+digest,alternating_tile_color_repair,13058921850789507365
+phase,full_color_raster,iterations=24,total_ns=49450834,ns_each=2060451,requests=0,requested_bytes=0,live_bytes=0
+digest,full_color_raster,13058921850789507365
+phase,full_geometry_replacement,iterations=12,total_ns=154947428,ns_each=12912285,requests=396,requested_bytes=11004672,live_bytes=0
+digest,full_geometry_replacement,17861992808374739749
+final,csr_capacity_bytes=209944,output_capacity_bytes=0
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+

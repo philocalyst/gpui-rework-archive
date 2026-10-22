@@ -1,0 +1,16 @@
+[
+  {
+    "when": "before",
+    "raw_snapshot": "/tmp/gpui-bin-miss-processes-before.txt",
+    "raw_snapshot_sha256": "ba7962bfcc99b58759bb20fcd6ff1f5d060a0f0d6b5f41bee27d9d27106d7385",
+    "process_rows": 298,
+    "unexpected_heavy_jobs": []
+  },
+  {
+    "when": "after",
+    "raw_snapshot": "/tmp/gpui-bin-miss-processes-after.txt",
+    "raw_snapshot_sha256": "4828e6ea9ef5915696373ba36b339acde3588a762a88ada31c3259ee936622dd",
+    "process_rows": 296,
+    "unexpected_heavy_jobs": []
+  }
+]
