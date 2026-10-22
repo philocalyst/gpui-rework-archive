@@ -427,6 +427,19 @@ impl DisplayList {
     fn iter(&self) -> impl ExactSizeIterator<Item = BorrowedCommand<'_>> + DoubleEndedIterator {
         self.order.iter().map(|&address| self.get(address))
     }
+    /// Device-clipped integer bounds in painter order. CSR construction needs
+    /// no material, resource lease, inverse mapping, or command reconstruction.
+    fn ordered_bounds(&self) -> impl ExactSizeIterator<Item = [u16; 4]> + DoubleEndedIterator {
+        self.order.iter().map(|&address| {
+            if address & INLINE_DRAW != 0 {
+                self.inline[(address & !INLINE_DRAW) as usize]
+                    .geometry
+                    .bounds
+            } else {
+                self.placements[address as usize].geometry.bounds
+            }
+        })
+    }
     // Addresses are private and constructed only by admitted appends. Every
     // resource/common/geometry index belongs to this DisplayList; no external
     // stale address can enter this indexing path.
@@ -2100,20 +2113,6 @@ fn validate_rect(rect: Rect) -> Result<(), Error> {
         Err(Error::InvalidGeometry)
     } else {
         Ok(())
-    }
-}
-#[inline]
-fn visit_tiles(
-    command: &BorrowedCommand<'_>,
-    tile_bounds: [usize; 4],
-    mut visit: impl FnMut(usize),
-) {
-    let [x, y, r, b] = command.bounds;
-    let columns = tile_bounds[2] - tile_bounds[0];
-    for ty in (y / TILE).max(tile_bounds[1])..b.div_ceil(TILE).min(tile_bounds[3]) {
-        for tx in (x / TILE).max(tile_bounds[0])..r.div_ceil(TILE).min(tile_bounds[2]) {
-            visit((ty - tile_bounds[1]) * columns + tx - tile_bounds[0]);
-        }
     }
 }
 fn full_tile(

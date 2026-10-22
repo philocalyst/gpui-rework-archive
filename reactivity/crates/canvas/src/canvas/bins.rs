@@ -1,5 +1,5 @@
 //! One authoritative CPU scratch owner, allocated only when rasterizing.
-use super::{DisplayList, TILE, visit_tiles};
+use super::{DisplayList, TILE};
 
 #[derive(Default)]
 pub(super) struct RasterScratch {
@@ -35,8 +35,8 @@ impl RasterScratch {
         let tiles = (bounds[2] - bounds[0]) * (bounds[3] - bounds[1]);
         self.offsets.clear();
         self.offsets.resize(tiles + 1, 0);
-        for command in commands.iter() {
-            visit_tiles(&command, bounds, |tile| self.offsets[tile + 1] += 1);
+        for command_bounds in commands.ordered_bounds() {
+            visit_tiles(command_bounds, bounds, |tile| self.offsets[tile + 1] += 1);
         }
         for i in 1..self.offsets.len() {
             self.offsets[i] += self.offsets[i - 1];
@@ -46,8 +46,8 @@ impl RasterScratch {
         // Counting cursor is O(tile count), never O(pixel count).
         self.cursor.clear();
         self.cursor.extend_from_slice(&self.offsets[..tiles]);
-        for (index, command) in commands.iter().enumerate() {
-            visit_tiles(&command, bounds, |tile| {
+        for (index, command_bounds) in commands.ordered_bounds().enumerate() {
+            visit_tiles(command_bounds, bounds, |tile| {
                 self.indices[self.cursor[tile]] = index as u32;
                 self.cursor[tile] += 1;
             });
@@ -57,10 +57,117 @@ impl RasterScratch {
     }
 }
 
+// Integer bounds were clipped and admitted before append; this projection
+// preserves the previous floor/ceil tile intersection and painter ordinal.
+#[inline]
+fn visit_tiles(command_bounds: [u16; 4], tile_bounds: [usize; 4], mut visit: impl FnMut(usize)) {
+    let [x, y, r, b] = command_bounds.map(usize::from);
+    let columns = tile_bounds[2] - tile_bounds[0];
+    for ty in (y / TILE).max(tile_bounds[1])..b.div_ceil(TILE).min(tile_bounds[3]) {
+        for tx in (x / TILE).max(tile_bounds[0])..r.div_ceil(TILE).min(tile_bounds[2]) {
+            visit((ty - tile_bounds[1]) * columns + tx - tile_bounds[0]);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{Canvas, ColorConfig};
+
+    #[test]
+    fn bounds_projection_and_csr_match_independent_command_membership() {
+        use crate::{Affine, AlphaMode, Color, Image, ImageSampling, Point, Rect, TextSystem};
+        let mut canvas = Canvas::recording(65, 49, ColorConfig::default()).unwrap();
+        let clip = Rect::new(1.25, 2.5, 62.0, 44.0);
+        for i in 0..9 {
+            canvas
+                .fill_rounded_rect(
+                    Rect::new(-3.5 + i as f32 * 7.0, i as f32 * 3.25, 19.5, 13.5),
+                    i as f32,
+                    Affine {
+                        c: 0.125,
+                        ..Affine::IDENTITY
+                    },
+                    clip,
+                    Color::BLACK,
+                )
+                .unwrap();
+        }
+        let mut text = TextSystem::bundled().unwrap();
+        let layout = text.shape("ABA café", 16.0, None).unwrap();
+        canvas
+            .draw_text(
+                &mut text,
+                &layout,
+                Point { x: 2.0, y: 13.0 },
+                Affine::IDENTITY,
+                clip,
+                Color::BLACK,
+            )
+            .unwrap();
+        let image = Image::linear_srgb(
+            1,
+            1,
+            AlphaMode::Straight,
+            Box::new([[0.25, 0.5, 0.75, 0.5]]),
+        )
+        .unwrap();
+        canvas
+            .draw_image(
+                &image,
+                Rect::new(34.5, 23.0, 30.0, 24.0),
+                Affine::IDENTITY,
+                clip,
+                ImageSampling::Linear,
+            )
+            .unwrap();
+        let commands = &canvas.commands;
+        assert!(!commands.inline.is_empty());
+        assert!(!commands.placements.is_empty());
+        let expected: Vec<_> = commands.iter().map(|c| c.bounds).collect();
+        assert_eq!(commands.ordered_bounds().len(), expected.len());
+        assert!(
+            commands
+                .ordered_bounds()
+                .map(|b| b.map(usize::from))
+                .eq(expected.iter().copied())
+        );
+        assert!(
+            commands
+                .ordered_bounds()
+                .rev()
+                .map(|b| b.map(usize::from))
+                .eq(expected.iter().rev().copied())
+        );
+        for bounds in [[0, 0, 5, 4], [1, 1, 4, 3], [3, 2, 5, 4], [0, 0, 1, 1]] {
+            let mut scratch = RasterScratch::default();
+            assert!(!scratch.prepare(commands, bounds));
+            let columns = bounds[2] - bounds[0];
+            for ty in bounds[1]..bounds[3] {
+                for tx in bounds[0]..bounds[2] {
+                    // Independent intersection/ordinal walk, with no CSR count
+                    // or cursor code and no resource/material projection.
+                    let members: Vec<_> = expected
+                        .iter()
+                        .enumerate()
+                        .filter_map(|(i, &[l, t, r, b])| {
+                            (l / TILE <= tx
+                                && r.div_ceil(TILE) > tx
+                                && t / TILE <= ty
+                                && b.div_ceil(TILE) > ty)
+                                .then_some(i as u32)
+                        })
+                        .collect();
+                    let tile = (ty - bounds[1]) * columns + tx - bounds[0];
+                    assert_eq!(
+                        &scratch.indices[scratch.offsets[tile]..scratch.offsets[tile + 1]],
+                        members
+                    );
+                }
+            }
+        }
+    }
 
     #[test]
     fn recording_has_no_scratch_allocation_and_first_raster_charges_one_owner() {
