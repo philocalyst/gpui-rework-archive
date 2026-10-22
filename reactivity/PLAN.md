@@ -46,6 +46,15 @@ and proves per-entry shader artifacts behind vendor-owned admission; its optiona
 unsafe path must preserve exact enabled guards and driver workarounds before any
 adoption. No hardware performance gate is inferred from llvmpipe.
 
+The [native shader lifecycle audit](docs/native-shader-lifecycle-luna.md) selects
+static SPIR-V recipes with temporary Vulkan 1.0 modules under the existing stage
+guard. An isolated Sol slice must preserve reusable Raw ownership, exact device
+profile admission, Core error scopes, trace/replay, repeated/concurrent pipeline
+creation and ordinary feature-off behavior. Prove native module lifetime and
+the full authored/vendor/binary bill before integration. Maintenance5 inline
+stages require separate queried/enabled state and pointer-lifetime proof; the
+first static recipe does not depend on that extension.
+
 The [acknowledged geometry slice](docs/acknowledged-text-geometry-luna.md) must retain
 exact old P/C text maps for public queries and native wrapped/directional runs,
 including late accessibility activation after failed newer shaping. Measure its

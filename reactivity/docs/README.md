@@ -11,6 +11,7 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Solid and Ripple async graph](async-graph-luna.md) | Pinned runtime and accessible author sources, typed lane fit and remaining Future/stream/optimistic ergonomics |
 | [Bounded Future questions](future-questions.md) | Integrated typed executor API, physical-credit teardown, close barrier, costs and remaining stream/optimistic work |
 | [Typed Future admission](async-admission-luna.md) | Injected exact-task cancellation, pinned Future teardown before completion, unchanged ordinary controller storage and adversarial lifecycle traces |
+| [Static shader lifecycle](native-shader-lifecycle-luna.md) | Vendor-owned static SPIR-V recipes, scoped Vulkan module ownership, Core trace/error routing and separately gated inline-stage research |
 | [Portable presenter boundary](portable-presenter-luna.md) | Vendor-owned hints/target proof/leases, source-review corrections and cross-platform fallback limits |
 | [Graphics work elimination](graphics-work-elimination-luna.md) | Device-owned resources, shader artifact safety, backend preservation contracts and separately gated first-window experiments |
 | [Offline shader proof](offline-shader-proof-luna.md) | Exact six-binding ABI, Vulkan artifact generation, enabled robustness policies, host bounds and unsafe admission gates; proposed, not implemented |
