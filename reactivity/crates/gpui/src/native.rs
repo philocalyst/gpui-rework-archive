@@ -16,8 +16,14 @@ use winit::{
     window::Window as NativeWindow,
 };
 
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+use crate::Target;
 use crate::{
-    Commit, Error, Key, Point, Target, View, Win, WindowOptions,
+    Commit, Error, Key, Point, PointerEvent, PointerSession, View, Win, WindowOptions,
     remote::{DeliveryError, Inbox, Lane, LaneSet},
     runtime::SurfaceDamage,
 };
@@ -334,8 +340,7 @@ struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
     window: Option<Arc<NativeWindow>>,
     owner: Option<Win<V, L>>,
     graphics: Option<Graphics>,
-    pointer: Option<Point>,
-    pressed: Option<Target>,
+    pointer: PointerSession,
     occluded: bool,
     destination: destination::Destination,
     error: Option<NativeError>,
@@ -368,8 +373,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             window: None,
             owner: None,
             graphics: None,
-            pointer: None,
-            pressed: None,
+            pointer: PointerSession::default(),
             occluded: false,
             destination: destination::Destination::default(),
             error: None,
@@ -504,7 +508,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
     }
     fn resize(&mut self, size: [u32; 2]) -> Result<(), NativeError> {
         self.destination.invalidate();
-        self.pressed = None;
+        self.pointer = PointerSession::default();
         if size.contains(&0) {
             return Ok(());
         }
@@ -888,6 +892,24 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         let result = owner.key(key);
         self.input_result(result)
     }
+    fn pointer_input(&mut self, event: PointerEvent) -> Result<(), NativeError> {
+        let Some(owner) = &mut self.owner else {
+            return Ok(());
+        };
+        let result = owner.pointer_event(&mut self.pointer, event);
+        match result {
+            Ok(_)
+                if matches!(
+                    event,
+                    PointerEvent::Move(_) | PointerEvent::Leave | PointerEvent::Cancel
+                ) =>
+            {
+                Ok(())
+            }
+            Err(Error::NotHittable) => Ok(()),
+            result => self.input_result(result),
+        }
+    }
     fn window_event(
         &mut self,
         event_loop: &ActiveEventLoop,
@@ -906,6 +928,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 event_loop.exit();
             }
             WindowEvent::Resized(size) => self.resize([size.width, size.height])?,
+            // A prior physical point is relative to the previous window
+            // origin. Wait for a new cursor sample before another press.
+            WindowEvent::Moved(_) => self.pointer = PointerSession::default(),
             WindowEvent::ScaleFactorChanged { .. } => {
                 if let Some(window) = &self.window {
                     let size = window.inner_size();
@@ -921,16 +946,16 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 }
             }
             WindowEvent::CursorMoved { position, .. } => {
-                self.pointer = Some(Point {
+                self.pointer_input(PointerEvent::Move(Point {
                     x: position.x as f32,
                     y: position.y as f32,
-                });
+                }))?;
             }
             WindowEvent::CursorLeft { .. } => {
-                self.pointer = None;
+                self.pointer_input(PointerEvent::Leave)?;
             }
             WindowEvent::Focused(false) => {
-                self.pressed = None;
+                self.pointer = PointerSession::default();
                 if let Some(owner) = &mut self.owner {
                     owner.clear_focus()?;
                 }
@@ -938,9 +963,6 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             }
             WindowEvent::ModifiersChanged(modifiers) => self.modifiers = modifiers.state(),
             WindowEvent::MouseWheel { delta, .. } => {
-                let (Some(point), Some(owner)) = (self.pointer, &mut self.owner) else {
-                    return Ok(());
-                };
                 let scale = self
                     .window
                     .as_ref()
@@ -956,52 +978,18 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 if !dx.is_finite() || !dy.is_finite() {
                     return Ok(());
                 }
-                // A scroll changes the hit cohort, cancelling an in-progress press.
-                self.pressed = None;
-                let result = owner.scroll_at_2d(point, crate::ScrollDelta { x: dx, y: dy });
-                match result {
-                    Err(Error::NotHittable | Error::PresentationStale) => {}
-                    result => self.input_result(result)?,
-                }
+                self.pointer_input(PointerEvent::Wheel(crate::ScrollDelta { x: dx, y: dy }))?;
             }
             WindowEvent::MouseInput {
                 state,
                 button: MouseButton::Left,
                 ..
             } => {
-                let Some(owner) = &mut self.owner else {
-                    return Ok(());
-                };
-                let hit = match self
-                    .pointer
-                    .map(|point| owner.hit_target(point))
-                    .transpose()
-                {
-                    Ok(hit) => hit.flatten(),
-                    // A gesture across a not-yet-presented sheet is cancelled.
-                    // It cannot be reinterpreted against a later layout.
-                    Err(Error::PresentationStale) => {
-                        self.pressed = None;
-                        return Ok(());
-                    }
-                    Err(error) => return Err(error.into()),
-                };
-                if *state == ElementState::Pressed {
-                    self.pressed = hit;
-                    match hit {
-                        Some(target) => {
-                            owner.focus(target)?;
-                        }
-                        None => {
-                            owner.clear_focus()?;
-                        }
-                    }
-                } else if let Some(target) =
-                    self.pressed.take().filter(|target| Some(*target) == hit)
-                {
-                    let result = owner.activate(target);
-                    self.input_result(result)?;
-                }
+                self.pointer_input(if *state == ElementState::Pressed {
+                    PointerEvent::Press
+                } else {
+                    PointerEvent::Release
+                })?;
             }
             WindowEvent::KeyboardInput {
                 event,
@@ -1122,7 +1110,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             Callback::Resumed => self.resumed(event_loop),
             Callback::Suspended => {
                 self.destination.invalidate();
-                self.pressed = None;
+                self.pointer = PointerSession::default();
                 // Dropping both bounded channel endpoints cancels this admission
                 // generation; a late worker can only drop its owned resources.
                 self.upgrade = None;
@@ -1192,7 +1180,7 @@ mod solid_tests;
 mod tests {
     use super::*;
     use crate::{
-        Affine,
+        Affine, Target,
         property::{Contribution, TRANSFORM},
     };
     use std::sync::mpsc::{self, Receiver};
@@ -1418,6 +1406,46 @@ mod tests {
                         f64::from(bounds.y + bounds.height * 0.5),
                     );
                     let device_id = DeviceId::dummy();
+                    for invalidation in [
+                        WindowEvent::Moved(winit::dpi::PhysicalPosition::new(0, 0)),
+                        WindowEvent::Resized(winit::dpi::PhysicalSize::new(
+                            sheet.size[0],
+                            sheet.size[1],
+                        )),
+                        WindowEvent::Focused(false),
+                    ] {
+                        self.host
+                            .pointer_input(PointerEvent::Move(Point {
+                                x: position.x as f32,
+                                y: position.y as f32,
+                            }))
+                            .unwrap();
+                        self.host.pointer_input(PointerEvent::Press).unwrap();
+                        self.host.window_event(event_loop, &invalidation).unwrap();
+                        assert_eq!(self.host.pointer.position(), None);
+                        // Resize detaches coordinate authority. Exercise a
+                        // real native present before trying a fresh press.
+                        self.host.redraw().unwrap();
+                        // No new physical sample: neither the old release nor
+                        // a fresh press/release may reuse the previous point.
+                        for event in [
+                            PointerEvent::Release,
+                            PointerEvent::Press,
+                            PointerEvent::Release,
+                        ] {
+                            self.host.pointer_input(event).unwrap();
+                        }
+                        assert_eq!(
+                            self.host
+                                .owner
+                                .as_ref()
+                                .unwrap()
+                                .snapshot()
+                                .unwrap()
+                                .source_epoch,
+                            sheet.source_epoch
+                        );
+                    }
                     self.host
                         .window_event(
                             event_loop,
@@ -1427,6 +1455,15 @@ mod tests {
                             },
                         )
                         .unwrap();
+                    assert_eq!(
+                        self.host
+                            .owner
+                            .as_ref()
+                            .unwrap()
+                            .hit_target(self.host.pointer.position().unwrap())
+                            .unwrap(),
+                        Some(target),
+                    );
                     for state in [ElementState::Pressed, ElementState::Released] {
                         self.host
                             .window_event(

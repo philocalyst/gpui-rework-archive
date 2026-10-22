@@ -48,7 +48,7 @@ mod metadata;
 mod query;
 mod semantics;
 mod styles;
-pub use input::Key;
+pub use input::{Key, PointerEvent, PointerSession};
 use metadata::{Declared, Destination, Metadata, Port, Publish};
 pub use metadata::{ListInfo, ListItemInfo};
 pub use query::{Part, Query, SemanticSnapshot};

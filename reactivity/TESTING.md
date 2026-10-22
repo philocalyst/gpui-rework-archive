@@ -80,6 +80,29 @@ or paint work. Virtual time, completion control and replay remain implementation
 gates through production facilities. There are no dummy test-only timers or a
 second event loop.
 
+`PointerSession` and `Win::pointer_event` expose the native host's normalized
+mouse reducer to ordinary applications and tests. Move uses physical window
+coordinates; wheel uses a window-logical `ScrollDelta`. Press focuses the current
+hit, and release activates only the same surviving target under a fresh hit.
+Leave, wheel and cancellation consume a press. A press/release rejected for stale
+geometry cannot be retried after acknowledgement. A session holds no owner borrow
+or allocation and cannot transfer a press between window namespaces. Native move,
+resize, focus loss and suspension reset the session and await a new cursor sample.
+Explicit cancellation preserves the position and keyboard focus. Release can
+activate a surviving target on a newer acknowledged sheet after a fresh re-hit.
+The initial protocol covers one mouse, without pointer capture, touch or drag.
+
+```rust,ignore
+let mut mouse = PointerSession::default();
+window.pointer_event(&mut mouse, PointerEvent::Move(Point { x: 12.0, y: 8.0 }))?;
+window.pointer_event(&mut mouse, PointerEvent::Press)?;
+window.pointer_event(&mut mouse, PointerEvent::Release)?;
+```
+
+The input-focus oracle executes 1,000 move/press/release cycles with zero
+allocations and no source, layout or paint work. An activating callback can edit
+sources and prepare output; that oracle does not claim all clicks allocate nothing.
+
 `win.semantics()?.write_json(writer)?` streams a borrowed semantic presentation
 through the same `Part` getters as `visit` and accessibility. `Part` also implements
 Serde `Serialize`, so applications can use their own serializers. The snapshot
