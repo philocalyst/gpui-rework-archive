@@ -1,5 +1,7 @@
 //! One public GPUI View, shared by the ordinary native and headless owners.
 use crate::{
+    queue::TrackRef,
+    queue_view::QueueScreen,
     search::{SearchInput, SearchPage, Sort, Version},
     worker::{LibraryEvent, PlaybackRequest, Selection, WorkerHandle},
 };
@@ -12,9 +14,16 @@ pub struct Library {
     pub selected: Signal<Selection>,
     pub results: Reader<SearchPage>,
     pub playback: Reader<PlaybackRequest>,
+    pub queue: QueueScreen,
     notice: String,
 }
 impl Library {
+    pub const QUEUE: Component<Self, QueueScreen> = Component::new(
+        FieldId::new(5),
+        "playback queue",
+        |model| &model.queue,
+        |model| &mut model.queue,
+    );
     pub const QUERY: Source<Self, String> =
         Source::new(FieldId::new(1), "search", |m| &m.query, |m| &mut m.query);
     pub const SORT: Source<Self, Sort> =
@@ -66,6 +75,13 @@ impl Library {
             self.notice = "This recording belongs to the previous library source".into();
         }
     }
+    fn enqueue(&mut self, track: TrackRef, generation: u64) {
+        if generation == self.version.generation {
+            self.queue.enqueue(track);
+        } else {
+            self.notice = "This prepared recording belongs to the previous library source".into();
+        }
+    }
 }
 
 pub fn connect(
@@ -98,6 +114,9 @@ pub fn connect(
             selected: Signal::new(Selection::default()),
             results,
             playback,
+            // Search generations use generation+1; this one stable queue owns
+            // the reserved zero domain and survives database replacement.
+            queue: QueueScreen::new(ListId::new(0)).map_err(|_| QuestionFault::Exhausted)?,
             notice: String::new(),
         },
         questions,
@@ -152,6 +171,7 @@ impl View for Library {
             .field(Self::SORT)
             .field(Self::VERSION)
             .field(Self::SELECTED)
+            .direct_component(Self::QUEUE)
     }
     fn view(&self) -> El<'_> {
         column((
@@ -193,19 +213,32 @@ impl View for Library {
                 .failed(|failure| text(format!("Library unavailable: {failure}"))),
             self.playback
                 .project(|request| {
-                    text(match &request.track {
-                        Some(track) => format!(
-                            "Play request {}: recording {} — {}",
-                            request.selection.sequence,
-                            track.id,
-                            track.location.display()
-                        ),
-                        None => "No recording selected".into(),
-                    })
+                    if let Some(track) = &request.track {
+                        let leased = track.clone();
+                        let generation = request.selection.generation;
+                        column((
+                            text(format!(
+                                "Play request {}: recording {} — {}",
+                                request.selection.sequence,
+                                track.track_id.unwrap(),
+                                track.path.display()
+                            )),
+                            button(format!(
+                                "Add prepared recording {} to queue",
+                                track.track_id.unwrap()
+                            ))
+                            .on_click(move |model: &mut Library| {
+                                model.enqueue(leased.clone(), generation)
+                            }),
+                        ))
+                    } else {
+                        text("No recording selected")
+                    }
                 })
                 .loading(|| text("Preparing playback request…"))
                 .failed(|failure| text(format!("Recording unavailable: {failure}"))),
             text(self.notice.as_str()),
+            Self::QUEUE.view(self),
         ))
         .p(12)
         .gap(10)

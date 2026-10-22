@@ -1,7 +1,8 @@
 //! One explicit, bounded application service; no UI/runtime/entity executor.
 use crate::{
     database::Database,
-    query::{TrackPlaybackRow, tracks},
+    query::tracks,
+    queue::{Track, TrackRef},
     search::{SearchInput, SearchPage, Searcher, SourceError, Version},
 };
 use gpui::{Completion, Inbox, Remote, StartError};
@@ -27,7 +28,7 @@ pub struct Selection {
 }
 pub struct PlaybackRequest {
     pub selection: Selection,
-    pub track: Option<TrackPlaybackRow>,
+    pub track: Option<TrackRef>,
 }
 #[derive(Debug)]
 pub enum LibraryEvent {
@@ -121,9 +122,19 @@ impl Worker {
                                     if cancellation.is_cancelled() {
                                         None
                                     } else {
-                                        Some(
-                                            track.map(|track| PlaybackRequest { selection, track }),
-                                        )
+                                        Some(track.map(|track| PlaybackRequest {
+                                            selection,
+                                            track: track.map(|row| {
+                                                let available_when_prepared = row.location.exists();
+                                                TrackRef::new(Track {
+                                                    path: row.location,
+                                                    track_id: Some(row.id),
+                                                    album_id: row.album_id,
+                                                    title: format!("Recording {}", row.id),
+                                                    available_when_prepared,
+                                                })
+                                            }),
+                                        }))
                                     }
                                 });
                         }
