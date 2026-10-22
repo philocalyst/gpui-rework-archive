@@ -1,18 +1,22 @@
 //! Pixels begin with one exact working color. Only divergent sample coverage
 //! promotes a pixel to sixteen independently composited colors. No averaging
 //! occurs before all commands have painted, preserving overlap correlation.
-use super::{TILE, blend, sample_mean};
+use super::{TILE, sample_mean};
+use fearless_simd::{Simd, f32x4, prelude::*};
+use fearless_simd_macros::simd;
 
 const PIXELS: usize = TILE * TILE;
 
-pub(super) struct Samples {
+pub(super) struct Samples<S: Simd> {
+    simd: S,
     uniform: [[f32; 4]; PIXELS],
     samples: [[f32; 4]; PIXELS * 16],
     mixed: [u64; PIXELS / 64],
 }
-impl Samples {
-    pub(super) fn new() -> Self {
+impl<S: Simd> Samples<S> {
+    pub(super) fn with_simd(simd: S) -> Self {
         Self {
+            simd,
             uniform: [[0.0; 4]; PIXELS],
             samples: [[0.0; 4]; PIXELS * 16],
             mixed: [0; PIXELS / 64],
@@ -36,21 +40,19 @@ impl Samples {
             let first = coverage[0];
             if coverage.iter().all(|&value| value == first) {
                 if first > 0.0 {
-                    blend(&mut self.uniform[pixel], color, first);
+                    blend_one(self.simd, &mut self.uniform[pixel], color, first);
                 }
                 return;
             }
             self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
             self.mixed[pixel / 64] |= bit;
         }
-        for (sample, coverage) in self.samples[pixel * 16..pixel * 16 + 16]
-            .iter_mut()
-            .zip(coverage)
-        {
-            if coverage > 0.0 {
-                blend(sample, color, coverage);
-            }
-        }
+        blend_coverage(
+            self.simd,
+            &mut self.samples[pixel * 16..pixel * 16 + 16],
+            color,
+            coverage,
+        );
     }
 
     pub(super) fn blend_sources(&mut self, pixel: usize, sources: [Option<[f32; 4]>; 16]) {
@@ -62,21 +64,18 @@ impl Samples {
                 .all(|color| color.map(|c| c.map(f32::to_bits)) == bits)
             {
                 if let Some(source) = sources[0] {
-                    blend(&mut self.uniform[pixel], source, 1.0);
+                    blend_one(self.simd, &mut self.uniform[pixel], source, 1.0);
                 }
                 return;
             }
             self.samples[pixel * 16..pixel * 16 + 16].fill(self.uniform[pixel]);
             self.mixed[pixel / 64] |= bit;
         }
-        for (sample, source) in self.samples[pixel * 16..pixel * 16 + 16]
-            .iter_mut()
-            .zip(sources)
-        {
-            if let Some(source) = source {
-                blend(sample, source, 1.0);
-            }
-        }
+        blend_sources(
+            self.simd,
+            &mut self.samples[pixel * 16..pixel * 16 + 16],
+            sources,
+        );
     }
 
     #[inline]
@@ -95,9 +94,54 @@ impl Samples {
     }
 }
 
+// RGBA is already a four-f32 contiguous AoS record. These safe loads/stores do
+// not require 16-byte alignment, never read another sample, and have no tail.
+// Keep the original scalar alpha multiplication and separate multiplies/add:
+// neither reassociation nor fused multiply-add is part of this equation.
+#[inline(always)]
+fn source_over<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
+    let alpha = src[3] * coverage;
+    let source = f32x4::from_slice(simd, &src) * coverage;
+    let backdrop = f32x4::from_slice(simd, dst) * (1.0 - alpha);
+    (source + backdrop).store_slice(dst);
+}
+
+#[simd]
+fn blend_one<S: Simd>(simd: S, dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
+    source_over(simd, dst, src, coverage);
+}
+
+#[simd]
+fn blend_coverage<S: Simd>(simd: S, dst: &mut [[f32; 4]], src: [f32; 4], coverage: [f32; 16]) {
+    for (sample, coverage) in dst.iter_mut().zip(coverage) {
+        // Do not blend zero coverage: multiplication by zero can change HDR
+        // signed zeros, and evaluating an absent sample can create NaNs.
+        if coverage > 0.0 {
+            source_over(simd, sample, src, coverage);
+        }
+    }
+}
+
+#[simd]
+fn blend_sources<S: Simd>(simd: S, dst: &mut [[f32; 4]], sources: [Option<[f32; 4]>; 16]) {
+    for (sample, source) in dst.iter_mut().zip(sources) {
+        if let Some(source) = source {
+            source_over(simd, sample, source, 1.0);
+        }
+    }
+}
+
+#[cfg(test)]
+impl Samples<fearless_simd::Fallback> {
+    pub(super) fn new() -> Self {
+        Self::with_simd(fearless_simd::Fallback::new())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::canvas::blend;
 
     #[test]
     fn identical_finite_samples_preserve_exact_bits_including_signed_zero() {
@@ -154,5 +198,125 @@ mod tests {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod backend_tests {
+    use super::*;
+
+    // Independent component loop, kept outside the SIMD-generic pipeline.
+    fn reference(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
+        let alpha = src[3] * coverage;
+        for channel in 0..4 {
+            dst[channel] = src[channel] * coverage + dst[channel] * (1.0 - alpha);
+        }
+    }
+
+    fn check<S: Simd>(simd: S) {
+        let values = [
+            0.0,
+            -0.0,
+            f32::from_bits(1),
+            -f32::from_bits(1),
+            f32::MIN_POSITIVE,
+            -f32::MIN_POSITIVE,
+            0.5_f32.next_down(),
+            0.5,
+            0.5_f32.next_up(),
+            -3.25,
+            2.5,
+            1e20,
+            -1e20,
+        ];
+        let coverages = [0.0, -0.0, f32::from_bits(1), 0.125, 0.5, 1.0];
+        let mut tile = Samples::with_simd(simd);
+        let mut expected = [[0.0; 4]; 16];
+        for (index, &value) in values.iter().enumerate() {
+            for alpha in [0.0, -0.0, f32::from_bits(1), 0.25, 0.5, 1.0] {
+                let clear = [value, -value, values[(index + 3) % values.len()], alpha];
+                for collapse in [false, true] {
+                    tile.reset(clear, collapse);
+                    expected.fill(clear);
+                    for turn in 0..32 {
+                        let source = [
+                            values[(index + turn) % values.len()],
+                            -value,
+                            values[(index + 7) % values.len()],
+                            alpha,
+                        ];
+                        let coverage =
+                            std::array::from_fn(|i| coverages[(i + turn) % coverages.len()]);
+                        tile.blend(255, source, coverage);
+                        for (sample, coverage) in expected.iter_mut().zip(coverage) {
+                            if coverage > 0.0 {
+                                reference(sample, source, coverage);
+                            }
+                        }
+                        // Compare every working sample as well as the unchanged
+                        // sequential f64 reduction; quantization cannot hide a bit.
+                        assert_eq!(
+                            tile.samples[255 * 16..256 * 16]
+                                .iter()
+                                .map(|c| c.map(f32::to_bits))
+                                .collect::<Vec<_>>(),
+                            expected.map(|c| c.map(f32::to_bits)),
+                            "{:?}",
+                            simd.level()
+                        );
+                        assert_eq!(
+                            tile.color(255).map(f32::to_bits),
+                            sample_mean(&expected).map(f32::to_bits)
+                        );
+                        let sources =
+                            std::array::from_fn(|i| ((i + turn) % 3 != 0).then_some(source));
+                        tile.blend_sources(255, sources);
+                        for (sample, source) in expected.iter_mut().zip(sources) {
+                            if let Some(source) = source {
+                                reference(sample, source, 1.0);
+                            }
+                        }
+                        assert_eq!(
+                            tile.color(255).map(f32::to_bits),
+                            sample_mean(&expected).map(f32::to_bits)
+                        );
+                    }
+                }
+            }
+        }
+        // Backend tokens are zero-sized. Sample storage has exactly the prior
+        // 16-byte RGBA records and promotion bitmap, with no dispatch header.
+        assert_eq!(std::mem::size_of::<S>(), 0);
+        assert_eq!(std::mem::size_of::<Samples<S>>(), 16 * 256 * 17 + 32);
+    }
+
+    #[test]
+    fn every_supported_backend_preserves_working_sample_bits_and_storage_size() {
+        check(fearless_simd::Fallback::new());
+        let level = fearless_simd::Level::new();
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        {
+            if let Some(simd) = level.as_sse2() {
+                check(simd);
+            }
+            if let Some(simd) = level.as_sse4_2() {
+                check(simd);
+            }
+            if let Some(simd) = level.as_avx2() {
+                check(simd);
+            }
+            if let Some(simd) = level.as_avx512() {
+                check(simd);
+            }
+        }
+        #[cfg(target_arch = "aarch64")]
+        if let Some(simd) = level.as_neon() {
+            check(simd);
+        }
+        #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))]
+        if let Some(simd) = level.as_wasm_simd128() {
+            check(simd);
+        }
+        eprintln!("executed supported backends up to {level:?}");
     }
 }

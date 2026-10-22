@@ -3,6 +3,11 @@ use crate::{
     Affine, Color, ColorConfig, DamageRegion, Error, Image, ImageKey, ImageSampling, ImageView,
     Point, Rect, TextLayout, TextSystem,
 };
+#[cfg(any(feature = "simd", test))]
+use fearless_simd::Level;
+use fearless_simd::Simd;
+#[cfg(feature = "simd")]
+use fearless_simd::dispatch;
 use std::{collections::HashMap, sync::Arc};
 
 mod bins;
@@ -14,6 +19,8 @@ pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
 pub use rounded::rounded_rect_contains;
 mod samples;
+#[cfg(test)]
+mod simd_tests;
 use glyph_axis::GlyphAxis;
 use samples::Samples;
 
@@ -1754,7 +1761,7 @@ fn render_rows<W: PixelWriter>(
     pixels: &mut [W::Element],
     offsets: &[u32],
     members: &mut [u32],
-    parallel: bool,
+    _parallel: bool,
 ) -> RenderStats {
     let rows = frame.tile_bounds[3] - frame.tile_bounds[1];
     if rows == 1 {
@@ -1778,7 +1785,7 @@ fn render_rows<W: PixelWriter>(
             left_pixels,
             &offsets[..=boundary],
             left_members,
-            parallel,
+            _parallel,
         )
     };
     let mut render_right = move || {
@@ -1788,11 +1795,11 @@ fn render_rows<W: PixelWriter>(
             right_pixels,
             &offsets[boundary..],
             right_members,
-            parallel,
+            _parallel,
         )
     };
     #[cfg(feature = "parallel")]
-    let (left, right) = if parallel {
+    let (left, right) = if _parallel {
         rayon::join(render_left, render_right)
     } else {
         (render_left(), render_right())
@@ -1811,10 +1818,37 @@ fn render_band<W: PixelWriter>(
     offsets: &[u32],
     members: &mut [u32],
 ) -> RenderStats {
+    #[cfg(not(feature = "simd"))]
+    return render_band_impl(
+        fearless_simd::Fallback::new(),
+        frame,
+        writer,
+        pixels,
+        offsets,
+        members,
+    );
+    #[cfg(feature = "simd")]
+    // RGBA occupies four f32 lanes on every backend. Wider ISA dispatch would
+    // clone the complete raster pipeline without widening this kernel. Use the
+    // guaranteed target baseline, avoiding CPU detection and startup state.
+    dispatch!(Level::baseline(), simd => render_band_impl(simd, frame, writer, pixels, offsets, members))
+}
+
+// Geometry helpers remain shared; the leaf sample pipeline carries the selected
+// token, so every hot blend is a direct call with no per-pixel feature checks.
+#[inline(never)]
+fn render_band_impl<W: PixelWriter, S: Simd>(
+    simd: S,
+    frame: Frame<'_>,
+    writer: W,
+    pixels: &mut [W::Element],
+    offsets: &[u32],
+    members: &mut [u32],
+) -> RenderStats {
     let band_index = frame.tile_bounds[1];
     let columns = frame.tile_bounds[2] - frame.tile_bounds[0];
     let mut stats = RenderStats::default();
-    let mut samples = Samples::new();
+    let mut samples = Samples::with_simd(simd);
     // All admitted writers emit at most eight elements. These fixed local buffers
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [W::Element::default(); 8];
@@ -1960,8 +1994,8 @@ fn render_band<W: PixelWriter>(
 // In particular, adding an image path must not duplicate that dispatch in each
 // output-format loop or extend the live ranges of ordinary rect/glyph state.
 #[inline(never)]
-fn render_image_command(
-    samples: &mut Samples,
+fn render_image_command<S: Simd>(
+    samples: &mut Samples<S>,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -1994,8 +2028,8 @@ fn render_image_command(
 }
 
 #[inline(never)]
-fn render_rounded_image(
-    samples: &mut Samples,
+fn render_rounded_image<S: Simd>(
+    samples: &mut Samples<S>,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2027,8 +2061,8 @@ fn render_rounded_image(
         });
     }
 }
-fn render_shaped_image(
-    samples: &mut Samples,
+fn render_shaped_image<S: Simd>(
+    samples: &mut Samples<S>,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2048,8 +2082,8 @@ fn render_shaped_image(
 // Keep image-only scratch off image-free raster frames. Direct linear/HDR and
 // straight-sRGB byte-table inputs never construct or initialize a decode memo.
 #[inline(never)]
-fn render_cached_image(
-    samples: &mut Samples,
+fn render_cached_image<S: Simd>(
+    samples: &mut Samples<S>,
     command: &BorrowedCommand<'_>,
     bounds: [usize; 4],
     stats: &mut RenderStats,
@@ -2075,8 +2109,8 @@ fn render_cached_image(
     });
 }
 #[inline(never)]
-fn render_image(
-    samples: &mut Samples,
+fn render_image<S: Simd>(
+    samples: &mut Samples<S>,
     command: &BorrowedCommand<'_>,
     [left, top, right, bottom]: [usize; 4],
     stats: &mut RenderStats,

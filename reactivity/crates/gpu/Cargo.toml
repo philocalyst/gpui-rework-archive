@@ -7,6 +7,8 @@ description = "GPU rendering of GPUI's canonical prepared scene"
 publish = false
 
 [features]
+default = ["simd"]
+simd = ["gpui_canvas/simd"]
 vulkan-tests = []
 
 [[test]]
@@ -18,7 +20,7 @@ name = "tiles"
 required-features = ["vulkan-tests"]
 
 [dependencies]
-gpui_canvas = { path = "../canvas" }
+gpui_canvas = { path = "../canvas", default-features = false }
 wgpu = { version = "=29.0.4", default-features = false, features = ["std", "wgsl", "vulkan", "gles", "metal", "dx12"] }
 wgsl-rs = { version = "=0.1.0-beta.1", default-features = false, features = ["validation"] }
 bytemuck = { version = "=1.25.2", features = ["derive"] }

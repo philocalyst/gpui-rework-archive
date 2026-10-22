@@ -1,6 +1,7 @@
 //! Exact separable taps; each of the sixteen correlated samples still blends.
 use super::{BorrowedCommand, RenderStats, SAMPLES, Samples, TILE};
 use crate::image::{ImageSampling, ImageView, lerp};
+use fearless_simd::Simd;
 #[derive(Clone, Copy)]
 struct Tap {
     low: u32,
@@ -177,8 +178,8 @@ impl Column {
 // Image-only scratch stays out of image-free raster frames; no owning lease or
 // heap allocation is created. Pixel traversal changes, sample/painter order does not.
 #[inline(never)]
-pub(super) fn render(
-    samples: &mut Samples,
+pub(super) fn render<S: Simd>(
+    samples: &mut Samples<S>,
     command: &BorrowedCommand<'_>,
     tile: [usize; 4],
     stats: &mut RenderStats,
