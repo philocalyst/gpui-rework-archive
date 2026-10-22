@@ -1,0 +1,265 @@
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-mount-api-sol/reactivity/vendor/wgpu-hal)
+    Checking accesskit v0.25.1 (/tmp/gpui-mount-api-sol/reactivity/vendor/accesskit)
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-mount-api-sol/reactivity/vendor/wgpu-core)
+   Compiling winit v0.30.13 (/tmp/gpui-mount-api-sol/reactivity/vendor/winit)
+    Checking parley_engine v0.12.0 (/tmp/gpui-mount-api-sol/reactivity/vendor/parley_engine)
+    Checking accesskit_consumer v0.39.1 (/tmp/gpui-mount-api-sol/reactivity/vendor/accesskit_consumer)
+   Compiling wgpu v30.0.1 (/tmp/gpui-mount-api-sol/reactivity/vendor/wgpu)
+    Checking cephal v0.1.1 (/tmp/gpui-mount-api-sol/reactivity/vendor/cephal)
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/core)
+    Checking accesskit_atspi_common v0.21.0 (/tmp/gpui-mount-api-sol/reactivity/vendor/accesskit_atspi_common)
+    Checking parley v0.12.0 (/tmp/gpui-mount-api-sol/reactivity/vendor/parley)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/gpu)
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/canvas)
+    Checking accesskit_unix v0.24.0 (/tmp/gpui-mount-api-sol/reactivity/vendor/accesskit_unix)
+    Checking softbuffer v0.4.8 (/tmp/gpui-mount-api-sol/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/host)
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/state)
+    Checking accesskit_winit v0.34.1
+    Checking gpui v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/gpui)
+warning: unused import: `Sources`
+ --> crates/gpui/tests/mount_api_controls.rs:6:93
+  |
+6 |     Component, El, Error, FieldId, LaneSet, PresentedFrame, PropertyChange, RendererPolicy, Sources,
+  |                                                                                             ^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:125:20
+    |
+125 | const _: [(); 0] = [(); std::mem::size_of::<Win<Empty>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 8
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+125 - const _: [(); 0] = [(); std::mem::size_of::<Win<Empty>>()];
+125 + const _: [(); 8] = [(); std::mem::size_of::<Win<Empty>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:126:20
+    |
+126 | const _: [(); 0] = [(); std::mem::size_of::<Option<Win<Empty>>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 16
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+126 - const _: [(); 0] = [(); std::mem::size_of::<Option<Win<Empty>>>()];
+126 + const _: [(); 16] = [(); std::mem::size_of::<Option<Win<Empty>>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:127:20
+    |
+127 | const _: [(); 0] = [(); std::mem::size_of::<Window<Empty>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 72
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+127 - const _: [(); 0] = [(); std::mem::size_of::<Window<Empty>>()];
+127 + const _: [(); 72] = [(); std::mem::size_of::<Window<Empty>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:128:20
+    |
+128 | const _: [(); 0] = [(); std::mem::size_of::<Option<Window<Empty>>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 72
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+128 - const _: [(); 0] = [(); std::mem::size_of::<Option<Window<Empty>>>()];
+128 + const _: [(); 72] = [(); std::mem::size_of::<Option<Window<Empty>>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:129:20
+    |
+129 | const _: [(); 0] = [(); std::mem::size_of::<Window<Small>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 80
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+129 | const _: [(); 80] = [(); std::mem::size_of::<Window<Small>>()];
+    |               +
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:130:20
+    |
+130 | const _: [(); 0] = [(); std::mem::size_of::<Window<Large>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 200
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+130 | const _: [(); 200] = [(); std::mem::size_of::<Window<Large>>()];
+    |               ++
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:131:20
+    |
+131 | const _: [(); 0] = [(); std::mem::size_of::<Window<Companion>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 208
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+131 - const _: [(); 0] = [(); std::mem::size_of::<Window<Companion>>()];
+131 + const _: [(); 208] = [(); std::mem::size_of::<Window<Companion>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:132:20
+    |
+132 | const _: [(); 0] = [(); std::mem::size_of::<Policy>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 72
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+132 - const _: [(); 0] = [(); std::mem::size_of::<Policy>()];
+132 + const _: [(); 72] = [(); std::mem::size_of::<Policy>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:133:20
+    |
+133 | const _: [(); 0] = [(); std::mem::size_of::<Mount<Empty>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 16
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+133 - const _: [(); 0] = [(); std::mem::size_of::<Mount<Empty>>()];
+133 + const _: [(); 16] = [(); std::mem::size_of::<Mount<Empty>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:134:20
+    |
+134 | const _: [(); 0] = [(); std::mem::size_of::<Mount<Small>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 16
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+134 - const _: [(); 0] = [(); std::mem::size_of::<Mount<Small>>()];
+134 + const _: [(); 16] = [(); std::mem::size_of::<Mount<Small>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:135:20
+    |
+135 | const _: [(); 0] = [(); std::mem::size_of::<Mount<Large>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 136
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+135 - const _: [(); 0] = [(); std::mem::size_of::<Mount<Large>>()];
+135 + const _: [(); 136] = [(); std::mem::size_of::<Mount<Large>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:136:20
+    |
+136 | const _: [(); 0] = [(); std::mem::size_of::<AdoptOpening<Empty>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 88
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+136 - const _: [(); 0] = [(); std::mem::size_of::<AdoptOpening<Empty>>()];
+136 + const _: [(); 88] = [(); std::mem::size_of::<AdoptOpening<Empty>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:137:20
+    |
+137 | const _: [(); 0] = [(); std::mem::size_of::<AdoptOpening<Small>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 88
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+137 - const _: [(); 0] = [(); std::mem::size_of::<AdoptOpening<Small>>()];
+137 + const _: [(); 88] = [(); std::mem::size_of::<AdoptOpening<Small>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:138:20
+    |
+138 | const _: [(); 0] = [(); std::mem::size_of::<AdoptOpening<Large>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 208
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+138 - const _: [(); 0] = [(); std::mem::size_of::<AdoptOpening<Large>>()];
+138 + const _: [(); 208] = [(); std::mem::size_of::<AdoptOpening<Large>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:139:20
+    |
+139 | const _: [(); 0] = [(); std::mem::size_of::<BoxedOpening<Empty>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 88
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+139 - const _: [(); 0] = [(); std::mem::size_of::<BoxedOpening<Empty>>()];
+139 + const _: [(); 88] = [(); std::mem::size_of::<BoxedOpening<Empty>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:140:20
+    |
+140 | const _: [(); 0] = [(); std::mem::size_of::<FunctionOpening<Empty>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 80
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+140 | const _: [(); 80] = [(); std::mem::size_of::<FunctionOpening<Empty>>()];
+    |               +
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:141:20
+    |
+141 | const _: [(); 0] = [(); std::mem::size_of::<PropertyState>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 80
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+141 | const _: [(); 80] = [(); std::mem::size_of::<PropertyState>()];
+    |               +
+
+For more information about this error, try `rustc --explain E0308`.
+warning: `gpui` (test "mount_api_controls") generated 1 warning
+error: could not compile `gpui` (test "mount_api_controls") due to 17 previous errors; 1 warning emitted

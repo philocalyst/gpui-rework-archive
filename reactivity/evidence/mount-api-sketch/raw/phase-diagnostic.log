@@ -1,0 +1,99 @@
+    Checking gpui v0.1.0 (/tmp/gpui-mount-api-sol/reactivity/crates/gpui)
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:165:20
+    |
+165 | const _: [(); 0] = [(); std::mem::size_of::<CurrentPhase<'_>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 32
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+165 - const _: [(); 0] = [(); std::mem::size_of::<CurrentPhase<'_>>()];
+165 + const _: [(); 32] = [(); std::mem::size_of::<CurrentPhase<'_>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:166:20
+    |
+166 | const _: [(); 0] = [(); std::mem::size_of::<PropertyChange>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 48
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+166 - const _: [(); 0] = [(); std::mem::size_of::<PropertyChange>()];
+166 + const _: [(); 48] = [(); std::mem::size_of::<PropertyChange>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:167:20
+    |
+167 | const _: [(); 0] = [(); std::mem::size_of::<Request>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 48
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+167 - const _: [(); 0] = [(); std::mem::size_of::<Request>()];
+167 + const _: [(); 48] = [(); std::mem::size_of::<Request>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:168:20
+    |
+168 | const _: [(); 0] = [(); std::mem::size_of::<Option<Request>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 48
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+168 - const _: [(); 0] = [(); std::mem::size_of::<Option<Request>>()];
+168 + const _: [(); 48] = [(); std::mem::size_of::<Option<Request>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:169:20
+    |
+169 | const _: [(); 0] = [(); std::mem::size_of::<Result<PropertyState, &Error>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 80
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+169 | const _: [(); 80] = [(); std::mem::size_of::<Result<PropertyState, &Error>>()];
+    |               +
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:170:20
+    |
+170 | const _: [(); 0] = [(); std::mem::size_of::<ProposedPhase<'_>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 96
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+170 - const _: [(); 0] = [(); std::mem::size_of::<ProposedPhase<'_>>()];
+170 + const _: [(); 96] = [(); std::mem::size_of::<ProposedPhase<'_>>()];
+    |
+
+error[E0308]: mismatched types
+   --> crates/gpui/tests/mount_api_controls.rs:175:20
+    |
+175 | const _: [(); 0] = [(); std::mem::size_of::<BorrowedReplyPhase<'_>>()];
+    |          -------   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected an array with a size of 0, found one with a size of 40
+    |          |
+    |          expected because of the type of the constant
+    |
+help: consider specifying the actual array length
+    |
+175 | const _: [(); 40] = [(); std::mem::size_of::<BorrowedReplyPhase<'_>>()];
+    |               +
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `gpui` (test "mount_api_controls") due to 7 previous errors
