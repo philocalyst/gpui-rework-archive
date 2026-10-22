@@ -2,8 +2,9 @@
 
 Immutable base: `f0bd5335ae`.
 Failing public control: `8475528f55cd34ead451b6600bdf5b6294e01e15`.
-Shipping fix: `c3f7207eb578a0789d794bf3f16d5204c9fd245c`.
-Final public tests: `568f42bc7e87c8118491fca3f2c4dba7e1178168`.
+First qualified fix: `c3f7207eb578a0789d794bf3f16d5204c9fd245c`.
+Expanded public tests: `568f42bc7e87c8118491fca3f2c4dba7e1178168`.
+Final shipping/test pin: `42a5aed2c2e5df98cbb0c558e29687fe23840f98`.
 Worktree: `/root/gpui-property-change-union`.
 Separate target: `/tmp/gpui-property-change-union-target`.
 
@@ -20,11 +21,12 @@ an explicit boolean; the common logical mutation returns the changed existing
 NonZero node identity. The admitted turn carries that single optional identity
 on the stack through the same source/description barrier. The existing node
 reconciliation consumes a surviving identity into node_changed, counting overlap
-once. The existing old-node retirement loop consumes it when counting removal.
-An unconsumed identity counts once after both loops: a previous site may have
-been consumed and then rejected because its component scope changed. That old
-identity and its fresh replacement are distinct destinations. This is an exact
-union with description changes, not addition or max of two diagnostic counters.
+once. The existing retirement population-count loop remains unchanged. For a
+leftover marker, the still-old identity index locates its original old slot:
+Some was already counted as retired; None means the site was consumed and then
+rejected because its component scope changed, so that edited old identity adds1.
+That old identity and its fresh replacement are distinct destinations. This is
+an exact union with description changes, not addition or max of two counters.
 
 The retirement scan borrows the existing vector, preserving Handler drop order.
 No retained fields, count vector, index, scratch allocation, interior mutability,
@@ -64,9 +66,21 @@ exact568 tracked bytes before and after. `c3-qualified.json` records the frozen
 the raw logs. This remains a qualified control if a later retirement-accounting
 formulation supersedes it.
 
-`core.json` and `core-baseline.json` measure30390→30423 shipping code lines:
-+33, including all build scripts. The complete immutable inventory confirms
-+36 first-party non-test physical lines, +420 test physical lines and no other
+The final42a formulation passed all11 public union cases, all-target default
+Clippy with warnings denied and GPUI formatting. `index-qualified.json` records
+the frozen binary/fingerprint, source hashes and before/after byte guards;
+`index-public.log`, `index-strict.log` and `index-format.log` are its exact logs.
+The full524 result remains a c3/568 result. The final formulation removes the
+per-retired-row marker branch/mutation and uses one admitted lookup only when a
+marker remains. It changes only runtime.rs relative to the qualified c3 control.
+The original by_identity remains unchanged until after this accounting; the
+canonical kernel admitted the marker before the reply, and neither model borrow
+can change Runtime's index. No public unchecked API was introduced.
+
+`core.json` and `core-baseline.json` measure the first candidate's30390→30423
+shipping code lines (+33). `index-core.json` measures the final30390→30420 (+30),
+including all build scripts. The final complete immutable inventory confirms
++33 first-party non-test physical lines, +420 test physical lines and no other
 non-test source additions. Code and physical line measures are distinct. JSON,
 Markdown and raw logs add no executable source. No shipping type declarations
 or retained headers changed; no zero-cost claim is made for the additional
