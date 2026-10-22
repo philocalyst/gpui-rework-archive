@@ -1,0 +1,10 @@
+{"round": 0, "flavor": "baseline", "elapsed": 0.23711570695741102}
+{"round": 0, "flavor": "geometry-only", "elapsed": 0.38910936698084697}
+{"round": 0, "flavor": "geometry-only-scalar", "elapsed": 0.5440574520034716}
+{"round": 1, "flavor": "geometry-only", "elapsed": 0.6966060439590365}
+{"round": 1, "flavor": "geometry-only-scalar", "elapsed": 0.8510604779585265}
+{"round": 1, "flavor": "baseline", "elapsed": 1.0785017099697143}
+{"round": 2, "flavor": "geometry-only-scalar", "elapsed": 1.2323172799660824}
+{"round": 2, "flavor": "baseline", "elapsed": 1.4575939439819194}
+{"round": 2, "flavor": "geometry-only", "elapsed": 1.6102465279982425}
+{"complete": true, "processes": 9, "phases": 108, "elapsed": 1.6559876919491217}

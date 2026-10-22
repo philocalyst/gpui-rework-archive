@@ -1,0 +1,8 @@
+{
+  "binary": "/run/current-system/sw/bin/true",
+  "sha256": "170066392344698f95e3e258d71f0a0427abd4a1c26b2eb7b54cf97ddd2497a1",
+  "records": [],
+  "stdout": "",
+  "write_payloads": [],
+  "mechanism": "PTRACE_SYSCALL existing stdout write boundaries; user-only counters on child, no source changes. Each CSV phase includes its original warm frame plus3 timed scene rebuild/render frames and formatting, not just raster."
+}

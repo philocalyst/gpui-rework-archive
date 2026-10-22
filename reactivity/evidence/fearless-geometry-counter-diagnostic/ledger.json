@@ -1,0 +1,468 @@
+{
+  "source": "05b255ec6531dc955fb097b269b275be548b460e",
+  "diagnostic_only": true,
+  "processes": 9,
+  "phases": 108,
+  "guards": "all source/rlib/executable and phase structural signatures passed",
+  "counters": "cycles,instructions,branches,branchmisses; user-only group, all enabled_ns==running_ns",
+  "limits": "No traced timing performance claim. Existing unchanged cpu phase includes setup,warm frame,3 full frames,formatting; ptrace stops/syscall traps can disturb cache/branch state. Use counters to identify instruction debt, then qualify source using separate untraced complete-frame controls.",
+  "finding": "Proof-flat instructions+1.89%bothpolicies, branchcount unchanged. Original uniform row retains limits in registers; geometry-only reloads limits and registers perrow. SIMD coordinate proof-sheared instructions0.692x vsFallback0.793x original, confirming useful explicit f64 work.",
+  "summary": [
+    {
+      "case": "flat",
+      "proofs": "false",
+      "median": {
+        "baseline": {
+          "cycles": 152520359,
+          "instructions": 434561512,
+          "branches": 30264451,
+          "branch_misses": 70355
+        },
+        "geometry-only": {
+          "cycles": 91866256,
+          "instructions": 227119455,
+          "branches": 16440524,
+          "branch_misses": 69877
+        },
+        "geometry-only-scalar": {
+          "cycles": 92228153,
+          "instructions": 227118191,
+          "branches": 16440517,
+          "branch_misses": 70176
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.602,
+          "instructions": 0.523,
+          "branches": 0.543,
+          "branch_misses": 0.993
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.605,
+          "instructions": 0.523,
+          "branches": 0.543,
+          "branch_misses": 0.997
+        }
+      }
+    },
+    {
+      "case": "flat",
+      "proofs": "true",
+      "median": {
+        "baseline": {
+          "cycles": 3208419,
+          "instructions": 10310760,
+          "branches": 1527912,
+          "branch_misses": 4432
+        },
+        "geometry-only": {
+          "cycles": 3371798,
+          "instructions": 10505640,
+          "branches": 1527993,
+          "branch_misses": 4381
+        },
+        "geometry-only-scalar": {
+          "cycles": 3230547,
+          "instructions": 10504410,
+          "branches": 1527993,
+          "branch_misses": 4461
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 1.051,
+          "instructions": 1.019,
+          "branches": 1.0,
+          "branch_misses": 0.988
+        },
+        "geometry-only-scalar": {
+          "cycles": 1.007,
+          "instructions": 1.019,
+          "branches": 1.0,
+          "branch_misses": 1.007
+        }
+      }
+    },
+    {
+      "case": "opaque_overlap",
+      "proofs": "false",
+      "median": {
+        "baseline": {
+          "cycles": 155685988,
+          "instructions": 540157092,
+          "branches": 37273038,
+          "branch_misses": 100095
+        },
+        "geometry-only": {
+          "cycles": 52451009,
+          "instructions": 184639608,
+          "branches": 13680074,
+          "branch_misses": 99719
+        },
+        "geometry-only-scalar": {
+          "cycles": 53717564,
+          "instructions": 184639320,
+          "branches": 13680072,
+          "branch_misses": 99563
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.337,
+          "instructions": 0.342,
+          "branches": 0.367,
+          "branch_misses": 0.996
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.345,
+          "instructions": 0.342,
+          "branches": 0.367,
+          "branch_misses": 0.995
+        }
+      }
+    },
+    {
+      "case": "opaque_overlap",
+      "proofs": "true",
+      "median": {
+        "baseline": {
+          "cycles": 348667,
+          "instructions": 996759,
+          "branches": 151321,
+          "branch_misses": 711
+        },
+        "geometry-only": {
+          "cycles": 363700,
+          "instructions": 1007465,
+          "branches": 151357,
+          "branch_misses": 712
+        },
+        "geometry-only-scalar": {
+          "cycles": 347441,
+          "instructions": 1007195,
+          "branches": 151358,
+          "branch_misses": 619
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 1.043,
+          "instructions": 1.011,
+          "branches": 1.0,
+          "branch_misses": 1.001
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.996,
+          "instructions": 1.01,
+          "branches": 1.0,
+          "branch_misses": 0.871
+        }
+      }
+    },
+    {
+      "case": "alpha_overlap",
+      "proofs": "false",
+      "median": {
+        "baseline": {
+          "cycles": 154802412,
+          "instructions": 540158149,
+          "branches": 37273265,
+          "branch_misses": 99859
+        },
+        "geometry-only": {
+          "cycles": 52192193,
+          "instructions": 184640675,
+          "branches": 13680304,
+          "branch_misses": 99423
+        },
+        "geometry-only-scalar": {
+          "cycles": 53724656,
+          "instructions": 184640427,
+          "branches": 13680314,
+          "branch_misses": 99481
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.337,
+          "instructions": 0.342,
+          "branches": 0.367,
+          "branch_misses": 0.996
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.347,
+          "instructions": 0.342,
+          "branches": 0.367,
+          "branch_misses": 0.996
+        }
+      }
+    },
+    {
+      "case": "alpha_overlap",
+      "proofs": "true",
+      "median": {
+        "baseline": {
+          "cycles": 848963,
+          "instructions": 2894462,
+          "branches": 403375,
+          "branch_misses": 996
+        },
+        "geometry-only": {
+          "cycles": 851089,
+          "instructions": 2875368,
+          "branches": 391495,
+          "branch_misses": 917
+        },
+        "geometry-only-scalar": {
+          "cycles": 841338,
+          "instructions": 2875135,
+          "branches": 391507,
+          "branch_misses": 1024
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 1.003,
+          "instructions": 0.993,
+          "branches": 0.971,
+          "branch_misses": 0.921
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.991,
+          "instructions": 0.993,
+          "branches": 0.971,
+          "branch_misses": 1.028
+        }
+      }
+    },
+    {
+      "case": "sheared",
+      "proofs": "false",
+      "median": {
+        "baseline": {
+          "cycles": 54336674,
+          "instructions": 184522095,
+          "branches": 27204215,
+          "branch_misses": 54498
+        },
+        "geometry-only": {
+          "cycles": 40966724,
+          "instructions": 125510178,
+          "branches": 8250451,
+          "branch_misses": 53753
+        },
+        "geometry-only-scalar": {
+          "cycles": 44951684,
+          "instructions": 140305641,
+          "branches": 8250443,
+          "branch_misses": 54100
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.754,
+          "instructions": 0.68,
+          "branches": 0.303,
+          "branch_misses": 0.986
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.827,
+          "instructions": 0.76,
+          "branches": 0.303,
+          "branch_misses": 0.993
+        }
+      }
+    },
+    {
+      "case": "sheared",
+      "proofs": "true",
+      "median": {
+        "baseline": {
+          "cycles": 37725333,
+          "instructions": 147165684,
+          "branches": 24262462,
+          "branch_misses": 57328
+        },
+        "geometry-only": {
+          "cycles": 27915305,
+          "instructions": 101865977,
+          "branches": 7858564,
+          "branch_misses": 54783
+        },
+        "geometry-only-scalar": {
+          "cycles": 31463750,
+          "instructions": 116661480,
+          "branches": 7858567,
+          "branch_misses": 54855
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.74,
+          "instructions": 0.692,
+          "branches": 0.324,
+          "branch_misses": 0.956
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.834,
+          "instructions": 0.793,
+          "branches": 0.324,
+          "branch_misses": 0.957
+        }
+      }
+    },
+    {
+      "case": "labels",
+      "proofs": "false",
+      "median": {
+        "baseline": {
+          "cycles": 128206453,
+          "instructions": 352283872,
+          "branches": 50692250,
+          "branch_misses": 193114
+        },
+        "geometry-only": {
+          "cycles": 128168480,
+          "instructions": 353071427,
+          "branches": 50684588,
+          "branch_misses": 191429
+        },
+        "geometry-only-scalar": {
+          "cycles": 128473638,
+          "instructions": 353071903,
+          "branches": 50684942,
+          "branch_misses": 194682
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 1.0,
+          "instructions": 1.002,
+          "branches": 1.0,
+          "branch_misses": 0.991
+        },
+        "geometry-only-scalar": {
+          "cycles": 1.002,
+          "instructions": 1.002,
+          "branches": 1.0,
+          "branch_misses": 1.008
+        }
+      }
+    },
+    {
+      "case": "labels",
+      "proofs": "true",
+      "median": {
+        "baseline": {
+          "cycles": 91150010,
+          "instructions": 284907829,
+          "branches": 45013641,
+          "branch_misses": 204726
+        },
+        "geometry-only": {
+          "cycles": 93404531,
+          "instructions": 285684565,
+          "branches": 45005608,
+          "branch_misses": 202452
+        },
+        "geometry-only-scalar": {
+          "cycles": 91726102,
+          "instructions": 285680474,
+          "branches": 45005208,
+          "branch_misses": 206154
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 1.025,
+          "instructions": 1.003,
+          "branches": 1.0,
+          "branch_misses": 0.989
+        },
+        "geometry-only-scalar": {
+          "cycles": 1.006,
+          "instructions": 1.003,
+          "branches": 1.0,
+          "branch_misses": 1.007
+        }
+      }
+    },
+    {
+      "case": "boundary_dense",
+      "proofs": "false",
+      "median": {
+        "baseline": {
+          "cycles": 13739352,
+          "instructions": 33414575,
+          "branches": 4984017,
+          "branch_misses": 13653
+        },
+        "geometry-only": {
+          "cycles": 11537641,
+          "instructions": 26215153,
+          "branches": 2305942,
+          "branch_misses": 3472
+        },
+        "geometry-only-scalar": {
+          "cycles": 12078098,
+          "instructions": 28465473,
+          "branches": 2305988,
+          "branch_misses": 2970
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.84,
+          "instructions": 0.785,
+          "branches": 0.463,
+          "branch_misses": 0.254
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.879,
+          "instructions": 0.852,
+          "branches": 0.463,
+          "branch_misses": 0.218
+        }
+      }
+    },
+    {
+      "case": "boundary_dense",
+      "proofs": "true",
+      "median": {
+        "baseline": {
+          "cycles": 10076108,
+          "instructions": 30606244,
+          "branches": 4555633,
+          "branch_misses": 11919
+        },
+        "geometry-only": {
+          "cycles": 7997767,
+          "instructions": 23604535,
+          "branches": 2067245,
+          "branch_misses": 1518
+        },
+        "geometry-only-scalar": {
+          "cycles": 8538582,
+          "instructions": 25854650,
+          "branches": 2067236,
+          "branch_misses": 1486
+        }
+      },
+      "ratio": {
+        "geometry-only": {
+          "cycles": 0.794,
+          "instructions": 0.771,
+          "branches": 0.454,
+          "branch_misses": 0.127
+        },
+        "geometry-only-scalar": {
+          "cycles": 0.847,
+          "instructions": 0.845,
+          "branches": 0.454,
+          "branch_misses": 0.125
+        }
+      }
+    }
+  ]
+}
