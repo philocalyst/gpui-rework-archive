@@ -182,7 +182,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.changed_nodes = 0;
         if matches!(key, Key::Tab | Key::ReverseTab) {
             let previous = runtime.focused;
-            let painted = runtime.counters.paint_passes;
+            let prepared = runtime.latest_token;
             let commit = runtime.tab(matches!(key, Key::ReverseTab))?;
             let focused = runtime.focused;
             let identity = focused.and_then(|target| runtime.resolve(target).ok());
@@ -210,7 +210,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             }
             if revealed.is_ok() {
                 let mut runtime = self.runtime_mut()?;
-                if runtime.counters.paint_passes == painted {
+                // Reveal either prepares a full scene with this focus or does
+                // nothing; a metadata epoch alone cannot prove caret painting.
+                if runtime.latest_token == prepared {
                     return runtime.publish_focus_change(previous);
                 }
             }

@@ -13,10 +13,15 @@ pub(super) struct Editing {
 
 /// Stack-only post-admission intent. It is consumed after the source is frozen
 /// back into the live text lane and before a candidate scene is prepared.
-pub(super) struct SelectionIntent {
-    identity: u64,
-    field: FieldId,
-    byte: usize,
+#[derive(Clone, Copy)]
+pub(super) enum EditingIntent {
+    None,
+    Replace {
+        identity: u64,
+        field: FieldId,
+        byte: usize,
+    },
+    Focus,
 }
 
 fn position(byte: usize) -> Result<TextPosition, Error> {
@@ -192,19 +197,21 @@ impl<M: View + 'static> Runtime<M> {
         true
     }
 
-    pub(super) fn reconcile_editing(
-        &mut self,
-        intent: Option<SelectionIntent>,
-    ) -> Result<bool, Error> {
-        if let Some(intent) = intent {
-            if let Some(index) = self.by_identity.get(intent.identity)
+    pub(super) fn reconcile_editing(&mut self, intent: EditingIntent) -> Result<bool, Error> {
+        if let EditingIntent::Replace {
+            identity,
+            field,
+            byte,
+        } = intent
+        {
+            if let Some(index) = self.by_identity.get(identity)
                 && self.nodes[index].kind() == NodeKind::Input
                 && let Some(site) = self.nodes[index].text_slot().get(&self.texts)
-                && site.field == Some(intent.field)
+                && site.field == Some(field)
             {
                 let byte = GraphemeClusterSegmenter::new()
                     .segment_str(&site.value)
-                    .find(|&byte| byte >= intent.byte.min(site.value.len()))
+                    .find(|&boundary| boundary >= byte.min(site.value.len()))
                     .unwrap_or(site.value.len());
                 let caret = position(byte)?;
                 return Ok(self.set_selection(
@@ -228,7 +235,12 @@ impl<M: View + 'static> Runtime<M> {
                         .get(state.identity)
                         .is_none_or(|index| self.editing_at(index).is_none())
             });
-        Ok(stale && self.clear_editing())
+        let changed = stale && self.clear_editing();
+        if matches!(intent, EditingIntent::Focus) {
+            self.dirty = true;
+            return Ok(true);
+        }
+        Ok(changed)
     }
 }
 
@@ -264,16 +276,22 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 }
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+    pub(super) fn focus_needs_paint(&self, previous: Option<Target>) -> bool {
+        self.active_selection()
+            .is_some_and(|(identity, selection)| {
+                let before =
+                    previous.and_then(|target| self.sites.resolve(target)) == Some(identity);
+                let after =
+                    self.focused.and_then(|target| self.sites.resolve(target)) == Some(identity);
+                before != after && selection.anchor.offset == selection.focus.offset
+            })
+    }
+
     pub(super) fn publish_focus_change(
         &mut self,
         previous: Option<Target>,
     ) -> Result<Commit, Error> {
-        let Some((identity, selection)) = self.active_selection() else {
-            return Ok(self.commit());
-        };
-        let before = previous.and_then(|target| self.sites.resolve(target)) == Some(identity);
-        let after = self.focused.and_then(|target| self.sites.resolve(target)) == Some(identity);
-        if before == after || selection.anchor.offset != selection.focus.offset {
+        if !self.focus_needs_paint(previous) {
             return Ok(self.commit());
         }
         let Some(epoch) = self.source_epoch.checked_add(1) else {
@@ -330,7 +348,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .ok_or(Error::EpochExhausted)?;
         // The point and map are resolved before focus or selection can publish.
         let previous = self.focused;
-        let painted = self.counters.paint_passes;
+        let prepared = self.latest_token;
         self.focus(target)?;
         let commit = self.select_input(
             target,
@@ -339,7 +357,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 focus,
             },
         )?;
-        if self.counters.paint_passes == painted {
+        // select_input either prepares a full scene containing current focus,
+        // or does no publication. It cannot mint a bank-only token.
+        if self.latest_token == prepared {
             self.publish_focus_change(previous)
         } else {
             Ok(commit)
@@ -450,18 +470,18 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let end = range.anchor.offset.byte().max(range.focus.offset.byte());
         let byte = start.checked_add(text.len()).ok_or(Error::ResourceLimit)?;
         input.replace_range(start..end, text);
-        let intent = SelectionIntent {
+        let intent = EditingIntent::Replace {
             identity,
             field,
             byte,
         };
-        self.operation_with_selection(
+        self.operation_with_editing(
             Some(field),
             move |model, sources, _| {
                 sources.write_text(model, field, input, codec)?;
                 Ok(())
             },
-            Some(intent),
+            intent,
         )
     }
 

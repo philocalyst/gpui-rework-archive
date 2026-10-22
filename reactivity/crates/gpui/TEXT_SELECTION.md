@@ -38,6 +38,10 @@ Both use the input's transform, text padding, and clip. Caret ink follows the
 same shared foreground paint row as its glyphs, so color-source updates retain
 the ordinary paint-bank fast path. Native pointer moves request redraw when
 they publish a changed selection; idle moves remain idle.
+Compound `click` and `click_at` combine caret blur with admitted model output in
+one candidate, including otherwise unchanged or metadata-only actions. Rejected
+actions restore previous focus before source admission; accepted source changes
+retain their logical focus or reconciliation cleanup when presentation fails.
 
 On 64-bit targets there is one 40-byte cold `Editing` allocation per active
 window and one 8-byte optional slot in the already cold `Metadata`. The same

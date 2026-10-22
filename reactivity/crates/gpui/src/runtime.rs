@@ -37,7 +37,7 @@ const MAX_LAYOUT_DEPTH: usize = 128;
 mod accessibility;
 mod delivery;
 mod editing;
-use editing::SelectionIntent;
+use editing::EditingIntent;
 mod identity_index;
 mod image;
 use identity_index::IdentityIndex;
@@ -1202,8 +1202,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         }
         let previous = runtime.focused;
         runtime.focus(target)?;
-        runtime.publish_focus_change(previous)?;
-        runtime.activate(target)
+        runtime.activate_focused(target, previous)
     }
     pub fn click_at(&mut self, point: Point) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
@@ -1226,8 +1225,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         }
         let previous = runtime.focused;
         runtime.focus(target)?;
-        runtime.publish_focus_change(previous)?;
-        runtime.activate(target)
+        runtime.activate_focused(target, previous)
     }
     /// Insert committed text into the input's current logical selection.
     /// An input without an active selection starts at its document end.
@@ -2302,7 +2300,7 @@ impl<M: View + 'static> Runtime<M> {
             .then_some(self.complete_epoch)
     }
     fn present(&mut self) -> Result<Commit, Error> {
-        self.reconcile_editing(None)?;
+        self.reconcile_editing(EditingIntent::None)?;
         self.refresh_inspector(false)?;
         if !self.dirty {
             if self.source_epoch > 0

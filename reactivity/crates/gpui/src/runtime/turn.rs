@@ -110,13 +110,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         exact: Option<FieldId>,
         edit: impl FnOnce(&mut M, &Sources<M>, &mut L) -> Result<(), Error>,
     ) -> Result<Commit, Error> {
-        self.operation_with_selection(exact, edit, None)
+        self.operation_with_editing(exact, edit, EditingIntent::None)
     }
-    pub(super) fn operation_with_selection(
+    pub(super) fn operation_with_editing(
         &mut self,
         exact: Option<FieldId>,
         edit: impl FnOnce(&mut M, &Sources<M>, &mut L) -> Result<(), Error>,
-        selection: Option<SelectionIntent>,
+        editing: EditingIntent,
     ) -> Result<Commit, Error> {
         self.live()?;
         let epoch = self
@@ -135,15 +135,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.runtime.source_epoch = epoch;
         self.runtime.counters.source_operations += 1;
         self.runtime.changed_nodes = 0;
-        self.after_source_with_selection(exact, selection)
+        self.after_source_with_editing(exact, editing)
     }
-    fn after_source(&mut self, exact: Option<FieldId>) -> Result<Commit, Error> {
-        self.after_source_with_selection(exact, None)
-    }
-    fn after_source_with_selection(
+    fn after_source_with_editing(
         &mut self,
         exact: Option<FieldId>,
-        selection: Option<SelectionIntent>,
+        editing: EditingIntent,
     ) -> Result<Commit, Error> {
         let questions_changed = match catch_unwind(AssertUnwindSafe(|| {
             self.lanes.refresh(
@@ -164,21 +161,27 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 return Err(Error::OwnerPanicked);
             }
         };
-        self.after_admission_with_selection(exact, questions_changed, selection)
+        self.after_admission_with_editing(exact, questions_changed, editing)
     }
     pub(super) fn after_admission(
         &mut self,
         exact: Option<FieldId>,
         questions_changed: bool,
     ) -> Result<Commit, Error> {
-        self.after_admission_with_selection(exact, questions_changed, None)
+        self.after_admission_with_editing(exact, questions_changed, EditingIntent::None)
     }
-    fn after_admission_with_selection(
+    fn after_admission_with_editing(
         &mut self,
         exact: Option<FieldId>,
         questions_changed: bool,
-        selection: Option<SelectionIntent>,
+        editing: EditingIntent,
     ) -> Result<Commit, Error> {
+        // A bank-only candidate cannot include changed caret visibility.
+        // Disable that early publication before patching, then combine both
+        // effects in the one ordinary full preparation below.
+        if matches!(editing, EditingIntent::Focus) {
+            self.runtime.dirty = true;
+        }
         let exact = match exact {
             Some(field)
                 if self.runtime.logical_valid
@@ -229,16 +232,57 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.focused = None;
             return Err(error);
         }
-        let selection_changed = self.runtime.reconcile_editing(selection)?;
-        if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() && !selection_changed {
+        let editing_changed = self.runtime.reconcile_editing(editing)?;
+        if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() && !editing_changed {
             return Ok(self.commit());
         }
-        if result == Ok(PatchOutcome::Metadata) && !self.inspector_enabled() && !selection_changed {
+        if result == Ok(PatchOutcome::Metadata) && !self.inspector_enabled() && !editing_changed {
             return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
         }
         self.present()
     }
     pub(super) fn activate(&mut self, target: Target) -> Result<Commit, Error> {
+        self.activate_with_editing(target, EditingIntent::None)
+    }
+
+    /// Compound clicks admit focus and model output into at most one candidate.
+    /// A rejected action has not admitted either effect; committed failures
+    /// retain the existing source/reconciliation cleanup rather than reviving P.
+    pub(super) fn activate_focused(
+        &mut self,
+        target: Target,
+        previous: Option<Target>,
+    ) -> Result<Commit, Error> {
+        let epoch = self.source_epoch;
+        let prepared = self.latest_token;
+        let focus_changed = self.focus_needs_paint(previous);
+        let intent = if focus_changed {
+            EditingIntent::Focus
+        } else {
+            EditingIntent::None
+        };
+        match self.activate_with_editing(target, intent) {
+            // Only the closed Window actions can return without consuming the
+            // intent. Their setters prepare a full scene or no scene; unlike
+            // model source patches, they never publish a bank-only candidate.
+            Ok(_) if focus_changed && self.latest_token == prepared => {
+                self.publish_focus_change(previous)
+            }
+            Err(error) => {
+                if self.source_epoch == epoch && self.logical_valid && self.runtime.live().is_ok() {
+                    self.runtime.focused = previous;
+                }
+                Err(error)
+            }
+            result => result,
+        }
+    }
+
+    fn activate_with_editing(
+        &mut self,
+        target: Target,
+        editing: EditingIntent,
+    ) -> Result<Commit, Error> {
         self.live()?;
         let index = self.resolve_index(target)?;
         if self.runtime.nodes[index].kind() == NodeKind::Input {
@@ -276,6 +320,6 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         self.runtime.source_epoch = epoch;
         self.runtime.counters.source_operations += 1;
         self.runtime.changed_nodes = 0;
-        self.after_source(exact)
+        self.after_source_with_editing(exact, editing)
     }
 }
