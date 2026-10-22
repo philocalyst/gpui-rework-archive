@@ -1,0 +1,6 @@
+implementation=2926d66cdd
+foundation=f01947e679
+worktree=/root/gpui-reactive-styles
+target=/tmp/gpui-style-target
+native_binary=/tmp/gpui-style-target/debug/deps/gpui-3eaf6c563bc32a3a
+native_binary_sha256=c1ff292cce9c261fdca67e002df43a11befc09227e40457ea2b8c29da45da88e
