@@ -4,7 +4,7 @@ This is an isolated diagnostic comparing the counted style palette with its
 exact parent, `f01947e679d9dd2ca7ef149b70dccff92dad67dc`. The candidate is
 **not recommended for adoption in its current form**: it removes most sparse
 mutation allocation but measured full-cohort mutation regresses by 62% at
-65,536 styles and more than 2.8× for the 60/139-style cases. See
+65,536 styles and about 3.8× the parent time for the 60/139-style cases. See
 [`phase-results.md`](phase-results.md) for the full measurements and limits.
 
 The same ignored probe and Todo/virtual Library-derived style seeds ran in

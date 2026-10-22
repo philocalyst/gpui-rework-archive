@@ -34,7 +34,7 @@ and allocation figures are bytes/requests as emitted by the probe.
 | 60 | First sparse set | 565 (310–870) | 185 (160–210) | −67.3% | 5,280 / 5,280 → 828 / 888 |
 | 139 | First sparse set | 1,010 (600–1,930) | 285 (190–350) | −71.8% | 12,232 / 12,232 → 828 / 967 |
 | 4,096 | First sparse set | 90,367 (21,700–157,754) | 135 (110–160) | −99.9% | 360,448 / 360,448 → 828 / 4,924 |
-| 65,536 | First sparse set | 2,293,181 (2,070,716–2,964,656) | 140 (110–190) | −100.0% | 5,767,168 / 5,767,168 → 828 / 66,364 |
+| 65,536 | First sparse set | 2,293,181 (2,070,716–2,964,656) | 140 (110–190) | below −99.99% | 5,767,168 / 5,767,168 → 828 / 66,364 |
 | 60 | Four whole-cohort mutations | 2,400 (2,210–2,670) | 9,110 (8,700–9,380) | +279.6% | 5,280 / 5,280 → 9,200 / 1,532 |
 | 139 | Four whole-cohort mutations | 5,455 (5,200–5,880) | 20,931 (19,691–21,700) | +283.7% | 12,232 / 12,232 → 9,200 / 1,611 |
 | 4,096 | Four whole-cohort mutations | 220,515 (153,273–296,246) | 469,871 (430,670–493,641) | +113.1% | 360,448 / 360,448 → 9,200 / 5,568 |
@@ -45,7 +45,7 @@ allocations in both variants. Candidate build requests were 160 bytes higher
 at every lane size in this probe: 128 extra transient bytes for the 32-entry
 builder palette capacity and 32 bytes for the retained eight-entry palette.
 The retained lane delta is exactly 4 bytes per live palette entry. At eight
-patterns, the added retained size is 32 bytes, including for 65,536 owners.
+patterns, the added retained size is 32 bytes, including for 65,536 style slots.
 The implementation bounds the palette at 32 entries (maximum +128 retained
 bytes, plus up to 128 bytes in the temporary builder vector). The default
 style lane remains allocation-free.
@@ -58,7 +58,7 @@ the candidate does not load its user count. Treat this as a probe signal, not
 a general performance claim. The candidate's broad-mutation regression is
 larger and plainly visible in the measured loop; `Styles::set` linearly
 searches the bounded palette and updates a per-pattern count for each changed
-owner. The parent pays one dense allocation and then performs direct stores.
+slot. The parent pays one dense allocation and then performs direct stores.
 
 ## Public and application-shaped controls
 
@@ -98,10 +98,10 @@ snapshots are preserved in `raw/`; SHA-256 digests appear in
 The evidence supports a conditional memory optimization for owners with
 repeated styles and isolated sparse inspector updates. It does not support
 unconditional adoption: full-cohort reactive style replacement is 62% slower
-at 65K and about 2.8× slower on the small 60/139-owner lane tests. A follow-up
-would need to measure the real frequency and timing of sparse versus
-cohort-wide style writes on application workloads, or redesign the counted
-update path without hiding full-lane work. No further capture was run.
+at 65K and about 3.8× the parent time on the small 60/139-slot lane tests.
+The implementation remains isolated and is not integrated. The follow-up is
+a class-level batch transform, with separate sparse, partial and whole-cohort
+controls; its results are not part of this capture. No further capture was run.
 
 ## Immutable inputs
 
@@ -109,7 +109,7 @@ update path without hiding full-lane work. No further capture was run.
 - Candidate `styles.rs` SHA-256: `2e535b39a2a0ec699fcdee3465b84c1e61d378585606f83296592e5362e3b479`.
 - Shared probe source SHA-256: `6a09247eb8944d088912b9f1d13a5e22da70ee5f9c08dd0938bc4d828c12e935`.
 - Parent and candidate binaries and build/toolchain details: `README.md` and
-  `assembly-review.md`.
+  `assembly/assembly-review.md`.
 - Runtime results: `raw/parent-{1,2,3}.log` and
   `raw/candidate-{1,2,3}.log`.
 - Process/load snapshots and binary hashes: `raw/capture-envelope.txt`.

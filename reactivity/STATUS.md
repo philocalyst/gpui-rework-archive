@@ -187,6 +187,10 @@ The [ordered identity index](crates/gpui/evidence/identity-order/README.md) and
 [bounded dense index](crates/gpui/evidence/identity-order-dense/README.md) also
 remain isolated: their allocation/lookup savings did not justify application
 regressions. The production owner retains its 2,384-byte header and BTree lookup.
+The [counted style palette](benchmarks/research/counted-style-palette/phase-results.md)
+also remains isolated. It sharply reduces first sparse-edit allocations, but
+whole-cohort lane changes take 62–113% longer at 4K/65K slots and about 3.8×
+the parent time at 60/139 slots. A separate batch transform is under evaluation.
 
 ## Measurements and their boundaries
 
