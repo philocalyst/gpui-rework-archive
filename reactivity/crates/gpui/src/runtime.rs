@@ -2071,16 +2071,13 @@ impl<M: View + 'static> Runtime<M> {
             nodes.push(node);
         }
         image::reconcile(&mut self.images, image_resources);
-        for node in old.iter().flatten() {
-            changed += 1;
-            if property_changed == Some(node.identity) {
-                property_changed = None;
-            }
-        }
+        changed += old.iter().filter(|node| node.is_some()).count();
         // A previous site can be consumed before its component scope rejects
-        // reuse. Its replacement has a fresh identity, so count the edited old
-        // destination once even when neither surviving nor retired loop saw it.
-        changed += usize::from(property_changed.is_some());
+        // reuse. The still-old identity index locates its original slot: Some
+        // was counted as retired above, while None needs the edited old site.
+        if let Some(identity) = property_changed {
+            changed += usize::from(old[self.by_identity.required(identity.get())].is_none());
+        }
         let topology = old_ids.len() != nodes.len()
             || old_ids
                 .iter()
