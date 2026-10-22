@@ -1349,16 +1349,62 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         property: Property<T, D>,
         contribution: Contribution<T>,
     ) -> Result<Commit, Error> {
-        D::dispatch(
-            property,
-            (self, target, contribution),
-            |(win, target, contribution), property| {
-                win.set_style_property(target, property, contribution)
-            },
-            |(win, target, contribution), property| {
-                win.set_geometry_property(target, property, contribution)
-            },
-        )
+        self.runtime_mut()?
+            .set_property(target, property, contribution)
+    }
+    /// Read current logical state through the closed catalog. Displayed geometry
+    /// remains qualified by its separately acknowledged presentation epoch.
+    pub fn property_value(
+        &self,
+        target: Target,
+        id: crate::property::PropertyId,
+    ) -> Result<crate::property::PropertyValue, Error> {
+        use crate::property::PropertyDestination;
+        let runtime = self.runtime()?;
+        runtime.live()?;
+        let index = runtime.resolve_index(target)?;
+        Ok(match id.info().destination {
+            PropertyDestination::Style => runtime.styles.with(index, |style| id.value(style))?,
+            PropertyDestination::Geometry => id.value(
+                &runtime
+                    .metadata
+                    .as_ref()
+                    .and_then(|m| m.geometry.as_ref())
+                    .map_or_else(Default::default, |g| g.get(runtime.nodes[index].identity())),
+            )?,
+        })
+    }
+    /// Contribution presence is distinct from equality with a lower/default value.
+    pub fn property_contribution(
+        &self,
+        target: Target,
+        id: crate::property::PropertyId,
+    ) -> Result<Contribution<crate::property::PropertyValue>, Error> {
+        let runtime = self.runtime()?;
+        runtime.live()?;
+        let identity = runtime.resolve(target)?;
+        Ok(match id.info().destination {
+            crate::property::PropertyDestination::Style => {
+                runtime.overrides.contribution(identity, id)
+            }
+            crate::property::PropertyDestination::Geometry => runtime
+                .metadata
+                .as_ref()
+                .and_then(|m| m.geometry.as_ref())
+                .map_or(Contribution::Inherit, |g| g.contribution(identity, id)),
+        })
+    }
+    /// Validated catalog contribution. The ID owns destination, validation,
+    /// exact authoring equality and impact; mismatched values reject atomically.
+    pub fn set_property_value(
+        &mut self,
+        target: Target,
+        id: crate::property::PropertyId,
+        contribution: Contribution<crate::property::PropertyValue>,
+    ) -> Result<Commit, Error> {
+        let mut runtime = self.runtime_mut()?;
+        let (index, epoch) = runtime.property_edit_target(target)?;
+        runtime.set_property_value_at(index, epoch, id, contribution)
     }
     fn style_property<T>(&self, target: Target, property: Property<T>) -> Result<T, Error> {
         let runtime = self.runtime()?;
@@ -1375,17 +1421,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.live()?;
         let identity = runtime.resolve(target)?;
         Ok(runtime.overrides.get(identity, property))
-    }
-    /// A typed inspector contribution. Validation precedes editing; inheritance
-    /// removes the contribution and reveals the latest component declaration.
-    fn set_style_property<T: PartialEq>(
-        &mut self,
-        target: Target,
-        property: Property<T>,
-        contribution: Contribution<T>,
-    ) -> Result<Commit, Error> {
-        self.runtime_mut()?
-            .set_style_property(target, property, contribution)
     }
     pub fn try_button(&self, label: &str) -> Result<Target, Error> {
         self.find(NodeKind::Button, Some(label))
@@ -3120,41 +3155,73 @@ fn layout_style(style: &Style) -> cephal::Style {
 }
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
-    fn set_style_property<T: PartialEq>(
-        &mut self,
-        target: Target,
-        property: Property<T>,
-        contribution: Contribution<T>,
-    ) -> Result<Commit, Error> {
-        let runtime = self;
-        runtime.live()?;
-        let index = runtime.resolve_index(target)?;
-        let identity = runtime.nodes[index].identity();
-        let epoch = runtime
+    fn property_edit_target(&self, target: Target) -> Result<(usize, u64), Error> {
+        self.live()?;
+        let index = self.resolve_index(target)?;
+        let epoch = self
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        let before = runtime.styles.get(index);
-        if let Contribution::Set(value) = &contribution {
-            property.validate(value)?;
+        Ok((index, epoch))
+    }
+    fn set_property<T: PartialEq, D: crate::property::PropertyDomain>(
+        &mut self,
+        target: Target,
+        property: Property<T, D>,
+        contribution: Contribution<T>,
+    ) -> Result<Commit, Error> {
+        let (index, epoch) = self.property_edit_target(target)?;
+        let contribution = match contribution {
+            Contribution::Inherit => Contribution::Inherit,
+            Contribution::Set(value) => Contribution::Set(property.erase(value)?),
+        };
+        self.set_property_value_at(index, epoch, property.id(), contribution)
+    }
+    fn set_property_value_at(
+        &mut self,
+        index: usize,
+        epoch: u64,
+        id: crate::property::PropertyId,
+        contribution: Contribution<crate::property::PropertyValue>,
+    ) -> Result<Commit, Error> {
+        use crate::property::PropertyDestination;
+        if let Contribution::Set(value) = contribution {
+            id.validate_erased(value)?;
         }
+        match id.info().destination {
+            PropertyDestination::Style => self.set_style_value(index, id, contribution)?,
+            PropertyDestination::Geometry => self.set_geometry_value(index, id, contribution)?,
+        }
+        self.source_epoch = epoch;
+        self.counters.source_operations += 1;
+        if id.info().destination == PropertyDestination::Style && self.has_lists() {
+            self.describe(false)?;
+        }
+        self.present()
+    }
+    fn set_style_value(
+        &mut self,
+        index: usize,
+        id: crate::property::PropertyId,
+        contribution: Contribution<crate::property::PropertyValue>,
+    ) -> Result<(), Error> {
+        let runtime = self;
+        let identity = runtime.nodes[index].identity();
+        let before = runtime.styles.get(index);
         if let Some(colors) = runtime.styles.declared_colors(index) {
             runtime.overrides.refresh_color_base(identity, colors);
         }
         let explicit = matches!(&contribution, Contribution::Set(_));
         let after = runtime
             .overrides
-            .set(identity, before, property, contribution)?;
+            .set_value(identity, before, id, contribution)?;
         let count = runtime.nodes.len();
-        let relationship_changed =
-            runtime
-                .styles
-                .color_contribution(index, property.id(), after, explicit, count);
+        let relationship_changed = runtime
+            .styles
+            .color_contribution(index, id, after, explicit, count);
         // Equal Set/Inherit still changes which immutable C paint row this
         // node follows. Rebind C before a later shared-source write can occur.
         runtime.dirty |= relationship_changed;
-        runtime.source_epoch = epoch;
-        runtime.counters.source_operations += 1;
         runtime.changed_nodes = usize::from(!styles::exact_eq(&before, &after));
         if !styles::exact_eq(&before, &after) {
             if layout_changed(before, after) {
@@ -3170,10 +3237,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             runtime.styles.set(index, after, count);
             runtime.dirty = true;
         }
-        if runtime.has_lists() {
-            runtime.describe(false)?;
-        }
-        runtime.present()
+        Ok(())
     }
 }
 
