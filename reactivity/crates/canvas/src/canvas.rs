@@ -28,6 +28,7 @@ const SAMPLES: [f64; 4] = [0.125, 0.375, 0.625, 0.875];
 pub struct RenderStats {
     pub render_count: u64,
     pub commands: usize,
+    /// Command references in the tiles rasterized by this call, before opacity cuts.
     pub tile_references: usize,
     pub full_rect_tiles: usize,
     pub skipped_command_tiles: usize,
@@ -1490,7 +1491,6 @@ impl Canvas {
         let mut stats = RenderStats {
             render_count: self.stats.render_count.saturating_add(1),
             commands: self.commands.len(),
-            tile_references: raster.indices.len(),
             retained_mask_bytes: self.mask_bytes,
             command_bytes: self.commands.bytes(),
             bin_bytes: raster.bytes(),
@@ -1502,8 +1502,7 @@ impl Canvas {
             height: self.height,
             clear: self.clear,
             commands: &self.commands,
-            offsets: &raster.offsets,
-            indices: &raster.indices,
+            raster,
             tile_proofs: self.tile_proofs,
             tile_bounds,
         };
@@ -1519,6 +1518,7 @@ impl Canvas {
                 }
             }
         };
+        stats.tile_references = rendered.tile_references;
         stats.full_rect_tiles = rendered.full_rect_tiles;
         stats.skipped_command_tiles = rendered.skipped_command_tiles;
         stats.boundary_pixels = rendered.boundary_pixels;
@@ -1545,8 +1545,7 @@ struct Frame<'a> {
     height: usize,
     clear: [f32; 4],
     commands: &'a DisplayList,
-    offsets: &'a [usize],
-    indices: &'a [u32],
+    raster: &'a RasterScratch,
     tile_proofs: bool,
     tile_bounds: [usize; 4],
 }
@@ -1604,6 +1603,7 @@ impl RenderSchedule for Serial {
     }
 }
 fn combine_stats(mut left: RenderStats, right: RenderStats) -> RenderStats {
+    left.tile_references += right.tile_references;
     left.full_rect_tiles += right.full_rect_tiles;
     left.skipped_command_tiles += right.skipped_command_tiles;
     left.boundary_pixels += right.boundary_pixels;
@@ -1730,8 +1730,8 @@ fn render_band<W: PixelWriter>(
     let mut encoded_color = frame.clear.map(f32::to_bits);
     let mut encoded_bytes = clear;
     for column in 0..columns {
-        let tile = (band_index - frame.tile_bounds[1]) * columns + column;
-        let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
+        let ordered = frame.raster.tile(frame.tile_bounds[0] + column, band_index);
+        stats.tile_references += ordered.len();
         let left = (frame.tile_bounds[0] + column) * TILE;
         let top = band_index * TILE;
         let right = (left + TILE).min(frame.width);

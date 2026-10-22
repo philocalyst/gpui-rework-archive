@@ -134,14 +134,16 @@ fn color_patches_reuse_unpruned_bins_and_match_fresh_full_scenes() {
 }
 
 #[test]
-fn exact_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving() {
+fn containing_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving() {
     let mut canvas = canvas();
     canvas.clear(Color::WHITE);
-    let mut output = render(&mut canvas);
-    assert!(!canvas.stats().bins_reused);
+    let mut output = vec![0x123456; 64 * 48];
     let small = region(Rect::new(2.0, 3.0, 2.0, 3.0));
     canvas.render_bgrx_region(&mut output, small).unwrap();
-    assert!(!canvas.stats().bins_reused);
+    assert!(
+        !canvas.stats().bins_reused,
+        "first regional render primes only itself"
+    );
     let same_tiles = region(Rect::new(8.0, 9.0, 4.0, 4.0));
     canvas.render_bgrx_region(&mut output, same_tiles).unwrap();
     assert!(canvas.stats().bins_reused);
@@ -152,22 +154,101 @@ fn exact_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving() {
     canvas.render_bgrx_region(&mut output, same_tiles).unwrap();
     assert!(
         canvas.stats().bins_reused,
-        "empty region did not replace cached bins"
+        "empty region preserved cached bins"
     );
     canvas.pixels();
     assert!(
         !canvas.stats().bins_reused,
-        "full diagnostic needs different tile bins"
+        "full diagnostic needs larger bins"
     );
     render(&mut canvas);
     assert!(canvas.stats().bins_reused);
-    // Appending to a cached empty scene must invalidate its zero-reference CSR.
+    for rect in [
+        Rect::new(2.0, 3.0, 2.0, 3.0),
+        Rect::new(49.0, 33.0, 2.0, 2.0),
+    ] {
+        canvas
+            .render_bgrx_region(&mut output, region(rect))
+            .unwrap();
+        assert!(
+            canvas.stats().bins_reused,
+            "full cache covers distant repairs"
+        );
+    }
     canvas
         .fill_rect(CLIP, Affine::IDENTITY, CLIP, Color::BLACK)
         .unwrap();
     let output = render(&mut canvas);
-    assert!(!canvas.stats().bins_reused);
+    assert!(
+        !canvas.stats().bins_reused,
+        "append invalidates empty-scene CSR"
+    );
     assert!(output.iter().all(|&pixel| pixel == 0));
+}
+
+#[test]
+fn cached_origin_and_stride_do_not_change_regional_output_or_reference_stats() {
+    let mut fixture = Fixture::new();
+    for proofs in [false, true] {
+        let mut patched = canvas();
+        patched.set_tile_proofs(proofs);
+        fixture.scene(&mut patched, 0, Color::BLACK);
+        let mut fresh = canvas();
+        fresh.set_tile_proofs(proofs);
+        fixture.scene(&mut fresh, 0, Color::BLACK);
+        let oracle = render(&mut fresh);
+        let sentinel = 0x00123456;
+        let mut output = vec![sentinel; 64 * 48];
+        let prime = region(Rect::new(17.0, 17.0, 46.0, 30.0));
+        patched.render_bgrx_region(&mut output, prime).unwrap();
+        assert!(!patched.stats().bins_reused);
+        let capacity = patched.stats().bin_bytes;
+        for y in 0..48 {
+            for x in 0..64 {
+                assert_eq!(
+                    output[y * 64 + x],
+                    if x >= 16 && y >= 16 {
+                        oracle[y * 64 + x]
+                    } else {
+                        sentinel
+                    }
+                );
+            }
+        }
+        for rect in [
+            Rect::new(33.0, 33.0, 14.0, 14.0),
+            Rect::new(17.0, 17.0, 14.0, 14.0),
+        ] {
+            let damage = region(rect);
+            let mut repaired = vec![sentinel; 64 * 48];
+            patched.render_bgrx_region(&mut repaired, damage).unwrap();
+            assert!(patched.stats().bins_reused);
+            assert_eq!(patched.stats().bin_bytes, capacity);
+            let mut regional = canvas();
+            regional.set_tile_proofs(proofs);
+            fixture.scene(&mut regional, 0, Color::BLACK);
+            let mut expected = vec![sentinel; 64 * 48];
+            regional.render_bgrx_region(&mut expected, damage).unwrap();
+            assert!(!regional.stats().bins_reused);
+            assert_eq!(repaired, expected);
+            assert_eq!(
+                patched.stats().tile_references,
+                regional.stats().tile_references,
+                "references count requested tiles, not the larger cached CSR"
+            );
+        }
+        let outside = region(Rect::new(0.0, 0.0, 16.0, 16.0));
+        patched.render_bgrx_region(&mut output, outside).unwrap();
+        assert!(
+            !patched.stats().bins_reused,
+            "noncontained request rebuilds"
+        );
+        assert_eq!(render(&mut patched), oracle);
+        assert!(
+            !patched.stats().bins_reused,
+            "regional miss did not prebuild full viewport"
+        );
+    }
 }
 
 #[test]
@@ -270,4 +351,38 @@ fn serial_and_parallel_raster_share_the_same_current_geometry_cache() {
     assert_eq!(patched.pixels(), fresh.pixels());
     assert!(patched.stats().bins_reused);
     assert!(!patched.stats().parallel);
+}
+
+#[cfg(feature = "parallel")]
+#[test]
+fn parallel_repairs_use_cached_stride_but_visit_only_requested_bands() {
+    let mut fixture = Fixture::new();
+    let pool = gpui_canvas::RenderPool::new(2).unwrap().with_min_work(0);
+    let mut cached = canvas();
+    fixture.scene(&mut cached, 0, Color::BLACK);
+    let mut words = vec![0; 64 * 48];
+    cached.render_bgrx_with(&mut words, &pool).unwrap();
+    assert!(!cached.stats().bins_reused);
+    for rect in [
+        Rect::new(33.0, 17.0, 30.0, 30.0),
+        Rect::new(1.0, 1.0, 14.0, 30.0),
+    ] {
+        let damage = region(rect);
+        let mut parallel = vec![0x123456; 64 * 48];
+        cached
+            .render_bgrx_region_with(&mut parallel, damage, &pool)
+            .unwrap();
+        assert!(cached.stats().parallel);
+        assert!(cached.stats().bins_reused);
+        assert_eq!(cached.stats().output_bands, 2);
+        let mut fresh = canvas();
+        fixture.scene(&mut fresh, 0, Color::BLACK);
+        let mut serial = vec![0x123456; 64 * 48];
+        fresh.render_bgrx_region(&mut serial, damage).unwrap();
+        assert_eq!(parallel, serial);
+        assert_eq!(
+            cached.stats().tile_references,
+            fresh.stats().tile_references
+        );
+    }
 }

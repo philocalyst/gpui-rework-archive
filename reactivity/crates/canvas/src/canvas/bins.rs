@@ -3,8 +3,8 @@ use super::{DisplayList, TILE};
 
 #[derive(Default)]
 pub(super) struct RasterScratch {
-    pub(super) offsets: Vec<usize>,
-    pub(super) indices: Vec<u32>,
+    offsets: Vec<usize>,
+    indices: Vec<u32>,
     cursor: Vec<usize>,
     // Canvas axes are at most 16384px: tile endpoints fit in 0..=1024.
     // All-zero bounds cannot describe a nonempty render, so also mean invalid.
@@ -19,6 +19,15 @@ impl RasterScratch {
             + self.cursor.capacity() * size_of::<usize>()
             + self.indices.capacity() * size_of::<u32>()
     }
+    /// Physical tile lookup uses the cached origin/stride, independently of
+    /// the requested subrectangle that controls worker and output traversal.
+    #[inline]
+    pub(super) fn tile(&self, x: usize, y: usize) -> &[u32] {
+        let [left, top, right, bottom] = self.bounds.map(usize::from);
+        debug_assert!(x >= left && x < right && y >= top && y < bottom);
+        let tile = (y - top) * (right - left) + x - left;
+        &self.indices[self.offsets[tile]..self.offsets[tile + 1]]
+    }
     /// Retain unpruned command membership, never color/occlusion certificates.
     /// The scene owner invalidates this at each structural commit; admitted
     /// color patches leave geometry, order and resource membership unchanged.
@@ -26,7 +35,14 @@ impl RasterScratch {
         debug_assert!(bounds[0] < bounds[2] && bounds[1] < bounds[3]);
         debug_assert!(bounds.iter().all(|&edge| edge <= 16_384 / TILE));
         let key = bounds.map(|edge| edge as u16);
-        if self.bounds == key {
+        // Any subrectangle uses the same unpruned membership. In particular,
+        // a full raster primes every later regional repair until structural
+        // invalidation. Never enlarge a first regional request speculatively.
+        if key[0] >= self.bounds[0]
+            && key[1] >= self.bounds[1]
+            && key[2] <= self.bounds[2]
+            && key[3] <= self.bounds[3]
+        {
             return true;
         }
         // Invalidate before any allocation: catching an allocation panic must
@@ -77,7 +93,7 @@ mod tests {
 
     #[test]
     fn bounds_projection_and_csr_match_independent_command_membership() {
-        use crate::{Affine, AlphaMode, Color, Image, ImageSampling, Point, Rect, TextSystem};
+        use crate::{Affine, AlphaMode, Color, Image, ImageSampling, Rect};
         let mut canvas = Canvas::recording(65, 49, ColorConfig::default()).unwrap();
         let clip = Rect::new(1.25, 2.5, 62.0, 44.0);
         for i in 0..9 {
@@ -94,18 +110,18 @@ mod tests {
                 )
                 .unwrap();
         }
-        let mut text = TextSystem::bundled().unwrap();
-        let layout = text.shape("ABA café", 16.0, None).unwrap();
-        canvas
-            .draw_text(
-                &mut text,
-                &layout,
-                Point { x: 2.0, y: 13.0 },
-                Affine::IDENTITY,
-                clip,
-                Color::BLACK,
-            )
-            .unwrap();
+        // Exercise both private address forms without loading a shared font
+        // in this unit binary (the font lifecycle oracle owns that registry).
+        let draw = canvas.commands.inline[0];
+        canvas.commands.append(
+            draw.common,
+            [super::super::PendingDraw {
+                geometry: draw.geometry,
+                source: super::super::RECT_SOURCE,
+            }],
+            true,
+            Vec::new(),
+        );
         let image = Image::linear_srgb(
             1,
             1,
@@ -187,10 +203,11 @@ mod tests {
         });
         assert_eq!((warm.count_total, warm.bytes_total), (0, 0));
         eprintln!(
-            "raster_headers,Canvas={},Scratch={},RenderStats={}",
+            "raster_headers,Canvas={},Scratch={},RenderStats={},Frame={}",
             size_of::<Canvas>(),
             size_of::<RasterScratch>(),
-            size_of::<super::super::RenderStats>()
+            size_of::<super::super::RenderStats>(),
+            size_of::<super::super::Frame<'_>>()
         );
         eprintln!(
             "raster_allocations,first_requests={},first_bytes={},retained={},csr_bytes={},warm_requests={},warm_bytes={}",
@@ -206,6 +223,7 @@ mod tests {
             assert_eq!(size_of::<Canvas>(), 488);
             assert_eq!(size_of::<RasterScratch>(), 80);
             assert_eq!(size_of::<super::super::RenderStats>(), 96);
+            assert_eq!(size_of::<super::super::Frame<'_>>(), 88);
             assert_eq!(
                 first.bytes_current as usize,
                 size_of::<RasterScratch>() + canvas.bin_bytes()
