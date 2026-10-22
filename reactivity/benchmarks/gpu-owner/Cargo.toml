@@ -8,6 +8,8 @@ publish = false
 
 [features]
 counts = ["wgpu/counters"]
+trace = ["wgpu/trace"]
+noop = ["wgpu/noop"]
 offline-shader = ["gpui_gpu/offline-shader"]
 
 [dependencies]
@@ -15,15 +17,22 @@ gpui_gpu = { path = "../../crates/gpu" }
 gpui_canvas = { path = "../../crates/canvas" }
 pollster = "=1.0.1"
 allocation-counter = "=0.8.1"
+libloading = "=0.8.9"
 wgpu = { version = "=30.0.1", default-features = false }
 
 [patch.crates-io]
 wgpu = { path = "../../vendor/wgpu" }
 wgpu-hal = { path = "../../vendor/wgpu-hal" }
+wgpu-core = { path = "../../vendor/wgpu-core" }
 parley = { path = "../../vendor/parley" }
 parley_engine = { path = "../../vendor/parley_engine" }
 
 [[bin]]
 name = "admission"
 path = "src/bin/admission.rs"
+required-features = ["offline-shader"]
+
+[[bin]]
+name = "static-lifetime"
+path = "src/bin/static-lifetime.rs"
 required-features = ["offline-shader"]

@@ -45,15 +45,10 @@ pub(super) fn create(
     // Runtime shader/pipeline errors remain in the caller's error scopes.
     let module = |words: &'static [u32],
                   entries: &'static [wgpu::PassthroughShaderEntryPoint<'static>]| unsafe {
-        device.create_shader_module_passthrough(wgpu::ShaderModuleDescriptorPassthrough {
-            label: Some("GPUI offline compositor"),
-            entry_points: Cow::Borrowed(entries),
-            spirv: Some(Cow::Borrowed(words)),
-            ..Default::default()
-        })
+        device.create_shader_module_static_spirv(Some("GPUI offline compositor"), entries, words)
     };
-    let vertex = module(&bundle::VERTEX, &ENTRIES[..1]);
-    let fragment = module(words, &ENTRIES[1..]);
+    let vertex = module(&bundle::VERTEX, &ENTRIES[..1])?;
+    let fragment = module(words, &ENTRIES[1..])?;
     Some((vertex, fragment, layout, pipeline_layout))
 }
 

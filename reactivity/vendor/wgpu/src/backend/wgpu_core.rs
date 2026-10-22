@@ -1112,31 +1112,16 @@ impl dispatch::DeviceInterface for CoreDevice {
         desc: &crate::ShaderModuleDescriptorPassthrough<'_>,
     ) -> dispatch::DispatchShaderModule {
         let desc = desc.map_label(|l| l.map(Cow::from));
-        let (id, error) = unsafe {
+        let result = unsafe {
             self.context
                 .0
                 .device_create_shader_module_passthrough(self.id, &desc, None)
         };
-
-        let compilation_info = match error {
-            Some(cause) => {
-                self.context.handle_error(
-                    &self.error_sink,
-                    cause.clone(),
-                    desc.label.as_deref(),
-                    "Device::create_shader_module_passthrough",
-                );
-                CompilationInfo::from(cause)
-            }
-            None => CompilationInfo { messages: vec![] },
-        };
-
-        CoreShaderModule {
-            context: self.context.clone(),
-            id,
-            compilation_info,
-        }
-        .into()
+        self.shader_module_from_passthrough_result(
+            result,
+            desc.label.as_deref(),
+            "Device::create_shader_module_passthrough",
+        )
     }
 
     fn create_bind_group_layout(
@@ -4120,5 +4105,55 @@ impl dispatch::BufferMappedRangeInterface for CoreBufferMappedRange {
     #[cfg(webgpu)]
     fn as_uint8array(&self) -> &js_sys::Uint8Array {
         panic!("Only available on WebGPU")
+    }
+}
+
+impl CoreDevice {
+    #[cfg(feature = "shader-artifacts")]
+    pub(crate) unsafe fn create_shader_module_static_spirv(
+        &self,
+        label: Label<'_>,
+        entry_points: &[crate::PassthroughShaderEntryPoint<'_>],
+        words: &'static [u32],
+    ) -> dispatch::DispatchShaderModule {
+        // SAFETY: the unsafe facade requires the ordinary passthrough proof;
+        // this typed forwarding path neither alters words nor extends a borrow.
+        let result = unsafe {
+            self.context.0.device_create_shader_module_static_spirv(
+                self.id,
+                label.map(Cow::Borrowed),
+                entry_points,
+                words,
+                None,
+            )
+        };
+        self.shader_module_from_passthrough_result(
+            result,
+            label,
+            "Device::create_shader_module_static_spirv",
+        )
+    }
+
+    fn shader_module_from_passthrough_result(
+        &self,
+        (id, error): (wgc::id::ShaderModuleId, Option<CreateShaderModuleError>),
+        label: Label<'_>,
+        operation: &'static str,
+    ) -> dispatch::DispatchShaderModule {
+        let compilation_info = match error {
+            Some(cause) => {
+                self.context
+                    .handle_error(&self.error_sink, cause.clone(), label, operation);
+                CompilationInfo::from(cause)
+            }
+            None => CompilationInfo { messages: vec![] },
+        };
+
+        CoreShaderModule {
+            context: self.context.clone(),
+            id,
+            compilation_info,
+        }
+        .into()
     }
 }

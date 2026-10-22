@@ -45,6 +45,7 @@ targets = [
 ignored = ["cfg_aliases"]
 
 [features]
+shader-artifacts = ["wgpu-hal/shader-artifacts"]
 angle = ["wgpu-core-deps-apple/angle"]
 api_log_info = []
 counters = ["wgpu-types/counters"]

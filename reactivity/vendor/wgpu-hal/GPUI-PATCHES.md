@@ -41,3 +41,31 @@ code-generation options. Raw modules therefore retain their VkShaderModule
 payload through core pipeline leases; checked Intermediate modules instead
 destroy their temporary native modules after pipeline compilation. This is an
 explicit artifact-route lifetime cost, not a GPU-memory reduction claim.
+
+
+## Static SPIR-V stage ownership
+
+This branch first applies exactly the Vulkan device.rs stage-ownership delta from
+root ffb4b8f58035330f4034a6891ec87de6574195c0, retaining this branch's independent
+artifact policy query. CompiledStage borrows the Device and destroys only its
+unique temporary module on every success/error/unwind exit. Ordinary Raw module
+handles remain reusable and owned by their HAL shader wrapper.
+
+The optional shader-artifacts feature adds StaticSpirV(&'static [u32]) input and
+Vulkan wrapper variants; feature-off enum shapes remain upstream. Vulkan stores
+only the immutable slice recipe. Each stage use creates one native shader module
+with no debug-name operation, then gives it to the borrowed CompiledStage owner.
+The CString is constructed before native creation. Temporary native modules retire
+after synchronous graphics/compute/ray creation, including later-stage or driver
+failure. Shader-wrapper destruction has no native work for static recipes. Other
+backends explicitly return a compilation error for this unsupported input; Core
+already rejects them through normal error scopes before HAL.
+
+Repeated/concurrent pipeline construction creates independent temporary modules;
+static storage neither adds shared mutable state nor relaxes Vulkan host external
+synchronization. HAL pipeline caches use empty creation flags (internally
+synchronized Vulkan cache); imported/external cache synchronization duties remain
+with their existing callers. The compositor uses cache None. Ray creation currently
+passes a null deferred operation and completes synchronously: a future deferred
+operation must retain all stage inputs/owners until completion before using this
+local-owner implementation. No maintenance5/GPL/inline-pNext path is added.

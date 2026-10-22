@@ -2500,8 +2500,29 @@ impl Device {
         self: &Arc<Self>,
         descriptor: &pipeline::ShaderModuleDescriptorPassthrough<'a>,
     ) -> Result<Arc<pipeline::ShaderModule>, pipeline::CreateShaderModuleError> {
+        // SAFETY: preserve the caller's existing unchecked passthrough proof.
+        unsafe {
+            self.create_shader_module_passthrough_with_static_spirv(
+                descriptor,
+                #[cfg(feature = "shader-artifacts")]
+                None,
+            )
+        }
+    }
+
+    // `static_spirv` is passed only by Global's typed static-source entry point.
+    // It never comes from extending the lifetime of a descriptor's Cow borrow.
+    pub(crate) unsafe fn create_shader_module_passthrough_with_static_spirv(
+        self: &Arc<Self>,
+        descriptor: &pipeline::ShaderModuleDescriptorPassthrough<'_>,
+        #[cfg(feature = "shader-artifacts")] static_spirv: Option<&'static [u32]>,
+    ) -> Result<Arc<pipeline::ShaderModule>, pipeline::CreateShaderModuleError> {
         self.check_is_valid()?;
         self.require_features(wgt::Features::PASSTHROUGH_SHADERS)?;
+        #[cfg(feature = "shader-artifacts")]
+        if static_spirv.is_some() && self.backend() != wgt::Backend::Vulkan {
+            return Err(pipeline::CreateShaderModuleError::NotCompiledForBackend);
+        }
 
         // Mainly important for GLSL or SPIR-V or DXIL, which each take exactly 1 entry point.
         if (descriptor.dxil.is_some() || descriptor.glsl.is_some())
@@ -2519,12 +2540,20 @@ impl Device {
         };
 
         let hal_shader = match self.backend() {
-            wgt::Backend::Vulkan => hal::ShaderInput::SpirV(
-                descriptor
-                    .spirv
-                    .as_ref()
-                    .ok_or(pipeline::CreateShaderModuleError::NotCompiledForBackend)?,
-            ),
+            wgt::Backend::Vulkan => {
+                let input = hal::ShaderInput::SpirV(
+                    descriptor
+                        .spirv
+                        .as_ref()
+                        .ok_or(pipeline::CreateShaderModuleError::NotCompiledForBackend)?,
+                );
+                #[cfg(feature = "shader-artifacts")]
+                let input = match static_spirv {
+                    Some(words) => hal::ShaderInput::StaticSpirV(words),
+                    None => input,
+                };
+                input
+            }
             wgt::Backend::Dx12 => {
                 if let Some(dxil) = &descriptor.dxil {
                     hal::ShaderInput::Dxil { shader: dxil }

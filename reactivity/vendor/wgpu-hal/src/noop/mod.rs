@@ -378,6 +378,12 @@ impl crate::Device for Context {
         desc: &crate::ShaderModuleDescriptor,
         shader: crate::ShaderInput,
     ) -> Result<Resource, crate::ShaderError> {
+        #[cfg(feature = "shader-artifacts")]
+        if let crate::ShaderInput::StaticSpirV(_) = shader {
+            return Err(crate::ShaderError::Compilation(
+                "Static SPIR-V requires the Vulkan backend".into(),
+            ));
+        }
         Ok(Resource)
     }
     unsafe fn destroy_shader_module(&self, module: Resource) {}
