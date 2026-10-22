@@ -444,28 +444,34 @@ fn append_carets(
     // A fixed small number of direct queries is linear in source
     // length and avoids an index for e.g. one huge grapheme. Bulk
     // maps use constant-time source/prefix lookup per destination.
-    let geometry = if segmenter.segment_str(content).count() > 8 {
+    let geometry = if segmenter.segment_str(content).nth(8).is_some() {
         Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
     } else {
         None
     };
     for byte in segmenter.segment_str(content) {
+        let indexed_pair = if let Some(index) = &geometry {
+            let Some(pair) = index.geometries_at(byte, 1.) else {
+                continue;
+            };
+            Some(pair)
+        } else {
+            None
+        };
         let mut pair = [None, None];
         for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
             .into_iter()
             .enumerate()
         {
-            let cursor = geometry.as_ref().map_or_else(
-                || Cursor::from_byte_index(planned, byte, affinity),
-                |index| index.cursor(byte, affinity),
-            );
-            if cursor.index() != byte {
-                continue;
-            }
-            let r = geometry.as_ref().map_or_else(
-                || cursor.geometry(planned, 1.),
-                |index| index.geometry(cursor, 1.),
-            );
+            let r = if let Some(bounds) = &indexed_pair {
+                bounds[index]
+            } else {
+                let cursor = Cursor::from_byte_index(planned, byte, affinity);
+                if cursor.index() != byte {
+                    continue;
+                }
+                cursor.geometry(planned, 1.)
+            };
             let bounds = Rect::new(
                 r.x0 as f32,
                 (f64::from(height) + r.y0) as f32,
@@ -501,6 +507,9 @@ fn append_carets(
     }
     Ok(())
 }
+#[cfg(test)]
+#[path = "cursor_pair_tests.rs"]
+mod cursor_pair_tests;
 #[cfg(test)]
 #[path = "line_ownership_tests.rs"]
 mod line_ownership_tests;
