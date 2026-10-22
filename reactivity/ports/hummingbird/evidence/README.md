@@ -1,5 +1,12 @@
 # Hummingbird port qualification
 
+The later [combined native text/layout/presentation campaign](../../../evidence/native-text-integration/README.md)
+retests the borrowed-SQL-row refinement with nine native-feature tests and both
+executable transcripts against library source `8ea8b9d76a`. Its external driver
+reacquires the native input object after a text lease changes; the initial stale
+object request is preserved as a losing driver control. The original qualification
+below retains its source pin and is not retagged as a result for later code.
+
 Final source is `1183954cdab2a15060bc8a1046cb9c5fb815e495`, based on
 `6e9839856d`, with Hummingbird source pinned to
 `e15e8ba0ef6ff5445294030d373e3c8ccc7d780c`. Source and evidence commits are

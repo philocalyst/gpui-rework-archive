@@ -1,8 +1,13 @@
 # Shipping core code ledger
 
-Pinned source `8350157374`: **26,069** non-test code lines. Original GPUI crate
-`41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,894**. No feature-equivalence or
-future final-size claim follows from this comparison.
+Current frozen source `8ea8b9d76a`: **27,696** non-test code lines including
+13 build-script lines; original GPUI `41a42eb96d6c04e5e71f3577d12934d4de569b20`:
+**56,922** including 28 build-script lines. The current per-file snapshot is in
+[the combined integration evidence](../native-text-integration/core-lines-8ea8b9d76a.json.gz).
+No feature-equivalence or future final-size claim follows from this comparison.
+
+Historical source `8350157374` measured **26,069** under `src`; original GPUI
+measured **56,894** under `src`.
 
 Those historical snapshots cover the six shipping first-party libraries under
 `crates/{canvas,core,gpui,gpu,host,state}/src` and original `crates/gpui/src`.

@@ -1,0 +1,83 @@
+{
+  "library_source": "8ea8b9d76abb76717bd84fc28a5d471ce69f5ed3",
+  "hummingbird_driver_source": "0b5f23f5c5f5684394261e54e12b0c24c5f1e61b",
+  "qualification": "Only the external port transcript driver changed after the library freeze; source guards list exact library/vendor/app hashes. Native scripts use copies of the actual Cargo artifacts, with executable and source guards around each gate. Counts overlap prior campaigns and are not added together. No timing/RSS/scanout or native foreign-OS result is inferred.",
+  "logs": {
+    "core": {
+      "command": "cargo test --offline --locked -p gpui_reactivity_core --features layout,cephal/verify-cache --jobs 2",
+      "groups": 5,
+      "passed": 43,
+      "ignored": 0,
+      "source_sha256": "d4d94f3c9f82504431f5d6e850532ea7f453dae8013adcdabb95e27acced8286",
+      "archive": "logs/core.log.gz",
+      "archive_sha256": "a6d98469f2112247615bc9f6b186f86f34fdda6a7a2e6f6676207c2f781c4cf6"
+    },
+    "public": {
+      "command": "cargo test --offline --locked -p gpui --features desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache --jobs 2",
+      "groups": 46,
+      "passed": 489,
+      "ignored": 25,
+      "source_sha256": "c8168a1f5cf810056ae6884d5465c9407f3e6dfab8b1dd1d69baa3ce8911b48f",
+      "archive": "logs/public.log.gz",
+      "archive_sha256": "86414bf0f77fb2ff4fb4dc5c7fd34ec20f546296dc56bc11f4be75509d687449"
+    },
+    "clippy": {
+      "command": "cargo clippy --offline --locked -p gpui -p gpui_reactivity_core -p gpui_gpu --features gpui/desktop,gpui/x11,gpui/wayland,gpui_canvas/parallel,cephal/verify-cache --all-targets --jobs 2 -- -D warnings",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_sha256": "65af4b766c6ea20553862ca31547ae752b37ead0fa474dcf008e081dd1700f64",
+      "archive": "logs/clippy.log.gz",
+      "archive_sha256": "eea6524939fe3942b781a9e9fae3411559eb1d2c7a45332350321f891d1c73d8"
+    },
+    "apple": {
+      "command": "RUSTC_BOOTSTRAP=1 cargo check --offline --locked -p gpui --features desktop,gpui_canvas/parallel --all-targets --target aarch64-apple-darwin -Zbuild-std=std,panic_abort --jobs 2",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_sha256": "934681dfb63b6e9d9a8c37c28586763f2a6a717843267eb1a343ae3a4794d4ef",
+      "archive": "logs/apple.log.gz",
+      "archive_sha256": "af738418c0083115ce5172c62bb0a94fdd92bd9d15574b56a3c546f09df60efa"
+    },
+    "msvc": {
+      "command": "RUSTC_BOOTSTRAP=1 cargo check --offline --locked -p gpui --features desktop,gpui_canvas/parallel --all-targets --target x86_64-pc-windows-msvc -Zbuild-std=std,panic_abort --jobs 2",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_sha256": "70362c1efb24aa1b52ea667e0b4290540d6bd004199861c2aabd7615515f132f",
+      "archive": "logs/msvc.log.gz",
+      "archive_sha256": "ede8b2f5dedf8027387de09d5b6f178f6e34a81108b4c3d0511fbc15e9b9121c"
+    },
+    "fmt": {
+      "command": "cargo fmt --check -p gpui -p gpui_reactivity_core -p gpui_gpu -p gpui_canvas -p gpui_reactivity_host -p gpui_reactivity_state",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "logs/fmt.log.gz",
+      "archive_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    "hummingbird-tests": {
+      "command": "cargo test --offline --locked --manifest-path ports/hummingbird/Cargo.toml --all-targets --features native --jobs 2",
+      "groups": 5,
+      "passed": 9,
+      "ignored": 0,
+      "source_sha256": "3e9fa6873165b75be5321c8ca17f91f11f58d305d4ac0a6a23be803fb1c1e081",
+      "archive": "logs/hummingbird-tests.log.gz",
+      "archive_sha256": "febb071a8ec1546d542cfbc7644db793dd4e677d989f6c33f7e1dcc06a2ad6db"
+    },
+    "hummingbird-build": {
+      "command": "cargo build --offline --locked --manifest-path ports/hummingbird/Cargo.toml --features native --message-format json --jobs 2",
+      "groups": 0,
+      "passed": 0,
+      "ignored": 0,
+      "source_sha256": "b925df15aa8fe71119f23eb98ef122ee09600571709130d337c13d0b3beb1914",
+      "archive": "logs/hummingbird-build.log.gz",
+      "archive_sha256": "acac308efc0d2f000d8987b383bc74dccfdf300593f35737db3bb98f25b26c81"
+    }
+  },
+  "native_scripts_passed": 5,
+  "hummingbird_executable_paths_passed": 2,
+  "core_non_test_code_lines": 27696,
+  "environment": "Linux x86_64; Xvfb/private D-Bus/AT-SPI; Mesa 26.1.4 llvmpipe. Cross checks use build-std and compile the actual platform adapters."
+}

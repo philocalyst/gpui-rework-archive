@@ -29,13 +29,19 @@ delivery through the same public View/Win/Window. Grow it into the full player,
 then use Zed to exercise independently owned components, editors and multiwindow
 services; a synthetic scale fixture cannot stand in for those application contracts.
 
-The active slices are target-compatible portable WGPU/HAL admission, complete
-accessible text editing and native lifecycle, and selective nonparent containing
-blocks over Cephal `perf/cold-layout`. Preserve software-first startup and
-acknowledged semantic/scene authority while integrating them. SIMD uses one
+Portable WGPU/HAL target admission, source-qualified native range editing and
+selective nonparent containing blocks over Cephal `perf/cold-layout` are now
+[integrated together](evidence/native-text-integration/README.md). Remaining
+work includes early Metal/Wayland target proof, accessible text geometry and
+the complete editor/lifecycle contracts. Preserve software-first startup and
+acknowledged semantic/scene authority. SIMD uses one
 fearless_simd formulation and fallback, with assembly and measured controls.
-Typed reflection must feed real inspector controls and component override
-composition. Designer color needs shared batch operations, explicit gamut/mix
+The active isolated slices separate immutable device/pipeline work from mutable
+per-window GPU state, expose the existing closed property catalog through shared
+validated transactions, and derive SIMD-shaped gamut limits. Qualify single-window
+costs as well as multiwindow savings before adoption. Typed reflection must feed
+real inspector controls and component override composition. Designer color needs
+shared batch operations, explicit gamut/mix
 contracts and accessibility contrast, beyond tagged HDR storage.
 
 The [Solid/Ripple review](docs/async-graph-luna.md) identifies compositional

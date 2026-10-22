@@ -1,0 +1,71 @@
+[
+  {
+    "case": "target-lease",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-native-text-native-test-bin",
+      "native::upgrade_tests::automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_window",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "9447392f682c37d8c486cf5570cb09273a778537a2e69b7a74f9f4333142cc66"
+  },
+  {
+    "case": "todo",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-native-text-native-test-bin",
+      "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "dfd5e8aabeaabeccc10afcb12e7bb89f49327f2f56117cf1f0a2f182620ecfa6"
+  },
+  {
+    "case": "lifecycle",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-native-text-native-test-bin",
+      "native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "f0bc4d0b8cf45e274bbaaa91f1198c66b1c550751e5e08b42c27ec0292ebe5c6"
+  },
+  {
+    "case": "real-registry",
+    "command": [
+      "bash",
+      "/root/gpui-ce3/reactivity/tools/test_atspi.sh",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "/tmp/gpui-native-text-native-test-bin"
+    ],
+    "exit": 0,
+    "log_sha256": "a8042bf7618326e1d6df5266e7cb1da06710ac6b1682bbd8933e209efb71ccfc"
+  },
+  {
+    "case": "no-session",
+    "command": [
+      "/tmp/gpui-native-text-native-test-bin",
+      "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "c5f1f364ed775fbad9c5f52075ffd71a32ef259c68bc269a20658404c85b82ce"
+  }
+]
