@@ -90,6 +90,7 @@ pub enum Error {
     StaleTarget,
     PresentationStale,
     InvalidScale,
+    ZeroInboxCapacity,
     NoPreparedScene,
     StalePresentation,
     NotInteractive,
