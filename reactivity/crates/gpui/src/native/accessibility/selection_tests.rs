@@ -162,6 +162,46 @@ fn source_aba_and_shared_empty_allocation_cannot_revive_retired_provider_ids() {
 }
 
 #[test]
+fn unpublished_source_aba_keeps_only_identical_acknowledged_root_authority() {
+    let mut win = Win::recording(Inputs::new(""), WindowOptions::default()).unwrap();
+    ack(&mut win);
+    let target = target(&win, 1);
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let root = native_id(&win, &cohort, target);
+    let empty = win.accessibility_input(target).unwrap().1.as_ptr();
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    ingress.do_action(request(
+        accesskit::Action::SetValue,
+        root,
+        ActionData::Value("after identical empty source".into()),
+    ));
+    win.set(Inputs::A, "unpublished intermediate".into())
+        .unwrap();
+    win.set(Inputs::A, String::new()).unwrap();
+    ack(&mut win);
+    cohort.refresh(&win).unwrap();
+    assert!(std::ptr::eq(
+        empty,
+        win.accessibility_input(target).unwrap().1.as_ptr()
+    ));
+    assert_eq!(native_id(&win, &cohort, target), root);
+    // No different source was ever published under this ID. A position-free
+    // intent still addresses the same field and exact acknowledged empty lease.
+    assert!(
+        drain_actions(&ingress, &receiver, &cohort, &mut win).unwrap()[0]
+            .as_ref()
+            .unwrap()
+            .is_ok()
+    );
+    assert_eq!(
+        win.root().unwrap().a.as_str(),
+        "after identical empty source"
+    );
+}
+
+#[test]
 fn old_provider_run_endpoints_fail_on_both_sides_of_geometry_publication() {
     let mut win = Win::demo(Inputs::new("e\u{301} אבג"));
     let target = target(&win, 1);
