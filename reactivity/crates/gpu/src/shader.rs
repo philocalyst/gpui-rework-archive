@@ -426,8 +426,28 @@ pub mod ui {
         if (range.y & 0x80000000) != 0 {
             return output(load_draw(range.x).color);
         }
-        if range.x == range.y {
+        let end = range.y & 0x3fffffff;
+        if range.x == end {
             return output(globals.clear);
+        }
+        if (range.y & 0x40000000) != 0 {
+            // All retained solids cover every sample. Keep painter order and
+            // the same source-over recurrence, but evaluate it once per pixel.
+            let mut color = globals.clear;
+            #[wgsl_allow(non_literal_loop_bounds)]
+            for cursor in range.x..end {
+                let source = load_draw(get!(INDICES)[cursor as usize]).color;
+                color = source + color * (1.0 - source.w);
+            }
+            // Identical finite samples have +0 reduction delta. Integer bits
+            // preserve its zero normalization against float identity folding.
+            let mut bits = bitcast_vec4u(color);
+            for axis in 0..4 {
+                if bits[axis as usize] == 0x80000000 {
+                    bits[axis as usize] = 0;
+                }
+            }
+            return output(bitcast_vec4f(bits));
         }
         let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
@@ -439,7 +459,7 @@ pub mod ui {
                 [globals.clear, globals.clear, globals.clear, globals.clear];
             // Host-built CSR ranges are monotone and bounded by INDICES.
             #[wgsl_allow(non_literal_loop_bounds)]
-            for cursor in range.x..range.y {
+            for cursor in range.x..end {
                 let draw = load_draw(get!(INDICES)[cursor as usize]);
                 for x in 0..4 {
                     let point = position.xy()

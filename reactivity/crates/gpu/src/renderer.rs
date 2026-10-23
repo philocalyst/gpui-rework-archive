@@ -23,7 +23,8 @@ const MAX_ATLAS_SIDE: u32 = 2048;
 const ROUNDED_SOURCE: u32 = 1 << 30;
 const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
 const UNIFORM_TILE: u32 = 1 << 31;
-const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
+const CONSTANT_TILE: u32 = 1 << 30;
+const _: () = assert!(MAX_REFERENCES < CONSTANT_TILE as usize);
 const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
 
 #[derive(Debug)]
@@ -90,9 +91,11 @@ pub struct Stats {
     /// References omitted from the sampled CSR, including uniform tiles.
     pub skipped_tile_references: usize,
     pub uniform_tiles: usize,
-    /// Planned lattice samples, excluding clear and certified uniform pixels.
+    /// Planned color evaluations: sixteen samples per pixel, or one when all
+    /// retained draws have certified constant coverage. Direct fills cost zero.
     pub sample_evaluations: u64,
-    /// Planned sample_draw calls, including calls rejected by clip/geometry.
+    /// Planned ordered source evaluations, including rejected sample_draw calls
+    /// and the once-per-pixel blends of constant-coverage ranges.
     pub sample_draw_evaluations: u64,
     pub instance_upload_bytes: usize,
     pub draw_record_bytes: usize,
@@ -724,7 +727,7 @@ impl RendererState {
             scene.height.div_ceil(16) as usize,
         );
         self.ranges.clear();
-        self.ranges.resize(columns * rows, [0, 0]);
+        self.ranges.resize(columns * rows, [0, CONSTANT_TILE]);
         let old_words = self.records.len();
         let bank_count = scene.paint_bank().len();
         if bank_count > MAX_DRAWS * 2 {
@@ -858,12 +861,13 @@ impl RendererState {
         let mask_bytes = self.prepare_atlas(context, scene, has_masks)?;
         let mut offset = 0;
         for (tile, range) in self.ranges.iter_mut().enumerate() {
-            let count = range[1];
+            let constant = range[1] & CONSTANT_TILE;
+            let count = range[1] & !CONSTANT_TILE;
             if self.cursors[tile] != 0 && count == 1 {
                 range[1] = UNIFORM_TILE;
             } else {
                 offset += count;
-                *range = [offset, offset];
+                *range = [offset, offset | constant];
             }
         }
         let references = offset as usize;
@@ -924,12 +928,14 @@ impl RendererState {
         for (tile, range) in self.ranges.iter().enumerate() {
             if range[1] == UNIFORM_TILE {
                 uniform_tiles += 1;
-            } else if range[0] != range[1] {
+            } else if range[0] != range[1] & !CONSTANT_TILE {
                 let [left, top, right, bottom] =
                     tile_bounds(tile, columns, scene.width, scene.height);
-                let samples = u64::from((right - left) * (bottom - top)) * 16;
+                let end = range[1] & !CONSTANT_TILE;
+                let samples = u64::from((right - left) * (bottom - top))
+                    * if range[1] & CONSTANT_TILE != 0 { 1 } else { 16 };
                 sample_evaluations += samples;
-                sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
+                sample_draw_evaluations += samples * u64::from(end - range[0]);
             }
         }
         let (tone, exposure) = match scene.color_config.mapping {
@@ -1150,11 +1156,19 @@ impl RendererState {
             return Err(Error::ResourceLimit);
         }
         visit(draw, columns, |tile| {
-            if self.tile_proofs && full_tile(draw, error, tile, columns, width, height) {
-                self.ranges[tile] = [address, 1];
+            let covered = self.tile_proofs && full_tile(draw, error, tile, columns, width, height);
+            if covered
+                && draw.color[3] == 1.0
+                // Prefix discard additionally needs backdrop-independent bits.
+                && !draw.color.iter().any(|v| v.is_sign_negative() && !v.is_normal())
+            {
+                self.ranges[tile] = [address, CONSTANT_TILE | 1];
                 self.cursors[tile] = ordinal as u32 + 1;
             } else {
                 self.ranges[tile][1] += 1;
+                if !covered {
+                    self.ranges[tile][1] &= !CONSTANT_TILE;
+                }
             }
         });
         Ok(total)
@@ -1235,13 +1249,7 @@ fn full_tile(
     width: u32,
     height: u32,
 ) -> bool {
-    if !draw.source.is_solid()
-        || draw.color[3] != 1.0
-        // Source-over can change -0 to +0 according to the backdrop's sign.
-        // A negative subnormal may also flush to -0 before that addition.
-        // Neither is a backdrop-independent byte value on float targets.
-        || draw.color.iter().any(|v| v.is_sign_negative() && !v.is_normal())
-    {
+    if !draw.source.is_solid() {
         return false;
     }
     let [left, top, right, bottom] = tile_bounds(tile, columns, width, height);

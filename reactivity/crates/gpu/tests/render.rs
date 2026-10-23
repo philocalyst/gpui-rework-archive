@@ -392,6 +392,111 @@ fn compare_tile_modes(renderer: &mut Renderer, canvas: &mut Canvas) -> Stats {
 }
 
 #[test]
+fn constant_coverage_ranges_preserve_order_and_fall_back_at_partial_edges() {
+    use gpui_canvas::OutputProfile;
+    pollster::block_on(async {
+        let viewport = Rect::new(0.0, 0.0, 35.0, 19.0);
+        let area = 35 * 19;
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut renderer = renderer(format).await;
+            for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
+                let config = if hdr {
+                    ColorConfig::linear_hdr(profile, 203.0).unwrap()
+                } else {
+                    ColorConfig {
+                        profile,
+                        ..ColorConfig::default()
+                    }
+                };
+                for opaque_prefix in [false, true] {
+                    let mut canvas = Canvas::recording(35, 19, config).unwrap();
+                    canvas.clear(Color::linear_srgb(-0.0, 0.2, 0.4, 1.0).unwrap());
+                    renderer.set_tile_proofs(true);
+                    readback(&mut renderer, &canvas);
+                    assert_eq!(renderer.stats().sample_evaluations, 0, "empty ranges");
+                    if opaque_prefix {
+                        canvas
+                            .fill_rect(viewport, Affine::IDENTITY, viewport, Color::rgb(50, 90, 20))
+                            .unwrap();
+                    }
+                    for channels in [
+                        [-0.0, -1e-40, 1.0, 0.0],
+                        [-2.0, 0.5, 3.0, 0.25],
+                        [0.1, 2.0, 0.0, 0.75],
+                    ] {
+                        let [r, g, b, a] = channels;
+                        canvas
+                            .fill_rect(
+                                viewport,
+                                Affine::IDENTITY,
+                                viewport,
+                                Color::linear_srgb(r, g, b, a).unwrap(),
+                            )
+                            .unwrap();
+                    }
+                    renderer.set_tile_proofs(false);
+                    let reference = readback(&mut renderer, &canvas);
+                    let sampled = renderer.stats();
+                    renderer.set_tile_proofs(true);
+                    assert_eq!(readback(&mut renderer, &canvas), reference);
+                    let constant = renderer.stats();
+                    assert_eq!(
+                        constant.uniform_tiles, 0,
+                        "ranges still blend their backdrop"
+                    );
+                    assert_eq!(constant.tile_references, sampled.tile_references);
+                    assert_eq!(constant.sample_evaluations, area);
+                    assert_eq!(
+                        constant.sample_draw_evaluations * 16,
+                        sampled.sample_draw_evaluations
+                    );
+
+                    canvas
+                        .fill_rect(
+                            Rect::new(4.125, 3.125, 17.75, 10.25),
+                            Affine::IDENTITY,
+                            viewport,
+                            Color::rgba(30, 150, 240, 90),
+                        )
+                        .unwrap();
+                    // A later full translucent draw cannot discard partial coverage.
+                    canvas
+                        .fill_rect(
+                            viewport,
+                            Affine::IDENTITY,
+                            viewport,
+                            Color::rgba(200, 10, 80, 70),
+                        )
+                        .unwrap();
+                    renderer.set_tile_proofs(false);
+                    let reference = readback(&mut renderer, &canvas);
+                    renderer.set_tile_proofs(true);
+                    assert_eq!(readback(&mut renderer, &canvas), reference);
+                    assert!(renderer.stats().sample_evaluations > area);
+
+                    // A safe opaque cover retires that entire sampled prefix.
+                    canvas
+                        .fill_rect(viewport, Affine::IDENTITY, viewport, Color::rgb(90, 20, 50))
+                        .unwrap();
+                    renderer.set_tile_proofs(false);
+                    let reference = readback(&mut renderer, &canvas);
+                    renderer.set_tile_proofs(true);
+                    assert_eq!(readback(&mut renderer, &canvas), reference);
+                    assert_eq!(renderer.stats().uniform_tiles, 6);
+                    assert_eq!(renderer.stats().tile_references, 0);
+                    assert_eq!(renderer.stats().sample_draw_evaluations, 0);
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn opaque_tile_proofs_skip_overlap_and_preserve_later_edges() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
