@@ -28,29 +28,34 @@ fn unwrap_struct(module: &Module, mut ty: naga::Handle<naga::Type>) -> naga::Han
     }
     ty
 }
+fn vector_type(width: naga::VectorSize, kind: naga::ScalarKind) -> TypeInner {
+    TypeInner::Vector {
+        size: width,
+        scalar: naga::Scalar { kind, width: 4 },
+    }
+}
 fn vector(
     module: &Module,
     ty: naga::Handle<naga::Type>,
     width: naga::VectorSize,
     kind: naga::ScalarKind,
 ) {
-    assert_eq!(
-        module.types[ty].inner,
-        TypeInner::Vector {
-            size: width,
-            scalar: naga::Scalar { kind, width: 4 }
-        }
-    );
+    assert_eq!(module.types[ty].inner, vector_type(width, kind));
 }
-fn structure(module: &Module, ty: naga::Handle<naga::Type>, kinds: &[naga::ScalarKind]) {
+fn structure(
+    module: &Module,
+    ty: naga::Handle<naga::Type>,
+    bytes: u32,
+    fields: &[(u32, TypeInner)],
+) {
     let TypeInner::Struct { members, span } = &module.types[unwrap_struct(module, ty)].inner else {
         panic!("ABI struct")
     };
-    assert_eq!(*span, kinds.len() as u32 * 16);
-    assert_eq!(members.len(), kinds.len());
-    for (i, (member, &kind)) in members.iter().zip(kinds).enumerate() {
-        assert_eq!(member.offset, i as u32 * 16);
-        vector(module, member.ty, naga::VectorSize::Quad, kind);
+    assert_eq!(*span, bytes);
+    assert_eq!(members.len(), fields.len());
+    for (member, (offset, ty)) in members.iter().zip(fields) {
+        assert_eq!(member.offset, *offset);
+        assert_eq!(module.types[member.ty].inner, *ty);
     }
 }
 /// Recheck source and independently reparsed output, including dynamic strides,
@@ -154,7 +159,17 @@ fn reflect(
         let kind = match binding.binding {
             0 => {
                 assert_eq!(global.space, AddressSpace::Uniform);
-                structure(module, global.ty, &[K::Uint, K::Float, K::Float]);
+                structure(
+                    module,
+                    global.ty,
+                    48,
+                    &[
+                        (0, vector_type(V::Quad, K::Uint)),
+                        (16, vector_type(V::Quad, K::Float)),
+                        (32, TypeInner::Scalar(naga::Scalar::F32)),
+                        (36, TypeInner::Scalar(naga::Scalar::U32)),
+                    ],
+                );
                 assert_eq!(size, 48);
                 "uniform"
             }
@@ -190,7 +205,15 @@ fn reflect(
                         4
                     }
                     5 => {
-                        structure(module, base, &[K::Float, K::Float]);
+                        structure(
+                            module,
+                            base,
+                            32,
+                            &[
+                                (0, vector_type(V::Quad, K::Float)),
+                                (16, vector_type(V::Quad, K::Float)),
+                            ],
+                        );
                         32
                     }
                     _ => unreachable!(),
