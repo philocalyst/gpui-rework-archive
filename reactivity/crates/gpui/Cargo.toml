@@ -91,3 +91,7 @@ required-features = ["native-core"]
 [[example]]
 name = "property_editor"
 required-features = ["native-core"]
+
+[[example]]
+name = "todo_comparison"
+required-features = ["native-core"]
