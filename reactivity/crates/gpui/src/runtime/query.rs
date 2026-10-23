@@ -640,6 +640,7 @@ pub(super) struct HitSheet<'a> {
     pub has_viewports: bool,
 }
 impl HitSheet<'_> {
+    #[inline(always)]
     pub fn contains_window(&self, point: crate::Point) -> bool {
         Rect::new(0., 0., self.size[0] as f32, self.size[1] as f32).contains(point)
     }

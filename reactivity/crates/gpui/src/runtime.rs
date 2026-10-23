@@ -3221,6 +3221,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         Ok(())
     }
+    // Keep the P hit boundary out of ordinary callers; its borrowed view is local.
+    #[inline(never)]
     fn hit(&self, point: Point) -> Option<u64> {
         self.hit_in_sheet(self.presented_hit_sheet(), point)
     }
