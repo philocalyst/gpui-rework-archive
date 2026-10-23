@@ -95,3 +95,7 @@ required-features = ["native-core"]
 [[example]]
 name = "todo_comparison"
 required-features = ["native-core"]
+
+[[example]]
+name = "component_sources"
+required-features = ["native-core"]

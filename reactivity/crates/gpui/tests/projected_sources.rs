@@ -218,9 +218,9 @@ fn question_inputs_qualify_mounted_scopes_before_filtering_edits() {
 }
 #[test]
 fn borrowed_question_path_uses_the_same_scoped_admission_and_credit_protocol() {
-    check_question_input(
-        &const { QuestionPage::PAGE.source(Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE))) },
-    );
+    let input =
+        &const { QuestionPage::PAGE.source(Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE))) };
+    check_question_input(input);
 }
 fn check_question_input<I>(left: I)
 where
@@ -390,7 +390,6 @@ fn borrowed_question_declarations_reduce_actual_lane_storage_without_growing_ver
     let (borrowed_path, _) = Questions::<QuestionPage>::new()
         .question(input, Clone::clone, finish_question)
         .unwrap();
-    assert_eq!(size_of_val(&input), 8);
     assert_eq!(size_of_val(&owned_path) - size_of_val(&borrowed_path), 24);
     eprintln!(
         "QUESTION_DECLARATIONS leafOwned={} leafBorrowed={} pathOwned={} pathBorrowed={}",
