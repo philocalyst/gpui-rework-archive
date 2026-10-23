@@ -236,6 +236,14 @@ pub struct TextLayout {
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
 }
+/// Advance size and first baseline, without retaining glyphs, font leases or
+/// interaction geometry. Produced by the same validated Unicode planner.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TextMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub baseline: f32,
+}
 impl TextLayout {
     pub fn font_size(&self) -> f32 {
         self.font_size
@@ -271,6 +279,17 @@ pub struct TextShaper<'font> {
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
+    /// Measure wrapping without freezing an owned layout. Paragraph scratch is
+    /// reused within this shaper; the returned numbers borrow no font storage.
+    pub fn measure(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<TextMetrics, Error> {
+        self.planner(text, font_size, max_width)?
+            .measure(text, font_size, max_width)
+    }
     pub fn shape(
         &mut self,
         text: &str,
@@ -296,6 +315,15 @@ impl<'font> TextShaper<'font> {
         max_width: Option<f32>,
         interactive: bool,
     ) -> Result<TextLayout, Error> {
+        self.planner(text, font_size, max_width)?
+            .shape(text, font_size, max_width, interactive)
+    }
+    fn planner(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<&mut planner::Planner<'font>, Error> {
         if !font_size.is_finite() || !(0.0..=512.0).contains(&font_size) || font_size == 0. {
             return Err(Error::InvalidFontSize);
         }
@@ -308,10 +336,7 @@ impl<'font> TextShaper<'font> {
         if self.planner.is_none() {
             self.planner = Some(Box::new(planner::Planner::new(self.font)?));
         }
-        self.planner
-            .as_mut()
-            .unwrap()
-            .shape(text, font_size, max_width, interactive)
+        Ok(self.planner.as_mut().unwrap())
     }
 }
 

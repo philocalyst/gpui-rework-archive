@@ -11,7 +11,8 @@ use std::{
 };
 
 use gpui_canvas::{
-    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextShaper, TextSystem,
+    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextMetrics, TextShaper,
+    TextSystem,
 };
 use gpui_reactivity_core::{
     Affine, CoordinateSpace, NodeId, Point, Rect,
@@ -656,6 +657,25 @@ impl Node {
     }
 }
 impl TextSite {
+    fn measure_for(
+        &self,
+        service: &mut TextShaper<'_>,
+        font_size: f32,
+        width: Option<f32>,
+    ) -> Result<TextMetrics, Error> {
+        let width = width.map(|value| value.max(f32::MIN_POSITIVE));
+        if let Some(shape) = &self.shaped
+            && shape.width == width.map(f32::to_bits)
+            && shape.layout.font_size() == font_size
+        {
+            return Ok(TextMetrics {
+                width: shape.layout.width,
+                height: shape.layout.height,
+                baseline: shape.layout.baseline,
+            });
+        }
+        Ok(service.measure(&self.value, font_size, width)?)
+    }
     fn shape_for<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
@@ -2700,14 +2720,10 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            match node.text_slot().get_mut(texts).unwrap().shape_for(
+            match node.text_slot().get(texts).unwrap().measure_for(
                 service,
                 styles.get(index).font_size,
                 width,
-                // Intrinsic probes cannot publish geometry. Final finite
-                // placement upgrades the cache before retaining C/P maps.
-                input.known_dimensions.width.is_some()
-                    || matches!(input.available_width, AvailableSpace::Definite(_)),
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
@@ -3876,6 +3892,50 @@ mod tests {
             assert_eq!(slots, (0..expected as u32).collect::<Vec<_>>());
             assert_eq!(runtime.text.is_none(), expected == 0);
         }
+    }
+
+    #[test]
+    fn measurements_preserve_the_last_successful_canonical_text_geometry() {
+        let system = TextSystem::bundled().unwrap();
+        let mut shaper = system.font_face().shaper();
+        let mut site = TextSite {
+            value: SharedText::from("office אבג\nnext"),
+            field: None,
+            shaped: None,
+        };
+        let geometry = site
+            .shape_for(&mut shaper, 16., Some(80.), true)
+            .unwrap()
+            .retain_geometry()
+            .unwrap();
+        let glyphs = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+        for (size, width) in [(16., None), (16., Some(1.)), (24., Some(80.))] {
+            site.measure_for(&mut shaper, size, width).unwrap();
+            let shape = site.shaped.as_ref().unwrap();
+            assert_eq!(shape.width, Some(80.0f32.to_bits()));
+            assert_eq!(shape.layout.glyphs().as_ptr(), glyphs);
+            assert!(std::sync::Arc::ptr_eq(
+                &geometry,
+                &shape.layout.retain_geometry().unwrap()
+            ));
+        }
+        assert!(site.measure_for(&mut shaper, 0., Some(80.)).is_err());
+        assert_eq!(
+            site.shaped.as_ref().unwrap().layout.glyphs().as_ptr(),
+            glyphs
+        );
+        let cost = allocation_counter::measure(|| {
+            site.measure_for(&mut shaper, 16., Some(80.)).unwrap();
+        });
+        assert_eq!(
+            cost.count_total, 0,
+            "exact published operands borrow metrics"
+        );
+        println!(
+            "TEXT_SITE_HEADERS site={} shaped={}",
+            size_of::<TextSite>(),
+            size_of::<Shaped>()
+        );
     }
 
     #[test]

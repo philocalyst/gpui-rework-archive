@@ -23,7 +23,8 @@ pub use image::{
 };
 pub use text::{
     CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextDirection, TextGeometry, TextGrapheme,
-    TextLayout, TextLine, TextOffset, TextPosition, TextRun, TextSelection, TextShaper, TextSystem,
+    TextLayout, TextLine, TextMetrics, TextOffset, TextPosition, TextRun, TextSelection,
+    TextShaper, TextSystem,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
