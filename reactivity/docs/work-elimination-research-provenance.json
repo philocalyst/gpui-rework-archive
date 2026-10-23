@@ -26,5 +26,33 @@
     "document": "shared-tile-prefix-luna.md",
     "document_sha256": "da8f4695c3941d4540f9d8c10f8a8acb32dbcbd10c3f9a96fc88dd0bb0dfee36",
     "changes": "status/review preamble only"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/source-schema-elimination.md",
+    "original_sha256": "fa3c12b6c37da0656f1c507e55c04bd7dd4254abf4c292eba20152758bf99a04",
+    "document": "source-schema-products-luna.md",
+    "document_sha256": "a579f6eafffa65f79c1ee64850154c445d36807ef44cacfa330fada8ea3abe0a",
+    "changes": "status/correction/isolated-probe preamble only"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/source-schema-erasure-gap.md",
+    "original_sha256": "dcfc3b923f6de6f0b31a187cf7ffb707c5d29ec512ae6b8753f0e32e1385877f",
+    "document": "source-schema-erasure-luna.md",
+    "document_sha256": "3caa8eb84c3308d2eb2a365559f8a4625262a0c4b96b2d5b8e343aeb22216a72",
+    "changes": "status/correction/isolated-probe preamble only"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/source-schema-root-dispatch.md",
+    "original_sha256": "3734a88101d6e9b73b8e8b205dde900e46c1b203c1b6dc62a660811ebd8dc28e",
+    "document": "source-schema-root-dispatch-luna.md",
+    "document_sha256": "89574c5b50507ef4211346c6a80b2ea3b249273d753afd780fdfbea373bc008a",
+    "changes": "status/correction/isolated-probe preamble only"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/source-schema-tait.md",
+    "original_sha256": "ed5ee9f29b0715f0736d41e4eb8077308e1b23aa7e6bde8b52b655095ff0bcff",
+    "document": "source-schema-tait-luna.md",
+    "document_sha256": "248478dae99efcb1a1e600a414f16e0fd6133ae74798f0738e34ff6f0ee66197",
+    "changes": "status/correction/isolated-probe preamble only"
   }
 ]

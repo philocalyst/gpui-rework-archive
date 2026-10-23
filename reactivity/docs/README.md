@@ -22,6 +22,10 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Ready-publication transport](ready-publication-mpsc-luna.md) | Pinned standard-channel reserved-head stall and a custom-queue proposal with explicit progress/unsafe obligations; unimplemented |
 | [Offline shader proof](offline-shader-proof-luna.md) | Exact six-binding ABI, Vulkan artifact generation, enabled robustness policies, host bounds and unsafe admission gates; proposed, not implemented |
 | [Typed reflection and composition](typed-reflection-composition-luna.md) | Closed property traversal, shared validators, component-library controls and inspector ownership budgets |
+| [Product schemas](source-schema-products-luna.md) | Borrowed typed products and once-at-mount erasure; allocation formulas and legacy bridge proposals |
+| [Hidden child schema types](source-schema-erasure-luna.md) | Object-safe borrowed child facets, safe projector admission and priced erasure boundaries |
+| [Root dispatch correction](source-schema-root-dispatch-luna.md) | One root virtual call with the stable M-only owner; monomorphic traversal begins afterward |
+| [Inline opaque schema](source-schema-tait-luna.md) | Unstable TAIT/RPITIT option, isolated constructibility proof and recursive/toolchain limits |
 | [Production API gaps](production-gaps-luna.md) | Concrete accessible editor actions, typed reflection/inspector and designer color operations |
 | [Color formulation](color-formulation-luna.md) | SIMD-shaped fixed-lightness/hue cubic gamut limits, numerical proof obligations and separate CSS mapping semantics |
 | [Designer palette interpolation](designer-color-next-luna.md) | Explicit domains, alpha/hue semantics, shared SIMD setup/sampling and corrected primary-basis equivalence |
