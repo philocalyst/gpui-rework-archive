@@ -257,11 +257,12 @@ impl Host for ClosingScript {
         }
         self.host.dispatch(event_loop, callback);
         assert!(self.host.error.is_none(), "{:?}", self.host.error);
-        if let Some(owner) = &self.host.owner {
-            if owner.root().unwrap().finished && self.terminal_turn.is_none() {
-                assert!(ready, "terminal must enter through an actual WorkReady");
-                self.terminal_turn = Some(self.ready_turns);
-            }
+        if let Some(owner) = &self.host.owner
+            && owner.root().unwrap().finished
+            && self.terminal_turn.is_none()
+        {
+            assert!(ready, "terminal must enter through an actual WorkReady");
+            self.terminal_turn = Some(self.ready_turns);
         }
         if !idle {
             return;
@@ -286,13 +287,13 @@ impl Host for ClosingScript {
             self.produced.recv_timeout(Duration::from_secs(5)).unwrap();
         }
         let model = owner.root().unwrap();
-        if model.rows.len() == self.expected_rows {
-            if let Some(release) = self.release.take() {
-                assert!(!model.finished, "an extant clone keeps the lane open");
-                self.retained.take();
-                release.send(()).unwrap();
-                return;
-            }
+        if model.rows.len() == self.expected_rows
+            && let Some(release) = self.release.take()
+        {
+            assert!(!model.finished, "an extant clone keeps the lane open");
+            self.retained.take();
+            release.send(()).unwrap();
+            return;
         }
         if !model.finished {
             return;

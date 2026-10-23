@@ -423,6 +423,28 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "native-core")]
+    #[test]
+    fn native_status_builder_rejects_zero_capacity_and_an_already_closed_inbox() {
+        struct Page;
+        impl crate::View for Page {
+            fn view(&self) -> crate::El<'_> {
+                crate::div()
+            }
+        }
+        for closed in [false, true] {
+            let (remote, mut inbox) = Remote::<u64>::bounded(usize::from(closed));
+            if closed {
+                inbox.close();
+            }
+            assert!(matches!(
+                crate::Window::document(Page)
+                    .with_inbox_status(inbox, |_: &mut Page, _: Option<u64>| {}),
+                Err(Error::ZeroInboxCapacity)
+            ));
+            assert!(matches!(remote.try_send(1), Err(SendError::Closed(1))));
+        }
+    }
     #[test]
     fn preallocated_static_transport_and_staging_have_no_per_message_allocations() {
         let (remote, inbox) = Remote::bounded(8);
