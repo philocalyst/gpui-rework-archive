@@ -105,8 +105,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// the same surviving target.
     /// A release may also use P while only its own caret-focus paint awaits ACK;
     /// any intervening source, viewport or presentation change revokes that proof.
-    /// The built-in inspector retains strict ACK admission because its epoch
-    /// captions can change geometry during an otherwise focus-only publication.
+    /// With the built-in inspector, both P and that pending focus C must hit
+    /// the same target at release, accounting for changed caption geometry.
     ///
     /// A move extends a pressed input's selection through current geometry.
     /// Other moves, cancellation and an unpaired release prepare no frame.
@@ -168,21 +168,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         {
             return Ok(runtime.commit());
         }
-        if let Some(pressed) = pressed.filter(|_| matches!(event, PointerEvent::Release)) {
-            runtime.pointer_release_presentation(pressed)?;
+        let hit = if let Some(pressed) = pressed.filter(|_| matches!(event, PointerEvent::Release))
+        {
+            runtime.pointer_release_hit(pressed, session.position())?
         } else {
             runtime.current_presentation()?;
-        }
+            runtime.pointer_hit(session.position())
+        };
         let picking = runtime.inspector_picking();
-        let hit = session.position().and_then(|point| {
-            if picking {
-                runtime.inspector_pick(point)
-            } else {
-                runtime
-                    .hit(point)
-                    .map(|identity| runtime.sites.target(identity))
-            }
-        });
         if matches!(event, PointerEvent::Press) {
             let previous = runtime.focused;
             if let Some(target) = hit.filter(|_| !picking) {
@@ -202,8 +195,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             let commit = runtime.publish_focus_change(previous)?;
             // Press entered through current P. This call changes only focus:
             // no model/route callback or description runs before recording C.
-            let focus_sequence = if !runtime.inspector_enabled()
-                && runtime.prepared.is_some()
+            let focus_sequence = if runtime.prepared.is_some()
                 && runtime.presentation_epoch.checked_add(1) == Some(runtime.source_epoch)
             {
                 runtime.latest_token.map(|token| token.sequence)
@@ -320,33 +312,79 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 }
 
 impl<M: View + 'static> Runtime<M> {
-    fn pointer_release_presentation(&self, pressed: Pressed) -> Result<(), Error> {
-        self.current_presentation().or_else(|error| {
-            // Only this press's successful focus paint may still be pending.
-            // Epoch rejects even no-op source edits; token rejects resize/DPI
-            // ABA and re-preparation at the same source epoch. Hit geometry and
-            // metadata remain in P; activation still resolves and admits the target.
-            if self.logical_valid
-                && !self.dirty
-                && self.presentation_valid
-                && self.prepared.is_some()
-                && self.requested_size == self.presentation_size
-                && self.requested_scale_factor == self.presentation_scale_factor
-                && self.presentation_epoch.checked_add(1) == Some(self.source_epoch)
-                && self.complete_epoch == self.source_epoch
-                && pressed.focus_sequence.is_some()
-                && self.latest_token.map(|token| token.sequence) == pressed.focus_sequence
-                && self.sites.resolve(pressed.target).is_some()
-            {
-                Ok(())
-            } else {
-                Err(error)
-            }
-        })
+    fn pointer_hit(&self, point: Option<Point>) -> Option<Target> {
+        let point = point?;
+        if self.inspector_picking() {
+            self.inspector_pick(point)
+        } else {
+            self.hit(point).map(|id| self.sites.target(id))
+        }
     }
-}
-
-impl<M: View + 'static> Runtime<M> {
+    // Keep the new opt-in C view out of ordinary pointer caller frames.
+    #[inline(never)]
+    fn inspector_focus_hit(&self, target: Target, point: Option<Point>) -> bool {
+        let Some(point) = point else {
+            return false;
+        };
+        // Strict picking historically relies on outward frozen bounds. Only
+        // this pending-C proof additionally requires both window extents.
+        if !crate::Rect::new(
+            0.,
+            0.,
+            self.presentation_size[0] as f32,
+            self.presentation_size[1] as f32,
+        )
+        .contains(point)
+        {
+            return false;
+        }
+        let Some(sheet) = self.candidate_hit_sheet() else {
+            return false;
+        };
+        if !sheet.contains_window(point) {
+            return false;
+        }
+        let hit = if self.inspector_picking() {
+            self.inspector_pick_in_sheet(sheet, point)
+        } else {
+            self.hit_in_sheet(sheet, point)
+                .map(|id| self.sites.target(id))
+        };
+        hit == Some(target)
+    }
+    fn pointer_release_hit(
+        &self,
+        pressed: Pressed,
+        point: Option<Point>,
+    ) -> Result<Option<Target>, Error> {
+        let error = match self.current_presentation() {
+            Ok(()) => return Ok(self.pointer_hit(point)),
+            Err(error) => error,
+        };
+        // Epoch rejects even no-op source edits; token rejects viewport ABA and
+        // re-preparation at the same S. Only this press's full focus C is eligible.
+        if !self.logical_valid
+            || self.dirty
+            || !self.presentation_valid
+            || self.prepared.is_none()
+            || self.requested_size != self.presentation_size
+            || self.requested_scale_factor != self.presentation_scale_factor
+            || self.presentation_epoch.checked_add(1) != Some(self.source_epoch)
+            || self.complete_epoch != self.source_epoch
+            || pressed.focus_sequence.is_none()
+            || self.latest_token.map(|token| token.sequence) != pressed.focus_sequence
+            || self.sites.resolve(pressed.target).is_none()
+        {
+            return Err(error);
+        }
+        let hit = self.pointer_hit(point);
+        if self.inspector_enabled()
+            && (hit != Some(pressed.target) || !self.inspector_focus_hit(pressed.target, point))
+        {
+            return Err(error);
+        }
+        Ok(hit)
+    }
     fn focusable(&self, identity: u64) -> bool {
         self.by_identity
             .get(identity)
@@ -435,8 +473,20 @@ mod focus_release_tests {
                 checkbox("check", false)
                     .w(240)
                     .h(40)
+                    .rounded(4.)
+                    .transform(Affine {
+                        a: 1.,
+                        b: 0.1,
+                        c: 0.2,
+                        d: 1.,
+                        tx: 0.,
+                        ty: 0.,
+                    })
                     .on_click(|m: &mut Self| m.calls += 1),
             ))
+            .w(300)
+            .h(200)
+            .scroll(crate::Axis::Y)
         }
     }
     fn ack(win: &mut Win<Page>) {
@@ -502,10 +552,199 @@ mod focus_release_tests {
         }
     }
 
+    fn inspector_press() -> (Win<Page>, PointerSession, Target) {
+        let mut win = Win::recording_with_inspector(
+            Page {
+                value: Signal::new("search".into()),
+                calls: 0,
+            },
+            WindowOptions {
+                size: [720, 900],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        win.click(win.input()).unwrap();
+        ack(&mut win);
+        let mut pointer = PointerSession::default();
+        win.pointer_event(&mut pointer, PointerEvent::Move(Point { x: 12., y: 52. }))
+            .unwrap();
+        let commit = win
+            .pointer_event(&mut pointer, PointerEvent::Press)
+            .unwrap();
+        assert_eq!(commit.source_epoch, commit.presentation_epoch + 1);
+        let target = pointer.pressed.unwrap().target;
+        (win, pointer, target)
+    }
+
+    #[test]
+    fn inspector_proof_uses_candidate_shapes_clips_sizes_and_required_columns() {
+        for change in 0..12 {
+            let (mut win, mut pointer, target) = inspector_press();
+            let point = if change == 4 {
+                Point { x: 8., y: 33. }
+            } else {
+                Point { x: 12., y: 52. }
+            };
+            win.pointer_event(&mut pointer, PointerEvent::Move(point))
+                .unwrap();
+            {
+                let mut runtime = win.runtime_mut().unwrap();
+                assert_eq!(runtime.pointer_hit(Some(point)), Some(target));
+                assert_eq!(
+                    runtime
+                        .hit_in_sheet(runtime.candidate_hit_sheet().unwrap(), point)
+                        .map(|id| runtime.sites.target(id)),
+                    Some(target)
+                );
+                let identity = runtime.sites.resolve(target).unwrap();
+                let index = runtime
+                    .prepared
+                    .as_ref()
+                    .unwrap()
+                    .nodes
+                    .iter()
+                    .position(|row| row.identity == identity)
+                    .unwrap();
+                match change {
+                    0 => {
+                        runtime.prepared.as_mut().unwrap().size = [4, 4];
+                    }
+                    1 => {
+                        runtime.prepared.as_mut().unwrap().nodes[index]
+                            .placement
+                            .translation
+                            .x += 1000.;
+                    }
+                    2 => {
+                        runtime.prepared.as_mut().unwrap().nodes[index].bounds =
+                            Rect::new(1000., 1000., 20., 20.);
+                    }
+                    3 => {
+                        let sheet = runtime.candidate_hit_sheet().unwrap();
+                        let mut map = sheet.nodes[index]
+                            .transform(sheet.geometry.bases())
+                            .unwrap();
+                        map.c = 100.;
+                        let mut records = Vec::new();
+                        let basis =
+                            super::super::geometry::MapBasis::record(Some(map), None, &mut records);
+                        runtime.prepared.as_mut().unwrap().nodes[index].basis = basis;
+                        let geometry = runtime
+                            .metadata
+                            .as_mut()
+                            .unwrap()
+                            .geometry
+                            .as_mut()
+                            .unwrap();
+                        let records = geometry.freeze(records, |_| true);
+                        geometry.prepare(records);
+                    }
+                    4 => {
+                        super::super::geometry::patch(
+                            &mut runtime.metadata,
+                            identity,
+                            crate::property::PropertyId::CornerRadius,
+                            crate::property::PropertyValue::Number(20.),
+                        )
+                        .unwrap();
+                        let mut records = Vec::new();
+                        let sheet = runtime.candidate_hit_sheet().unwrap();
+                        let map = sheet.nodes[index]
+                            .transform(sheet.geometry.bases())
+                            .unwrap();
+                        let basis =
+                            super::super::geometry::MapBasis::record(Some(map), None, &mut records);
+                        runtime.prepared.as_mut().unwrap().nodes[index].basis = basis;
+                        let geometry = runtime
+                            .metadata
+                            .as_mut()
+                            .unwrap()
+                            .geometry
+                            .as_mut()
+                            .unwrap();
+                        let records = geometry.freeze(records, |_| true);
+                        geometry.prepare(records);
+                    }
+                    5 => {
+                        let prepared = runtime.prepared.as_mut().unwrap();
+                        let parent = prepared.nodes[index].parent.index().unwrap();
+                        assert_eq!(prepared.nodes[parent].kind, NodeKind::Scroll);
+                        prepared.nodes[parent].placement.size = [4., 4.];
+                    }
+                    6 => {
+                        runtime.metadata.as_mut().unwrap().candidate = None;
+                    }
+                    7 => {
+                        runtime
+                            .metadata
+                            .as_mut()
+                            .unwrap()
+                            .geometry
+                            .as_mut()
+                            .unwrap()
+                            .acknowledge();
+                    }
+                    8 => {
+                        runtime.prepared.as_mut().unwrap().size[0] |= 1 << 15;
+                    }
+                    9 => {
+                        runtime.prepared.as_mut().unwrap().nodes.truncate(index);
+                    }
+                    10 => {
+                        let prepared = runtime.prepared.as_mut().unwrap();
+                        let placement = prepared.nodes[index].placement;
+                        let bounds = prepared.nodes[index].bounds;
+                        let overlay = prepared
+                            .nodes
+                            .iter_mut()
+                            .rev()
+                            .find(|row| row.kind == NodeKind::Text)
+                            .unwrap();
+                        overlay.placement = placement;
+                        // Use an inline identity basis for this moved foreground caption.
+                        overlay.basis = super::super::geometry::MapBasis::record(
+                            Some(Affine::IDENTITY),
+                            None,
+                            &mut Vec::new(),
+                        );
+                        overlay.bounds = bounds;
+                        overlay.hittable = true;
+                    }
+                    11 => {
+                        let prepared = runtime.prepared.as_mut().unwrap();
+                        let panel = prepared
+                            .nodes
+                            .iter_mut()
+                            .rev()
+                            .find(|node| node.kind == NodeKind::Scroll)
+                            .unwrap();
+                        panel.placement.translation.x = 0.;
+                        panel.bounds.x = 0.;
+                    }
+                    _ => unreachable!(),
+                }
+                // Inject only C-side outcomes; P's exact shape must remain eligible.
+                assert_eq!(runtime.pointer_hit(Some(point)), Some(target));
+            }
+            let result = win.pointer_event(&mut pointer, PointerEvent::Release);
+            if change == 10 {
+                // The moved caption stays clipped by its own panel viewport.
+                result.unwrap();
+                assert_eq!(win.root().unwrap().calls, 1);
+            } else {
+                assert_eq!(result, Err(Error::PresentationStale), "change {change}");
+                assert_eq!(win.root().unwrap().calls, 0);
+            }
+            assert!(pointer.pressed.is_none());
+        }
+    }
+
     #[test]
     fn private_press_proof_uses_the_existing_session_header() {
         println!(
-            "POINTER_LAYOUT point={} option_point={} target={} pressed={} option_pressed={} position={} optional_position={} session={} optional_session={} session_align={} runtime={} win={}",
+            "POINTER_LAYOUT point={} option_point={} target={} pressed={} option_pressed={} position={} optional_position={} session={} optional_session={} session_align={} hit_sheet={} optional_hit_sheet={} hit_reply={} old_hit_reply={} runtime={} win={}",
             size_of::<Point>(),
             size_of::<Option<Point>>(),
             size_of::<Target>(),
@@ -516,6 +755,10 @@ mod focus_release_tests {
             size_of::<PointerSession>(),
             size_of::<Option<PointerSession>>(),
             align_of::<PointerSession>(),
+            size_of::<super::super::query::HitSheet<'_>>(),
+            size_of::<Option<super::super::query::HitSheet<'_>>>(),
+            size_of::<Result<Option<Target>, Error>>(),
+            size_of::<Result<(), Error>>(),
             size_of::<Runtime<Page>>(),
             size_of::<Win<Page>>(),
         );
@@ -527,6 +770,7 @@ mod focus_release_tests {
             assert_eq!(size_of::<PointerSession>(), 32);
             assert_eq!(size_of::<Option<PointerSession>>(), 32);
             assert_eq!(align_of::<PointerSession>(), 8);
+            assert_eq!(size_of::<super::super::query::HitSheet<'_>>(), 56);
         }
     }
 }

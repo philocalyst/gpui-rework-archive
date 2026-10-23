@@ -332,19 +332,20 @@ impl<M: View + 'static> Runtime<M> {
             Err(Error::StaleTarget)
         }
     }
+    #[inline(never)]
     pub(super) fn inspector_pick(&self, point: Point) -> Option<Target> {
+        self.inspector_pick_in_sheet(self.presented_hit_sheet(), point)
+    }
+    pub(super) fn inspector_pick_in_sheet(
+        &self,
+        sheet: query::HitSheet<'_>,
+        point: Point,
+    ) -> Option<Target> {
         self.inspector_panel()?;
-        // Unlike activation, picking selects the foremost actual shape, even
-        // when it has no handler. The same rounded/clip hit kernel admits it.
-        let geometry = self.presented_geometry();
-        for (index, node) in self.presented.iter().enumerate().rev() {
-            if !node.hittable || !self.sheet_hit_with_geometry(index, point, geometry) {
-                continue;
-            }
-            let target = self.sites.target(node.identity);
-            return self.inspector_app_index(target).ok().map(|_| target);
-        }
-        None
+        // Picking selects the foremost actual shape, even without a handler.
+        let node = &sheet.nodes[sheet.hit(point)?];
+        let target = self.sites.target(node.identity);
+        self.inspector_app_index(target).ok().map(|_| target)
     }
     pub(super) fn inspector_display(&self) -> Option<DisplayCaptions> {
         let panel = self.inspector_panel()?;
@@ -748,6 +749,189 @@ pub(super) fn description<'a, M: View>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    // Frozen old direct-loop oracle: no window-extent gate or compressed skip.
+    fn legacy_pick<M: View + 'static>(
+        runtime: &Runtime<M>,
+        sheet: &query::HitSheet<'_>,
+        point: Point,
+    ) -> Option<Target> {
+        runtime.inspector_panel()?;
+        for (index, node) in sheet.nodes.iter().enumerate().rev() {
+            if !node.hittable
+                || !query::contains_point(
+                    sheet.nodes,
+                    sheet.geometry,
+                    sheet.has_viewports,
+                    index,
+                    point,
+                )
+            {
+                continue;
+            }
+            let target = runtime.sites.target(node.identity);
+            return runtime.inspector_app_index(target).ok().map(|_| target);
+        }
+        None
+    }
+    #[test]
+    fn outward_bounds_preserve_strict_picking_but_do_not_admit_pending_focus_outside_window() {
+        use crate::{Axis, prelude::*};
+        struct Outside(Signal<String>);
+        impl View for Outside {
+            fn sources() -> Sources<Self> {
+                Sources::new().direct(Source::new(
+                    FieldId::new(1),
+                    "input",
+                    |m| &m.0,
+                    |m| &mut m.0,
+                ))
+            }
+            fn view(&self) -> El<'_> {
+                column((
+                    text_input(&self.0).w(240).h(32),
+                    column((div().size(100).bg(Color::BLACK).name("outward child"),))
+                        .size(100)
+                        .scroll(Axis::Y)
+                        .transform(Affine {
+                            a: 10.,
+                            b: 0.,
+                            c: 0.,
+                            d: 1.,
+                            tx: 0.1,
+                            ty: 0.,
+                        }),
+                ))
+            }
+        }
+        let mut win = Win::recording_with_inspector(
+            Outside(Signal::new("search".into())),
+            WindowOptions {
+                size: [720, 900],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let ack = |win: &mut Win<Outside>| {
+            let token = win.with_scene(|_, t| t).unwrap();
+            win.presented(token).unwrap();
+        };
+        ack(&mut win);
+        win.activate(win.button("Pick element")).unwrap();
+        ack(&mut win);
+        win.click(win.input()).unwrap();
+        ack(&mut win);
+        let target = win.query().name("outward child").one().unwrap();
+        let point = Point { x: 720., y: 52. };
+        {
+            let runtime = win.runtime().unwrap();
+            let sheet = runtime.presented_hit_sheet();
+            assert!(!sheet.contains_window(point));
+            assert_eq!(legacy_pick(runtime, &sheet, point), Some(target));
+            assert_eq!(runtime.inspector_pick(point), Some(target));
+            assert_eq!(runtime.hit(point), None);
+            let row = sheet
+                .nodes
+                .iter()
+                .find(|row| row.identity == runtime.sites.resolve(target).unwrap())
+                .unwrap();
+            println!(
+                "OUTWARD_PICK x_bits={} width_bits={} endpoint64={} point_x={}",
+                row.bounds.x.to_bits(),
+                row.bounds.width.to_bits(),
+                f64::from(row.bounds.x) + f64::from(row.bounds.width),
+                point.x
+            );
+        }
+        let mut mouse = PointerSession::default();
+        win.pointer_event(&mut mouse, PointerEvent::Move(point))
+            .unwrap();
+        let focus = win.pointer_event(&mut mouse, PointerEvent::Press).unwrap();
+        assert_eq!(focus.source_epoch, focus.presentation_epoch + 1);
+        assert_eq!(
+            win.pointer_event(&mut mouse, PointerEvent::Release),
+            Err(Error::PresentationStale)
+        );
+        assert_eq!(win.inspector_selected().unwrap(), None);
+        ack(&mut win);
+        // A new strict gesture preserves the preexisting portable picking policy.
+        win.pointer_event(&mut mouse, PointerEvent::Press).unwrap();
+        win.pointer_event(&mut mouse, PointerEvent::Release)
+            .unwrap();
+        assert_eq!(win.inspector_selected().unwrap(), Some(target));
+    }
+
+    #[test]
+    fn picking_skip_matches_old_loop_for_compacted_p_and_c_with_outside_points() {
+        use crate::{ItemKey, ItemSource, prelude::*, uniform_list};
+        struct Rows;
+        const LIST: ListId = ListId::new(1);
+        impl ItemSource for Rows {
+            fn len(&self) -> usize {
+                100
+            }
+            fn key(&self, index: usize) -> ItemKey {
+                ItemKey::new(index as u64)
+            }
+            fn index_of(&self, key: ItemKey) -> Option<usize> {
+                (key.get() < 100).then_some(key.get() as usize)
+            }
+            fn row(&self, _: usize) -> El<'_> {
+                column((
+                    div().size(0),
+                    div().h(0).child(div().size(20).bg(Color::BLACK)),
+                ))
+            }
+        }
+        impl View for Rows {
+            fn view(&self) -> El<'_> {
+                column((div().h(8), uniform_list(LIST, self, 32).size(64)))
+            }
+        }
+        let mut win = Win::recording_with_inspector(
+            Rows,
+            WindowOptions {
+                size: [720, 128],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        for delta in [0., 0.25, 31., 64., -48.5] {
+            if delta != 0. {
+                let list = win.list(LIST).unwrap();
+                win.scroll(list, delta).unwrap();
+            }
+            {
+                let runtime = win.runtime().unwrap();
+                assert!(runtime.prepared.as_ref().unwrap().nodes.len() < runtime.nodes.len());
+                for y in (-1..130).step_by(4) {
+                    for x in [-1., 0., 0.5, 31., 63.9, 64., 719.9, 720., 721.] {
+                        let point = Point { x, y: y as f32 };
+                        let sheet = runtime.candidate_hit_sheet().unwrap();
+                        let expected = legacy_pick(runtime, &sheet, point);
+                        assert_eq!(
+                            runtime.inspector_pick_in_sheet(sheet, point),
+                            expected,
+                            "C {point:?}"
+                        );
+                    }
+                }
+            }
+            let token = win.with_scene(|_, token| token).unwrap();
+            win.presented(token).unwrap();
+            let runtime = win.runtime().unwrap();
+            for y in (-1..130).step_by(4) {
+                for x in [-1., 0., 0.5, 31., 63.9, 64., 719.9, 720., 721.] {
+                    let point = Point { x, y: y as f32 };
+                    assert_eq!(
+                        runtime.inspector_pick(point),
+                        legacy_pick(runtime, &runtime.presented_hit_sheet(), point),
+                        "P {point:?}"
+                    );
+                }
+            }
+        }
+    }
+
     #[test]
     fn every_typed_caption_matches_its_constructed_panel_slot() {
         let nodes = panel(560.0, PropertyId::Width).flatten();
