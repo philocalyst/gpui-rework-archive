@@ -40,15 +40,13 @@ pub(super) fn write_prefix(
             let bits =
                 (u32::from(paint.shared()) * SHARED) | (u32::from(paint.rectangle()) * RECTANGLE);
             word[index / 16] |= bits << (index % 16 * 2);
+            changes.replace(
+                records,
+                1 + flags + flag * 64 + index,
+                [float_word(paint.value().working())],
+            );
         }
         changes.replace(records, 1 + flag, [word]);
-    }
-    for (index, paint) in scene.paint_bank().enumerate() {
-        changes.replace(
-            records,
-            1 + flags + index,
-            [float_word(paint.value().working())],
-        );
     }
 }
 fn row(records: &[Word], slot: PaintSlot) -> Option<(usize, u32)> {
