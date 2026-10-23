@@ -47,7 +47,40 @@ impl QueueScreen {
     /// The existing service revision revokes an unconsumed Library intent when
     /// any newer transport command, including Stop on an empty queue, wins.
     pub fn audio_revision(&self) -> Option<u64> {
-        self.audio.as_ref().map(|audio| audio.receipt.revision)
+        self.audio
+            .as_ref()?
+            .handle
+            .receipt()
+            .ok()
+            .map(|receipt| receipt.revision)
+    }
+    pub(crate) fn play_now_if(
+        &mut self,
+        track: &crate::queue::TrackRef,
+        revision: u64,
+    ) -> Result<bool, AudioError> {
+        let Some(audio) = &mut self.audio else {
+            return Ok(false);
+        };
+        let receipt = audio.handle.replace_if(revision, || {
+            self.playback
+                .play_now(track.clone(), &super::available, &mut super::draw)?;
+            Ok(self.playback.plan().unwrap().clone())
+        })?;
+        let Some(receipt) = receipt else {
+            return Ok(false);
+        };
+        audio.receipt = receipt;
+        audio.playing = true;
+        audio.status = Status {
+            state: State::Opening,
+            position_ms: 0,
+            duration_ms: None,
+        };
+        self.selected.clear();
+        self.anchor = None;
+        self.notice.clear();
+        Ok(true)
     }
     pub fn audio_status(&self) -> Option<Status> {
         self.audio.as_ref().map(|audio| audio.status)

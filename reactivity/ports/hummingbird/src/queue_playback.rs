@@ -219,7 +219,11 @@ impl PlaybackQueue {
         }
         let serial = self.next_serial()?;
         let key = self.queue.append(vec![track], draw)?.unwrap();
-        self.queue.jump(key, available)?;
+        // Availability is the accepted preparation snapshot. Every returned
+        // error precedes append; the fresh retained key cannot be stale.
+        self.queue
+            .jump(key, &|_| true)
+            .expect("appended key is retained");
         self.install(serial, available);
         Ok(())
     }

@@ -612,6 +612,139 @@ fn cloned_handle_stop_revokes_buffered_play_without_editing_the_owner_queue() {
 }
 
 #[test]
+fn cloned_pause_seek_and_stop_revoke_pending_replacement_and_later_explicit_play_can_win() {
+    for control in ["pause", "seek", "stop"] {
+        let (worker, audio, capture, _, mut win) = owner();
+        row_prepare(&mut win, 44);
+        win.activate(
+            win.role(Role::Button)
+                .name("Play Καλημέρα now")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        settle(&mut win, &worker).unwrap();
+        until(&mut win, &capture, false, |_, sink| !sink.opened.is_empty());
+        let original = win
+            .with_model(|model| model.queue.playback().plan().unwrap().stamp())
+            .unwrap();
+        row_prepare(&mut win, 90);
+        win.activate(
+            win.role(Role::Button)
+                .name("Play Untitled now")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(5))
+            .unwrap();
+        let handle = audio.handle().clone();
+        let receipt = match control {
+            "pause" => handle.set_playing(false),
+            "seek" => handle.seek(0),
+            "stop" => handle.stop(),
+            _ => unreachable!(),
+        }
+        .unwrap();
+        settle(&mut win, &worker).unwrap();
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().queue().len())
+                .unwrap(),
+            1,
+            "{control}"
+        );
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
+                .unwrap(),
+            original
+        );
+        assert_eq!(
+            win.with_model(Library::preparation_status).unwrap(),
+            PreparationStatus::Canceled
+        );
+        assert_eq!(handle.receipt().unwrap().revision, receipt.revision);
+        // A new user click captures authoritative authority rather than the
+        // cached UI receipt, so controls do not permanently disable playback.
+        win.activate(
+            win.role(Role::Button)
+                .name("Play Untitled now")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        settle(&mut win, &worker).unwrap();
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().queue().len())
+                .unwrap(),
+            2
+        );
+        assert_eq!(
+            win.with_model(|model| model
+                .queue
+                .playback()
+                .plan()
+                .unwrap()
+                .current
+                .track
+                .track_id)
+                .unwrap(),
+            Some(90)
+        );
+        assert!(handle.receipt().unwrap().revision > receipt.revision);
+        close(win, audio, worker);
+    }
+}
+
+#[test]
+fn unavailable_play_error_leaves_current_queue_plan_and_audio_authority_unchanged() {
+    let (worker, audio, capture, _, mut win) = owner();
+    row_prepare(&mut win, 44);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Καλημέρα now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    settle(&mut win, &worker).unwrap();
+    until(&mut win, &capture, false, |_, sink| !sink.opened.is_empty());
+    let plan = win
+        .with_model(|model| model.queue.playback().plan().unwrap().stamp())
+        .unwrap();
+    let receipt = audio.handle().receipt().unwrap();
+    row_prepare(&mut win, 1);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Album Track now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Failed
+    );
+    assert!(win.contains_text("queue rejected: Unavailable").unwrap());
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        1
+    );
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
+            .unwrap(),
+        plan
+    );
+    assert_eq!(audio.handle().receipt().unwrap().revision, receipt.revision);
+    assert_eq!(audio.handle().receipt().unwrap().token, receipt.token);
+    close(win, audio, worker);
+}
+
+#[test]
 fn stop_on_empty_queue_and_active_pause_seek_revoke_play_before_result_consumption() {
     for control in ["Stop", "Pause", "Back 10 seconds"] {
         let (worker, audio, capture, _, mut win) = owner();

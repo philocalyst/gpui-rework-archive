@@ -48,6 +48,7 @@ pub enum AudioError {
     WorkerClosed,
     Closed,
     Exhausted,
+    Queue(crate::queue::QueueError),
 }
 impl fmt::Display for AudioError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -60,6 +61,7 @@ impl fmt::Display for AudioError {
             Self::WorkerClosed => f.write_str("decoder worker closed"),
             Self::Closed => f.write_str("audio service closed"),
             Self::Exhausted => f.write_str("audio request identity exhausted"),
+            Self::Queue(error) => write!(f, "queue rejected: {error:?}"),
         }
     }
 }

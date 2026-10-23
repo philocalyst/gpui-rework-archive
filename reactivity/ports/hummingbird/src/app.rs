@@ -25,7 +25,10 @@ enum Preparation {
         selection: Selection,
         track: TrackRef,
     },
-    Failed(String),
+    Failed {
+        selection: Selection,
+        error: String,
+    },
     Canceled,
 }
 
@@ -97,7 +100,9 @@ impl Library {
             Preparation::Ready { selection, .. } if self.current_selection(*selection) => {
                 PreparationStatus::Ready
             }
-            Preparation::Failed(_) => PreparationStatus::Failed,
+            Preparation::Failed { selection, .. } if self.current_selection(*selection) => {
+                PreparationStatus::Failed
+            }
             _ => PreparationStatus::Canceled,
         }
     }
@@ -114,9 +119,10 @@ impl Library {
     pub fn receive(&mut self, event: Option<LibraryEvent>) {
         let Some(event) = event else {
             if self.preparation_status() == PreparationStatus::Pending {
-                self.preparation = Preparation::Failed(
-                    "Library worker closed before preparation completed".into(),
-                );
+                self.preparation = Preparation::Failed {
+                    selection: *self.selected,
+                    error: "Library worker closed before preparation completed".into(),
+                };
             } else if matches!(self.preparation, Preparation::Pending { .. }) {
                 self.preparation = Preparation::Canceled;
             }
@@ -157,20 +163,33 @@ impl Library {
                     return;
                 }
                 match result {
-                    Err(error) => self.preparation = Preparation::Failed(error.to_string()),
+                    Err(error) => {
+                        self.preparation = Preparation::Failed {
+                            selection,
+                            error: error.to_string(),
+                        }
+                    }
                     Ok(track) => {
                         // Retire authority before queue/service mutation. Duplicate and
                         // late replies cannot consume this continuation a second time.
-                        self.preparation = Preparation::Ready {
-                            selection,
-                            track: track.clone(),
-                        };
+                        self.preparation = Preparation::Canceled;
                         #[cfg(feature = "audio")]
-                        if play_revision.is_some() {
-                            self.queue.play_now(track);
+                        if let Some(revision) = play_revision {
+                            match self.queue.play_now_if(&track, revision) {
+                                Ok(true) => {}
+                                Ok(false) => return,
+                                Err(error) => {
+                                    self.preparation = Preparation::Failed {
+                                        selection,
+                                        error: error.to_string(),
+                                    };
+                                    return;
+                                }
+                            }
                         }
                         #[cfg(not(feature = "audio"))]
                         let _ = play_revision;
+                        self.preparation = Preparation::Ready { selection, track };
                     }
                 }
             }
@@ -196,7 +215,10 @@ impl Library {
             return;
         }
         let Some(sequence) = self.issued.checked_add(1) else {
-            self.preparation = Preparation::Failed("Preparation request space exhausted".into());
+            self.preparation = Preparation::Failed {
+                selection: *self.selected,
+                error: "Preparation request space exhausted".into(),
+            };
             return;
         };
         self.issued = sequence;
@@ -216,7 +238,10 @@ impl Library {
             self.worker.prepare(selection)
         };
         if let Err(error) = result {
-            self.preparation = Preparation::Failed(crate::worker::QueueError(error).to_string());
+            self.preparation = Preparation::Failed {
+                selection,
+                error: crate::worker::QueueError(error).to_string(),
+            };
         }
     }
     fn enqueue(&mut self, track: TrackRef, selection: Selection) {
@@ -237,7 +262,7 @@ impl Library {
             } else {
                 "Preparing recording…"
             }),
-            Preparation::Failed(error) => text(format!("Recording unavailable: {error}")),
+            Preparation::Failed { error, .. } => text(format!("Recording unavailable: {error}")),
             Preparation::Canceled => text("Preparation canceled by newer controls"),
             Preparation::Ready { selection, track } => {
                 let selection = *selection;

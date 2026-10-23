@@ -3,7 +3,7 @@ use super::{
     block::AudioBlock,
     media::{Media, Reply, Request},
     output::{Gate, OutputProvider, OutputStream, PlaybackGate},
-    pipeline::Pipeline,
+    pipeline::{Pipeline, fft_geometry},
 };
 use crate::queue_playback::Plan;
 use gpui::{Inbox, Remote, SendError};
@@ -47,6 +47,53 @@ pub struct AudioHandle {
     shared: Arc<Shared>,
 }
 impl AudioHandle {
+    /// Authoritative control snapshot. A later conditional commit must still
+    /// compare under the same desired-state lock; this read grants no authority.
+    pub fn receipt(&self) -> Result<Receipt, AudioError> {
+        let desired = self.shared.desired.lock().map_err(|_| AudioError::Closed)?;
+        if self.shared.gate.0.closed.load(Ordering::Acquire) {
+            return Err(AudioError::Closed);
+        }
+        Ok(Receipt {
+            revision: desired.revision,
+            token: desired.token,
+        })
+    }
+    /// The app's bounded queue edit runs only after revision/terminal/exhaustion
+    /// checks. It cannot call this handle recursively or do blocking work.
+    /// Holding desired through edit and publication closes the read/commit race.
+    pub(crate) fn replace_if(
+        &self,
+        expected: u64,
+        prepare: impl FnOnce() -> Result<Plan, crate::queue::QueueError>,
+    ) -> Result<Option<Receipt>, AudioError> {
+        let mut desired = self.shared.desired.lock().map_err(|_| AudioError::Closed)?;
+        if self.shared.gate.0.closed.load(Ordering::Acquire) {
+            return Err(AudioError::Closed);
+        }
+        if desired.revision != expected {
+            return Ok(None);
+        }
+        let revision = expected.checked_add(1).ok_or(AudioError::Exhausted)?;
+        let plan = prepare().map_err(AudioError::Queue)?;
+        let token = Some(Token {
+            stamp: plan.stamp(),
+            revision,
+        });
+        *desired = Intent {
+            revision,
+            plan: Some(plan),
+            token,
+            playing: true,
+            seek: None,
+            transition: Transition::Replace,
+            output_epoch: revision,
+        };
+        self.publish_gate(&desired);
+        drop(desired);
+        self.shared.owner.unpark();
+        Ok(Some(Receipt { revision, token }))
+    }
     // Call under desired's lock so control order and final gate order agree.
     fn publish_gate(&self, desired: &Intent) {
         let gate = &self.shared.gate.0;
@@ -418,6 +465,18 @@ impl<P: OutputProvider> Owner<P> {
                 let info = result?;
                 self.info = Some(info);
                 self.event(Event::Opened { token, info });
+                if self.natural
+                    && self
+                        .pipeline
+                        .as_ref()
+                        .is_some_and(|pipeline| !pipeline.compatible(info.format))
+                    && let Some(output) = &self.output
+                    && info.format.rate != output.format().rate
+                {
+                    // Admission can fail after the old tail is accepted but
+                    // still queued. Check once before retiring that pipeline.
+                    fft_geometry(info.format.rate, output.format().rate)?;
+                }
                 if let Some(time) = self.intent.seek {
                     self.media.decode_request(Request::Seek(time))?;
                     self.phase = Phase::Seeking;
@@ -1057,5 +1116,99 @@ mod publication_tests {
         assert_eq!(handle.seek(0).unwrap_err(), AudioError::Closed);
         assert!(handle.clone().stop().unwrap().token.is_none());
         assert!(!handle.shared.gate.allows(1));
+    }
+
+    #[test]
+    fn conditional_replace_rejects_before_edit_and_keeps_failed_queue_edits_unpublished() {
+        use std::cell::Cell;
+        let (handle, plan) = active_handle(1);
+        let called = Cell::new(false);
+        let stopped = handle.clone().stop().unwrap();
+        assert!(
+            handle
+                .replace_if(1, || {
+                    called.set(true);
+                    Ok(plan.clone())
+                })
+                .unwrap()
+                .is_none()
+        );
+        assert!(!called.get());
+        assert_eq!(handle.receipt().unwrap().revision, stopped.revision);
+        assert_eq!(
+            handle
+                .replace_if(stopped.revision, || Err(
+                    crate::queue::QueueError::Unavailable
+                ))
+                .unwrap_err(),
+            AudioError::Queue(crate::queue::QueueError::Unavailable)
+        );
+        assert_eq!(handle.receipt().unwrap().revision, stopped.revision);
+        assert!(handle.receipt().unwrap().token.is_none());
+        assert!(!handle.shared.gate.allows(1));
+
+        let (exhausted, _) = active_handle(u64::MAX);
+        assert_eq!(
+            exhausted
+                .replace_if(u64::MAX, || {
+                    called.set(true);
+                    Ok(plan.clone())
+                })
+                .unwrap_err(),
+            AudioError::Exhausted
+        );
+        assert!(!called.get());
+        handle.shared.gate.0.closed.store(true, Ordering::Release);
+        assert_eq!(
+            handle
+                .replace_if(stopped.revision, || {
+                    called.set(true);
+                    Ok(plan)
+                })
+                .unwrap_err(),
+            AudioError::Closed
+        );
+        assert!(!called.get());
+    }
+
+    #[test]
+    fn conditional_replace_holds_authority_through_edit_and_publication() {
+        let (handle, plan) = active_handle(1);
+        let entered = Arc::new(Barrier::new(2));
+        let release = Arc::new(Barrier::new(2));
+        let publishing = {
+            let publisher = handle.clone();
+            let entered = entered.clone();
+            let release = release.clone();
+            thread::spawn(move || {
+                publisher.replace_if(1, || {
+                    entered.wait();
+                    release.wait();
+                    Ok(plan)
+                })
+            })
+        };
+        entered.wait();
+        let stopping = {
+            let stopper = handle.clone();
+            thread::spawn(move || stopper.stop())
+        };
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while handle.shared.gate.0.epoch.load(Ordering::Acquire) != 0 {
+            assert!(
+                Instant::now() < deadline,
+                "Stop did not reach early revocation"
+            );
+            thread::yield_now();
+        }
+        // Stop has begun, but cannot linearize between revision comparison
+        // and publication while the actual queue-edit callback owns this lock.
+        release.wait();
+        let published = publishing.join().unwrap().unwrap().unwrap();
+        let stopped = stopping.join().unwrap().unwrap();
+        assert_eq!(published.revision, 2);
+        assert_eq!(stopped.revision, 3);
+        assert!(handle.receipt().unwrap().token.is_none());
+        assert!(!handle.shared.gate.allows(published.revision));
     }
 }

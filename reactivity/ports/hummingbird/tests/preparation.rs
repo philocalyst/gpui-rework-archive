@@ -135,6 +135,27 @@ fn full_worker_result_lane_visibly_fails_the_pending_owner_instead_of_losing_com
             .contains_text("Library worker closed before preparation completed")
             .unwrap()
     );
+    let failed = owner.with_model(|model| *model.selected).unwrap();
+    owner
+        .set(
+            Library::SELECTED,
+            Selection {
+                id: Some(90),
+                ..failed
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        owner.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Canceled
+    );
+    assert!(
+        !owner
+            .contains_text(
+                "Recording unavailable: Library worker closed before preparation completed"
+            )
+            .unwrap()
+    );
     assert!(
         owner
             .with_model(|model| model.prepared().is_none())
@@ -312,4 +333,32 @@ fn failed_preparation_is_retired_by_full_public_selection_and_source_identity() 
         owner.with_model(Library::preparation_status).unwrap(),
         PreparationStatus::Canceled
     );
+}
+
+#[test]
+fn typed_worker_failure_belongs_only_to_its_issued_selection() {
+    let (worker, mut owner) = open();
+    owner.update(|model| model.prepare(-1, 0)).unwrap();
+    settle(&mut owner, &worker).unwrap();
+    assert_eq!(
+        owner.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Failed
+    );
+    let failed = owner.with_model(|model| *model.selected).unwrap();
+    owner
+        .set(
+            Library::SELECTED,
+            Selection {
+                id: Some(44),
+                ..failed
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        owner.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Canceled
+    );
+    assert!(!owner.contains_text("Recording unavailable:").unwrap());
+    drop(owner);
+    worker.finish().unwrap();
 }

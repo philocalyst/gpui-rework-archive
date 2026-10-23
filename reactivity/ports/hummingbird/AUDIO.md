@@ -14,7 +14,10 @@ The decoder worker exclusively owns File, Symphonia format reader and codec.
 Three reusable 20 ms planar f64 blocks cross its bounded one-operation channel.
 The audio control owner holds FFT/remainder/tail staging, stream and the producer
 of a 100 ms f64 SPSC ring. CPAL's data callback consumes complete frames, converts
-sample type, applies the gain ramp and writes silence on underrun. It performs
+sample type, applies the gain ramp and writes silence on underrun. Pause calls
+CPAL pause immediately, so the callback is not guaranteed to run its 15 ms
+fade-out. Fade-in is covered by callback tests; hardware pause click suppression
+is unqualified. It performs
 no allocation, reclamation, locks or I/O. CPAL's separate owned-error callback
 has a four-error retirement ring; overflow reclaims the exceptional owned error
 and sets a fault flag. It cannot promise universally allocation-free backend
