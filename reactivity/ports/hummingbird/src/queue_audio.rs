@@ -129,8 +129,31 @@ impl QueueScreen {
                 token,
                 playing,
             } => {
-                if revision == audio.receipt.revision && token == audio.receipt.token {
+                if audio
+                    .handle
+                    .receipt()
+                    .is_ok_and(|current| revision == current.revision && token == current.token)
+                {
+                    let changed = token != audio.receipt.token;
+                    audio.receipt = Receipt { revision, token };
                     audio.playing = playing;
+                    if changed {
+                        audio.status = Status {
+                            state: if token.is_none() {
+                                State::Stopped
+                            } else if playing {
+                                State::Opening
+                            } else {
+                                State::Paused
+                            },
+                            position_ms: 0,
+                            duration_ms: None,
+                        };
+                    } else if !playing && token.is_some() {
+                        audio.status.state = State::Paused;
+                    } else if playing && audio.status.state == State::Paused {
+                        audio.status.state = State::Playing;
+                    }
                 }
             }
             event if event.token() != audio.receipt.token => {}
@@ -152,21 +175,37 @@ impl QueueScreen {
                 }
             }
             Event::SourceEof { token, end } => {
-                match self
-                    .playback
-                    .end_of_stream(end, &super::available, &mut super::draw)
-                {
-                    Ok(true) => {
+                if self.playback.plan().map(|plan| plan.end_of_stream()) != Some(end) {
+                    return;
+                }
+                match audio.handle.advance_if(token, || {
+                    // The owner alone edits this queue. The matching stamp
+                    // cannot change between this check and the accepted edit.
+                    self.playback
+                        .end_of_stream(end, &super::available, &mut super::draw)?;
+                    Ok(self.playback.plan().cloned())
+                }) {
+                    Ok(Some((receipt, playing))) => {
                         self.selected.clear();
                         self.anchor = None;
-                        audio.status.state = State::Draining;
-                        self.sync_audio(Transition::Advance { from: token });
+                        audio.receipt = receipt;
+                        audio.playing = playing;
+                        audio.status = Status {
+                            state: if !playing {
+                                State::Paused
+                            } else if self.playback.plan().is_some() {
+                                State::Opening
+                            } else {
+                                State::Draining
+                            },
+                            position_ms: 0,
+                            duration_ms: None,
+                        };
                     }
-                    Ok(false) => {}
+                    Ok(None) => {}
                     Err(error) => {
-                        self.notice = format!("Queue rejected: {error:?}");
-                        self.playback.stop();
-                        let _ = audio.handle.stop();
+                        self.notice = error.to_string();
+                        audio.status.state = State::Failed;
                     }
                 }
             }

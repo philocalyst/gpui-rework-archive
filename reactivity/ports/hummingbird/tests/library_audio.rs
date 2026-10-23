@@ -913,6 +913,72 @@ fn cloned_stop_after_adopted_rejects_retired_eof_without_queue_edit() {
 }
 
 #[test]
+fn cloned_transport_adoption_updates_status_and_accepts_only_new_token_position() {
+    let ((worker, audio, capture, inject, mut win), held) = held_transport_owner();
+    let original = audio.handle().receipt().unwrap();
+    let paused = audio.handle().clone().set_playing(false).unwrap();
+    inject
+        .try_send(take_adopted(&mut win, &capture, &held, paused.revision))
+        .unwrap();
+    win.deliver_ready(32).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.audio_status().unwrap().state)
+            .unwrap(),
+        AudioState::Paused
+    );
+    let playing = audio.handle().clone().set_playing(true).unwrap();
+    inject
+        .try_send(take_adopted(&mut win, &capture, &held, playing.revision))
+        .unwrap();
+    win.deliver_ready(32).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.audio_status().unwrap().state)
+            .unwrap(),
+        AudioState::Playing
+    );
+    let sought = audio.handle().clone().seek(0).unwrap();
+    inject
+        .try_send(take_adopted(&mut win, &capture, &held, sought.revision))
+        .unwrap();
+    inject
+        .try_send(Event::Position {
+            token: sought.token.unwrap(),
+            milliseconds: 1234,
+        })
+        .unwrap();
+    inject
+        .try_send(Event::Position {
+            token: original.token.unwrap(),
+            milliseconds: 9876,
+        })
+        .unwrap();
+    inject
+        .try_send(Event::Adopted {
+            revision: paused.revision,
+            token: paused.token,
+            playing: false,
+        })
+        .unwrap();
+    win.deliver_ready(32).unwrap();
+    let status = win
+        .with_model(|model| model.queue.audio_status().unwrap())
+        .unwrap();
+    assert_eq!(status.state, AudioState::Opening);
+    assert_eq!(status.position_ms, 1234);
+    let stopped = audio.handle().clone().stop().unwrap();
+    inject
+        .try_send(take_adopted(&mut win, &capture, &held, stopped.revision))
+        .unwrap();
+    win.deliver_ready(32).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.audio_status().unwrap().state)
+            .unwrap(),
+        AudioState::Stopped
+    );
+    close(win, audio, worker);
+}
+
+#[test]
 fn paused_same_token_eof_advances_once_without_resuming_output() {
     for adopted_first in [false, true] {
         let ((worker, audio, capture, inject, mut win), held) = held_transport_owner();
