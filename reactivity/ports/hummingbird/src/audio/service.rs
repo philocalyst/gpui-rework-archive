@@ -879,3 +879,107 @@ mod tests {
         assert!(service.finish(Duration::MAX));
     }
 }
+
+#[cfg(test)]
+mod publication_tests {
+    use super::*;
+    use crate::{
+        queue::{Track, TrackRef},
+        queue_playback::PlaybackQueue,
+    };
+    use std::sync::Barrier;
+
+    fn active_handle(revision: u64) -> (AudioHandle, Plan) {
+        let mut queue = PlaybackQueue::new().unwrap();
+        queue
+            .play_now(
+                TrackRef::new(Track {
+                    path: "publication-only.wav".into(),
+                    track_id: None,
+                    album_id: None,
+                    title: "Gate publication".into(),
+                    available_when_prepared: true,
+                }),
+                &|_| true,
+                &mut |_| 0,
+            )
+            .unwrap();
+        let plan = queue.plan().unwrap().clone();
+        let intent = Intent {
+            revision,
+            plan: Some(plan.clone()),
+            token: Some(Token {
+                stamp: plan.stamp(),
+                revision,
+            }),
+            playing: true,
+            seek: None,
+            transition: Transition::Replace,
+            output_epoch: revision,
+        };
+        let handle = AudioHandle {
+            shared: Arc::new(Shared {
+                desired: Mutex::new(intent),
+                gate: PlaybackGate(Arc::new(Gate {
+                    epoch: AtomicU64::new(revision),
+                    playing: AtomicBool::new(true),
+                    closed: AtomicBool::new(false),
+                })),
+                owner: thread::current(),
+            }),
+        };
+        (handle, plan)
+    }
+
+    #[test]
+    fn stop_winning_the_desired_lock_cannot_leave_an_older_publication_playable() {
+        for revision in [1, u64::MAX - 1] {
+            let (handle, _) = active_handle(revision);
+            let entered = Arc::new(Barrier::new(2));
+            let release = Arc::new(Barrier::new(2));
+            let publisher = handle.clone();
+            let publishing = {
+                let entered = entered.clone();
+                let release = release.clone();
+                thread::spawn(move || {
+                    // Use the actual shared change path used by public controls.
+                    // The barrier only holds its existing desired-state lock.
+                    publisher.change(|state| {
+                        state.playing = true;
+                        entered.wait();
+                        release.wait();
+                        Ok(())
+                    })
+                })
+            };
+            entered.wait();
+            let stopper = handle.clone();
+            let stopping = thread::spawn(move || stopper.stop());
+            let deadline = Instant::now() + Duration::from_secs(5);
+            while handle.shared.gate.0.epoch.load(Ordering::Acquire) != 0
+                || handle.shared.gate.0.playing.load(Ordering::Acquire)
+            {
+                assert!(
+                    Instant::now() < deadline,
+                    "Stop did not revoke before its lock"
+                );
+                thread::yield_now();
+            }
+            // Stop has revoked and cannot acquire the held mutex. The older
+            // operation now republishes live permission before Stop wins it.
+            release.wait();
+            let published = publishing.join().unwrap().unwrap();
+            let stopped = stopping.join().unwrap().unwrap();
+            assert!(stopped.revision >= published.revision);
+            assert!(stopped.token.is_none());
+            let desired = handle.shared.desired.lock().unwrap();
+            assert!(desired.plan.is_none() && desired.token.is_none());
+            assert!(!desired.playing);
+            assert_eq!(desired.output_epoch, 0);
+            assert!(
+                !handle.shared.gate.allows(revision),
+                "Stop returned after committing stopped desired state, but old PCM is still permitted"
+            );
+        }
+    }
+}
