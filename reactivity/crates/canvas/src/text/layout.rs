@@ -1,5 +1,5 @@
 //! Borrowed typed views over the one canonical owned glyph layout.
-use super::{FontFace, FontSlot, Glyph, TextLayout};
+use super::{FontFace, FontSlot, Glyph, PackedGlyph, TextLayout};
 use crate::Rect;
 use std::ops::Range;
 mod interaction;
@@ -112,8 +112,13 @@ impl<'a> GlyphRun<'a> {
     pub fn text_range(self) -> Range<TextOffset> {
         TextOffset(self.run.start)..TextOffset(self.run.end)
     }
-    pub fn glyphs(self) -> &'a [Glyph] {
-        &self.layout.glyphs[self.run.glyph_start as usize..self.run.glyph_end as usize]
+    pub fn glyphs(
+        self,
+    ) -> impl DoubleEndedIterator<Item = Glyph> + ExactSizeIterator + Clone + std::iter::FusedIterator + 'a
+    {
+        self.layout.glyphs[self.run.glyph_start as usize..self.run.glyph_end as usize]
+            .iter()
+            .map(PackedGlyph::glyph)
     }
     pub fn direction(self) -> TextDirection {
         self.run.direction
@@ -146,14 +151,7 @@ impl TextLine {
 
 impl TextLayout {
     pub fn text_len(&self) -> usize {
-        self.mapping.as_ref().map_or_else(
-            || {
-                self.glyphs
-                    .last()
-                    .map_or(0, |g| (g.cluster + u32::from(g.simple_tail_bytes)) as usize)
-            },
-            |m| m.len as usize,
-        )
+        self.text_len as usize
     }
     pub fn runs(&self) -> impl Iterator<Item = GlyphRun<'_>> + Clone {
         let (single, many): (Option<Run>, &[Run]) = match &self.mapping {
@@ -211,14 +209,11 @@ impl TextLayout {
 
     /// Release opt-in caret geometry while preserving the canonical glyphs,
     /// fonts and placement. Single primary-font LTR metadata is folded back
-    /// into the ordinary compact layout when its tail fits the existing slot.
+    /// into the ordinary compact layout.
     pub fn discard_interaction(&mut self) {
         let Some(map) = &mut self.mapping else {
             return;
         };
-        // Explicit mutation detaches shared geometry; preparation never uses COW.
-        let map = std::sync::Arc::make_mut(map);
-        map.carets = None;
         let simple = map.lines.len() == 1
             && map.runs.len() <= 1
             && map.runs.iter().all(|run| {
@@ -228,18 +223,10 @@ impl TextLayout {
                     && run.end == map.len
             });
         if simple {
-            let encoded = match self.glyphs.last_mut() {
-                Some(last) => map
-                    .len
-                    .checked_sub(last.cluster)
-                    .and_then(|tail| u8::try_from(tail).ok())
-                    .map(|tail| last.simple_tail_bytes = tail)
-                    .is_some(),
-                None => map.len == 0,
-            };
-            if encoded {
-                self.mapping = None;
-            }
+            self.mapping = None;
+        } else {
+            // Explicit mutation detaches shared geometry; preparation never uses COW.
+            std::sync::Arc::make_mut(map).carets = None;
         }
     }
 }

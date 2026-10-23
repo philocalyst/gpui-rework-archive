@@ -162,10 +162,61 @@ impl std::fmt::Debug for FontFace {
 pub struct Glyph {
     pub id: u16,
     font: FontSlot,
-    simple_tail_bytes: u8,
     pub cluster: u32,
     pub x: f32,
     pub baseline: f32,
+}
+
+// Source starts use 15 bits under MAX_TEXT. Primary glyphs retain all 16 bits;
+// the two fixed fallback faces each fit in one half of the remaining namespace.
+const GLYPH_CODE_BITS: u32 = 17;
+const FALLBACK_CODE: u32 = 1 << 16;
+const FALLBACK_GLYPHS: u32 = 1 << 15;
+const _: () = assert!(MAX_TEXT <= 1 << 15);
+
+#[derive(Clone, Copy, Debug)]
+struct PackedGlyph {
+    meta: u32,
+    x: f32,
+    baseline: f32,
+}
+impl PackedGlyph {
+    fn new(glyph: Glyph) -> Result<Self, Error> {
+        let code = match glyph.font.0 {
+            0 => u32::from(glyph.id),
+            slot @ 1..=2 if u32::from(glyph.id) < FALLBACK_GLYPHS => {
+                FALLBACK_CODE + u32::from(slot - 1) * FALLBACK_GLYPHS + u32::from(glyph.id)
+            }
+            _ => return Err(Error::InvalidFont),
+        };
+        if glyph.cluster >= MAX_TEXT as u32 {
+            return Err(Error::InvalidFont);
+        }
+        Ok(Self {
+            meta: (glyph.cluster << GLYPH_CODE_BITS) | code,
+            x: glyph.x,
+            baseline: glyph.baseline,
+        })
+    }
+    fn glyph(&self) -> Glyph {
+        let code = self.meta & ((1 << GLYPH_CODE_BITS) - 1);
+        let (font, id) = if code < FALLBACK_CODE {
+            (FontSlot(0), code as u16)
+        } else {
+            let fallback = code - FALLBACK_CODE;
+            (
+                FontSlot(1 + (fallback / FALLBACK_GLYPHS) as u8),
+                (fallback % FALLBACK_GLYPHS) as u16,
+            )
+        };
+        Glyph {
+            id,
+            font,
+            cluster: self.meta >> GLYPH_CODE_BITS,
+            x: self.x,
+            baseline: self.baseline,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -232,16 +283,22 @@ pub struct TextLayout {
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
-    glyphs: Vec<Glyph>,
+    glyphs: Vec<PackedGlyph>,
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
+    text_len: u32,
 }
 impl TextLayout {
     pub fn font_size(&self) -> f32 {
         self.font_size
     }
-    pub fn glyphs(&self) -> &[Glyph] {
-        &self.glyphs
+    /// Borrow canonical positions without allocating an expanded glyph array.
+    /// Collect the returned values when an owned array is needed.
+    pub fn glyphs(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = Glyph> + ExactSizeIterator + Clone + std::iter::FusedIterator + '_
+    {
+        self.glyphs.iter().map(PackedGlyph::glyph)
     }
 }
 
@@ -397,7 +454,7 @@ impl TextSystem {
         self.validate(layout)?;
         let mut min = [f32::INFINITY; 2];
         let mut max = [f32::NEG_INFINITY; 2];
-        for g in &layout.glyphs {
+        for g in layout.glyphs() {
             let Some([left, bottom, right, top]) = outline_bounds(
                 &layout.fonts.face(g.font_slot())?.0.bytes,
                 g.id,
@@ -600,6 +657,9 @@ impl OutlinePen for BoundsPen {
 
 #[cfg(test)]
 pub(crate) static BUNDLED_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+#[cfg(test)]
+mod glyph_codec_tests;
 
 #[cfg(test)]
 mod font_tests {

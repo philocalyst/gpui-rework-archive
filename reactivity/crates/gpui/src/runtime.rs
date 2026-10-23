@@ -3842,14 +3842,26 @@ mod tests {
         let runtime = win.runtime().unwrap();
         let first = runtime.texts[0].as_ref().unwrap();
         let value = SharedText::as_ptr(&first.value);
-        let glyphs = first.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+        let glyphs = first
+            .shaped
+            .as_ref()
+            .unwrap()
+            .layout
+            .glyphs()
+            .collect::<Vec<_>>();
         win.reset_counters().unwrap();
         win.update(|_| {}).unwrap();
         let first = win.runtime().unwrap().texts[0].as_ref().unwrap();
         assert!(std::ptr::eq(value, SharedText::as_ptr(&first.value)));
         assert_eq!(
             glyphs,
-            first.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
+            first
+                .shaped
+                .as_ref()
+                .unwrap()
+                .layout
+                .glyphs()
+                .collect::<Vec<_>>()
         );
         assert_eq!(win.counters().paint_passes, 0);
         assert_eq!(win.counters().measure_calls, 0);
@@ -3893,12 +3905,13 @@ mod tests {
             .unwrap()
             .height;
         assert!(narrow > wide);
-        let pointer = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
-        site.shape_for(&mut shaper, 16.0, Some(40.0), false)
-            .unwrap();
+        let cached = allocation_counter::measure(|| {
+            site.shape_for(&mut shaper, 16.0, Some(40.0), false)
+                .unwrap();
+        });
         assert_eq!(
-            pointer,
-            site.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
+            cached.count_total, 0,
+            "same-width cache must not reshape or clone"
         );
         assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
         site.shape_for(&mut shaper, 16.0, None, false).unwrap();

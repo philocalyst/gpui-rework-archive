@@ -21,11 +21,10 @@ fn mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage() {
         "a\u{202e}b",
     ] {
         let layout = shaper.shape(source, 20., None).unwrap();
-        assert!(!layout.glyphs().is_empty());
+        assert!(!layout.glyphs().next().is_none());
         assert!(
             layout
                 .glyphs()
-                .iter()
                 .all(|g| g.id != 0 && source.is_char_boundary(g.cluster as usize))
         );
         assert_eq!(layout.text_len(), source.len());
@@ -57,7 +56,7 @@ fn bidi_visual_positions_match_explicit_mixed_direction_examples() {
         ("a\u{202e}BC\u{202c}D", "aCBD"),
     ] {
         let layout = shaper.shape(source, 20., None).unwrap();
-        let mut placed = layout.glyphs().iter().collect::<Vec<_>>();
+        let mut placed = layout.glyphs().collect::<Vec<_>>();
         placed.sort_by(|a, b| a.x.total_cmp(&b.x));
         let visual = placed
             .into_iter()
@@ -97,7 +96,7 @@ fn original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact() {
     let empty = shaper.shape_interactive("", 18., None).unwrap();
     assert_eq!(empty.lines().count(), 1);
     assert_eq!(empty.width, 0.);
-    assert!(empty.glyphs().is_empty());
+    assert!(empty.glyphs().next().is_none());
     for source_layout in [&empty, &layout] {
         for line in source_layout.lines() {
             assert!(line.text_range().end.byte() <= source_layout.text_len());
@@ -274,7 +273,6 @@ fn compare_harfbuzz(
     let mut advance = 0.;
     for ((actual, info), position) in layout
         .glyphs()
-        .iter()
         .zip(independent.glyph_infos())
         .zip(independent.glyph_positions())
     {
@@ -305,7 +303,7 @@ fn missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback() {
     ));
     for text in ["\u{651}ع", "ع\u{651}"] {
         let layout = shaper.shape_interactive(text, 20., None).unwrap();
-        assert!(layout.glyphs().iter().all(|glyph| glyph.id != 0));
+        assert!(layout.glyphs().all(|glyph| glyph.id != 0));
         assert!(
             layout
                 .caret_bounds(position(text.len(), CaretAffinity::Upstream))
@@ -402,12 +400,10 @@ fn line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it() 
         assert_eq!(layout.lines().count(), 2);
         let one = layout
             .glyphs()
-            .iter()
             .find(|glyph| glyph.cluster as usize == source.find('1').unwrap())
             .unwrap();
         let a = layout
             .glyphs()
-            .iter()
             .find(|glyph| glyph.cluster as usize == source.find('a').unwrap())
             .unwrap();
         assert_eq!(a.x < one.x, rtl_base);
@@ -440,7 +436,11 @@ fn fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_byt
         let mut prior = font.shaper();
         prior.shape("العربية עברית", 18., None).unwrap();
         let actual = prior.shape_interactive(source, 18., None).unwrap();
-        assert_eq!(actual.glyphs(), expected.glyphs(), "{source:?}");
+        assert_eq!(
+            actual.glyphs().collect::<Vec<_>>(),
+            expected.glyphs().collect::<Vec<_>>(),
+            "{source:?}"
+        );
         assert_eq!(actual.text_len(), source.len());
         let mut service = TextSystem::from_font(font.clone());
         assert_eq!(paint(&mut service, &actual), paint(&mut service, &expected));
@@ -502,7 +502,6 @@ fn mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range
         let glyphs = |layout: &gpui_canvas::TextLayout| {
             layout
                 .glyphs()
-                .iter()
                 .map(|g| (g.id, g.cluster, g.x.to_bits(), g.baseline.to_bits()))
                 .collect::<Vec<_>>()
         };
@@ -546,7 +545,6 @@ fn wrapped_ligatures_never_cross_font_or_bidi_run_boundaries() {
         let unwrapped = shaper.shape_interactive(source, 18., None).unwrap();
         let mut expected = unwrapped
             .glyphs()
-            .iter()
             .map(|g| (g.cluster, g.id))
             .collect::<Vec<_>>();
         expected.sort_unstable();
@@ -554,7 +552,6 @@ fn wrapped_ligatures_never_cross_font_or_bidi_run_boundaries() {
             let layout = shaper.shape_interactive(source, 18., Some(width)).unwrap();
             let mut actual = layout
                 .glyphs()
-                .iter()
                 .map(|g| (g.cluster, g.id))
                 .collect::<Vec<_>>();
             actual.sort_unstable();

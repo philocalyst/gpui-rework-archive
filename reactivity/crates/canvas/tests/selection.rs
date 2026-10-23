@@ -35,10 +35,8 @@ fn discarding_interaction_keeps_glyph_storage_source_runs_and_lines() {
         ("", None),
     ] {
         let mut layout = font.shaper().shape_interactive(text, 18., width).unwrap();
-        let pointer = layout.glyphs().as_ptr();
         let glyphs = layout
             .glyphs()
-            .iter()
             .map(|g| (g.id, g.cluster, g.x, g.baseline))
             .collect::<Vec<_>>();
         let lines = layout
@@ -47,7 +45,7 @@ fn discarding_interaction_keeps_glyph_storage_source_runs_and_lines() {
             .collect::<Vec<_>>();
         let runs = layout
             .runs()
-            .filter(|run| !run.glyphs().is_empty())
+            .filter(|run| !run.glyphs().next().is_none())
             .map(|run| {
                 (
                     run.text_range(),
@@ -58,14 +56,13 @@ fn discarding_interaction_keeps_glyph_storage_source_runs_and_lines() {
             })
             .collect::<Vec<_>>();
         assert!(layout.caret_bounds(position(0, A::Downstream)).is_some());
-        layout.discard_interaction();
+        let released = allocation_counter::measure(|| layout.discard_interaction());
+        assert_eq!(released.count_total, 0);
         assert!(layout.caret_bounds(position(0, A::Downstream)).is_none());
         assert_eq!(layout.text_len(), text.len());
-        assert_eq!(layout.glyphs().as_ptr(), pointer);
         assert_eq!(
             layout
                 .glyphs()
-                .iter()
                 .map(|g| (g.id, g.cluster, g.x, g.baseline))
                 .collect::<Vec<_>>(),
             glyphs
@@ -80,7 +77,7 @@ fn discarding_interaction_keeps_glyph_storage_source_runs_and_lines() {
         assert_eq!(
             layout
                 .runs()
-                .filter(|run| !run.glyphs().is_empty())
+                .filter(|run| !run.glyphs().next().is_none())
                 .map(|run| (
                     run.text_range(),
                     run.direction(),

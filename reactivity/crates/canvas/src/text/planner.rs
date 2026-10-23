@@ -297,14 +297,13 @@ impl<'font> Planner<'font> {
                         if !g.x.is_finite() || !g.y.is_finite() {
                             return Err(Error::InvalidGeometry);
                         }
-                        glyphs.push(Glyph {
+                        glyphs.push(PackedGlyph::new(Glyph {
                             id: u16::try_from(g.id).map_err(|_| Error::InvalidFont)?,
                             font: FontSlot(slot as u8),
-                            simple_tail_bytes: 0,
                             cluster: (paragraph.content.start + source.start) as u32,
                             x: g.x,
                             baseline: height + g.y,
-                        });
+                        })?);
                     }
                     if clusters.next().is_some() {
                         return Err(Error::InvalidFont);
@@ -339,46 +338,6 @@ impl<'font> Planner<'font> {
             }
             height += planned.height();
         }
-        if details.is_none() {
-            let encoded = match glyphs.last_mut() {
-                Some(last) => {
-                    let tail = (text.len() as u32)
-                        .checked_sub(last.cluster)
-                        .ok_or(Error::InvalidFont)?;
-                    if let Ok(tail) = u8::try_from(tail) {
-                        last.simple_tail_bytes = tail;
-                        true
-                    } else {
-                        false
-                    }
-                }
-                None => text.is_empty(),
-            };
-            if !encoded {
-                details = Some(Details {
-                    len: text.len() as u32,
-                    font_size: size,
-                    runs: vec![Run {
-                        start: 0,
-                        end: text.len() as u32,
-                        glyph_start: 0,
-                        glyph_end: glyphs.len() as u32,
-                        line: 0,
-                        font: FontSlot(0),
-                        direction: TextDirection::LeftToRight,
-                    }],
-                    lines: vec![Line {
-                        start: 0,
-                        end: text.len() as u32,
-                        top: 0.,
-                        height,
-                        baseline,
-                        width,
-                    }],
-                    carets: None,
-                });
-            }
-        }
         // The immutable map cannot append stops after publication. Charge the
         // trim separately from stop-field compression and query changes.
         if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
@@ -392,6 +351,7 @@ impl<'font> Planner<'font> {
             glyphs,
             fonts: self.font_set(mask),
             mapping: details.map(Arc::new),
+            text_len: text.len() as u32,
         })
     }
 }
@@ -567,7 +527,10 @@ mod tests {
             .shaper()
             .shape_interactive(source, 18., Some(60.))
             .unwrap();
-        assert_eq!(actual.glyphs(), expected.glyphs());
+        assert_eq!(
+            actual.glyphs().collect::<Vec<_>>(),
+            expected.glyphs().collect::<Vec<_>>()
+        );
         assert_eq!(
             [actual.width, actual.height, actual.baseline],
             [expected.width, expected.height, expected.baseline]

@@ -226,23 +226,29 @@ fn real_shaping_ligatures_unicode_measure_and_paint_are_stable() {
             .shape("Ελληνικά", 22.0, None)
             .unwrap()
             .glyphs()
-            .is_empty()
+            .next()
+            .is_none()
     );
     assert!(
         !text
             .shape("Привет", 22.0, None)
             .unwrap()
             .glyphs()
-            .is_empty()
+            .next()
+            .is_none()
     );
     assert!(
         !text
             .shape("Latin Ω", 22.0, None)
             .unwrap()
             .glyphs()
-            .is_empty()
+            .next()
+            .is_none()
     );
-    assert_eq!(layout.glyphs(), repeat.glyphs());
+    assert_eq!(
+        layout.glyphs().collect::<Vec<_>>(),
+        repeat.glyphs().collect::<Vec<_>>()
+    );
     assert_eq!(layout.width, repeat.width);
     let ink = text.ink_bounds(&layout).unwrap();
     let mut canvas = Canvas::new(240, 80).unwrap();
@@ -430,7 +436,7 @@ fn swash_native_pixels_and_transformed_cells_match_independent_oracles() {
 
     for content in ["H", "j", "é"] {
         let layout = text.shape(content, 22.0, None).unwrap();
-        let glyph = layout.glyphs()[0];
+        let glyph = layout.glyphs().next().unwrap();
         let (metrics, mask) = reference_mask(glyph.id, 22.0);
         let origin = Point {
             x: 12.0,
@@ -459,7 +465,7 @@ fn swash_native_pixels_and_transformed_cells_match_independent_oracles() {
         assert_close(canvas.pixels(), &expected);
     }
     let layout = text.shape("H", 12.0, None).unwrap();
-    let glyph = layout.glyphs()[0];
+    let glyph = layout.glyphs().next().unwrap();
     let (metrics, mask) = reference_mask(glyph.id, 12.0);
     let origin = Point { x: 4.0, y: 2.0 };
     let transform = Affine {

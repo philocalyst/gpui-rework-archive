@@ -48,7 +48,6 @@ fn requested_outline_masks_have_real_coverage_and_preserve_placement() {
             // Space has no outline; all other glyphs have an actual leased mask.
             let glyphs = layout
                 .glyphs()
-                .iter()
                 .filter(|g| old.rasterize_indexed(g.id, 16.0 * density).0.width != 0)
                 .collect::<Vec<_>>();
             assert_eq!(
