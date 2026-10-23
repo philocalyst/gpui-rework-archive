@@ -550,7 +550,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         {
             self.accessibility = None;
         }
-        if let Some(owner) = &mut self.owner {
+        if let Some(mut owner) = self.owner.take() {
             owner.close();
         }
         self.graphics = None;
