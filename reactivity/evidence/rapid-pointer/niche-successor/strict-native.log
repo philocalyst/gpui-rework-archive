@@ -1,0 +1,98 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling synstructure v0.14.0
+   Compiling serde_derive v1.0.229
+   Compiling bytemuck_derive v1.12.1
+    Checking bytemuck v1.25.2
+   Compiling zerofrom-derive v0.1.8
+    Checking zerofrom v0.1.8
+   Compiling serde v1.0.229
+   Compiling yoke-derive v0.8.4
+   Compiling enumflags2_derive v0.7.12
+    Checking yoke v0.8.3
+   Compiling zvariant_utils v4.2.0
+   Compiling thiserror-impl v2.0.21
+   Compiling zvariant_derive v5.15.1
+   Compiling zerocopy-derive v0.8.63
+   Compiling zerovec-derive v0.11.6
+    Checking zerovec v0.11.8
+   Compiling displaydoc v0.2.7
+   Compiling enumflags2 v0.7.12
+   Compiling zcheapstr v1.1.0
+   Compiling zvariant v5.15.1
+   Compiling tracing-attributes v0.1.31
+    Checking tracing v0.1.44
+   Compiling zbus_names v4.3.5
+    Checking tinystr v0.8.4
+    Checking thiserror v2.0.21
+    Checking font-types v0.12.7
+    Checking icu_locale_core v2.3.0
+    Checking zerotrie v0.2.5
+    Checking potential_utf v0.1.6
+    Checking icu_provider v2.3.1
+    Checking naga-types v30.0.1
+    Checking zerocopy v0.8.63
+    Checking icu_collections v2.3.0
+    Checking read-fonts v0.41.0
+    Checking half v2.7.1
+   Compiling zbus_xml v5.2.1
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling snafu-derive v0.8.9
+   Compiling zbus-lockstep v0.5.2
+    Checking naga v30.0.1
+   Compiling zbus_macros v5.19.0
+   Compiling async-recursion v1.2.0
+    Checking zbus v5.19.0
+   Compiling snafu v0.8.9
+   Compiling zbus-lockstep-macros v0.5.2
+    Checking wgpu-types v30.0.1
+    Checking wgpu-naga-bridge v30.0.1
+    Checking atspi-common v0.13.0
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+    Checking icu_properties v2.3.0
+    Checking icu_locale_fallback v2.3.0
+    Checking read-fonts v0.46.0
+    Checking gpu-allocator v0.28.0
+   Compiling thiserror-impl v1.0.69
+    Checking thiserror v1.0.69
+    Checking wgpu-hal v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu-hal)
+    Checking skrifa v0.49.0
+    Checking icu_segmenter v2.3.0
+    Checking parley_data v0.12.0
+    Checking fontique v0.12.0
+    Checking harfrust v0.12.0
+    Checking icu_normalizer v2.3.0
+   Compiling phf_macros v0.14.0
+    Checking phf v0.14.0
+    Checking parley_engine v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley_engine)
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking calloop v0.13.0
+   Compiling wgsl-rs v0.1.0-beta.6
+    Checking atspi-proxies v0.13.0
+    Checking skrifa v0.44.0
+   Compiling futures-macro v0.3.34
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpu)
+    Checking futures-util v0.3.34
+    Checking swash v0.2.10
+    Checking atspi v0.29.0
+    Checking winit v0.30.13 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/winit)
+    Checking wgpu-core v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu-core)
+    Checking parley v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley)
+    Checking accesskit_atspi_common v0.21.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_atspi_common)
+   Compiling fearless_simd_macros v0.1.0
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/canvas)
+    Checking wgpu v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu)
+    Checking accesskit_unix v0.24.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_unix)
+    Checking tiny-xlib v0.2.5
+   Compiling zbus_utils v6.0.0
+    Checking accesskit_winit v0.34.1
+    Checking softbuffer v0.4.8 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/softbuffer)
+   Compiling zbus_macros v6.0.0
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/host)
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/state)
+    Checking zbus v6.0.0
+    Checking gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 10s

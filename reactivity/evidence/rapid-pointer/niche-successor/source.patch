@@ -1,0 +1,719 @@
+diff --git a/reactivity/crates/gpui/src/runtime/input.rs b/reactivity/crates/gpui/src/runtime/input.rs
+index d5d956c254..ecb2722954 100644
+--- a/reactivity/crates/gpui/src/runtime/input.rs
++++ b/reactivity/crates/gpui/src/runtime/input.rs
+@@ -2,6 +2,10 @@
+ use super::{Commit, Error, NodeKind, Runtime, Target, View, Win};
+ use crate::remote::LaneSet;
+ use crate::{Point, ScrollDelta};
++use std::{
++    fmt,
++    num::{NonZeroU32, NonZeroU64},
++};
+ 
+ /// One portable mouse stream. Points are physical window coordinates; wheel
+ /// displacement is window-logical, with positive values scrolling right/down.
+@@ -19,17 +23,49 @@ pub enum PointerEvent {
+ }
+ 
+ /// Caller-owned state for one mouse stream, without an allocation or an owner
+-/// reference. A press retains only a window-qualified target; release performs
++/// reference. A press retains a window-qualified target; release performs
+ /// a fresh acknowledged-sheet hit test. Moving a session to another window
+ /// cannot transfer that press's authority.
+-#[derive(Debug, Default)]
+ pub struct PointerSession {
+-    position: Option<Point>,
+-    pressed: Option<Target>,
++    position: Position,
++    pressed: Option<Pressed>,
++}
++// Finite x bits plus one cannot be zero or MAX. MAX represents absence;
++// NonZeroU32 also preserves the optional session's compiler niche.
++struct Position {
++    x: NonZeroU32,
++    y: f32,
++}
++#[derive(Clone, Copy)]
++struct Pressed {
++    target: Target,
++    focus_sequence: Option<NonZeroU64>,
++}
++impl Default for PointerSession {
++    fn default() -> Self {
++        Self {
++            position: Position {
++                x: NonZeroU32::MAX,
++                y: 0.,
++            },
++            pressed: None,
++        }
++    }
++}
++impl fmt::Debug for PointerSession {
++    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++        f.debug_struct("PointerSession")
++            .field("position", &self.position())
++            .field("pressed", &self.pressed.map(|pressed| pressed.target))
++            .finish()
++    }
+ }
+ impl PointerSession {
+     pub fn position(&self) -> Option<Point> {
+-        self.position
++        (self.position.x != NonZeroU32::MAX).then(|| Point {
++            x: f32::from_bits(self.position.x.get() - 1),
++            y: self.position.y,
++        })
+     }
+ 
+     /// Cancel a gesture while keeping the last position. This does not change
+@@ -67,6 +103,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+     /// the gesture. A rejected stale release cannot be retried after a new
+     /// presentation. A fresh hit on a newer acknowledged sheet may activate
+     /// the same surviving target.
++    /// A release may also use P while only its own caret-focus paint awaits ACK;
++    /// any intervening source, viewport or presentation change revokes that proof.
++    /// The built-in inspector retains strict ACK admission because its epoch
++    /// captions can change geometry during an otherwise focus-only publication.
+     ///
+     /// A move extends a pressed input's selection through current geometry.
+     /// Other moves, cancellation and an unpaired release prepare no frame.
+@@ -85,14 +125,20 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+         };
+         match event {
+             PointerEvent::Move(point) => {
+-                session.position = (point.x.is_finite() && point.y.is_finite()).then_some(point);
+-                if session.position.is_none() {
++                if point.x.is_finite() && point.y.is_finite() {
++                    session.position = Position {
++                        x: NonZeroU32::new(point.x.to_bits() + 1)
++                            .expect("finite x bits plus one are nonzero"),
++                        y: point.y,
++                    };
++                } else {
++                    session.position.x = NonZeroU32::MAX;
+                     session.cancel();
+                 }
+             }
+-            PointerEvent::Leave => session.position = None,
++            PointerEvent::Leave => session.position.x = NonZeroU32::MAX,
+             PointerEvent::Wheel(delta) => {
+-                if let Some(point) = session.position {
++                if let Some(point) = session.position() {
+                     return self.scroll_at_2d(point, delta);
+                 }
+             }
+@@ -103,11 +149,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+         runtime.changed_nodes = 0;
+         if matches!(event, PointerEvent::Move(_))
+             && !runtime.inspector_picking()
+-            && let Some(target) = session.pressed
++            && let Some(Pressed { target, .. }) = session.pressed
+         {
+             if let Ok(index) = runtime.resolve_index(target) {
+                 if runtime.nodes[index].kind() == NodeKind::Input {
+-                    let result = runtime.select_pointer(target, session.position.unwrap(), true);
++                    let result = runtime.select_pointer(target, session.position().unwrap(), true);
+                     if matches!(result, Err(Error::StaleTarget)) {
+                         session.cancel();
+                     }
+@@ -122,9 +168,13 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+         {
+             return Ok(runtime.commit());
+         }
+-        runtime.current_presentation()?;
++        if let Some(pressed) = pressed.filter(|_| matches!(event, PointerEvent::Release)) {
++            runtime.pointer_release_presentation(pressed)?;
++        } else {
++            runtime.current_presentation()?;
++        }
+         let picking = runtime.inspector_picking();
+-        let hit = session.position.and_then(|point| {
++        let hit = session.position().and_then(|point| {
+             if picking {
+                 runtime.inspector_pick(point)
+             } else {
+@@ -134,18 +184,40 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             }
+         });
+         if matches!(event, PointerEvent::Press) {
+-            session.pressed = hit;
+             let previous = runtime.focused;
+             if let Some(target) = hit.filter(|_| !picking) {
+                 if runtime.nodes[runtime.resolve_index(target)?].kind() == NodeKind::Input {
+-                    return runtime.select_pointer(target, session.position.unwrap(), false);
++                    let commit =
++                        runtime.select_pointer(target, session.position().unwrap(), false)?;
++                    session.pressed = Some(Pressed {
++                        target,
++                        focus_sequence: None,
++                    });
++                    return Ok(commit);
+                 }
+                 runtime.focus(target)?;
+             } else {
+                 runtime.focused = None;
+             }
+-            return runtime.publish_focus_change(previous);
+-        } else if let Some(target) = pressed.filter(|target| Some(*target) == hit) {
++            let commit = runtime.publish_focus_change(previous)?;
++            // Press entered through current P. This call changes only focus:
++            // no model/route callback or description runs before recording C.
++            let focus_sequence = if !runtime.inspector_enabled()
++                && runtime.prepared.is_some()
++                && runtime.presentation_epoch.checked_add(1) == Some(runtime.source_epoch)
++            {
++                runtime.latest_token.map(|token| token.sequence)
++            } else {
++                None
++            };
++            session.pressed = hit.map(|target| Pressed {
++                target,
++                focus_sequence,
++            });
++            return Ok(commit);
++        } else if let Some(Pressed { target, .. }) =
++            pressed.filter(|pressed| Some(pressed.target) == hit)
++        {
+             if picking {
+                 return runtime.inspector_select(target);
+             }
+@@ -247,6 +319,33 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+     }
+ }
+ 
++impl<M: View + 'static> Runtime<M> {
++    fn pointer_release_presentation(&self, pressed: Pressed) -> Result<(), Error> {
++        self.current_presentation().or_else(|error| {
++            // Only this press's successful focus paint may still be pending.
++            // Epoch rejects even no-op source edits; token rejects resize/DPI
++            // ABA and re-preparation at the same source epoch. Hit geometry and
++            // metadata remain in P; activation still resolves and admits the target.
++            if self.logical_valid
++                && !self.dirty
++                && self.presentation_valid
++                && self.prepared.is_some()
++                && self.requested_size == self.presentation_size
++                && self.requested_scale_factor == self.presentation_scale_factor
++                && self.presentation_epoch.checked_add(1) == Some(self.source_epoch)
++                && self.complete_epoch == self.source_epoch
++                && pressed.focus_sequence.is_some()
++                && self.latest_token.map(|token| token.sequence) == pressed.focus_sequence
++                && self.sites.resolve(pressed.target).is_some()
++            {
++                Ok(())
++            } else {
++                Err(error)
++            }
++        })
++    }
++}
++
+ impl<M: View + 'static> Runtime<M> {
+     fn focusable(&self, identity: u64) -> bool {
+         self.by_identity
+@@ -311,3 +410,123 @@ impl<M: View + 'static> Runtime<M> {
+         Ok(self.commit())
+     }
+ }
++
++#[cfg(test)]
++mod focus_release_tests {
++    use super::*;
++    use crate::{WindowOptions, prelude::*};
++
++    struct Page {
++        value: Signal<String>,
++        calls: usize,
++    }
++    impl View for Page {
++        fn sources() -> Sources<Self> {
++            Sources::new().direct(Source::new(
++                FieldId::new(1),
++                "value",
++                |m| &m.value,
++                |m| &mut m.value,
++            ))
++        }
++        fn view(&self) -> El<'_> {
++            column((
++                text_input(&self.value).w(240).h(32),
++                checkbox("check", false)
++                    .w(240)
++                    .h(40)
++                    .on_click(|m: &mut Self| m.calls += 1),
++            ))
++        }
++    }
++    fn ack(win: &mut Win<Page>) {
++        let token = win.with_scene(|_, token| token).unwrap();
++        win.presented(token).unwrap();
++    }
++    fn page() -> Win<Page> {
++        let mut win = Win::recording(
++            Page {
++                value: Signal::new("search".into()),
++                calls: 0,
++            },
++            WindowOptions {
++                size: [720, 900],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        ack(&mut win);
++        win.click(win.input()).unwrap();
++        ack(&mut win);
++        win
++    }
++
++    #[test]
++    fn failed_focus_preparation_and_epoch_exhaustion_leave_no_pressed_authority() {
++        for exhausted_source in [false, true] {
++            let mut win = page();
++            let (old_epoch, next) = {
++                let mut runtime = win.runtime_mut().unwrap();
++                let saved = (runtime.source_epoch, runtime.next_presentation);
++                if exhausted_source {
++                    runtime.source_epoch = u64::MAX;
++                    runtime.presentation_epoch = u64::MAX;
++                    runtime.complete_epoch = u64::MAX;
++                } else {
++                    runtime.next_presentation = NonZeroU64::new(u64::MAX).unwrap();
++                }
++                saved
++            };
++            let mut pointer = PointerSession::default();
++            win.pointer_event(&mut pointer, PointerEvent::Move(Point { x: 12., y: 52. }))
++                .unwrap();
++            assert_eq!(
++                win.pointer_event(&mut pointer, PointerEvent::Press),
++                Err(Error::EpochExhausted)
++            );
++            assert!(pointer.pressed.is_none());
++            {
++                let mut runtime = win.runtime_mut().unwrap();
++                runtime.next_presentation = next;
++                if exhausted_source {
++                    runtime.source_epoch = old_epoch;
++                    runtime.presentation_epoch = old_epoch;
++                    runtime.complete_epoch = old_epoch;
++                }
++            }
++            win.update(|_| {}).unwrap();
++            ack(&mut win);
++            win.pointer_event(&mut pointer, PointerEvent::Release)
++                .unwrap();
++            assert_eq!(win.root().unwrap().calls, 0);
++        }
++    }
++
++    #[test]
++    fn private_press_proof_uses_the_existing_session_header() {
++        println!(
++            "POINTER_LAYOUT point={} option_point={} target={} pressed={} option_pressed={} position={} optional_position={} session={} optional_session={} session_align={} runtime={} win={}",
++            size_of::<Point>(),
++            size_of::<Option<Point>>(),
++            size_of::<Target>(),
++            size_of::<Pressed>(),
++            size_of::<Option<Pressed>>(),
++            size_of::<Position>(),
++            size_of::<Option<Position>>(),
++            size_of::<PointerSession>(),
++            size_of::<Option<PointerSession>>(),
++            align_of::<PointerSession>(),
++            size_of::<Runtime<Page>>(),
++            size_of::<Win<Page>>(),
++        );
++        if cfg!(target_pointer_width = "64") {
++            assert_eq!(size_of::<Pressed>(), 24);
++            assert_eq!(size_of::<Option<Pressed>>(), 24);
++            assert_eq!(size_of::<Position>(), 8);
++            assert_eq!(size_of::<Option<Position>>(), 8);
++            assert_eq!(size_of::<PointerSession>(), 32);
++            assert_eq!(size_of::<Option<PointerSession>>(), 32);
++            assert_eq!(align_of::<PointerSession>(), 8);
++        }
++    }
++}
+diff --git a/reactivity/crates/gpui/tests/pointer_focus.rs b/reactivity/crates/gpui/tests/pointer_focus.rs
+new file mode 100644
+index 0000000000..f90db0a25b
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/pointer_focus.rs
+@@ -0,0 +1,374 @@
++//! Own-focus release admission uses public non-automatic presentation owners.
++use gpui::{Error, Role, WindowOptions, prelude::*};
++
++struct Page {
++    value: Signal<String>,
++    label: Signal<String>,
++    checked: bool,
++    calls: usize,
++    x: f32,
++    show: bool,
++    replacement: bool,
++    broken: bool,
++}
++impl Default for Page {
++    fn default() -> Self {
++        Self {
++            value: Signal::new("search".into()),
++            label: Signal::new("check".into()),
++            checked: false,
++            calls: 0,
++            x: 0.,
++            show: true,
++            replacement: false,
++            broken: false,
++        }
++    }
++}
++impl Page {
++    const VALUE: Source<Self, String> =
++        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(2), "label", |m| &m.label, |m| &mut m.label);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::VALUE).field(Self::LABEL)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text_input(&self.value).name("input").w(240).h(32),
++            self.show.then(|| {
++                let control = if self.replacement {
++                    button("replacement")
++                } else {
++                    checkbox("check", self.checked)
++                };
++                control
++                    .name(&self.label)
++                    .w(240)
++                    .h(40)
++                    .transform(if self.broken {
++                        Affine::scale(0., 1.)
++                    } else {
++                        Affine::translation(self.x, 0.)
++                    })
++                    .on_click(|m: &mut Self| {
++                        m.checked = !m.checked;
++                        m.calls += 1;
++                    })
++            }),
++        ))
++    }
++}
++fn ack(win: &mut Win<Page>) {
++    let token = win.with_scene(|_, token| token).unwrap();
++    win.presented(token).unwrap();
++}
++fn page(inspector: bool) -> Win<Page> {
++    let options = WindowOptions {
++        size: [720, 900],
++        ..Default::default()
++    };
++    let mut win = if inspector {
++        Win::recording_with_inspector(Page::default(), options)
++    } else {
++        Win::recording(Page::default(), options)
++    }
++    .unwrap();
++    ack(&mut win);
++    // Unlike logical focus alone, clicking establishes the collapsed caret
++    // whose removal needs the own-focus candidate on the subsequent press.
++    win.click(win.query().name("input").one().unwrap()).unwrap();
++    ack(&mut win);
++    win
++}
++fn press(win: &mut Win<Page>) -> PointerSession {
++    let mut pointer = PointerSession::default();
++    win.pointer_event(&mut pointer, PointerEvent::Move(Point { x: 12., y: 52. }))
++        .unwrap();
++    let commit = win
++        .pointer_event(&mut pointer, PointerEvent::Press)
++        .unwrap();
++    assert_eq!(commit.source_epoch, commit.presentation_epoch + 1);
++    assert_eq!(commit.prepared_epoch, Some(commit.source_epoch));
++    assert_eq!(commit.changed_nodes, 0);
++    assert_eq!(win.root().unwrap().calls, 0);
++    pointer
++}
++fn published_checked(win: &Win<Page>) -> bool {
++    let mut value = None;
++    win.visit(|part| {
++        if part.role() == Role::CheckBox {
++            value = part.checked();
++        }
++    })
++    .unwrap();
++    value.unwrap()
++}
++
++#[test]
++fn own_focus_candidate_does_not_lose_rapid_release_or_publish_unacknowledged_state() {
++    let mut win = page(false);
++    let mut pointer = press(&mut win);
++    let focus_token = win.with_scene(|_, token| token).unwrap();
++    let target = win.focused().unwrap().unwrap();
++    assert!(!published_checked(&win));
++    let commit = win
++        .pointer_event(&mut pointer, PointerEvent::Release)
++        .unwrap();
++    assert_eq!(win.root().unwrap().calls, 1);
++    assert!(win.root().unwrap().checked);
++    assert!(commit.prepared_epoch.is_some());
++    assert!(!published_checked(&win));
++    assert_eq!(win.presented(focus_token), Err(Error::StalePresentation));
++    ack(&mut win);
++    assert!(published_checked(&win));
++    assert_eq!(win.focused().unwrap(), Some(target));
++    win.pointer_event(&mut pointer, PointerEvent::Release)
++        .unwrap();
++    assert_eq!(win.root().unwrap().calls, 1);
++}
++
++#[test]
++fn ack_before_release_uses_the_ordinary_current_sheet() {
++    let mut win = page(false);
++    let mut pointer = press(&mut win);
++    ack(&mut win);
++    win.pointer_event(&mut pointer, PointerEvent::Release)
++        .unwrap();
++    assert_eq!(win.root().unwrap().calls, 1);
++}
++
++#[test]
++fn intervening_model_noop_semantic_geometry_replacement_and_failure_revoke_focus_proof() {
++    for change in 0..6 {
++        let mut win = page(false);
++        let mut pointer = press(&mut win);
++        match change {
++            0 => {
++                win.update(|_| {}).unwrap();
++            }
++            1 => {
++                win.set(Page::LABEL, "renamed".into()).unwrap();
++            }
++            2 => {
++                win.update(|m| m.x = 20.).unwrap();
++            }
++            3 => {
++                win.update(|m| m.replacement = true).unwrap();
++            }
++            4 => {
++                win.update(|m| m.show = false).unwrap();
++                win.update(|m| m.show = true).unwrap();
++            }
++            5 => {
++                assert!(win.update(|m| m.broken = true).is_err());
++            }
++            _ => unreachable!(),
++        }
++        assert_eq!(
++            win.pointer_event(&mut pointer, PointerEvent::Release),
++            Err(Error::PresentationStale),
++            "change {change}"
++        );
++        assert_eq!(win.root().unwrap().calls, 0);
++        win.update(|m| {
++            m.broken = false;
++            m.x = 0.;
++        })
++        .unwrap();
++        ack(&mut win);
++        win.pointer_event(&mut pointer, PointerEvent::Release)
++            .unwrap();
++        assert_eq!(win.root().unwrap().calls, 0);
++    }
++}
++
++#[test]
++fn viewport_aba_and_surface_loss_revoke_the_exact_focus_candidate() {
++    for change in 0..3 {
++        let mut win = page(false);
++        let mut pointer = press(&mut win);
++        let focus_token = win.with_scene(|_, token| token).unwrap();
++        match change {
++            0 => {
++                win.resize([720, 901]).unwrap();
++                win.resize([720, 900]).unwrap();
++            }
++            1 => {
++                win.resize_scaled([720, 900], 2.).unwrap();
++                win.resize_scaled([720, 900], 1.).unwrap();
++            }
++            2 => {
++                win.presentation_lost().unwrap();
++            }
++            _ => unreachable!(),
++        }
++        if change != 2 {
++            assert_eq!(win.presented(focus_token), Err(Error::StalePresentation));
++        }
++        assert_eq!(
++            win.pointer_event(&mut pointer, PointerEvent::Release),
++            Err(Error::PresentationStale)
++        );
++        ack(&mut win);
++        win.pointer_event(&mut pointer, PointerEvent::Release)
++            .unwrap();
++        assert_eq!(win.root().unwrap().calls, 0);
++    }
++}
++
++#[test]
++fn equal_viewport_and_fresh_hit_inside_own_focus_paint_keep_the_gesture() {
++    let mut win = page(false);
++    let mut pointer = press(&mut win);
++    win.resize_scaled([720, 900], 1.).unwrap();
++    for x in [500., 12.] {
++        win.pointer_event(&mut pointer, PointerEvent::Move(Point { x, y: 52. }))
++            .unwrap();
++    }
++    win.pointer_event(&mut pointer, PointerEvent::Release)
++        .unwrap();
++    assert_eq!(win.root().unwrap().calls, 1);
++}
++
++#[test]
++fn focus_proof_never_crosses_window_namespaces() {
++    let mut first = page(false);
++    let mut second = page(false);
++    let mut pointer = press(&mut first);
++    let _second_pointer = press(&mut second);
++    assert_eq!(
++        second.pointer_event(&mut pointer, PointerEvent::Release),
++        Err(Error::PresentationStale)
++    );
++    ack(&mut first);
++    first
++        .pointer_event(&mut pointer, PointerEvent::Release)
++        .unwrap();
++    assert_eq!(first.root().unwrap().calls, 0);
++    assert_eq!(second.root().unwrap().calls, 0);
++}
++
++#[test]
++fn cancellation_and_failed_new_press_consume_the_own_focus_proof() {
++    for event in [
++        PointerEvent::Cancel,
++        PointerEvent::Leave,
++        PointerEvent::Move(Point {
++            x: f32::NAN,
++            y: 52.,
++        }),
++        PointerEvent::Move(Point {
++            x: 12.,
++            y: f32::INFINITY,
++        }),
++        PointerEvent::Wheel(ScrollDelta { x: 0., y: 1. }),
++        PointerEvent::Press,
++    ] {
++        let mut win = page(false);
++        let mut pointer = press(&mut win);
++        let result = win.pointer_event(&mut pointer, event);
++        assert!(
++            result.is_ok() || matches!(result, Err(Error::NotHittable | Error::PresentationStale))
++        );
++        ack(&mut win);
++        win.pointer_event(&mut pointer, PointerEvent::Move(Point { x: 12., y: 52. }))
++            .unwrap();
++        win.pointer_event(&mut pointer, PointerEvent::Release)
++            .unwrap();
++        assert_eq!(win.root().unwrap().calls, 0, "event {event:?}");
++    }
++}
++
++#[test]
++fn built_in_inspector_requires_ack_because_epoch_captions_can_change_layout() {
++    let mut win = page(true);
++    let mut pointer = press(&mut win);
++    assert_eq!(
++        win.pointer_event(&mut pointer, PointerEvent::Release),
++        Err(Error::PresentationStale)
++    );
++    ack(&mut win);
++    win.pointer_event(&mut pointer, PointerEvent::Press)
++        .unwrap();
++    win.pointer_event(&mut pointer, PointerEvent::Release)
++        .unwrap();
++    assert_eq!(win.root().unwrap().calls, 1);
++}
++
++#[test]
++fn absent_point_encoding_preserves_finite_bits_and_public_debug_shape() {
++    let mut win = page(false);
++    let mut pointer = PointerSession::default();
++    assert_eq!(pointer.position(), None);
++    assert_eq!(
++        format!("{pointer:?}"),
++        "PointerSession { position: None, pressed: None }"
++    );
++    // Both signs, zero, subnormals, normal boundaries and maximum finite.
++    let finite_bits = [
++        0,
++        1,
++        0x007f_ffff,
++        0x0080_0000,
++        0x3f7f_ffff,
++        0x3f80_0000,
++        0x7f7f_ffff,
++        0x8000_0000,
++        0x8000_0001,
++        0x807f_ffff,
++        0x8080_0000,
++        0xbf80_0000,
++        0xff7f_ffff,
++    ];
++    for x in finite_bits {
++        for y in finite_bits {
++            let point = Point {
++                x: f32::from_bits(x),
++                y: f32::from_bits(y),
++            };
++            win.pointer_event(&mut pointer, PointerEvent::Move(point))
++                .unwrap();
++            let actual = pointer.position().unwrap();
++            assert_eq!([actual.x.to_bits(), actual.y.to_bits()], [x, y]);
++        }
++    }
++    // Include the reserved word and its predecessor: neither is finite input.
++    for bits in [
++        0x7f80_0000,
++        0xff80_0000,
++        0x7fc0_0000,
++        0xffff_fffe,
++        0xffff_ffff,
++    ] {
++        for point in [
++            Point {
++                x: f32::from_bits(bits),
++                y: 0.,
++            },
++            Point {
++                x: 0.,
++                y: f32::from_bits(bits),
++            },
++        ] {
++            let mut win = page(false);
++            let mut pressed = press(&mut win);
++            win.pointer_event(&mut pressed, PointerEvent::Move(point))
++                .unwrap();
++            assert_eq!(pressed.position(), None);
++            ack(&mut win);
++            win.pointer_event(&mut pressed, PointerEvent::Move(Point { x: 12., y: 52. }))
++                .unwrap();
++            win.pointer_event(&mut pressed, PointerEvent::Release)
++                .unwrap();
++            assert_eq!(win.root().unwrap().calls, 0);
++        }
++    }
++    if cfg!(target_pointer_width = "64") {
++        assert_eq!(size_of::<PointerSession>(), 32);
++        assert_eq!(size_of::<Option<PointerSession>>(), 32);
++        assert_eq!(align_of::<PointerSession>(), 8);
++    }
++}
