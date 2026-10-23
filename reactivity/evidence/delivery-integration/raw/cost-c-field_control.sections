@@ -1,0 +1,35 @@
+/tmp/gpui-delivery-integration-captures/cost-c-field_control.elf  :
+section                 size       addr
+.interp                   83        736
+.note.ABI-tag             32        820
+.dynsym                 1920        856
+.gnu.version             160       2776
+.gnu.version_r           384       2936
+.gnu.hash                 28       3320
+.dynstr                 1187       3348
+.rela.dyn             213864       4536
+.rela.plt                 48     218400
+.gcc_except_table      82780     218448
+.rodata              6512800     301232
+.eh_frame_hdr          40812    6814032
+.eh_frame             275192    6854848
+.text                3702711    7134144
+.init                     27   10836856
+.fini                     13   10836884
+.plt                      48   10836912
+.tdata                   928   10841056
+.tbss                   3176   10841984
+.fini_array                8   10841984
+.init_array               16   10841992
+.data.rel.ro          155192   10842008
+.dynamic                 480   10997200
+.got                   14896   10997680
+.got.plt                  40   11012576
+.relro_padding          1528   11012616
+.tm_clone_table            0   11016712
+.data                   2744   11016712
+.bss                     283   11019456
+.comment                 166          0
+Total               11011546
+
+

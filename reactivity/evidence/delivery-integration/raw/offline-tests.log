@@ -1,0 +1,4 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+     Running unittests src/lib.rs (/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/322174a90d30998e/out/gpui_gpu-322174a90d30998e)
+     Running tests/presentation.rs (/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/4a46a30efdbcb764/out/presentation-4a46a30efdbcb764)
+     Running tests/render.rs (/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/acaed382d6bf052f/out/render-acaed382d6bf052f)

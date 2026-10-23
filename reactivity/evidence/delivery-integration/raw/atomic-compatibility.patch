@@ -1,0 +1,117 @@
+diff --git a/reactivity/crates/algebra-lab/src/lib.rs b/reactivity/crates/algebra-lab/src/lib.rs
+index 7d480b6441..4f73b4c038 100644
+--- a/reactivity/crates/algebra-lab/src/lib.rs
++++ b/reactivity/crates/algebra-lab/src/lib.rs
+@@ -271,7 +271,7 @@ impl<A: Algebra> Default for Dynamic<A> {
+ impl<A: Algebra> Dynamic<A> {
+     pub fn new() -> Self {
+         let arena = NEXT_ARENA
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+             .expect("algebra arena identity exhausted");
+         Self {
+             arena,
+diff --git a/reactivity/crates/canvas/src/image.rs b/reactivity/crates/canvas/src/image.rs
+index 6eec722f0f..bd0235cf79 100644
+--- a/reactivity/crates/canvas/src/image.rs
++++ b/reactivity/crates/canvas/src/image.rs
+@@ -185,7 +185,7 @@ impl Image {
+     fn new(width: u32, height: u32, pixels: Pixels) -> Result<Self, Error> {
+         static NEXT: AtomicU64 = AtomicU64::new(1);
+         let key = NEXT
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+             .map_err(|_| Error::ResourceLimit)?;
+         Ok(Self(Arc::new(ImageData {
+             key: ImageKey(key),
+diff --git a/reactivity/crates/canvas/src/text.rs b/reactivity/crates/canvas/src/text.rs
+index 0ce2392694..810a7af632 100644
+--- a/reactivity/crates/canvas/src/text.rs
++++ b/reactivity/crates/canvas/src/text.rs
+@@ -123,7 +123,7 @@ impl FontFace {
+         }
+         let raster_key = CacheKey::new();
+         let id = NEXT_FONT
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
+             .map_err(|_| Error::ResourceLimit)?;
+         #[cfg(test)]
+         if bundled {
+diff --git a/reactivity/crates/core/src/tree.rs b/reactivity/crates/core/src/tree.rs
+index ccb431f7fb..e2c9bd92c9 100644
+--- a/reactivity/crates/core/src/tree.rs
++++ b/reactivity/crates/core/src/tree.rs
+@@ -62,7 +62,7 @@ impl Default for Tree {
+ impl Tree {
+     pub fn new() -> Self {
+         let arena = NEXT_ARENA
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+             .expect("tree arena identity exhausted");
+         Self {
+             arena,
+diff --git a/reactivity/crates/gpui/src/identity.rs b/reactivity/crates/gpui/src/identity.rs
+index 5c802de7ac..6e1551569e 100644
+--- a/reactivity/crates/gpui/src/identity.rs
++++ b/reactivity/crates/gpui/src/identity.rs
+@@ -27,7 +27,7 @@ pub(crate) struct Sites {
+ impl Sites {
+     pub(crate) fn new() -> Self {
+         let next = NEXT_WINDOW
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+                 value.checked_add(1)
+             })
+             .expect("window namespace exhausted");
+diff --git a/reactivity/crates/gpui/src/native/accessibility.rs b/reactivity/crates/gpui/src/native/accessibility.rs
+index 89d6c46f28..0525d6a36c 100644
+--- a/reactivity/crates/gpui/src/native/accessibility.rs
++++ b/reactivity/crates/gpui/src/native/accessibility.rs
+@@ -100,7 +100,7 @@ impl Shared {
+     fn set_active(&self, active: bool) {
+         if self
+             .session
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |session| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |session| {
+                 if (session & 1 != 0) == active {
+                     Some(session)
+                 } else {
+diff --git a/reactivity/crates/host/src/lib.rs b/reactivity/crates/host/src/lib.rs
+index 68f0efecbc..78f2aa62aa 100644
+--- a/reactivity/crates/host/src/lib.rs
++++ b/reactivity/crates/host/src/lib.rs
+@@ -36,7 +36,7 @@ impl WakeGate {
+         // execution possible when that check observes an older empty cursor.
+         match self
+             .0
+-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |state| {
++            .try_update(Ordering::AcqRel, Ordering::Acquire, |state| {
+                 (state != CLOSED).then_some(PENDING)
+             }) {
+             Ok(IDLE) => {
+diff --git a/reactivity/crates/template-lab/src/lib.rs b/reactivity/crates/template-lab/src/lib.rs
+index f56b79db32..1c434c2f32 100644
+--- a/reactivity/crates/template-lab/src/lib.rs
++++ b/reactivity/crates/template-lab/src/lib.rs
+@@ -102,7 +102,7 @@ impl Scene {
+     }
+     pub fn with_capacity(capacity: usize) -> Self {
+         let id = NEXT_SCENE
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+             .expect("scene identities exhausted");
+         Self {
+             id,
+diff --git a/reactivity/ports/hummingbird/src/queue_playback.rs b/reactivity/ports/hummingbird/src/queue_playback.rs
+index 07687252d2..8a01a3fe45 100644
+--- a/reactivity/ports/hummingbird/src/queue_playback.rs
++++ b/reactivity/ports/hummingbird/src/queue_playback.rs
+@@ -51,7 +51,7 @@ pub struct PlaybackQueue {
+ impl PlaybackQueue {
+     pub fn new() -> Result<Self, QueueError> {
+         let previous = NEXT_SESSION
+-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
++            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+                 value.checked_add(1)
+             })
+             .map_err(|_| QueueError::SessionExhausted)?;

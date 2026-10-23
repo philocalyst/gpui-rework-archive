@@ -180,12 +180,18 @@ preserved together. Those Rust 1.97 costs are relative to typed-delivery f9;
 the composed nightly kernel needs its own matched comparison. Historical
 [statistics traversal](evidence/uniform-packet/stats-csr/ROOT-REVIEW.md) and
 [packed cursor](evidence/uniform-packet/packed-csr/ROOT-REVIEW.md) experiments
-are also archived without adoption or timing claims.
+are also archived without adoption or timing claims. The
+[composed kernel's matched comparison](evidence/delivery-integration/ROOT-REVIEW.md)
+is now archived: ordinary bound-owner storage and linked code shrink, while
+typed destination fanout duplicates substantial code and grows its own frame.
+The mutable-alias failure blocks that exact source; its repair remains separate.
 
 The [endpoint spare-bit cursor](evidence/uniform-packet/endpoint-csr/ROOT-REVIEW.md)
 also preserves shipping GPU bytes while deleting CPU cursor storage. Its
 complete packets, fault controls and static costs are independently verified;
-a stronger descending-cursor successor remains under qualification. The
+a stronger [descending-cursor successor](evidence/uniform-packet/descending-csr/ROOT-REVIEW.md)
+passes correctness, fault, foreign-compile and static-cost qualification. Its
+matched timing regression campaign remains separate and Main is unchanged. The
 [one-word short-text experiment](evidence/word-text/ROOT-REVIEW.md) passes six
 strict-provenance Miri target/model gates and two deliberate broken controls,
 but remains unadopted because target-byte portability, equality and actual

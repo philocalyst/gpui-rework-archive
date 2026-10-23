@@ -1,0 +1,7 @@
+{
+  "test_overlay": "cb83d485451e2cbd69da95b68f58409a4dee5abf",
+  "kernel": "e31ffdbc15c8e786e822715c7c0d00d95629f97c",
+  "source_sha256": "90cab9b7018360e3441984cd0490245ef3dc92f03d086cf48eb14f580c9fa3e2",
+  "owner": "Root independent reproduction; copied read-only after completed gate",
+  "status": "blocking failure; initial parser mistake retained alongside independent-summary.json"
+}
