@@ -79,6 +79,14 @@ zero-source deferral must prove fallible admission before init-tracker mutation,
 queue ordering, outer-lock callback safety and portable cleanup; descriptor bytes
 are not process-memory measurements.
 
+The [used-prefix binding cut](evidence/buffer-prefix/README.md) now avoids Core
+initialization of unbound storage-buffer capacity without resizing allocations,
+adding resources or changing retained packet ownership. Packed image WORDS
+bindings keep their complete reserved payload domain. Its exact Vulkan clears,
+shipping tests and foreign library checks are qualified separately from the
+preceding full native campaign. Larger atlas/zero-source changes still need
+their own lifecycle, platform and resource-placement proof.
+
 The [combined inspector/capability qualification](evidence/inspector-params-main/README.md)
 now covers the actual merged source and ordinary Hummingbird/inspector clients.
 The matched caret transaction is [rejected](evidence/caret-transaction/matched-rejected/README.md)

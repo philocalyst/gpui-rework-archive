@@ -1,9 +1,9 @@
 # Shipping core code ledger
 
-Latest measured source `a50b3b85121be0a5741b4733db977173c01806d2`:
-**30,681** non-test code lines, including 18 build-script lines. Original GPUI
+Latest measured source `7248895bce3433fefad44d6e3272bba998621875`:
+**30,692** non-test code lines, including 18 build-script lines. Original GPUI
 `41a42eb96d6c04e5e71f3577d12934d4de569b20`: **56,922**, including 28 build-script
-lines. [The exact source snapshot](../inspector-params-main/core-lines.json) records every counted file.
+lines. [The exact source snapshot](../buffer-prefix/core-lines.json) records every counted file.
 Comments, tests, blanks, examples, vendors and support tools are excluded; host
 shader proof/generator source inside the shipping library remains charged.
 
@@ -18,7 +18,8 @@ mounted selection with canonical state replies adds 47. Outlining its opt-in
 activation adds one attribute line, giving 30,468. The flat sibling reconciliation
 index then adds 45, giving 30,513. The qualified rapid-focus pointer correction
 adds 86, giving 30,599; its public tests and private layout/admission
-tests are excluded. Inspector P/C admission adds 82, giving 30,681. Hummingbird
+tests are excluded. Inspector P/C admission adds 82, giving 30,681. Narrowing GPU
+storage bindings adds 11, giving 30,692. Hummingbird
 queue/controller source is application code and
 remains outside this core bill. The lazy indirect-validation cut
 changes vendor source only; its separate source/test/allocator bill is retained

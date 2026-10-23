@@ -228,6 +228,15 @@ impl Buffer {
             queue.write_buffer(&self.handle, 0, bytes);
         }
     }
+    fn binding<T>(&self, rows: &[T]) -> wgpu::BindingResource<'_> {
+        // Runtime arrays require one element even when no shader path reads it.
+        // Keep spare allocation capacity outside the shader's visible range.
+        wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+            buffer: &self.handle,
+            offset: 0,
+            size: wgpu::BufferSize::new((rows.len().max(1) * size_of::<T>()) as u64),
+        })
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -916,15 +925,20 @@ impl RendererState {
                     },
                     wgpu::BindGroupEntry {
                         binding: 1,
-                        resource: self.draws.handle.as_entire_binding(),
+                        resource: if self.images.is_some() {
+                            // Packed image pixels follow the record prefix.
+                            self.draws.handle.as_entire_binding()
+                        } else {
+                            self.draws.binding(&self.records)
+                        },
                     },
                     wgpu::BindGroupEntry {
                         binding: 2,
-                        resource: self.tiles.handle.as_entire_binding(),
+                        resource: self.tiles.binding(&self.ranges),
                     },
                     wgpu::BindGroupEntry {
                         binding: 3,
-                        resource: self.indices.handle.as_entire_binding(),
+                        resource: self.indices.binding(&self.references),
                     },
                     wgpu::BindGroupEntry {
                         binding: 4,
@@ -932,7 +946,7 @@ impl RendererState {
                     },
                     wgpu::BindGroupEntry {
                         binding: 5,
-                        resource: self.corrections.handle.as_entire_binding(),
+                        resource: self.corrections.binding(&self.residuals),
                     },
                 ],
             });

@@ -68,6 +68,16 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The narrower [GPU scene bindings](evidence/buffer-prefix/README.md) follow source
+`a50b3b8512`: exact used prefixes avoid six Core capacity-tail clears/1,340 bytes
+in the matched growth/shrink control, while empty-array/readback initialization
+remains intact. The exact shipping GPU source passes 62 tests/docs, strict checks,
+formatting and Apple/MSVC library compilation. It changes no buffer capacity or
+owner field, and adds 11 core code lines, bringing the measured bill to 30,692.
+This is a command-count result; there is no new startup, RSS or frame-time claim.
+The full GPUI/Hummingbird/native qualification below pins the prior source;
+unchanged library files and the separate GPU qualification define this follow-on.
+
 Core shipping source `a50b3b8512` combines inspector P/C picking, the playback
 occurrence correction and the vendor external-parameters capability cut with
 the qualified sibling index and rapid-pointer proof. The
@@ -152,7 +162,7 @@ from 3,816 to 3,416 bytes, with 96 additional linked text bytes and an opt-in ca
 allocation rows are unchanged. Canonical
 value and exact stored contribution can differ on the inspector shell, so a
 compact representation cannot silently conflate them. Current core source is
-[30,681 non-test code lines](evidence/core-lines/README.md), including build scripts;
+[30,692 non-test code lines](evidence/core-lines/README.md), including build scripts;
 this does not establish full feature parity or forecast final size.
 
 The unmerged [monotonic caret control](evidence/monotonic-caret-stream/control16/README.md)

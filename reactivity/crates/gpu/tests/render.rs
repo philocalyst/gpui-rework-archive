@@ -131,6 +131,42 @@ async fn renderer(format: wgpu::TextureFormat) -> Renderer {
     eprintln!("adapter: {:?}", adapter.get_info());
     Renderer::request(&adapter, format).await.unwrap()
 }
+
+#[test]
+fn scene_buffer_growth_and_shrinking_prefixes_preserve_pixels_and_replay() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        renderer.set_tile_proofs(false);
+        for (width, height, draws) in [(17, 19, 0), (33, 35, 1), (65, 49, 31), (3, 5, 2), (1, 1, 0)]
+        {
+            let mut canvas = Canvas::recording(width, height, ColorConfig::default()).unwrap();
+            canvas.clear(Color::rgb(19, 29, 47));
+            let clip = Rect::new(0., 0., width as f32, height as f32);
+            for index in 0..draws {
+                canvas
+                    .fill_rect(
+                        Rect::new(index as f32 * 0.125, 0.25, 2.5, 3.25),
+                        Affine::rotation(index as f32 * 0.01),
+                        clip,
+                        Color::rgba(37, 71, 113, 87),
+                    )
+                    .unwrap();
+            }
+            let actual = readback(&mut renderer, &canvas);
+            for (&a, &b) in actual.iter().zip(canvas.pixels()) {
+                assert!((i16::from(a) - i16::from(b)).abs() <= 1);
+            }
+            let before = renderer.stats();
+            let target = output_texture(&renderer, &canvas);
+            renderer
+                .redraw(&target.create_view(&Default::default()))
+                .unwrap();
+            assert_eq!(read_texture(&renderer, &target), actual);
+            assert_packet_replay(before, renderer.stats());
+        }
+    });
+}
+
 fn readback(renderer: &mut Renderer, canvas: &Canvas) -> Vec<u8> {
     let texture = output_texture(renderer, canvas);
     renderer
