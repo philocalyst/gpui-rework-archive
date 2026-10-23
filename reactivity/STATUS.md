@@ -68,7 +68,7 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Current shipping source `8c17a763ee` integrates the rapid-focus pointer correction
+Core shipping source `8c17a763ee` integrates the rapid-focus pointer correction
 and Hummingbird queue/controller, including the smaller playback occurrence
 stamp. The [combined main qualification](evidence/pointer-queue-main/README.md)
 passes 667 GPUI/GPU cases and docs (30 ignored), 33 default and 33 native
@@ -79,6 +79,13 @@ force Vulkan, for six native executions in total. Owned displays stop. These are
 behavioral checks on a software-driver host, not timing, RSS, native HDR or
 foreign-OS runtime results. Producer foreign library checks remain separately
 pinned; SQLite SDK failures are not foreign-app success.
+
+The later [Hummingbird occurrence correction](evidence/hummingbird-occurrence/README.md)
+preserves an in-flight EOS across lookahead edits without a restart flag or new
+owner field. Two old-source controls fail actual EOS acceptance; the corrected
+application passes 35 default and 35 native-feature cases, strict checks and its
+headless executable. Core source remains identical to `8c17a763ee`; this does not
+rerun or broaden the separate native-window campaign.
 
 Its predecessor `89aeabd539` integrates the
 [flat sibling index](evidence/sibling-reconciliation/README.md) and

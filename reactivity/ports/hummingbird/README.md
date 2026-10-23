@@ -50,10 +50,14 @@ is not supplied by this slice. Remove, reorder, clear, undo, shuffle, repeat and
 previous/next operate on the exclusive controller.
 
 Plans lease only current/lookahead metadata. A unique checked session/serial
-stamp rejects duplicate, retired and foreign end-of-stream messages, including
-same-entry replay. The entry key remains in the plan and is not repeated in the
-16-byte stamp. Track availability is a worker snapshot; a real decoder must
-recheck file-open errors. This UI prepares plans and does not attach audio,
+stamp names a playback occurrence and rejects duplicate, retired and foreign
+end-of-stream messages, including same-entry replay. Edits that keep the current
+entry playing preserve its stamp, so an EOS already in transit still advances
+using the latest queue/policy/availability. Equal stamps do not mean equal plans:
+a decoder must reconcile lookahead on every delivery. The entry key remains in
+the plan and is not repeated in the 16-byte stamp. Track availability is a worker
+snapshot; a real decoder must recheck file-open errors. This UI prepares plans
+and does not attach audio,
 pause/seek, five-second previous behavior, consume or stop-after-current.
 
 [Producer fixtures and costs](../../evidence/hummingbird-queue/README.md) retain
@@ -62,6 +66,9 @@ the pinned original queue behavior and explicit desired differences. The
 under default/native features, strict checks, and actual Registry/X11 immediate
 press/release clients on CPU/GPU. The core focus-paint correction is exercised
 through these ordinary app controls; no private event dispatcher is substituted.
+The later [occurrence-continuity qualification](../../evidence/hummingbird-occurrence/README.md)
+passes 35 default/native-feature cases and strict checks, including EOS queued
+before lookahead edits. It adds no audio device or new native-window execution.
 
 ## Source, SQL and matching
 

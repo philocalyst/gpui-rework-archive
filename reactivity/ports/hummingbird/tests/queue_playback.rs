@@ -76,79 +76,102 @@ fn repeat_one_creates_a_new_occurrence_and_manual_next_bypasses_it() {
     assert_eq!(player.queue().current_position(), Some(1));
 }
 #[test]
-fn every_accepted_queue_or_policy_edit_retires_previous_eos_authority() {
+fn queued_eos_survives_lookahead_edits_and_uses_the_latest_live_successor() {
     let mut player = playback();
-    let mut previous = player.plan().unwrap().end_of_stream();
+    let before = player.plan().unwrap().clone();
+    let removed = player.queue().at(1).unwrap().key;
     player
         .append(vec![track(4)], &available, &mut draw)
         .unwrap();
-    assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
-            .unwrap()
-    );
-    previous = player.plan().unwrap().end_of_stream();
-    let last = player.queue().at(3).unwrap().key;
-    player.move_entries(&[last], 1, &available).unwrap();
-    assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
-            .unwrap()
-    );
-    assert_eq!(player.plan().unwrap().lookahead.as_ref().unwrap().key, last);
-    previous = player.plan().unwrap().end_of_stream();
-    player.remove(&[last], &available).unwrap();
-    assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
-            .unwrap()
-    );
-    previous = player.plan().unwrap().end_of_stream();
+    let inserted = player.queue().at(3).unwrap().key;
+    player.move_entries(&[inserted], 1, &available).unwrap();
+    player.remove(&[removed], &available).unwrap();
+    player.remove(&[inserted], &available).unwrap();
     player.undo(&available).unwrap();
-    assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
-            .unwrap()
-    );
-    previous = player.plan().unwrap().end_of_stream();
-    player.toggle_shuffle(&available, &mut draw).unwrap();
-    assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
-            .unwrap()
-    );
-    previous = player.plan().unwrap().end_of_stream();
     player.set_repeat(Repeat::All, &available).unwrap();
+    let live = |track: &Track| track.track_id != Some(4);
+    player.availability_changed(&live).unwrap();
+    let revised = player.plan().unwrap();
+    let refreshed_stamp = revised.stamp();
+    assert_eq!(revised.current.key, before.current.key);
+    assert_eq!(revised.lookahead.as_ref().unwrap().track.track_id, Some(3));
+    assert_eq!(before.lookahead.as_ref().unwrap().track.track_id, Some(2));
+    // This event was produced before all edits. Its file is still the current
+    // occurrence; the old lookahead was removed and must never be installed.
     assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
+        player
+            .end_of_stream(before.end_of_stream(), &live, &mut draw)
             .unwrap()
     );
-    previous = player.plan().unwrap().end_of_stream();
-    player.availability_changed(&|_| false).unwrap();
+    assert_eq!(refreshed_stamp, before.stamp());
+    assert_eq!(player.plan().unwrap().current.track.track_id, Some(3));
+    assert_ne!(player.plan().unwrap().stamp(), before.stamp());
     assert!(
         !player
-            .end_of_stream(previous, &available, &mut draw)
+            .end_of_stream(before.end_of_stream(), &live, &mut draw)
             .unwrap()
     );
-    assert!(player.plan().unwrap().lookahead.is_none());
-    previous = player.plan().unwrap().end_of_stream();
-    player
-        .replace(vec![track(5)], &available, &mut draw)
-        .unwrap();
-    assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
-            .unwrap()
-    );
-    previous = player.plan().unwrap().end_of_stream();
+}
+#[test]
+fn repeat_shuffle_and_keep_current_clear_preserve_a_queued_eos() {
+    let mut player = playback();
+    let before = player.plan().unwrap().clone();
+    player.set_repeat(Repeat::One, &available).unwrap();
+    player.toggle_shuffle(&available, &mut draw).unwrap();
     player.clear(true, &available).unwrap();
+    assert_eq!(player.queue().len(), 1);
+    let refreshed_stamp = player.plan().unwrap().stamp();
     assert!(
-        !player
-            .end_of_stream(previous, &available, &mut draw)
+        player
+            .end_of_stream(before.end_of_stream(), &available, &mut draw)
             .unwrap()
     );
-    assert!(player.plan().unwrap().lookahead.is_none());
+    assert_eq!(refreshed_stamp, before.stamp());
+    let repeated = player.plan().unwrap().clone();
+    assert_eq!(repeated.current.key, before.current.key);
+    assert_ne!(repeated.stamp(), before.stamp());
+    assert!(
+        !player
+            .end_of_stream(before.end_of_stream(), &available, &mut draw)
+            .unwrap()
+    );
+    player.set_repeat(Repeat::Off, &available).unwrap();
+    assert_eq!(player.plan().unwrap().stamp(), repeated.stamp());
+    assert!(
+        player
+            .end_of_stream(repeated.end_of_stream(), &available, &mut draw)
+            .unwrap()
+    );
+    assert!(player.plan().is_none());
+}
+#[test]
+fn restoring_the_same_entry_after_replacement_cannot_revive_its_old_eos() {
+    let mut player = playback();
+    let original = player.plan().unwrap().clone();
+    player.remove(&[original.current.key], &available).unwrap();
+    assert_ne!(player.plan().unwrap().current.key, original.current.key);
+    player.undo(&available).unwrap();
+    let restored = player.plan().unwrap().clone();
+    assert_eq!(restored.current.key, original.current.key);
+    assert_ne!(restored.stamp(), original.stamp());
+    assert!(
+        !player
+            .end_of_stream(original.end_of_stream(), &available, &mut draw)
+            .unwrap()
+    );
+    player.stop();
+    player.play(restored.current.key, &available).unwrap();
+    assert!(
+        !player
+            .end_of_stream(restored.end_of_stream(), &available, &mut draw)
+            .unwrap()
+    );
+    let restarted = player.plan().unwrap().end_of_stream();
+    assert!(
+        player
+            .end_of_stream(restarted, &available, &mut draw)
+            .unwrap()
+    );
 }
 #[test]
 fn no_op_edits_do_not_create_a_new_plan_and_borrowed_projection_clones_nothing() {

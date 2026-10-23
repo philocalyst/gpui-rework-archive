@@ -26,10 +26,11 @@ pub struct Plan {
     pub lookahead: Option<Entry>,
 }
 impl Plan {
-    /// A fresh stamp retires EOS authority. It does not alone request reopening
-    /// or seeking this path: edits reconcile lookahead while explicit play is a
-    /// restart intent. A future real decoder adapter must distinguish those
-    /// accepted intents instead of restarting the current file on every edit.
+    /// Names the current playback occurrence, not a revision of its lookahead.
+    /// A changed stamp requests opening/restarting the current entry. Queue or
+    /// policy edits that keep it playing preserve the stamp, including an EOS
+    /// already in transit. EOS resolves the successor from the current queue.
+    /// Equal stamps do not imply equal lookahead: reconcile it on each delivery.
     pub fn stamp(&self) -> PlanStamp {
         self.stamp
     }
@@ -97,11 +98,15 @@ impl PlaybackQueue {
         });
     }
     fn refresh(&mut self, serial: NonZeroU64, available: &impl Fn(&Track) -> bool) {
-        if self.plan.is_some() {
-            self.install(serial, available);
-        } else {
-            // Even a stopped edit invalidates an older in-flight occurrence.
-            self.serial = serial.get();
+        if let Some(plan) = self.plan.as_mut() {
+            if self.queue.current() == Some(plan.current.key) {
+                let next = self.queue.lookahead(available);
+                if plan.lookahead.as_ref().map(|entry| entry.key) != next {
+                    plan.lookahead = next.map(|key| self.queue.entry(key).unwrap().clone());
+                }
+            } else {
+                self.install(serial, available);
+            }
         }
     }
     fn navigate(
@@ -159,8 +164,9 @@ impl PlaybackQueue {
         }
         Ok(())
     }
-    /// Duplicate/late EOS is inert, including after replacement of the whole
-    /// controller. RepeatOne creates a new occurrence before accepting EOS again.
+    /// Duplicate/retired EOS is inert, including after controller replacement.
+    /// A lookahead edit cannot retire the still-playing occurrence. RepeatOne
+    /// creates a fresh occurrence before accepting another EOS.
     pub fn end_of_stream(
         &mut self,
         event: EndOfStream,
@@ -313,8 +319,8 @@ impl PlaybackQueue {
         }
         Ok(changed)
     }
-    /// Call after accepted availability changes even if the current key stays
-    /// equal: the resolved lookahead and EOS policy belong to a new plan.
+    /// Refresh availability without restarting an unchanged current occurrence.
+    /// A queued EOS resolves navigation using the latest availability snapshot.
     pub fn availability_changed(
         &mut self,
         available: &impl Fn(&Track) -> bool,

@@ -193,7 +193,11 @@ The integrated [Hummingbird queue](evidence/hummingbird-queue/README.md) now sup
 real queue/controller and public UI contracts, including distinct duplicate
 identity and stale EOS rejection. Its native consumer exposed and now verifies
 the core rapid-click correction, including immediate press/release. The checked
-session/serial pair removes a redundant entry key from playback stamps. Audio
+session/serial pair removes a redundant entry key from playback stamps. The
+[occurrence follow-on](evidence/hummingbird-occurrence/README.md) preserves that
+stamp during lookahead edits, so a queued EOS uses the latest queue without a
+decoder restart flag. It passes both 35-case app profiles and strict checks.
+Audio
 transport and the rest of the full player remain required work; held-button
 success alone is not rapid-click proof.
 Designer color still needs shared
