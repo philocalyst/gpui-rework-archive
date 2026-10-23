@@ -1,0 +1,61 @@
+{
+  "cwd": "/tmp/gpui-inspector-pointer-sol",
+  "environment": "source /tmp/gpui-native-env.sh; unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS; CARGO_BUILD_JOBS=2; CARGO_TARGET_DIR=/tmp/gpui-presented-basis-target",
+  "commands": [
+    [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--lib",
+      "focus_release_tests",
+      "--",
+      "--nocapture"
+    ],
+    [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--lib",
+      "runtime::inspector::tests",
+      "--",
+      "--nocapture"
+    ],
+    [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--locked",
+      "-p",
+      "gpui",
+      "--test",
+      "pointer",
+      "--test",
+      "pointer_focus",
+      "--test",
+      "inspector"
+    ]
+  ],
+  "exits": [
+    0,
+    0,
+    0
+  ],
+  "passed": {
+    "input_private": 3,
+    "inspector_private_oracle": 4,
+    "public_inspector": 15,
+    "public_pointer": 9,
+    "public_pointer_focus": 12,
+    "total": 43
+  },
+  "base_public_counts": "6021 has9pointer+9pointer_focus=18 combined; candidate pointer_focus replaces the prior strict-inspector-limit expectation and adds3cases."
+}
