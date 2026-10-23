@@ -1,6 +1,10 @@
 //! Typed owner-relative sources. Borrowed addresses are compared only while the
 //! owner is borrowed; installed bindings retain a field key, never an address.
 
+mod path;
+pub(crate) use path::Path;
+pub use path::{ProjectedSource, SourcePath};
+
 use crate::{View, component::Component};
 use gpui_reactivity_state::{Revision, Signal};
 use std::{any::Any, borrow::Cow, fmt, num::NonZeroU64};
@@ -90,6 +94,7 @@ impl<M, T> Source<M, T> {
         FieldAction {
             source: self,
             update,
+            owner: std::marker::PhantomData,
         }
     }
     /// Apply a typed source operation. Mismatched projectors fail before the
@@ -110,15 +115,6 @@ impl<M, T> Source<M, T> {
 }
 
 impl<M, T: 'static> Source<M, T> {
-    /// Check an operation's declaration against the mounted registry. Equal
-    /// IDs alone do not authorize a different projection to claim exact impact.
-    pub(crate) fn validate_registered(
-        &self,
-        model: &M,
-        sources: &Sources<M>,
-    ) -> Result<(), BindError> {
-        self.borrow_registered(model, sources).map(|_| ())
-    }
     pub(crate) fn borrow_registered<'a>(
         &self,
         model: &'a M,
@@ -134,23 +130,20 @@ impl<M, T: 'static> Source<M, T> {
 }
 
 /// An exact source route constructed by [`Source::update`].
-pub struct FieldAction<M, T, F> {
-    source: Source<M, T>,
+pub struct FieldAction<M, T, F, S = Source<M, T>> {
+    source: S,
     update: F,
+    owner: std::marker::PhantomData<fn(&mut M, &mut T)>,
 }
-impl<M, T: 'static, F: Fn(&mut T)> FieldAction<M, T, F> {
-    pub(crate) fn field_id(&self) -> FieldId {
-        self.source.id
-    }
+impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> {
     pub(crate) fn validate_registered(
         &self,
         model: &M,
         sources: &Sources<M>,
-    ) -> Result<(), BindError> {
-        self.source.validate_registered(model, sources)
+    ) -> Result<FieldId, BindError> {
+        self.source.resolve(model, sources).map(|(field, _)| field)
     }
-    /// Validate exclusive projector agreement before exposing `&mut T`.
-    /// A checked declaration error is not an application callback panic.
+    /// Validate every exclusive projector before exposing `&mut T`.
     pub(crate) fn invoke(&self, model: &mut M) -> Result<(), BindError> {
         self.source.modify(model, &self.update)
     }
@@ -1304,8 +1297,7 @@ mod tests {
         let sources = sources();
         let mut model = model();
         let action = COUNT.update(|value| *value += 1);
-        assert_eq!(action.field_id(), COUNT.id());
-        action.validate_registered(&model, &sources).unwrap();
+        assert_eq!(action.validate_registered(&model, &sources), Ok(COUNT.id()));
         action.invoke(&mut model).unwrap();
         assert_eq!(*model.count, 5);
         assert_eq!(model.first.revision().get(), 0);
@@ -1316,7 +1308,7 @@ mod tests {
             |m| &mut m.second,
         );
         assert_eq!(
-            imposter.validate_registered(&model, &sources),
+            imposter.borrow_registered(&model, &sources).map(|_| ()),
             Err(BindError::ProjectionMismatch(FIRST.id()))
         );
     }

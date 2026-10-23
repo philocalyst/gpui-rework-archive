@@ -1,7 +1,8 @@
 //! Static input families. Only borrowed owner values and concrete revision packs
 //! live here; workers receive the frozen I and an independent request stamp.
 use super::*;
-use crate::{FieldId, Source, Sources};
+use crate::source::Path;
+use crate::{BindError, FieldId, ProjectedSource, Source, SourcePath, Sources};
 
 mod sealed {
     pub trait Sealed {}
@@ -27,7 +28,7 @@ pub trait QuestionInputs<M: 'static>: sealed::Sealed + 'static {
     type Versions: Copy + Eq;
     const READERS: bool;
     fn validate(&self, namespace: NonZeroU64, before: NonZeroU64) -> Result<(), QuestionFault>;
-    fn contains(&self, field: FieldId) -> bool;
+    fn contains(&self, sources: &Sources<M>, field: FieldId) -> Result<bool, BindError>;
     fn resolve<'a, R: ReaderValues>(
         &self,
         model: &'a M,
@@ -48,7 +49,52 @@ pub trait QuestionInputs<M: 'static>: sealed::Sealed + 'static {
         coarse: u64,
         policy: u64,
         visit: &mut impl FnMut(QuestionInput),
-    );
+    ) {
+        if let Some(input) = self.single(version, coarse, policy) {
+            visit(QuestionInput::Source(input));
+        }
+    }
+}
+// Retain a declared input family by reference, preserving its exact version
+// pack and Reader/pair behavior. No owned descriptor or routing cache is made.
+impl<I> sealed::Sealed for &I {}
+impl<M: 'static, I: QuestionInputs<M>> QuestionInputs<M> for &'static I {
+    type Borrowed<'a> = I::Borrowed<'a>;
+    type Versions = I::Versions;
+    const READERS: bool = I::READERS;
+    fn validate(&self, namespace: NonZeroU64, before: NonZeroU64) -> Result<(), QuestionFault> {
+        (**self).validate(namespace, before)
+    }
+    fn contains(&self, sources: &Sources<M>, field: FieldId) -> Result<bool, BindError> {
+        (**self).contains(sources, field)
+    }
+    fn resolve<'a, R: ReaderValues>(
+        &self,
+        model: &'a M,
+        sources: &Sources<M>,
+        earlier: &'a R,
+    ) -> Result<Resolved<Self::Borrowed<'a>, Self::Versions>, crate::Error> {
+        (**self).resolve(model, sources, earlier)
+    }
+    fn failure<'a, R: ReaderValues>(
+        &self,
+        version: Self::Versions,
+        earlier: &'a R,
+    ) -> Option<Failure<'a>> {
+        (**self).failure(version, earlier)
+    }
+    fn single(&self, version: Self::Versions, coarse: u64, policy: u64) -> Option<InputVersion> {
+        (**self).single(version, coarse, policy)
+    }
+    fn visit(
+        &self,
+        version: Self::Versions,
+        coarse: u64,
+        policy: u64,
+        visit: &mut impl FnMut(QuestionInput),
+    ) {
+        (**self).visit(version, coarse, policy, visit);
+    }
 }
 impl<M, V> sealed::Sealed for Source<M, V> {}
 impl<M: 'static, V: 'static> QuestionInputs<M> for Source<M, V> {
@@ -58,8 +104,8 @@ impl<M: 'static, V: 'static> QuestionInputs<M> for Source<M, V> {
     fn validate(&self, _: NonZeroU64, _: NonZeroU64) -> Result<(), QuestionFault> {
         Ok(())
     }
-    fn contains(&self, field: FieldId) -> bool {
-        self.id() == field
+    fn contains(&self, _: &Sources<M>, field: FieldId) -> Result<bool, BindError> {
+        Ok(self.id() == field)
     }
     fn resolve<'a, R: ReaderValues>(
         &self,
@@ -81,16 +127,44 @@ impl<M: 'static, V: 'static> QuestionInputs<M> for Source<M, V> {
             policy,
         })
     }
-    fn visit(
+}
+impl<P, C, T, S> sealed::Sealed for ProjectedSource<'_, P, C, T, S> {}
+impl<P: 'static, C: 'static, T: 'static, S: SourcePath<C, T> + 'static> QuestionInputs<P>
+    for ProjectedSource<'static, P, C, T, S>
+{
+    type Borrowed<'a> = &'a T;
+    type Versions = (FieldId, Revision);
+    const READERS: bool = false;
+    fn validate(&self, _: NonZeroU64, _: NonZeroU64) -> Result<(), QuestionFault> {
+        Ok(())
+    }
+    fn contains(&self, sources: &Sources<P>, field: FieldId) -> Result<bool, BindError> {
+        Ok(self.field(sources)? == field)
+    }
+    fn resolve<'a, R: ReaderValues>(
         &self,
-        version: Revision,
+        model: &'a P,
+        sources: &Sources<P>,
+        _: &'a R,
+    ) -> Result<Resolved<&'a T, Self::Versions>, crate::Error> {
+        let (field, value) = Path::resolve(self, model, sources)?;
+        Ok(Resolved {
+            version: (field, value.revision()),
+            availability: Availability::Ready(value),
+        })
+    }
+    fn single(
+        &self,
+        (field, revision): Self::Versions,
         coarse: u64,
         policy: u64,
-        visit: &mut impl FnMut(QuestionInput),
-    ) {
-        visit(QuestionInput::Source(
-            self.single(version, coarse, policy).unwrap(),
-        ));
+    ) -> Option<InputVersion> {
+        Some(InputVersion {
+            field,
+            revision,
+            coarse,
+            policy,
+        })
     }
 }
 #[doc(hidden)]
@@ -111,8 +185,8 @@ impl<M: 'static, T: 'static> QuestionInputs<M> for Reader<T> {
             Err(QuestionFault::Revoked)
         }
     }
-    fn contains(&self, _: FieldId) -> bool {
-        false
+    fn contains(&self, _: &Sources<M>, _: FieldId) -> Result<bool, BindError> {
+        Ok(false)
     }
     fn resolve<'a, R: ReaderValues>(
         &self,
@@ -173,8 +247,8 @@ impl<M: 'static, A: QuestionInputs<M>, B: QuestionInputs<M>> QuestionInputs<M> f
         self.0.validate(namespace, before)?;
         self.1.validate(namespace, before)
     }
-    fn contains(&self, field: FieldId) -> bool {
-        self.0.contains(field) || self.1.contains(field)
+    fn contains(&self, sources: &Sources<M>, field: FieldId) -> Result<bool, BindError> {
+        Ok(self.0.contains(sources, field)? || self.1.contains(sources, field)?)
     }
     fn resolve<'a, R: ReaderValues>(
         &self,

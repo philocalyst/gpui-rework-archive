@@ -564,7 +564,9 @@ where
         change: Change,
     ) -> Result<bool, crate::Error> {
         match change {
-            Change::Source(Some(field)) if !A::READERS && !self.inputs.contains(field) => {
+            Change::Source(Some(field))
+                if !A::READERS && !self.inputs.contains(sources, field)? =>
+            {
                 return Ok(false);
             }
             Change::Retry(key) if key != self.key && !A::READERS => return Ok(false),

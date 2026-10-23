@@ -1,0 +1,547 @@
+diff --git a/reactivity/crates/gpui/src/element.rs b/reactivity/crates/gpui/src/element.rs
+index da45d95f7c..dc7015998f 100644
+--- a/reactivity/crates/gpui/src/element.rs
++++ b/reactivity/crates/gpui/src/element.rs
+@@ -9,7 +9,7 @@ use crate::{
+     View,
+     component::Component,
+     property::PropertyId,
+-    source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
++    source::{BindError, FieldAction, FieldId, IntoText, SourcePath, Sources, Text},
+     style::{Affine, Align, Color, Flex, Flow, Justify, Style},
+     style_port::{IntoProp, StyleSignal, Value},
+ };
+@@ -355,7 +355,7 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
+ // that duplicate Source. Mount checks registered read identity; invocation checks
+ // exclusive projector agreement before exposing a mutable value to the callback.
+ // The runtime must validate before exact-source admission.
+-impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
++impl<M: 'static, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> Route for FieldAction<M, T, F, S> {
+     fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError> {
+         let receiver = receiver
+             .downcast_ref::<M>()
+@@ -363,9 +363,8 @@ impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
+         let sources = sources
+             .downcast_ref::<Sources<M>>()
+             .ok_or(BindError::ReceiverMismatch)?;
+-        self.validate_registered(receiver, sources)?;
+         Ok(Admission::Model {
+-            exact: Some(self.field_id()),
++            exact: Some(self.validate_registered(receiver, sources)?),
+         })
+     }
+ 
+@@ -1091,7 +1090,7 @@ impl<M: 'static, F: Fn(&mut M) + 'static> IntoHandler<M, shape::Method> for F {
+     }
+ }
+ 
+-impl<M, T, F> sealed::Handler<M, shape::Field> for FieldAction<M, T, F> {}
++impl<M, T, F, S> sealed::Handler<M, shape::Field> for FieldAction<M, T, F, S> {}
+ impl<M, F, R> sealed::Handler<M, shape::Property> for PropertyRoute<M, F, R> {}
+ impl<M: 'static, F, R> IntoHandler<M, shape::Property> for PropertyRoute<M, F, R>
+ where
+@@ -1103,8 +1102,8 @@ where
+         element
+     }
+ }
+-impl<M: 'static, T: 'static, F: Fn(&mut T) + 'static> IntoHandler<M, shape::Field>
+-    for FieldAction<M, T, F>
++impl<M: 'static, T: 'static, F: Fn(&mut T) + 'static, S: SourcePath<M, T> + 'static>
++    IntoHandler<M, shape::Field> for FieldAction<M, T, F, S>
+ {
+     fn install(self, mut element: El<'_>) -> El<'_> {
+         element.on_click = Some(Handler(Box::new(self)));
+diff --git a/reactivity/crates/gpui/src/lib.rs b/reactivity/crates/gpui/src/lib.rs
+index 031fd2d1d8..1781a6437f 100644
+--- a/reactivity/crates/gpui/src/lib.rs
++++ b/reactivity/crates/gpui/src/lib.rs
+@@ -63,7 +63,10 @@ pub use scroll::{
+     Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,
+ };
+ pub use semantic::SemanticText;
+-pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
++pub use source::{
++    BindError, FieldAction, FieldId, IntoText, ProjectedSource, Source, SourcePath, Sources,
++    TextValue,
++};
+ #[doc(hidden)]
+ pub use style::FlexRecipe;
+ pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Style, rgb};
+diff --git a/reactivity/crates/gpui/src/reader/inputs.rs b/reactivity/crates/gpui/src/reader/inputs.rs
+index 2a820cbdf6..f62f357c8c 100644
+--- a/reactivity/crates/gpui/src/reader/inputs.rs
++++ b/reactivity/crates/gpui/src/reader/inputs.rs
+@@ -1,7 +1,8 @@
+ //! Static input families. Only borrowed owner values and concrete revision packs
+ //! live here; workers receive the frozen I and an independent request stamp.
+ use super::*;
+-use crate::{FieldId, Source, Sources};
++use crate::source::Path;
++use crate::{BindError, FieldId, ProjectedSource, Source, SourcePath, Sources};
+ 
+ mod sealed {
+     pub trait Sealed {}
+@@ -27,7 +28,7 @@ pub trait QuestionInputs<M: 'static>: sealed::Sealed + 'static {
+     type Versions: Copy + Eq;
+     const READERS: bool;
+     fn validate(&self, namespace: NonZeroU64, before: NonZeroU64) -> Result<(), QuestionFault>;
+-    fn contains(&self, field: FieldId) -> bool;
++    fn contains(&self, sources: &Sources<M>, field: FieldId) -> Result<bool, BindError>;
+     fn resolve<'a, R: ReaderValues>(
+         &self,
+         model: &'a M,
+@@ -48,7 +49,52 @@ pub trait QuestionInputs<M: 'static>: sealed::Sealed + 'static {
+         coarse: u64,
+         policy: u64,
+         visit: &mut impl FnMut(QuestionInput),
+-    );
++    ) {
++        if let Some(input) = self.single(version, coarse, policy) {
++            visit(QuestionInput::Source(input));
++        }
++    }
++}
++// Retain a declared input family by reference, preserving its exact version
++// pack and Reader/pair behavior. No owned descriptor or routing cache is made.
++impl<I> sealed::Sealed for &I {}
++impl<M: 'static, I: QuestionInputs<M>> QuestionInputs<M> for &'static I {
++    type Borrowed<'a> = I::Borrowed<'a>;
++    type Versions = I::Versions;
++    const READERS: bool = I::READERS;
++    fn validate(&self, namespace: NonZeroU64, before: NonZeroU64) -> Result<(), QuestionFault> {
++        (**self).validate(namespace, before)
++    }
++    fn contains(&self, sources: &Sources<M>, field: FieldId) -> Result<bool, BindError> {
++        (**self).contains(sources, field)
++    }
++    fn resolve<'a, R: ReaderValues>(
++        &self,
++        model: &'a M,
++        sources: &Sources<M>,
++        earlier: &'a R,
++    ) -> Result<Resolved<Self::Borrowed<'a>, Self::Versions>, crate::Error> {
++        (**self).resolve(model, sources, earlier)
++    }
++    fn failure<'a, R: ReaderValues>(
++        &self,
++        version: Self::Versions,
++        earlier: &'a R,
++    ) -> Option<Failure<'a>> {
++        (**self).failure(version, earlier)
++    }
++    fn single(&self, version: Self::Versions, coarse: u64, policy: u64) -> Option<InputVersion> {
++        (**self).single(version, coarse, policy)
++    }
++    fn visit(
++        &self,
++        version: Self::Versions,
++        coarse: u64,
++        policy: u64,
++        visit: &mut impl FnMut(QuestionInput),
++    ) {
++        (**self).visit(version, coarse, policy, visit);
++    }
+ }
+ impl<M, V> sealed::Sealed for Source<M, V> {}
+ impl<M: 'static, V: 'static> QuestionInputs<M> for Source<M, V> {
+@@ -58,8 +104,8 @@ impl<M: 'static, V: 'static> QuestionInputs<M> for Source<M, V> {
+     fn validate(&self, _: NonZeroU64, _: NonZeroU64) -> Result<(), QuestionFault> {
+         Ok(())
+     }
+-    fn contains(&self, field: FieldId) -> bool {
+-        self.id() == field
++    fn contains(&self, _: &Sources<M>, field: FieldId) -> Result<bool, BindError> {
++        Ok(self.id() == field)
+     }
+     fn resolve<'a, R: ReaderValues>(
+         &self,
+@@ -81,16 +127,44 @@ impl<M: 'static, V: 'static> QuestionInputs<M> for Source<M, V> {
+             policy,
+         })
+     }
+-    fn visit(
++}
++impl<P, C, T, S> sealed::Sealed for ProjectedSource<'_, P, C, T, S> {}
++impl<P: 'static, C: 'static, T: 'static, S: SourcePath<C, T> + 'static> QuestionInputs<P>
++    for ProjectedSource<'static, P, C, T, S>
++{
++    type Borrowed<'a> = &'a T;
++    type Versions = (FieldId, Revision);
++    const READERS: bool = false;
++    fn validate(&self, _: NonZeroU64, _: NonZeroU64) -> Result<(), QuestionFault> {
++        Ok(())
++    }
++    fn contains(&self, sources: &Sources<P>, field: FieldId) -> Result<bool, BindError> {
++        Ok(self.field(sources)? == field)
++    }
++    fn resolve<'a, R: ReaderValues>(
+         &self,
+-        version: Revision,
++        model: &'a P,
++        sources: &Sources<P>,
++        _: &'a R,
++    ) -> Result<Resolved<&'a T, Self::Versions>, crate::Error> {
++        let (field, value) = Path::resolve(self, model, sources)?;
++        Ok(Resolved {
++            version: (field, value.revision()),
++            availability: Availability::Ready(value),
++        })
++    }
++    fn single(
++        &self,
++        (field, revision): Self::Versions,
+         coarse: u64,
+         policy: u64,
+-        visit: &mut impl FnMut(QuestionInput),
+-    ) {
+-        visit(QuestionInput::Source(
+-            self.single(version, coarse, policy).unwrap(),
+-        ));
++    ) -> Option<InputVersion> {
++        Some(InputVersion {
++            field,
++            revision,
++            coarse,
++            policy,
++        })
+     }
+ }
+ #[doc(hidden)]
+@@ -111,8 +185,8 @@ impl<M: 'static, T: 'static> QuestionInputs<M> for Reader<T> {
+             Err(QuestionFault::Revoked)
+         }
+     }
+-    fn contains(&self, _: FieldId) -> bool {
+-        false
++    fn contains(&self, _: &Sources<M>, _: FieldId) -> Result<bool, BindError> {
++        Ok(false)
+     }
+     fn resolve<'a, R: ReaderValues>(
+         &self,
+@@ -173,8 +247,8 @@ impl<M: 'static, A: QuestionInputs<M>, B: QuestionInputs<M>> QuestionInputs<M> f
+         self.0.validate(namespace, before)?;
+         self.1.validate(namespace, before)
+     }
+-    fn contains(&self, field: FieldId) -> bool {
+-        self.0.contains(field) || self.1.contains(field)
++    fn contains(&self, sources: &Sources<M>, field: FieldId) -> Result<bool, BindError> {
++        Ok(self.0.contains(sources, field)? || self.1.contains(sources, field)?)
+     }
+     fn resolve<'a, R: ReaderValues>(
+         &self,
+diff --git a/reactivity/crates/gpui/src/reader/question.rs b/reactivity/crates/gpui/src/reader/question.rs
+index 759029a17a..23dfcca62e 100644
+--- a/reactivity/crates/gpui/src/reader/question.rs
++++ b/reactivity/crates/gpui/src/reader/question.rs
+@@ -564,7 +564,9 @@ where
+         change: Change,
+     ) -> Result<bool, crate::Error> {
+         match change {
+-            Change::Source(Some(field)) if !A::READERS && !self.inputs.contains(field) => {
++            Change::Source(Some(field))
++                if !A::READERS && !self.inputs.contains(sources, field)? =>
++            {
+                 return Ok(false);
+             }
+             Change::Retry(key) if key != self.key && !A::READERS => return Ok(false),
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 9235146972..5f5352a4e0 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -1,6 +1,8 @@
+ //! One serial owner turn, a retained logical description, and an admitted sheet.
+ //! Layout is private scratch; the canvas stages commands without another output
+ //! framebuffer. Callbacks carry ordinary Rust borrows; there is no shared mutable owner cell.
++#[cfg(test)]
++use crate::Source;
+ use crate::shared_text::SharedText;
+ use std::{
+     collections::{BTreeMap, BTreeSet},
+@@ -23,7 +25,7 @@ use crate::{
+     identity::Sites,
+     property::{Contribution, Overrides, Property, PropertyError},
+     remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet, Stage},
+-    source::{BindError, FieldId, Source, Sources, TextCodec, TextEditError},
++    source::{BindError, FieldId, SourcePath, Sources, TextCodec, TextEditError},
+     style::{Color, Flow, Style},
+ };
+ 
+@@ -1146,9 +1148,15 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             Ok(())
+         })
+     }
++    /// Borrow the current logical value through its mounted declaration/path.
++    /// This does not require a presentation ACK or expose an old P snapshot.
++    pub fn read<T: 'static>(&self, source: impl SourcePath<M, T>) -> Result<&T, Error> {
++        let runtime = self.runtime()?;
++        Ok(source.resolve(&runtime.model, &runtime.sources)?.1)
++    }
+     pub fn set<T: 'static>(
+         &mut self,
+-        source: Source<M, T>,
++        source: impl SourcePath<M, T>,
+         value: T,
+     ) -> Result<Commit, SetError<T>> {
+         let mut runtime = match self.runtime_mut() {
+@@ -1159,16 +1167,18 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+         let previous_epoch = runtime.source_epoch;
+         let result = (|| {
+             runtime.live()?;
+-            match catch_unwind(AssertUnwindSafe(|| {
+-                source.validate_registered(&runtime.model, &runtime.sources)
++            let field = match catch_unwind(AssertUnwindSafe(|| {
++                source
++                    .resolve(&runtime.model, &runtime.sources)
++                    .map(|(field, _)| field)
+             })) {
+                 Ok(result) => result?,
+                 Err(_) => {
+                     runtime.poison();
+                     return Err(Error::OwnerPanicked);
+                 }
+-            }
+-            runtime.operation(Some(source.id()), |model, _| {
++            };
++            runtime.operation(Some(field), |model, _| {
+                 source.modify(model, |old| {
+                     // Projector agreement and mutable-value admission have
+                     // succeeded. This is the only ownership-transfer point.
+diff --git a/reactivity/crates/gpui/src/source.rs b/reactivity/crates/gpui/src/source.rs
+index 9f52513795..3be71f5468 100644
+--- a/reactivity/crates/gpui/src/source.rs
++++ b/reactivity/crates/gpui/src/source.rs
+@@ -1,6 +1,10 @@
+ //! Typed owner-relative sources. Borrowed addresses are compared only while the
+ //! owner is borrowed; installed bindings retain a field key, never an address.
+ 
++mod path;
++pub(crate) use path::Path;
++pub use path::{ProjectedSource, SourcePath};
++
+ use crate::{View, component::Component};
+ use gpui_reactivity_state::{Revision, Signal};
+ use std::{any::Any, borrow::Cow, fmt, num::NonZeroU64};
+@@ -90,6 +94,7 @@ impl<M, T> Source<M, T> {
+         FieldAction {
+             source: self,
+             update,
++            owner: std::marker::PhantomData,
+         }
+     }
+     /// Apply a typed source operation. Mismatched projectors fail before the
+@@ -110,15 +115,6 @@ impl<M, T> Source<M, T> {
+ }
+ 
+ impl<M, T: 'static> Source<M, T> {
+-    /// Check an operation's declaration against the mounted registry. Equal
+-    /// IDs alone do not authorize a different projection to claim exact impact.
+-    pub(crate) fn validate_registered(
+-        &self,
+-        model: &M,
+-        sources: &Sources<M>,
+-    ) -> Result<(), BindError> {
+-        self.borrow_registered(model, sources).map(|_| ())
+-    }
+     pub(crate) fn borrow_registered<'a>(
+         &self,
+         model: &'a M,
+@@ -134,23 +130,20 @@ impl<M, T: 'static> Source<M, T> {
+ }
+ 
+ /// An exact source route constructed by [`Source::update`].
+-pub struct FieldAction<M, T, F> {
+-    source: Source<M, T>,
++pub struct FieldAction<M, T, F, S = Source<M, T>> {
++    source: S,
+     update: F,
++    owner: std::marker::PhantomData<fn(&mut M, &mut T)>,
+ }
+-impl<M, T: 'static, F: Fn(&mut T)> FieldAction<M, T, F> {
+-    pub(crate) fn field_id(&self) -> FieldId {
+-        self.source.id
+-    }
++impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> {
+     pub(crate) fn validate_registered(
+         &self,
+         model: &M,
+         sources: &Sources<M>,
+-    ) -> Result<(), BindError> {
+-        self.source.validate_registered(model, sources)
++    ) -> Result<FieldId, BindError> {
++        self.source.resolve(model, sources).map(|(field, _)| field)
+     }
+-    /// Validate exclusive projector agreement before exposing `&mut T`.
+-    /// A checked declaration error is not an application callback panic.
++    /// Validate every exclusive projector before exposing `&mut T`.
+     pub(crate) fn invoke(&self, model: &mut M) -> Result<(), BindError> {
+         self.source.modify(model, &self.update)
+     }
+@@ -1304,8 +1297,7 @@ mod tests {
+         let sources = sources();
+         let mut model = model();
+         let action = COUNT.update(|value| *value += 1);
+-        assert_eq!(action.field_id(), COUNT.id());
+-        action.validate_registered(&model, &sources).unwrap();
++        assert_eq!(action.validate_registered(&model, &sources), Ok(COUNT.id()));
+         action.invoke(&mut model).unwrap();
+         assert_eq!(*model.count, 5);
+         assert_eq!(model.first.revision().get(), 0);
+@@ -1316,7 +1308,7 @@ mod tests {
+             |m| &mut m.second,
+         );
+         assert_eq!(
+-            imposter.validate_registered(&model, &sources),
++            imposter.borrow_registered(&model, &sources).map(|_| ()),
+             Err(BindError::ProjectionMismatch(FIRST.id()))
+         );
+     }
+diff --git a/reactivity/crates/gpui/src/source/path.rs b/reactivity/crates/gpui/src/source/path.rs
+new file mode 100644
+index 0000000000..4ad2d9f9a3
+--- /dev/null
++++ b/reactivity/crates/gpui/src/source/path.rs
+@@ -0,0 +1,144 @@
++//! Typed paths borrow declarations, never owner addresses or schema ordinals.
++use super::*;
++use std::marker::PhantomData;
++
++/// A typed source relative to an owner. Implementations are library-owned:
++/// declarations and contained paths share registered source admission.
++#[allow(private_bounds)]
++pub trait SourcePath<M, T: 'static>: Path<M, T> {}
++impl<M, T: 'static, S: Path<M, T>> SourcePath<M, T> for S {}
++
++pub(crate) trait Path<M, T: 'static> {
++    // Schema-only lookup for mounted question invalidation, not authority.
++    // Mount must first resolve the input against this immutable schema/model.
++    fn field(&self, sources: &Sources<M>) -> Result<FieldId, BindError>;
++    fn resolve<'a>(
++        &self,
++        model: &'a M,
++        sources: &Sources<M>,
++    ) -> Result<(FieldId, &'a Signal<T>), BindError>;
++    fn modify<R>(&self, model: &mut M, edit: impl FnOnce(&mut T) -> R) -> Result<R, BindError>;
++}
++impl<M, T: 'static> Path<M, T> for Source<M, T> {
++    fn field(&self, _: &Sources<M>) -> Result<FieldId, BindError> {
++        Ok(self.id)
++    }
++    fn resolve<'a>(
++        &self,
++        model: &'a M,
++        sources: &Sources<M>,
++    ) -> Result<(FieldId, &'a Signal<T>), BindError> {
++        Ok((self.id, self.borrow_registered(model, sources)?))
++    }
++    fn modify<R>(&self, model: &mut M, edit: impl FnOnce(&mut T) -> R) -> Result<R, BindError> {
++        Source::modify(self, model, edit)
++    }
++}
++impl<M, T: 'static, S: Path<M, T>> Path<M, T> for &S {
++    fn field(&self, sources: &Sources<M>) -> Result<FieldId, BindError> {
++        (**self).field(sources)
++    }
++    fn resolve<'a>(
++        &self,
++        model: &'a M,
++        sources: &Sources<M>,
++    ) -> Result<(FieldId, &'a Signal<T>), BindError> {
++        (**self).resolve(model, sources)
++    }
++    fn modify<R>(&self, model: &mut M, edit: impl FnOnce(&mut T) -> R) -> Result<R, BindError> {
++        (**self).modify(model, edit)
++    }
++}
++
++/// A contained source declared with [`Component::source`]. The path borrows its
++/// component declaration and owns only the child declaration/path. It retains no
++/// model address, revision, resolved scope, allocation or window authority.
++pub struct ProjectedSource<'a, P, C, T, S> {
++    component: &'a Component<P, C>,
++    source: S,
++    value: PhantomData<fn() -> T>,
++}
++impl<P, C, T, S: Copy> Copy for ProjectedSource<'_, P, C, T, S> {}
++impl<P, C, T, S: Clone> Clone for ProjectedSource<'_, P, C, T, S> {
++    fn clone(&self) -> Self {
++        Self {
++            component: self.component,
++            source: self.source.clone(),
++            value: PhantomData,
++        }
++    }
++}
++impl<P, C> Component<P, C> {
++    /// Compose a child source with this registered component. Nested components
++    /// compose in the same way. Borrow declared Sources to avoid copying their
++    /// metadata. Transient read/set paths may borrow local declarations; retained
++    /// actions/questions need static declarations, as their closures do.
++    ///
++    /// For example, a parent can use the source declared by a nested library
++    /// counter, without registering an alias or duplicating its Signal:
++    ///
++    /// ```text
++    /// // Each View registers its own sources once:
++    /// // Counter: Sources::new().direct(Self::COUNT)
++    /// // Pane:    Sources::new().direct_component(Self::COUNTER)
++    /// // Page:    Sources::new().direct_component(Self::LEFT)
++    /// let count = Page::LEFT.source(Pane::COUNTER.source(&Counter::COUNT));
++    /// let current = win.read(count)?;
++    /// win.set(count, *current + 1)?;
++    /// let button = button("Increase left").on_click(count.update(|n| *n += 1));
++    /// // Retained question inputs can borrow the entire static path:
++    /// let input = &const { Page::LEFT.source(Pane::COUNTER.source(&Counter::COUNT)) };
++    /// let (questions, answer) = Questions::new().question(input, |n| *n, start)?;
++    /// ```
++    ///
++    /// `component_sources` is a complete ordinary native example of this shape.
++    /// Paths name the current registered field, not a historical component
++    /// instance or presentation. They do not retain a model or grant access
++    /// after its Win closes. A borrowed read prevents editing that same Win
++    /// until the returned value's last use.
++    pub const fn source<T: 'static, S: SourcePath<C, T>>(
++        &self,
++        source: S,
++    ) -> ProjectedSource<'_, P, C, T, S> {
++        ProjectedSource {
++            component: self,
++            source,
++            value: PhantomData,
++        }
++    }
++}
++impl<P: 'static, C: 'static, T: 'static, S: SourcePath<C, T>> Path<P, T>
++    for ProjectedSource<'_, P, C, T, S>
++{
++    fn field(&self, sources: &Sources<P>) -> Result<FieldId, BindError> {
++        let entry = sources.component_entry::<C>(self.component.id)?;
++        Ok(entry.qualify(self.source.field(&entry.sources)?))
++    }
++    fn resolve<'a>(
++        &self,
++        parent: &'a P,
++        sources: &Sources<P>,
++    ) -> Result<(FieldId, &'a Signal<T>), BindError> {
++        let entry = sources.component_entry::<C>(self.component.id)?;
++        let child = (self.component.read)(parent);
++        if !std::ptr::eq(child, (entry.component.read)(parent)) {
++            return Err(BindError::ComponentProjectionMismatch(self.component.id));
++        }
++        let (field, value) = self.source.resolve(child, &entry.sources)?;
++        Ok((entry.qualify(field), value))
++    }
++    fn modify<R>(&self, parent: &mut P, edit: impl FnOnce(&mut T) -> R) -> Result<R, BindError> {
++        self.source
++            .modify(self.component.project_mut(parent)?, edit)
++    }
++}
++impl<P, C, T: 'static, S> ProjectedSource<'_, P, C, T, S> {
++    /// A route whose only mutable model access is the contained source value.
++    pub fn update<F: Fn(&mut T)>(self, update: F) -> FieldAction<P, T, F, Self> {
++        FieldAction {
++            source: self,
++            update,
++            owner: PhantomData,
++        }
++    }
++}

@@ -101,6 +101,17 @@ checks pass on the exact integrated sources. Current core is **30,805** nontest,
 noncomment lines (+109). Hummingbird application integration remains separate;
 its discovered Stop race is pending correction. No latency or RSS win is claimed.
 
+The integrated [typed source paths](evidence/projected-sources/README.md)
+compose existing child declarations through registered component scopes for
+read/set/actions/Questions. Borrowed input families reduce inline controller
+storage by 32 bytes for a leaf and 24 bytes for the measured nested path;
+matched constructor/update heap ledgers are unchanged. Exact producer tests,
+native example/Registry replay, strict lint and Apple/MSVC compilation pass.
+The new resolver call and static frame are charged. The slice adds 182 core
+lines, making the combined current core **30,987**; it adds no owner fields.
+Per-field schema boxes, subowner scheduling and nested SourceTween adaptation
+remain. The typed inbox successor is isolated and still under qualification.
+
 The [coverage frontier](evidence/uniform-packet/coverage-frontier/README.md)
 and [canonical text campaign](evidence/canonical-text-stream/README.md) remain
 unadopted. Graphics has exact readbacks and cross-platform compile checks but

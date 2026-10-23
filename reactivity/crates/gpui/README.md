@@ -128,6 +128,15 @@ addresses. Same-field fanout shares one immutable text promotion. Private retain
 text uses one-word ArcStr leases; empty text allocates nothing, while nonempty
 headers and measured CPU costs are charged in [the ownership ledger](evidence/thin-text.md).
 
+`Component::source` composes a child library's declaration through nested
+registered components. The resulting typed path works with `Win::read`,
+`Win::set`, source-bound actions and Question inputs. For example,
+`Page::LEFT.source(&Counter::COUNT)` needs no duplicated parent Signal or
+projector. A static input family can be borrowed to keep its controller small.
+Paths name current registered fields; presentation targets and keyed row
+identity retain their separate authority. See the ordinary
+[component_sources example](examples/component_sources.rs).
+
 `Win::set` returns `SetError::Rejected` with the original value when admission
 fails. `Committed` reports the source/presentation epochs after a successful
 source edit whose derived presentation failed. `OwnerFault` reports a consumed
