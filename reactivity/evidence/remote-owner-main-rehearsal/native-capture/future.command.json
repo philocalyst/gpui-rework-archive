@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "dbus-run-session",
+    "--",
+    "/tmp/gpui-remote-owner-main-qualification/native-capture/candidate-tests",
+    "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "display": ":0",
+  "timeout_seconds": 90,
+  "scope": "functional integration; watchdogs detect failure, no timing comparison"
+}
