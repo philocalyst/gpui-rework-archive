@@ -1,0 +1,17 @@
+{
+  "ready": true,
+  "normal_variants": {
+    "normal-baseline": {
+      "path": "/tmp/gpui-text-column-cpu-evidence/normal-baseline-frozen",
+      "sha256": "c9c8b4c4bffbfa794dfe36026d0f819038b6483b620de5419e18d0b89c057a67",
+      "bytes": 15541944
+    },
+    "normal-candidate": {
+      "path": "/tmp/gpui-text-column-cpu-evidence/normal-candidate-frozen",
+      "sha256": "e7f81f27aba1d4fe0fea88cade401d9d17e4d43bee67b3cfe1b271e75e813246",
+      "bytes": 15543992
+    }
+  },
+  "pending_competitors": [],
+  "capture_cap_seconds": 300
+}

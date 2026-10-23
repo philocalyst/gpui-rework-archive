@@ -1,0 +1,25 @@
+
+running 1 test
+test runtime::text_geometry::owner_tests::whole_window_text_column_owner_ledger ... TEXT_COLUMN stage=transform-C1 count=1 p_bytes=96 c_entries=0 c_bytes=0 p_map_strong_sum=2 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=192 resources=120 entry=24 runtime=1824 allocations=31 requested=5940 peak_extra=2140 retained_delta=192
+TEXT_COLUMN stage=transform-C2 count=1 p_bytes=96 c_entries=0 c_bytes=0 p_map_strong_sum=2 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=192 resources=120 entry=24 runtime=1824 allocations=31 requested=5940 peak_extra=2140 retained_delta=0
+TEXT_COLUMN stage=transform-ACK count=1 p_bytes=96 c_entries=0 c_bytes=0 p_map_strong_sum=2 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=0 resources=120 entry=24 runtime=1824 allocations=0 requested=0 peak_extra=0 retained_delta=-192
+TEXT_COLUMN stage=one-map-C count=1 p_bytes=96 c_entries=1 c_bytes=24 p_map_strong_sum=1 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=192 resources=120 entry=24 runtime=1824 allocations=407 requested=182044 peak_extra=76063 retained_delta=4102
+TEXT_COLUMN stage=one-map-ACK count=1 p_bytes=24 c_entries=0 c_bytes=0 p_map_strong_sum=2 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=0 resources=120 entry=24 runtime=1824 allocations=0 requested=0 peak_extra=0 retained_delta=-815
+TEXT_COLUMN stage=all-shapes-C count=1 p_bytes=24 c_entries=1 c_bytes=24 p_map_strong_sum=1 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=192 resources=120 entry=24 runtime=1824 allocations=380 requested=176256 peak_extra=76077 retained_delta=4198
+TEXT_COLUMN stage=all-shapes-ACK count=1 p_bytes=24 c_entries=0 c_bytes=0 p_map_strong_sum=2 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=0 resources=120 entry=24 runtime=1824 allocations=0 requested=0 peak_extra=0 retained_delta=-836
+TEXT_COLUMN stage=all-origins-C count=1 p_bytes=24 c_entries=1 c_bytes=24 p_map_strong_sum=3 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=192 resources=120 entry=24 runtime=1824 allocations=42 requested=9896 peak_extra=4500 retained_delta=300
+TEXT_COLUMN stage=all-origins-ACK count=1 p_bytes=24 c_entries=0 c_bytes=0 p_map_strong_sum=2 l_node_bytes=120 p_rows_bytes=192 c_rows_bytes=0 resources=120 entry=24 runtime=1824 allocations=0 requested=0 peak_extra=0 retained_delta=-216
+TEXT_COLUMN stage=truncate-C count=1 p_bytes=24 c_entries=0 c_bytes=0 p_map_strong_sum=1 l_node_bytes=80 p_rows_bytes=192 c_rows_bytes=128 resources=120 entry=24 runtime=1824 allocations=39 requested=6648 peak_extra=1100 retained_delta=-14849
+
+thread 'runtime::text_geometry::owner_tests::whole_window_text_column_owner_ledger' (2397687) panicked at crates/gpui/src/runtime/text_geometry/owner_tests.rs:60:44:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    runtime::text_geometry::owner_tests::whole_window_text_column_owner_ledger
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.02s
+

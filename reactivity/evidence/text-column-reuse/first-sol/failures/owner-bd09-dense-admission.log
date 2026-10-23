@@ -1,0 +1,20 @@
+
+running 1 test
+test runtime::text_geometry::owner_tests::whole_window_text_column_owner_ledger ... TEXT_COLUMN stage=transform-C1 count=32768 p_bytes=786432 c_entries=0 c_bytes=0 p_map_strong_sum=65536 l_node_bytes=1310800 p_rows_bytes=2097280 c_rows_bytes=2097280 resources=120 entry=24 runtime=1824 allocations=32836 requested=71746386 peak_extra=22282464 retained_delta=2097368
+TEXT_COLUMN stage=transform-C2 count=32768 p_bytes=786432 c_entries=0 c_bytes=0 p_map_strong_sum=65536 l_node_bytes=1310800 p_rows_bytes=2097280 c_rows_bytes=2097280 resources=120 entry=24 runtime=1824 allocations=32836 requested=71746386 peak_extra=22282464 retained_delta=0
+TEXT_COLUMN stage=transform-ACK count=32768 p_bytes=786432 c_entries=0 c_bytes=0 p_map_strong_sum=65536 l_node_bytes=1310800 p_rows_bytes=2097280 c_rows_bytes=0 resources=120 entry=24 runtime=1824 allocations=0 requested=0 peak_extra=0 retained_delta=-2097280
+TEXT_COLUMN stage=one-map-C count=32768 p_bytes=786432 c_entries=32768 c_bytes=786432 p_map_strong_sum=98302 l_node_bytes=1310800 p_rows_bytes=2097280 c_rows_bytes=2097280 resources=120 entry=24 runtime=1824 allocations=33211 requested=72707454 peak_extra=22282464 retained_delta=2887042
+TEXT_COLUMN stage=one-map-ACK count=32768 p_bytes=786432 c_entries=0 c_bytes=0 p_map_strong_sum=65536 l_node_bytes=1310800 p_rows_bytes=2097280 c_rows_bytes=0 resources=120 entry=24 runtime=1824 allocations=0 requested=0 peak_extra=0 retained_delta=-2884239
+
+thread 'runtime::text_geometry::owner_tests::whole_window_text_column_owner_ledger' (2395824) panicked at crates/gpui/src/runtime/text_geometry/owner_tests.rs:117:46:
+called `Result::unwrap()` on an `Err` value: Canvas(InvalidGeometry)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    runtime::text_geometry::owner_tests::whole_window_text_column_owner_ledger
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 166 filtered out; finished in 44.84s
+

@@ -1,0 +1,295 @@
+{
+  "campaign_status": "incomplete",
+  "observations": 219,
+  "complete_pairs": 109,
+  "qualification_pass": false,
+  "speed_claim": false,
+  "failure": "TimeoutExpired(['taskset', '-c', '0', '/tmp/gpui-text-column-cpu-evidence/normal-candidate-frozen', 'sample', 'origin32k', 'typed'], 0.5825640370021574)",
+  "cells": [
+    {
+      "case": "tiny1",
+      "lane": "update",
+      "label": "tiny1",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9949317081689113,
+        0.9845543134233887,
+        0.9909881893834291,
+        0.8648918613851407,
+        1.0042419509821652,
+        0.9835413308019019,
+        0.9878521889239774
+      ],
+      "median_candidate_over_baseline": 0.9878521889239774,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "tiny1",
+      "lane": "typed",
+      "label": "tiny1",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9909993737234327,
+        0.9938837505963105,
+        0.9740756286848598,
+        0.9821952434891379,
+        0.979348638649605,
+        0.9274346690213446,
+        0.9912491111425351
+      ],
+      "median_candidate_over_baseline": 0.9821952434891379,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "small32",
+      "lane": "update",
+      "label": "small32",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9814997438595883,
+        0.9877406416483414,
+        0.989225504947474,
+        0.9861776219468096,
+        0.9928280338804061,
+        0.9905998680959788,
+        0.9982933884105518
+      ],
+      "median_candidate_over_baseline": 0.989225504947474,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "small32",
+      "lane": "typed",
+      "label": "small32",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9849440749268098,
+        0.9855640983823274,
+        0.9771774284927313,
+        1.009348118837799,
+        0.9859435415359564,
+        0.9796878750018909,
+        0.997468168929146
+      ],
+      "median_candidate_over_baseline": 0.9855640983823274,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "transform32k",
+      "lane": "update",
+      "label": "transform32k",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9949827985760469,
+        1.0898470158610496,
+        0.9966920193499419,
+        1.0880395530925644,
+        1.01551001828276,
+        1.0852907975713246,
+        0.9975061757289335
+      ],
+      "median_candidate_over_baseline": 1.01551001828276,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "transform32k",
+      "lane": "typed",
+      "label": "transform32k",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9946073419258112,
+        1.0006638354926143,
+        1.0006217046620467,
+        1.008406012728004,
+        0.9728459973366956,
+        0.9977456497077936,
+        0.9963030033281354
+      ],
+      "median_candidate_over_baseline": 0.9977456497077936,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "pending32k",
+      "lane": "update",
+      "label": "pending32k",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9435823738407317,
+        0.964288072083565,
+        0.956090429653471,
+        0.9588195677514478,
+        0.9690162770583863,
+        0.9627401304670873,
+        0.9576670119512158
+      ],
+      "median_candidate_over_baseline": 0.9588195677514478,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "pending32k",
+      "lane": "typed",
+      "label": "pending32k",
+      "complete_pairs": 7,
+      "ratios": [
+        1.0005939733854627,
+        0.9916107540980497,
+        0.9882237877311986,
+        0.980992267973838,
+        0.9963116498046567,
+        0.9887535063219116,
+        0.9956588148623245
+      ],
+      "median_candidate_over_baseline": 0.9916107540980497,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "one-map32k",
+      "lane": "update",
+      "label": "one-map32k",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9774592543699058,
+        0.994061941027125,
+        0.99559219757412,
+        0.9971509987850424,
+        1.0021206733720252,
+        0.9906362221824222,
+        0.991348537560592
+      ],
+      "median_candidate_over_baseline": 0.994061941027125,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "one-map32k",
+      "lane": "typed",
+      "label": "one-map32k",
+      "complete_pairs": 7,
+      "ratios": [
+        1.0003790269045356,
+        0.9987786143371208,
+        1.0010109386037138,
+        1.005301571805087,
+        0.9901633682084127,
+        1.000562952788363,
+        0.9934320561392703
+      ],
+      "median_candidate_over_baseline": 1.0003790269045356,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "all-map32k",
+      "lane": "update",
+      "label": "all-map32k",
+      "complete_pairs": 7,
+      "ratios": [
+        0.9748199023668437,
+        0.9801280962766136,
+        0.9928371173117376,
+        0.9471873780220639,
+        0.9872379573657651,
+        1.0072530095224308,
+        0.987539273506284
+      ],
+      "median_candidate_over_baseline": 0.9872379573657651,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "all-map32k",
+      "lane": "typed",
+      "label": "all-map32k",
+      "complete_pairs": 7,
+      "ratios": [
+        0.966818850233802,
+        1.0027728340586206,
+        0.9746562099778269,
+        0.9840604981460526,
+        0.980757005103581,
+        0.956850649128995,
+        0.985581016089594
+      ],
+      "median_candidate_over_baseline": 0.980757005103581,
+      "qualification_gate": "pass",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "origin32k",
+      "lane": "update",
+      "label": "origin32k",
+      "complete_pairs": 7,
+      "ratios": [
+        1.0365524214034785,
+        1.0409147300625392,
+        1.0460605863940469,
+        1.0141606844830962,
+        1.0381950512777707,
+        1.054298892104056,
+        1.042520644324326
+      ],
+      "median_candidate_over_baseline": 1.0409147300625392,
+      "qualification_gate": "fail",
+      "partial_observation_exceeds_3_percent": true
+    },
+    {
+      "case": "origin32k",
+      "lane": "typed",
+      "label": "padding-layout32k",
+      "complete_pairs": 6,
+      "ratios": [
+        0.9890638762577896,
+        0.9465213305543821,
+        0.9732770790660551,
+        0.9845520040254891,
+        0.9947760864240283,
+        0.9832668207426971
+      ],
+      "median_candidate_over_baseline": 0.9839094123840931,
+      "qualification_gate": "incomplete",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "contract32k",
+      "lane": "update",
+      "label": "contract32k",
+      "complete_pairs": 6,
+      "ratios": [
+        0.9981281634509058,
+        0.9910935711308332,
+        0.9744543282208897,
+        0.9858068406425406,
+        0.9861172530290498,
+        0.9828059858399296
+      ],
+      "median_candidate_over_baseline": 0.9859620468357952,
+      "qualification_gate": "incomplete",
+      "partial_observation_exceeds_3_percent": false
+    },
+    {
+      "case": "contract32k",
+      "lane": "typed",
+      "label": "contract32k",
+      "complete_pairs": 6,
+      "ratios": [
+        0.9879179069622861,
+        0.9883300610665455,
+        0.972851440117154,
+        0.9815195494645346,
+        0.9905514977468692,
+        0.9871793584830665
+      ],
+      "median_candidate_over_baseline": 0.9875486327226763,
+      "qualification_gate": "incomplete",
+      "partial_observation_exceeds_3_percent": false
+    }
+  ]
+}

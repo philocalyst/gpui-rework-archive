@@ -1,0 +1,12 @@
+
+running 7 tests
+test runtime::text_geometry::column_tests::full_fallback_bounds_contraction_and_releases_excess_with_nontext_survivors ... ok
+test runtime::text_geometry::column_tests::full_fallback_is_local_and_successful_reuse_retires_previous_full_candidate ... ok
+test runtime::text_geometry::column_tests::list_reorder_and_clipping_replace_entries_at_exact_published_rows ... ok
+test runtime::text_geometry::column_tests::reuse_proof_checks_origin_bits_and_immutable_map_identity ... ok
+test runtime::text_geometry::column_tests::selection_only_and_fractional_dpi_keep_the_exact_geometry_column ... ok
+test runtime::text_geometry::column_tests::shortening_and_clearing_are_explicit_replacements ... ok
+test runtime::text_geometry::column_tests::unchanged_column_adds_no_map_owners_and_survives_failed_dirty_l ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 236 filtered out; finished in 0.13s
+
