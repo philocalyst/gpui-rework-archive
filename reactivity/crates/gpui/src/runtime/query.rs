@@ -643,6 +643,7 @@ impl HitSheet<'_> {
     pub fn contains_window(&self, point: crate::Point) -> bool {
         Rect::new(0., 0., self.size[0] as f32, self.size[1] as f32).contains(point)
     }
+    #[inline]
     pub fn hit(&self, point: crate::Point) -> Option<usize> {
         let mut rows = self.nodes.iter().enumerate().rev();
         while let Some((index, node)) = rows.next() {
