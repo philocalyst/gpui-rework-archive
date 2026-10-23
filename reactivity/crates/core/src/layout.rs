@@ -416,7 +416,7 @@ impl LayoutTree {
         root: NodeId,
         viewport: Size<AvailableSpace>,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner::<false>(root, viewport, None)
+        self.compute_inner(root, viewport, None, false)
     }
     /// Borrow a content service for this computation instead of storing it in
     /// every measured node. Only nodes installed with `set_measure` invoke it.
@@ -430,7 +430,7 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: &mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner::<false>(root, viewport, Some(measure))
+        self.compute_inner(root, viewport, Some(measure), false)
     }
     /// Like `compute_with`, with no available height in the callback's input.
     /// The existing leaf cache can therefore share answers across available
@@ -442,7 +442,7 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner::<true>(
+        self.compute_inner(
             root,
             viewport,
             Some(&mut |node, input| {
@@ -454,13 +454,15 @@ impl LayoutTree {
                     },
                 )
             }),
+            true,
         )
     }
-    fn compute_inner<const WIDTH_ONLY: bool>(
+    fn compute_inner(
         &mut self,
         root: NodeId,
         viewport: Size<AvailableSpace>,
         measure: Option<&mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
+        width_only: bool,
     ) -> Result<bool, LayoutError> {
         self.tree.index(root)?;
         if self.poisoned {
@@ -504,10 +506,11 @@ impl LayoutTree {
             self.pending.remove(node);
         }
         {
-            let mut engine = Engine::<WIDTH_ONLY> {
+            let mut engine = Engine {
                 owner: self,
                 measure,
                 observed: 0,
+                width_only,
             };
             for node in selected {
                 let key = EngineId::new(engine.owner.tree.layout_key(node));
@@ -646,12 +649,13 @@ impl LayoutTree {
 // Private view: Cephal's engine-local u64 ids cannot be used as public GPUI
 // capabilities. The codec includes generation; arena validation occurs at the
 // public boundary, and every engine id is minted from this adapter's topology.
-struct Engine<'a, 'service, const WIDTH_ONLY: bool> {
+struct Engine<'a, 'service> {
     observed: u8,
+    width_only: bool,
     owner: &'a mut LayoutTree,
     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
 }
-impl<const WIDTH_ONLY: bool> Engine<'_, '_, WIDTH_ONLY> {
+impl Engine<'_, '_> {
     fn node(&self, node: EngineId) -> NodeId {
         self.owner.tree.node_for_layout_key(node.raw())
     }
@@ -671,7 +675,7 @@ impl Iterator for Children<'_> {
             .map(|id| EngineId::new(self.tree.layout_key(id)))
     }
 }
-impl<const WIDTH_ONLY: bool> EngineTree for Engine<'_, '_, WIDTH_ONLY> {
+impl EngineTree for Engine<'_, '_> {
     type ChildIter<'a>
         = Children<'a>
     where
@@ -726,7 +730,7 @@ impl<const WIDTH_ONLY: bool> EngineTree for Engine<'_, '_, WIDTH_ONLY> {
             cheap_leaf: leaf && !self.is_measured_leaf(node),
             dependency: self.owner.styles.parent_size_dependency(style),
             kind: if leaf {
-                if WIDTH_ONLY {
+                if self.width_only {
                     cephal::tree::NodeKind::LeafIgnoringHeight
                 } else {
                     cephal::tree::NodeKind::Leaf
@@ -755,7 +759,7 @@ impl<const WIDTH_ONLY: bool> EngineTree for Engine<'_, '_, WIDTH_ONLY> {
         }
     }
     fn measure_ignores_available_height(&self) -> bool {
-        WIDTH_ONLY
+        self.width_only
     }
     fn set_unrounded_layout(&mut self, node: EngineId, layout: &Layout) {
         if self.owner.speculation != 0 {
@@ -821,7 +825,7 @@ impl<const WIDTH_ONLY: bool> EngineTree for Engine<'_, '_, WIDTH_ONLY> {
         }
     }
 }
-impl<const WIDTH_ONLY: bool> CacheAccess for Engine<'_, '_, WIDTH_ONLY> {
+impl CacheAccess for Engine<'_, '_> {
     fn cache(&self, node: EngineId) -> &NodeCache {
         &self.owner.caches[self.slot(node)]
     }
@@ -849,7 +853,7 @@ impl<const WIDTH_ONLY: bool> CacheAccess for Engine<'_, '_, WIDTH_ONLY> {
         self.owner.speculation = depth;
     }
 }
-impl<const WIDTH_ONLY: bool> Incremental for Engine<'_, '_, WIDTH_ONLY> {
+impl Incremental for Engine<'_, '_> {
     fn parent(&self, node: EngineId) -> Option<EngineId> {
         self.owner
             .tree
