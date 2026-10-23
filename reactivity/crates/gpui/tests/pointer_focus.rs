@@ -307,39 +307,68 @@ fn absent_point_encoding_preserves_finite_bits_and_public_debug_shape() {
         format!("{pointer:?}"),
         "PointerSession { position: None, pressed: None }"
     );
-    for point in [
-        Point { x: -0., y: 0. },
-        Point { x: 0., y: -0. },
-        Point {
-            x: f32::from_bits(1),
-            y: -f32::from_bits(1),
-        },
-    ] {
-        win.pointer_event(&mut pointer, PointerEvent::Move(point))
-            .unwrap();
-        let actual = pointer.position().unwrap();
-        assert_eq!(
-            [actual.x.to_bits(), actual.y.to_bits()],
-            [point.x.to_bits(), point.y.to_bits()]
-        );
+    // Both signs, zero, subnormals, normal boundaries and maximum finite.
+    let finite_bits = [
+        0,
+        1,
+        0x007f_ffff,
+        0x0080_0000,
+        0x3f7f_ffff,
+        0x3f80_0000,
+        0x7f7f_ffff,
+        0x8000_0000,
+        0x8000_0001,
+        0x807f_ffff,
+        0x8080_0000,
+        0xbf80_0000,
+        0xff7f_ffff,
+    ];
+    for x in finite_bits {
+        for y in finite_bits {
+            let point = Point {
+                x: f32::from_bits(x),
+                y: f32::from_bits(y),
+            };
+            win.pointer_event(&mut pointer, PointerEvent::Move(point))
+                .unwrap();
+            let actual = pointer.position().unwrap();
+            assert_eq!([actual.x.to_bits(), actual.y.to_bits()], [x, y]);
+        }
     }
-    for point in [
-        Point { x: f32::NAN, y: 0. },
-        Point {
-            x: 0.,
-            y: f32::INFINITY,
-        },
-        Point {
-            x: f32::NEG_INFINITY,
-            y: 0.,
-        },
+    // Include the reserved word and its predecessor: neither is finite input.
+    for bits in [
+        0x7f80_0000,
+        0xff80_0000,
+        0x7fc0_0000,
+        0xffff_fffe,
+        0xffff_ffff,
     ] {
-        win.pointer_event(&mut pointer, PointerEvent::Move(point))
-            .unwrap();
-        assert_eq!(pointer.position(), None);
+        for point in [
+            Point {
+                x: f32::from_bits(bits),
+                y: 0.,
+            },
+            Point {
+                x: 0.,
+                y: f32::from_bits(bits),
+            },
+        ] {
+            let mut win = page(false);
+            let mut pressed = press(&mut win);
+            win.pointer_event(&mut pressed, PointerEvent::Move(point))
+                .unwrap();
+            assert_eq!(pressed.position(), None);
+            ack(&mut win);
+            win.pointer_event(&mut pressed, PointerEvent::Move(Point { x: 12., y: 52. }))
+                .unwrap();
+            win.pointer_event(&mut pressed, PointerEvent::Release)
+                .unwrap();
+            assert_eq!(win.root().unwrap().calls, 0);
+        }
     }
     if cfg!(target_pointer_width = "64") {
         assert_eq!(size_of::<PointerSession>(), 32);
+        assert_eq!(size_of::<Option<PointerSession>>(), 32);
         assert_eq!(align_of::<PointerSession>(), 8);
     }
 }

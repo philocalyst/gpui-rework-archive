@@ -2,7 +2,10 @@
 use super::{Commit, Error, NodeKind, Runtime, Target, View, Win};
 use crate::remote::LaneSet;
 use crate::{Point, ScrollDelta};
-use std::{fmt, num::NonZeroU64};
+use std::{
+    fmt,
+    num::{NonZeroU32, NonZeroU64},
+};
 
 /// One portable mouse stream. Points are physical window coordinates; wheel
 /// displacement is window-logical, with positive values scrolling right/down.
@@ -24,10 +27,14 @@ pub enum PointerEvent {
 /// a fresh acknowledged-sheet hit test. Moving a session to another window
 /// cannot transfer that press's authority.
 pub struct PointerSession {
-    // Move admits only finite points. A NaN x represents absence without the
-    // padding of Option<Point>, keeping the press's proof inside this header.
-    position: Point,
+    position: Position,
     pressed: Option<Pressed>,
+}
+// Finite x bits plus one cannot be zero or MAX. MAX represents absence;
+// NonZeroU32 also preserves the optional session's compiler niche.
+struct Position {
+    x: NonZeroU32,
+    y: f32,
 }
 #[derive(Clone, Copy)]
 struct Pressed {
@@ -37,7 +44,10 @@ struct Pressed {
 impl Default for PointerSession {
     fn default() -> Self {
         Self {
-            position: Point { x: f32::NAN, y: 0. },
+            position: Position {
+                x: NonZeroU32::MAX,
+                y: 0.,
+            },
             pressed: None,
         }
     }
@@ -52,7 +62,10 @@ impl fmt::Debug for PointerSession {
 }
 impl PointerSession {
     pub fn position(&self) -> Option<Point> {
-        self.position.x.is_finite().then_some(self.position)
+        (self.position.x != NonZeroU32::MAX).then(|| Point {
+            x: f32::from_bits(self.position.x.get() - 1),
+            y: self.position.y,
+        })
     }
 
     /// Cancel a gesture while keeping the last position. This does not change
@@ -113,13 +126,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         match event {
             PointerEvent::Move(point) => {
                 if point.x.is_finite() && point.y.is_finite() {
-                    session.position = point;
+                    session.position = Position {
+                        x: NonZeroU32::new(point.x.to_bits() + 1)
+                            .expect("finite x bits plus one are nonzero"),
+                        y: point.y,
+                    };
                 } else {
-                    session.position.x = f32::NAN;
+                    session.position.x = NonZeroU32::MAX;
                     session.cancel();
                 }
             }
-            PointerEvent::Leave => session.position.x = f32::NAN,
+            PointerEvent::Leave => session.position.x = NonZeroU32::MAX,
             PointerEvent::Wheel(delta) => {
                 if let Some(point) = session.position() {
                     return self.scroll_at_2d(point, delta);
@@ -488,13 +505,16 @@ mod focus_release_tests {
     #[test]
     fn private_press_proof_uses_the_existing_session_header() {
         println!(
-            "POINTER_LAYOUT point={} option_point={} target={} pressed={} option_pressed={} session={} session_align={} runtime={} win={}",
+            "POINTER_LAYOUT point={} option_point={} target={} pressed={} option_pressed={} position={} optional_position={} session={} optional_session={} session_align={} runtime={} win={}",
             size_of::<Point>(),
             size_of::<Option<Point>>(),
             size_of::<Target>(),
             size_of::<Pressed>(),
             size_of::<Option<Pressed>>(),
+            size_of::<Position>(),
+            size_of::<Option<Position>>(),
             size_of::<PointerSession>(),
+            size_of::<Option<PointerSession>>(),
             align_of::<PointerSession>(),
             size_of::<Runtime<Page>>(),
             size_of::<Win<Page>>(),
@@ -502,7 +522,10 @@ mod focus_release_tests {
         if cfg!(target_pointer_width = "64") {
             assert_eq!(size_of::<Pressed>(), 24);
             assert_eq!(size_of::<Option<Pressed>>(), 24);
+            assert_eq!(size_of::<Position>(), 8);
+            assert_eq!(size_of::<Option<Position>>(), 8);
             assert_eq!(size_of::<PointerSession>(), 32);
+            assert_eq!(size_of::<Option<PointerSession>>(), 32);
             assert_eq!(align_of::<PointerSession>(), 8);
         }
     }
