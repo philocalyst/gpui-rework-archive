@@ -22,9 +22,6 @@ mod geometry_ledger;
 mod layout;
 mod paragraph;
 mod planner;
-// The allocation-preserving owner has a private, separately Miri-tested boundary.
-#[allow(unsafe_code)]
-mod retained;
 use layout::Details;
 pub use layout::{
     CaretAffinity, GlyphRun, TextDirection, TextGeometry, TextGrapheme, TextLine, TextOffset,
@@ -235,7 +232,7 @@ pub struct TextLayout {
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
-    glyphs: retained::RetainedSlice<Glyph>,
+    glyphs: Box<[Glyph]>,
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
 }

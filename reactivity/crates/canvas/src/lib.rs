@@ -1,5 +1,5 @@
 //! CPU canvas with extended-linear source-over and profiled premultiplied output.
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 mod canvas;
 mod color;

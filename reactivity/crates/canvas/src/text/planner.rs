@@ -164,8 +164,7 @@ impl<'font> Planner<'font> {
             height: planned.metrics.height,
             baseline: planned.metrics.baseline,
             font_size: size,
-            glyphs: super::retained::RetainedSlice::try_from(planned.glyphs)
-                .map_err(|_| Error::ResourceLimit)?,
+            glyphs: planned.glyphs.into_boxed_slice(),
             fonts: self.font_set(planned.mask),
             mapping: planned.details.map(Arc::new),
         })
