@@ -784,39 +784,6 @@ impl RendererState {
             scene,
         )?;
         let mask_bytes = self.prepare_atlas(context, scene, has_masks)?;
-        // Patch only resource coordinates after every draw has passed admission.
-        // Metadata words/correction indices and private common addresses remain.
-        let mut word = bank_words;
-        for group in scene.groups() {
-            let compact = compact_group(group, self.grouped_records);
-            if compact {
-                word += 5;
-            }
-            for p in group.placements() {
-                let atlas = if let Some((image, sampling)) = p.source.image() {
-                    let [offset, mut flags] = self
-                        .images
-                        .as_ref()
-                        .unwrap()
-                        .metadata(image.key(), sampling);
-                    if rounded_image(p.source) {
-                        flags |= images::ROUNDED;
-                    }
-                    [offset, flags, image.width() | (image.height() << 16)]
-                } else if p.source.corner_radius().is_some() {
-                    let [radius, scale, _, _] = shape_word(p.source, p.local_rect);
-                    [ROUNDED_SOURCE, radius, scale]
-                } else {
-                    p.source.mask().map_or([0; 3], |mask| {
-                        let t = self.atlas.entries[&mask.key];
-                        [t.x, t.y, t.width | (t.height << 16)]
-                    })
-                };
-                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
-                word += if compact { 2 } else { 6 };
-            }
-        }
-        debug_assert_eq!(word, self.records.len());
         let mut offset = 0;
         for (tile, range) in self.ranges.iter_mut().enumerate() {
             let count = range[1];
@@ -839,6 +806,29 @@ impl RendererState {
             for p in group.placements().rev() {
                 word -= if compact { 2 } else { 6 };
                 reverse_ordinal -= 1;
+                // Resource preparation follows admission of every draw. Patch
+                // coordinates at the same address needed for tile references,
+                // preserving correction indices and private common addresses.
+                let atlas = if let Some((image, sampling)) = p.source.image() {
+                    let [offset, mut flags] = self
+                        .images
+                        .as_ref()
+                        .unwrap()
+                        .metadata(image.key(), sampling);
+                    if rounded_image(p.source) {
+                        flags |= images::ROUNDED;
+                    }
+                    [offset, flags, image.width() | (image.height() << 16)]
+                } else if p.source.corner_radius().is_some() {
+                    let [radius, scale, _, _] = shape_word(p.source, p.local_rect);
+                    [ROUNDED_SOURCE, radius, scale]
+                } else {
+                    p.source.mask().map_or([0; 3], |mask| {
+                        let t = self.atlas.entries[&mask.key];
+                        [t.x, t.y, t.width | (t.height << 16)]
+                    })
+                };
+                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
                 visit(prepared(group, p), columns, |tile| {
                     let range = &mut self.ranges[tile];
