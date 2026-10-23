@@ -1227,3 +1227,34 @@ fn published_source_replace_rejects_buffered_named_play_before_owner_notificatio
     assert!(capture.lock().unwrap().opened.is_empty());
     close(win, audio, worker);
 }
+
+#[test]
+fn published_source_replace_rejects_visible_prepared_enqueue_before_owner_notification() {
+    let (worker, audio, capture, _, mut win) = owner();
+    let prepare = row_prepare(&mut win, 44);
+    win.activate(prepare).unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    worker
+        .replace_database(database())
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap()
+        .unwrap();
+    win.deliver_ready(1).unwrap();
+    assert!(win.with_model(|model| model.prepared().is_some()).unwrap());
+    assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 0);
+    win.activate(win.button("Add prepared recording 44 to queue"))
+        .unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        0,
+        "visible old-source prepared action edited queue after replacement acknowledgement"
+    );
+    assert!(capture.lock().unwrap().opened.is_empty());
+    close(win, audio, worker);
+}
