@@ -1,0 +1,182 @@
+diff --git a/reactivity/ports/hummingbird/tests/audio.rs b/reactivity/ports/hummingbird/tests/audio.rs
+index fbf874ea47..13e8d7a402 100644
+--- a/reactivity/ports/hummingbird/tests/audio.rs
++++ b/reactivity/ports/hummingbird/tests/audio.rs
+@@ -516,6 +516,67 @@ fn bad_next_source_keeps_preceding_resampled_tail_and_reports_failure() {
+     finish(service, win);
+ }
+ 
++#[test]
++fn incompatible_successor_admission_keeps_every_accepted_predecessor_tail_sample() {
++    use audioadapter_buffers::direct::SequentialSliceOfVecs;
++    use rubato::{Fft, FixedSync, Resampler};
++    let samples: Vec<i16> = (0..169).map(|i| (i * 53 - 10000) as i16).collect();
++    let first = Wave::new(8000, samples.iter().copied());
++    let successor = Wave::new(44101, std::iter::repeat_n(6000, 17));
++    // Independent pinned Rubato, explicit unchanged 160/960 geometry, integer
++    // final-frame bound. No AudioService result is its own sample oracle.
++    let mut oracle = Fft::<f64>::new(8000, 48000, 160, 1, FixedSync::Both).unwrap();
++    let frames = samples.len() * 6 + oracle.output_delay();
++    let mut expected = Vec::new();
++    for cursor in [0, 160] {
++        let length = (samples.len() - cursor).min(160);
++        let input = vec![
++            samples[cursor..cursor + length]
++                .iter()
++                .map(|sample| f64::from(*sample) / 32768.)
++                .collect(),
++        ];
++        let input = SequentialSliceOfVecs::new(&input, 1, length).unwrap();
++        let mut output = vec![vec![0.; 960]];
++        let mut adapter = SequentialSliceOfVecs::new_mut(&mut output, 1, 960).unwrap();
++        oracle
++            .process_into_buffer(
++                &input,
++                &mut adapter,
++                Some(&rubato::Indexing {
++                    input_offset: 0,
++                    output_offset: 0,
++                    active_channels_mask: None,
++                    partial_len: Some(length),
++                }),
++            )
++            .unwrap();
++        expected.extend_from_slice(&output[0]);
++    }
++    expected.truncate(frames);
++    let (service, capture, mut win) = owner(
++        vec![
++            track(&first.0, "valid predecessor"),
++            track(&successor.0, "unadmitted successor"),
++        ],
++        2048,
++        Some(48000),
++    );
++    // Hold all accepted output rather than conflating acceptance with playback.
++    until(&mut win, &capture, false, |model| {
++        model.audio_status().unwrap().state == AudioState::Failed
++    });
++    {
++        let observed = capture.lock().unwrap();
++        assert_eq!(observed.drops, 0, "failure retired queued predecessor PCM");
++        assert_eq!(observed.queue.iter().copied().collect::<Vec<_>>(), expected);
++        assert!(observed.samples.is_empty());
++    }
++    drain(&capture);
++    assert_eq!(capture.lock().unwrap().samples, expected);
++    finish(service, win);
++}
++
+ #[test]
+ fn paused_device_failure_closes_output_and_explicit_replay_can_reopen() {
+     let source = Wave::new(8000, (0..100_000).map(|i| (i / 100) as i16));
+diff --git a/reactivity/ports/hummingbird/tests/library_audio.rs b/reactivity/ports/hummingbird/tests/library_audio.rs
+index 76bbd59979..342fd2e60a 100644
+--- a/reactivity/ports/hummingbird/tests/library_audio.rs
++++ b/reactivity/ports/hummingbird/tests/library_audio.rs
+@@ -572,6 +572,45 @@ fn source_replacement_rejects_old_row_then_one_click_plays_revalidated_path() {
+     close(win, audio, worker);
+ }
+ 
++#[test]
++fn cloned_handle_stop_revokes_buffered_play_without_editing_the_owner_queue() {
++    let (worker, audio, capture, _, mut win) = owner();
++    row_prepare(&mut win, 44);
++    win.activate(
++        win.role(Role::Button)
++            .name("Play Καλημέρα now")
++            .one()
++            .unwrap(),
++    )
++    .unwrap();
++    worker
++        .checkpoint()
++        .unwrap()
++        .recv_timeout(Duration::from_secs(5))
++        .unwrap();
++    assert_eq!(
++        win.with_model(Library::preparation_status).unwrap(),
++        PreparationStatus::Pending
++    );
++    // The real worker result is buffered. No Adopted event has updated the UI
++    // receipt when the separately owned public clone wins authoritative Stop.
++    let stopped = audio.handle().clone().stop().unwrap();
++    assert!(stopped.token.is_none());
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(
++        win.with_model(|model| model.queue.playback().queue().len())
++            .unwrap(),
++        0,
++        "retired preparation mutated the queue after cloned Stop"
++    );
++    assert_eq!(
++        win.with_model(Library::preparation_status).unwrap(),
++        PreparationStatus::Canceled
++    );
++    assert!(capture.lock().unwrap().streams.is_empty());
++    close(win, audio, worker);
++}
++
+ #[test]
+ fn stop_on_empty_queue_and_active_pause_seek_revoke_play_before_result_consumption() {
+     for control in ["Stop", "Pause", "Back 10 seconds"] {
+diff --git a/reactivity/ports/hummingbird/tests/preparation.rs b/reactivity/ports/hummingbird/tests/preparation.rs
+index 2591dd68ec..51e0839f47 100644
+--- a/reactivity/ports/hummingbird/tests/preparation.rs
++++ b/reactivity/ports/hummingbird/tests/preparation.rs
+@@ -261,3 +261,55 @@ fn public_selection_change_revokes_buffered_preparation_and_closed_commands_fail
+     assert!(owner.contains_text("Library worker is closed").unwrap());
+     drop(owner);
+ }
++
++#[test]
++fn failed_preparation_is_retired_by_full_public_selection_and_source_identity() {
++    let (worker, mut owner) = open();
++    worker.finish().unwrap();
++    owner.update(|model| model.prepare(44, 0)).unwrap();
++    assert_eq!(
++        owner.with_model(Library::preparation_status).unwrap(),
++        PreparationStatus::Failed
++    );
++    assert!(owner.contains_text("Library worker is closed").unwrap());
++    let failed = owner.with_model(|model| *model.selected).unwrap();
++    for selected in [
++        Selection {
++            id: Some(90),
++            ..failed
++        },
++        Selection {
++            sequence: failed.sequence + 1,
++            ..failed
++        },
++        Selection {
++            generation: failed.generation + 1,
++            ..failed
++        },
++    ] {
++        owner.set(Library::SELECTED, selected).unwrap();
++        assert_eq!(
++            owner.with_model(Library::preparation_status).unwrap(),
++            PreparationStatus::Canceled
++        );
++        assert!(
++            !owner
++                .contains_text("Recording unavailable: Library worker is closed")
++                .unwrap()
++        );
++        owner.set(Library::SELECTED, failed).unwrap();
++    }
++    owner
++        .set(
++            Library::VERSION,
++            hummingbird_gpui_port::search::Version {
++                generation: 1,
++                revision: 1,
++            },
++        )
++        .unwrap();
++    assert_eq!(
++        owner.with_model(Library::preparation_status).unwrap(),
++        PreparationStatus::Canceled
++    );
++}

@@ -1,0 +1,22 @@
+{
+  "tail": {
+    "from": "/tmp/gpui-hummingbird-audio-target/debug/deps/audio-ca32fd64a2475926",
+    "frozen": "/tmp/gpui-hummingbird-port-authority-evidence/candidate-binaries/tail",
+    "sha256": "57fa1b635bdb33ab288686239abb9fbc940a6c7fdf7ce69f41ff0e63fdd416c9"
+  },
+  "selection": {
+    "from": "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation-d527d4cfb6f7d870",
+    "frozen": "/tmp/gpui-hummingbird-port-authority-evidence/candidate-binaries/selection",
+    "sha256": "75b962578d86cd8c4de257ad54e2e3cbe6326288d1770ad4bc09ca06d32b99b2"
+  },
+  "authority": {
+    "from": "/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-9bd09aea3e0a9d75",
+    "frozen": "/tmp/gpui-hummingbird-port-authority-evidence/candidate-binaries/authority",
+    "sha256": "bf0aab459b0615c546062d1994a261eab77d31314eadb52e2a1e6b32a6cf6dfc"
+  },
+  "native-service": {
+    "from": "/tmp/gpui-hummingbird-audio-target/debug/examples/native_service",
+    "frozen": "/tmp/gpui-hummingbird-port-authority-evidence/candidate-binaries/native-service",
+    "sha256": "6f23b6bdce3c26f39ecd4fd0770b279d541db2891bf5d7e82bcaa00b6632b99c"
+  }
+}

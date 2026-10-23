@@ -59,9 +59,10 @@ impl AudioHandle {
             token: desired.token,
         })
     }
-    /// The app's bounded queue edit runs only after revision/terminal/exhaustion
-    /// checks. It cannot call this handle recursively or do blocking work.
-    /// Holding desired through edit and publication closes the read/commit race.
+    /// The app's queue edit runs after revision/terminal/exhaustion checks.
+    /// It must not re-enter this handle. Vec growth and queue lookup can scale
+    /// with queue size while desired stays locked through edit and publication.
+    /// Returned QueueError precedes mutation; a panic does not imply rollback.
     pub(crate) fn replace_if(
         &self,
         expected: u64,
