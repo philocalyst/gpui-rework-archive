@@ -434,7 +434,7 @@ fn visit_source_pairs<B: Brush, E>(
             let mut prefix = slot.origin;
             rtl.clear();
             if run.is_rtl() {
-                run.try_for_each_caret_cluster(true, |run, atom, grapheme| {
+                run.try_for_each_cluster(true, |run, atom, grapheme| {
                     rtl.push(prefix);
                     prefix += run
                         .line_spacing()
@@ -447,7 +447,7 @@ fn visit_source_pairs<B: Brush, E>(
             let mut previous_shared = false;
             let full = run.full_slice();
             let mut logical_index = 0;
-            let flow = run.try_for_each_caret_cluster(false, |run, atom, grapheme| {
+            let flow = run.try_for_each_cluster(false, |run, atom, grapheme| {
                 let range = full.text_byte_range(grapheme.char_range());
                 let offset = if run.is_rtl() {
                     rtl[rtl.len() - logical_index - 1]

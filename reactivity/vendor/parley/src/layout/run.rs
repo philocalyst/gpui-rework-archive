@@ -208,10 +208,10 @@ impl<'a, B: Brush> Run<'a, B> {
 
     // The callback borrows the cursor's current atom and run; it cannot retain
     // those stack references. Public iteration still yields owned Clusters.
-    pub(crate) fn try_for_each_caret_cluster<E>(
+    pub(crate) fn try_for_each_cluster<E>(
         &self,
         rev: bool,
-        mut visit: impl FnMut(&Run<'a, B>, &Atom<'a>, Grapheme) -> ControlFlow<E>,
+        mut visit: impl FnMut(&Self, &Atom<'a>, Grapheme) -> ControlFlow<E>,
     ) -> ControlFlow<E> {
         let mut clusters = Clusters::new(*self, rev);
         while let Some(grapheme) = clusters.advance_cursor() {
