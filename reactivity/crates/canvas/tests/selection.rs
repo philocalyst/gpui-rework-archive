@@ -216,7 +216,7 @@ fn ordinary_interaction_queries_allocate_nothing_and_preserve_layout_size() {
         }
     });
     assert_eq!(allocations.count_total, 0);
-    assert_eq!(std::mem::size_of::<gpui_canvas::TextLayout>(), 56);
+    assert_eq!(std::mem::size_of::<gpui_canvas::TextLayout>(), 48);
     assert_eq!(std::mem::size_of::<gpui_canvas::Glyph>(), 16);
 }
 

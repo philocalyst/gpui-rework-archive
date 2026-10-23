@@ -22,6 +22,8 @@ mod geometry_ledger;
 mod layout;
 mod paragraph;
 mod planner;
+// The allocation-preserving owner has a private, separately Miri-tested boundary.
+#[allow(unsafe_code)]
 mod retained;
 use layout::Details;
 pub use layout::{
@@ -423,7 +425,7 @@ impl TextSystem {
         self.validate(layout)?;
         let mut min = [f32::INFINITY; 2];
         let mut max = [f32::NEG_INFINITY; 2];
-        for g in &layout.glyphs {
+        for g in layout.glyphs.iter() {
             let Some([left, bottom, right, top]) = outline_bounds(
                 &layout.fonts.face(g.font_slot())?.0.bytes,
                 g.id,
