@@ -4,7 +4,7 @@ use gpui_canvas::{PaintSlot, SlotEdit};
 
 const SHARED: u32 = 1;
 const RECTANGLE: u32 = 2;
-const _: () = assert!(MAX_DRAWS * 6 + MAX_DRAWS * 2 + MAX_DRAWS / 32 + 1 < INLINE_RECORD as usize);
+const _: () = assert!(MAX_DRAWS * 6 + MAX_DRAWS * 2 + MAX_DRAWS / 32 + 1 < SLOT_COLOR as usize);
 
 pub(super) fn prefix_words(rows: usize) -> usize {
     if rows == 0 {

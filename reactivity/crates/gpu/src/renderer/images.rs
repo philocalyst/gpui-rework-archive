@@ -11,6 +11,10 @@ const DISPLAY_P3: u32 = 4;
 const LINEAR_RGBA: u32 = 8;
 pub(super) const ROUNDED: u32 = 16;
 const _: () = assert!(ROUNDED & (FILTER_LINEAR | PREMULTIPLIED | DISPLAY_P3 | LINEAR_RGBA) == 0);
+const _: () = assert!(
+    (FILTER_LINEAR | PREMULTIPLIED | DISPLAY_P3 | LINEAR_RGBA | ROUNDED)
+        < 1 << super::RESOURCE_BITS
+);
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ImageStats {

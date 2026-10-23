@@ -58,16 +58,6 @@ fn validate_format(format: wgpu::TextureFormat) -> Result<(), Error> {
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
-struct DrawData {
-    local: [f32; 4],
-    inverse_x: [f32; 4],
-    inverse_y: [f32; 4],
-    clip: [f32; 4],
-    color: [f32; 4],
-    atlas: [u32; 4],
-}
-#[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
 struct Globals {
     viewport: [u32; 4],
     clear: [f32; 4],
@@ -118,12 +108,15 @@ pub struct Stats {
     pub correction_key_capacity: usize,
 }
 
-// Private word addresses refer only to this validated frame packet. The tag
-// selects an inline 96-byte draw; compact placements are two 16-byte words and
-// point at a five-word shared common record in the same storage buffer.
-const INLINE_RECORD: u32 = 1 << 31;
-// Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
-const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
+// Every placement is two words pointing into a four-word common-state prefix.
+// Singleton packets still cost six words; sharing saves four words per repeat.
+// The common address's high bit selects a paint-bank color, never another schema.
+const _: () = assert!(MAX_DRAWS * 6 < SLOT_COLOR as usize);
+const CORRECTION_BITS: u32 = 17;
+const CORRECTION_MASK: u32 = (1 << CORRECTION_BITS) - 1;
+const RESOURCE_BITS: u32 = 32 - CORRECTION_BITS;
+const _: () = assert!(MAX_DRAWS <= CORRECTION_MASK as usize);
+const _: () = assert!(MAX_ATLAS_SIDE < 1 << RESOURCE_BITS);
 type Word = [u32; 4];
 fn float_word(value: [f32; 4]) -> Word {
     value.map(f32::to_bits)
@@ -138,28 +131,31 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
         source: p.source,
     }
 }
-fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
-    let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
-    let clip = group.clip;
+fn common_words(draw: PreparedDraw<'_>, error: [f32; 2]) -> [Word; 4] {
+    let [a, b, c, d, tx, ty] = draw.inverse.map(|v| v as f32);
+    let clip = draw.clip;
     [
         float_word([a, c, tx, error[0]]),
         float_word([b, d, ty, error[1]]),
         float_word([clip.x, clip.y, clip.width, clip.height]),
-        float_word(group.color),
-        [correction, 0, 0, 0],
+        float_word(packet_color(draw)),
     ]
 }
-fn inline_words(draw: PreparedDraw<'_>, error: [f32; 2], correction: u32) -> [Word; 6] {
-    let [a, b, c, d, tx, ty] = draw.inverse.map(|v| v as f32);
-    let (r, clip) = (draw.local_rect, draw.clip);
-    bytemuck::cast(DrawData {
-        local: [r.x, r.y, r.width, r.height],
-        inverse_x: [a, c, tx, error[0]],
-        inverse_y: [b, d, ty, error[1]],
-        clip: [clip.x, clip.y, clip.width, clip.height],
-        color: packet_color(draw),
-        atlas: [0, 0, 0, correction],
-    })
+
+// Closed resource variants leave seventeen exact bits available. Mask y is an
+// atlas coordinate; image y contains five flags. Rounded solids instead keep a
+// full radius in y and a power-of-two scale in z, whose low 23 bits are zero.
+// Decode restores the original resource words before any shader interpretation.
+fn resource_words(mut resource: [u32; 3], common: u32, correction: u32) -> Word {
+    debug_assert!(correction <= CORRECTION_MASK);
+    if resource[0] == ROUNDED_SOURCE {
+        debug_assert_eq!(resource[2] & CORRECTION_MASK, 0);
+        resource[2] |= correction;
+    } else {
+        debug_assert!(resource[1] < 1 << RESOURCE_BITS);
+        resource[1] |= correction << RESOURCE_BITS;
+    }
+    [resource[0], resource[1], resource[2], common]
 }
 
 // Image material has no tint/opacity port. Its otherwise unused solid-color
@@ -594,7 +590,7 @@ impl RendererState {
     pub fn image_stats(&self) -> Option<ImageStats> {
         self.images.as_ref().map(|images| images.stats())
     }
-    /// Diagnostic schema oracle: keep old inline fields for every draw.
+    /// Diagnostic sharing oracle: give every draw its own common state.
     pub fn set_grouped_records(&mut self, enabled: bool) {
         if self.grouped_records != enabled {
             self.packet = None;
@@ -680,16 +676,25 @@ impl RendererState {
             return Err(Error::ResourceLimit);
         }
         let bank_words = slots::prefix_words(bank_count);
-        let word_count = scene.groups().try_fold(0usize, |sum, group| {
-            let n = group.placements().len();
-            let compact = compact_group(group, self.grouped_records);
-            let words = if compact { 5 + 2 * n } else { 6 * n };
-            sum.checked_add(words).ok_or(Error::ResourceLimit)
-        })?;
+        // Prepared groups partition the already bounded draw iterator. Reserve
+        // the common prefix once; placements remain a uniform two-word suffix.
+        let common_count: usize = scene
+            .groups()
+            .map(|group| {
+                if compact_group(group, self.grouped_records) {
+                    1
+                } else {
+                    group.placements().len()
+                }
+            })
+            .sum();
+        let placement_start = bank_words + common_count * 4;
+        let word_count = placement_start + scene.draws().len() * 2;
         self.records
-            .try_reserve_exact(word_count + bank_words)
+            .try_reserve_exact(word_count)
             .map_err(|_| Error::ResourceLimit)?;
         slots::write_prefix(&mut self.records, scene, bank_count);
+        self.records.resize(placement_start, [0; 4]);
         self.cursors.clear();
         self.cursors.resize(columns * rows, 0);
         self.residuals.clear();
@@ -700,81 +705,69 @@ impl RendererState {
         let mut ordinal = 0;
         let mut shared_groups = 0;
         let mut compact_draws = 0;
+        let mut common_word = bank_words;
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
-            let correction = self.correction(group.inverse, group.clip);
-            // The optional paint owner captures only requested groups here.
-            // Ordinary render's empty observer specializes away. Inline
-            // multi-placement diagnostic groups decline color-only patching.
-            group_ready(ordinal, group, self.records.len(), compact);
+            group_ready(ordinal, group, common_word, compact);
+            let mut shared_error = [0.0_f32; 2];
             if compact {
-                let mut error = [0.0_f32; 2];
                 for (offset, p) in group.placements().enumerate() {
-                    let e = validate_draw(
+                    let error = validate_draw(
                         prepared(group, p),
                         ordinal + offset,
                         scene.width,
                         scene.height,
                     )?;
-                    error[0] = error[0].max(e[0]);
-                    error[1] = error[1].max(e[1]);
+                    shared_error[0] = shared_error[0].max(error[0]);
+                    shared_error[1] = shared_error[1].max(error[1]);
                 }
-                let common = self.records.len() as u32;
-                let mut words = common_words(group, error, correction);
-                if let Some(slot) = group.paint_slot() {
-                    words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
-                    words[4][0] |= SLOT_COLOR;
-                }
-                self.records.extend_from_slice(&words);
                 shared_groups += 1;
                 compact_draws += group.placements().len();
-                for p in group.placements() {
-                    let draw = prepared(group, p);
-                    has_masks |= draw.source.mask().is_some();
-                    let r = draw.local_rect;
-                    let address = self.records.len() as u32;
-                    self.records.extend_from_slice(&[
-                        float_word([r.x, r.y, r.width, r.height]),
-                        [0, 0, 0, common],
-                    ]);
-                    original_references = self.bin_draw(
-                        draw,
-                        error,
-                        address,
-                        ordinal,
-                        columns,
-                        scene.width,
-                        scene.height,
-                        original_references,
-                    )?;
-                    ordinal += 1;
-                }
-            } else {
-                for p in group.placements() {
-                    let draw = prepared(group, p);
-                    let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
-                    has_masks |= draw.source.mask().is_some();
-                    let address = INLINE_RECORD | self.records.len() as u32;
-                    let mut words = inline_words(draw, error, correction);
+            }
+            let group_word = common_word;
+            for (offset, p) in group.placements().enumerate() {
+                let draw = prepared(group, p);
+                let error = if compact {
+                    shared_error
+                } else {
+                    validate_draw(draw, ordinal, scene.width, scene.height)?
+                };
+                let common = if compact { group_word } else { common_word };
+                if !compact || offset == 0 {
+                    let mut words = common_words(draw, error);
                     if let Some(slot) = group.paint_slot() {
-                        words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
-                        words[5][3] |= SLOT_COLOR;
+                        words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
                     }
-                    self.records.extend_from_slice(&words);
-                    original_references = self.bin_draw(
-                        draw,
-                        error,
-                        address,
-                        ordinal,
-                        columns,
-                        scene.width,
-                        scene.height,
-                        original_references,
-                    )?;
-                    ordinal += 1;
+                    self.records[common_word..common_word + 4].copy_from_slice(&words);
+                    common_word += 4;
                 }
+                has_masks |= draw.source.mask().is_some();
+                let r = draw.local_rect;
+                let address = self.records.len() as u32;
+                let common = common as u32
+                    | if group.paint_slot().is_some() {
+                        SLOT_COLOR
+                    } else {
+                        0
+                    };
+                self.records.extend_from_slice(&[
+                    float_word([r.x, r.y, r.width, r.height]),
+                    [0, 0, 0, common],
+                ]);
+                original_references = self.bin_draw(
+                    draw,
+                    error,
+                    address,
+                    ordinal,
+                    columns,
+                    scene.width,
+                    scene.height,
+                    original_references,
+                )?;
+                ordinal += 1;
             }
         }
+        debug_assert_eq!(common_word, placement_start);
         images::prepare(
             &context.device,
             &context.queue,
@@ -797,14 +790,14 @@ impl RendererState {
         let references = offset as usize;
         self.references.clear();
         self.references.resize(references, 0);
-        // Reverse group traversal recovers variable-width word addresses without
-        // retaining another per-draw address lane or a duplicate expanded scene.
+        // Uniform placement strides need no per-draw address lane. Correction
+        // handles are assigned here, so no temporary metadata crosses admission.
         let mut word = self.records.len();
         let mut reverse_ordinal = ordinal;
         for group in scene.groups().rev() {
-            let compact = compact_group(group, self.grouped_records);
+            let correction = self.correction(group.inverse, group.clip);
             for p in group.placements().rev() {
-                word -= if compact { 2 } else { 6 };
+                word -= 2;
                 reverse_ordinal -= 1;
                 // Resource preparation follows admission of every draw. Patch
                 // coordinates at the same address needed for tile references,
@@ -828,8 +821,9 @@ impl RendererState {
                         [t.x, t.y, t.width | (t.height << 16)]
                     })
                 };
-                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
-                let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
+                let metadata = self.records[word + 1];
+                self.records[word + 1] = resource_words(atlas, metadata[3], correction);
+                let address = word as u32;
                 visit(prepared(group, p), columns, |tile| {
                     let range = &mut self.ranges[tile];
                     if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
@@ -839,11 +833,8 @@ impl RendererState {
                     }
                 });
             }
-            if compact {
-                word -= 5;
-            }
         }
-        debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
+        debug_assert_eq!((word, reverse_ordinal), (placement_start, 0));
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
@@ -1365,10 +1356,6 @@ mod tests {
 
     #[test]
     fn storage_records_match_shader_stride_and_offsets() {
-        assert_eq!(std::mem::size_of::<DrawData>(), 96);
-        assert_eq!(std::mem::offset_of!(DrawData, inverse_x), 16);
-        assert_eq!(std::mem::offset_of!(DrawData, inverse_y), 32);
-        assert_eq!(std::mem::offset_of!(DrawData, atlas), 80);
         assert_eq!(std::mem::size_of::<Correction>(), 32);
         assert_eq!(std::mem::offset_of!(Correction, y), 16);
         assert_eq!(std::mem::size_of::<Globals>(), 48);
@@ -1444,15 +1431,51 @@ mod tests {
         let group = scene.groups().next().unwrap();
         let draw = scene.draws().next().unwrap();
         let error = [0.00001, 0.00002];
-        let inline = inline_words(draw, error, 57);
-        let common = common_words(group, error, 57);
-        assert_eq!(inline[1], common[0]);
-        assert_eq!(inline[2], common[1]);
-        assert_eq!(inline[3], common[2]);
-        assert_eq!(inline[4], common[3]);
-        assert_eq!(inline[5][3], common[4][0]);
-        assert_eq!(inline[4], draw.color.map(f32::to_bits));
-        assert_eq!(inline[1][3], error[0].to_bits());
+        let common = common_words(draw, error);
+        assert_eq!(common[3], draw.color.map(f32::to_bits));
+        assert_eq!(common[0][3], error[0].to_bits());
+        assert_eq!(common[1][3], error[1].to_bits());
+        assert_eq!(
+            common[2],
+            float_word([
+                group.clip.x,
+                group.clip.y,
+                group.clip.width,
+                group.clip.height
+            ])
+        );
+    }
+
+    #[test]
+    fn resource_codec_restores_every_correction_index_and_resource_bit() {
+        use wgsl_rs::std::vec4u;
+        let common = SLOT_COLOR | 300_000;
+        for correction in 0..=MAX_DRAWS as u32 {
+            for resource in [
+                [0, 0, 0],
+                [2047, 2047, 2048 | (2048 << 16)],
+                [images::IMAGE | 0x3fff_ffff, 31, 16_384 | (16_384 << 16)],
+            ] {
+                let word = resource_words(resource, common, correction);
+                assert_eq!(word[3], common);
+                let decoded =
+                    crate::shader::ui::decode_resource(vec4u(word[0], word[1], word[2], word[3]));
+                assert_eq!([decoded.x, decoded.y, decoded.z], resource);
+                assert_eq!(decoded.w, correction);
+            }
+        }
+        for exponent in 1..=254 {
+            let radius = (exponent << 23) | 0x7f_ffff;
+            let scale = (254 - exponent) << 23;
+            for correction in [0, 1, 65_535, 65_536] {
+                let resource = [ROUNDED_SOURCE, radius, scale];
+                let word = resource_words(resource, common, correction);
+                let decoded =
+                    crate::shader::ui::decode_resource(vec4u(word[0], word[1], word[2], word[3]));
+                assert_eq!([decoded.x, decoded.y, decoded.z], resource);
+                assert_eq!(decoded.w, correction);
+            }
+        }
     }
 
     #[test]

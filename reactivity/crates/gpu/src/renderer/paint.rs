@@ -161,7 +161,7 @@ impl PaintRenderer {
                 {
                     site.word = (group.paint_slot().is_none()
                         && (compact || group.placements().len() == 1))
-                        .then(|| NonZeroU32::new((word + if compact { 3 } else { 4 }) as u32))
+                        .then(|| NonZeroU32::new((word + 3) as u32))
                         .flatten();
                     site.rectangle = group
                         .placements()

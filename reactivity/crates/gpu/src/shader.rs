@@ -31,37 +31,32 @@ pub mod ui {
     texture!(group(0), binding(4), MASKS: Texture2D<f32>);
     storage!(group(0), binding(5), CORRECTIONS: RuntimeArray<Correction>);
 
-    // Typed host writers publish only validated private word addresses. The
-    // inline tag preserves singleton storage; compact records share common state.
-    pub fn load_color(word: Vec4u, correction: u32) -> Vec4f {
-        if (correction & 0x80000000) != 0 {
+    // One packet schema: a two-word placement points at four common words.
+    // The resource's closed variants supply seventeen otherwise unused bits;
+    // decoding restores all original float, coordinate and flag bits exactly.
+    pub fn load_color(word: Vec4u, state_base: u32) -> Vec4f {
+        if (state_base & 0x80000000) != 0 {
             return bitcast_vec4f(get!(WORDS)[word.x as usize]);
         }
         bitcast_vec4f(word)
     }
-    pub fn load_draw(address: u32) -> Draw {
-        let base = (address & 0x7fffffff) as usize;
-        if (address & 0x80000000) != 0 {
-            let atlas = get!(WORDS)[base + 5];
-            return Draw {
-                local: bitcast_vec4f(get!(WORDS)[base]),
-                inverse_x: bitcast_vec4f(get!(WORDS)[base + 1]),
-                inverse_y: bitcast_vec4f(get!(WORDS)[base + 2]),
-                clip: bitcast_vec4f(get!(WORDS)[base + 3]),
-                color: load_color(get!(WORDS)[base + 4], atlas.w),
-                atlas: vec4u(atlas.x, atlas.y, atlas.z, atlas.w & 0x7fffffff),
-            };
+    pub fn decode_resource(atlas: Vec4u) -> Vec4u {
+        if atlas.x == 0x40000000 {
+            return vec4u(atlas.x, atlas.y, atlas.z & 0xfffe0000, atlas.z & 0x1ffff);
         }
+        vec4u(atlas.x, atlas.y & 0x7fff, atlas.z, atlas.y >> 15)
+    }
+    pub fn load_draw(address: u32) -> Draw {
+        let base = address as usize;
         let atlas = get!(WORDS)[base + 1];
-        let state_base = atlas.w as usize;
-        let correction = get!(WORDS)[state_base + 4].x;
+        let state_base = (atlas.w & 0x7fffffff) as usize;
         Draw {
             local: bitcast_vec4f(get!(WORDS)[base]),
             inverse_x: bitcast_vec4f(get!(WORDS)[state_base]),
             inverse_y: bitcast_vec4f(get!(WORDS)[state_base + 1]),
             clip: bitcast_vec4f(get!(WORDS)[state_base + 2]),
-            color: load_color(get!(WORDS)[state_base + 3], correction),
-            atlas: vec4u(atlas.x, atlas.y, atlas.z, correction & 0x7fffffff),
+            color: load_color(get!(WORDS)[state_base + 3], atlas.w),
+            atlas: decode_resource(atlas),
         }
     }
 

@@ -1038,12 +1038,12 @@ fn grouped_and_inline_packets_match_every_pixel_in_mixed_scenes() {
                 assert_eq!(new.compact_draws + new.inline_draws, new.draws);
                 assert_eq!(
                     new.draw_record_bytes,
-                    new.shared_groups * 80 + new.compact_draws * 32 + new.inline_draws * 96
+                    new.shared_groups * 64 + new.compact_draws * 32 + new.inline_draws * 96
                 );
                 assert!(new.draw_record_bytes < old.draw_record_bytes);
             }
-            // A final certificate points to a tagged inline word address AFTER
-            // several compact runs. Canonical earlier groups remain retained.
+            // A final certificate points into the placement suffix after shared
+            // groups. Canonical earlier groups remain retained.
             canvas
                 .fill_rect(
                     Rect::new(-2.0, -2.0, 164.0, 92.0),
