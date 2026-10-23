@@ -1862,9 +1862,9 @@ impl<M: View + 'static> Runtime<M> {
         }
         let old_styles = std::mem::take(&mut self.styles);
         let siblings = siblings::Siblings::new(&self.nodes);
-        // Siblings is the last reader of old ordinals. Until reset below,
-        // consumed old rows carry their cold route slot instead. This linear
-        // indexing needs no scratch allocation or per-row sparse search.
+        // Siblings is the last old-ordinal reader. Sparse routed rows borrow
+        // that word as a cold slot until reset below. Dense and route-free
+        // descriptions need no indexing pass, scratch allocation or search.
         let mut old_handlers = std::mem::take(&mut self.handlers);
         old_handlers.index_old(&mut self.nodes);
         let mut old = std::mem::take(&mut self.nodes)
@@ -1953,7 +1953,7 @@ impl<M: View + 'static> Runtime<M> {
             // where the former Node handler field was dropped.
             let mut previous_handler = previous
                 .as_ref()
-                .and_then(|node| old_handlers.take_slot(node.ordinal));
+                .and_then(|node| old_handlers.take_old(previous_index.unwrap(), node));
             let previous = previous.filter(|node| {
                 let keep = node.component_scope == component_scopes[index];
                 if !keep {

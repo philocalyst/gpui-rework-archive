@@ -14,7 +14,6 @@ pub(super) struct Builder {
     dense: bool,
 }
 const _: () = {
-    assert!(super::MAX_NODES < u32::MAX as usize);
     #[cfg(target_pointer_width = "64")]
     {
         assert!(size_of::<Node>() == 24);
@@ -37,29 +36,23 @@ impl HandlerSites {
         let slot = self.slot(node).expect("installed route site");
         &mut self.handlers[slot]
     }
-    // Siblings is the last old-ordinal reader. Reused rows reset the ordinal
-    // before publication; this temporary route-slot meaning cannot escape.
+    // Only sparse routed rows borrow their old ordinal as a route slot.
+    // Siblings already read it; every reused row resets it before publication.
     pub(super) fn index_old(&self, nodes: &mut [Node]) {
-        if self.sites.is_empty() && !self.handlers.is_empty() {
-            debug_assert_eq!(self.handlers.len(), nodes.len());
-            for (index, node) in nodes.iter_mut().enumerate() {
-                node.ordinal = index as u32;
-            }
-        } else {
-            for node in nodes.iter_mut() {
-                node.ordinal = u32::MAX;
-            }
-            for (index, &node) in self.sites.iter().enumerate() {
-                nodes[node as usize].ordinal = index as u32;
-            }
+        for (slot, &node) in self.sites.iter().enumerate() {
+            nodes[node as usize].ordinal = slot as u32;
         }
     }
-    pub(super) fn take_slot(&mut self, slot: u32) -> Option<Handler> {
-        if slot == u32::MAX {
-            None
-        } else {
-            self.handlers[slot as usize].take()
+    pub(super) fn take_old(&mut self, index: usize, node: &Node) -> Option<Handler> {
+        if !node.content.has_route() {
+            return None;
         }
+        let slot = if self.sites.is_empty() {
+            index
+        } else {
+            node.ordinal as usize
+        };
+        self.handlers[slot].take()
     }
 }
 impl Builder {
