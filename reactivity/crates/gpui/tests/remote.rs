@@ -162,6 +162,87 @@ fn small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo() {
     assert_eq!(win.root().unwrap().rows, [100, 0, 101, 1, 102, 2, 103, 3]);
 }
 
+#[test]
+fn status_lanes_deliver_buffered_fifo_then_one_terminal_and_rotate_saturated_turns() {
+    let (left, lin) = Remote::bounded(130);
+    let (right, rin) = Remote::bounded(130);
+    for row in 0..130 {
+        left.try_send(row).unwrap();
+        right.try_send(1000 + row).unwrap();
+    }
+    drop(left);
+    drop(right);
+    let mut win = Win::demo(Catalogue::default())
+        .with_inbox_status(lin, |m: &mut Catalogue, v: Option<u32>| {
+            m.rows.push(v.unwrap_or(999))
+        })
+        .unwrap()
+        .with_inbox_status(rin, |m: &mut Catalogue, v: Option<u32>| {
+            m.rows.push(v.unwrap_or(1999))
+        })
+        .unwrap();
+    assert_eq!(win.deliver_ready(0).unwrap().received, 0);
+    // A budget of one proves the round-robin cursor independently of the
+    // callback application order in larger frozen batches.
+    for row in 0..130 {
+        let delivery = win.deliver_ready(1).unwrap();
+        assert!(delivery.more);
+        assert_eq!((delivery.received, delivery.applied), (1, 1));
+        assert_eq!(win.root().unwrap().rows.last(), Some(&(1000 + row)));
+        assert!(win.deliver_ready(1).unwrap().more);
+        assert_eq!(win.root().unwrap().rows.last(), Some(&row));
+    }
+    let terminal = win.deliver_ready(64).unwrap();
+    assert_eq!(
+        (terminal.received, terminal.applied, terminal.more),
+        (2, 2, false)
+    );
+    assert_eq!(&win.root().unwrap().rows[260..], [1999, 999]);
+    assert_eq!(win.deliver_ready(64).unwrap().applied, 0);
+}
+
+#[test]
+fn status_close_waits_for_every_clone_and_owner_close_revokes_it() {
+    let (remote, inbox) = Remote::bounded(4);
+    let retained = remote.clone();
+    remote.try_send(7).unwrap();
+    drop(remote);
+    let mut win = Win::demo(Catalogue::default())
+        .with_inbox_status(inbox, |m: &mut Catalogue, value: Option<u32>| {
+            m.rows.push(value.unwrap_or(99));
+        })
+        .unwrap();
+    assert_eq!(win.deliver_ready(8).unwrap().applied, 1);
+    assert_eq!(win.root().unwrap().rows, [7]);
+    assert_eq!(win.deliver_ready(8).unwrap().applied, 0);
+    drop(retained);
+    assert_eq!(win.deliver_ready(8).unwrap().applied, 1);
+    assert_eq!(win.root().unwrap().rows, [7, 99]);
+    assert_eq!(win.deliver_ready(8).unwrap().applied, 0);
+
+    let (remote, inbox) = Remote::<u32>::bounded(0);
+    let rejected = Win::demo(Catalogue::default())
+        .with_inbox_status(inbox, |_: &mut Catalogue, _: Option<u32>| {});
+    assert!(matches!(rejected, Err(Error::ZeroInboxCapacity)));
+    assert!(matches!(remote.try_send(1), Err(SendError::Closed(1))));
+    let (remote, inbox) = Remote::<u32>::bounded(1);
+    let mut win = Win::demo(Catalogue::default())
+        .with_inbox_status(inbox, |_: &mut Catalogue, _: Option<u32>| {
+            panic!("closed owner must not apply")
+        })
+        .unwrap();
+    remote.try_send(1).unwrap();
+    win.close();
+    drop(remote);
+    assert!(matches!(
+        win.deliver_ready(8),
+        Err(DeliveryError {
+            error: Error::Closed,
+            ..
+        })
+    ));
+}
+
 fn failed_batch(error: DeliveryError) -> gpui::Delivery {
     error.delivery.unwrap()
 }

@@ -119,6 +119,26 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         inbox: Inbox<T>,
         receive: F,
     ) -> Result<Win<M, Lane<T, F, L>>, Error> {
+        self.with_inbox_handler(inbox, receive)
+    }
+
+    /// Observe owned messages and then exactly one `None` when all producers
+    /// disconnect. Buffered messages precede `None`; owner close revokes both.
+    /// Capacity zero is rejected because this lane requires receive progress.
+    pub fn with_inbox_status<T: Send + 'static, F: FnMut(&mut M, Option<T>)>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Result<Win<M, Lane<T, crate::InboxStatus<F>, L>>, Error> {
+        inbox.observe_close()?;
+        self.with_inbox_handler(inbox, crate::InboxStatus(receive))
+    }
+
+    fn with_inbox_handler<T: Send + 'static, F: crate::InboxHandler<M, T>>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Result<Win<M, Lane<T, F, L>>, Error> {
         let runtime = self.runtime()?;
         runtime.live()?;
         if runtime.source_epoch == u64::MAX {
@@ -202,10 +222,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut applied = 0;
         let result = RuntimeMut { runtime, lanes }.deliver(&mut applied);
         let revoked = runtime.poisoned || runtime.source_epoch == u64::MAX;
-        // The borrowed turn already retired its lanes before returning.
-        if !revoked && more {
-            lanes.signal();
-        }
         let delivery = Delivery {
             received,
             applied,

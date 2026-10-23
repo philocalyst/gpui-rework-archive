@@ -188,6 +188,26 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
             inspector: self.inspector,
         }
     }
+    /// Deliver `Some(message)` in FIFO order and one `None` after the final
+    /// producer disconnects, including while the native owner is quiescent.
+    /// Capacity zero is rejected; closing the owner revokes pending delivery.
+    pub fn with_inbox_status<T: Send + 'static, F: FnMut(&mut V, Option<T>) + 'static>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Result<Window<V, Lane<T, crate::InboxStatus<F>, L>>, Error> {
+        inbox.observe_close()?;
+        Ok(Window {
+            root: self.root,
+            lanes: Lane::new(inbox, crate::InboxStatus(receive), self.lanes),
+            title: self.title,
+            size: self.size,
+            presentation_error: self.presentation_error,
+            presentation_feedback: self.presentation_feedback,
+            renderer: self.renderer,
+            inspector: self.inspector,
+        })
+    }
     /// Show a retained inspector beside this window's actual application.
     pub fn inspector(mut self) -> Self {
         self.inspector = true;
@@ -1133,7 +1153,15 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                 }
                 if let Some(owner) = &mut self.owner {
                     let before = owner.runtime_epoch();
-                    let result = match owner.deliver_ready(64) {
+                    let delivery = owner.deliver_ready(64);
+                    let more = match &delivery {
+                        Ok(delivery) => delivery.more,
+                        Err(failure) => failure
+                            .delivery
+                            .as_ref()
+                            .is_some_and(|delivery| delivery.more),
+                    };
+                    let result = match delivery {
                         Ok(delivery) => Ok(delivery.commit),
                         Err(DeliveryError {
                             error,
@@ -1156,6 +1184,11 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                         }
                         Err(failure) => Err(failure.error),
                     };
+                    if more && result.is_ok() {
+                        if let Some(wake) = &self.wake {
+                            wake.signal();
+                        }
+                    }
                     if let Err(error) = self.input_result(result) {
                         self.error = Some(error);
                         event_loop.exit();
