@@ -1,0 +1,14 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/lib.rs (/tmp/gpui-caret-transaction-overlay-target/debug/deps/parley-4b60df062949d943)
+
+running 1 test
+LOCAL RunSlot=8 Entry=16 OptionEntry=20 VecRunSlot=24 VecF32=24 OptionUsize=16 Restart=0
+CAPACITY case=empty spill=0 rtl=0 requested_payload=0
+CAPACITY case=tiny spill=0 rtl=0 requested_payload=0
+CAPACITY case=ltr32k spill=0 rtl=0 requested_payload=0
+CAPACITY case=rtl spill=0 rtl=8192 requested_payload=32768
+CAPACITY case=mixed spill=26 rtl=4 requested_payload=224
+test editing::geometry::transaction_state_tests::actual_headers_and_scratch_capacities ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.48s
+

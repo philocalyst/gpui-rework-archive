@@ -1,0 +1,30 @@
+{
+  "base": "81bd9e53b7a18161903dad3816d494ed1afdfce3",
+  "count_method": "physical and nonblank lines; comments included, tests separate",
+  "files": [
+    {
+      "path": "reactivity/crates/canvas/src/text/planner.rs",
+      "before_physical": 784,
+      "after_physical": 803,
+      "before_nonblank": 770,
+      "after_nonblank": 788,
+      "sha256": "2f24bcc297e2b86abd2510aad1292fa63d0d6c2594937e32fe515de8c4bcf92b"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/geometry.rs",
+      "before_physical": 560,
+      "after_physical": 645,
+      "before_nonblank": 542,
+      "after_nonblank": 625,
+      "sha256": "bcec9c105187cb797332b458d3fe3f52509992bb29a6869bb9510df00011de43"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/mod.rs",
+      "before_physical": 12,
+      "after_physical": 12,
+      "before_nonblank": 10,
+      "after_nonblank": 10,
+      "sha256": "5108088031d5ed5ccbd08a89d05be0e7c49364953d0058081044dd13916c7353"
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "helper_sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea",
+  "tokei_sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712",
+  "revisions": {
+    "1d5bc3061cce3beb3c4857102ed651da501b5cfd": {
+      "reactivity/vendor/parley/src/editing/mod.rs": {
+        "code": 8,
+        "sha256": "43b9f0a8a6eb4bae19f15669502754531ebb7e947a8257cb493683edcb09a456",
+        "unclassified": []
+      },
+      "reactivity/vendor/parley/src/editing/geometry.rs": {
+        "code": 142,
+        "sha256": "21983679ebfeeb48d67f06a58ca7873fcfe5d437032de0f54903819e49af12cc",
+        "unclassified": []
+      },
+      "reactivity/vendor/parley/src/layout/run.rs": {
+        "code": 342,
+        "sha256": "5d9fff5492c2adab4a4263ce47fcbff7820b156deb5c2246b15ddc7c5944b45f",
+        "unclassified": []
+      },
+      "reactivity/crates/canvas/src/text/planner.rs": {
+        "code": 506,
+        "sha256": "afc3384ea7d3850f491d2f2234ddc90fd9c770f2f339f1ddb999bd4abee86579",
+        "unclassified": []
+      }
+    },
+    "81bd9e53b7a18161903dad3816d494ed1afdfce3": {
+      "reactivity/vendor/parley/src/editing/mod.rs": {
+        "code": 8,
+        "sha256": "43b9f0a8a6eb4bae19f15669502754531ebb7e947a8257cb493683edcb09a456",
+        "unclassified": []
+      },
+      "reactivity/vendor/parley/src/editing/geometry.rs": {
+        "code": 476,
+        "sha256": "58d35e2d412cdb76695cc21f14518faed527753abae4c5746e0ca82cc0e1bde2",
+        "unclassified": []
+      },
+      "reactivity/vendor/parley/src/layout/run.rs": {
+        "code": 362,
+        "sha256": "c7636e7bcb979c9ed065ec66418f40b14c58c08808ed6379b2b376a21fb6eb54",
+        "unclassified": []
+      },
+      "reactivity/crates/canvas/src/text/planner.rs": {
+        "code": 518,
+        "sha256": "b25be1c75de3d78b0fcd2e257e04d08ab65713839adb97b3beb8b675245ad28a",
+        "unclassified": []
+      }
+    },
+    "8d81d28bc4": {
+      "reactivity/vendor/parley/src/editing/mod.rs": {
+        "code": 8,
+        "sha256": "5108088031d5ed5ccbd08a89d05be0e7c49364953d0058081044dd13916c7353",
+        "unclassified": []
+      },
+      "reactivity/vendor/parley/src/layout/run.rs": {
+        "code": 362,
+        "sha256": "c7636e7bcb979c9ed065ec66418f40b14c58c08808ed6379b2b376a21fb6eb54",
+        "unclassified": []
+      },
+      "reactivity/vendor/parley/src/editing/geometry.rs": {
+        "code": 542,
+        "sha256": "bcec9c105187cb797332b458d3fe3f52509992bb29a6869bb9510df00011de43",
+        "unclassified": []
+      },
+      "reactivity/crates/canvas/src/text/planner.rs": {
+        "code": 534,
+        "sha256": "2f24bcc297e2b86abd2510aad1292fa63d0d6c2594937e32fe515de8c4bcf92b",
+        "unclassified": []
+      }
+    }
+  },
+  "evidence_support": {
+    "Python": {
+      "blanks": 3,
+      "code": 76,
+      "comments": 3,
+      "reports": [
+        {
+          "stats": {
+            "blanks": 1,
+            "code": 39,
+            "comments": 3,
+            "blobs": {}
+          },
+          "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/prepare.py"
+        },
+        {
+          "stats": {
+            "blanks": 2,
+            "code": 37,
+            "comments": 0,
+            "blobs": {}
+          },
+          "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/count-source.py"
+        }
+      ],
+      "children": {},
+      "inaccurate": false
+    },
+    "Rust": {
+      "blanks": 11,
+      "code": 203,
+      "comments": 1,
+      "reports": [
+        {
+          "stats": {
+            "blanks": 1,
+            "code": 24,
+            "comments": 1,
+            "blobs": {}
+          },
+          "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/state_tests.rs"
+        },
+        {
+          "stats": {
+            "blanks": 10,
+            "code": 179,
+            "comments": 0,
+            "blobs": {
+              "Markdown": {
+                "blanks": 0,
+                "code": 0,
+                "comments": 1,
+                "blobs": {}
+              }
+            }
+          },
+          "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/transaction_tests.rs"
+        }
+      ],
+      "children": {
+        "Markdown": [
+          {
+            "stats": {
+              "blanks": 0,
+              "code": 0,
+              "comments": 1,
+              "blobs": {}
+            },
+            "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/transaction_tests.rs"
+          }
+        ]
+      },
+      "inaccurate": false
+    },
+    "Total": {
+      "blanks": 14,
+      "code": 279,
+      "comments": 5,
+      "reports": [],
+      "children": {
+        "Python": [
+          {
+            "stats": {
+              "blanks": 1,
+              "code": 39,
+              "comments": 3,
+              "blobs": {}
+            },
+            "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/prepare.py"
+          },
+          {
+            "stats": {
+              "blanks": 2,
+              "code": 37,
+              "comments": 0,
+              "blobs": {}
+            },
+            "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/count-source.py"
+          }
+        ],
+        "Rust": [
+          {
+            "stats": {
+              "blanks": 1,
+              "code": 24,
+              "comments": 1,
+              "blobs": {}
+            },
+            "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/state_tests.rs"
+          },
+          {
+            "stats": {
+              "blanks": 10,
+              "code": 179,
+              "comments": 0,
+              "blobs": {
+                "Markdown": {
+                  "blanks": 0,
+                  "code": 0,
+                  "comments": 1,
+                  "blobs": {}
+                }
+              }
+            },
+            "name": "/root/gpui-caret-transaction-sol/reactivity/evidence/caret-transaction/transaction_tests.rs"
+          }
+        ]
+      },
+      "inaccurate": false
+    }
+  }
+}

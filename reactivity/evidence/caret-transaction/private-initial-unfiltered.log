@@ -1,0 +1,128 @@
+     Locking 3 packages to latest compatible versions
+      Adding objc2-core-text v0.3.2
+      Adding roxmltree v0.21.1
+      Adding yeslogic-fontconfig-sys v6.0.1
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling stable_deref_trait v1.2.1
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling syn v3.0.9
+   Compiling smallvec v1.16.3
+   Compiling utf8_iter v1.0.4
+   Compiling once_cell v1.21.4
+   Compiling libc v0.2.191
+   Compiling icu_locale_fallback_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling foldhash v0.2.0
+   Compiling synstructure v0.14.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling icu_segmenter_data v2.3.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerofrom v0.1.8
+   Compiling zerovec-derive v0.11.6
+   Compiling yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerovec v0.11.8
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling bytemuck v1.25.2
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling font-types v0.12.7
+   Compiling icu_provider v2.3.1
+   Compiling icu_collections v2.3.0
+   Compiling read-fonts v0.41.0
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling memmap2 v0.9.12
+   Compiling read-fonts v0.46.0
+   Compiling hashbrown v0.17.1
+   Compiling linebender_resource_handle v0.1.1
+   Compiling bitflags v2.13.2
+   Compiling parlance v0.1.1
+   Compiling fontique v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling skrifa v0.49.0
+   Compiling icu_segmenter v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling parley_emoji v0.12.0
+   Compiling parley_engine v0.12.0 (/root/gpui-caret-transaction-sol/reactivity/vendor/parley_engine)
+   Compiling parley v0.12.0 (/tmp/gpui-caret-transaction-overlay)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 48.94s
+     Running unittests src/lib.rs (/tmp/gpui-caret-transaction-overlay-target/debug/deps/parley-4b60df062949d943)
+
+running 34 tests
+
+thread 'layout::cluster::tests::cluster_from_position_end_alignment' (2123273) panicked at src/layout/cluster.rs:588:9:
+assertion failed: test_count > 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'layout::cluster::tests::cluster_from_position_justified_alignment' (2123274) panicked at src/layout/cluster.rs:588:9:
+assertion failed: test_count > 5
+
+thread 'layout::cluster::tests::cluster_from_position_start_alignment' (2123275) panicked at src/layout/cluster.rs:588:9:
+assertion failed: test_count > 5
+
+thread 'layout::cluster::tests::cluster_from_position_center_alignment' (2123272) panicked at src/layout/cluster.rs:588:9:
+assertion failed: test_count > 5
+test layout::line_break::tests::subtree_extents_restored_at_break_opportunities ... ok
+test resolve::tree::tests::collapses_ascii_whitespace_without_trimming_non_ascii_whitespace ... ok
+test resolve::tree::tests::collapsible_whitespace_around_a_preserved_segment_break_is_removed ... ok
+test resolve::tree::tests::collapsible_whitespace_at_span_end_is_committed_with_the_span_style ... ok
+test resolve::tree::tests::collapsible_whitespace_before_preserved_text_is_committed ... ok
+test resolve::tree::tests::empty_text_uses_root_style ... ok
+test layout::cluster::tests::cluster_from_position_end_alignment ... FAILED
+test layout::cluster::tests::cluster_from_position_justified_alignment ... FAILED
+test layout::cluster::tests::cluster_from_position_center_alignment ... FAILED
+test layout::cluster::tests::cluster_from_position_start_alignment ... FAILED
+test resolve::tree::tests::materialises_ancestor_spans_without_text ... ok
+test resolve::tree::tests::preserve_breaks_keeps_pending_whitespace_provenance_across_modes ... ok
+test resolve::tree::tests::reports_pending_whitespace ... ok
+test resolve::tree::tests::reuses_parent_and_root_style_ids_after_nested_pop ... ok
+test resolve::tree::tests::reuses_root_style_id_across_multiple_pop_return_cycles ... ok
+test resolve::tree::tests::reuses_style_id_when_returning_to_parent_span ... ok
+test resolve::tree::tests::preserve_breaks_collapses_across_text_and_style_boundaries ... ok
+
+thread 'tests::stream_tests::invalid_private_run_identity_keeps_old_panic_before_callbacks' (2123295) panicked at src/layout/line.rs:131:30:
+index out of bounds: the len is 1 but the index is 18446744073709551615
+
+thread 'tests::stream_tests::invalid_private_run_identity_keeps_old_panic_before_callbacks' (2123295) panicked at src/layout/line.rs:131:30:
+index out of bounds: the len is 1 but the index is 18446744073709551615
+test tests::stream_tests::complete_font_preflight_precedes_nonfinite_geometry_and_callbacks ... ok
+test tests::stream_tests::overlapping_line_fragments_reject_before_any_callback ... ok
+test tests::stream_tests::invalid_private_run_identity_keeps_old_panic_before_callbacks ... ok
+test tests::transaction_tests::late_decreasing_disjoint_lines_restart_after_callbacks ... ok
+test tests::stream_tests::disjoint_out_of_order_lines_keep_the_old_admission ... ok
+test tests::transaction_tests::empty_synthetic_metrics_and_large_source_guard_are_explicit ... ok
+test tests::stream_tests::duplicate_disjoint_or_empty_run_fragments_use_exact_index_fallback ... ok
+test tests::stream_tests::gaps_and_empty_layouts_remain_admitted_without_coverage_requirement ... ok
+test tests::transaction_tests::late_duplicate_run_fragments_restart_without_changing_admission ... ok
+test tests::transaction_tests::repeated_and_decreasing_requests_preserve_restarted_source_order ... ok
+STATE Vec=24 Run=48 Cluster=144 clusters=272 Restart=0 BoundingBox=32
+test tests::transaction_tests::public_borrowed_state_sizes ... ok
+test tests::stream_tests::trailing_source_gap_and_empty_middle_run_keep_exact_byte_owners ... ok
+test tests::transaction_tests::late_font_rejection_overrides_earlier_nonfinite_geometry ... ok
+test tests::stream_tests::borrowed_spacing_and_completion_match_ordinary_cursors ... ok
+span_census,Census { layouts: 396, lines: 2468, reordered: 344, split_runs: 629, empty_runs: 144, empty_edges: 144, empty_among_other_runs: 0, boxes: 396, max_span: 33 }
+test tests::span_tests::producer_line_run_span_survives_bidi_split_and_empty_edges ... ok
+span_census,Census { layouts: 396, lines: 2468, reordered: 344, split_runs: 629, empty_runs: 144, empty_edges: 144, empty_among_other_runs: 0, boxes: 396, max_span: 33 }
+test tests::stream_tests::producer_bidi_split_empty_edge_and_inline_box_pairs_match_index ... ok
+span_census,Census { layouts: 396, lines: 2468, reordered: 344, split_runs: 629, empty_runs: 144, empty_edges: 144, empty_among_other_runs: 0, boxes: 396, max_span: 33 }
+test tests::transaction_tests::partial_producer_pairs_match_full_index_bits ... ok
+
+failures:
+
+failures:
+    layout::cluster::tests::cluster_from_position_center_alignment
+    layout::cluster::tests::cluster_from_position_end_alignment
+    layout::cluster::tests::cluster_from_position_justified_alignment
+    layout::cluster::tests::cluster_from_position_start_alignment
+
+test result: FAILED. 30 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+error: test failed, to rerun pass `--lib`

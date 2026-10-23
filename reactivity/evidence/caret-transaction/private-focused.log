@@ -1,0 +1,43 @@
+   Compiling parley v0.12.0 (/tmp/gpui-caret-transaction-overlay)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.60s
+     Running unittests src/lib.rs (/tmp/gpui-caret-transaction-overlay-target/debug/deps/parley-4b60df062949d943)
+
+running 18 tests
+LOCAL RunSlot=8 Entry=16 OptionEntry=20 VecRunSlot=24 VecF32=24 OptionUsize=16 Restart=0
+CAPACITY case=empty spill=0 rtl=0 requested_payload=0
+
+thread 'tests::stream_tests::invalid_private_run_identity_keeps_old_panic_before_callbacks' (2126300) panicked at src/layout/line.rs:131:30:
+index out of bounds: the len is 1 but the index is 18446744073709551615
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'tests::stream_tests::invalid_private_run_identity_keeps_old_panic_before_callbacks' (2126300) panicked at src/layout/line.rs:131:30:
+index out of bounds: the len is 1 but the index is 18446744073709551615
+test tests::stream_tests::invalid_private_run_identity_keeps_old_panic_before_callbacks ... ok
+test tests::stream_tests::overlapping_line_fragments_reject_before_any_callback ... ok
+test tests::stream_tests::disjoint_out_of_order_lines_keep_the_old_admission ... ok
+test tests::transaction_tests::late_decreasing_disjoint_lines_restart_after_callbacks ... ok
+test tests::transaction_tests::empty_synthetic_metrics_and_large_source_guard_are_explicit ... ok
+CAPACITY case=tiny spill=0 rtl=0 requested_payload=0
+STATE Vec=24 Run=48 Cluster=144 clusters=272 Restart=0 BoundingBox=32
+test tests::stream_tests::trailing_source_gap_and_empty_middle_run_keep_exact_byte_owners ... ok
+test tests::stream_tests::gaps_and_empty_layouts_remain_admitted_without_coverage_requirement ... ok
+test tests::transaction_tests::public_borrowed_state_sizes ... ok
+test tests::transaction_tests::repeated_and_decreasing_requests_preserve_restarted_source_order ... ok
+test tests::transaction_tests::late_font_rejection_overrides_earlier_nonfinite_geometry ... ok
+test tests::transaction_tests::late_duplicate_run_fragments_restart_without_changing_admission ... ok
+test tests::stream_tests::complete_font_preflight_precedes_nonfinite_geometry_and_callbacks ... ok
+test tests::stream_tests::duplicate_disjoint_or_empty_run_fragments_use_exact_index_fallback ... ok
+test tests::stream_tests::borrowed_spacing_and_completion_match_ordinary_cursors ... ok
+CAPACITY case=ltr32kspan_census,Census { layouts: 396, lines: 2468, reordered: 344, split_runs: 629, empty_runs: 144, empty_edges: 144, empty_among_other_runs: 0, boxes: 396, max_span: 33 }
+ spill=0 rtl=0 requested_payload=0
+span_census,Census { layouts: 396, lines: 2468, reordered: 344, split_runs: 629, empty_runs: 144, empty_edges: 144, empty_among_other_runs: 0, boxes: 396, max_span: 33 }
+span_census,Census { layouts: 396, lines: 2468, reordered: 344, split_runs: 629, empty_runs: 144, empty_edges: 144, empty_among_other_runs: 0, boxes: 396, max_span: 33 }
+test tests::span_tests::producer_line_run_span_survives_bidi_split_and_empty_edges ... ok
+test tests::stream_tests::producer_bidi_split_empty_edge_and_inline_box_pairs_match_index ... ok
+test tests::transaction_tests::partial_producer_pairs_match_full_index_bits ... ok
+CAPACITY case=rtl spill=0 rtl=8192 requested_payload=32768
+CAPACITY case=mixed spill=26 rtl=4 requested_payload=224
+test editing::geometry::transaction_state_tests::actual_headers_and_scratch_capacities ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 6.38s
+
