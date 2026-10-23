@@ -284,7 +284,8 @@ pub struct Device {
     /// that a [`TextureView`] bound to a [`wgt::BindingType::ExternalTexture`]
     /// binding point will be rendered correctly. Intended to be used as the
     /// [`hal::ExternalTextureBinding::params`] field.
-    pub(crate) default_external_texture_params_buffer: ManuallyDrop<Box<dyn hal::DynBuffer>>,
+    /// Present only when [`wgt::Features::EXTERNAL_TEXTURE`] was requested.
+    pub(crate) default_external_texture_params_buffer: Option<Box<dyn hal::DynBuffer>>,
     // needs to be dropped last
     #[cfg(feature = "trace")]
     pub(crate) trace: Mutex<Option<Box<dyn trace::Trace + Send + Sync + 'static>>>,
@@ -315,10 +316,8 @@ impl Drop for Device {
         let zero_buffer = unsafe { ManuallyDrop::take(&mut self.zero_buffer) };
         // SAFETY: We are in the Drop impl and we don't use self.empty_bgl anymore after this point.
         let empty_bgl = unsafe { ManuallyDrop::take(&mut self.empty_bgl) };
-        // SAFETY: We are in the Drop impl and we don't use
-        // self.default_external_texture_params_buffer anymore after this point.
         let default_external_texture_params_buffer =
-            unsafe { ManuallyDrop::take(&mut self.default_external_texture_params_buffer) };
+            self.default_external_texture_params_buffer.take();
         // SAFETY: We are in the Drop impl and we don't use self.fence anymore after this point.
         let fence = unsafe { ManuallyDrop::take(&mut self.fence) };
         if let Some(Ok(indirect_validation)) = self
@@ -334,8 +333,9 @@ impl Drop for Device {
         unsafe {
             self.raw.destroy_buffer(zero_buffer);
             self.raw.destroy_bind_group_layout(empty_bgl);
-            self.raw
-                .destroy_buffer(default_external_texture_params_buffer);
+            if let Some(buffer) = default_external_texture_params_buffer {
+                self.raw.destroy_buffer(buffer);
+            }
             self.raw.destroy_fence(fence);
         }
     }
@@ -487,18 +487,27 @@ impl Device {
         }
         .map_err(DeviceError::from_hal)?;
 
-        let default_external_texture_params_buffer = unsafe {
-            raw_device.create_buffer(&hal::BufferDescriptor {
-                label: hal_label(
-                    Some("(wgpu internal) default external texture params buffer"),
-                    instance_flags,
-                ),
-                size: size_of::<ExternalTextureParams>() as _,
-                usage: wgt::BufferUses::COPY_DST | wgt::BufferUses::UNIFORM,
-                memory_flags: hal::MemoryFlags::empty(),
-            })
-        }
-        .map_err(DeviceError::from_hal)?;
+        let default_external_texture_params_buffer = if desc
+            .required_features
+            .contains(wgt::Features::EXTERNAL_TEXTURE)
+        {
+            Some(
+                unsafe {
+                    raw_device.create_buffer(&hal::BufferDescriptor {
+                        label: hal_label(
+                            Some("(wgpu internal) default external texture params buffer"),
+                            instance_flags,
+                        ),
+                        size: size_of::<ExternalTextureParams>() as _,
+                        usage: wgt::BufferUses::COPY_DST | wgt::BufferUses::UNIFORM,
+                        memory_flags: hal::MemoryFlags::empty(),
+                    })
+                }
+                .map_err(DeviceError::from_hal)?,
+            )
+        } else {
+            None
+        };
 
         // Cloned as we need them below anyway.
         let alignments = adapter.raw.capabilities.alignments.clone();
@@ -520,9 +529,7 @@ impl Device {
             queue: OnceCellOrLock::new(),
             zero_buffer: ManuallyDrop::new(zero_buffer),
             empty_bgl: ManuallyDrop::new(empty_bgl),
-            default_external_texture_params_buffer: ManuallyDrop::new(
-                default_external_texture_params_buffer,
-            ),
+            default_external_texture_params_buffer,
             label: desc.label.to_string(),
             command_allocator,
             command_indices: RwLock::new(
@@ -565,6 +572,9 @@ impl Device {
     /// [`wgt::BindingType::ExternalTexture`] binding point will be rendered
     /// correctly.
     fn init_default_external_texture_params_buffer(self: &Arc<Self>) -> Result<(), DeviceError> {
+        let Some(params_buffer) = self.default_external_texture_params_buffer.as_deref() else {
+            return Ok(());
+        };
         let data = ExternalTextureParams {
             #[rustfmt::skip]
             yuv_conversion_matrix: [
@@ -602,7 +612,6 @@ impl Device {
         staging_buffer.write(bytemuck::bytes_of(&data));
         let staging_buffer = staging_buffer.flush();
 
-        let params_buffer = self.default_external_texture_params_buffer.as_ref();
         let queue = self.get_queue().unwrap();
         let mut pending_writes = queue.pending_writes.lock();
 
@@ -3446,7 +3455,9 @@ impl Device {
             },
         ];
         let params = hal::BufferBinding::new_unchecked(
-            self.default_external_texture_params_buffer.as_ref(),
+            self.default_external_texture_params_buffer
+                .as_deref()
+                .expect("ExternalTexture layouts require the feature and its default params"),
             0,
             None,
         );
