@@ -149,6 +149,12 @@ pub struct Worker {
 }
 impl Worker {
     pub fn new(mut database: Database) -> std::io::Result<(Self, Inbox<LibraryEvent>)> {
+        if !database.connection().is_autocommit() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                SourceError::SourceNotCommitted,
+            ));
+        }
         let (sender, commands) = mpsc::sync_channel(4);
         let (updates, inbox) = Remote::bounded(8);
         let shared = Arc::new(Producer {
@@ -223,6 +229,9 @@ impl Worker {
                         }
                         Command::Replace(replacement, reply) => {
                             let result = next_revision(version).and_then(|mut next| {
+                                if !replacement.connection().is_autocommit() {
+                                    return Err(SourceError::SourceNotCommitted);
+                                }
                                 next.generation = next
                                     .generation
                                     .checked_add(1)

@@ -58,6 +58,7 @@ pub enum SourceError {
     MissingTrack(i64),
     SourceAuthorityUnavailable,
     SourceClosed,
+    SourceNotCommitted,
     NoSelection,
     OutdatedSource,
     VersionExhausted,
@@ -70,6 +71,9 @@ impl fmt::Display for SourceError {
             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
             Self::NoSelection => f.write_str("No recording selected"),
             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
+            Self::SourceNotCommitted => {
+                f.write_str("Commit the source database before attaching it")
+            }
             Self::SourceClosed => f.write_str("Library worker is closed"),
             Self::SourceAuthorityUnavailable => {
                 f.write_str("Library source authority is unavailable")
