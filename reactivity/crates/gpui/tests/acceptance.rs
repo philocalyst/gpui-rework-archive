@@ -236,8 +236,10 @@ fn output_color_configuration_reaches_the_real_pixel_surface() {
             assert_eq!((width, height), (8, 8));
             assert!(
                 pixels
-                    .chunks_exact(4)
-                    .all(|pixel| pixel == [255, 0, 0, 255])
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .all(|pixel| *pixel == [255, 0, 0, 255])
             );
         })
         .unwrap();

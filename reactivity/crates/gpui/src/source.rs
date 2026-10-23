@@ -2,8 +2,10 @@
 //! owner is borrowed; installed bindings retain a field key, never an address.
 
 mod path;
+mod value;
 pub(crate) use path::Path;
 pub use path::{ProjectedSource, SourcePath};
+pub use value::SourceValue;
 
 use crate::{View, component::Component};
 use gpui_reactivity_state::{Revision, Signal};
@@ -75,7 +77,10 @@ impl<M, T> Source<M, T> {
         name: &'static str,
         read: fn(&M) -> &Signal<T>,
         write: fn(&mut M) -> &mut Signal<T>,
-    ) -> Self {
+    ) -> Self
+    where
+        T: SourceValue,
+    {
         Self {
             id,
             name,
@@ -135,7 +140,14 @@ pub struct FieldAction<M, T, F, S = Source<M, T>> {
     update: F,
     owner: std::marker::PhantomData<fn(&mut M, &mut T)>,
 }
-impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> {
+impl<M, T: 'static, F, S: SourcePath<M, T>> FieldAction<M, T, F, S> {
+    pub(crate) fn new(source: S, update: F) -> Self {
+        Self {
+            source,
+            update,
+            owner: std::marker::PhantomData,
+        }
+    }
     pub(crate) fn validate_registered(
         &self,
         model: &M,
@@ -143,6 +155,22 @@ impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> 
     ) -> Result<FieldId, BindError> {
         self.source.resolve(model, sources).map(|(field, _)| field)
     }
+    pub(crate) fn receive<U>(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        value: U,
+    ) -> Result<FieldId, BindError>
+    where
+        F: FnMut(&mut T, U),
+    {
+        let field = self.validate_registered(model, sources)?;
+        self.source
+            .modify(model, |target| (self.update)(target, value))?;
+        Ok(field)
+    }
+}
+impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> {
     /// Validate every exclusive projector before exposing `&mut T`.
     pub(crate) fn invoke(&self, model: &mut M) -> Result<(), BindError> {
         self.source.modify(model, &self.update)

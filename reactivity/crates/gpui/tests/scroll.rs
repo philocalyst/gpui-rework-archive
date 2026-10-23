@@ -1049,7 +1049,11 @@ fn wide_overflow_endpoints_match_continuous_reference_after_p_narrowing() {
                 assert_eq!(!win.bounds(leaf).unwrap().is_empty(), visible);
                 if visible {
                     assert!(
-                        win.with_pixels(|pixels, _, _| pixels.chunks_exact(4).any(|p| p[0] == 0))
+                        win.with_pixels(|pixels, _, _| pixels
+                            .as_chunks::<4>()
+                            .0
+                            .iter()
+                            .any(|p| p[0] == 0))
                             .unwrap()
                     );
                 }

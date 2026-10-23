@@ -34,7 +34,9 @@ fn record(canvas: &mut Canvas, text: &mut TextSystem) {
         .unwrap();
 }
 fn packed(rgba: &[u8]) -> Vec<u32> {
-    rgba.chunks_exact(4)
+    rgba.as_chunks::<4>()
+        .0
+        .iter()
         .map(|p| {
             assert_eq!(p[3], 255);
             u32::from(p[0]) << 16 | u32::from(p[1]) << 8 | u32::from(p[2])

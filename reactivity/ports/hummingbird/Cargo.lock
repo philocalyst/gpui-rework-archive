@@ -1061,6 +1061,7 @@ dependencies = [
  "serde",
  "serde_json",
  "softbuffer",
+ "triomphe",
 ]
 
 [[package]]

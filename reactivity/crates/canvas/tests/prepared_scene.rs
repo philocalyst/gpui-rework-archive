@@ -108,7 +108,13 @@ fn recording_canvas_allocates_sole_cpu_image_only_on_request() {
     assert_eq!(canvas.output_bytes(), 0);
     let first = canvas.try_pixels().unwrap();
     assert_eq!(first.len(), 53 * 29 * 4);
-    assert!(first.chunks_exact(4).all(|pixel| pixel == [255; 4]));
+    assert!(
+        first
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .all(|pixel| *pixel == [255; 4])
+    );
     let pointer = first.as_ptr();
     {
         let mut candidate = canvas.stage();

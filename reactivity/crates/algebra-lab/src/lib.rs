@@ -271,7 +271,7 @@ impl<A: Algebra> Default for Dynamic<A> {
 impl<A: Algebra> Dynamic<A> {
     pub fn new() -> Self {
         let arena = NEXT_ARENA
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .expect("algebra arena identity exhausted");
         Self {
             arena,

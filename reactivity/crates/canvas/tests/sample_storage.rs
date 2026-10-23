@@ -19,7 +19,9 @@ fn adjacent_hdr_zeros_keep_distinct_output_signs() {
         canvas.set_tile_proofs(proofs);
         let words: Vec<_> = canvas
             .pixels()
-            .chunks_exact(2)
+            .as_chunks::<2>()
+            .0
+            .iter()
             .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
             .collect();
         assert_eq!(words, [0x8000, 0x8000, 0x8000, 0x3c00, 0, 0, 0, 0x3c00]);

@@ -181,7 +181,13 @@ fn hdr_support_uses_unquantized_working_colors() {
     let damage = stage(&mut canvas, &[draw(6)], Color::WHITE);
     let next = canvas.pixels();
     let [left, top, right, bottom] = damage.bounds().unwrap();
-    for (index, (old, new)) in before.chunks_exact(8).zip(next.chunks_exact(8)).enumerate() {
+    for (index, (old, new)) in before
+        .as_chunks::<8>()
+        .0
+        .iter()
+        .zip(next.as_chunks::<8>().0.iter())
+        .enumerate()
+    {
         if old != new {
             let (x, y) = ((index % WIDTH) as u32, (index / WIDTH) as u32);
             assert!(x >= left && x < right && y >= top && y < bottom);

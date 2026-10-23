@@ -1,5 +1,5 @@
 use gpui::{Error, prelude::*};
-use std::{cell::RefCell, rc::Rc};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 struct Counter {
     count: Signal<u32>,
@@ -270,7 +270,9 @@ fn rotated_button_hit_uses_the_exact_painted_matrix_not_its_aabb() {
     assert_eq!(win.with_model(|m| m.presses).unwrap(), 1);
     assert!(
         win.with_pixels(|p, _, _| p
-            .chunks_exact(4)
+            .as_chunks::<4>()
+            .0
+            .iter()
             .any(|px| px[0] != 255 || px[1] != 255 || px[2] != 255))
             .unwrap()
     );
@@ -298,8 +300,10 @@ fn wide_ancestor_products_recover_before_admitting_a_visible_primitive() {
     win.with_pixels(|pixels, _, _| {
         assert!(
             pixels
-                .chunks_exact(4)
-                .all(|pixel| pixel == [255, 0, 0, 255])
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .all(|pixel| *pixel == [255, 0, 0, 255])
         )
     })
     .unwrap();
@@ -522,19 +526,22 @@ fn a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning() 
 // resource, and even generic error diagnostics must not impose those bounds.
 struct Resource {
     bytes: Vec<u8>,
-    drops: Rc<std::cell::Cell<usize>>,
+    // Test instrumentation is external to the canonical resource representation.
+    drops: fn() -> usize,
+    dropped: fn(),
 }
 impl Resource {
-    fn new(drops: &Rc<std::cell::Cell<usize>>) -> Self {
+    fn new(drops: fn() -> usize, dropped: fn()) -> Self {
         Self {
             bytes: vec![1, 2, 3],
-            drops: drops.clone(),
+            drops,
+            dropped,
         }
     }
 }
 impl Drop for Resource {
     fn drop(&mut self) {
-        self.drops.set(self.drops.get() + 1);
+        (self.dropped)();
     }
 }
 struct Resources {
@@ -568,11 +575,10 @@ impl View for Resources {
     }
 }
 fn resources() -> Win<Resources> {
-    let old_drops = Rc::new(std::cell::Cell::new(0));
     Win::with_size(
         Resources {
-            first: Signal::new(Resource::new(&old_drops)),
-            second: Signal::new(Resource::new(&old_drops)),
+            first: Signal::new(Resource::new(|| 0, || {})),
+            second: Signal::new(Resource::new(|| 0, || {})),
         },
         8,
         8,
@@ -589,7 +595,7 @@ fn rejected_resource(
         gpui::SetError::Rejected { error, value } => {
             assert_eq!(error, expected);
             assert_eq!(value.bytes.as_ptr(), pointer);
-            assert_eq!(value.drops.get(), 0);
+            assert_eq!((value.drops)(), 0);
             value
         }
         _ => panic!("a pre-admission error consumed the resource"),
@@ -598,9 +604,15 @@ fn rejected_resource(
 
 #[test]
 fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
+    static DROPS: AtomicUsize = AtomicUsize::new(0);
     let mut win = resources();
-    let drops = Rc::new(std::cell::Cell::new(0));
-    let value = Resource::new(&drops);
+    DROPS.store(0, Ordering::Relaxed);
+    let value = Resource::new(
+        || DROPS.load(Ordering::Relaxed),
+        || {
+            DROPS.fetch_add(1, Ordering::Relaxed);
+        },
+    );
     let pointer = value.bytes.as_ptr();
     let mut closed = resources();
     closed.close();
@@ -633,16 +645,22 @@ fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
     let commit = win.set(Resources::FIRST, value).unwrap();
     assert_eq!(commit.source_epoch, 1);
     assert_eq!(win.with_model(|m| m.first.bytes.as_ptr()).unwrap(), pointer);
-    assert_eq!(drops.get(), 0);
+    assert_eq!(DROPS.load(Ordering::Relaxed), 0);
     drop(win);
-    assert_eq!(drops.get(), 1);
+    assert_eq!(DROPS.load(Ordering::Relaxed), 1);
 }
 
 #[test]
 fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
+    static DROPS: AtomicUsize = AtomicUsize::new(0);
     let mut win = resources();
-    let drops = Rc::new(std::cell::Cell::new(0));
-    let value = Resource::new(&drops);
+    DROPS.store(0, Ordering::Relaxed);
+    let value = Resource::new(
+        || DROPS.load(Ordering::Relaxed),
+        || {
+            DROPS.fetch_add(1, Ordering::Relaxed);
+        },
+    );
     let pointer = value.bytes.as_ptr();
     let bad_getter = Source::new(
         Resources::FIRST.id(),
@@ -662,11 +680,16 @@ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
         pointer,
     );
     drop(value);
-    assert_eq!(drops.get(), 1);
+    assert_eq!(DROPS.load(Ordering::Relaxed), 1);
 
     let mut win = resources();
-    let drops = Rc::new(std::cell::Cell::new(0));
-    let value = Resource::new(&drops);
+    DROPS.store(0, Ordering::Relaxed);
+    let value = Resource::new(
+        || DROPS.load(Ordering::Relaxed),
+        || {
+            DROPS.fetch_add(1, Ordering::Relaxed);
+        },
+    );
     let pointer = value.bytes.as_ptr();
     let bad_writer = Source::new(
         Resources::FIRST.id(),
@@ -682,7 +705,7 @@ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
     assert!(win.snapshot().unwrap().poisoned);
     assert_eq!(win.snapshot().unwrap().source_epoch, 0);
     drop(value);
-    assert_eq!(drops.get(), 1);
+    assert_eq!(DROPS.load(Ordering::Relaxed), 1);
 }
 
 #[test]
@@ -711,14 +734,18 @@ fn committed_sets_report_the_actual_epochs_without_returning_a_consumed_value() 
 
 #[test]
 fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() {
+    static DROPS: [AtomicUsize; 3] = [const { AtomicUsize::new(0) }; 3];
+    fn observe_drop(id: u8) {
+        DROPS[usize::from(id)].fetch_add(1, Ordering::Relaxed);
+    }
     struct Owned {
         id: u8,
         panic: bool,
-        drops: Rc<RefCell<Vec<u8>>>,
+        dropped: fn(u8),
     }
     impl Drop for Owned {
         fn drop(&mut self) {
-            self.drops.borrow_mut().push(self.id);
+            (self.dropped)(self.id);
             if self.panic {
                 self.panic = false;
                 panic!("old value destructor panic");
@@ -738,13 +765,12 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() 
             div().size(8).bg(Color::BLACK)
         }
     }
-    let drops = Rc::new(RefCell::new(Vec::new()));
     let mut win = Win::with_size(
         Owner {
             value: Signal::new(Owned {
                 id: 1,
                 panic: true,
-                drops: drops.clone(),
+                dropped: observe_drop,
             }),
         },
         8,
@@ -757,7 +783,7 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() 
             Owned {
                 id: 2,
                 panic: false,
-                drops: drops.clone(),
+                dropped: observe_drop,
             },
         )
         .unwrap_err();
@@ -770,7 +796,6 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() 
     assert!(win.snapshot().unwrap().poisoned);
     assert_eq!(win.snapshot().unwrap().source_epoch, 0);
     drop(win);
-    let dropped = drops.borrow();
-    assert_eq!(dropped.iter().filter(|&&id| id == 1).count(), 1);
-    assert_eq!(dropped.iter().filter(|&&id| id == 2).count(), 1);
+    assert_eq!(DROPS[1].load(Ordering::Relaxed), 1);
+    assert_eq!(DROPS[2].load(Ordering::Relaxed), 1);
 }

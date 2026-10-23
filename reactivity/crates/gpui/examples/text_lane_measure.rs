@@ -82,7 +82,11 @@ fn main() {
     preflight
         .with_pixels(|pixels, _, _| {
             assert_eq!(
-                pixels.chunks_exact(4).any(|pixel| pixel[..3] != [255; 3]),
+                pixels
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .any(|pixel| pixel[..3] != [255; 3]),
                 expected_texts > 0
             );
         })

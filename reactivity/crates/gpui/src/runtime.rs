@@ -3495,7 +3495,13 @@ mod tests {
         win.with_pixels(|pixels, width, height| {
             assert_eq!([width, height], [8, 8]);
             assert_eq!(pixels.len(), 8 * 8 * 4);
-            assert!(pixels.chunks_exact(4).all(|p| p == [255, 0, 0, 255]));
+            assert!(
+                pixels
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .all(|p| *p == [255, 0, 0, 255])
+            );
         })
         .unwrap();
         assert_eq!(win.snapshot().unwrap().presentation_epoch, before);
@@ -3505,7 +3511,13 @@ mod tests {
         assert_eq!(snapshot.source_epoch, snapshot.presentation_epoch);
         assert_eq!(win.runtime().unwrap().canvas.stats().render_count, 1);
         win.with_pixels(|pixels, _, _| {
-            assert!(pixels.chunks_exact(4).all(|p| p == [0, 0, 255, 255]));
+            assert!(
+                pixels
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .all(|p| *p == [0, 0, 255, 255])
+            );
         })
         .unwrap();
         win.resize([16, 8]).unwrap();
@@ -3515,7 +3527,13 @@ mod tests {
         win.with_pixels(|pixels, width, height| {
             assert_eq!([width, height], [16, 8]);
             assert_eq!(pixels.len(), 16 * 8 * 4);
-            assert!(pixels.chunks_exact(4).all(|p| p == [0, 0, 255, 255]));
+            assert!(
+                pixels
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .all(|p| *p == [0, 0, 255, 255])
+            );
         })
         .unwrap();
     }

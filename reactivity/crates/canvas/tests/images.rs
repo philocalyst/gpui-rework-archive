@@ -72,7 +72,7 @@ fn nearest_packed_texels_match_independent_color_rectangles() {
     actual
         .draw_image(&image, clip, Affine::IDENTITY, clip, ImageSampling::Nearest)
         .unwrap();
-    for (index, pixel) in bytes.chunks_exact(4).enumerate() {
+    for (index, pixel) in bytes.as_chunks::<4>().0.iter().enumerate() {
         reference
             .fill_rect(
                 Rect::new((index % 2) as f32, (index / 2) as f32, 1., 1.),

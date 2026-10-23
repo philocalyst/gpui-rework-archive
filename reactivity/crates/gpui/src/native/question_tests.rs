@@ -223,7 +223,7 @@ impl crate::QuestionExecutor for FutureExecutor {
             .name("question-future-test".into())
             .spawn(move || {
                 let waker = std::task::Waker::from(Arc::new(ThreadWake(std::thread::current())));
-                let mut future = Box::pin(future);
+                let mut future = std::pin::pin!(future);
                 loop {
                     if abort.load(Ordering::Acquire) {
                         break;

@@ -74,8 +74,10 @@ fn nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing() {
             // Alpha is always255; compare RGB, not the alpha padding above.
             assert!(
                 actual
-                    .chunks_exact(4)
-                    .zip(expected.chunks_exact(4))
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .zip(expected.as_chunks::<4>().0.iter())
                     .all(|(a, b)| a[..3] == b[..3])
             );
         }

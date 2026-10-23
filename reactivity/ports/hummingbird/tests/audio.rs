@@ -373,8 +373,10 @@ fn nonzero_stereo_wav_flac_and_mp3_preserve_samples_channels_and_partial_tail() 
     let wav = std::fs::read(base.join("stereo.wav")).unwrap();
     assert_eq!(&wav[36..40], b"data");
     let expected: Vec<f64> = wav[44..]
-        .chunks_exact(2)
-        .map(|bytes| i16::from_le_bytes(bytes.try_into().unwrap()) as f64 / 32768.)
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .map(|bytes| i16::from_le_bytes(*bytes) as f64 / 32768.)
         .collect();
     assert_eq!(expected.len(), 17239 * 2);
     for extension in ["wav", "flac", "mp3"] {

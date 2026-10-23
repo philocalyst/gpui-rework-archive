@@ -62,7 +62,7 @@ impl Default for Tree {
 impl Tree {
     pub fn new() -> Self {
         let arena = NEXT_ARENA
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .expect("tree arena identity exhausted");
         Self {
             arena,

@@ -5,6 +5,14 @@ owner-relative state operations, Cephal layout, real font shaping, prepared
 graphics, input geometry, and typed inspection. It has no dependency on legacy
 GPUI. It is an implementation in progress, not a GPUI 1.0 compatibility claim.
 
+The workspace pins `nightly-2026-10-23`. An exact `Source<M, T>` requires
+`T: SourceValue`: ordinary structs and containers qualify automatically when
+their values contain no nested Signals. This prevents inner revisions from
+changing behind an unchanged declared source revision. It requires no consumer
+derive or marker implementation. Models can still contain multiple Signals and
+nested components; coarse owner updates remain available. The bound does not
+make arbitrary callbacks pure or track hidden external state.
+
 ```rust
 use gpui::prelude::*;
 struct Counter { count: Signal<u32> }

@@ -69,7 +69,7 @@ fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
     drop(mapped);
     buffer.unmap();
     if matches!(texture.format(), wgpu::TextureFormat::Bgra8UnormSrgb) {
-        for pixel in output.chunks_exact_mut(4) {
+        for pixel in output.as_chunks_mut::<4>().0.iter_mut() {
             pixel.swap(0, 2);
         }
     }
@@ -100,10 +100,15 @@ fn render(
         "native patch vs independent full GPU renderer"
     );
     if texture.format() == wgpu::TextureFormat::Rgba16Float {
-        for (gpu, cpu) in actual.chunks_exact(2).zip(expected.chunks_exact(2)) {
+        for (gpu, cpu) in actual
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .zip(expected.as_chunks::<2>().0.iter())
+        {
             // This fixture uses nonnegative SDR-range author colors in HDR.
-            let a = u16::from_le_bytes(gpu.try_into().unwrap());
-            let b = u16::from_le_bytes(cpu.try_into().unwrap());
+            let a = u16::from_le_bytes(*gpu);
+            let b = u16::from_le_bytes(*cpu);
             assert!(a.abs_diff(b) <= 1, "CPU/HDR conversion: {a:04x} vs {b:04x}");
         }
     } else {

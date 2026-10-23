@@ -529,7 +529,7 @@ fn real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks() {
                 "byte{index}:GPU{a} CPU{b}"
             );
         }
-        assert!(actual.chunks_exact(4).any(|pixel| pixel[0] < 50));
+        assert!(actual.as_chunks::<4>().0.iter().any(|pixel| pixel[0] < 50));
     });
 }
 
@@ -596,8 +596,10 @@ fn text_free_reset_releases_keys_without_invalidating_in_flight_text() {
         }
         assert!(
             read_texture(&renderer, &empty_target)
-                .chunks_exact(4)
-                .all(|pixel| pixel == [20, 40, 80, 255])
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .all(|pixel| *pixel == [20, 40, 80, 255])
         );
         assert_eq!(readback(&mut renderer, &text), previous);
         assert!(
@@ -620,7 +622,9 @@ fn linear_float_target_retains_hdr_and_premultiplied_alpha() {
         canvas.clear(Color::linear_srgb(4.0, 0.5, -0.25, 0.5).unwrap());
         let bytes = readback(&mut renderer, &canvas);
         let pixel: Vec<_> = bytes[..8]
-            .chunks_exact(2)
+            .as_chunks::<2>()
+            .0
+            .iter()
             .map(|b| u16::from_le_bytes([b[0], b[1]]))
             .collect();
         assert_eq!(pixel, [0x4000, 0x3400, 0xb000, 0x3800]);
@@ -795,7 +799,9 @@ fn zero_coverage_hdr_preserves_numeric_zero_across_cpu_and_gpu() {
                 // Shader reductions may erase the sign of a zero. Require the
                 // same numeric color without promising cross-device zero signs.
                 let words: Vec<_> = pixels
-                    .chunks_exact(2)
+                    .as_chunks::<2>()
+                    .0
+                    .iter()
                     .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
                     .collect();
                 assert!(words[..3].iter().all(|value| value & 0x7fff == 0));
@@ -1088,7 +1094,12 @@ fn all_authored_color_layouts_reach_real_sdr_and_hdr_targets() {
                 let actual = readback(&mut renderer, &canvas);
                 let expected = canvas.pixels();
                 if format == wgpu::TextureFormat::Rgba16Float {
-                    for (a, b) in actual.chunks_exact(2).zip(expected.chunks_exact(2)) {
+                    for (a, b) in actual
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .zip(expected.as_chunks::<2>().0.iter())
+                    {
                         assert!(
                             u16::from_le_bytes([a[0], a[1]])
                                 .abs_diff(u16::from_le_bytes([b[0], b[1]]))
@@ -1219,7 +1230,12 @@ fn images_reach_linear_hdr_and_display_p3_output_without_a_linear_gpu_mirror() {
                         .unwrap();
                     let gpu = readback(&mut renderer, &canvas);
                     let cpu = canvas.pixels();
-                    for (index, (a, b)) in gpu.chunks_exact(2).zip(cpu.chunks_exact(2)).enumerate()
+                    for (index, (a, b)) in gpu
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .zip(cpu.as_chunks::<2>().0.iter())
+                        .enumerate()
                     {
                         let (a, b) = (half(a), half(b));
                         worst = worst.max((a - b).abs());
@@ -1867,8 +1883,10 @@ fn analytic_rounded_rectangles_match_cpu_and_never_use_rect_certificates() {
                     let expected = canvas.pixels();
                     if hdr {
                         for (i, (a, b)) in actual
-                            .chunks_exact(2)
-                            .zip(expected.chunks_exact(2))
+                            .as_chunks::<2>()
+                            .0
+                            .iter()
+                            .zip(expected.as_chunks::<2>().0.iter())
                             .enumerate()
                         {
                             assert!(

@@ -253,7 +253,9 @@ impl Script {
                     .with_pixels(|pixels, width, height| {
                         assert_eq!([width, height], [700, 560]);
                         pixels
-                            .chunks_exact(4)
+                            .as_chunks::<4>()
+                            .0
+                            .iter()
                             .map(|p| {
                                 (u32::from(p[0]) << 16) | (u32::from(p[1]) << 8) | u32::from(p[2])
                             })

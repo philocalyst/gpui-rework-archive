@@ -102,7 +102,7 @@ impl Scene {
     }
     pub fn with_capacity(capacity: usize) -> Self {
         let id = NEXT_SCENE
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .expect("scene identities exhausted");
         Self {
             id,

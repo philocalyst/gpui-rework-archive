@@ -193,10 +193,7 @@ pub mod ui {
             pair_add(pair_square(dx), pair_square(dy)),
             -pair_product(r, r),
         );
-        if pair_negative(-residual) {
-            return false;
-        }
-        true
+        !pair_negative(-residual)
     }
 
     pub fn outside_clip_max(

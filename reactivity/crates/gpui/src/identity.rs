@@ -27,7 +27,7 @@ pub(crate) struct Sites {
 impl Sites {
     pub(crate) fn new() -> Self {
         let next = NEXT_WINDOW
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
                 value.checked_add(1)
             })
             .expect("window namespace exhausted");

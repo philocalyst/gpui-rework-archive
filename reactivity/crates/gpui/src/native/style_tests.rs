@@ -122,7 +122,9 @@ impl Script {
                 let expected = owner
                     .with_pixels(|bytes, _, _| {
                         bytes
-                            .chunks_exact(4)
+                            .as_chunks::<4>()
+                            .0
+                            .iter()
                             .map(|p| {
                                 (u32::from(p[0]) << 16) | (u32::from(p[1]) << 8) | u32::from(p[2])
                             })

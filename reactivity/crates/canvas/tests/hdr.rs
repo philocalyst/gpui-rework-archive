@@ -39,8 +39,8 @@ fn rgba16f_is_actual_eight_byte_linear_premultiplied_output() {
     canvas.clear(Color::linear_srgb(-0.25, 4.0, 2.0, 0.5).unwrap());
     let bytes = canvas.pixels();
     assert_eq!(bytes.len(), 3 * 2 * 8);
-    for bytes in bytes.chunks_exact(8) {
-        assert_eq!(bytes, [0, 0xb0, 0, 0x40, 0, 0x3c, 0, 0x38]);
+    for bytes in bytes.as_chunks::<8>().0.iter() {
+        assert_eq!(*bytes, [0, 0xb0, 0, 0x40, 0, 0x3c, 0, 0x38]);
         assert_eq!(pixel(bytes), [-0.125, 2.0, 1.0, 0.5]);
     }
     let metadata = canvas.color_config().metadata();
@@ -134,7 +134,9 @@ fn recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them() {
     assert!(
         canvas
             .pixels()
-            .chunks_exact(8)
+            .as_chunks::<8>()
+            .0
+            .iter()
             .all(|p| pixel(p) == [2.0, 0.0, 0.0, 1.0])
     );
     assert_eq!(canvas.stats().render_count, 2);
@@ -158,7 +160,7 @@ fn actual_font_coverage_is_encoded_as_extended_linear_half_pixels() {
     let mut covered = 0;
     let mut fractional = false;
     let mut hdr = false;
-    for bytes in canvas.pixels().chunks_exact(8) {
+    for bytes in canvas.pixels().as_chunks::<8>().0.iter() {
         let [r, g, b, a] = pixel(bytes);
         if a > 0.0 {
             covered += 1;

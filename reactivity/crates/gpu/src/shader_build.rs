@@ -575,8 +575,10 @@ mod tests {
     fn changed_descriptor_set_cannot_pass_physical_binding_proof() {
         let bytes = std::fs::read(std::env::var_os("GPUI_PROOF_FRAGMENT").unwrap()).unwrap();
         let mut words = bytes
-            .chunks_exact(4)
-            .map(|b| u32::from_le_bytes(b.try_into().unwrap()))
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .map(|b| u32::from_le_bytes(*b))
             .collect::<Vec<_>>();
         decorations(&words, &CAPABILITIES, &[0, 1, 2, 3, 4, 5]);
         let mut at = 5;

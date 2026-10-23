@@ -259,7 +259,9 @@ fn real_shaping_ligatures_unicode_measure_and_paint_are_stable() {
         .unwrap();
     let first = canvas.pixels().to_vec();
     let dark: Vec<_> = first
-        .chunks_exact(4)
+        .as_chunks::<4>()
+        .0
+        .iter()
         .enumerate()
         .filter(|(_, p)| p[0] < 240)
         .map(|(i, _)| (i % 240, i / 240))
@@ -328,7 +330,7 @@ fn transformed_text_clip_and_foreign_layout_failure_are_explicit() {
         )
         .unwrap();
     let output = canvas.pixels().to_vec();
-    assert!(output.chunks_exact(4).any(|p| p[0] < 200));
+    assert!(output.as_chunks::<4>().0.iter().any(|p| p[0] < 200));
     for y in 0..72 {
         for x in 0..96 {
             if !(20..71).contains(&x) || !(10..41).contains(&y) {
@@ -529,7 +531,14 @@ fn staged_scene_keeps_old_pixels_and_reuses_the_output_allocation() {
     candidate.clear(Color::BLACK);
     candidate.commit();
     assert_eq!(canvas.pixels().as_ptr(), address);
-    assert!(canvas.pixels().chunks_exact(4).all(|p| p == [0, 0, 0, 255]));
+    assert!(
+        canvas
+            .pixels()
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .all(|p| *p == [0, 0, 0, 255])
+    );
 }
 
 #[test]

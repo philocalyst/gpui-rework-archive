@@ -45,16 +45,13 @@ impl Policy {
         }
     }
     fn accepts(self, kind: wgpu::DeviceType) -> bool {
-        if kind != wgpu::DeviceType::Cpu {
-            return true;
-        }
         #[cfg(test)]
         {
-            self.allow_cpu
+            kind != wgpu::DeviceType::Cpu || self.allow_cpu
         }
         #[cfg(not(test))]
         {
-            false
+            kind != wgpu::DeviceType::Cpu
         }
     }
 }

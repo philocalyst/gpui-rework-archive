@@ -125,7 +125,9 @@ impl Image {
         }
         if alpha == AlphaMode::Premultiplied
             && bytes
-                .chunks_exact(4)
+                .as_chunks::<4>()
+                .0
+                .iter()
                 .any(|p| p[..3].iter().any(|&v| v > p[3]))
         {
             return Err(Error::InvalidImageAlpha);
@@ -185,7 +187,7 @@ impl Image {
     fn new(width: u32, height: u32, pixels: Pixels) -> Result<Self, Error> {
         static NEXT: AtomicU64 = AtomicU64::new(1);
         let key = NEXT
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |id| id.checked_add(1))
             .map_err(|_| Error::ResourceLimit)?;
         Ok(Self(Arc::new(ImageData {
             key: ImageKey(key),

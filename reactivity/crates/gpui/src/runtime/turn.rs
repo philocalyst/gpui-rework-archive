@@ -3,22 +3,35 @@
 use super::*;
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
-    pub(super) fn deliver(&mut self, applied: &mut usize) -> Result<Commit, Error> {
+    pub(super) fn deliver(&mut self, applied: &mut usize, budget: usize) -> Result<Commit, Error> {
         self.live()?;
         let epoch = self
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         let mut models = 0;
-        match catch_unwind(AssertUnwindSafe(|| {
-            self.lanes.apply(&mut self.runtime.model, &mut models)
+        let mut exact = None;
+        let mut remaining = budget;
+        let result = match catch_unwind(AssertUnwindSafe(|| {
+            self.lanes.apply(
+                &mut self.runtime.model,
+                &self.runtime.sources,
+                &mut models,
+                &mut exact,
+                &mut remaining,
+            )
         })) {
-            Ok(()) => {}
+            Ok(result) => result,
             Err(_) => {
                 *applied = models;
                 self.poison();
                 return Err(Error::OwnerPanicked);
             }
+        };
+        // Ordinary callbacks stay coarse even when queue operations outline
+        // apply; their static chain cannot report a declaration-bound edit.
+        if !L::FIELD_EDITS {
+            exact = None;
         }
         *applied = models;
         if models != 0 {
@@ -27,17 +40,26 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
         }
+        let rejected = result.is_err();
         let mut questions = 0;
         let result = match catch_unwind(AssertUnwindSafe(|| {
             if models != 0 {
                 self.lanes.refresh(
                     &self.runtime.model,
                     &self.runtime.sources,
-                    crate::reader::question::Change::Source(None),
+                    crate::reader::question::Change::Source(exact),
                 )?;
             }
-            self.lanes
-                .apply_questions(&self.runtime.model, &self.runtime.sources, &mut questions)
+            // An accepted prefix supersedes old answers even when a later
+            // callback is rejected. Refresh before returning that rejection;
+            // leave frozen completions for a later bounded continuation.
+            result?;
+            self.lanes.apply_questions(
+                &self.runtime.model,
+                &self.runtime.sources,
+                &mut questions,
+                &mut remaining,
+            )
         })) {
             Ok(result) => result,
             Err(_) => {
@@ -52,14 +74,19 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.counters.source_operations += 1;
         }
         if let Err(error) = result {
-            self.runtime.logical_valid = false;
-            self.runtime.focused = None;
+            // A projector rejection before every callback leaves the coherent
+            // input untouched. Applied prefixes revoke their logical addresses.
+            if !rejected || models != 0 {
+                self.runtime.clear_editing();
+                self.runtime.logical_valid = false;
+                self.runtime.focused = None;
+            }
             return Err(error);
         }
         if *applied == 0 {
             return Ok(self.commit());
         }
-        self.after_admission(None, questions != 0)
+        self.after_admission(exact, questions != 0)
     }
     pub(super) fn describe(&mut self, mount: bool) -> Result<(), Error> {
         self.describe_with(mount, &[])
@@ -80,6 +107,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let was_valid = self.logical_valid;
         match catch_unwind(AssertUnwindSafe(|| {
             self.runtime.sources.validate(&mut self.runtime.model)?;
+            if mount {
+                self.lanes
+                    .validate(&self.runtime.model, &self.runtime.sources)?;
+            }
             if mount && L::QUESTIONS {
                 self.lanes.refresh(
                     &self.runtime.model,

@@ -82,7 +82,13 @@ fn preflight(count: usize, virtualized: bool) {
     actual
         .with_pixels(|pixels, width, height| {
             assert_eq!([width, height], [320, 400]);
-            assert!(pixels.chunks_exact(4).any(|pixel| pixel[..3] != [255; 3]));
+            assert!(
+                pixels
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .any(|pixel| pixel[..3] != [255; 3])
+            );
             reference
                 .with_pixels(|expected, _, _| assert_eq!(pixels, expected))
                 .unwrap();

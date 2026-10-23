@@ -36,7 +36,7 @@ impl WakeGate {
         // execution possible when that check observes an older empty cursor.
         match self
             .0
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |state| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |state| {
                 (state != CLOSED).then_some(PENDING)
             }) {
             Ok(IDLE) => {

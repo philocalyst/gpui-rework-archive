@@ -123,7 +123,7 @@ impl FontFace {
         }
         let raster_key = CacheKey::new();
         let id = NEXT_FONT
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
             .map_err(|_| Error::ResourceLimit)?;
         #[cfg(test)]
         if bundled {

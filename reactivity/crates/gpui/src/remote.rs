@@ -2,41 +2,35 @@
 use crate::{
     Commit, Error,
     reader::{Outcome, ReaderKey, ReaderValues, question::Change},
-    source::Sources,
+    source::{FieldAction, FieldId, SourcePath, Sources},
 };
 #[cfg(feature = "native-core")]
 use gpui_reactivity_host::native::Wake;
 use std::collections::VecDeque;
-use std::sync::mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError};
 #[cfg(feature = "native-core")]
-use std::sync::{
-    Arc, OnceLock, Weak,
-    atomic::{AtomicBool, Ordering},
-};
+use std::sync::OnceLock;
+use std::sync::{Arc, Mutex, MutexGuard};
 
-#[cfg(feature = "native-core")]
-struct Notification {
+// The sole payload buffer includes both the owner's frozen prefix and later
+// sends. No callback or payload destructor runs while this mutex is held.
+struct State<T> {
+    queue: VecDeque<T>,
+    capacity: usize,
+    producers: usize,
+    open: bool,
+    observe_close: bool,
+}
+struct Shared<T> {
+    state: Mutex<State<T>>,
+    #[cfg(feature = "native-core")]
     wake: OnceLock<Wake>,
-    terminal: AtomicBool,
 }
-#[cfg(feature = "native-core")]
-struct Producer<T> {
-    // Rust drops fields in declaration order. Closing the sole channel sender
-    // before Notification drops makes the terminal wake observe disconnection.
-    sender: SyncSender<T>,
-    notification: Notification,
-}
-#[cfg(feature = "native-core")]
-impl Drop for Notification {
-    fn drop(&mut self) {
-        if *self.terminal.get_mut() {
-            self.signal();
-        }
+impl<T> Shared<T> {
+    fn lock(&self) -> MutexGuard<'_, State<T>> {
+        self.state.lock().unwrap_or_else(|error| error.into_inner())
     }
-}
-#[cfg(feature = "native-core")]
-impl Notification {
     fn signal(&self) {
+        #[cfg(feature = "native-core")]
         if let Some(wake) = self.wake.get() {
             wake.signal();
         }
@@ -89,75 +83,75 @@ impl<T> std::fmt::Debug for SendError<T> {
 /// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
 pub struct Remote<T> {
-    #[cfg(not(feature = "native-core"))]
-    sender: SyncSender<T>,
-    #[cfg(feature = "native-core")]
-    producer: Arc<Producer<T>>,
+    shared: Arc<Shared<T>>,
 }
 impl<T> Clone for Remote<T> {
     fn clone(&self) -> Self {
+        let mut state = self.shared.lock();
+        state.producers = state
+            .producers
+            .checked_add(1)
+            .expect("too many inbox producers");
         Self {
-            #[cfg(not(feature = "native-core"))]
-            sender: self.sender.clone(),
-            #[cfg(feature = "native-core")]
-            producer: Arc::clone(&self.producer),
+            shared: Arc::clone(&self.shared),
+        }
+    }
+}
+impl<T> Drop for Remote<T> {
+    fn drop(&mut self) {
+        let mut state = self.shared.lock();
+        state.producers -= 1;
+        let notify = state.producers == 0 && state.observe_close;
+        drop(state);
+        if notify {
+            self.shared.signal();
         }
     }
 }
 impl<T> Remote<T> {
     /// Create an unbound lane. Sending before binding is permitted and bounded.
     /// Moving its sole Inbox into a window binds that receiver exactly once.
-    /// Capacity zero rejects every try_send with Full. Storage is allocated here,
-    /// including one staging buffer, rather than for each message or owner turn.
+    /// Capacity bounds all accepted but undelivered values, including a frozen
+    /// delivery remainder. Zero rejects every try_send with Full. One payload
+    /// buffer is allocated here; queue operations share a mutex and can wait for
+    /// its current holder. Callbacks and payload destruction run outside it.
     /// An attached native event proxy/OS may allocate separately when posting wakes.
     pub fn bounded(capacity: usize) -> (Self, Inbox<T>) {
-        let (sender, receiver) = mpsc::sync_channel(capacity);
-        #[cfg(feature = "native-core")]
-        let producer = Arc::new(Producer {
-            sender,
-            notification: Notification {
-                wake: OnceLock::new(),
-                terminal: AtomicBool::new(false),
-            },
+        let shared = Arc::new(Shared {
+            state: Mutex::new(State {
+                queue: VecDeque::with_capacity(capacity),
+                capacity,
+                producers: 1,
+                open: true,
+                observe_close: false,
+            }),
+            #[cfg(feature = "native-core")]
+            wake: OnceLock::new(),
         });
-        #[cfg(feature = "native-core")]
-        let attached = Arc::downgrade(&producer);
         (
             Self {
-                #[cfg(not(feature = "native-core"))]
-                sender,
-                #[cfg(feature = "native-core")]
-                producer,
+                shared: Arc::clone(&shared),
             },
             Inbox {
-                receiver: Some(receiver),
-                staging: VecDeque::with_capacity(capacity),
-                capacity,
-                #[cfg(feature = "native-core")]
-                producer: attached,
+                shared,
+                frozen: 0,
+                terminal: Terminal::Open,
             },
         )
     }
-    fn sender(&self) -> &SyncSender<T> {
-        #[cfg(feature = "native-core")]
-        {
-            &self.producer.sender
-        }
-        #[cfg(not(feature = "native-core"))]
-        {
-            &self.sender
-        }
-    }
     pub fn try_send(&self, value: T) -> Result<(), SendError<T>> {
-        match self.sender().try_send(value) {
-            Ok(()) => {
-                #[cfg(feature = "native-core")]
-                self.producer.notification.signal();
-                Ok(())
-            }
-            Err(TrySendError::Full(value)) => Err(SendError::Full(value)),
-            Err(TrySendError::Disconnected(value)) => Err(SendError::Closed(value)),
+        let mut state = self.shared.lock();
+        if !state.open {
+            return Err(SendError::Closed(value));
         }
+        // VecDeque's allocation capacity is not a logical bound (notably for ZSTs).
+        if state.queue.len() == state.capacity {
+            return Err(SendError::Full(value));
+        }
+        state.queue.push_back(value);
+        drop(state);
+        self.shared.signal();
+        Ok(())
     }
 }
 
@@ -168,49 +162,70 @@ impl<T> Remote<T> {
 /// let second_receiver = inbox.clone();
 /// ```
 pub struct Inbox<T> {
-    receiver: Option<Receiver<T>>,
-    staging: VecDeque<T>,
-    capacity: usize,
-    #[cfg(feature = "native-core")]
-    producer: Weak<Producer<T>>,
+    shared: Arc<Shared<T>>,
+    frozen: usize,
+    terminal: Terminal,
+}
+#[derive(PartialEq, Eq)]
+enum Terminal {
+    Open,
+    Frozen,
+    Delivered,
 }
 impl<T> Inbox<T> {
+    // Return ownership without dropping values, allowing a static lane chain to
+    // revoke every producer before any user destructor can unwind retirement.
+    fn revoke(&mut self) -> VecDeque<T> {
+        let mut state = self.shared.lock();
+        state.open = false;
+        self.frozen = 0;
+        self.terminal = Terminal::Delivered;
+        std::mem::take(&mut state.queue)
+    }
     pub(crate) fn close(&mut self) {
-        self.receiver.take();
-        self.staging.clear();
-        self.capacity = 0;
+        drop(self.revoke());
     }
     pub(crate) fn observe_close(&self) -> Result<(), Error> {
-        if self.capacity == 0 {
+        let mut state = self.shared.lock();
+        if state.capacity == 0 || !state.open {
             return Err(Error::ZeroInboxCapacity);
         }
-        #[cfg(feature = "native-core")]
-        if let Some(producer) = self.producer.upgrade() {
-            producer
-                .notification
-                .terminal
-                .store(true, Ordering::Relaxed);
-        }
+        state.observe_close = true;
         Ok(())
     }
     pub(crate) fn stage(&mut self, observe_close: bool) -> Stage {
-        if self.capacity == 0 {
+        if self.terminal != Terminal::Open {
             return Stage::Empty;
         }
-        if self.staging.len() == self.capacity {
+        let state = self.shared.lock();
+        if !state.open || state.capacity == 0 {
+            return Stage::Empty;
+        }
+        if self.frozen == state.capacity {
             return Stage::Limited;
         }
-        match self.receiver.as_ref().map(Receiver::try_recv) {
-            Some(Ok(value)) => {
-                self.staging.push_back(value);
-                Stage::Ready
-            }
-            Some(Err(TryRecvError::Disconnected)) if observe_close => {
-                self.receiver.take();
-                Stage::Ready
-            }
-            _ => Stage::Empty,
+        if self.frozen < state.queue.len() {
+            self.frozen += 1;
+            Stage::Ready
+        } else if state.producers == 0 && observe_close {
+            self.terminal = Terminal::Frozen;
+            Stage::Ready
+        } else {
+            Stage::Empty
         }
+    }
+    fn pop(&mut self) -> Option<T> {
+        if self.frozen == 0 {
+            return None;
+        }
+        let mut state = self.shared.lock();
+        self.frozen -= 1;
+        state.queue.pop_front()
+    }
+}
+impl<T> Drop for Inbox<T> {
+    fn drop(&mut self) {
+        self.close();
     }
 }
 
@@ -218,6 +233,8 @@ impl<T> Inbox<T> {
 /// saturated batch rearms once even if its last receive emptied the queue.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Delivery {
+    /// New messages frozen from the transport in this turn. `applied` may also
+    /// include messages retained from a previous checked delivery failure.
     pub received: usize,
     pub applied: usize,
     pub commit: Commit,
@@ -246,16 +263,37 @@ pub(crate) mod sealed {
 pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     const EMPTY: bool;
     const QUESTIONS: bool = false;
+    // Whether any model-message handler can return an exact source identity.
+    const FIELD_EDITS: bool = false;
     type Retired;
     fn count(&self) -> usize;
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
     fn stage(&mut self, index: usize) -> Stage;
-    fn apply(&mut self, model: &mut M, applied: &mut usize);
+    fn staged(&self) -> usize {
+        0
+    }
+    fn validate(&self, _: &M, _: &Sources<M>) -> Result<(), Error> {
+        Ok(())
+    }
+    fn apply(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+        exact: &mut Option<FieldId>,
+        remaining: &mut usize,
+    ) -> Result<(), Error>;
     fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
         Ok(false)
     }
-    fn apply_questions(&mut self, _: &M, _: &Sources<M>, _: &mut usize) -> Result<(), Error> {
+    fn apply_questions(
+        &mut self,
+        _: &M,
+        _: &Sources<M>,
+        _: &mut usize,
+        _: &mut usize,
+    ) -> Result<(), Error> {
         Ok(())
     }
     fn start_questions(&mut self) -> bool {
@@ -293,7 +331,16 @@ impl<M> LaneSet<M> for () {
     fn stage(&mut self, _: usize) -> Stage {
         Stage::Empty
     }
-    fn apply(&mut self, _: &mut M, _: &mut usize) {}
+    fn apply(
+        &mut self,
+        _: &mut M,
+        _: &Sources<M>,
+        _: &mut usize,
+        _: &mut Option<FieldId>,
+        _: &mut usize,
+    ) -> Result<(), Error> {
+        Ok(())
+    }
     fn cancel_questions(&mut self) {}
     fn clear(&mut self) {}
     #[cfg(feature = "native-core")]
@@ -335,28 +382,71 @@ pub type StatusLane<T, F, L> = Lane<T, InboxStatus<F>, L>;
 #[doc(hidden)]
 pub trait InboxHandler<M, T> {
     const OBSERVE_CLOSE: bool;
-    fn receive(&mut self, model: &mut M, value: T);
+    const FIELD_EDITS: bool = false;
+    fn validate(&self, _: &M, _: &Sources<M>) -> Result<(), Error> {
+        Ok(())
+    }
+    fn receive(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error>;
     fn closed(&mut self, _: &mut M) {}
 }
 impl<M, T, F: FnMut(&mut M, T)> InboxHandler<M, T> for F {
     const OBSERVE_CLOSE: bool = false;
-    fn receive(&mut self, model: &mut M, value: T) {
+    fn receive(
+        &mut self,
+        model: &mut M,
+        _: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error> {
         self(model, value);
+        Ok(None)
     }
 }
 impl<M, T, F: FnMut(&mut M, Option<T>)> InboxHandler<M, T> for InboxStatus<F> {
     const OBSERVE_CLOSE: bool = true;
-    fn receive(&mut self, model: &mut M, value: T) {
+    fn receive(
+        &mut self,
+        model: &mut M,
+        _: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error> {
         (self.0)(model, Some(value));
+        Ok(None)
     }
     fn closed(&mut self, model: &mut M) {
         (self.0)(model, None);
     }
 }
+impl<M, T, U: 'static, F: FnMut(&mut U, T), S: SourcePath<M, U>> InboxHandler<M, T>
+    for FieldAction<M, U, F, S>
+{
+    const OBSERVE_CLOSE: bool = false;
+    const FIELD_EDITS: bool = true;
+    fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), Error> {
+        self.validate_registered(model, sources)
+            .map(|_| ())
+            .map_err(Into::into)
+    }
+    fn receive(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error> {
+        FieldAction::receive(self, model, sources, value)
+            .map(Some)
+            .map_err(Into::into)
+    }
+}
 impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
     const EMPTY: bool = false;
     const QUESTIONS: bool = L::QUESTIONS;
-    type Retired = (Option<Receiver<T>>, L::Retired);
+    const FIELD_EDITS: bool = F::FIELD_EDITS || L::FIELD_EDITS;
+    type Retired = (VecDeque<T>, L::Retired);
     fn count(&self) -> usize {
         1 + self.tail.count()
     }
@@ -372,20 +462,49 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         }
         self.inbox.stage(F::OBSERVE_CLOSE)
     }
-    fn apply(&mut self, model: &mut M, applied: &mut usize) {
-        while let Some(value) = self.inbox.staging.pop_front() {
-            self.receive.receive(model, value);
+    fn staged(&self) -> usize {
+        self.inbox.frozen
+            + usize::from(self.inbox.terminal == Terminal::Frozen)
+            + self.tail.staged()
+    }
+    fn apply(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+        exact: &mut Option<FieldId>,
+        remaining: &mut usize,
+    ) -> Result<(), Error> {
+        while *remaining != 0 {
+            let Some(value) = self.inbox.pop() else {
+                break;
+            };
+            *remaining -= 1;
+            let field = self.receive.receive(model, sources, value)?;
+            // The first applied callback establishes the candidate grain.
+            // Different fields and unrestricted callbacks make it conservative.
+            if *applied == 0 {
+                *exact = field;
+            } else if *exact != field {
+                *exact = None;
+            }
             *applied += 1;
         }
-        if F::OBSERVE_CLOSE && self.inbox.receiver.is_none() && self.inbox.capacity != 0 {
-            self.inbox.capacity = 0;
+        if *remaining != 0 && self.inbox.terminal == Terminal::Frozen {
+            *remaining -= 1;
+            self.inbox.terminal = Terminal::Delivered;
             self.receive.closed(model);
+            *exact = None;
             *applied += 1;
         }
-        self.tail.apply(model, applied);
+        self.tail.apply(model, sources, applied, exact, remaining)
+    }
+    fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), Error> {
+        self.receive.validate(model, sources)?;
+        self.tail.validate(model, sources)
     }
     fn cancel_questions(&mut self) -> Self::Retired {
-        (self.inbox.receiver.take(), self.tail.cancel_questions())
+        (self.inbox.revoke(), self.tail.cancel_questions())
     }
     fn clear(&mut self) {
         self.inbox.close();
@@ -399,8 +518,10 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         model: &M,
         sources: &Sources<M>,
         applied: &mut usize,
+        remaining: &mut usize,
     ) -> Result<(), Error> {
-        self.tail.apply_questions(model, sources, applied)
+        self.tail
+            .apply_questions(model, sources, applied, remaining)
     }
     fn start_questions(&mut self) -> bool {
         self.tail.start_questions()
@@ -409,11 +530,11 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
     fn attach(&mut self, wake: &Wake) {
         // Attach once to this owner's event loop; surface suspend/resume does not
         // change its loop. Signal after attachment covers messages sent unbound.
-        if self.inbox.receiver.is_some() {
-            if let Some(producer) = self.inbox.producer.upgrade() {
-                let _ = producer.notification.wake.set(wake.clone());
-            }
-            // Producer death before binding must still enter the owner barrier.
+        let open = self.inbox.shared.lock().open;
+        if open {
+            let _ = self.inbox.shared.wake.set(wake.clone());
+            // Installation followed by a wake covers both pre-bind sends and
+            // last-producer death, including a race with wake publication.
             wake.signal();
         }
         self.tail.attach(wake);
@@ -446,9 +567,10 @@ mod tests {
         }
     }
     #[test]
-    fn preallocated_static_transport_and_staging_have_no_per_message_allocations() {
+    fn preallocated_frozen_prefix_has_no_per_message_allocations() {
         let (remote, inbox) = Remote::bounded(8);
         let mut lanes = Lane::new(inbox, |sum: &mut u64, value: u64| *sum += value, ());
+        let sources = Sources::new();
         let mut sum = 0;
         let measured = allocation_counter::measure(|| {
             for _ in 0..1000 {
@@ -459,36 +581,14 @@ mod tests {
                     assert!(matches!(lanes.stage(0), Stage::Ready));
                 }
                 let mut applied = 0;
-                lanes.apply(&mut sum, &mut applied);
+                lanes
+                    .apply(&mut sum, &sources, &mut applied, &mut None, &mut 8)
+                    .unwrap();
                 assert_eq!(applied, 8);
             }
         });
         assert_eq!(sum, 8000);
         assert_eq!(measured.count_total, 0);
-    }
-}
-
-#[cfg(test)]
-fn notification_size() -> usize {
-    #[cfg(feature = "native-core")]
-    {
-        std::mem::size_of::<Notification>()
-    }
-    #[cfg(not(feature = "native-core"))]
-    {
-        0
-    }
-}
-
-#[cfg(test)]
-fn producer_size() -> usize {
-    #[cfg(feature = "native-core")]
-    {
-        std::mem::size_of::<Producer<u64>>()
-    }
-    #[cfg(not(feature = "native-core"))]
-    {
-        0
     }
 }
 
@@ -518,13 +618,12 @@ mod ledger {
         );
         assert!(std::mem::size_of::<DeliveryError>() <= 128);
         println!(
-            "remote={} inbox={} lane={} notification={} producer={} optional_sender={} delivery={} error={} empty_win={} channel_allocs={} channel_bytes={} bind_allocs={} bind_bytes={}",
+            "remote={} inbox={} lane={} shared={} state={} delivery={} error={} empty_win={} channel_allocs={} channel_bytes={} bind_allocs={} bind_bytes={}",
             std::mem::size_of::<Remote<u64>>(),
             std::mem::size_of::<Inbox<u64>>(),
             std::mem::size_of::<Lane<u64, fn(&mut Page, u64), ()>>(),
-            notification_size(),
-            producer_size(),
-            std::mem::size_of::<Option<SyncSender<u64>>>(),
+            std::mem::size_of::<Shared<u64>>(),
+            std::mem::size_of::<State<u64>>(),
             std::mem::size_of::<Delivery>(),
             std::mem::size_of::<DeliveryError>(),
             std::mem::size_of::<Win<Page>>(),

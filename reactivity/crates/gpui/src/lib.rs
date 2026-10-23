@@ -4,6 +4,9 @@
 //! ordinary input, layout, text, presentation and inspection paths without an OS
 //! window. This implementation is under construction; see the crate README for
 //! the supported surface and integration gates.
+#![feature(auto_traits, negative_impls, trait_alias)]
+// The native WGPU Send proof exceeds the default trait-solver depth.
+#![cfg_attr(feature = "native-core", recursion_limit = "256")]
 #![forbid(unsafe_code)]
 
 #[cfg(test)]
@@ -64,8 +67,8 @@ pub use scroll::{
 };
 pub use semantic::SemanticText;
 pub use source::{
-    BindError, FieldAction, FieldId, IntoText, ProjectedSource, Source, SourcePath, Sources,
-    TextValue,
+    BindError, FieldAction, FieldId, IntoText, ProjectedSource, Source, SourcePath, SourceValue,
+    Sources, TextValue,
 };
 #[doc(hidden)]
 pub use style::FlexRecipe;

@@ -149,7 +149,7 @@ fn main() {
             {
                 let mut file = std::fs::File::create(path).unwrap();
                 write!(file, "P6\n{width} {height}\n255\n").unwrap();
-                for rgba in canvas.pixels().chunks_exact(4) {
+                for rgba in canvas.pixels().as_chunks::<4>().0.iter() {
                     file.write_all(&rgba[..3]).unwrap();
                 }
             }

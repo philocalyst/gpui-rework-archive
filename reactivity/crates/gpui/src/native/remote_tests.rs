@@ -46,6 +46,89 @@ impl View for Catalogue {
     }
 }
 type Results = Lane<ResultMessage, fn(&mut Catalogue, ResultMessage), ()>;
+
+struct SourceScript<L: LaneSet<Catalogue>> {
+    host: NativeHost<Catalogue, L>,
+    start: Option<Remote<String>>,
+    deadline: Instant,
+    ready_turns: usize,
+    checked: bool,
+}
+impl<L: LaneSet<Catalogue> + 'static> Host for SourceScript<L> {
+    fn dispatch(&mut self, event_loop: &ActiveEventLoop, callback: Callback<'_>) {
+        let idle = matches!(callback, Callback::AboutToWait);
+        if matches!(callback, Callback::WorkReady) {
+            self.ready_turns += 1;
+        }
+        self.host.dispatch(event_loop, callback);
+        assert!(self.host.error.is_none(), "{:?}", self.host.error);
+        if !idle {
+            return;
+        }
+        assert!(Instant::now() < self.deadline, "lost source inbox wake");
+        event_loop.set_control_flow(winit::event_loop::ControlFlow::WaitUntil(self.deadline));
+        let Some(owner) = self.host.owner.as_ref() else {
+            return;
+        };
+        let sheet = owner.snapshot().unwrap();
+        if !sheet.presentation_valid || sheet.presentation_epoch != sheet.source_epoch {
+            return;
+        }
+        if let Some(remote) = self.start.take() {
+            remote.try_send("漢".into()).unwrap();
+        }
+        if owner.root().unwrap().title.as_str() != "repair-129" {
+            return;
+        }
+        assert!(owner.contains_text("repair-129").unwrap());
+        assert_eq!(owner.counters().owner_reruns, 0);
+        assert!(owner.counters().exact_updates >= 4);
+        assert!(self.ready_turns >= 4);
+        self.checked = true;
+        event_loop.exit();
+    }
+}
+
+#[test]
+#[ignore = "requires real X11; actual wakes and failed presentation repair"]
+fn native_source_inbox_patches_and_rearms_without_describing_the_owner() {
+    let mut event_loop = EventLoop::builder()
+        .with_x11()
+        .with_any_thread(true)
+        .build()
+        .unwrap();
+    let (remote, inbox) = Remote::bounded(130);
+    let repair = remote.clone();
+    let (faults, observed) = mpsc::channel();
+    let window = Window::document(Catalogue::default())
+        .renderer(RendererPolicy::ReferenceCpu)
+        .on_presentation_error(move |error| {
+            faults.send(error.clone()).unwrap();
+            for i in 0..130 {
+                repair.try_send(format!("repair-{i}")).unwrap();
+            }
+        })
+        .with_inbox_for(
+            inbox,
+            Catalogue::TITLE,
+            (|value, message| *value = message) as fn(&mut String, String),
+        );
+    let script = SourceScript {
+        host: NativeHost::new(window),
+        start: Some(remote),
+        deadline: Instant::now() + Duration::from_secs(15),
+        ready_turns: 0,
+        checked: false,
+    };
+    let (mut driver, wake) = Driver::new(&event_loop, script);
+    driver.host_mut().host.wake = Some(wake);
+    event_loop.run_app_on_demand(&mut driver).unwrap();
+    assert!(driver.host().checked);
+    drop(driver);
+    let errors = observed.try_iter().collect::<Vec<_>>();
+    assert!(matches!(errors.as_slice(), [Error::Canvas(_)]));
+}
+
 struct Script {
     host: NativeHost<Catalogue, Results>,
     start: Option<mpsc::Sender<()>>,

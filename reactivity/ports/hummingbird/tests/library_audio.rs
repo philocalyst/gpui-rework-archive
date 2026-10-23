@@ -229,8 +229,10 @@ fn expected() -> Vec<f64> {
     let wave = std::fs::read(fixture("wav")).unwrap();
     assert_eq!(&wave[36..40], b"data");
     wave[44..]
-        .chunks_exact(2)
-        .map(|bytes| f64::from(i16::from_le_bytes(bytes.try_into().unwrap())) / 32768.)
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .map(|bytes| f64::from(i16::from_le_bytes(*bytes)) / 32768.)
         .collect()
 }
 

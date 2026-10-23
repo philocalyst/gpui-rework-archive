@@ -106,7 +106,7 @@ fn density_one_preserves_existing_pixels_and_fractional_density_uses_physical_ra
     ) {
         assert_ne!(old, new);
     }
-    assert!(scaled.pixels().chunks_exact(4).any(|p| p[3] > 0));
+    assert!(scaled.pixels().as_chunks::<4>().0.iter().any(|p| p[3] > 0));
 }
 
 #[test]

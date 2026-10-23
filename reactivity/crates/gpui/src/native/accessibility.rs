@@ -100,7 +100,7 @@ impl Shared {
     fn set_active(&self, active: bool) {
         if self
             .session
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |session| {
+            .try_update(Ordering::AcqRel, Ordering::Acquire, |session| {
                 if (session & 1 != 0) == active {
                     Some(session)
                 } else {
