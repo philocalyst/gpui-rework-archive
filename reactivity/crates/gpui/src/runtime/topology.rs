@@ -21,6 +21,7 @@ impl Topology {
     const MASK: u64 = u64::MAX >> (u64::BITS - Self::BITS);
     const ROUTE_SHIFT: u32 = Self::BITS * 2;
 
+    #[inline]
     pub(super) fn new(parent: Option<usize>, ordinal: u32, route: Option<usize>) -> Self {
         assert!((ordinal as usize) < MAX_NODES, "admitted sibling ordinal");
         let encode = |index: Option<usize>| {
