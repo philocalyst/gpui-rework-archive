@@ -1,0 +1,45 @@
+{
+  "source": "0cbd09c9d7c6f932c1e54ae28296262fb25904b9",
+  "post_source_guards": true,
+  "tests": {
+    "full-parallel": {
+      "harnesses": 28,
+      "totals": [
+        193,
+        0,
+        4
+      ],
+      "sha256": "c7b457f767ed143d3c447d379181b659689c5710dcb4e4b67cd7fd1e89f4c4e6"
+    },
+    "full-fallback": {
+      "harnesses": 28,
+      "totals": [
+        183,
+        0,
+        3
+      ],
+      "sha256": "23d24a7a35ce4ef3703ad6b9a6a41263bf3b1db03b179cf37c24f507329563e4"
+    },
+    "final-private-admission": {
+      "harnesses": 1,
+      "totals": [
+        9,
+        0,
+        0
+      ],
+      "sha256": "16fbc32358b45e71467d8c03b6cd154685b42e0286cefe101566ef5e0da3906e"
+    },
+    "producer-cost": {
+      "harnesses": 1,
+      "totals": [
+        1,
+        0,
+        0
+      ],
+      "sha256": "a35fc7a3872719abe0b4de668811eae6a59d81f349d081255522e7fa57772c53"
+    }
+  },
+  "canvas_strict": true,
+  "vendor_strict": "baseline three errors plus new use_self error; control retained, final spelling repair follows",
+  "timing_qualified": false
+}

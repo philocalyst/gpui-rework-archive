@@ -1,0 +1,11 @@
+{
+  "base": "1d5bc3061cce3beb3c4857102ed651da501b5cfd",
+  "source": "0cbd09c9d7c6f932c1e54ae28296262fb25904b9",
+  "source_patch_sha256": "bb29c937a269010e175abed4f80582eee7c6456c45b7f340adb1d3049e62c10f",
+  "source_patch_bytes": 28686,
+  "support_patch_sha256": "a84912e467c00132af7ae738af4ec4042c54c41c7045e28a61820345c1261f0f",
+  "support_patch_bytes": 131625,
+  "binary_sha256": "51359736eadad727c0e8d31db7eea0f55ed0ee177591cfd9d032de9ef179e97c",
+  "guards": 421,
+  "support_source": "98b68895c96b82af4ec259c37e59d0127ce35268"
+}
