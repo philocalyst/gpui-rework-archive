@@ -15,9 +15,10 @@ impl Interval {
         // steps into the subnormal band. A box crossing zero already encloses
         // zero and every value that a flush-to-zero operation could produce.
         if low > high
-            || [low, high]
-                .iter()
-                .any(|value| !value.is_finite() || (*value != 0.0 && !value.is_normal()))
+            || [low, high].iter().any(|value| {
+                !value.is_finite()
+                    || (value.to_bits() & 0x7fff_ffff_ffff_ffff != 0 && !value.is_normal())
+            })
         {
             return None;
         }
@@ -386,6 +387,8 @@ mod tests {
             f64::NEG_INFINITY,
             f64::from_bits(1),
             -f64::from_bits(1),
+            f64::MIN_POSITIVE.next_down(),
+            -f64::MIN_POSITIVE.next_down(),
         ] {
             assert!(Interval::point(value).is_none());
         }
