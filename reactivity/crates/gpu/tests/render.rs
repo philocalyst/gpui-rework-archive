@@ -145,8 +145,10 @@ fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() 
             2,
             ImageProfile::Srgb,
             AlphaMode::Straight,
-            vec![255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255]
-                .into_boxed_slice(),
+            vec![
+                255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255,
+            ]
+            .into_boxed_slice(),
         )
         .unwrap();
         let viewport = Rect::new(0.0, 0.0, 128.0, 80.0);
@@ -213,10 +215,15 @@ fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() 
         for (grouped, proofs) in [(false, false), (true, false), (true, true)] {
             renderer.set_grouped_records(grouped);
             renderer.set_tile_proofs(proofs);
-            let outputs = pages.each_ref().map(|canvas| output_texture(&renderer, canvas));
+            let outputs = pages
+                .each_ref()
+                .map(|canvas| output_texture(&renderer, canvas));
             for (canvas, output) in pages.iter().zip(&outputs) {
                 renderer
-                    .render(canvas.prepared_scene(), &output.create_view(&Default::default()))
+                    .render(
+                        canvas.prepared_scene(),
+                        &output.create_view(&Default::default()),
+                    )
                     .unwrap();
                 if grouped {
                     assert!(renderer.stats().compact_draws > 0);

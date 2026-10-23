@@ -438,12 +438,8 @@ pub mod ui {
             // Both ordinary and banked records use one compositor. Sharing a
             // decode across a sample row keeps four colors live, rather than
             // decoding sixteen times or retaining all sixteen sample colors.
-            let mut colors: [Vec4f; 4] = [
-                globals.clear,
-                globals.clear,
-                globals.clear,
-                globals.clear,
-            ];
+            let mut colors: [Vec4f; 4] =
+                [globals.clear, globals.clear, globals.clear, globals.clear];
             // Host-built CSR ranges are monotone and bounded by INDICES.
             #[wgsl_allow(non_literal_loop_bounds)]
             for cursor in range.x..range.y {
