@@ -11,7 +11,7 @@ mod service;
 mod timing;
 
 use crate::queue_playback::{EndOfStream, PlanStamp};
-#[cfg(feature = "cpal-output")]
+#[cfg(feature = "native")]
 pub(crate) fn system_output() -> impl output::OutputProvider {
     cpal::CpalProvider
 }
