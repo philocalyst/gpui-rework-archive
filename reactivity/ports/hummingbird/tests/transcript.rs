@@ -72,7 +72,7 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
     );
     assert_eq!(
         owner
-            .with_ready(results, |page| page.input.version.revision)
+            .with_ready(results, |page| page.input().version.revision)
             .unwrap(),
         None
     );
@@ -86,7 +86,7 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
     assert_eq!(
         owner
             .with_ready(results, |page| (
-                page.input.version.revision,
+                page.input().version.revision,
                 page.ids().collect::<Vec<_>>()
             ))
             .unwrap(),

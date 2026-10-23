@@ -290,20 +290,22 @@ pub struct Collections {
     pub rows: Vec<CollectionRow>,
 }
 pub struct Page {
-    pub input: Arc<Input>,
     pub title: String,
     pub rows: TrackRows,
     pub collections: Collections,
 }
 impl Page {
+    pub fn input(&self) -> &Arc<Input> {
+        &self.rows.input
+    }
     pub fn ids(&self) -> impl Iterator<Item = i64> + '_ {
         self.rows.rows.iter().map(|row| row.id)
     }
     pub fn track_list(&self) -> ListId {
-        ListId::new(self.input.domain)
+        ListId::new(self.input().domain)
     }
     pub fn collection_list(&self) -> ListId {
-        ListId::new(self.input.domain + 1)
+        ListId::new(self.input().domain + 1)
     }
 }
 impl ItemSource for TrackRows {
@@ -323,7 +325,9 @@ impl ItemSource for TrackRows {
         let track = &self.rows[index];
         let id = track.id;
         let generation = self.input.version.generation;
+        #[cfg(feature = "audio")]
         let context = self.input.clone();
+        #[cfg(feature = "audio")]
         let key = self.identity(index);
         #[cfg(feature = "audio")]
         let play = button("Play now")
@@ -338,10 +342,7 @@ impl ItemSource for TrackRows {
             .name(format!("Play from {}", track.title))
             .on_click(move |model: &mut Library| model.play_listing(context.clone(), Some(key)));
         #[cfg(not(feature = "audio"))]
-        let from = {
-            let _ = (context, key);
-            text("")
-        };
+        let from = text("");
         row((
             button("Prepare")
                 .name(format!("Prepare {}", track.title))

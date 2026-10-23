@@ -116,7 +116,6 @@ fn read_page(
             }
         }
         Ok(Some(Page {
-            input,
             title,
             rows,
             collections,

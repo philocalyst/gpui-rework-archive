@@ -1199,7 +1199,7 @@ fn playlist<L: LaneSet<Library>>(
         .unwrap();
     settle(win, worker).unwrap();
     let reader = win.with_model(|model| model.results).unwrap();
-    win.with_ready(reader, |page| page.input.clone())
+    win.with_ready(reader, |page| page.input().clone())
         .unwrap()
         .unwrap()
 }

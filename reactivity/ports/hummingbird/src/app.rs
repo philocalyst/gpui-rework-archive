@@ -537,10 +537,10 @@ impl View for Library {
                 .project(|page| {
                     #[cfg(feature = "audio")]
                     let play_all = {
-                        let input = page.input.clone();
                         if page.rows.is_empty() {
                             text("")
                         } else {
+                            let input = page.input().clone();
                             button("Play all")
                                 .name(format!("Play all {}", page.title))
                                 .on_click(move |model: &mut Library| {
@@ -559,24 +559,24 @@ impl View for Library {
                             .h(96)
                     };
                     let summary = if matches!(
-                        page.input.route,
+                        page.input().route,
                         Route::Albums | Route::Artists | Route::Playlists
                     ) {
                         format!(
                             "{} {}",
                             page.collections.rows.len(),
-                            page.input.route.label().to_lowercase()
+                            page.input().route.label().to_lowercase()
                         )
                     } else {
                         format!(
                             "{} recordings for ‘{}’ — {}",
                             page.rows.len(),
-                            page.input.query,
-                            page.input.sort_label()
+                            page.input().query,
+                            page.input().sort_label()
                         )
                     };
                     column((
-                        text(format!("{} — {}", page.input.route.label(), page.title)),
+                        text(format!("{} — {}", page.input().route.label(), page.title)),
                         text(summary),
                         play_all,
                         collections,
