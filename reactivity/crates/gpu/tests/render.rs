@@ -3503,3 +3503,83 @@ fn resident_words_match_forced_uploads_across_transforms_growth_and_failed_prepa
         }
     });
 }
+
+#[test]
+fn same_word_count_with_different_bank_and_material_planes_stays_coherent() {
+    use gpui_canvas::PaintColor;
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let mut reused = renderer(format).await;
+            let mut reference = renderer(format).await;
+            let mut fonts = TextSystem::bundled().unwrap();
+            let one = fonts.shape("H", 18.0, None).unwrap();
+            let pair = fonts.shape("HH", 18.0, None).unwrap();
+            let clip = Rect::new(0.0, 0.0, 96.0, 48.0);
+            let mut packet_bytes = None;
+            for rows in [1, 5, 1, 5] {
+                let mut canvas = Canvas::recording(96, 48, config).unwrap();
+                canvas.clear(Color::WHITE);
+                let mut slot = None;
+                for index in 0..rows {
+                    slot = Some(
+                        canvas
+                            .paint_slot(PaintColor::new(Color::rgb(31 + index * 20, 61, 127)))
+                            .unwrap(),
+                    );
+                }
+                let slot = slot.unwrap();
+                if rows == 1 {
+                    for x in [8.0, 36.0] {
+                        canvas
+                            .draw_text_scaled_slot(
+                                &mut fonts,
+                                &one,
+                                Point { x, y: 8.0 },
+                                Affine::IDENTITY,
+                                clip,
+                                slot,
+                                1.0,
+                            )
+                            .unwrap();
+                    }
+                } else {
+                    canvas
+                        .draw_text_scaled_slot(
+                            &mut fonts,
+                            &pair,
+                            Point { x: 16.0, y: 8.0 },
+                            Affine::translation(0.125, 0.0),
+                            clip,
+                            slot,
+                            1.0,
+                        )
+                        .unwrap();
+                }
+                assert_eq!(canvas.prepared_scene().paint_bank().len(), rows as usize);
+                reference.set_tile_proofs(false);
+                reference.set_tile_proofs(true);
+                let expected = readback(&mut reference, &canvas);
+                assert_eq!(
+                    readback(&mut reused, &canvas),
+                    expected,
+                    "{format:?}, bank rows={rows}"
+                );
+                let stats = reused.stats();
+                assert_eq!(stats.draws, 2);
+                assert_eq!(
+                    stats.draw_record_bytes,
+                    *packet_bytes.get_or_insert(stats.draw_record_bytes)
+                );
+                assert_eq!(stats.draw_record_bytes, 15 * 16);
+            }
+        }
+    });
+}

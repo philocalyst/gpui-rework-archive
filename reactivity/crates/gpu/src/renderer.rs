@@ -127,29 +127,35 @@ type Word = [u32; 4];
 
 // Two stack-owned envelopes follow the physical packet bands. No shadow
 // records, per-draw dirty tags, dirty collection or retained generation exists.
-struct Changes(std::ops::Range<usize>);
+struct Changes {
+    first: usize,
+    last: usize,
+}
 impl Changes {
     fn new() -> Self {
-        Self(usize::MAX..0)
+        Self {
+            first: usize::MAX,
+            last: 0,
+        }
     }
     fn replace<const N: usize>(&mut self, records: &mut [Word], start: usize, next: [Word; N]) {
         for (offset, next) in next.into_iter().enumerate() {
             let index = start + offset;
             if records[index] != next {
-                self.0.start = self.0.start.min(index);
-                self.0.end = self.0.end.max(index + 1);
+                self.first = self.first.min(index);
+                self.last = self.last.max(index + 1);
                 records[index] = next;
             }
         }
     }
     fn upload(&self, records: &[Word], buffer: &Buffer, queue: &wgpu::Queue) -> usize {
-        if self.0.is_empty() {
+        if self.first >= self.last {
             return 0;
         }
-        let words = &records[self.0.clone()];
+        let words = &records[self.first..self.last];
         queue.write_buffer(
             &buffer.handle,
-            (self.0.start * 16) as u64,
+            (self.first * 16) as u64,
             bytemuck::cast_slice(words),
         );
         words.len() * 16
@@ -955,8 +961,8 @@ impl RendererState {
         } else {
             // Merge only touching envelopes. Disjoint changes cost at most two
             // queue writes, independent of the number of changed placements.
-            if common_changes.0.end == placement_changes.0.start {
-                common_changes.0.end = placement_changes.0.end;
+            if common_changes.last == placement_changes.first {
+                common_changes.last = placement_changes.last;
                 placement_changes = Changes::new();
             }
             common_changes.upload(&self.records, &self.draws, &context.queue)
@@ -1553,18 +1559,21 @@ mod tests {
             }
             assert_eq!(records, expected);
             if mask == 0 {
-                assert!(changes.0.is_empty());
+                assert!(changes.first >= changes.last);
             } else {
                 assert_eq!(
-                    changes.0,
-                    mask.trailing_zeros() as usize..(32 - mask.leading_zeros()) as usize
+                    (changes.first, changes.last),
+                    (
+                        mask.trailing_zeros() as usize,
+                        (32 - mask.leading_zeros()) as usize
+                    )
                 );
             }
-            let before = changes.0.clone();
-            for index in 0..12 {
-                changes.replace(&mut records, index, [expected[index]]);
+            let before = (changes.first, changes.last);
+            for (index, word) in expected.into_iter().enumerate() {
+                changes.replace(&mut records, index, [word]);
             }
-            assert_eq!(changes.0, before);
+            assert_eq!((changes.first, changes.last), before);
         }
     }
 
