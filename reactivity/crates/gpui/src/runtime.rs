@@ -312,7 +312,7 @@ impl Snapshot {
     }
 }
 
-/// One interactive layout per text-bearing site. A first definite measurement
+/// One interactive layout per text-bearing site. A first known-width measurement
 /// may fill a vacant slot; other measurement widths never replace it. Final
 /// placement checks its exact width before retaining C/P geometry. Description
 /// moves surviving identities and removed sites drop their glyph buffers.
@@ -673,10 +673,7 @@ impl TextSite {
                 AvailableSpace::MaxContent => None,
             });
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
-        if self.shaped.is_none()
-            && (input.known_dimensions.width.is_some()
-                || matches!(input.available_width, AvailableSpace::Definite(_)))
-        {
+        if self.shaped.is_none() && input.known_dimensions.width.is_some() {
             self.shape_for(service, font_size, width)?;
         }
         if let Some(shape) = &self.shaped
@@ -3890,7 +3887,7 @@ mod tests {
     }
 
     #[test]
-    fn first_definite_measurement_fills_only_a_vacant_layout_slot() {
+    fn first_known_width_measurement_fills_only_a_vacant_layout_slot() {
         let system = TextSystem::bundled().unwrap();
         let mut shaper = system.font_face().shaper();
         let mut site = TextSite {
@@ -3902,15 +3899,29 @@ mod tests {
             known_dimensions: Size::NONE,
             available_width,
         };
-        for width in [AvailableSpace::MaxContent, AvailableSpace::MinContent] {
+        for width in [
+            AvailableSpace::MaxContent,
+            AvailableSpace::MinContent,
+            AvailableSpace::Definite(80.),
+        ] {
             site.measure_for(&mut shaper, 16., input(width)).unwrap();
             assert!(
                 site.shaped.is_none(),
-                "intrinsic probes cannot fill the slot"
+                "an available constraint cannot fill the slot"
             );
         }
-        site.measure_for(&mut shaper, 16., input(AvailableSpace::Definite(80.)))
-            .unwrap();
+        site.measure_for(
+            &mut shaper,
+            16.,
+            WidthMeasureInput {
+                known_dimensions: Size {
+                    width: Some(80.),
+                    height: None,
+                },
+                available_width: AvailableSpace::MaxContent,
+            },
+        )
+        .unwrap();
         let first = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
         let geometry = site
             .shaped
@@ -3919,12 +3930,19 @@ mod tests {
             .layout
             .retain_geometry()
             .unwrap();
-        for width in [
-            AvailableSpace::MaxContent,
-            AvailableSpace::MinContent,
-            AvailableSpace::Definite(40.),
+        for other in [
+            input(AvailableSpace::MaxContent),
+            input(AvailableSpace::MinContent),
+            input(AvailableSpace::Definite(40.)),
+            WidthMeasureInput {
+                known_dimensions: Size {
+                    width: Some(40.),
+                    height: None,
+                },
+                available_width: AvailableSpace::MaxContent,
+            },
         ] {
-            site.measure_for(&mut shaper, 16., input(width)).unwrap();
+            site.measure_for(&mut shaper, 16., other).unwrap();
             assert_eq!(
                 site.shaped.as_ref().unwrap().layout.glyphs().as_ptr(),
                 first
@@ -3936,7 +3954,7 @@ mod tests {
             site.shape_for(&mut shaper, 16., Some(80.)).unwrap();
         });
         assert_eq!(cost.count_total, 0);
-        // The first finite width is provisional. Final placement must still
+        // The first known width is provisional. Final placement must still
         // check its own width, while the old geometry lease remains usable.
         site.shape_for(&mut shaper, 16., Some(40.)).unwrap();
         assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
