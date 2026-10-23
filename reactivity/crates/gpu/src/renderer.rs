@@ -1168,13 +1168,20 @@ impl RendererState {
         if total > MAX_REFERENCES {
             return Err(Error::ResourceLimit);
         }
+        let solid = self.tile_proofs && draw.source.is_solid();
+        // Classify material once per draw. A sampled tile only needs another
+        // coverage proof when an opaque solid could retire its partial prefix.
+        let opaque = solid
+            && draw.color[3] == 1.0
+            && !draw
+                .color
+                .iter()
+                .any(|v| v.is_sign_negative() && !v.is_normal());
         visit(draw, columns, |tile| {
-            let covered = self.tile_proofs && full_tile(draw, error, tile, columns, width, height);
-            if covered
-                && draw.color[3] == 1.0
-                // Prefix discard additionally needs backdrop-independent bits.
-                && !draw.color.iter().any(|v| v.is_sign_negative() && !v.is_normal())
-            {
+            let covered = solid
+                && (opaque || self.ranges[tile][1] & CONSTANT_TILE != 0)
+                && full_tile(draw, error, tile, columns, width, height);
+            if covered && opaque {
                 self.ranges[tile] = [address, CONSTANT_TILE | 1];
                 self.cursors[tile] = ordinal as u32 + 1;
             } else {
