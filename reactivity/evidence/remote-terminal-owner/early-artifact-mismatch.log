@@ -1,0 +1,9 @@
+error[E0463]: can't find crate for `gpui`
+ --> /tmp/gpui-intent-transport-codegen/probe.rs:2:5
+  |
+2 | use gpui::{Remote, SendError};
+  |     ^^^^ can't find crate
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0463`.

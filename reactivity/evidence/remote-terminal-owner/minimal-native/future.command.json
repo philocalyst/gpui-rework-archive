@@ -1,0 +1,1 @@
+["bash", "-c", "source /tmp/gpui-hummingbird-audio-env.sh\nexport DISPLAY=:247\nexec /tmp/gpui-hummingbird-audio-target/debug/deps/gpui-907284547f21f784 native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input --exact --ignored --nocapture --test-threads=1"]

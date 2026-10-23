@@ -1,0 +1,47 @@
+    Checking gpui v0.1.0 (/root/gpui-hummingbird-library-intent-sol/reactivity/crates/gpui)
+error: this `if` statement can be collapsed
+   --> crates/gpui/src/native/remote_tests.rs:260:9
+    |
+260 | /         if let Some(owner) = &self.host.owner {
+261 | |             if owner.root().unwrap().finished && self.terminal_turn.is_none() {
+262 | |                 assert!(ready, "terminal must enter through an actual WorkReady");
+263 | |                 self.terminal_turn = Some(self.ready_turns);
+264 | |             }
+265 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+260 ~         if let Some(owner) = &self.host.owner
+261 ~             && owner.root().unwrap().finished && self.terminal_turn.is_none() {
+262 |                 assert!(ready, "terminal must enter through an actual WorkReady");
+263 |                 self.terminal_turn = Some(self.ready_turns);
+264 ~             }
+    |
+
+error: this `if` statement can be collapsed
+   --> crates/gpui/src/native/remote_tests.rs:289:9
+    |
+289 | /         if model.rows.len() == self.expected_rows {
+290 | |             if let Some(release) = self.release.take() {
+291 | |                 assert!(!model.finished, "an extant clone keeps the lane open");
+292 | |                 self.retained.take();
+...   |
+296 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+289 ~         if model.rows.len() == self.expected_rows
+290 ~             && let Some(release) = self.release.take() {
+291 |                 assert!(!model.finished, "an extant clone keeps the lane open");
+...
+294 |                 return;
+295 ~             }
+    |
+
+error: could not compile `gpui` (lib test) due to 2 previous errors
