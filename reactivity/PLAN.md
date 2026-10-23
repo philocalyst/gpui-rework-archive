@@ -67,6 +67,12 @@ boundaries. Enabled pipeline policy, sticky loss delivery, reentrant callbacks,
 imported-buffer ownership and unwind cleanup have explicit controls. Producer
 Apple/MSVC/WebGL compilation is separate from actual Vulkan runtime proof;
 neither startup nor process-memory improvements follow from these counts.
+The [zero-source audit](docs/gpu-zero-floor-luna.md) identifies eager Core/HAL
+owners and their command-order obligations. Its first isolated implementation
+targets the unused default external-texture parameters buffer/upload. Larger
+zero-source deferral must prove fallible admission before init-tracker mutation,
+queue ordering, outer-lock callback safety and portable cleanup; descriptor bytes
+are not process-memory measurements.
 The [combined main source](evidence/structural-main/README.md) passes 656
 GPUI/GPU cases/docs, strict all-target checks and formatting with all 2,033
 shipping/configuration/port guards intact. It does not rerun the separate native
@@ -176,10 +182,11 @@ The [route storage frontier](docs/route-storage-frontier-luna.md) motivates
 safe hot/cold retained nodes. Actual [density-column controls](crates/gpui/evidence/route-columns/rejected-controls.md)
 lose the speed gate; the [packed direct-slot successor](crates/gpui/evidence/route-columns/packed-rejected-controls.md)
 recovers activation but consistently loses resize and no-route description.
-Preserve every losing capture. The next isolated formulation keeps the hot
-parent representation intact and uses spare ordinal/content bits for direct
-route addressing. Qualify actual owner headers, old/new overlap, full-width
-identity/scope, dispatch and destructor order before accepting a smaller node.
+The [split-word control](crates/gpui/evidence/route-columns/split-rejected-controls.md)
+keeps raw parents and uses spare ordinal/content bits. It passes actual
+100,000-route dispatch, but loses no-route description by 9.50% and several
+activation cohorts. It is rejected before broad gates. Preserve every losing
+capture: smaller retained nodes alone do not justify extra reconciliation work.
 A separate tail-header thin owner reduces padding
 but still requires an unsafe policy decision and full soundness qualification.
 The integrated [Hummingbird queue](evidence/hummingbird-queue/README.md) now supplies

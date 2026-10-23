@@ -153,15 +153,24 @@ likewise remain evidence, not adopted unsafe storage. The
 [rejected AoS/SoA controls](crates/gpui/evidence/route-columns/rejected-controls.md).
 The later [packed topology control](crates/gpui/evidence/route-columns/packed-rejected-controls.md)
 restores direct activation but still loses no-route description and resize in
-all nine pairs. None is merged. The next isolated representation keeps the raw
-parent word and distributes bounded route bits across unused ordinal/content
-space; this is a hypothesis, not a speed or memory result.
+all nine pairs. The [split-word successor](crates/gpui/evidence/route-columns/split-rejected-controls.md)
+keeps raw parent words and passes actual 100,000-route dispatch. Its single
+180-observation capture still loses no-route description by 9.50% in all nine
+pairs and several activation cohorts. None is merged; all captures and complete
+owner costs are retained.
 The [Hummingbird producer](evidence/hummingbird-queue/README.md) retains its
 original queue/navigation and native bug evidence. The integrated correction
 keeps Session and optional Session at 32 bytes. Its separate inspector successor
 requires matching hits on P and its own pending C; it remains unadopted pending
 codegen and broader qualification. Audio output/full player and foreign-app
 compilation remain outstanding.
+
+The [portable GPU zero-source audit](docs/gpu-zero-floor-luna.md) identifies
+Core's eager 512 KiB zero source and separate 256 KiB DX12/GLES sources. These are
+descriptor sizes, with no new RSS or timing result. A reviewed primary-source
+record corrects an inaccessible Dawn citation. The next isolated Core spike
+defers the unused default external-texture parameters buffer/upload; zero-source
+ordering and initialization-tracker recovery remain separate proof obligations.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),
