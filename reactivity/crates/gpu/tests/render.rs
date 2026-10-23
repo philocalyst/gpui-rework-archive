@@ -392,6 +392,95 @@ fn compare_tile_modes(renderer: &mut Renderer, canvas: &mut Canvas) -> Stats {
 }
 
 #[test]
+fn whole_coverage_setup_preserves_partial_edges_and_hdr_order() {
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let mut renderer = renderer(format).await;
+            let viewport = Rect::new(0.0, 0.0, 65.0, 33.0);
+            let full = Rect::new(-1.0, -1.0, 67.0, 35.0);
+            let mut canvas = Canvas::recording(65, 33, config).unwrap();
+            canvas.clear(Color::linear_srgb(-0.0, 0.2, 0.4, 1.0).unwrap());
+            for channels in [
+                [-0.0, -1e-40, 1.0, 0.0],
+                [-2.0, 0.5, 3.0, 0.25],
+                [0.1, 2.0, 0.0, 0.75],
+            ] {
+                let [r, g, b, a] = channels;
+                canvas
+                    .fill_rect(
+                        full,
+                        Affine::IDENTITY,
+                        viewport,
+                        Color::linear_srgb(r, g, b, a).unwrap(),
+                    )
+                    .unwrap();
+            }
+            for stage in 0..4 {
+                if stage == 1 {
+                    canvas
+                        .fill_rect(
+                            Rect::new(0.375, 0.375, 64.25, 32.25),
+                            Affine::IDENTITY,
+                            viewport,
+                            Color::rgba(25, 140, 230, 127),
+                        )
+                        .unwrap();
+                } else if stage == 2 {
+                    // Full translucent geometry cannot restore the constant
+                    // tag on tiles whose earlier edge was partially sampled.
+                    canvas
+                        .fill_rect(
+                            full,
+                            Affine::IDENTITY,
+                            viewport,
+                            Color::rgba(220, 50, 90, 73),
+                        )
+                        .unwrap();
+                } else if stage == 3 {
+                    canvas
+                        .fill_rect(full, Affine::IDENTITY, viewport, Color::rgb(17, 81, 151))
+                        .unwrap();
+                }
+                renderer.set_tile_proofs(false);
+                let reference = readback(&mut renderer, &canvas);
+                let sampled = renderer.stats();
+                renderer.set_tile_proofs(true);
+                assert_eq!(
+                    readback(&mut renderer, &canvas),
+                    reference,
+                    "whole-coverage setup changed pixels: HDR={hdr}, stage={stage}"
+                );
+                let actual = renderer.stats();
+                assert_eq!(
+                    actual.original_tile_references,
+                    sampled.original_tile_references
+                );
+                if stage == 0 {
+                    assert_eq!(actual.sample_evaluations, 65 * 33);
+                }
+                if matches!(stage, 1 | 2) {
+                    assert!(actual.sample_evaluations > 65 * 33);
+                }
+                if stage == 3 {
+                    assert_eq!(actual.uniform_tiles, 15);
+                    assert_eq!(actual.tile_references, 0);
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn constant_coverage_ranges_preserve_order_and_fall_back_at_partial_edges() {
     use gpui_canvas::OutputProfile;
     pollster::block_on(async {

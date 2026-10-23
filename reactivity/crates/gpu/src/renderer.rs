@@ -7,6 +7,7 @@ use std::{borrow::Cow, collections::HashMap};
 #[cfg(feature = "offline-shader")]
 #[allow(unsafe_code)]
 mod artifact;
+mod coverage;
 mod images;
 mod owned;
 mod paint;
@@ -1162,9 +1163,8 @@ impl RendererState {
         height: u32,
         previous: usize,
     ) -> Result<usize, Error> {
-        let total = previous
-            .checked_add(tile_count(draw))
-            .ok_or(Error::ResourceLimit)?;
+        let count = tile_count(draw);
+        let total = previous.checked_add(count).ok_or(Error::ResourceLimit)?;
         if total > MAX_REFERENCES {
             return Err(Error::ResourceLimit);
         }
@@ -1177,10 +1177,22 @@ impl RendererState {
                 .color
                 .iter()
                 .any(|v| v.is_sign_negative() && !v.is_normal());
+        // Do not set up a rectangle proof for sampled sources or a lone
+        // eligible tile. A second actual proof request opens the shared setup;
+        // tiny glyphs and already-sampled translucent ranges never pay for it.
+        let mut proof_seen = false;
+        let mut whole = None;
         visit(draw, columns, |tile| {
-            let covered = solid
-                && (opaque || self.ranges[tile][1] & CONSTANT_TILE != 0)
-                && full_tile(draw, error, tile, columns, width, height);
+            let covered = solid && (opaque || self.ranges[tile][1] & CONSTANT_TILE != 0) && {
+                let certified = if count > 1 && proof_seen {
+                    *whole
+                        .get_or_insert_with(|| coverage::whole(draw, error, columns, width, height))
+                } else {
+                    proof_seen = true;
+                    false
+                };
+                certified || full_tile(draw, error, tile, columns, width, height)
+            };
             if covered && opaque {
                 self.ranges[tile] = [address, CONSTANT_TILE | 1];
                 self.cursors[tile] = ordinal as u32 + 1;
