@@ -155,6 +155,14 @@ impl SubmissionTiming {
     pub fn take_started(&mut self) -> Option<Token> {
         self.started.take()
     }
+    #[cfg(test)]
+    pub fn capacities(&self) -> (usize, usize) {
+        (self.spans.capacity(), self.capacity)
+    }
+    #[cfg(test)]
+    pub fn span_bytes() -> usize {
+        std::mem::size_of::<Span>()
+    }
 }
 
 #[cfg(test)]

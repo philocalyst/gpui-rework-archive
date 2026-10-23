@@ -68,12 +68,16 @@ trait OutputSample: cpal::SizedSample + Copy {
 }
 impl OutputSample for f32 {
     fn pcm(value: f64) -> Self {
-        value as f32
+        f64::pcm(value) as f32
     }
 }
 impl OutputSample for f64 {
     fn pcm(value: f64) -> Self {
-        value
+        if value.is_finite() {
+            value.clamp(-1., 1.)
+        } else {
+            0.
+        }
     }
 }
 macro_rules! signed {
@@ -359,6 +363,20 @@ mod tests {
         assert_eq!(output, [0, 16384, 32768, 49152, 65535, 32768]);
     }
     #[test]
+    fn floating_device_conversion_is_finite_and_normalized_without_heap_work() {
+        let values = [2., -2., f64::NAN, f64::INFINITY, f64::MAX, 0.25];
+        let expected = [1., -1., 0., 0., 1., 0.25];
+        let (mut producer, mut callback) = callback(1, 8);
+        producer.push_entire_slice(&values).unwrap();
+        let mut output = [0f32; 6];
+        no_heap(|| callback.render(&mut output));
+        assert_eq!(output, expected.map(|sample| sample as f32));
+        producer.push_entire_slice(&values).unwrap();
+        let mut output = [0f64; 6];
+        no_heap(|| callback.render(&mut output));
+        assert_eq!(output, expected);
+    }
+    #[test]
     fn exceptional_owned_error_retirement_is_bounded_and_never_leaks_on_overflow() {
         let (mut producer, mut consumer) = RingBuffer::new(1);
         let fault = AtomicU32::new(0);
@@ -377,5 +395,68 @@ mod tests {
         assert_eq!(fault.load(Ordering::Acquire), 1);
         assert_eq!(consumer.pop().unwrap().kind(), cpal::ErrorKind::Xrun);
         assert!(consumer.pop().is_err());
+    }
+}
+
+#[cfg(test)]
+mod ownership_bill {
+    use super::*;
+    use crate::audio::output::Gate;
+    use std::sync::atomic::AtomicBool;
+    #[test]
+    fn actual_application_pcm_transport_without_native_stream_allocation_bill() {
+        let gate = PlaybackGate(Arc::new(Gate {
+            epoch: AtomicU64::new(1),
+            playing: AtomicBool::new(true),
+            closed: AtomicBool::new(false),
+        }));
+        let mut live = None;
+        let allocation = allocation_counter::measure(|| {
+            let (samples, consumer) = RingBuffer::new(9600);
+            let (errors, retired) = RingBuffer::new(4);
+            let fault = Arc::new(AtomicU32::new(0));
+            let underruns = Arc::new(AtomicU64::new(0));
+            let callback = Callback {
+                samples: consumer,
+                gate: gate.clone(),
+                epoch: 1,
+                channels: 2,
+                gain: 0.,
+                step: 1. / (48000. * 0.015),
+                underruns: underruns.clone(),
+            };
+            let stream = CpalStream {
+                stream: None,
+                samples,
+                format: Format {
+                    rate: 48000,
+                    channels: 2,
+                },
+                capacity: 9600,
+                errors: retired,
+                fault: fault.clone(),
+                _underruns: underruns,
+            };
+            live = Some((stream, callback, errors, fault));
+        });
+        let (stream, callback, _, _) = live.as_ref().unwrap();
+        assert_eq!(stream.samples.buffer().capacity(), 9600);
+        println!(
+            "AUDIO_PCM_TRANSPORT {allocation:?}; real CpalStream/Callback/rings/status; excludes shared gate and native CPAL/backend stream"
+        );
+        println!(
+            "AUDIO_PCM_HEADERS stream={} callback={} producer={} consumer={} ring={} error={} sample_capacity={} error_capacity={}",
+            size_of::<CpalStream>(),
+            size_of::<Callback>(),
+            size_of::<Producer<f64>>(),
+            size_of::<Consumer<f64>>(),
+            size_of::<RingBuffer<f64>>(),
+            size_of::<cpal::Error>(),
+            callback.samples.buffer().capacity(),
+            stream.errors.buffer().capacity()
+        );
+        let retirement = allocation_counter::measure(|| drop(live.take()));
+        assert_eq!(allocation.count_current + retirement.count_current, 0);
+        assert_eq!(allocation.bytes_current + retirement.bytes_current, 0);
     }
 }

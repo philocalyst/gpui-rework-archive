@@ -3,6 +3,7 @@ mod block;
 #[cfg(feature = "cpal-output")]
 mod cpal;
 mod decoder;
+mod fft;
 mod media;
 pub mod output;
 mod pipeline;
@@ -12,6 +13,7 @@ mod timing;
 use crate::queue_playback::{EndOfStream, PlanStamp};
 pub use service::{AudioHandle, AudioService, Receipt, Transition};
 use std::{fmt, io};
+pub(super) const MAX_RATE: u32 = 768_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Format {
@@ -20,7 +22,7 @@ pub struct Format {
 }
 impl Format {
     fn checked(self) -> Result<Self, AudioError> {
-        if self.rate == 0 || self.rate > 768_000 || !(1..=2).contains(&self.channels) {
+        if self.rate == 0 || self.rate > MAX_RATE || !(1..=2).contains(&self.channels) {
             return Err(AudioError::Unsupported("audio rate or channel layout"));
         }
         Ok(self)

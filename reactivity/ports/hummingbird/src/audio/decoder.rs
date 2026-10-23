@@ -12,6 +12,9 @@ use symphonia::core::{
     units::{Time, TimeBase},
 };
 const MAX_PACKET_FRAMES: usize = 1_048_576;
+// Normalized float PCM may carry headroom. Bound it before persistent DSP:
+// four extra amplitude bits (24 dB), rather than accepting arbitrary finite f64.
+const MAX_FLOAT_PCM: f64 = 16.;
 
 pub(super) struct Decoder {
     format: Box<dyn FormatReader>,
@@ -180,9 +183,16 @@ impl Decoder {
             if decoded.frames() > MAX_PACKET_FRAMES {
                 return Err(AudioError::Unsupported("oversized decoded packet"));
             }
+            // Gapless decoding has already removed trim_start. Packet PTS can
+            // still name encoder-delay frames; seek trimming starts at the
+            // first valid decoded sample, otherwise MP3 seek-to-zero trims twice.
+            let presentation = packet
+                .pts
+                .checked_add(packet.trim_start)
+                .ok_or(AudioError::Unsupported("packet presentation timestamp"))?;
             self.packet_position = self
                 .time_base
-                .and_then(|base| base.calc_time(packet.pts))
+                .and_then(|base| base.calc_time(presentation))
                 .map_or(self.position, |time| time.as_secs_f64());
             let skip = self
                 .seek_to
@@ -199,13 +209,13 @@ impl Decoder {
             for plane in &mut self.packet {
                 plane.clear();
             }
-            convert(decoded, &mut self.packet);
+            convert(decoded, &mut self.packet)?;
             self.packet_offset = skip;
         }
         Ok(block.frames > 0)
     }
 }
-fn convert(decoded: GenericAudioBufferRef<'_>, output: &mut [Vec<f64>]) {
+fn convert(decoded: GenericAudioBufferRef<'_>, output: &mut [Vec<f64>]) -> Result<(), AudioError> {
     macro_rules! planes {
         ($buffer:ident, $sample:expr) => {{
             for (channel, output) in output.iter_mut().enumerate() {
@@ -213,6 +223,21 @@ fn convert(decoded: GenericAudioBufferRef<'_>, output: &mut [Vec<f64>]) {
                     output.extend(input.iter().map($sample));
                 }
             }
+        }};
+    }
+    macro_rules! floats {
+        ($buffer:ident, $sample:expr) => {{
+            for channel in 0..output.len() {
+                if let Some(input) = $buffer.plane(channel)
+                    && input
+                        .iter()
+                        .map($sample)
+                        .any(|sample| !sample.is_finite() || sample.abs() > MAX_FLOAT_PCM)
+                {
+                    return Err(AudioError::Decode("invalid float PCM".into()));
+                }
+            }
+            planes!($buffer, $sample);
         }};
     }
     match decoded {
@@ -231,7 +256,149 @@ fn convert(decoded: GenericAudioBufferRef<'_>, output: &mut [Vec<f64>]) {
                 / 8_388_608.)
         }
         GenericAudioBufferRef::S32(v) => planes!(v, |&s| f64::from(s) / 2_147_483_648.),
-        GenericAudioBufferRef::F32(v) => planes!(v, |&s| f64::from(s)),
-        GenericAudioBufferRef::F64(v) => planes!(v, |&s| s),
+        GenericAudioBufferRef::F32(v) => floats!(v, |&s| f64::from(s)),
+        GenericAudioBufferRef::F64(v) => floats!(v, |&s| s),
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn remaining(decoder: &mut Decoder) -> Vec<f64> {
+        let mut block = AudioBlock::new(decoder.info.format).unwrap();
+        let mut samples = Vec::new();
+        while decoder.decode(&mut block).unwrap() {
+            for frame in 0..block.frames {
+                for plane in &block.planes {
+                    samples.push(plane[frame]);
+                }
+            }
+        }
+        samples
+    }
+    #[test]
+    fn repeated_real_nonzero_codec_seeks_reset_remainders_and_trim_to_target() {
+        for extension in ["wav", "flac", "mp3"] {
+            let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(format!("assets/audio/stereo.{extension}"));
+            let mut decoder = Decoder::open(&path).unwrap();
+            let full = remaining(&mut decoder);
+            for milliseconds in [37, 241, 0] {
+                decoder.seek(milliseconds).unwrap();
+                let seeked = remaining(&mut decoder);
+                let first = (milliseconds * 44100).div_ceil(1000) as usize * 2;
+                assert_eq!(
+                    seeked.len(),
+                    full.len() - first,
+                    "{extension} at {milliseconds} ms"
+                );
+                if extension == "mp3" {
+                    let mse = seeked
+                        .iter()
+                        .zip(&full[first..])
+                        .map(|(a, b)| (a - b).powi(2))
+                        .sum::<f64>()
+                        / seeked.len() as f64;
+                    assert!(
+                        mse.sqrt() < 0.01,
+                        "{extension} seek {milliseconds} RMSE {}",
+                        mse.sqrt()
+                    );
+                } else {
+                    assert_eq!(
+                        seeked,
+                        full[first..],
+                        "{extension} seek {milliseconds} exact PCM"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod ownership_bill {
+    use super::*;
+    use crate::{
+        audio::{Token, pipeline::Pipeline},
+        queue::{Track, TrackRef},
+        queue_playback::PlaybackQueue,
+    };
+    #[test]
+    fn actual_decoded_data_owner_capacity_and_requested_allocation_bill() {
+        let mut queue = PlaybackQueue::new().unwrap();
+        queue
+            .append(
+                vec![TrackRef::new(Track {
+                    path: "unused".into(),
+                    title: "bill".into(),
+                    track_id: None,
+                    album_id: None,
+                    available_when_prepared: true,
+                })],
+                &|_| true,
+                &mut |_| 0,
+            )
+            .unwrap();
+        let token = Token {
+            stamp: queue.plan().unwrap().stamp(),
+            revision: 1,
+        };
+        for extension in ["wav", "flac", "mp3"] {
+            let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(format!("assets/audio/stereo.{extension}"));
+            let mut warm = Decoder::open(&path).unwrap();
+            let mut block = AudioBlock::new(warm.info.format).unwrap();
+            while warm.decode(&mut block).unwrap() {}
+            drop((warm, block));
+            let mut live = None;
+            let allocations = allocation_counter::measure(|| {
+                let mut decoder = Decoder::open(&path).unwrap();
+                let mut blocks = (0..3)
+                    .map(|_| AudioBlock::new(decoder.info.format).unwrap())
+                    .collect::<Vec<_>>();
+                let mut pipeline = Pipeline::new(
+                    decoder.info.format,
+                    Format {
+                        rate: 48000,
+                        channels: 2,
+                    },
+                    token,
+                    0,
+                )
+                .unwrap();
+                while decoder.decode(&mut blocks[0]).unwrap() {
+                    let mut offset = 0;
+                    while offset < blocks[0].frames {
+                        pipeline.feed(&blocks[0], &mut offset).unwrap();
+                        pipeline.accepted((pipeline.pending.len() - pipeline.offset) / 2);
+                        let _ = pipeline.take_started();
+                    }
+                }
+                while !pipeline.finish().unwrap() {
+                    pipeline.accepted((pipeline.pending.len() - pipeline.offset) / 2);
+                }
+                live = Some((decoder, blocks, pipeline));
+            });
+            let (decoder, blocks, pipeline) = live.as_ref().unwrap();
+            println!(
+                "AUDIO_DATA_OWNER {extension} {allocations:?}; actual decoder+3 blocks+pipeline, excludes leases/transport/service/threads/backend"
+            );
+            println!(
+                "AUDIO_CAPACITIES {extension} packet_planes={:?} block_headers_cap={} block_planes={:?}",
+                decoder.packet.iter().map(Vec::capacity).collect::<Vec<_>>(),
+                blocks.capacity(),
+                blocks
+                    .iter()
+                    .flat_map(|block| block.planes.iter().map(Vec::capacity))
+                    .collect::<Vec<_>>()
+            );
+            pipeline.print_capacity_bill(extension);
+            let retirement = allocation_counter::measure(|| drop(live.take()));
+            println!("AUDIO_DATA_OWNER_DROP {extension} {retirement:?}");
+            assert_eq!(allocations.count_current + retirement.count_current, 0);
+            assert_eq!(allocations.bytes_current + retirement.bytes_current, 0);
+        }
     }
 }

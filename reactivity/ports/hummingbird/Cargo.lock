@@ -1182,11 +1182,13 @@ dependencies = [
  "fastrand",
  "gpui",
  "nucleo-matcher",
+ "realfft",
  "rtrb",
  "rubato",
  "rusqlite",
  "symphonia",
  "triomphe",
+ "windowfunctions",
 ]
 
 [[package]]

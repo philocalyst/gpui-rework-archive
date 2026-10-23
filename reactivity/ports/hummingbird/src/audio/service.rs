@@ -239,8 +239,8 @@ impl AudioService {
             .closed
             .store(true, Ordering::Release);
         self.handle.shared.owner.unpark();
-        let deadline = Instant::now() + timeout;
-        while !self.thread.as_ref().unwrap().is_finished() && Instant::now() < deadline {
+        let started = Instant::now();
+        while !self.thread.as_ref().unwrap().is_finished() && started.elapsed() < timeout {
             thread::sleep(Duration::from_millis(1));
         }
         if self.thread.as_ref().unwrap().is_finished() {
@@ -617,5 +617,40 @@ impl<P: OutputProvider> Owner<P> {
         }
         self.shared.gate.0.closed.store(true, Ordering::Release);
         // Output and decoder ownership are destroyed here, never by Window drop.
+    }
+}
+
+#[cfg(all(test, feature = "cpal-output"))]
+mod tests {
+    use super::*;
+    use std::mem::size_of;
+    #[test]
+    fn actual_audio_owner_header_bill() {
+        println!(
+            "AUDIO_HEADERS service={} handle={} shared={} intent={} token={} receipt={} event={} block={} pipeline={} media={} cpal_stream={} owner_cpal={}",
+            size_of::<AudioService>(),
+            size_of::<AudioHandle>(),
+            size_of::<Shared>(),
+            size_of::<Intent>(),
+            size_of::<Token>(),
+            size_of::<Receipt>(),
+            size_of::<Event>(),
+            size_of::<AudioBlock>(),
+            size_of::<Pipeline>(),
+            size_of::<Media>(),
+            size_of::<super::super::cpal::CpalStream>(),
+            size_of::<Owner<super::super::cpal::CpalProvider>>()
+        );
+    }
+    #[test]
+    fn cold_production_constructor_caller_allocation_bill_and_max_timeout() {
+        let mut live = None;
+        let allocations = allocation_counter::measure(|| live = Some(AudioService::new().unwrap()));
+        println!(
+            "AUDIO_COLD_CPAL_CONSTRUCTOR_CALLER_THREAD {allocations:?}; excludes control/decoder allocation and OS stacks"
+        );
+        let (service, inbox) = live.unwrap();
+        drop(inbox);
+        assert!(service.finish(Duration::MAX));
     }
 }

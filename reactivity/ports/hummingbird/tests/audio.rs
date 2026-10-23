@@ -28,6 +28,7 @@ struct Provider {
     capture: Arc<Mutex<Capture>>,
     frames: usize,
     rate: Option<u32>,
+    channels: Option<u16>,
 }
 struct Sink {
     capture: Arc<Mutex<Capture>>,
@@ -49,7 +50,7 @@ impl OutputProvider for Provider {
             frames: self.frames,
             format: Format {
                 rate: self.rate.unwrap_or(source.rate),
-                ..source
+                channels: self.channels.unwrap_or(source.channels),
             },
             gate,
             epoch,
@@ -128,11 +129,20 @@ fn owner(
     frames: usize,
     rate: Option<u32>,
 ) -> (AudioService, Arc<Mutex<Capture>>, AudioWin) {
+    owner_format(tracks, frames, rate, None)
+}
+fn owner_format(
+    tracks: Vec<TrackRef>,
+    frames: usize,
+    rate: Option<u32>,
+    channels: Option<u16>,
+) -> (AudioService, Arc<Mutex<Capture>>, AudioWin) {
     let capture = Arc::new(Mutex::new(Capture::default()));
     let (service, inbox) = AudioService::with_output(Provider {
         capture: capture.clone(),
         frames,
         rate,
+        channels,
     })
     .unwrap();
     let mut screen = QueueScreen::new(ListId::new(5000)).unwrap();
@@ -230,23 +240,27 @@ fn source_eof_is_not_application_output_drain() {
 struct Wave(PathBuf);
 impl Wave {
     fn new(rate: u32, samples: impl Iterator<Item = i16>) -> Self {
-        let samples: Vec<i16> = samples.collect();
-        let bytes = (samples.len() * 2) as u32;
+        Self::pcm(rate, 1, 1, 16, samples.flat_map(i16::to_le_bytes).collect())
+    }
+    fn pcm(rate: u32, channels: u16, codec: u16, bits: u16, samples: Vec<u8>) -> Self {
+        let bytes = samples.len() as u32;
+        let alignment = channels * bits / 8;
         let mut data = Vec::new();
         data.extend_from_slice(b"RIFF");
-        data.extend_from_slice(&(bytes + 36).to_le_bytes());
+        data.extend_from_slice(&(bytes + bytes % 2 + 36).to_le_bytes());
         data.extend_from_slice(b"WAVEfmt ");
         data.extend_from_slice(&16u32.to_le_bytes());
-        data.extend_from_slice(&1u16.to_le_bytes());
-        data.extend_from_slice(&1u16.to_le_bytes());
+        data.extend_from_slice(&codec.to_le_bytes());
+        data.extend_from_slice(&channels.to_le_bytes());
         data.extend_from_slice(&rate.to_le_bytes());
-        data.extend_from_slice(&(rate * 2).to_le_bytes());
-        data.extend_from_slice(&2u16.to_le_bytes());
-        data.extend_from_slice(&16u16.to_le_bytes());
+        data.extend_from_slice(&(rate * u32::from(alignment)).to_le_bytes());
+        data.extend_from_slice(&alignment.to_le_bytes());
+        data.extend_from_slice(&bits.to_le_bytes());
         data.extend_from_slice(b"data");
         data.extend_from_slice(&bytes.to_le_bytes());
-        for sample in samples {
-            data.extend_from_slice(&sample.to_le_bytes());
+        data.extend(samples);
+        if !bytes.is_multiple_of(2) {
+            data.push(0);
         }
         let path = std::env::temp_dir().join(format!(
             "hummingbird-audio-{}-{}.wav",
@@ -311,7 +325,10 @@ fn latest_equal_stamp_lookahead_controls_the_real_next_source() {
 }
 #[test]
 fn paused_seek_and_stop_follow_public_controls() {
-    let source = Wave::new(8000, (0..100_000).map(|index| (index / 1000) as i16));
+    let source = Wave::new(
+        8000,
+        (0..100_000).map(|index| (index % 30001 - 15000) as i16),
+    );
     let (service, capture, mut win) = owner(vec![track(&source.0, "seek")], 32, None);
     until(&mut win, &capture, false, |model| {
         model.audio_status().unwrap().state == AudioState::Playing
@@ -322,6 +339,9 @@ fn paused_seek_and_stop_follow_public_controls() {
         model.audio_status().unwrap().state == AudioState::Paused
             && model.audio_status().unwrap().position_ms >= 10_000
     });
+    let seek_position = win
+        .with_model(|model| model.audio_status().unwrap().position_ms)
+        .unwrap();
     assert!(capture.lock().unwrap().queue.is_empty());
     win.activate(win.button("Resume")).unwrap();
     until(&mut win, &capture, false, |_| {
@@ -329,7 +349,7 @@ fn paused_seek_and_stop_follow_public_controls() {
     });
     assert_eq!(
         *capture.lock().unwrap().queue.front().unwrap(),
-        80. / 32768.
+        ((seek_position * 8 % 30001) as i32 - 15000) as f64 / 32768.
     );
     win.activate(win.button("Stop")).unwrap();
     assert!(
@@ -615,8 +635,7 @@ fn old_seek_eof_failure_and_started_events_cannot_revive_stopped_or_new_audio() 
 #[test]
 fn concrete_stream_can_be_non_send_and_is_opened_and_dropped_on_control_owner() {
     use std::{
-        cell::Cell,
-        rc::Rc,
+        marker::PhantomData,
         thread::{self, ThreadId},
     };
     type Calls = Arc<Mutex<Vec<(&'static str, ThreadId)>>>;
@@ -624,7 +643,7 @@ fn concrete_stream_can_be_non_send_and_is_opened_and_dropped_on_control_owner() 
     struct AffineStream {
         calls: Calls,
         format: Format,
-        _not_send: Rc<Cell<usize>>,
+        _not_send: PhantomData<*mut ()>,
     }
     impl OutputProvider for AffineProvider {
         type Stream = AffineStream;
@@ -641,7 +660,7 @@ fn concrete_stream_can_be_non_send_and_is_opened_and_dropped_on_control_owner() 
             Ok(AffineStream {
                 calls: self.0.clone(),
                 format,
-                _not_send: Rc::new(Cell::new(0)),
+                _not_send: PhantomData,
             })
         }
     }
@@ -699,11 +718,298 @@ fn cold_service_does_not_open_output_and_explicit_close_finishes_owner() {
         capture: capture.clone(),
         frames: 31,
         rate: None,
+        channels: None,
     })
     .unwrap();
     // No Plan, stream, device or PCM queue is admitted by service construction.
     drop(inbox);
-    assert!(service.finish(Duration::from_secs(1)));
+    assert!(service.finish(Duration::MAX));
     assert_eq!(capture.lock().unwrap().opens, 0);
     assert_eq!(capture.lock().unwrap().drops, 0);
+}
+
+#[test]
+fn real_pcm_decoder_preserves_unsigned_8_signed_24_32_and_float_precision() {
+    let integers: Vec<i32> = (0..514)
+        .map(|i| {
+            [
+                i32::MIN,
+                i32::MIN + 1,
+                -16777217,
+                -8388609,
+                -32769,
+                -1,
+                0,
+                1,
+                32769,
+                8388609,
+                16777217,
+                i32::MAX - 1,
+                i32::MAX,
+            ][i % 13]
+        })
+        .collect();
+    let pcm24: Vec<i32> = (0..514)
+        .map(|i| {
+            [
+                -8388608, -8388607, -32769, -1, 0, 1, 32769, 8388606, 8388607,
+            ][i % 9]
+        })
+        .collect();
+    let float: Vec<f64> = (0..514)
+        .map(|i| {
+            [
+                -1.,
+                -0.75,
+                -0.000000000123456789,
+                0.,
+                0.125,
+                0.5,
+                0.9999999999999,
+            ][i % 7]
+        })
+        .collect();
+    let cases = [
+        (
+            1,
+            8,
+            (0..514)
+                .map(|i| [0u8, 1, 127, 128, 129, 254, 255][i % 7])
+                .collect::<Vec<_>>(),
+            (0..514)
+                .map(|i| (f64::from([0u8, 1, 127, 128, 129, 254, 255][i % 7]) - 128.) / 128.)
+                .collect::<Vec<_>>(),
+        ),
+        (
+            1,
+            24,
+            pcm24
+                .iter()
+                .flat_map(|value| value.to_le_bytes()[..3].to_vec())
+                .collect(),
+            pcm24
+                .iter()
+                .map(|value| f64::from(*value) / 8388608.)
+                .collect(),
+        ),
+        (
+            1,
+            32,
+            integers
+                .iter()
+                .flat_map(|value| value.to_le_bytes())
+                .collect(),
+            integers
+                .iter()
+                .map(|value| f64::from(*value) / 2147483648.)
+                .collect(),
+        ),
+        (
+            3,
+            32,
+            float
+                .iter()
+                .flat_map(|value| (*value as f32).to_le_bytes())
+                .collect(),
+            float.iter().map(|value| f64::from(*value as f32)).collect(),
+        ),
+        (
+            3,
+            64,
+            float.iter().flat_map(|value| value.to_le_bytes()).collect(),
+            float,
+        ),
+    ];
+    for (codec, bits, bytes, expected) in cases {
+        let source = Wave::pcm(44100, 2, codec, bits, bytes);
+        let (service, capture, mut win) = owner(vec![track(&source.0, "PCM precision")], 31, None);
+        until(&mut win, &capture, true, |model| {
+            model.audio_status().unwrap().state == AudioState::Finished
+        });
+        assert_eq!(
+            capture.lock().unwrap().samples,
+            expected,
+            "codec {codec} bits {bits}"
+        );
+        finish(service, win);
+    }
+}
+
+#[test]
+fn natural_resampled_join_preserves_fft_history_and_rate_change_preserves_both_tails() {
+    for next_rate in [8000, 11025] {
+        let first_values: Vec<i16> = (0..169).map(|i| (i * 53 - 10000) as i16).collect();
+        let next_values: Vec<i16> = (0..257).map(|i| (8000 - i * 31) as i16).collect();
+        let first = Wave::new(8000, first_values.iter().copied());
+        let next = Wave::new(next_rate, next_values.iter().copied());
+        let reference = if next_rate == 8000 {
+            let combined = Wave::new(8000, first_values.iter().chain(&next_values).copied());
+            let (service, capture, mut win) =
+                owner(vec![track(&combined.0, "combined")], 31, Some(44100));
+            until(&mut win, &capture, true, |model| {
+                model.audio_status().unwrap().state == AudioState::Finished
+            });
+            let samples = capture.lock().unwrap().samples.clone();
+            finish(service, win);
+            samples
+        } else {
+            let mut samples = Vec::new();
+            for source in [&first, &next] {
+                let (service, capture, mut win) =
+                    owner(vec![track(&source.0, "independent")], 31, Some(44100));
+                until(&mut win, &capture, true, |model| {
+                    model.audio_status().unwrap().state == AudioState::Finished
+                });
+                samples.extend_from_slice(&capture.lock().unwrap().samples);
+                finish(service, win);
+            }
+            samples
+        };
+        let (service, capture, mut win) = owner(
+            vec![track(&first.0, "first"), track(&next.0, "next")],
+            31,
+            Some(44100),
+        );
+        until(&mut win, &capture, true, |model| {
+            model.audio_status().unwrap().state == AudioState::Finished
+        });
+        assert_eq!(
+            capture.lock().unwrap().opens,
+            1,
+            "natural advance preserves output stream"
+        );
+        assert_eq!(
+            capture.lock().unwrap().samples,
+            reference,
+            "natural {next_rate} Hz successor"
+        );
+        finish(service, win);
+    }
+}
+
+#[test]
+fn hostile_float_pcm_is_rejected_before_downmix_resampler_or_output_admission() {
+    for bits in [32, 64] {
+        for value in [
+            f64::NAN,
+            f64::NEG_INFINITY,
+            f64::INFINITY,
+            f64::MAX,
+            -f64::MAX,
+            16.5,
+            -16.5,
+        ] {
+            let bytes = if bits == 32 {
+                std::iter::repeat_n(value as f32, 514)
+                    .flat_map(f32::to_le_bytes)
+                    .collect()
+            } else {
+                std::iter::repeat_n(value, 514)
+                    .flat_map(f64::to_le_bytes)
+                    .collect()
+            };
+            let source = Wave::pcm(8000, 2, 3, bits, bytes);
+            let (service, capture, mut win) = owner_format(
+                vec![track(&source.0, "hostile float")],
+                31,
+                Some(48000),
+                Some(1),
+            );
+            until(&mut win, &capture, true, |model| {
+                model.audio_status().unwrap().state == AudioState::Failed
+            });
+            assert!(win.contains_text("decoder: invalid float PCM").unwrap());
+            assert!(
+                capture.lock().unwrap().samples.is_empty(),
+                "{bits}-bit {value:?} reached output"
+            );
+            assert!(capture.lock().unwrap().queue.is_empty());
+            finish(service, win);
+        }
+    }
+    let headroom = [16f64, 16., -2., -2., 0.25, 0.75];
+    let source = Wave::pcm(
+        8000,
+        2,
+        3,
+        64,
+        headroom.into_iter().flat_map(f64::to_le_bytes).collect(),
+    );
+    let (service, capture, mut win) =
+        owner_format(vec![track(&source.0, "valid headroom")], 31, None, Some(1));
+    until(&mut win, &capture, true, |model| {
+        model.audio_status().unwrap().state == AudioState::Finished
+    });
+    assert_eq!(
+        capture.lock().unwrap().samples,
+        [16., -2., 0.5],
+        "valid float headroom is preserved before device conversion"
+    );
+    finish(service, win);
+}
+
+#[test]
+fn hostile_successor_preserves_only_the_preceding_valid_resampled_tail() {
+    let first = Wave::new(8000, (0..169).map(|i| (i * 53 - 10000) as i16));
+    let (service, capture, mut win) = owner(vec![track(&first.0, "valid")], 31, Some(48000));
+    until(&mut win, &capture, true, |model| {
+        model.audio_status().unwrap().state == AudioState::Finished
+    });
+    let expected = capture.lock().unwrap().samples.clone();
+    finish(service, win);
+    for bad in [f64::NAN, f64::INFINITY, f64::MAX] {
+        let next = Wave::pcm(
+            8000,
+            1,
+            3,
+            64,
+            std::iter::repeat_n(bad, 257)
+                .flat_map(f64::to_le_bytes)
+                .collect(),
+        );
+        let (service, capture, mut win) = owner(
+            vec![track(&first.0, "valid"), track(&next.0, "invalid")],
+            31,
+            Some(48000),
+        );
+        until(&mut win, &capture, true, |model| {
+            model.audio_status().unwrap().state == AudioState::Failed
+        });
+        until(&mut win, &capture, true, |_| {
+            capture.lock().unwrap().samples.len() == expected.len()
+        });
+        assert_eq!(capture.lock().unwrap().samples, expected);
+        assert!(
+            capture
+                .lock()
+                .unwrap()
+                .samples
+                .iter()
+                .all(|sample| sample.is_finite())
+        );
+        assert!(win.contains_text("decoder: invalid float PCM").unwrap());
+        finish(service, win);
+    }
+}
+
+#[test]
+fn unusual_coprime_rates_fail_resource_admission_before_pcm_output() {
+    for (source_rate, output_rate) in [(44101, 48000), (767999, 768000)] {
+        let source = Wave::new(source_rate, (0..257).map(|i| (i * 7) as i16));
+        let (service, capture, mut win) = owner(
+            vec![track(&source.0, "unsupported rate pair")],
+            31,
+            Some(output_rate),
+        );
+        until(&mut win, &capture, true, |model| {
+            model.audio_status().unwrap().state == AudioState::Failed
+        });
+        assert!(
+            win.contains_text("unsupported FFT rate-pair resource limit")
+                .unwrap()
+        );
+        assert!(capture.lock().unwrap().samples.is_empty());
+        assert!(capture.lock().unwrap().queue.is_empty());
+        finish(service, win);
+    }
 }
