@@ -342,7 +342,8 @@ fn a_committed_prefix_revokes_a_ready_answer_before_returning_a_later_binding_er
             Panel::LEFT,
             String::clone,
             move |input, completion: Completion<usize, std::io::Error>| {
-                send.send((input, completion)).map_err(|_| StartError::Closed)
+                send.send((input, completion))
+                    .map_err(|_| StartError::Closed)
             },
         )
         .unwrap();
@@ -372,7 +373,10 @@ fn a_committed_prefix_revokes_a_ready_answer_before_returning_a_later_binding_er
     assert_eq!(failure.delivery.unwrap().applied, 1);
     assert_eq!(&**win.read(Panel::LEFT).unwrap(), "changed");
     assert_eq!(win.with_ready(reader, |value| *value).unwrap(), None);
-    assert_eq!(win.question_status(reader).unwrap(), gpui::QuestionStatus::Pending);
+    assert_eq!(
+        win.question_status(reader).unwrap(),
+        gpui::QuestionStatus::Pending
+    );
     let (input, completion) = jobs.recv_timeout(Duration::from_secs(3)).unwrap();
     assert_eq!(input, "changed");
     completion.complete(Ok(7)).unwrap();

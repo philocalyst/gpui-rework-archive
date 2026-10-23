@@ -35,17 +35,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
         }
-        if let Err(error) = result {
-            // A rejected projector may precede every callback. Preserve the
-            // coherent sheet and input in that case; an applied prefix instead
-            // commits source authority and revokes its old logical addresses.
-            if models != 0 {
-                self.runtime.clear_editing();
-                self.runtime.logical_valid = false;
-                self.runtime.focused = None;
-            }
-            return Err(error);
-        }
+        let rejected = result.is_err();
         let mut questions = 0;
         let result = match catch_unwind(AssertUnwindSafe(|| {
             if models != 0 {
@@ -55,6 +45,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     crate::reader::question::Change::Source(exact),
                 )?;
             }
+            // An accepted prefix supersedes old answers even when a later
+            // callback is rejected. Refresh before returning that rejection;
+            // leave frozen completions for a later bounded continuation.
+            result?;
             self.lanes.apply_questions(
                 &self.runtime.model,
                 &self.runtime.sources,
@@ -75,8 +69,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.counters.source_operations += 1;
         }
         if let Err(error) = result {
-            self.runtime.logical_valid = false;
-            self.runtime.focused = None;
+            // A projector rejection before every callback leaves the coherent
+            // input untouched. Applied prefixes revoke their logical addresses.
+            if !rejected || models != 0 {
+                self.runtime.clear_editing();
+                self.runtime.logical_valid = false;
+                self.runtime.focused = None;
+            }
             return Err(error);
         }
         if *applied == 0 {
