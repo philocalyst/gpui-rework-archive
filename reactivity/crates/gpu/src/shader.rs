@@ -1,6 +1,5 @@
 //! A single fullscreen pass composites ordered tile records in linear light.
-//! Sample-major evaluation keeps two vec4 accumulators rather than sixteen
-//! live sample colors. It needs neither an MSAA image nor a float intermediate.
+//! Four samples share each draw decode, with no MSAA image or float intermediate.
 #[wgsl_rs::wgsl]
 pub mod ui {
     use wgsl_rs::std::*;
@@ -41,31 +40,6 @@ pub mod ui {
         bitcast_vec4f(word)
     }
     pub fn load_draw(address: u32) -> Draw {
-        let base = (address & 0x7fffffff) as usize;
-        if (address & 0x80000000) != 0 {
-            return Draw {
-                local: bitcast_vec4f(get!(WORDS)[base]),
-                inverse_x: bitcast_vec4f(get!(WORDS)[base + 1]),
-                inverse_y: bitcast_vec4f(get!(WORDS)[base + 2]),
-                clip: bitcast_vec4f(get!(WORDS)[base + 3]),
-                color: bitcast_vec4f(get!(WORDS)[base + 4]),
-                atlas: get!(WORDS)[base + 5],
-            };
-        }
-        let atlas = get!(WORDS)[base + 1];
-        let state_base = atlas.w as usize;
-        let correction = get!(WORDS)[state_base + 4].x;
-        Draw {
-            local: bitcast_vec4f(get!(WORDS)[base]),
-            inverse_x: bitcast_vec4f(get!(WORDS)[state_base]),
-            inverse_y: bitcast_vec4f(get!(WORDS)[state_base + 1]),
-            clip: bitcast_vec4f(get!(WORDS)[state_base + 2]),
-            color: bitcast_vec4f(get!(WORDS)[state_base + 3]),
-            atlas: vec4u(atlas.x, atlas.y, atlas.z, correction),
-        }
-    }
-
-    pub fn load_banked_draw(address: u32) -> Draw {
         let base = (address & 0x7fffffff) as usize;
         if (address & 0x80000000) != 0 {
             let atlas = get!(WORDS)[base + 5];
@@ -447,67 +421,43 @@ pub mod ui {
         exposed / (vec3f(1.0, 1.0, 1.0) + exposed)
     }
 
-    // Banked scenes decode a draw and its working paint once before the
-    // sixteen sample operations. This deliberately trades sixteen local colors
-    // for the ordinary sample-major path's repeated record/bank loads; it is
-    // not a claim of lower register pressure or universally faster shading.
-    pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
-        let mut colors: [Vec4f; 16] = [
-            clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear,
-            clear, clear, clear, clear,
-        ];
-        #[wgsl_allow(non_literal_loop_bounds)]
-        for cursor in range.x..range.y {
-            let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
-            for y in 0..4 {
-                for x in 0..4 {
-                    let point = position
-                        + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                    let source = sample_draw(draw, point);
-                    let index = (y * 4 + x) as usize;
-                    colors[index] = source + colors[index] * (1.0 - source.w);
-                }
-            }
-        }
-        let anchor = colors[0];
-        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
-        for index in 0..16 {
-            delta += (colors[index as usize] - anchor) * 0.0625;
-        }
-        output(anchor + delta)
-    }
-
     #[fragment]
     pub fn fragment(#[builtin(position)] position: Vec4f) -> Vec4f {
         let globals = get!(GLOBALS);
         let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
         let range = get!(TILES)[tile as usize];
         if (range.y & 0x80000000) != 0 {
-            if (globals.viewport.w & 8) != 0 {
-                return output(load_banked_draw(range.x).color);
-            }
             return output(load_draw(range.x).color);
         }
         if range.x == range.y {
             return output(globals.clear);
         }
-        if (globals.viewport.w & 8) != 0 {
-            return banked_fragment(position.xy(), range, globals.clear);
-        }
         let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
         for y in 0..4 {
-            for x in 0..4 {
-                let point = position.xy()
-                    + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                let mut color = globals.clear;
-                // Host-built CSR ranges are monotone and bounded by INDICES.
-                #[wgsl_allow(non_literal_loop_bounds)]
-                for cursor in range.x..range.y {
-                    let index = get!(INDICES)[cursor as usize];
-                    let source = sample_draw(load_draw(index), point);
-                    color = source + color * (1.0 - source.w);
+            // Both ordinary and banked records use one compositor. Sharing a
+            // decode across a sample row keeps four colors live, rather than
+            // decoding sixteen times or retaining all sixteen sample colors.
+            let mut colors: [Vec4f; 4] = [
+                globals.clear,
+                globals.clear,
+                globals.clear,
+                globals.clear,
+            ];
+            // Host-built CSR ranges are monotone and bounded by INDICES.
+            #[wgsl_allow(non_literal_loop_bounds)]
+            for cursor in range.x..range.y {
+                let draw = load_draw(get!(INDICES)[cursor as usize]);
+                for x in 0..4 {
+                    let point = position.xy()
+                        + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
+                    let source = sample_draw(draw, point);
+                    colors[x as usize] = source + colors[x as usize] * (1.0 - source.w);
                 }
+            }
+            // Keep the original sample-major reduction order and grouping.
+            for x in 0..4 {
+                let color = colors[x as usize];
                 if x == 0 && y == 0 {
                     anchor = color;
                 }

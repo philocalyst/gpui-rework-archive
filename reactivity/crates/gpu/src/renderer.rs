@@ -871,12 +871,7 @@ impl RendererState {
             | tone
             | if hdr { 4 } else { 0 };
         let globals = Globals {
-            viewport: [
-                scene.width,
-                scene.height,
-                columns as u32,
-                mode | if bank_count != 0 { 8 } else { 0 },
-            ],
+            viewport: [scene.width, scene.height, columns as u32, mode],
             clear: scene.clear,
             mapping: [exposure, 0.0, 0.0, 0.0],
         };
