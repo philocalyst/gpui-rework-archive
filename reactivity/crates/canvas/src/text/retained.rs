@@ -38,8 +38,8 @@ impl<T> TryFrom<Vec<T>> for RetainedSlice<T> {
     }
 }
 
+#[cfg(test)]
 impl<T> RetainedSlice<T> {
-    #[cfg(test)]
     pub fn capacity(&self) -> usize {
         self.capacity as usize
     }
