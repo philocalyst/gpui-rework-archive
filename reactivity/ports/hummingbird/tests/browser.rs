@@ -51,6 +51,19 @@ fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_wi
             .unwrap(),
         [10, 20, 40, 30]
     );
+    assert_eq!(
+        win.with_ready(result, |page| page
+            .collections
+            .rows
+            .iter()
+            .find(|row| row.id == 40)
+            .unwrap()
+            .detail
+            .clone())
+            .unwrap()
+            .unwrap(),
+        "Guest"
+    );
     win.activate(win.button("Open Album")).unwrap();
     settle(&mut win, &worker).unwrap();
     assert_eq!(ids(&win), [1, 3]);

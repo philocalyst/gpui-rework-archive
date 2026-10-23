@@ -18,9 +18,6 @@ pub(crate) fn page(
     input: Arc<Input>,
     cancelled: impl FnMut() -> bool,
 ) -> Option<Result<Page, SourceError>> {
-    if input.query.len() > crate::search::MAX_QUERY_BYTES {
-        return Some(Err(SourceError::QueryTooLong));
-    }
     let _snapshot = match database.connection().unchecked_transaction() {
         Ok(snapshot) => snapshot,
         Err(error) => return Some(Err(error.into())),
@@ -33,6 +30,9 @@ fn read_page(
     input: Arc<Input>,
     mut cancelled: impl FnMut() -> bool,
 ) -> Option<Result<Page, SourceError>> {
+    if input.query.len() > crate::search::MAX_QUERY_BYTES {
+        return Some(Err(SourceError::QueryTooLong));
+    }
     if cancelled() {
         return None;
     }
@@ -53,69 +53,17 @@ fn read_page(
             route => Some(route.label().to_owned()),
         }
         .ok_or(SourceError::MissingCollection)?;
-        let mut rows = TrackRows {
-            input: input.clone(),
-            rows: Vec::new(),
-            playlist_items: Vec::new(),
+        let Some(rows) = read_tracks(database, searcher, input.clone(), &mut cancelled) else {
+            return Ok(None);
         };
+        let rows = rows?;
         let mut collections = Collections {
             input: input.clone(),
             rows: Vec::new(),
         };
-        match input.route {
-            Route::Tracks | Route::Album(_) | Route::Artist(_) => {
-                let base = match input.route {
-                    Route::Album(id) => tracks().from_album(id),
-                    Route::Artist(id) => tracks().from_artist(id),
-                    _ => tracks(),
-                };
-                let query = ordered(base, &input);
-                let Some(page) =
-                    searcher.search_rows(database, &input.search, query, &mut cancelled)
-                else {
-                    return Ok(None);
-                };
-                rows.rows = page?;
-            }
-            Route::Playlist(id) => {
-                let order = match input.sort {
-                    Sort::Title => "playlist_item.position ASC, playlist_item.id ASC",
-                    Sort::Artist => {
-                        "COALESCE(album.artist_sort, track.artist_sort, track.artist_names) COLLATE NOCASE ASC, track.title_sortable ASC, playlist_item.id ASC"
-                    }
-                    Sort::Longest => {
-                        "track.duration DESC, track.title_sortable COLLATE NOCASE ASC, playlist_item.id ASC"
-                    }
-                };
-                let sql = format!(
-                    "SELECT track.id,track.title,track.artist_names,track.album_id,playlist_item.id FROM playlist_item JOIN track ON track.id=playlist_item.track_id LEFT JOIN album ON album.id=track.album_id WHERE playlist_item.playlist_id=? ORDER BY {order}"
-                );
-                let pattern =
-                    Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
-                let mut statement = connection.prepare(&sql)?;
-                let mut cursor = statement.query([id])?;
-                while let Some(row) = cursor.next()? {
-                    if cancelled() {
-                        return Ok(None);
-                    }
-                    let title = row.get_ref(1)?.as_str().map_err(text_error)?;
-                    let artist = row.get_ref(2)?.as_str_or_null().map_err(text_error)?;
-                    if searcher.matches(&pattern, title, artist) {
-                        rows.rows.push(TrackSearchRow {
-                            id: row.get(0)?,
-                            title: title.to_owned(),
-                            artist_names: artist.map(str::to_owned),
-                            album_id: row.get(3)?,
-                        });
-                        rows.playlist_items.push(row.get(4)?);
-                    }
-                }
-            }
-            _ => {}
-        }
         let collection_query = match input.route {
             Route::Albums | Route::Artist(_) => Some((
-                "SELECT album.id,album.title,COALESCE((SELECT GROUP_CONCAT(artist.name, ', ') FROM album_artist JOIN artist ON artist.id=album_artist.artist_id WHERE album_artist.album_id=album.id),'Unknown artist') FROM album",
+                "SELECT album.id,album.title,COALESCE(NULLIF(album.artist_display_override,''),(SELECT GROUP_CONCAT(artist.name, ', ') FROM album_artist JOIN artist ON artist.id=album_artist.artist_id WHERE album_artist.album_id=album.id),'Unknown artist') FROM album",
                 "album.title_sortable COLLATE NOCASE ASC,album.id ASC",
                 0,
             )),
@@ -185,6 +133,84 @@ fn read_page(
     }
 }
 use rusqlite::OptionalExtension;
+fn read_tracks(
+    database: &Database,
+    searcher: &mut Searcher,
+    input: Arc<Input>,
+    mut cancelled: impl FnMut() -> bool,
+) -> Option<Result<TrackRows, SourceError>> {
+    if input.query.len() > crate::search::MAX_QUERY_BYTES {
+        return Some(Err(SourceError::QueryTooLong));
+    }
+    if cancelled() {
+        return None;
+    }
+    let result = (|| {
+        let connection = database.connection();
+        let mut rows = TrackRows {
+            input: input.clone(),
+            rows: Vec::new(),
+            playlist_items: Vec::new(),
+        };
+        match input.route {
+            Route::Tracks | Route::Album(_) | Route::Artist(_) => {
+                let base = match input.route {
+                    Route::Album(id) => tracks().from_album(id),
+                    Route::Artist(id) => tracks().from_artist(id),
+                    _ => tracks(),
+                };
+                let query = ordered(base, &input);
+                let Some(page) =
+                    searcher.search_rows(database, &input.search, query, &mut cancelled)
+                else {
+                    return Ok(None);
+                };
+                rows.rows = page?;
+            }
+            Route::Playlist(id) => {
+                let order = match input.sort {
+                    Sort::Title => "playlist_item.position ASC, playlist_item.id ASC",
+                    Sort::Artist => {
+                        "COALESCE(album.artist_sort, track.artist_sort, track.artist_names) COLLATE NOCASE ASC, track.title_sortable ASC, playlist_item.id ASC"
+                    }
+                    Sort::Longest => {
+                        "track.duration DESC, track.title_sortable COLLATE NOCASE ASC, playlist_item.id ASC"
+                    }
+                };
+                let sql = format!(
+                    "SELECT track.id,track.title,track.artist_names,track.album_id,playlist_item.id FROM playlist_item JOIN track ON track.id=playlist_item.track_id LEFT JOIN album ON album.id=track.album_id WHERE playlist_item.playlist_id=? ORDER BY {order}"
+                );
+                let pattern =
+                    Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
+                let mut statement = connection.prepare(&sql)?;
+                let mut cursor = statement.query([id])?;
+                while let Some(row) = cursor.next()? {
+                    if cancelled() {
+                        return Ok(None);
+                    }
+                    let title = row.get_ref(1)?.as_str().map_err(text_error)?;
+                    let artist = row.get_ref(2)?.as_str_or_null().map_err(text_error)?;
+                    if searcher.matches(&pattern, title, artist) {
+                        rows.rows.push(TrackSearchRow {
+                            id: row.get(0)?,
+                            title: title.to_owned(),
+                            artist_names: artist.map(str::to_owned),
+                            album_id: row.get(3)?,
+                        });
+                        rows.playlist_items.push(row.get(4)?);
+                    }
+                }
+            }
+            _ => {}
+        }
+        Ok(Some(rows))
+    })();
+    if cancelled() {
+        None
+    } else {
+        result.transpose()
+    }
+}
 fn ordered(query: TrackQuery, input: &Input) -> TrackQuery {
     match input.sort {
         Sort::Title if matches!(input.route, Route::Album(_)) => {
@@ -203,22 +229,22 @@ pub(crate) fn prepare(
     request: &PlayRequest,
 ) -> Result<PreparedListing, SourceError> {
     let _snapshot = database.connection().unchecked_transaction()?;
-    let page = read_page(database, searcher, request.input.clone(), || false)
+    let rows = read_tracks(database, searcher, request.input.clone(), || false)
         .expect("uncancelled listing")?;
     let start = match request.start {
-        Some(key) => (0..page.rows.len())
-            .find(|i| page.rows.identity(*i) == key)
+        Some(key) => (0..rows.len())
+            .find(|i| rows.identity(*i) == key)
             .ok_or(SourceError::MissingCollection)?,
         None => 0,
     };
-    if page.rows.is_empty() {
+    if rows.is_empty() {
         return Err(SourceError::NoSelection);
     }
-    let mut prepared = Vec::with_capacity(page.rows.len());
+    let mut prepared = Vec::with_capacity(rows.len());
     let mut statement = database
         .connection()
         .prepare("SELECT location FROM track WHERE id=?")?;
-    for row in page.rows.rows {
+    for row in rows.rows {
         let path: String = statement
             .query_row([row.id], |result| result.get(0))
             .optional()?

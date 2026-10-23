@@ -1,6 +1,6 @@
 //! Executable app transcript using only the ordinary public window/service API.
 use crate::{
-    app::{Library, PreparationStatus, connect, recordings, track_key},
+    app::{Library, PreparationStatus, connect, track_key},
     database::Database,
     search::Sort,
     worker::Worker,
@@ -75,7 +75,7 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     settle(&mut win, &worker)?;
     let initial_ids = ids(&win);
     assert_eq!(initial_ids, [1, 13, 11, 21, 3, 2, 90, 44, 1001]);
-    let list = win.list(recordings(Default::default()))?;
+    let list = win.list(win.with_model(Library::recording_list)?)?;
     let realized_rows = win.list_state(list)?.realized_rows;
     assert_eq!(realized_rows, 5);
     assert!(win.inspect()?.nodes.len() < 100);

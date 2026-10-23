@@ -407,6 +407,10 @@ mod tests {
             Err(QueueError::PlanExhausted)
         );
         assert_eq!(
+            player.replace_at(vec![track.clone()], 0, &|_| true, &mut |_| 0),
+            Err(QueueError::PlanExhausted)
+        );
+        assert_eq!(
             player.replace(vec![track], &|_| true, &mut |_| 0),
             Err(QueueError::PlanExhausted)
         );

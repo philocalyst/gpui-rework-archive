@@ -162,11 +162,14 @@ impl Database {
         Ok(())
     }
     pub(crate) fn prepend_fixture_track(&mut self) -> Result<TrackSearchRow> {
+        let transaction = self.connection.unchecked_transaction()?;
         self.insert_track(5000, "A New Arrival", None, Some("New Artist"), 220, None)?;
-        Ok(crate::query::tracks()
+        let row = crate::query::tracks()
             .by_id(5000)
             .for_search()
             .fetch_rows(&self.connection)?
-            .remove(0))
+            .remove(0);
+        transaction.commit()?;
+        Ok(row)
     }
 }

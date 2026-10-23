@@ -10,7 +10,7 @@ use hummingbird_gpui_port::{
     database::Database,
     queue_view::AudioState,
     transcript::settle,
-    worker::Worker,
+    worker::{Selection, Worker},
 };
 use std::{
     collections::VecDeque,
@@ -1280,8 +1280,11 @@ fn context_results_reject_route_filter_selection_source_and_cloned_transport_cha
     for control in [
         "route",
         "filter",
+        "sort",
+        "refresh",
         "selection",
         "source",
+        "import",
         "stop",
         "pause",
         "seek",
@@ -1327,6 +1330,29 @@ fn context_results_reject_route_filter_selection_source_and_cloned_transport_cha
                 win.set(Library::BROWSER.source(&Browser::QUERY), String::new())
                     .unwrap();
             }
+            "sort" => {
+                win.set(
+                    Library::BROWSER.source(&Browser::SORT),
+                    hummingbird_gpui_port::search::Sort::Longest,
+                )
+                .unwrap();
+                win.set(
+                    Library::BROWSER.source(&Browser::SORT),
+                    hummingbird_gpui_port::search::Sort::Title,
+                )
+                .unwrap();
+            }
+            "refresh" => {
+                win.activate(win.button("Refresh")).unwrap();
+            }
+            "import" => {
+                worker
+                    .prepend_fixture_track()
+                    .unwrap()
+                    .recv_timeout(Duration::from_secs(10))
+                    .unwrap()
+                    .unwrap();
+            }
             "selection" => {
                 let mut selected = *win.read(Library::SELECTED).unwrap();
                 selected.id = Some(11);
@@ -1367,7 +1393,299 @@ fn context_results_reject_route_filter_selection_source_and_cloned_transport_cha
             win.with_model(|model| model.preparation_status()).unwrap(),
             PreparationStatus::Pending
         );
-        assert_eq!(capture.lock().unwrap().opened.len(), 1);
+        if control == "seek" {
+            until(&mut win, &capture, false, |_, sink| sink.opened.len() == 2);
+        }
+        assert_eq!(
+            capture.lock().unwrap().opened.len(),
+            if control == "seek" { 2 } else { 1 },
+            "{control} output opens"
+        );
         close(win, audio, worker);
     }
+}
+
+#[test]
+fn published_source_replace_rejects_buffered_named_play_before_owner_notification() {
+    let (worker, audio, capture, _, mut win) = owner();
+    row_prepare(&mut win, 44);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Καλημέρα now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    let replacement = worker
+        .replace_database(database())
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap()
+        .unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    assert_eq!(replacement.generation, 1);
+    assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 0);
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        0,
+        "buffered old-source preparation edited queue after replacement acknowledgement"
+    );
+    assert!(capture.lock().unwrap().opened.is_empty());
+    close(win, audio, worker);
+}
+
+#[test]
+fn published_source_replace_rejects_visible_prepared_enqueue_before_owner_notification() {
+    let (worker, audio, capture, _, mut win) = owner();
+    let prepare = row_prepare(&mut win, 44);
+    win.activate(prepare).unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    worker
+        .replace_database(database())
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap()
+        .unwrap();
+    win.deliver_ready(1).unwrap();
+    assert!(win.with_model(|model| model.prepared().is_some()).unwrap());
+    assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 0);
+    win.activate(win.button("Add prepared recording 44 to queue"))
+        .unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        0,
+        "visible old-source prepared action edited queue after replacement acknowledgement"
+    );
+    assert!(capture.lock().unwrap().opened.is_empty());
+    close(win, audio, worker);
+}
+
+#[test]
+fn source_import_keeps_buffered_existing_named_play_authorized_but_finish_retires_it() {
+    for finish in [false, true] {
+        let (worker, audio, capture, _, mut win) = owner();
+        row_prepare(&mut win, 44);
+        win.activate(
+            win.role(Role::Button)
+                .name("Play Καλημέρα now")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        if finish {
+            worker.finish().unwrap();
+            win.deliver_ready(32).unwrap();
+            assert!(
+                win.with_model(|model| model.queue.playback().queue().is_empty())
+                    .unwrap()
+            );
+            assert!(capture.lock().unwrap().opened.is_empty());
+            drop(win);
+            assert!(audio.finish(Duration::from_secs(2)));
+        } else {
+            worker
+                .prepend_fixture_track()
+                .unwrap()
+                .recv_timeout(Duration::from_secs(10))
+                .unwrap()
+                .unwrap();
+            settle(&mut win, &worker).unwrap();
+            until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
+            assert_eq!(
+                win.with_model(|model| model
+                    .queue
+                    .playback()
+                    .plan()
+                    .unwrap()
+                    .current
+                    .track
+                    .track_id)
+                    .unwrap(),
+                Some(44)
+            );
+            close(win, audio, worker);
+        }
+    }
+}
+
+#[test]
+fn context_play_rejects_prequeued_public_wrong_occurrence_input_sequence_and_pure_prepare_replies()
+{
+    use hummingbird_gpui_port::browser::{PlayRequest, RowKey};
+    for collision in ["occurrence", "input", "sequence", "pure"] {
+        let (worker, audio, capture, _, mut win) =
+            owner_with(Database::collection_fixture().unwrap());
+        let input = playlist(&mut win, &worker);
+        if collision == "pure" {
+            worker
+                .handle()
+                .prepare(Selection {
+                    id: Some(90),
+                    generation: 0,
+                    sequence: 1,
+                })
+                .unwrap();
+        } else {
+            let mut wrong = PlayRequest {
+                input,
+                start: Some(RowKey::PlaylistItem {
+                    item: 701,
+                    track: 90,
+                }),
+                sequence: 1,
+            };
+            match collision {
+                "occurrence" => {
+                    wrong.start = Some(RowKey::PlaylistItem {
+                        item: 703,
+                        track: 11,
+                    })
+                }
+                "input" => {
+                    let mut input = (*wrong.input).clone();
+                    input.search.sort = hummingbird_gpui_port::search::Sort::Longest;
+                    wrong.input = triomphe::Arc::new(input);
+                }
+                "sequence" => wrong.sequence = 2,
+                _ => unreachable!(),
+            }
+            worker.handle().prepare_listing(wrong).unwrap();
+        }
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        win.activate(
+            win.role(Role::Button)
+                .name("Play from Untitled")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        win.deliver_ready(1).unwrap();
+        assert!(
+            win.with_model(|model| model.queue.playback().queue().is_empty())
+                .unwrap(),
+            "{collision} consumed the intent"
+        );
+        assert_eq!(
+            win.with_model(Library::preparation_status).unwrap(),
+            PreparationStatus::Pending
+        );
+        settle(&mut win, &worker).unwrap();
+        until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
+        assert_eq!(
+            win.with_model(|model| model
+                .queue
+                .playback()
+                .plan()
+                .unwrap()
+                .current
+                .track
+                .track_id)
+                .unwrap(),
+            Some(90)
+        );
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().queue().len())
+                .unwrap(),
+            3
+        );
+        close(win, audio, worker);
+    }
+}
+
+#[test]
+fn worker_finish_retires_buffered_context_intent_before_terminal_notification() {
+    let (worker, audio, capture, _, mut win) = owner_with(Database::collection_fixture().unwrap());
+    playlist(&mut win, &worker);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play all Evening Καφέ")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    worker.finish().unwrap();
+    win.deliver_ready(32).unwrap();
+    assert!(
+        win.with_model(|model| model.queue.playback().queue().is_empty())
+            .unwrap()
+    );
+    assert!(capture.lock().unwrap().opened.is_empty());
+    assert_eq!(
+        win.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Failed
+    );
+    assert!(win.contains_text("Library worker closed").unwrap());
+    drop(win);
+    assert!(audio.finish(Duration::from_secs(2)));
+}
+
+#[test]
+fn context_prepare_missing_selected_path_does_not_replace_queue_or_open_output() {
+    let database = Database::collection_fixture().unwrap();
+    database
+        .connection()
+        .execute(
+            "UPDATE track SET location='/missing/context-selected.wav' WHERE id=90",
+            [],
+        )
+        .unwrap();
+    let (worker, audio, capture, _, mut win) = owner_with(database);
+    playlist(&mut win, &worker);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play from Untitled")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Failed
+    );
+    assert!(
+        win.with_model(|model| model.queue.playback().queue().is_empty())
+            .unwrap()
+    );
+    assert!(capture.lock().unwrap().opened.is_empty());
+    assert!(
+        win.contains_text("Recording 90 is no longer available")
+            .unwrap()
+    );
+    close(win, audio, worker);
 }

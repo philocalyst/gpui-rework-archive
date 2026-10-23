@@ -173,12 +173,29 @@ impl View for Browser {
                 .description("Search this collection")
                 .w(650)
                 .h(32),
-            row((
-                button("Title").on_click(Self::SORT.update(|sort| *sort = Sort::Title)),
-                button("Artist").on_click(Self::SORT.update(|sort| *sort = Sort::Artist)),
-                button("Longest first").on_click(Self::SORT.update(|sort| *sort = Sort::Longest)),
-            ))
-            .gap(8),
+            if matches!(
+                self.navigation.current(),
+                Route::Albums | Route::Artists | Route::Playlists
+            ) {
+                text(match self.navigation.current() {
+                    Route::Albums => "Album title order",
+                    Route::Artists => "Artist name order",
+                    _ => "Playlist order",
+                })
+            } else {
+                row((
+                    button(match self.navigation.current() {
+                        Route::Album(_) => "Track order",
+                        Route::Playlist(_) => "Playlist order",
+                        _ => "Title",
+                    })
+                    .on_click(Self::SORT.update(|sort| *sort = Sort::Title)),
+                    button("Artist").on_click(Self::SORT.update(|sort| *sort = Sort::Artist)),
+                    button("Longest first")
+                        .on_click(Self::SORT.update(|sort| *sort = Sort::Longest)),
+                ))
+                .gap(8)
+            },
             text(if self.navigation.exhausted {
                 "Navigation identity space exhausted"
             } else {
@@ -195,6 +212,13 @@ pub struct Input {
     pub search: SearchInput,
 }
 impl Input {
+    pub fn sort_label(&self) -> &'static str {
+        match (self.route, self.sort) {
+            (Route::Album(_), Sort::Title) => "Track order",
+            (Route::Playlist(_), Sort::Title) => "Playlist order",
+            _ => self.sort.label(),
+        }
+    }
     pub fn freeze(
         navigation: &Navigation,
         query: &str,
@@ -360,5 +384,21 @@ impl ItemSource for Collections {
             text(item.detail.as_str()).w(330),
         ))
         .h(32)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn navigation_domain_exhaustion_keeps_current_route_and_never_reuses_a_new_identity() {
+        let mut navigation = Navigation::new();
+        navigation.domain = u64::MAX - 2;
+        let old = navigation.track_list();
+        navigation.navigate(Route::Albums);
+        assert!(navigation.exhausted);
+        assert_eq!(navigation.current(), Route::Tracks);
+        assert_eq!(navigation.track_list(), old);
+        assert_eq!(navigation.len(), 1);
     }
 }

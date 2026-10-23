@@ -271,11 +271,20 @@ impl Library {
                     }
                     Ok(listing) => {
                         #[cfg(feature = "audio")]
-                        match self.queue.play_listing_if(listing, revision) {
-                            Ok(true) => {
+                        match self.worker.with_current_version(request.input.version, || {
+                            self.queue.play_listing_if(listing, revision)
+                        }) {
+                            Ok(Some(Ok(true))) => {
                                 self.preparation = Preparation::ListingPlayed { request, edits }
                             }
-                            Ok(false) => {}
+                            Ok(Some(Ok(false))) | Ok(None) => {}
+                            Ok(Some(Err(error))) => {
+                                self.preparation = Preparation::ListingFailed {
+                                    request,
+                                    edits,
+                                    error: error.to_string(),
+                                }
+                            }
                             Err(error) => {
                                 self.preparation = Preparation::ListingFailed {
                                     request,
@@ -336,9 +345,18 @@ impl Library {
                         self.preparation = Preparation::Canceled;
                         #[cfg(feature = "audio")]
                         if let Some(revision) = play_revision {
-                            match self.queue.play_now_if(&track, revision) {
-                                Ok(true) => {}
-                                Ok(false) => return,
+                            match self.worker.with_current_source(selection.generation, || {
+                                self.queue.play_now_if(&track, revision)
+                            }) {
+                                Ok(Some(Ok(true))) => {}
+                                Ok(Some(Ok(false))) | Ok(None) => return,
+                                Ok(Some(Err(error))) => {
+                                    self.preparation = Preparation::Failed {
+                                        selection,
+                                        error: error.to_string(),
+                                    };
+                                    return;
+                                }
                                 Err(error) => {
                                     self.preparation = Preparation::Failed {
                                         selection,
@@ -408,7 +426,14 @@ impl Library {
     }
     fn enqueue(&mut self, track: TrackRef, selection: Selection) {
         if self.current_selection(selection) {
-            self.queue.enqueue(track);
+            match self
+                .worker
+                .with_current_source(selection.generation, || self.queue.enqueue(track))
+            {
+                Ok(Some(())) => {}
+                Ok(None) => self.notice = "The library source changed".into(),
+                Err(error) => self.notice = error.to_string(),
+            }
         } else {
             self.notice = "This prepared recording is no longer the current selection".into();
         }
@@ -483,8 +508,8 @@ pub fn connect(
             preparation: Preparation::Empty,
             worker: handle,
             issued: 0,
-            // Search generations use generation+1; this one stable queue owns
-            // the reserved zero domain and survives database replacement.
+            // Navigation domains are nonzero; this stable queue owns zero
+            // and survives database replacement.
             queue: QueueScreen::new(ListId::new(0)).map_err(|_| QuestionFault::Exhausted)?,
             notice: String::new(),
         },
@@ -494,9 +519,6 @@ pub fn connect(
 
 pub fn track_key(id: i64) -> ItemKey {
     ItemKey::new(id as u64)
-}
-pub fn recordings(version: Version) -> ListId {
-    ListId::new(version.generation + 1)
 }
 
 impl View for Library {
@@ -550,7 +572,7 @@ impl View for Library {
                             "{} recordings for ‘{}’ — {}",
                             page.rows.len(),
                             page.input.query,
-                            page.input.sort.label()
+                            page.input.sort_label()
                         )
                     };
                     column((
