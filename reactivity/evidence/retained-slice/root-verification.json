@@ -1,0 +1,15 @@
+{
+  "source": "0fc39c500c44f3059095975d0de4749815a3ef18",
+  "payloads_reopened": 240,
+  "payload_bytes": 150056,
+  "guarded_gate_records": 26,
+  "stable_passed": 9,
+  "strict_passed": true,
+  "final_miri_target_models": 6,
+  "final_miri_passed": 42,
+  "actual_ub_controls": 2,
+  "archive_bytes": 25169,
+  "archive_sha256": "5c854908be564406a54fdc64aca9d46a93faf0e897737463fe6eff01eda2bec1",
+  "production_adopted": false,
+  "scope": "Standalone allocation ownership, not application performance, full GPUI behavior or production integration."
+}

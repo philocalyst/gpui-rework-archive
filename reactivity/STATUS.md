@@ -200,6 +200,12 @@ but remains unadopted because target-byte portability, equality and actual
 application/code costs need resolution. Neither result establishes a new
 runtime speed claim.
 
+The [finished-slice ownership experiment](evidence/retained-slice/ROOT-REVIEW.md)
+retains exact Vec allocations with smaller bounded count metadata. Its final
+nine normal/doc cases, strict lint, six Miri target/model gates and two actual
+broken-ownership controls are independently archived. Canvas integration and
+application/code costs remain separate; shipping storage is unchanged.
+
 [Borrowed-kernel research](evidence/borrowed-kernel-research/README.md)
 now includes a compiled standalone Rust lifetime probe with three rejected
 sharing/aliasing controls. It establishes constructibility of borrowed selected
