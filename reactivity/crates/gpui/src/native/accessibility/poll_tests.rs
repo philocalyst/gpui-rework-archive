@@ -98,7 +98,13 @@ impl Host for Script {
                     .as_ref()
                     .unwrap();
                 assert!(
-                    matches!(receiver.try_recv().unwrap().command, Command::Activate(_)),
+                    matches!(
+                        receiver
+                            .try_recv()
+                            .expect("the command after a fatal action must remain unconsumed")
+                            .command,
+                        Command::Activate(_)
+                    ),
                     "the command after a fatal action must remain unconsumed"
                 );
                 assert!(matches!(receiver.try_recv(), Err(TryRecvError::Empty)));
