@@ -1,3 +1,5 @@
+> Final disposition: this transaction experiment was rejected after the matched 196-observation campaign. See [the sealed rejection report](matched-rejected/README.md). The dated stage report below is preserved as historical evidence.
+
 # Partial caret construction candidate
 
 Shipping source **8d81d28bc4a058786fa2fc7336d2e88e6b686f26**, isolated worktree

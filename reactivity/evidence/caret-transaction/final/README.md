@@ -1,3 +1,5 @@
+> Final disposition: this transaction experiment was rejected after the matched 196-observation campaign. See [the sealed rejection report](../matched-rejected/README.md). The dated stage report below is preserved as historical evidence.
+
 # Qualified partial caret construction, source62e4047420
 
 This candidate is **not adopted** and has no timing result. It preserves the

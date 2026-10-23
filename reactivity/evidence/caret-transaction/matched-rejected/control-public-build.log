@@ -1,0 +1,10 @@
+   Compiling dpi v0.1.2
+   Compiling winit v0.30.13 (/root/gpui-caret-transaction-sol/reactivity/vendor/winit)
+   Compiling parley v0.12.0 (/root/gpui-caret-transaction-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-caret-transaction-sol/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/root/gpui-caret-transaction-sol/reactivity/crates/gpu)
+   Compiling accesskit_winit v0.34.1
+   Compiling gpui_reactivity_host v0.1.0 (/root/gpui-caret-transaction-sol/reactivity/crates/host)
+   Compiling gpui v0.1.0 (/root/gpui-caret-transaction-sol/reactivity/crates/gpui)
+   Compiling ack-query-control v0.0.0 (/tmp/gpui-caret-transaction-public-d54)
+    Finished `release` profile [optimized + debuginfo] target(s) in 50.22s

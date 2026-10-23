@@ -1,0 +1,65 @@
+{
+  "status": "PROPOSAL; root timing GO required",
+  "pairs": 7,
+  "cases": [
+    "tiny",
+    "label",
+    "latin",
+    "rtl",
+    "mixed",
+    "paragraphs",
+    "one-grapheme"
+  ],
+  "scopes": [
+    "cold",
+    "warm"
+  ],
+  "rounds": {
+    "short": {
+      "cold": 128,
+      "warm": 512
+    },
+    "bulk": {
+      "cold": 16,
+      "warm": 32
+    }
+  },
+  "cpu": 0,
+  "hard_cap_seconds": 300,
+  "observations": 196,
+  "ordering": "pair outer, fixed case order, cold then warm; indexed/partial on even pair, partial/indexed on odd pair",
+  "binaries": {
+    "indexed": "/tmp/gpui-caret-transaction-bin/matched-indexed-caret_pair_measure",
+    "partial": "/tmp/gpui-caret-transaction-bin/matched-partial-caret_pair_measure"
+  },
+  "checksums": {
+    "tiny": "b649e9bd042fc63e",
+    "label": "21b79ff5ef85eee1",
+    "latin": "4ee3b78371cffeda",
+    "rtl": "1869641830c76088",
+    "mixed": "538e6fbe1e0efce0",
+    "paragraphs": "9968f25bda81ed2f",
+    "one-grapheme": "0afdd313057ae27c"
+  },
+  "root_config": "/root/gpui-ce3/.cargo/config.toml",
+  "gate": {
+    "max_cell_ratio": 1.02,
+    "max_bulk_geometric_ratio": 0.98,
+    "bulk_cases": [
+      "latin",
+      "rtl",
+      "mixed"
+    ],
+    "meaning": "All 14 cell medians of within-pair ratios <=1.02; geometric mean of six bulk cell medians <=0.98. Correctness, complete observations and guards mandatory. No resampling. A pass qualifies this scoped Planner proposal for root review, not automatic adoption or a native-frame claim."
+  },
+  "artifacts": {
+    "run-pairs.py": "908460525c546a8df39606bc2c7d102200fe0cc612fd48240dfc4df21651452c",
+    "candidate-inputs.json": "df758912c4301d1a5248aeb72d3ca77e669399545b7d7c2152199523fd02ba08",
+    "control-inputs.json": "35df16bda0dee12932207b9743bc8abb896f435254898e901e372c0452a1c6a5",
+    "candidate-results.json": "e30b24285da6f4608293822c09829a69fc69c3121008e81d8710c7afbb35fc18",
+    "control-results.json": "bc6e32d47acf67f2f585dac14d985dfc95659332b13d55ed987d1e2abaf84ec0",
+    "control.patch": "bc0bef51ef7ce09944b03dec684fbd569b79faa7c1397ea28e87de83026ff671",
+    "comparison.json": "6fc3d0a6341e6bcd587ad54a40d0037911825c30f424ced7715f968f63a4969b",
+    "required-fingerprint-comparison.json": "bcfc4d4a90d2f4ee57337f2514245c4536e0c0423468f33157c1bdd01211f550"
+  }
+}
