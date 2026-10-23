@@ -101,9 +101,11 @@ impl Host for Script {
                 assert!(self.host.window.is_none());
                 assert!(self.host.upgrade.is_none());
                 assert!(self.host.graphics.is_none());
-                let owner = self.host.owner.as_mut().unwrap();
-                assert!(owner.is_closed());
-                assert!(matches!(owner.activate(target), Err(Error::Closed)));
+                // A worker wake can already be queued when CloseRequested
+                // retires the owner. Winit may dispatch it before Exiting.
+                self.host.dispatch(event_loop, Callback::WorkReady);
+                assert!(self.host.error.is_none());
+                assert!(self.host.owner.is_none());
             }
             assert!(self.model_dropped.load(Ordering::Acquire));
             assert!(!initialization.renderer_started());
