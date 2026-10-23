@@ -1,0 +1,16 @@
+{
+  "commit": "6224da8f9781ea70a1965fb8b0054dc6605e3859",
+  "shipping_source_commit": "78497e978e3e9cb0eb6329f32d630c211e1bc7ea",
+  "baseline": "984e5eb0ce35d3cf6ced068c687a12a8e1344cca",
+  "files": {
+    "reactivity/crates/gpu/src/renderer.rs": "4bb6e094ceb9dc47d3c7a6108585237a429da75bfadc028a195b067cf55c9736",
+    "reactivity/crates/gpu/src/renderer/changes.rs": "57c68111d9dddd2c53dbb7753d57c1e1111ed60cc768eefd8d0fa1626c56e834",
+    "reactivity/crates/gpu/src/renderer/images.rs": "29a60b846b371c9dcffce048f86b7ae606a73b3a443857679a59703aaa20c93a",
+    "reactivity/crates/gpu/src/renderer/paint.rs": "35f9054db4741459d886274f1cf658f130fa731cab0a7514868c049244d20493",
+    "reactivity/crates/gpu/src/renderer/slots.rs": "9441b00d4a15a35e4ced216d86c0e4f12250311d78a14125e8e10ba6525eb515",
+    "reactivity/crates/gpu/tests/render.rs": "1890efb0f9e956307b993f355508b2a5ca1678bdf4e3529f95d3548fae637df5",
+    "reactivity/Cargo.lock": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22",
+    "reactivity/crates/gpu/Cargo.toml": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222",
+    ".cargo/config.toml": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295"
+  }
+}

@@ -1,0 +1,624 @@
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 7c75e12982..3c69e55459 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -7,6 +7,7 @@ use std::{borrow::Cow, collections::HashMap};
+ #[cfg(feature = "offline-shader")]
+ #[allow(unsafe_code)]
+ mod artifact;
++mod changes;
+ mod images;
+ mod owned;
+ mod paint;
+@@ -215,15 +216,20 @@ impl Buffer {
+             size,
+         }
+     }
+-    fn write(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, bytes: &[u8]) {
+-        if bytes.len() as u64 > self.size {
++    fn reserve(&mut self, device: &wgpu::Device, bytes: usize) -> bool {
++        if bytes as u64 > self.size {
+             *self = Self::new(
+                 device,
+                 "scene data",
+-                (bytes.len() as u64).next_power_of_two(),
++                (bytes as u64).next_power_of_two(),
+                 false,
+             );
++            return true;
+         }
++        false
++    }
++    fn write(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, bytes: &[u8]) {
++        self.reserve(device, bytes.len());
+         if !bytes.is_empty() {
+             queue.write_buffer(&self.handle, 0, bytes);
+         }
+@@ -621,13 +627,16 @@ impl RendererState {
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+-        self.render_observed(context, scene, target, |_, _, _, _| {})
++        self.check_context(context)?;
++        let resident = self.packet.take().is_some();
++        self.render_observed(context, scene, target, resident, |_, _, _, _| {})
+     }
+     fn render_observed(
+         &mut self,
+         context: &GpuContext,
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
++        resident: bool,
+         mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+         self.check_context(context)?;
+@@ -674,7 +683,7 @@ impl RendererState {
+         );
+         self.ranges.clear();
+         self.ranges.resize(columns * rows, [0, 0]);
+-        self.records.clear();
++        let old_words = self.records.len();
+         let bank_count = scene.paint_bank().len();
+         if bank_count > MAX_DRAWS * 2 {
+             return Err(Error::ResourceLimit);
+@@ -687,9 +696,11 @@ impl RendererState {
+             sum.checked_add(words).ok_or(Error::ResourceLimit)
+         })?;
+         self.records
+-            .try_reserve_exact(word_count + bank_words)
++            .try_reserve_exact((word_count + bank_words).saturating_sub(old_words))
+             .map_err(|_| Error::ResourceLimit)?;
+-        slots::write_prefix(&mut self.records, scene, bank_count);
++        self.records.resize(word_count + bank_words, [0; 4]);
++        let bank_changes = slots::write_prefix(&mut self.records[..bank_words], scene, bank_count);
++        let mut word = bank_words;
+         self.cursors.clear();
+         self.cursors.resize(columns * rows, 0);
+         self.residuals.clear();
+@@ -706,7 +717,7 @@ impl RendererState {
+             // The optional paint owner captures only requested groups here.
+             // Ordinary render's empty observer specializes away. Inline
+             // multi-placement diagnostic groups decline color-only patching.
+-            group_ready(ordinal, group, self.records.len(), compact);
++            group_ready(ordinal, group, word, compact);
+             if compact {
+                 let mut error = [0.0_f32; 2];
+                 for (offset, p) in group.placements().enumerate() {
+@@ -719,24 +730,31 @@ impl RendererState {
+                     error[0] = error[0].max(e[0]);
+                     error[1] = error[1].max(e[1]);
+                 }
+-                let common = self.records.len() as u32;
++                let common = word as u32;
+                 let mut words = common_words(group, error, correction);
+                 if let Some(slot) = group.paint_slot() {
+                     words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
+                     words[4][0] |= SLOT_COLOR;
+                 }
+-                self.records.extend_from_slice(&words);
++                changes::common(
++                    &mut self.records[word..word + 5],
++                    words,
++                    resident && word + 5 <= old_words,
++                );
++                word += 5;
+                 shared_groups += 1;
+                 compact_draws += group.placements().len();
+                 for p in group.placements() {
+                     let draw = prepared(group, p);
+                     has_masks |= draw.source.mask().is_some();
+                     let r = draw.local_rect;
+-                    let address = self.records.len() as u32;
+-                    self.records.extend_from_slice(&[
+-                        float_word([r.x, r.y, r.width, r.height]),
+-                        [0, 0, 0, common],
+-                    ]);
++                    let address = word as u32;
++                    changes::placement(
++                        &mut self.records[word..word + 2],
++                        [float_word([r.x, r.y, r.width, r.height]), [0, 0, 0, common]],
++                        resident && word + 2 <= old_words,
++                    );
++                    word += 2;
+                     original_references = self.bin_draw(
+                         draw,
+                         error,
+@@ -754,13 +772,18 @@ impl RendererState {
+                     let draw = prepared(group, p);
+                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
+                     has_masks |= draw.source.mask().is_some();
+-                    let address = INLINE_RECORD | self.records.len() as u32;
++                    let address = INLINE_RECORD | word as u32;
+                     let mut words = inline_words(draw, error, correction);
+                     if let Some(slot) = group.paint_slot() {
+                         words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
+                         words[5][3] |= SLOT_COLOR;
+                     }
+-                    self.records.extend_from_slice(&words);
++                    changes::inline(
++                        &mut self.records[word..word + 6],
++                        words,
++                        resident && word + 6 <= old_words,
++                    );
++                    word += 6;
+                     original_references = self.bin_draw(
+                         draw,
+                         error,
+@@ -775,7 +798,8 @@ impl RendererState {
+                 }
+             }
+         }
+-        images::prepare(
++        debug_assert_eq!(word, self.records.len());
++        let relocated = images::prepare(
+             &context.device,
+             &context.queue,
+             &mut self.draws,
+@@ -784,6 +808,8 @@ impl RendererState {
+             scene,
+         )?;
+         let mask_bytes = self.prepare_atlas(context, scene, has_masks)?;
++        let grew = self.draws.reserve(&context.device, self.records.len() * 16);
++        let full = !resident || relocated || grew;
+         // Patch only resource coordinates after every draw has passed admission.
+         // Metadata words/correction indices and private common addresses remain.
+         let mut word = bank_words;
+@@ -812,7 +838,11 @@ impl RendererState {
+                         [t.x, t.y, t.width | (t.height << 16)]
+                     })
+                 };
+-                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
++                changes::metadata(
++                    &mut self.records[word..word + if compact { 2 } else { 6 }],
++                    atlas,
++                    compact,
++                );
+                 word += if compact { 2 } else { 6 };
+             }
+         }
+@@ -832,12 +862,31 @@ impl RendererState {
+         self.references.resize(references, 0);
+         // Reverse group traversal recovers variable-width word addresses without
+         // retaining another per-draw address lane or a duplicate expanded scene.
++        let mut uploads = changes::Uploads::default();
++        let mut draw_upload_bytes = 0;
++        let mut upload = |range: std::ops::Range<usize>, records: &[Word]| {
++            draw_upload_bytes += range.len() * 16;
++            context.queue.write_buffer(
++                &self.draws.handle,
++                (range.start * 16) as u64,
++                bytemuck::cast_slice(&records[range]),
++            );
++        };
+         let mut word = self.records.len();
+         let mut reverse_ordinal = ordinal;
+         for group in scene.groups().rev() {
+             let compact = compact_group(group, self.grouped_records);
+             for p in group.placements().rev() {
+                 word -= if compact { 2 } else { 6 };
++                let count = if compact { 2 } else { 6 };
++                let mask = changes::take(&mut self.records[word..word + count], compact);
++                if !full {
++                    if compact {
++                        uploads.record::<2>(word, mask, &self.records, &mut upload);
++                    } else {
++                        uploads.record::<6>(word, mask, &self.records, &mut upload);
++                    }
++                }
+                 reverse_ordinal -= 1;
+                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
+                 visit(prepared(group, p), columns, |tile| {
+@@ -851,9 +900,22 @@ impl RendererState {
+             }
+             if compact {
+                 word -= 5;
++                let mask = self.records[word + 4][1];
++                self.records[word + 4][1] = 0;
++                if !full {
++                    uploads.record::<5>(word, mask, &self.records, &mut upload);
++                }
+             }
+         }
+         debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
++        if full {
++            if !self.records.is_empty() {
++                upload(0..self.records.len(), &self.records);
++            }
++        } else {
++            uploads.prefix(bank_words, bank_changes, &self.records, &mut upload);
++            uploads.finish(&self.records, &mut upload);
++        }
+         let mut uniform_tiles = 0;
+         let mut sample_evaluations = 0;
+         let mut sample_draw_evaluations = 0;
+@@ -893,11 +955,6 @@ impl RendererState {
+         context
+             .queue
+             .write_buffer(&self.globals.handle, 0, bytemuck::bytes_of(&globals));
+-        self.draws.write(
+-            &context.device,
+-            &context.queue,
+-            bytemuck::cast_slice(&self.records),
+-        );
+         self.tiles.write(
+             &context.device,
+             &context.queue,
+@@ -975,7 +1032,7 @@ impl RendererState {
+             uniform_tiles,
+             sample_evaluations,
+             sample_draw_evaluations,
+-            instance_upload_bytes: self.records.len() * 16
++            instance_upload_bytes: draw_upload_bytes
+                 + self.ranges.len() * 8
+                 + references * 4
+                 + self.residuals.len() * 32
+diff --git a/reactivity/crates/gpu/src/renderer/changes.rs b/reactivity/crates/gpu/src/renderer/changes.rs
+new file mode 100644
+index 0000000000..9415352d93
+--- /dev/null
++++ b/reactivity/crates/gpu/src/renderer/changes.rs
+@@ -0,0 +1,218 @@
++//! Temporary dirty bits occupy only private, otherwise unused packet bits.
++//! A failed prepare revokes residency; only clean words reach the GPU or replay.
++use super::{MAX_DRAWS, Word};
++use std::ops::Range;
++
++// An inline atlas.w holds a 17-bit correction index and SLOT_COLOR at bit 31.
++// A compact atlas.w holds a word address below 2^30. Shared common[4].y is
++// reserved zero. These fields become ordinary clean ABI words before upload;
++// only packet presence certifies that the retained words mirror the GPU.
++const INLINE_SHIFT: u32 = 17;
++const INLINE_MASK: u32 = 63 << INLINE_SHIFT;
++const PLACEMENT_SHIFT: u32 = 30;
++const PLACEMENT_MASK: u32 = 3 << PLACEMENT_SHIFT;
++const _: () = assert!(MAX_DRAWS < 1 << INLINE_SHIFT);
++const _: () = assert!(MAX_DRAWS * 8 + MAX_DRAWS / 32 + 1 < 1 << PLACEMENT_SHIFT);
++
++fn replace<const N: usize>(
++    old: &mut [Word],
++    mut next: [Word; N],
++    resident: bool,
++    metadata: Option<usize>,
++) -> u32 {
++    if let Some(index) = metadata {
++        next[index][..3].copy_from_slice(&old[index][..3]);
++    }
++    if !resident {
++        old.copy_from_slice(&next);
++        return 0;
++    }
++    let mut dirty = 0;
++    for (index, (old, next)) in old.iter_mut().zip(next).enumerate() {
++        if *old != next {
++            dirty |= 1 << index;
++        }
++        *old = next;
++    }
++    dirty
++}
++
++pub(super) fn common(old: &mut [Word], next: [Word; 5], resident: bool) {
++    let dirty = replace(old, next, resident, None);
++    old[4][1] = dirty;
++}
++pub(super) fn placement(old: &mut [Word], next: [Word; 2], resident: bool) {
++    let dirty = replace(old, next, resident, Some(1));
++    old[1][3] |= dirty << PLACEMENT_SHIFT;
++}
++pub(super) fn inline(old: &mut [Word], next: [Word; 6], resident: bool) {
++    let dirty = replace(old, next, resident, Some(5));
++    old[5][3] |= dirty << INLINE_SHIFT;
++}
++pub(super) fn metadata(record: &mut [Word], next: [u32; 3], compact: bool) {
++    let index = if compact { 1 } else { 5 };
++    if record[index][..3] != next {
++        record[index][..3].copy_from_slice(&next);
++        record[index][3] |= if compact {
++            2 << PLACEMENT_SHIFT
++        } else {
++            32 << INLINE_SHIFT
++        };
++    }
++}
++pub(super) fn take(record: &mut [Word], compact: bool) -> u32 {
++    let (word, mask, shift) = if compact {
++        (&mut record[1][3], PLACEMENT_MASK, PLACEMENT_SHIFT)
++    } else {
++        (&mut record[5][3], INLINE_MASK, INLINE_SHIFT)
++    };
++    let dirty = (*word & mask) >> shift;
++    *word &= !mask;
++    dirty
++}
++
++/// Reverse-order runs coalesce across record boundaries without a dirty Vec.
++#[derive(Default)]
++pub(super) struct Uploads(Option<Range<usize>>);
++impl Uploads {
++    pub(super) fn record<const N: usize>(
++        &mut self,
++        start: usize,
++        mut mask: u32,
++        records: &[Word],
++        emit: &mut impl FnMut(Range<usize>, &[Word]),
++    ) {
++        debug_assert!(N < 32 && mask >> N == 0);
++        if mask >> (N - 1) == 0 {
++            self.finish(records, emit);
++        }
++        // Visit dirty runs, not words. Empty records take no loop; a fully
++        // changed record extends the preceding run in one step.
++        while mask != 0 {
++            let end = (32 - mask.leading_zeros()) as usize;
++            let begin = end - (mask << (32 - end)).leading_ones() as usize;
++            self.extend(start + begin..start + end);
++            mask &= (1 << begin) - 1;
++            if begin != 0 {
++                self.finish(records, emit);
++            }
++        }
++    }
++    pub(super) fn prefix(
++        &mut self,
++        count: usize,
++        dirty: Range<usize>,
++        records: &[Word],
++        emit: &mut impl FnMut(Range<usize>, &[Word]),
++    ) {
++        if dirty.end != count || dirty.is_empty() {
++            self.finish(records, emit);
++        }
++        if !dirty.is_empty() {
++            let first = dirty.start;
++            self.extend(dirty);
++            if first != 0 {
++                self.finish(records, emit);
++            }
++        }
++    }
++    fn extend(&mut self, next: Range<usize>) {
++        if let Some(run) = &mut self.0 {
++            debug_assert_eq!(run.start, next.end);
++            run.start = next.start;
++        } else {
++            self.0 = Some(next);
++        }
++    }
++    pub(super) fn finish(
++        &mut self,
++        records: &[Word],
++        emit: &mut impl FnMut(Range<usize>, &[Word]),
++    ) {
++        if let Some(run) = self.0.take() {
++            emit(run, records);
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn dirty_tags_preserve_every_final_word_and_resource_bit() {
++        for compact in [false, true] {
++            let count = if compact { 2 } else { 6 };
++            for mask in 0..1 << count {
++                let mut old = [[0x8000_0000, u32::MAX, 7, 0x8123_4567]; 6];
++                old[count - 1][3] = if compact { 524_289 } else { 0x8001_0000 };
++                let mut next = old;
++                for (index, word) in next[..count].iter_mut().enumerate() {
++                    if mask & (1 << index) != 0 {
++                        word[0] ^= 0x8000_0001;
++                    }
++                }
++                let expected = next;
++                // Resource words are deliberately finalized after construction.
++                let atlas = next[count - 1][..3].try_into().unwrap();
++                if compact {
++                    placement(&mut old[..2], next[..2].try_into().unwrap(), true);
++                } else {
++                    inline(&mut old, next, true);
++                }
++                metadata(&mut old[..count], atlas, compact);
++                assert_eq!(take(&mut old[..count], compact), mask);
++                assert_eq!(old, expected);
++            }
++        }
++        let mut old = [[u32::MAX; 4]; 5];
++        old[4] = [0x8001_0000, 0, 0, 0];
++        let next = old;
++        common(&mut old, next, true);
++        assert_eq!(old, next);
++    }
++
++    #[test]
++    fn reverse_uploads_are_exact_maximal_runs_across_record_boundaries() {
++        let records = [[u32::MAX; 4]; 12];
++        for mask in 0u32..4096 {
++            let mut uploads = Uploads::default();
++            let mut received = 0;
++            let mut runs: Vec<Range<usize>> = Vec::new();
++            let mut emit = |range: Range<usize>, words: &[Word]| {
++                assert_eq!(words, records);
++                for word in range.clone() {
++                    assert_ne!(mask & (1 << word), 0);
++                    assert_eq!(received & (1 << word), 0);
++                    received |= 1 << word;
++                }
++                runs.push(range);
++            };
++            uploads.record::<6>(6, mask >> 6, &records, &mut emit);
++            uploads.record::<6>(0, mask & 63, &records, &mut emit);
++            uploads.finish(&records, &mut emit);
++            assert_eq!(received, mask);
++            for pair in runs.windows(2) {
++                assert!(pair[1].end < pair[0].start, "adjacent runs must coalesce");
++            }
++        }
++    }
++
++    #[test]
++    fn failed_partially_tagged_packets_require_full_reconstruction() {
++        let mut old = [[u32::MAX; 4]; 6];
++        let mut next = old;
++        next[5][3] = 65_536;
++        inline(&mut old, next, false);
++        // Admission fails here, before resource finalization and tag removal.
++        let mut admitted = [[0; 4]; 6];
++        admitted[5][3] = 0x8001_0000;
++        inline(&mut old, admitted, false);
++        metadata(&mut old, [u32::MAX, 0x8000_0000, 7], false);
++        admitted[5][..3].copy_from_slice(&[u32::MAX, 0x8000_0000, 7]);
++        assert_ne!(take(&mut old, false) & 32, 0);
++        // The failed owner has no residency certificate; its caller ignores this
++        // sparse mask and uploads the complete clean packet.
++        assert_eq!(old, admitted);
++    }
++}
+diff --git a/reactivity/crates/gpu/src/renderer/images.rs b/reactivity/crates/gpu/src/renderer/images.rs
+index e86a876b7f..97c5b984e0 100644
+--- a/reactivity/crates/gpu/src/renderer/images.rs
++++ b/reactivity/crates/gpu/src/renderer/images.rs
+@@ -61,10 +61,11 @@ pub(super) fn prepare(
+     current: &mut Option<Box<Images>>,
+     draw_words: usize,
+     scene: PreparedScene<'_>,
+-) -> Result<(), Error> {
++) -> Result<bool, Error> {
+     let count = scene.images().count();
+     if count == 0 {
+-        if current.take().is_some() {
++        let relocated = current.take().is_some();
++        if relocated {
+             // Submitted bind groups retain their own old buffer leases.
+             *buffer = Buffer::new(
+                 device,
+@@ -73,7 +74,7 @@ pub(super) fn prepare(
+                 false,
+             );
+         }
+-        return Ok(());
++        return Ok(relocated);
+     }
+     if let Some(current) = current.as_mut()
+         && draw_words <= current.prefix_words
+@@ -84,7 +85,7 @@ pub(super) fn prepare(
+             .eq(scene.images().map(|image| image.key()))
+     {
+         current.stats.uploaded_bytes = 0;
+-        return Ok(());
++        return Ok(false);
+     }
+     let prefix_words = draw_words
+         .max(1)
+@@ -149,7 +150,8 @@ pub(super) fn prepare(
+     {
+         return Err(Error::ResourceLimit);
+     }
+-    if buffer.size < required || buffer.size > required.saturating_mul(4) {
++    let relocated = buffer.size < required || buffer.size > required.saturating_mul(4);
++    if relocated {
+         *buffer = Buffer::new(device, "scene words and packed images", required, false);
+     }
+     for image in scene.images() {
+@@ -176,5 +178,5 @@ pub(super) fn prepare(
+     next.stats.gpu_buffer_bytes = buffer.size;
+     next.stats.index_capacity = next.entries.capacity();
+     *current = Some(Box::new(next));
+-    Ok(())
++    Ok(relocated)
+ }
+diff --git a/reactivity/crates/gpu/src/renderer/paint.rs b/reactivity/crates/gpu/src/renderer/paint.rs
+index 9067295638..7b77d8d0d8 100644
+--- a/reactivity/crates/gpu/src/renderer/paint.rs
++++ b/reactivity/crates/gpu/src/renderer/paint.rs
+@@ -105,7 +105,7 @@ impl PaintRenderer {
+         target: &wgpu::TextureView,
+         requested: impl IntoIterator<Item = PaintIndex>,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+-        self.inner.state.packet = None;
++        let resident = self.inner.state.packet.take().is_some();
+         self.sites.clear();
+         let requested = requested.into_iter();
+         let demand = requested.size_hint().0;
+@@ -130,13 +130,14 @@ impl PaintRenderer {
+         } else if self.sites.capacity() > self.sites.len().saturating_mul(4) {
+             self.sites.shrink_to_fit();
+         }
+-        self.render_mapped(scene, target)
++        self.render_mapped(scene, target, resident)
+     }
+ 
+     fn render_mapped(
+         &mut self,
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
++        resident: bool,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+         self.sites.sort_unstable_by_key(|site| site.index);
+         let mut previous = None;
+@@ -155,6 +156,7 @@ impl PaintRenderer {
+             &self.inner.context,
+             scene,
+             target,
++            resident,
+             |ordinal, group, word, compact| {
+                 if let Some(site) = sites.get_mut(next)
+                     && site.index.order() as usize == ordinal
+diff --git a/reactivity/crates/gpu/src/renderer/slots.rs b/reactivity/crates/gpu/src/renderer/slots.rs
+index db9ccb1131..c1d9d8bfdf 100644
+--- a/reactivity/crates/gpu/src/renderer/slots.rs
++++ b/reactivity/crates/gpu/src/renderer/slots.rs
+@@ -18,20 +18,39 @@ pub(super) fn color_word(rows: usize, slot: PaintSlot) -> u32 {
+     assert!(index < rows);
+     (1 + rows.div_ceil(64) + index) as u32
+ }
+-pub(super) fn write_prefix(records: &mut Vec<Word>, scene: PreparedScene<'_>, rows: usize) {
+-    if rows == 0 {
+-        return;
+-    }
+-    let flags = rows.div_ceil(64);
+-    records.resize(1 + flags, [0; 4]);
+-    records[0] = [rows as u32, flags as u32, (1 + flags) as u32, 0];
+-    for (index, paint) in scene.paint_bank().enumerate() {
+-        let bits =
+-            (u32::from(paint.shared()) * SHARED) | (u32::from(paint.rectangle()) * RECTANGLE);
+-        records[1 + index / 64][index / 16 % 4] |= bits << (index % 16 * 2);
+-        records.push(float_word(paint.value().working()));
++pub(super) fn write_prefix(
++    records: &mut [Word],
++    scene: PreparedScene<'_>,
++    rows: usize,
++) -> std::ops::Range<usize> {
++    let mut dirty = records.len()..0;
++    let mut write = |index: usize, value: Word| {
++        if records[index] != value {
++            dirty.start = dirty.start.min(index);
++            dirty.end = dirty.end.max(index + 1);
++            records[index] = value;
++        }
++    };
++    if rows != 0 {
++        let flags = rows.div_ceil(64);
++        write(0, [rows as u32, flags as u32, (1 + flags) as u32, 0]);
++        let mut paints = scene.paint_bank();
++        for flag in 0..flags {
++            let mut word = [0; 4];
++            for (index, paint) in paints.by_ref().take(64).enumerate() {
++                let bits = (u32::from(paint.shared()) * SHARED)
++                    | (u32::from(paint.rectangle()) * RECTANGLE);
++                word[index / 16] |= bits << (index % 16 * 2);
++            }
++            write(1 + flag, word);
++        }
++        for (index, paint) in scene.paint_bank().enumerate() {
++            write(1 + flags + index, float_word(paint.value().working()));
++        }
+     }
++    dirty
+ }
++
+ fn row(records: &[Word], slot: PaintSlot) -> Option<(usize, u32)> {
+     let index = slot.index() as usize;
+     if index >= records.first()?[0] as usize {

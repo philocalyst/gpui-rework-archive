@@ -1,5 +1,47 @@
 # Typed property traversal and component-library composition
 
+## Source ownership follow-on, 2026-10-23
+
+The current source registry also deserves a structural replacement. At
+`7587b59c2f`, `Sources<M>` owns a `Vec<Box<dyn Field<M>>>` and recursively
+boxed component schemas. Each ordinary declaration copies a 40-byte Source
+into its own allocation on the measured 64-bit target. Typed property
+declarations already use borrowed metadata; source declarations do not.
+
+Luna's follow-on audit identifies two candidates, neither implemented here:
+
+- A typed operation visitor can traverse declarations against the borrowed
+  model without retaining a schema tree. A visitor `Op<M>` can project a child
+  through `Op<C>` with shared operation state and a scope cursor; its type
+  depends on the child model, rather than an accumulated projection path.
+  Declaration syntax and schema-at-mount semantics need deliberate migration.
+- A type-changing tuple/HList builder returned through `impl Schema<Self>`
+  preserves builder composition. Retaining its opaque type inside today's
+  concrete Runtime requires a new ownership boundary; RPITIT alone does not
+  remove that problem. One whole-schema allocation is a separate compromise
+  from per-field boxes and must be charged explicitly.
+
+Both must preserve projection/alias checks, duplicate names and IDs, owner
+versus direct impact, scoped component routes, rejected text payloads,
+Reader/remote operations, reflection and model JSON restoration. Reexecuting a
+declaration function is not automatically equivalent to capturing its result
+at mount. Per-operation traversal, compile time, generated code and wide/deep
+component fixtures are acceptance gates alongside allocation counts.
+
+Borrowing promoted Source constants can remove copied declaration payloads,
+but cannot promise a unique process-wide address. Rust permits separate copies
+of a constant; promotion eligibility and lifetime must be checked. Declaration
+addresses must not become capabilities. See the primary Rust references on
+[constants](https://doc.rust-lang.org/reference/items/constant-items.html),
+[statics and generics](https://doc.rust-lang.org/reference/items/static-items.html#statics--generics)
+and [trait return impl Trait](https://doc.rust-lang.org/reference/types/impl-trait.html).
+Bevy's [WorldQuery](https://docs.rs/bevy/latest/bevy/ecs/query/trait.WorldQuery.html)
+illustrates typed composition, while its unsafe implementor contract is not a
+replacement for GPUI's safe source projection checks.
+
+The dated property/inspector audit below remains historical evidence; its
+then-current inspector coverage must not be read as the active implementation.
+
 Read-only source audit of `/root/gpui-ce3/reactivity` at `8ea8b9d76abb76717bd84fc28a5d471ce69f5ed3` (2026-10-22). No production files, builds, tests, or timings were changed or run. External primary-source documentation was checked on 2026-10-22; versions are pinned in the source list below.
 
 ## Implementation review dispositions
