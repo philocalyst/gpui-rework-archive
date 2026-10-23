@@ -439,7 +439,8 @@ impl<'font> Planner<'font> {
                 height,
                 baseline,
             },
-            glyphs,
+            glyphs: super::retained::RetainedSlice::try_from(glyphs)
+                .map_err(|_| Error::ResourceLimit)?,
             mask,
             details,
         })

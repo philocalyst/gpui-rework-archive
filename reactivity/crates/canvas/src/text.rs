@@ -22,6 +22,7 @@ mod geometry_ledger;
 mod layout;
 mod paragraph;
 mod planner;
+mod retained;
 use layout::Details;
 pub use layout::{
     CaretAffinity, GlyphRun, TextDirection, TextGeometry, TextGrapheme, TextLine, TextOffset,
@@ -232,7 +233,7 @@ pub struct TextLayout {
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
-    glyphs: Vec<Glyph>,
+    glyphs: retained::RetainedSlice<Glyph>,
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
 }
