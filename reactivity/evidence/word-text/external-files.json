@@ -1,0 +1,27 @@
+[
+  {
+    "path": "/tmp/gpui-shorttext-miri-tools/bin/miri",
+    "bytes": 11544016,
+    "sha256": "cee09bf77fa01220884fa754e7de06eb6a40fb61e24765026ffe299d2923628f"
+  },
+  {
+    "path": "/tmp/gpui-shorttext-miri-tools/bin/cargo-miri",
+    "bytes": 2480376,
+    "sha256": "dab916ab57c1dc6abe45308fe7fb5391be0935b27358a8c64685d4f4c348dc31"
+  },
+  {
+    "path": "/tmp/gpui-nightly-2026-10-23/bin/rustc",
+    "bytes": 656904,
+    "sha256": "0f1fe0ea69fb19db963ad349f5948b7c79cabc298df71a8981a09031bdb61753"
+  },
+  {
+    "path": "/tmp/gpui-nightly-2026-10-23/bin/cargo",
+    "bytes": 36405208,
+    "sha256": "8063ecc69dba351c3f252b5720b6cf37b1cd4aa4b0b05cb5432955b3ee584980"
+  },
+  {
+    "path": "/tmp/gpui-shorttext-miri-provision/miri-nightly-x86_64-unknown-linux-gnu.tar.xz",
+    "bytes": 4919732,
+    "sha256": "ff156ee3d4fad959583f770d39a577e8aac7f80b937852dba7ff13ae8527c6bd"
+  }
+]

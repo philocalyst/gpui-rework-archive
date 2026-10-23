@@ -1,0 +1,20 @@
+[
+  {
+    "path": "/tmp/gpui-shorttext-miri-tools/bin/cargo-miri",
+    "official_sha256": "161e6adbce9b29a54b7a5a5dbf347819bddd44e000172c68ad0226a847b530ff",
+    "pre_adaptation_sha256": "c4f765e796c479cbb0765b5a29b2a39b21c12e608f4ae882205c86cc6f2149fd",
+    "adapted_sha256": "dab916ab57c1dc6abe45308fe7fb5391be0935b27358a8c64685d4f4c348dc31",
+    "text_sha256_unchanged": "a24b1cf1336fc6495e78b836e9799784f984ac958f9602ec3256f66a116ab16d",
+    "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+    "rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+  },
+  {
+    "path": "/tmp/gpui-shorttext-miri-tools/bin/miri",
+    "official_sha256": "85f30df439309f34c040de10792cd100e4722b6b604c28606df0fee00f8f1c0f",
+    "pre_adaptation_sha256": "85f30df439309f34c040de10792cd100e4722b6b604c28606df0fee00f8f1c0f",
+    "adapted_sha256": "cee09bf77fa01220884fa754e7de06eb6a40fb61e24765026ffe299d2923628f",
+    "text_sha256_unchanged": "c81cf15db4f7b212371ad48dd0e7cfafe7fba01e15385930c9199c227b6405ab",
+    "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+    "rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+  }
+]

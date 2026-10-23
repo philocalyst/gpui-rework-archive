@@ -173,6 +173,16 @@ the composed nightly kernel needs its own matched comparison. Historical
 [packed cursor](evidence/uniform-packet/packed-csr/ROOT-REVIEW.md) experiments
 are also archived without adoption or timing claims.
 
+The [endpoint spare-bit cursor](evidence/uniform-packet/endpoint-csr/ROOT-REVIEW.md)
+also preserves shipping GPU bytes while deleting CPU cursor storage. Its
+complete packets, fault controls and static costs are independently verified;
+a stronger descending-cursor successor remains under qualification. The
+[one-word short-text experiment](evidence/word-text/ROOT-REVIEW.md) passes six
+strict-provenance Miri target/model gates and two deliberate broken controls,
+but remains unadopted because target-byte portability, equality and actual
+application/code costs need resolution. Neither result establishes a new
+runtime speed claim.
+
 [Borrowed-kernel research](evidence/borrowed-kernel-research/README.md)
 now includes a compiled standalone Rust lifetime probe with three rejected
 sharing/aliasing controls. It establishes constructibility of borrowed selected

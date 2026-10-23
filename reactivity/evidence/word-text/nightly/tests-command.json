@@ -1,0 +1,23 @@
+{
+  "source": "3d6bbcde4b67b9e99fe35b23db3bf216a79835f8",
+  "argv": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/gpui-short-text-root/Cargo.toml",
+    "--offline",
+    "--locked",
+    "--all-targets"
+  ],
+  "timeout_seconds": 600,
+  "environment": {
+    "RUSTC": "/tmp/gpui-nightly-2026-10-23/bin/rustc",
+    "RUSTDOC": "/tmp/gpui-nightly-2026-10-23/bin/rustdoc",
+    "CARGO_TARGET_DIR": "/tmp/gpui-short-text-nightly-target",
+    "CARGO_BUILD_JOBS": "1",
+    "MIRI": "/tmp/gpui-shorttext-miri-tools/bin/miri",
+    "MIRI_SYSROOT": null,
+    "RUST_SRC_PATH": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/src/rust/library",
+    "RUSTC_BOOTSTRAP": null
+  }
+}

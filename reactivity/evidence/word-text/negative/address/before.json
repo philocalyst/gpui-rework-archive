@@ -1,0 +1,7 @@
+{
+  "Cargo.lock": "cddae46f2086cdb7abc2fd5a6f8aeca73f82a747f86c27f1e4e6988c8af73c15",
+  "Cargo.toml": "9755599dbe43a9b8702c54ecf5ab8e5258df778da13b6af898fbc2cc6301ab54",
+  "README.md": "c17d76013df0130fc5fe50e8225d85b495cd021cfd5b4f19cb1eeaf6d8728455",
+  "src/lib.rs": "398c2bf2c4826c4abb3194cd2637550070b8f0cf43034eb0a8aa0f05f8f825ae",
+  "tests/ownership.rs": "0d0098bdcc02a93e580a755726a3e174620ccd3e10e3784f4b9d1753b63da02d"
+}

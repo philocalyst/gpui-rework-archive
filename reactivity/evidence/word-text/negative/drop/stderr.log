@@ -1,0 +1,53 @@
+   Compiling arcstr v1.2.0
+   Compiling gpui_word_text_spike v0.0.0 (/tmp/gpui-short-text-drop-negative)
+   Compiling allocation-counter v0.8.1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests/ownership.rs (/tmp/gpui-short-text-negative-drop-target/miri/x86_64-unknown-linux-gnu/debug/build/gpui_word_text_spike/a26ba4ab1f1fd36e/out/ownership-a26ba4ab1f1fd36e)
+error: Undefined Behavior: memory access failed: alloc62577 has been freed, so this pointer is dangling
+    --> /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:1293:9
+     |
+1293 |         *p.cast()
+     |         ^^^^^^^^^ Undefined Behavior occurred here
+     |
+     = help: this indicates a bug in the program: it performed an invalid operation, and caused Undefined Behavior
+     = help: see https://doc.rust-lang.org/nightly/reference/behavior-considered-undefined.html for further information
+help: alloc62577 was allocated here:
+    --> src/lib.rs:59:43
+     |
+  59 |             Self(arcstr::ArcStr::into_raw(arcstr::ArcStr::from(value)))
+     |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: alloc62577 was deallocated here:
+    --> src/lib.rs:98:22
+     |
+  98 |             unsafe { drop(arcstr::ArcStr::from_raw(self.0)) }
+     |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: this is on thread `niche_content_m`
+     = note: stack backtrace:
+             0: arcstr::arc_str::ThinInner::get_len_flag
+                 at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:1293:9: 1293:18
+             1: arcstr::arc_str::ArcStr::get_inner_len_flag
+                 at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:334:18: 334:58
+             2: arcstr::arc_str::ArcStr::len
+                 at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:329:9: 329:34
+             3: arcstr::arc_str::ArcStr::as_bytes
+                 at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:382:19: 382:29
+             4: <arcstr::arc_str::ArcStr as std::ops::Deref>::deref
+                 at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:1337:49: 1337:64
+             5: arcstr::arc_str::ArcStr::as_str
+                 at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/arcstr-1.2.0/src/arc_str.rs:315:9: 315:13
+             6: <gpui_word_text_spike::WordText as std::ops::Deref>::deref
+                 at src/lib.rs:82:25: 82:39
+             7: niche_content_move_clone_and_borrow_agree_with_owned_strings
+                 at tests/ownership.rs:35:21: 35:26
+             8: niche_content_move_clone_and_borrow_agree_with_owned_strings::{closure#0}
+                 at tests/ownership.rs:23:66: 23:66
+
+note: some details are omitted, run with `MIRIFLAGS=-Zmiri-backtrace=full` for a verbose backtrace
+
+error: aborting due to 1 previous error
+
+error: test failed, to rerun pass `--test ownership`
+
+Caused by:
+  process didn't exit successfully: `/tmp/gpui-shorttext-miri-tools/bin/cargo-miri runner /tmp/gpui-short-text-negative-drop-target/miri/x86_64-unknown-linux-gnu/debug/build/gpui_word_text_spike/a26ba4ab1f1fd36e/out/ownership-a26ba4ab1f1fd36e niche_content_move_clone_and_borrow_agree_with_owned_strings --test-threads=1` (exit status: 1)
+note: test exited abnormally; to see the full output pass --no-capture to the harness.
