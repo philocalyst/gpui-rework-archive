@@ -690,3 +690,33 @@ fn audio_feature_without_attached_output_rejects_play_now_and_still_allows_pure_
     drop(win);
     worker.finish().unwrap();
 }
+
+#[test]
+fn public_prepare_and_play_command_cannot_turn_a_pure_owner_prepare_into_playback() {
+    let (worker, audio, capture, _, mut win) = owner();
+    let selection = hummingbird_gpui_port::worker::Selection {
+        id: Some(44),
+        sequence: 1,
+        generation: 0,
+    };
+    worker.handle().prepare_and_play(selection).unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    win.update(|model| model.prepare(44, 0)).unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(win.with_model(|model| *model.selected).unwrap(), selection);
+    assert_eq!(
+        win.with_model(|model| model.prepared().unwrap().1.track_id)
+            .unwrap(),
+        Some(44)
+    );
+    assert!(
+        win.with_model(|model| model.queue.playback().queue().is_empty())
+            .unwrap()
+    );
+    assert!(capture.lock().unwrap().streams.is_empty());
+    close(win, audio, worker);
+}

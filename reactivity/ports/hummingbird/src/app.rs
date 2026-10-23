@@ -142,12 +142,14 @@ impl Library {
                     self.notice = "Library source changed".into();
                 }
             }
-            LibraryEvent::Prepared { request, result } => {
+            LibraryEvent::Prepared { selection, result } => {
+                // Public worker callers choose their own request numbers.
+                // Match the full recording/source identity issued by this owner.
                 let (selection, play_revision) = match &self.preparation {
                     Preparation::Pending {
                         selection: pending,
                         play_revision,
-                    } if pending.sequence == request => (*pending, *play_revision),
+                    } if *pending == selection => (*pending, *play_revision),
                     _ => return,
                 };
                 if self.preparation_status() != PreparationStatus::Pending {

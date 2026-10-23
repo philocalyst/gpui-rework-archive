@@ -29,7 +29,7 @@ pub struct Selection {
 #[derive(Debug)]
 pub enum LibraryEvent {
     Prepared {
-        request: u64,
+        selection: Selection,
         result: Result<TrackRef, SourceError>,
     },
     Imported {
@@ -108,10 +108,7 @@ impl Worker {
                         Command::Prepare(selection) | Command::PrepareAndPlay(selection) => {
                             let result = prepare(&database, version, selection);
                             if updates
-                                .try_send(LibraryEvent::Prepared {
-                                    request: selection.sequence,
-                                    result,
-                                })
+                                .try_send(LibraryEvent::Prepared { selection, result })
                                 .is_err()
                             {
                                 // The status-aware lane reports final producer close after

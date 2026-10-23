@@ -10,7 +10,7 @@ The playback Question, PlaybackRequest placeholder and playback Reader are
 removed. Search remains a pure Question. The explicit owner action reserves a
 checked request number and stores full Selection plus the current audio Receipt
 revision. The worker validates source generation before the same SQL projection
-and returns that request number with Result<TrackRef, SourceError>. The owner
+and returns full Selection with Result<TrackRef, SourceError>. The owner
 requires the matching Pending, selected value, source generation and transport
 revision, then retires authority before calling queue.play_now. Duplicate and
 late results cannot consume it again.
@@ -18,9 +18,10 @@ late results cannot consume it again.
 A private u64 issuance counter survives source replacement; public selected data
 and its typed Source remain editable. Resetting that data cannot reuse a prior
 request. Exhaustion fails the new action and revokes prior Pending without
-wrapping. This costs 8 B in Library and removes 24 B from each result slot.
-Typed errors remain intact. Preparation already queued on the worker can still
-perform its one-row query after revocation; cancellation here governs owner
+wrapping. This costs 8 B in Library. Typed errors remain intact. Public worker
+commands can carry caller-chosen sequence values; full id/generation/sequence
+must therefore match Pending, not just the request number. Preparation already
+queued on the worker can still perform its one-row query after revocation; cancellation here governs owner
 admission, not preemption of SQLite.
 
 Selection/source replacement, Stop (including an empty queue), Pause and Seek
@@ -53,20 +54,25 @@ Prepare. Hardware CPAL execution remains unavailable in this environment.
 
 ## Bills and qualification
 
-The exact before-narrowing patch and constructor probe are retained with the
-qualification. A full Selection echoed in each reply initially made LibraryEvent
-96 B. Request-only echo narrows it to 72 B; the prepared-only control was 32 B.
-The existing channel and staging capacities remain eight each. Worker/UI cold
-buffer bytes therefore still grow 640 B versus control. Model grows 416 to
-472 B; removing the playback Question shrinks Questions 1,016 to 600 B and the
-bound Win's inline size 1,080 to 664 B.
+The initial full-Selection and rejected request-only patches and constructor
+controls are retained with qualification. A request-only reply was rejected:
+a prequeued public worker command for id90/sequence1 could satisfy the first
+Library intent for id44/sequence1. The exact public regression fails at a357cc3c2d
+and passes after restoring full Selection. Private issuance remains necessary
+to prevent public selected data from reusing prior issued identities. A public
+PrepareAndPlay command cannot grant playback to an owner's pure Prepare.
 
-Four actual construction cohorts measure UI-thread Rust allocations across
-worker creation, connect and mount, plus Win inline storage. Retained totals
-fall 7,635 B in each cohort: cold 107,763 to 100,128 B; warm 103,443 to 95,808 B.
-Requested bytes fall 35,754 and allocation requests fall 44. The first full-echo
-candidate fell 7,259 B; narrowing adds the measured 376 B saving after charging
-its private counter. These numbers exclude worker-thread allocations, SQLite C
+LibraryEvent is 96 B versus the prepared-only control's 32 B. The existing
+channel and staging capacities remain eight each, so their requested buffer
+bytes grow 1,024 B. Model grows 416 to 472 B; removing the playback Question
+shrinks Questions 1,016 to 600 B and the bound Win's inline size 1,080 to 664 B.
+
+Four default-feature construction cohorts measure UI-thread Rust allocations
+across worker creation, connect and mount, plus Win inline storage. Retained
+totals fall 7,251 B in every cohort: cold 107,763 to 100,512 B; warm 103,443 to
+96,192 B. Requested bytes fall 35,370 and allocation requests fall 44. The
+rejected request-only version saved another 384 B, which did not justify its
+authority bug. These numbers exclude worker-thread allocations, SQLite C
 allocation, native/device memory, RSS and performance. They establish no whole
 process or universal resource claim.
 
@@ -78,9 +84,10 @@ fresh occurrences and retired token rejection; duplicate/late preparation;
 source-revalidated same-ID playback; cancellation by empty Stop and active
 Pause/Seek before buffered result consumption; close with Pending; unattached
 output; full result-lane terminal failure; public selection reset/source
-replacement; and checked exhaustion through the actual method. Scheduled audio
-performance remains ignored; no new timing campaign was run. The final full
-default suite passes 40 tests; the full CPAL-feature suite passes 85 with one
+replacement; checked exhaustion through the actual method; caller-chosen request
+collisions across recording/source identities; and public worker Play commands
+against a pure owner Prepare. Scheduled audio performance remains ignored; no new timing campaign was run. The final full
+default suite passes 42 tests; the full CPAL-feature suite passes 88 with one
 scheduled test ignored. Strict native-feature all-target Clippy passes. Raw
 commands, logs and constructor controls are in `qualification/library-intent/`.
 
