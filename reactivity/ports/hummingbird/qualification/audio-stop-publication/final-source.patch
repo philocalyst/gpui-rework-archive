@@ -1,0 +1,294 @@
+diff --git a/reactivity/ports/hummingbird/src/audio/service.rs b/reactivity/ports/hummingbird/src/audio/service.rs
+index 0a65d205e1..d6838facda 100644
+--- a/reactivity/ports/hummingbird/src/audio/service.rs
++++ b/reactivity/ports/hummingbird/src/audio/service.rs
+@@ -47,6 +47,12 @@ pub struct AudioHandle {
+     shared: Arc<Shared>,
+ }
+ impl AudioHandle {
++    // Call under desired's lock so control order and final gate order agree.
++    fn publish_gate(&self, desired: &Intent) {
++        let gate = &self.shared.gate.0;
++        gate.epoch.store(desired.output_epoch, Ordering::Release);
++        gate.playing.store(desired.playing, Ordering::Release);
++    }
+     fn change(
+         &self,
+         change: impl FnOnce(&mut Intent) -> Result<(), AudioError>,
+@@ -61,16 +67,7 @@ impl AudioHandle {
+             desired.revision = previous;
+             return Err(error);
+         }
+-        self.shared
+-            .gate
+-            .0
+-            .epoch
+-            .store(desired.output_epoch, Ordering::Release);
+-        self.shared
+-            .gate
+-            .0
+-            .playing
+-            .store(desired.playing, Ordering::Release);
++        self.publish_gate(&desired);
+         let receipt = Receipt {
+             revision: desired.revision,
+             token: desired.token,
+@@ -155,6 +152,9 @@ impl AudioHandle {
+         desired.seek = None;
+         desired.output_epoch = 0;
+         desired.transition = Transition::Replace;
++        // An older control may have republished after the early revocation
++        // while Stop waited for this lock. Stop must publish last here too.
++        self.publish_gate(&desired);
+         let receipt = Receipt {
+             revision: desired.revision,
+             token: None,
+@@ -879,3 +879,183 @@ mod tests {
+         assert!(service.finish(Duration::MAX));
+     }
+ }
++
++#[cfg(test)]
++mod publication_tests {
++    use super::*;
++    use crate::{
++        queue::{Track, TrackRef},
++        queue_playback::PlaybackQueue,
++    };
++    use std::sync::Barrier;
++
++    fn active_handle(revision: u64) -> (AudioHandle, Plan) {
++        let mut queue = PlaybackQueue::new().unwrap();
++        queue
++            .play_now(
++                TrackRef::new(Track {
++                    path: "publication-only.wav".into(),
++                    track_id: None,
++                    album_id: None,
++                    title: "Gate publication".into(),
++                    available_when_prepared: true,
++                }),
++                &|_| true,
++                &mut |_| 0,
++            )
++            .unwrap();
++        let plan = queue.plan().unwrap().clone();
++        let intent = Intent {
++            revision,
++            plan: Some(plan.clone()),
++            token: Some(Token {
++                stamp: plan.stamp(),
++                revision,
++            }),
++            playing: true,
++            seek: None,
++            transition: Transition::Replace,
++            output_epoch: revision,
++        };
++        let handle = AudioHandle {
++            shared: Arc::new(Shared {
++                desired: Mutex::new(intent),
++                gate: PlaybackGate(Arc::new(Gate {
++                    epoch: AtomicU64::new(revision),
++                    playing: AtomicBool::new(true),
++                    closed: AtomicBool::new(false),
++                })),
++                owner: thread::current(),
++            }),
++        };
++        (handle, plan)
++    }
++
++    #[test]
++    fn stop_winning_the_desired_lock_cannot_leave_an_older_publication_playable() {
++        for revision in [1, u64::MAX - 1] {
++            let (handle, _) = active_handle(revision);
++            let entered = Arc::new(Barrier::new(2));
++            let release = Arc::new(Barrier::new(2));
++            let publisher = handle.clone();
++            let publishing = {
++                let entered = entered.clone();
++                let release = release.clone();
++                thread::spawn(move || {
++                    // Use the actual shared change path used by public controls.
++                    // The barrier only holds its existing desired-state lock.
++                    publisher.change(|state| {
++                        state.playing = true;
++                        entered.wait();
++                        release.wait();
++                        Ok(())
++                    })
++                })
++            };
++            entered.wait();
++            let stopper = handle.clone();
++            let stopping = thread::spawn(move || stopper.stop());
++            let deadline = Instant::now() + Duration::from_secs(5);
++            while handle.shared.gate.0.epoch.load(Ordering::Acquire) != 0
++                || handle.shared.gate.0.playing.load(Ordering::Acquire)
++            {
++                assert!(
++                    Instant::now() < deadline,
++                    "Stop did not revoke before its lock"
++                );
++                thread::yield_now();
++            }
++            // Stop has revoked and cannot acquire the held mutex. The older
++            // operation now republishes live permission before Stop wins it.
++            release.wait();
++            let published = publishing.join().unwrap().unwrap();
++            let stopped = stopping.join().unwrap().unwrap();
++            assert!(stopped.revision >= published.revision);
++            assert!(stopped.token.is_none());
++            let desired = handle.shared.desired.lock().unwrap();
++            assert!(desired.plan.is_none() && desired.token.is_none());
++            assert!(!desired.playing);
++            assert_eq!(desired.output_epoch, 0);
++            assert!(
++                !handle.shared.gate.allows(revision),
++                "Stop returned after committing stopped desired state, but old PCM is still permitted"
++            );
++        }
++    }
++
++    #[test]
++    fn stale_advance_and_exhaustion_cannot_restore_stopped_permission_through_clones() {
++        let (handle, plan) = active_handle(1);
++        let stale = handle.shared.desired.lock().unwrap().token.unwrap();
++        let stopped = handle.clone().stop().unwrap();
++        assert!(matches!(
++            handle.apply(Some(&plan), Transition::Advance { from: stale }),
++            Err(AudioError::Unsupported("stale source-end transition"))
++        ));
++        assert_eq!(
++            handle.shared.desired.lock().unwrap().revision,
++            stopped.revision
++        );
++        handle.clone().set_playing(true).unwrap();
++        assert!(!handle.shared.gate.allows(1));
++        assert!(matches!(handle.seek(0), Err(AudioError::Unsupported(_))));
++        let resumed = handle
++            .apply(Some(&plan), Transition::Replace)
++            .unwrap()
++            .token
++            .unwrap();
++        assert!(handle.shared.gate.allows(resumed.revision));
++        assert!(
++            handle
++                .apply(None, Transition::Advance { from: stale })
++                .is_err()
++        );
++        assert!(handle.shared.gate.allows(resumed.revision));
++
++        let (handle, plan) = active_handle(u64::MAX);
++        let stopped = handle.clone().stop().unwrap();
++        assert_eq!(stopped.revision, u64::MAX);
++        assert!(stopped.token.is_none());
++        assert_eq!(handle.set_playing(true).unwrap_err(), AudioError::Exhausted);
++        assert_eq!(handle.seek(0).unwrap_err(), AudioError::Exhausted);
++        assert_eq!(
++            handle.apply(Some(&plan), Transition::Replace).unwrap_err(),
++            AudioError::Exhausted
++        );
++        assert!(handle.clone().stop().unwrap().token.is_none());
++        assert!(!handle.shared.gate.allows(u64::MAX));
++    }
++
++    #[test]
++    fn terminal_close_dominates_a_control_already_inside_its_publication_lock() {
++        let (handle, _) = active_handle(1);
++        let entered = Arc::new(Barrier::new(2));
++        let release = Arc::new(Barrier::new(2));
++        let publisher = handle.clone();
++        let publishing = {
++            let entered = entered.clone();
++            let release = release.clone();
++            thread::spawn(move || {
++                publisher.change(|state| {
++                    state.playing = true;
++                    entered.wait();
++                    release.wait();
++                    Ok(())
++                })
++            })
++        };
++        entered.wait();
++        // This is the same monotonic terminal publication used by finish/Drop.
++        handle.shared.gate.0.closed.store(true, Ordering::Release);
++        release.wait();
++        publishing.join().unwrap().unwrap();
++        assert!(!handle.shared.gate.allows(1));
++        assert_eq!(
++            handle.clone().set_playing(true).unwrap_err(),
++            AudioError::Closed
++        );
++        assert_eq!(handle.seek(0).unwrap_err(), AudioError::Closed);
++        assert!(handle.clone().stop().unwrap().token.is_none());
++        assert!(!handle.shared.gate.allows(1));
++    }
++}
+diff --git a/reactivity/ports/hummingbird/tests/audio.rs b/reactivity/ports/hummingbird/tests/audio.rs
+index 5afb90779c..fbf874ea47 100644
+--- a/reactivity/ports/hummingbird/tests/audio.rs
++++ b/reactivity/ports/hummingbird/tests/audio.rs
+@@ -1015,3 +1015,60 @@ fn unusual_coprime_rates_fail_resource_admission_before_pcm_output() {
+         finish(service, win);
+     }
+ }
++
++#[test]
++fn public_stop_and_close_revoke_a_real_open_stream_for_every_handle_clone() {
++    use hummingbird_gpui_port::{audio::Transition, queue_playback::PlaybackQueue};
++    use std::sync::mpsc;
++    struct ObservedProvider {
++        provider: Provider,
++        gate: mpsc::SyncSender<(PlaybackGate, u64)>,
++    }
++    impl OutputProvider for ObservedProvider {
++        type Stream = Sink;
++        fn open(
++            &mut self,
++            format: Format,
++            gate: PlaybackGate,
++            epoch: u64,
++        ) -> Result<Sink, AudioError> {
++            self.gate.try_send((gate.clone(), epoch)).unwrap();
++            self.provider.open(format, gate, epoch)
++        }
++    }
++    let capture = Arc::new(Mutex::new(Capture::default()));
++    let (sender, opened) = mpsc::sync_channel(1);
++    let (service, inbox) = AudioService::with_output(ObservedProvider {
++        provider: Provider {
++            capture: capture.clone(),
++            frames: 31,
++            rate: None,
++            channels: None,
++        },
++        gate: sender,
++    })
++    .unwrap();
++    let mut queue = PlaybackQueue::new().unwrap();
++    queue
++        .play_now(track(&fixture("wav"), "public gate"), &|_| true, &mut |_| 0)
++        .unwrap();
++    let handle = service.handle();
++    let clone = handle.clone();
++    handle.apply(queue.plan(), Transition::Replace).unwrap();
++    let (gate, epoch) = opened.recv_timeout(Duration::from_secs(5)).unwrap();
++    assert!(gate.allows(epoch));
++    assert!(clone.stop().unwrap().token.is_none());
++    assert!(!gate.allows(epoch));
++    handle.set_playing(true).unwrap();
++    assert!(
++        !gate.allows(epoch),
++        "Resume without a source cannot restore old PCM"
++    );
++    assert!(service.finish(Duration::from_secs(5)));
++    assert_eq!(clone.set_playing(true).unwrap_err(), AudioError::Closed);
++    assert_eq!(handle.seek(0).unwrap_err(), AudioError::Closed);
++    assert!(clone.stop().unwrap().token.is_none());
++    assert!(!gate.allows(epoch));
++    assert_eq!(capture.lock().unwrap().drops, 1);
++    drop(inbox);
++}
