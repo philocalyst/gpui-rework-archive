@@ -178,7 +178,7 @@ def main():
                 invoke("Back")
                 find("4 albums")
                 invoke("Artists")
-                invoke("Open Alpha")
+                invoke("Open Alpha Artist")
                 find("4 recordings for ‘’ — Title")
                 invoke("Playlists")
                 invoke("Open Evening Καφέ")
