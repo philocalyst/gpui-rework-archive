@@ -1,0 +1,370 @@
+[
+  {
+    "target": "aarch64-apple-darwin",
+    "command": {
+      "name": "apple-library",
+      "argv": [
+        "cargo",
+        "check",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "desktop",
+        "--lib",
+        "--target",
+        "aarch64-apple-darwin",
+        "-Zbuild-std=std,panic_abort"
+      ],
+      "start_utc": "2026-10-23 01:58:44 UTC",
+      "exit": 0
+    },
+    "path": "/tmp/gpui-presented-basis-target/aarch64-apple-darwin/debug/.fingerprint/gpui-a933d2713d620d47/lib-gpui.json",
+    "sha256": "5d17f670e2806930bc90ac9fe5fe06d36de7ebf990aadd5f85007f7292aea0c2",
+    "modified_utc": "2026-10-23T01:59:04.493693+00:00",
+    "fingerprint": {
+      "rustc": 12019306335353385202,
+      "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\"]",
+      "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+      "target": 13433137496993833081,
+      "profile": 2330448797067240312,
+      "path": 8373320921053062204,
+      "deps": [
+        [
+          535147103364023206,
+          "icu_segmenter",
+          false,
+          973808476001259365
+        ],
+        [
+          1001648224152866569,
+          "arcstr",
+          false,
+          9822924776009981804
+        ],
+        [
+          1940408237737794595,
+          "accesskit_winit",
+          false,
+          13860009303848323619
+        ],
+        [
+          2251399859588827949,
+          "pin_project_lite",
+          false,
+          5413269920858908314
+        ],
+        [
+          3750483387937644717,
+          "pollster",
+          false,
+          1519382412023753083
+        ],
+        [
+          3778966308548958430,
+          "std",
+          true,
+          6253408828184949774
+        ],
+        [
+          4590322165379248138,
+          "gpui_reactivity_host",
+          false,
+          422718435154061184
+        ],
+        [
+          5283411439217056619,
+          "core",
+          true,
+          4711418921979188925
+        ],
+        [
+          6491792180230419711,
+          "panic_abort",
+          true,
+          12031065843000651273
+        ],
+        [
+          6557439603276904804,
+          "serde",
+          false,
+          1295237071621173907
+        ],
+        [
+          7648903741785607723,
+          "compiler_builtins",
+          true,
+          15171898199652259600
+        ],
+        [
+          8160210889872729633,
+          "serde_json",
+          false,
+          117967942605868881
+        ],
+        [
+          8676817272026490959,
+          "accesskit",
+          false,
+          11262855941312039389
+        ],
+        [
+          8991190325997472044,
+          "gpui_gpu",
+          false,
+          5667657735720447107
+        ],
+        [
+          11671159878170094075,
+          "gpui_reactivity_state",
+          false,
+          15554515021659425379
+        ],
+        [
+          11905275778120334160,
+          "softbuffer",
+          false,
+          18391161911844164618
+        ],
+        [
+          12292871154985835666,
+          "alloc",
+          true,
+          9372266246650984919
+        ],
+        [
+          13316223584457521750,
+          "cephal",
+          false,
+          14164428574115837670
+        ],
+        [
+          13672653153045154758,
+          "gpui_reactivity_core",
+          false,
+          1031167508887225541
+        ],
+        [
+          16004514561570924261,
+          "proc_macro",
+          true,
+          3612617210297948472
+        ],
+        [
+          16203338811130749637,
+          "panic_unwind",
+          true,
+          13181856990345569968
+        ],
+        [
+          17032968227276897852,
+          "gpui_canvas",
+          false,
+          16697534193750476900
+        ]
+      ],
+      "local": [
+        {
+          "CheckDepInfo": {
+            "dep_info": "aarch64-apple-darwin/debug/.fingerprint/gpui-a933d2713d620d47/dep-lib-gpui",
+            "checksum": false
+          }
+        }
+      ],
+      "rustflags": [
+        "-C",
+        "symbol-mangling-version=v0",
+        "--cfg",
+        "tokio_unstable"
+      ],
+      "config": 9396254390672932401,
+      "compile_kind": 551198452465029181
+    }
+  },
+  {
+    "target": "x86_64-pc-windows-msvc",
+    "command": {
+      "name": "msvc-library",
+      "argv": [
+        "cargo",
+        "check",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "desktop",
+        "--lib",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "-Zbuild-std=std,panic_abort"
+      ],
+      "start_utc": "2026-10-23 01:59:04 UTC",
+      "exit": 0
+    },
+    "path": "/tmp/gpui-presented-basis-target/x86_64-pc-windows-msvc/debug/.fingerprint/gpui-9fa49e1895d09e6e/lib-gpui.json",
+    "sha256": "b2994e4fa0f0f59367f6268c755babcd1d59aa2c8af4544a47e6e8d685145aaf",
+    "modified_utc": "2026-10-23T01:59:21.438067+00:00",
+    "fingerprint": {
+      "rustc": 12019306335353385202,
+      "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\"]",
+      "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+      "target": 13433137496993833081,
+      "profile": 17672942494452627365,
+      "path": 8373320921053062204,
+      "deps": [
+        [
+          535147103364023206,
+          "icu_segmenter",
+          false,
+          10739603318344984976
+        ],
+        [
+          1001648224152866569,
+          "arcstr",
+          false,
+          11073126255389602449
+        ],
+        [
+          1940408237737794595,
+          "accesskit_winit",
+          false,
+          2346721871443506744
+        ],
+        [
+          2251399859588827949,
+          "pin_project_lite",
+          false,
+          10456978976521182853
+        ],
+        [
+          3750483387937644717,
+          "pollster",
+          false,
+          16416091174816168556
+        ],
+        [
+          3778966308548958430,
+          "std",
+          true,
+          14366942892819440638
+        ],
+        [
+          4590322165379248138,
+          "gpui_reactivity_host",
+          false,
+          8736794754455497107
+        ],
+        [
+          5283411439217056619,
+          "core",
+          true,
+          13937958533358113116
+        ],
+        [
+          6491792180230419711,
+          "panic_abort",
+          true,
+          11162516522201884119
+        ],
+        [
+          6557439603276904804,
+          "serde",
+          false,
+          1708978034019034612
+        ],
+        [
+          7648903741785607723,
+          "compiler_builtins",
+          true,
+          6059542134591568899
+        ],
+        [
+          8160210889872729633,
+          "serde_json",
+          false,
+          5380992843241504620
+        ],
+        [
+          8676817272026490959,
+          "accesskit",
+          false,
+          7409280488509759651
+        ],
+        [
+          8991190325997472044,
+          "gpui_gpu",
+          false,
+          17098832606763322181
+        ],
+        [
+          11671159878170094075,
+          "gpui_reactivity_state",
+          false,
+          3777171494675645085
+        ],
+        [
+          11905275778120334160,
+          "softbuffer",
+          false,
+          13411617620640882775
+        ],
+        [
+          12292871154985835666,
+          "alloc",
+          true,
+          12310412264206608622
+        ],
+        [
+          13316223584457521750,
+          "cephal",
+          false,
+          6669252417872931395
+        ],
+        [
+          13672653153045154758,
+          "gpui_reactivity_core",
+          false,
+          14497024184301636694
+        ],
+        [
+          16004514561570924261,
+          "proc_macro",
+          true,
+          13398876970815676198
+        ],
+        [
+          16203338811130749637,
+          "panic_unwind",
+          true,
+          13488760404788596460
+        ],
+        [
+          17032968227276897852,
+          "gpui_canvas",
+          false,
+          13178144707687385474
+        ]
+      ],
+      "local": [
+        {
+          "CheckDepInfo": {
+            "dep_info": "x86_64-pc-windows-msvc/debug/.fingerprint/gpui-9fa49e1895d09e6e/dep-lib-gpui",
+            "checksum": false
+          }
+        }
+      ],
+      "rustflags": [
+        "--cfg",
+        "windows_slim_errors",
+        "-C",
+        "target-feature=+crt-static"
+      ],
+      "config": 9396254390672932401,
+      "compile_kind": 9161124489350129226
+    }
+  }
+]

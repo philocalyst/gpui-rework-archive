@@ -1,0 +1,5 @@
+HEAD is now at 6021d0009d Preserve the optional pointer-session niche with finite coordinate bits
+Previous HEAD position was 6021d0009d Preserve the optional pointer-session niche with finite coordinate bits
+HEAD is now at 9457193834 Archive focused inspector hit-sheet proof and preserved picking counterexample
+Switched to branch 'inspector-pointer-sol'
+matched source/flags/freshness/layout/behavior guards PASS
