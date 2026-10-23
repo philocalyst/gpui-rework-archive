@@ -56,6 +56,7 @@ pub enum SourceError {
     Sqlite(rusqlite::Error),
     QueryTooLong,
     MissingTrack(i64),
+    NoSelection,
     OutdatedSource,
     VersionExhausted,
     NotificationsUnavailable,
@@ -65,6 +66,7 @@ impl fmt::Display for SourceError {
         match self {
             Self::Sqlite(error) => write!(f, "Library source: {error}"),
             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
+            Self::NoSelection => f.write_str("No recording selected"),
             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
             Self::OutdatedSource => f.write_str("The library source changed"),
             Self::VersionExhausted => f.write_str("Library revision space exhausted"),

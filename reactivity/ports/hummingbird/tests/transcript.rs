@@ -1,7 +1,7 @@
 #[test]
 fn real_database_search_list_play_import_stale_completion_and_failure_use_public_owner() {
     let transcript = hummingbird_gpui_port::transcript::run().unwrap();
-    assert_eq!(transcript.played_id, 44);
+    assert_eq!(transcript.prepared_id, 44);
     assert_eq!(transcript.imported_id, 5000);
     assert!(transcript.source_failure_visible);
 }
@@ -18,7 +18,7 @@ fn dropping_the_public_owner_cancels_work_and_service_shutdown_revokes_cloned_ha
     let (model, questions) = connect(handle.clone()).unwrap();
     let owner = gpui::Win::with_questions(model, questions, gpui::WindowOptions::default())
         .unwrap()
-        .with_inbox(inbox, Library::receive)
+        .with_inbox_status(inbox, Library::receive)
         .unwrap();
     drop(owner);
     worker.finish().unwrap();
@@ -76,7 +76,7 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
             .contains_text("Library unavailable: The library source changed")
             .unwrap()
     );
-    let mut owner = owner.with_inbox(inbox, Library::receive).unwrap();
+    let mut owner = owner.with_inbox_status(inbox, Library::receive).unwrap();
     settle(&mut owner, &worker).unwrap();
     assert_eq!(
         owner

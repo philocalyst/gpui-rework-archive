@@ -1,0 +1,8 @@
+{
+  "environment": "source /tmp/gpui-hummingbird-audio-env.sh; Rust1.97.1; jobs1; exclusive audio target; no target-CPU flags",
+  "baseline_and_fixed_exact": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --features audio --lib audio::service::publication_tests::stop_winning_the_desired_lock_cannot_leave_an_older_publication_playable -- --exact --nocapture",
+  "additional_controls": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --features audio --lib audio::service::publication_tests",
+  "full_suite": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --features cpal-output",
+  "strict_native": "cargo clippy --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --all-targets --features native -- -D warnings",
+  "counter": "qualification/library-intent/count-app.py from sealed1cb evidence, --ref d9137cb; same installed Syn/Tokei helper as control"
+}

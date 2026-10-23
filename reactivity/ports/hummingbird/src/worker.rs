@@ -26,18 +26,24 @@ pub struct Selection {
     pub sequence: u64,
     pub generation: u64,
 }
-pub struct PlaybackRequest {
-    pub selection: Selection,
-    pub track: Option<TrackRef>,
-}
 #[derive(Debug)]
 pub enum LibraryEvent {
-    Imported { id: i64, version: Version },
-    Replaced { version: Version },
+    Prepared {
+        selection: Selection,
+        result: Result<TrackRef, SourceError>,
+    },
+    Imported {
+        id: i64,
+        version: Version,
+    },
+    Replaced {
+        version: Version,
+    },
 }
 enum Command {
     Search(SearchInput, Completion<SearchPage, SourceError>),
-    Play(Selection, Completion<PlaybackRequest, SourceError>),
+    Prepare(Selection),
+    PrepareAndPlay(Selection),
     Prepend(mpsc::SyncSender<Result<Version, SourceError>>),
     Replace(Database, mpsc::SyncSender<Result<Version, SourceError>>),
     Checkpoint(mpsc::SyncSender<()>),
@@ -62,12 +68,14 @@ impl WorkerHandle {
     ) -> Result<(), StartError> {
         self.enqueue(Command::Search(input, completion))
     }
-    pub fn play(
-        &self,
-        selection: Selection,
-        completion: Completion<PlaybackRequest, SourceError>,
-    ) -> Result<(), StartError> {
-        self.enqueue(Command::Play(selection, completion))
+    /// Prepare data only. Playback authority belongs to the receiving owner.
+    pub fn prepare(&self, selection: Selection) -> Result<(), StartError> {
+        self.enqueue(Command::Prepare(selection))
+    }
+    /// Explicit one-shot continuation, admitted only by the owner's matching
+    /// pending Selection and unchanged audio Receipt. The worker never plays.
+    pub fn prepare_and_play(&self, selection: Selection) -> Result<(), StartError> {
+        self.enqueue(Command::PrepareAndPlay(selection))
     }
 }
 
@@ -97,46 +105,16 @@ impl Worker {
                                 searcher.search(&database, input, || cancellation.is_cancelled())
                             });
                         }
-                        Command::Play(selection, completion) => {
-                            let _ =
-                                completion.run_cancellable(selection, |selection, cancellation| {
-                                    if cancellation.is_cancelled() {
-                                        return None;
-                                    }
-                                    if selection.generation != version.generation {
-                                        return Some(Err(SourceError::OutdatedSource));
-                                    }
-                                    let track = match selection.id {
-                                        None => Ok(None),
-                                        Some(id) => tracks()
-                                            .by_id(id)
-                                            .for_queue()
-                                            .fetch_rows(database.connection())
-                                            .map_err(SourceError::from)
-                                            .and_then(|mut rows| {
-                                                rows.pop()
-                                                    .map(Some)
-                                                    .ok_or(SourceError::MissingTrack(id))
-                                            }),
-                                    };
-                                    if cancellation.is_cancelled() {
-                                        None
-                                    } else {
-                                        Some(track.map(|track| PlaybackRequest {
-                                            selection,
-                                            track: track.map(|row| {
-                                                let available_when_prepared = row.location.exists();
-                                                TrackRef::new(Track {
-                                                    path: row.location,
-                                                    track_id: Some(row.id),
-                                                    album_id: row.album_id,
-                                                    title: row.title,
-                                                    available_when_prepared,
-                                                })
-                                            }),
-                                        }))
-                                    }
-                                });
+                        Command::Prepare(selection) | Command::PrepareAndPlay(selection) => {
+                            let result = prepare(&database, version, selection);
+                            if updates
+                                .try_send(LibraryEvent::Prepared { selection, result })
+                                .is_err()
+                            {
+                                // The status-aware lane reports final producer close after
+                                // its buffered events. No accepted owner intent stays Pending.
+                                break;
+                            }
                         }
                         Command::Prepend(reply) => {
                             let result = next_revision(version).and_then(|next| {
@@ -245,4 +223,28 @@ fn next_revision(version: Version) -> Result<Version, SourceError> {
             .ok_or(SourceError::VersionExhausted)?,
         ..version
     })
+}
+
+fn prepare(
+    database: &Database,
+    version: Version,
+    selection: Selection,
+) -> Result<TrackRef, SourceError> {
+    if selection.generation != version.generation {
+        return Err(SourceError::OutdatedSource);
+    }
+    let id = selection.id.ok_or(SourceError::NoSelection)?;
+    let row = tracks()
+        .by_id(id)
+        .for_queue()
+        .fetch_rows(database.connection())?
+        .pop()
+        .ok_or(SourceError::MissingTrack(id))?;
+    Ok(TrackRef::new(Track {
+        available_when_prepared: row.location.exists(),
+        path: row.location,
+        track_id: Some(row.id),
+        album_id: row.album_id,
+        title: row.title,
+    }))
 }

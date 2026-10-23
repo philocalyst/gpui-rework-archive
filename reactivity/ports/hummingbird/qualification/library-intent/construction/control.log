@@ -1,0 +1,20 @@
+   Compiling parley_engine v0.12.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/root/gpui-hummingbird-transport-control-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/crates/gpui)
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-transport-control-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 27.19s
+     Running tests/application_cost.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/application_cost-83f52fbf22c5f08f)
+
+running 1 test
+COHORT 0 model=416 questions=1016 event=32 selection=32 error=64 win=1080 ui_current_plus_inline=107763 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 2463, bytes_current: 2444, bytes_max: 2444 } connected=AllocationInfo { count_total: 3, count_current: 3, count_max: 3, bytes_total: 320, bytes_current: 320, bytes_max: 320 } mounted=AllocationInfo { count_total: 1867, count_current: 377, count_max: 531, bytes_total: 452845, bytes_current: 103919, bytes_max: 166771 }
+COHORT 1 model=416 questions=1016 event=32 selection=32 error=64 win=1080 ui_current_plus_inline=103443 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 2463, bytes_current: 2444, bytes_max: 2444 } connected=AllocationInfo { count_total: 3, count_current: 3, count_max: 3, bytes_total: 320, bytes_current: 320, bytes_max: 320 } mounted=AllocationInfo { count_total: 1853, count_current: 368, count_max: 522, bytes_total: 447129, bytes_current: 99599, bytes_max: 162451 }
+COHORT 2 model=416 questions=1016 event=32 selection=32 error=64 win=1080 ui_current_plus_inline=103443 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 2463, bytes_current: 2444, bytes_max: 2444 } connected=AllocationInfo { count_total: 3, count_current: 3, count_max: 3, bytes_total: 320, bytes_current: 320, bytes_max: 320 } mounted=AllocationInfo { count_total: 1853, count_current: 368, count_max: 522, bytes_total: 447129, bytes_current: 99599, bytes_max: 162451 }
+COHORT 3 model=416 questions=1016 event=32 selection=32 error=64 win=1080 ui_current_plus_inline=103443 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 2463, bytes_current: 2444, bytes_max: 2444 } connected=AllocationInfo { count_total: 3, count_current: 3, count_max: 3, bytes_total: 320, bytes_current: 320, bytes_max: 320 } mounted=AllocationInfo { count_total: 1853, count_current: 368, count_max: 522, bytes_total: 447129, bytes_current: 99599, bytes_max: 162451 }
+test requested_ui_construction_and_static_owner_bill ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+

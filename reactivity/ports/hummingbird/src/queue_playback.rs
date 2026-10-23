@@ -206,6 +206,23 @@ impl PlaybackQueue {
         }
         Ok(first)
     }
+    /// The explicit Play-now action appends and starts one fresh occurrence.
+    /// Reserve its authority before editing; publish only the final plan.
+    pub fn play_now(
+        &mut self,
+        track: TrackRef,
+        available: &impl Fn(&Track) -> bool,
+        draw: &mut impl FnMut(usize) -> usize,
+    ) -> Result<(), QueueError> {
+        if !available(&track) {
+            return Err(QueueError::Unavailable);
+        }
+        let serial = self.next_serial()?;
+        let key = self.queue.append(vec![track], draw)?.unwrap();
+        self.queue.jump(key, available)?;
+        self.install(serial, available);
+        Ok(())
+    }
     pub fn insert(
         &mut self,
         index: usize,
@@ -351,6 +368,10 @@ mod tests {
         let event = player.plan().unwrap().end_of_stream();
         player.serial = u64::MAX;
         assert_eq!(player.play(key, &|_| true), Err(QueueError::PlanExhausted));
+        assert_eq!(
+            player.play_now(track.clone(), &|_| true, &mut |_| 0),
+            Err(QueueError::PlanExhausted)
+        );
         assert_eq!(
             player.remove(&[key], &|_| true),
             Err(QueueError::PlanExhausted)
