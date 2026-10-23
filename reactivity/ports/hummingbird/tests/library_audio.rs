@@ -840,9 +840,9 @@ fn assert_retired_eof(control: &str, adopted_first: bool) {
         _ => unreachable!(),
     }
     .unwrap();
-    let adopted = take_adopted(&mut win, &capture, &held, latest.revision);
+    let mut adopted = Some(take_adopted(&mut win, &capture, &held, latest.revision));
     if adopted_first {
-        inject.try_send(adopted).unwrap();
+        inject.try_send(adopted.take().unwrap()).unwrap();
         win.deliver_ready(32).unwrap();
     }
     inject
@@ -866,7 +866,7 @@ fn assert_retired_eof(control: &str, adopted_first: bool) {
     assert_eq!(audio.handle().receipt().unwrap().revision, latest.revision);
     assert_eq!(audio.handle().receipt().unwrap().token, latest.token);
     if !adopted_first {
-        inject.try_send(adopted).unwrap();
+        inject.try_send(adopted.take().unwrap()).unwrap();
         win.deliver_ready(32).unwrap();
     }
     let expected = if control == "stop" {
@@ -922,9 +922,9 @@ fn paused_same_token_eof_advances_once_without_resuming_output() {
         let old = audio.handle().receipt().unwrap();
         let paused = audio.handle().clone().set_playing(false).unwrap();
         assert_eq!(paused.token, old.token);
-        let adopted = take_adopted(&mut win, &capture, &held, paused.revision);
+        let mut adopted = Some(take_adopted(&mut win, &capture, &held, paused.revision));
         if adopted_first {
-            inject.try_send(adopted).unwrap();
+            inject.try_send(adopted.take().unwrap()).unwrap();
             win.deliver_ready(32).unwrap();
         }
         inject
@@ -949,7 +949,7 @@ fn paused_same_token_eof_advances_once_without_resuming_output() {
             AudioState::Paused
         );
         if !adopted_first {
-            inject.try_send(adopted).unwrap();
+            inject.try_send(adopted.take().unwrap()).unwrap();
         }
         inject
             .try_send(Event::SourceEof {
