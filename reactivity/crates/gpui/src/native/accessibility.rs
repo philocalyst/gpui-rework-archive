@@ -34,7 +34,6 @@ enum Command {
 }
 struct Queued {
     session: u64,
-    publication: u64,
     command: Command,
 }
 impl Command {
@@ -84,7 +83,6 @@ struct Shared {
     // never on a new presentation; old live position-free targets remain valid.
     session: AtomicU64,
     initial: AtomicBool,
-    publication: AtomicU64,
 }
 impl Shared {
     fn set_active(&self, active: bool) {
@@ -123,32 +121,23 @@ impl Ingress {
             overflow: AtomicBool::new(false),
             session: AtomicU64::new(0),
             initial: AtomicBool::new(false),
-            publication: AtomicU64::new(0),
         }))
     }
     // Only the owner's actual publication factory initializes this cell.
     // Callbacks use get(), so they neither initialize nor wait for the queue.
-    fn prepare_publication(&self, receiver: &mut Option<Receiver<Queued>>) -> Result<(), ()> {
+    fn prepare_publication(&self, receiver: &mut Option<Receiver<Queued>>) {
         self.0.sender.get_or_init(|| {
             let (sender, channel) = mpsc::sync_channel(CAPACITY);
             *receiver = Some(channel);
             sender
         });
-        self.0
-            .publication
-            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
-            .map(|_| ())
-            .map_err(|_| {
-                self.0.closed.store(true, Ordering::Release);
-                self.0.overload();
-            })
     }
     #[cfg(test)]
     fn channel(wake: Option<Wake>) -> (Self, Receiver<Queued>) {
         // Lower-layer transport fixtures represent an installed publication.
         let ingress = Self::new(wake);
         let mut receiver = None;
-        ingress.prepare_publication(&mut receiver).unwrap();
+        ingress.prepare_publication(&mut receiver);
         (ingress, receiver.unwrap())
     }
 }
@@ -261,11 +250,7 @@ impl accesskit::ActionHandler for Ingress {
             // item realization need additional runtime authority.
             _ => return,
         };
-        match sender.try_send(Queued {
-            session,
-            publication: self.0.publication.load(Ordering::Acquire),
-            command,
-        }) {
+        match sender.try_send(Queued { session, command }) {
             Ok(()) => self.0.signal(),
             Err(TrySendError::Full(_)) => self.0.overload(),
             Err(TrySendError::Disconnected(_)) => {}
@@ -408,7 +393,7 @@ impl Bridge {
         let sheet = owner.accessibility_sheet()?;
         let ingress = &self.ingress;
         let receiver = &mut self.receiver;
-        let mut updated = Ok(false);
+        let mut updated = false;
         self.adapter.update_if_active(|| {
             let update = if let Some(indices) = delta.filter(|_| !relink.root) {
                 project_sparse(
@@ -427,12 +412,13 @@ impl Bridge {
             {
                 self.conversions += update.nodes.len();
             }
-            // A skipped factory creates no queue. Publish the receiver/sender
-            // and checked generation before the returned tree can serve actions.
-            updated = ingress.prepare_publication(receiver).map(|()| true);
+            // A skipped factory creates no queue. Install transport before the
+            // returned tree can serve actions; cohort IDs qualify text leases.
+            ingress.prepare_publication(receiver);
+            updated = true;
             update
         });
-        if updated.map_err(|()| NativeError::AccessibilityOverloaded)? {
+        if updated {
             self.published = Some(state);
             self.refresh = Refresh::published(qualified);
         }
@@ -461,11 +447,6 @@ fn drain_actions<M: View + 'static, L: crate::remote::LaneSet<M>>(
         }
         *result = Some((|| {
             let (id, action) = queued.command.operation(cohort)?;
-            if id.0 >= (1 << 63)
-                && queued.publication != ingress.0.publication.load(Ordering::Acquire)
-            {
-                return Err(Error::StaleTarget);
-            }
             let target = cohort.target(owner, id)?;
             let action = local_scroll_action(owner, target, action)?;
             owner.perform(target, action)
