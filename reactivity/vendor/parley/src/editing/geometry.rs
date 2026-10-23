@@ -196,7 +196,9 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                 &mut spill,
                 &mut rtl,
             )
-            .expect("the immutable layout passed complete source admission"),
+            .unwrap_or_else(|_| {
+                panic!("the immutable layout passed complete source admission")
+            }),
         )
     }
 
