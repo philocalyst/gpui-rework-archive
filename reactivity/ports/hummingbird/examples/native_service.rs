@@ -89,11 +89,14 @@ impl Drop for Sink {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database = Database::fixture()?;
-    let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/audio/stereo.wav");
-    database.connection().execute(
-        "UPDATE track SET location = ?1 WHERE id IN (44, 90)",
-        [fixture.to_str().unwrap()],
-    )?;
+    for (id, extension) in [(44, "wav"), (90, "flac")] {
+        let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(format!("assets/audio/stereo.{extension}"));
+        database.connection().execute(
+            "UPDATE track SET location = ?1 WHERE id = ?2",
+            rusqlite::params![fixture.to_str().unwrap(), id],
+        )?;
+    }
     let capture = Arc::new(Mutex::new(Capture::default()));
     let (services, window) = application::window(database, Provider(capture.clone()))?;
     // A harness-only command reader owns the existing SQL service; the app

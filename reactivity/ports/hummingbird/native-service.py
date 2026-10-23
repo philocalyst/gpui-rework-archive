@@ -84,7 +84,9 @@ def main():
             assert select.select([read], [], [], 15)[0], "Xvfb readiness"
             display = ":" + os.read(read, 32).decode().strip()
             os.close(read)
-            env = dict(os.environ, DISPLAY=display, GSETTINGS_BACKEND="memory")
+            runtime = args.output / "runtime"
+            runtime.mkdir(mode=0o700)
+            env = dict(os.environ, DISPLAY=display, GSETTINGS_BACKEND="memory", XDG_RUNTIME_DIR=str(runtime.resolve()))
             children.append(subprocess.Popen([
                 "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
                 "--launch-immediately", "--a11y=1"], env=env, stdout=log, stderr=log))
@@ -140,6 +142,7 @@ def main():
                 return nodes
 
             def named(name):
+                assert app.poll() is None, "native app exited"
                 try:
                     return next((node for node in tree() if node[0] == name), None)
                 except subprocess.CalledProcessError:
