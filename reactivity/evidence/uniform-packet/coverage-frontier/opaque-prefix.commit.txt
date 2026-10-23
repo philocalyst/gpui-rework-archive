@@ -1,0 +1,26 @@
+commit 67510c225915c777b9b4471e95e6cc4a11accbc4
+Author:     Codex <codex@openai.com>
+AuthorDate: Fri Oct 23 07:56:25 2026 -0400
+Commit:     Codex <codex@openai.com>
+CommitDate: Fri Oct 23 07:56:25 2026 -0400
+
+    Seed sampled tile tails from their already certified opaque prefix
+    
+    The existing cursor cutoff proves the first retained CSR draw covers every
+    sample with a safe opaque solid. Preserve that fact in a spare endpoint bit
+    and evaluate its original blend once before the remaining sampled tail.
+    This applies beneath text, images and partial geometry too, without another
+    coverage test, tile array, texture, pass or retained owner field.
+    
+    Color-only loads share the existing palette decoder and avoid expressing
+    unused geometry/resource loads for these certified solids. Keep the exact
+    original first source-over arithmetic instead of assuming assignment has
+    identical subnormal/zero behavior. Diagnostics charge that seed once plus
+    sixteen tail evaluations, rather than hiding it as zero work.
+    
+    Default controls pass 11 library, 4 presentation, 52 real software-Vulkan
+    readbacks and the compile-fail doc case. The focused prefix test proves exact
+    pixels with 256*(1+16) ordered source evaluations instead of 256*16*2, while
+    retaining both references and the sampled tail. Existing HDR, transform,
+    banked-paint, mask/image, transition and queued-resource cases pass. This
+    is work-count evidence; performance and final codegen remain unqualified.

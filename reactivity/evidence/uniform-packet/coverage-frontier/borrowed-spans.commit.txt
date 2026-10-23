@@ -1,0 +1,17 @@
+commit 014b19cf04b9c2914098cbfa281be26639b6f77d
+Author:     Codex <codex@openai.com>
+AuthorDate: Fri Oct 23 07:31:20 2026 -0400
+Commit:     Codex <codex@openai.com>
+CommitDate: Fri Oct 23 07:31:20 2026 -0400
+
+    Borrow the complete replacement range before walking GPU words
+    
+    The first linked assembly comparison exposed two bounds checks and scalar
+    ABI fragments in the two-word specialization. Borrow the whole admitted
+    range once and zip its mutable words with the borrowed replacement array.
+    This expresses disjoint, exactly bounded storage directly to the compiler
+    and keeps the same bitwise comparison and change-envelope semantics.
+    
+    All eleven existing library cases pass, including all 4,096 dirty masks.
+    No SIMD, timing or code-size win is assumed from this source formulation;
+    the matched linked artifact must establish what the compiler actually does.

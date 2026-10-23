@@ -1,0 +1,1255 @@
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 7c75e12982..62078b204d 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -23,7 +23,10 @@ const MAX_ATLAS_SIDE: u32 = 2048;
+ const ROUNDED_SOURCE: u32 = 1 << 30;
+ const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
+ const UNIFORM_TILE: u32 = 1 << 31;
+-const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
++const CONSTANT_TILE: u32 = 1 << 30;
++const OPAQUE_PREFIX: u32 = 1 << 29;
++const TILE_END: u32 = OPAQUE_PREFIX - 1;
++const _: () = assert!(MAX_REFERENCES < OPAQUE_PREFIX as usize);
+ const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
+ 
+ #[derive(Debug)]
+@@ -56,22 +59,14 @@ fn validate_format(format: wgpu::TextureFormat) -> Result<(), Error> {
+     }
+ }
+ 
+-#[repr(C)]
+-#[derive(Clone, Copy, Pod, Zeroable)]
+-struct DrawData {
+-    local: [f32; 4],
+-    inverse_x: [f32; 4],
+-    inverse_y: [f32; 4],
+-    clip: [f32; 4],
+-    color: [f32; 4],
+-    atlas: [u32; 4],
+-}
+ #[repr(C)]
+ #[derive(Clone, Copy, Pod, Zeroable)]
+ struct Globals {
+     viewport: [u32; 4],
+     clear: [f32; 4],
+-    mapping: [f32; 4],
++    exposure: f32,
++    material_offset: u32,
++    padding: [u32; 2],
+ }
+ #[repr(C)]
+ #[derive(Clone, Copy, Pod, Zeroable)]
+@@ -98,14 +93,19 @@ pub struct Stats {
+     /// References omitted from the sampled CSR, including uniform tiles.
+     pub skipped_tile_references: usize,
+     pub uniform_tiles: usize,
+-    /// Planned lattice samples, excluding clear and certified uniform pixels.
++    /// Planned color evaluations: sixteen samples per pixel, or one when all
++    /// retained draws have certified constant coverage. Direct fills cost zero.
+     pub sample_evaluations: u64,
+-    /// Planned sample_draw calls, including calls rejected by clip/geometry.
++    /// Planned ordered source evaluations, including rejected sample_draw calls
++    /// and the once-per-pixel blends of constant-coverage ranges.
+     pub sample_draw_evaluations: u64,
+     pub instance_upload_bytes: usize,
+     pub draw_record_bytes: usize,
+     pub shared_groups: usize,
++    /// Placements sharing common state with another placement.
+     pub compact_draws: usize,
++    /// Placements owning unshared common state; the legacy diagnostic name
++    /// remains, but every placement now uses the same two-word schema.
+     pub inline_draws: usize,
+     pub mask_upload_bytes: usize,
+     pub gpu_buffer_bytes: u64,
+@@ -118,13 +118,58 @@ pub struct Stats {
+     pub correction_key_capacity: usize,
+ }
+ 
+-// Private word addresses refer only to this validated frame packet. The tag
+-// selects an inline 96-byte draw; compact placements are two 16-byte words and
+-// point at a five-word shared common record in the same storage buffer.
+-const INLINE_RECORD: u32 = 1 << 31;
+-// Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
+-const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
++// Every placement points at two affine words and two material words. Separate
++// planes make a multi-group transform one contiguous upload. Singleton packets
++// still cost six words; sharing saves four words per repeated placement.
++// The common address's high bit selects a paint-bank color, never another schema.
++const _: () = assert!(MAX_DRAWS * 6 < SLOT_COLOR as usize);
++const CORRECTION_BITS: u32 = 17;
++const CORRECTION_MASK: u32 = (1 << CORRECTION_BITS) - 1;
++const RESOURCE_BITS: u32 = 32 - CORRECTION_BITS;
++const _: () = assert!(MAX_DRAWS <= CORRECTION_MASK as usize);
++const _: () = assert!(MAX_ATLAS_SIDE < 1 << RESOURCE_BITS);
+ type Word = [u32; 4];
++
++// Two stack-owned envelopes follow the physical packet bands. No shadow
++// records, per-draw dirty tags, dirty collection or retained generation exists.
++struct Changes {
++    first: usize,
++    last: usize,
++}
++impl Changes {
++    fn new() -> Self {
++        Self {
++            first: usize::MAX,
++            last: 0,
++        }
++    }
++    fn replace<const N: usize>(&mut self, records: &mut [Word], start: usize, next: [Word; N]) {
++        for (offset, (old, next)) in records[start..start + N]
++            .iter_mut()
++            .zip(next.iter())
++            .enumerate()
++        {
++            let index = start + offset;
++            if old != next {
++                self.first = self.first.min(index);
++                self.last = self.last.max(index + 1);
++                *old = *next;
++            }
++        }
++    }
++    fn upload(&self, records: &[Word], buffer: &Buffer, queue: &wgpu::Queue) -> usize {
++        if self.first >= self.last {
++            return 0;
++        }
++        let words = &records[self.first..self.last];
++        queue.write_buffer(
++            &buffer.handle,
++            (self.first * 16) as u64,
++            bytemuck::cast_slice(words),
++        );
++        words.len() * 16
++    }
++}
+ fn float_word(value: [f32; 4]) -> Word {
+     value.map(f32::to_bits)
+ }
+@@ -138,28 +183,31 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
+         source: p.source,
+     }
+ }
+-fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
+-    let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
+-    let clip = group.clip;
++fn common_words(draw: PreparedDraw<'_>, error: [f32; 2]) -> [Word; 4] {
++    let [a, b, c, d, tx, ty] = draw.inverse.map(|v| v as f32);
++    let clip = draw.clip;
+     [
+         float_word([a, c, tx, error[0]]),
+         float_word([b, d, ty, error[1]]),
+         float_word([clip.x, clip.y, clip.width, clip.height]),
+-        float_word(group.color),
+-        [correction, 0, 0, 0],
++        float_word(packet_color(draw)),
+     ]
+ }
+-fn inline_words(draw: PreparedDraw<'_>, error: [f32; 2], correction: u32) -> [Word; 6] {
+-    let [a, b, c, d, tx, ty] = draw.inverse.map(|v| v as f32);
+-    let (r, clip) = (draw.local_rect, draw.clip);
+-    bytemuck::cast(DrawData {
+-        local: [r.x, r.y, r.width, r.height],
+-        inverse_x: [a, c, tx, error[0]],
+-        inverse_y: [b, d, ty, error[1]],
+-        clip: [clip.x, clip.y, clip.width, clip.height],
+-        color: packet_color(draw),
+-        atlas: [0, 0, 0, correction],
+-    })
++
++// Closed resource variants leave seventeen exact bits available. Mask y is an
++// atlas coordinate; image y contains five flags. Rounded solids instead keep a
++// full radius in y and a power-of-two scale in z, whose low 23 bits are zero.
++// Decode restores the original resource words before any shader interpretation.
++fn resource_words(mut resource: [u32; 3], common: u32, correction: u32) -> Word {
++    debug_assert!(correction <= CORRECTION_MASK);
++    if resource[0] == ROUNDED_SOURCE {
++        debug_assert_eq!(resource[2] & CORRECTION_MASK, 0);
++        resource[2] |= correction;
++    } else {
++        debug_assert!(resource[1] < 1 << RESOURCE_BITS);
++        resource[1] |= correction << RESOURCE_BITS;
++    }
++    [resource[0], resource[1], resource[2], common]
+ }
+ 
+ // Image material has no tint/opacity port. Its otherwise unused solid-color
+@@ -215,15 +263,20 @@ impl Buffer {
+             size,
+         }
+     }
+-    fn write(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, bytes: &[u8]) {
+-        if bytes.len() as u64 > self.size {
++    fn reserve(&mut self, device: &wgpu::Device, bytes: usize) -> bool {
++        if bytes as u64 > self.size {
+             *self = Self::new(
+                 device,
+                 "scene data",
+-                (bytes.len() as u64).next_power_of_two(),
++                (bytes as u64).next_power_of_two(),
+                 false,
+             );
++            return true;
+         }
++        false
++    }
++    fn write(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, bytes: &[u8]) {
++        self.reserve(device, bytes.len());
+         if !bytes.is_empty() {
+             queue.write_buffer(&self.handle, 0, bytes);
+         }
+@@ -594,7 +647,7 @@ impl RendererState {
+     pub fn image_stats(&self) -> Option<ImageStats> {
+         self.images.as_ref().map(|images| images.stats())
+     }
+-    /// Diagnostic schema oracle: keep old inline fields for every draw.
++    /// Diagnostic sharing oracle: give every draw its own common state.
+     pub fn set_grouped_records(&mut self, enabled: bool) {
+         if self.grouped_records != enabled {
+             self.packet = None;
+@@ -621,13 +674,16 @@ impl RendererState {
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+-        self.render_observed(context, scene, target, |_, _, _, _| {})
++        self.check_context(context)?;
++        let resident = self.packet.take().is_some();
++        self.render_observed(context, scene, target, resident, |_, _, _, _| {})
+     }
+     fn render_observed(
+         &mut self,
+         context: &GpuContext,
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
++        resident: bool,
+         mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+         self.check_context(context)?;
+@@ -673,23 +729,40 @@ impl RendererState {
+             scene.height.div_ceil(16) as usize,
+         );
+         self.ranges.clear();
+-        self.ranges.resize(columns * rows, [0, 0]);
+-        self.records.clear();
++        self.ranges.resize(columns * rows, [0, CONSTANT_TILE]);
++        let old_words = self.records.len();
+         let bank_count = scene.paint_bank().len();
+         if bank_count > MAX_DRAWS * 2 {
+             return Err(Error::ResourceLimit);
+         }
+         let bank_words = slots::prefix_words(bank_count);
+-        let word_count = scene.groups().try_fold(0usize, |sum, group| {
+-            let n = group.placements().len();
+-            let compact = compact_group(group, self.grouped_records);
+-            let words = if compact { 5 + 2 * n } else { 6 * n };
+-            sum.checked_add(words).ok_or(Error::ResourceLimit)
+-        })?;
++        // Prepared groups partition the already bounded draw iterator. Reserve
++        // the common prefix once; placements remain a uniform two-word suffix.
++        let common_count: usize = scene
++            .groups()
++            .map(|group| {
++                if compact_group(group, self.grouped_records) {
++                    1
++                } else {
++                    group.placements().len()
++                }
++            })
++            .sum();
++        let material_offset = common_count * 2;
++        let placement_start = bank_words + material_offset * 2;
++        let word_count = placement_start + scene.draws().len() * 2;
+         self.records
+-            .try_reserve_exact(word_count + bank_words)
++            .try_reserve_exact(word_count.saturating_sub(old_words))
+             .map_err(|_| Error::ResourceLimit)?;
+-        slots::write_prefix(&mut self.records, scene, bank_count);
++        self.records.resize(word_count, [0; 4]);
++        let mut common_changes = Changes::new();
++        let mut placement_changes = Changes::new();
++        slots::write_prefix(
++            &mut self.records[..bank_words],
++            scene,
++            bank_count,
++            &mut common_changes,
++        );
+         self.cursors.clear();
+         self.cursors.resize(columns * rows, 0);
+         self.residuals.clear();
+@@ -700,82 +773,86 @@ impl RendererState {
+         let mut ordinal = 0;
+         let mut shared_groups = 0;
+         let mut compact_draws = 0;
++        let mut common_word = bank_words;
++        let mut placement_word = placement_start;
+         for group in scene.groups() {
+             let compact = compact_group(group, self.grouped_records);
+-            let correction = self.correction(group.inverse, group.clip);
+-            // The optional paint owner captures only requested groups here.
+-            // Ordinary render's empty observer specializes away. Inline
+-            // multi-placement diagnostic groups decline color-only patching.
+-            group_ready(ordinal, group, self.records.len(), compact);
++            group_ready(ordinal, group, common_word + material_offset + 1, compact);
++            let mut shared_error = [0.0_f32; 2];
+             if compact {
+-                let mut error = [0.0_f32; 2];
+                 for (offset, p) in group.placements().enumerate() {
+-                    let e = validate_draw(
++                    let error = validate_draw(
+                         prepared(group, p),
+                         ordinal + offset,
+                         scene.width,
+                         scene.height,
+                     )?;
+-                    error[0] = error[0].max(e[0]);
+-                    error[1] = error[1].max(e[1]);
++                    shared_error[0] = shared_error[0].max(error[0]);
++                    shared_error[1] = shared_error[1].max(error[1]);
+                 }
+-                let common = self.records.len() as u32;
+-                let mut words = common_words(group, error, correction);
+-                if let Some(slot) = group.paint_slot() {
+-                    words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
+-                    words[4][0] |= SLOT_COLOR;
+-                }
+-                self.records.extend_from_slice(&words);
+                 shared_groups += 1;
+                 compact_draws += group.placements().len();
+-                for p in group.placements() {
+-                    let draw = prepared(group, p);
+-                    has_masks |= draw.source.mask().is_some();
+-                    let r = draw.local_rect;
+-                    let address = self.records.len() as u32;
+-                    self.records.extend_from_slice(&[
+-                        float_word([r.x, r.y, r.width, r.height]),
+-                        [0, 0, 0, common],
+-                    ]);
+-                    original_references = self.bin_draw(
+-                        draw,
+-                        error,
+-                        address,
+-                        ordinal,
+-                        columns,
+-                        scene.width,
+-                        scene.height,
+-                        original_references,
+-                    )?;
+-                    ordinal += 1;
+-                }
+-            } else {
+-                for p in group.placements() {
+-                    let draw = prepared(group, p);
+-                    let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
+-                    has_masks |= draw.source.mask().is_some();
+-                    let address = INLINE_RECORD | self.records.len() as u32;
+-                    let mut words = inline_words(draw, error, correction);
++            }
++            let group_word = common_word;
++            for (offset, p) in group.placements().enumerate() {
++                let draw = prepared(group, p);
++                let error = if compact {
++                    shared_error
++                } else {
++                    validate_draw(draw, ordinal, scene.width, scene.height)?
++                };
++                let common = if compact { group_word } else { common_word };
++                if !compact || offset == 0 {
++                    let mut words = common_words(draw, error);
+                     if let Some(slot) = group.paint_slot() {
+-                        words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
+-                        words[5][3] |= SLOT_COLOR;
++                        words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
+                     }
+-                    self.records.extend_from_slice(&words);
+-                    original_references = self.bin_draw(
+-                        draw,
+-                        error,
+-                        address,
+-                        ordinal,
+-                        columns,
+-                        scene.width,
+-                        scene.height,
+-                        original_references,
+-                    )?;
+-                    ordinal += 1;
++                    common_changes.replace(&mut self.records, common_word, [words[0], words[1]]);
++                    common_changes.replace(
++                        &mut self.records,
++                        common_word + material_offset,
++                        [words[2], words[3]],
++                    );
++                    common_word += 2;
+                 }
++                has_masks |= draw.source.mask().is_some();
++                let r = draw.local_rect;
++                let address = placement_word as u32;
++                let common = common as u32
++                    | if group.paint_slot().is_some() {
++                        SLOT_COLOR
++                    } else {
++                        0
++                    };
++                placement_changes.replace(
++                    &mut self.records,
++                    placement_word,
++                    [float_word([r.x, r.y, r.width, r.height])],
++                );
++                // Resource xyz remain untouched until final admission. Merge
++                // only the common address now; no temporary correction encoding.
++                let mut metadata = self.records[placement_word + 1];
++                metadata[3] = common;
++                placement_changes.replace(&mut self.records, placement_word + 1, [metadata]);
++                placement_word += 2;
++                original_references = self.bin_draw(
++                    draw,
++                    error,
++                    address,
++                    ordinal,
++                    columns,
++                    scene.width,
++                    scene.height,
++                    original_references,
++                )?;
++                ordinal += 1;
+             }
+         }
+-        images::prepare(
++        debug_assert_eq!(
++            (common_word, placement_word),
++            (bank_words + material_offset, word_count)
++        );
++        let relocated = images::prepare(
+             &context.device,
+             &context.queue,
+             &mut self.draws,
+@@ -784,15 +861,41 @@ impl RendererState {
+             scene,
+         )?;
+         let mask_bytes = self.prepare_atlas(context, scene, has_masks)?;
+-        // Patch only resource coordinates after every draw has passed admission.
+-        // Metadata words/correction indices and private common addresses remain.
+-        let mut word = bank_words;
+-        for group in scene.groups() {
+-            let compact = compact_group(group, self.grouped_records);
+-            if compact {
+-                word += 5;
++        let mut offset = 0;
++        for (tile, range) in self.ranges.iter_mut().enumerate() {
++            let constant = range[1] & CONSTANT_TILE;
++            let count = range[1] & !CONSTANT_TILE;
++            if self.cursors[tile] != 0 && count == 1 {
++                range[1] = UNIFORM_TILE;
++            } else {
++                offset += count;
++                *range = [
++                    offset,
++                    offset
++                        | constant
++                        | if self.cursors[tile] != 0 {
++                            OPAQUE_PREFIX
++                        } else {
++                            0
++                        },
++                ];
+             }
+-            for p in group.placements() {
++        }
++        let references = offset as usize;
++        self.references.clear();
++        self.references.resize(references, 0);
++        // Uniform placement strides need no per-draw address lane. Correction
++        // handles are assigned here, so no temporary metadata crosses admission.
++        let mut word = word_count;
++        let mut reverse_ordinal = ordinal;
++        for group in scene.groups().rev() {
++            let correction = self.correction(group.inverse, group.clip);
++            for p in group.placements().rev() {
++                word -= 2;
++                reverse_ordinal -= 1;
++                // Resource preparation follows admission of every draw. Patch
++                // coordinates at the same address needed for tile references,
++                // preserving correction indices and private common addresses.
+                 let atlas = if let Some((image, sampling)) = p.source.image() {
+                     let [offset, mut flags] = self
+                         .images
+@@ -812,34 +915,13 @@ impl RendererState {
+                         [t.x, t.y, t.width | (t.height << 16)]
+                     })
+                 };
+-                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
+-                word += if compact { 2 } else { 6 };
+-            }
+-        }
+-        debug_assert_eq!(word, self.records.len());
+-        let mut offset = 0;
+-        for (tile, range) in self.ranges.iter_mut().enumerate() {
+-            let count = range[1];
+-            if self.cursors[tile] != 0 && count == 1 {
+-                range[1] = UNIFORM_TILE;
+-            } else {
+-                offset += count;
+-                *range = [offset, offset];
+-            }
+-        }
+-        let references = offset as usize;
+-        self.references.clear();
+-        self.references.resize(references, 0);
+-        // Reverse group traversal recovers variable-width word addresses without
+-        // retaining another per-draw address lane or a duplicate expanded scene.
+-        let mut word = self.records.len();
+-        let mut reverse_ordinal = ordinal;
+-        for group in scene.groups().rev() {
+-            let compact = compact_group(group, self.grouped_records);
+-            for p in group.placements().rev() {
+-                word -= if compact { 2 } else { 6 };
+-                reverse_ordinal -= 1;
+-                let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
++                let metadata = self.records[word + 1];
++                placement_changes.replace(
++                    &mut self.records,
++                    word + 1,
++                    [resource_words(atlas, metadata[3], correction)],
++                );
++                let address = word as u32;
+                 visit(prepared(group, p), columns, |tile| {
+                     let range = &mut self.ranges[tile];
+                     if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
+@@ -849,23 +931,24 @@ impl RendererState {
+                     }
+                 });
+             }
+-            if compact {
+-                word -= 5;
+-            }
+         }
+-        debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
++        debug_assert_eq!((word, reverse_ordinal), (placement_start, 0));
+         let mut uniform_tiles = 0;
+         let mut sample_evaluations = 0;
+         let mut sample_draw_evaluations = 0;
+         for (tile, range) in self.ranges.iter().enumerate() {
+             if range[1] == UNIFORM_TILE {
+                 uniform_tiles += 1;
+-            } else if range[0] != range[1] {
++            } else if range[0] != (range[1] & TILE_END) {
+                 let [left, top, right, bottom] =
+                     tile_bounds(tile, columns, scene.width, scene.height);
+-                let samples = u64::from((right - left) * (bottom - top)) * 16;
++                let end = range[1] & TILE_END;
++                let area = u64::from((right - left) * (bottom - top));
++                let samples = area * if range[1] & CONSTANT_TILE != 0 { 1 } else { 16 };
++                let prefix = u64::from(range[1] & OPAQUE_PREFIX != 0);
+                 sample_evaluations += samples;
+-                sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
++                sample_draw_evaluations +=
++                    area * prefix + samples * (u64::from(end - range[0]) - prefix);
+             }
+         }
+         let (tone, exposure) = match scene.color_config.mapping {
+@@ -881,23 +964,33 @@ impl RendererState {
+             | tone
+             | if hdr { 4 } else { 0 };
+         let globals = Globals {
+-            viewport: [
+-                scene.width,
+-                scene.height,
+-                columns as u32,
+-                mode | if bank_count != 0 { 8 } else { 0 },
+-            ],
++            viewport: [scene.width, scene.height, columns as u32, mode],
+             clear: scene.clear,
+-            mapping: [exposure, 0.0, 0.0, 0.0],
++            exposure,
++            material_offset: material_offset as u32,
++            padding: [0; 2],
+         };
+         context
+             .queue
+             .write_buffer(&self.globals.handle, 0, bytemuck::bytes_of(&globals));
+-        self.draws.write(
+-            &context.device,
+-            &context.queue,
+-            bytemuck::cast_slice(&self.records),
+-        );
++        let grew = self.draws.reserve(&context.device, word_count * 16);
++        let draw_upload_bytes = if !resident || old_words != word_count || relocated || grew {
++            self.draws.write(
++                &context.device,
++                &context.queue,
++                bytemuck::cast_slice(&self.records),
++            );
++            word_count * 16
++        } else {
++            // Merge only touching envelopes. Disjoint changes cost at most two
++            // queue writes, independent of the number of changed placements.
++            if common_changes.last == placement_changes.first {
++                common_changes.last = placement_changes.last;
++                placement_changes = Changes::new();
++            }
++            common_changes.upload(&self.records, &self.draws, &context.queue)
++                + placement_changes.upload(&self.records, &self.draws, &context.queue)
++        };
+         self.tiles.write(
+             &context.device,
+             &context.queue,
+@@ -975,7 +1068,7 @@ impl RendererState {
+             uniform_tiles,
+             sample_evaluations,
+             sample_draw_evaluations,
+-            instance_upload_bytes: self.records.len() * 16
++            instance_upload_bytes: draw_upload_bytes
+                 + self.ranges.len() * 8
+                 + references * 4
+                 + self.residuals.len() * 32
+@@ -1075,12 +1168,27 @@ impl RendererState {
+         if total > MAX_REFERENCES {
+             return Err(Error::ResourceLimit);
+         }
++        let solid = self.tile_proofs && draw.source.is_solid();
++        // Classify material once per draw. A sampled tile only needs another
++        // coverage proof when an opaque solid could retire its partial prefix.
++        let opaque = solid
++            && draw.color[3] == 1.0
++            && !draw
++                .color
++                .iter()
++                .any(|v| v.is_sign_negative() && !v.is_normal());
+         visit(draw, columns, |tile| {
+-            if self.tile_proofs && full_tile(draw, error, tile, columns, width, height) {
+-                self.ranges[tile] = [address, 1];
++            let covered = solid
++                && (opaque || self.ranges[tile][1] & CONSTANT_TILE != 0)
++                && full_tile(draw, error, tile, columns, width, height);
++            if covered && opaque {
++                self.ranges[tile] = [address, CONSTANT_TILE | 1];
+                 self.cursors[tile] = ordinal as u32 + 1;
+             } else {
+                 self.ranges[tile][1] += 1;
++                if !covered {
++                    self.ranges[tile][1] &= !CONSTANT_TILE;
++                }
+             }
+         });
+         Ok(total)
+@@ -1161,13 +1269,7 @@ fn full_tile(
+     width: u32,
+     height: u32,
+ ) -> bool {
+-    if !draw.source.is_solid()
+-        || draw.color[3] != 1.0
+-        // Source-over can change -0 to +0 according to the backdrop's sign.
+-        // A negative subnormal may also flush to -0 before that addition.
+-        // Neither is a backdrop-independent byte value on float targets.
+-        || draw.color.iter().any(|v| v.is_sign_negative() && !v.is_normal())
+-    {
++    if !draw.source.is_solid() {
+         return false;
+     }
+     let [left, top, right, bottom] = tile_bounds(tile, columns, width, height);
+@@ -1380,13 +1482,11 @@ mod tests {
+ 
+     #[test]
+     fn storage_records_match_shader_stride_and_offsets() {
+-        assert_eq!(std::mem::size_of::<DrawData>(), 96);
+-        assert_eq!(std::mem::offset_of!(DrawData, inverse_x), 16);
+-        assert_eq!(std::mem::offset_of!(DrawData, inverse_y), 32);
+-        assert_eq!(std::mem::offset_of!(DrawData, atlas), 80);
+         assert_eq!(std::mem::size_of::<Correction>(), 32);
+         assert_eq!(std::mem::offset_of!(Correction, y), 16);
+         assert_eq!(std::mem::size_of::<Globals>(), 48);
++        assert_eq!(std::mem::offset_of!(Globals, exposure), 32);
++        assert_eq!(std::mem::offset_of!(Globals, material_offset), 36);
+         assert_eq!(
+             SHADER_SOURCE,
+             crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap()
+@@ -1418,7 +1518,7 @@ mod tests {
+         layout.update(module.to_ctx()).unwrap();
+         for (name, size, offsets) in [
+             ("Draw", 96, &[0, 16, 32, 48, 64, 80][..]),
+-            ("Globals", 48, &[0, 16, 32][..]),
++            ("Globals", 48, &[0, 16, 32, 36][..]),
+             ("Correction", 32, &[0, 16][..]),
+         ] {
+             let (handle, ty) = module
+@@ -1459,15 +1559,86 @@ mod tests {
+         let group = scene.groups().next().unwrap();
+         let draw = scene.draws().next().unwrap();
+         let error = [0.00001, 0.00002];
+-        let inline = inline_words(draw, error, 57);
+-        let common = common_words(group, error, 57);
+-        assert_eq!(inline[1], common[0]);
+-        assert_eq!(inline[2], common[1]);
+-        assert_eq!(inline[3], common[2]);
+-        assert_eq!(inline[4], common[3]);
+-        assert_eq!(inline[5][3], common[4][0]);
+-        assert_eq!(inline[4], draw.color.map(f32::to_bits));
+-        assert_eq!(inline[1][3], error[0].to_bits());
++        let common = common_words(draw, error);
++        assert_eq!(common[3], draw.color.map(f32::to_bits));
++        assert_eq!(common[0][3], error[0].to_bits());
++        assert_eq!(common[1][3], error[1].to_bits());
++        assert_eq!(
++            common[2],
++            float_word([
++                group.clip.x,
++                group.clip.y,
++                group.clip.width,
++                group.clip.height
++            ])
++        );
++    }
++
++    #[test]
++    fn change_envelopes_cover_exactly_the_first_through_last_changed_word() {
++        for mask in 0u32..4096 {
++            let mut records = [[0; 4]; 12];
++            let expected: [Word; 12] = std::array::from_fn(|index| {
++                if mask & (1 << index) == 0 {
++                    [0; 4]
++                } else {
++                    [u32::MAX; 4]
++                }
++            });
++            let mut changes = Changes::new();
++            for index in (0..12).step_by(2) {
++                changes.replace(&mut records, index, [expected[index], expected[index + 1]]);
++            }
++            assert_eq!(records, expected);
++            if mask == 0 {
++                assert!(changes.first >= changes.last);
++            } else {
++                assert_eq!(
++                    (changes.first, changes.last),
++                    (
++                        mask.trailing_zeros() as usize,
++                        (32 - mask.leading_zeros()) as usize
++                    )
++                );
++            }
++            let before = (changes.first, changes.last);
++            for (index, word) in expected.into_iter().enumerate() {
++                changes.replace(&mut records, index, [word]);
++            }
++            assert_eq!((changes.first, changes.last), before);
++        }
++    }
++
++    #[test]
++    fn resource_codec_restores_every_correction_index_and_resource_bit() {
++        use wgsl_rs::std::vec4u;
++        let common = SLOT_COLOR | 300_000;
++        for correction in 0..=MAX_DRAWS as u32 {
++            for resource in [
++                [0, 0, 0],
++                [2047, 2047, 2048 | (2048 << 16)],
++                [images::IMAGE | 0x3fff_ffff, 31, 16_384 | (16_384 << 16)],
++            ] {
++                let word = resource_words(resource, common, correction);
++                assert_eq!(word[3], common);
++                let decoded =
++                    crate::shader::ui::decode_resource(vec4u(word[0], word[1], word[2], word[3]));
++                assert_eq!([decoded.x, decoded.y, decoded.z], resource);
++                assert_eq!(decoded.w, correction);
++            }
++        }
++        for exponent in 1..=254 {
++            let radius = (exponent << 23) | 0x7f_ffff;
++            let scale = (254 - exponent) << 23;
++            for correction in [0, 1, 65_535, 65_536] {
++                let resource = [ROUNDED_SOURCE, radius, scale];
++                let word = resource_words(resource, common, correction);
++                let decoded =
++                    crate::shader::ui::decode_resource(vec4u(word[0], word[1], word[2], word[3]));
++                assert_eq!([decoded.x, decoded.y, decoded.z], resource);
++                assert_eq!(decoded.w, correction);
++            }
++        }
+     }
+ 
+     #[test]
+diff --git a/reactivity/crates/gpu/src/renderer/images.rs b/reactivity/crates/gpu/src/renderer/images.rs
+index e86a876b7f..1a94840b31 100644
+--- a/reactivity/crates/gpu/src/renderer/images.rs
++++ b/reactivity/crates/gpu/src/renderer/images.rs
+@@ -11,6 +11,8 @@ const DISPLAY_P3: u32 = 4;
+ const LINEAR_RGBA: u32 = 8;
+ pub(super) const ROUNDED: u32 = 16;
+ const _: () = assert!(ROUNDED & (FILTER_LINEAR | PREMULTIPLIED | DISPLAY_P3 | LINEAR_RGBA) == 0);
++const PACKET_FLAGS: u32 = FILTER_LINEAR | PREMULTIPLIED | DISPLAY_P3 | LINEAR_RGBA | ROUNDED;
++const _: () = assert!(PACKET_FLAGS >> super::RESOURCE_BITS == 0);
+ 
+ #[derive(Clone, Copy, Debug, Default)]
+ pub struct ImageStats {
+@@ -61,10 +63,11 @@ pub(super) fn prepare(
+     current: &mut Option<Box<Images>>,
+     draw_words: usize,
+     scene: PreparedScene<'_>,
+-) -> Result<(), Error> {
++) -> Result<bool, Error> {
+     let count = scene.images().count();
+     if count == 0 {
+-        if current.take().is_some() {
++        let relocated = current.take().is_some();
++        if relocated {
+             // Submitted bind groups retain their own old buffer leases.
+             *buffer = Buffer::new(
+                 device,
+@@ -73,7 +76,7 @@ pub(super) fn prepare(
+                 false,
+             );
+         }
+-        return Ok(());
++        return Ok(relocated);
+     }
+     if let Some(current) = current.as_mut()
+         && draw_words <= current.prefix_words
+@@ -84,7 +87,7 @@ pub(super) fn prepare(
+             .eq(scene.images().map(|image| image.key()))
+     {
+         current.stats.uploaded_bytes = 0;
+-        return Ok(());
++        return Ok(false);
+     }
+     let prefix_words = draw_words
+         .max(1)
+@@ -149,7 +152,8 @@ pub(super) fn prepare(
+     {
+         return Err(Error::ResourceLimit);
+     }
+-    if buffer.size < required || buffer.size > required.saturating_mul(4) {
++    let relocated = buffer.size < required || buffer.size > required.saturating_mul(4);
++    if relocated {
+         *buffer = Buffer::new(device, "scene words and packed images", required, false);
+     }
+     for image in scene.images() {
+@@ -176,5 +180,5 @@ pub(super) fn prepare(
+     next.stats.gpu_buffer_bytes = buffer.size;
+     next.stats.index_capacity = next.entries.capacity();
+     *current = Some(Box::new(next));
+-    Ok(())
++    Ok(relocated)
+ }
+diff --git a/reactivity/crates/gpu/src/renderer/paint.rs b/reactivity/crates/gpu/src/renderer/paint.rs
+index 9067295638..93c2c0bf3a 100644
+--- a/reactivity/crates/gpu/src/renderer/paint.rs
++++ b/reactivity/crates/gpu/src/renderer/paint.rs
+@@ -105,7 +105,7 @@ impl PaintRenderer {
+         target: &wgpu::TextureView,
+         requested: impl IntoIterator<Item = PaintIndex>,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+-        self.inner.state.packet = None;
++        let resident = self.inner.state.packet.take().is_some();
+         self.sites.clear();
+         let requested = requested.into_iter();
+         let demand = requested.size_hint().0;
+@@ -130,13 +130,14 @@ impl PaintRenderer {
+         } else if self.sites.capacity() > self.sites.len().saturating_mul(4) {
+             self.sites.shrink_to_fit();
+         }
+-        self.render_mapped(scene, target)
++        self.render_mapped(scene, target, resident)
+     }
+ 
+     fn render_mapped(
+         &mut self,
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
++        resident: bool,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+         self.sites.sort_unstable_by_key(|site| site.index);
+         let mut previous = None;
+@@ -155,13 +156,14 @@ impl PaintRenderer {
+             &self.inner.context,
+             scene,
+             target,
+-            |ordinal, group, word, compact| {
++            resident,
++            |ordinal, group, color_word, compact| {
+                 if let Some(site) = sites.get_mut(next)
+                     && site.index.order() as usize == ordinal
+                 {
+                     site.word = (group.paint_slot().is_none()
+                         && (compact || group.placements().len() == 1))
+-                        .then(|| NonZeroU32::new((word + if compact { 3 } else { 4 }) as u32))
++                        .then(|| NonZeroU32::new(color_word as u32))
+                         .flatten();
+                     site.rectangle = group
+                         .placements()
+diff --git a/reactivity/crates/gpu/src/renderer/slots.rs b/reactivity/crates/gpu/src/renderer/slots.rs
+index db9ccb1131..8ea348f75b 100644
+--- a/reactivity/crates/gpu/src/renderer/slots.rs
++++ b/reactivity/crates/gpu/src/renderer/slots.rs
+@@ -4,7 +4,7 @@ use gpui_canvas::{PaintSlot, SlotEdit};
+ 
+ const SHARED: u32 = 1;
+ const RECTANGLE: u32 = 2;
+-const _: () = assert!(MAX_DRAWS * 6 + MAX_DRAWS * 2 + MAX_DRAWS / 32 + 1 < INLINE_RECORD as usize);
++const _: () = assert!(MAX_DRAWS * 6 + MAX_DRAWS * 2 + MAX_DRAWS / 32 + 1 < SLOT_COLOR as usize);
+ 
+ pub(super) fn prefix_words(rows: usize) -> usize {
+     if rows == 0 {
+@@ -18,18 +18,35 @@ pub(super) fn color_word(rows: usize, slot: PaintSlot) -> u32 {
+     assert!(index < rows);
+     (1 + rows.div_ceil(64) + index) as u32
+ }
+-pub(super) fn write_prefix(records: &mut Vec<Word>, scene: PreparedScene<'_>, rows: usize) {
++pub(super) fn write_prefix(
++    records: &mut [Word],
++    scene: PreparedScene<'_>,
++    rows: usize,
++    changes: &mut Changes,
++) {
+     if rows == 0 {
+         return;
+     }
+     let flags = rows.div_ceil(64);
+-    records.resize(1 + flags, [0; 4]);
+-    records[0] = [rows as u32, flags as u32, (1 + flags) as u32, 0];
+-    for (index, paint) in scene.paint_bank().enumerate() {
+-        let bits =
+-            (u32::from(paint.shared()) * SHARED) | (u32::from(paint.rectangle()) * RECTANGLE);
+-        records[1 + index / 64][index / 16 % 4] |= bits << (index % 16 * 2);
+-        records.push(float_word(paint.value().working()));
++    changes.replace(
++        records,
++        0,
++        [[rows as u32, flags as u32, (1 + flags) as u32, 0]],
++    );
++    let mut paints = scene.paint_bank();
++    for flag in 0..flags {
++        let mut word = [0; 4];
++        for (index, paint) in paints.by_ref().take(64).enumerate() {
++            let bits =
++                (u32::from(paint.shared()) * SHARED) | (u32::from(paint.rectangle()) * RECTANGLE);
++            word[index / 16] |= bits << (index % 16 * 2);
++            changes.replace(
++                records,
++                1 + flags + flag * 64 + index,
++                [float_word(paint.value().working())],
++            );
++        }
++        changes.replace(records, 1 + flag, [word]);
+     }
+ }
+ fn row(records: &[Word], slot: PaintSlot) -> Option<(usize, u32)> {
+diff --git a/reactivity/crates/gpu/src/shader.rs b/reactivity/crates/gpu/src/shader.rs
+index d836051150..ca28c98f0e 100644
+--- a/reactivity/crates/gpu/src/shader.rs
++++ b/reactivity/crates/gpu/src/shader.rs
+@@ -1,6 +1,5 @@
+ //! A single fullscreen pass composites ordered tile records in linear light.
+-//! Sample-major evaluation keeps two vec4 accumulators rather than sixteen
+-//! live sample colors. It needs neither an MSAA image nor a float intermediate.
++//! Four samples share each draw decode, with no MSAA image or float intermediate.
+ #[wgsl_rs::wgsl]
+ pub mod ui {
+     use wgsl_rs::std::*;
+@@ -18,7 +17,8 @@ pub mod ui {
+     pub struct Globals {
+         pub viewport: Vec4u,
+         pub clear: Vec4f,
+-        pub mapping: Vec4f,
++        pub exposure: f32,
++        pub material_offset: u32,
+     }
+     #[derive(Clone, Copy, Wgsl)]
+     pub struct Correction {
+@@ -32,64 +32,40 @@ pub mod ui {
+     texture!(group(0), binding(4), MASKS: Texture2D<f32>);
+     storage!(group(0), binding(5), CORRECTIONS: RuntimeArray<Correction>);
+ 
+-    // Typed host writers publish only validated private word addresses. The
+-    // inline tag preserves singleton storage; compact records share common state.
+-    pub fn load_color(word: Vec4u, correction: u32) -> Vec4f {
+-        if (correction & 0x80000000) != 0 {
++    // One placement schema points at two affine words and two material words.
++    // The resource's closed variants supply seventeen otherwise unused bits;
++    // decoding restores all original float, coordinate and flag bits exactly.
++    pub fn load_color(word: Vec4u, state_base: u32) -> Vec4f {
++        if (state_base & 0x80000000) != 0 {
+             return bitcast_vec4f(get!(WORDS)[word.x as usize]);
+         }
+         bitcast_vec4f(word)
+     }
+-    pub fn load_draw(address: u32) -> Draw {
+-        let base = (address & 0x7fffffff) as usize;
+-        if (address & 0x80000000) != 0 {
+-            return Draw {
+-                local: bitcast_vec4f(get!(WORDS)[base]),
+-                inverse_x: bitcast_vec4f(get!(WORDS)[base + 1]),
+-                inverse_y: bitcast_vec4f(get!(WORDS)[base + 2]),
+-                clip: bitcast_vec4f(get!(WORDS)[base + 3]),
+-                color: bitcast_vec4f(get!(WORDS)[base + 4]),
+-                atlas: get!(WORDS)[base + 5],
+-            };
+-        }
+-        let atlas = get!(WORDS)[base + 1];
+-        let state_base = atlas.w as usize;
+-        let correction = get!(WORDS)[state_base + 4].x;
+-        Draw {
+-            local: bitcast_vec4f(get!(WORDS)[base]),
+-            inverse_x: bitcast_vec4f(get!(WORDS)[state_base]),
+-            inverse_y: bitcast_vec4f(get!(WORDS)[state_base + 1]),
+-            clip: bitcast_vec4f(get!(WORDS)[state_base + 2]),
+-            color: bitcast_vec4f(get!(WORDS)[state_base + 3]),
+-            atlas: vec4u(atlas.x, atlas.y, atlas.z, correction),
++    pub fn decode_resource(atlas: Vec4u) -> Vec4u {
++        if atlas.x == 0x40000000 {
++            return vec4u(atlas.x, atlas.y, atlas.z & 0xfffe0000, atlas.z & 0x1ffff);
+         }
++        vec4u(atlas.x, atlas.y & 0x7fff, atlas.z, atlas.y >> 15)
+     }
+-
+-    pub fn load_banked_draw(address: u32) -> Draw {
+-        let base = (address & 0x7fffffff) as usize;
+-        if (address & 0x80000000) != 0 {
+-            let atlas = get!(WORDS)[base + 5];
+-            return Draw {
+-                local: bitcast_vec4f(get!(WORDS)[base]),
+-                inverse_x: bitcast_vec4f(get!(WORDS)[base + 1]),
+-                inverse_y: bitcast_vec4f(get!(WORDS)[base + 2]),
+-                clip: bitcast_vec4f(get!(WORDS)[base + 3]),
+-                color: load_color(get!(WORDS)[base + 4], atlas.w),
+-                atlas: vec4u(atlas.x, atlas.y, atlas.z, atlas.w & 0x7fffffff),
+-            };
+-        }
++    pub fn load_draw(address: u32) -> Draw {
++        let base = address as usize;
+         let atlas = get!(WORDS)[base + 1];
+-        let state_base = atlas.w as usize;
+-        let correction = get!(WORDS)[state_base + 4].x;
++        let state_base = (atlas.w & 0x7fffffff) as usize;
++        let material_base = state_base + get!(GLOBALS).material_offset as usize;
+         Draw {
+             local: bitcast_vec4f(get!(WORDS)[base]),
+             inverse_x: bitcast_vec4f(get!(WORDS)[state_base]),
+             inverse_y: bitcast_vec4f(get!(WORDS)[state_base + 1]),
+-            clip: bitcast_vec4f(get!(WORDS)[state_base + 2]),
+-            color: load_color(get!(WORDS)[state_base + 3], correction),
+-            atlas: vec4u(atlas.x, atlas.y, atlas.z, correction & 0x7fffffff),
++            clip: bitcast_vec4f(get!(WORDS)[material_base]),
++            color: load_color(get!(WORDS)[material_base + 1], atlas.w),
++            atlas: decode_resource(atlas),
+         }
+     }
++    pub fn load_paint(address: u32) -> Vec4f {
++        let state_base = get!(WORDS)[address as usize + 1].w;
++        let material_base = (state_base & 0x7fffffff) + get!(GLOBALS).material_offset;
++        load_color(get!(WORDS)[material_base as usize + 1], state_base)
++    }
+ 
+     #[vertex]
+     pub fn vertex(#[builtin(vertex_index)] index: u32) -> Vec4f {
+@@ -428,7 +404,7 @@ pub mod ui {
+         }
+         rgb /= alpha;
+         if (mode & 2) != 0 {
+-            rgb = reinhard(rgb, globals.mapping.x);
++            rgb = reinhard(rgb, globals.exposure);
+         } else {
+             rgb = clamp(rgb, vec3f(0.0, 0.0, 0.0), vec3f(1.0, 1.0, 1.0));
+         }
+@@ -447,67 +423,67 @@ pub mod ui {
+         exposed / (vec3f(1.0, 1.0, 1.0) + exposed)
+     }
+ 
+-    // Banked scenes decode a draw and its working paint once before the
+-    // sixteen sample operations. This deliberately trades sixteen local colors
+-    // for the ordinary sample-major path's repeated record/bank loads; it is
+-    // not a claim of lower register pressure or universally faster shading.
+-    pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
+-        let mut colors: [Vec4f; 16] = [
+-            clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear,
+-            clear, clear, clear, clear,
+-        ];
+-        #[wgsl_allow(non_literal_loop_bounds)]
+-        for cursor in range.x..range.y {
+-            let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
+-            for y in 0..4 {
+-                for x in 0..4 {
+-                    let point = position
+-                        + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
+-                    let source = sample_draw(draw, point);
+-                    let index = (y * 4 + x) as usize;
+-                    colors[index] = source + colors[index] * (1.0 - source.w);
+-                }
+-            }
+-        }
+-        let anchor = colors[0];
+-        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
+-        for index in 0..16 {
+-            delta += (colors[index as usize] - anchor) * 0.0625;
+-        }
+-        output(anchor + delta)
+-    }
+-
+     #[fragment]
+     pub fn fragment(#[builtin(position)] position: Vec4f) -> Vec4f {
+         let globals = get!(GLOBALS);
+         let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
+         let range = get!(TILES)[tile as usize];
+         if (range.y & 0x80000000) != 0 {
+-            if (globals.viewport.w & 8) != 0 {
+-                return output(load_banked_draw(range.x).color);
+-            }
+-            return output(load_draw(range.x).color);
++            return output(load_paint(range.x));
+         }
+-        if range.x == range.y {
++        let end = range.y & 0x1fffffff;
++        if range.x == end {
+             return output(globals.clear);
+         }
+-        if (globals.viewport.w & 8) != 0 {
+-            return banked_fragment(position.xy(), range, globals.clear);
++        let mut start = range.x;
++        let mut backdrop = globals.clear;
++        if (range.y & 0x20000000) != 0 {
++            // The existing opaque cutoff certifies the first retained solid.
++            // Evaluate its recurrence once, including the original float ops.
++            let source = load_paint(get!(INDICES)[start as usize]);
++            backdrop = source + backdrop * (1.0 - source.w);
++            start += 1;
++        }
++        if (range.y & 0x40000000) != 0 {
++            // All retained solids cover every sample. Keep painter order and
++            // the same source-over recurrence, but evaluate it once per pixel.
++            let mut color = backdrop;
++            #[wgsl_allow(non_literal_loop_bounds)]
++            for cursor in start..end {
++                let source = load_paint(get!(INDICES)[cursor as usize]);
++                color = source + color * (1.0 - source.w);
++            }
++            // Identical finite samples have +0 reduction delta. Integer bits
++            // preserve its zero normalization against float identity folding.
++            let mut bits = bitcast_vec4u(color);
++            for axis in 0..4 {
++                if bits[axis as usize] == 0x80000000 {
++                    bits[axis as usize] = 0;
++                }
++            }
++            return output(bitcast_vec4f(bits));
+         }
+         let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
+         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
+         for y in 0..4 {
+-            for x in 0..4 {
+-                let point = position.xy()
+-                    + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
+-                let mut color = globals.clear;
+-                // Host-built CSR ranges are monotone and bounded by INDICES.
+-                #[wgsl_allow(non_literal_loop_bounds)]
+-                for cursor in range.x..range.y {
+-                    let index = get!(INDICES)[cursor as usize];
+-                    let source = sample_draw(load_draw(index), point);
+-                    color = source + color * (1.0 - source.w);
++            // Both ordinary and banked records use one compositor. Sharing a
++            // decode across a sample row keeps four colors live, rather than
++            // decoding sixteen times or retaining all sixteen sample colors.
++            let mut colors: [Vec4f; 4] = [backdrop, backdrop, backdrop, backdrop];
++            // Host-built CSR ranges are monotone and bounded by INDICES.
++            #[wgsl_allow(non_literal_loop_bounds)]
++            for cursor in start..end {
++                let draw = load_draw(get!(INDICES)[cursor as usize]);
++                for x in 0..4 {
++                    let point = position.xy()
++                        + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
++                    let source = sample_draw(draw, point);
++                    colors[x as usize] = source + colors[x as usize] * (1.0 - source.w);
+                 }
++            }
++            // Keep the original sample-major reduction order and grouping.
++            for x in 0..4 {
++                let color = colors[x as usize];
+                 if x == 0 && y == 0 {
+                     anchor = color;
+                 }
+diff --git a/reactivity/crates/gpu/src/shader_build.rs b/reactivity/crates/gpu/src/shader_build.rs
+index 31b7472f42..fd07b7332d 100644
+--- a/reactivity/crates/gpu/src/shader_build.rs
++++ b/reactivity/crates/gpu/src/shader_build.rs
+@@ -28,29 +28,34 @@ fn unwrap_struct(module: &Module, mut ty: naga::Handle<naga::Type>) -> naga::Han
+     }
+     ty
+ }
++fn vector_type(width: naga::VectorSize, kind: naga::ScalarKind) -> TypeInner {
++    TypeInner::Vector {
++        size: width,
++        scalar: naga::Scalar { kind, width: 4 },
++    }
++}
+ fn vector(
+     module: &Module,
+     ty: naga::Handle<naga::Type>,
+     width: naga::VectorSize,
+     kind: naga::ScalarKind,
+ ) {
+-    assert_eq!(
+-        module.types[ty].inner,
+-        TypeInner::Vector {
+-            size: width,
+-            scalar: naga::Scalar { kind, width: 4 }
+-        }
+-    );
++    assert_eq!(module.types[ty].inner, vector_type(width, kind));
+ }
+-fn structure(module: &Module, ty: naga::Handle<naga::Type>, kinds: &[naga::ScalarKind]) {
++fn structure(
++    module: &Module,
++    ty: naga::Handle<naga::Type>,
++    bytes: u32,
++    fields: &[(u32, TypeInner)],
++) {
+     let TypeInner::Struct { members, span } = &module.types[unwrap_struct(module, ty)].inner else {
+         panic!("ABI struct")
+     };
+-    assert_eq!(*span, kinds.len() as u32 * 16);
+-    assert_eq!(members.len(), kinds.len());
+-    for (i, (member, &kind)) in members.iter().zip(kinds).enumerate() {
+-        assert_eq!(member.offset, i as u32 * 16);
+-        vector(module, member.ty, naga::VectorSize::Quad, kind);
++    assert_eq!(*span, bytes);
++    assert_eq!(members.len(), fields.len());
++    for (member, (offset, ty)) in members.iter().zip(fields) {
++        assert_eq!(member.offset, *offset);
++        assert_eq!(module.types[member.ty].inner, *ty);
+     }
+ }
+ /// Recheck source and independently reparsed output, including dynamic strides,
+@@ -154,7 +159,17 @@ fn reflect(
+         let kind = match binding.binding {
+             0 => {
+                 assert_eq!(global.space, AddressSpace::Uniform);
+-                structure(module, global.ty, &[K::Uint, K::Float, K::Float]);
++                structure(
++                    module,
++                    global.ty,
++                    48,
++                    &[
++                        (0, vector_type(V::Quad, K::Uint)),
++                        (16, vector_type(V::Quad, K::Float)),
++                        (32, TypeInner::Scalar(naga::Scalar::F32)),
++                        (36, TypeInner::Scalar(naga::Scalar::U32)),
++                    ],
++                );
+                 assert_eq!(size, 48);
+                 "uniform"
+             }
+@@ -190,7 +205,15 @@ fn reflect(
+                         4
+                     }
+                     5 => {
+-                        structure(module, base, &[K::Float, K::Float]);
++                        structure(
++                            module,
++                            base,
++                            32,
++                            &[
++                                (0, vector_type(V::Quad, K::Float)),
++                                (16, vector_type(V::Quad, K::Float)),
++                            ],
++                        );
+                         32
+                     }
+                     _ => unreachable!(),

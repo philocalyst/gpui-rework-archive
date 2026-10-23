@@ -1,0 +1,49 @@
+{
+  "source_commit": "a81bc7536b002b1f81e1b36137c1c4de543e2204",
+  "shipping_patch_base": "3f9ee2bbbe18bdebf46f57baff754a8a53c8eb04",
+  "status": "unadopted; no measured speed or RSS claim",
+  "historical_exact_readbacks": {
+    "source": "67510c225915c777b9b4471e95e6cc4a11accbc4",
+    "files": 578,
+    "bytes": 13912048,
+    "mismatches": 0,
+    "observer_patch_archived": true
+  },
+  "final_gates": {
+    "default": [
+      11,
+      4,
+      52,
+      1
+    ],
+    "fallback": [
+      11,
+      4,
+      52,
+      1
+    ],
+    "offline": [
+      12,
+      4,
+      53,
+      1
+    ],
+    "strict_default": true,
+    "strict_offline": true,
+    "apple_arm64_all_features_lib_check": true,
+    "windows_msvc_all_features_lib_check": true
+  },
+  "core_non_test_noncomment_lines": 30796,
+  "shipping_core_baseline": 30692,
+  "linked_groups_delta_against_2774732": {
+    ".text": 1616,
+    ".rodata": 896,
+    ".data.rel.ro": 96
+  },
+  "renderer_frame": {
+    "baseline": 1432,
+    "candidate": 1448
+  },
+  "runtime": "Mesa llvmpipe software Vulkan; cross checks compile only",
+  "capture_archive_sha256": "a8187fb23e24e16fe11998f454bb3b28b0730866aa98d6cd9a1cec606400d27f"
+}

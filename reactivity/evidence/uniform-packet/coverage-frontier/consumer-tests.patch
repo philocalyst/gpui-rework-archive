@@ -1,0 +1,579 @@
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index 5b17a4068b..14da890b4d 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -132,6 +132,118 @@ async fn renderer(format: wgpu::TextureFormat) -> Renderer {
+     Renderer::request(&adapter, format).await.unwrap()
+ }
+ 
++#[test]
++fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() {
++    use gpui_canvas::{AlphaMode, Image, ImageOptions, ImageProfile, ImageSampling};
++    pollster::block_on(async {
++        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let mut text = TextSystem::bundled().unwrap();
++        let captions = ["Library", "Now playing: café"].map(|s| text.shape(s, 14.0, None).unwrap());
++        let inspector = text.shape("Inspector", 12.0, None).unwrap();
++        let image = Image::rgba8(
++            2,
++            2,
++            ImageProfile::Srgb,
++            AlphaMode::Straight,
++            vec![
++                255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255,
++            ]
++            .into_boxed_slice(),
++        )
++        .unwrap();
++        let viewport = Rect::new(0.0, 0.0, 128.0, 80.0);
++        let mut pages = [0.0, 0.25, 0.75, 1.0].map(|progress| {
++            let mut canvas = Canvas::recording(128, 80, ColorConfig::default()).unwrap();
++            canvas.clear(Color::WHITE);
++            for (page, caption) in captions.iter().enumerate() {
++                let map = Affine::translation((page as f32 - progress) * 96.0, 0.0);
++                canvas
++                    .fill_rounded_rect(
++                        Rect::new(2.125, 3.375, 92.0, 72.0),
++                        7.0,
++                        map,
++                        viewport,
++                        Color::rgba(37 + page as u8 * 60, 71, 113, 220),
++                    )
++                    .unwrap();
++                canvas
++                    .draw_image_with(
++                        &image,
++                        Rect::new(8.125, 29.375, 32.0, 31.0),
++                        map,
++                        viewport,
++                        ImageOptions {
++                            sampling: ImageSampling::Linear,
++                            corner_radius: page as f32 * 6.0,
++                        },
++                    )
++                    .unwrap();
++                canvas
++                    .draw_text(
++                        &mut text,
++                        caption,
++                        Point { x: 7.0, y: 9.0 },
++                        map,
++                        viewport,
++                        Color::WHITE,
++                    )
++                    .unwrap();
++            }
++            // This stationary overlay is later in the same canonical scene,
++            // rather than a second surface or an independently cached image.
++            canvas
++                .fill_rounded_rect(
++                    Rect::new(61.25, 48.5, 64.0, 29.0),
++                    4.0,
++                    Affine::IDENTITY,
++                    viewport,
++                    Color::rgba(240, 240, 250, 230),
++                )
++                .unwrap();
++            canvas
++                .draw_text(
++                    &mut text,
++                    &inspector,
++                    Point { x: 66.0, y: 54.0 },
++                    Affine::IDENTITY,
++                    viewport,
++                    Color::BLACK,
++                )
++                .unwrap();
++            canvas
++        });
++        for (grouped, proofs) in [(false, false), (true, false), (true, true)] {
++            renderer.set_grouped_records(grouped);
++            renderer.set_tile_proofs(proofs);
++            let outputs = pages
++                .each_ref()
++                .map(|canvas| output_texture(&renderer, canvas));
++            for (canvas, output) in pages.iter().zip(&outputs) {
++                renderer
++                    .render(
++                        canvas.prepared_scene(),
++                        &output.create_view(&Default::default()),
++                    )
++                    .unwrap();
++                if grouped {
++                    assert!(renderer.stats().compact_draws > 0);
++                }
++            }
++            // Queue every transition before reading: later resource/record
++            // patches must not change an earlier submitted page or overlay.
++            for (frame, (canvas, output)) in pages.iter_mut().zip(&outputs).enumerate() {
++                let actual = read_texture(&renderer, output);
++                for (byte, (&gpu, &cpu)) in actual.iter().zip(canvas.pixels()).enumerate() {
++                    assert!(
++                        (i16::from(gpu) - i16::from(cpu)).abs() <= 1,
++                        "grouped={grouped},proofs={proofs},frame={frame},byte={byte}: GPU{gpu} CPU{cpu}"
++                    );
++                }
++            }
++        }
++    });
++}
++
+ #[test]
+ fn scene_buffer_growth_and_shrinking_prefixes_preserve_pixels_and_replay() {
+     pollster::block_on(async {
+@@ -279,6 +391,147 @@ fn compare_tile_modes(renderer: &mut Renderer, canvas: &mut Canvas) -> Stats {
+     stats
+ }
+ 
++#[test]
++fn constant_coverage_ranges_preserve_order_and_fall_back_at_partial_edges() {
++    use gpui_canvas::OutputProfile;
++    pollster::block_on(async {
++        let viewport = Rect::new(0.0, 0.0, 35.0, 19.0);
++        let area = 35 * 19;
++        for hdr in [false, true] {
++            let format = if hdr {
++                wgpu::TextureFormat::Rgba16Float
++            } else {
++                wgpu::TextureFormat::Rgba8UnormSrgb
++            };
++            let mut renderer = renderer(format).await;
++            for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
++                let config = if hdr {
++                    ColorConfig::linear_hdr(profile, 203.0).unwrap()
++                } else {
++                    ColorConfig {
++                        profile,
++                        ..ColorConfig::default()
++                    }
++                };
++                for opaque_prefix in [false, true] {
++                    let mut canvas = Canvas::recording(35, 19, config).unwrap();
++                    canvas.clear(Color::linear_srgb(-0.0, 0.2, 0.4, 1.0).unwrap());
++                    renderer.set_tile_proofs(true);
++                    readback(&mut renderer, &canvas);
++                    assert_eq!(renderer.stats().sample_evaluations, 0, "empty ranges");
++                    if opaque_prefix {
++                        canvas
++                            .fill_rect(viewport, Affine::IDENTITY, viewport, Color::rgb(50, 90, 20))
++                            .unwrap();
++                    }
++                    for channels in [
++                        [-0.0, -1e-40, 1.0, 0.0],
++                        [-2.0, 0.5, 3.0, 0.25],
++                        [0.1, 2.0, 0.0, 0.75],
++                    ] {
++                        let [r, g, b, a] = channels;
++                        canvas
++                            .fill_rect(
++                                viewport,
++                                Affine::IDENTITY,
++                                viewport,
++                                Color::linear_srgb(r, g, b, a).unwrap(),
++                            )
++                            .unwrap();
++                    }
++                    renderer.set_tile_proofs(false);
++                    let reference = readback(&mut renderer, &canvas);
++                    let sampled = renderer.stats();
++                    renderer.set_tile_proofs(true);
++                    assert_eq!(readback(&mut renderer, &canvas), reference);
++                    let constant = renderer.stats();
++                    assert_eq!(
++                        constant.uniform_tiles, 0,
++                        "ranges still blend their backdrop"
++                    );
++                    assert_eq!(constant.tile_references, sampled.tile_references);
++                    assert_eq!(constant.sample_evaluations, area);
++                    assert_eq!(
++                        constant.sample_draw_evaluations * 16,
++                        sampled.sample_draw_evaluations
++                    );
++
++                    canvas
++                        .fill_rect(
++                            Rect::new(4.125, 3.125, 17.75, 10.25),
++                            Affine::IDENTITY,
++                            viewport,
++                            Color::rgba(30, 150, 240, 90),
++                        )
++                        .unwrap();
++                    // A later full translucent draw cannot discard partial coverage.
++                    canvas
++                        .fill_rect(
++                            viewport,
++                            Affine::IDENTITY,
++                            viewport,
++                            Color::rgba(200, 10, 80, 70),
++                        )
++                        .unwrap();
++                    renderer.set_tile_proofs(false);
++                    let reference = readback(&mut renderer, &canvas);
++                    renderer.set_tile_proofs(true);
++                    assert_eq!(readback(&mut renderer, &canvas), reference);
++                    assert!(renderer.stats().sample_evaluations > area);
++
++                    // A safe opaque cover retires that entire sampled prefix.
++                    canvas
++                        .fill_rect(viewport, Affine::IDENTITY, viewport, Color::rgb(90, 20, 50))
++                        .unwrap();
++                    renderer.set_tile_proofs(false);
++                    let reference = readback(&mut renderer, &canvas);
++                    renderer.set_tile_proofs(true);
++                    assert_eq!(readback(&mut renderer, &canvas), reference);
++                    assert_eq!(renderer.stats().uniform_tiles, 6);
++                    assert_eq!(renderer.stats().tile_references, 0);
++                    assert_eq!(renderer.stats().sample_draw_evaluations, 0);
++                }
++            }
++        }
++    });
++}
++
++#[test]
++fn certified_opaque_prefix_is_blended_once_before_a_sampled_tail() {
++    pollster::block_on(async {
++        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let viewport = Rect::new(0.0, 0.0, 16.0, 16.0);
++        let mut canvas = Canvas::recording(16, 16, ColorConfig::default()).unwrap();
++        canvas.clear(Color::rgb(20, 70, 90));
++        canvas
++            .fill_rect(
++                viewport,
++                Affine::IDENTITY,
++                viewport,
++                Color::rgb(100, 40, 80),
++            )
++            .unwrap();
++        canvas
++            .fill_rect(
++                Rect::new(4.125, 3.125, 7.75, 8.5),
++                Affine::IDENTITY,
++                viewport,
++                Color::rgba(180, 90, 30, 130),
++            )
++            .unwrap();
++        renderer.set_tile_proofs(false);
++        let reference = readback(&mut renderer, &canvas);
++        assert_eq!(renderer.stats().sample_draw_evaluations, 256 * 16 * 2);
++        renderer.set_tile_proofs(true);
++        assert_eq!(readback(&mut renderer, &canvas), reference);
++        let stats = renderer.stats();
++        assert_eq!(stats.uniform_tiles, 0);
++        assert_eq!(stats.tile_references, 2);
++        assert_eq!(stats.sample_evaluations, 256 * 16);
++        assert_eq!(stats.sample_draw_evaluations, 256 * (1 + 16));
++    });
++}
++
+ #[test]
+ fn opaque_tile_proofs_skip_overlap_and_preserve_later_edges() {
+     pollster::block_on(async {
+@@ -926,12 +1179,12 @@ fn grouped_and_inline_packets_match_every_pixel_in_mixed_scenes() {
+                 assert_eq!(new.compact_draws + new.inline_draws, new.draws);
+                 assert_eq!(
+                     new.draw_record_bytes,
+-                    new.shared_groups * 80 + new.compact_draws * 32 + new.inline_draws * 96
++                    new.shared_groups * 64 + new.compact_draws * 32 + new.inline_draws * 96
+                 );
+                 assert!(new.draw_record_bytes < old.draw_record_bytes);
+             }
+-            // A final certificate points to a tagged inline word address AFTER
+-            // several compact runs. Canonical earlier groups remain retained.
++            // A final certificate points into the placement suffix after shared
++            // groups. Canonical earlier groups remain retained.
+             canvas
+                 .fill_rect(
+                     Rect::new(-2.0, -2.0, 164.0, 92.0),
+@@ -3237,3 +3490,291 @@ fn viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges() {
+         }
+     });
+ }
++
++fn record_upload_bytes(stats: Stats, width: u32, height: u32) -> usize {
++    stats.instance_upload_bytes
++        - (width.div_ceil(16) * height.div_ceil(16)) as usize * 8
++        - stats.tile_references * 4
++        - stats.correction_records * 32
++        - 48
++}
++
++#[test]
++fn resident_words_match_forced_uploads_across_transforms_growth_and_failed_prepare() {
++    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
++    pollster::block_on(async {
++        let mut reused = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let mut reference = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let mut fonts = TextSystem::bundled().unwrap();
++        let run = fonts.shape("office café", 16.0, None).unwrap();
++        let image = Image::rgba8(
++            1,
++            1,
++            ImageProfile::Srgb,
++            AlphaMode::Straight,
++            vec![13, 61, 209, 255].into_boxed_slice(),
++        )
++        .unwrap();
++        let viewport = Rect::new(0., 0., 160., 64.);
++        for (step, (translation, extras, has_image)) in [
++            (0., 0, true),
++            (0., 0, true),
++            (0.25, 0, true),
++            (1.5, 0, true),
++            (1.5, 41, true),
++            (1.5, 0, true),
++            (-0.25, 0, false),
++            (-0.25, 0, false),
++            (0., 0, true),
++        ]
++        .into_iter()
++        .enumerate()
++        {
++            let mut canvas = Canvas::recording(160, 64, ColorConfig::default()).unwrap();
++            canvas.clear(Color::WHITE);
++            canvas
++                .draw_text(
++                    &mut fonts,
++                    &run,
++                    Point { x: 8., y: 4. },
++                    Affine::translation(translation, 0.),
++                    viewport,
++                    Color::BLACK,
++                )
++                .unwrap();
++            if has_image {
++                canvas
++                    .draw_image(
++                        &image,
++                        Rect::new(2., 40., 16., 16.),
++                        Affine::translation(translation, 0.),
++                        viewport,
++                        ImageSampling::Nearest,
++                    )
++                    .unwrap();
++            }
++            for index in 0..extras {
++                canvas
++                    .fill_rect(
++                        Rect::new(index as f32, 31., 0.5, 2.),
++                        Affine::IDENTITY,
++                        viewport,
++                        Color::rgba(31, 61, 103, 80),
++                    )
++                    .unwrap();
++            }
++            reference.set_tile_proofs(false);
++            reference.set_tile_proofs(true);
++            let expected = readback(&mut reference, &canvas);
++            let actual = readback(&mut reused, &canvas);
++            assert_eq!(actual, expected, "step{step}");
++            let stats = reused.stats();
++            let bytes = record_upload_bytes(stats, 160, 64);
++            if step == 1 || step == 7 {
++                assert_eq!(bytes, 0, "equal final words require no record upload");
++            }
++            if step == 2 || step == 3 {
++                // Both groups share the affine plane. Their local placements,
++                // materials, glyph masks and image pixels remain resident.
++                assert!(bytes <= 4 * 16, "step{step}: {bytes} bytes");
++                assert!(bytes < stats.draw_record_bytes);
++                assert_eq!(stats.mask_upload_bytes, 0);
++                assert_eq!(reused.image_stats().unwrap().uploaded_bytes, 0);
++            }
++            if step == 3 {
++                let mut scene_for = |reject| {
++                    let mut scene = Canvas::recording(160, 64, ColorConfig::default()).unwrap();
++                    scene.clear(Color::WHITE);
++                    scene
++                        .draw_text(
++                            &mut fonts,
++                            &run,
++                            Point { x: 8., y: 4. },
++                            Affine::translation(-0.75, 0.),
++                            viewport,
++                            Color::BLACK,
++                        )
++                        .unwrap();
++                    if reject {
++                        // CPU geometry admits this radius; GPU precision admission
++                        // rejects it after earlier common words have been replaced.
++                        scene
++                            .fill_rounded_rect(
++                                Rect::new(2., 40., 16., 16.),
++                                1e-40,
++                                Affine::IDENTITY,
++                                viewport,
++                                Color::BLACK,
++                            )
++                            .unwrap();
++                    } else {
++                        scene
++                            .draw_image(
++                                &image,
++                                Rect::new(2., 40., 16., 16.),
++                                Affine::IDENTITY,
++                                viewport,
++                                ImageSampling::Nearest,
++                            )
++                            .unwrap();
++                    }
++                    scene
++                };
++                let bad = scene_for(true);
++                let repaired = scene_for(false);
++                let texture = output_texture(&reused, &bad);
++                let target = texture.create_view(&Default::default());
++                assert!(matches!(
++                    reused.render(bad.prepared_scene(), &target),
++                    Err(gpui_gpu::Error::Precision { .. })
++                ));
++                assert!(reused.redraw(&target).unwrap().is_none());
++                // Exact old dimensions, record count and image prefix prevent
++                // growth/relocation from concealing a stale residency certificate.
++                reference.set_tile_proofs(false);
++                reference.set_tile_proofs(true);
++                let expected = readback(&mut reference, &repaired);
++                assert_eq!(readback(&mut reused, &repaired), expected);
++                let recovered = reused.stats();
++                assert_eq!(
++                    record_upload_bytes(recovered, 160, 64),
++                    recovered.draw_record_bytes
++                );
++            }
++        }
++    });
++}
++
++#[test]
++fn same_word_count_with_different_bank_and_material_planes_stays_coherent() {
++    use gpui_canvas::PaintColor;
++    pollster::block_on(async {
++        for format in [
++            wgpu::TextureFormat::Rgba8UnormSrgb,
++            wgpu::TextureFormat::Rgba16Float,
++        ] {
++            let config = if format == wgpu::TextureFormat::Rgba16Float {
++                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.0).unwrap()
++            } else {
++                ColorConfig::default()
++            };
++            let mut reused = renderer(format).await;
++            let mut reference = renderer(format).await;
++            let mut fonts = TextSystem::bundled().unwrap();
++            let one = fonts.shape("H", 18.0, None).unwrap();
++            let pair = fonts.shape("HH", 18.0, None).unwrap();
++            let clip = Rect::new(0.0, 0.0, 96.0, 48.0);
++            let mut packet_bytes = None;
++            for rows in [1, 5, 1, 5] {
++                let mut canvas = Canvas::recording(96, 48, config).unwrap();
++                canvas.clear(Color::WHITE);
++                let mut slot = None;
++                for index in 0..rows {
++                    slot = Some(
++                        canvas
++                            .paint_slot(PaintColor::new(Color::rgb(31 + index * 20, 61, 127)))
++                            .unwrap(),
++                    );
++                }
++                let slot = slot.unwrap();
++                if rows == 1 {
++                    for x in [8.0, 36.0] {
++                        canvas
++                            .draw_text_scaled_slot(
++                                &mut fonts,
++                                &one,
++                                Point { x, y: 8.0 },
++                                Affine::IDENTITY,
++                                clip,
++                                slot,
++                                1.0,
++                            )
++                            .unwrap();
++                    }
++                } else {
++                    canvas
++                        .draw_text_scaled_slot(
++                            &mut fonts,
++                            &pair,
++                            Point { x: 16.0, y: 8.0 },
++                            Affine::translation(0.125, 0.0),
++                            clip,
++                            slot,
++                            1.0,
++                        )
++                        .unwrap();
++                }
++                assert_eq!(canvas.prepared_scene().paint_bank().len(), rows as usize);
++                reference.set_tile_proofs(false);
++                reference.set_tile_proofs(true);
++                let expected = readback(&mut reference, &canvas);
++                assert_eq!(
++                    readback(&mut reused, &canvas),
++                    expected,
++                    "{format:?}, bank rows={rows}"
++                );
++                let stats = reused.stats();
++                assert_eq!(stats.draws, 2);
++                assert_eq!(
++                    stats.draw_record_bytes,
++                    *packet_bytes.get_or_insert(stats.draw_record_bytes)
++                );
++                assert_eq!(stats.draw_record_bytes, 15 * 16);
++            }
++        }
++    });
++}
++
++#[test]
++fn highest_correction_handle_reaches_real_shader_clip_admission() {
++    use std::collections::HashSet;
++    pollster::block_on(async {
++        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
++        let mut expected = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
++        let viewport = Rect::new(0.0, 0.0, 1.0, 1.0);
++        // The first sample lies at the rounded clip endpoint but below its exact
++        // sum. It must read this draw's correction, assigned last in reverse.
++        let clip = Rect::new(f32::EPSILON / 16.0, 0.0, 0.125, 1.0);
++        for canvas in [&mut canvas, &mut expected] {
++            canvas.clear(Color::WHITE);
++            canvas
++                .fill_rect(viewport, Affine::IDENTITY, clip, Color::rgb(255, 0, 0))
++                .unwrap();
++        }
++        // Every remaining group contributes a distinct nonzero coefficient
++        // residual, while its narrow geometry misses all fixed sample sites.
++        let mut residuals = HashSet::with_capacity(65_535);
++        for bits in (1.0f32.to_bits() + 1)..1.1f32.to_bits() {
++            let scale = f32::from_bits(bits);
++            let inverse = 1.0 / f64::from(scale);
++            let low = (inverse - f64::from(inverse as f32)) as f32;
++            if low == 0.0 || !residuals.insert(low.to_bits()) {
++                continue;
++            }
++            canvas
++                .fill_rect(
++                    Rect::new(0.49, 0.0, 0.02, 1.0),
++                    Affine {
++                        a: scale,
++                        ..Affine::IDENTITY
++                    },
++                    viewport,
++                    Color::BLACK,
++                )
++                .unwrap();
++            if residuals.len() == 65_535 {
++                break;
++            }
++        }
++        assert_eq!(residuals.len(), 65_535);
++        let actual = readback(&mut gpu, &canvas);
++        assert_eq!(gpu.stats().draws, 65_536);
++        assert_eq!(gpu.stats().correction_records, 65_537);
++        assert_eq!(actual, expected.pixels());
++        assert_ne!(
++            actual, [255; 4],
++            "the highest correction must include the red sample"
++        );
++    });
++}
