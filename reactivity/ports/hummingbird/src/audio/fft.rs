@@ -17,101 +17,14 @@ pub(super) struct FftUnit {
     overlaps: Vec<Vec<f64>>,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use audioadapter_buffers::direct::SequentialSliceOfVecs;
-    use rubato::{Fft, FixedSync, Resampler};
-
-    #[test]
-    fn borrowed_unit_matches_independent_pinned_rubato_across_channels_and_tails() {
-        for (source, target) in [
-            (8000, 48000),
-            (11025, 44100),
-            (44100, 11025),
-            (44100, 48000),
-            (48000, 44100),
-            (192000, 44100),
-            (768000, 44100),
-            (81920, 78750),
-            (44100, 768000),
-        ] {
-            let (input_frames, output_frames) =
-                super::super::pipeline::fft_geometry(source, target).unwrap();
-            for channels in 1..=2 {
-                let mut reference = Fft::<f64>::new(
-                    source as usize,
-                    target as usize,
-                    input_frames,
-                    channels,
-                    FixedSync::Both,
-                )
-                .unwrap();
-                let mut actual = FftUnit::new(input_frames, output_frames, channels);
-                let mut input: Vec<_> = (0..channels)
-                    .map(|_| Vec::with_capacity(2 * input_frames))
-                    .collect();
-                let mut expected = vec![vec![0.0; output_frames]; channels];
-                let mut pending = Vec::with_capacity(output_frames * channels);
-                // Distinct impulse channels, nonperiodic signal, short partial
-                // input and two zero units exercise independent filter history.
-                for unit in 0..7 {
-                    let length = match unit {
-                        4 => input_frames.saturating_sub(1).min(17),
-                        5.. => 0,
-                        _ => input_frames,
-                    };
-                    for (channel, input) in input.iter_mut().enumerate() {
-                        input.clear();
-                        input.extend((0..length).map(|frame| match unit {
-                            0 => f64::from(frame == channel),
-                            _ => {
-                                let index = unit * input_frames + frame;
-                                ((index * (channel + 3) * 37 % 509) as f64 - 254.0) / 512.0
-                            }
-                        }));
-                    }
-                    let adapter = SequentialSliceOfVecs::new(&input, channels, length).unwrap();
-                    let mut output =
-                        SequentialSliceOfVecs::new_mut(&mut expected, channels, output_frames)
-                            .unwrap();
-                    let indexing = rubato::Indexing {
-                        input_offset: 0,
-                        output_offset: 0,
-                        active_channels_mask: None,
-                        partial_len: Some(length),
-                    };
-                    let (_, written) = reference
-                        .process_into_buffer(&adapter, &mut output, Some(&indexing))
-                        .unwrap();
-                    assert_eq!(written, output_frames);
-                    for plane in &mut input {
-                        plane.resize(2 * input_frames, 0.0);
-                    }
-                    let allocations = allocation_counter::measure(|| {
-                        actual.process(&mut input, length, &mut pending);
-                    });
-                    assert_eq!(allocations.count_total, 0, "{allocations:?}");
-                    assert_eq!(allocations.count_current, 0, "{allocations:?}");
-                    for frame in 0..output_frames {
-                        for channel in 0..channels {
-                            assert_eq!(
-                                pending[frame * channels + channel],
-                                expected[channel][frame],
-                                "{source}->{target} channels={channels} unit={unit} frame={frame} channel={channel}"
-                            );
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 impl FftUnit {
     pub fn new(input: usize, output: usize, channels: usize) -> Self {
         // Preserve Rubato's f32 cutoff calculation, including its rounding.
         let length = input.min(output) as f32;
+        #[allow(
+            clippy::excessive_precision,
+            reason = "retain the pinned upstream coefficients and f32 rounding"
+        )]
         let cutoff = 1.0_f32
             / (13.745202940783823_f32 / length
                 + 121.73532586374934_f32 / (length * length)
@@ -209,6 +122,97 @@ impl FftUnit {
                 pending[frame * channels + channel] = self.output[frame] + overlap[frame];
             }
             overlap.copy_from_slice(&self.output[output_frames..]);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use audioadapter_buffers::direct::SequentialSliceOfVecs;
+    use rubato::{Fft, FixedSync, Resampler};
+
+    #[test]
+    fn borrowed_unit_matches_independent_pinned_rubato_across_channels_and_tails() {
+        for (source, target) in [
+            (8000, 48000),
+            (11025, 44100),
+            (44100, 11025),
+            (44100, 48000),
+            (48000, 44100),
+            (192000, 44100),
+            (768000, 44100),
+            (81920, 78750),
+            (44100, 768000),
+        ] {
+            let (input_frames, output_frames) =
+                super::super::pipeline::fft_geometry(source, target).unwrap();
+            for channels in 1..=2 {
+                let mut reference = Fft::<f64>::new(
+                    source as usize,
+                    target as usize,
+                    input_frames,
+                    channels,
+                    FixedSync::Both,
+                )
+                .unwrap();
+                let mut actual = FftUnit::new(input_frames, output_frames, channels);
+                let mut input: Vec<_> = (0..channels)
+                    .map(|_| Vec::with_capacity(2 * input_frames))
+                    .collect();
+                let mut expected = vec![vec![0.0; output_frames]; channels];
+                let mut pending = Vec::with_capacity(output_frames * channels);
+                // Distinct impulse channels, nonperiodic signal, short partial
+                // input and two zero units exercise independent filter history.
+                for unit in 0..7 {
+                    let length = match unit {
+                        4 => input_frames.saturating_sub(1).min(17),
+                        5.. => 0,
+                        _ => input_frames,
+                    };
+                    for (channel, input) in input.iter_mut().enumerate() {
+                        input.clear();
+                        input.extend((0..length).map(|frame| match unit {
+                            0 => f64::from(frame == channel),
+                            _ => {
+                                let index = unit * input_frames + frame;
+                                ((index * (channel + 3) * 37 % 509) as f64 - 254.0) / 512.0
+                            }
+                        }));
+                    }
+                    let adapter = SequentialSliceOfVecs::new(&input, channels, length).unwrap();
+                    let mut output =
+                        SequentialSliceOfVecs::new_mut(&mut expected, channels, output_frames)
+                            .unwrap();
+                    let indexing = rubato::Indexing {
+                        input_offset: 0,
+                        output_offset: 0,
+                        active_channels_mask: None,
+                        partial_len: Some(length),
+                    };
+                    let (_, written) = reference
+                        .process_into_buffer(&adapter, &mut output, Some(&indexing))
+                        .unwrap();
+                    assert_eq!(written, output_frames);
+                    for plane in &mut input {
+                        plane.resize(2 * input_frames, 0.0);
+                    }
+                    let allocations = allocation_counter::measure(|| {
+                        actual.process(&mut input, length, &mut pending);
+                    });
+                    assert_eq!(allocations.count_total, 0, "{allocations:?}");
+                    assert_eq!(allocations.count_current, 0, "{allocations:?}");
+                    for frame in 0..output_frames {
+                        for channel in 0..channels {
+                            assert_eq!(
+                                pending[frame * channels + channel],
+                                expected[channel][frame],
+                                "{source}->{target} channels={channels} unit={unit} frame={frame} channel={channel}"
+                            );
+                        }
+                    }
+                }
+            }
         }
     }
 }

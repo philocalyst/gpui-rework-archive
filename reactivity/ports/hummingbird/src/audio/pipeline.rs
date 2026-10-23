@@ -312,17 +312,14 @@ mod resource_tests {
 
     // Exactly the prior Pipeline's heap owners. Scalar fields live inline and
     // add no allocations. This is constructor evidence, not an output oracle.
-    fn prior_owners(
-        source: Format,
-        device: Format,
-        token: Token,
-    ) -> (
+    type PriorOwners = (
         Option<Fft<f64>>,
         Vec<Vec<f64>>,
         Vec<Vec<f64>>,
         Vec<f64>,
         SubmissionTiming,
-    ) {
+    );
+    fn prior_owners(source: Format, device: Format, token: Token) -> PriorOwners {
         let chunk = (source.rate as usize).div_ceil(50);
         let fft = (source.rate != device.rate).then(|| {
             Fft::<f64>::new(
