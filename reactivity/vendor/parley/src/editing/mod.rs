@@ -8,5 +8,5 @@ mod selection;
 
 pub use self::cursor::*;
 pub use self::editor::*;
-pub use self::geometry::CursorGeometry;
+pub use self::geometry::{CursorGeometry, CursorGeometryRestart};
 pub use self::selection::*;

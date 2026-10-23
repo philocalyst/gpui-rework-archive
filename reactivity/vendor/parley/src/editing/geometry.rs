@@ -96,6 +96,14 @@ pub struct CursorGeometry<'a, B: Brush> {
     bytes: Vec<u32>,
 }
 
+/// Retry every request through [`CursorGeometry::new`].
+///
+/// Partial callbacks may already have observed pairs. Their consumer must
+/// discard those pairs before retrying; the index decides final admission.
+#[doc(hidden)]
+#[derive(Debug)]
+pub struct CursorGeometryRestart;
+
 impl<'a, B: Brush> CursorGeometry<'a, B> {
     /// Visit source byte requests without building the random-access index.
     ///
@@ -178,15 +186,65 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         // Both buffers now have their maximum required capacity. No font
         // admission or scratch growth remains after the first callback.
         let mut rtl = Vec::with_capacity(rtl_capacity);
-        Some(visit_source_pairs(
+        Some(
+            visit_source_pairs::<false, _, _>(
+                layout,
+                offsets.into_iter(),
+                width,
+                &mut visit,
+                &mut inline,
+                &mut spill,
+                &mut rtl,
+            )
+            .expect("the immutable layout passed complete source admission"),
+        )
+    }
+
+    /// Visit pairs with explicitly partial, externally observable callbacks.
+    ///
+    /// Unlike [`Self::try_for_each_pair`], a later source-admission failure may
+    /// follow earlier callbacks. On restart the caller must discard all output
+    /// and retry every request through [`Self::new`]. Requests must be monotone;
+    /// a decreasing request also requests restart. The callback cannot stop
+    /// traversal: structural admission must finish before geometry is accepted.
+    ///
+    /// Canvas uses this only while constructing an unpublished local TextLayout.
+    /// An arbitrary callback or owned accumulator provides no rollback guarantee.
+    #[doc(hidden)]
+    pub fn try_for_each_pair_partial(
+        layout: &'a Layout<B>,
+        offsets: impl IntoIterator<Item = usize>,
+        width: f32,
+        mut visit: impl FnMut(usize, Option<[BoundingBox; 2]>),
+    ) -> Result<(), CursorGeometryRestart> {
+        if layout.data.text_len > u32::MAX as usize
+            || layout.data.shaped_text.characters().len() > u32::MAX as usize
+            || layout.len() > u32::MAX as usize
+        {
+            return Err(CursorGeometryRestart);
+        }
+        let mut inline = [RunSlot {
+            item: u32::MAX,
+            origin: 0.,
+        }];
+        let mut spill = Vec::new();
+        let mut rtl = Vec::new();
+        let result = visit_source_pairs::<true, _, core::convert::Infallible>(
             layout,
             offsets.into_iter(),
             width,
-            &mut visit,
+            &mut |byte, pair| {
+                visit(byte, pair);
+                ControlFlow::Continue(())
+            },
             &mut inline,
             &mut spill,
             &mut rtl,
-        ))
+        )?;
+        match result {
+            ControlFlow::Continue(()) => Ok(()),
+            ControlFlow::Break(never) => match never {},
+        }
     }
 
     pub fn new(layout: &'a Layout<B>) -> Option<Self> {
@@ -401,7 +459,7 @@ fn visit_direct<B: Brush, E>(
     ControlFlow::Continue(())
 }
 
-fn visit_source_pairs<B: Brush, E>(
+fn visit_source_pairs<const ADMIT: bool, B: Brush, E>(
     layout: &Layout<B>,
     offsets: impl Iterator<Item = usize>,
     width: f32,
@@ -409,14 +467,15 @@ fn visit_source_pairs<B: Brush, E>(
     inline: &mut [RunSlot; 1],
     spill: &mut Vec<RunSlot>,
     rtl: &mut Vec<f32>,
-) -> ControlFlow<E> {
+) -> Result<ControlFlow<E>, CursorGeometryRestart> {
     let mut offsets = offsets.peekable();
     let mut last_request = None;
     let mut previous_owner = None;
     let mut previous_owner_end = 0;
+    let mut admitted_count = 0_usize;
+    let mut admitted_end = 0;
     for line in layout.lines() {
-        let (min, slots) =
-            source_runs(&line, inline, spill).expect("preflight verified run identities");
+        let (min, slots) = source_runs(&line, inline, spill).ok_or(CursorGeometryRestart)?;
         let mut origin = line.metrics().offset;
         for (position, item) in line.items_nonpositioned().enumerate() {
             match item {
@@ -434,13 +493,13 @@ fn visit_source_pairs<B: Brush, E>(
             let mut prefix = slot.origin;
             rtl.clear();
             if run.is_rtl() {
-                run.try_for_each_cluster(true, |run, atom, grapheme| {
+                let _ = run.try_for_each_cluster(true, |run, atom, grapheme| {
                     rtl.push(prefix);
                     prefix += run
                         .line_spacing()
                         .grapheme_advance(atom, grapheme, run.is_rtl());
                     ControlFlow::<E>::Continue(())
-                })?;
+                });
             }
             let mut previous_end = 0;
             let mut previous_offset = 0.;
@@ -449,6 +508,27 @@ fn visit_source_pairs<B: Brush, E>(
             let mut logical_index = 0;
             let flow = run.try_for_each_cluster(false, |run, atom, grapheme| {
                 let range = full.text_byte_range(grapheme.char_range());
+                if ADMIT {
+                    // Empty-layout metrics never own source bytes. A
+                    // decreasing range may be disjoint; let the byte map
+                    // decide final admission on every ambiguous restart.
+                    if layout.data.text_len != 0 {
+                        if range.start > range.end
+                            || range.end > layout.data.text_len
+                            || (!range.is_empty() && range.start < admitted_end)
+                            || u32::try_from(admitted_count).is_err()
+                        {
+                            return ControlFlow::Break(Err(CursorGeometryRestart));
+                        }
+                        if !range.is_empty() {
+                            admitted_end = range.end;
+                        }
+                    }
+                    let Some(count) = admitted_count.checked_add(1) else {
+                        return ControlFlow::Break(Err(CursorGeometryRestart));
+                    };
+                    admitted_count = count;
+                }
                 let offset = if run.is_rtl() {
                     rtl[rtl.len() - logical_index - 1]
                 } else {
@@ -473,12 +553,11 @@ fn visit_source_pairs<B: Brush, E>(
                     if last_request.is_some_and(|previous| byte < previous) {
                         // Break can complete successfully after draining the
                         // remaining requests through the direct fallback.
-                        return ControlFlow::Break(visit_direct(
-                            layout,
-                            offsets.by_ref(),
-                            width,
-                            visit,
-                        ));
+                        return ControlFlow::Break(if ADMIT {
+                            Err(CursorGeometryRestart)
+                        } else {
+                            Ok(visit_direct(layout, offsets.by_ref(), width, visit))
+                        });
                     }
                     offsets.next();
                     last_request = Some(byte);
@@ -523,7 +602,7 @@ fn visit_source_pairs<B: Brush, E>(
                             None,
                         )
                     };
-                    visit(byte, pair).map_break(ControlFlow::Break)?;
+                    visit(byte, pair).map_break(|error| Ok(ControlFlow::Break(error)))?;
                 }
                 previous_end = range.end;
                 previous_offset = offset;
@@ -539,11 +618,15 @@ fn visit_source_pairs<B: Brush, E>(
     }
     while let Some(&byte) = offsets.peek() {
         if last_request.is_some_and(|previous| byte < previous) {
-            return visit_direct(layout, offsets, width, visit);
+            return if ADMIT {
+                Err(CursorGeometryRestart)
+            } else {
+                Ok(visit_direct(layout, offsets, width, visit))
+            };
         }
         offsets.next();
         last_request = Some(byte);
-        visit(
+        if let ControlFlow::Break(error) = visit(
             byte,
             pair_from_entries(
                 layout,
@@ -554,7 +637,9 @@ fn visit_source_pairs<B: Brush, E>(
                     .filter(|_| previous_owner_end == byte),
                 None,
             ),
-        )?;
+        ) {
+            return Ok(ControlFlow::Break(error));
+        }
     }
-    ControlFlow::Continue(())
+    Ok(ControlFlow::Continue(()))
 }
