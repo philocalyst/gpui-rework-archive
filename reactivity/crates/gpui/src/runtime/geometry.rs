@@ -202,6 +202,9 @@ impl Geometry {
     pub fn view(&self) -> GeometryView<'_> {
         GeometryView::new(&self.presented)
     }
+    pub fn candidate_view(&self) -> Option<GeometryView<'_>> {
+        self.candidate.as_deref().map(GeometryView::new)
+    }
     pub fn freeze(&self, mut column: Vec<Record>, include: impl Fn(u64) -> bool) -> Vec<Record> {
         // Bases are already stable direct indices. Append only published radii;
         // the logical column is sorted, so the suffix keeps binary-search order.

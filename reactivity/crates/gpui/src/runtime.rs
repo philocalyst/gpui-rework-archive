@@ -768,6 +768,33 @@ impl Presented {
     }
 }
 impl<M> Runtime<M> {
+    fn presented_hit_sheet(&self) -> query::HitSheet<'_> {
+        query::HitSheet {
+            nodes: &self.presented,
+            geometry: self.presented_geometry(),
+            size: self.presentation_size,
+            has_viewports: self
+                .metadata
+                .as_ref()
+                .is_some_and(|m| !m.presented.viewports.is_empty()),
+        }
+    }
+    // This proof requires a full C and its own frozen columns, never KEEP/P.
+    fn candidate_hit_sheet(&self) -> Option<query::HitSheet<'_>> {
+        let prepared = self.prepared.as_ref().filter(|c| !c.keeps_rows())?;
+        let metadata = self.metadata.as_ref()?;
+        let sheet = metadata.candidate.as_ref()?;
+        let geometry = match metadata.geometry.as_deref() {
+            Some(geometry) => geometry.candidate_view()?,
+            None => geometry::GeometryView::empty(),
+        };
+        Some(query::HitSheet {
+            nodes: &prepared.nodes,
+            geometry,
+            size: prepared.dimensions(),
+            has_viewports: !sheet.viewports.is_empty(),
+        })
+    }
     fn presented_geometry(&self) -> geometry::GeometryView<'_> {
         self.metadata
             .as_ref()
@@ -3195,41 +3222,21 @@ impl<M: View + 'static> Runtime<M> {
         Ok(())
     }
     fn hit(&self, point: Point) -> Option<u64> {
-        if !Rect::new(
-            0.0,
-            0.0,
-            self.presentation_size[0] as f32,
-            self.presentation_size[1] as f32,
-        )
-        .contains(point)
-        {
+        self.hit_in_sheet(self.presented_hit_sheet(), point)
+    }
+    fn hit_in_sheet(&self, sheet: query::HitSheet<'_>, point: Point) -> Option<u64> {
+        if !sheet.contains_window(point) {
             return None;
         }
-        let geometry = self.presented_geometry();
-        let mut rows = self.presented.iter().enumerate().rev();
-        while let Some((index, node)) = rows.next() {
-            if !node.hittable {
-                let skip = node.parent.skip();
-                // This row is consumed. nth discards the rest of the run in
-                // constant time without indexing the visible-path traversal.
-                if skip > 1 {
-                    rows.nth(skip - 2);
-                }
-                continue;
+        let mut cursor = Some(sheet.hit(point)?);
+        while let Some(index) = cursor {
+            let node = &sheet.nodes[index];
+            if let Some(logical) = self.by_identity.get(node.identity)
+                && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
+            {
+                return Some(node.identity);
             }
-            if self.sheet_hit_with_geometry(index, point, geometry) {
-                let mut cursor = Some(index);
-                while let Some(index) = cursor {
-                    let node = &self.presented[index];
-                    if let Some(logical) = self.by_identity.get(node.identity)
-                        && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
-                    {
-                        return Some(node.identity);
-                    }
-                    cursor = node.parent.index();
-                }
-                return None;
-            }
+            cursor = node.parent.index();
         }
         None
     }

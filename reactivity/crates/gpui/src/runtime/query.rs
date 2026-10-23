@@ -632,8 +632,38 @@ mod tests {
     }
 }
 
+// One sheet-qualified borrow for hit traversal, never retained in a row/owner.
+pub(super) struct HitSheet<'a> {
+    pub nodes: &'a [Presented],
+    pub geometry: super::geometry::GeometryView<'a>,
+    pub size: [u32; 2],
+    pub has_viewports: bool,
+}
+impl HitSheet<'_> {
+    pub fn contains_window(&self, point: crate::Point) -> bool {
+        Rect::new(0., 0., self.size[0] as f32, self.size[1] as f32).contains(point)
+    }
+    pub fn hit(&self, point: crate::Point) -> Option<usize> {
+        let mut rows = self.nodes.iter().enumerate().rev();
+        while let Some((index, node)) = rows.next() {
+            if !node.hittable {
+                let skip = node.parent.skip();
+                // Discard the remaining nonhittable run in constant time.
+                if skip > 1 {
+                    rows.nth(skip - 2);
+                }
+                continue;
+            }
+            if contains_point(self.nodes, self.geometry, self.has_viewports, index, point) {
+                return Some(index);
+            }
+        }
+        None
+    }
+}
+
 // Shared by production pointer dispatch and borrowed public/native queries.
-// Every clip/shape belongs to P; current logical viewports cannot skip checks.
+// Every clip/shape belongs to the supplied sheet; L cannot skip its checks.
 pub(super) fn contains_point(
     nodes: &[Presented],
     geometry: super::geometry::GeometryView<'_>,

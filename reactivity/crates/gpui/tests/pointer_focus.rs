@@ -283,19 +283,153 @@ fn cancellation_and_failed_new_press_consume_the_own_focus_proof() {
 }
 
 #[test]
-fn built_in_inspector_requires_ack_because_epoch_captions_can_change_layout() {
+fn built_in_inspector_accepts_own_focus_c_without_publishing_its_epoch_captions() {
     let mut win = page(true);
-    let mut pointer = press(&mut win);
-    assert_eq!(
-        win.pointer_event(&mut pointer, PointerEvent::Release),
-        Err(Error::PresentationStale)
-    );
+    let target = win.query().name("check").one().unwrap();
+    win.inspector_select(target).unwrap();
     ack(&mut win);
-    win.pointer_event(&mut pointer, PointerEvent::Press)
+    while win.update(|_| {}).unwrap().source_epoch < 9 {
+        ack(&mut win);
+    }
+    ack(&mut win);
+    let captions = |win: &Win<Page>| {
+        let mut values = Vec::new();
+        win.visit(|part| {
+            if let Some(text) = part.text() {
+                values.push(text.to_owned());
+            }
+        })
         .unwrap();
+        values
+    };
+    let before = captions(&win);
+    let mut pointer = press(&mut win);
+    let focus = win.with_scene(|_, token| token).unwrap();
     win.pointer_event(&mut pointer, PointerEvent::Release)
         .unwrap();
     assert_eq!(win.root().unwrap().calls, 1);
+    assert_eq!(win.inspector_selected().unwrap(), Some(target));
+    assert!(!published_checked(&win));
+    assert_eq!(captions(&win), before);
+    assert_eq!(win.presented(focus), Err(Error::StalePresentation));
+    ack(&mut win);
+    assert!(published_checked(&win));
+    assert_eq!(win.query().name("check").one().unwrap(), target);
+}
+
+#[test]
+fn inspector_panel_action_uses_the_same_focus_release_proof() {
+    let mut win = page(true);
+    let target = win.query().name("check").one().unwrap();
+    win.inspector_select(target).unwrap();
+    ack(&mut win);
+    let height = win.query().name("height").one().unwrap();
+    let mut point = None;
+    win.visit(|part| {
+        if part.target() == height {
+            let b = part.bounds();
+            point = Some(Point {
+                x: b.x + b.width / 2.,
+                y: b.y + b.height / 2.,
+            });
+        }
+    })
+    .unwrap();
+    let mut pointer = PointerSession::default();
+    win.pointer_event(&mut pointer, PointerEvent::Move(point.unwrap()))
+        .unwrap();
+    let focus = win
+        .pointer_event(&mut pointer, PointerEvent::Press)
+        .unwrap();
+    assert_eq!(focus.source_epoch, focus.presentation_epoch + 1);
+    win.pointer_event(&mut pointer, PointerEvent::Release)
+        .unwrap();
+    assert_eq!(win.root().unwrap().calls, 0);
+    ack(&mut win);
+    let mut chosen = false;
+    win.visit(|part| {
+        chosen |= part
+            .text()
+            .is_some_and(|text| text.starts_with("Logical height:"))
+    })
+    .unwrap();
+    assert!(chosen);
+}
+
+#[test]
+fn inspector_picking_uses_actual_shape_and_cannot_select_panel_controls() {
+    for panel in [false, true] {
+        let mut win = page(true);
+        win.activate(win.button("Pick element")).unwrap();
+        ack(&mut win);
+        win.click(win.query().name("input").one().unwrap()).unwrap();
+        ack(&mut win);
+        let app = win.query().name("check").one().unwrap();
+        let point = if panel {
+            Point { x: 420., y: 16. }
+        } else {
+            Point { x: 12., y: 52. }
+        };
+        let mut pointer = PointerSession::default();
+        win.pointer_event(&mut pointer, PointerEvent::Move(point))
+            .unwrap();
+        win.pointer_event(&mut pointer, PointerEvent::Press)
+            .unwrap();
+        win.pointer_event(&mut pointer, PointerEvent::Release)
+            .unwrap();
+        assert_eq!(win.inspector_selected().unwrap(), (!panel).then_some(app));
+        assert_eq!(win.root().unwrap().calls, 0);
+    }
+}
+
+#[test]
+fn inspector_focus_proof_does_not_cover_later_source_or_viewport_changes() {
+    for change in 0..9 {
+        let mut win = page(true);
+        let target = win.query().name("check").one().unwrap();
+        let mut pointer = press(&mut win);
+        match change {
+            0 => {
+                win.update(|_| {}).unwrap();
+            }
+            1 => {
+                win.set(Page::LABEL, "renamed".into()).unwrap();
+            }
+            2 => {
+                win.inspector_select(target).unwrap();
+            }
+            3 => {
+                win.resize([721, 900]).unwrap();
+                win.resize([720, 900]).unwrap();
+            }
+            4 => {
+                win.resize_scaled([720, 900], 2.).unwrap();
+                win.resize_scaled([720, 900], 1.).unwrap();
+            }
+            5 => {
+                win.presentation_lost().unwrap();
+            }
+            6 => {
+                win.update(|m| m.show = false).unwrap();
+            }
+            7 => {
+                win.activate(win.button("Pick element")).unwrap();
+            }
+            8 => {
+                assert!(win.update(|m| m.broken = true).is_err());
+            }
+            _ => unreachable!(),
+        }
+        assert_eq!(
+            win.pointer_event(&mut pointer, PointerEvent::Release),
+            Err(Error::PresentationStale),
+            "change {change}"
+        );
+        ack(&mut win);
+        win.pointer_event(&mut pointer, PointerEvent::Release)
+            .unwrap();
+        assert_eq!(win.root().unwrap().calls, 0);
+    }
 }
 
 #[test]
