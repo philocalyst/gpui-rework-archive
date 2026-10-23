@@ -1,0 +1,30 @@
+    Checking zvariant_utils v4.2.0
+    Checking wgpu-hal v30.0.1 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/wgpu-hal)
+    Checking zvariant v5.15.1
+    Checking zbus_names v4.3.5
+    Checking zbus_xml v5.2.1
+    Checking zbus-lockstep v0.5.2
+    Checking zbus v5.19.0
+    Checking parley_engine v0.12.0 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/parley_engine)
+    Checking accesskit_consumer v0.39.1 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/accesskit_consumer)
+    Checking atspi-common v0.13.0
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking dpi v0.1.2
+    Checking winit v0.30.13 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/winit)
+    Checking wgpu-core v30.0.1 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/wgpu-core)
+    Checking atspi-proxies v0.13.0
+    Checking atspi v0.29.0
+    Checking accesskit_atspi_common v0.21.0 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/accesskit_atspi_common)
+    Checking parley v0.12.0 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/parley)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-inspector-pointer-sol/reactivity/crates/gpu)
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-inspector-pointer-sol/reactivity/crates/canvas)
+    Checking wgpu v30.0.1 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/wgpu)
+    Checking accesskit_unix v0.24.0 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/accesskit_unix)
+    Checking accesskit_winit v0.34.1
+    Checking softbuffer v0.4.8 (/tmp/gpui-inspector-pointer-sol/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-inspector-pointer-sol/reactivity/crates/host)
+    Checking zbus_utils v6.0.0
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-inspector-pointer-sol/reactivity/crates/state)
+    Checking gpui v0.1.0 (/tmp/gpui-inspector-pointer-sol/reactivity/crates/gpui)
+    Checking zbus v6.0.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 35.67s

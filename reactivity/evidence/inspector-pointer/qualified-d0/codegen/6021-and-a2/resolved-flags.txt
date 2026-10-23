@@ -1,0 +1,1 @@
+build.rustflags = ["-C", "symbol-mangling-version=v0", "--cfg", "tokio_unstable", "-Zemit-stack-sizes"]
