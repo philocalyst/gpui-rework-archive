@@ -335,6 +335,60 @@ fn typed_delivery_refreshes_only_questions_that_depend_on_its_source() {
 }
 
 #[test]
+fn a_rejected_message_does_not_strand_its_frozen_fifo_or_evade_a_smaller_budget() {
+    struct Moving {
+        value: Signal<String>,
+        peer: Signal<String>,
+        reject: bool,
+    }
+    const REGISTERED: Source<Moving, String> = Source::new(
+        FieldId::new(1),
+        "value",
+        |m| if m.reject { &m.peer } else { &m.value },
+        |m| if m.reject { &mut m.peer } else { &mut m.value },
+    );
+    const VALUE: Source<Moving, String> =
+        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    impl View for Moving {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(REGISTERED)
+        }
+        fn view(&self) -> El<'_> {
+            text(&self.value)
+        }
+    }
+    let (remote, inbox) = Remote::bounded(4);
+    let (flip, flips) = Remote::bounded(1);
+    let mut win = Win::demo(Moving {
+        value: Signal::new("seed".into()),
+        peer: Signal::new("peer".into()),
+        reject: false,
+    })
+    .with_inbox_for(inbox, VALUE, |value, message| *value = message)
+    .unwrap()
+    .with_inbox(flips, |model, _: ()| model.reject = true)
+    .unwrap();
+    flip.try_send(()).unwrap();
+    for value in ["rejected", "first", "second", "third"] {
+        remote.try_send(value.into()).unwrap();
+    }
+    let failure = win.deliver_ready(16).unwrap_err();
+    assert!(matches!(failure.error, Error::Binding(_)));
+    let delivery = failure.delivery.unwrap();
+    assert_eq!((delivery.received, delivery.applied), (5, 1));
+    assert!(delivery.more, "retained frozen messages require another turn");
+    win.update(|model| model.reject = false).unwrap();
+    assert_eq!(win.deliver_ready(0).unwrap().applied, 0);
+    for value in ["first", "second", "third"] {
+        let delivery = win.deliver_ready(1).unwrap();
+        assert_eq!(delivery.received, 0, "this message was already frozen");
+        assert_eq!(delivery.applied, 1);
+        assert_eq!(&**win.read(VALUE).unwrap(), value);
+    }
+    assert_eq!(win.deliver_ready(16).unwrap().applied, 0);
+}
+
+#[test]
 fn mutable_projector_disagreement_rejects_before_editing_or_advancing_source() {
     let bad = Source::new(
         FieldId::new(1),
