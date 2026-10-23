@@ -100,13 +100,13 @@ def main():
                 events.append({"stage": "initial", "visible_name": "9 recordings for ‘’ — Title"})
                 # The old first row anchors the scroll position after resort,
                 # so it remains visible even though its SQL index moves0→6.
-                play = find("Play Album Track")
+                play = find("Prepare Album Track")
                 invoke(play)
-                find("Play request 1: recording 1 — /music/1.flac")
-                events.append({"stage": "play", "id": 1, "path": "/music/1.flac"})
+                find("Prepared request 1: recording 1 — /music/1.flac")
+                events.append({"stage": "prepare", "id": 1, "path": "/music/1.flac"})
                 invoke(find("Longest first"))
                 find("9 recordings for ‘’ — Longest first")
-                assert find("Play Album Track")[1:] == play[1:], "row's native action identity changed after SQL resort"
+                assert find("Prepare Album Track")[1:] == play[1:], "row's native action identity changed after SQL resort"
                 events.append({"stage": "resort", "same_accessible_action": list(play[1:])})
 
                 search = find("Search recordings")
@@ -128,9 +128,9 @@ def main():
                                "current": list(search[1:])})
                 assert bus(address, "call", search[1], search[2], "org.a11y.atspi.EditableText", "SetTextContents", "s", "μαρ") == [True]
                 find("1 recordings for ‘μαρ’ — Longest first")
-                invoke(find("Play Καλημέρα"))
-                find("Play request 2: recording 44 — /music/44.flac")
-                events.append({"stage": "unicode_edit_and_play", "query": "μαρ", "id": 44, "path": "/music/44.flac"})
+                invoke(find("Prepare Καλημέρα"))
+                find("Prepared request 2: recording 44 — /music/44.flac")
+                events.append({"stage": "unicode_edit_and_prepare", "query": "μαρ", "id": 44, "path": "/music/44.flac"})
                 log.flush()
                 output = native_log.read_text()
                 frames = [line.split(",")[1:] for line in output.splitlines() if line.startswith("HUMMINGBIRD_PRESENT,")]
@@ -145,7 +145,7 @@ def main():
                                                    "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                                                    "events": events, "presented_frames": frames, "native_log": output}, indent=2) + "\n")
                 captured = True
-                print("Native render, SQL resort, stable action, X11 edit, Unicode AT-SPI edit and real-ID playback requests passed")
+                print("Native render, SQL resort, stable action, X11 edit, Unicode AT-SPI edit and pure real-ID preparation passed")
             finally:
                 for process in reversed(processes):
                     process.terminate()

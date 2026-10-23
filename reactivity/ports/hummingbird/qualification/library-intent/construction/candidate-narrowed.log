@@ -1,0 +1,13 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.72s
+     Running tests/application_cost.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/application_cost-151d771af9b43c2f)
+
+running 1 test
+COHORT 0 model=472 questions=600 event=72 selection=32 error=64 win=664 ui_current_plus_inline=100128 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 3103, bytes_current: 3084, bytes_max: 3084 } connected=AllocationInfo { count_total: 2, count_current: 2, count_max: 2, bytes_total: 184, bytes_current: 184, bytes_max: 184 } mounted=AllocationInfo { count_total: 1824, count_current: 369, count_max: 522, bytes_total: 416587, bytes_current: 96196, bytes_max: 154118 }
+COHORT 1 model=472 questions=600 event=72 selection=32 error=64 win=664 ui_current_plus_inline=95808 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 3103, bytes_current: 3084, bytes_max: 3084 } connected=AllocationInfo { count_total: 2, count_current: 2, count_max: 2, bytes_total: 184, bytes_current: 184, bytes_max: 184 } mounted=AllocationInfo { count_total: 1810, count_current: 360, count_max: 513, bytes_total: 410871, bytes_current: 91876, bytes_max: 149798 }
+COHORT 2 model=472 questions=600 event=72 selection=32 error=64 win=664 ui_current_plus_inline=95808 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 3103, bytes_current: 3084, bytes_max: 3084 } connected=AllocationInfo { count_total: 2, count_current: 2, count_max: 2, bytes_total: 184, bytes_current: 184, bytes_max: 184 } mounted=AllocationInfo { count_total: 1810, count_current: 360, count_max: 513, bytes_total: 410871, bytes_current: 91876, bytes_max: 149798 }
+COHORT 3 model=472 questions=600 event=72 selection=32 error=64 win=664 ui_current_plus_inline=95808 spawn=AllocationInfo { count_total: 10, count_current: 9, count_max: 9, bytes_total: 3103, bytes_current: 3084, bytes_max: 3084 } connected=AllocationInfo { count_total: 2, count_current: 2, count_max: 2, bytes_total: 184, bytes_current: 184, bytes_max: 184 } mounted=AllocationInfo { count_total: 1810, count_current: 360, count_max: 513, bytes_total: 410871, bytes_current: 91876, bytes_max: 149798 }
+test requested_ui_construction_and_static_owner_bill ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+

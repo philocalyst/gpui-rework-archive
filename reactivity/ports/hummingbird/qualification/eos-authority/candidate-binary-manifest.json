@@ -1,0 +1,27 @@
+{
+  "cpal-lib": {
+    "source": "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-f85e63c93d857d2d",
+    "frozen": "/tmp/gpui-hummingbird-eos-authority-evidence/candidate-binaries/cpal-lib",
+    "sha256": "bc3b8b7dc2f0c659844d27fac18a0823b2b9b911792d7541e028ea3e28f5327d"
+  },
+  "cpal-library-audio": {
+    "source": "/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-0fc84c1a60b46f5a",
+    "frozen": "/tmp/gpui-hummingbird-eos-authority-evidence/candidate-binaries/cpal-library-audio",
+    "sha256": "22c47113e9d3b58efb684afaa3474ad24adff0d7fc75fb0ce4bcf6804b312eab"
+  },
+  "native-lib": {
+    "source": "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-e5ec828edd75236d",
+    "frozen": "/tmp/gpui-hummingbird-eos-authority-evidence/candidate-binaries/native-lib",
+    "sha256": "208cfdce9580fbe8afa47ef32fdf448b3ee7778779f722401309c49146a90f62"
+  },
+  "native-library-audio": {
+    "source": "/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-d513ce620e1de31e",
+    "frozen": "/tmp/gpui-hummingbird-eos-authority-evidence/candidate-binaries/native-library-audio",
+    "sha256": "473f17883363a8a9c2b463530d7e3554ed03eaccd669a728ed9d12e98bccbf17"
+  },
+  "native-service": {
+    "source": "/tmp/gpui-hummingbird-audio-target/debug/examples/native_service",
+    "frozen": "/tmp/gpui-hummingbird-eos-authority-evidence/candidate-binaries/native-service",
+    "sha256": "be3bc0202c359d27f833665b9283daab1cd49a03aacb7c7434473497842a2b43"
+  }
+}

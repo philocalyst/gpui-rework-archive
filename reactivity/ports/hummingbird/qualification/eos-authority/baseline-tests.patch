@@ -1,0 +1,240 @@
+diff --git a/reactivity/ports/hummingbird/tests/library_audio.rs b/reactivity/ports/hummingbird/tests/library_audio.rs
+index 32ee5d2d05..23a42c7d1e 100644
+--- a/reactivity/ports/hummingbird/tests/library_audio.rs
++++ b/reactivity/ports/hummingbird/tests/library_audio.rs
+@@ -744,6 +744,235 @@ fn unavailable_play_error_leaves_current_queue_plan_and_audio_authority_unchange
+     close(win, audio, worker);
+ }
+ 
++fn held_transport_owner() -> (Owners<impl LaneSet<Library>>, Arc<Mutex<Vec<Event>>>) {
++    let (worker, inbox) = Worker::new(database()).unwrap();
++    let (mut model, questions) = connect(worker.handle()).unwrap();
++    let capture = Arc::new(Mutex::new(Capture {
++        capacity: 4096,
++        ..Default::default()
++    }));
++    let (audio, audio_inbox) = AudioService::with_output(Provider(capture.clone())).unwrap();
++    model.queue.attach_audio(audio.handle()).unwrap();
++    let held = Arc::new(Mutex::new(Vec::new()));
++    let buffered = held.clone();
++    let observed = capture.clone();
++    let (inject, injected) = Remote::bounded(8);
++    let mut win = Win::with_questions(
++        model,
++        questions,
++        WindowOptions {
++            size: [720, 1100],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++    .with_inbox_status(inbox, Library::receive)
++    .unwrap()
++    .with_inbox(audio_inbox, move |model: &mut Library, event: Event| {
++        if let Event::Opened { token, .. } = &event {
++            observed.lock().unwrap().opened.push(*token);
++        }
++        match event {
++            Event::Adopted { .. } | Event::SourceEof { .. } | Event::Seeked { .. } => {
++                buffered.lock().unwrap().push(event);
++            }
++            event => model.receive_audio(event),
++        }
++    })
++    .unwrap()
++    .with_inbox(injected, Library::receive_audio)
++    .unwrap();
++    settle(&mut win, &worker).unwrap();
++    for id in [44, 90] {
++        prepare(&mut win, &worker, id);
++        win.activate(win.button(&format!("Add prepared recording {id} to queue")))
++            .unwrap();
++    }
++    // The real decoder reaches EOF; only its owner delivery is withheld.
++    // Zero new credits later prevent Seek from generating a second EOF.
++    until(&mut win, &capture, true, |_, _| {
++        held.lock()
++            .unwrap()
++            .iter()
++            .any(|event| matches!(event, Event::SourceEof { .. }))
++    });
++    capture.lock().unwrap().capacity = 0;
++    ((worker, audio, capture, inject, win), held)
++}
++
++fn take_adopted<L: LaneSet<Library>>(
++    win: &mut Win<Library, L>,
++    capture: &Arc<Mutex<Capture>>,
++    held: &Arc<Mutex<Vec<Event>>>,
++    revision: u64,
++) -> Event {
++    until(win, capture, false, |_, _| {
++        held.lock().unwrap().iter().any(
++            |event| matches!(event, Event::Adopted { revision: actual, .. } if *actual == revision),
++        )
++    });
++    let mut events = held.lock().unwrap();
++    let index = events
++        .iter()
++        .position(
++            |event| matches!(event, Event::Adopted { revision: actual, .. } if *actual == revision),
++        )
++        .unwrap();
++    events.remove(index)
++}
++
++fn assert_retired_eof(control: &str, adopted_first: bool) {
++    let ((worker, audio, capture, inject, mut win), held) = held_transport_owner();
++    let original = win
++        .with_model(|model| model.queue.playback().plan().unwrap().clone())
++        .unwrap();
++    assert_eq!(original.current.track.track_id, Some(44));
++    assert_eq!(
++        original.lookahead.as_ref().unwrap().track.track_id,
++        Some(90)
++    );
++    let old = audio.handle().receipt().unwrap();
++    let token = old.token.unwrap();
++    assert_eq!(token.stamp, original.stamp());
++    let latest = match control {
++        "seek" => audio.handle().clone().seek(0),
++        "stop" => audio.handle().clone().stop(),
++        _ => unreachable!(),
++    }
++    .unwrap();
++    let mut adopted = Some(take_adopted(&mut win, &capture, &held, latest.revision));
++    if adopted_first {
++        inject.try_send(adopted.take().unwrap()).unwrap();
++        win.deliver_ready(32).unwrap();
++    }
++    inject
++        .try_send(Event::SourceEof {
++            token,
++            end: original.end_of_stream(),
++        })
++        .unwrap();
++    win.deliver_ready(32).unwrap();
++    assert_eq!(
++        win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
++            .unwrap(),
++        original.stamp(),
++        "retired {control} EOF edited the queue, adopted_first={adopted_first}"
++    );
++    assert_eq!(
++        win.with_model(|model| model.queue.playback().plan().unwrap().current.key)
++            .unwrap(),
++        original.current.key
++    );
++    assert_eq!(audio.handle().receipt().unwrap().revision, latest.revision);
++    assert_eq!(audio.handle().receipt().unwrap().token, latest.token);
++    if !adopted_first {
++        inject.try_send(adopted.take().unwrap()).unwrap();
++        win.deliver_ready(32).unwrap();
++    }
++    let expected = if control == "stop" {
++        AudioState::Stopped
++    } else {
++        AudioState::Opening
++    };
++    assert_eq!(
++        win.with_model(|model| model.queue.audio_status().unwrap().state)
++            .unwrap(),
++        expected
++    );
++    inject
++        .try_send(Event::Adopted {
++            revision: old.revision,
++            token: old.token,
++            playing: true,
++        })
++        .unwrap();
++    win.deliver_ready(32).unwrap();
++    assert_eq!(
++        win.with_model(|model| model.queue.audio_status().unwrap().state)
++            .unwrap(),
++        expected
++    );
++    close(win, audio, worker);
++}
++
++#[test]
++fn cloned_seek_before_adopted_rejects_retired_eof_without_queue_edit() {
++    assert_retired_eof("seek", false);
++}
++#[test]
++fn cloned_seek_after_adopted_rejects_retired_eof_without_queue_edit() {
++    assert_retired_eof("seek", true);
++}
++#[test]
++fn cloned_stop_before_adopted_rejects_retired_eof_without_queue_edit() {
++    assert_retired_eof("stop", false);
++}
++#[test]
++fn cloned_stop_after_adopted_rejects_retired_eof_without_queue_edit() {
++    assert_retired_eof("stop", true);
++}
++
++#[test]
++fn paused_same_token_eof_advances_once_without_resuming_output() {
++    for adopted_first in [false, true] {
++        let ((worker, audio, capture, inject, mut win), held) = held_transport_owner();
++        let original = win
++            .with_model(|model| model.queue.playback().plan().unwrap().clone())
++            .unwrap();
++        let old = audio.handle().receipt().unwrap();
++        let paused = audio.handle().clone().set_playing(false).unwrap();
++        assert_eq!(paused.token, old.token);
++        let mut adopted = Some(take_adopted(&mut win, &capture, &held, paused.revision));
++        if adopted_first {
++            inject.try_send(adopted.take().unwrap()).unwrap();
++            win.deliver_ready(32).unwrap();
++        }
++        inject
++            .try_send(Event::SourceEof {
++                token: old.token.unwrap(),
++                end: original.end_of_stream(),
++            })
++            .unwrap();
++        win.deliver_ready(32).unwrap();
++        let advanced = win
++            .with_model(|model| model.queue.playback().plan().unwrap().clone())
++            .unwrap();
++        assert_eq!(
++            advanced.current.track.track_id,
++            Some(90),
++            "same-token pause stranded EOF"
++        );
++        assert_ne!(advanced.stamp(), original.stamp());
++        assert_eq!(
++            win.with_model(|model| model.queue.audio_status().unwrap().state)
++                .unwrap(),
++            AudioState::Paused
++        );
++        if !adopted_first {
++            inject.try_send(adopted.take().unwrap()).unwrap();
++        }
++        inject
++            .try_send(Event::SourceEof {
++                token: old.token.unwrap(),
++                end: original.end_of_stream(),
++            })
++            .unwrap();
++        win.deliver_ready(32).unwrap();
++        assert_eq!(
++            win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
++                .unwrap(),
++            advanced.stamp()
++        );
++        assert_eq!(
++            win.with_model(|model| model.queue.audio_status().unwrap().state)
++                .unwrap(),
++            AudioState::Paused
++        );
++        assert!(!capture.lock().unwrap().playing);
++        close(win, audio, worker);
++    }
++}
++
+ #[test]
+ fn stop_on_empty_queue_and_active_pause_seek_revoke_play_before_result_consumption() {
+     for control in ["Stop", "Pause", "Back 10 seconds"] {

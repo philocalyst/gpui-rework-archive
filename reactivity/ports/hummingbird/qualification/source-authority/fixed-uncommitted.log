@@ -1,0 +1,10 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 30.63s
+     Running tests/source_authority.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/source_authority-6559322e57dbb038)
+
+running 2 tests
+test initial_uncommitted_database_is_rejected_before_starting_a_worker ... ok
+test replacement_with_uncommitted_sql_never_publishes_or_consumes_a_version ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+

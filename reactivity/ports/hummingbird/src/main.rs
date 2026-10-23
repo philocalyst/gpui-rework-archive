@@ -1,10 +1,6 @@
-use hummingbird_gpui_port::transcript;
 #[cfg(feature = "native")]
-use hummingbird_gpui_port::{
-    app::{Library, connect},
-    database::Database,
-    worker::Worker,
-};
+use hummingbird_gpui_port::database::Database;
+use hummingbird_gpui_port::transcript;
 
 enum Renderer {
     Auto,
@@ -60,14 +56,9 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
         Some(path) => Database::open_read_only(std::path::Path::new(&path))?,
         None => Database::fixture()?,
     };
-    let (worker, inbox) = Worker::new(database)?;
-    let (model, questions) = connect(worker.handle())?;
+    let (services, window) = hummingbird_gpui_port::application::system_window(database)?;
     let result = gpui::Application::run_window(
-        gpui::Window::document(model)
-            .questions(questions)
-            .with_inbox(inbox, Library::receive)
-            .title("Hummingbird — Library port")
-            .size(720, 900)
+        window
             .renderer(match renderer {
                 Renderer::Auto => gpui::RendererPolicy::Auto,
                 Renderer::Cpu => gpui::RendererPolicy::ReferenceCpu,
@@ -80,7 +71,11 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
                 )
             }),
     );
-    worker.finish().map_err(|_| "library worker panicked")?;
+    let _ = services.audio.finish(std::time::Duration::from_millis(100));
+    services
+        .library
+        .finish()
+        .map_err(|_| "library worker panicked")?;
     result?;
     Ok(())
 }

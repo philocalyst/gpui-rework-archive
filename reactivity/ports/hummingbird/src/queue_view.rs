@@ -1,9 +1,12 @@
-//! Ordinary public queue consumer. Explicit controls expose selection and range
-//! operations until modified-click/drag metadata has a portable public route.
+#[cfg(feature = "audio")]
+#[path = "queue_audio.rs"]
+mod audio;
 use crate::{
     queue::{EntryKey, QueueError, Repeat, Track, TrackRef},
     queue_playback::{EndOfStream, PlaybackQueue},
 };
+#[cfg(feature = "audio")]
+pub use audio::{State as AudioState, Status as AudioStatus};
 use gpui::prelude::*;
 
 pub struct QueueScreen {
@@ -12,6 +15,8 @@ pub struct QueueScreen {
     anchor: Option<EntryKey>,
     list: ListId,
     notice: String,
+    #[cfg(feature = "audio")]
+    audio: Option<audio::AudioUi>,
 }
 fn available(track: &Track) -> bool {
     track.available_when_prepared
@@ -30,6 +35,8 @@ impl QueueScreen {
             anchor: None,
             list,
             notice: String::new(),
+            #[cfg(feature = "audio")]
+            audio: None,
         })
     }
     pub fn list_id(&self) -> ListId {
@@ -48,9 +55,18 @@ impl QueueScreen {
         let result = self.playback.append(tracks, &available, &mut draw);
         self.changed(result.map(|_| ()));
     }
+    pub fn play_now(&mut self, track: TrackRef) {
+        let result = self.playback.play_now(track, &available, &mut draw);
+        self.changed(result);
+    }
     /// The application may bind this to its real decoder's typed Inbox. The
     /// queue UI itself never fabricates EOS or installs an audio side effect.
     pub fn receive_end_of_stream(&mut self, event: EndOfStream) {
+        // Attached playback requires the seek-qualified audio token too.
+        #[cfg(feature = "audio")]
+        if self.audio.is_some() {
+            return;
+        }
         match self.playback.end_of_stream(event, &available, &mut draw) {
             Ok(true) => self.changed(Ok(())),
             Ok(false) => {}
@@ -64,6 +80,8 @@ impl QueueScreen {
                 self.selected.clear();
                 self.anchor = None;
                 self.notice.clear();
+                #[cfg(feature = "audio")]
+                self.sync_audio(crate::audio::Transition::Replace);
             }
             Err(error) => self.notice = format!("Queue rejected: {error:?}"),
         }
@@ -171,8 +189,16 @@ impl ItemSource for QueueScreen {
     fn row(&self, index: usize) -> El<'_> {
         let entry = self.playback.queue().at(index).unwrap();
         let key = entry.key;
-        let play = button("Prepare")
-            .name(format!("Prepare {}", entry.track.title))
+        #[cfg(feature = "audio")]
+        let label = if self.audio.is_some() {
+            "Play"
+        } else {
+            "Prepare"
+        };
+        #[cfg(not(feature = "audio"))]
+        let label = "Prepare";
+        let play = button(label)
+            .name(format!("{label} {}", entry.track.title))
             .w(80);
         row((
             checkbox(
@@ -207,9 +233,13 @@ impl ItemSource for QueueScreen {
 impl View for QueueScreen {
     fn view(&self) -> El<'_> {
         let last = self.playback.queue().len();
+        #[cfg(feature = "audio")]
+        let transport = self.audio_controls();
+        #[cfg(not(feature = "audio"))]
+        let transport = text("Decoder plans only; audio output is not attached");
         column((
             text(format!("Queue — {} entries", last)).font_size(20),
-            text("Decoder plans only; audio output is not attached"),
+            transport,
             row((
                 button("Previous").on_click(Self::previous),
                 button("Next").on_click(Self::next),

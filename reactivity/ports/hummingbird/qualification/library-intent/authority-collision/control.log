@@ -1,0 +1,24 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.19s
+     Running tests/preparation_authority_probe.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/preparation_authority_probe-f230167f3c63a23e)
+
+running 1 test
+test prequeued_public_request_cannot_claim_library_issued_authority ... FAILED
+
+failures:
+
+---- prequeued_public_request_cannot_claim_library_issued_authority stdout ----
+
+thread 'prequeued_public_request_cannot_claim_library_issued_authority' (3108192) panicked at tests/preparation_authority_probe.rs:18:5:
+assertion `left == right` failed
+  left: Some(90)
+ right: Some(44)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    prequeued_public_request_cannot_claim_library_issued_authority
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+error: test failed, to rerun pass `--test preparation_authority_probe`

@@ -110,14 +110,21 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
         },
     )
     .unwrap()
-    .with_inbox(inbox, Library::receive)
+    .with_inbox_status(inbox, Library::receive)
     .unwrap();
     settle(&mut owner, &worker).unwrap();
     let list = owner.list(recordings(Default::default())).unwrap();
     owner.scroll_to_key(list, track_key(44)).unwrap();
     let item = owner.list_item(list, track_key(44)).unwrap();
     owner
-        .activate(owner.role(Role::Button).within(item).one().unwrap())
+        .activate(
+            owner
+                .role(Role::Button)
+                .text("Prepare")
+                .within(item)
+                .one()
+                .unwrap(),
+        )
         .unwrap();
     settle(&mut owner, &worker).unwrap();
     let add = owner.button("Add prepared recording 44 to queue");
@@ -224,9 +231,8 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
     );
 
     // Commit a real service replacement, admit just its inbox notification,
-    // and leave the new question completions pending. The previous good
-    // prepared recording is still labelled honestly and cannot enqueue into
-    // the new library generation. Existing owned queue tracks remain valid.
+    // and leave the new search completion pending. Source replacement revokes
+    // preparation and its old action; existing owned queue tracks remain valid.
     worker
         .replace_database(Database::fixture().unwrap())
         .unwrap()
@@ -239,21 +245,16 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
         1
     );
     assert!(
-        owner
+        !owner
             .contains_text("Add prepared recording 44 to queue")
             .unwrap()
     );
-    owner.activate(add).unwrap();
+    assert_eq!(owner.activate(add), Err(Error::StaleTarget));
     assert_eq!(
         owner
             .with_model(|model| model.queue.playback().queue().len())
             .unwrap(),
         3
-    );
-    assert!(
-        owner
-            .contains_text("This prepared recording belongs to the previous library source")
-            .unwrap()
     );
     assert_eq!(
         owner

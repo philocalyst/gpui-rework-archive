@@ -19,7 +19,7 @@ describe the intended complete system; this page records what is connected now.
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
 | Native | Vendor-owned backend hints and target proof; Winit software-first windows, no Auto GPU initialization for certified fills, background GPU preparation for general scenes, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
-| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library and queue port with shared native/headless View, typed workers, duplicate occurrence identity and revocable playback plans | Hummingbird audio/scanner/full navigation/artwork/media services and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
+| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library, queue, decoding and lazy CPAL output with shared native/headless View, typed workers, duplicate occurrence identity and checked source/audio authority | Full Hummingbird navigation, scanner, artwork, settings and media services, broader audio formats/output policy and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
@@ -68,6 +68,31 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The integrated [Hummingbird audio and source-authority slice](ports/hummingbird/qualification/main-source-authority-integration/README.md)
+uses runtime `9f83f23288` over the independently replayed `9145411365` package.
+Default tests pass 50 cases across 14 harnesses; native-feature tests pass 116
+across 16 harnesses with one ignored device test. Strict default/native lint,
+formatting and the native example build pass. All 2,160 compiler/source guards
+match through a real external Registry client: SQLite import, Unicode search,
+pure preparation, explicit Play, exactly 64 produced PCM frames, Stop, worker
+disconnection and normal window close. The client uses the public application
+and a bounded counting output, with no hardware or timing claim.
+The original headless and external Registry/X11 clients also pass on the frozen
+ordinary application under CPU, Vulkan and Auto; all 1,491 inputs match and owned
+displays stop. Vulkan uses llvmpipe. The shared source-authority fix costs one
+additional allocation and 48 retained measured heap-plus-owner bytes in each
+of four matched constructor cohorts; the guard itself allocates nothing.
+
+The source guard closes an actual queued-reply race: a database replacement can
+finish before the UI receives its notification. Queue adoption now checks shared
+worker authority while holding the source lock, then takes audio authority in a
+fixed order. Worker retirement reuses the reserved terminal generation instead
+of retaining another version mirror. The application has **5,633** nontest,
+noncomment source lines, including its binary and all feature branches; this
+app-only integration keeps the six shipping libraries at **30,987**. The prior
+DSP constructor regression, unsupported rate families, baseline tail failures
+and output/OS drain limits remain recorded in the application evidence.
+
 The integrated [owner-lazy accessibility transport](evidence/owner-lazy-a11y/README.md)
 uses exact source `157b995e7e` and final tests `112c27e728`. It creates no action
 queue before the first actual provider tree and removes the redundant global
@@ -98,8 +123,8 @@ native endpoint pair costs eight more combined requested/header bytes, and the
 sealed optimized caller adds 99 code bytes. Default/native suites, six actual
 native controls including Registry repair, strict lint and Apple/MSVC source
 checks pass on the exact integrated sources. Core at that checkpoint is **30,805** nontest,
-noncomment lines (+109). Hummingbird application integration remains separate;
-its discovered Stop race is pending correction. No latency or RSS win is claimed.
+noncomment lines (+109). The later Hummingbird integration above fixes its
+discovered Stop race. No latency or RSS win is claimed.
 
 The integrated [typed source paths](evidence/projected-sources/README.md)
 compose existing child declarations through registered component scopes for
@@ -118,8 +143,23 @@ unadopted. The [fixed GPU comparison](evidence/uniform-packet/failed-gpu-campaig
 passes exact readbacks but fails its speed/regression gates: host submission
 ratio 1.2843916, total render/poll wall ratio 0.4873842, llvmpipe only. All
 22 legs and 6,864 warmup/measured frames remain archived; no retry or gate
-change followed measurement. Its coverage-setup successor is isolated. The text timing campaign stopped at a watchdog;
+change followed measurement. The later [coverage-setup proof](evidence/uniform-packet/coverage-setup/ROOT-REVIEW.md)
+and [legacy coverage qualification](evidence/uniform-packet/legacy-coverage/ROOT-REVIEW.md)
+also remain unadopted. Their [fixed 11-pair campaign](evidence/uniform-packet/legacy-timing/ROOT-REVIEW.md)
+passes all exact images and the aggregate speed gate, but fails the per-cell
+regression gate: median host ratio 0.9366274 and total render/poll wall ratio
+0.4417257, with 46 individual rule failures. Every leg and adverse result is
+archived; no production renderer change follows those timings. The text timing campaign stopped at a watchdog;
 diagnostic success does not complete or replace its missing benchmark cells.
+
+The isolated [SourceValue prerequisite](evidence/source-value-nightly/README.md)
+passes 554 default tests (10 ignored) and nine expected public type rejections
+plus a positive generic/trait-object case on genuine rustc 1.101.0-nightly,
+without RUSTC_BOOTSTRAP. It rejects nested Signals inside an exact Source value;
+ordinary coarse owner updates remain supported. Its nightly requirement,
+existing compiler deprecation warnings and incomplete native/strict/foreign/cost
+qualification are explicit. It and the typed inbox/one-buffer successors are
+not yet adopted.
 
 [Borrowed-kernel research](evidence/borrowed-kernel-research/README.md)
 now includes a compiled standalone Rust lifetime probe with three rejected

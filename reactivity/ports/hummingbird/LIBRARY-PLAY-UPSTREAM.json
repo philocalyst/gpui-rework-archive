@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/hummingbird-player/hummingbird",
+  "commit": "e15e8ba0ef6ff5445294030d373e3c8ccc7d780c",
+  "license_file": "LICENSE.upstream",
+  "adaptation": "Named Play-now append-and-jump behavior, implemented with the port's exclusive queue owner, one checked occurrence and existing audio publication; no upstream UI/global runtime layer copied.",
+  "sources": [
+    { "path": "src/ui/library/context_menus.rs", "sha256": "c779e91072826310d1a2833468978b5afa63b4b59b31b3eb95c3d5d3f155b299" },
+    { "path": "src/playback/interface.rs", "sha256": "2217bbf86b3f13b629b62ec90b2d4aefbce108a291a259c04dd546a7f2ea08a9" },
+    { "path": "src/ui/library/context_menus/track.rs", "sha256": "a290200193689c167e361477ba74146ef2668cf000dd29d0fc88a896be941709" }
+  ]
+}

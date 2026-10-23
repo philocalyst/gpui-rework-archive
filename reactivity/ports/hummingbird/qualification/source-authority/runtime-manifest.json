@@ -1,0 +1,12 @@
+{
+  "runtime": "9f83f23288bbb364142ff2a82d059b6d99670a7e",
+  "base": "9145411365adfe850b58cb6dafcfb64d1cc73221",
+  "files": {
+    "reactivity/ports/hummingbird/src/app.rs": "7d28ed1d2d11b740ac367750594989350576f4c6cdef6d9395be05d8ea4e21bd",
+    "reactivity/ports/hummingbird/src/database.rs": "75248126c6a3ea14dc0ebb59319b17f399019f88084834857dc764ef7d37455f",
+    "reactivity/ports/hummingbird/src/search.rs": "43a0a891b1900304d3e766424683aeac24ff5fd87e2c545bab829b3893a6eddc",
+    "reactivity/ports/hummingbird/src/worker.rs": "010fd7eb18a3daa51ff15248d6065c144ae5bf4d306e0ac8ef0dd62461b69312",
+    "reactivity/ports/hummingbird/tests/library_audio.rs": "216f0e7d0683a0164cb50297a813acfa1a8d68884ea2ebae51310912354ab84e",
+    "reactivity/ports/hummingbird/tests/source_authority.rs": "3c5c028e5bfa3122ef36711d87a36c2faaf67fd8d8d71eb066ca6eeea0ef044f"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "method": "Ordinary Window/shared View; private Xvfb+AT-SPI2, actual X11 keyboard and AT-SPI edits/actions; acknowledged accessible labels, stable row action across SQL resort. No timing measurement.",
+  "requested_renderer": "cpu",
+  "binary_sha256": "71e40f914b0300d60eb6e6588b1eef29959eedec34c894adfab0df61afd4b407",
+  "events": [
+    {
+      "stage": "initial",
+      "visible_name": "9 recordings for \u2018\u2019 \u2014 Title"
+    },
+    {
+      "stage": "prepare",
+      "id": 1,
+      "path": "/music/1.flac"
+    },
+    {
+      "stage": "resort",
+      "same_accessible_action": [
+        ":1.5",
+        "/org/a11y/atspi/accessible/0/1549526502191602335744"
+      ]
+    },
+    {
+      "stage": "x11_text_edit",
+      "query": "cafe",
+      "visible_result_count": 3
+    },
+    {
+      "stage": "text_lease_replaced",
+      "previous": [
+        ":1.5",
+        "/org/a11y/atspi/accessible/0/170141183460469231768580791863303208960"
+      ],
+      "current": [
+        ":1.5",
+        "/org/a11y/atspi/accessible/0/170141183460469236786095179912301248512"
+      ]
+    },
+    {
+      "stage": "unicode_edit_and_prepare",
+      "query": "\u03bc\u03b1\u03c1",
+      "id": 44,
+      "path": "/music/44.flac"
+    }
+  ],
+  "presented_frames": [
+    [
+      "ReferenceCpu",
+      "2",
+      "2"
+    ],
+    [
+      "ReferenceCpu",
+      "5",
+      "5"
+    ],
+    [
+      "ReferenceCpu",
+      "7",
+      "7"
+    ],
+    [
+      "ReferenceCpu",
+      "8",
+      "8"
+    ],
+    [
+      "ReferenceCpu",
+      "12",
+      "12"
+    ],
+    [
+      "ReferenceCpu",
+      "13",
+      "13"
+    ],
+    [
+      "ReferenceCpu",
+      "15",
+      "15"
+    ],
+    [
+      "ReferenceCpu",
+      "18",
+      "18"
+    ]
+  ],
+  "native_log": "The XKEYBOARD keymap compiler (xkbcomp) reports:\n> Warning:          Multiple symbols for level 1/group 1 on key <FK23>\n>                   Using F23, ignoring XF86TouchpadOff\n> Warning:          Symbol map for key <FK23> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Symbol map for key <FK24> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff\n> Warning:          Could not resolve keysym XF86ActionOnSelection\n> Warning:          Could not resolve keysym XF86ContextualInsert\n> Warning:          Could not resolve keysym XF86ContextualQuery\nErrors from xkbcomp are not fatal to the X server\nThe XKEYBOARD keymap compiler (xkbcomp) reports:\n> Warning:          Multiple symbols for level 1/group 1 on key <FK23>\n>                   Using F23, ignoring XF86TouchpadOff\n> Warning:          Symbol map for key <FK23> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Symbol map for key <FK24> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff\n> Warning:          Could not resolve keysym XF86ActionOnSelection\n> Warning:          Could not resolve keysym XF86ContextualInsert\n> Warning:          Could not resolve keysym XF86ContextualQuery\nErrors from xkbcomp are not fatal to the X server\nThe XKEYBOARD keymap compiler (xkbcomp) reports:\n> Warning:          Multiple symbols for level 1/group 1 on key <FK23>\n>                   Using F23, ignoring XF86TouchpadOff\n> Warning:          Symbol map for key <FK23> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Symbol map for key <FK24> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff\n> Warning:          Could not resolve keysym XF86ActionOnSelection\n> Warning:          Could not resolve keysym XF86ContextualInsert\n> Warning:          Could not resolve keysym XF86ContextualQuery\nErrors from xkbcomp are not fatal to the X server\ndbus-daemon[3370750]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=3370755 comm=\"busctl --json=short --timeout=2 --address=unix:pat\")\ndbus-daemon[3370750]: Successfully activated service 'org.a11y.atspi.Registry'\nSpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry\nThe XKEYBOARD keymap compiler (xkbcomp) reports:\n> Warning:          Multiple symbols for level 1/group 1 on key <FK23>\n>                   Using F23, ignoring XF86TouchpadOff\n> Warning:          Symbol map for key <FK23> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Symbol map for key <FK24> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff\n> Warning:          Could not resolve keysym XF86ActionOnSelection\n> Warning:          Could not resolve keysym XF86ContextualInsert\n> Warning:          Could not resolve keysym XF86ContextualQuery\nErrors from xkbcomp are not fatal to the X server\nHUMMINGBIRD_PRESENT,ReferenceCpu,2,2\nHUMMINGBIRD_PRESENT,ReferenceCpu,5,5\nHUMMINGBIRD_PRESENT,ReferenceCpu,7,7\nHUMMINGBIRD_PRESENT,ReferenceCpu,8,8\nHUMMINGBIRD_PRESENT,ReferenceCpu,12,12\nHUMMINGBIRD_PRESENT,ReferenceCpu,13,13\nHUMMINGBIRD_PRESENT,ReferenceCpu,15,15\nHUMMINGBIRD_PRESENT,ReferenceCpu,18,18\n"
+}

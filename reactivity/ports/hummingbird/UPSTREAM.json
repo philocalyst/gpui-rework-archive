@@ -233,6 +233,61 @@
       "path": "src/library/types.rs",
       "sha256": "59488f1f8d47f39d0ff04cf5cf0e2ce8993595356e7902d8b8fef0161a7ebd44",
       "adaptation": "selected Rust/SQL/domain/matcher fragments adapted; see README and source notices"
+    },
+    {
+      "path": "src/media/pipeline.rs",
+      "sha256": "2e8e09ce69d79e78d28fce087d8d4aa7d4bc402e383d2e84bed461b1823fe8b4",
+      "adaptation": "reusable timed block shape and bounds"
+    },
+    {
+      "path": "src/media/builtin/symphonia.rs",
+      "sha256": "2ab9a58c2dcc1b1f86ff69f38d9f8e2a7ce13a259f75fef28788b8fb9e0d7c06",
+      "adaptation": "Symphonia packet remainders, PCM scaling, seek reset and trim"
+    },
+    {
+      "path": "src/devices/builtin/cpal.rs",
+      "sha256": "a8ea61a254fcc5b8035fbcdbe02e3a82870ecdeb7c1faf8ddf777afb547c1098",
+      "adaptation": "bounded PCM ring, sample conversion and gain ramp; separate error retirement"
+    },
+    {
+      "path": "src/devices/resample.rs",
+      "sha256": "131ff93fb0b6faa3542be0ad06a916974ec3c286ff0d6e2836ae60f1a289fb5f",
+      "adaptation": "FFT input/remainder/final-tail accounting adapted to Rubato 5"
+    },
+    {
+      "path": "src/playback/thread/audio_engine.rs",
+      "sha256": "f9c07d70a74e56109f1cc1bc5f03b02d1f5e987e6b25b14ad05cf12c992e3408",
+      "adaptation": "source EOF versus application queue drain and natural transition ordering"
+    },
+    {
+      "path": "src/playback/thread/decoder.rs",
+      "sha256": "05c661fa01531dd1465a7cc10ae776501a08d2ee1856124f2bdb94d2af5a427d",
+      "adaptation": "decoder ownership and source operations"
+    },
+    {
+      "path": "src/playback/thread/media_controller.rs",
+      "sha256": "903f3414160aed5f5cd8d45c57081bb680d99ac6483d0ea71c52603a32195989",
+      "adaptation": "single in-flight affine worker, bounded cancellation recovery"
+    },
+    {
+      "path": "src/playback/thread/submission_timing.rs",
+      "sha256": "cb604a75a02188b69046d8aefa17ad2de099c4a0b11b6950b46eed85362958bd",
+      "adaptation": "accepted-frame position spans and source-boundary markers"
+    },
+    {
+      "path": "assets/tests/audio-fixtures/fixture.wav",
+      "sha256": "388c81c848f8d8192cdd55108f042ee8270007477364d41f1526680785af654d",
+      "adaptation": "byte-identical silent corner fixture; local assets/audio/fixture.wav"
+    },
+    {
+      "path": "assets/tests/audio-fixtures/fixture.flac",
+      "sha256": "4e46433e8551aa6975b9ea05a716ce720c4a7f1dfd9c1e678266b5324b1a6a89",
+      "adaptation": "byte-identical silent corner fixture; local assets/audio/fixture.flac"
+    },
+    {
+      "path": "assets/tests/audio-fixtures/fixture.mp3",
+      "sha256": "44f5150156f5cec7cac0e384e614716abfc1d81df1b3e9e94464b91374094871",
+      "adaptation": "byte-identical silent corner fixture; local assets/audio/fixture.mp3"
     }
   ],
   "license_file_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"

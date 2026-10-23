@@ -1,0 +1,42 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.93s
+     Running tests/library_audio.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-0fc84c1a60b46f5a)
+
+running 4 tests
+test cloned_seek_after_adopted_rejects_retired_eof_without_queue_edit ... 
+thread 'cloned_seek_after_adopted_rejects_retired_eof_without_queue_edit' (3566693) panicked at tests/library_audio.rs:855:5:
+assertion `left == right` failed: retired seek EOF edited the queue, adopted_first=true
+  left: PlanStamp { session: 1, serial: 2 }
+ right: PlanStamp { session: 1, serial: 1 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test cloned_seek_before_adopted_rejects_retired_eof_without_queue_edit ... 
+thread 'cloned_seek_before_adopted_rejects_retired_eof_without_queue_edit' (3566878) panicked at tests/library_audio.rs:855:5:
+assertion `left == right` failed: retired seek EOF edited the queue, adopted_first=false
+  left: PlanStamp { session: 2, serial: 2 }
+ right: PlanStamp { session: 2, serial: 1 }
+FAILED
+test cloned_stop_after_adopted_rejects_retired_eof_without_queue_edit ... 
+thread 'cloned_stop_after_adopted_rejects_retired_eof_without_queue_edit' (3566904) panicked at tests/library_audio.rs:855:5:
+assertion `left == right` failed: retired stop EOF edited the queue, adopted_first=true
+  left: PlanStamp { session: 3, serial: 2 }
+ right: PlanStamp { session: 3, serial: 1 }
+FAILED
+test cloned_stop_before_adopted_rejects_retired_eof_without_queue_edit ... 
+thread 'cloned_stop_before_adopted_rejects_retired_eof_without_queue_edit' (3567173) panicked at tests/library_audio.rs:855:5:
+assertion `left == right` failed: retired stop EOF edited the queue, adopted_first=false
+  left: PlanStamp { session: 4, serial: 2 }
+ right: PlanStamp { session: 4, serial: 1 }
+FAILED
+
+failures:
+
+failures:
+    cloned_seek_after_adopted_rejects_retired_eof_without_queue_edit
+    cloned_seek_before_adopted_rejects_retired_eof_without_queue_edit
+    cloned_stop_after_adopted_rejects_retired_eof_without_queue_edit
+    cloned_stop_before_adopted_rejects_retired_eof_without_queue_edit
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 10 filtered out; finished in 6.35s
+
+error: test failed, to rerun pass `--test library_audio`

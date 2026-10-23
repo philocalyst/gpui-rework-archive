@@ -1,0 +1,586 @@
+{
+  "control": [
+    {
+      "cohort": 0,
+      "model": 416,
+      "questions": 1016,
+      "event": 32,
+      "selection": 32,
+      "error": 64,
+      "win": 1080,
+      "ui_current_plus_inline": 107763,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 2463,
+          "bytes_current": 2444,
+          "bytes_max": 2444
+        },
+        "connected": {
+          "count_total": 3,
+          "count_current": 3,
+          "count_max": 3,
+          "bytes_total": 320,
+          "bytes_current": 320,
+          "bytes_max": 320
+        },
+        "mounted": {
+          "count_total": 1867,
+          "count_current": 377,
+          "count_max": 531,
+          "bytes_total": 452845,
+          "bytes_current": 103919,
+          "bytes_max": 166771
+        }
+      }
+    },
+    {
+      "cohort": 1,
+      "model": 416,
+      "questions": 1016,
+      "event": 32,
+      "selection": 32,
+      "error": 64,
+      "win": 1080,
+      "ui_current_plus_inline": 103443,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 2463,
+          "bytes_current": 2444,
+          "bytes_max": 2444
+        },
+        "connected": {
+          "count_total": 3,
+          "count_current": 3,
+          "count_max": 3,
+          "bytes_total": 320,
+          "bytes_current": 320,
+          "bytes_max": 320
+        },
+        "mounted": {
+          "count_total": 1853,
+          "count_current": 368,
+          "count_max": 522,
+          "bytes_total": 447129,
+          "bytes_current": 99599,
+          "bytes_max": 162451
+        }
+      }
+    },
+    {
+      "cohort": 2,
+      "model": 416,
+      "questions": 1016,
+      "event": 32,
+      "selection": 32,
+      "error": 64,
+      "win": 1080,
+      "ui_current_plus_inline": 103443,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 2463,
+          "bytes_current": 2444,
+          "bytes_max": 2444
+        },
+        "connected": {
+          "count_total": 3,
+          "count_current": 3,
+          "count_max": 3,
+          "bytes_total": 320,
+          "bytes_current": 320,
+          "bytes_max": 320
+        },
+        "mounted": {
+          "count_total": 1853,
+          "count_current": 368,
+          "count_max": 522,
+          "bytes_total": 447129,
+          "bytes_current": 99599,
+          "bytes_max": 162451
+        }
+      }
+    },
+    {
+      "cohort": 3,
+      "model": 416,
+      "questions": 1016,
+      "event": 32,
+      "selection": 32,
+      "error": 64,
+      "win": 1080,
+      "ui_current_plus_inline": 103443,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 2463,
+          "bytes_current": 2444,
+          "bytes_max": 2444
+        },
+        "connected": {
+          "count_total": 3,
+          "count_current": 3,
+          "count_max": 3,
+          "bytes_total": 320,
+          "bytes_current": 320,
+          "bytes_max": 320
+        },
+        "mounted": {
+          "count_total": 1853,
+          "count_current": 368,
+          "count_max": 522,
+          "bytes_total": 447129,
+          "bytes_current": 99599,
+          "bytes_max": 162451
+        }
+      }
+    }
+  ],
+  "initial": [
+    {
+      "cohort": 0,
+      "model": 464,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 100504,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1824,
+          "count_current": 369,
+          "count_max": 522,
+          "bytes_total": 416579,
+          "bytes_current": 96188,
+          "bytes_max": 154110
+        }
+      }
+    },
+    {
+      "cohort": 1,
+      "model": 464,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96184,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410863,
+          "bytes_current": 91868,
+          "bytes_max": 149790
+        }
+      }
+    },
+    {
+      "cohort": 2,
+      "model": 464,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96184,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410863,
+          "bytes_current": 91868,
+          "bytes_max": 149790
+        }
+      }
+    },
+    {
+      "cohort": 3,
+      "model": 464,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96184,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410863,
+          "bytes_current": 91868,
+          "bytes_max": 149790
+        }
+      }
+    }
+  ],
+  "rejected-request-only": [
+    {
+      "cohort": 0,
+      "model": 472,
+      "questions": 600,
+      "event": 72,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 100128,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3103,
+          "bytes_current": 3084,
+          "bytes_max": 3084
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1824,
+          "count_current": 369,
+          "count_max": 522,
+          "bytes_total": 416587,
+          "bytes_current": 96196,
+          "bytes_max": 154118
+        }
+      }
+    },
+    {
+      "cohort": 1,
+      "model": 472,
+      "questions": 600,
+      "event": 72,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 95808,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3103,
+          "bytes_current": 3084,
+          "bytes_max": 3084
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410871,
+          "bytes_current": 91876,
+          "bytes_max": 149798
+        }
+      }
+    },
+    {
+      "cohort": 2,
+      "model": 472,
+      "questions": 600,
+      "event": 72,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 95808,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3103,
+          "bytes_current": 3084,
+          "bytes_max": 3084
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410871,
+          "bytes_current": 91876,
+          "bytes_max": 149798
+        }
+      }
+    },
+    {
+      "cohort": 3,
+      "model": 472,
+      "questions": 600,
+      "event": 72,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 95808,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3103,
+          "bytes_current": 3084,
+          "bytes_max": 3084
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410871,
+          "bytes_current": 91876,
+          "bytes_max": 149798
+        }
+      }
+    }
+  ],
+  "qualified-full-selection": [
+    {
+      "cohort": 0,
+      "model": 472,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 100512,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1824,
+          "count_current": 369,
+          "count_max": 522,
+          "bytes_total": 416587,
+          "bytes_current": 96196,
+          "bytes_max": 154118
+        }
+      }
+    },
+    {
+      "cohort": 1,
+      "model": 472,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96192,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410871,
+          "bytes_current": 91876,
+          "bytes_max": 149798
+        }
+      }
+    },
+    {
+      "cohort": 2,
+      "model": 472,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96192,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410871,
+          "bytes_current": 91876,
+          "bytes_max": 149798
+        }
+      }
+    },
+    {
+      "cohort": 3,
+      "model": 472,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96192,
+      "stages": {
+        "spawn": {
+          "count_total": 10,
+          "count_current": 9,
+          "count_max": 9,
+          "bytes_total": 3487,
+          "bytes_current": 3468,
+          "bytes_max": 3468
+        },
+        "connected": {
+          "count_total": 2,
+          "count_current": 2,
+          "count_max": 2,
+          "bytes_total": 184,
+          "bytes_current": 184,
+          "bytes_max": 184
+        },
+        "mounted": {
+          "count_total": 1810,
+          "count_current": 360,
+          "count_max": 513,
+          "bytes_total": 410871,
+          "bytes_current": 91876,
+          "bytes_max": 149798
+        }
+      }
+    }
+  ]
+}

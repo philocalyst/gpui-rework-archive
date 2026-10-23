@@ -1,0 +1,36 @@
+   Compiling parley_engine v0.12.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/root/gpui-hummingbird-eos-authority-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/gpui)
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/ports/hummingbird)
+error[E0382]: use of moved value: `adopted`
+   --> tests/library_audio.rs:869:25
+    |
+843 |     let adopted = take_adopted(&mut win, &capture, &held, latest.revision);
+    |         ------- move occurs because `adopted` has type `Event`, which does not implement the `Copy` trait
+844 |     if adopted_first {
+845 |         inject.try_send(adopted).unwrap();
+    |                         ------- value moved here
+...
+869 |         inject.try_send(adopted).unwrap();
+    |                         ^^^^^^^ value used here after move
+
+error[E0382]: use of moved value: `adopted`
+   --> tests/library_audio.rs:952:29
+    |
+925 |         let adopted = take_adopted(&mut win, &capture, &held, paused.revision);
+    |             -------   -------------------------------------------------------- this reinitialization might get skipped
+    |             |
+    |             move occurs because `adopted` has type `Event`, which does not implement the `Copy` trait
+926 |         if adopted_first {
+927 |             inject.try_send(adopted).unwrap();
+    |                             ------- value moved here
+...
+952 |             inject.try_send(adopted).unwrap();
+    |                             ^^^^^^^ value used here after move
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `hummingbird-gpui-port` (test "library_audio") due to 2 previous errors

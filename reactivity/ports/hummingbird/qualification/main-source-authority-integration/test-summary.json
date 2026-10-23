@@ -1,0 +1,16 @@
+{
+  "default": {
+    "passed": 50,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 14
+  },
+  "native": {
+    "passed": 116,
+    "failed": 0,
+    "ignored": 1,
+    "harnesses": 16
+  },
+  "source_guards": 2160,
+  "guards_match": true
+}
