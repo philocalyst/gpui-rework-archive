@@ -568,7 +568,7 @@ mod tests {
                 }
                 let mut applied = 0;
                 lanes
-                    .apply(&mut sum, &sources, &mut applied, &mut None, &mut usize::MAX)
+                    .apply(&mut sum, &sources, &mut applied, &mut None, &mut 8)
                     .unwrap();
                 assert_eq!(applied, 8);
             }

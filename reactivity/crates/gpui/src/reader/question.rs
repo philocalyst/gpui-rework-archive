@@ -1067,7 +1067,7 @@ mod tests {
         plan.lanes.inputs = Source::new(FieldId::new(1), "value", |m| &m.other, |m| &mut m.other);
         assert!(
             plan.lanes
-                .apply_questions(&model, &sources, &mut 0, &mut usize::MAX)
+                .apply_questions(&model, &sources, &mut 0, &mut 1)
                 .is_err()
         );
         assert!(plan.lanes.running_ticket.is_none());
@@ -1104,7 +1104,7 @@ mod tests {
         jobs.recv().unwrap().complete(Ok(1)).unwrap();
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         plan.lanes
-            .apply_questions(&model, &sources, &mut 0, &mut usize::MAX)
+            .apply_questions(&model, &sources, &mut 0, &mut 1)
             .unwrap();
         assert_eq!(
             plan.lanes.read(reader.key).unwrap().info.status,
@@ -1117,7 +1117,7 @@ mod tests {
         jobs.recv().unwrap().complete(Ok(3)).unwrap();
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         plan.lanes
-            .apply_questions(&model, &sources, &mut 0, &mut usize::MAX)
+            .apply_questions(&model, &sources, &mut 0, &mut 1)
             .unwrap();
         assert_eq!(
             plan.lanes.read(reader.key).unwrap().info.status,

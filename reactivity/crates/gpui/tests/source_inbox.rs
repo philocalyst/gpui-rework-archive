@@ -383,6 +383,26 @@ fn a_committed_prefix_revokes_a_ready_answer_before_returning_a_later_binding_er
     win.deliver_ready(8).unwrap();
     assert_eq!(win.with_ready(reader, |value| *value).unwrap(), Some(7));
     assert!(win.contains_text("changed").unwrap());
+
+    // Repeat while an older completion is frozen in this failing batch.
+    // Retiring that physical credit must not require a fresh transport send.
+    win.set(Panel::LEFT, "inflight".into()).unwrap();
+    let (input, completion) = jobs.recv_timeout(Duration::from_secs(3)).unwrap();
+    assert_eq!(input, "inflight");
+    completion.complete(Ok(8)).unwrap();
+    remote.try_send("latest".into()).unwrap();
+    bad.try_send(()).unwrap();
+    let failure = win.deliver_ready(8).unwrap_err();
+    assert!(matches!(failure.error, Error::Binding(_)));
+    assert_eq!(failure.delivery.unwrap().applied, 1);
+    let resumed = win.deliver_ready(1).unwrap();
+    assert_eq!((resumed.received, resumed.applied), (0, 0));
+    assert_eq!(win.with_ready(reader, |value| *value).unwrap(), None);
+    let (input, completion) = jobs.recv_timeout(Duration::from_secs(3)).unwrap();
+    assert_eq!(input, "latest");
+    completion.complete(Ok(6)).unwrap();
+    win.deliver_ready(8).unwrap();
+    assert_eq!(win.with_ready(reader, |value| *value).unwrap(), Some(6));
 }
 
 #[test]
