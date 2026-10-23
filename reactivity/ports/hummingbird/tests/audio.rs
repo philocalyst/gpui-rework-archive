@@ -21,6 +21,8 @@ struct Capture {
     samples: Vec<f64>,
     playing: bool,
     opens: usize,
+    drops: usize,
+    output_fault: bool,
 }
 struct Provider {
     capture: Arc<Mutex<Capture>>,
@@ -80,6 +82,21 @@ impl OutputStream for Sink {
         self.capture.lock().unwrap().playing = playing;
         Ok(())
     }
+    fn poll(&mut self) -> Result<(), AudioError> {
+        if self.capture.lock().unwrap().output_fault {
+            Err(AudioError::Output("injected device loss".into()))
+        } else {
+            Ok(())
+        }
+    }
+}
+impl Drop for Sink {
+    fn drop(&mut self) {
+        let mut capture = self.capture.lock().unwrap();
+        capture.queue.clear();
+        capture.playing = false;
+        capture.drops += 1;
+    }
 }
 fn drain(capture: &Arc<Mutex<Capture>>) {
     let mut capture = capture.lock().unwrap();
@@ -134,8 +151,8 @@ fn owner(
         .unwrap();
     (service, capture, win)
 }
-fn until(
-    win: &mut AudioWin,
+fn until<L: gpui::LaneSet<QueueScreen>>(
+    win: &mut Win<QueueScreen, L>,
     capture: &Arc<Mutex<Capture>>,
     pump: bool,
     predicate: impl Fn(&QueueScreen) -> bool,
@@ -157,7 +174,7 @@ fn until(
         std::thread::sleep(Duration::from_millis(1));
     }
 }
-fn finish(service: AudioService, win: AudioWin) {
+fn finish<L: gpui::LaneSet<QueueScreen>>(service: AudioService, win: Win<QueueScreen, L>) {
     drop(win);
     assert!(service.finish(Duration::from_secs(1)));
 }
@@ -443,4 +460,158 @@ fn resampled_short_and_high_rate_sources_keep_exact_tail_frame_counts() {
         drop(observed);
         finish(service, win);
     }
+}
+
+#[test]
+fn bad_next_source_keeps_preceding_resampled_tail_and_reports_failure() {
+    let source = Wave::new(8000, (0..169).map(|i| (i * 53) as i16));
+    let (service, capture, mut win) = owner(vec![track(&source.0, "good")], 31, Some(48000));
+    until(&mut win, &capture, true, |model| {
+        model.audio_status().unwrap().state == AudioState::Finished
+    });
+    let expected = capture.lock().unwrap().samples.clone();
+    finish(service, win);
+    let missing = source.0.with_extension("missing");
+    let (service, capture, mut win) = owner(
+        vec![track(&source.0, "good"), track(&missing, "missing")],
+        31,
+        Some(48000),
+    );
+    until(&mut win, &capture, true, |model| {
+        model.audio_status().unwrap().state == AudioState::Failed
+    });
+    until(&mut win, &capture, true, |_| {
+        capture.lock().unwrap().samples.len() == expected.len()
+    });
+    let observed = capture.lock().unwrap();
+    assert_eq!(
+        observed.samples, expected,
+        "failure must preserve every preceding tail sample"
+    );
+    assert_eq!(observed.opens, 1);
+    drop(observed);
+    assert_eq!(
+        win.with_model(|model| model.audio_status().unwrap().state)
+            .unwrap(),
+        AudioState::Failed
+    );
+    finish(service, win);
+}
+
+#[test]
+fn paused_device_failure_closes_output_and_explicit_replay_can_reopen() {
+    let source = Wave::new(8000, (0..100_000).map(|i| (i / 100) as i16));
+    let (service, capture, mut win) = owner(vec![track(&source.0, "device")], 31, None);
+    until(&mut win, &capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Playing
+    });
+    win.activate(win.button("Pause")).unwrap();
+    capture.lock().unwrap().output_fault = true;
+    until(&mut win, &capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Failed
+    });
+    assert!(capture.lock().unwrap().queue.is_empty());
+    assert_eq!(capture.lock().unwrap().drops, 1);
+    capture.lock().unwrap().output_fault = false;
+    win.activate(win.role(Role::Button).name("Play device").one().unwrap())
+        .unwrap();
+    until(&mut win, &capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Playing
+    });
+    assert_eq!(capture.lock().unwrap().opens, 2);
+    win.activate(win.button("Stop")).unwrap();
+    until(&mut win, &capture, false, |_| {
+        capture.lock().unwrap().drops == 2
+    });
+    assert!(capture.lock().unwrap().queue.is_empty());
+    finish(service, win);
+}
+
+#[test]
+fn old_seek_eof_failure_and_started_events_cannot_revive_stopped_or_new_audio() {
+    use hummingbird_gpui_port::audio::{Event, Transition};
+    let source = Wave::new(8000, (0..100_000).map(|i| (i / 1000) as i16));
+    let (service, capture, win) = owner(vec![track(&source.0, "stale")], 31, None);
+    let old_plan = win
+        .with_model(|model| model.playback().plan().unwrap().clone())
+        .unwrap();
+    let old_token = service
+        .handle()
+        .apply(Some(&old_plan), Transition::Replace)
+        .unwrap()
+        .token
+        .unwrap();
+    let (inject, inbox) = gpui::Remote::bounded(8);
+    let mut win = win
+        .with_inbox(
+            inbox,
+            QueueScreen::receive_audio as fn(&mut QueueScreen, Event),
+        )
+        .unwrap();
+    until(&mut win, &capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Playing
+    });
+    win.activate(win.button("Pause")).unwrap();
+    win.activate(win.button("Forward 10 seconds")).unwrap();
+    until(&mut win, &capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Paused
+            && model.audio_status().unwrap().position_ms >= 10_000
+    });
+    let seek_position = win
+        .with_model(|model| model.audio_status().unwrap().position_ms)
+        .unwrap();
+    for event in [
+        Event::SourceEof {
+            token: old_token,
+            end: old_plan.end_of_stream(),
+        },
+        Event::Failed {
+            token: old_token,
+            error: AudioError::DeviceUnavailable,
+        },
+        Event::Started { token: old_token },
+        Event::Seeked {
+            token: old_token,
+            milliseconds: 0,
+        },
+    ] {
+        inject.try_send(event).unwrap();
+    }
+    win.deliver_ready(32).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.playback().plan().unwrap().stamp())
+            .unwrap(),
+        old_plan.stamp()
+    );
+    assert_eq!(
+        win.with_model(|model| model.audio_status().unwrap().position_ms)
+            .unwrap(),
+        seek_position
+    );
+    assert_eq!(
+        win.with_model(|model| model.audio_status().unwrap().state)
+            .unwrap(),
+        AudioState::Paused
+    );
+    win.activate(win.button("Stop")).unwrap();
+    inject
+        .try_send(Event::Started { token: old_token })
+        .unwrap();
+    inject
+        .try_send(Event::SourceEof {
+            token: old_token,
+            end: old_plan.end_of_stream(),
+        })
+        .unwrap();
+    win.deliver_ready(32).unwrap();
+    assert!(
+        win.with_model(|model| model.playback().plan().is_none())
+            .unwrap()
+    );
+    assert_eq!(
+        win.with_model(|model| model.audio_status().unwrap().state)
+            .unwrap(),
+        AudioState::Stopped
+    );
+    finish(service, win);
 }

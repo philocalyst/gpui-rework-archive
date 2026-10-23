@@ -271,6 +271,7 @@ enum Phase {
     Ended,
     Finishing,
     Finished,
+    FailedDraining,
     Failed,
 }
 struct Owner {
@@ -394,8 +395,21 @@ impl Owner {
         Ok(())
     }
     fn fail(&mut self, error: AudioError) {
-        self.phase = Phase::Failed;
+        self.phase = if self.phase != Phase::FailedDraining
+            && !matches!(error, AudioError::Output(_) | AudioError::DeviceUnavailable)
+            && self.pipeline.is_some()
+            && self.output.is_some()
+        {
+            // A bad successor must not strand the preceding valid FFT/PCM tail.
+            Phase::FailedDraining
+        } else {
+            self.output.take();
+            self.pipeline.take();
+            Phase::Failed
+        };
         self.ready = None;
+        self.pending_info = None;
+        let _ = self.media.replace(Request::Close);
         if let Some(token) = self.intent.token {
             self.event(Event::Failed { token, error });
         }
@@ -493,17 +507,19 @@ impl Owner {
         Ok(())
     }
     fn cycle(&mut self) -> Result<(), AudioError> {
-        if let Some(reply) = self.media.poll()? {
-            self.reply(reply)?;
-        }
-        self.prepare()?;
-        if !self.intent.playing {
-            return Ok(());
+        if self.phase != Phase::FailedDraining {
+            if let Some(reply) = self.media.poll()? {
+                self.reply(reply)?;
+            }
+            self.prepare()?;
         }
         let Some(output) = &mut self.output else {
             return Ok(());
         };
         output.poll()?;
+        if !self.intent.playing {
+            return Ok(());
+        }
         let Some(pipeline) = &mut self.pipeline else {
             return Ok(());
         };
@@ -541,11 +557,15 @@ impl Owner {
                 {
                     self.media.decode(block)?;
                 }
-            } else if self.phase == Phase::Finishing
+            } else if matches!(self.phase, Phase::Finishing | Phase::FailedDraining)
                 && pipeline.finish()?
                 && output.queued_frames() == 0
             {
-                self.phase = Phase::Finished;
+                self.phase = if self.phase == Phase::FailedDraining {
+                    Phase::Failed
+                } else {
+                    Phase::Finished
+                };
                 // Leave the stream emitting silence: application queue-empty is
                 // not proof the backend/hardware has played its final buffer.
             }

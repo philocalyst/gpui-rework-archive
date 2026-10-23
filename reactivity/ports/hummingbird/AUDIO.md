@@ -29,11 +29,18 @@ before polling replies. Stale decoder replies and stale UI events cannot change
 its current token. A cancelled OS/codec operation is not preempted: after 100 ms,
 one replacement decoder may be created while at most one retired worker remains.
 Closing the service never joins an unfinished codec call from a UI turn.
+The timing queue initially reserves eight merged spans and can grow on the
+control owner up to the checked input-chunk boundary bound. A fractional source
+start that rounds to zero output frames is carried to the next accepted frame.
 
 SourceEof follows all decoded source frames entering pipeline staging. It does
 not mean output drain. The UI authorizes the next plan from its latest queue;
 natural compatible transitions retain the prior PCM and FFT history, while
 explicit play/seek/stop replace the stream and flush the application queue.
+Source failures retain and finish preceding valid resampler/PCM tails while the
+UI remains Failed. Output failures close their stream on the control owner;
+paused streams are also polled for faults. Explicit Play can start a new output
+after failure; there is no automatic recovery loop.
 SourceEof → UI → next-plan delivery can stall, so this protocol cannot promise
 gapless playback under an arbitrary UI stall. Started and Position describe
 frames accepted into the application output queue. Drained additionally requires
