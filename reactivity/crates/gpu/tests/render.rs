@@ -153,7 +153,7 @@ fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() 
         let mut pages = [0.0, 0.25, 0.75, 1.0].map(|progress| {
             let mut canvas = Canvas::recording(128, 80, ColorConfig::default()).unwrap();
             canvas.clear(Color::WHITE);
-            for page in 0..2 {
+            for (page, caption) in captions.iter().enumerate() {
                 let map = Affine::translation((page as f32 - progress) * 96.0, 0.0);
                 canvas
                     .fill_rounded_rect(
@@ -179,7 +179,7 @@ fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() 
                 canvas
                     .draw_text(
                         &mut text,
-                        &captions[page],
+                        caption,
                         Point { x: 7.0, y: 9.0 },
                         map,
                         viewport,
