@@ -133,6 +133,111 @@ async fn renderer(format: wgpu::TextureFormat) -> Renderer {
 }
 
 #[test]
+fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() {
+    use gpui_canvas::{AlphaMode, Image, ImageOptions, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut text = TextSystem::bundled().unwrap();
+        let captions = ["Library", "Now playing: café"].map(|s| text.shape(s, 14.0, None).unwrap());
+        let inspector = text.shape("Inspector", 12.0, None).unwrap();
+        let image = Image::rgba8(
+            2,
+            2,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 255, 255, 255, 255, 255]
+                .into_boxed_slice(),
+        )
+        .unwrap();
+        let viewport = Rect::new(0.0, 0.0, 128.0, 80.0);
+        let pages = [0.0, 0.25, 0.75, 1.0].map(|progress| {
+            let mut canvas = Canvas::recording(128, 80, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            for page in 0..2 {
+                let map = Affine::translation((page as f32 - progress) * 96.0, 0.0);
+                canvas
+                    .fill_rounded_rect(
+                        Rect::new(2.125, 3.375, 92.0, 72.0),
+                        7.0,
+                        map,
+                        viewport,
+                        Color::rgba(37 + page as u8 * 60, 71, 113, 220),
+                    )
+                    .unwrap();
+                canvas
+                    .draw_image_with(
+                        &image,
+                        Rect::new(8.125, 29.375, 32.0, 31.0),
+                        map,
+                        viewport,
+                        ImageOptions {
+                            sampling: ImageSampling::Linear,
+                            corner_radius: page as f32 * 6.0,
+                        },
+                    )
+                    .unwrap();
+                canvas
+                    .draw_text(
+                        &mut text,
+                        &captions[page],
+                        Point { x: 7.0, y: 9.0 },
+                        map,
+                        viewport,
+                        Color::WHITE,
+                    )
+                    .unwrap();
+            }
+            // This stationary overlay is later in the same canonical scene,
+            // rather than a second surface or an independently cached image.
+            canvas
+                .fill_rounded_rect(
+                    Rect::new(61.25, 48.5, 64.0, 29.0),
+                    4.0,
+                    Affine::IDENTITY,
+                    viewport,
+                    Color::rgba(240, 240, 250, 230),
+                )
+                .unwrap();
+            canvas
+                .draw_text(
+                    &mut text,
+                    &inspector,
+                    Point { x: 66.0, y: 54.0 },
+                    Affine::IDENTITY,
+                    viewport,
+                    Color::BLACK,
+                )
+                .unwrap();
+            canvas
+        });
+        for (grouped, proofs) in [(false, false), (true, false), (true, true)] {
+            renderer.set_grouped_records(grouped);
+            renderer.set_tile_proofs(proofs);
+            let outputs = pages.each_ref().map(|canvas| output_texture(&renderer, canvas));
+            for (canvas, output) in pages.iter().zip(&outputs) {
+                renderer
+                    .render(canvas.prepared_scene(), &output.create_view(&Default::default()))
+                    .unwrap();
+                if grouped {
+                    assert!(renderer.stats().compact_draws > 0);
+                }
+            }
+            // Queue every transition before reading: later resource/record
+            // patches must not change an earlier submitted page or overlay.
+            for (frame, (canvas, output)) in pages.iter().zip(&outputs).enumerate() {
+                let actual = read_texture(&renderer, output);
+                for (byte, (&gpu, &cpu)) in actual.iter().zip(canvas.pixels()).enumerate() {
+                    assert!(
+                        (i16::from(gpu) - i16::from(cpu)).abs() <= 1,
+                        "grouped={grouped},proofs={proofs},frame={frame},byte={byte}: GPU{gpu} CPU{cpu}"
+                    );
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn scene_buffer_growth_and_shrinking_prefixes_preserve_pixels_and_replay() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
