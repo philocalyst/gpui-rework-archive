@@ -4,82 +4,14 @@
 //! Scoped bulk cursor geometry without repeated source/prefix scans.
 use super::{Cursor, cursor::line_cursor_rect};
 use crate::BoundingBox;
-use crate::layout::{Affinity, Cluster, ClusterPath, Layout, Line, LineItem};
+use crate::layout::{Affinity, Cluster, ClusterPath, Layout, LineItem};
 use crate::style::Brush;
 use alloc::{vec, vec::Vec};
-use core::ops::ControlFlow;
-use parley_engine::shape::Whitespace;
 
 #[derive(Clone, Copy)]
 struct Entry {
     path: ClusterPath,
     offset: f32,
-}
-
-#[derive(Clone, Copy)]
-struct RunSlot {
-    item: u32,
-    origin: f32,
-}
-
-// Source shaping appends one item for every shaped run. A line commits a
-// contiguous item interval and can omit only its edge runs. Bidi permutes that
-// interval without changing stored identities; boxes use a separate domain.
-fn source_runs<'s, B: Brush>(
-    line: &Line<'_, B>,
-    inline: &'s mut [RunSlot; 1],
-    spill: &'s mut Vec<RunSlot>,
-) -> Option<(usize, &'s mut [RunSlot])> {
-    use crate::layout::data::LayoutItemKind;
-    let items = &line.layout.data.line_items[line.data.item_range.clone()];
-    // This is a visual item position, not a shaped/source run identity. Keep
-    // the indexed implementation for a line that cannot reserve MAX as empty.
-    if items.len() > u32::MAX as usize {
-        return None;
-    }
-    let mut min = usize::MAX;
-    let mut max = 0;
-    let mut count = 0;
-    for item in items {
-        if item.kind == LayoutItemKind::TextRun {
-            if item.index >= line.layout.data.shaped_text.runs().len()
-                || item.index >= line.layout.data.runs.len()
-            {
-                return None;
-            }
-            min = min.min(item.index);
-            max = max.max(item.index);
-            count += 1;
-        }
-    }
-    if min == usize::MAX {
-        return Some((0, &mut inline[..0]));
-    }
-    let span = max.checked_sub(min)?.checked_add(1)?;
-    if span != count {
-        return None;
-    }
-    let empty = RunSlot {
-        item: u32::MAX,
-        origin: 0.,
-    };
-    let slots = if span == 1 {
-        inline[0] = empty;
-        &mut inline[..]
-    } else {
-        spill.clear();
-        spill.resize(span, empty);
-        spill.as_mut_slice()
-    };
-    for (position, item) in items.iter().enumerate() {
-        if item.kind == LayoutItemKind::TextRun {
-            if slots[item.index - min].item != u32::MAX {
-                return None;
-            }
-            slots[item.index - min].item = u32::try_from(position).ok()?;
-        }
-    }
-    Some((min, slots))
 }
 
 /// Transient lookup over one immutably borrowed, fully line-broken layout.
@@ -96,159 +28,7 @@ pub struct CursorGeometry<'a, B: Brush> {
     bytes: Vec<u32>,
 }
 
-/// Retry every request through [`CursorGeometry::new`].
-///
-/// Partial callbacks may already have observed pairs. Their consumer must
-/// discard those pairs before retrying; the index decides final admission.
-#[doc(hidden)]
-#[derive(Debug)]
-pub struct CursorGeometryRestart;
-
 impl<'a, B: Brush> CursorGeometry<'a, B> {
-    /// Visit source byte requests without building the random-access index.
-    ///
-    /// Complete source-range validation precedes every callback. `None` means
-    /// the same font/range rejection as [`Self::new`], with no callback invoked.
-    /// Otherwise the callback can stop traversal with its own concrete error.
-    /// Pairs are upstream first; `None` pairs mean ordinary cursors snap away
-    /// from that byte. Repeated requests are supported. A decreasing request
-    /// switches the remaining requests to ordinary direct cursor geometry.
-    ///
-    /// Scratch is one reusable source-run slot table per line and one reusable
-    /// RTL visual-offset buffer. Neither survives this immutable layout borrow.
-    /// Single-run lines use a stack slot; multiple runs spill into the table.
-    /// Source lengths above `u32::MAX` retain the exact indexed implementation,
-    /// because the engine's stored byte offsets can wrap in that domain.
-    pub fn try_for_each_pair<E>(
-        layout: &'a Layout<B>,
-        offsets: impl IntoIterator<Item = usize>,
-        width: f32,
-        mut visit: impl FnMut(usize, Option<[BoundingBox; 2]>) -> ControlFlow<E>,
-    ) -> Option<ControlFlow<E>> {
-        if layout.data.text_len > u32::MAX as usize {
-            return visit_indexed(layout, offsets, width, &mut visit);
-        }
-        if layout.data.shaped_text.characters().len() > u32::MAX as usize
-            || layout.len() > u32::MAX as usize
-        {
-            return None;
-        }
-        let mut inline = [RunSlot {
-            item: u32::MAX,
-            origin: 0.,
-        }];
-        let mut spill = Vec::new();
-        let mut count = 0_usize;
-        let mut previous_end = 0;
-        let mut rtl_capacity = 0;
-        for line in layout.lines() {
-            let Some((_, slots)) = source_runs(&line, &mut inline, &mut spill) else {
-                // Preserve exact old admission for duplicate/fragmented run
-                // identities, including empty ranges the old map can accept.
-                return visit_indexed(layout, offsets, width, &mut visit);
-            };
-            for slot in slots {
-                if slot.item == u32::MAX {
-                    continue;
-                }
-                let run = line.item(slot.item as usize)?.run()?;
-                let mut run_count = 0;
-                let full = run.full_slice();
-                // Only source ranges/counts are needed for checked admission.
-                // Layout's internal grapheme/atom invariants remain trusted.
-                for grapheme in run.line_slice().graphemes_start() {
-                    // The old index explicitly exempts the empty layout's
-                    // synthetic metrics space from source/entry validation.
-                    if layout.data.text_len != 0 {
-                        let range = full.text_byte_range(grapheme.char_range());
-                        if range.start > range.end || range.end > layout.data.text_len {
-                            return None;
-                        }
-                        if !range.is_empty() {
-                            if range.start < previous_end {
-                                // A decreasing range can be disjoint rather
-                                // than overlapping. Preserve the byte map's
-                                // exact admission for this unexpected ordering.
-                                return visit_indexed(layout, offsets, width, &mut visit);
-                            }
-                            previous_end = range.end;
-                        }
-                        u32::try_from(count).ok()?;
-                    }
-                    count = count.checked_add(1)?;
-                    run_count += 1;
-                }
-                if run.is_rtl() {
-                    rtl_capacity = rtl_capacity.max(run_count);
-                }
-            }
-        }
-        // Both buffers now have their maximum required capacity. No font
-        // admission or scratch growth remains after the first callback.
-        let mut rtl = Vec::with_capacity(rtl_capacity);
-        Some(
-            visit_source_pairs::<false, _, _>(
-                layout,
-                offsets.into_iter(),
-                width,
-                &mut visit,
-                &mut inline,
-                &mut spill,
-                &mut rtl,
-            )
-            .unwrap_or_else(|_| {
-                panic!("the immutable layout passed complete source admission")
-            }),
-        )
-    }
-
-    /// Visit pairs with explicitly partial, externally observable callbacks.
-    ///
-    /// Unlike [`Self::try_for_each_pair`], a later source-admission failure may
-    /// follow earlier callbacks. On restart the caller must discard all output
-    /// and retry every request through [`Self::new`]. Requests must be monotone;
-    /// a decreasing request also requests restart. The callback cannot stop
-    /// traversal: structural admission must finish before geometry is accepted.
-    ///
-    /// Canvas uses this only while constructing an unpublished local TextLayout.
-    /// An arbitrary callback or owned accumulator provides no rollback guarantee.
-    #[doc(hidden)]
-    pub fn try_for_each_pair_partial(
-        layout: &'a Layout<B>,
-        offsets: impl IntoIterator<Item = usize>,
-        width: f32,
-        mut visit: impl FnMut(usize, Option<[BoundingBox; 2]>),
-    ) -> Result<(), CursorGeometryRestart> {
-        if layout.data.text_len > u32::MAX as usize
-            || layout.data.shaped_text.characters().len() > u32::MAX as usize
-            || layout.len() > u32::MAX as usize
-        {
-            return Err(CursorGeometryRestart);
-        }
-        let mut inline = [RunSlot {
-            item: u32::MAX,
-            origin: 0.,
-        }];
-        let mut spill = Vec::new();
-        let mut rtl = Vec::new();
-        let result = visit_source_pairs::<true, _, core::convert::Infallible>(
-            layout,
-            offsets.into_iter(),
-            width,
-            &mut |byte, pair| {
-                visit(byte, pair);
-                ControlFlow::Continue(())
-            },
-            &mut inline,
-            &mut spill,
-            &mut rtl,
-        )?;
-        match result {
-            ControlFlow::Continue(()) => Ok(()),
-            ControlFlow::Break(never) => match never {},
-        }
-    }
-
     pub fn new(layout: &'a Layout<B>) -> Option<Self> {
         if layout.data.shaped_text.characters().len() > u32::MAX as usize
             || layout.len() > u32::MAX as usize
@@ -296,12 +76,9 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         Some(result)
     }
 
-    fn entry(&self, byte: usize) -> Option<&Entry> {
-        self.entries.get(*self.bytes.get(byte)? as usize)
-    }
-
     fn cluster(&self, byte: usize) -> Option<Cluster<'a, B>> {
-        self.entry(byte)?.path.cluster(self.layout)
+        let index = *self.bytes.get(byte)? as usize;
+        self.entries.get(index)?.path.cluster(self.layout)
     }
 
     /// The same snapping and endpoint/affinity policy as Cursor::from_byte_index.
@@ -318,14 +95,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         if let Some(bounds) = self.shared_edge(byte, width) {
             return Some([bounds; 2]);
         }
-        pair_from_entries(
-            self.layout,
-            byte,
-            width,
-            byte.checked_sub(1)
-                .and_then(|previous| self.entry(previous)),
-            self.entry(byte),
-        )
+        self.boundary_geometries(byte, width)
     }
 
     fn shared_edge(&self, byte: usize, width: f32) -> Option<BoundingBox> {
@@ -357,6 +127,38 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         })
     }
 
+    // Keep large source-cluster reconstruction outside the cached-edge frame.
+    #[inline(never)]
+    fn boundary_geometries(&self, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
+        let next = self.cluster(byte);
+        let upstream = Cursor::from_source_cluster(self.layout, Affinity::Upstream, next.as_ref());
+        if upstream.index() != byte {
+            return None;
+        }
+        let previous = byte.checked_sub(1).and_then(|b| self.cluster(b));
+        let clusters = [previous.as_ref(), next.as_ref()];
+        // A present byte-zero cluster forces both cursors downstream. A
+        // missing next cluster forces both to the upstream text endpoint.
+        let same_edge = byte == 0 || next.is_none();
+        let geometry = |cursor: Cursor| {
+            cursor.geometry_with(self.layout, width, clusters, |cluster| {
+                let index = self.bytes[cluster.text_range().start] as usize;
+                self.entries[index].offset
+            })
+        };
+        let first = geometry(upstream);
+        Some([
+            first,
+            if same_edge {
+                first
+            } else {
+                let downstream =
+                    Cursor::from_source_cluster(self.layout, Affinity::Downstream, next.as_ref());
+                geometry(downstream)
+            },
+        ])
+    }
+
     /// The existing Cursor geometry policy, using cached source/prefix lookups.
     pub fn geometry(&self, cursor: Cursor, width: f32) -> BoundingBox {
         let clusters = [
@@ -378,273 +180,4 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
             },
         )
     }
-}
-
-fn direct_pair<B: Brush>(layout: &Layout<B>, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
-    let upstream = Cursor::from_byte_index(layout, byte, Affinity::Upstream);
-    if upstream.index() != byte {
-        return None;
-    }
-    Some([
-        upstream.geometry(layout, width),
-        Cursor::from_byte_index(layout, byte, Affinity::Downstream).geometry(layout, width),
-    ])
-}
-
-// Indexed and monotonic byte owners carry the same exact visual prefixes.
-// Keep reconstruction cold and apply one shared cursor endpoint/affinity policy.
-#[inline(never)]
-fn pair_from_entries<B: Brush>(
-    layout: &Layout<B>,
-    byte: usize,
-    width: f32,
-    previous: Option<&Entry>,
-    next: Option<&Entry>,
-) -> Option<[BoundingBox; 2]> {
-    let downstream = next.and_then(|entry| entry.path.cluster(layout));
-    let upstream_cursor =
-        Cursor::from_source_cluster(layout, Affinity::Upstream, downstream.as_ref());
-    if upstream_cursor.index() != byte {
-        return None;
-    }
-    let upstream = previous.and_then(|entry| entry.path.cluster(layout));
-    let clusters = [upstream.as_ref(), downstream.as_ref()];
-    let geometry = |cursor: Cursor| {
-        cursor.geometry_with(layout, width, clusters, |cluster| {
-            [previous, next]
-                .into_iter()
-                .flatten()
-                .find(|entry| entry.path == cluster.path())
-                .expect("geometry reborrows one of the two source-owner paths")
-                .offset
-        })
-    };
-    let first = geometry(upstream_cursor);
-    Some([
-        first,
-        if byte == 0 || downstream.is_none() {
-            first
-        } else {
-            geometry(Cursor::from_source_cluster(
-                layout,
-                Affinity::Downstream,
-                downstream.as_ref(),
-            ))
-        },
-    ])
-}
-
-fn visit_indexed<B: Brush, E>(
-    layout: &Layout<B>,
-    offsets: impl IntoIterator<Item = usize>,
-    width: f32,
-    visit: &mut impl FnMut(usize, Option<[BoundingBox; 2]>) -> ControlFlow<E>,
-) -> Option<ControlFlow<E>> {
-    let index = CursorGeometry::new(layout)?;
-    Some((|| {
-        for byte in offsets {
-            visit(byte, index.geometries_at(byte, width))?;
-        }
-        ControlFlow::Continue(())
-    })())
-}
-
-fn visit_direct<B: Brush, E>(
-    layout: &Layout<B>,
-    offsets: impl Iterator<Item = usize>,
-    width: f32,
-    visit: &mut impl FnMut(usize, Option<[BoundingBox; 2]>) -> ControlFlow<E>,
-) -> ControlFlow<E> {
-    for byte in offsets {
-        visit(byte, direct_pair(layout, byte, width))?;
-    }
-    ControlFlow::Continue(())
-}
-
-fn visit_source_pairs<const ADMIT: bool, B: Brush, E>(
-    layout: &Layout<B>,
-    offsets: impl Iterator<Item = usize>,
-    width: f32,
-    visit: &mut impl FnMut(usize, Option<[BoundingBox; 2]>) -> ControlFlow<E>,
-    inline: &mut [RunSlot; 1],
-    spill: &mut Vec<RunSlot>,
-    rtl: &mut Vec<f32>,
-) -> Result<ControlFlow<E>, CursorGeometryRestart> {
-    let mut offsets = offsets.peekable();
-    let mut last_request = None;
-    let mut previous_owner = None;
-    let mut previous_owner_end = 0;
-    let mut admitted_count = 0_usize;
-    let mut admitted_end = 0;
-    for line in layout.lines() {
-        let (min, slots) = source_runs(&line, inline, spill).ok_or(CursorGeometryRestart)?;
-        let mut origin = line.metrics().offset;
-        for (position, item) in line.items_nonpositioned().enumerate() {
-            match item {
-                LineItem::InlineBox(inline_box) => origin += inline_box.width,
-                LineItem::Run(run) => {
-                    let identity =
-                        line.layout.data.line_items[line.data.item_range.start + position].index;
-                    slots[identity - min].origin = origin;
-                    origin += run.advance();
-                }
-            }
-        }
-        for slot in slots.iter().copied().filter(|slot| slot.item != u32::MAX) {
-            let run = line.item(slot.item as usize).unwrap().run().unwrap();
-            let mut prefix = slot.origin;
-            rtl.clear();
-            if run.is_rtl() {
-                if ADMIT {
-                    rtl.reserve(run.len());
-                }
-                let _ = run.try_for_each_cluster(true, |run, atom, grapheme| {
-                    rtl.push(prefix);
-                    prefix += run
-                        .line_spacing()
-                        .grapheme_advance(atom, grapheme, run.is_rtl());
-                    ControlFlow::<E>::Continue(())
-                });
-            }
-            let mut previous_end = 0;
-            let mut previous_offset = 0.;
-            let mut previous_shared = false;
-            let full = run.full_slice();
-            let mut logical_index = 0;
-            let flow = run.try_for_each_cluster(false, |run, atom, grapheme| {
-                let range = full.text_byte_range(grapheme.char_range());
-                if ADMIT {
-                    // Empty-layout metrics never own source bytes. A
-                    // decreasing range may be disjoint; let the byte map
-                    // decide final admission on every ambiguous restart.
-                    if layout.data.text_len != 0 {
-                        if range.start > range.end
-                            || range.end > layout.data.text_len
-                            || (!range.is_empty() && range.start < admitted_end)
-                            || u32::try_from(admitted_count).is_err()
-                        {
-                            return ControlFlow::Break(Err(CursorGeometryRestart));
-                        }
-                        if !range.is_empty() {
-                            admitted_end = range.end;
-                        }
-                    }
-                    let Some(count) = admitted_count.checked_add(1) else {
-                        return ControlFlow::Break(Err(CursorGeometryRestart));
-                    };
-                    admitted_count = count;
-                }
-                let offset = if run.is_rtl() {
-                    rtl[rtl.len() - logical_index - 1]
-                } else {
-                    let offset = prefix;
-                    prefix += run
-                        .line_spacing()
-                        .grapheme_advance(atom, grapheme, run.is_rtl());
-                    offset
-                };
-                logical_index += 1;
-                // Empty ranges, including the empty layout's metrics space,
-                // never own a byte in the original random-access byte map.
-                if range.is_empty() || layout.data.text_len == 0 {
-                    previous_shared = false;
-                    return ControlFlow::Continue(());
-                }
-                let current = Entry {
-                    path: ClusterPath::new(run.line_index, run.index, grapheme.char_range().start),
-                    offset,
-                };
-                while let Some(&byte) = offsets.peek().filter(|&&byte| byte < range.end) {
-                    if last_request.is_some_and(|previous| byte < previous) {
-                        // Break can complete successfully after draining the
-                        // remaining requests through the direct fallback.
-                        return ControlFlow::Break(if ADMIT {
-                            Err(CursorGeometryRestart)
-                        } else {
-                            Ok(visit_direct(layout, offsets.by_ref(), width, visit))
-                        });
-                    }
-                    offsets.next();
-                    last_request = Some(byte);
-                    let pair = if byte == range.start {
-                        if previous_shared
-                            && previous_end == byte
-                            && grapheme.whitespace() != Whitespace::Newline
-                        {
-                            let bounds = line_cursor_rect(
-                                &line,
-                                width,
-                                if run.is_rtl() {
-                                    previous_offset
-                                } else {
-                                    offset
-                                },
-                            );
-                            Some([bounds; 2])
-                        } else {
-                            pair_from_entries(
-                                layout,
-                                byte,
-                                width,
-                                previous_owner
-                                    .as_ref()
-                                    .filter(|_| previous_owner_end == byte),
-                                Some(&current),
-                            )
-                        }
-                    } else if byte > range.start {
-                        // The ordinary cursor canonicalizes an in-cluster
-                        // byte to its start, so this request would snap away.
-                        None
-                    } else {
-                        pair_from_entries(
-                            layout,
-                            byte,
-                            width,
-                            previous_owner
-                                .as_ref()
-                                .filter(|_| previous_owner_end == byte),
-                            None,
-                        )
-                    };
-                    visit(byte, pair).map_break(|error| Ok(ControlFlow::Break(error)))?;
-                }
-                previous_end = range.end;
-                previous_offset = offset;
-                previous_shared = !range.is_empty() && grapheme.whitespace() != Whitespace::Newline;
-                previous_owner = Some(current);
-                previous_owner_end = range.end;
-                ControlFlow::Continue(())
-            });
-            if let ControlFlow::Break(completion) = flow {
-                return completion;
-            }
-        }
-    }
-    while let Some(&byte) = offsets.peek() {
-        if last_request.is_some_and(|previous| byte < previous) {
-            return if ADMIT {
-                Err(CursorGeometryRestart)
-            } else {
-                Ok(visit_direct(layout, offsets, width, visit))
-            };
-        }
-        offsets.next();
-        last_request = Some(byte);
-        if let ControlFlow::Break(error) = visit(
-            byte,
-            pair_from_entries(
-                layout,
-                byte,
-                width,
-                previous_owner
-                    .as_ref()
-                    .filter(|_| previous_owner_end == byte),
-                None,
-            ),
-        ) {
-            return Ok(ControlFlow::Break(error));
-        }
-    }
-    Ok(ControlFlow::Continue(()))
 }

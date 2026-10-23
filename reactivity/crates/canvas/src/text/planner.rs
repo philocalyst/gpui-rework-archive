@@ -433,63 +433,6 @@ fn freeze_line(
         width: if content.is_empty() { 0. } else { m.advance },
     })
 }
-fn append_caret(
-    stops: &mut Vec<Stop>,
-    planned: &parley::Layout<()>,
-    source: usize,
-    height: f32,
-    byte: usize,
-    indexed_pair: Option<[parley::BoundingBox; 2]>,
-) -> Result<(), Error> {
-    let mut pair = [None, None];
-    for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
-        .into_iter()
-        .enumerate()
-    {
-        let r = if let Some(bounds) = &indexed_pair {
-            bounds[index]
-        } else {
-            let cursor = Cursor::from_byte_index(planned, byte, affinity);
-            if cursor.index() != byte {
-                continue;
-            }
-            cursor.geometry(planned, 1.)
-        };
-        let bounds = Rect::new(
-            r.x0 as f32,
-            (f64::from(height) + r.y0) as f32,
-            (r.x1 - r.x0) as f32,
-            (r.y1 - r.y0) as f32,
-        );
-        if ![bounds.x, bounds.y, bounds.width, bounds.height]
-            .into_iter()
-            .all(f32::is_finite)
-        {
-            return Err(Error::InvalidGeometry);
-        }
-        pair[index] = Some(bounds);
-    }
-    let global = (source + byte) as u32;
-    if pair[0].is_some() && pair[0] == pair[1] {
-        stops.push(Stop {
-            byte: global,
-            x: pair[0].unwrap().x,
-            affinities: 3,
-        });
-    } else {
-        for (i, bounds) in pair.into_iter().enumerate() {
-            if let Some(bounds) = bounds {
-                stops.push(Stop {
-                    byte: global,
-                    x: bounds.x,
-                    affinities: 1 << i,
-                });
-            }
-        }
-    }
-    Ok(())
-}
-
 fn append_carets(
     stops: &mut Vec<Stop>,
     planned: &parley::Layout<()>,
@@ -498,45 +441,71 @@ fn append_carets(
     height: f32,
 ) -> Result<(), Error> {
     let segmenter = GraphemeClusterSegmenter::new();
-    // Keep the bounded direct path for tiny labels and single huge graphemes.
-    // This Vec belongs to shape_inner's unpublished TextLayout. Partial writes
-    // can be rolled back here; no external callback or owner is transactional.
-    if segmenter.segment_str(content).nth(8).is_some() {
-        let checkpoint = stops.len();
-        let mut invalid_geometry = false;
-        let result = CursorGeometry::try_for_each_pair_partial(
-            planned,
-            segmenter.segment_str(content),
-            1.,
-            |byte, pair| {
-                if let Some(pair) = pair {
-                    // Drain admission even after nonfinite geometry: the old
-                    // index's InvalidFont takes precedence on late rejection.
-                    invalid_geometry |=
-                        append_caret(stops, planned, source, height, byte, Some(pair)).is_err();
+    // A fixed small number of direct queries is linear in source
+    // length and avoids an index for e.g. one huge grapheme. Bulk
+    // maps use constant-time source/prefix lookup per destination.
+    let geometry = if segmenter.segment_str(content).nth(8).is_some() {
+        Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
+    } else {
+        None
+    };
+    for byte in segmenter.segment_str(content) {
+        let indexed_pair = if let Some(index) = &geometry {
+            let Some(pair) = index.geometries_at(byte, 1.) else {
+                continue;
+            };
+            Some(pair)
+        } else {
+            None
+        };
+        let mut pair = [None, None];
+        for (index, affinity) in [Affinity::Upstream, Affinity::Downstream]
+            .into_iter()
+            .enumerate()
+        {
+            let r = if let Some(bounds) = &indexed_pair {
+                bounds[index]
+            } else {
+                let cursor = Cursor::from_byte_index(planned, byte, affinity);
+                if cursor.index() != byte {
+                    continue;
                 }
-            },
-        );
-        if result.is_err() {
-            stops.truncate(checkpoint);
-            let index = CursorGeometry::new(planned).ok_or(Error::InvalidFont)?;
-            for byte in segmenter.segment_str(content) {
-                if let Some(pair) = index.geometries_at(byte, 1.) {
-                    append_caret(stops, planned, source, height, byte, Some(pair))?;
+                cursor.geometry(planned, 1.)
+            };
+            let bounds = Rect::new(
+                r.x0 as f32,
+                (f64::from(height) + r.y0) as f32,
+                (r.x1 - r.x0) as f32,
+                (r.y1 - r.y0) as f32,
+            );
+            if ![bounds.x, bounds.y, bounds.width, bounds.height]
+                .into_iter()
+                .all(f32::is_finite)
+            {
+                return Err(Error::InvalidGeometry);
+            }
+            pair[index] = Some(bounds);
+        }
+        let global = (source + byte) as u32;
+        if pair[0].is_some() && pair[0] == pair[1] {
+            stops.push(Stop {
+                byte: global,
+                x: pair[0].unwrap().x,
+                affinities: 3,
+            });
+        } else {
+            for (i, bounds) in pair.into_iter().enumerate() {
+                if let Some(bounds) = bounds {
+                    stops.push(Stop {
+                        byte: global,
+                        x: bounds.x,
+                        affinities: 1 << i,
+                    });
                 }
             }
-            Ok(())
-        } else if invalid_geometry {
-            Err(Error::InvalidGeometry)
-        } else {
-            Ok(())
         }
-    } else {
-        for byte in segmenter.segment_str(content) {
-            append_caret(stops, planned, source, height, byte, None)?;
-        }
-        Ok(())
     }
+    Ok(())
 }
 #[cfg(test)]
 #[path = "cursor_pair_tests.rs"]
