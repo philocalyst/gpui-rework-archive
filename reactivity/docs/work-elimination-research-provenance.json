@@ -1,0 +1,16 @@
+[
+  {
+    "original": "/tmp/gpui-work-elimination-luna/constant-ranges.md",
+    "original_sha256": "78e3afcf1b87f9490453099f84f155cb1b88ceecb259648c944950ecdd42d24a",
+    "document": "constant-coverage-luna.md",
+    "document_sha256": "34efc675e77bc2a915a4c7adbba2a2d3487e0d7b958da2aa0194109e1b8a4d44",
+    "changes": "status preamble and local Markdown URL normalization"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/ready-publication-mpsc.md",
+    "original_sha256": "fe53004268ba8fe38905fc53c063b8562564bad27d09a48ce48e2c2ae53df2e2",
+    "document": "ready-publication-mpsc-luna.md",
+    "document_sha256": "b20b3b0dac75e00f344bb05f1fbd47794d830662f8e504c30426175386e0ea19",
+    "changes": "status preamble and local Markdown URL normalization"
+  }
+]
