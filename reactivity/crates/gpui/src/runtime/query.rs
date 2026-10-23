@@ -666,7 +666,19 @@ impl<'a, R: RowAccess<'a>> HitSheet<'a, R> {
 
 // Shared by production pointer dispatch and borrowed public/native queries.
 // Every clip/shape belongs to the supplied sheet; L cannot skip its checks.
+// Static dispatch preserves the library compilation boundary for both readers.
+#[inline(always)]
 pub(super) fn contains_point<'a>(
+    nodes: impl RowAccess<'a>,
+    geometry: super::geometry::GeometryView<'_>,
+    has_viewports: bool,
+    index: usize,
+    point: crate::Point,
+) -> bool {
+    nodes.contains_point(geometry, has_viewports, index, point)
+}
+#[inline(always)]
+pub(super) fn contains_point_in_rows<'a>(
     nodes: impl RowAccess<'a>,
     geometry: super::geometry::GeometryView<'_>,
     has_viewports: bool,
