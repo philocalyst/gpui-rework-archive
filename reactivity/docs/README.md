@@ -7,6 +7,7 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | Report | Scope |
 | --- | --- |
 | [Core](research-core.md) | JustRach NanoUI, MyGo, zgui, Bevy, Rust, data structures and PanGui |
+| [Route storage frontier](route-storage-frontier-luna.md) | Safe density-selected route columns, exact owner/header/drop costs and a separate tail-header thin-owner alternative; no storage adoption |
 | [Full feature audit](feature-parity.md) | Original GPUI behavior gaps, representative Hummingbird fixtures and conservative migration rules; full replacement scope retained |
 | [Solid and Ripple async graph](async-graph-luna.md) | Pinned runtime and accessible author sources, typed lane fit and remaining Future/stream/optimistic ergonomics |
 | [Bounded Future questions](future-questions.md) | Integrated typed executor API, physical-credit teardown, close barrier, costs and remaining stream/optimistic work |

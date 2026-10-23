@@ -1,0 +1,12 @@
+{
+  "passed": 656,
+  "failed": 0,
+  "ignored": 30,
+  "harnesses": 61,
+  "source": "89aeabd53942c3a4643bcb6fd978e6a24703f6d2",
+  "guarded_files": 2033,
+  "source_unchanged": true,
+  "producer_blobs_equal": true,
+  "strict_alltargets": true,
+  "format": true
+}

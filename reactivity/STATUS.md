@@ -68,11 +68,19 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Current shipping source `06b15c1835` adds an
+Current shipping source `89aeabd539` integrates the
+[flat sibling index](evidence/sibling-reconciliation/README.md) and
+[lazy Core indirect validation](evidence/lazy-indirect/README.md). Their exact
+producer archives retain allocation, code and lifecycle controls. The
+[combined main qualification](evidence/structural-main/README.md) passes 656
+GPUI/GPU tests and doctests across 61 result groups, with 30 ignored, strict
+all-target checks and formatting. All 2,033 source/configuration/port guards and
+the frozen executable hash hold. Native Window and foreign-OS qualification
+remain pinned to their separate producer campaigns. The earlier `06b15c1835` adds an
 [outlined property activation](evidence/property-successor/ADOPTION.md). Its
 32 public merged-source cases, strict all-target checks and formatting pass;
 exact producer `49707a4a4a` retains its native and Apple/MSVC qualification.
-The full combined parent campaign remains at `c717df64a9`, which combines cached-edge caret lowering,
+The broader actual native Window/Hummingbird campaign remains at `c717df64a9`, which combines cached-edge caret lowering,
 compact presentation rows, contained property actions, their exact count fix and
 [public selection/state replies](docs/property-state-routes.md). The
 [four-way text controls](benchmarks/caret-pair-controls/cached-edge/README.md)
@@ -111,7 +119,7 @@ from 3,816 to 3,416 bytes, with 96 additional linked text bytes and an opt-in ca
 allocation rows are unchanged. Canonical
 value and exact stored contribution can differ on the inspector shell, so a
 compact representation cannot silently conflate them. Current core source is
-[30,468 non-test code lines](evidence/core-lines/README.md), including build scripts;
+[30,513 non-test code lines](evidence/core-lines/README.md), including build scripts;
 this does not establish full feature parity or forecast final size.
 
 The unmerged [monotonic caret control](evidence/monotonic-caret-stream/control16/README.md)
@@ -121,9 +129,14 @@ retention, but loses 10–29% on warm long-text timing medians. Main keeps its
 cached index while separate slot, boundary-cache and iterator controls develop.
 The [route census](docs/route-density-census-luna.md) and
 [thin-handle feasibility experiment](evidence/thin-route-feasibility/README.md)
-likewise remain evidence, not adopted unsafe storage. A new
-[portable Core initialization spike](docs/lazy-indirect-validation-luna.md)
-targets unused indirect-validation pipelines; it has no measured result yet.
+likewise remain evidence, not adopted unsafe storage. The
+[safe route-column proposal](docs/route-storage-frontier-luna.md) is now an
+isolated implementation experiment, including dense-route and blank-owner costs.
+The [Hummingbird queue/controller](evidence/hummingbird-queue/README.md) is also
+isolated: its public native consumer exposed a core focus-paint rapid-click bug.
+The correction passes the unchanged original native client; broader gates and
+a public optional-session layout correction remain before adoption. No full
+player or foreign-app compilation success is claimed.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),

@@ -58,14 +58,28 @@ authored/vendor/binary bill remain qualified at the frozen producer source. Main
 stages require separate queried/enabled state and pointer-lifetime proof; the
 first static recipe does not depend on that extension.
 
-The next portable graphics slice targets entire unused initialization stacks.
-The [Core lifecycle audit](docs/lazy-indirect-validation-luna.md) finds two
-indirect-validation shader/pipeline stacks built during device creation even
-for direct-only applications. An isolated implementation will defer them to the
-first INDIRECT buffer, preserving enabled policy on earlier pipeline layouts.
-Transactional HAL cleanup, sticky initialization errors and imported-buffer
-ownership are prerequisites. This is a work-elimination hypothesis, with no
-startup, memory or backend-runtime result yet.
+The [lazy indirect-validation slice](evidence/lazy-indirect/README.md) is now
+integrated. Direct-only device creation avoids two shader/pipeline stacks and
+13 HAL acquisitions; three matched Vulkan allocator pairs report 1,608→39 Rust
+allocation calls and 74,926→5,558 newly retained requested bytes. First INDIRECT
+use pays the deferred work and adds one allocation and 32 bytes across the two
+boundaries. Enabled pipeline policy, sticky loss delivery, reentrant callbacks,
+imported-buffer ownership and unwind cleanup have explicit controls. Producer
+Apple/MSVC/WebGL compilation is separate from actual Vulkan runtime proof;
+neither startup nor process-memory improvements follow from these counts.
+The [combined main source](evidence/structural-main/README.md) passes 656
+GPUI/GPU cases/docs, strict all-target checks and formatting with all 2,033
+shipping/configuration/port guards intact. It does not rerun the separate native
+Window or foreign-OS producer campaigns.
+
+The [flat sibling index](evidence/sibling-reconciliation/README.md) is also
+integrated. One temporary prefix/child buffer replaces ordered reconciliation
+maps, without retained fields or dependencies. Seven alternating complete-owner
+pairs measure 17–22% lower unchanged-tree redescription medians on the 1K/16K
+fixtures and a 1.73% tiny-owner regression. Allocation calls for three 16K
+descriptions fall 8,310→123; whole-operation peak is unchanged. Its 45 additional
+core code lines and the linked executable's 10,048-byte text reduction are
+separate bills. These controls do not measure changed-pixel frames or startup.
 
 The [acknowledged geometry baseline](benchmarks/acknowledged-text-geometry/README.md)
 now preserves exact old P/C maps for ordinary queries and native wrapped/bidi
@@ -115,7 +129,8 @@ loses the paired timing comparison: long-text warm medians regress 10–29%.
 Its 32 KiB owner saves 655,296 requested transient bytes with unchanged retention;
 that does not justify adopting slower code. Later controls separately reduce the
 run slot to eight bytes, inline the single-run case, preserve boundary-neighbour
-prefixes and remove iterator staging copies. The [assembly audit](docs/monotonic-iterator-copy-luna.md)
+prefixes and remove iterator staging copies. Their [slot/boundary archive](evidence/monotonic-caret-stream/slot-boundary-controls/README.md)
+preserves exact source patches and controls without claiming adoption. The [assembly audit](docs/monotonic-iterator-copy-luna.md)
 identifies those copies; it does not establish a later win. Preserve the empty-edge
 fixture coverage limits and exact RTL f32
 recurrence; do not reverse-subtract advances or assume wrapped u32 source
@@ -146,6 +161,17 @@ modeled route payload grows 40 bytes. The [standalone feasibility controls](evid
 preserve an initial unsound lifetime-erasure candidate and its corrected version.
 They are neither a shipping implementation nor a soundness proof; allocator-class,
 dispatch and full lifecycle costs remain before adoption.
+The [route storage frontier](docs/route-storage-frontier-luna.md) instead selects
+a safe hot/cold retained-node experiment: keep route presence in the packed kind
+word and move callback owners into density-selected columns. Qualify actual
+owner headers, old/new overlap, dispatch and destructor order before accepting
+the proposed 40→24-byte node. A separate tail-header thin owner reduces padding
+but still requires an unsafe policy decision and full soundness qualification.
+The isolated [Hummingbird queue](evidence/hummingbird-queue/README.md) now supplies
+real queue/controller and public UI contracts, including distinct duplicate
+identity and stale EOS rejection. Integration is waiting on a core rapid-click
+correction exposed by the native consumer. Audio transport and the rest of the
+full player remain required work; held-button success is not rapid-click proof.
 Designer color still needs shared
 batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut
