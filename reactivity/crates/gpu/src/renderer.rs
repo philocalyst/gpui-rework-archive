@@ -24,7 +24,9 @@ const ROUNDED_SOURCE: u32 = 1 << 30;
 const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
 const UNIFORM_TILE: u32 = 1 << 31;
 const CONSTANT_TILE: u32 = 1 << 30;
-const _: () = assert!(MAX_REFERENCES < CONSTANT_TILE as usize);
+const OPAQUE_PREFIX: u32 = 1 << 29;
+const TILE_END: u32 = OPAQUE_PREFIX - 1;
+const _: () = assert!(MAX_REFERENCES < OPAQUE_PREFIX as usize);
 const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
 
 #[derive(Debug)]
@@ -867,7 +869,16 @@ impl RendererState {
                 range[1] = UNIFORM_TILE;
             } else {
                 offset += count;
-                *range = [offset, offset | constant];
+                *range = [
+                    offset,
+                    offset
+                        | constant
+                        | if self.cursors[tile] != 0 {
+                            OPAQUE_PREFIX
+                        } else {
+                            0
+                        },
+                ];
             }
         }
         let references = offset as usize;
@@ -928,14 +939,16 @@ impl RendererState {
         for (tile, range) in self.ranges.iter().enumerate() {
             if range[1] == UNIFORM_TILE {
                 uniform_tiles += 1;
-            } else if range[0] != range[1] & !CONSTANT_TILE {
+            } else if range[0] != (range[1] & TILE_END) {
                 let [left, top, right, bottom] =
                     tile_bounds(tile, columns, scene.width, scene.height);
-                let end = range[1] & !CONSTANT_TILE;
-                let samples = u64::from((right - left) * (bottom - top))
-                    * if range[1] & CONSTANT_TILE != 0 { 1 } else { 16 };
+                let end = range[1] & TILE_END;
+                let area = u64::from((right - left) * (bottom - top));
+                let samples = area * if range[1] & CONSTANT_TILE != 0 { 1 } else { 16 };
+                let prefix = u64::from(range[1] & OPAQUE_PREFIX != 0);
                 sample_evaluations += samples;
-                sample_draw_evaluations += samples * u64::from(end - range[0]);
+                sample_draw_evaluations +=
+                    area * prefix + samples * (u64::from(end - range[0]) - prefix);
             }
         }
         let (tone, exposure) = match scene.color_config.mapping {

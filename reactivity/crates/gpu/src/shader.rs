@@ -61,6 +61,11 @@ pub mod ui {
             atlas: decode_resource(atlas),
         }
     }
+    pub fn load_paint(address: u32) -> Vec4f {
+        let state_base = get!(WORDS)[address as usize + 1].w;
+        let material_base = (state_base & 0x7fffffff) + get!(GLOBALS).material_offset;
+        load_color(get!(WORDS)[material_base as usize + 1], state_base)
+    }
 
     #[vertex]
     pub fn vertex(#[builtin(vertex_index)] index: u32) -> Vec4f {
@@ -424,19 +429,28 @@ pub mod ui {
         let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
         let range = get!(TILES)[tile as usize];
         if (range.y & 0x80000000) != 0 {
-            return output(load_draw(range.x).color);
+            return output(load_paint(range.x));
         }
-        let end = range.y & 0x3fffffff;
+        let end = range.y & 0x1fffffff;
         if range.x == end {
             return output(globals.clear);
+        }
+        let mut start = range.x;
+        let mut backdrop = globals.clear;
+        if (range.y & 0x20000000) != 0 {
+            // The existing opaque cutoff certifies the first retained solid.
+            // Evaluate its recurrence once, including the original float ops.
+            let source = load_paint(get!(INDICES)[start as usize]);
+            backdrop = source + backdrop * (1.0 - source.w);
+            start += 1;
         }
         if (range.y & 0x40000000) != 0 {
             // All retained solids cover every sample. Keep painter order and
             // the same source-over recurrence, but evaluate it once per pixel.
-            let mut color = globals.clear;
+            let mut color = backdrop;
             #[wgsl_allow(non_literal_loop_bounds)]
-            for cursor in range.x..end {
-                let source = load_draw(get!(INDICES)[cursor as usize]).color;
+            for cursor in start..end {
+                let source = load_paint(get!(INDICES)[cursor as usize]);
                 color = source + color * (1.0 - source.w);
             }
             // Identical finite samples have +0 reduction delta. Integer bits
@@ -455,11 +469,10 @@ pub mod ui {
             // Both ordinary and banked records use one compositor. Sharing a
             // decode across a sample row keeps four colors live, rather than
             // decoding sixteen times or retaining all sixteen sample colors.
-            let mut colors: [Vec4f; 4] =
-                [globals.clear, globals.clear, globals.clear, globals.clear];
+            let mut colors: [Vec4f; 4] = [backdrop, backdrop, backdrop, backdrop];
             // Host-built CSR ranges are monotone and bounded by INDICES.
             #[wgsl_allow(non_literal_loop_bounds)]
-            for cursor in range.x..end {
+            for cursor in start..end {
                 let draw = load_draw(get!(INDICES)[cursor as usize]);
                 for x in 0..4 {
                     let point = position.xy()

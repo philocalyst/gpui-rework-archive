@@ -497,6 +497,42 @@ fn constant_coverage_ranges_preserve_order_and_fall_back_at_partial_edges() {
 }
 
 #[test]
+fn certified_opaque_prefix_is_blended_once_before_a_sampled_tail() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let viewport = Rect::new(0.0, 0.0, 16.0, 16.0);
+        let mut canvas = Canvas::recording(16, 16, ColorConfig::default()).unwrap();
+        canvas.clear(Color::rgb(20, 70, 90));
+        canvas
+            .fill_rect(
+                viewport,
+                Affine::IDENTITY,
+                viewport,
+                Color::rgb(100, 40, 80),
+            )
+            .unwrap();
+        canvas
+            .fill_rect(
+                Rect::new(4.125, 3.125, 7.75, 8.5),
+                Affine::IDENTITY,
+                viewport,
+                Color::rgba(180, 90, 30, 130),
+            )
+            .unwrap();
+        renderer.set_tile_proofs(false);
+        let reference = readback(&mut renderer, &canvas);
+        assert_eq!(renderer.stats().sample_draw_evaluations, 256 * 16 * 2);
+        renderer.set_tile_proofs(true);
+        assert_eq!(readback(&mut renderer, &canvas), reference);
+        let stats = renderer.stats();
+        assert_eq!(stats.uniform_tiles, 0);
+        assert_eq!(stats.tile_references, 2);
+        assert_eq!(stats.sample_evaluations, 256 * 16);
+        assert_eq!(stats.sample_draw_evaluations, 256 * (1 + 16));
+    });
+}
+
+#[test]
 fn opaque_tile_proofs_skip_overlap_and_preserve_later_edges() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
