@@ -1,0 +1,13 @@
+{
+  "producer": "/tmp/gpui-one-buffer-inbox-sol",
+  "review": "581640fee40ee6b16cc296548f666de8a9750443",
+  "production": "5acdf79d410a27dc8efff0bb7c8266951c6e3c84",
+  "base": "f9efa331398cbdd9c0bac45a9cce82139a81acbf",
+  "payloads_reopened": 128,
+  "external_files_reopened": 9,
+  "guard_pairs_verified": 17,
+  "source_and_test_patches_match_git": true,
+  "all_payloads_match_after_copy": true,
+  "production_adopted": false,
+  "scope": "Historical Rust1.97 one-buffer slice relative to typed f9. Composed genuine-nightly costs remain separate."
+}

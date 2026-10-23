@@ -1,0 +1,11 @@
+{
+  "source": "b3123ea1b4df2d144108d25499780217aac5b470",
+  "baseline": "299c6aca30c1245c15c2da6a5ccabb41dd435d17",
+  "archive_sha256": "511789688ffbc947c4d5d170ed7555f2ea51ba9db9407d7b639c091e9ea6d202",
+  "manifest_sha256": "313661d85e2a2ad7d7f607a1afd890ea4a32bc949d0bd1a292035344a2cdbd95",
+  "payloads_reopened": 2891,
+  "payload_bytes": 77419272,
+  "external_files_reopened": 9,
+  "production_adopted": false,
+  "timing_qualified": false
+}

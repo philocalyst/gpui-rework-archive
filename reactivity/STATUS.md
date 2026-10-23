@@ -164,6 +164,15 @@ supported. Actual native-window execution, strict compatibility, foreign and
 matched-cost integration are separate requirements. It and the typed
 inbox/one-buffer successors are not yet adopted.
 
+The historical [one-buffer Inbox slice](evidence/inbox-buffer/ROOT-REVIEW.md)
+has independently verified payloads, binary identities, guards and test totals.
+Its measured storage/code reductions and adverse initial codegen control are
+preserved together. Those Rust 1.97 costs are relative to typed-delivery f9;
+the composed nightly kernel needs its own matched comparison. Historical
+[statistics traversal](evidence/uniform-packet/stats-csr/ROOT-REVIEW.md) and
+[packed cursor](evidence/uniform-packet/packed-csr/ROOT-REVIEW.md) experiments
+are also archived without adoption or timing claims.
+
 [Borrowed-kernel research](evidence/borrowed-kernel-research/README.md)
 now includes a compiled standalone Rust lifetime probe with three rejected
 sharing/aliasing controls. It establishes constructibility of borrowed selected

@@ -1,0 +1,11 @@
+{
+  "source": "5559828a4f6d093401cc374654f634b4d8fb9ddb",
+  "baseline": "7a5e1619a27010ec63f6c27506a6d1fcd113f67c",
+  "archive_sha256": "0fea47ab7c1d19e73f0b00817d4b37dc4fd8c63d366bbd2fb76d2d05dce7b992",
+  "manifest_sha256": "1239c91ea474e569071080d5fb5deaedd4b05e751e0ed0f8c18a322ee051ea01",
+  "payloads_reopened": 3879,
+  "payload_bytes": 123575954,
+  "external_files_reopened": 14,
+  "production_adopted": false,
+  "timing_qualified": false
+}
