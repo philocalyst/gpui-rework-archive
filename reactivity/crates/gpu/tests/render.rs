@@ -3583,3 +3583,57 @@ fn same_word_count_with_different_bank_and_material_planes_stays_coherent() {
         }
     });
 }
+
+#[test]
+fn highest_correction_handle_reaches_real_shader_clip_admission() {
+    use std::collections::HashSet;
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+        let mut expected = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+        let viewport = Rect::new(0.0, 0.0, 1.0, 1.0);
+        // The first sample lies at the rounded clip endpoint but below its exact
+        // sum. It must read this draw's correction, assigned last in reverse.
+        let clip = Rect::new(f32::EPSILON / 16.0, 0.0, 0.125, 1.0);
+        for canvas in [&mut canvas, &mut expected] {
+            canvas.clear(Color::WHITE);
+            canvas
+                .fill_rect(viewport, Affine::IDENTITY, clip, Color::rgb(255, 0, 0))
+                .unwrap();
+        }
+        // Every remaining group contributes a distinct nonzero coefficient
+        // residual, while its narrow geometry misses all fixed sample sites.
+        let mut residuals = HashSet::with_capacity(65_535);
+        for bits in (1.0f32.to_bits() + 1)..1.1f32.to_bits() {
+            let scale = f32::from_bits(bits);
+            let inverse = 1.0 / f64::from(scale);
+            let low = (inverse - f64::from(inverse as f32)) as f32;
+            if low == 0.0 || !residuals.insert(low.to_bits()) {
+                continue;
+            }
+            canvas
+                .fill_rect(
+                    Rect::new(0.49, 0.0, 0.02, 1.0),
+                    Affine {
+                        a: scale,
+                        ..Affine::IDENTITY
+                    },
+                    viewport,
+                    Color::BLACK,
+                )
+                .unwrap();
+            if residuals.len() == 65_535 {
+                break;
+            }
+        }
+        assert_eq!(residuals.len(), 65_535);
+        let actual = readback(&mut gpu, &canvas);
+        assert_eq!(gpu.stats().draws, 65_536);
+        assert_eq!(gpu.stats().correction_records, 65_537);
+        assert_eq!(actual, expected.pixels());
+        assert_ne!(
+            actual, [255; 4],
+            "the highest correction must include the red sample"
+        );
+    });
+}
