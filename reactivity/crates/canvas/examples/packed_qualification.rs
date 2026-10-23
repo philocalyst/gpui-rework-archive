@@ -150,7 +150,7 @@ fn main() {
                         .draw_text_scaled(
                             &mut text,
                             &layout,
-                            Point::new(3., 2.),
+                            Point { x: 3., y: 2. },
                             Affine::IDENTITY,
                             Rect::new(0., 0., 192., 96.),
                             Color::WHITE,
