@@ -332,6 +332,7 @@ impl<M: View + 'static> Runtime<M> {
             Err(Error::StaleTarget)
         }
     }
+    #[inline(never)]
     pub(super) fn inspector_pick(&self, point: Point) -> Option<Target> {
         self.inspector_pick_in_sheet(self.presented_hit_sheet(), point)
     }
