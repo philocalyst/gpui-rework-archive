@@ -48,3 +48,7 @@ accesskit_macos = { path = "../../vendor/accesskit_macos" }
 [[example]]
 name = "audio_output"
 required-features = ["cpal-output"]
+
+[[example]]
+name = "native_service"
+required-features = ["native"]

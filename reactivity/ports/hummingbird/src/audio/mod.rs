@@ -11,6 +11,10 @@ mod service;
 mod timing;
 
 use crate::queue_playback::{EndOfStream, PlanStamp};
+#[cfg(feature = "cpal-output")]
+pub(crate) fn system_output() -> impl output::OutputProvider {
+    cpal::CpalProvider
+}
 pub use service::{AudioHandle, AudioService, Receipt, Transition};
 use std::{fmt, io};
 pub(super) const MAX_RATE: u32 = 768_000;

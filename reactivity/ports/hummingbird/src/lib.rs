@@ -1,4 +1,6 @@
 pub mod app;
+#[cfg(feature = "native")]
+pub mod application;
 #[cfg(feature = "audio")]
 pub mod audio;
 pub mod database;
