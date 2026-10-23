@@ -235,7 +235,7 @@ fn native_remote_results_wake_bounded_owner_turns_without_polling() {
 }
 
 type StatusResults =
-    Lane<ResultMessage, crate::InboxStatus<fn(&mut Catalogue, Option<ResultMessage>)>, ()>;
+    crate::StatusLane<ResultMessage, fn(&mut Catalogue, Option<ResultMessage>), ()>;
 struct ClosingScript {
     host: NativeHost<Catalogue, StatusResults>,
     start: Option<mpsc::Sender<()>>,

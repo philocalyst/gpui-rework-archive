@@ -186,11 +186,11 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
         self,
         inbox: Inbox<T>,
         receive: F,
-    ) -> Result<Window<V, Lane<T, crate::InboxStatus<F>, L>>, Error> {
+    ) -> Result<Window<V, crate::StatusLane<T, F, L>>, Error> {
         inbox.observe_close()?;
-        Ok(self.with_inbox_handler(inbox, crate::InboxStatus(receive)))
+        Ok(self.with_inbox_handler(inbox, crate::remote::InboxStatus(receive)))
     }
-    fn with_inbox_handler<T: Send + 'static, F: crate::InboxHandler<V, T> + 'static>(
+    fn with_inbox_handler<T: Send + 'static, F: crate::remote::InboxHandler<V, T> + 'static>(
         self,
         inbox: Inbox<T>,
         receive: F,
@@ -1182,10 +1182,11 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                         }
                         Err(failure) => Err(failure.error),
                     };
-                    if more && result.is_ok() {
-                        if let Some(wake) = &self.wake {
-                            wake.signal();
-                        }
+                    if more
+                        && result.is_ok()
+                        && let Some(wake) = &self.wake
+                    {
+                        wake.signal();
                     }
                     if let Err(error) = self.input_result(result) {
                         self.error = Some(error);

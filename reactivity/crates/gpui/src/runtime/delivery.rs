@@ -129,12 +129,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         self,
         inbox: Inbox<T>,
         receive: F,
-    ) -> Result<Win<M, Lane<T, crate::InboxStatus<F>, L>>, Error> {
+    ) -> Result<Win<M, crate::StatusLane<T, F, L>>, Error> {
         inbox.observe_close()?;
-        self.with_inbox_handler(inbox, crate::InboxStatus(receive))
+        self.with_inbox_handler(inbox, crate::remote::InboxStatus(receive))
     }
 
-    fn with_inbox_handler<T: Send + 'static, F: crate::InboxHandler<M, T>>(
+    fn with_inbox_handler<T: Send + 'static, F: crate::remote::InboxHandler<M, T>>(
         self,
         inbox: Inbox<T>,
         receive: F,

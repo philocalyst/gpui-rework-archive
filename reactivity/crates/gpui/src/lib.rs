@@ -53,7 +53,7 @@ pub use reader::{
 };
 pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]
-pub use remote::{InboxHandler, InboxStatus, Lane, LaneSet};
+pub use remote::{Lane, LaneSet, StatusLane};
 pub use runtime::{
     Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
     PointerEvent, PointerSession, PresentationToken, Query, SemanticSnapshot, SetError, Snapshot,
