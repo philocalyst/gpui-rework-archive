@@ -232,6 +232,30 @@ mod tests {
     }
 
     #[test]
+    fn a_panicking_destructor_still_releases_the_remaining_elements() {
+        struct Item {
+            id: usize,
+            drops: Arc<AtomicUsize>,
+        }
+        impl Drop for Item {
+            fn drop(&mut self) {
+                self.drops.fetch_add(1, Ordering::Relaxed);
+                assert_ne!(self.id, 1, "deliberate destructor failure");
+            }
+        }
+        let drops = Arc::new(AtomicUsize::new(0));
+        let values = (0..4)
+            .map(|id| Item {
+                id,
+                drops: drops.clone(),
+            })
+            .collect::<Vec<_>>();
+        let retained = RetainedSlice::try_from(values).ok().unwrap();
+        assert!(std::panic::catch_unwind(|| drop(retained)).is_err());
+        assert_eq!(drops.load(Ordering::Relaxed), 4);
+    }
+
+    #[test]
     fn shared_thread_borrows_and_owned_thread_transfer_join_before_reuse() {
         let retained = RetainedSlice::try_from(vec![1_u64, 2, 3]).unwrap();
         std::thread::scope(|scope| {
