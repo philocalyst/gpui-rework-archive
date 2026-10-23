@@ -135,7 +135,14 @@ pub struct FieldAction<M, T, F, S = Source<M, T>> {
     update: F,
     owner: std::marker::PhantomData<fn(&mut M, &mut T)>,
 }
-impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> {
+impl<M, T: 'static, F, S: SourcePath<M, T>> FieldAction<M, T, F, S> {
+    pub(crate) fn new(source: S, update: F) -> Self {
+        Self {
+            source,
+            update,
+            owner: std::marker::PhantomData,
+        }
+    }
     pub(crate) fn validate_registered(
         &self,
         model: &M,
@@ -143,6 +150,22 @@ impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> 
     ) -> Result<FieldId, BindError> {
         self.source.resolve(model, sources).map(|(field, _)| field)
     }
+    pub(crate) fn receive<U>(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        value: U,
+    ) -> Result<FieldId, BindError>
+    where
+        F: FnMut(&mut T, U),
+    {
+        let field = self.validate_registered(model, sources)?;
+        self.source
+            .modify(model, |target| (self.update)(target, value))?;
+        Ok(field)
+    }
+}
+impl<M, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> FieldAction<M, T, F, S> {
     /// Validate every exclusive projector before exposing `&mut T`.
     pub(crate) fn invoke(&self, model: &mut M) -> Result<(), BindError> {
         self.source.modify(model, &self.update)

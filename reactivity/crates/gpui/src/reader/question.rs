@@ -686,8 +686,17 @@ where
         }
     }
 
-    fn apply(&mut self, model: &mut M, applied: &mut usize) {
-        self.tail.apply(model, applied);
+    fn apply(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+        exact: &mut Option<crate::FieldId>,
+    ) -> Result<(), crate::Error> {
+        self.tail.apply(model, sources, applied, exact)
+    }
+    fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), crate::Error> {
+        self.tail.validate(model, sources)
     }
     fn refresh(
         &mut self,
@@ -826,9 +835,19 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
             self.tail.stage(index - count)
         }
     }
-    fn apply(&mut self, model: &mut M, applied: &mut usize) {
-        self.lanes.apply(model, applied);
-        self.tail.apply(model, applied);
+    fn apply(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+        exact: &mut Option<crate::FieldId>,
+    ) -> Result<(), crate::Error> {
+        self.lanes.apply(model, sources, applied, exact)?;
+        self.tail.apply(model, sources, applied, exact)
+    }
+    fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), crate::Error> {
+        self.lanes.validate(model, sources)?;
+        self.tail.validate(model, sources)
     }
     fn refresh(
         &mut self,

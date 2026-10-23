@@ -122,6 +122,24 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         self.with_inbox_handler(inbox, receive)
     }
 
+    /// Receive messages through one registered source. The callback borrows only
+    /// that value. A batch editing the same direct source patches its ports
+    /// without describing the owner; mixed or owner-dependent edits stay coarse.
+    /// Both declaration and mutable projection are checked before every edit.
+    pub fn with_inbox_for<
+        T: Send + 'static,
+        U: 'static,
+        S: crate::SourcePath<M, U>,
+        F: FnMut(&mut U, T),
+    >(
+        self,
+        inbox: Inbox<T>,
+        source: S,
+        receive: F,
+    ) -> Result<Win<M, impl LaneSet<M>>, Error> {
+        self.with_inbox_handler(inbox, crate::FieldAction::new(source, receive))
+    }
+
     /// Observe owned messages and then exactly one `None` when all producers
     /// disconnect. Buffered messages precede `None`; owner close revokes both.
     /// Capacity zero is rejected because this lane requires receive progress.
@@ -144,6 +162,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         if runtime.source_epoch == u64::MAX {
             return Err(Error::EpochExhausted);
         }
+        receive.validate(&runtime.model, &runtime.sources)?;
         let Self { lanes, inner } = self;
         let lane = Lane::new(inbox, receive, lanes);
         Ok(Win { lanes: lane, inner })

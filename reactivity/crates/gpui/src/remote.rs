@@ -2,7 +2,7 @@
 use crate::{
     Commit, Error,
     reader::{Outcome, ReaderKey, ReaderValues, question::Change},
-    source::Sources,
+    source::{FieldAction, FieldId, SourcePath, Sources},
 };
 #[cfg(feature = "native-core")]
 use gpui_reactivity_host::native::Wake;
@@ -251,7 +251,16 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
     fn stage(&mut self, index: usize) -> Stage;
-    fn apply(&mut self, model: &mut M, applied: &mut usize);
+    fn validate(&self, _: &M, _: &Sources<M>) -> Result<(), Error> {
+        Ok(())
+    }
+    fn apply(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+        exact: &mut Option<FieldId>,
+    ) -> Result<(), Error>;
     fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
         Ok(false)
     }
@@ -293,7 +302,15 @@ impl<M> LaneSet<M> for () {
     fn stage(&mut self, _: usize) -> Stage {
         Stage::Empty
     }
-    fn apply(&mut self, _: &mut M, _: &mut usize) {}
+    fn apply(
+        &mut self,
+        _: &mut M,
+        _: &Sources<M>,
+        _: &mut usize,
+        _: &mut Option<FieldId>,
+    ) -> Result<(), Error> {
+        Ok(())
+    }
     fn cancel_questions(&mut self) {}
     fn clear(&mut self) {}
     #[cfg(feature = "native-core")]
@@ -335,22 +352,62 @@ pub type StatusLane<T, F, L> = Lane<T, InboxStatus<F>, L>;
 #[doc(hidden)]
 pub trait InboxHandler<M, T> {
     const OBSERVE_CLOSE: bool;
-    fn receive(&mut self, model: &mut M, value: T);
+    fn validate(&self, _: &M, _: &Sources<M>) -> Result<(), Error> {
+        Ok(())
+    }
+    fn receive(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error>;
     fn closed(&mut self, _: &mut M) {}
 }
 impl<M, T, F: FnMut(&mut M, T)> InboxHandler<M, T> for F {
     const OBSERVE_CLOSE: bool = false;
-    fn receive(&mut self, model: &mut M, value: T) {
+    fn receive(
+        &mut self,
+        model: &mut M,
+        _: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error> {
         self(model, value);
+        Ok(None)
     }
 }
 impl<M, T, F: FnMut(&mut M, Option<T>)> InboxHandler<M, T> for InboxStatus<F> {
     const OBSERVE_CLOSE: bool = true;
-    fn receive(&mut self, model: &mut M, value: T) {
+    fn receive(
+        &mut self,
+        model: &mut M,
+        _: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error> {
         (self.0)(model, Some(value));
+        Ok(None)
     }
     fn closed(&mut self, model: &mut M) {
         (self.0)(model, None);
+    }
+}
+impl<M, T, U: 'static, F: FnMut(&mut U, T), S: SourcePath<M, U>> InboxHandler<M, T>
+    for FieldAction<M, U, F, S>
+{
+    const OBSERVE_CLOSE: bool = false;
+    fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), Error> {
+        self.validate_registered(model, sources)
+            .map(|_| ())
+            .map_err(Into::into)
+    }
+    fn receive(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        value: T,
+    ) -> Result<Option<FieldId>, Error> {
+        FieldAction::receive(self, model, sources, value)
+            .map(Some)
+            .map_err(Into::into)
     }
 }
 impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
@@ -372,17 +429,35 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         }
         self.inbox.stage(F::OBSERVE_CLOSE)
     }
-    fn apply(&mut self, model: &mut M, applied: &mut usize) {
+    fn apply(
+        &mut self,
+        model: &mut M,
+        sources: &Sources<M>,
+        applied: &mut usize,
+        exact: &mut Option<FieldId>,
+    ) -> Result<(), Error> {
         while let Some(value) = self.inbox.staging.pop_front() {
-            self.receive.receive(model, value);
+            let field = self.receive.receive(model, sources, value)?;
+            // The first applied callback establishes the candidate grain.
+            // Different fields and unrestricted callbacks make it conservative.
+            if *applied == 0 {
+                *exact = field;
+            } else if *exact != field {
+                *exact = None;
+            }
             *applied += 1;
         }
         if F::OBSERVE_CLOSE && self.inbox.receiver.is_none() && self.inbox.capacity != 0 {
             self.inbox.capacity = 0;
             self.receive.closed(model);
+            *exact = None;
             *applied += 1;
         }
-        self.tail.apply(model, applied);
+        self.tail.apply(model, sources, applied, exact)
+    }
+    fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), Error> {
+        self.receive.validate(model, sources)?;
+        self.tail.validate(model, sources)
     }
     fn cancel_questions(&mut self) -> Self::Retired {
         (self.inbox.receiver.take(), self.tail.cancel_questions())
@@ -449,6 +524,7 @@ mod tests {
     fn preallocated_static_transport_and_staging_have_no_per_message_allocations() {
         let (remote, inbox) = Remote::bounded(8);
         let mut lanes = Lane::new(inbox, |sum: &mut u64, value: u64| *sum += value, ());
+        let sources = Sources::new();
         let mut sum = 0;
         let measured = allocation_counter::measure(|| {
             for _ in 0..1000 {
@@ -459,7 +535,9 @@ mod tests {
                     assert!(matches!(lanes.stage(0), Stage::Ready));
                 }
                 let mut applied = 0;
-                lanes.apply(&mut sum, &mut applied);
+                lanes
+                    .apply(&mut sum, &sources, &mut applied, &mut None)
+                    .unwrap();
                 assert_eq!(applied, 8);
             }
         });

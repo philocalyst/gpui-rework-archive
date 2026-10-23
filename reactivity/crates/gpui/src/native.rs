@@ -179,6 +179,21 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
     ) -> Window<V, Lane<T, F, L>> {
         self.with_inbox_handler(inbox, receive)
     }
+    /// Receive through one registered source, using the same source admission
+    /// and exact dependency grain as `Win::with_inbox_for`.
+    pub fn with_inbox_for<
+        T: Send + 'static,
+        U: 'static,
+        S: crate::SourcePath<V, U> + 'static,
+        F: FnMut(&mut U, T) + 'static,
+    >(
+        self,
+        inbox: Inbox<T>,
+        source: S,
+        receive: F,
+    ) -> Window<V, impl LaneSet<V>> {
+        self.with_inbox_handler(inbox, crate::FieldAction::new(source, receive))
+    }
     /// Deliver `Some(message)` in FIFO order and one `None` after the final
     /// producer disconnects, including while the native owner is quiescent.
     /// Capacity zero is rejected; closing the owner revokes pending delivery.

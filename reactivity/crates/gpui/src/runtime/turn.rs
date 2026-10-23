@@ -10,16 +10,22 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         let mut models = 0;
-        match catch_unwind(AssertUnwindSafe(|| {
-            self.lanes.apply(&mut self.runtime.model, &mut models)
+        let mut exact = None;
+        let result = match catch_unwind(AssertUnwindSafe(|| {
+            self.lanes.apply(
+                &mut self.runtime.model,
+                &self.runtime.sources,
+                &mut models,
+                &mut exact,
+            )
         })) {
-            Ok(()) => {}
+            Ok(result) => result,
             Err(_) => {
                 *applied = models;
                 self.poison();
                 return Err(Error::OwnerPanicked);
             }
-        }
+        };
         *applied = models;
         if models != 0 {
             // Normal model callbacks commit before any derived freeze/projection
@@ -27,13 +33,18 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.source_epoch = epoch;
             self.runtime.counters.source_operations += 1;
         }
+        if let Err(error) = result {
+            self.runtime.logical_valid = false;
+            self.runtime.focused = None;
+            return Err(error);
+        }
         let mut questions = 0;
         let result = match catch_unwind(AssertUnwindSafe(|| {
             if models != 0 {
                 self.lanes.refresh(
                     &self.runtime.model,
                     &self.runtime.sources,
-                    crate::reader::question::Change::Source(None),
+                    crate::reader::question::Change::Source(exact),
                 )?;
             }
             self.lanes
@@ -59,7 +70,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if *applied == 0 {
             return Ok(self.commit());
         }
-        self.after_admission(None, questions != 0)
+        self.after_admission(exact, questions != 0)
     }
     pub(super) fn describe(&mut self, mount: bool) -> Result<(), Error> {
         self.describe_with(mount, &[])
@@ -80,6 +91,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let was_valid = self.logical_valid;
         match catch_unwind(AssertUnwindSafe(|| {
             self.runtime.sources.validate(&mut self.runtime.model)?;
+            if mount {
+                self.lanes
+                    .validate(&self.runtime.model, &self.runtime.sources)?;
+            }
             if mount && L::QUESTIONS {
                 self.lanes.refresh(
                     &self.runtime.model,
