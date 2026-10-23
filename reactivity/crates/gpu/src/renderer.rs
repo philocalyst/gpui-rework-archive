@@ -139,12 +139,16 @@ impl Changes {
         }
     }
     fn replace<const N: usize>(&mut self, records: &mut [Word], start: usize, next: [Word; N]) {
-        for (offset, next) in next.into_iter().enumerate() {
+        for (offset, (old, next)) in records[start..start + N]
+            .iter_mut()
+            .zip(next.iter())
+            .enumerate()
+        {
             let index = start + offset;
-            if records[index] != next {
+            if old != next {
                 self.first = self.first.min(index);
                 self.last = self.last.max(index + 1);
-                records[index] = next;
+                *old = *next;
             }
         }
     }
