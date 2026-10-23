@@ -320,7 +320,7 @@ impl<M: View + 'static> Runtime<M> {
         // The fixed panel is the final sibling in every description. Derive
         // its root from that contract without walking the application's tree.
         let panel = self.nodes.len().checked_sub(PANEL_NODES)?;
-        debug_assert_eq!(self.nodes[panel].parent.index(), Some(0));
+        debug_assert_eq!(self.nodes[panel].parent().index(), Some(0));
         Some(panel)
     }
     fn inspector_app_index(&self, target: Target) -> Result<usize, Error> {
@@ -623,9 +623,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     (5, EditorOp::Auto),
                     (6, EditorOp::Inherit),
                 ] {
-                    self.nodes[panel + EDITOR + offset].handler = Some(
-                        crate::element::Handler::window(WindowAction::Inspector(Edit(next.0, op))),
-                    );
+                    let slot = self.nodes[panel + EDITOR + offset]
+                        .route()
+                        .expect("inspector route");
+                    self.handlers[slot] = Some(crate::element::Handler::window(
+                        WindowAction::Inspector(Edit(next.0, op)),
+                    ));
                 }
             }
             self.runtime.source_epoch = epoch;
@@ -645,7 +648,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         match action {
             Pick | Choose(_) => unreachable!(),
             Parent => {
-                let parent = self.nodes[index].parent.index().ok_or(Error::StaleTarget)?;
+                let parent = self.nodes[index]
+                    .parent()
+                    .index()
+                    .ok_or(Error::StaleTarget)?;
                 let target = self.sites.target(self.nodes[parent].identity());
                 if self.inspector_app_index(target).is_err() {
                     return Ok(self.commit());

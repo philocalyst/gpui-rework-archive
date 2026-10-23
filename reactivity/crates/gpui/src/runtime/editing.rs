@@ -762,7 +762,7 @@ mod tests {
             assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
             assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);
-            assert_eq!(std::mem::size_of::<Node>(), 40);
+            assert_eq!(std::mem::size_of::<Node>(), 24);
             assert_eq!(std::mem::size_of::<TextSite>(), 80);
         }
     }

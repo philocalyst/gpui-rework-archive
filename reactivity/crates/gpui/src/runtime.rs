@@ -338,16 +338,14 @@ mod parent_tests {
 
     #[test]
     fn nonzero_identity_keeps_old_node_migration_in_place() {
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
         let nodes = (1..=64)
             .map(|identity| Node {
                 identity: NonZeroU64::new(identity).unwrap(),
-                parent: Parent::NONE,
-                ordinal: 0,
+                topology: Topology::new(None, 0, None),
                 content: Content::new(NodeKind::Div, TextSlot::NONE),
                 component_scope: 0,
-                handler: None,
             })
             .collect::<Vec<_>>();
         let pointer = nodes.as_ptr().cast::<u8>();
@@ -475,8 +473,8 @@ mod parent_tests {
         assert_eq!(size_of::<NodeKind>(), 1);
         assert_eq!(size_of::<Option<NodeKind>>(), 1);
         assert_eq!(size_of::<Content>(), 4);
-        assert_eq!(size_of::<Node>(), 40);
-        assert_eq!(size_of::<Option<Node>>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
+        assert_eq!(size_of::<Option<Node>>(), 24);
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
@@ -620,21 +618,34 @@ impl Content {
         })
     }
 }
+mod topology;
+use topology::Topology;
+
 struct Node {
     identity: NonZeroU64,
-    parent: Parent,
-    ordinal: u32,
+    topology: Topology,
     content: Content,
     component_scope: u32,
-    handler: Option<Handler>,
 }
 #[cfg(test)]
 mod hit_tests;
 #[cfg(test)]
 mod style_ledger;
 impl Node {
+    fn parent(&self) -> Parent {
+        self.topology.parent()
+    }
+    fn ordinal(&self) -> u32 {
+        self.topology.ordinal()
+    }
+    fn route(&self) -> Option<usize> {
+        self.topology.route()
+    }
+    fn has_route(&self) -> bool {
+        self.topology.has_route()
+    }
     fn focusable(&self) -> bool {
-        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.handler.is_some()
+        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_route()
     }
     #[inline]
     fn identity(&self) -> u64 {
@@ -816,6 +827,7 @@ struct Runtime<M> {
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
+    handlers: Box<[Option<Handler>]>,
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
     images: Option<Box<image::Images>>,
@@ -1023,6 +1035,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             model: pending.model,
             sources,
             nodes: Vec::new(),
+            handlers: Box::default(),
             styles: styles::Styles::default(),
             texts: Vec::new(),
             images: None,
@@ -1354,7 +1367,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 && !runtime.poisoned
                 && let Some(index) = runtime.by_identity.get(identity)
                 && (all_targets
-                    || runtime.nodes[index].handler.is_some()
+                    || runtime.nodes[index].has_route()
                     || runtime.nodes[index].kind() == NodeKind::Input)
             {
                 Some(runtime.sites.target(identity))
@@ -1726,6 +1739,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut component_scopes = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0usize; drafts.len() + 1];
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
+        let mut route_count = 0;
         for (index, node) in drafts.iter().enumerate() {
             new_counts[node.parent.map_or(0, |parent| parent as usize + 1)] += 1;
             let depth = node.parent.map_or(0, |parent| depths[parent as usize] + 1);
@@ -1747,6 +1761,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             component_scopes.push(component_scope);
             if let Some(handler) = &node.on_click {
+                route_count += 1;
                 handler.admit(&self.model, &self.sources)?;
             }
             let field = match node.text.as_ref().and_then(|text| text.signal()) {
@@ -1850,6 +1865,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         let old_styles = std::mem::take(&mut self.styles);
         let siblings = siblings::Siblings::new(&self.nodes);
+        let mut old_handlers = std::mem::take(&mut self.handlers);
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()
             .map(Some)
@@ -1867,7 +1883,7 @@ impl<M: View + 'static> Runtime<M> {
         for (index, node) in old.iter().enumerate() {
             let node = node.as_ref().unwrap();
             let parent = node
-                .parent
+                .parent()
                 .index()
                 .map(|parent| old[parent].as_ref().unwrap().identity());
             if let Some(row) = self
@@ -1887,6 +1903,7 @@ impl<M: View + 'static> Runtime<M> {
             .collect::<Vec<_>>();
         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
+        let mut handlers = Vec::with_capacity(route_count);
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
         let mut texts =
@@ -1929,9 +1946,19 @@ impl<M: View + 'static> Runtime<M> {
                             .is_some_and(|node| node.kind().site_kind() == draft.kind.site_kind())
                     })
             };
-            let previous = previous_index
-                .and_then(|old_index| old[old_index].take())
-                .filter(|node| node.component_scope == component_scopes[index]);
+            let previous = previous_index.and_then(|old_index| old[old_index].take());
+            // Consumed routes drop at replacement; scope rejection drops here.
+            // Unmatched old owners retain their original row order until exit.
+            let mut previous_handler = previous
+                .as_ref()
+                .and_then(|node| node.route().and_then(|slot| old_handlers[slot].take()));
+            let previous = previous.filter(|node| {
+                let keep = node.component_scope == component_scopes[index];
+                if !keep {
+                    drop(previous_handler.take());
+                }
+                keep
+            });
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
             } else {
@@ -1956,11 +1983,9 @@ impl<M: View + 'static> Runtime<M> {
                     // IDs start at one, never roll back, and admission above
                     // reserves the entire checked nonzero interval.
                     identity: NonZeroU64::new(identity).expect("admitted node identity"),
-                    parent: Parent::new(parent),
-                    ordinal,
+                    topology: Topology::new(None, 0, None),
                     content: Content::new(draft.kind, TextSlot::NONE),
                     component_scope: component_scopes[index],
-                    handler: None,
                 }
             };
             let mut site = node.text_slot().take(&mut self.texts);
@@ -2041,14 +2066,12 @@ impl<M: View + 'static> Runtime<M> {
             {
                 site.shaped = None;
             }
-            if node.handler.is_some() != draft.on_click.is_some() {
+            if node.has_route() != draft.on_click.is_some() {
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
                 node_changed = true;
             }
-            node.parent = Parent::new(parent);
-            node.ordinal = ordinal;
             let mask = u8::from(matches!(
                 self.overrides
                     .get(node.identity(), crate::property::FOREGROUND),
@@ -2059,7 +2082,13 @@ impl<M: View + 'static> Runtime<M> {
                 Contribution::Set(_)
             )) << 1);
             styles.declaration(index, draft.style, style, mask);
-            node.handler = draft.on_click;
+            drop(previous_handler);
+            let route = draft.on_click.map(|handler| {
+                let slot = handlers.len();
+                handlers.push(Some(handler));
+                slot
+            });
+            node.topology = Topology::new(parent, ordinal, route);
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
@@ -2225,6 +2254,7 @@ impl<M: View + 'static> Runtime<M> {
         self.viewports = viewports;
         self.list_rows = list_rows;
         self.nodes = nodes;
+        self.handlers = handlers.into_boxed_slice();
         self.styles = styles.finish();
         // A replacement source bank has no authority over the preceding
         // Canvas slots, even if every effective value and binding is equal.
@@ -2581,14 +2611,19 @@ impl<M: View + 'static> Runtime<M> {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
             for (index, node) in self.nodes.iter().enumerate() {
-                let parent = node.parent.index().map(|parent| self.layout_nodes[parent]);
+                let parent = node
+                    .parent()
+                    .index()
+                    .map(|parent| self.layout_nodes[parent]);
                 let id = self.layout.insert(
                     parent,
                     gpui_reactivity_core::NodeKind::Element,
                     list::row_style(
                         node.kind(),
                         &self.styles.get(index),
-                        node.parent.index().map(|index| self.styles.get(index).flow),
+                        node.parent()
+                            .index()
+                            .map(|index| self.styles.get(index).flow),
                         self.list_rows.get(&node.identity()),
                     ),
                 )?;
@@ -2608,7 +2643,7 @@ impl<M: View + 'static> Runtime<M> {
             for (&key, state) in &self.viewports {
                 let identity = state.identity(key);
                 let index = self.by_identity.required(identity);
-                if self.nodes[index].parent.index().is_some_and(|parent| {
+                if self.nodes[index].parent().index().is_some_and(|parent| {
                     self.layout_dirty.contains(&self.nodes[parent].identity())
                 }) {
                     self.layout_dirty.insert(identity);
@@ -2623,7 +2658,7 @@ impl<M: View + 'static> Runtime<M> {
                         self.nodes[index].kind(),
                         &self.styles.get(index),
                         self.nodes[index]
-                            .parent
+                            .parent()
                             .index()
                             .map(|parent| self.styles.get(parent).flow),
                         self.list_rows.get(identity),
@@ -2756,13 +2791,13 @@ impl<M: View + 'static> Runtime<M> {
             let has_children = self
                 .nodes
                 .get(index + 1)
-                .is_some_and(|child| child.parent.index() == Some(index));
+                .is_some_and(|child| child.parent().index() == Some(index));
             let style = self.styles.get(index);
-            let parent_is_viewport = self.nodes[index].parent.index().is_some_and(|parent| {
+            let parent_is_viewport = self.nodes[index].parent().index().is_some_and(|parent| {
                 matches!(self.nodes[parent].kind(), NodeKind::List | NodeKind::Scroll)
             });
             let parent_identity = self.nodes[index]
-                .parent
+                .parent()
                 .index()
                 .map(|parent| self.nodes[parent].identity());
             let radius = self
@@ -2771,7 +2806,7 @@ impl<M: View + 'static> Runtime<M> {
                 .and_then(|m| m.geometry.as_ref())
                 .map_or(0.0, |g| g.get(self.nodes[index].identity()).corner_radius);
             let node = &mut self.nodes[index];
-            let parent = node.parent.index().map_or(
+            let parent = node.parent().index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
                 |parent| {
                     let base = spaces[parent];
@@ -2794,13 +2829,15 @@ impl<M: View + 'static> Runtime<M> {
             let rect = Rect::new(0.0, 0.0, layout.size.width, layout.size.height);
             let (mut clip, mut hit_clip, in_list) = if list_mode {
                 (
-                    node.parent.index().map_or(viewport, |parent| clips[parent]),
-                    node.parent
+                    node.parent()
+                        .index()
+                        .map_or(viewport, |parent| clips[parent]),
+                    node.parent()
                         .index()
                         .map_or(viewport, |parent| hit_clips[parent]),
                     node.kind() == NodeKind::ListItem
                         || node
-                            .parent
+                            .parent()
                             .index()
                             .is_some_and(|parent| clip_membership[parent] & 1 != 0),
                 )
@@ -2808,7 +2845,7 @@ impl<M: View + 'static> Runtime<M> {
                 (viewport, viewport, false)
             };
             let in_scroll = node.kind() == NodeKind::Scroll
-                || node.parent.index().is_some_and(|parent| {
+                || node.parent().index().is_some_and(|parent| {
                     clip_membership
                         .get(parent)
                         .is_some_and(|flags| flags & 2 != 0)
@@ -2852,7 +2889,7 @@ impl<M: View + 'static> Runtime<M> {
                 } else {
                     scene.fill_rounded_rect(rect, radius, transform, clip, style.bg)?;
                 }
-            } else if paint && (node.handler.is_some() || node.kind() == NodeKind::Input) {
+            } else if paint && (node.has_route() || node.kind() == NodeKind::Input) {
                 // An invisible input region still obeys the renderer's exact
                 // numerical admission domain before becoming a hit target.
                 scene.fill_rounded_rect(
@@ -2985,11 +3022,11 @@ impl<M: View + 'static> Runtime<M> {
                 )?;
             }
             let published_parent = if list_mode {
-                node.parent
+                node.parent()
                     .index()
                     .map_or(Parent::NONE, |parent| published[parent])
             } else {
-                node.parent
+                node.parent()
             };
             if in_list
                 && bounds.is_empty()
@@ -3011,7 +3048,7 @@ impl<M: View + 'static> Runtime<M> {
             let hittable = !bounds.is_empty()
                 && (node.text_slot().0 != u32::MAX
                     || style.bg.alpha() > 0.0
-                    || node.handler.is_some()
+                    || node.has_route()
                     || matches!(node.kind(), NodeKind::Input | NodeKind::Image));
             let link = PresentedLink::new(
                 published_parent,
@@ -3042,8 +3079,8 @@ impl<M: View + 'static> Runtime<M> {
                 basis,
                 bounds,
                 hittable,
-                actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
-                    node.parent.index().is_some_and(|parent| {
+                actions: Actions::for_node(node.kind(), node.has_route()).scroll_into_view(
+                    node.parent().index().is_some_and(|parent| {
                         clip_membership.get(parent).is_some_and(|flags| *flags != 0)
                     }) || parent_is_viewport,
                 ),
@@ -3232,7 +3269,7 @@ impl<M: View + 'static> Runtime<M> {
                 while let Some(index) = cursor {
                     let node = &self.presented[index];
                     if let Some(logical) = self.by_identity.get(node.identity)
-                        && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
+                        && (self.nodes[logical].has_route() || node.kind == NodeKind::Input)
                     {
                         return Some(node.identity);
                     }
@@ -3972,7 +4009,7 @@ mod semantic_storage_ledger {
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
@@ -4367,7 +4404,7 @@ mod style_port_tests {
             size_of::<Destination>(),
             size_of::<crate::Flex>()
         );
-        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<crate::El<'_>>(), 176);
         assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
@@ -4382,3 +4419,6 @@ mod basis_layout_probe;
 
 #[cfg(test)]
 mod basis_lifecycle_tests;
+
+#[cfg(test)]
+mod route_ledger;

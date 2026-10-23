@@ -366,7 +366,7 @@ pub(super) fn geometry<M: View + 'static>(
     }
     for (index, node) in runtime.nodes.iter().enumerate() {
         let layout = runtime.layout.layout(runtime.layout_nodes[index])?;
-        let parent = node.parent.index();
+        let parent = node.parent().index();
         let inherited = parent.and_then(|parent| nearest[parent].index());
         let base = parent
             .filter(|&parent| {
