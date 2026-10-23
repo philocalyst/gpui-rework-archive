@@ -472,7 +472,7 @@ fn long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip() {
         assert_eq!(win.root().unwrap().a.as_str(), value);
     }
     if cfg!(target_pointer_width = "64") {
-        assert_eq!(size_of::<Queued>(), 48);
+        assert_eq!(size_of::<Queued>(), 40);
         assert_eq!(size_of::<accesskit::ActionData>(), 40);
     }
 }
