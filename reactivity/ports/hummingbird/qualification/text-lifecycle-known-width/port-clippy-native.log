@@ -1,0 +1,54 @@
+    Checking num-traits v0.2.19
+    Checking num-complex v0.4.6
+    Checking half v2.7.1
+    Checking naga v30.0.1
+    Checking lazy_static v1.5.1
+    Checking symphonia-core v0.6.1
+    Checking wgpu-naga-bridge v30.0.1
+    Checking ordered-float v5.5.0
+    Checking wgpu-hal v30.0.1 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/wgpu-hal)
+    Checking accesskit v0.25.1 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/accesskit)
+    Checking num-integer v0.1.47
+    Checking regex-lite v0.1.9
+    Checking parley_engine v0.12.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/parley_engine)
+    Checking symphonia-metadata v0.6.1
+   Compiling wgsl-rs v0.1.0-beta.6
+    Checking accesskit_consumer v0.39.1 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/accesskit_consumer)
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking winit v0.30.13 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/winit)
+    Checking transpose v0.2.3
+    Checking wgpu-core v30.0.1 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/wgpu-core)
+    Checking accesskit_atspi_common v0.21.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/accesskit_atspi_common)
+   Compiling gpui_gpu v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpu)
+    Checking parley v0.12.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/parley)
+    Checking primal-check v0.3.4
+    Checking gpui_canvas v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/canvas)
+    Checking rustfft v6.4.1
+    Checking accesskit_unix v0.24.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/accesskit_unix)
+    Checking wgpu v30.0.1 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/wgpu)
+    Checking alsa-sys v0.4.0
+    Checking symphonia-common v0.6.1
+    Checking extended v0.1.0
+    Checking symphonia-format-riff v0.6.1
+    Checking symphonia-bundle-flac v0.6.1
+    Checking alsa v0.11.0
+    Checking accesskit_winit v0.34.1
+    Checking realfft v3.5.0
+    Checking softbuffer v0.4.8 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/host)
+    Checking symphonia-bundle-mp3 v0.6.1
+    Checking symphonia-codec-pcm v0.6.1
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/state)
+    Checking windowfunctions v0.1.1
+    Checking dasp_sample v0.11.0
+    Checking audioadapter-sample v5.2.0
+    Checking gpui v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpui)
+    Checking rusqlite v0.40.2
+    Checking cpal v0.18.2
+    Checking symphonia v0.6.1
+    Checking rtrb v0.4.0
+    Checking audioadapter-buffers v5.2.0
+   Compiling visibility v0.1.1
+    Checking rubato v5.0.1
+    Checking hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/ports/hummingbird)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3m 28s

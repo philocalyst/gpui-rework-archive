@@ -1,0 +1,646 @@
+{
+  "scope": "Same physical source/build path, normal release Cargo constructor artifacts; calling-thread Rust counters only. Worker/C/OS/device/RSS excluded. Header fields overlap; phase peaks must not be summed.",
+  "baseline": "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-output.txt",
+  "candidate": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-runtime.log",
+  "baseline_rows": [
+    {
+      "cohort": 0,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 121253
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 2353,
+        "count_current": 466,
+        "count_max": 621,
+        "bytes_total": 498074,
+        "bytes_current": 116777,
+        "bytes_max": 178658
+      }
+    },
+    {
+      "cohort": 1,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 117253
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 2340,
+        "count_current": 457,
+        "count_max": 612,
+        "bytes_total": 493346,
+        "bytes_current": 112777,
+        "bytes_max": 174658
+      }
+    },
+    {
+      "cohort": 2,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 117253
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 2340,
+        "count_current": 457,
+        "count_max": 612,
+        "bytes_total": 493346,
+        "bytes_current": 112777,
+        "bytes_max": 174658
+      }
+    },
+    {
+      "cohort": 3,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 117253
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 2340,
+        "count_current": 457,
+        "count_max": 612,
+        "bytes_total": 493346,
+        "bytes_current": 112777,
+        "bytes_max": 174658
+      }
+    }
+  ],
+  "candidate_rows": [
+    {
+      "cohort": 0,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 120085
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 1335,
+        "count_current": 464,
+        "count_max": 619,
+        "bytes_total": 366430,
+        "bytes_current": 115609,
+        "bytes_max": 177490
+      }
+    },
+    {
+      "cohort": 1,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 116085
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 1322,
+        "count_current": 455,
+        "count_max": 610,
+        "bytes_total": 361702,
+        "bytes_current": 111609,
+        "bytes_max": 173490
+      }
+    },
+    {
+      "cohort": 2,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 116085
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 1322,
+        "count_current": 455,
+        "count_max": 610,
+        "bytes_total": 361702,
+        "bytes_current": 111609,
+        "bytes_max": 173490
+      }
+    },
+    {
+      "cohort": 3,
+      "headers": {
+        "model": 632,
+        "questions": 640,
+        "event": 104,
+        "selection": 32,
+        "error": 64,
+        "win": 704,
+        "ui_current_plus_inline": 116085
+      },
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 3,
+        "count_current": 3,
+        "count_max": 3,
+        "bytes_total": 240,
+        "bytes_current": 240,
+        "bytes_max": 240
+      },
+      "mounted": {
+        "count_total": 1322,
+        "count_current": 455,
+        "count_max": 610,
+        "bytes_total": 361702,
+        "bytes_current": 111609,
+        "bytes_max": 173490
+      }
+    }
+  ],
+  "release_equals_corresponding_original_debug_rows": true,
+  "deltas": [
+    {
+      "spawn": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": -1018,
+        "count_current": -2,
+        "count_max": -2,
+        "bytes_total": -131644,
+        "bytes_current": -1168,
+        "bytes_max": -1168
+      },
+      "headers": {
+        "model": 0,
+        "questions": 0,
+        "event": 0,
+        "selection": 0,
+        "error": 0,
+        "win": 0,
+        "ui_current_plus_inline": -1168
+      },
+      "cohort": 0
+    },
+    {
+      "spawn": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": -1018,
+        "count_current": -2,
+        "count_max": -2,
+        "bytes_total": -131644,
+        "bytes_current": -1168,
+        "bytes_max": -1168
+      },
+      "headers": {
+        "model": 0,
+        "questions": 0,
+        "event": 0,
+        "selection": 0,
+        "error": 0,
+        "win": 0,
+        "ui_current_plus_inline": -1168
+      },
+      "cohort": 1
+    },
+    {
+      "spawn": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": -1018,
+        "count_current": -2,
+        "count_max": -2,
+        "bytes_total": -131644,
+        "bytes_current": -1168,
+        "bytes_max": -1168
+      },
+      "headers": {
+        "model": 0,
+        "questions": 0,
+        "event": 0,
+        "selection": 0,
+        "error": 0,
+        "win": 0,
+        "ui_current_plus_inline": -1168
+      },
+      "cohort": 2
+    },
+    {
+      "spawn": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": -1018,
+        "count_current": -2,
+        "count_max": -2,
+        "bytes_total": -131644,
+        "bytes_current": -1168,
+        "bytes_max": -1168
+      },
+      "headers": {
+        "model": 0,
+        "questions": 0,
+        "event": 0,
+        "selection": 0,
+        "error": 0,
+        "win": 0,
+        "ui_current_plus_inline": -1168
+      },
+      "cohort": 3
+    }
+  ],
+  "candidate_artifacts": {
+    "libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_core-92df8da154377e11.rlib",
+      "sha256": "62ce4d3564025987f905f8a96a4b804b822487bf5c792177c100f441ee4cda82",
+      "features": [
+        "default",
+        "layout"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+      "target": "gpui_reactivity_core"
+    },
+    "libgpui_canvas-a68439ac3cff0c5d.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_canvas-a68439ac3cff0c5d.rlib",
+      "sha256": "ace6be876e1935695ffa621bb01d1d7da012e286611831c202448b020c73980d",
+      "features": [
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "target": "gpui_canvas"
+    },
+    "libgpui_reactivity_state-d8aba0459b795ede.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_state-d8aba0459b795ede.rlib",
+      "sha256": "a8d3954b2d992ea1c57fd31349b926cd90e6c689dd741700721b8a76c4423e9b",
+      "features": [
+        "default",
+        "serde"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+      "target": "gpui_reactivity_state"
+    },
+    "libgpui-a7df7971da668c03.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui-a7df7971da668c03.rlib",
+      "sha256": "8050eaf97892aeea1a3063b4d9fb24ba60ccc4faa51fd96227dd63110e8a0e47",
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpui#0.1.0",
+      "target": "gpui"
+    },
+    "libhummingbird_gpui_port-646161ad5c635a87.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libhummingbird_gpui_port-646161ad5c635a87.rlib",
+      "sha256": "72b0564fcfcbea68a2a50a7ff2ce07314a71c2711198b1381f31928fbf82a365",
+      "features": [
+        "audio",
+        "cpal-output",
+        "default"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+      "target": "hummingbird_gpui_port"
+    },
+    "authority-constructor-bill": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/authority-constructor-bill",
+      "sha256": "46e802417a2e67086e75a0631d60910bb5cd441a8fd6080d7e1b7bf0001764d6",
+      "features": [],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///tmp/gpui-hummingbird-browser-allocation-evidence/normal#authority-constructor-bill@0.0.0",
+      "target": "authority-constructor-bill"
+    }
+  },
+  "baseline_artifacts": {
+    "libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_core-92df8da154377e11.rlib",
+      "sha256": "6069487348c020a801e89d58f53622ad9e74b0afd4a2095094bfcb899a90ab11",
+      "features": [
+        "default",
+        "layout"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+      "target": "gpui_reactivity_core"
+    },
+    "libgpui_canvas-a68439ac3cff0c5d.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_canvas-a68439ac3cff0c5d.rlib",
+      "sha256": "f82d7c38c389bd417eedd3ee740b16a9c65dc3e8235ecd879a50429f5214c624",
+      "features": [
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "target": "gpui_canvas"
+    },
+    "libgpui_reactivity_state-d8aba0459b795ede.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_state-d8aba0459b795ede.rlib",
+      "sha256": "a8d3954b2d992ea1c57fd31349b926cd90e6c689dd741700721b8a76c4423e9b",
+      "features": [
+        "default",
+        "serde"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+      "target": "gpui_reactivity_state"
+    },
+    "libgpui-a7df7971da668c03.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui-a7df7971da668c03.rlib",
+      "sha256": "071ed06b7d9e32144665703d4875732476aa3f72d04ce81d52706b112f646ed3",
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpui#0.1.0",
+      "target": "gpui"
+    },
+    "libhummingbird_gpui_port-646161ad5c635a87.rlib": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libhummingbird_gpui_port-646161ad5c635a87.rlib",
+      "sha256": "70ca6069458b49c38ae1c7e5da8882baad5a1ef1968008ac6d33ce7c1c7c5b5b",
+      "features": [
+        "audio",
+        "cpal-output",
+        "default"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+      "target": "hummingbird_gpui_port"
+    },
+    "authority-constructor-bill": {
+      "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/authority-constructor-bill",
+      "sha256": "4a00a2b8851af1674a03c59dbfb01b597e96eb4137207bcc0b1ffda35b157ea5",
+      "features": [],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "package": "path+file:///tmp/gpui-hummingbird-browser-allocation-evidence/normal#authority-constructor-bill@0.0.0",
+      "target": "authority-constructor-bill"
+    }
+  }
+}

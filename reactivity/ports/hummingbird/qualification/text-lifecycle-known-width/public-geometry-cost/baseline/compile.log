@@ -1,0 +1,23 @@
+error[E0308]: mismatched types
+   --> /tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/main.rs:104:9
+    |
+104 | /         win.update(|page| page.value = "b".repeat(32 * 1024))
+105 | |             .unwrap()
+    | |                     ^- help: consider using a semicolon here: `;`
+    | |_____________________|
+    |                       expected `()`, found `Commit`
+
+error[E0308]: mismatched types
+   --> /tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/main.rs:121:46
+    |
+121 |     let ack = allocation_counter::measure(|| win.presented(candidate).unwrap());
+    |                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `()`, found `Commit`
+    |
+help: consider using a semicolon here
+    |
+121 |     let ack = allocation_counter::measure(|| { win.presented(candidate).unwrap(); });
+    |                                              +                                  +++
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

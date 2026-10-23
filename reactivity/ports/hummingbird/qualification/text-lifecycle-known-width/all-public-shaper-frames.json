@@ -1,0 +1,81 @@
+{
+  "baseline": [
+    {
+      "name": "<gpui_canvas::text::TextShaper>::shape_mode",
+      "symbol_bytes": 537,
+      "max_observed_rsp_cfa_offset": 5520,
+      "cfa_forms": [
+        "rsp+16",
+        "rsp+24",
+        "rsp+32",
+        "rsp+40",
+        "rsp+4152",
+        "rsp+48",
+        "rsp+5520",
+        "rsp+56",
+        "rsp+8"
+      ]
+    },
+    {
+      "name": "<gpui_canvas::text::TextShaper>::shape_interactive",
+      "symbol_bytes": 20,
+      "max_observed_rsp_cfa_offset": 16,
+      "cfa_forms": [
+        "rsp+16",
+        "rsp+8"
+      ]
+    },
+    {
+      "name": "<gpui_canvas::text::TextShaper>::shape",
+      "symbol_bytes": 17,
+      "max_observed_rsp_cfa_offset": 16,
+      "cfa_forms": [
+        "rsp+16",
+        "rsp+8"
+      ]
+    }
+  ],
+  "candidate": [
+    {
+      "name": "<gpui_canvas::text::TextShaper>::shape_interactive",
+      "symbol_bytes": 127,
+      "max_observed_rsp_cfa_offset": 64,
+      "cfa_forms": [
+        "rsp+16",
+        "rsp+24",
+        "rsp+32",
+        "rsp+40",
+        "rsp+64",
+        "rsp+8"
+      ]
+    },
+    {
+      "name": "<gpui_canvas::text::TextShaper>::measure",
+      "symbol_bytes": 120,
+      "max_observed_rsp_cfa_offset": 64,
+      "cfa_forms": [
+        "rsp+16",
+        "rsp+24",
+        "rsp+32",
+        "rsp+40",
+        "rsp+64",
+        "rsp+8"
+      ]
+    },
+    {
+      "name": "<gpui_canvas::text::TextShaper>::planner",
+      "symbol_bytes": 447,
+      "max_observed_rsp_cfa_offset": 5472,
+      "cfa_forms": [
+        "rsp+16",
+        "rsp+24",
+        "rsp+32",
+        "rsp+40",
+        "rsp+4144",
+        "rsp+48",
+        "rsp+5472",
+        "rsp+8"
+      ]
+    }
+  ]
+}

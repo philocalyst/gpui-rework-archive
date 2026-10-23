@@ -1,0 +1,146 @@
+{
+  "libgpui_reactivity_core-92df8da154377e11.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_core-92df8da154377e11.rlib",
+    "sha256": "62ce4d3564025987f905f8a96a4b804b822487bf5c792177c100f441ee4cda82",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core"
+  },
+  "libgpui_canvas-1de80d4b918bb5d5.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_canvas-1de80d4b918bb5d5.rlib",
+    "sha256": "4cc5f8d88a36a8b4aef97576266eb37e4f38e15bb6996f4937faa47b5f934232",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas"
+  },
+  "libgpui_gpu-f5b84b1ee8dfe36a.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_gpu-f5b84b1ee8dfe36a.rlib",
+    "sha256": "d61745a6c166e3d88305a236392d35d5d17bc5e667553ccb8e781b523f935c84",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "target": "gpui_gpu"
+  },
+  "libgpui_reactivity_host-d8c31c402a77eb4d.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_host-d8c31c402a77eb4d.rlib",
+    "sha256": "b27c4f4419131b6b0caf033ca4b4c690d86de78225637800db14b2baec2da0ea",
+    "features": [
+      "default",
+      "native",
+      "x11"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/host#gpui_reactivity_host@0.1.0",
+    "target": "gpui_reactivity_host"
+  },
+  "libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib",
+    "sha256": "7b0d30111ed58337c198e9072694b40806ec3f942dc842d7aa6c504f7ccfafc6",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state"
+  },
+  "libgpui-c47fc36e702f939d.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libgpui-c47fc36e702f939d.rlib",
+    "sha256": "228527f7c29b2ed9df013c0807f016b159027af7f4bc2b8e5378a4449b04c87c",
+    "features": [
+      "accessibility",
+      "default",
+      "native",
+      "native-core",
+      "simd",
+      "x11",
+      "x11-minimal"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpui#0.1.0",
+    "target": "gpui"
+  },
+  "libhummingbird_gpui_port-f32d631e14ab0246.rlib": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/deps/libhummingbird_gpui_port-f32d631e14ab0246.rlib",
+    "sha256": "61034991a2cc039f76134a1a50aeded355e5adc86739d01a2136064710ee4e29",
+    "features": [
+      "audio",
+      "cpal-output",
+      "default",
+      "native"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "hummingbird_gpui_port"
+  },
+  "native_service": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-target/release/examples/native_service",
+    "sha256": "a55b8edf26188a225cdc7b3503513f1d2cbd55adeb6597fe0a5bd1719e64bca4",
+    "features": [
+      "audio",
+      "cpal-output",
+      "default",
+      "native"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "package": "path+file:///root/gpui-hummingbird-browser-allocation-sol/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "native_service"
+  }
+}

@@ -1,0 +1,15 @@
+HEADERS layout=56 shaper=16 font=8 win=8
+SHAPE case=empty interactive=false glyphs=0 metrics=[0, 1101944324, 1099486462] cost=AllocationInfo { count_total: 206, count_current: 1, count_max: 142, bytes_total: 110272, bytes_current: 40, bytes_max: 47412 }
+SHAPE case=empty interactive=true glyphs=0 metrics=[0, 1101944324, 1099486462] cost=AllocationInfo { count_total: 210, count_current: 4, count_max: 144, bytes_total: 110524, bytes_current: 244, bytes_max: 47608 }
+SHAPE case=short interactive=false glyphs=13 metrics=[1119487001, 1101944324, 1099486462] cost=AllocationInfo { count_total: 208, count_current: 2, count_max: 142, bytes_total: 111394, bytes_current: 248, bytes_max: 48494 }
+SHAPE case=short interactive=true glyphs=13 metrics=[1119487001, 1101944324, 1099486462] cost=AllocationInfo { count_total: 217, count_current: 6, count_max: 148, bytes_total: 112446, bytes_current: 704, bytes_max: 49234 }
+SHAPE case=wrapped interactive=false glyphs=624 metrics=[1125815158, 1147891876, 1099486462] cost=AllocationInfo { count_total: 440, count_current: 7, count_max: 232, bytes_total: 444560, bytes_current: 17160, bytes_max: 237868 }
+SHAPE case=wrapped interactive=true glyphs=624 metrics=[1125815158, 1147891876, 1099486462] cost=AllocationInfo { count_total: 452, count_current: 6, count_max: 232, bytes_total: 493016, bytes_current: 26464, bytes_max: 267596 }
+SHAPE case=ascii32k interactive=false glyphs=32768 metrics=[1137015003, 1182641193, 1099486462] cost=AllocationInfo { count_total: 242, count_current: 5, count_max: 145, bytes_total: 4253720, bytes_current: 573576, bytes_max: 3999044 }
+SHAPE case=ascii32k interactive=true glyphs=32768 metrics=[1137015003, 1182641193, 1099486462] cost=AllocationInfo { count_total: 260, count_current: 6, count_max: 148, bytes_total: 6884052, bytes_current: 975732, bytes_max: 5821764 }
+SHAPE case=one_long_grapheme interactive=false glyphs=1024 metrics=[1091542451, 1101944324, 1099486462] cost=AllocationInfo { count_total: 219, count_current: 5, count_max: 145, bytes_total: 357866, bytes_current: 16568, bytes_max: 278646 }
+SHAPE case=one_long_grapheme interactive=true glyphs=1024 metrics=[1091542451, 1101944324, 1099486462] cost=AllocationInfo { count_total: 221, count_current: 6, count_max: 146, bytes_total: 358082, bytes_current: 16736, bytes_max: 278814 }
+OWNER case=first_c cost=AllocationInfo { count_total: 382, count_current: 56, count_max: 199, bytes_total: 21246192, bytes_current: 1091656, bytes_max: 12817040 }
+OWNER case=old_p_new_c cost=AllocationInfo { count_total: 340, count_current: 9, count_max: 158, bytes_total: 21232180, bytes_current: 482088, bytes_max: 12253348 }
+OWNER case=old_p_old_c_failed_l cost=AllocationInfo { count_total: 337, count_current: 8, count_max: 158, bytes_total: 21232040, bytes_current: 483084, bytes_max: 12253348 }
+OWNER case=old_c_ack_failed_l cost=AllocationInfo { count_total: 0, count_current: -7, count_max: 0, bytes_total: 0, bytes_current: -484476, bytes_max: 0 }

@@ -1,0 +1,6 @@
+{
+  "exit": 1,
+  "reason": "Offline review parser compared prefixed JSON hex pointer strings with unprefixed CSV hex strings and found no events; IndexError at spawn[-1].",
+  "correction": "Parse both pointer values as integers; same saved capture and untouched raw/runtime sources. No capture rerun.",
+  "fixed_exit": 0
+}

@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running unittests src/lib.rs (/tmp/gpui-hummingbird-browser-allocation-target/debug/deps/gpui_canvas-3c502a0c35f4b432)
+
+running 1 test
+GEOMETRY_HEADERS layout=56 details=80 stop=12 run=24 line=24 system=72
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=false glyphs=0 glyph_capacity_bytes=0 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=206 requested=110272 peak_live=47412 retained=40 retained_allocations=1
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=true glyphs=0 glyph_capacity_bytes=0 runs=0 lines=1 stops=1 geometry_capacity_bytes=108 allocations=210 requested=110524 peak_live=47608 retained=244 retained_allocations=4
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=false glyphs=13 glyph_capacity_bytes=208 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=208 requested=111394 peak_live=48494 retained=248 retained_allocations=2
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=true glyphs=13 glyph_capacity_bytes=208 runs=1 lines=1 stops=14 geometry_capacity_bytes=360 allocations=217 requested=112446 peak_live=49234 retained=704 retained_allocations=6
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=false glyphs=624 glyph_capacity_bytes=9984 runs=150 lines=30 stops=0 geometry_capacity_bytes=6912 allocations=440 requested=444560 peak_live=237868 retained=17160 retained_allocations=7
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=true glyphs=624 glyph_capacity_bytes=9984 runs=150 lines=30 stops=786 geometry_capacity_bytes=16344 allocations=452 requested=493016 peak_live=267596 retained=26464 retained_allocations=6
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=false glyphs=32768 glyph_capacity_bytes=524288 runs=745 lines=745 stops=0 geometry_capacity_bytes=49152 allocations=242 requested=4253720 peak_live=3999044 retained=573576 retained_allocations=5
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=true glyphs=32768 glyph_capacity_bytes=524288 runs=745 lines=745 stops=33513 geometry_capacity_bytes=451308 allocations=260 requested=6884052 peak_live=5821764 retained=975732 retained_allocations=6
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=false glyphs=1024 glyph_capacity_bytes=16384 runs=1 lines=1 stops=0 geometry_capacity_bytes=48 allocations=219 requested=357866 peak_live=278646 retained=16568 retained_allocations=5
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=true glyphs=1024 glyph_capacity_bytes=16384 runs=1 lines=1 stops=2 geometry_capacity_bytes=216 allocations=221 requested=358082 peak_live=278814 retained=16736 retained_allocations=6
+test text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 67 filtered out; finished in 0.95s
+

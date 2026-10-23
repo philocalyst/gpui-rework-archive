@@ -1,0 +1,7 @@
+Saved guarded release constructor comparison, all gate exits and type headers.
+{
+  "scope": "Calling-thread diagnostic backtrace attribution, accepted only after every phase/header/counter equals normal release constructor. Diagnostic build invocation differs in Cargo ancestor config and is not used for code-size or timing comparisons. Counter-retained categories are not all-thread heap; cross-thread thread-name address reuse is reviewed separately.",
+  "all_original_phase_counters_equal_normal": true,
+  "binary_sha256_unchanged": "c2757bf068c6d9b4e90601a7b577a451e61a5fd54abf2b51284db02c1845aa80",
+  "cross_thread_pointer_reuse_records": 4
+}

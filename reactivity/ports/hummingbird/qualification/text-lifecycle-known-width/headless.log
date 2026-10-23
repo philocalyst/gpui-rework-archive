@@ -1,0 +1,37 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 25.13s
+     Running `/tmp/gpui-hummingbird-browser-allocation-target/debug/hummingbird-gpui-port --headless`
+Transcript {
+    sqlite_version: "3.53.2",
+    initial_ids: [
+        1,
+        13,
+        11,
+        21,
+        3,
+        2,
+        90,
+        44,
+        1001,
+    ],
+    sorted_ids: [
+        13,
+        11,
+        21,
+        90,
+        44,
+        1001,
+        1,
+        3,
+        2,
+    ],
+    matched_ids: [
+        13,
+        11,
+        21,
+    ],
+    prepared_id: 44,
+    imported_id: 5000,
+    stale_completions: 2,
+    realized_rows: 5,
+    source_failure_visible: true,
+}

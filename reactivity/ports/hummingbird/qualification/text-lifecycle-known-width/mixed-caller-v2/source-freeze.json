@@ -1,0 +1,6 @@
+{
+  "source": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/main.rs",
+  "sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d",
+  "original_source_sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d",
+  "scope": "Standalone optimized public API old/new control. v2 fixes only allocation-counter closure result type after original compile rejected Commit rather than unit; original frozen source/error retained."
+}

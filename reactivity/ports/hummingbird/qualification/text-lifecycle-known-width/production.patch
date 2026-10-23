@@ -1,0 +1,1106 @@
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index 3790d2eab8..e648861dc6 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -23,7 +23,8 @@ pub use image::{
+ };
+ pub use text::{
+     CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextDirection, TextGeometry, TextGrapheme,
+-    TextLayout, TextLine, TextOffset, TextPosition, TextRun, TextSelection, TextShaper, TextSystem,
++    TextLayout, TextLine, TextMetrics, TextOffset, TextPosition, TextRun, TextSelection,
++    TextShaper, TextSystem,
+ };
+ 
+ #[derive(Clone, Debug, PartialEq, Eq)]
+diff --git a/reactivity/crates/canvas/src/text.rs b/reactivity/crates/canvas/src/text.rs
+index 0ce2392694..731e62928d 100644
+--- a/reactivity/crates/canvas/src/text.rs
++++ b/reactivity/crates/canvas/src/text.rs
+@@ -236,6 +236,14 @@ pub struct TextLayout {
+     fonts: Arc<FontSet>,
+     mapping: Option<Arc<Details>>,
+ }
++/// Advance size and first baseline, without retaining glyphs, font leases or
++/// interaction geometry. Produced by the same validated Unicode planner.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub struct TextMetrics {
++    pub width: f32,
++    pub height: f32,
++    pub baseline: f32,
++}
+ impl TextLayout {
+     pub fn font_size(&self) -> f32 {
+         self.font_size
+@@ -271,6 +279,17 @@ pub struct TextShaper<'font> {
+     planner: Option<Box<planner::Planner<'font>>>,
+ }
+ impl<'font> TextShaper<'font> {
++    /// Measure wrapping without freezing an owned layout. Paragraph scratch is
++    /// reused within this shaper; the returned numbers borrow no font storage.
++    pub fn measure(
++        &mut self,
++        text: &str,
++        font_size: f32,
++        max_width: Option<f32>,
++    ) -> Result<TextMetrics, Error> {
++        self.planner(text, font_size, max_width)?
++            .measure(text, font_size, max_width)
++    }
+     pub fn shape(
+         &mut self,
+         text: &str,
+@@ -296,6 +315,15 @@ impl<'font> TextShaper<'font> {
+         max_width: Option<f32>,
+         interactive: bool,
+     ) -> Result<TextLayout, Error> {
++        self.planner(text, font_size, max_width)?
++            .shape(text, font_size, max_width, interactive)
++    }
++    fn planner(
++        &mut self,
++        text: &str,
++        font_size: f32,
++        max_width: Option<f32>,
++    ) -> Result<&mut planner::Planner<'font>, Error> {
+         if !font_size.is_finite() || !(0.0..=512.0).contains(&font_size) || font_size == 0. {
+             return Err(Error::InvalidFontSize);
+         }
+@@ -308,10 +336,7 @@ impl<'font> TextShaper<'font> {
+         if self.planner.is_none() {
+             self.planner = Some(Box::new(planner::Planner::new(self.font)?));
+         }
+-        self.planner
+-            .as_mut()
+-            .unwrap()
+-            .shape(text, font_size, max_width, interactive)
++        Ok(self.planner.as_mut().unwrap())
+     }
+ }
+ 
+diff --git a/reactivity/crates/canvas/src/text/planner.rs b/reactivity/crates/canvas/src/text/planner.rs
+index 8a2bc5dd46..4231794257 100644
+--- a/reactivity/crates/canvas/src/text/planner.rs
++++ b/reactivity/crates/canvas/src/text/planner.rs
+@@ -52,6 +52,12 @@ pub(super) struct Planner<'font> {
+     primary_cmap: Cmap<'font>,
+     fallback_cmaps: Option<[Cmap<'static>; 2]>,
+ }
++struct Planned {
++    metrics: TextMetrics,
++    glyphs: Vec<Glyph>,
++    details: Option<Details>,
++    mask: usize,
++}
+ impl<'font> Planner<'font> {
+     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
+         let faces = FontSet {
+@@ -152,7 +158,33 @@ impl<'font> Planner<'font> {
+         max_width: Option<f32>,
+         interactive: bool,
+     ) -> Result<TextLayout, Error> {
+-        let result = self.shape_inner(text, size, max_width, interactive);
++        let planned = self.plan::<true>(text, size, max_width, interactive)?;
++        Ok(TextLayout {
++            width: planned.metrics.width,
++            height: planned.metrics.height,
++            baseline: planned.metrics.baseline,
++            font_size: size,
++            glyphs: planned.glyphs,
++            fonts: self.font_set(planned.mask),
++            mapping: planned.details.map(Arc::new),
++        })
++    }
++    pub fn measure(
++        &mut self,
++        text: &str,
++        size: f32,
++        max_width: Option<f32>,
++    ) -> Result<TextMetrics, Error> {
++        Ok(self.plan::<false>(text, size, max_width, false)?.metrics)
++    }
++    fn plan<const MATERIALIZE: bool>(
++        &mut self,
++        text: &str,
++        size: f32,
++        max_width: Option<f32>,
++        interactive: bool,
++    ) -> Result<Planned, Error> {
++        let result = self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive);
+         if result.is_err() {
+             // An invalid or expanding font can create a rejected large layout.
+             // Do not keep its buffers for later calls in this planning pass.
+@@ -160,13 +192,13 @@ impl<'font> Planner<'font> {
+         }
+         result
+     }
+-    fn shape_inner(
++    fn plan_inner<const MATERIALIZE: bool>(
+         &mut self,
+         text: &str,
+         size: f32,
+         max_width: Option<f32>,
+         interactive: bool,
+-    ) -> Result<TextLayout, Error> {
++    ) -> Result<Planned, Error> {
+         let needed = self.coverage(text)?;
+         let mut names = FAMILIES.map(|name| FontFamilyName::Named(name.into()));
+         let mut family_count = 1;
+@@ -178,6 +210,9 @@ impl<'font> Planner<'font> {
+         }
+         let mut glyphs = Vec::new();
+         let mut details: Option<Details> = None;
++        let mut detailed = false;
++        let mut glyph_count = 0usize;
++        let mut last_cluster = None;
+         let mut width = 0.0f32;
+         let mut height = 0.0f32;
+         let mut baseline = 0.0f32;
+@@ -202,14 +237,17 @@ impl<'font> Planner<'font> {
+                     .flat_map(|line| line.runs())
+                     .all(|run| !run.is_rtl() && Some(run.font().data.id()) == self.blob_ids[0])
+                 && planned.lines().flat_map(|line| line.runs()).count() <= 1;
+-            if !simple && details.is_none() {
+-                details = Some(Details {
+-                    len: text.len() as u32,
+-                    font_size: size,
+-                    runs: Vec::new(),
+-                    lines: Vec::new(),
+-                    carets: interactive.then(Vec::new),
+-                });
++            if !simple && !detailed {
++                detailed = true;
++                if MATERIALIZE {
++                    details = Some(Details {
++                        len: text.len() as u32,
++                        font_size: size,
++                        runs: Vec::new(),
++                        lines: Vec::new(),
++                        carets: interactive.then(Vec::new),
++                    });
++                }
+             }
+             let count = planned
+                 .lines()
+@@ -219,14 +257,13 @@ impl<'font> Planner<'font> {
+                     _ => 0,
+                 })
+                 .sum::<usize>();
+-            if glyphs
+-                .len()
++            if glyph_count
+                 .checked_add(count)
+                 .is_none_or(|n| n > MAX_GLYPHS)
+             {
+                 return Err(Error::ResourceLimit);
+             }
+-            if !content.is_empty() {
++            if MATERIALIZE && !content.is_empty() {
+                 glyphs.reserve(count);
+             }
+             if paragraph.content.start == 0 {
+@@ -244,9 +281,11 @@ impl<'font> Planner<'font> {
+             });
+             for (line_index, line) in planned.lines().enumerate() {
+                 let global_line = details.as_ref().map_or(line_index, |d| d.lines.len());
+-                if let Some(d) = &mut details {
+-                    d.lines
+-                        .push(freeze_line(line, content, paragraph.content.start, height)?);
++                if detailed {
++                    let frozen = freeze_line(line, content, paragraph.content.start, height)?;
++                    if let Some(d) = &mut details {
++                        d.lines.push(frozen);
++                    }
+                 }
+                 for item in line.items() {
+                     let PositionedLayoutItem::GlyphRun(run) = item else {
+@@ -268,7 +307,7 @@ impl<'font> Planner<'font> {
+                     if slot != 0 {
+                         mask |= 1 << (slot - 1);
+                     }
+-                    let first = glyphs.len();
++                    let first = glyph_count;
+                     // This API shapes one style over each paragraph, so every
+                     // positioned item covers its run's full visual glyph range.
+                     let mut clusters = run.run().glyph_source_ranges();
+@@ -297,19 +336,25 @@ impl<'font> Planner<'font> {
+                         if !g.x.is_finite() || !g.y.is_finite() {
+                             return Err(Error::InvalidGeometry);
+                         }
+-                        glyphs.push(Glyph {
+-                            id: u16::try_from(g.id).map_err(|_| Error::InvalidFont)?,
+-                            font: FontSlot(slot as u8),
+-                            simple_tail_bytes: 0,
+-                            cluster: (paragraph.content.start + source.start) as u32,
+-                            x: g.x,
+-                            baseline: height + g.y,
+-                        });
++                        let id = u16::try_from(g.id).map_err(|_| Error::InvalidFont)?;
++                        let cluster = (paragraph.content.start + source.start) as u32;
++                        glyph_count += 1;
++                        last_cluster = Some(cluster);
++                        if MATERIALIZE {
++                            glyphs.push(Glyph {
++                                id,
++                                font: FontSlot(slot as u8),
++                                simple_tail_bytes: 0,
++                                cluster,
++                                x: g.x,
++                                baseline: height + g.y,
++                            });
++                        }
+                     }
+                     if clusters.next().is_some() {
+                         return Err(Error::InvalidFont);
+                     }
+-                    if let Some(d) = &mut details {
++                    if detailed {
+                         let source = if content.is_empty() {
+                             0..0
+                         } else {
+@@ -318,19 +363,21 @@ impl<'font> Planner<'font> {
+                         if content.get(source.clone()).is_none() {
+                             return Err(Error::InvalidFont);
+                         }
+-                        d.runs.push(Run {
+-                            start: (paragraph.content.start + source.start) as u32,
+-                            end: (paragraph.content.start + source.end) as u32,
+-                            glyph_start: first as u32,
+-                            glyph_end: glyphs.len() as u32,
+-                            line: global_line as u32,
+-                            font: FontSlot(slot as u8),
+-                            direction: if run.run().is_rtl() {
+-                                TextDirection::RightToLeft
+-                            } else {
+-                                TextDirection::LeftToRight
+-                            },
+-                        });
++                        if let Some(d) = &mut details {
++                            d.runs.push(Run {
++                                start: (paragraph.content.start + source.start) as u32,
++                                end: (paragraph.content.start + source.end) as u32,
++                                glyph_start: first as u32,
++                                glyph_end: glyph_count as u32,
++                                line: global_line as u32,
++                                font: FontSlot(slot as u8),
++                                direction: if run.run().is_rtl() {
++                                    TextDirection::RightToLeft
++                                } else {
++                                    TextDirection::LeftToRight
++                                },
++                            });
++                        }
+                     }
+                 }
+             }
+@@ -339,14 +386,16 @@ impl<'font> Planner<'font> {
+             }
+             height += planned.height();
+         }
+-        if details.is_none() {
+-            let encoded = match glyphs.last_mut() {
+-                Some(last) => {
++        if !detailed {
++            let encoded = match last_cluster {
++                Some(cluster) => {
+                     let tail = (text.len() as u32)
+-                        .checked_sub(last.cluster)
++                        .checked_sub(cluster)
+                         .ok_or(Error::InvalidFont)?;
+                     if let Ok(tail) = u8::try_from(tail) {
+-                        last.simple_tail_bytes = tail;
++                        if let Some(last) = glyphs.last_mut() {
++                            last.simple_tail_bytes = tail;
++                        }
+                         true
+                     } else {
+                         false
+@@ -354,7 +403,7 @@ impl<'font> Planner<'font> {
+                 }
+                 None => text.is_empty(),
+             };
+-            if !encoded {
++            if MATERIALIZE && !encoded {
+                 details = Some(Details {
+                     len: text.len() as u32,
+                     font_size: size,
+@@ -384,14 +433,15 @@ impl<'font> Planner<'font> {
+         if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
+             stops.shrink_to_fit();
+         }
+-        Ok(TextLayout {
+-            width,
+-            height,
+-            baseline,
+-            font_size: size,
++        Ok(Planned {
++            metrics: TextMetrics {
++                width,
++                height,
++                baseline,
++            },
+             glyphs,
+-            fonts: self.font_set(mask),
+-            mapping: details.map(Arc::new),
++            mask,
++            details,
+         })
+     }
+ }
+@@ -561,6 +611,10 @@ mod tests {
+             planner.shape(&"W".repeat(MAX_GLYPHS + 1), 18., None, false),
+             Err(Error::ResourceLimit)
+         ));
++        assert!(matches!(
++            planner.measure(&"W".repeat(MAX_GLYPHS + 1), 18., None),
++            Err(Error::ResourceLimit)
++        ));
+         let source = "office\n\nnext";
+         let actual = planner.shape(source, 18., Some(60.), true).unwrap();
+         let expected = face
+@@ -589,6 +643,41 @@ mod tests {
+             }
+         }
+     }
++    #[test]
++    fn measurement_keeps_exact_metrics_and_no_owned_geometry() {
++        let _registry = super::super::BUNDLED_TEST_LOCK.lock().unwrap();
++        let face = FontFace::bundled().unwrap();
++        let mut planner = Planner::new(&face).unwrap();
++        for source in [
++            "",
++            "office ffi fi  spaces   tail ",
++            "a\u{301}b\u{200d}c",
++            "abc אבג 123 xyz العربية نهاية",
++            "\r\n\u{2028}\u{2028}end\n",
++        ] {
++            for width in [None, Some(f32::MIN_POSITIVE), Some(30.), Some(180.)] {
++                let measured = planner.measure(source, 16., width).unwrap();
++                let shape = planner.shape(source, 16., width, true).unwrap();
++                assert_eq!(
++                    [measured.width, measured.height, measured.baseline].map(f32::to_bits),
++                    [shape.width, shape.height, shape.baseline].map(f32::to_bits),
++                    "source={source:?} width={width:?}",
++                );
++                // Inspect the same specialization used by the public measure
++                // entry point, including scripts that need detailed layouts.
++                let planned = planner.plan::<false>(source, 16., width, false).unwrap();
++                assert_eq!(planned.glyphs.capacity(), 0);
++                assert!(planned.details.is_none());
++            }
++        }
++        println!(
++            "TEXT_HEADERS metrics={} planned={} layout={} planner={}",
++            size_of::<TextMetrics>(),
++            size_of::<Planned>(),
++            size_of::<TextLayout>(),
++            size_of::<Planner<'_>>()
++        );
++    }
+     use parley::Cursor;
+ 
+     fn cmap_record(bytes: &[u8]) -> usize {
+diff --git a/reactivity/crates/core/src/layout.rs b/reactivity/crates/core/src/layout.rs
+index d31fa1d8df..c59b72c19d 100644
+--- a/reactivity/crates/core/src/layout.rs
++++ b/reactivity/crates/core/src/layout.rs
+@@ -45,6 +45,14 @@ const _: () = assert!(HIDDEN_SUBTREE & cephal::schedule::META_MASK == HIDDEN_SUB
+ /// Hooks must give consistent answers for a fixed question during one compute.
+ pub type MeasureFn = fn(MeasureInput) -> MeasureOutput;
+ 
++/// A measurement whose wrapping depends only on available width. Known
++/// dimensions still constrain either axis; available height is not observable.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub struct WidthMeasureInput {
++    pub known_dimensions: Size<Option<f32>>,
++    pub available_width: AvailableSpace,
++}
++
+ #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+ pub enum LayoutError {
+     Tree(TreeError),
+@@ -408,7 +416,7 @@ impl LayoutTree {
+         root: NodeId,
+         viewport: Size<AvailableSpace>,
+     ) -> Result<bool, LayoutError> {
+-        self.compute_inner(root, viewport, None)
++        self.compute_inner::<false>(root, viewport, None)
+     }
+     /// Borrow a content service for this computation instead of storing it in
+     /// every measured node. Only nodes installed with `set_measure` invoke it.
+@@ -422,9 +430,33 @@ impl LayoutTree {
+         viewport: Size<AvailableSpace>,
+         measure: &mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput,
+     ) -> Result<bool, LayoutError> {
+-        self.compute_inner(root, viewport, Some(measure))
++        self.compute_inner::<false>(root, viewport, Some(measure))
+     }
+-    fn compute_inner(
++    /// Like `compute_with`, with no available height in the callback's input.
++    /// The existing leaf cache can therefore share answers across available
++    /// heights. Known heights remain part of the question. As with any content
++    /// service change, mark affected nodes dirty before replacing its answers.
++    pub fn compute_with_width_measure(
++        &mut self,
++        root: NodeId,
++        viewport: Size<AvailableSpace>,
++        measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
++    ) -> Result<bool, LayoutError> {
++        self.compute_inner::<true>(
++            root,
++            viewport,
++            Some(&mut |node, input| {
++                measure(
++                    node,
++                    WidthMeasureInput {
++                        known_dimensions: input.known_dimensions,
++                        available_width: input.available_space.width,
++                    },
++                )
++            }),
++        )
++    }
++    fn compute_inner<const WIDTH_ONLY: bool>(
+         &mut self,
+         root: NodeId,
+         viewport: Size<AvailableSpace>,
+@@ -472,7 +504,7 @@ impl LayoutTree {
+             self.pending.remove(node);
+         }
+         {
+-            let mut engine = Engine {
++            let mut engine = Engine::<WIDTH_ONLY> {
+                 owner: self,
+                 measure,
+                 observed: 0,
+@@ -614,12 +646,12 @@ impl LayoutTree {
+ // Private view: Cephal's engine-local u64 ids cannot be used as public GPUI
+ // capabilities. The codec includes generation; arena validation occurs at the
+ // public boundary, and every engine id is minted from this adapter's topology.
+-struct Engine<'a, 'service> {
++struct Engine<'a, 'service, const WIDTH_ONLY: bool> {
+     observed: u8,
+     owner: &'a mut LayoutTree,
+     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
+ }
+-impl Engine<'_, '_> {
++impl<const WIDTH_ONLY: bool> Engine<'_, '_, WIDTH_ONLY> {
+     fn node(&self, node: EngineId) -> NodeId {
+         self.owner.tree.node_for_layout_key(node.raw())
+     }
+@@ -639,7 +671,7 @@ impl Iterator for Children<'_> {
+             .map(|id| EngineId::new(self.tree.layout_key(id)))
+     }
+ }
+-impl EngineTree for Engine<'_, '_> {
++impl<const WIDTH_ONLY: bool> EngineTree for Engine<'_, '_, WIDTH_ONLY> {
+     type ChildIter<'a>
+         = Children<'a>
+     where
+@@ -693,10 +725,12 @@ impl EngineTree for Engine<'_, '_> {
+             hidden: self.owner.styles.get(style).generates_no_box(),
+             cheap_leaf: leaf && !self.is_measured_leaf(node),
+             dependency: self.owner.styles.parent_size_dependency(style),
+-            // This adapter uses Cephal's default leaf algorithm. Measurements
+-            // may inspect either available axis, so height remains observed.
+             kind: if leaf {
+-                cephal::tree::NodeKind::Leaf
++                if WIDTH_ONLY {
++                    cephal::tree::NodeKind::LeafIgnoringHeight
++                } else {
++                    cephal::tree::NodeKind::Leaf
++                }
+             } else {
+                 self.owner.styles.kind(style)
+             },
+@@ -720,6 +754,9 @@ impl EngineTree for Engine<'_, '_> {
+             MeasureOutput::from_size(input.known_dimensions.unwrap_or(Size::ZERO))
+         }
+     }
++    fn measure_ignores_available_height(&self) -> bool {
++        WIDTH_ONLY
++    }
+     fn set_unrounded_layout(&mut self, node: EngineId, layout: &Layout) {
+         if self.owner.speculation != 0 {
+             return;
+@@ -784,7 +821,7 @@ impl EngineTree for Engine<'_, '_> {
+         }
+     }
+ }
+-impl CacheAccess for Engine<'_, '_> {
++impl<const WIDTH_ONLY: bool> CacheAccess for Engine<'_, '_, WIDTH_ONLY> {
+     fn cache(&self, node: EngineId) -> &NodeCache {
+         &self.owner.caches[self.slot(node)]
+     }
+@@ -812,7 +849,7 @@ impl CacheAccess for Engine<'_, '_> {
+         self.owner.speculation = depth;
+     }
+ }
+-impl Incremental for Engine<'_, '_> {
++impl<const WIDTH_ONLY: bool> Incremental for Engine<'_, '_, WIDTH_ONLY> {
+     fn parent(&self, node: EngineId) -> Option<EngineId> {
+         self.owner
+             .tree
+@@ -861,7 +898,7 @@ mod tests {
+         assert_eq!(tree.storage().cache_heap_bytes, 0);
+         let key = EngineId::new(tree.tree.layout_key(hidden));
+         {
+-            let mut engine = Engine {
++            let mut engine = Engine::<false> {
+                 owner: &mut tree,
+                 measure: None,
+                 observed: 0,
+@@ -1031,7 +1068,7 @@ mod tests {
+             .insert(None, NodeKind::Element, Style::DEFAULT)
+             .unwrap();
+         let key = EngineId::new(owner.tree.layout_key(node));
+-        let mut engine = Engine {
++        let mut engine = Engine::<false> {
+             owner: &mut owner,
+             observed: 0,
+             measure: None,
+diff --git a/reactivity/crates/core/tests/layout.rs b/reactivity/crates/core/tests/layout.rs
+index 92e804c59f..0f61472a2a 100644
+--- a/reactivity/crates/core/tests/layout.rs
++++ b/reactivity/crates/core/tests/layout.rs
+@@ -8,6 +8,7 @@ use cephal::style::{
+ };
+ use gpui_reactivity_core::layout::{
+     AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size, Style,
++    WidthMeasureInput,
+ };
+ use gpui_reactivity_core::{NodeId, NodeKind, TreeError};
+ 
+@@ -483,6 +484,141 @@ fn measured_content_service_is_borrowed_per_compute_and_invalidates_explicitly()
+     // Stable content does not imply that every cached query remains reusable.
+ }
+ 
++#[test]
++fn width_measurement_reuses_height_probes_and_matches_full_axis_layout() {
++    fn fixture() -> (LayoutTree, NodeId, Vec<NodeId>) {
++        let mut tree = LayoutTree::new();
++        let root = tree
++            .insert(
++                None,
++                NodeKind::Element,
++                Style {
++                    display: Display::Flex,
++                    flex_direction: cephal::style::FlexDirection::Column,
++                    ..Style::DEFAULT
++                },
++            )
++            .unwrap();
++        let row = tree
++            .insert(
++                Some(root),
++                NodeKind::Element,
++                Style {
++                    display: Display::Flex,
++                    ..Style::DEFAULT
++                },
++            )
++            .unwrap();
++        let mut leaves = Vec::new();
++        for _ in 0..8 {
++            let leaf = tree
++                .insert(Some(row), NodeKind::Element, Style::DEFAULT)
++                .unwrap();
++            tree.set_measure(leaf, Some(measure)).unwrap();
++            leaves.push(leaf);
++        }
++        (tree, root, leaves)
++    }
++    fn content(input: WidthMeasureInput, advance: f32) -> MeasureOutput {
++        let width = input
++            .known_dimensions
++            .width
++            .unwrap_or(match input.available_width {
++                AvailableSpace::MaxContent => advance * 8.0,
++                AvailableSpace::MinContent => advance,
++                AvailableSpace::Definite(width) => width.min(advance * 8.0),
++            });
++        MeasureOutput {
++            size: Size {
++                width,
++                height: input
++                    .known_dimensions
++                    .height
++                    .unwrap_or((advance * 8.0 / width.max(1.0)).ceil() * 20.0),
++            },
++            baselines: cephal::tree::Baselines::from_first(Some(15.0)),
++        }
++    }
++    let (mut full, full_root, full_leaves) = fixture();
++    let (mut narrow, narrow_root, narrow_leaves) = fixture();
++    let mut full_calls = 0;
++    let mut narrow_calls = 0;
++    for (width, height, advance, known_height) in [
++        (400.0, AvailableSpace::MaxContent, 7.0, None),
++        (240.0, AvailableSpace::MinContent, 7.0, None),
++        (500.0, AvailableSpace::Definite(300.0), 9.0, Some(43.0)),
++        (240.0, AvailableSpace::Definite(120.0), 6.0, Some(17.0)),
++    ] {
++        for (tree, leaves) in [(&mut full, &full_leaves), (&mut narrow, &narrow_leaves)] {
++            for &leaf in leaves {
++                tree.set_style(
++                    leaf,
++                    Style {
++                        size: Size {
++                            width: Dimension::AUTO,
++                            height: known_height.map_or(Dimension::AUTO, Dimension::length),
++                        },
++                        ..Style::DEFAULT
++                    },
++                )
++                .unwrap();
++                // An advance/font/content dependency changed independently of style.
++                tree.mark_dirty(leaf).unwrap();
++            }
++        }
++        let available = Size {
++            width: AvailableSpace::Definite(width),
++            height,
++        };
++        full.compute_with(full_root, available, &mut |_, input| {
++            full_calls += 1;
++            content(
++                WidthMeasureInput {
++                    known_dimensions: input.known_dimensions,
++                    available_width: input.available_space.width,
++                },
++                advance,
++            )
++        })
++        .unwrap();
++        narrow
++            .compute_with_width_measure(narrow_root, available, &mut |_, input| {
++                narrow_calls += 1;
++                content(input, advance)
++            })
++            .unwrap();
++        for (a, b) in full
++            .tree()
++            .subtree(full_root)
++            .unwrap()
++            .zip(narrow.tree().subtree(narrow_root).unwrap())
++        {
++            assert_eq!(full.layout(a).unwrap(), narrow.layout(b).unwrap());
++        }
++        if let Some(height) = known_height {
++            assert_eq!(narrow.layout(narrow_leaves[0]).unwrap().size.height, height);
++        }
++    }
++    assert!(
++        narrow_calls < full_calls,
++        "full={full_calls}, narrow={narrow_calls}"
++    );
++    let before = narrow.stats();
++    assert!(
++        !narrow
++            .compute_with_width_measure(
++                narrow_root,
++                Size {
++                    width: AvailableSpace::Definite(240.0),
++                    height: AvailableSpace::Definite(120.0),
++                },
++                &mut |_, _| panic!("clean computation must not measure")
++            )
++            .unwrap()
++    );
++    assert_eq!(narrow.stats(), before);
++}
++
+ #[test]
+ fn borrowed_measurement_panic_poisoning_ends_the_service_borrow() {
+     let mut tree = LayoutTree::new();
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 909d4a4b1a..750c5ed0e4 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -11,11 +11,15 @@ use std::{
+ };
+ 
+ use gpui_canvas::{
+-    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextShaper, TextSystem,
++    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextMetrics, TextShaper,
++    TextSystem,
+ };
+ use gpui_reactivity_core::{
+     Affine, CoordinateSpace, NodeId, Point, Rect,
+-    layout::{AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size},
++    layout::{
++        AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size,
++        WidthMeasureInput,
++    },
+ };
+ use serde::Serialize;
+ 
+@@ -308,9 +312,10 @@ impl Snapshot {
+     }
+ }
+ 
+-/// One current-width layout per text-bearing site, owned by the runtime's dense
+-/// lane. A description moves cache entries with surviving identities; removed
+-/// sites drop their glyph buffers when the preceding lane is dropped.
++/// One interactive layout per text-bearing site. A first known-width measurement
++/// may fill a vacant slot; other measurement widths never replace it. Final
++/// placement checks its exact width before retaining C/P geometry. Description
++/// moves surviving identities and removed sites drop their glyph buffers.
+ struct Shaped {
+     width: Option<u32>,
+     layout: TextLayout,
+@@ -653,31 +658,50 @@ impl Node {
+     }
+ }
+ impl TextSite {
++    fn measure_for(
++        &mut self,
++        service: &mut TextShaper<'_>,
++        font_size: f32,
++        input: WidthMeasureInput,
++    ) -> Result<TextMetrics, Error> {
++        let width = input
++            .known_dimensions
++            .width
++            .or(match input.available_width {
++                AvailableSpace::Definite(width) => Some(width),
++                AvailableSpace::MinContent => Some(f32::MIN_POSITIVE),
++                AvailableSpace::MaxContent => None,
++            });
++        let width = width.map(|value| value.max(f32::MIN_POSITIVE));
++        if self.shaped.is_none() && input.known_dimensions.width.is_some() {
++            self.shape_for(service, font_size, width)?;
++        }
++        if let Some(shape) = &self.shaped
++            && shape.width == width.map(f32::to_bits)
++            && shape.layout.font_size() == font_size
++        {
++            return Ok(TextMetrics {
++                width: shape.layout.width,
++                height: shape.layout.height,
++                baseline: shape.layout.baseline,
++            });
++        }
++        Ok(service.measure(&self.value, font_size, width)?)
++    }
+     fn shape_for<'n>(
+         &'n mut self,
+         service: &mut TextShaper<'_>,
+         font_size: f32,
+         width: Option<f32>,
+-        interactive: bool,
+     ) -> Result<&'n TextLayout, Error> {
+         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
+         let key = width.map(f32::to_bits);
+-        if self.shaped.as_ref().is_none_or(|shape| {
+-            shape.width != key
+-                || (interactive
+-                    && shape
+-                        .layout
+-                        .caret_bounds(gpui_canvas::TextPosition {
+-                            offset: gpui_canvas::TextOffset::new(0).unwrap(),
+-                            affinity: gpui_canvas::CaretAffinity::Downstream,
+-                        })
+-                        .is_none())
+-        }) {
+-            let layout = if interactive {
+-                service.shape_interactive(&self.value, font_size, width)?
+-            } else {
+-                service.shape(&self.value, font_size, width)?
+-            };
++        if self
++            .shaped
++            .as_ref()
++            .is_none_or(|shape| shape.width != key || shape.layout.font_size() != font_size)
++        {
++            let layout = service.shape_interactive(&self.value, font_size, width)?;
+             self.shaped = Some(Shaped { width: key, layout });
+         }
+         Ok(&self.shaped.as_ref().unwrap().layout)
+@@ -2678,15 +2702,7 @@ impl<M: View + 'static> Runtime<M> {
+         let texts = &mut self.texts;
+         let images = &self.images;
+         let service = &mut shaper;
+-        let mut measure = |id: NodeId, input: MeasureInput| {
+-            let width = input
+-                .known_dimensions
+-                .width
+-                .or(match input.available_space.width {
+-                    AvailableSpace::Definite(width) => Some(width),
+-                    AvailableSpace::MinContent => Some(f32::MIN_POSITIVE),
+-                    AvailableSpace::MaxContent => None,
+-                });
++        let mut measure = |id: NodeId, input: WidthMeasureInput| {
+             let index = layout_nodes
+                 .binary_search(&id)
+                 .expect("measurement names a node in the current layout arena");
+@@ -2697,14 +2713,10 @@ impl<M: View + 'static> Runtime<M> {
+             let service = service
+                 .as_mut()
+                 .expect("measured text has an initialized service");
+-            match node.text_slot().get_mut(texts).unwrap().shape_for(
++            match node.text_slot().get_mut(texts).unwrap().measure_for(
+                 service,
+                 styles.get(index).font_size,
+-                width,
+-                // Intrinsic probes cannot publish geometry. Final finite
+-                // placement upgrades the cache before retaining C/P maps.
+-                input.known_dimensions.width.is_some()
+-                    || matches!(input.available_space.width, AvailableSpace::Definite(_)),
++                input,
+             ) {
+                 Ok(shape) => MeasureOutput {
+                     size: Size {
+@@ -2722,7 +2734,7 @@ impl<M: View + 'static> Runtime<M> {
+                 }
+             }
+         };
+-        self.layout.compute_with(
++        self.layout.compute_with_width_measure(
+             self.layout_nodes[0],
+             Size {
+                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
+@@ -2915,7 +2927,6 @@ impl<M: View + 'static> Runtime<M> {
+                     shaper.as_mut().expect("text initialized before layout"),
+                     style.font_size,
+                     Some(layout.content_box_width()),
+-                    true,
+                 )?;
+                 let origin = Point {
+                     x: layout.padding.left,
+@@ -3875,6 +3886,159 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn first_known_width_measurement_fills_only_a_vacant_layout_slot() {
++        let system = TextSystem::bundled().unwrap();
++        let mut shaper = system.font_face().shaper();
++        let mut site = TextSite {
++            value: SharedText::from("office אבג\nnext"),
++            field: None,
++            shaped: None,
++        };
++        let input = |available_width| WidthMeasureInput {
++            known_dimensions: Size::NONE,
++            available_width,
++        };
++        for width in [
++            AvailableSpace::MaxContent,
++            AvailableSpace::MinContent,
++            AvailableSpace::Definite(80.),
++        ] {
++            site.measure_for(&mut shaper, 16., input(width)).unwrap();
++            assert!(
++                site.shaped.is_none(),
++                "an available constraint cannot fill the slot"
++            );
++        }
++        site.measure_for(
++            &mut shaper,
++            16.,
++            WidthMeasureInput {
++                known_dimensions: Size {
++                    width: Some(80.),
++                    height: None,
++                },
++                available_width: AvailableSpace::MaxContent,
++            },
++        )
++        .unwrap();
++        let first = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
++        let geometry = site
++            .shaped
++            .as_ref()
++            .unwrap()
++            .layout
++            .retain_geometry()
++            .unwrap();
++        for other in [
++            input(AvailableSpace::MaxContent),
++            input(AvailableSpace::MinContent),
++            input(AvailableSpace::Definite(40.)),
++            WidthMeasureInput {
++                known_dimensions: Size {
++                    width: Some(40.),
++                    height: None,
++                },
++                available_width: AvailableSpace::MaxContent,
++            },
++        ] {
++            site.measure_for(&mut shaper, 16., other).unwrap();
++            assert_eq!(
++                site.shaped.as_ref().unwrap().layout.glyphs().as_ptr(),
++                first
++            );
++        }
++        let cost = allocation_counter::measure(|| {
++            site.measure_for(&mut shaper, 16., input(AvailableSpace::Definite(80.)))
++                .unwrap();
++            site.shape_for(&mut shaper, 16., Some(80.)).unwrap();
++        });
++        assert_eq!(cost.count_total, 0);
++        // The first known width is provisional. Final placement must still
++        // check its own width, while the old geometry lease remains usable.
++        site.shape_for(&mut shaper, 16., Some(40.)).unwrap();
++        assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
++        assert!(
++            geometry
++                .caret_bounds(gpui_canvas::TextPosition {
++                    offset: gpui_canvas::TextOffset::new(0).unwrap(),
++                    affinity: gpui_canvas::CaretAffinity::Downstream,
++                })
++                .is_some()
++        );
++    }
++
++    #[test]
++    fn measurements_preserve_the_last_successful_canonical_text_geometry() {
++        let system = TextSystem::bundled().unwrap();
++        let mut shaper = system.font_face().shaper();
++        let mut site = TextSite {
++            value: SharedText::from("office אבג\nnext"),
++            field: None,
++            shaped: None,
++        };
++        let geometry = site
++            .shape_for(&mut shaper, 16., Some(80.))
++            .unwrap()
++            .retain_geometry()
++            .unwrap();
++        let glyphs = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
++        for (size, width) in [(16., None), (16., Some(1.)), (24., Some(80.))] {
++            site.measure_for(
++                &mut shaper,
++                size,
++                WidthMeasureInput {
++                    known_dimensions: Size::NONE,
++                    available_width: width
++                        .map_or(AvailableSpace::MaxContent, AvailableSpace::Definite),
++                },
++            )
++            .unwrap();
++            let shape = site.shaped.as_ref().unwrap();
++            assert_eq!(shape.width, Some(80.0f32.to_bits()));
++            assert_eq!(shape.layout.glyphs().as_ptr(), glyphs);
++            assert!(std::sync::Arc::ptr_eq(
++                &geometry,
++                &shape.layout.retain_geometry().unwrap()
++            ));
++        }
++        assert!(
++            site.measure_for(
++                &mut shaper,
++                0.,
++                WidthMeasureInput {
++                    known_dimensions: Size::NONE,
++                    available_width: AvailableSpace::Definite(80.),
++                }
++            )
++            .is_err()
++        );
++        assert_eq!(
++            site.shaped.as_ref().unwrap().layout.glyphs().as_ptr(),
++            glyphs
++        );
++        let cost = allocation_counter::measure(|| {
++            site.measure_for(
++                &mut shaper,
++                16.,
++                WidthMeasureInput {
++                    known_dimensions: Size::NONE,
++                    available_width: AvailableSpace::Definite(80.),
++                },
++            )
++            .unwrap();
++        });
++        assert_eq!(
++            cost.count_total, 0,
++            "exact published operands borrow metrics"
++        );
++        println!(
++            "TEXT_SITE_HEADERS site={} shaped={}",
++            size_of::<TextSite>(),
++            size_of::<Shaped>()
++        );
++    }
++
+     #[test]
+     fn text_width_cache_preserves_keys_and_replaces_only_after_success() {
+         let system = TextSystem::bundled().unwrap();
+@@ -3885,36 +4049,31 @@ mod tests {
+             shaped: None,
+         };
+         let wide = site
+-            .shape_for(&mut shaper, 16.0, Some(140.0), false)
++            .shape_for(&mut shaper, 16.0, Some(140.0))
+             .unwrap()
+             .height;
+         let narrow = site
+-            .shape_for(&mut shaper, 16.0, Some(40.0), false)
++            .shape_for(&mut shaper, 16.0, Some(40.0))
+             .unwrap()
+             .height;
+         assert!(narrow > wide);
+         let pointer = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+-        site.shape_for(&mut shaper, 16.0, Some(40.0), false)
+-            .unwrap();
++        site.shape_for(&mut shaper, 16.0, Some(40.0)).unwrap();
+         assert_eq!(
+             pointer,
+             site.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
+         );
+         assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
+-        site.shape_for(&mut shaper, 16.0, None, false).unwrap();
++        site.shape_for(&mut shaper, 16.0, None).unwrap();
+         assert_eq!(site.shaped.as_ref().unwrap().width, None);
+-        site.shape_for(&mut shaper, 16.0, Some(-0.0), false)
+-            .unwrap();
++        site.shape_for(&mut shaper, 16.0, Some(-0.0)).unwrap();
+         assert_eq!(
+             site.shaped.as_ref().unwrap().width,
+             Some(f32::MIN_POSITIVE.to_bits())
+         );
+         site.value = SharedText::from("漢");
+         site.shaped = None;
+-        assert!(
+-            site.shape_for(&mut shaper, 16.0, Some(40.0), false)
+-                .is_err()
+-        );
++        assert!(site.shape_for(&mut shaper, 16.0, Some(40.0)).is_err());
+         assert!(site.shaped.is_none());
+     }
+ }
+diff --git a/reactivity/crates/gpui/src/runtime/editing.rs b/reactivity/crates/gpui/src/runtime/editing.rs
+index 7454a0fd06..e1ea7297be 100644
+--- a/reactivity/crates/gpui/src/runtime/editing.rs
++++ b/reactivity/crates/gpui/src/runtime/editing.rs
+@@ -96,7 +96,7 @@ impl<M: View + 'static> Runtime<M> {
+         let ready = slot
+             .get(&self.texts)
+             .and_then(|site| site.shaped.as_ref())
+-            .is_some_and(|shape| shape.layout.caret_bounds(position(0).unwrap()).is_some());
++            .is_some();
+         if !ready {
+             let width = self
+                 .layout
+@@ -113,7 +113,6 @@ impl<M: View + 'static> Runtime<M> {
+                 &mut font.shaper(),
+                 self.styles.get(index).font_size,
+                 Some(width),
+-                true,
+             )?;
+         }
+         Ok(&slot
+diff --git a/reactivity/crates/gpui/src/runtime/image.rs b/reactivity/crates/gpui/src/runtime/image.rs
+index e4c1d1b8e7..caf11bd6c4 100644
+--- a/reactivity/crates/gpui/src/runtime/image.rs
++++ b/reactivity/crates/gpui/src/runtime/image.rs
+@@ -92,7 +92,7 @@ fn prune(current: &mut Option<Box<Images>>) {
+     }
+ }
+ 
+-pub(super) fn measure(image: &Image, input: MeasureInput) -> MeasureOutput {
++pub(super) fn measure(image: &Image, input: WidthMeasureInput) -> MeasureOutput {
+     let ratio = image.width() as f32 / image.height() as f32;
+     let (width, height) = match (input.known_dimensions.width, input.known_dimensions.height) {
+         (Some(width), Some(height)) => (width, height),

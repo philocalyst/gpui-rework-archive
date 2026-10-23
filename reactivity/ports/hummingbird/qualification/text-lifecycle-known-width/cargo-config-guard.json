@@ -1,0 +1,8 @@
+{
+  "path": ".cargo/config.toml",
+  "same_as_dfc4": true,
+  "sha256": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295",
+  "rustflags_environment": "unset by allocation env; ancestor .cargo config applies",
+  "jobs": 1,
+  "target": "/tmp/gpui-hummingbird-browser-allocation-target"
+}

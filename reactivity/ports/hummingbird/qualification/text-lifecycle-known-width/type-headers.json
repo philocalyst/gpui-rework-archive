@@ -1,0 +1,26 @@
+{
+  "GEOMETRY_HEADERS": {
+    "layout": 56,
+    "details": 80,
+    "stop": 12,
+    "run": 24,
+    "line": 24,
+    "system": 72
+  },
+  "TEXT_HEADERS": {
+    "metrics": 12,
+    "planned": 128,
+    "layout": 56,
+    "planner": 2712
+  },
+  "TEXT_OWNER_HEADERS": {
+    "resources": 120,
+    "entry": 24,
+    "runtime": 1824,
+    "text_site": 80,
+    "node": 40,
+    "presented": 64,
+    "prepared": 40,
+    "part": 16
+  }
+}

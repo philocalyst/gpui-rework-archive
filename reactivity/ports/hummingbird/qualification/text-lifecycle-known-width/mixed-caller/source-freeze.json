@@ -1,0 +1,5 @@
+{
+  "source": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/main.rs",
+  "sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d",
+  "scope": "Standalone optimized public API control. Same input source and rustc flags for old/new frozen release library artifacts. No timing. No production source changes."
+}

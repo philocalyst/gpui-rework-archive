@@ -1,0 +1,33 @@
+{
+  "command": [
+    "rustc",
+    "--edition=2024",
+    "-Copt-level=3",
+    "-Cdebuginfo=0",
+    "-Cembed-bitcode=no",
+    "-Csymbol-mangling-version=v0",
+    "--cfg",
+    "tokio_unstable",
+    "-L",
+    "dependency=/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts",
+    "-L",
+    "dependency=/tmp/gpui-hummingbird-browser-allocation-target/release/deps",
+    "--extern",
+    "gpui_reactivity_core=/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/main.rs",
+    "-o",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/mixed-caller"
+  ],
+  "source_sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d",
+  "artifact_manifest": "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts.json",
+  "binary_sha256": "3ca045ab76e767d8cdc5785d6d1adeeda2ee84b46e3745fd660c797e6423fa62",
+  "runtime_command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=5s",
+    "60s",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/mixed-caller"
+  ],
+  "runtime_exit": 0,
+  "binary_after_sha256": "3ca045ab76e767d8cdc5785d6d1adeeda2ee84b46e3745fd660c797e6423fa62"
+}

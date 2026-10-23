@@ -1,0 +1,25 @@
+{
+  "command": [
+    "rustc",
+    "--edition=2024",
+    "-Copt-level=3",
+    "-Cdebuginfo=0",
+    "-Cembed-bitcode=no",
+    "-Csymbol-mangling-version=v0",
+    "--cfg",
+    "tokio_unstable",
+    "-L",
+    "dependency=/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts",
+    "-L",
+    "dependency=/tmp/gpui-hummingbird-browser-allocation-target/release/deps",
+    "--extern",
+    "gpui_reactivity_core=/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib",
+    "--cfg",
+    "candidate",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/main.rs",
+    "-o",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/mixed-caller-v2"
+  ],
+  "source_sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d",
+  "artifact_manifest": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts.json"
+}

@@ -1,0 +1,90 @@
+{
+  "libgpui_reactivity_core-92df8da154377e11.rlib": {
+    "file_bytes": 2142368,
+    "categories": {
+      ".text": 686346,
+      ".rodata": 12253,
+      ".data": 6648,
+      ".bss": 0,
+      ".eh_frame": 42640,
+      ".gcc_except_table": 9688
+    }
+  },
+  "libgpui_canvas-1de80d4b918bb5d5.rlib": {
+    "file_bytes": 7227930,
+    "categories": {
+      ".text": 403545,
+      ".rodata": 2347297,
+      ".data": 12192,
+      ".bss": 0,
+      ".eh_frame": 36648,
+      ".gcc_except_table": 5084
+    }
+  },
+  "libgpui_gpu-f5b84b1ee8dfe36a.rlib": {
+    "file_bytes": 1749578,
+    "categories": {
+      ".text": 607263,
+      ".rodata": 6713,
+      ".data": 2552,
+      ".bss": 0,
+      ".eh_frame": 16008,
+      ".gcc_except_table": 41080
+    }
+  },
+  "libgpui_reactivity_host-d8c31c402a77eb4d.rlib": {
+    "file_bytes": 106374,
+    "categories": {
+      ".text": 10384,
+      ".rodata": 1961,
+      ".data": 728,
+      ".bss": 0,
+      ".eh_frame": 1720,
+      ".gcc_except_table": 784
+    }
+  },
+  "libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib": {
+    "file_bytes": 109778,
+    "categories": {
+      ".text": 627,
+      ".rodata": 0,
+      ".data": 0,
+      ".bss": 0,
+      ".eh_frame": 256,
+      ".gcc_except_table": 0
+    }
+  },
+  "libgpui-c47fc36e702f939d.rlib": {
+    "file_bytes": 6904374,
+    "categories": {
+      ".text": 280434,
+      ".rodata": 55824,
+      ".data": 9160,
+      ".bss": 0,
+      ".eh_frame": 45288,
+      ".gcc_except_table": 13044
+    }
+  },
+  "libhummingbird_gpui_port-f32d631e14ab0246.rlib": {
+    "file_bytes": 7713256,
+    "categories": {
+      ".text": 1674539,
+      ".rodata": 104396,
+      ".data": 46992,
+      ".bss": 8,
+      ".eh_frame": 200416,
+      ".gcc_except_table": 54812
+    }
+  },
+  "native_service": {
+    "file_bytes": 32644160,
+    "categories": {
+      ".text": 14841095,
+      ".rodata": 7638368,
+      ".data": 574288,
+      ".bss": 8452,
+      ".eh_frame": 1469856,
+      ".gcc_except_table": 879268
+    }
+  }
+}

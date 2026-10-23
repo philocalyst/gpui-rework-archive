@@ -1,0 +1,750 @@
+{
+  "scope": "Original four calling-thread Rust constructor phase counters, excluding worker/C/OS/device/RSS; inline public headers overlap and must not be summed. Preliminary debug allocation captures; final guarded release capture compared separately.",
+  "variants": {
+    "dfc4": {
+      "log": "/tmp/gpui-hummingbird-browser-allocation-evidence/normal.log",
+      "rows": [
+        {
+          "cohort": 0,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 121253
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 2353,
+            "count_current": 466,
+            "count_max": 621,
+            "bytes_total": 498074,
+            "bytes_current": 116777,
+            "bytes_max": 178658
+          }
+        },
+        {
+          "cohort": 1,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 117253
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 2340,
+            "count_current": 457,
+            "count_max": 612,
+            "bytes_total": 493346,
+            "bytes_current": 112777,
+            "bytes_max": 174658
+          }
+        },
+        {
+          "cohort": 2,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 117253
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 2340,
+            "count_current": 457,
+            "count_max": 612,
+            "bytes_total": 493346,
+            "bytes_current": 112777,
+            "bytes_max": 174658
+          }
+        },
+        {
+          "cohort": 3,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 117253
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 2340,
+            "count_current": 457,
+            "count_max": 612,
+            "bytes_total": 493346,
+            "bytes_current": 112777,
+            "bytes_max": 174658
+          }
+        }
+      ]
+    },
+    "width-contract": {
+      "log": "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-first.log",
+      "rows": [
+        {
+          "cohort": 0,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 120085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1906,
+            "count_current": 464,
+            "count_max": 619,
+            "bytes_total": 449446,
+            "bytes_current": 115609,
+            "bytes_max": 177490
+          }
+        },
+        {
+          "cohort": 1,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1893,
+            "count_current": 455,
+            "count_max": 610,
+            "bytes_total": 444718,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        },
+        {
+          "cohort": 2,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1893,
+            "count_current": 455,
+            "count_max": 610,
+            "bytes_total": 444718,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        },
+        {
+          "cohort": 3,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1893,
+            "count_current": 455,
+            "count_max": 610,
+            "bytes_total": 444718,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        }
+      ]
+    },
+    "metrics-only": {
+      "log": "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-first.log",
+      "rows": [
+        {
+          "cohort": 0,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 120085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1464,
+            "count_current": 464,
+            "count_max": 616,
+            "bytes_total": 368938,
+            "bytes_current": 115609,
+            "bytes_max": 173869
+          }
+        },
+        {
+          "cohort": 1,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1451,
+            "count_current": 455,
+            "count_max": 607,
+            "bytes_total": 364210,
+            "bytes_current": 111609,
+            "bytes_max": 169869
+          }
+        },
+        {
+          "cohort": 2,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1451,
+            "count_current": 455,
+            "count_max": 607,
+            "bytes_total": 364210,
+            "bytes_current": 111609,
+            "bytes_max": 169869
+          }
+        },
+        {
+          "cohort": 3,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1451,
+            "count_current": 455,
+            "count_max": 607,
+            "bytes_total": 364210,
+            "bytes_current": 111609,
+            "bytes_max": 169869
+          }
+        }
+      ]
+    },
+    "broad-finite": {
+      "log": "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-first.log",
+      "rows": [
+        {
+          "cohort": 0,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 120085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1445,
+            "count_current": 464,
+            "count_max": 623,
+            "bytes_total": 379822,
+            "bytes_current": 115609,
+            "bytes_max": 177490
+          }
+        },
+        {
+          "cohort": 1,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1432,
+            "count_current": 455,
+            "count_max": 614,
+            "bytes_total": 375094,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        },
+        {
+          "cohort": 2,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1432,
+            "count_current": 455,
+            "count_max": 614,
+            "bytes_total": 375094,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        },
+        {
+          "cohort": 3,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1432,
+            "count_current": 455,
+            "count_max": 614,
+            "bytes_total": 375094,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        }
+      ]
+    },
+    "known-width": {
+      "log": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-first.log",
+      "rows": [
+        {
+          "cohort": 0,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 120085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1335,
+            "count_current": 464,
+            "count_max": 619,
+            "bytes_total": 366430,
+            "bytes_current": 115609,
+            "bytes_max": 177490
+          }
+        },
+        {
+          "cohort": 1,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1322,
+            "count_current": 455,
+            "count_max": 610,
+            "bytes_total": 361702,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        },
+        {
+          "cohort": 2,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1322,
+            "count_current": 455,
+            "count_max": 610,
+            "bytes_total": 361702,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        },
+        {
+          "cohort": 3,
+          "headers": {
+            "model": 632,
+            "questions": 640,
+            "event": 104,
+            "selection": 32,
+            "error": 64,
+            "win": 704,
+            "ui_current_plus_inline": 116085
+          },
+          "spawn": {
+            "count_total": 11,
+            "count_current": 10,
+            "count_max": 10,
+            "bytes_total": 3551,
+            "bytes_current": 3532,
+            "bytes_max": 3532
+          },
+          "connected": {
+            "count_total": 3,
+            "count_current": 3,
+            "count_max": 3,
+            "bytes_total": 240,
+            "bytes_current": 240,
+            "bytes_max": 240
+          },
+          "mounted": {
+            "count_total": 1322,
+            "count_current": 455,
+            "count_max": 610,
+            "bytes_total": 361702,
+            "bytes_current": 111609,
+            "bytes_max": 173490
+          }
+        }
+      ]
+    }
+  }
+}

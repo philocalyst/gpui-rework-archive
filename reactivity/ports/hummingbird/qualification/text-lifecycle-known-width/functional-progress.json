@@ -1,0 +1,86 @@
+{
+  "canvas-ledger": {
+    "exit": 0,
+    "harness_result_groups": 1,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0
+  },
+  "canvas": {
+    "exit": 0,
+    "harness_result_groups": 28,
+    "passed": 184,
+    "failed": 0,
+    "ignored": 3
+  },
+  "core-layout": {
+    "exit": 0,
+    "harness_result_groups": 5,
+    "passed": 45,
+    "failed": 0,
+    "ignored": 0
+  },
+  "core": {
+    "exit": 0,
+    "harness_result_groups": 5,
+    "passed": 18,
+    "failed": 0,
+    "ignored": 0
+  },
+  "gpui-default": {
+    "exit": 0,
+    "harness_result_groups": 61,
+    "passed": 580,
+    "failed": 0,
+    "ignored": 10
+  },
+  "gpui-ledger": {
+    "exit": 0,
+    "harness_result_groups": 1,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0
+  },
+  "gpui-native": {
+    "exit": 0,
+    "harness_result_groups": 61,
+    "passed": 645,
+    "failed": 0,
+    "ignored": 34
+  },
+  "gpui-verify": {
+    "exit": 0,
+    "harness_result_groups": 2,
+    "passed": 7,
+    "failed": 0,
+    "ignored": 0
+  },
+  "port-cpal": {
+    "exit": 0,
+    "harness_result_groups": 16,
+    "passed": 125,
+    "failed": 0,
+    "ignored": 1
+  },
+  "port-default": {
+    "exit": 0,
+    "harness_result_groups": 16,
+    "passed": 54,
+    "failed": 0,
+    "ignored": 0
+  },
+  "port-native": {
+    "exit": 0,
+    "harness_result_groups": 16,
+    "passed": 125,
+    "failed": 0,
+    "ignored": 1
+  },
+  "text-headers": {
+    "exit": 0,
+    "harness_result_groups": 1,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0
+  }
+}

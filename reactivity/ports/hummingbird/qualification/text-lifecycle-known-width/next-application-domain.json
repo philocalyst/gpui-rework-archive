@@ -1,0 +1,129 @@
+{
+  "upstream": "e15e8ba0ef6ff5445294030d373e3c8ccc7d780c",
+  "reviewed_paths": [
+    {
+      "path": "src/library/scan.rs",
+      "exit": 0,
+      "sha256": "59af1217d46125d104391e3b1bd90a9855ea436fc06995f46d534b7a1d16bdeb",
+      "git_blob": "2ed3b4e5e3579ca088981e4472c61480a0ff989a"
+    },
+    {
+      "path": "src/library/scan/control.rs",
+      "exit": 0,
+      "sha256": "0f8e340476430c53fadc4ea7b6a3f1988ad0311253fbc1511c50749e765cb4e8",
+      "git_blob": "1c9e65b4c58be4c47f5a13693e8251bf42d5726e"
+    },
+    {
+      "path": "src/library/scan/discover/full.rs",
+      "exit": 0,
+      "sha256": "67a3e04aecb917ea14c2d26151759f6a7b9892c1b9eb84ee9c1da2a2b59e18c4",
+      "git_blob": "d03aa44b969573a9bb037678454df56c287cfb92"
+    },
+    {
+      "path": "src/library/scan/discover/targeted.rs",
+      "exit": 0,
+      "sha256": "8454863f3927a6e64cd456507f4d1b8545fdd4b4dc1a20a0ec4ece1559d1bcc5",
+      "git_blob": "95f2538308ba454a10c6043c559b2d782ad97487"
+    },
+    {
+      "path": "src/library/scan/database/tracks.rs",
+      "exit": 0,
+      "sha256": "89a82939e8646e467fa7a1f4586cfb6f16ae9299b39c5462b045d9f76b90eda9",
+      "git_blob": "a64ce4e3dca08e5606a97b5e1579a1305ff1f43d"
+    },
+    {
+      "path": "src/library/scan/database/albums.rs",
+      "exit": 0,
+      "sha256": "7c11afbb0bb978d752ce42253d6a1eea8510d9d2c6e9dbfd082a4f1a31586eae",
+      "git_blob": "6f522804f27ee4ededf90b49fd9854d90c31eb47"
+    },
+    {
+      "path": "src/library/scan/database/artists.rs",
+      "exit": 0,
+      "sha256": "d7c1d0919db9fdbe5e3a9d549710f5cf3c3245581319d836b89621ca553c1209",
+      "git_blob": "12aac9bf9ece368415cd795e91caf2850671ddaa"
+    },
+    {
+      "path": "src/library/scan/decode.rs",
+      "exit": 0,
+      "sha256": "4d36a66c0caa1192517a09fe3f4c6f4474965327f2c2e9824beed043f56356e8",
+      "git_blob": "cdc490c49fb41821df88d8ccec84290bac086287"
+    },
+    {
+      "path": "src/library/scan/record.rs",
+      "exit": 0,
+      "sha256": "2604091b25231d6173557cf55d357831fa5171c9fec57d261a88ac6fff97a81b",
+      "git_blob": "478c93f8f67730dd36119d4740bc5e824d2ee35d"
+    },
+    {
+      "path": "src/library/scan/watch.rs",
+      "exit": 0,
+      "sha256": "45513efba8c25216eec18435864e5df8a195591b688520630f8ca8e007a62ca9",
+      "git_blob": "1e269fda9ac73338c2fa115d95f5c4550d896ddf"
+    },
+    {
+      "path": "src/ui/library/files_view.rs",
+      "exit": 0,
+      "sha256": "1b9f51d3aab393ef2799c2e110b7150afb3483ecd40b8be58aec507bf431f491",
+      "git_blob": "898ddd8f57b28254024314eca487e8f563faad76"
+    },
+    {
+      "path": "src/ui/library/files_view/loader.rs",
+      "exit": 0,
+      "sha256": "894a885c145b1f96284e7dbff29774a078456b268a4dd3fa913e69a7c7ff0d30",
+      "git_blob": "43fa644e69707c9fc137fdaa63962fd621bfc593"
+    },
+    {
+      "path": "src/ui/library/files_view/model.rs",
+      "exit": 0,
+      "sha256": "65af46b76f284465807e8172c76d7884b0a08c2326a30e3afafa2f0b8ea263f3",
+      "git_blob": "fe4ff811b9142edd8a399b47f21a6b7c075d06f2"
+    },
+    {
+      "path": "src/ui/library/files_view/tree.rs",
+      "exit": 0,
+      "sha256": "970468d1150a6fc6762446f57232e56e80c808c94d7b2f78e9c67468b0bfe10b",
+      "git_blob": "243e4f364ccb57c6f63e54167778283f01e814b0"
+    },
+    {
+      "path": "src/settings/scan.rs",
+      "exit": 0,
+      "sha256": "343c82cfbc8d8b1274e8cd1e5aed0b212946a3e650de9f970467c066bb3690e0",
+      "git_blob": "b27c1997e0e0895b038eea4aa4eabbef4d814327"
+    },
+    {
+      "path": "src/settings.rs",
+      "exit": 0,
+      "sha256": "d0996aaa4f0ff883fc51b7e93d3c3ceeb74d890e73e35ca78dfd2b003b7b90b8",
+      "git_blob": "0fc6ec6cb42d85568f1b716cb359b6b117f0d4b5"
+    },
+    {
+      "path": "src/library/scan/artwork/processing.rs",
+      "exit": 0,
+      "sha256": "dbbaee7cfa57fcca312975b8d457ca4440b4e786cdefef6c62e74595dba44aee",
+      "git_blob": "ae6d6d9f4d8f00a63e9c5f0e76b3f38dd1d1735b"
+    },
+    {
+      "path": "src/playback/controller.rs",
+      "exit": 128,
+      "sha256": null,
+      "git_blob": null
+    }
+  ],
+  "recommendation": "Library folders, explicit cancellable indexing and Files navigation, ending in the existing Browser/queue/audio service. This closes the fixture-only library acquisition gap.",
+  "architecture": {
+    "authority": "Existing Worker producer source-generation/version publication remains the SQLite-to-UI authority. A scan is a checked request tied to source generation and roots revision; completion after replacement/cancel/close cannot publish. Imports commit SQL before publishing Version; same-generation prepared metadata needs a new policy if scans edit existing tracks, because present generation-only leases assume additive imports.",
+    "execution": "Reuse the existing library worker, bounded command/result lanes and typed existing Question for directory/page reads. Incremental discovery/index work must poll controls between files and coalesce progress, preserving browse responsiveness without an extra scanner worker forest. No scan or page completion authorizes playback.",
+    "data": "Canonical PathBuf file identity and file metadata observations feed typed indexed metadata, then transactional album/artist/track/link updates. Preserve track/playlist occurrence IDs across unchanged rescans and relocations where proved. Avoid parallel page entity/cache models.",
+    "ui": "Typed LibraryFolders component with SourcePath edits, Scan/Stop/Rescan and missing-root Keep/Delete decisions; real Files directory route and explicit file/folder Play actions. Public Win tests and original Registry service/provider remain the testing surface.",
+    "settings": "Persist only library roots/scan policy needed for this domain with atomic replacement/corrupt-file failure visibility. Full appearance/services/playback settings editor remains a separate domain.",
+    "not_claimed": "OS watching/storage notifications, artwork thumbnail cache/UI, full metadata/provider/codec coverage and platform media/scrobbling stay explicitly absent unless separately implemented and qualified."
+  },
+  "fixtures": [
+    "Temporary persistent SQLite library, restart and corrupt settings/scan-record controls",
+    "Real tagged WAV/FLAC/MP3 fixtures with Unicode names, multiple artists/discs, duration, malformed and missing files",
+    "Nested roots, overlap/symlink cycle, unavailable/remounted root, rename and modified tags, canceled/replaced scan",
+    "Exact old buffered Prepared/context result against index commit; stable queue occurrence and clone Stop/Pause/Seek",
+    "Headless public sources/questions plus actual native Registry folder selection/scan/Files/play/stop/disconnect/normal close"
+  ]
+}

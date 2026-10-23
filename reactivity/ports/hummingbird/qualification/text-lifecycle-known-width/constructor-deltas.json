@@ -1,0 +1,1602 @@
+{
+  "scope": "Original four calling-thread Rust constructor phase counters, excluding worker/C/OS/device/RSS; inline public headers overlap and must not be summed. Preliminary debug allocation captures; final guarded release capture compared separately.",
+  "historical_9f_note": "Sealed earlier application feature control; retains its original separate-tree qualification, not recaptured as same-path here.",
+  "comparisons": {
+    "dfc4": [
+      {
+        "cohort": 0,
+        "candidate": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "control": {
+          "count_total": 2367,
+          "count_current": 479,
+          "bytes_total": 501865,
+          "bytes_current": 120549,
+          "ui_current_plus_inline": 121253,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 621,
+              "bytes_max": 178658
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -1018,
+          "count_current": -2,
+          "bytes_total": -131644,
+          "bytes_current": -1168,
+          "ui_current_plus_inline": -1168
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -2,
+            "bytes_max": -1168
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 2354,
+          "count_current": 470,
+          "bytes_total": 497137,
+          "bytes_current": 116549,
+          "ui_current_plus_inline": 117253,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 612,
+              "bytes_max": 174658
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -1018,
+          "count_current": -2,
+          "bytes_total": -131644,
+          "bytes_current": -1168,
+          "ui_current_plus_inline": -1168
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -2,
+            "bytes_max": -1168
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 2354,
+          "count_current": 470,
+          "bytes_total": 497137,
+          "bytes_current": 116549,
+          "ui_current_plus_inline": 117253,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 612,
+              "bytes_max": 174658
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -1018,
+          "count_current": -2,
+          "bytes_total": -131644,
+          "bytes_current": -1168,
+          "ui_current_plus_inline": -1168
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -2,
+            "bytes_max": -1168
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 2354,
+          "count_current": 470,
+          "bytes_total": 497137,
+          "bytes_current": 116549,
+          "ui_current_plus_inline": 117253,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 612,
+              "bytes_max": 174658
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -1018,
+          "count_current": -2,
+          "bytes_total": -131644,
+          "bytes_current": -1168,
+          "ui_current_plus_inline": -1168
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -2,
+            "bytes_max": -1168
+          }
+        }
+      }
+    ],
+    "width-contract": [
+      {
+        "cohort": 0,
+        "candidate": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1920,
+          "count_current": 477,
+          "bytes_total": 453237,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -571,
+          "count_current": 0,
+          "bytes_total": -83016,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1907,
+          "count_current": 468,
+          "bytes_total": 448509,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -571,
+          "count_current": 0,
+          "bytes_total": -83016,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1907,
+          "count_current": 468,
+          "bytes_total": 448509,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -571,
+          "count_current": 0,
+          "bytes_total": -83016,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1907,
+          "count_current": 468,
+          "bytes_total": 448509,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -571,
+          "count_current": 0,
+          "bytes_total": -83016,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      }
+    ],
+    "metrics-only": [
+      {
+        "cohort": 0,
+        "candidate": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1478,
+          "count_current": 477,
+          "bytes_total": 372729,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 616,
+              "bytes_max": 173869
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -129,
+          "count_current": 0,
+          "bytes_total": -2508,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 3,
+            "bytes_max": 3621
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1465,
+          "count_current": 468,
+          "bytes_total": 368001,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 607,
+              "bytes_max": 169869
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -129,
+          "count_current": 0,
+          "bytes_total": -2508,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 3,
+            "bytes_max": 3621
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1465,
+          "count_current": 468,
+          "bytes_total": 368001,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 607,
+              "bytes_max": 169869
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -129,
+          "count_current": 0,
+          "bytes_total": -2508,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 3,
+            "bytes_max": 3621
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1465,
+          "count_current": 468,
+          "bytes_total": 368001,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 607,
+              "bytes_max": 169869
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -129,
+          "count_current": 0,
+          "bytes_total": -2508,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 3,
+            "bytes_max": 3621
+          }
+        }
+      }
+    ],
+    "broad-finite": [
+      {
+        "cohort": 0,
+        "candidate": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1459,
+          "count_current": 477,
+          "bytes_total": 383613,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 623,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -110,
+          "count_current": 0,
+          "bytes_total": -13392,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -4,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1446,
+          "count_current": 468,
+          "bytes_total": 378885,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 614,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -110,
+          "count_current": 0,
+          "bytes_total": -13392,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -4,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1446,
+          "count_current": 468,
+          "bytes_total": 378885,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 614,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -110,
+          "count_current": 0,
+          "bytes_total": -13392,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -4,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1446,
+          "count_current": 468,
+          "bytes_total": 378885,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 614,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -110,
+          "count_current": 0,
+          "bytes_total": -13392,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": -4,
+            "bytes_max": 0
+          }
+        }
+      }
+    ],
+    "known-width": [
+      {
+        "cohort": 0,
+        "candidate": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": 0,
+          "count_current": 0,
+          "bytes_total": 0,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": 0,
+          "count_current": 0,
+          "bytes_total": 0,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": 0,
+          "count_current": 0,
+          "bytes_total": 0,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "deltas": {
+          "count_total": 0,
+          "count_current": 0,
+          "bytes_total": 0,
+          "bytes_current": 0,
+          "ui_current_plus_inline": 0
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "mounted": {
+            "count_max": 0,
+            "bytes_max": 0
+          }
+        }
+      }
+    ],
+    "historical-9f": [
+      {
+        "cohort": 0,
+        "candidate": {
+          "count_total": 1349,
+          "count_current": 477,
+          "bytes_total": 370221,
+          "bytes_current": 119381,
+          "ui_current_plus_inline": 120085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 619,
+              "bytes_max": 177490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1837,
+          "count_current": 381,
+          "bytes_total": 420402,
+          "bytes_current": 99992,
+          "ui_current_plus_inline": 100648,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 2,
+              "bytes_max": 184
+            },
+            "mounted": {
+              "count_max": 522,
+              "bytes_max": 154198
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -488,
+          "count_current": 96,
+          "bytes_total": -50181,
+          "bytes_current": 19389,
+          "ui_current_plus_inline": 19437
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 1,
+            "bytes_max": 56
+          },
+          "mounted": {
+            "count_max": 97,
+            "bytes_max": 23292
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1823,
+          "count_current": 372,
+          "bytes_total": 414686,
+          "bytes_current": 95672,
+          "ui_current_plus_inline": 96328,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 2,
+              "bytes_max": 184
+            },
+            "mounted": {
+              "count_max": 513,
+              "bytes_max": 149878
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -487,
+          "count_current": 96,
+          "bytes_total": -49193,
+          "bytes_current": 19709,
+          "ui_current_plus_inline": 19757
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 1,
+            "bytes_max": 56
+          },
+          "mounted": {
+            "count_max": 97,
+            "bytes_max": 23612
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1823,
+          "count_current": 372,
+          "bytes_total": 414686,
+          "bytes_current": 95672,
+          "ui_current_plus_inline": 96328,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 2,
+              "bytes_max": 184
+            },
+            "mounted": {
+              "count_max": 513,
+              "bytes_max": 149878
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -487,
+          "count_current": 96,
+          "bytes_total": -49193,
+          "bytes_current": 19709,
+          "ui_current_plus_inline": 19757
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 1,
+            "bytes_max": 56
+          },
+          "mounted": {
+            "count_max": 97,
+            "bytes_max": 23612
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "candidate": {
+          "count_total": 1336,
+          "count_current": 468,
+          "bytes_total": 365493,
+          "bytes_current": 115381,
+          "ui_current_plus_inline": 116085,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 3,
+              "bytes_max": 240
+            },
+            "mounted": {
+              "count_max": 610,
+              "bytes_max": 173490
+            }
+          }
+        },
+        "control": {
+          "count_total": 1823,
+          "count_current": 372,
+          "bytes_total": 414686,
+          "bytes_current": 95672,
+          "ui_current_plus_inline": 96328,
+          "phase_maxima": {
+            "spawn": {
+              "count_max": 10,
+              "bytes_max": 3532
+            },
+            "connected": {
+              "count_max": 2,
+              "bytes_max": 184
+            },
+            "mounted": {
+              "count_max": 513,
+              "bytes_max": 149878
+            }
+          }
+        },
+        "deltas": {
+          "count_total": -487,
+          "count_current": 96,
+          "bytes_total": -49193,
+          "bytes_current": 19709,
+          "ui_current_plus_inline": 19757
+        },
+        "phase_maximum_deltas": {
+          "spawn": {
+            "count_max": 0,
+            "bytes_max": 0
+          },
+          "connected": {
+            "count_max": 1,
+            "bytes_max": 56
+          },
+          "mounted": {
+            "count_max": 97,
+            "bytes_max": 23612
+          }
+        }
+      }
+    ]
+  }
+}

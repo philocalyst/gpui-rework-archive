@@ -1,0 +1,24 @@
+   Compiling cephal v0.1.1 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-browser-allocation-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 46.15s
+     Running tests/intrinsic_text.rs (/tmp/gpui-hummingbird-browser-allocation-target/debug/deps/intrinsic_text-cb4f0d8919b3f196)
+
+running 3 tests
+test explicit_ulp_adjacent_widths_keep_real_wrapping_constraints ... ok
+test unmodified_main_todo_add_remains_one_line ... ok
+test intrinsic_fractional_captions_preserve_single_line_across_padding_and_dpi ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+     Running tests/text_geometry.rs (/tmp/gpui-hummingbird-browser-allocation-target/debug/deps/text_geometry-372132b695150482)
+
+running 4 tests
+test zero_advance_unit_retains_visible_semantic_extent_without_a_damage_rectangle ... ok
+test physical_geometry_keeps_padding_fractional_dpi_reflection_shear_and_exact_target_hits ... ok
+test wrapped_directional_runs_cover_source_and_containing_hit_is_not_nearest_caret ... ok
+test old_p_and_eligible_c_keep_exact_geometry_after_new_l_reshapes_then_fails ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

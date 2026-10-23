@@ -1,0 +1,2361 @@
+{
+  "scope": "Complete external evidence tree at closure, including original alternatives, old/new outputs, complete assembly/raw allocation traces and frozen binaries. Targets are excluded; copied actual release artifact archives/ELFs are included. These are file bytes, not retained heap or RSS.",
+  "files": {
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/PREREG.md": {
+      "bytes": 2685,
+      "sha256": "94b4b4891674e60f62ebd55ce11825ee6e1848ee9bcafef917d3a94f04c7653f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/aggregate-comparison.json": {
+      "bytes": 4226,
+      "sha256": "975407c0d3a078fb1c719d2d443fea1612d4a6d85e11e6ef400ec7cdcbfa8442"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/analysis-errors.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/analysis.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/analyze.py": {
+      "bytes": 4538,
+      "sha256": "c175d3284fbed4feb6262ff03da3dae7b38d8782fcff620977f5865e26cd0005"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/app-lines-a11.log": {
+      "bytes": 6514,
+      "sha256": "154e64675f9ed1823036db6930985dae8c05512d335a79a6cc56e30bd1dec896"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-binary.json": {
+      "bytes": 515,
+      "sha256": "2d26675e4be4f8905b27e8b0a86d806c7020499e9225dc166d2ac2cafbc883b8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-freeze.sha256": {
+      "bytes": 260,
+      "sha256": "6467d6b28d6b08aef47a78cd1b1bb12c355f1dc31601c582db01f835dd015e29"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-frozen": {
+      "bytes": 204120552,
+      "sha256": "58d1276980ea77dc072fd250579a83c5d2695d0b135d170dc02b37eb991fb284"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-report.txt": {
+      "bytes": 10772,
+      "sha256": "ea5fe549d4f03df981a55e34867f10a0d82c06245461e3c8c47208e3230ded91"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-sites.json": {
+      "bytes": 298619,
+      "sha256": "347005db73c55c977ee5bbe78aedc78fec757b4a3d0a6c60bd8e2f85446a7ad4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-v2.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution-v2.log": {
+      "bytes": 3787,
+      "sha256": "b98792952ff20590fa3b24aec9c4ea3682839df6f1e2d7f874410b44c7ed66df"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution.exit": {
+      "bytes": 4,
+      "sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/attribution.log": {
+      "bytes": 1650,
+      "sha256": "362e6bb27969b22f3db68a0f213659514bc1629a5c4dd5e3441b84638d0e013e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/binary.sha256": {
+      "bytes": 65,
+      "sha256": "39b3ac3d63e3db63df708517b52cb892695a9c7e3de3999e9800caa315cf9a24"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/diagnostic-frozen": {
+      "bytes": 204087832,
+      "sha256": "1ab1346f883ab2c030b2e426428668fbfc21c7663150e7856bac5cb073db4edc"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/diagnostic.patch": {
+      "bytes": 1819,
+      "sha256": "dcceb4a37372bd1e66478c0e3fe13706492e7dc8f778a64eff2c6fb0faec1398"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/layout-before.rs": {
+      "bytes": 39306,
+      "sha256": "19e012b77be0881c0bba4c5fc075c1c893834492a511610aee17d8ca184fc29b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/layout-diagnostic.rs": {
+      "bytes": 39605,
+      "sha256": "fc266ef583332a6c5d726ca118c8380b0197e2b01ed476e87d6989f77aebf1fa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/run.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/run.log": {
+      "bytes": 1165860,
+      "sha256": "be9030e0c11f8714e66359050c60f141920b3945dcee61d4e5027569a42f403d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/runtime-before.rs": {
+      "bytes": 173282,
+      "sha256": "3e204e2d146bae93a50799f3428a08b6df744b93f4c66daaec27fc34ac096684"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/cephal-calls/runtime-diagnostic.rs": {
+      "bytes": 173536,
+      "sha256": "19a698ef10eac8bac180c7ea1d4a1ed19e6984d3e01ee5393a72fa2e6cbf5839"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/core-all.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/core-all.log": {
+      "bytes": 4584,
+      "sha256": "74e679b29a66ef6e73b474f68dc6a1b781a868f1895b8f6c78921d25425019f4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/core-lines-a11.log": {
+      "bytes": 45196,
+      "sha256": "d643b85366836a0b383be1d8d6beed5dc6d1befa13a9ef00c68b37b2d02d8365"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/binary.sha256": {
+      "bytes": 65,
+      "sha256": "830aab29817135361784c7f319f2557152d24c098d861794460709e37d6a6551"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/counts.json": {
+      "bytes": 51614,
+      "sha256": "f5c23d0e2bd6b4cb3e2c583e8b2262d4101befe1d7521c9565f9319469e9c66a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/decoded-operands.json": {
+      "bytes": 103575,
+      "sha256": "dcd339e8149c1bf3bdf0f6603b73d2c6c1581ed5968e06e74d7a0892d5dc21f8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/diagnostic-frozen": {
+      "bytes": 218643528,
+      "sha256": "ce3aba2b9073a2c587d86e41901a6c7868fba96662392acab3aeb3a6a452f27e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/diagnostic.patch": {
+      "bytes": 753,
+      "sha256": "1e78369f3fd7e64bc5684cf90ada64515e2d81608ee594cdcbc8fe55ffc37054"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/planner-before.rs": {
+      "bytes": 34067,
+      "sha256": "9b91db46a2429eb972955d6a502c9e938ab90062bed5b099bb6086bd75dafeb5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/planner-diagnostic.rs": {
+      "bytes": 34230,
+      "sha256": "d06cb37a3756939b8b961b45cdc201e1d8f0bd5ab1c4764fb1345d733ade29d6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/run.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-calls/run.log": {
+      "bytes": 47911,
+      "sha256": "0cca289b12f2ca1d3bc52090c5c8b84ffd7e9fdc432b4573ebe6611d818df9b8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-candidate/pin.txt": {
+      "bytes": 41,
+      "sha256": "6a670e0f8a05caa8d2b2a8391a759a9b393ab24051ffca27f9e9e975496d6cf8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-candidate/source-hashes.json": {
+      "bytes": 908,
+      "sha256": "02bb0128b8fd12ccf8d6be113a3ba6f1dd64515c33b5aecb1a7772f7f5e53603"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-candidate/source.patch": {
+      "bytes": 43989,
+      "sha256": "bcf7bab64862d8b1d4770081bf0a85ce6800f450705a833f6b313fab92d99efc"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-first.log": {
+      "bytes": 4152,
+      "sha256": "4960c7ec9cd85653acbbf0101064699dddd615315e755a1f5ccbca6c43af8ab0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-private-final.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-private-final.log": {
+      "bytes": 490,
+      "sha256": "07f926c94ca3c056f50cfa0e1c081ee638a63b611dcfab48fe29d3f9c518e86c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-private-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-private-first.log": {
+      "bytes": 708,
+      "sha256": "df9646fa116a6980e8048f48117cbf8643be60268eaec5871ea9f39ccb73a123"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/PLAN.md": {
+      "bytes": 2561,
+      "sha256": "d02d019ba3bb9f68f909a2cb910f8b4b3d64f0088aa60f374f282a467c837de9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/README.md": {
+      "bytes": 5090,
+      "sha256": "cbc0aa0d45307ce4887b868389bf4fc72776786647ff2a735148bee3dab1ed25"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/all-gate-exits.json": {
+      "bytes": 1198,
+      "sha256": "7e03031c4624a7998b7290f8a75136c283a91ff0db450d7b6f273ce87c276d0a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/all-public-shaper-frames.json": {
+      "bytes": 1665,
+      "sha256": "37f78b24c35fafef2495db71f998a5b22822ecdb5a5d92daac4af702be9f2bdd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/assembly-ledger.json": {
+      "bytes": 34966886,
+      "sha256": "5325d3647aaa288cbe6ab5acf05bbe0f250f3a835fce0c13c8b30c71bc67646d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/assembly_ledger.py": {
+      "bytes": 2929,
+      "sha256": "1ad39372b5f82595a17c032b3075d5cb1a0d0ffa133efb2c67c516e25b62cd88"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/attribution-compare.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/attribution-compare.log": {
+      "bytes": 649,
+      "sha256": "131a666b1184e3e3ea9197ecb61cfda9cacb6943839e6b37eb9b10f4d0be8bef"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/attribution-comparison.json": {
+      "bytes": 10931,
+      "sha256": "21a39313674af53cae09af2357bd8017e758b690bba0b3803287b1def3f8b695"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/attribution-parser-initial-failure.json": {
+      "bytes": 323,
+      "sha256": "f0ea62f685e36b38092da49ea64f0bf2335abeb20425ebe7252520a97fe42ca8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/attribution.sh": {
+      "bytes": 2304,
+      "sha256": "3f63e32087df7c1f417d6694de387e4759b9d671f3faef623896a74faaf2ca9d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/canvas-ledger.command": {
+      "bytes": 113,
+      "sha256": "d8215b36aefcd430cef8a9595c04811bf81c08ed709fa53dbcb27e951fa6cf20"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/canvas-ledger.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/canvas-ledger.log": {
+      "bytes": 2826,
+      "sha256": "e34418dee6832640f93fd4ed6084d1e90c819f29dcafde048fbb71b24af3a3e6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/canvas.command": {
+      "bytes": 46,
+      "sha256": "b55c0cc33b1ea35ef62a011da33c397f2fe299bac59c70ce85d666df01fd970d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/canvas.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/canvas.log": {
+      "bytes": 22541,
+      "sha256": "83a4ba974f56a85cacac5ab9efe5acec58729a234a4a1f3a2502a0c5ce0f768d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cargo-config-guard.json": {
+      "bytes": 300,
+      "sha256": "7d25f4a56a61c9397066737e0bf6d3699d64a7b1459e9648ec92c054883ef5be"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/clippy-default.command": {
+      "bytes": 109,
+      "sha256": "bc15a51097e9ef330a04b8a438e14f4f647415386d854346acce6b101a9031b7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/clippy-default.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/clippy-default.log": {
+      "bytes": 4275,
+      "sha256": "aa4f92323291f8ebcc3e9f1e0a8faa265000dd75b16f69872283c22a255edba7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/clippy-native.command": {
+      "bytes": 85,
+      "sha256": "b0e85c999d5c18d8041f57ed727361946dce5acebcd2cee3be4da07897264e4f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/clippy-native.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/clippy-native.log": {
+      "bytes": 7128,
+      "sha256": "b23b9cd924fdd2bb5f6ddda42e80b8c906f31622f8921a4eb4606ce36d112f23"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/compare_attribution.py": {
+      "bytes": 3898,
+      "sha256": "022d4f1afa515c2182774297e5fdefd9a5c0658d621cafbd9dba182caa549baa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/compare_static.py": {
+      "bytes": 2018,
+      "sha256": "ae5f7ddc4ab434e3488b0415d6a9239c0aa111971e6aed9e47c427f8f1f81a8b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/authority-constructor-bill": {
+      "bytes": 15233800,
+      "sha256": "46e802417a2e67086e75a0631d60910bb5cd441a8fd6080d7e1b7bf0001764d6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/libgpui-a7df7971da668c03.rlib": {
+      "bytes": 5603228,
+      "sha256": "8050eaf97892aeea1a3063b4d9fb24ba60ccc4faa51fd96227dd63110e8a0e47"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/libgpui_canvas-a68439ac3cff0c5d.rlib": {
+      "bytes": 7253118,
+      "sha256": "ace6be876e1935695ffa621bb01d1d7da012e286611831c202448b020c73980d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "bytes": 2917466,
+      "sha256": "62ce4d3564025987f905f8a96a4b804b822487bf5c792177c100f441ee4cda82"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/libgpui_reactivity_state-d8aba0459b795ede.rlib": {
+      "bytes": 109778,
+      "sha256": "a8d3954b2d992ea1c57fd31349b926cd90e6c689dd741700721b8a76c4423e9b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts/libhummingbird_gpui_port-646161ad5c635a87.rlib": {
+      "bytes": 7553146,
+      "sha256": "72b0564fcfcbea68a2a50a7ff2ce07314a71c2711198b1381f31928fbf82a365"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-artifacts.json": {
+      "bytes": 3678,
+      "sha256": "45b7b57b7a7db281f4b87c034cfd998bf39f306be8e427ea8ff956bb188e2498"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-deltas.json": {
+      "bytes": 40558,
+      "sha256": "8e4be16240debc016be074a666df9f3e368f709d321111bdd8225a96df153c40"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-freeze.log": {
+      "bytes": 3679,
+      "sha256": "0e2369ab4c0e6efe236a8a8c62c0711fc0393d62999362438a433002cd69c1b8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-ledger.json": {
+      "bytes": 20327,
+      "sha256": "72daa812bfe0c25d95457fdbe44d84516cc45d2fcc1922a7056d9deaa3328cb5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-build.command": {
+      "bytes": 148,
+      "sha256": "4a67344b0a4533ce0269831cb3381f9f54efd3fb07a4d434e9b8f3830d82cee2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-build.jsonl": {
+      "bytes": 113583,
+      "sha256": "c7ea7f42a033c681e0b5485b0cb329660a3ec9bc73e728127e94ddc84c7fac82"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-comparison.json": {
+      "bytes": 18168,
+      "sha256": "59f4549a1506a44c263866f38ca0dc4099674f8457f5ff02c8fc47325f5874f9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-runtime.command": {
+      "bytes": 162,
+      "sha256": "669535aecfa8749b76a58ac5b0d3c283fee4bb6b45bb499358c56d9b2445c55a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-runtime.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor-release-runtime.log": {
+      "bytes": 2056,
+      "sha256": "925bc90b7514f0af6075054560e74d8dfec0ec93030cfdeb714cdbccb8511734"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/constructor_deltas.py": {
+      "bytes": 2298,
+      "sha256": "f9203bffe5244382a2c4e37e139a2ae98fe6682c6b8a467e9208de5307c19cca"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core-layout.command": {
+      "bytes": 73,
+      "sha256": "af6b679496613a6f7e76773d8a13c714b6c7c472e6062d3c18c4bf17edf91e7d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core-layout.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core-layout.log": {
+      "bytes": 4585,
+      "sha256": "6bc7889df04aff205fa2e13decb571d3e1646cc9da91590bc878c2a157c3892e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core-lines.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core-lines.log": {
+      "bytes": 45196,
+      "sha256": "b6fa04f6055d45784b33168e38584f3ebb6fd09054c160a52705dbc6672775da"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core.command": {
+      "bytes": 55,
+      "sha256": "bd0269b5e7d83856f08cc320870cbf9dbe2d5f3bbf3646b9c480fe1e369abe11"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/core.log": {
+      "bytes": 2527,
+      "sha256": "d6285ce66d1a541aeefeb977f23255b4c873e21821998aba30057f8fbc81b90e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-aarch64-apple-darwin.command": {
+      "bytes": 161,
+      "sha256": "9f489bdea71e19a68d8d1a6721738ddf8261737912c8e972a84ca8da88cd699a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-aarch64-apple-darwin.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-aarch64-apple-darwin.jsonl": {
+      "bytes": 199602,
+      "sha256": "f1c135336836f4239e5127ab16f9a55a0d6242c6a642c1c97e51833dae4acae6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-aarch64-apple-darwin.log": {
+      "bytes": 8544,
+      "sha256": "1f5c9330c751078d4b23f46a53488648196d033e7315b34c8a4168e4964e336b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-source-after.log": {
+      "bytes": 27,
+      "sha256": "a8c06fa5017208a2fd4b1ff2da0871ec701cd092700bcb45bf6dcbf0d6037cd2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-x86_64-pc-windows-msvc.command": {
+      "bytes": 163,
+      "sha256": "6e5d5e84ea73c04ea7e2a3a2b989e29351c5e39611cb35e7bc0bc9815cb20baa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-x86_64-pc-windows-msvc.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-x86_64-pc-windows-msvc.jsonl": {
+      "bytes": 200658,
+      "sha256": "8f4552371345f3940597792c30740c7db4d6b0396b88673af79406058d648527"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross-x86_64-pc-windows-msvc.log": {
+      "bytes": 7915,
+      "sha256": "345a15f6a32dfe0263a3f0e02d85d98fd18d8d092f5b6cc4e181f2833510ebff"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/cross.sh": {
+      "bytes": 1245,
+      "sha256": "a43f19bcf54300cdc1b98163deff072e2c8ff92adb2186abaa1a72eee258934b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/dispatch-and-count-traversal.json": {
+      "bytes": 42590,
+      "sha256": "0787ea48aecb27c762739b0232c958269e90f0625da00c5bd6a4a4635427542c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/final_ledgers.py": {
+      "bytes": 2879,
+      "sha256": "fda3b32743f6b2ba0e31d0b2d0dc9b0612470674798bff89f947f5211dc16912"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/frame_bill.py": {
+      "bytes": 2304,
+      "sha256": "6e8788095732a0123a256230503e47effe6d7c8493b6c43a3dc65553248f54ea"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/freeze_artifacts.py": {
+      "bytes": 1290,
+      "sha256": "bbe1a880265c5357ab44ac4a67d20b8bfceb63cca6da7b8d438842003c95ab7a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/functional-progress.json": {
+      "bytes": 1479,
+      "sha256": "da3abb4841c671c2b18cfe48235389c96199207e3a5bced898964f87d3749ef1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/functional-source-after.log": {
+      "bytes": 27,
+      "sha256": "a8c06fa5017208a2fd4b1ff2da0871ec701cd092700bcb45bf6dcbf0d6037cd2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/functional.sh": {
+      "bytes": 2083,
+      "sha256": "d328bf1329e55ed4f894f011373fa3ed4de4babe1478973ca7b0e2472168263a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-default.command": {
+      "bytes": 39,
+      "sha256": "b61e664334063fa4956cf7091113146776961cb8f82e25264014b5b8664c96df"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-default.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-default.log": {
+      "bytes": 65519,
+      "sha256": "d4527135bdb1b36882df86d1977d2e3333a83fbdee58d4633d839bc6c6e93e19"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-ledger.command": {
+      "bytes": 116,
+      "sha256": "39f946a117134c403b7ce629d867fd673344c6556a2b051609fa3db491055b8c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-ledger.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-ledger.log": {
+      "bytes": 1340,
+      "sha256": "9a174cee2d06c5c1b6bbc989dd621ca7c0a7b81f9a357db23defb662bab02eb0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-native.command": {
+      "bytes": 54,
+      "sha256": "5af51b77338d7f617ef6e8249f2fad886a8aae6f5db190c5a808464262d6d152"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-native.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-native.log": {
+      "bytes": 78651,
+      "sha256": "28245a7c727873a8e69661c7d9a39efc134226606f37129365e024c23a284389"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-verify.command": {
+      "bytes": 113,
+      "sha256": "a8d991eeeb6e7a13b8fa7ad3a6191c5c241412e9cd0fb415e16abbc908299706"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-verify.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/gpui-verify.log": {
+      "bytes": 1545,
+      "sha256": "35354cd3afa9f88027c17c8d9ca97e5f2113c7ec2a7bbe295867160b751a923a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/guard.py": {
+      "bytes": 585,
+      "sha256": "994ba7f3e07870bed012f8cdd77520b26f964cc69610c55b4cb4edd6c0c755f2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/headless.command": {
+      "bytes": 89,
+      "sha256": "140824e4f7fdacf1b031474b50760133982d8bbe227f8cdb1521c8e1aab5c7cd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/headless.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/headless.log": {
+      "bytes": 673,
+      "sha256": "fd94bb226a429924825ff1051541ce73b1f58f20a16f49ac21de9b1611b4a4db"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/important-frames-baseline.json": {
+      "bytes": 611,
+      "sha256": "858acb24d817ab3a1bf11e11e9e28fadaf639c2e3641fe768529cef5c999e8ab"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/important-frames-candidate.json": {
+      "bytes": 1424,
+      "sha256": "337959ccb071ffefeeb9646a7b6df409fa070a5b93a1faddb4f666c8aec8478b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/actual-compiler-command-sample.json": {
+      "bytes": 1423,
+      "sha256": "11683e4da10cc70e4aac37dcb09a885f4b19d9df0851655b9ad6b0fcf9598b53"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/analysis.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/analysis.log": {
+      "bytes": 10714,
+      "sha256": "2ff31aa5d42606ce714fdf5b08df7479fb2ac46ed51f4285e4833a66109c595a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/analyze.py": {
+      "bytes": 4538,
+      "sha256": "c175d3284fbed4feb6262ff03da3dae7b38d8782fcff620977f5865e26cd0005"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/attribution-sites.json": {
+      "bytes": 298665,
+      "sha256": "c5a7d0682ee257fd25841c5dba8bbc4211d7301483f9aa5b498ca0a6443b6f47"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/binary.json": {
+      "bytes": 1081,
+      "sha256": "75052501bfc0d860cb84b374cbcb9feef724bd12555bfc43329e929c26a76db7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/browser-allocation-sites": {
+      "bytes": 218712368,
+      "sha256": "c2757bf068c6d9b4e90601a7b577a451e61a5fd54abf2b51284db02c1845aa80"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/build.command": {
+      "bytes": 136,
+      "sha256": "cd134210defd05a65079536cbd2831bdb328d69221ad630516cc94fbac3b0f50"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/build.jsonl": {
+      "bytes": 110079,
+      "sha256": "c30dbe4bf7d00c454872d72d09081a1a4d5555dedddd89bfc9a0dfe629fb69cb"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/build.log": {
+      "bytes": 5712,
+      "sha256": "eaf71cf2996aaf9766385d4ce0f48a12bcbe370d7120b93da39e66bd62a0f6b7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/pointer-reuse-review.json": {
+      "bytes": 33303,
+      "sha256": "da78047dc04e7e6d46524155dd7f1ef0f9b86f3aa5da4745e6faa48f683f392a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/0-connected.csv": {
+      "bytes": 986,
+      "sha256": "99e3306f2de4f57a02d6a90602822de9b565190245f6f5b8e7cb2eeeb761865e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/0-mounted.csv": {
+      "bytes": 1165706,
+      "sha256": "8c111162c993a799b919853577d0bb5aa6f78b9f65acf25845b1cff5c60d29c6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/0-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "6cf99ed4d5c8f869df264185bbba4f55d7c7698951098896e2094f4454190e2b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/1-connected.csv": {
+      "bytes": 986,
+      "sha256": "926929cb382619eb8981e64ad68c740871d4fe3ff2b7a6a138e667a540e84c10"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/1-mounted.csv": {
+      "bytes": 1156397,
+      "sha256": "1b337254f1862e3e4c4eca765ed547ef09d99680fc8c14b38f83cec61872f700"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/1-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "c9f5c46b94fbf70c7bd4ee0f880de46ba94e6708f175a96e3d1ca062eb8dfe5d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/2-connected.csv": {
+      "bytes": 986,
+      "sha256": "47ead99c8d32dbaa65067192ec5ae0b9b18371e712917d5dedcbc1dfad279000"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/2-mounted.csv": {
+      "bytes": 1156397,
+      "sha256": "cf6cb476c5cead21b2c9f5d0e15d00d73dca30b3815f25bd4bc22141cb27b9ad"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/2-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "615c3b3ec1a8793d3f7fd037e351fbe90f03db9aba039603a0b01d35e0ed5785"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/3-connected.csv": {
+      "bytes": 986,
+      "sha256": "5e67743593883cf35f04844dd29ee451b6f240f62670aee0d49ee8d0a1a54a5b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/3-mounted.csv": {
+      "bytes": 1156397,
+      "sha256": "d2fc4c43a37776a0c947c50ff47dca49154d22a3ba384f2b1e0dbca453d7b018"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/3-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "1415a90e1d6ef4536faf7fbbcabf9773ea07cbf9fb518445329f55fdcb44199e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/exe-base.txt": {
+      "bytes": 13,
+      "sha256": "890fdf6f419cb780553c59fab0609465d733adb6c1b633c947cc0140e630cf33"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/raw/maps.txt": {
+      "bytes": 4873,
+      "sha256": "11cecaa0840d20acb0be58f9807d8d338fe1a87e1d55c044053fd5448cd9e599"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/runtime.command": {
+      "bytes": 248,
+      "sha256": "1f4cad5e0399e945fe2ffae8bcf5eb4cd62a906ab486a2bb2497b31b39631bc9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/runtime.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/runtime.log": {
+      "bytes": 2074,
+      "sha256": "045b651fa180f3e59d12ae8baf0a5294183ac592dbb81b442c33db45ed3414d8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/source-after.log": {
+      "bytes": 27,
+      "sha256": "a8c06fa5017208a2fd4b1ff2da0871ec701cd092700bcb45bf6dcbf0d6037cd2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/source-before.log": {
+      "bytes": 27,
+      "sha256": "a8c06fa5017208a2fd4b1ff2da0871ec701cd092700bcb45bf6dcbf0d6037cd2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/symbols-raw.txt": {
+      "bytes": 579658,
+      "sha256": "2151899b2f4db7e684c5f607a51c5c515e5fd55b248b0166d3d7f9ce3f1122c3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/known-attribution/symbols.json": {
+      "bytes": 649694,
+      "sha256": "f000c51b23b259a3791bf793c7eaff4c13dcdddd27aebed476ab8951db40e955"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/capture.json": {
+      "bytes": 1466,
+      "sha256": "7300e6603ee9edb23007a01a6fa2c8fd156767353cc7b93b9427e13cc2344f69"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/compile.command.json": {
+      "bytes": 1056,
+      "sha256": "40ab41949e562eba00aa72079f4aa5795fcf0be9896e4ec60e7bde6c32d616d2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/compile.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/mixed-caller": {
+      "bytes": 5381736,
+      "sha256": "3ca045ab76e767d8cdc5785d6d1adeeda2ee84b46e3745fd660c797e6423fa62"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/baseline/runtime.log": {
+      "bytes": 6184,
+      "sha256": "97eedd8b90224261ef50b4d03db4c25ad54109f43f4d5d710ab6cff5c06da644"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/main.rs": {
+      "bytes": 3082,
+      "sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller/source-freeze.json": {
+      "bytes": 364,
+      "sha256": "b8ce68b10187095ce2087f6080786ba712d527224c150720b7e3ed44ec2daae5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline/capture.json": {
+      "bytes": 1481,
+      "sha256": "f009f364c06ffdf6bfd387c4e3ecc77e8ff4a941f4ab60320d07770eb575ff5b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline/compile.command.json": {
+      "bytes": 1065,
+      "sha256": "0ce1afa76968674db0dac22ec69f4b1bcbba6320f201699fcf0cb0adef2c5b95"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline/compile.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline/mixed-caller-v2": {
+      "bytes": 5381736,
+      "sha256": "c3970555f80d89bd6b8e1aef400ebc409ad79ce2ac9d2bc073029904cbeb85d1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline/runtime.log": {
+      "bytes": 6184,
+      "sha256": "97eedd8b90224261ef50b4d03db4c25ad54109f43f4d5d710ab6cff5c06da644"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/baseline.json": {
+      "bytes": 430,
+      "sha256": "e027a81aec774b1c8ba3a78f4023afe350942bc8c9de675724c99852cc088fa8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/capture.json": {
+      "bytes": 1474,
+      "sha256": "3fcaaeb1662c18ba3d2dbb80b9802dc2e45461bcf5bcf3503ff6e638c7014a2c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/compile.command.json": {
+      "bytes": 1057,
+      "sha256": "b7b2fbb6b009324fb45fc27daa23743913f7c4f4555cb82a6ba40ac6632ed310"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/compile.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/mixed-caller-v2": {
+      "bytes": 5827072,
+      "sha256": "46c61fafca03c7f16827086134fc8ee38a06ef55c35cc0bb26f1a929e25bddf4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/runtime.log": {
+      "bytes": 6184,
+      "sha256": "97eedd8b90224261ef50b4d03db4c25ad54109f43f4d5d710ab6cff5c06da644"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate.json": {
+      "bytes": 432,
+      "sha256": "77f63b6491d28651b814ecfdd12c4cf7135440012cc1de77af967bfbe05c8d50"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/main.rs": {
+      "bytes": 3082,
+      "sha256": "8843c46d3d7bc1fbe5db6cf346bafd2e42ba2601855459b08f5b9d74b1d3b87d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/source-freeze.json": {
+      "bytes": 500,
+      "sha256": "05fa66bedb0c78fac1be84ada663281ea6954683e170bcaebed3a8398901b509"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libgpui-c47fc36e702f939d.rlib": {
+      "bytes": 6898894,
+      "sha256": "228527f7c29b2ed9df013c0807f016b159027af7f4bc2b8e5378a4449b04c87c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libgpui_canvas-1de80d4b918bb5d5.rlib": {
+      "bytes": 7248142,
+      "sha256": "4cc5f8d88a36a8b4aef97576266eb37e4f38e15bb6996f4937faa47b5f934232"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libgpui_gpu-f5b84b1ee8dfe36a.rlib": {
+      "bytes": 1749578,
+      "sha256": "d61745a6c166e3d88305a236392d35d5d17bc5e667553ccb8e781b523f935c84"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "bytes": 2917466,
+      "sha256": "62ce4d3564025987f905f8a96a4b804b822487bf5c792177c100f441ee4cda82"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libgpui_reactivity_host-d8c31c402a77eb4d.rlib": {
+      "bytes": 106374,
+      "sha256": "b27c4f4419131b6b0caf033ca4b4c690d86de78225637800db14b2baec2da0ea"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib": {
+      "bytes": 109778,
+      "sha256": "7b0d30111ed58337c198e9072694b40806ec3f942dc842d7aa6c504f7ccfafc6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/libhummingbird_gpui_port-f32d631e14ab0246.rlib": {
+      "bytes": 7712074,
+      "sha256": "61034991a2cc039f76134a1a50aeded355e5adc86739d01a2136064710ee4e29"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts/native_service": {
+      "bytes": 32689472,
+      "sha256": "a55b8edf26188a225cdc7b3503513f1d2cbd55adeb6597fe0a5bd1719e64bca4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-artifacts.json": {
+      "bytes": 5074,
+      "sha256": "32ddafbf5ea1fbc0034a24f6e27b71237da6ce5f429b487713db30735409d0bd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections/after.json": {
+      "bytes": 102179,
+      "sha256": "7c11ae370a1d1892c5613e518cdf62c53295e1aefa91ffc91b5ae2e3d9cd304d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections/before.json": {
+      "bytes": 102179,
+      "sha256": "7c11ae370a1d1892c5613e518cdf62c53295e1aefa91ffc91b5ae2e3d9cd304d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections/events.json": {
+      "bytes": 5469,
+      "sha256": "07b38cbb073aac83f3d3f480438167556d020ea013271d69e087175f024e6b0a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections/native.log": {
+      "bytes": 3594,
+      "sha256": "bee53c3db326a6e5c9e4651f8ad59249defade335fec00d27f050b59416fdc44"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections/result.json": {
+      "bytes": 6266,
+      "sha256": "2a81025e59129d5357e9ff4df5f38abda287d0b0a99e41298873a379a9f31819"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections-after.json": {
+      "bytes": 118,
+      "sha256": "fbb4de49323b3610b48880ef1c5b6927ad905e840dabbcc6385aae229b0797b5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections.command.json": {
+      "bytes": 625,
+      "sha256": "a5337929c62b0e800e4fe3c1eaa9b61aeb66223e7bf27b4c554ca2e1264bc6b8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-collections.log": {
+      "bytes": 94,
+      "sha256": "1a828b090a77732cfc373266484a6c64cc9842cf9feda0cd06917a089046104c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default/after.json": {
+      "bytes": 102179,
+      "sha256": "7c11ae370a1d1892c5613e518cdf62c53295e1aefa91ffc91b5ae2e3d9cd304d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default/before.json": {
+      "bytes": 102179,
+      "sha256": "7c11ae370a1d1892c5613e518cdf62c53295e1aefa91ffc91b5ae2e3d9cd304d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default/events.json": {
+      "bytes": 3678,
+      "sha256": "77493f86bfe9f80022b2fa67757b4ef39dafa62ecc93ad68834253ee62651340"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default/native.log": {
+      "bytes": 2428,
+      "sha256": "fb03e513b78251eaf86adc278159a0487fb2349a53dd501c7d40b376e90cdbef"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default/result.json": {
+      "bytes": 4294,
+      "sha256": "4d350e811c62f7614226077d1e81677d1c5da4491a0fa9017c600a96648439ed"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default-after.json": {
+      "bytes": 118,
+      "sha256": "fbb4de49323b3610b48880ef1c5b6927ad905e840dabbcc6385aae229b0797b5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default.command.json": {
+      "bytes": 600,
+      "sha256": "e6707e5b06598cad253c95717c4c4459d46707f991c977f1f44bd5e8fb97bdac"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-client-default.log": {
+      "bytes": 94,
+      "sha256": "1a828b090a77732cfc373266484a6c64cc9842cf9feda0cd06917a089046104c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-clients-driver.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-clients-driver.log": {
+      "bytes": 108,
+      "sha256": "5100ea0f41bc1c0479a0712f1f48c1dd7b99aaf77cd435a0be321007abac1ddf"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-clients-summary.json": {
+      "bytes": 1323,
+      "sha256": "18035deb86894df98653ab6866306ad64103106ffae34d03293e20a585ae29a4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-freeze.log": {
+      "bytes": 5075,
+      "sha256": "5f111ada0f30eacad51ee62aeddf0fe96ad886a6af74166b7199356613187b2e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-public-summary.json": {
+      "bytes": 1439,
+      "sha256": "50803c57b79fd1428ba51caeaa2b717675ebe9e526357bff0a7e52fd7ad01db9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-release-build.command": {
+      "bytes": 152,
+      "sha256": "cc2b7af64467b1a37856d37b0d8eb46997da8466ca0483c370f61e16e9f7d853"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-release-build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native-release-build.jsonl": {
+      "bytes": 302214,
+      "sha256": "ac88ceb4cdee037bb2b8bdd7315dc1597060783a4073cc3a83c0055ea35fb661"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/native_clients.py": {
+      "bytes": 1941,
+      "sha256": "5b2a53c71b5fb47843fbe9862f7ea660ff6ff4d4cf149e33ae50e35e7f9bcf16"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/next-application-domain.json": {
+      "bytes": 6621,
+      "sha256": "656ca0a37de2b70a52114cb206f1f2bcf74224efa6ea057a1f1c137214c6e0e5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized-callers-driver.exit": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized-callers-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized-callers-v2-driver.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized-callers-v2-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized-public-controls.json": {
+      "bytes": 57188,
+      "sha256": "efad8412e1e9948e5ebd539de3274ad5e0525738b0653e26d3a7479c3a7b1871"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized_callers.py": {
+      "bytes": 3684,
+      "sha256": "8b73755e188e5c49e3e748784880e1f5bca47771735299468092768020f84bdd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/optimized_callers_v2.py": {
+      "bytes": 3693,
+      "sha256": "cbd20bcd8560fe97b531271436e191235210566a538b6bb6808064088ee8aa2e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-after.json": {
+      "bytes": 160,
+      "sha256": "2574f673dad91d50a68c618407b9d8517e638739bcffa0ceab1186fa99136943"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-before.json": {
+      "bytes": 160,
+      "sha256": "2574f673dad91d50a68c618407b9d8517e638739bcffa0ceab1186fa99136943"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-build.log": {
+      "bytes": 272,
+      "sha256": "8d3fb32c1b7258c10d4edb53593d214d651e484bb3175ae5f4dcb08008b7c92c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-comparison.json": {
+      "bytes": 291,
+      "sha256": "2d45b30a6b42b152d8c21af991b219ff915508d01a513ef60a05f0b68d5b4bdd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-frozen": {
+      "bytes": 10430784,
+      "sha256": "37bb47060498761e84c6a152089a56dd8f66995399241cbb7e4dbc0e5081e419"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-output.txt": {
+      "bytes": 285940280,
+      "sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-runtime.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/oracle-runtime.log": {
+      "bytes": 39277,
+      "sha256": "475b198f0fd2b9e29f129cacc5a270803f461f784a310da1722d6dad1699ba00"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/parse_callers.py": {
+      "bytes": 3540,
+      "sha256": "6b8b6d5eb64941349572494945f27d2cb96e60136dc5e878114ea22563b13501"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/parse_ledgers.py": {
+      "bytes": 2681,
+      "sha256": "04d054cc79ca0942d9ef6a931298db47cd160ed31710be7e5fc3eed2d601fd6e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-clippy-default.command": {
+      "bytes": 107,
+      "sha256": "e1dae0a03a105d683ab65697eeee4e17adc1bbafe12679e868a07ac0cee3eea5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-clippy-default.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-clippy-default.log": {
+      "bytes": 2479,
+      "sha256": "22f1a66e1f7c09206b6b529048390b9dc706c9c03bc5b5d15aec034cb22f63b2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-clippy-native.command": {
+      "bytes": 125,
+      "sha256": "4241bbe5af0d96212b70d7e73ae288dcc7ce2b02c826605c9ec6f3e55275f4c1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-clippy-native.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-clippy-native.log": {
+      "bytes": 3144,
+      "sha256": "20450ccefd350ee04083b9ca84d450a4c05567b5447abe74fac8994f4bf2a707"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-cpal.command": {
+      "bytes": 99,
+      "sha256": "0a1517082b573be3117ed225afdd9d5cd7c299d9322969b707249d76b58d4fd7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-cpal.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-cpal.log": {
+      "bytes": 15752,
+      "sha256": "599038c3ec46cdd5192e924cf9033507a0de9ca7d1b353d64f071aa9bd6ef074"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-default.command": {
+      "bytes": 76,
+      "sha256": "b144e6f5cc674f22b09053de7fbf622d7c6c41f4fe82f4de109b231d5ce35ca5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-default.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-default.log": {
+      "bytes": 9387,
+      "sha256": "a992f427b0e4f18bcd87f3c22608486b2ce9d2e3038fc50148ca3dfb7736e118"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-native.command": {
+      "bytes": 94,
+      "sha256": "b0be081bd694c0ef5e80d9eef6fda95f6e8f437536171b893525c7f556eeae49"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-native.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/port-native.log": {
+      "bytes": 23605,
+      "sha256": "6a74fde7c6db966762b2c1a56d2b5a02ade90fb33f49367057568a128acea379"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/baseline/compile.command.json": {
+      "bytes": 1372,
+      "sha256": "9fc65e831a1d0734c81bc4f6c9b23bcbf7cc43250557928556c785e300cf2b59"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/baseline/compile.exit": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/baseline/compile.log": {
+      "bytes": 1107,
+      "sha256": "b4e05a8e1e8d341cba83fdcf132071ad22d7345ff887cc55eea4c42ce266fa14"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/main.rs": {
+      "bytes": 4090,
+      "sha256": "abffdfab85ace58eaab76cf1fde9d7a312454104cb8a25b955ada9a818d123f3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/source-freeze.json": {
+      "bytes": 372,
+      "sha256": "bfd07c7c489b743d114a736c2208dcfecc4895ceec89b5a465f32bebd61db695"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/capture.json": {
+      "bytes": 1813,
+      "sha256": "8c02ae605c6c0b08e97b0f8c2e9621550709c34c910f7dc392c688561f966b2f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/compile.command.json": {
+      "bytes": 1381,
+      "sha256": "d5f39a11570b79613d2f033dcf95c96c464fc98cb95fe02afd3f7500dbab1efd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/compile.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/public-geometry-cost-v2": {
+      "bytes": 16204744,
+      "sha256": "71a4e228bdaf7e6bc27e6323e810d2033729d6cd7b1cd815069bd02becebb936"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/runtime.log": {
+      "bytes": 2983,
+      "sha256": "4454cdf7646b0b1fb8c2deef79034c1af8384e19f1098a4289a8d048a5147a52"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline.json": {
+      "bytes": 462,
+      "sha256": "72af2abe04b405a11358a8ed75165e34b43910b2c9a49b41af3a2dbf3f0cbea0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate/capture.json": {
+      "bytes": 1763,
+      "sha256": "d60c0e13f2296bf9e3716fadda5947fd72ac741afa5e26b1159aea1278a854cd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate/compile.command.json": {
+      "bytes": 1330,
+      "sha256": "7e26e0a6c4f63cd0dbd6b3bab60544ed3de26700dc3a3a7f9b61ee76efcd6e61"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate/compile.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate/compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate/public-geometry-cost-v2": {
+      "bytes": 16249160,
+      "sha256": "e582617c37523bcfbcd6e16c713b2f89d8a016bf56cfd4768bb58a873c33b703"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate/runtime.log": {
+      "bytes": 2983,
+      "sha256": "69a60fc164f28fe32e2605143feed12a990671d1677ea37b7b839a94ab34dee6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/candidate.json": {
+      "bytes": 464,
+      "sha256": "b4e8d5b9911172e507ff36f4675dd15200008a1522410122d5ef42625f3faec0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/main.rs": {
+      "bytes": 4096,
+      "sha256": "74926185702d3567b13627d10ef1c0068b41f889d1e23768eae454722b812dfa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/source-freeze.json": {
+      "bytes": 508,
+      "sha256": "08bdf00e0a1109093dba0ef37933556957b131cef6e95738e2c99932e82616c1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/remaining-source-after.log": {
+      "bytes": 27,
+      "sha256": "a8c06fa5017208a2fd4b1ff2da0871ec701cd092700bcb45bf6dcbf0d6037cd2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/remaining.sh": {
+      "bytes": 2313,
+      "sha256": "9ac555c052ddb9883d9ff69436ecc28ade5d2cce315724a766fe697338df164b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/scoped-fmt.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/scoped-fmt.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/seal.py": {
+      "bytes": 8429,
+      "sha256": "e40d5e5c86fa7585bbfa565afd6cd8c35c9c09a8b343399d536dac925da14d32"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/source-guard-scope.json": {
+      "bytes": 1381,
+      "sha256": "43298ecf96c7f80dc8f1113512f1f15821172d86843d881963e7476b6baa30ca"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/source-guard.json": {
+      "bytes": 268583,
+      "sha256": "a38ebc868dbd8928470d4ca22158ba9d0ff84021f795ab6996432da9d9b84e81"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/source-pin.txt": {
+      "bytes": 41,
+      "sha256": "6a670e0f8a05caa8d2b2a8391a759a9b393ab24051ffca27f9e9e975496d6cf8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v2.exit": {
+      "bytes": 4,
+      "sha256": "743c7850cccfba5e53a9002663ec1ddd1079315a98bdbfdde10e6044f56abefe"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v2.log": {
+      "bytes": 68,
+      "sha256": "3414416a29352a35ff4ca402250a6f3db4856f917bf04b751689861118fa7866"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/authority-constructor-bill.nm": {
+      "bytes": 1511980,
+      "sha256": "3cd3e4008835c3c2587406e0931b48330e21f44528b3119ffbf951d72ff9680a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/authority-constructor-bill.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/bill.json": {
+      "bytes": 4596374,
+      "sha256": "62aff9fccdb2ec7ad6301b969d0a74a25699f5186497aa95c124a012a64e50fc"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui-a7df7971da668c03.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui-a7df7971da668c03.rlib.nm": {
+      "bytes": 115558,
+      "sha256": "c915f14d48392465dc53ebb0aaba3108547ec04b1fefb3ed78aeac63c1da3eb6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui-a7df7971da668c03.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui-a7df7971da668c03.rlib.selected.asm": {
+      "bytes": 6276,
+      "sha256": "6d3c870a9bbbf9257944f5dc28f4a050eca92042d8918875a34729db6fc947ae"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.nm": {
+      "bytes": 165360,
+      "sha256": "966c0182bb746eb263d6a50275ecce8bcd1001d2a5226a37b589a76d72610b1e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.selected.asm": {
+      "bytes": 332202,
+      "sha256": "1ccac387e1c16e5ad934ebe348223799e06eabc10ba39c114e9bc4c4a5b78695"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_reactivity_core-92df8da154377e11.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_reactivity_core-92df8da154377e11.rlib.nm": {
+      "bytes": 281594,
+      "sha256": "7ed307d43f88de15752f25b75f014793f15ed669f9630555675d120c6ccc6c47"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_reactivity_core-92df8da154377e11.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_reactivity_core-92df8da154377e11.rlib.selected.asm": {
+      "bytes": 7362458,
+      "sha256": "86352d8e315483a0697c5cc3febeda386056c2bda7ffe48bebb3c4d8bd46398b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_reactivity_state-d8aba0459b795ede.rlib.nm": {
+      "bytes": 884,
+      "sha256": "f59113a8538eab51fcfefc49a7a3270a9b9104b09349dc154fe91c7aaeb0521b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libgpui_reactivity_state-d8aba0459b795ede.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libhummingbird_gpui_port-646161ad5c635a87.rlib.nm": {
+      "bytes": 1026774,
+      "sha256": "6be90a9d4a3478df385ed8625db523086d46da8ae1cfc21468e83fd7e0b5680d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3/libhummingbird_gpui_port-646161ad5c635a87.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-baseline-v3.log": {
+      "bytes": 1489,
+      "sha256": "8e68e305bcc425bff438bf785d850f022b5f1b88063a5afe7b2acddede28e8fb"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v2.exit": {
+      "bytes": 4,
+      "sha256": "743c7850cccfba5e53a9002663ec1ddd1079315a98bdbfdde10e6044f56abefe"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v2.log": {
+      "bytes": 68,
+      "sha256": "adea59948d1239d43f415487276b5c0266a651eae0216ae5ae4b8b4beff114d5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/authority-constructor-bill.nm": {
+      "bytes": 1547587,
+      "sha256": "00aabeef7a0922de6bb6f3f26e11d8eb7e1cb4dc6fbec9a65248ef9797ef88dd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/authority-constructor-bill.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/bill.json": {
+      "bytes": 4713074,
+      "sha256": "a9f2969260d37a9e0e388a11eefb66733defde0dfffe7af36b3e025f0dc4d270"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui-a7df7971da668c03.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui-a7df7971da668c03.rlib.nm": {
+      "bytes": 115662,
+      "sha256": "11216d8970d536bb144838ec592b097cb80e41a6f15b8bca9657465dae3c4701"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui-a7df7971da668c03.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui-a7df7971da668c03.rlib.selected.asm": {
+      "bytes": 9569,
+      "sha256": "c631f7f426cfa8c33fca0a8c4615f213071fe82b69aab69e7fcce9eb503bdea1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.nm": {
+      "bytes": 171495,
+      "sha256": "018afa9edbaa923806325527a09a78d0f56f52f406bb809ac739f99b1221da62"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_canvas-a68439ac3cff0c5d.rlib.selected.asm": {
+      "bytes": 273000,
+      "sha256": "9c0c30296bb8beb5dce4d12b75e60c82053782c804c2bc6dcec5ba3fa4dba7c4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_reactivity_core-92df8da154377e11.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_reactivity_core-92df8da154377e11.rlib.nm": {
+      "bytes": 387797,
+      "sha256": "b6410db3fbbb5eaddccc16501d68c84d51a97b03a553b5d778641a0e173a7000"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_reactivity_core-92df8da154377e11.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_reactivity_core-92df8da154377e11.rlib.selected.asm": {
+      "bytes": 12218840,
+      "sha256": "68888a794207d2a21ed8ec7caefc706a467603f287c4f425c32063376493154e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_reactivity_state-d8aba0459b795ede.rlib.nm": {
+      "bytes": 884,
+      "sha256": "f59113a8538eab51fcfefc49a7a3270a9b9104b09349dc154fe91c7aaeb0521b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libgpui_reactivity_state-d8aba0459b795ede.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libhummingbird_gpui_port-646161ad5c635a87.rlib.nm": {
+      "bytes": 1026722,
+      "sha256": "f13161dea4248f6cf4f187f1992aa0fb52c4488744ddb237d0a29aa7b302237b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3/libhummingbird_gpui_port-646161ad5c635a87.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-constructor-candidate-v3.log": {
+      "bytes": 1491,
+      "sha256": "f137786232afde00ba6b767674b50a80c41e39b0c370688c3e21771310f78710"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-env-failures.json": {
+      "bytes": 554,
+      "sha256": "57efa0289f882e04764e26ad5b02a143735ce3308c92918190f566982899a0c4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/bill.json": {
+      "bytes": 2515,
+      "sha256": "bc6f45c97837820cf735d86c326ff43b627b7d39911f34db09abd944b0b6a744"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/frame-parser.log": {
+      "bytes": 53,
+      "sha256": "053d9097e695f8c792ae5bbc2d26e14e4e6dcd20d738c59f57f6e74e8ce009a5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.frames": {
+      "bytes": 800351,
+      "sha256": "ab3b85169b95357761e6853cc7d0dfbf9d75b1f043c9eca27d0416810a5055fe"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.frames.json": {
+      "bytes": 439033,
+      "sha256": "dd5640168bb1b7d3152d0648ed2950610a58dd9445441e823c14b32d57468953"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.full.asm": {
+      "bytes": 12541708,
+      "sha256": "ae9265047a45aa9dd62fb5bd9efeb39fedf972ad38af3eedf5d6e7a9ab131d06"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.full.asm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.nm": {
+      "bytes": 268625,
+      "sha256": "ae880d57087d3a8d8a000c3b75bc0cab4347b7dbd4f3fd1af187192ae6d1a924"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline/mixed-caller-v2.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-baseline.log": {
+      "bytes": 231,
+      "sha256": "5d1843dedd929be39217a763ff4820f06cd1dfc72a4f0a7053aa5abf6d7d5ce3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/bill.json": {
+      "bytes": 2520,
+      "sha256": "db9de28a16b1a5cbff2943d8f778045e833d5a06fc6de77d3a32e6f9ccfb30dc"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/frame-parser.log": {
+      "bytes": 53,
+      "sha256": "5d42b50b0fdafe42afa79bd92ece76b512104a5ceee410fe751928bec2b543cc"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.frames": {
+      "bytes": 962334,
+      "sha256": "54f8ae91de855e437d521c4a396d039fd4a7a959ce7c5c8fe3c9358accb5bff9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.frames.json": {
+      "bytes": 834174,
+      "sha256": "8cddf56f9bc1b4549417d996006f9f5ca2a310ffc82e93f5be0ba6114aafd8fd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.full.asm": {
+      "bytes": 16855777,
+      "sha256": "377918586262889035f49ad7c18f19a1fbcd6e9cbb16ed687c49a37e30d4ff8c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.full.asm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.nm": {
+      "bytes": 320797,
+      "sha256": "bd309ae5e93c4d21ccc221e15b67debc66739a3360becfde696e4b3783d2b13f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate/mixed-caller-v2.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-mixed-caller-v2-candidate.log": {
+      "bytes": 232,
+      "sha256": "cdc1405dac82e855dcf355aa08f24b19adec42b84c387e14a77a3eb47c92fb29"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/bill.json": {
+      "bytes": 5164959,
+      "sha256": "f0a0fecbac83339d8ea360a14756f161e3f36dd6d340a0f5d6e23a6fc8fd87c1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/frame-parse.log": {
+      "bytes": 53,
+      "sha256": "3b82257851d45c4133953b2147059d150addb3e3fa33c4d288e06bb176a1db00"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/frames.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui-c47fc36e702f939d.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui-c47fc36e702f939d.rlib.nm": {
+      "bytes": 181342,
+      "sha256": "1b16d1dee59455284d8c4422385e1f2a81a1ea5cb55223257772eaeb7a099833"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui-c47fc36e702f939d.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui-c47fc36e702f939d.rlib.selected.asm": {
+      "bytes": 6275,
+      "sha256": "de896fa2b8edadad16dc9404f3b0ff74f4e9a611cd2c7f3983c22be87ca0a4a0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_canvas-1de80d4b918bb5d5.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_canvas-1de80d4b918bb5d5.rlib.nm": {
+      "bytes": 165398,
+      "sha256": "80673bc687ecd60ae10da2314fac058525643ea27badbf87a78405c9f6b33ddd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_canvas-1de80d4b918bb5d5.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_canvas-1de80d4b918bb5d5.rlib.selected.asm": {
+      "bytes": 331916,
+      "sha256": "c0507630df02dfbfce5e93f673a4feffce457832e2b0f9499b0fc23792132b25"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_gpu-f5b84b1ee8dfe36a.rlib.nm": {
+      "bytes": 59213,
+      "sha256": "5e4235fc71545f4cf45a734d40d3d0dc5feed30c44e191614f3cd5b39fd5c15a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_gpu-f5b84b1ee8dfe36a.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_core-92df8da154377e11.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_core-92df8da154377e11.rlib.nm": {
+      "bytes": 281594,
+      "sha256": "7ed307d43f88de15752f25b75f014793f15ed669f9630555675d120c6ccc6c47"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_core-92df8da154377e11.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_core-92df8da154377e11.rlib.selected.asm": {
+      "bytes": 7362458,
+      "sha256": "86352d8e315483a0697c5cc3febeda386056c2bda7ffe48bebb3c4d8bd46398b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_host-d8c31c402a77eb4d.rlib.nm": {
+      "bytes": 6224,
+      "sha256": "30a08118633e9ec1e49d5daf6c7b89c48711192e02fafcf16bd708b3994c4f82"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_host-d8c31c402a77eb4d.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib.nm": {
+      "bytes": 884,
+      "sha256": "087dbd29d603bb7a7f5ac67da460b79d5c8badae532baad31dbc9a633c03ef12"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libhummingbird_gpui_port-f32d631e14ab0246.rlib.nm": {
+      "bytes": 1050096,
+      "sha256": "928d64d213a8a98ce676bcf93074f5db809c45a94eb4bafc2429ac10ebc1f504"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/libhummingbird_gpui_port-f32d631e14ab0246.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/native_service.frames": {
+      "bytes": 20963413,
+      "sha256": "de058cdfc23cb7a713fb1869c146686639281255410890fdd14588ed8c1183aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/native_service.frames.json": {
+      "bytes": 484849,
+      "sha256": "87508640a01fd3f7f640187367f0bc62fc38cf9c97ebeee2d981eb9e3f263e7d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/native_service.frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/native_service.nm": {
+      "bytes": 5648138,
+      "sha256": "788425b84dc60629e1451a86eecd05288b4fcc6952130de80cd02a9ec72f098f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline/native_service.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-baseline.log": {
+      "bytes": 1970,
+      "sha256": "81535c106cab9e9ab440963018c7e8cedd428d490b977485615491d51b602cf6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/bill.json": {
+      "bytes": 5277376,
+      "sha256": "fa68580135b12b1cb2b995d420a859dae1825491aa2a1531c8548cc00f4eb285"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/frame-parser.log": {
+      "bytes": 53,
+      "sha256": "ce987375954a2248c154ee266b2ef52e7c38bd23a113be63f616cbb600800ab0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui-c47fc36e702f939d.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui-c47fc36e702f939d.rlib.nm": {
+      "bytes": 180038,
+      "sha256": "38178f4a5b0b2a6378dacc7626cfa9967b194d4da70e7e8987a6e72620e5e330"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui-c47fc36e702f939d.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui-c47fc36e702f939d.rlib.selected.asm": {
+      "bytes": 9568,
+      "sha256": "450539bc71c77b3376b242cbb35f65d2c9e7e46f87e4ad29c62d6638055febb0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_canvas-1de80d4b918bb5d5.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_canvas-1de80d4b918bb5d5.rlib.nm": {
+      "bytes": 171131,
+      "sha256": "cc96cf0535d11ecba0e794983d086713fda3db7165776b5a80fcc0a2aad28d0e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_canvas-1de80d4b918bb5d5.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_canvas-1de80d4b918bb5d5.rlib.selected.asm": {
+      "bytes": 267857,
+      "sha256": "ddcaa1f65c6b98e006b804f9e91428b191c14bb169fd524e20e737a215a46813"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_gpu-f5b84b1ee8dfe36a.rlib.nm": {
+      "bytes": 59213,
+      "sha256": "5e4235fc71545f4cf45a734d40d3d0dc5feed30c44e191614f3cd5b39fd5c15a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_gpu-f5b84b1ee8dfe36a.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_core-92df8da154377e11.rlib.disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_core-92df8da154377e11.rlib.nm": {
+      "bytes": 387797,
+      "sha256": "b6410db3fbbb5eaddccc16501d68c84d51a97b03a553b5d778641a0e173a7000"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_core-92df8da154377e11.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_core-92df8da154377e11.rlib.selected.asm": {
+      "bytes": 12218840,
+      "sha256": "68888a794207d2a21ed8ec7caefc706a467603f287c4f425c32063376493154e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_host-d8c31c402a77eb4d.rlib.nm": {
+      "bytes": 6224,
+      "sha256": "30a08118633e9ec1e49d5daf6c7b89c48711192e02fafcf16bd708b3994c4f82"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_host-d8c31c402a77eb4d.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib.nm": {
+      "bytes": 884,
+      "sha256": "087dbd29d603bb7a7f5ac67da460b79d5c8badae532baad31dbc9a633c03ef12"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libhummingbird_gpui_port-f32d631e14ab0246.rlib.nm": {
+      "bytes": 1050062,
+      "sha256": "7a9b6e8c52451c78d651955b0867084aed3fbd386e6b6f8e2bb134f5d49e3a6e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/libhummingbird_gpui_port-f32d631e14ab0246.rlib.nm.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/native_service.frames": {
+      "bytes": 20972776,
+      "sha256": "7f4d62c4f940161f17c328b08069dc27d80608cfd5a23f6590df6a4e167bd3af"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/native_service.frames.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/native_service.frames.json": {
+      "bytes": 663027,
+      "sha256": "9999dd569ed83d465c83008dc4046ea3e89b84b4b74fad1735da56252443ca21"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/native_service.frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/native_service.nm": {
+      "bytes": 5683727,
+      "sha256": "cbf8361ef8caceaeb290ee68f51b242df15e4122f1b3be4cb27e8050fe60a382"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate/native_service.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-native-candidate.log": {
+      "bytes": 1972,
+      "sha256": "093b04fd7c8567bc883bb12a0afe3224041f57c36516fba91066d1f8e58e07c2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/bill.json": {
+      "bytes": 2575,
+      "sha256": "75f0fb9558b5674bc93964a5c0b54c0f05e146b08dbb39a0e5c0a7950261c8ab"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/frame-parser.log": {
+      "bytes": 53,
+      "sha256": "3b82257851d45c4133953b2147059d150addb3e3fa33c4d288e06bb176a1db00"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.frames": {
+      "bytes": 3802215,
+      "sha256": "2594b886afe62dd8cb4cc53591ee534820d09335aec49e54e9805df0ada7062c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.frames.json": {
+      "bytes": 484852,
+      "sha256": "34b2fc1e55c7d648a415dd3a7a614d31941d11f0e44dd3df0f42e4cce7e8b5cf"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.full.asm": {
+      "bytes": 43888213,
+      "sha256": "1a876023ca125cf579480af133c7d3dac6155a8f68b09324beeb85f20421d16c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.full.asm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.nm": {
+      "bytes": 1100863,
+      "sha256": "4bef2e63c4cf142cbdf5977e0569f0244e14d3a0db3e18267c4ecc9664ff08e4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline/public-geometry-cost-v2.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-baseline.log": {
+      "bytes": 245,
+      "sha256": "c33ab5f61c7ca044f693713ce74b896cd5b21e1c69c46fe8e157baf873b2bde8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/bill.json": {
+      "bytes": 2575,
+      "sha256": "490836b34f320fea0e347ef39491237133cc75aa38217809fd1a169065555564"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/frame-parser.log": {
+      "bytes": 53,
+      "sha256": "dff94a0d19d292218ef15c4a698d2f21f62e507adb3b10c2d81ae1224b3c5cb9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.frames": {
+      "bytes": 3808124,
+      "sha256": "a20a5603b14b187b6465bf1fa91573737113eba1f0c08e5dc354d0195c25a0ab"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.frames.json": {
+      "bytes": 663549,
+      "sha256": "f8924ce2d9cae819e0c45be39a656ba4b995ee6af380511d6839a47d327c47a1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.full.asm": {
+      "bytes": 44138073,
+      "sha256": "c4bdd07c4ad17c11842dd53f6c0eda1283a82c3f972974c298749098dcca0909"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.full.asm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.nm": {
+      "bytes": 1136581,
+      "sha256": "668e2642d9c767b912774bbb618e571bdec506e2b5206b5391bd07823aea7248"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate/public-geometry-cost-v2.nm.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static-public-geometry-cost-v2-candidate.log": {
+      "bytes": 245,
+      "sha256": "46e0f6d649975f6a251a6ea6f2c81e382a9a6191f35961cc6d885c05cbd2e2f9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/static_bill.py": {
+      "bytes": 3873,
+      "sha256": "097c253ee7c7e61903add84d965d6869e2e0a5bee4bb3e36c22f8aa68b158323"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/text-headers.command": {
+      "bytes": 121,
+      "sha256": "1aaaf9eff9c0f485e3aea47ff0cc07c17cd8251bac29fc44f066f52e197111b3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/text-headers.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/text-headers.log": {
+      "bytes": 457,
+      "sha256": "ba22e41e0165113dc1ef3cc95b0f8886686e484ab2e0adbc3aa2cc841aa823c5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/type-headers.json": {
+      "bytes": 419,
+      "sha256": "22d80347ba6253241e04dfd86e8e49bfbbfa8c05dc2e70d5d18d55027ff43b32"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/whole-code-comparison.json": {
+      "bytes": 17231,
+      "sha256": "ece1f4b4d4a32604ecdd228811183aa44c30a13a31440e1d9a7a71e3702ee247"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/lock-identity-comparison.json": {
+      "bytes": 271,
+      "sha256": "ae95a3b63b891e42982724fdba9921c2ea1258ebfbcba1dca0b7f6cd78eda1b9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-canonical-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-canonical-first.log": {
+      "bytes": 17015,
+      "sha256": "bf15589d09f6fca19458dfaa2feb52bf5ece71d50fc9fea9faa44975c78b57c4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-first.log": {
+      "bytes": 4040,
+      "sha256": "e9d9459b5c5c8a05c1f4765f6183bd15fa7674532aeeb173e1ab7a2a83b1bd18"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-private-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/metrics-private-first.log": {
+      "bytes": 7847,
+      "sha256": "98ae222245ff8ba316fa938333d7105be4f9fc7b2d1d06cedbce864fb5268211"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/normal/Cargo.lock": {
+      "bytes": 62534,
+      "sha256": "0ed94ebedc617dc7602c4a0eb1a5ccb0a06ee152bc6370492c6e9d64f1a1ea3f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/normal/Cargo.toml": {
+      "bytes": 1623,
+      "sha256": "1bb3562096f5b6c59f8ccaa8262fee7f1800b063236359de0e17982e6d1ed968"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/normal/src/main.rs": {
+      "bytes": 1737,
+      "sha256": "af517de94ea50ae27b1abf0e75e20cd302c8153c683b00815f9f7fecc90098bb"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/normal.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/normal.log": {
+      "bytes": 8048,
+      "sha256": "e55a3cdd3002a6c706fac2ef2ac1215cc558a580e46cbab78b9fe7a287f0f8f3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/pointer-reuse-review.json": {
+      "bytes": 24749,
+      "sha256": "f5814b5f5bbb49a1a122f56fe520cb5ecd3c11c22555da152c5cb90620223477"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe/Cargo.lock": {
+      "bytes": 62307,
+      "sha256": "98190701c95f6ac5c1f174b92a3c0ba445a0b809a0aa6e81721a05502cf06565"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe/Cargo.toml": {
+      "bytes": 1591,
+      "sha256": "101263fcfce18d893c2548aee53b387cf717a747cc4ee0a83109ceca4c639982"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe/src/main.rs": {
+      "bytes": 8033,
+      "sha256": "db98f1bfd86d26c966efc4689abaaad4318a994baf25813fcae30f837dab7bd8"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe-lock-before-resolution.lock": {
+      "bytes": 62509,
+      "sha256": "8cee69891f5c08db668ac5ef3884f32c1f76600adcc5e2a6a93144f646b6b9c0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe-lock-resolution.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe-lock-resolution.log": {
+      "bytes": 1389,
+      "sha256": "d70483bd06eab828372176c836f1ee29ff0195f017bc305c01cd4bbc4f633f76"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/probe-metadata.json": {
+      "bytes": 1295357,
+      "sha256": "a8c25f47b24e7dd501f1e4601a54a9776584e13b92ff8f6684dc9bafb3177a33"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/0-connected.csv": {
+      "bytes": 986,
+      "sha256": "04f25a74960168fa0ef25565197b06f9dc81cfea32504b3bc600b0081acd3ab5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/0-mounted.csv": {
+      "bytes": 2267880,
+      "sha256": "310991e9bfaef89a4434fc8c9b6b80cef477f4d4f3aa119e066c6363115876a1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/0-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "682debeee01c14785ed8a2688ea8575e2e1130785369b018279ba881c139e772"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/1-connected.csv": {
+      "bytes": 986,
+      "sha256": "5fbb9985baa68a73cd0882a063e9b38880a5b008b705b385fe905e71c7b3d7e3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/1-mounted.csv": {
+      "bytes": 2258571,
+      "sha256": "45f4e1712eca43ffd4702512bc23081a601fd5f58ea82d41049c27bce1c7f22c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/1-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "9d74f5b4b60ded61f6675d6f58a189cfc79b44ee3505c4923f3a10de03da8eaf"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/2-connected.csv": {
+      "bytes": 986,
+      "sha256": "b93e44e9a2cad6eaf6c1e1bc7db3dc56f85ddf31b6aeee9d6ad6305b9deb3e3e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/2-mounted.csv": {
+      "bytes": 2258571,
+      "sha256": "e66aa2b58cca1f958f78dc46307f95ee1ec5a42b488050f11624593412efb2d9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/2-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "d237cbb9e6afac1f9fe61c18a116240a5c44be753f0af84bdd4d5abdc9791f16"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/3-connected.csv": {
+      "bytes": 986,
+      "sha256": "111d498fc3ab3a5c5f1f0f93e6485adae4588ef4854626ce147a51ea2b364cd5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/3-mounted.csv": {
+      "bytes": 2258571,
+      "sha256": "1ebe1153b4142eea4627e8254bccacdf2046934891ac9470bddea4315e3dc13b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/3-spawn.csv": {
+      "bytes": 4048,
+      "sha256": "e4d5c809adab2748e5162357337ef03ff00111c78569591c4c8e20669e520cbc"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/exe-base.txt": {
+      "bytes": 13,
+      "sha256": "34b6cf4a6e91c17fc2250f58aa9d06f68e30a7969961a3a727610828bc9e0897"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/raw/maps.txt": {
+      "bytes": 4688,
+      "sha256": "054ec7abd9613a99b980f88cc2e19d35667b792b849cb499ba48f288b31b3201"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/README.md": {
+      "bytes": 1045,
+      "sha256": "59f05e58e7b7cd8bda1774447b38c2f34fe365ea7449104fa155b042a80cc398"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-artifacts/authority-constructor-bill": {
+      "bytes": 15189776,
+      "sha256": "4a00a2b8851af1674a03c59dbfb01b597e96eb4137207bcc0b1ffda35b157ea5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-artifacts/libgpui-a7df7971da668c03.rlib": {
+      "bytes": 5602438,
+      "sha256": "071ed06b7d9e32144665703d4875732476aa3f72d04ce81d52706b112f646ed3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-artifacts/libgpui_canvas-a68439ac3cff0c5d.rlib": {
+      "bytes": 7228058,
+      "sha256": "f82d7c38c389bd417eedd3ee740b16a9c65dc3e8235ecd879a50429f5214c624"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "bytes": 2142368,
+      "sha256": "6069487348c020a801e89d58f53622ad9e74b0afd4a2095094bfcb899a90ab11"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/authority-constructor-bill": {
+      "bytes": 15189776,
+      "sha256": "4a00a2b8851af1674a03c59dbfb01b597e96eb4137207bcc0b1ffda35b157ea5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui-a7df7971da668c03.rlib": {
+      "bytes": 5602438,
+      "sha256": "071ed06b7d9e32144665703d4875732476aa3f72d04ce81d52706b112f646ed3"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui_canvas-a68439ac3cff0c5d.rlib": {
+      "bytes": 7228058,
+      "sha256": "f82d7c38c389bd417eedd3ee740b16a9c65dc3e8235ecd879a50429f5214c624"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "bytes": 2142368,
+      "sha256": "6069487348c020a801e89d58f53622ad9e74b0afd4a2095094bfcb899a90ab11"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui_reactivity_state-d8aba0459b795ede.rlib": {
+      "bytes": 109778,
+      "sha256": "a8d3954b2d992ea1c57fd31349b926cd90e6c689dd741700721b8a76c4423e9b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libhummingbird_gpui_port-646161ad5c635a87.rlib": {
+      "bytes": 7554320,
+      "sha256": "70ca6069458b49c38ae1c7e5da8882baad5a1ef1968008ac6d33ce7c1c7c5b5b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts.json": {
+      "bytes": 3678,
+      "sha256": "325deeb54060649bbfef89c52e80479512fa8e8ffcc687539be2fea2568f38f2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-core-symbols.stderr": {
+      "bytes": 57,
+      "sha256": "1a3343ce9a19685ffd15a200ea283ae18c5a7f36aa76f0b07b851666a68bd11c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-core-symbols.txt": {
+      "bytes": 281594,
+      "sha256": "7ed307d43f88de15752f25b75f014793f15ed669f9630555675d120c6ccc6c47"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-full-source-guard.json": {
+      "bytes": 268583,
+      "sha256": "3a33546207a6c5ee1bdfb32675d0779591c7804fee89ead14063ea03d699189a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libgpui-c47fc36e702f939d.rlib": {
+      "bytes": 6904374,
+      "sha256": "bbb600bd8f3f25899416a429dff7a521099d7b15964a59df4eba4a725c3984e7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libgpui_canvas-1de80d4b918bb5d5.rlib": {
+      "bytes": 7227930,
+      "sha256": "b0fe3137b9a2493c19bc2283df53c5d657fb9ad6eacf869031be7ba434e3921c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libgpui_gpu-f5b84b1ee8dfe36a.rlib": {
+      "bytes": 1749578,
+      "sha256": "f731b7c76192dc233cd70477a4113bc3d1cb15bbff3a627252f75ebf75f21133"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libgpui_reactivity_core-92df8da154377e11.rlib": {
+      "bytes": 2142368,
+      "sha256": "6069487348c020a801e89d58f53622ad9e74b0afd4a2095094bfcb899a90ab11"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libgpui_reactivity_host-d8c31c402a77eb4d.rlib": {
+      "bytes": 106374,
+      "sha256": "b27c4f4419131b6b0caf033ca4b4c690d86de78225637800db14b2baec2da0ea"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib": {
+      "bytes": 109778,
+      "sha256": "7b0d30111ed58337c198e9072694b40806ec3f942dc842d7aa6c504f7ccfafc6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/libhummingbird_gpui_port-f32d631e14ab0246.rlib": {
+      "bytes": 7713256,
+      "sha256": "5ebed4a9e92bfb5da991a78364aaa8bdc3e249d1d0bcd26ca2a7c8a16719ed95"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts/native_service": {
+      "bytes": 32644160,
+      "sha256": "2eba4ad5fc994d9501c23097dc82b1087bfa0168fd4ec93faee6c6b182b35e2f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-native-whole-artifacts.json": {
+      "bytes": 5074,
+      "sha256": "8730be0b260a662174e87658d0f55bc6ff6d64669727e3b1991db50f465cb1cb"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/candidate-restored-full-source-guard.json": {
+      "bytes": 268583,
+      "sha256": "3f8c867642848b4d34a967eeb8fbdb4eda16299bc94d9884a67afcb01fc39fc2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-after.json": {
+      "bytes": 1404,
+      "sha256": "4933a981a40a3faf8400d4572cbcc761b91235ba13b259cb4c486ac992bd394a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-artifacts.json": {
+      "bytes": 2362,
+      "sha256": "1eddb6f19f3e06d67e28250e32bb62f5e128b6875db9ae484ba9078190c54fd6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-before.json": {
+      "bytes": 1404,
+      "sha256": "4933a981a40a3faf8400d4572cbcc761b91235ba13b259cb4c486ac992bd394a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-build.jsonl": {
+      "bytes": 111654,
+      "sha256": "4cf4bded3d1217b21c2ed30e64a2eb4951b56e7c33ffdfc5582fda554aafee74"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-build.log": {
+      "bytes": 3854,
+      "sha256": "e379090733c415263ca62c39a06108da12a242f258ef671871b0decb4e6c594d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-output.txt": {
+      "bytes": 2056,
+      "sha256": "86d8186a17afa4b0e4fad36a72860981e0c8460732b7b3e5a96dd94449280705"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-runtime.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/constructor-baseline-runtime.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/native-baseline-build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/native-baseline-build.jsonl": {
+      "bytes": 302013,
+      "sha256": "67148fd804684a977b2f2e505d2a2fd86187ea82faee13038ef3e212f2669cfa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/native-baseline-build.log": {
+      "bytes": 8591,
+      "sha256": "cedf41bcfac0dd3bbe2c62bd39dac84b6c9643626417c89f56e4cd43bfcf030b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-after.json": {
+      "bytes": 1100,
+      "sha256": "50024594550325227c9082cabf4bca0835b92d8a3cd36a51081b3279a159a27b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-before.json": {
+      "bytes": 1100,
+      "sha256": "50024594550325227c9082cabf4bca0835b92d8a3cd36a51081b3279a159a27b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-build.log": {
+      "bytes": 2416,
+      "sha256": "70319430cc5afc70f6b2f5b99cc3c71e87cd8d0d191f71210198e396014c8b46"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-frozen": {
+      "bytes": 10421968,
+      "sha256": "c690fc309ba84e62264badc1ea1b03c47c94747f1e3bedf19fa44fb29d834aa2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-output.txt": {
+      "bytes": 285940280,
+      "sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-runtime.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-baseline-runtime.log": {
+      "bytes": 11,
+      "sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-lock.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/oracle-lock.log": {
+      "bytes": 67,
+      "sha256": "f807bb3c9eb89b77aa64711f244721a622aea6f7907934a7e82a4c4aebfa2623"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/rustc-version.txt": {
+      "bytes": 196,
+      "sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/canvas/src/lib.rs": {
+      "bytes": 1916,
+      "sha256": "8aadd5144b3bc0a22ff1f60384f30ffa01ba5d94234deb98a3ede119bd8126bb"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/canvas/src/text/planner.rs": {
+      "bytes": 30561,
+      "sha256": "afc3384ea7d3850f491d2f2234ddc90fd9c770f2f339f1ddb999bd4abee86579"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/canvas/src/text.rs": {
+      "bytes": 23700,
+      "sha256": "161f5a0e7185cbce705ee5d58cd0f1e6209c5c385ffc4e150871afecf1ac2890"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/core/src/layout.rs": {
+      "bytes": 39306,
+      "sha256": "19e012b77be0881c0bba4c5fc075c1c893834492a511610aee17d8ca184fc29b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/core/tests/layout.rs": {
+      "bytes": 19485,
+      "sha256": "c7ce201f9ed4f62e363f20ccd95f16caacc0d5436146caa7e596a0a65d5c6631"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/gpui/src/runtime/editing.rs": {
+      "bytes": 27295,
+      "sha256": "37b610c0556ec38fb61e1417ee4694c527fdb9a3c8247d34ec84c34c1bafb120"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/gpui/src/runtime/image.rs": {
+      "bytes": 7944,
+      "sha256": "e2ff2da37ec6d2b2861cdcf640d341416ec91fe86a121fcee494ee47ad7a84f2"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/baseline/reactivity/crates/gpui/src/runtime.rs": {
+      "bytes": 173282,
+      "sha256": "3e204e2d146bae93a50799f3428a08b6df744b93f4c66daaec27fc34ac096684"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/canvas/src/lib.rs": {
+      "bytes": 1933,
+      "sha256": "d94ef71906171feaad9f997b1f2db9b89d5d35255616b080b00c88bfa5fbc8be"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/canvas/src/text/planner.rs": {
+      "bytes": 34067,
+      "sha256": "9b91db46a2429eb972955d6a502c9e938ab90062bed5b099bb6086bd75dafeb5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/canvas/src/text.rs": {
+      "bytes": 24602,
+      "sha256": "540df6bf78ae0e38e8b8a130155283adc256a8a0e2f5c3d015e85e86515d7ee6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/core/src/layout.rs": {
+      "bytes": 40892,
+      "sha256": "5221c96f82798047ecaa14b94810a8f10af6b25e3b6843740f482ccd22bd6b96"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/core/tests/layout.rs": {
+      "bytes": 24205,
+      "sha256": "2d03bb2a10ddbbb1905e663d29c995ce150bdfef7d23b5b894440fc909ddb114"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/gpui/src/runtime/editing.rs": {
+      "bytes": 27204,
+      "sha256": "58a0b53f022418a7355a5abe878724df7022934e2b3b36846e64ada437118b2a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/gpui/src/runtime/image.rs": {
+      "bytes": 7949,
+      "sha256": "03cd3029790bf71dd88597f4f9a0470c0fbd937f6e7f3cb54d51acd11791a743"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source/candidate/reactivity/crates/gpui/src/runtime.rs": {
+      "bytes": 178204,
+      "sha256": "75902cbd89d6ff35ab5f94fc982e356b5c906b8a33d752837760362f942250d9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/source-manifest.json": {
+      "bytes": 1887,
+      "sha256": "4cce5bc1fe95b983c5d305f787fcbc54bd1aef14094c711ad5f9d4db4a3c000c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/binary.sha256": {
+      "bytes": 65,
+      "sha256": "cfe8fa1d5cbc19eff194fa95fe99a6ab319d707f8be891295356fd59a112be8d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/calls.json": {
+      "bytes": 218042,
+      "sha256": "6005601484381fc8eba17eec391993ee1c6a7c833ce3de03f9cf5cb7f0fd16f6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/diagnostic-frozen": {
+      "bytes": 204075144,
+      "sha256": "9a2c95bbff07fb52f02d0b549ba8aa5b230e99696aebfe3333c84d597c466a7d"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/run.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/run.log": {
+      "bytes": 141151,
+      "sha256": "a31fdeeb3bfabdae13d8a03ce9e97782dfd95ee1e5de5b62052ff146a4282b89"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/runtime-before.rs": {
+      "bytes": 173282,
+      "sha256": "3e204e2d146bae93a50799f3428a08b6df744b93f4c66daaec27fc34ac096684"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/runtime-diagnostic.patch": {
+      "bytes": 1037,
+      "sha256": "3f10a30a608e39c17737a5a2a2d4a3f51535cfd7e8479143b1ee0a32ea16105c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/runtime-diagnostic.rs": {
+      "bytes": 173536,
+      "sha256": "19a698ef10eac8bac180c7ea1d4a1ed19e6984d3e01ee5393a72fa2e6cbf5839"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/shape-calls/source-hashes.txt": {
+      "bytes": 148,
+      "sha256": "593948b45ec223aac032b37d16f660892bbdd7ca37e076ba8c44cfaf739b51c1"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/symbols-raw.txt": {
+      "bytes": 578299,
+      "sha256": "231464d92e7d4eea08e5ec23dd9f2b92c848af69b696e5a5f5dbf0feb5b8ae98"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/symbols.json": {
+      "bytes": 648144,
+      "sha256": "5ac7777ff610ed7d148f0571f6297433fd1dea0cfff835206eca12c5954bd7f0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/text-oracle/Cargo.lock": {
+      "bytes": 15176,
+      "sha256": "88d80117db49da5e4388d7e3ac32ba6f9268cef5d9dc77175e42555fe5e0353b"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/text-oracle/Cargo.toml": {
+      "bytes": 441,
+      "sha256": "12be2f634bf06a7d740b269a63037aadea68f6aa4b3ae1974e6d6ab3e73d6c35"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/text-oracle/compare.py": {
+      "bytes": 1496,
+      "sha256": "6ecfcfc54a76fe12fa006450f3186dfdbfdd0358357a5436e30d931092eaa75a"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/text-oracle/src/main.rs": {
+      "bytes": 4007,
+      "sha256": "c7dcea9813a30ae9e2c977afd4e34034d8c6b4c27eea10f084fac01a22250c10"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/binary.sha256": {
+      "bytes": 65,
+      "sha256": "d0aa837b8735016a328014ffb145ce617372f0a2f09f60fde795ededbbb05809"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/counts.json": {
+      "bytes": 56826,
+      "sha256": "027d2493ce8e37325326f38692994186eb3078478facc58302cb493d6d672034"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/diagnostic-frozen": {
+      "bytes": 218643576,
+      "sha256": "ae7b0024835586e6a5f12260b0f89f438ed29504a9e277badc6f822bcfe6d42f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/diagnostic.patch": {
+      "bytes": 753,
+      "sha256": "1e78369f3fd7e64bc5684cf90ada64515e2d81608ee594cdcbc8fe55ffc37054"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/planner-before.rs": {
+      "bytes": 34067,
+      "sha256": "9b91db46a2429eb972955d6a502c9e938ab90062bed5b099bb6086bd75dafeb5"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/planner-diagnostic.rs": {
+      "bytes": 34230,
+      "sha256": "d06cb37a3756939b8b961b45cdc201e1d8f0bd5ab1c4764fb1345d733ade29d6"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/run.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-calls/run.log": {
+      "bytes": 54488,
+      "sha256": "bda112fb99d26f591c61407c4c5f221839456e3e0053fc15af9e89399a09e3dd"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-candidate/pin.txt": {
+      "bytes": 41,
+      "sha256": "602e44272d5f8109ee4eacaa9e7bfbe547b2dcc672dcb1f6a21ca58fb3e81848"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-candidate/source-hashes.json": {
+      "bytes": 908,
+      "sha256": "ca0f93fdc344f337692cb3ef4ee004b44181a438504dea9535ff8784a495513f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-candidate/source.patch": {
+      "bytes": 43496,
+      "sha256": "7b12fcfa6b012378859c2a4417474ea2074e0e7cb6b8c3b6a442409821b03232"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-first.log": {
+      "bytes": 4040,
+      "sha256": "a2a3403d3c40bbbf0597eba2ea3d00dfd3ba8bb60fd46be91c3dec8ee4eee4a7"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-private-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/vacant-private-first.log": {
+      "bytes": 488,
+      "sha256": "dfeaaccb94bd2ee098562998c140777ec55a6cbb438e293c8cbca0fef755f82c"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/binary.sha256": {
+      "bytes": 65,
+      "sha256": "01dc9f32bc5886bad9c5cd4015e060159b07272fcce7fe33d71d323b892ff1ef"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/calls.json": {
+      "bytes": 123174,
+      "sha256": "6f80d648253141522aa21e1cadb83a8f14fa334ec94eb7681a8fa597d4447ca9"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/diagnostic-frozen": {
+      "bytes": 218318752,
+      "sha256": "3b1c2709e710d6ee7209dff18816c71b30201bd211104c8cf394e7e520d96794"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/diagnostic.patch": {
+      "bytes": 1037,
+      "sha256": "a7667e0f25ab1c9e6a0da160599129eea83a013fc99646dbaae7ffb1679ff859"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/run.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/run.log": {
+      "bytes": 102191,
+      "sha256": "7244efcecf7a22a0c9bbb975dbc34ea70e6aa88085404320a9da355ddcbc952e"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/runtime-before.rs": {
+      "bytes": 173331,
+      "sha256": "7c0ef14b0560705af008caec4de47dfa8024ef336efcf8baacc28ecc05021fbf"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-calls/runtime-diagnostic.rs": {
+      "bytes": 173585,
+      "sha256": "4facf19ec05caea7b989d65e8cc08acb9ac4e5fefed800c2da475ecef622896f"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-candidate/constructor-debug-frozen": {
+      "bytes": 218290232,
+      "sha256": "a9e8096e3cf7ebdc675e6c01178a75cb083fe6b63e585724b6d20e4b60de89c0"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-candidate/source-hashes.json": {
+      "bytes": 452,
+      "sha256": "6e9607ab94212fae4e8ecfbb737f94d490fca007efdceee4e15721829c92ae89"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-candidate/source.patch": {
+      "bytes": 14961,
+      "sha256": "8f90d4cb7ddc8500e55ad7b9f7036c855c3af078cb28912780d861c3582952db"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-first.log": {
+      "bytes": 4152,
+      "sha256": "829cc5f536bc405e41934994dc2fb92b6d3f3141f321ed7e4e820ef2c370e920"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-oracle-first.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/width-contract-oracle-first.log": {
+      "bytes": 593,
+      "sha256": "8ad9c91f70ec1c4fdcd1bf3023b5b2c67d1bb185a34a59455e9e33b73ec49c9b"
+    }
+  }
+}

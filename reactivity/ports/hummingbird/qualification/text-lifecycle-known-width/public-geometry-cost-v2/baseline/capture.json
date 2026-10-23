@@ -1,0 +1,37 @@
+{
+  "command": [
+    "rustc",
+    "--edition=2024",
+    "-Copt-level=3",
+    "-Cdebuginfo=0",
+    "-Cembed-bitcode=no",
+    "-Csymbol-mangling-version=v0",
+    "--cfg",
+    "tokio_unstable",
+    "-L",
+    "dependency=/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts",
+    "-L",
+    "dependency=/tmp/gpui-hummingbird-browser-allocation-target/release/deps",
+    "--extern",
+    "gpui=/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui-a7df7971da668c03.rlib",
+    "--extern",
+    "gpui_canvas=/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts/libgpui_canvas-a68439ac3cff0c5d.rlib",
+    "--extern",
+    "allocation_counter=/tmp/gpui-hummingbird-browser-allocation-target/release/deps/liballocation_counter-106565607919f7e1.rlib",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/main.rs",
+    "-o",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/public-geometry-cost-v2"
+  ],
+  "source_sha256": "74926185702d3567b13627d10ef1c0068b41f889d1e23768eae454722b812dfa",
+  "artifact_manifest": "/tmp/gpui-hummingbird-browser-allocation-evidence/same-path-control/baseline-constructor-whole-artifacts.json",
+  "binary_sha256": "71a4e228bdaf7e6bc27e6323e810d2033729d6cd7b1cd815069bd02becebb936",
+  "runtime_command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=5s",
+    "60s",
+    "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/public-geometry-cost-v2"
+  ],
+  "runtime_exit": 0,
+  "binary_after_sha256": "71a4e228bdaf7e6bc27e6323e810d2033729d6cd7b1cd815069bd02becebb936"
+}

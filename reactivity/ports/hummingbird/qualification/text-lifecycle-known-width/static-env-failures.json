@@ -1,0 +1,20 @@
+{
+  "first": {
+    "attempts": [
+      "static-constructor-baseline",
+      "static-constructor-candidate"
+    ],
+    "exit": 1,
+    "reason": "invoked without native environment; ar not on PATH"
+  },
+  "second": {
+    "attempts": [
+      "static-constructor-baseline-v2",
+      "static-constructor-candidate-v2"
+    ],
+    "exit": 127,
+    "reason": "bare python3 unavailable; saved command logs and exits"
+  },
+  "recovery": "same script/artifacts with sourced environment and absolute Python, distinct v3 destination",
+  "artifact_mutations": false
+}

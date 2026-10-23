@@ -1,0 +1,13 @@
+{
+  "public-geometry-cost-v2": {
+    "file_bytes": 16249160,
+    "categories": {
+      ".text": 3696055,
+      ".rodata": 6537048,
+      ".data": 169224,
+      ".bss": 291,
+      ".eh_frame": 265380,
+      ".gcc_except_table": 85624
+    }
+  }
+}

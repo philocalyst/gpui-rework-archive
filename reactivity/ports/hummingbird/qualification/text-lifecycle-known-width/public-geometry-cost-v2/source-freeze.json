@@ -1,0 +1,6 @@
+{
+  "source": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/main.rs",
+  "sha256": "74926185702d3567b13627d10ef1c0068b41f889d1e23768eae454722b812dfa",
+  "original_source_sha256": "abffdfab85ace58eaab76cf1fde9d7a312454104cb8a25b955ada9a818d123f3",
+  "scope": "Standalone optimized public API old/new control. v2 fixes only allocation-counter closure result type after original compile rejected Commit rather than unit; original frozen source/error retained."
+}

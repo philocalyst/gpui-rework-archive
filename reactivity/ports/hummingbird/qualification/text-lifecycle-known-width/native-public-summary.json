@@ -1,0 +1,120 @@
+[
+  {
+    "client": "default",
+    "passed": true,
+    "exit": 0,
+    "source_binary_guards_equal": true,
+    "all_children_exited_transcript": true,
+    "events": 26,
+    "stats": [
+      [
+        0,
+        0,
+        0,
+        0,
+        false
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        1,
+        64,
+        64,
+        0,
+        true
+      ],
+      [
+        1,
+        64,
+        0,
+        1,
+        false
+      ],
+      [
+        1,
+        64,
+        0,
+        1,
+        false
+      ]
+    ]
+  },
+  {
+    "client": "collections",
+    "passed": true,
+    "exit": 0,
+    "source_binary_guards_equal": true,
+    "all_children_exited_transcript": true,
+    "events": 39,
+    "stats": [
+      [
+        0,
+        0,
+        0,
+        0,
+        false
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        true
+      ],
+      [
+        1,
+        64,
+        64,
+        0,
+        true
+      ],
+      [
+        1,
+        64,
+        0,
+        1,
+        false
+      ],
+      [
+        1,
+        64,
+        0,
+        1,
+        false
+      ]
+    ]
+  }
+]

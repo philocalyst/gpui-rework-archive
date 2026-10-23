@@ -1,0 +1,33 @@
+[
+  {
+    "name": "<gpui_canvas::text::planner::Planner>::shape",
+    "symbol_bytes": 14895,
+    "max_observed_rsp_cfa_offset": 4624,
+    "cfa_forms": [
+      "rsp+16",
+      "rsp+24",
+      "rsp+32",
+      "rsp+40",
+      "rsp+4152",
+      "rsp+4624",
+      "rsp+48",
+      "rsp+56",
+      "rsp+8"
+    ]
+  },
+  {
+    "name": "<gpui_reactivity_core::layout::LayoutTree>::compute_inner",
+    "symbol_bytes": 1530,
+    "max_observed_rsp_cfa_offset": 272,
+    "cfa_forms": [
+      "rsp+16",
+      "rsp+24",
+      "rsp+272",
+      "rsp+32",
+      "rsp+40",
+      "rsp+48",
+      "rsp+56",
+      "rsp+8"
+    ]
+  }
+]

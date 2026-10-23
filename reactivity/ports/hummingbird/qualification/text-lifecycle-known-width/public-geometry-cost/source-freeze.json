@@ -1,0 +1,5 @@
+{
+  "source": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost/main.rs",
+  "sha256": "abffdfab85ace58eaab76cf1fde9d7a312454104cb8a25b955ada9a818d123f3",
+  "scope": "Standalone optimized public API control. Same input source and rustc flags for old/new frozen release library artifacts. No timing. No production source changes."
+}

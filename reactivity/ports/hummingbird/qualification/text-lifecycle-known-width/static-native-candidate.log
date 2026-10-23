@@ -1,0 +1,90 @@
+{
+  "libgpui_reactivity_core-92df8da154377e11.rlib": {
+    "file_bytes": 2917466,
+    "categories": {
+      ".text": 1072699,
+      ".rodata": 14096,
+      ".data": 6680,
+      ".bss": 0,
+      ".eh_frame": 53392,
+      ".gcc_except_table": 15964
+    }
+  },
+  "libgpui_canvas-1de80d4b918bb5d5.rlib": {
+    "file_bytes": 7248142,
+    "categories": {
+      ".text": 408763,
+      ".rodata": 2346771,
+      ".data": 11992,
+      ".bss": 0,
+      ".eh_frame": 37624,
+      ".gcc_except_table": 5140
+    }
+  },
+  "libgpui_gpu-f5b84b1ee8dfe36a.rlib": {
+    "file_bytes": 1749578,
+    "categories": {
+      ".text": 607263,
+      ".rodata": 6713,
+      ".data": 2552,
+      ".bss": 0,
+      ".eh_frame": 16008,
+      ".gcc_except_table": 41080
+    }
+  },
+  "libgpui_reactivity_host-d8c31c402a77eb4d.rlib": {
+    "file_bytes": 106374,
+    "categories": {
+      ".text": 10384,
+      ".rodata": 1961,
+      ".data": 728,
+      ".bss": 0,
+      ".eh_frame": 1720,
+      ".gcc_except_table": 784
+    }
+  },
+  "libgpui_reactivity_state-d8ec0d7a23e65a6c.rlib": {
+    "file_bytes": 109778,
+    "categories": {
+      ".text": 627,
+      ".rodata": 0,
+      ".data": 0,
+      ".bss": 0,
+      ".eh_frame": 256,
+      ".gcc_except_table": 0
+    }
+  },
+  "libgpui-c47fc36e702f939d.rlib": {
+    "file_bytes": 6898894,
+    "categories": {
+      ".text": 280582,
+      ".rodata": 55841,
+      ".data": 9136,
+      ".bss": 0,
+      ".eh_frame": 45056,
+      ".gcc_except_table": 13020
+    }
+  },
+  "libhummingbird_gpui_port-f32d631e14ab0246.rlib": {
+    "file_bytes": 7712074,
+    "categories": {
+      ".text": 1674090,
+      ".rodata": 104349,
+      ".data": 46968,
+      ".bss": 8,
+      ".eh_frame": 200416,
+      ".gcc_except_table": 54788
+    }
+  },
+  "native_service": {
+    "file_bytes": 32689472,
+    "categories": {
+      ".text": 14853623,
+      ".rodata": 7638376,
+      ".data": 574048,
+      ".bss": 8452,
+      ".eh_frame": 1470504,
+      ".gcc_except_table": 885528
+    }
+  }
+}

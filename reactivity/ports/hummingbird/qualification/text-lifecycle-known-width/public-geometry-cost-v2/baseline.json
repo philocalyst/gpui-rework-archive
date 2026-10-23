@@ -1,0 +1,15 @@
+{
+  "public-geometry-cost-v2": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/public-geometry-cost-v2/baseline/public-geometry-cost-v2",
+    "sha256": "71a4e228bdaf7e6bc27e6323e810d2033729d6cd7b1cd815069bd02becebb936",
+    "features": [
+      "baseline"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0
+    },
+    "package": "standalone-public-control",
+    "target": "public-geometry-cost-v2"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "mixed-caller-v2": {
+    "original": "/tmp/gpui-hummingbird-browser-allocation-evidence/known-qualification/mixed-caller-v2/candidate/mixed-caller-v2",
+    "sha256": "46c61fafca03c7f16827086134fc8ee38a06ef55c35cc0bb26f1a929e25bddf4",
+    "features": [
+      "candidate"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0
+    },
+    "package": "standalone-public-control",
+    "target": "mixed-caller-v2"
+  }
+}

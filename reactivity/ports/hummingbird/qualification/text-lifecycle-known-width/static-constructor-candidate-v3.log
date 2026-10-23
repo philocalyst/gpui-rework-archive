@@ -1,0 +1,68 @@
+{
+  "libgpui_reactivity_core-92df8da154377e11.rlib": {
+    "file_bytes": 2917466,
+    "categories": {
+      ".text": 1072699,
+      ".rodata": 14096,
+      ".data": 6680,
+      ".bss": 0,
+      ".eh_frame": 53392,
+      ".gcc_except_table": 15964
+    }
+  },
+  "libgpui_canvas-a68439ac3cff0c5d.rlib": {
+    "file_bytes": 7253118,
+    "categories": {
+      ".text": 408918,
+      ".rodata": 2347391,
+      ".data": 12096,
+      ".bss": 0,
+      ".eh_frame": 37152,
+      ".gcc_except_table": 5168
+    }
+  },
+  "libgpui_reactivity_state-d8aba0459b795ede.rlib": {
+    "file_bytes": 109778,
+    "categories": {
+      ".text": 627,
+      ".rodata": 0,
+      ".data": 0,
+      ".bss": 0,
+      ".eh_frame": 256,
+      ".gcc_except_table": 0
+    }
+  },
+  "libgpui-a7df7971da668c03.rlib": {
+    "file_bytes": 5603228,
+    "categories": {
+      ".text": 163335,
+      ".rodata": 21559,
+      ".data": 5816,
+      ".bss": 0,
+      ".eh_frame": 27056,
+      ".gcc_except_table": 5152
+    }
+  },
+  "libhummingbird_gpui_port-646161ad5c635a87.rlib": {
+    "file_bytes": 7553146,
+    "categories": {
+      ".text": 1658521,
+      ".rodata": 102984,
+      ".data": 45432,
+      ".bss": 8,
+      ".eh_frame": 195440,
+      ".gcc_except_table": 54132
+    }
+  },
+  "authority-constructor-bill": {
+    "file_bytes": 15233800,
+    "categories": {
+      ".text": 5646343,
+      ".rodata": 6780288,
+      ".data": 210960,
+      ".bss": 1328,
+      ".eh_frame": 417392,
+      ".gcc_except_table": 162032
+    }
+  }
+}

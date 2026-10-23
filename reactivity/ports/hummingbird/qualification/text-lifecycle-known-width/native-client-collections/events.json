@@ -1,0 +1,271 @@
+[
+  {
+    "visible": "9 recordings for \u2018\u2019 \u2014 Title",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "command": "import",
+    "reply": [
+      "ACK,import"
+    ]
+  },
+  {
+    "visible": "10 recordings for \u2018\u2019 \u2014 Title",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Albums",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/221360928884514619392"
+    ]
+  },
+  {
+    "visible": "4 albums",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Open Album",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/3578668350299653013504"
+    ]
+  },
+  {
+    "visible": "2 recordings for \u2018\u2019 \u2014 Track order",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Back",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/332041393326771929088"
+    ]
+  },
+  {
+    "visible": "4 albums",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Artists",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/258254417031933722624"
+    ]
+  },
+  {
+    "visible": "Open Alpha Artist",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/5681597174702541897728"
+    ]
+  },
+  {
+    "visible": "4 recordings for \u2018\u2019 \u2014 Title",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Playlists",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/295147905179352825856"
+    ]
+  },
+  {
+    "visible": "Open Evening \u039a\u03b1\u03c6\u03ad",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/8005886927989945401344"
+    ]
+  },
+  {
+    "visible": "3 recordings for \u2018\u2019 \u2014 Playlist order",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Search recordings",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/170141183460469232026835208895236931584"
+    ]
+  },
+  {
+    "visible": "1 recordings for \u2018\u03bc\u03b1\u03c1\u2019 \u2014 Playlist order",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Search recordings",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/170141183460469238114260753219388964864"
+    ]
+  },
+  {
+    "visible": "3 recordings for \u2018\u2019 \u2014 Playlist order",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "command": "collision",
+    "reply": [
+      "ACK,collision"
+    ]
+  },
+  {
+    "visible": "Prepare \u039a\u03b1\u03bb\u03b7\u03bc\u03ad\u03c1\u03b1",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/8669969714643489259520"
+    ]
+  },
+  {
+    "visible": "Prepared request 1: recording 44 \u2014 /root/gpui-hummingbird-browser-allocation-sol/reactivity/ports/hummingbird/assets/audio/stereo.wav",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/10182602728687672492032"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,0,0,0,0,false",
+      "ACK,stats"
+    ]
+  },
+  {
+    "visible": "Play from Untitled",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/9739880870918643253248"
+    ]
+  },
+  {
+    "visible": "Collection playback started",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/10330176681277348904960"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,1,0,0,0,true",
+      "ACK,stats"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,1,0,0,0,true",
+      "ACK,stats"
+    ]
+  },
+  {
+    "command": "credit",
+    "reply": [
+      "ACK,credit"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,1,0,0,0,true",
+      "ACK,stats"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,1,64,64,0,true",
+      "ACK,stats"
+    ]
+  },
+  {
+    "visible": "Queue \u2014 3 entries",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/922337203685477580800"
+    ]
+  },
+  {
+    "visible": "Stop",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1069911156275153993728"
+    ]
+  },
+  {
+    "visible": "No decoder plan",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/1660206966633859645440"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,1,64,0,1,false",
+      "ACK,stats"
+    ]
+  },
+  {
+    "command": "disconnect",
+    "reply": [
+      "ACK,disconnect"
+    ]
+  },
+  {
+    "visible": "Library worker closed",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/848550227390639374336"
+    ]
+  },
+  {
+    "visible": "Prepare \u039a\u03b1\u03bb\u03b7\u03bc\u03ad\u03c1\u03b1",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/8669969714643489259520"
+    ]
+  },
+  {
+    "visible": "Recording unavailable: Library worker is closed",
+    "provider": [
+      ":1.3",
+      "/org/a11y/atspi/accessible/0/10330176681277348904960"
+    ]
+  },
+  {
+    "command": "stats",
+    "reply": [
+      "STATS,1,64,0,1,false",
+      "ACK,stats"
+    ]
+  }
+]

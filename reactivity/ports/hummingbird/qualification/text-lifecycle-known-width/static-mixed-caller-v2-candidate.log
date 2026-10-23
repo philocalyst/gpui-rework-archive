@@ -1,0 +1,13 @@
+{
+  "mixed-caller-v2": {
+    "file_bytes": 5827072,
+    "categories": {
+      ".text": 1359769,
+      ".rodata": 37832,
+      ".data": 18784,
+      ".bss": 203,
+      ".eh_frame": 68092,
+      ".gcc_except_table": 30628
+    }
+  }
+}
