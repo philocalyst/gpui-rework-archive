@@ -218,6 +218,8 @@ impl<T> Inbox<T> {
 /// saturated batch rearms once even if its last receive emptied the queue.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Delivery {
+    /// New messages frozen from the transport in this turn. `applied` may also
+    /// include messages retained from a previous checked delivery failure.
     pub received: usize,
     pub applied: usize,
     pub commit: Commit,
@@ -251,6 +253,9 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
     fn stage(&mut self, index: usize) -> Stage;
+    fn staged(&self) -> usize {
+        0
+    }
     fn validate(&self, _: &M, _: &Sources<M>) -> Result<(), Error> {
         Ok(())
     }
@@ -260,11 +265,18 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
         sources: &Sources<M>,
         applied: &mut usize,
         exact: &mut Option<FieldId>,
+        remaining: &mut usize,
     ) -> Result<(), Error>;
     fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
         Ok(false)
     }
-    fn apply_questions(&mut self, _: &M, _: &Sources<M>, _: &mut usize) -> Result<(), Error> {
+    fn apply_questions(
+        &mut self,
+        _: &M,
+        _: &Sources<M>,
+        _: &mut usize,
+        _: &mut usize,
+    ) -> Result<(), Error> {
         Ok(())
     }
     fn start_questions(&mut self) -> bool {
@@ -308,6 +320,7 @@ impl<M> LaneSet<M> for () {
         _: &Sources<M>,
         _: &mut usize,
         _: &mut Option<FieldId>,
+        _: &mut usize,
     ) -> Result<(), Error> {
         Ok(())
     }
@@ -429,14 +442,26 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         }
         self.inbox.stage(F::OBSERVE_CLOSE)
     }
+    fn staged(&self) -> usize {
+        self.inbox.staging.len()
+            + usize::from(
+                F::OBSERVE_CLOSE && self.inbox.receiver.is_none() && self.inbox.capacity != 0,
+            )
+            + self.tail.staged()
+    }
     fn apply(
         &mut self,
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
         exact: &mut Option<FieldId>,
+        remaining: &mut usize,
     ) -> Result<(), Error> {
-        while let Some(value) = self.inbox.staging.pop_front() {
+        while *remaining != 0 {
+            let Some(value) = self.inbox.staging.pop_front() else {
+                break;
+            };
+            *remaining -= 1;
             let field = self.receive.receive(model, sources, value)?;
             // The first applied callback establishes the candidate grain.
             // Different fields and unrestricted callbacks make it conservative.
@@ -447,13 +472,18 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
             }
             *applied += 1;
         }
-        if F::OBSERVE_CLOSE && self.inbox.receiver.is_none() && self.inbox.capacity != 0 {
+        if *remaining != 0
+            && F::OBSERVE_CLOSE
+            && self.inbox.receiver.is_none()
+            && self.inbox.capacity != 0
+        {
+            *remaining -= 1;
             self.inbox.capacity = 0;
             self.receive.closed(model);
             *exact = None;
             *applied += 1;
         }
-        self.tail.apply(model, sources, applied, exact)
+        self.tail.apply(model, sources, applied, exact, remaining)
     }
     fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), Error> {
         self.receive.validate(model, sources)?;
@@ -474,8 +504,10 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         model: &M,
         sources: &Sources<M>,
         applied: &mut usize,
+        remaining: &mut usize,
     ) -> Result<(), Error> {
-        self.tail.apply_questions(model, sources, applied)
+        self.tail
+            .apply_questions(model, sources, applied, remaining)
     }
     fn start_questions(&mut self) -> bool {
         self.tail.start_questions()
@@ -536,7 +568,7 @@ mod tests {
                 }
                 let mut applied = 0;
                 lanes
-                    .apply(&mut sum, &sources, &mut applied, &mut None)
+                    .apply(&mut sum, &sources, &mut applied, &mut None, &mut usize::MAX)
                     .unwrap();
                 assert_eq!(applied, 8);
             }

@@ -3,7 +3,7 @@
 use super::*;
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
-    pub(super) fn deliver(&mut self, applied: &mut usize) -> Result<Commit, Error> {
+    pub(super) fn deliver(&mut self, applied: &mut usize, budget: usize) -> Result<Commit, Error> {
         self.live()?;
         let epoch = self
             .source_epoch
@@ -11,12 +11,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .ok_or(Error::EpochExhausted)?;
         let mut models = 0;
         let mut exact = None;
+        let mut remaining = budget;
         let result = match catch_unwind(AssertUnwindSafe(|| {
             self.lanes.apply(
                 &mut self.runtime.model,
                 &self.runtime.sources,
                 &mut models,
                 &mut exact,
+                &mut remaining,
             )
         })) {
             Ok(result) => result,
@@ -53,8 +55,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     crate::reader::question::Change::Source(exact),
                 )?;
             }
-            self.lanes
-                .apply_questions(&self.runtime.model, &self.runtime.sources, &mut questions)
+            self.lanes.apply_questions(
+                &self.runtime.model,
+                &self.runtime.sources,
+                &mut questions,
+                &mut remaining,
+            )
         })) {
             Ok(result) => result,
             Err(_) => {

@@ -211,13 +211,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         }
         let count = lanes.count();
         let mut received = 0;
+        // A checked error may leave part of the preceding frozen batch in its
+        // original lane. Charge that backlog before freezing any newer work.
+        let mut staged = lanes.staged();
         let mut misses = 0;
         let mut limited = false;
         let mut cursor = lanes.cursor();
-        while received < budget && misses < count {
+        while staged < budget && misses < count {
             match lanes.stage(cursor) {
                 Stage::Ready => {
                     received += 1;
+                    staged += 1;
                     misses = 0;
                 }
                 Stage::Limited => {
@@ -229,8 +233,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             cursor = (cursor + 1) % count;
         }
         lanes.set_cursor(cursor);
-        let more = budget != 0 && (received == budget || limited);
-        if received == 0 {
+        let mut more = budget != 0 && (staged >= budget || limited);
+        if budget == 0 || staged == 0 {
             return Ok(Delivery {
                 received,
                 applied: 0,
@@ -239,7 +243,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             });
         }
         let mut applied = 0;
-        let result = RuntimeMut { runtime, lanes }.deliver(&mut applied);
+        let result = RuntimeMut { runtime, lanes }.deliver(&mut applied, budget);
+        if result.is_err() {
+            more |= lanes.staged() != 0;
+        }
         let revoked = runtime.poisoned || runtime.source_epoch == u64::MAX;
         let delivery = Delivery {
             received,

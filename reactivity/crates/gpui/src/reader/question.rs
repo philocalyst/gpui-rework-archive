@@ -686,14 +686,19 @@ where
         }
     }
 
+    fn staged(&self) -> usize {
+        usize::from(self.staged_terminal.is_some()) + self.tail.staged()
+    }
+
     fn apply(
         &mut self,
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
         exact: &mut Option<crate::FieldId>,
+        remaining: &mut usize,
     ) -> Result<(), crate::Error> {
-        self.tail.apply(model, sources, applied, exact)
+        self.tail.apply(model, sources, applied, exact, remaining)
     }
     fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), crate::Error> {
         self.tail.validate(model, sources)
@@ -713,15 +718,22 @@ where
         model: &M,
         sources: &Sources<M>,
         applied: &mut usize,
+        remaining: &mut usize,
     ) -> Result<(), crate::Error> {
-        let mut binding_error = self.tail.apply_questions(model, sources, applied).err();
+        let mut binding_error = self
+            .tail
+            .apply_questions(model, sources, applied, remaining)
+            .err();
         if A::READERS
             && let Err(error) = self.refresh_self(model, sources, Change::Dependencies)
             && binding_error.is_none()
         {
             binding_error = Some(error);
         }
-        if let Some(terminal) = self.staged_terminal.take() {
+        if *remaining != 0
+            && let Some(terminal) = self.staged_terminal.take()
+        {
+            *remaining -= 1;
             // The staged terminal seals this response across ordinary callbacks.
             // Take only now, before retiring the physical credit.
             if let Some(message) = self.control().mailbox.take() {
@@ -835,15 +847,20 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
             self.tail.stage(index - count)
         }
     }
+    fn staged(&self) -> usize {
+        self.lanes.staged() + self.tail.staged()
+    }
     fn apply(
         &mut self,
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
         exact: &mut Option<crate::FieldId>,
+        remaining: &mut usize,
     ) -> Result<(), crate::Error> {
-        self.lanes.apply(model, sources, applied, exact)?;
-        self.tail.apply(model, sources, applied, exact)
+        self.lanes
+            .apply(model, sources, applied, exact, remaining)?;
+        self.tail.apply(model, sources, applied, exact, remaining)
     }
     fn validate(&self, model: &M, sources: &Sources<M>) -> Result<(), crate::Error> {
         self.lanes.validate(model, sources)?;
@@ -863,9 +880,14 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         model: &M,
         sources: &Sources<M>,
         applied: &mut usize,
+        remaining: &mut usize,
     ) -> Result<(), crate::Error> {
-        let own = self.lanes.apply_questions(model, sources, applied);
-        let tail = self.tail.apply_questions(model, sources, applied);
+        let own = self
+            .lanes
+            .apply_questions(model, sources, applied, remaining);
+        let tail = self
+            .tail
+            .apply_questions(model, sources, applied, remaining);
         own.and(tail)
     }
     fn cancel_questions(&mut self) -> Self::Retired {
@@ -1045,7 +1067,7 @@ mod tests {
         plan.lanes.inputs = Source::new(FieldId::new(1), "value", |m| &m.other, |m| &mut m.other);
         assert!(
             plan.lanes
-                .apply_questions(&model, &sources, &mut 0)
+                .apply_questions(&model, &sources, &mut 0, &mut usize::MAX)
                 .is_err()
         );
         assert!(plan.lanes.running_ticket.is_none());
@@ -1082,7 +1104,7 @@ mod tests {
         jobs.recv().unwrap().complete(Ok(1)).unwrap();
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         plan.lanes
-            .apply_questions(&model, &sources, &mut 0)
+            .apply_questions(&model, &sources, &mut 0, &mut usize::MAX)
             .unwrap();
         assert_eq!(
             plan.lanes.read(reader.key).unwrap().info.status,
@@ -1095,7 +1117,7 @@ mod tests {
         jobs.recv().unwrap().complete(Ok(3)).unwrap();
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         plan.lanes
-            .apply_questions(&model, &sources, &mut 0)
+            .apply_questions(&model, &sources, &mut 0, &mut usize::MAX)
             .unwrap();
         assert_eq!(
             plan.lanes.read(reader.key).unwrap().info.status,
