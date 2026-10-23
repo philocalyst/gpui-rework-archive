@@ -164,6 +164,15 @@ supported. Actual native-window execution, strict compatibility, foreign and
 matched-cost integration are separate requirements. It and the typed
 inbox/one-buffer successors are not yet adopted.
 
+An actual [mutable-alias adversary](evidence/source-isolation/ROOT-REVIEW.md)
+blocks the composed successor: two exact sources sharing one atomic payload can
+leave a dependent Question Ready with stale data after typed ingress. The
+isolated repair excludes UnsafeCell payloads while preserving immutable Arc and
+copy-on-write values, and keeps shared mutable resources available to coarse
+models. Its initial 156 tests and all 25 downstream contracts pass. The complete
+negative, two harness reporting mistakes and their corrections remain archived;
+full integration and matched production-dependency costs are still pending.
+
 The historical [one-buffer Inbox slice](evidence/inbox-buffer/ROOT-REVIEW.md)
 has independently verified payloads, binary identities, guards and test totals.
 Its measured storage/code reductions and adverse initial codegen control are

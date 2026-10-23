@@ -1,0 +1,11 @@
+{
+  "archive_bytes": 487434,
+  "archive_sha256": "d282ebb75db4f28b648ea3e46c7f299ede0fdc058cdcff93ee3389832fb4f940",
+  "payloads_reopened": 191,
+  "payload_bytes": 2365518,
+  "source_guards_reopened": 3988,
+  "downstream_artifacts_reopened": 186,
+  "frozen_negative_executable_reopened": true,
+  "production_adopted": false,
+  "timing_claim": false
+}
