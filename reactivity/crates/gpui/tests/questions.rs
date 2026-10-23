@@ -110,6 +110,74 @@ fn queued_model_callback_supersedes_a_completion_in_the_same_batch() {
 }
 
 #[test]
+fn saturated_static_inboxes_keep_question_completion_and_fifo_progress() {
+    let (win, jobs, answer) = open();
+    let (_, completion) = jobs.recv().unwrap();
+    let (left, lin) = gpui::Remote::bounded(130);
+    let (right, rin) = gpui::Remote::bounded(130);
+    let mut win = win
+        .with_inbox_status(lin, |m: &mut Model, row: Option<u32>| {
+            use std::fmt::Write;
+            write!(m.caption, "L{},", row.unwrap_or(999)).unwrap();
+        })
+        .unwrap()
+        .with_inbox_status(rin, |m: &mut Model, row: Option<u32>| {
+            use std::fmt::Write;
+            write!(m.caption, "R{},", row.unwrap_or(999)).unwrap();
+        })
+        .unwrap();
+    for row in 0..130 {
+        left.try_send(row).unwrap();
+        right.try_send(row).unwrap();
+    }
+    drop(left);
+    drop(right);
+    completion
+        .complete(Ok("question survives saturated inboxes".into()))
+        .unwrap();
+    assert_eq!(win.deliver_ready(1).unwrap().applied, 1);
+    assert_eq!(win.root().unwrap().caption, "CaptionR0,");
+    assert_eq!(win.deliver_ready(1).unwrap().applied, 1);
+    assert_eq!(win.root().unwrap().caption, "CaptionR0,L0,");
+    let question_turn = win.deliver_ready(1).unwrap();
+    assert!(question_turn.more);
+    assert_eq!((question_turn.received, question_turn.applied), (1, 0));
+    // Model-message callbacks conservatively supersede prior Questions. The
+    // third lane gets its fair receive turn and rejects that obsolete result.
+    assert_eq!(win.question_status(answer), Ok(QuestionStatus::Pending));
+    for _ in 0..5 {
+        if !win.deliver_ready(64).unwrap().more {
+            break;
+        }
+    }
+    let caption = win.root().unwrap().caption.strip_prefix("Caption").unwrap();
+    for lane in ['L', 'R'] {
+        let rows = caption
+            .split(',')
+            .filter_map(|value| value.strip_prefix(lane))
+            .map(|value| value.parse::<u32>().unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(rows, (0..130).chain([999]).collect::<Vec<_>>());
+    }
+    assert_eq!(win.deliver_ready(64).unwrap().received, 0);
+    for _ in 0..3 {
+        let (_, completion) = jobs
+            .recv_timeout(std::time::Duration::from_secs(1))
+            .unwrap();
+        let _ = completion.complete(Ok("question survives saturated inboxes".into()));
+        win.deliver_ready(64).unwrap();
+        if win.question_status(answer) == Ok(QuestionStatus::Ready) {
+            break;
+        }
+    }
+    assert_eq!(win.question_status(answer), Ok(QuestionStatus::Ready));
+    assert!(
+        win.contains_text("question survives saturated inboxes")
+            .unwrap()
+    );
+}
+
+#[test]
 fn cancellable_none_faults_current_work_but_frees_superseded_credit_without_faulting_newer_work() {
     let (mut win, jobs, answer) = open();
     let (_, current) = jobs.recv().unwrap();

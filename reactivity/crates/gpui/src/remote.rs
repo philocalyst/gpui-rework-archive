@@ -7,13 +7,32 @@ use crate::{
 #[cfg(feature = "native-core")]
 use gpui_reactivity_host::native::Wake;
 use std::collections::VecDeque;
-use std::sync::mpsc::{self, Receiver, SyncSender, TrySendError};
+use std::sync::mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError};
 #[cfg(feature = "native-core")]
-use std::sync::{Arc, OnceLock};
+use std::sync::{
+    Arc, OnceLock, Weak,
+    atomic::{AtomicBool, Ordering},
+};
 
 #[cfg(feature = "native-core")]
 struct Notification {
     wake: OnceLock<Wake>,
+    terminal: AtomicBool,
+}
+#[cfg(feature = "native-core")]
+struct Producer<T> {
+    // Rust drops fields in declaration order. Closing the sole channel sender
+    // before Notification drops makes the terminal wake observe disconnection.
+    sender: SyncSender<T>,
+    notification: Notification,
+}
+#[cfg(feature = "native-core")]
+impl Drop for Notification {
+    fn drop(&mut self) {
+        if *self.terminal.get_mut() {
+            self.signal();
+        }
+    }
 }
 #[cfg(feature = "native-core")]
 impl Notification {
@@ -70,16 +89,18 @@ impl<T> std::fmt::Debug for SendError<T> {
 /// # Ok::<(), Box<dyn std::error::Error>>(())
 /// ```
 pub struct Remote<T> {
+    #[cfg(not(feature = "native-core"))]
     sender: SyncSender<T>,
     #[cfg(feature = "native-core")]
-    notification: Arc<Notification>,
+    producer: Arc<Producer<T>>,
 }
 impl<T> Clone for Remote<T> {
     fn clone(&self) -> Self {
         Self {
+            #[cfg(not(feature = "native-core"))]
             sender: self.sender.clone(),
             #[cfg(feature = "native-core")]
-            notification: Arc::clone(&self.notification),
+            producer: Arc::clone(&self.producer),
         }
     }
 }
@@ -92,29 +113,46 @@ impl<T> Remote<T> {
     pub fn bounded(capacity: usize) -> (Self, Inbox<T>) {
         let (sender, receiver) = mpsc::sync_channel(capacity);
         #[cfg(feature = "native-core")]
-        let notification = Arc::new(Notification {
-            wake: OnceLock::new(),
+        let producer = Arc::new(Producer {
+            sender,
+            notification: Notification {
+                wake: OnceLock::new(),
+                terminal: AtomicBool::new(false),
+            },
         });
+        #[cfg(feature = "native-core")]
+        let attached = Arc::downgrade(&producer);
         (
             Self {
+                #[cfg(not(feature = "native-core"))]
                 sender,
                 #[cfg(feature = "native-core")]
-                notification: Arc::clone(&notification),
+                producer,
             },
             Inbox {
                 receiver: Some(receiver),
                 staging: VecDeque::with_capacity(capacity),
                 capacity,
                 #[cfg(feature = "native-core")]
-                notification,
+                producer: attached,
             },
         )
     }
+    fn sender(&self) -> &SyncSender<T> {
+        #[cfg(feature = "native-core")]
+        {
+            &self.producer.sender
+        }
+        #[cfg(not(feature = "native-core"))]
+        {
+            &self.sender
+        }
+    }
     pub fn try_send(&self, value: T) -> Result<(), SendError<T>> {
-        match self.sender.try_send(value) {
+        match self.sender().try_send(value) {
             Ok(()) => {
                 #[cfg(feature = "native-core")]
-                self.notification.signal();
+                self.producer.notification.signal();
                 Ok(())
             }
             Err(TrySendError::Full(value)) => Err(SendError::Full(value)),
@@ -134,30 +172,44 @@ pub struct Inbox<T> {
     staging: VecDeque<T>,
     capacity: usize,
     #[cfg(feature = "native-core")]
-    notification: Arc<Notification>,
+    producer: Weak<Producer<T>>,
 }
 impl<T> Inbox<T> {
     pub(crate) fn close(&mut self) {
         self.receiver.take();
         self.staging.clear();
+        self.capacity = 0;
     }
-    pub(crate) fn stage(&mut self) -> Stage {
+    pub(crate) fn observe_close(&self) -> Result<(), Error> {
+        if self.capacity == 0 {
+            return Err(Error::ZeroInboxCapacity);
+        }
+        #[cfg(feature = "native-core")]
+        if let Some(producer) = self.producer.upgrade() {
+            producer
+                .notification
+                .terminal
+                .store(true, Ordering::Relaxed);
+        }
+        Ok(())
+    }
+    pub(crate) fn stage(&mut self, observe_close: bool) -> Stage {
         if self.capacity == 0 {
             return Stage::Empty;
         }
         if self.staging.len() == self.capacity {
             return Stage::Limited;
         }
-        match self
-            .receiver
-            .as_ref()
-            .and_then(|receiver| receiver.try_recv().ok())
-        {
-            Some(value) => {
+        match self.receiver.as_ref().map(Receiver::try_recv) {
+            Some(Ok(value)) => {
                 self.staging.push_back(value);
                 Stage::Ready
             }
-            None => Stage::Empty,
+            Some(Err(TryRecvError::Disconnected)) if observe_close => {
+                self.receiver.take();
+                Stage::Ready
+            }
+            _ => Stage::Empty,
         }
     }
 }
@@ -220,7 +272,6 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     }
     #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &Wake);
-    fn signal(&self);
 }
 #[doc(hidden)]
 pub enum Stage {
@@ -247,7 +298,6 @@ impl<M> LaneSet<M> for () {
     fn clear(&mut self) {}
     #[cfg(feature = "native-core")]
     fn attach(&mut self, _: &Wake) {}
-    fn signal(&self) {}
 }
 
 /// An inferred, statically dispatched lane; not an application-managed task.
@@ -277,7 +327,33 @@ impl<T, F, L: ReaderValues> ReaderValues for Lane<T, F, L> {
         self.tail.visit_inputs(key, visit)
     }
 }
-impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
+/// Inferred callback adapter for a lane which observes producer disconnection.
+#[doc(hidden)]
+pub struct InboxStatus<F>(pub(crate) F);
+#[doc(hidden)]
+pub type StatusLane<T, F, L> = Lane<T, InboxStatus<F>, L>;
+#[doc(hidden)]
+pub trait InboxHandler<M, T> {
+    const OBSERVE_CLOSE: bool;
+    fn receive(&mut self, model: &mut M, value: T);
+    fn closed(&mut self, _: &mut M) {}
+}
+impl<M, T, F: FnMut(&mut M, T)> InboxHandler<M, T> for F {
+    const OBSERVE_CLOSE: bool = false;
+    fn receive(&mut self, model: &mut M, value: T) {
+        self(model, value);
+    }
+}
+impl<M, T, F: FnMut(&mut M, Option<T>)> InboxHandler<M, T> for InboxStatus<F> {
+    const OBSERVE_CLOSE: bool = true;
+    fn receive(&mut self, model: &mut M, value: T) {
+        (self.0)(model, Some(value));
+    }
+    fn closed(&mut self, model: &mut M) {
+        (self.0)(model, None);
+    }
+}
+impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for Lane<T, F, L> {
     const EMPTY: bool = false;
     const QUESTIONS: bool = L::QUESTIONS;
     type Retired = (Option<Receiver<T>>, L::Retired);
@@ -294,11 +370,16 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
         if index != 0 {
             return self.tail.stage(index - 1);
         }
-        self.inbox.stage()
+        self.inbox.stage(F::OBSERVE_CLOSE)
     }
     fn apply(&mut self, model: &mut M, applied: &mut usize) {
         while let Some(value) = self.inbox.staging.pop_front() {
-            (self.receive)(model, value);
+            self.receive.receive(model, value);
+            *applied += 1;
+        }
+        if F::OBSERVE_CLOSE && self.inbox.receiver.is_none() && self.inbox.capacity != 0 {
+            self.inbox.capacity = 0;
+            self.receive.closed(model);
             *applied += 1;
         }
         self.tail.apply(model, applied);
@@ -328,20 +409,42 @@ impl<M, T: Send + 'static, F: FnMut(&mut M, T), L: LaneSet<M>> LaneSet<M> for La
     fn attach(&mut self, wake: &Wake) {
         // Attach once to this owner's event loop; surface suspend/resume does not
         // change its loop. Signal after attachment covers messages sent unbound.
-        let _ = self.inbox.notification.wake.set(wake.clone());
-        self.inbox.notification.signal();
+        if self.inbox.receiver.is_some() {
+            if let Some(producer) = self.inbox.producer.upgrade() {
+                let _ = producer.notification.wake.set(wake.clone());
+            }
+            // Producer death before binding must still enter the owner barrier.
+            wake.signal();
+        }
         self.tail.attach(wake);
-    }
-    fn signal(&self) {
-        #[cfg(feature = "native-core")]
-        self.inbox.notification.signal();
-        self.tail.signal();
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "native-core")]
+    #[test]
+    fn native_status_builder_rejects_zero_capacity_and_an_already_closed_inbox() {
+        struct Page;
+        impl crate::View for Page {
+            fn view(&self) -> crate::El<'_> {
+                crate::div()
+            }
+        }
+        for closed in [false, true] {
+            let (remote, mut inbox) = Remote::<u64>::bounded(usize::from(closed));
+            if closed {
+                inbox.close();
+            }
+            assert!(matches!(
+                crate::Window::document(Page)
+                    .with_inbox_status(inbox, |_: &mut Page, _: Option<u64>| {}),
+                Err(Error::ZeroInboxCapacity)
+            ));
+            assert!(matches!(remote.try_send(1), Err(SendError::Closed(1))));
+        }
+    }
     #[test]
     fn preallocated_static_transport_and_staging_have_no_per_message_allocations() {
         let (remote, inbox) = Remote::bounded(8);
@@ -378,6 +481,18 @@ fn notification_size() -> usize {
 }
 
 #[cfg(test)]
+fn producer_size() -> usize {
+    #[cfg(feature = "native-core")]
+    {
+        std::mem::size_of::<Producer<u64>>()
+    }
+    #[cfg(not(feature = "native-core"))]
+    {
+        0
+    }
+}
+
+#[cfg(test)]
 mod ledger {
     use super::*;
     use crate::{El, View, Win, div};
@@ -403,11 +518,13 @@ mod ledger {
         );
         assert!(std::mem::size_of::<DeliveryError>() <= 128);
         println!(
-            "remote={} inbox={} lane={} notification={} delivery={} error={} empty_win={} channel_allocs={} channel_bytes={} bind_allocs={} bind_bytes={}",
+            "remote={} inbox={} lane={} notification={} producer={} optional_sender={} delivery={} error={} empty_win={} channel_allocs={} channel_bytes={} bind_allocs={} bind_bytes={}",
             std::mem::size_of::<Remote<u64>>(),
             std::mem::size_of::<Inbox<u64>>(),
             std::mem::size_of::<Lane<u64, fn(&mut Page, u64), ()>>(),
             notification_size(),
+            producer_size(),
+            std::mem::size_of::<Option<SyncSender<u64>>>(),
             std::mem::size_of::<Delivery>(),
             std::mem::size_of::<DeliveryError>(),
             std::mem::size_of::<Win<Page>>(),

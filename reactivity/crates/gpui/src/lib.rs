@@ -53,7 +53,7 @@ pub use reader::{
 };
 pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]
-pub use remote::{Lane, LaneSet};
+pub use remote::{Lane, LaneSet, StatusLane};
 pub use runtime::{
     Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
     PointerEvent, PointerSession, PresentationToken, Query, SemanticSnapshot, SetError, Snapshot,
@@ -63,7 +63,10 @@ pub use scroll::{
     Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,
 };
 pub use semantic::SemanticText;
-pub use source::{BindError, FieldAction, FieldId, IntoText, Source, Sources, TextValue};
+pub use source::{
+    BindError, FieldAction, FieldId, IntoText, ProjectedSource, Source, SourcePath, Sources,
+    TextValue,
+};
 #[doc(hidden)]
 pub use style::FlexRecipe;
 pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Style, rgb};

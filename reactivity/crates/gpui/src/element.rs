@@ -9,7 +9,7 @@ use crate::{
     View,
     component::Component,
     property::PropertyId,
-    source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
+    source::{BindError, FieldAction, FieldId, IntoText, SourcePath, Sources, Text},
     style::{Affine, Align, Color, Flex, Flow, Justify, Style},
     style_port::{IntoProp, StyleSignal, Value},
 };
@@ -355,7 +355,7 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
 // that duplicate Source. Mount checks registered read identity; invocation checks
 // exclusive projector agreement before exposing a mutable value to the callback.
 // The runtime must validate before exact-source admission.
-impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
+impl<M: 'static, T: 'static, F: Fn(&mut T), S: SourcePath<M, T>> Route for FieldAction<M, T, F, S> {
     fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError> {
         let receiver = receiver
             .downcast_ref::<M>()
@@ -363,9 +363,8 @@ impl<M: 'static, T: 'static, F: Fn(&mut T)> Route for FieldAction<M, T, F> {
         let sources = sources
             .downcast_ref::<Sources<M>>()
             .ok_or(BindError::ReceiverMismatch)?;
-        self.validate_registered(receiver, sources)?;
         Ok(Admission::Model {
-            exact: Some(self.field_id()),
+            exact: Some(self.validate_registered(receiver, sources)?),
         })
     }
 
@@ -1091,7 +1090,7 @@ impl<M: 'static, F: Fn(&mut M) + 'static> IntoHandler<M, shape::Method> for F {
     }
 }
 
-impl<M, T, F> sealed::Handler<M, shape::Field> for FieldAction<M, T, F> {}
+impl<M, T, F, S> sealed::Handler<M, shape::Field> for FieldAction<M, T, F, S> {}
 impl<M, F, R> sealed::Handler<M, shape::Property> for PropertyRoute<M, F, R> {}
 impl<M: 'static, F, R> IntoHandler<M, shape::Property> for PropertyRoute<M, F, R>
 where
@@ -1103,8 +1102,8 @@ where
         element
     }
 }
-impl<M: 'static, T: 'static, F: Fn(&mut T) + 'static> IntoHandler<M, shape::Field>
-    for FieldAction<M, T, F>
+impl<M: 'static, T: 'static, F: Fn(&mut T) + 'static, S: SourcePath<M, T> + 'static>
+    IntoHandler<M, shape::Field> for FieldAction<M, T, F, S>
 {
     fn install(self, mut element: El<'_>) -> El<'_> {
         element.on_click = Some(Handler(Box::new(self)));

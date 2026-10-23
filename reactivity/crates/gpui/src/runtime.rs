@@ -1,6 +1,8 @@
 //! One serial owner turn, a retained logical description, and an admitted sheet.
 //! Layout is private scratch; the canvas stages commands without another output
 //! framebuffer. Callbacks carry ordinary Rust borrows; there is no shared mutable owner cell.
+#[cfg(test)]
+use crate::Source;
 use crate::shared_text::SharedText;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -23,7 +25,7 @@ use crate::{
     identity::Sites,
     property::{Contribution, Overrides, Property, PropertyError},
     remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet, Stage},
-    source::{BindError, FieldId, Source, Sources, TextCodec, TextEditError},
+    source::{BindError, FieldId, SourcePath, Sources, TextCodec, TextEditError},
     style::{Color, Flow, Style},
 };
 
@@ -90,6 +92,7 @@ pub enum Error {
     StaleTarget,
     PresentationStale,
     InvalidScale,
+    ZeroInboxCapacity,
     NoPreparedScene,
     StalePresentation,
     NotInteractive,
@@ -1146,9 +1149,15 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             Ok(())
         })
     }
+    /// Borrow the current logical value through its mounted declaration/path.
+    /// This does not require a presentation ACK or expose an old P snapshot.
+    pub fn read<T: 'static>(&self, source: impl SourcePath<M, T>) -> Result<&T, Error> {
+        let runtime = self.runtime()?;
+        Ok(source.resolve(&runtime.model, &runtime.sources)?.1)
+    }
     pub fn set<T: 'static>(
         &mut self,
-        source: Source<M, T>,
+        source: impl SourcePath<M, T>,
         value: T,
     ) -> Result<Commit, SetError<T>> {
         let mut runtime = match self.runtime_mut() {
@@ -1159,16 +1168,18 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let previous_epoch = runtime.source_epoch;
         let result = (|| {
             runtime.live()?;
-            match catch_unwind(AssertUnwindSafe(|| {
-                source.validate_registered(&runtime.model, &runtime.sources)
+            let field = match catch_unwind(AssertUnwindSafe(|| {
+                source
+                    .resolve(&runtime.model, &runtime.sources)
+                    .map(|(field, _)| field)
             })) {
                 Ok(result) => result?,
                 Err(_) => {
                     runtime.poison();
                     return Err(Error::OwnerPanicked);
                 }
-            }
-            runtime.operation(Some(source.id()), |model, _| {
+            };
+            runtime.operation(Some(field), |model, _| {
                 source.modify(model, |old| {
                     // Projector agreement and mutable-value admission have
                     // succeeded. This is the only ownership-transfer point.

@@ -177,6 +177,24 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
         inbox: Inbox<T>,
         receive: F,
     ) -> Window<V, Lane<T, F, L>> {
+        self.with_inbox_handler(inbox, receive)
+    }
+    /// Deliver `Some(message)` in FIFO order and one `None` after the final
+    /// producer disconnects, including while the native owner is quiescent.
+    /// Capacity zero is rejected; closing the owner revokes pending delivery.
+    pub fn with_inbox_status<T: Send + 'static, F: FnMut(&mut V, Option<T>) + 'static>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Result<Window<V, crate::StatusLane<T, F, L>>, Error> {
+        inbox.observe_close()?;
+        Ok(self.with_inbox_handler(inbox, crate::remote::InboxStatus(receive)))
+    }
+    fn with_inbox_handler<T: Send + 'static, F: crate::remote::InboxHandler<V, T> + 'static>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Window<V, Lane<T, F, L>> {
         Window {
             root: self.root,
             lanes: Lane::new(inbox, receive, self.lanes),
@@ -1143,7 +1161,15 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                 }
                 if let Some(owner) = &mut self.owner {
                     let before = owner.runtime_epoch();
-                    let result = match owner.deliver_ready(64) {
+                    let delivery = owner.deliver_ready(64);
+                    let more = match &delivery {
+                        Ok(delivery) => delivery.more,
+                        Err(failure) => failure
+                            .delivery
+                            .as_ref()
+                            .is_some_and(|delivery| delivery.more),
+                    };
+                    let result = match delivery {
                         Ok(delivery) => Ok(delivery.commit),
                         Err(DeliveryError {
                             error,
@@ -1166,6 +1192,12 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                         }
                         Err(failure) => Err(failure.error),
                     };
+                    if more
+                        && result.is_ok()
+                        && let Some(wake) = &self.wake
+                    {
+                        wake.signal();
+                    }
                     if let Err(error) = self.input_result(result) {
                         self.error = Some(error);
                         event_loop.exit();

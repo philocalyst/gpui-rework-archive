@@ -564,7 +564,9 @@ where
         change: Change,
     ) -> Result<bool, crate::Error> {
         match change {
-            Change::Source(Some(field)) if !A::READERS && !self.inputs.contains(field) => {
+            Change::Source(Some(field))
+                if !A::READERS && !self.inputs.contains(sources, field)? =>
+            {
                 return Ok(false);
             }
             Change::Retry(key) if key != self.key && !A::READERS => return Ok(false),
@@ -784,12 +786,6 @@ where
         self.control().signal();
         self.tail.attach(wake);
     }
-    fn signal(&self) {
-        if let Some(controller) = &self.controller {
-            controller.signal();
-        }
-        self.tail.signal();
-    }
 }
 
 /// One owner scope around a concrete chain; no per-producer trait-object box.
@@ -871,10 +867,6 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
     fn attach(&mut self, wake: &gpui_reactivity_host::native::Wake) {
         self.lanes.attach(wake);
         self.tail.attach(wake);
-    }
-    fn signal(&self) {
-        self.lanes.signal();
-        self.tail.signal();
     }
 }
 
