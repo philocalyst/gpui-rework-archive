@@ -3,7 +3,7 @@
 use crate::geometry::{AvailableSpace, MaybeMath, Rect, Size};
 use crate::style::{BoxSizing, Overflow};
 use crate::tree::{
-    Baselines, CollapsibleMarginSet, LayoutInput, LayoutOutput, LayoutTree, MeasureInput, MeasureOutput, NodeId, RunMode, SizingMode,
+    Baselines, CollapsibleMarginSet, Layout, LayoutInput, LayoutOutput, LayoutTree, MeasureInput, MeasureOutput, NodeId, RunMode, SizingMode,
 };
 
 /// A leaf style's lengths resolved once; valid when none of them is a percentage or `calc()`.
@@ -105,12 +105,7 @@ fn resolve_box(style: &crate::style::Style, parent_size: Size<Option<f32>>, calc
         height: if overflow.x == Overflow::Scroll { style.scrollbar_width } else { 0.0 },
     };
     let padding_border = padding + border;
-    let content_box_inset = Rect {
-        left: padding_border.left,
-        right: padding_border.right + scrollbar_gutter.width,
-        top: padding_border.top,
-        bottom: padding_border.bottom + scrollbar_gutter.height,
-    };
+    let content_box_inset = Layout::content_box_inset(padding_border, scrollbar_gutter);
     let scrolls = overflow.x.is_scroll_container() || overflow.y.is_scroll_container();
     let style_prevents_collapse = !style.is_block()
         || scrolls
@@ -190,6 +185,20 @@ fn prepare(resolved: &LeafBox, known_dimensions: Size<Option<f32>>, sizing_mode:
         ratio_is_minimum: resolved.ratio_is_minimum,
         padding_top: resolved.padding.top,
         padding_bottom: resolved.padding.bottom,
+    }
+}
+
+/// Preserve measured content when its padding-rounded outer size is inverted.
+#[inline]
+fn measured_outer_width(content: f32, inset: f32) -> f32 {
+    let rounded = content + inset;
+    // A finite sum of nonnegative operands proves both operands finite.
+    if content >= 0.0 && inset >= 0.0 && rounded.is_finite() && rounded - inset < content {
+        // The rounded sum undershot the exact sum. Its next float encloses it.
+        // At MAX this is infinity: no finite outer width can honor the content.
+        rounded.next_up()
+    } else {
+        rounded
     }
 }
 
@@ -286,10 +295,12 @@ pub fn compute_leaf_layout_with<T: LayoutTree + ?Sized>(
     let measured = measure(tree, MeasureInput { known_dimensions: measure_known, available_space: available_for_measure });
     let measured_size = measured.size;
 
-    let clamped = known_dimensions
-        .or(node_size)
-        .unwrap_or(measured_size + content_box_inset_sum)
-        .maybe_clamp(node_min_size, node_max_size);
+    let known_size = known_dimensions.or(node_size);
+    let clamped = Size {
+        width: known_size.width.unwrap_or_else(|| measured_outer_width(measured_size.width, content_box_inset_sum.width)),
+        height: known_size.height.unwrap_or(measured_size.height + content_box_inset_sum.height),
+    }
+    .maybe_clamp(node_min_size, node_max_size);
     let height = match aspect_ratio {
         // The ratio gives the height, which the content may exceed only where that is its
         // automatic minimum.

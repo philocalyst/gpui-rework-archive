@@ -53,8 +53,18 @@ impl Layout {
     }
 
     #[inline]
+    pub(crate) fn content_box_inset(padding_border: Rect<f32>, scrollbar: Size<f32>) -> Rect<f32> {
+        Rect {
+            right: padding_border.right + scrollbar.width,
+            bottom: padding_border.bottom + scrollbar.height,
+            ..padding_border
+        }
+    }
+
+    #[inline]
     pub fn content_box_width(&self) -> f32 {
-        self.size.width - self.padding.left - self.padding.right - self.border.left - self.border.right - self.scrollbar_size.width
+        let inset = Self::content_box_inset(self.padding + self.border, self.scrollbar_size);
+        self.size.width - inset.sum_axes().width
     }
     #[inline]
     pub fn content_box_height(&self) -> f32 {
