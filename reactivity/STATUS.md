@@ -153,13 +153,16 @@ archived; no production renderer change follows those timings. The text timing c
 diagnostic success does not complete or replace its missing benchmark cells.
 
 The isolated [SourceValue prerequisite](evidence/source-value-nightly/README.md)
-passes 554 default tests (10 ignored) and nine expected public type rejections
-plus a positive generic/trait-object case on genuine rustc 1.101.0-nightly,
-without RUSTC_BOOTSTRAP. It rejects nested Signals inside an exact Source value;
-ordinary coarse owner updates remain supported. Its nightly requirement,
-existing compiler deprecation warnings and incomplete native/strict/foreign/cost
-qualification are explicit. It and the typed inbox/one-buffer successors are
-not yet adopted.
+passes 554 default tests (10 ignored), 620 X11-feature tests (34 ignored), and
+nine expected public type rejections plus a positive generic/trait-object case
+on genuine rustc 1.101.0-nightly, without RUSTC_BOOTSTRAP. The native combined
+build/test timeout and backend-omission compilation failure remain archived;
+the passing postbuild run keeps the same 600-second deadline. Exact-source
+strict checks fail on existing std atomic deprecations. It rejects nested
+Signals inside an exact Source value; ordinary coarse owner updates remain
+supported. Actual native-window execution, strict compatibility, foreign and
+matched-cost integration are separate requirements. It and the typed
+inbox/one-buffer successors are not yet adopted.
 
 [Borrowed-kernel research](evidence/borrowed-kernel-research/README.md)
 now includes a compiled standalone Rust lifetime probe with three rejected
