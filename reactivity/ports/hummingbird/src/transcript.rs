@@ -82,7 +82,9 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     win.click(original_play)?;
     settle(&mut win, &worker)?;
     let played_id = win
-        .with_ready(playback, |request| request.track.as_ref().unwrap().id)?
+        .with_ready(playback, |request| {
+            request.track.as_ref().unwrap().track_id.unwrap()
+        })?
         .unwrap();
     assert_eq!(played_id, 44);
     assert!(win.contains_text("Play request 1: recording 44 — /music/44.flac")?);
@@ -100,7 +102,12 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     assert_eq!(ids(&win), [13, 11, 21, 5000, 90, 44, 1001, 1, 3, 2]);
     assert_eq!(play_target(&win, 44), original_play);
     assert_eq!(
-        win.with_ready(playback, |request| request.track.as_ref().unwrap().id)?,
+        win.with_ready(playback, |request| request
+            .track
+            .as_ref()
+            .unwrap()
+            .track_id
+            .unwrap())?,
         Some(44)
     );
 

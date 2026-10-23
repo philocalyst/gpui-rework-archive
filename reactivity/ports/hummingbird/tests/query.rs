@@ -77,6 +77,14 @@ fn projection_is_not_matching_and_nullable_track_artist_is_not_album_artist() {
     assert_eq!(playback.len(), 1);
     assert_eq!(playback[0].id, 21);
     assert_eq!(playback[0].location.to_str(), Some("/music/z.flac"));
+    let queued = tracks()
+        .by_id(21)
+        .for_queue()
+        .fetch_rows(database.connection())
+        .unwrap();
+    assert_eq!(queued[0].id, playback[0].id);
+    assert_eq!(queued[0].location, playback[0].location);
+    assert_eq!(queued[0].title, "Café Étude");
     assert_eq!(
         tracks()
             .at_path(&playback[0].location)

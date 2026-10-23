@@ -67,7 +67,7 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
             .questions(questions)
             .with_inbox(inbox, Library::receive)
             .title("Hummingbird — Library port")
-            .size(720, 520)
+            .size(720, 900)
             .renderer(match renderer {
                 Renderer::Auto => gpui::RendererPolicy::Auto,
                 Renderer::Cpu => gpui::RendererPolicy::ReferenceCpu,
