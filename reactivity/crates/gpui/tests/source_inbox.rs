@@ -335,6 +335,53 @@ fn typed_delivery_refreshes_only_questions_that_depend_on_its_source() {
 }
 
 #[test]
+fn a_committed_prefix_revokes_a_ready_answer_before_returning_a_later_binding_error() {
+    let (send, jobs) = mpsc::channel();
+    let (questions, reader) = Questions::new()
+        .question(
+            Panel::LEFT,
+            String::clone,
+            move |input, completion: Completion<usize, std::io::Error>| {
+                send.send((input, completion)).map_err(|_| StartError::Closed)
+            },
+        )
+        .unwrap();
+    let (bad, bad_inbox) = Remote::bounded(1);
+    let (remote, inbox) = Remote::bounded(1);
+    let bad_right = Source::new(
+        FieldId::new(2),
+        "right",
+        |m: &Panel| &m.right,
+        |m| &mut m.left,
+    );
+    let mut win = Win::with_questions(Panel::new(), questions, WindowOptions::default())
+        .unwrap()
+        .with_inbox_for(bad_inbox, bad_right, |_, _: ()| panic!("rejected callback"))
+        .unwrap()
+        .with_inbox_for(inbox, Panel::LEFT, |value, message| *value = message)
+        .unwrap();
+    let (input, completion) = jobs.recv_timeout(Duration::from_secs(3)).unwrap();
+    assert_eq!(input, "seed");
+    completion.complete(Ok(4)).unwrap();
+    win.deliver_ready(8).unwrap();
+    assert_eq!(win.with_ready(reader, |value| *value).unwrap(), Some(4));
+    remote.try_send("changed".into()).unwrap();
+    bad.try_send(()).unwrap();
+    let failure = win.deliver_ready(8).unwrap_err();
+    assert!(matches!(failure.error, Error::Binding(_)));
+    assert_eq!(failure.delivery.unwrap().applied, 1);
+    assert_eq!(&**win.read(Panel::LEFT).unwrap(), "changed");
+    assert_eq!(win.with_ready(reader, |value| *value).unwrap(), None);
+    assert_eq!(win.question_status(reader).unwrap(), gpui::QuestionStatus::Pending);
+    let (input, completion) = jobs.recv_timeout(Duration::from_secs(3)).unwrap();
+    assert_eq!(input, "changed");
+    completion.complete(Ok(7)).unwrap();
+    win.deliver_ready(8).unwrap();
+    assert_eq!(win.with_ready(reader, |value| *value).unwrap(), Some(7));
+    assert!(win.contains_text("changed").unwrap());
+}
+
+#[test]
 fn a_rejected_message_does_not_strand_its_frozen_fifo_or_evade_a_smaller_budget() {
     struct Moving {
         value: Signal<String>,
