@@ -1,0 +1,18 @@
+{
+  "source": "d6883d6d6ad2cee0ba3d3458ac9ef7fac5dea78e",
+  "source_tree_clean": true,
+  "bootstrap": false,
+  "default_all_targets": {
+    "passed": 554,
+    "failed": 0,
+    "ignored": 10,
+    "harnesses": 73
+  },
+  "downstream_expected_rejections": 9,
+  "downstream_positive_cases": 1,
+  "all_downstream_contracts_pass": true,
+  "library": "/tmp/gpui-source-value-nightly-target/debug/build/gpui/a9a39855dc9f9245/out/libgpui-a9a39855dc9f9245.rmeta",
+  "library_sha256": "0ce64a2c45f669714d7e65546eca91ca67a26315d22bf76bce6a38ebdc2f1e58",
+  "production_source_adopted": false,
+  "scope": "Exact-source genuine-nightly default/type qualification only. Strict/native/foreign/cost integration pending."
+}

@@ -1,0 +1,175 @@
+{
+  "scope": "Only ELF interpreter and RPATH adapted for the Nix host; every .text section byte-identical. Official distribution archives remain SHA-verified and untouched. No Rust source, feature behavior or RUSTC_BOOTSTRAP change.",
+  "files": [
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/cargo",
+      "original_sha256": "2f61a65e2f3029f4d849a6534bbd6627790142c59a74682f0025e80d6f638c7d",
+      "adapted_sha256": "8063ecc69dba351c3f252b5720b6cf37b1cd4aa4b0b05cb5432955b3ee584980",
+      "text_sha256_unchanged": "ef7935adb979acb015cf4e49ad08eb2195aa8012b544d558a1fc1256f00d4913",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/cargo-clippy",
+      "original_sha256": "c94498f1353e5dae6207613109bc89beec4a298b024ee46202d57430169f85e4",
+      "adapted_sha256": "3d8b4d8861fe729bf342b5ee04bf74c362b95d6f85616f654d75f7a398cf5e66",
+      "text_sha256_unchanged": "4969cc88daf9dd347b5f170840f3dfe185e59598aa8f5764cc58f5cabbbada18",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/cargo-fmt",
+      "original_sha256": "5422d2bbca9a723de7832d285de0805dc3f963f738edb49a0b63cf7f0eab2dd4",
+      "adapted_sha256": "ce218585a1a46e49922ddeb44dd170b087a04191ac6aa6c24175e1980eb5a0c5",
+      "text_sha256_unchanged": "140544f72a99cc1ad54a0d6921766eed437478438bf4150e33df384ec694c889",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/clippy-driver",
+      "original_sha256": "022518ef2dd21ef2db43c7f92bb51303536aeb8ac6f55c627ce9170026753360",
+      "adapted_sha256": "71b0e46dc04b78adec417b54f7ada2a9fe3b0fde65259d68282801151bb709ad",
+      "text_sha256_unchanged": "a370e692f42462df8ca3464fc37dc3be49d02ea318fcfb6edf07baa1be43d74c",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/rustc",
+      "original_sha256": "868823b4821483101b4e71435a11ae702dee76fca8a725b045eda1fb32318ed2",
+      "adapted_sha256": "0f1fe0ea69fb19db963ad349f5948b7c79cabc298df71a8981a09031bdb61753",
+      "text_sha256_unchanged": "c42bc72d067516e97f1caf3d6f5d69a48b0d58aa8f892fb792607adc67d98567",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/rustdoc",
+      "original_sha256": "0972d33a69385fcc7b13d4bcf251ce1c43c083452f2738041361dedbea5e4f68",
+      "adapted_sha256": "4ed08fd564432cf649c8da290b9b51d7af29154dd0b1cf0a18ad3b74a8a63713",
+      "text_sha256_unchanged": "615fe4d98fa93701a7f0ae6c7bebae8ba4612f60e88cebc693d651b54614a86c",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/bin/rustfmt",
+      "original_sha256": "27e84f33fec7f10af97b6dda523685a577bc8857401639b6dba7f77793b77892",
+      "adapted_sha256": "5c8b187bbc18961b246383b64fab7839638b71190a541200ca247f61f6bc58e1",
+      "text_sha256_unchanged": "ce9baa7f5f74be4b5f582689b43eb2a59be7602f432dd2dc61ec25f12c9833ff",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/libLLVM.so.23.1-rust-1.101.0-nightly",
+      "original_sha256": "a24aea8cc0450c476b3052a28350b40ea8b6bbaa2f7961f9886c510f009ad298",
+      "adapted_sha256": "36a3eed819a79d80ad4c1fd72dca27fe4c481283a6eaab3f317923fccabcb24a",
+      "text_sha256_unchanged": "60a50115853e47f6c25e3882c678ff19c86c8853c3f99029cbb1108bcd7ec908",
+      "original_interpreter": null,
+      "interpreter": null,
+      "old_rpath": "$ORIGIN/../lib:$ORIGIN/../lib/x86_64-unknown-linux-gnu",
+      "new_rpath": "$ORIGIN/../lib:$ORIGIN/../lib/x86_64-unknown-linux-gnu:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/librustc_driver-8ddbd174ff1ac129.so",
+      "original_sha256": "87823eec04880cd0ebf69b22030b4fc6e103ba298c0055a4ba54b2edd27eade0",
+      "adapted_sha256": "bd95646fb9a566fca3d52cbfb57c430f4f4410e30f8d9bc8846827fedcc053c4",
+      "text_sha256_unchanged": "4e9bb9b4fd31d1b5e9197cb8225c0c5c4c6257e387cf458033645cb58dc98f76",
+      "original_interpreter": null,
+      "interpreter": null,
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/ld.lld",
+      "original_sha256": "2e09d1c704b795b773f58c3fdca19c71f49f089058ea94d69c0de5bb375a7b5c",
+      "adapted_sha256": "de5cc6d34bd15767d91af05ca97540fbb13f8fdb7e4f69d7e2ccc2ef7fb1ce49",
+      "text_sha256_unchanged": "3378a0c952b336980f73b56057db1ba6f14a4d46b235fdb4482a33e701a452b8",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/ld64.lld",
+      "original_sha256": "2e09d1c704b795b773f58c3fdca19c71f49f089058ea94d69c0de5bb375a7b5c",
+      "adapted_sha256": "de5cc6d34bd15767d91af05ca97540fbb13f8fdb7e4f69d7e2ccc2ef7fb1ce49",
+      "text_sha256_unchanged": "3378a0c952b336980f73b56057db1ba6f14a4d46b235fdb4482a33e701a452b8",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/lld-link",
+      "original_sha256": "2e09d1c704b795b773f58c3fdca19c71f49f089058ea94d69c0de5bb375a7b5c",
+      "adapted_sha256": "de5cc6d34bd15767d91af05ca97540fbb13f8fdb7e4f69d7e2ccc2ef7fb1ce49",
+      "text_sha256_unchanged": "3378a0c952b336980f73b56057db1ba6f14a4d46b235fdb4482a33e701a452b8",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld/wasm-ld",
+      "original_sha256": "2e09d1c704b795b773f58c3fdca19c71f49f089058ea94d69c0de5bb375a7b5c",
+      "adapted_sha256": "de5cc6d34bd15767d91af05ca97540fbb13f8fdb7e4f69d7e2ccc2ef7fb1ce49",
+      "text_sha256_unchanged": "3378a0c952b336980f73b56057db1ba6f14a4d46b235fdb4482a33e701a452b8",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld",
+      "original_sha256": "f1b354ed937dfb7883db40007b6e75b9fc320cf57a6a109751e46a2bcbe8b663",
+      "adapted_sha256": "b8340a5f25b20787f46a372ec59315563bcc2c09def234dc32cde956ee34e667",
+      "text_sha256_unchanged": "37eb53c069f6a30185b714f4b8e1ae96c4ee35625229f83d853b4078cb4fc5d9",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../../../:$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../../../:$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-objcopy",
+      "original_sha256": "4d279bdccff5a6b7e764cf6865116b259c8e06fb3d472a3a10758869e03bd265",
+      "adapted_sha256": "9583abb9fd4f83f5dfd1e15a88fed4ac41ace80623c25eefa8afe5d081e84db7",
+      "text_sha256_unchanged": "23779c390d739eef80ae15992131cda775d4d092993b2e52524c7f8ee33ad3ca",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../../../:$ORIGIN/../lib:$ORIGIN/../lib/x86_64-unknown-linux-gnu",
+      "new_rpath": "$ORIGIN/../../../:$ORIGIN/../lib:$ORIGIN/../lib/x86_64-unknown-linux-gnu:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/bin/wasm-component-ld",
+      "original_sha256": "04766871c19f3505265d17d769fb90ee7f466b68dbc1f6852607c3b6e2bedf9a",
+      "adapted_sha256": "698a08fc758c122d3062ebf6edb1a9bc2ccef5ea7c8afa31ae07311ff906dc69",
+      "text_sha256_unchanged": "0bb97004aa3b78554d48fe5afd2e74e8ef51544c2a422db1ca0c101b5cc0c6d6",
+      "original_interpreter": "/lib64/ld-linux-x86-64.so.2",
+      "interpreter": "/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/ld-linux-x86-64.so.2",
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    },
+    {
+      "path": "/tmp/gpui-nightly-2026-10-23/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-530112f2fd58de10.so",
+      "original_sha256": "c7a328fc22e03bad9548128531d848b7b7d969134c156475385ee0532b70a87b",
+      "adapted_sha256": "5adf5a8a4bd5f8127e9ddaf343a33989abd73742a7fafae607c6616e562040f8",
+      "text_sha256_unchanged": "7834fa8fc1078d24304645ef81844601e71d07c4d228e9e50f89922109eafb06",
+      "original_interpreter": null,
+      "interpreter": null,
+      "old_rpath": "$ORIGIN/../lib",
+      "new_rpath": "$ORIGIN/../lib:/tmp/gpui-nightly-2026-10-23/lib:/nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib:/nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib:/nix/store/2ga5nd1m56n5cx2wh8vbf6nrdhqk2f0q-gcc-15.3.0-lib/lib:/nix/store/b2swxfi8srrbsafvh9iyyhd26mz9giwf-zlib-1.3.2/lib"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+error: only metadata stub found for `rlib` dependency `gpui`. Please provide path to the corresponding .rmeta file with full metadata
+ --> /tmp/gpui-source-value-nightly-evidence/contracts/generic_leaf_and_trait_object.rs:3:5
+  |
+3 | use gpui::{FieldId, Signal, Source, Sources};
+  |     ^^^^
+
+error: aborting due to 1 previous error
+

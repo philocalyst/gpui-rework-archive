@@ -1,0 +1,2757 @@
+{
+  "source": "6158d25e483dea439832399e768ff4fbe1202640",
+  "baseline": "a81bc7536b002b1f81e1b36137c1c4de543e2204",
+  "payload_members": [
+    {
+      "member": "evidence/README.md",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/README.md",
+      "bytes": 6045,
+      "sha256": "2b14eefa6090aa66af8bb407f95c45cf087862541b99d37a9cbee5ec1a4614c8"
+    },
+    {
+      "member": "evidence/apple.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/apple.log",
+      "bytes": 7074,
+      "sha256": "064b30002498baf26ccf2eda6df40ffe4e50f688aae715750e8eedb958c253b0"
+    },
+    {
+      "member": "evidence/archive.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/archive.py",
+      "bytes": 3734,
+      "sha256": "41b8898c884bf602d6f96f6e055a88f74ac92af19b54ad217efbbec9529da7e6"
+    },
+    {
+      "member": "evidence/assembly-regenerate.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/assembly-regenerate.log",
+      "bytes": 88,
+      "sha256": "dfebcd1aebf1b14f3f09ceff899b8a0e343dedaa3a470490066f144e2b961871"
+    },
+    {
+      "member": "evidence/assembly-regenerate.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/assembly-regenerate.py",
+      "bytes": 1935,
+      "sha256": "52d9e12d44396862e7f278f8d3e759b508a784d67b53720597ea7b7d2b5f4494"
+    },
+    {
+      "member": "evidence/borrowed-apple.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-apple.log",
+      "bytes": 363,
+      "sha256": "8d81f64492beca919ed09c641fe480c2d048dfd996c7a352eaca606643b413fd"
+    },
+    {
+      "member": "evidence/borrowed-codegen-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-codegen-runner.log",
+      "bytes": 115,
+      "sha256": "e801b362364ed1bb9d84cbdc1f6a336511a6364fe2dc794e324a35f7f713389c"
+    },
+    {
+      "member": "evidence/borrowed-codegen.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-codegen.py",
+      "bytes": 8266,
+      "sha256": "89330bb6b285067c458d8449d8a407cee8c8b58c08f455276481771c51b476c9"
+    },
+    {
+      "member": "evidence/borrowed-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-default.log",
+      "bytes": 6813,
+      "sha256": "6bc7b1781a2d7aa3c2256a8130d4dba65a21c9e569564bb199cf64aa9c5a82d4"
+    },
+    {
+      "member": "evidence/borrowed-fallback.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-fallback.log",
+      "bytes": 6813,
+      "sha256": "184c32cbb61057d4766a00f153f8c9c1a82d0f02fbe5f68617c0fd415bf942ba"
+    },
+    {
+      "member": "evidence/borrowed-msvc.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-msvc.log",
+      "bytes": 363,
+      "sha256": "5b6d7f5f06787e8f118ecca862c7ff5218e971ebf669c93d48eeae9c01af9b74"
+    },
+    {
+      "member": "evidence/borrowed-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-offline.log",
+      "bytes": 7002,
+      "sha256": "11bd7017f70223a37dd0036412929913b542509676a07bef5fd9ee05d8a45e9b"
+    },
+    {
+      "member": "evidence/borrowed-strict-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-strict-default.log",
+      "bytes": 144,
+      "sha256": "a006f484f1f7748b48d13c73c44f5a26447318e46af48448b1a630ded1f88b47"
+    },
+    {
+      "member": "evidence/borrowed-strict-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/borrowed-strict-offline.log",
+      "bytes": 144,
+      "sha256": "57adc347cd09f3d1651375edde1d515df5996ff21829df3f65046b9022bbc538"
+    },
+    {
+      "member": "evidence/codegen-cache-copy.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/codegen-cache-copy.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "evidence/codegen-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/codegen-runner.log",
+      "bytes": 149,
+      "sha256": "cfb06f0750f5815d81f45a3951fc12a28eecaa970cb1f1cdb4f4e59842cd53ea"
+    },
+    {
+      "member": "evidence/codegen.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/codegen.py",
+      "bytes": 7951,
+      "sha256": "66211ef4b4b330763971b726b1bd7715ed505236d13083f737527902adccac70"
+    },
+    {
+      "member": "evidence/codegen.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/codegen.toml",
+      "bytes": 43,
+      "sha256": "cb7f059c92d1853146dc543932ec444380a61475366117e7464d6d602ffca4fb"
+    },
+    {
+      "member": "evidence/core-lines-a81.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/core-lines-a81.json",
+      "bytes": 43300,
+      "sha256": "fc4d329f6c70b3f96660f97c256af81b85ac4d081d8472540b5459afed9594f9"
+    },
+    {
+      "member": "evidence/core-lines-borrowed.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/core-lines-borrowed.json",
+      "bytes": 43530,
+      "sha256": "c4dbc999f409f7e2c35ce32e0422aef137387bdf63e499b529fcdd61ed3c3fb3"
+    },
+    {
+      "member": "evidence/core-lines-candidate.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/core-lines-candidate.json",
+      "bytes": 43530,
+      "sha256": "48fb97280770c4ea7b1cf8b1eea87d02d42a218d80c9d88c5d7d132fffdc2f6f"
+    },
+    {
+      "member": "evidence/core-lines-final.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/core-lines-final.json",
+      "bytes": 43530,
+      "sha256": "8949a8bf7d620cef7b82949d2735ada5aad8aba113b601ed5f5ef71dde67b4d1"
+    },
+    {
+      "member": "evidence/core-lines-legacy-277.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/core-lines-legacy-277.json",
+      "bytes": 43300,
+      "sha256": "cddbd3131661472649bc922751339056ab8bebc3c08254db95df629596412ff8"
+    },
+    {
+      "member": "evidence/core-lines-sealed.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/core-lines-sealed.json",
+      "bytes": 43530,
+      "sha256": "087e232bcc6fe21c5418941403ba7f27a008acc3a86e1e628654f67cf186a233"
+    },
+    {
+      "member": "evidence/cost-ledger.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/cost-ledger.json",
+      "bytes": 7269,
+      "sha256": "95af9b7355a36138f01cc82d7ed4094434dbd46f8567c492619453173c30a104"
+    },
+    {
+      "member": "evidence/default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/default.log",
+      "bytes": 6969,
+      "sha256": "07550b7543443033562e530ae11bb7bdeaa503a161763c057848ffc0b8db7e77"
+    },
+    {
+      "member": "evidence/fallback.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/fallback.log",
+      "bytes": 6901,
+      "sha256": "99d8f980453074166dccd22f2acbcd9d650aae4363a4ec79b704e3ef75e7470c"
+    },
+    {
+      "member": "evidence/final-apple.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-apple.log",
+      "bytes": 466,
+      "sha256": "b950f16d0ec7c0cbf38261c324d4f6de039488dadcad1510321a3ddf545c26d2"
+    },
+    {
+      "member": "evidence/final-codegen-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-codegen-runner.log",
+      "bytes": 115,
+      "sha256": "2ad92a30e62a61cb04c6ede562346696ebc0fa361cd5718c6dabf475ab58c7f0"
+    },
+    {
+      "member": "evidence/final-codegen.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-codegen.py",
+      "bytes": 8263,
+      "sha256": "04044d3f9bbf80b79c9d595c69e687d024f6ef1fa09476fe8cd49ac839c081d1"
+    },
+    {
+      "member": "evidence/final-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-default.log",
+      "bytes": 6969,
+      "sha256": "cde9da6a106a0f86b471dbcb6c5724a8200de1f58deff8a66994b4b901199c86"
+    },
+    {
+      "member": "evidence/final-fallback.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-fallback.log",
+      "bytes": 6813,
+      "sha256": "f9940b29a9a2d267ada7d114856e2e76b81dea1337ddc8c98e6c3eb095d0e3f4"
+    },
+    {
+      "member": "evidence/final-msvc.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-msvc.log",
+      "bytes": 362,
+      "sha256": "1bda6e42ba4a7eb326092d0cc70f1f6898903e423abefb789cd49c9d3c369eef"
+    },
+    {
+      "member": "evidence/final-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-offline.log",
+      "bytes": 7002,
+      "sha256": "0240cd09fc297b54455cd235e19d21df18768ad141010517b75c707523b0a83a"
+    },
+    {
+      "member": "evidence/final-strict-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-strict-default.log",
+      "bytes": 144,
+      "sha256": "c52fbc2156dee786a1cb63756c2fb3663aa0081c7e9a69e1ebf7908b6ef9d9ab"
+    },
+    {
+      "member": "evidence/final-strict-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/final-strict-offline.log",
+      "bytes": 144,
+      "sha256": "488440c959ba18f2a9de9cb8d05bba3c0fa398a262e3a083d1f88b99e5be7892"
+    },
+    {
+      "member": "evidence/functional-build.jsonl",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-build.jsonl",
+      "bytes": 142790,
+      "sha256": "b11a89ead7493ece91371d50863e529beab4b5c2017efe7b4527393a471c4aac"
+    },
+    {
+      "member": "evidence/functional-build.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-build.log",
+      "bytes": 144,
+      "sha256": "3531e4c6e402bf55465e8bed837ed888cad674d1fae96451a79bb46af96bb696"
+    },
+    {
+      "member": "evidence/functional-readbacks/adapter.txt",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/adapter.txt",
+      "bytes": 368,
+      "sha256": "fb9b3ef35472ad4c9196bf4ddec0adb2cb35148fedca36bb6f9eb91ec7c79468"
+    },
+    {
+      "member": "evidence/functional-readbacks/flat-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/flat-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/flat-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/flat-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/flat-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/flat-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/flat-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/flat-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/frames.csv",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/frames.csv",
+      "bytes": 35301,
+      "sha256": "6e666ea937ff5b59a56ed41f82a4aa6c9c0c24f8337fe1641642c222c3ec8c21"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "cdc24b083b91785bcdef79644baecebb4e3b8236273473cced19f6c62853829b"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "member": "evidence/functional-readbacks/image-text-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/image-text-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "2aa354c4c477c5b5d3713f0e4ca8861814b1d7c9d85bedac95d71e5941c5c18c"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "3967c10ae69b13c065ea60bd2e82f3d3ccd97cd5de21ef496e7ec95a19f52211"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-text-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-text-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "d33ac5de12c8981a84daaf0a0184e5d1be73721dff6f109aed9633616895e86f"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/functional-readbacks/layers8-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/layers8-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4ebdc582d23230a45c4860c452221dd80649ae7597349f48b7247d558f10eef5"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "member": "evidence/functional-readbacks/rounded-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/rounded-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "629c2fcf4e1763214fa5375ac4f4f79f0385a338e32610b86998e5ee1b2d4042"
+    },
+    {
+      "member": "evidence/functional-readbacks/runs32k-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/runs32k-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/runs32k-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/runs32k-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/runs32k-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/runs32k-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/runs32k-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/runs32k-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/singletons32k-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/singletons32k-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/singletons32k-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/singletons32k-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/singletons32k-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/singletons32k-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/singletons32k-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/singletons32k-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-bg-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-bg-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-bg-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-bg-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-bg-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-bg-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-bg-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-bg-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "7e80ee0c392355c9d1c785c673bc65246ee5738443960efb7c2e1c41660e5330"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "member": "evidence/functional-readbacks/text-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-readbacks/text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "fcb4392ca44b6c92637d454dc4850ad14ca9b1f4c7a0a746b23efaf6e3df3181"
+    },
+    {
+      "member": "evidence/functional-run.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-run.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "evidence/functional-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-runner.log",
+      "bytes": 458,
+      "sha256": "adec6729cc858f47b30a869f8e9105469c32907ab37a7710da379336f77805ce"
+    },
+    {
+      "member": "evidence/functional-summary.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional-summary.json",
+      "bytes": 9944,
+      "sha256": "d0a10317072a1af3dac54c331f81024dc39ea0cf6a05c534b02cc994af67aa86"
+    },
+    {
+      "member": "evidence/functional.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/functional.py",
+      "bytes": 2997,
+      "sha256": "343e3c3f60fada2c6dcf28ad4d291682f66a870f94669248fe33f6b2d0ee60bb"
+    },
+    {
+      "member": "evidence/legacy-abi-feasibility.md",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/legacy-abi-feasibility.md",
+      "bytes": 5860,
+      "sha256": "ffc9691381c41741af16a22f5064987d384f25a4b8bc2dae5bd89bfb54ad093a"
+    },
+    {
+      "member": "evidence/luna-coverage-algebra.md",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/luna-coverage-algebra.md",
+      "bytes": 17488,
+      "sha256": "616c4db3b96ce3a053c44b96517ad2824df79271f8f5cea20714aeae652cb31a"
+    },
+    {
+      "member": "evidence/luna-second-pass.md",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/luna-second-pass.md",
+      "bytes": 26033,
+      "sha256": "7d53985b75a82ff82cd275111a4b6d1f3228c8d530ccf8da30a88fd741b7527b"
+    },
+    {
+      "member": "evidence/msvc.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/msvc.log",
+      "bytes": 7606,
+      "sha256": "eefcb2b03df214c746e1bf37220f1f251fc83521a5bbc6913fb9d968bb45a564"
+    },
+    {
+      "member": "evidence/negative-control.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/negative-control.json",
+      "bytes": 598,
+      "sha256": "3a56c9b7056432bd594e049168a29b934d9e864d7e7fe038caf6c04e937541ac"
+    },
+    {
+      "member": "evidence/negative-control.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/negative-control.py",
+      "bytes": 2235,
+      "sha256": "9a918cce09a3df2d497753d55403a256fbb92662e769495e285b9a9bdf0b2676"
+    },
+    {
+      "member": "evidence/negative-false-certificate.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/negative-false-certificate.log",
+      "bytes": 78429,
+      "sha256": "356f49a7901621b0dd46c7126a224fbcc677b01dc662cb45b57d7242d8b57327"
+    },
+    {
+      "member": "evidence/negative-recovery.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/negative-recovery.log",
+      "bytes": 1055,
+      "sha256": "8cbfbe6a41daef12780c340df59bfd4790d09240d89ff4598c3afc7b534b6bfb"
+    },
+    {
+      "member": "evidence/negative-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/negative-runner.log",
+      "bytes": 598,
+      "sha256": "3a56c9b7056432bd594e049168a29b934d9e864d7e7fe038caf6c04e937541ac"
+    },
+    {
+      "member": "evidence/offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/offline.log",
+      "bytes": 7757,
+      "sha256": "ec2a75338e662e89f163d852a756374ec75b96d8f7c86515b121b430308e0c08"
+    },
+    {
+      "member": "evidence/prior-frozen-archive-unchanged.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/prior-frozen-archive-unchanged.json",
+      "bytes": 163,
+      "sha256": "aa7f58a38d8fd2d12938b69fc4cf76b6b9bd7a226492a744c63f0c3e5cac376d"
+    },
+    {
+      "member": "evidence/qualification.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/qualification.rs",
+      "bytes": 10461,
+      "sha256": "8773146b44150adb0150323d51f241c946fb5cda26328f004562dcd9dee39cc0"
+    },
+    {
+      "member": "evidence/rounded-tree-proof.md",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/rounded-tree-proof.md",
+      "bytes": 5053,
+      "sha256": "3b5119d70c4ca09e887160987d356b4d81e1dadb59f8d93d8c7cdb7ae8a3cd3d"
+    },
+    {
+      "member": "evidence/sealed-apple.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-apple.log",
+      "bytes": 363,
+      "sha256": "908332988e67d0ea84c1d18dc2774352e3d642e27ac7f6a309cc6ff27f10be52"
+    },
+    {
+      "member": "evidence/sealed-codegen-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-codegen-runner.log",
+      "bytes": 115,
+      "sha256": "e801b362364ed1bb9d84cbdc1f6a336511a6364fe2dc794e324a35f7f713389c"
+    },
+    {
+      "member": "evidence/sealed-codegen.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-codegen.py",
+      "bytes": 8264,
+      "sha256": "84a48cb0c83b83cf9111bfd8e13a0a7789c9e043999c094c91479d90d6ee5715"
+    },
+    {
+      "member": "evidence/sealed-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-default.log",
+      "bytes": 6969,
+      "sha256": "22230d069afc3e9c09cf0b8cb63e07d9cdf88787a4750951d67a24198d1b429e"
+    },
+    {
+      "member": "evidence/sealed-fallback.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-fallback.log",
+      "bytes": 6813,
+      "sha256": "bdc92625cf01e01672b1933f691718afd69087aee208a361331d4a94b75b17e5"
+    },
+    {
+      "member": "evidence/sealed-functional-build.jsonl",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-build.jsonl",
+      "bytes": 142790,
+      "sha256": "d48300834e4ce7630554ab0493b005339fe2d45c355814d5b4976c8ae4865036"
+    },
+    {
+      "member": "evidence/sealed-functional-build.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-build.log",
+      "bytes": 144,
+      "sha256": "3b46d520e177eafd8173ffbe0e681b0888437ff05e363301b55ca3937978a796"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/adapter.txt",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/adapter.txt",
+      "bytes": 368,
+      "sha256": "fb9b3ef35472ad4c9196bf4ddec0adb2cb35148fedca36bb6f9eb91ec7c79468"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/flat-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/flat-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/flat-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/flat-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/flat-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/flat-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/flat-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/flat-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/frames.csv",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/frames.csv",
+      "bytes": 35304,
+      "sha256": "ad6e966f4d22bfe892dd8119d3240d78df5aebca944a277dae5a11e8ab43e811"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "cdc24b083b91785bcdef79644baecebb4e3b8236273473cced19f6c62853829b"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/image-text-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/image-text-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "2aa354c4c477c5b5d3713f0e4ca8861814b1d7c9d85bedac95d71e5941c5c18c"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "3967c10ae69b13c065ea60bd2e82f3d3ccd97cd5de21ef496e7ec95a19f52211"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-text-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-text-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "d33ac5de12c8981a84daaf0a0184e5d1be73721dff6f109aed9633616895e86f"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/layers8-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/layers8-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4ebdc582d23230a45c4860c452221dd80649ae7597349f48b7247d558f10eef5"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-true-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-true-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-true-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/rounded-true-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/rounded-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "629c2fcf4e1763214fa5375ac4f4f79f0385a338e32610b86998e5ee1b2d4042"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/runs32k-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/runs32k-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/runs32k-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/runs32k-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/runs32k-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/runs32k-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/runs32k-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/runs32k-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/singletons32k-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/singletons32k-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/singletons32k-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/singletons32k-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/singletons32k-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/singletons32k-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/singletons32k-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/singletons32k-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-bg-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-bg-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-bg-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-bg-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-bg-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-bg-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-bg-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-bg-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "7e80ee0c392355c9d1c785c673bc65246ee5738443960efb7c2e1c41660e5330"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-false-false-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-false-false-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-false-true-0.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "member": "evidence/sealed-functional-readbacks/text-false-true-1.bin",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-readbacks/text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "fcb4392ca44b6c92637d454dc4850ad14ca9b1f4c7a0a746b23efaf6e3df3181"
+    },
+    {
+      "member": "evidence/sealed-functional-run.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-run.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "evidence/sealed-functional-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-runner.log",
+      "bytes": 458,
+      "sha256": "26ecb36cf9277524773e0686036d5cc24deca7bda79b7f8bd7c2a772958869d7"
+    },
+    {
+      "member": "evidence/sealed-functional-summary.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional-summary.json",
+      "bytes": 9944,
+      "sha256": "5779111fdf58278ea435595e17efc69929604429351a4396e5a08ebf643efaf3"
+    },
+    {
+      "member": "evidence/sealed-functional.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-functional.py",
+      "bytes": 3053,
+      "sha256": "2e540af5de0d2514700d558ca99ffb92731f68dda01637405da3492d155286ed"
+    },
+    {
+      "member": "evidence/sealed-msvc.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-msvc.log",
+      "bytes": 467,
+      "sha256": "2256d7dd710b962bdfe824a32e68a075d800626bdcc1a4c9b9520774fbe53bf2"
+    },
+    {
+      "member": "evidence/sealed-negative-control.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-negative-control.json",
+      "bytes": 654,
+      "sha256": "f257d942cfc7d2813b3f8fbb480c1e83407d947ac3dbf52d10fc76886d57c6c7"
+    },
+    {
+      "member": "evidence/sealed-negative-control.py",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-negative-control.py",
+      "bytes": 2324,
+      "sha256": "16ea8d097d6816b91a91480e23a7be72091d887c112d6d43f9ac9409529626df"
+    },
+    {
+      "member": "evidence/sealed-negative-false-certificate.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-negative-false-certificate.log",
+      "bytes": 78429,
+      "sha256": "3f07988481e675e2c696e81f6fbe708fc61da6bed576c0bae6484ba3821636ff"
+    },
+    {
+      "member": "evidence/sealed-negative-recovery.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-negative-recovery.log",
+      "bytes": 1055,
+      "sha256": "b012cbd7ef1590242f2e260cdea06555724b5452154cb5a19476b1ddcdcc7715"
+    },
+    {
+      "member": "evidence/sealed-negative-runner.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-negative-runner.log",
+      "bytes": 654,
+      "sha256": "f257d942cfc7d2813b3f8fbb480c1e83407d947ac3dbf52d10fc76886d57c6c7"
+    },
+    {
+      "member": "evidence/sealed-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-offline.log",
+      "bytes": 7002,
+      "sha256": "98013e8abca588d35771b0528775f152f712d673839e30542622ea2e3d854849"
+    },
+    {
+      "member": "evidence/sealed-strict-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-strict-default.log",
+      "bytes": 145,
+      "sha256": "b2fb2e0a0395ac65aba88b55300d134c589f161a28518ad044d848e6c88d4b6a"
+    },
+    {
+      "member": "evidence/sealed-strict-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/sealed-strict-offline.log",
+      "bytes": 144,
+      "sha256": "38a48621ea6e8f6be9976ad976788e8a86b09da3015862fe53591efd106ca519"
+    },
+    {
+      "member": "evidence/source/Cargo.lock",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/Cargo.lock",
+      "bytes": 105176,
+      "sha256": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/Cargo.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/Cargo.toml",
+      "bytes": 1253,
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/build.rs",
+      "bytes": 772,
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/lib.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/lib.rs",
+      "bytes": 435,
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "bytes": 2970,
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/renderer/images.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/renderer/images.rs",
+      "bytes": 6299,
+      "sha256": "634b35b1e7368345d677027e62390a3279572b4bf60c714b9ec374fc9d0fd617"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/renderer/owned.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/renderer/owned.rs",
+      "bytes": 2365,
+      "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/renderer/paint.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/renderer/paint.rs",
+      "bytes": 14208,
+      "sha256": "5d5194223ba10f983bf2b05dadd46e522d910ce97f6443533bdd86366ad6d917"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/renderer/slots.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/renderer/slots.rs",
+      "bytes": 6665,
+      "sha256": "bcb1ab1245c23deb5ae379998458da4d7a89a793d19460f6bdd192724662d2f2"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/renderer.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/renderer.rs",
+      "bytes": 69866,
+      "sha256": "3572ff310e98c059f26a4d82eaa3573c1dab8b95152ae16d2d9f040f5cd683bd"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/shader.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/shader.rs",
+      "bytes": 19696,
+      "sha256": "5eda4bfd95ae130ef3e09afc483a13379b8d4c13d068988589d9b7b4527f57df"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/src/shader_build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/src/shader_build.rs",
+      "bytes": 23952,
+      "sha256": "e53d902715a1d5a42bdccb474c5f2c7bc977b8dd04a72a5ca47fb84aae990842"
+    },
+    {
+      "member": "evidence/source/a81/reactivity/crates/gpu/tests/render.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81/reactivity/crates/gpu/tests/render.rs",
+      "bytes": 149853,
+      "sha256": "41514ab3f40cdafbf4d7a15b1aa1c07e822edde7e2a7b069288cb9f0be408cac"
+    },
+    {
+      "member": "evidence/source/a81-to-sealed.patch",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/a81-to-sealed.patch",
+      "bytes": 21776,
+      "sha256": "d1292df0435effea725352a8ae78d763707398e646480ba1c060b4813a68d00e"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/Cargo.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/Cargo.toml",
+      "bytes": 1253,
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/build.rs",
+      "bytes": 772,
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/lib.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/lib.rs",
+      "bytes": 435,
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "bytes": 2970,
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "bytes": 14747,
+      "sha256": "4531dc456235a011656900e424403b4d9f23febc942eca5dae6d01f2c62cee24"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/images.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/images.rs",
+      "bytes": 6299,
+      "sha256": "634b35b1e7368345d677027e62390a3279572b4bf60c714b9ec374fc9d0fd617"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/owned.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/owned.rs",
+      "bytes": 2365,
+      "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/paint.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/paint.rs",
+      "bytes": 14208,
+      "sha256": "5d5194223ba10f983bf2b05dadd46e522d910ce97f6443533bdd86366ad6d917"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/slots.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer/slots.rs",
+      "bytes": 6665,
+      "sha256": "bcb1ab1245c23deb5ae379998458da4d7a89a793d19460f6bdd192724662d2f2"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/renderer.rs",
+      "bytes": 70515,
+      "sha256": "c9466644bb27e5ca416a53535c7f7132e0f8476c8951b3d7b1b479b4a5edcbe5"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/shader.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/shader.rs",
+      "bytes": 19696,
+      "sha256": "5eda4bfd95ae130ef3e09afc483a13379b8d4c13d068988589d9b7b4527f57df"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/src/shader_build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/src/shader_build.rs",
+      "bytes": 23952,
+      "sha256": "e53d902715a1d5a42bdccb474c5f2c7bc977b8dd04a72a5ca47fb84aae990842"
+    },
+    {
+      "member": "evidence/source/borrowed-779/reactivity/crates/gpu/tests/render.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/borrowed-779/reactivity/crates/gpu/tests/render.rs",
+      "bytes": 153376,
+      "sha256": "724385a30d5b7fa83eae987a2bec568976fea1f65d6e0273315d21363b7831d2"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/Cargo.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/Cargo.toml",
+      "bytes": 1253,
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/build.rs",
+      "bytes": 772,
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/lib.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/lib.rs",
+      "bytes": 435,
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "bytes": 2970,
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "bytes": 14743,
+      "sha256": "c3e9c0c8f989c2f4196686bb7d90c701bff65c16c18f047e24c5e1e6223200dd"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/images.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/images.rs",
+      "bytes": 6299,
+      "sha256": "634b35b1e7368345d677027e62390a3279572b4bf60c714b9ec374fc9d0fd617"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/owned.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/owned.rs",
+      "bytes": 2365,
+      "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/paint.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/paint.rs",
+      "bytes": 14208,
+      "sha256": "5d5194223ba10f983bf2b05dadd46e522d910ce97f6443533bdd86366ad6d917"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/slots.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer/slots.rs",
+      "bytes": 6665,
+      "sha256": "bcb1ab1245c23deb5ae379998458da4d7a89a793d19460f6bdd192724662d2f2"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/renderer.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/renderer.rs",
+      "bytes": 70491,
+      "sha256": "fae2d41ee0d17696f6403f3e33fe566b234644ccd06d7cbfba291e77fc85a12c"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/shader.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/shader.rs",
+      "bytes": 19696,
+      "sha256": "5eda4bfd95ae130ef3e09afc483a13379b8d4c13d068988589d9b7b4527f57df"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/src/shader_build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/src/shader_build.rs",
+      "bytes": 23952,
+      "sha256": "e53d902715a1d5a42bdccb474c5f2c7bc977b8dd04a72a5ca47fb84aae990842"
+    },
+    {
+      "member": "evidence/source/initial-0359/reactivity/crates/gpu/tests/render.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/initial-0359/reactivity/crates/gpu/tests/render.rs",
+      "bytes": 153376,
+      "sha256": "724385a30d5b7fa83eae987a2bec568976fea1f65d6e0273315d21363b7831d2"
+    },
+    {
+      "member": "evidence/source/legacy-277-against-shipping.patch",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/legacy-277-against-shipping.patch",
+      "bytes": 15583,
+      "sha256": "ab881b327bf98630a805600e1fa73c1981d94080c0bde0801b282c8ac3e193e8"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/Cargo.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/Cargo.toml",
+      "bytes": 1253,
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/build.rs",
+      "bytes": 772,
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/lib.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/lib.rs",
+      "bytes": 435,
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "bytes": 2970,
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "bytes": 14883,
+      "sha256": "e222344f7a7aedc25b47f2059047a063ef557a5cce2d5048512fcb1361b3e88d"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/images.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/images.rs",
+      "bytes": 6299,
+      "sha256": "634b35b1e7368345d677027e62390a3279572b4bf60c714b9ec374fc9d0fd617"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/owned.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/owned.rs",
+      "bytes": 2365,
+      "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/paint.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/paint.rs",
+      "bytes": 14208,
+      "sha256": "5d5194223ba10f983bf2b05dadd46e522d910ce97f6443533bdd86366ad6d917"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/slots.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer/slots.rs",
+      "bytes": 6665,
+      "sha256": "bcb1ab1245c23deb5ae379998458da4d7a89a793d19460f6bdd192724662d2f2"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/renderer.rs",
+      "bytes": 70515,
+      "sha256": "c9466644bb27e5ca416a53535c7f7132e0f8476c8951b3d7b1b479b4a5edcbe5"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/shader.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/shader.rs",
+      "bytes": 19696,
+      "sha256": "5eda4bfd95ae130ef3e09afc483a13379b8d4c13d068988589d9b7b4527f57df"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/src/shader_build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/src/shader_build.rs",
+      "bytes": 23952,
+      "sha256": "e53d902715a1d5a42bdccb474c5f2c7bc977b8dd04a72a5ca47fb84aae990842"
+    },
+    {
+      "member": "evidence/source/rejected-e7/reactivity/crates/gpu/tests/render.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/rejected-e7/reactivity/crates/gpu/tests/render.rs",
+      "bytes": 153376,
+      "sha256": "724385a30d5b7fa83eae987a2bec568976fea1f65d6e0273315d21363b7831d2"
+    },
+    {
+      "member": "evidence/source/root-cargo-config.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/root-cargo-config.toml",
+      "bytes": 1731,
+      "sha256": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/Cargo.toml",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/Cargo.toml",
+      "bytes": 1253,
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/build.rs",
+      "bytes": 772,
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/lib.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/lib.rs",
+      "bytes": 435,
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer/artifact.rs",
+      "bytes": 2970,
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer/coverage.rs",
+      "bytes": 14834,
+      "sha256": "7e80c771b75e61e6c1d31bd3f63ff67f49c4fa1f9ae60f8e47479bfe92c0487f"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer/images.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer/images.rs",
+      "bytes": 6299,
+      "sha256": "634b35b1e7368345d677027e62390a3279572b4bf60c714b9ec374fc9d0fd617"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer/owned.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer/owned.rs",
+      "bytes": 2365,
+      "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer/paint.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer/paint.rs",
+      "bytes": 14208,
+      "sha256": "5d5194223ba10f983bf2b05dadd46e522d910ce97f6443533bdd86366ad6d917"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer/slots.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer/slots.rs",
+      "bytes": 6665,
+      "sha256": "bcb1ab1245c23deb5ae379998458da4d7a89a793d19460f6bdd192724662d2f2"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/renderer.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/renderer.rs",
+      "bytes": 70515,
+      "sha256": "c9466644bb27e5ca416a53535c7f7132e0f8476c8951b3d7b1b479b4a5edcbe5"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/shader.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/shader.rs",
+      "bytes": 19696,
+      "sha256": "5eda4bfd95ae130ef3e09afc483a13379b8d4c13d068988589d9b7b4527f57df"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/src/shader_build.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/src/shader_build.rs",
+      "bytes": 23952,
+      "sha256": "e53d902715a1d5a42bdccb474c5f2c7bc977b8dd04a72a5ca47fb84aae990842"
+    },
+    {
+      "member": "evidence/source/sealed/reactivity/crates/gpu/tests/render.rs",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/source/sealed/reactivity/crates/gpu/tests/render.rs",
+      "bytes": 153376,
+      "sha256": "724385a30d5b7fa83eae987a2bec568976fea1f65d6e0273315d21363b7831d2"
+    },
+    {
+      "member": "evidence/strict-default.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/strict-default.log",
+      "bytes": 3803,
+      "sha256": "5c237a0da4487a2b285f788e63b2f730dd1c2e0fb1d256cc35d1015838000724"
+    },
+    {
+      "member": "evidence/strict-offline.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/strict-offline.log",
+      "bytes": 461,
+      "sha256": "a82d849627aacc306e5d06d68b7eca5531737808a737af5e3cf474ca46aeb1bc"
+    },
+    {
+      "member": "evidence/summary.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/summary.json",
+      "bytes": 3228,
+      "sha256": "82f40efff855f59f0c7b88f4086cd8c357088b8c598aae70c2b904dd46f3ffd1"
+    },
+    {
+      "member": "evidence/unchanged-authority.json",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/unchanged-authority.json",
+      "bytes": 231,
+      "sha256": "aef7e4708d10c7b6d82a291073caa493e00ba056fc64aec85f7eb03be9639505"
+    },
+    {
+      "member": "evidence/unit-attempt-1-invalid-admission-expectation.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/unit-attempt-1-invalid-admission-expectation.log",
+      "bytes": 5603,
+      "sha256": "f4b65ed552ad630f21c5738fb9e914777a31bb5e5190fd4dc983dfef08fc98a2"
+    },
+    {
+      "member": "evidence/unit.log",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/unit.log",
+      "bytes": 881,
+      "sha256": "83061b5a8e6be253d2b5d28a5bb178c0a77c63b425c131f05d3414be209bde0b"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "bytes": 352776,
+      "sha256": "523124f5781e6617b1298bdbf39300df640a211b5eec2cc3a12662ce94c173df"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/all-gpu-functions.asm",
+      "bytes": 352776,
+      "sha256": "9bd143f8cc7d47db5eb9aa22a6b4b965f43d65c29f7d907a6aacec45e0f1ce08"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/bin-draw.asm",
+      "bytes": 34351,
+      "sha256": "70f7009178eaa1db6e48a56bb85aa36c1388b88e61511550a6abfc0d6b85522a"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/cargo.jsonl",
+      "bytes": 3783245,
+      "sha256": "6e578d3075fac2aabcf130a635a9ebd4fad40b50b64543916698d52fffaa1971"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/cargo.log",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/cargo.log",
+      "bytes": 65554,
+      "sha256": "0bd5d6d97793cc0c786b11b23c587dfca13c8cdddfc87d2b25e7d953028ec72a"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/clean.log",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/clean.log",
+      "bytes": 38,
+      "sha256": "6ba3f84366c25bfb1e6f69244c46e5dbddfb233d393d58733b684337ba3f1d55"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 236,
+      "sha256": "51bd39a2edaad76a9a4eb30d8e11bf69c71df775faf54cd82a24969e41a29015"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "e8f31ebf902589c96deb0bbb3325bbc6d02eca865e30bad8df5f35d6461d0637"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/groups-elf.json",
+      "bytes": 51514,
+      "sha256": "77f7a1abd434ef9f9648aa787b0678988bde49bb567276ae6351cc3989c8fb0b"
+    },
+    {
+      "member": "codegen/initial-0359/baseline/render.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/render.asm",
+      "bytes": 64200,
+      "sha256": "d2aa89d7cda9af49c9212ef4528f57989f2028b9723741eb2897dac9663a9d44"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/all-gpu-functions-initial-buffered-headers.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/all-gpu-functions-initial-buffered-headers.asm",
+      "bytes": 396318,
+      "sha256": "91681953d9fd5c450c8fa3c876ef5ecbfb55aa620147b861883cc2ec477f3b11"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/all-gpu-functions.asm",
+      "bytes": 396318,
+      "sha256": "be74699f96463f357a8fcfa730e187dc3644bef1e639227e21031b594691b845"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/axis.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/axis.asm",
+      "bytes": 14081,
+      "sha256": "1a8589c8a541db4b26243be82c6927870cb289c1dd6d418372ad5811e44786f9"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/bin-draw.asm",
+      "bytes": 34584,
+      "sha256": "ec07927b55f8d388f7f20d85a99c92d64c485428eddb8639af5e4a2af6131421"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/cargo.jsonl",
+      "bytes": 3780148,
+      "sha256": "890d39acf80b2b0327933a71a9cfef354eeb43adc5daa58636bfa7599b848620"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/cargo.log",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/cargo.log",
+      "bytes": 14595,
+      "sha256": "726b71bf253da915c7f483211036234d0d4141c15982f25e99a7e6280b6107d2"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/clean.log",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/clean.log",
+      "bytes": 37,
+      "sha256": "d9410d56b50cb211b0fb2c3144068e7e92f1d9c3b994935b4717afcbe9e5ef1e"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 266,
+      "sha256": "6ff9cc90a03e900b5ef399ba94457fc82641717d290e278a7b67c5f32dd3599c"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "b1b22fce31bd4132a1ffd18721ea43977d0449a0ea65b8659378453f5bce5d1d"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/groups-elf.json",
+      "bytes": 55429,
+      "sha256": "75bd096ec355a95454c542981a4d2478a63942398db996bc656111637ecdffb4"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/render.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/render.asm",
+      "bytes": 64202,
+      "sha256": "88ca039d536a5ba8e9fc370134059320146688f7f609b9a17284a40257ebba46"
+    },
+    {
+      "member": "codegen/initial-0359/candidate/whole.asm",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/whole.asm",
+      "bytes": 12383,
+      "sha256": "5257e186be6c1f331eb2a10361017f2c354d5262635e071f7259eb997804a1a0"
+    },
+    {
+      "member": "codegen/initial-0359/metadata.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/metadata.json",
+      "bytes": 186620,
+      "sha256": "5696291ec957f7f05a485b36a9551561f3ef1e73061e2e5e93528a812a1cfd3d"
+    },
+    {
+      "member": "codegen/initial-0359/summary.json",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/summary.json",
+      "bytes": 64358,
+      "sha256": "492a425eabd224e287b20ec69326a372c60f0b90f55e6836d7905f4345ff62c9"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "bytes": 352776,
+      "sha256": "523124f5781e6617b1298bdbf39300df640a211b5eec2cc3a12662ce94c173df"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/all-gpu-functions.asm",
+      "bytes": 352776,
+      "sha256": "9bd143f8cc7d47db5eb9aa22a6b4b965f43d65c29f7d907a6aacec45e0f1ce08"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/bin-draw.asm",
+      "bytes": 34350,
+      "sha256": "169c8a08f98f58e64982a8427b93ef571e7b3a589cc16f65230a51663b559534"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/cargo.jsonl",
+      "bytes": 3783245,
+      "sha256": "6e578d3075fac2aabcf130a635a9ebd4fad40b50b64543916698d52fffaa1971"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/cargo.log",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/cargo.log",
+      "bytes": 65554,
+      "sha256": "0bd5d6d97793cc0c786b11b23c587dfca13c8cdddfc87d2b25e7d953028ec72a"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/clean.log",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/clean.log",
+      "bytes": 38,
+      "sha256": "6ba3f84366c25bfb1e6f69244c46e5dbddfb233d393d58733b684337ba3f1d55"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 236,
+      "sha256": "51bd39a2edaad76a9a4eb30d8e11bf69c71df775faf54cd82a24969e41a29015"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "e8f31ebf902589c96deb0bbb3325bbc6d02eca865e30bad8df5f35d6461d0637"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/groups-elf.json",
+      "bytes": 51514,
+      "sha256": "77f7a1abd434ef9f9648aa787b0678988bde49bb567276ae6351cc3989c8fb0b"
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/render.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/render.asm",
+      "bytes": 64199,
+      "sha256": "9df89d21a37852d161c7a9e0ae035bb33a4426d98de8316c61bc8ccda0cb29b0"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/all-gpu-functions.asm",
+      "bytes": 396192,
+      "sha256": "5b2a3ea838339e5879f4e527c9e68ba0169b05b7753c93e1df7f827c67ff109f"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/axis.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/axis.asm",
+      "bytes": 14083,
+      "sha256": "ff23b23878c99ad2aca5769e0b7147e48709bc2f0fbdf39a8e09a822bf2e3dc4"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/bin-draw.asm",
+      "bytes": 34328,
+      "sha256": "21b3e6b6af4ae8eef643e3589e831c62f28a2ba7408917912d6709c9ec32c8ce"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/cargo.jsonl",
+      "bytes": 3780148,
+      "sha256": "a810188977057a64e796bc8d38fc472ca7e6a17247097b2f7bc1945a8f05567a"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/cargo.log",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/cargo.log",
+      "bytes": 14595,
+      "sha256": "6ac61ebc0a9ebe8ca1d5cf31d8cd7c2e64271e6c60e346a845f487681738f26e"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/clean.log",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/clean.log",
+      "bytes": 37,
+      "sha256": "d9410d56b50cb211b0fb2c3144068e7e92f1d9c3b994935b4717afcbe9e5ef1e"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 266,
+      "sha256": "5745845c45478598d3762417a63f0c10cd0a6ee7bd1ca0ebf4eec5a76de5efa2"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "b1b22fce31bd4132a1ffd18721ea43977d0449a0ea65b8659378453f5bce5d1d"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/groups-elf.json",
+      "bytes": 55430,
+      "sha256": "c7551e5bb1e53a34fd3e65863c5544d9bd196d8e59a083b54070f12118ebb024"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/render.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/render.asm",
+      "bytes": 64198,
+      "sha256": "5d86fc9d680f7499aa1f99863cca8943aef26a9b2b2769160cfd906916135505"
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/whole.asm",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/whole.asm",
+      "bytes": 12385,
+      "sha256": "61d5da95470ba81c0c44993dd49adbbe5886b69bae5c08ec05d2ea1c2314e460"
+    },
+    {
+      "member": "codegen/borrowed-779/metadata.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/metadata.json",
+      "bytes": 186702,
+      "sha256": "ea1a8e22fdb0b5dc971b4e624e2cc75600913cbc29bd2468aaa458605ec60cf2"
+    },
+    {
+      "member": "codegen/borrowed-779/summary.json",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/summary.json",
+      "bytes": 64356,
+      "sha256": "4178f919ec10125bda354b399d7ea0050d7f29cfa15bfd9dc3f8fec7a4f648ba"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "bytes": 352776,
+      "sha256": "523124f5781e6617b1298bdbf39300df640a211b5eec2cc3a12662ce94c173df"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/all-gpu-functions.asm",
+      "bytes": 352776,
+      "sha256": "9bd143f8cc7d47db5eb9aa22a6b4b965f43d65c29f7d907a6aacec45e0f1ce08"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/bin-draw.asm",
+      "bytes": 34350,
+      "sha256": "169c8a08f98f58e64982a8427b93ef571e7b3a589cc16f65230a51663b559534"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/cargo.jsonl",
+      "bytes": 3783245,
+      "sha256": "6e578d3075fac2aabcf130a635a9ebd4fad40b50b64543916698d52fffaa1971"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/cargo.log",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/cargo.log",
+      "bytes": 65554,
+      "sha256": "0bd5d6d97793cc0c786b11b23c587dfca13c8cdddfc87d2b25e7d953028ec72a"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/clean.log",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/clean.log",
+      "bytes": 38,
+      "sha256": "6ba3f84366c25bfb1e6f69244c46e5dbddfb233d393d58733b684337ba3f1d55"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 236,
+      "sha256": "51bd39a2edaad76a9a4eb30d8e11bf69c71df775faf54cd82a24969e41a29015"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "e8f31ebf902589c96deb0bbb3325bbc6d02eca865e30bad8df5f35d6461d0637"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/groups-elf.json",
+      "bytes": 51514,
+      "sha256": "77f7a1abd434ef9f9648aa787b0678988bde49bb567276ae6351cc3989c8fb0b"
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/render.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/render.asm",
+      "bytes": 64199,
+      "sha256": "9df89d21a37852d161c7a9e0ae035bb33a4426d98de8316c61bc8ccda0cb29b0"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/all-gpu-functions.asm",
+      "bytes": 406076,
+      "sha256": "6e1c30b71080b44152caf3d7c69b1421698654ff18dc8ca8f439d1a7b04c0de6"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/axis.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/axis.asm",
+      "bytes": 24311,
+      "sha256": "6316ea9947509ad99c2a59ce9a36ea84bebe4fb5890cc2cd567462101bf31c6a"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/bin-draw.asm",
+      "bytes": 34325,
+      "sha256": "eb8fd3ce6e4ab5dd87dc2118638633f7dfab3e2a6c8a52b0357addbfcfc4c374"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/cargo.jsonl",
+      "bytes": 3780148,
+      "sha256": "b4a3592df2a5d6c951f9f3dd47bf5924cc5fc6739b0fdd142daa490ce32e8ee2"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/cargo.log",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/cargo.log",
+      "bytes": 14595,
+      "sha256": "a22a95f02b80452d148cfbc2678fa93c96fd1b0dde99c0d0ec6679ad5ae88691"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/clean.log",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/clean.log",
+      "bytes": 37,
+      "sha256": "d9410d56b50cb211b0fb2c3144068e7e92f1d9c3b994935b4717afcbe9e5ef1e"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 266,
+      "sha256": "fae4926f25bcf4bce0e7a06e5f606ee1f973b68055caf719d530ed161b69c4ba"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "b1b22fce31bd4132a1ffd18721ea43977d0449a0ea65b8659378453f5bce5d1d"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/groups-elf.json",
+      "bytes": 55427,
+      "sha256": "136274e61b8e21c514ac346652c21c45f772797e21b1e615e1817a9e4706454c"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/render.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/render.asm",
+      "bytes": 64195,
+      "sha256": "87a20f1e31aaf4b2a4ca35a28620aa2a2fce5ed9e2d849e47d0e076286c863b4"
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/whole.asm",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/whole.asm",
+      "bytes": 12382,
+      "sha256": "e2c8d899beb5fe800393f6ddca6a9973b1fc822ab2409ec01d780d20a2a99888"
+    },
+    {
+      "member": "codegen/rejected-e7/metadata.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/metadata.json",
+      "bytes": 186699,
+      "sha256": "949e1ebdd71442e965363820d7ba2e2b40d0081bfb3f18ceebd39feebfb7ea09"
+    },
+    {
+      "member": "codegen/rejected-e7/summary.json",
+      "source_path": "/tmp/gpui-coverage-final-codegen/summary.json",
+      "bytes": 64356,
+      "sha256": "ce057d9d9254ed7d93f10f945ba836146e1c7a98e2b5c3e803e4a183a53a94ad"
+    },
+    {
+      "member": "codegen/sealed/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/all-gpu-functions-initial-buffered-headers.asm",
+      "bytes": 352776,
+      "sha256": "523124f5781e6617b1298bdbf39300df640a211b5eec2cc3a12662ce94c173df"
+    },
+    {
+      "member": "codegen/sealed/baseline/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/all-gpu-functions.asm",
+      "bytes": 352776,
+      "sha256": "9bd143f8cc7d47db5eb9aa22a6b4b965f43d65c29f7d907a6aacec45e0f1ce08"
+    },
+    {
+      "member": "codegen/sealed/baseline/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/bin-draw.asm",
+      "bytes": 34350,
+      "sha256": "169c8a08f98f58e64982a8427b93ef571e7b3a589cc16f65230a51663b559534"
+    },
+    {
+      "member": "codegen/sealed/baseline/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/cargo.jsonl",
+      "bytes": 3783245,
+      "sha256": "6e578d3075fac2aabcf130a635a9ebd4fad40b50b64543916698d52fffaa1971"
+    },
+    {
+      "member": "codegen/sealed/baseline/cargo.log",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/cargo.log",
+      "bytes": 65554,
+      "sha256": "0bd5d6d97793cc0c786b11b23c587dfca13c8cdddfc87d2b25e7d953028ec72a"
+    },
+    {
+      "member": "codegen/sealed/baseline/clean.log",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/clean.log",
+      "bytes": 38,
+      "sha256": "6ba3f84366c25bfb1e6f69244c46e5dbddfb233d393d58733b684337ba3f1d55"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 236,
+      "sha256": "51bd39a2edaad76a9a4eb30d8e11bf69c71df775faf54cd82a24969e41a29015"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "e8f31ebf902589c96deb0bbb3325bbc6d02eca865e30bad8df5f35d6461d0637"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/sealed/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/sealed/baseline/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/groups-elf.json",
+      "bytes": 51514,
+      "sha256": "77f7a1abd434ef9f9648aa787b0678988bde49bb567276ae6351cc3989c8fb0b"
+    },
+    {
+      "member": "codegen/sealed/baseline/render.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/render.asm",
+      "bytes": 64199,
+      "sha256": "9df89d21a37852d161c7a9e0ae035bb33a4426d98de8316c61bc8ccda0cb29b0"
+    },
+    {
+      "member": "codegen/sealed/candidate/all-gpu-functions.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/all-gpu-functions.asm",
+      "bytes": 396086,
+      "sha256": "ddd5291c0aac5539b89f87ffece2aea087859228c327be8ca59c40559549eef5"
+    },
+    {
+      "member": "codegen/sealed/candidate/axis.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/axis.asm",
+      "bytes": 14081,
+      "sha256": "fd151a1443ca2e0d5965862268c76a69f9ce49cd904c02f29707e1553c61586e"
+    },
+    {
+      "member": "codegen/sealed/candidate/bin-draw.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/bin-draw.asm",
+      "bytes": 34326,
+      "sha256": "e116268b458ff1afc6c40976bbe07b73d4bb76f69ddaad187ea08683f630b7ec"
+    },
+    {
+      "member": "codegen/sealed/candidate/cargo.jsonl",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/cargo.jsonl",
+      "bytes": 3780148,
+      "sha256": "bed2742a35a2b5232b67f1ddc9d957fc8ec13df134addf4ad08b1733277c3ae4"
+    },
+    {
+      "member": "codegen/sealed/candidate/cargo.log",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/cargo.log",
+      "bytes": 14595,
+      "sha256": "6f6d3bc6fabdf1446b21d91ab37a49cdf181edcc91d99f03da5a36fecc42c64c"
+    },
+    {
+      "member": "codegen/sealed/candidate/clean.log",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/clean.log",
+      "bytes": 37,
+      "sha256": "d9410d56b50cb211b0fb2c3144068e7e92f1d9c3b994935b4717afcbe9e5ef1e"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/dep-example-groups",
+      "bytes": 38,
+      "sha256": "af4664998c9e6ced587efebae46b1e1245c5764c7242fbbffdab116b99e9fa9c"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups",
+      "bytes": 16,
+      "sha256": "dcada6e55c108ab3c77cae3acb70daa4ccbe214ac4f74389c67a69858ad44041"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/example-groups.json",
+      "bytes": 958,
+      "sha256": "d28703bee5d681dfb129cc2296b62974176366d779d43e5443c51ce5c0e9af03"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-36daa221c7fcf800/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/dep-lib-gpui_gpu",
+      "bytes": 266,
+      "sha256": "740f2e7e62ab88c6dd4c7ffd96946d07bc89325b23a0ed1e623876feb2337735"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu",
+      "bytes": 16,
+      "sha256": "88bde1e8d315e978a0475519fab2802e95ee11ffc0b8bb27e645067c07619461"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-56c2fb3440ec0a33/lib-gpui_gpu.json",
+      "bytes": 836,
+      "sha256": "12ea84bc984a77f1fb420b3dc1f133d47ea35b2917e5a5d8801a8f014e6fcb0f"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "22dd6b0edf3c326e5b1eeab58085aa717e2185e1838587225cfea150a59e8aa0"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/build-script-build-script-build.json",
+      "bytes": 606,
+      "sha256": "79da86ead0860366c61f56d0e16af51f6b8be5f97ec4f46a509f7cc004dc2d78"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/dep-build-script-build-script-build",
+      "bytes": 47,
+      "sha256": "e8f31ebf902589c96deb0bbb3325bbc6d02eca865e30bad8df5f35d6461d0637"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-9a1b743399f15799/invoked.timestamp",
+      "bytes": 48,
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build",
+      "bytes": 16,
+      "sha256": "e9e5d93799ee4ba321e2ff111dc164e64faf70c4ab174df17227956273f120f9"
+    },
+    {
+      "member": "codegen/sealed/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/fingerprints/gpui_gpu-cb4cdb23c06f3aff/run-build-script-build-script-build.json",
+      "bytes": 404,
+      "sha256": "8badd62f6da875ca60436a82385fbcb99b40cfd102af1ea1a885bab46c3d5b14"
+    },
+    {
+      "member": "codegen/sealed/candidate/groups-elf.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/groups-elf.json",
+      "bytes": 55428,
+      "sha256": "6fb18f9831bdc71b4e7cfdc16e300a14541cfaf531c3e9ed4dc34202e662d0dc"
+    },
+    {
+      "member": "codegen/sealed/candidate/render.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/render.asm",
+      "bytes": 64196,
+      "sha256": "45223f91d24cdea3909b533c8a579fe2d9e45a32e1d01fddfcb3e4beb8ed7c49"
+    },
+    {
+      "member": "codegen/sealed/candidate/whole.asm",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/whole.asm",
+      "bytes": 12383,
+      "sha256": "b9feef463122d6231d9ff4925d597c79d9238791e993fdf8dc910f8f81400bbd"
+    },
+    {
+      "member": "codegen/sealed/metadata.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/metadata.json",
+      "bytes": 186700,
+      "sha256": "1501ed626623ea7eae7262c94f4152af11b447026e42c4b38bd116d8ffc4b538"
+    },
+    {
+      "member": "codegen/sealed/summary.json",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/summary.json",
+      "bytes": 64356,
+      "sha256": "4178f919ec10125bda354b399d7ea0050d7f29cfa15bfd9dc3f8fec7a4f648ba"
+    }
+  ],
+  "external_elf": [
+    {
+      "member": "evidence/qualification",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/qualification",
+      "bytes": 17937272,
+      "sha256": "bb5c162ba8525ec0e109ff14fa5ead5f0b12111981b5e6775a81485851a8a328",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "evidence/qualification-sealed",
+      "source_path": "/tmp/gpui-coverage-setup-evidence/qualification-sealed",
+      "bytes": 17937216,
+      "sha256": "ff3e19d24ab3364cd9c2dc60c5ee22c91247bd305b1595b1855e127f5d7b1f80",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/initial-0359/baseline/groups",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/baseline/groups",
+      "bytes": 17930728,
+      "sha256": "301efb8072d834cf4ee3837b2ea815a98e70b916198a1b24f282a8d264a6fc4f",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/initial-0359/candidate/groups",
+      "source_path": "/tmp/gpui-coverage-setup-codegen/candidate/groups",
+      "bytes": 17935008,
+      "sha256": "e66e17bca97edb2f4f4319a7ddf5732c71ee3c2b311cd5ee9f0497dab7c951bb",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/borrowed-779/baseline/groups",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/baseline/groups",
+      "bytes": 17930728,
+      "sha256": "301efb8072d834cf4ee3837b2ea815a98e70b916198a1b24f282a8d264a6fc4f",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/borrowed-779/candidate/groups",
+      "source_path": "/tmp/gpui-coverage-borrowed-codegen/candidate/groups",
+      "bytes": 17934952,
+      "sha256": "93c567051b18566543e63e176156d60d6e953433bfc4d5f96fb1b68c3ba16447",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/rejected-e7/baseline/groups",
+      "source_path": "/tmp/gpui-coverage-final-codegen/baseline/groups",
+      "bytes": 17930728,
+      "sha256": "301efb8072d834cf4ee3837b2ea815a98e70b916198a1b24f282a8d264a6fc4f",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/rejected-e7/candidate/groups",
+      "source_path": "/tmp/gpui-coverage-final-codegen/candidate/groups",
+      "bytes": 17936024,
+      "sha256": "a3e40536bc9f0ce731009663ba112d94eae779adf385671587d0c96aa62d4ad1",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/sealed/baseline/groups",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/baseline/groups",
+      "bytes": 17930728,
+      "sha256": "301efb8072d834cf4ee3837b2ea815a98e70b916198a1b24f282a8d264a6fc4f",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    },
+    {
+      "member": "codegen/sealed/candidate/groups",
+      "source_path": "/tmp/gpui-coverage-sealed-codegen/candidate/groups",
+      "bytes": 17934952,
+      "sha256": "93c567051b18566543e63e176156d60d6e953433bfc4d5f96fb1b68c3ba16447",
+      "reason": "ELF excluded; preserved externally with exact hash."
+    }
+  ],
+  "manifest_member": "capture-manifest.json",
+  "manifest_integrity": "Anchored by external archive SHA-256; every other member is individually hashed.",
+  "scope": "Correctness/static qualification and intermediate costs. No timing campaign or adoption claim."
+}

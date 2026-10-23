@@ -1,0 +1,12 @@
+{
+  "source": "299c6aca30c1245c15c2da6a5ccabb41dd435d17",
+  "archive_sha256": "d07e8b2dae5d92715e91acd61d90048c1774a6b11dbd85a79a6a77007a8075f0",
+  "archive_bytes": 5599056,
+  "payload_members": 1503,
+  "payload_bytes": 82207659,
+  "external_elf_verified": 9,
+  "every_archive_member_independently_stream_hashed": true,
+  "producer_tree_clean": true,
+  "production_source_adopted": false,
+  "scope": "Correctness/static-cost producer archive. Later fixed timing failed regression gates; see separate campaign."
+}

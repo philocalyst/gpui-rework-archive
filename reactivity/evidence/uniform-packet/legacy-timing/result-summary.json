@@ -1,0 +1,591 @@
+{
+  "correctness_gate": true,
+  "speed_gate": true,
+  "regression_gate": false,
+  "qualified": false,
+  "started_utc": "2026-10-23T18:32:52.068260+00:00",
+  "finished_utc": "2026-10-23T18:36:19.761599+00:00",
+  "elapsed_wall_seconds": 207.67386745201657,
+  "complete_processes": 22,
+  "matched_readback_pairs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "raw_frames": 6864,
+  "sampled_frames": 5148,
+  "raw_readbacks": 2288,
+  "cell_gate_counts": {
+    "host_submit_ns": {
+      "passed": 2,
+      "failed": 24
+    },
+    "total_ns": {
+      "passed": 22,
+      "failed": 4
+    }
+  },
+  "regression_rule_failures": 46,
+  "regression_failures": [
+    [
+      [
+        "flat",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "flat",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "flat",
+        "false",
+        "true"
+      ],
+      "total_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "text",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "text-bg",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "text-bg",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8-text",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "layers8-text",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8-text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "at_least_nine_slower_pairs"
+    ],
+    [
+      [
+        "layers8-text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "layers8-text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "image-text",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "at_least_nine_slower_pairs"
+    ],
+    [
+      [
+        "image-text",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "image-text",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "image-text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "image-text",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "rounded",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "at_least_nine_slower_pairs"
+    ],
+    [
+      [
+        "rounded",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "rounded",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "rounded",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "rounded",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "runs32k",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "runs32k",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "runs32k",
+        "false",
+        "false"
+      ],
+      "total_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "runs32k",
+        "false",
+        "false"
+      ],
+      "total_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "singletons32k",
+        "false",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "singletons32k",
+        "false",
+        "false"
+      ],
+      "total_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "singletons32k",
+        "false",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "singletons32k",
+        "false",
+        "true"
+      ],
+      "total_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8-text",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "layers8-text",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "layers8-text",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "layers8-text",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "image-text",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "image-text",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "image-text",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "image-text",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "rounded",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "rounded",
+        "true",
+        "false"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ],
+    [
+      [
+        "rounded",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "ninth_ratio_above_1.01"
+    ],
+    [
+      [
+        "rounded",
+        "true",
+        "true"
+      ],
+      "host_submit_ns",
+      "frame_tail_above_1.10"
+    ]
+  ],
+  "aggregate": {
+    "host_submit_ns": {
+      "paired_geometric_means": [
+        0.9103219554250915,
+        1.0164523267048389,
+        0.9366274241452061,
+        0.861717234146539,
+        0.9882561943909711,
+        0.948727224978479,
+        0.9099013794444298,
+        0.9804095170731331,
+        0.9613044383683038,
+        0.8635773675261488,
+        0.9131629994641245
+      ],
+      "median_ratio": 0.9366274241452061,
+      "faster_pairs": 10
+    },
+    "total_ns": {
+      "paired_geometric_means": [
+        0.4225707542341496,
+        0.44475710742323116,
+        0.43759312440457354,
+        0.4417257136541153,
+        0.45405793396486915,
+        0.4397576946337688,
+        0.4425934150238432,
+        0.45974729330489955,
+        0.44512716172138517,
+        0.4209234065623651,
+        0.42672903979008625
+      ],
+      "median_ratio": 0.4417257136541153,
+      "faster_pairs": 11
+    },
+    "device_poll_ns": {
+      "paired_geometric_means": [
+        0.4176199949336156,
+        0.4368176227823866,
+        0.4373844601789711,
+        0.4427715485566592,
+        0.4516017185863581,
+        0.431545759132457,
+        0.4410958144298564,
+        0.4557030369244632,
+        0.4405587770846153,
+        0.4095238042567842,
+        0.4189619168598247
+      ],
+      "median_ratio": 0.4373844601789711,
+      "faster_pairs": 11
+    }
+  },
+  "speed_families": {
+    "flat": true,
+    "text": true,
+    "text-bg": true,
+    "layers8": true,
+    "layers8-text": true,
+    "image-text": true,
+    "rounded": true,
+    "runs32k": false,
+    "singletons32k": false
+  },
+  "worst_frame": {
+    "host_submit_ns": {
+      "pair": 2,
+      "cell": "rounded/false/true",
+      "metric": "host_submit_ns",
+      "maximum_frame_ratio": 1.8032928942807627,
+      "shipping": {
+        "frame": 8,
+        "row": {
+          "case": "rounded",
+          "hdr": "false",
+          "motion": "true",
+          "frame": "8",
+          "sampled": "true",
+          "host_submit_ns": 72702,
+          "device_poll_ns": 12845714,
+          "total_ns": 12918526,
+          "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+          "image_stats": "None"
+        }
+      },
+      "candidate": {
+        "frame": 5,
+        "row": {
+          "case": "rounded",
+          "hdr": "false",
+          "motion": "true",
+          "frame": "5",
+          "sampled": "true",
+          "host_submit_ns": 131103,
+          "device_poll_ns": 8671962,
+          "total_ns": 8803155,
+          "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+          "image_stats": "None"
+        }
+      }
+    },
+    "total_ns": {
+      "pair": 3,
+      "cell": "flat/false/true",
+      "metric": "total_ns",
+      "maximum_frame_ratio": 2.5778517992682795,
+      "shipping": {
+        "frame": 8,
+        "row": {
+          "case": "flat",
+          "hdr": "false",
+          "motion": "true",
+          "frame": "8",
+          "sampled": "true",
+          "host_submit_ns": 71222,
+          "device_poll_ns": 569633,
+          "total_ns": 640955,
+          "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4272, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+          "image_stats": "None"
+        }
+      },
+      "candidate": {
+        "frame": 5,
+        "row": {
+          "case": "flat",
+          "hdr": "false",
+          "motion": "true",
+          "frame": "5",
+          "sampled": "true",
+          "host_submit_ns": 55131,
+          "device_poll_ns": 1597086,
+          "total_ns": 1652287,
+          "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4272, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+          "image_stats": "None"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,463 @@
+{
+  "mode": "measure",
+  "started_utc": "2026-10-23T18:32:52.068260+00:00",
+  "frozen_sha256": {
+    "protocol.md": "0a7630864368ad1bfeb479b073f9924d77e19561ef6871b563f13a891f67583d",
+    "run.py": "c8b18752ebcb1789488de93a933f7b1dc95bdfaf53b3bc92463e0c0b67cd4778",
+    "analyze.py": "d7d84257a374fba14c052c302a6d2c9ebc4fa1cfc0ded707a73158a6b1c92164",
+    "build.py": "7c89dc4c1bd8028657f69e1d9ff88498e8079531f6b805e6589c08d4162b1eae",
+    "build-metadata.json": "3e2c5396ab45c12477772bc7fb81f1091fb5d32d94d2de8a079e8b1746251571",
+    "fixture": "8773146b44150adb0150323d51f241c946fb5cda26328f004562dcd9dee39cc0",
+    "shipping": "4cc2ff1eceebb77c068d737d59c47ca17214c8a4e5f21644009c14ec7a00f4ac",
+    "candidate": "9925ef0ed4a3f4b02b0ae71ab022d811f45d83b1cefcb3beffedeea303fee2c5"
+  },
+  "schedule": [
+    [
+      0,
+      "shipping"
+    ],
+    [
+      0,
+      "candidate"
+    ],
+    [
+      1,
+      "candidate"
+    ],
+    [
+      1,
+      "shipping"
+    ],
+    [
+      2,
+      "shipping"
+    ],
+    [
+      2,
+      "candidate"
+    ],
+    [
+      3,
+      "candidate"
+    ],
+    [
+      3,
+      "shipping"
+    ],
+    [
+      4,
+      "shipping"
+    ],
+    [
+      4,
+      "candidate"
+    ],
+    [
+      5,
+      "candidate"
+    ],
+    [
+      5,
+      "shipping"
+    ],
+    [
+      6,
+      "shipping"
+    ],
+    [
+      6,
+      "candidate"
+    ],
+    [
+      7,
+      "candidate"
+    ],
+    [
+      7,
+      "shipping"
+    ],
+    [
+      8,
+      "shipping"
+    ],
+    [
+      8,
+      "candidate"
+    ],
+    [
+      9,
+      "candidate"
+    ],
+    [
+      9,
+      "shipping"
+    ],
+    [
+      10,
+      "shipping"
+    ],
+    [
+      10,
+      "candidate"
+    ]
+  ],
+  "legs": [
+    {
+      "pair": 0,
+      "label": "shipping",
+      "directory": "pair-00-A",
+      "started_utc": "2026-10-23T18:32:52.264752+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-00-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 14.358619093021844,
+      "finished_utc": "2026-10-23T18:33:06.623639+00:00"
+    },
+    {
+      "pair": 0,
+      "label": "candidate",
+      "directory": "pair-00-B",
+      "started_utc": "2026-10-23T18:33:06.946985+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-00-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.189737283973955,
+      "finished_utc": "2026-10-23T18:33:13.137080+00:00"
+    },
+    {
+      "pair": 1,
+      "label": "candidate",
+      "directory": "pair-01-B",
+      "started_utc": "2026-10-23T18:33:13.461593+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-01-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.931000258016866,
+      "finished_utc": "2026-10-23T18:33:19.392948+00:00"
+    },
+    {
+      "pair": 1,
+      "label": "shipping",
+      "directory": "pair-01-A",
+      "started_utc": "2026-10-23T18:33:19.714543+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-01-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.625145659956615,
+      "finished_utc": "2026-10-23T18:33:31.340020+00:00"
+    },
+    {
+      "pair": 2,
+      "label": "shipping",
+      "directory": "pair-02-A",
+      "started_utc": "2026-10-23T18:33:31.675259+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-02-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.907764590985607,
+      "finished_utc": "2026-10-23T18:33:43.583383+00:00"
+    },
+    {
+      "pair": 2,
+      "label": "candidate",
+      "directory": "pair-02-B",
+      "started_utc": "2026-10-23T18:33:43.910519+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-02-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.952545815031044,
+      "finished_utc": "2026-10-23T18:33:49.863418+00:00"
+    },
+    {
+      "pair": 3,
+      "label": "candidate",
+      "directory": "pair-03-B",
+      "started_utc": "2026-10-23T18:33:50.184140+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-03-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.19517967000138,
+      "finished_utc": "2026-10-23T18:33:56.379736+00:00"
+    },
+    {
+      "pair": 3,
+      "label": "shipping",
+      "directory": "pair-03-A",
+      "started_utc": "2026-10-23T18:33:56.706052+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-03-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.189677867048886,
+      "finished_utc": "2026-10-23T18:34:08.896093+00:00"
+    },
+    {
+      "pair": 4,
+      "label": "shipping",
+      "directory": "pair-04-A",
+      "started_utc": "2026-10-23T18:34:09.229772+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-04-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.68259812402539,
+      "finished_utc": "2026-10-23T18:34:20.912735+00:00"
+    },
+    {
+      "pair": 4,
+      "label": "candidate",
+      "directory": "pair-04-B",
+      "started_utc": "2026-10-23T18:34:21.230974+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-04-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.192367828974966,
+      "finished_utc": "2026-10-23T18:34:27.423690+00:00"
+    },
+    {
+      "pair": 5,
+      "label": "candidate",
+      "directory": "pair-05-B",
+      "started_utc": "2026-10-23T18:34:27.750184+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-05-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.947144010977354,
+      "finished_utc": "2026-10-23T18:34:33.697698+00:00"
+    },
+    {
+      "pair": 5,
+      "label": "shipping",
+      "directory": "pair-05-A",
+      "started_utc": "2026-10-23T18:34:34.022476+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-05-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.695373344991822,
+      "finished_utc": "2026-10-23T18:34:45.718227+00:00"
+    },
+    {
+      "pair": 6,
+      "label": "shipping",
+      "directory": "pair-06-A",
+      "started_utc": "2026-10-23T18:34:46.043298+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-06-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.411371857044287,
+      "finished_utc": "2026-10-23T18:34:58.455042+00:00"
+    },
+    {
+      "pair": 6,
+      "label": "candidate",
+      "directory": "pair-06-B",
+      "started_utc": "2026-10-23T18:34:58.789068+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-06-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.200973829021677,
+      "finished_utc": "2026-10-23T18:35:04.990429+00:00"
+    },
+    {
+      "pair": 7,
+      "label": "candidate",
+      "directory": "pair-07-B",
+      "started_utc": "2026-10-23T18:35:05.313553+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-07-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.224625558999833,
+      "finished_utc": "2026-10-23T18:35:11.538549+00:00"
+    },
+    {
+      "pair": 7,
+      "label": "shipping",
+      "directory": "pair-07-A",
+      "started_utc": "2026-10-23T18:35:11.867164+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-07-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.008389406953938,
+      "finished_utc": "2026-10-23T18:35:23.875942+00:00"
+    },
+    {
+      "pair": 8,
+      "label": "shipping",
+      "directory": "pair-08-A",
+      "started_utc": "2026-10-23T18:35:24.208261+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-08-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.628612649976276,
+      "finished_utc": "2026-10-23T18:35:35.837288+00:00"
+    },
+    {
+      "pair": 8,
+      "label": "candidate",
+      "directory": "pair-08-B",
+      "started_utc": "2026-10-23T18:35:36.162060+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-08-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.919882966962177,
+      "finished_utc": "2026-10-23T18:35:42.082341+00:00"
+    },
+    {
+      "pair": 9,
+      "label": "candidate",
+      "directory": "pair-09-B",
+      "started_utc": "2026-10-23T18:35:42.430978+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-09-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 6.175472302013077,
+      "finished_utc": "2026-10-23T18:35:48.606872+00:00"
+    },
+    {
+      "pair": 9,
+      "label": "shipping",
+      "directory": "pair-09-A",
+      "started_utc": "2026-10-23T18:35:48.938081+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-09-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 12.185326268954668,
+      "finished_utc": "2026-10-23T18:36:01.123799+00:00"
+    },
+    {
+      "pair": 10,
+      "label": "shipping",
+      "directory": "pair-10-A",
+      "started_utc": "2026-10-23T18:36:01.486080+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-10-A",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 11.864241393050179,
+      "finished_utc": "2026-10-23T18:36:13.350785+00:00"
+    },
+    {
+      "pair": 10,
+      "label": "candidate",
+      "directory": "pair-10-B",
+      "started_utc": "2026-10-23T18:36:13.683532+00:00",
+      "argv": [
+        "/tmp/gpui-legacy-timing-evidence/execution/qualification",
+        "/tmp/gpui-legacy-timing-evidence/measure/pair-10-B",
+        "measure"
+      ],
+      "timed_out": false,
+      "returncode": 0,
+      "elapsed_wall_seconds": 5.922475287981797,
+      "finished_utc": "2026-10-23T18:36:19.606416+00:00"
+    }
+  ],
+  "failures": [],
+  "process_deadline_seconds": 240,
+  "campaign_deadline_seconds": 1800,
+  "deadline_expired": false,
+  "cpu_count": 16,
+  "governor": "powersave\n",
+  "driver": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/share/vulkan/icd.d/lvp_icd.x86_64.json",
+  "root_source_pin": "299c6aca30c1245c15c2da6a5ccabb41dd435d17",
+  "quiet_go": {
+    "approved_by": "Root",
+    "exclusive_quiet": true,
+    "recorded_utc": "2026-10-23T18:32:51.713610+00:00",
+    "frozen_sha256": {
+      "protocol.md": "0a7630864368ad1bfeb479b073f9924d77e19561ef6871b563f13a891f67583d",
+      "run.py": "c8b18752ebcb1789488de93a933f7b1dc95bdfaf53b3bc92463e0c0b67cd4778",
+      "analyze.py": "d7d84257a374fba14c052c302a6d2c9ebc4fa1cfc0ded707a73158a6b1c92164",
+      "build.py": "7c89dc4c1bd8028657f69e1d9ff88498e8079531f6b805e6589c08d4162b1eae",
+      "build-metadata.json": "3e2c5396ab45c12477772bc7fb81f1091fb5d32d94d2de8a079e8b1746251571",
+      "fixture": "8773146b44150adb0150323d51f241c946fb5cda26328f004562dcd9dee39cc0",
+      "shipping": "4cc2ff1eceebb77c068d737d59c47ca17214c8a4e5f21644009c14ec7a00f4ac",
+      "candidate": "9925ef0ed4a3f4b02b0ae71ab022d811f45d83b1cefcb3beffedeea303fee2c5"
+    },
+    "authorization": "Explicit Root quiet GO for unchanged frozen299c campaign; Static/Audio HOLD, Luna no heavy work, Root holds builds/tests/native/archive.",
+    "environment_scope": "Normal system services and unrelated existing package-store ticker remain; process snapshots retained. No isolated-machine claim."
+  },
+  "finished_utc": "2026-10-23T18:36:19.761599+00:00",
+  "elapsed_wall_seconds": 207.67386745201657
+}
