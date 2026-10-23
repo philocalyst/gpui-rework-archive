@@ -1,0 +1,12 @@
+{
+  "worktree": "/root/gpui-hummingbird-library-oneclick-sol",
+  "source_commit": "a357cc3c2d10813dfa56d71925bb5c06610ac9ea",
+  "environment": "source /tmp/gpui-hummingbird-audio-env.sh; Rust 1.97.1; jobs=1; no target CPU flags",
+  "commands": {
+    "default-final.log": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked",
+    "audio-final.log": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --features audio",
+    "cpal-final.log": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --features cpal-output",
+    "clippy-native.log": "cargo clippy --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --all-targets --features native -- -D warnings"
+  },
+  "scope": "Ordinary functional checks and requested UI-thread construction allocations; no new timing campaign, hardware execution or whole application codegen comparison."
+}

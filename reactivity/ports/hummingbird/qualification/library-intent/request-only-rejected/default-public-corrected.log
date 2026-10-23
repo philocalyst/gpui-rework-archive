@@ -1,0 +1,39 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.14s
+     Running unittests src/lib.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-202abe082427b88f)
+
+running 4 tests
+test queue::tests::contiguous_inserted_range_includes_maximum_key_and_never_recycles ... ok
+test queue_playback::tests::exhausted_plan_sequence_rejects_mutation_but_stop_still_revokes_eos ... ok
+test queue::tests::inverse_key_merge_restores_every_small_removal_subset_without_reordering ... ok
+test app::tests::exhausted_issuance_revokes_prior_work_and_survives_source_and_public_selection_reset ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+     Running tests/preparation.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/preparation-55d21826ab1e22dd)
+
+running 4 tests
+test full_worker_result_lane_visibly_fails_the_pending_owner_instead_of_losing_completion ... ok
+test public_selection_change_revokes_buffered_preparation_and_closed_commands_fail_immediately ... ok
+test public_selection_and_source_replacement_cannot_reuse_an_issued_reply_authority ... ok
+test preparation_is_explicit_and_search_retries_and_import_keep_the_same_prepared_lease ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.07s
+
+     Running tests/queue_consumer.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/queue_consumer-15500584d9f990aa)
+
+running 2 tests
+test reconstructed_public_queue_has_a_new_list_domain_and_rejects_old_decoder_eos ... ok
+test real_library_preparation_and_public_queue_input_preserve_keys_selection_and_source_admission ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.17s
+
+     Running tests/transcript.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/transcript-dcd4d8e247f0ef0f)
+
+running 3 tests
+test dropping_the_public_owner_cancels_work_and_service_shutdown_revokes_cloned_handles ... ok
+test committed_database_revision_cannot_be_mislabelled_before_its_inbox_notification_is_delivered ... ok
+test real_database_search_list_play_import_stale_completion_and_failure_use_public_owner ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s
+

@@ -1,0 +1,80 @@
+   Compiling num-traits v0.2.19
+   Compiling num-complex v0.4.6
+   Compiling half v2.7.1
+   Compiling naga v30.0.1
+   Compiling symphonia-core v0.6.1
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling ordered-float v5.5.0
+   Compiling wgpu-hal v30.0.1 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/wgpu-hal)
+   Compiling accesskit v0.25.1 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/accesskit)
+   Compiling symphonia-metadata v0.6.1
+   Compiling parley_engine v0.12.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/parley_engine)
+   Compiling accesskit_consumer v0.39.1 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/accesskit_consumer)
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling num-integer v0.1.47
+   Compiling winit v0.30.13 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/winit)
+   Compiling wgpu-core v30.0.1 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/wgpu-core)
+   Compiling gpui_gpu v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/crates/gpu)
+   Compiling accesskit_atspi_common v0.21.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/accesskit_atspi_common)
+   Compiling parley v0.12.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/parley)
+   Compiling transpose v0.2.3
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/crates/canvas)
+   Compiling accesskit_unix v0.24.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/accesskit_unix)
+   Compiling wgpu v30.0.1 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/wgpu)
+   Compiling primal-check v0.3.4
+   Compiling symphonia-common v0.6.1
+   Compiling symphonia-format-riff v0.6.1
+   Compiling symphonia-bundle-flac v0.6.1
+   Compiling rustfft v6.4.1
+   Compiling alsa v0.11.0
+   Compiling accesskit_winit v0.34.1
+   Compiling softbuffer v0.4.8 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/crates/host)
+   Compiling symphonia-bundle-mp3 v0.6.1
+   Compiling symphonia-codec-pcm v0.6.1
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/crates/state)
+   Compiling rusqlite v0.40.2
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/crates/gpui)
+   Compiling cpal v0.18.2
+   Compiling symphonia v0.6.1
+   Compiling realfft v3.5.0
+   Compiling windowfunctions v0.1.1
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/ports/hummingbird)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 35s
+     Running `/tmp/gpui-hummingbird-audio-target/debug/hummingbird-gpui-port --headless`
+Transcript {
+    sqlite_version: "3.53.2",
+    initial_ids: [
+        1,
+        13,
+        11,
+        21,
+        3,
+        2,
+        90,
+        44,
+        1001,
+    ],
+    sorted_ids: [
+        13,
+        11,
+        21,
+        90,
+        44,
+        1001,
+        1,
+        3,
+        2,
+    ],
+    matched_ids: [
+        13,
+        11,
+        21,
+    ],
+    prepared_id: 44,
+    imported_id: 5000,
+    stale_completions: 2,
+    realized_rows: 5,
+    source_failure_visible: true,
+}
