@@ -157,7 +157,10 @@ AccessKit has already allocated the incoming value before
 this boundary; this quota cannot prevent that upstream allocation.
 
 The owner applies at most 16 commands per wake and rearms when the budget is
-exhausted. It reconstructs the window-qualified Target and calls `Win::perform`:
+exhausted. Discarded sessions consume the same budget. Each outcome is handled
+before consuming another command: fatal errors stop immediately, while a
+recoverable presentation failure may be followed by a queued repair.
+It reconstructs the window-qualified Target and calls `Win::perform`:
 P-advertised support and current logical membership are checked again. Stable
 position-free static targets remain usable across later P updates. Input actions
 also validate current presentation, window, registered field and exact immutable
@@ -175,6 +178,9 @@ The [owner-lazy transport evidence](../../evidence/owner-lazy-a11y/README.md)
 records the matched whole-window allocation controls, unchanged peak and owner
 layouts, actual Registry failure/old-P/repair workflow, and the unfavorable
 ordinary drain stack cost. These allocator results are not RSS measurements.
+The [action-poll follow-on](../../evidence/a11y-action-poll/README.md) removes
+the production result batch and records smaller actual linked code/static
+frames, a native fault control, and real Registry failure/repair coverage.
 
 Activation is independent of the FIFO and is idempotent. Repeated activation
 requests cannot be blocked by a full action queue. Overflow or an oversized

@@ -934,6 +934,30 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         }
         Ok(())
     }
+    #[cfg(feature = "accessibility")]
+    fn accessibility_work(&mut self) -> Result<(), NativeError> {
+        for _ in 0..accessibility::APPLY_BUDGET {
+            // Release the owner and bridge borrows before handling this result.
+            // A fatal action must stop before any subsequent command is applied.
+            let action = match (&mut self.accessibility, &mut self.owner) {
+                (Some(bridge), Some(owner)) => bridge.poll(owner),
+                _ => return Ok(()),
+            };
+            match action {
+                Ok(accessibility::ActionPoll::Empty) => return Ok(()),
+                Ok(accessibility::ActionPoll::Discarded) => {}
+                Ok(accessibility::ActionPoll::Applied(result)) => self.input_result(result)?,
+                Err(error) => {
+                    self.accessibility = None;
+                    return Err(error);
+                }
+            }
+        }
+        if let Some(bridge) = &self.accessibility {
+            bridge.rearm();
+        }
+        Ok(())
+    }
     fn key_input(&mut self, key: &NativeKey, text: Option<&str>) -> Result<(), NativeError> {
         if self.modifiers.control_key() || self.modifiers.super_key() {
             return Ok(());
@@ -1112,24 +1136,10 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             }
             Callback::WorkReady => {
                 #[cfg(feature = "accessibility")]
-                if let (Some(bridge), Some(owner)) = (&mut self.accessibility, &mut self.owner) {
-                    match bridge.drain(owner) {
-                        Ok(results) => {
-                            for result in results.into_iter().flatten() {
-                                if let Err(error) = self.input_result(result) {
-                                    self.error = Some(error);
-                                    event_loop.exit();
-                                    return;
-                                }
-                            }
-                        }
-                        Err(error) => {
-                            self.accessibility = None;
-                            self.error = Some(error);
-                            event_loop.exit();
-                            return;
-                        }
-                    }
+                if let Err(error) = self.accessibility_work() {
+                    self.error = Some(error);
+                    event_loop.exit();
+                    return;
                 }
                 if let Some(owner) = &mut self.owner {
                     let before = owner.runtime_epoch();

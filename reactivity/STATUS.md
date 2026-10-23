@@ -76,8 +76,18 @@ The matched cold owner removes two allocations and 4,224 retained requested
 bytes; peak remains 90,734 bytes. Production owner layouts are unchanged.
 Actual Linux Registry failure/old-P/original-button repair and the recorded
 default/native/strict/Apple/MSVC gates pass. Core code is 30,686 noncomment,
-nontest lines, six fewer than the prior 30,692. The +16-byte ordinary drain
-frame is charged; a separate action-poll successor remains unadopted.
+nontest lines at that checkpoint, six fewer than the prior 30,692. Its +16-byte
+ordinary drain frame is charged in the historical dossier.
+
+The integrated [action-poll follow-on](evidence/a11y-action-poll/README.md)
+removes the production sixteen-result batch. Fatal outcomes stop before the
+next command; stale sessions retain the bounded turn/rearm contract. The
+ordinary linked consumer loses 3,696 code bytes, its callback static frame
+falls 3,000→2,120 bytes, and bridge drain/poll falls 1,432→296 bytes. Actual
+native fault injection/restoration, Registry failed-L/old-P/repair, strict and
+Apple/MSVC compile gates pass. Core is now **30,696** nontest, noncomment
+lines (+10 for this follow-on, +4 before both accessibility changes). No timing,
+dynamic stack-peak or RSS win is inferred from static frames.
 
 The [coverage frontier](evidence/uniform-packet/coverage-frontier/README.md)
 and [canonical text campaign](evidence/canonical-text-stream/README.md) remain

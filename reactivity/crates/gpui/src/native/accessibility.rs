@@ -14,11 +14,23 @@ use std::sync::{
 mod text;
 use text::Cohort;
 
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod poll_tests;
+
 const ROOT: NodeId = NodeId(0);
 const CAPACITY: usize = 64;
-const APPLY_BUDGET: usize = 16;
+pub(super) const APPLY_BUDGET: usize = 16;
 const MAX_VALUE_BYTES: usize = 64 * 1024;
-type Applied = [Option<Result<crate::Commit, Error>>; APPLY_BUDGET];
+
+pub(super) enum ActionPoll {
+    Empty,
+    Discarded,
+    Applied(Result<crate::Commit, Error>),
+}
 
 enum Command {
     Activate(NodeId),
@@ -325,16 +337,16 @@ impl Bridge {
     pub(super) fn process_event(&mut self, window: &NativeWindow, event: &super::WindowEvent) {
         self.adapter.process_event(window, event);
     }
-    pub(super) fn drain<M: View + 'static, L: crate::remote::LaneSet<M>>(
+    pub(super) fn poll<M: View + 'static, L: crate::remote::LaneSet<M>>(
         &mut self,
         owner: &mut Win<M, L>,
-    ) -> Result<Applied, NativeError> {
+    ) -> Result<ActionPoll, NativeError> {
         // No request may act before this provider has published a cohort.
         // Queue and namespace binding survive provider restarts.
         if self.published.is_none() {
-            return Ok(std::array::from_fn(|_| None));
+            return Ok(ActionPoll::Empty);
         }
-        drain_actions(
+        poll_action(
             &self.ingress,
             self.receiver
                 .as_ref()
@@ -342,6 +354,9 @@ impl Bridge {
             &self.cohort,
             owner,
         )
+    }
+    pub(super) fn rearm(&self) {
+        self.ingress.0.signal();
     }
     pub(super) fn sync<M: View + 'static, L: crate::remote::LaneSet<M>>(
         &mut self,
@@ -426,31 +441,49 @@ impl Bridge {
     }
 }
 
+fn poll_action<M: View + 'static, L: crate::remote::LaneSet<M>>(
+    ingress: &Ingress,
+    receiver: &Receiver<Queued>,
+    cohort: &Cohort,
+    owner: &mut Win<M, L>,
+) -> Result<ActionPoll, NativeError> {
+    if ingress.0.overflow.load(Ordering::Acquire) {
+        ingress.0.closed.store(true, Ordering::Release);
+        return Err(NativeError::AccessibilityOverloaded);
+    }
+    let queued = match receiver.try_recv() {
+        Ok(command) => command,
+        Err(TryRecvError::Empty | TryRecvError::Disconnected) => return Ok(ActionPoll::Empty),
+    };
+    if queued.session != ingress.0.session.load(Ordering::Acquire) {
+        return Ok(ActionPoll::Discarded);
+    }
+    Ok(ActionPoll::Applied((|| {
+        let (id, action) = queued.command.operation(cohort)?;
+        let target = cohort.target(owner, id)?;
+        let action = local_scroll_action(owner, target, action)?;
+        owner.perform(target, action)
+    })()))
+}
+
+// Keep the older projection fixtures' result collection outside shipping code.
+// Native dispatch consumes each result before borrowing the next command.
+#[cfg(test)]
+type Applied = [Option<Result<crate::Commit, Error>>; APPLY_BUDGET];
+#[cfg(test)]
 fn drain_actions<M: View + 'static, L: crate::remote::LaneSet<M>>(
     ingress: &Ingress,
     receiver: &Receiver<Queued>,
     cohort: &Cohort,
     owner: &mut Win<M, L>,
 ) -> Result<Applied, NativeError> {
-    if ingress.0.overflow.load(Ordering::Acquire) {
-        ingress.0.closed.store(true, Ordering::Release);
-        return Err(NativeError::AccessibilityOverloaded);
-    }
     let mut results = std::array::from_fn(|_| None);
     for result in &mut results {
-        let queued = match receiver.try_recv() {
-            Ok(command) => command,
-            Err(TryRecvError::Empty | TryRecvError::Disconnected) => return Ok(results),
-        };
-        if queued.session != ingress.0.session.load(Ordering::Acquire) {
-            continue;
+        match poll_action(ingress, receiver, cohort, owner)? {
+            ActionPoll::Empty => return Ok(results),
+            ActionPoll::Discarded => {}
+            ActionPoll::Applied(applied) => *result = Some(applied),
         }
-        *result = Some((|| {
-            let (id, action) = queued.command.operation(cohort)?;
-            let target = cohort.target(owner, id)?;
-            let action = local_scroll_action(owner, target, action)?;
-            owner.perform(target, action)
-        })());
     }
     ingress.0.signal();
     Ok(results)
