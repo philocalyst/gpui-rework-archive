@@ -92,3 +92,47 @@ workload, preserving every trial and its samples. Startup uses separate launches
 Compilation, functional probes and screenshots happen before the quiet capture.
 No result is accepted solely because a process consumed little CPU: callback,
 animation and presentation counts must explain what it actually delivered.
+
+The completed [2026-10-23 report](capture-2026-10-23/report.md) preserves all
+24 workload trials and nine startup launches. Idle and busy have three matched
+pairs each. All zgui heavy/animation trials delivered their required work; all
+GPUI heavy/animation trials failed that contract. Their measured resources and
+frame counts remain visible as overload observations. Capture completion is
+therefore **not** a passing performance or lifecycle gate.
+
+The busy CPU medians are 51.77% for GPUI and 1.50% for zgui, with one occupied
+logical core defined as 100%. Forced-GPU startup medians are 148.4 ms and
+67.6 ms. GPUI Auto's separate ReferenceCpu series is 16.0 ms. These are concrete
+adapter/software-Vulkan results with warm page cache; hardware GPU utilization
+and physical display smoothness remain unmeasured.
+
+[The raw records](capture-2026-10-23/results.jsonl), build evidence, failed first
+attempt, and [coordinator verification](coordinator-verification.json) accompany
+the report. The coordinator recomputed all 24 process-resource series and 18
+frame-interval series and verified all 33 cell identities/source/binary guards.
+The original animation close panic remains recorded. The later
+[native retirement fix](../../evidence/native-retired-wake/README.md) does not
+rewrite this campaign or establish a new performance result.
+
+The [zgui patch](zgui.patch) applies to the pinned upstream checkout; see
+[port/build notes](port-notes.md) for font provisioning and exact source hashes.
+It contains source and license text, without duplicated font binaries or capture
+logs. `gpui-qualification.tar.gz` preserves the matching GPUI build/source seals,
+public functional and actual 10,000-row tests, pointer geometry and native input
+receipts. The comparison adds no shipping-library code.
+
+The successor harness additionally writes a campaign status and exits nonzero
+when a required cell is absent, duplicated, changes its frozen inputs, loses
+required work or fails normal close. Preflight now exercises a seeded animation
+and close as well as an empty launch. Seven offline regression tests include
+the actual archived 33 records. The separate
+[post-capture audit](post-capture-audit.json) records the six failures without
+altering the frozen raw data or report. [Harness provenance](harness-provenance.json)
+distinguishes the original capture from this later runner correction.
+
+After applying the patch, run its archived-data regression with:
+
+```sh
+TODO_BENCH_RECORDED_RESULTS=/path/to/gpui/reactivity/comparisons/zgui/capture-2026-10-23/results.jsonl \
+  python3 scripts/test_todo_benchmark.py -v
+```

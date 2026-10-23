@@ -1,0 +1,14 @@
+{
+  "upstream": "c077cd3bc2e63311e04ecc0e7b484c7e1192d595",
+  "capture_harness": "25efd25094c326aa4a07a5e6ff645d5b8579345d",
+  "capture_zgui_app": "dcfa52166e8d28489721a3f241759c234775b664",
+  "capture_gpui_app": "63291a4ce494a7b6e129f0208004543b061c83ab",
+  "successor_harness": "50f09445ab8213d28f6a718d76649d6abca7bfdc",
+  "successor_patch_sha256": "4b043375a024907ed658cffa27098c6bd036a1067c17b1f182c1983ae0867400",
+  "offline_tests": {
+    "passed": 7,
+    "skipped": 0,
+    "archived_data_audit_exit_code": 1
+  },
+  "qualification": "Patch applies to pinned pristine upstream; font binaries provisioned separately using port notes. No new timed campaign; original report and raw hashes unchanged."
+}

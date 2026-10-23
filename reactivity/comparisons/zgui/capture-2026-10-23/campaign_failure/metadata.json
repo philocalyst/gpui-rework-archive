@@ -1,0 +1,511 @@
+{
+  "date_utc": "2026-10-23T07:07:59Z",
+  "host": {
+    "platform": "Linux-6.18.54-x86_64-with-glibc2.42",
+    "uname": {
+      "system": "Linux",
+      "node": "ilo-prod",
+      "release": "6.18.54",
+      "version": "#1-NixOS SMP PREEMPT_DYNAMIC Fri Sep 25 14:35:54 UTC 2026",
+      "machine": "x86_64",
+      "processor": ""
+    },
+    "details": {
+      "cpuinfo": "processor\t: 0\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3966.594\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 0\ncpu cores\t: 8\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 1\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3976.108\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 1\ncpu cores\t: 8\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 2\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3972.610\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 2\ncpu cores\t: 8\napicid\t\t: 4\ninitial apicid\t: 4\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 3\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3346.827\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 3\ncpu cores\t: 8\napicid\t\t: 6\ninitial apicid\t: 6\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 4\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3611.299\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 4\ncpu cores\t: 8\napicid\t\t: 8\ninitial apicid\t: 8\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 5\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3933.803\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 5\ncpu cores\t: 8\napicid\t\t: 10\ninitial apicid\t: 10\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 6\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3186.208\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 6\ncpu cores\t: 8\napicid\t\t: 12\ninitial apicid\t: 12\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 7\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3975.098\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 7\ncpu cores\t: 8\napicid\t\t: 14\ninitial apicid\t: 14\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 8\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 1760.000\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 0\ncpu cores\t: 8\napicid\t\t: 1\ninitial apicid\t: 1\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 9\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Core Processor\nstepping\t: 0\nmicrocode\t: 0x8701034\ncpu MHz\t\t: 3973.008\ncache size\t: 512 KB\nphysical id\t: 0\nsiblings\t: 16\ncore id\t\t: 1\ncpu cores\t: 8\napicid\t\t: 3\ninitial apicid\t: 3\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 16\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb cat_l3 cdp_l3 hw_pstate ssbd mba ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 cqm rdt_a rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local clzero irperf xsaveerptr rdpru wbnoinvd arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif v_spec_ctrl umip rdpid overflow_recov succor smca sev sev_es\nbugs\t\t: sysret_ss_attrs spectre_v1 spectre_v2 spec_store_bypass retbleed smt_rsb srso ibpb_no_ret spectre_v2_user vmscape\nbogomips\t: 7200.23\nTLB size\t: 3072 4K pages\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 43 bits physical, 48 bits virtual\npower management: ts ttp tm hwpstate cpb eff_freq_ro [13] [14]\n\nprocessor\t: 10\nvendor_id\t: AuthenticAMD\ncpu family\t: 23\nmodel\t\t: 113\nmodel name\t: AMD Ryzen 7 3700X 8-Co",
+      "meminfo": "MemTotal:       65770252 kB\nMemFree:         2317812 kB\nMemAvailable:   60504264 kB\nBuffers:         4492240 kB\nCached:         50201104 kB\nSwapCached:         8532 kB\nActive:         28647716 kB\nInactive:       27886556 kB\nActive(anon):    1513508 kB\nInactive(anon):   346000 kB\nActive(file):   27134208 kB\nInactive(file): 27540556 kB\nUnevictable:        3128 kB\nMlocked:               0 kB\nSwapTotal:      37079032 kB\nSwapFree:       33968644 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:             30120 kB\nWriteback:             0 kB\nAnonPages:       1842884 kB\nMapped:           484860 kB\nShmem:             18548 kB\nKReclaimable:    4238196 kB\nSlab:            5279996 kB\nSReclaimable:    4238196 kB\nSUnreclaim:      1041800 kB\nKernelStack:       14656 kB\nPageTables:        31488 kB\nSecPageTables:      7440 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    69964156 kB\nCommitted_AS:   12714192 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:      205760 kB\nVmallocChunk:          0 kB\nPercpu:            18816 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:   2940928 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      313068 kB\nDirectMap2M:    19533824 kB\nDirectMap1G:    47185920 kB",
+      "cpu_governor": "powersave",
+      "cpu_epp": "balance_performance"
+    }
+  },
+  "render_environment": {
+    "VK_DRIVER_FILES": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/share/vulkan/icd.d/lvp_icd.x86_64.json",
+    "icd": {
+      "path": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/share/vulkan/icd.d/lvp_icd.x86_64.json",
+      "sha256": "fb6adc9fc21899006577b36c90ec3e9a62a7228082de3651b9e7efd81189d00e",
+      "json": "{\n    \"ICD\": {\n        \"api_version\": \"1.4.354\",\n        \"library_arch\": \"64\",\n        \"library_path\": \"/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so\"\n    },\n    \"file_format_version\": \"1.0.1\"\n}"
+    },
+    "LD_LIBRARY_PATH": "/nix/store/ackf72likmlm6wyfzqqzmrpyjn73vlsa-vulkan-loader-1.4.341.0/lib:/nix/store/4wkicwb2jx5h63d79g5qyp9kn4vx27yb-libx11-1.8.13/lib:/nix/store/ncvfcirz3d4g2maj5dvzwjwrimwvnhl6-libxi-1.8.3/lib:/nix/store/ja3h2cmxcdwg03fbiycrabi1mksdz2g8-libxcursor-1.2.3/lib:/nix/store/aks94skdqa6mjhwz09w2xfxs9h4j5csa-libxrandr-1.5.5/lib:/nix/store/dz1628lmvs9ag2bpygh6zkp9wkyr3jz2-libxfixes-6.0.2/lib:/nix/store/nvrv5w6rhc39h8snrsw03nqs679cf7rh-libxkbcommon-1.13.2/lib:/nix/store/8pr51y4c1a72yr4fd7g561g1vk5m5k1p-dbus-1.16.2-lib/lib",
+    "dbus_library_dir": "/nix/store/8pr51y4c1a72yr4fd7g561g1vk5m5k1p-dbus-1.16.2-lib/lib",
+    "LP_NUM_THREADS": "4"
+  },
+  "display": ":230",
+  "mesa_threads": 4,
+  "perf_binary": "unavailable",
+  "workloads": {
+    "idle": "matched empty Todo comparison view after a 5s settle",
+    "busy": "30s absolute-deadline UI macro (one text operation plus seven button activations every 2s)",
+    "heavy": "10000 seeded, nonvirtualized Todo rows plus the same 30s UI macro",
+    "animation": "1000 seeded, nonvirtualized Todo rows, 60Hz deadline-sampled list translation, 12px amplitude",
+    "startup": "warm page cache, exec to successful host PresentationStatus::Presented marker; binary-default series plus separate GPUI auto-renderer subset"
+  },
+  "limitations": [
+    "GPU utilization unavailable: this host exposes an ASPEED display adapter without a render node; rendering uses Mesa llvmpipe.",
+    "Present intervals measure successful host submit intervals, not physical scanout or perceptual smoothness.",
+    "CPU percent is normalized so 100 means one fully occupied logical core; process threads include llvmpipe workers.",
+    "Xvfb process CPU is outside these per-app proc samples.",
+    "Page cache is warm; no cache drop is attempted."
+  ],
+  "source": {
+    "gpui_revision": "63291a4ce494a7b6e129f0208004543b061c83ab",
+    "zgui_revision": "dcfa52166e8d28489721a3f241759c234775b664",
+    "gpui_lock_sha256": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22",
+    "zgui_lock_sha256": "3527083d02ea62edc3790b8603445a8431f53cc556b96ff6e53bb124dc978ee7"
+  },
+  "toolchain": {
+    "rustc_vv": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6",
+    "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)"
+  },
+  "build_profile": {
+    "profile": "release",
+    "opt_level": 3,
+    "lto": "thin",
+    "codegen_units": 1,
+    "debug": 0,
+    "strip": "none",
+    "rustflags": [
+      "-C symbol-mangling-version=v0",
+      "--cfg tokio_unstable"
+    ],
+    "binaries": {
+      "gpui": {
+        "as_built_bytes": 25839328,
+        "as_built_sha256": "042c61b327da627fc4b059d95bcc8dabf7e592eb1e8715e269562860e0ec04fa",
+        "stripped_copy": {
+          "bytes": 20441664,
+          "sha256": "c386d8282c624f44ea5fd40e297955c08fe51f4381b1a443a63f18f9a28687f5",
+          "tool": "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/strip",
+          "copy": "/tmp/todo-comparison-final-20261023/size/gpui.stripped"
+        },
+        "elf_dependencies": {
+          "readelf_tool": "/nix/store/m59w5gavjx8db0ay3m1yzbw02l54109b-clang-wrapper-21.1.8/bin/readelf",
+          "readelf_dynamic": "Dynamic section at offset 0x1375570 contains 30 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-x86-64.so.2]\n 0x000000000000001e (FLAGS)              BIND_NOW\n 0x000000006ffffffb (FLAGS_1)            Flags: NOW PIE\n 0x0000000000000015 (DEBUG)              0x0\n 0x0000000000000007 (RELA)               0x2088\n 0x0000000000000008 (RELASZ)             476712 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000006ffffff9 (RELACOUNT)          19686\n 0x0000000000000017 (JMPREL)             0x766b0\n 0x0000000000000002 (PLTRELSZ)           48 (bytes)\n 0x0000000000000003 (PLTGOT)             0x137d538\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000006 (SYMTAB)             0x358\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000005 (STRTAB)             0x178c\n 0x000000000000000a (STRSZ)              2294 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x1770\n 0x0000000000000019 (INIT_ARRAY)         0x1324740\n 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x1324738\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000000000000c (INIT)               0x1323308\n 0x000000000000000d (FINI)               0x1323324\n 0x000000006ffffff0 (VERSYM)             0x1438\n 0x000000006ffffffe (VERNEED)            0x15a0\n 0x000000006fffffff (VERNEEDNUM)         4\n 0x0000000000000000 (NULL)               0x0",
+          "ldd_tool": "/run/current-system/sw/bin/ldd",
+          "ldd": "linux-vdso.so.1 (0x0000751344444000)\n\tlibgcc_s.so.1 => /nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib/libgcc_s.so.1 (0x000075134440f000)\n\tlibm.so.6 => /nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/libm.so.6 (0x0000751342f08000)\n\tlibc.so.6 => /nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/libc.so.6 (0x0000751342c00000)\n\t/nix/store/ias8xacs1h3jy7xgwi2awvim61k2ji6c-glibc-2.42-67/lib/ld-linux-x86-64.so.2 => /nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib64/ld-linux-x86-64.so.2 (0x0000751344446000)"
+        }
+      },
+      "zgui": {
+        "as_built_bytes": 28004320,
+        "as_built_sha256": "e8a5de7f1c984e4dbde84b8532963b6970e1ea2aea9de2722758c499e69b7ad3",
+        "stripped_copy": {
+          "bytes": 21226176,
+          "sha256": "119c3b4cf4428ad7a841a7bfc1e31a649e8549bdc6a224af61a971189268046c",
+          "tool": "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/strip",
+          "copy": "/tmp/todo-comparison-final-20261023/size/zgui.stripped"
+        },
+        "elf_dependencies": {
+          "readelf_tool": "/nix/store/m59w5gavjx8db0ay3m1yzbw02l54109b-clang-wrapper-21.1.8/bin/readelf",
+          "readelf_dynamic": "Dynamic section at offset 0x1432930 contains 31 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libdbus-1.so.3]\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-x86-64.so.2]\n 0x000000000000001e (FLAGS)              BIND_NOW\n 0x000000006ffffffb (FLAGS_1)            Flags: NOW PIE\n 0x0000000000000015 (DEBUG)              0x0\n 0x0000000000000007 (RELA)               0x2b58\n 0x0000000000000008 (RELASZ)             757536 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000006ffffff9 (RELACOUNT)          31333\n 0x0000000000000017 (JMPREL)             0xbba78\n 0x0000000000000002 (PLTRELSZ)           48 (bytes)\n 0x0000000000000003 (PLTGOT)             0x143d230\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000006 (SYMTAB)             0x358\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000005 (STRTAB)             0x1d2c\n 0x000000000000000a (STRSZ)              3623 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x1d10\n 0x0000000000000019 (INIT_ARRAY)         0x13b50b0\n 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x13b50a8\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000000000000c (INIT)               0x13b3fb8\n 0x000000000000000d (FINI)               0x13b3fd4\n 0x000000006ffffff0 (VERSYM)             0x1948\n 0x000000006ffffffe (VERNEED)            0x1b1c\n 0x000000006fffffff (VERNEEDNUM)         5\n 0x0000000000000000 (NULL)               0x0",
+          "ldd_tool": "/run/current-system/sw/bin/ldd",
+          "ldd": "linux-vdso.so.1 (0x00007af9fa10e000)\n\tlibdbus-1.so.3 => not found\n\tlibgcc_s.so.1 => /nix/store/hna4zsz4rdnl4mdbmwmks7cx3cdkkyqc-xgcc-15.3.0-libgcc/lib/libgcc_s.so.1 (0x00007af9fa0d9000)\n\tlibm.so.6 => /nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/libm.so.6 (0x00007af9f8b08000)\n\tlibc.so.6 => /nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib/libc.so.6 (0x00007af9f8800000)\n\t/nix/store/ias8xacs1h3jy7xgwi2awvim61k2ji6c-glibc-2.42-67/lib/ld-linux-x86-64.so.2 => /nix/store/znb3q6g1ik34454j3vcjx824h1871asg-glibc-2.42-84/lib64/ld-linux-x86-64.so.2 (0x00007af9fa110000)"
+        }
+      }
+    },
+    "cargo_evidence": {
+      "gpui": {
+        "log_path": "/tmp/gpui-todo-comparison-qualified/build.log",
+        "log_sha256": "d84a3ae97e897ba8798f6750816c9c3bba5da8ed971156894182b48e49c6aa65",
+        "fingerprint_path": "/tmp/gpui-todo-comparison-qualified/example-fingerprint.json",
+        "fingerprint_json": {
+          "rustc": 12019306335353385202,
+          "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+          "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+          "target": 8966705965215309092,
+          "profile": 992594501823498405,
+          "path": 15085361078245894875,
+          "deps": [
+            [
+              535147103364023206,
+              "icu_segmenter",
+              false,
+              11990755181417006811
+            ],
+            [
+              1001648224152866569,
+              "arcstr",
+              false,
+              1567359639925300496
+            ],
+            [
+              1940408237737794595,
+              "accesskit_winit",
+              false,
+              6907377839926235697
+            ],
+            [
+              2251399859588827949,
+              "pin_project_lite",
+              false,
+              1563639631244434026
+            ],
+            [
+              3750483387937644717,
+              "pollster",
+              false,
+              5239196873186601903
+            ],
+            [
+              4295957145130622623,
+              "zbus",
+              false,
+              16987130908427730928
+            ],
+            [
+              4590322165379248138,
+              "gpui_reactivity_host",
+              false,
+              12899460834634394487
+            ],
+            [
+              5686200050580704112,
+              "gpui",
+              false,
+              5754097279289343629
+            ],
+            [
+              6359120849577304855,
+              "x11rb",
+              false,
+              5900296436362184264
+            ],
+            [
+              6557439603276904804,
+              "serde",
+              false,
+              1704520296911595585
+            ],
+            [
+              8160210889872729633,
+              "serde_json",
+              false,
+              1741565152661869145
+            ],
+            [
+              8676817272026490959,
+              "accesskit",
+              false,
+              14701724467958275580
+            ],
+            [
+              8991190325997472044,
+              "gpui_gpu",
+              false,
+              13947206620406276049
+            ],
+            [
+              11048071599106839258,
+              "allocation_counter",
+              false,
+              11464380761639949256
+            ],
+            [
+              11671159878170094075,
+              "gpui_reactivity_state",
+              false,
+              8820245010483820361
+            ],
+            [
+              11905275778120334160,
+              "softbuffer",
+              false,
+              1111432866519404798
+            ],
+            [
+              13316223584457521750,
+              "cephal",
+              false,
+              6144676680972613023
+            ],
+            [
+              13672653153045154758,
+              "gpui_reactivity_core",
+              false,
+              15303202041576168362
+            ],
+            [
+              14670221084672822999,
+              "triomphe",
+              false,
+              6341116721706586693
+            ],
+            [
+              17032968227276897852,
+              "gpui_canvas",
+              false,
+              108089613931876964
+            ],
+            [
+              17400412893666519160,
+              "zruntime",
+              false,
+              1536477763468922435
+            ],
+            [
+              17719763280398284109,
+              "accesskit_consumer",
+              false,
+              5605905255735793032
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "release/.fingerprint/gpui-0fe2da9864d19108/dep-example-todo_comparison",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [
+            "-C",
+            "symbol-mangling-version=v0",
+            "--cfg",
+            "tokio_unstable"
+          ],
+          "config": 9396254390672932401,
+          "compile_kind": 0
+        }
+      },
+      "zgui": {
+        "log_path": "/tmp/gpui-zgui-todo-release-build-final.log",
+        "log_sha256": "da069825d0d010bb347081eb2c15fbc49eeb3686bdd8605c83a80e10b37a32f1",
+        "fingerprint_path": "/tmp/zgui-todo-frozen-fingerprint.json",
+        "fingerprint_json": {
+          "rustc": 12019306335353385202,
+          "features": "[]",
+          "declared_features": "[\"ghostty\", \"terminal-bundle\"]",
+          "target": 8966243395498794987,
+          "profile": 992594501823498405,
+          "path": 8029163671560050636,
+          "deps": [
+            [
+              86246135597337767,
+              "arboard",
+              false,
+              9761068115657044420
+            ],
+            [
+              827577758521457683,
+              "vt100",
+              false,
+              16116028669878855367
+            ],
+            [
+              944507655929432805,
+              "zgui_desktop",
+              false,
+              10954083700675889552
+            ],
+            [
+              944507655929432805,
+              "build_script_build",
+              false,
+              268756823758191141
+            ],
+            [
+              2514090032961650180,
+              "zgui_script",
+              false,
+              1841340003759831569
+            ],
+            [
+              2680342844819429369,
+              "zgui_gpu",
+              false,
+              4029366779243874963
+            ],
+            [
+              3151685427247483087,
+              "dbus",
+              false,
+              914168477283934760
+            ],
+            [
+              3317315565990553774,
+              "wayland_client",
+              false,
+              13937062470215374116
+            ],
+            [
+              3486048459523671587,
+              "dbus_crossroads",
+              false,
+              7217813038670584864
+            ],
+            [
+              5019070990281742224,
+              "accesskit",
+              false,
+              8677812700989470812
+            ],
+            [
+              5330460842384404171,
+              "serde_json",
+              false,
+              771111472358557868
+            ],
+            [
+              6305327886559338045,
+              "winit",
+              false,
+              9327220323223495747
+            ],
+            [
+              6675440598819514340,
+              "cosmic_text",
+              false,
+              6357593049905320373
+            ],
+            [
+              8463648438466411195,
+              "calloop",
+              false,
+              6744279066431882332
+            ],
+            [
+              10029280503098412861,
+              "fontdue",
+              false,
+              3646649474000256515
+            ],
+            [
+              10877810225362942956,
+              "rfd",
+              false,
+              16748072161526669596
+            ],
+            [
+              11790660976872878024,
+              "wayland_protocols",
+              false,
+              10435225840126511806
+            ],
+            [
+              11811317489113264584,
+              "wayland_backend",
+              false,
+              13804628843928717090
+            ],
+            [
+              12180580867954830311,
+              "softbuffer",
+              false,
+              11817297723778793324
+            ],
+            [
+              14167262109204400564,
+              "uuid",
+              false,
+              16657637694342837951
+            ],
+            [
+              14294947260506780522,
+              "calloop_wayland_source",
+              false,
+              8089525762351437633
+            ],
+            [
+              14559908604211499110,
+              "open",
+              false,
+              12311519366344892325
+            ],
+            [
+              16198203750081063573,
+              "unicode_segmentation",
+              false,
+              13155342898868492581
+            ],
+            [
+              16452208092402456357,
+              "tungstenite",
+              false,
+              9906999779648154946
+            ],
+            [
+              17487595214002120377,
+              "zgui",
+              false,
+              4717161219295633426
+            ],
+            [
+              17805545807379550219,
+              "accesskit_consumer",
+              false,
+              6754924253498096031
+            ],
+            [
+              18036921968688376572,
+              "zgui_workload",
+              false,
+              3624089486553190422
+            ],
+            [
+              18266834546688217199,
+              "accesskit_winit",
+              false,
+              4835927092371971978
+            ]
+          ],
+          "local": [
+            {
+              "CheckDepInfo": {
+                "dep_info": "release/.fingerprint/zgui-desktop-ffe023f59e83cdc3/dep-example-todos",
+                "checksum": false
+              }
+            }
+          ],
+          "rustflags": [
+            "-C",
+            "symbol-mangling-version=v0",
+            "--cfg",
+            "tokio_unstable"
+          ],
+          "config": 9396254390672932401,
+          "compile_kind": 0
+        }
+      }
+    },
+    "dbus_build_input": {
+      "pc_file": "/tmp/gpui-zgui-todo-pc/dbus-1.pc",
+      "archived_copy": "/tmp/todo-comparison-final-20261023/build-inputs/dbus-1.pc",
+      "pc_sha256": "cc24775091aace1ecdf3c8732bc9a2d467bfd1b28d09bb829a326bc202f05732",
+      "pc_content": "prefix=/nix/store/8pr51y4c1a72yr4fd7g561g1vk5m5k1p-dbus-1.16.2-lib\nexec_prefix=${prefix}\nlibdir=${exec_prefix}/lib\nincludedir=${prefix}/include/dbus-1.0\n\nName: dbus-1\nDescription: D-Bus Message Bus Library\nVersion: 1.16.2\nLibs: -L${libdir} -ldbus-1\nCflags: -I${includedir} -I${libdir}/dbus-1.0/include\n",
+      "runtime_library": "/nix/store/8pr51y4c1a72yr4fd7g561g1vk5m5k1p-dbus-1.16.2-lib/lib/libdbus-1.so.3.38.3",
+      "runtime_library_sha256": "556eecd0f8e01fa760524b6ca8f884b5e0a7f0fcb8358a2a90261c50c3a7ce85"
+    },
+    "embedded_font_assets": [
+      {
+        "name": "NotoSans.ttf",
+        "bytes": 2049096,
+        "sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 240456,
+        "sha256": "ceea25b464a656dc3b26849bab9356740401af62aedf1bfa8b7f0d9b75925b1b"
+      },
+      {
+        "name": "NotoSansHebrew-Regular.ttf",
+        "bytes": 26900,
+        "sha256": "a7fa16fffb27bedb060a0866267c29e9859aeb9c21cc33f5b3aaf6eb062eca85"
+      }
+    ],
+    "control_points_path": "/tmp/gpui-zgui-todo-luna/comparisons/todo/controls.json",
+    "control_points_sha256": "cda015583eb4f9b2bfe5a38b3318d4fe9ad68011d81891092f9e16fe0d802450"
+  },
+  "campaign_fingerprint": {
+    "gpui_source": {
+      "head": "63291a4ce494a7b6e129f0208004543b061c83ab",
+      "status": "",
+      "sha256": "62ac4d6b931eb6467fcdb68b60b39a84d38734e9bd8caaf64b4b3ae88108f3d1"
+    },
+    "zgui_source": {
+      "head": "dcfa52166e8d28489721a3f241759c234775b664",
+      "status": "",
+      "sha256": "8532d5c32ba25ccea999d3d76f15289bba6c0ddf4cfce385b9a4d621dc36e017"
+    },
+    "binaries": {
+      "gpui": "042c61b327da627fc4b059d95bcc8dabf7e592eb1e8715e269562860e0ec04fa",
+      "zgui": "e8a5de7f1c984e4dbde84b8532963b6970e1ea2aea9de2722758c499e69b7ad3"
+    }
+  }
+}

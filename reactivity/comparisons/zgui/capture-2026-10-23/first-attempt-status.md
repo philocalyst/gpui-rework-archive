@@ -1,0 +1,3 @@
+# Attempt 1 status
+
+This output directory is preserved separately from the successful campaign. The run stopped during idle setup after it exposed two qualification defects: the window matcher assumed GPUI's title was `Todos` although the frozen app uses `GPUI Todo comparison`, and the zgui frozen binary copy was mode 0444 rather than executable. Its four results rows contain only those invalid idle launch attempts. No performance values from this attempt are included in the final report. The harness was corrected, the zgui copy was changed to mode 0555 without changing its SHA-256, and both apps passed a new `--preflight-only` launch/present/geometry/renderer/model/normal-close check before the final run.

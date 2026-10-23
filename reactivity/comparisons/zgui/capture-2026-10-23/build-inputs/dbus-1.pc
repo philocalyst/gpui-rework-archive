@@ -1,0 +1,10 @@
+prefix=/nix/store/8pr51y4c1a72yr4fd7g561g1vk5m5k1p-dbus-1.16.2-lib
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/dbus-1.0
+
+Name: dbus-1
+Description: D-Bus Message Bus Library
+Version: 1.16.2
+Libs: -L${libdir} -ldbus-1
+Cflags: -I${includedir} -I${libdir}/dbus-1.0/include
