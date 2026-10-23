@@ -457,6 +457,18 @@ fn notification_size() -> usize {
 }
 
 #[cfg(test)]
+fn producer_size() -> usize {
+    #[cfg(feature = "native-core")]
+    {
+        std::mem::size_of::<Producer<u64>>()
+    }
+    #[cfg(not(feature = "native-core"))]
+    {
+        0
+    }
+}
+
+#[cfg(test)]
 mod ledger {
     use super::*;
     use crate::{El, View, Win, div};
@@ -482,11 +494,13 @@ mod ledger {
         );
         assert!(std::mem::size_of::<DeliveryError>() <= 128);
         println!(
-            "remote={} inbox={} lane={} notification={} delivery={} error={} empty_win={} channel_allocs={} channel_bytes={} bind_allocs={} bind_bytes={}",
+            "remote={} inbox={} lane={} notification={} producer={} optional_sender={} delivery={} error={} empty_win={} channel_allocs={} channel_bytes={} bind_allocs={} bind_bytes={}",
             std::mem::size_of::<Remote<u64>>(),
             std::mem::size_of::<Inbox<u64>>(),
             std::mem::size_of::<Lane<u64, fn(&mut Page, u64), ()>>(),
             notification_size(),
+            producer_size(),
+            std::mem::size_of::<Option<SyncSender<u64>>>(),
             std::mem::size_of::<Delivery>(),
             std::mem::size_of::<DeliveryError>(),
             std::mem::size_of::<Win<Page>>(),

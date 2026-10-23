@@ -243,6 +243,27 @@ fn status_close_waits_for_every_clone_and_owner_close_revokes_it() {
     ));
 }
 
+#[test]
+fn terminal_callback_panic_quarantines_the_same_owner_barrier() {
+    let (remote, inbox) = Remote::bounded(2);
+    remote.try_send(7).unwrap();
+    drop(remote);
+    let mut win = Win::demo(Catalogue::default())
+        .with_inbox_status(inbox, |m: &mut Catalogue, value: Option<u32>| match value {
+            Some(value) => m.rows.push(value),
+            None => panic!("terminal callback fault"),
+        })
+        .unwrap();
+    let failure = win.deliver_ready(8).unwrap_err();
+    assert_eq!(failure.error, Error::OwnerPanicked);
+    let delivery = failure.delivery.unwrap();
+    assert_eq!(
+        (delivery.received, delivery.applied, delivery.more),
+        (2, 1, false)
+    );
+    assert_eq!(win.deliver_ready(8).unwrap_err().error, Error::Poisoned);
+}
+
 fn failed_batch(error: DeliveryError) -> gpui::Delivery {
     error.delivery.unwrap()
 }

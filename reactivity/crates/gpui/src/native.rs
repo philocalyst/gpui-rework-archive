@@ -177,16 +177,7 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
         inbox: Inbox<T>,
         receive: F,
     ) -> Window<V, Lane<T, F, L>> {
-        Window {
-            root: self.root,
-            lanes: Lane::new(inbox, receive, self.lanes),
-            title: self.title,
-            size: self.size,
-            presentation_error: self.presentation_error,
-            presentation_feedback: self.presentation_feedback,
-            renderer: self.renderer,
-            inspector: self.inspector,
-        }
+        self.with_inbox_handler(inbox, receive)
     }
     /// Deliver `Some(message)` in FIFO order and one `None` after the final
     /// producer disconnects, including while the native owner is quiescent.
@@ -197,16 +188,23 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
         receive: F,
     ) -> Result<Window<V, Lane<T, crate::InboxStatus<F>, L>>, Error> {
         inbox.observe_close()?;
-        Ok(Window {
+        Ok(self.with_inbox_handler(inbox, crate::InboxStatus(receive)))
+    }
+    fn with_inbox_handler<T: Send + 'static, F: crate::InboxHandler<V, T> + 'static>(
+        self,
+        inbox: Inbox<T>,
+        receive: F,
+    ) -> Window<V, Lane<T, F, L>> {
+        Window {
             root: self.root,
-            lanes: Lane::new(inbox, crate::InboxStatus(receive), self.lanes),
+            lanes: Lane::new(inbox, receive, self.lanes),
             title: self.title,
             size: self.size,
             presentation_error: self.presentation_error,
             presentation_feedback: self.presentation_feedback,
             renderer: self.renderer,
             inspector: self.inspector,
-        })
+        }
     }
     /// Show a retained inspector beside this window's actual application.
     pub fn inspector(mut self) -> Self {
