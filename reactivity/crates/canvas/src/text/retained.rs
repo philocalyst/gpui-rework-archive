@@ -39,6 +39,11 @@ impl<T> TryFrom<Vec<T>> for RetainedSlice<T> {
 }
 
 impl<T> RetainedSlice<T> {
+    #[cfg(test)]
+    pub fn capacity(&self) -> usize {
+        self.capacity as usize
+    }
+
     pub fn into_vec(self) -> Vec<T> {
         let value = ManuallyDrop::new(self);
         // SAFETY: Admission transfers a Global Vec's unique allocation without
