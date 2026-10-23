@@ -1,0 +1,70 @@
+[
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/gpui_canvas-5fce0180308158a5/lib-gpui_canvas.json",
+    "rustflags": [],
+    "profile": 2040997289075261528,
+    "features": "[\"default\", \"simd\"]",
+    "path": 5941417894067501904,
+    "config": 9396254390672932401,
+    "sha256": "61176a1c9b10c2deb5950474f6d41cc6a48076aaf27ce66c65e046e80c811d98"
+  },
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/gpui_canvas-a26d35a673d8adfc/lib-gpui_canvas.json",
+    "rustflags": [],
+    "profile": 2195198361031172618,
+    "features": "[\"simd\"]",
+    "path": 16830625799998882417,
+    "config": 9396254390672932401,
+    "sha256": "b7765c3d11ff80b90a97833b996a273f37468a403cd64cdfe27160e370e42fc3"
+  },
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/parley-86fcb576952383a9/lib-parley.json",
+    "rustflags": [],
+    "profile": 2929894911942567002,
+    "features": "[\"complex-scripts\", \"std\"]",
+    "path": 6185362829253682477,
+    "config": 9396254390672932401,
+    "sha256": "4733e75f1d15bede63b6790a3a4e6e1179fc26c7985a4f94db88e92f97a27028"
+  },
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/parley-bf0112b6b20803dc/lib-parley.json",
+    "rustflags": [],
+    "profile": 1404696970774548837,
+    "features": "[\"complex-scripts\", \"std\"]",
+    "path": 10853897289326494564,
+    "config": 9396254390672932401,
+    "sha256": "5f0f3aa7c072ed116286c6914ab6c212e900b0feea317b4a3d4ee4f5c281a8f4"
+  },
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/fontique-60cffe7dfb4841cf/lib-fontique.json",
+    "rustflags": [
+      "-C",
+      "symbol-mangling-version=v0",
+      "--cfg",
+      "tokio_unstable"
+    ],
+    "profile": 1404696970774548837,
+    "features": "[\"std\"]",
+    "path": 11109392838356547005,
+    "config": 9396254390672932401,
+    "sha256": "e151504008e9effbc7726593d86247cf5cc6f1b0df1e8502046972dd9c62563d"
+  },
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/fontique-b8cc2812dcae2ea6/lib-fontique.json",
+    "rustflags": [],
+    "profile": 1404696970774548837,
+    "features": "[\"std\"]",
+    "path": 11109392838356547005,
+    "config": 9396254390672932401,
+    "sha256": "93e7e7a5f1daaa030b65ccdb8b6c99ee48f741a3993c927007c7b7670a8113cd"
+  },
+  {
+    "file": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/fontique-a107cd78eae5ff96/lib-fontique.json",
+    "rustflags": [],
+    "profile": 2929894911942567002,
+    "features": "[\"std\"]",
+    "path": 11109392838356547005,
+    "config": 9396254390672932401,
+    "sha256": "5735b439148d1e4b9c0907dd9a4634f9c0427fc7108e35e770155d7d97b6295d"
+  }
+]

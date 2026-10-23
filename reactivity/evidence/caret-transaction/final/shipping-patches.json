@@ -1,0 +1,15 @@
+{
+  "source": "62e4047420310da7c9e72836c1dbde1d7f215343",
+  "patches": {
+    "borrowed": {
+      "base": "81bd9e53b7a18161903dad3816d494ed1afdfce3",
+      "bytes": 16020,
+      "sha256": "90a4923a86f9246dac63ee1dda6d98bbb50bf00b3528a3d0f462a0a734646adf"
+    },
+    "indexed": {
+      "base": "1d5bc3061cce3beb3c4857102ed651da501b5cfd",
+      "bytes": 33459,
+      "sha256": "cd9a8b38a241fa93aeda69ec37ca10c9969693dd910b78fe5fdec51e384f217c"
+    }
+  }
+}

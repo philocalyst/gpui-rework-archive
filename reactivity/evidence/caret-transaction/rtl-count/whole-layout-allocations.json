@@ -1,0 +1,100 @@
+[
+  {
+    "case": "tiny",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,tiny,cold,bytes=5,count=213,requested=110954,retained=480,peak=47942,checksum=b649e9bd042fc63e\n",
+    "stderr": ""
+  },
+  {
+    "case": "tiny",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,tiny,warm,bytes=5,count=9,requested=648,retained=440,peak=440,checksum=b649e9bd042fc63e\n",
+    "stderr": ""
+  },
+  {
+    "case": "label",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,label,cold,bytes=18,count=216,requested=113200,retained=844,peak=49868,checksum=21b79ff5ef85eee1\n",
+    "stderr": ""
+  },
+  {
+    "case": "label",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,label,warm,bytes=18,count=12,requested=1620,retained=804,peak=1092,checksum=21b79ff5ef85eee1\n",
+    "stderr": ""
+  },
+  {
+    "case": "latin",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,latin,cold,bytes=30800,count=269,requested=5278792,retained=874088,peak=4487620,checksum=4ee3b78371cffeda\n",
+    "stderr": ""
+  },
+  {
+    "case": "latin",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,latin,warm,bytes=30800,count=49,requested=1840496,retained=874048,peak=1267168,checksum=4ee3b78371cffeda\n",
+    "stderr": ""
+  },
+  {
+    "case": "rtl",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,rtl,cold,bytes=27000,count=507,requested=8560524,retained=698632,peak=5260956,checksum=1869641830c76088\n",
+    "stderr": ""
+  },
+  {
+    "case": "rtl",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,rtl,warm,bytes=27000,count=54,requested=1775652,retained=714792,peak=1107912,checksum=1869641830c76088\n",
+    "stderr": ""
+  },
+  {
+    "case": "mixed",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,mixed,cold,bytes=25200,count=421,requested=8847436,retained=761512,peak=5366836,checksum=538e6fbe1e0efce0\n",
+    "stderr": ""
+  },
+  {
+    "case": "mixed",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,mixed,warm,bytes=25200,count=54,requested=1907600,retained=781272,peak=1174392,checksum=538e6fbe1e0efce0\n",
+    "stderr": ""
+  },
+  {
+    "case": "paragraphs",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,paragraphs,cold,bytes=10800,count=4754,requested=1203436,retained=425028,peak=570792,checksum=9968f25bda81ed2f\n",
+    "stderr": ""
+  },
+  {
+    "case": "paragraphs",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,paragraphs,warm,bytes=10800,count=4550,requested=1093036,retained=424988,peak=523196,checksum=9968f25bda81ed2f\n",
+    "stderr": ""
+  },
+  {
+    "case": "one-grapheme",
+    "scope": "cold",
+    "exit": 0,
+    "stdout": "alloc,one-grapheme,cold,bytes=24001,count=224,requested=2892418,retained=192352,peak=2698462,checksum=0afdd313057ae27c\n",
+    "stderr": ""
+  },
+  {
+    "case": "one-grapheme",
+    "scope": "warm",
+    "exit": 0,
+    "stdout": "alloc,one-grapheme,warm,bytes=24001,count=8,requested=192424,retained=192312,peak=192312,checksum=0afdd313057ae27c\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,135 @@
+{
+  "d54": {
+    "binary": "/tmp/gpui-caret-transaction-bin/d54-codegen",
+    "sha256": "5810fa7772b34d2a680b89d4d8ca0401f80c8e5b485bfb9f65ffdca0fd3763ad",
+    "symbols": {
+      "<parley::editing::geometry::CursorGeometryRestart as core::fmt::Debug>::fmt": {
+        "bytes": 21,
+        "assembly": "d54-codegen-1e2c0.asm",
+        "stack_subtractions": []
+      },
+      "transaction_codegen::atomic": {
+        "bytes": 74,
+        "assembly": "d54-codegen-1b6a0.asm",
+        "stack_subtractions": [
+          "28"
+        ]
+      },
+      "transaction_codegen::flag_count": {
+        "bytes": 176,
+        "assembly": "d54-codegen-1b5c0.asm",
+        "stack_subtractions": [
+          "38"
+        ]
+      },
+      "parley::layout::run::count_graphemes": {
+        "bytes": 306,
+        "assembly": "d54-codegen-20180.asm",
+        "stack_subtractions": []
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<(), parley::editing::geometry::visit_source_pairs<false, (), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>::{closure#1}>": {
+        "bytes": 400,
+        "assembly": "d54-codegen-1e8f0.asm",
+        "stack_subtractions": [
+          "168"
+        ]
+      },
+      "parley::editing::geometry::visit_direct::<(), (), &mut core::iter::adapters::peekable::Peekable<core::ops::range::RangeInclusive<usize>>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 647,
+        "assembly": "d54-codegen-1ced0.asm",
+        "stack_subtractions": [
+          "88"
+        ]
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::result::Result<core::ops::control_flow::ControlFlow<()>, parley::editing::geometry::CursorGeometryRestart>, parley::editing::geometry::visit_source_pairs<false, (), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>::{closure#2}>": {
+        "bytes": 1547,
+        "assembly": "d54-codegen-1e2e0.asm",
+        "stack_subtractions": [
+          "218"
+        ]
+      },
+      "parley::editing::geometry::visit_indexed::<(), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 3323,
+        "assembly": "d54-codegen-1d160.asm",
+        "stack_subtractions": [
+          "458"
+        ]
+      },
+      "<parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair::<(), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 4459,
+        "assembly": "d54-codegen-1bb60.asm",
+        "stack_subtractions": [
+          "2a8"
+        ]
+      }
+    },
+    "text_section": "13 .text         000425c3  000000000001a9d0  000000000001a9d0  000199d0  2**4"
+  },
+  "62e": {
+    "binary": "/tmp/gpui-caret-transaction-bin/62e-codegen",
+    "sha256": "304c1d949f118744884af1ab229a2c4462a5c8e0600db153602b75c9a2011f55",
+    "symbols": {
+      "transaction_codegen::atomic": {
+        "bytes": 74,
+        "assembly": "62e-codegen-1b640.asm",
+        "stack_subtractions": [
+          "28"
+        ]
+      },
+      "transaction_codegen::flag_count": {
+        "bytes": 176,
+        "assembly": "62e-codegen-1b560.asm",
+        "stack_subtractions": [
+          "38"
+        ]
+      },
+      "parley::layout::run::count_graphemes": {
+        "bytes": 306,
+        "assembly": "62e-codegen-200f0.asm",
+        "stack_subtractions": []
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<(), parley::editing::geometry::visit_source_pairs<false, (), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>::{closure#1}>": {
+        "bytes": 400,
+        "assembly": "62e-codegen-1e860.asm",
+        "stack_subtractions": [
+          "168"
+        ]
+      },
+      "parley::editing::geometry::visit_direct::<(), (), &mut core::iter::adapters::peekable::Peekable<core::ops::range::RangeInclusive<usize>>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 647,
+        "assembly": "62e-codegen-1ce60.asm",
+        "stack_subtractions": [
+          "88"
+        ]
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::result::Result<core::ops::control_flow::ControlFlow<()>, parley::editing::geometry::CursorGeometryRestart>, parley::editing::geometry::visit_source_pairs<false, (), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>::{closure#2}>": {
+        "bytes": 1547,
+        "assembly": "62e-codegen-1e250.asm",
+        "stack_subtractions": [
+          "218"
+        ]
+      },
+      "parley::editing::geometry::visit_indexed::<(), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 3323,
+        "assembly": "62e-codegen-1d0f0.asm",
+        "stack_subtractions": [
+          "458"
+        ]
+      },
+      "<parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair::<(), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 4447,
+        "assembly": "62e-codegen-1bb00.asm",
+        "stack_subtractions": [
+          "2a8"
+        ]
+      }
+    },
+    "text_section": "13 .text         00042593  000000000001a970  000000000001a970  00019970  2**4"
+  },
+  "comparison_scope": "same immutable minimal client/lock, compiler, features and root-config flags; only d54 to62e static panic source cleanup. Historical pre-root-config frozen controls are not matched.",
+  "identical_client_inputs": {
+    "/tmp/gpui-caret-transaction-codegen-d54/Cargo.lock": "1e180cb21049b6fa7fdd3b0ca59032a5c9da4a43c7f4f60ff76dc2f813d25008",
+    "/tmp/gpui-caret-transaction-codegen-d54/Cargo.toml": "f701cbeefb6b74b4863c3b967ae57101a87686dddea7a644ff9636450c5dcc23",
+    "/tmp/gpui-caret-transaction-codegen-d54/src/main.rs": "a87ff073a712ef5a146b50395496f7481472d548837ede51e12d7e5e9b501167"
+  }
+}

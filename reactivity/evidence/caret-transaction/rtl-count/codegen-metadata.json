@@ -1,0 +1,42 @@
+{
+  "source": "d54bde373645de13eecfab2a94dd443a8ec0a77d",
+  "binary": "/tmp/gpui-caret-transaction-bin/d54-codegen",
+  "sha256": "5810fa7772b34d2a680b89d4d8ca0401f80c8e5b485bfb9f65ffdca0fd3763ad",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///tmp/gpui-caret-transaction-codegen-d54#transaction-codegen@0.0.0",
+    "manifest_path": "/tmp/gpui-caret-transaction-codegen-d54/Cargo.toml",
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "transaction-codegen",
+      "src_path": "/tmp/gpui-caret-transaction-codegen-d54/src/main.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [],
+    "filenames": [
+      "/tmp/gpui-monotonic-borrowed-release-target/release/transaction-codegen"
+    ],
+    "executable": "/tmp/gpui-monotonic-borrowed-release-target/release/transaction-codegen",
+    "fresh": false
+  },
+  "input_files": {
+    "/tmp/gpui-caret-transaction-codegen-d54/Cargo.lock": "1e180cb21049b6fa7fdd3b0ca59032a5c9da4a43c7f4f60ff76dc2f813d25008",
+    "/tmp/gpui-caret-transaction-codegen-d54/Cargo.toml": "f701cbeefb6b74b4863c3b967ae57101a87686dddea7a644ff9636450c5dcc23",
+    "/tmp/gpui-caret-transaction-codegen-d54/src/main.rs": "a87ff073a712ef5a146b50395496f7481472d548837ede51e12d7e5e9b501167"
+  }
+}

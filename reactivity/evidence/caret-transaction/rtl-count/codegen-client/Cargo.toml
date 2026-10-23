@@ -1,0 +1,10 @@
+[package]
+name = "transaction-codegen"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+parley = { path = "/root/gpui-caret-transaction-sol/reactivity/vendor/parley", default-features = false, features = ["std", "complex-scripts"] }
+
+[patch.crates-io]
+parley_engine = { path = "/root/gpui-caret-transaction-sol/reactivity/vendor/parley_engine" }

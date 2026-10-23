@@ -1,0 +1,57 @@
+[
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-core-cac4aeed57ef3c4e/lib-wgpu_core.json",
+    "rustflags": [],
+    "profile": 1599777660455416998
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-core-deps-windows-linux-android-a57c7c0c58a7ba1c/lib-wgpu_core_deps_windows_linux_android.json",
+    "rustflags": [],
+    "profile": 9257212508732487614
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-core-cac4aeed57ef3c4e/lib-wgpu_core.json",
+    "rustflags": [],
+    "profile": 1599777660455416998
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-types-41b2fff2b018b801/lib-wgpu_types.json",
+    "rustflags": [],
+    "profile": 14022191605608154183
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-naga-bridge-d8d09fae7544809e/lib-wgpu_naga_bridge.json",
+    "rustflags": [],
+    "profile": 9257212508732487614
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-d3e13d7b136a1830/lib-wgpu.json",
+    "rustflags": [],
+    "profile": 9257212508732487614
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-hal-dfa997acdb38ee7c/lib-wgpu_hal.json",
+    "rustflags": [],
+    "profile": 13534444872591412580
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/wgpu-core-deps-windows-linux-android-a57c7c0c58a7ba1c/lib-wgpu_core_deps_windows_linux_android.json",
+    "rustflags": [],
+    "profile": 9257212508732487614
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/gpui_gpu-290dbdc1d6a38beb/lib-gpui_gpu.json",
+    "rustflags": [],
+    "profile": 2195198361031172618
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/winit-c2f42aa980893990/lib-winit.json",
+    "rustflags": [],
+    "profile": 2195198361031172618
+  },
+  {
+    "path": "/tmp/gpui-monotonic-borrowed-release-target/release/.fingerprint/gpui-eacbef72de687aee/lib-gpui.json",
+    "rustflags": [],
+    "profile": 2195198361031172618
+  }
+]

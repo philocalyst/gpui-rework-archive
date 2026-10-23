@@ -1,0 +1,138 @@
+{
+  "parallel": {
+    "harnesses": 28,
+    "passed": 193,
+    "failed": 0,
+    "ignored": 4,
+    "artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///root/gpui-caret-transaction-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/root/gpui-caret-transaction-sol/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_canvas",
+        "src_path": "/root/gpui-caret-transaction-sol/reactivity/crates/canvas/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "parallel",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-caret-transaction-target/debug/deps/gpui_canvas-28ceec100c0b3fdd"
+      ],
+      "executable": "/tmp/gpui-caret-transaction-target/debug/deps/gpui_canvas-28ceec100c0b3fdd",
+      "fresh": false
+    },
+    "binary": "/tmp/gpui-caret-transaction-bin/62e-parallel-test",
+    "sha256": "bf3716d99a7d5ace45f034d8396160d54d4fc69b9533fa31600194dc33dcff22"
+  },
+  "scalar": {
+    "harnesses": 28,
+    "passed": 183,
+    "failed": 0,
+    "ignored": 3,
+    "artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///root/gpui-caret-transaction-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/root/gpui-caret-transaction-sol/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_canvas",
+        "src_path": "/root/gpui-caret-transaction-sol/reactivity/crates/canvas/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/gpui-caret-transaction-target/debug/deps/gpui_canvas-632cbd6014900903"
+      ],
+      "executable": "/tmp/gpui-caret-transaction-target/debug/deps/gpui_canvas-632cbd6014900903",
+      "fresh": false
+    },
+    "binary": "/tmp/gpui-caret-transaction-bin/62e-scalar-test",
+    "sha256": "54477cd516391abb8276a0351d9878da4ea3108e0ffe739c01a8eace42b1b7a0"
+  },
+  "private": {
+    "harnesses": 1,
+    "passed": 19,
+    "failed": 0,
+    "ignored": 0,
+    "artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-caret-transaction-final-overlay#parley@0.12.0",
+      "manifest_path": "/tmp/gpui-caret-transaction-final-overlay/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "parley",
+        "src_path": "/tmp/gpui-caret-transaction-final-overlay/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "complex-scripts",
+        "std"
+      ],
+      "filenames": [
+        "/tmp/gpui-caret-transaction-overlay-target/debug/deps/parley-ebfc8196f402c2c0"
+      ],
+      "executable": "/tmp/gpui-caret-transaction-overlay-target/debug/deps/parley-ebfc8196f402c2c0",
+      "fresh": false
+    },
+    "binary": "/tmp/gpui-caret-transaction-bin/62e-private-test",
+    "sha256": "9e41ed66d1efea91e478b16f8ab2065dab1f92931c41f39047a14fc5395cc0b5"
+  },
+  "strict": {
+    "command": "cargo clippy -p gpui_canvas --all-targets --features parallel -j1 --offline --locked -- -D warnings",
+    "exit": 0
+  },
+  "source_guards": {
+    "files": 421,
+    "all_passed": true,
+    "config_sha256": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295"
+  }
+}

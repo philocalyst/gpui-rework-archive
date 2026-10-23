@@ -1,0 +1,101 @@
+{
+  "symbols": {
+    "parley::layout::run::count_graphemes": {
+      "bytes": 306,
+      "assembly": "owner-8226d0.asm",
+      "stack_subtractions": [],
+      "memcpy": []
+    },
+    "<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::adapters::filter_map::filter_map_try_fold<parley::layout::line::LineItem<()>, parley::layout::run::Run<()>, (), core::ops::control_flow::ControlFlow<()>, <parley::layout::line::Line<()>>::runs::{closure#0}, &mut core::iter::traits::iterator::Iterator::all::check<parley::layout::run::Run<()>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#2}>::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>": {
+      "bytes": 321,
+      "assembly": "owner-7fe5c0.asm",
+      "stack_subtractions": [],
+      "memcpy": []
+    },
+    "<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineData>>, <parley::layout::layout::Layout<()>>::lines::{closure#0}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#3}> as core::iter::traits::iterator::Iterator>::fold::<usize, <core::iter::adapters::flatten::FlattenCompat<_, _>>::iter_fold::flatten<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}>, <parley::layout::line::Line<()>>::runs::{closure#0}>, usize, <core::iter::adapters::flatten::FlattenCompat<_, _> as core::iter::traits::iterator::Iterator>::count::count<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}>, <parley::layout::line::Line<()>>::runs::{closure#0}>>>::{closure#0}>": {
+      "bytes": 347,
+      "assembly": "owner-7fdbe0.asm",
+      "stack_subtractions": [],
+      "memcpy": []
+    },
+    "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::convert::Infallible, parley::editing::geometry::visit_source_pairs<true, (), core::convert::Infallible, icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, <parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair_partial<icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, gpui_canvas::text::planner::append_carets::{closure#0}>::{closure#0}>::{closure#1}>": {
+      "bytes": 399,
+      "assembly": "owner-7f92b0.asm",
+      "stack_subtractions": [
+        "168"
+      ],
+      "memcpy": []
+    },
+    "<parley::layout::run::Clusters<()>>::new": {
+      "bytes": 747,
+      "assembly": "owner-7fa970.asm",
+      "stack_subtractions": [
+        "38"
+      ],
+      "memcpy": []
+    },
+    "gpui_canvas::text::planner::append_caret": {
+      "bytes": 935,
+      "assembly": "owner-7f32d0.asm",
+      "stack_subtractions": [
+        "88"
+      ],
+      "memcpy": []
+    },
+    "<&mut core::iter::adapters::map::map_fold<parley::layout::line::PositionedLayoutItem<()>, usize, usize, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}, <usize as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineData>>, <parley::layout::layout::Layout<()>>::lines::{closure#0}>, parley::layout::line::GlyphRunIter<()>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#4}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}>>::{closure#0}>::{closure#0} as core::ops::function::FnMut<(usize, parley::layout::line::PositionedLayoutItem<()>)>>::call_mut": {
+      "bytes": 1065,
+      "assembly": "owner-7ff310.asm",
+      "stack_subtractions": [
+        "118"
+      ],
+      "memcpy": []
+    },
+    "parley::editing::geometry::pair_from_entries::<()>": {
+      "bytes": 1113,
+      "assembly": "owner-7ebcf0.asm",
+      "stack_subtractions": [
+        "1d8"
+      ],
+      "memcpy": []
+    },
+    "<parley::layout::run::Clusters<()>>::advance_cursor": {
+      "bytes": 1538,
+      "assembly": "owner-7fac60.asm",
+      "stack_subtractions": [
+        "88"
+      ],
+      "memcpy": []
+    },
+    "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::result::Result<core::ops::control_flow::ControlFlow<core::convert::Infallible>, parley::editing::geometry::CursorGeometryRestart>, parley::editing::geometry::visit_source_pairs<true, (), core::convert::Infallible, icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, <parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair_partial<icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, gpui_canvas::text::planner::append_carets::{closure#0}>::{closure#0}>::{closure#2}>": {
+      "bytes": 1749,
+      "assembly": "owner-7f8bd0.asm",
+      "stack_subtractions": [
+        "288"
+      ],
+      "memcpy": []
+    },
+    "<parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair_partial::<icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, gpui_canvas::text::planner::append_carets::{closure#0}>": {
+      "bytes": 3165,
+      "assembly": "owner-7eb050.asm",
+      "stack_subtractions": [
+        "2d8"
+      ],
+      "memcpy": [
+        "7eb102:\tff 15 68 26 34 00    \tcall   *0x342668(%rip)        # b2d770 <memcpy@GLIBC_2.14>"
+      ]
+    },
+    "<gpui_canvas::text::planner::Planner>::shape": {
+      "bytes": 14741,
+      "assembly": "owner-7ef290.asm",
+      "stack_subtractions": [
+        "1000",
+        "1a8"
+      ],
+      "memcpy": [
+        "7f038e:\tff 15 dc d3 33 00    \tcall   *0x33d3dc(%rip)        # b2d770 <memcpy@GLIBC_2.14>"
+      ]
+    }
+  },
+  "text_section": "14 .text         00387bf7  000000000077b8e0  000000000077b8e0  0077a8e0  2**4",
+  "scope": "absolute62e native-owner binary; do not compare text size with old empty-rustflags controls as matched"
+}

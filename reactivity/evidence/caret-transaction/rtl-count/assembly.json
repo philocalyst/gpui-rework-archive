@@ -1,0 +1,153 @@
+{
+  "codegen": {
+    "symbols": {
+      "<parley::editing::geometry::CursorGeometryRestart as core::fmt::Debug>::fmt": {
+        "bytes": 21,
+        "assembly": "codegen-1e2c0.asm",
+        "stack_subtractions": [],
+        "memcpy": []
+      },
+      "transaction_codegen::atomic": {
+        "bytes": 74,
+        "assembly": "codegen-1b6a0.asm",
+        "stack_subtractions": [
+          "28"
+        ],
+        "memcpy": []
+      },
+      "transaction_codegen::flag_count": {
+        "bytes": 176,
+        "assembly": "codegen-1b5c0.asm",
+        "stack_subtractions": [
+          "38"
+        ],
+        "memcpy": []
+      },
+      "parley::layout::run::count_graphemes": {
+        "bytes": 306,
+        "assembly": "codegen-20180.asm",
+        "stack_subtractions": [],
+        "memcpy": []
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<(), parley::editing::geometry::visit_source_pairs<false, (), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>::{closure#1}>": {
+        "bytes": 400,
+        "assembly": "codegen-1e8f0.asm",
+        "stack_subtractions": [
+          "168"
+        ],
+        "memcpy": []
+      },
+      "parley::editing::geometry::visit_direct::<(), (), &mut core::iter::adapters::peekable::Peekable<core::ops::range::RangeInclusive<usize>>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 647,
+        "assembly": "codegen-1ced0.asm",
+        "stack_subtractions": [
+          "88"
+        ],
+        "memcpy": []
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::result::Result<core::ops::control_flow::ControlFlow<()>, parley::editing::geometry::CursorGeometryRestart>, parley::editing::geometry::visit_source_pairs<false, (), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>::{closure#2}>": {
+        "bytes": 1547,
+        "assembly": "codegen-1e2e0.asm",
+        "stack_subtractions": [
+          "218"
+        ],
+        "memcpy": []
+      },
+      "parley::editing::geometry::visit_indexed::<(), (), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 3323,
+        "assembly": "codegen-1d160.asm",
+        "stack_subtractions": [
+          "458"
+        ],
+        "memcpy": [
+          "1d504:\tff 15 0e 2f 04 00    \tcall   *0x42f0e(%rip)        # 60418 <memcpy@GLIBC_2.14>"
+        ]
+      },
+      "<parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair::<(), core::ops::range::RangeInclusive<usize>, transaction_codegen::atomic::{closure#0}>": {
+        "bytes": 4459,
+        "assembly": "codegen-1bb60.asm",
+        "stack_subtractions": [
+          "2a8"
+        ],
+        "memcpy": []
+      }
+    },
+    "text_section": "13 .text         000425c3  000000000001a9d0  000000000001a9d0  000199d0  2**4"
+  },
+  "canvas": {
+    "symbols": {
+      "parley::layout::run::count_graphemes": {
+        "bytes": 306,
+        "assembly": "canvas-695370.asm",
+        "stack_subtractions": [],
+        "memcpy": []
+      },
+      "<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::adapters::filter_map::filter_map_try_fold<parley::layout::line::LineItem<()>, parley::layout::run::Run<()>, (), core::ops::control_flow::ControlFlow<()>, <parley::layout::line::Line<()>>::runs::{closure#0}, &mut core::iter::traits::iterator::Iterator::all::check<parley::layout::run::Run<()>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#2}>::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>": {
+        "bytes": 321,
+        "assembly": "canvas-669620.asm",
+        "stack_subtractions": [],
+        "memcpy": []
+      },
+      "<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineData>>, <parley::layout::layout::Layout<()>>::lines::{closure#0}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#3}> as core::iter::traits::iterator::Iterator>::fold::<usize, <core::iter::adapters::flatten::FlattenCompat<_, _>>::iter_fold::flatten<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}>, <parley::layout::line::Line<()>>::runs::{closure#0}>, usize, <core::iter::adapters::flatten::FlattenCompat<_, _> as core::iter::traits::iterator::Iterator>::count::count<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}>, <parley::layout::line::Line<()>>::runs::{closure#0}>>>::{closure#0}>": {
+        "bytes": 347,
+        "assembly": "canvas-668c20.asm",
+        "stack_subtractions": [],
+        "memcpy": []
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::convert::Infallible, parley::editing::geometry::visit_source_pairs<true, (), core::convert::Infallible, icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, <parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair_partial<icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, gpui_canvas::text::planner::append_carets::{closure#0}>::{closure#0}>::{closure#1}>": {
+        "bytes": 399,
+        "assembly": "canvas-6818d0.asm",
+        "stack_subtractions": [
+          "168"
+        ],
+        "memcpy": []
+      },
+      "gpui_canvas::text::planner::append_caret": {
+        "bytes": 935,
+        "assembly": "canvas-680b00.asm",
+        "stack_subtractions": [
+          "88"
+        ],
+        "memcpy": []
+      },
+      "<&mut core::iter::adapters::map::map_fold<parley::layout::line::PositionedLayoutItem<()>, usize, usize, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}, <usize as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineData>>, <parley::layout::layout::Layout<()>>::lines::{closure#0}>, parley::layout::line::GlyphRunIter<()>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#4}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}>>::{closure#0}>::{closure#0} as core::ops::function::FnMut<(usize, parley::layout::line::PositionedLayoutItem<()>)>>::call_mut": {
+        "bytes": 1065,
+        "assembly": "canvas-669f80.asm",
+        "stack_subtractions": [
+          "118"
+        ],
+        "memcpy": []
+      },
+      "<parley::layout::run::Run<()>>::try_for_each_cluster::<core::result::Result<core::ops::control_flow::ControlFlow<core::convert::Infallible>, parley::editing::geometry::CursorGeometryRestart>, parley::editing::geometry::visit_source_pairs<true, (), core::convert::Infallible, icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, <parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair_partial<icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, gpui_canvas::text::planner::append_carets::{closure#0}>::{closure#0}>::{closure#2}>": {
+        "bytes": 1749,
+        "assembly": "canvas-6811f0.asm",
+        "stack_subtractions": [
+          "288"
+        ],
+        "memcpy": []
+      },
+      "<parley::editing::geometry::CursorGeometry<()>>::try_for_each_pair_partial::<icu_segmenter::grapheme::GraphemeClusterBreakIterator<icu_segmenter::scaffold::Utf8>, gpui_canvas::text::planner::append_carets::{closure#0}>": {
+        "bytes": 3165,
+        "assembly": "canvas-6852b0.asm",
+        "stack_subtractions": [
+          "2d8"
+        ],
+        "memcpy": [
+          "685362:\tff 15 80 3d 10 00    \tcall   *0x103d80(%rip)        # 7890e8 <memcpy@GLIBC_2.14>"
+        ]
+      },
+      "<gpui_canvas::text::planner::Planner>::shape": {
+        "bytes": 14523,
+        "assembly": "canvas-67cba0.asm",
+        "stack_subtractions": [
+          "1000",
+          "1b8"
+        ],
+        "memcpy": [
+          "67dbd7:\tff 15 0b b5 10 00    \tcall   *0x10b50b(%rip)        # 7890e8 <memcpy@GLIBC_2.14>"
+        ]
+      }
+    },
+    "text_section": "13 .text         0011ffb8  000000000065cf60  000000000065cf60  0065bf60  2**4"
+  }
+}
