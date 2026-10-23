@@ -611,3 +611,99 @@ fn old_seek_eof_failure_and_started_events_cannot_revive_stopped_or_new_audio() 
     );
     finish(service, win);
 }
+
+#[test]
+fn concrete_stream_can_be_non_send_and_is_opened_and_dropped_on_control_owner() {
+    use std::{
+        cell::Cell,
+        rc::Rc,
+        thread::{self, ThreadId},
+    };
+    type Calls = Arc<Mutex<Vec<(&'static str, ThreadId)>>>;
+    struct AffineProvider(Calls);
+    struct AffineStream {
+        calls: Calls,
+        format: Format,
+        _not_send: Rc<Cell<usize>>,
+    }
+    impl OutputProvider for AffineProvider {
+        type Stream = AffineStream;
+        fn open(
+            &mut self,
+            format: Format,
+            _: PlaybackGate,
+            _: u64,
+        ) -> Result<AffineStream, AudioError> {
+            self.0
+                .lock()
+                .unwrap()
+                .push(("open", thread::current().id()));
+            Ok(AffineStream {
+                calls: self.0.clone(),
+                format,
+                _not_send: Rc::new(Cell::new(0)),
+            })
+        }
+    }
+    impl OutputStream for AffineStream {
+        fn format(&self) -> Format {
+            self.format
+        }
+        fn submit(&mut self, input: &[f64]) -> Result<usize, AudioError> {
+            Ok(input.len() / self.format.channels as usize)
+        }
+        fn queued_frames(&self) -> usize {
+            0
+        }
+        fn set_playing(&mut self, _: bool) -> Result<(), AudioError> {
+            Ok(())
+        }
+    }
+    impl Drop for AffineStream {
+        fn drop(&mut self) {
+            self.calls
+                .lock()
+                .unwrap()
+                .push(("drop", thread::current().id()));
+        }
+    }
+    let calls = Arc::new(Mutex::new(Vec::new()));
+    let (service, inbox) = AudioService::with_output(AffineProvider(calls.clone())).unwrap();
+    let mut model = QueueScreen::new(ListId::new(6000)).unwrap();
+    model.enqueue(track(&fixture("wav"), "affine"));
+    model.attach_audio(service.handle()).unwrap();
+    let mut win = Win::with_size(model, 720, 700)
+        .unwrap()
+        .with_inbox(
+            inbox,
+            QueueScreen::receive_audio as fn(&mut QueueScreen, hummingbird_gpui_port::audio::Event),
+        )
+        .unwrap();
+    let unrelated_capture = Arc::new(Mutex::new(Capture::default()));
+    until(&mut win, &unrelated_capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Finished
+    });
+    finish(service, win);
+    let calls = calls.lock().unwrap();
+    assert_eq!(calls.len(), 2);
+    assert_eq!(calls[0].0, "open");
+    assert_eq!(calls[1].0, "drop");
+    assert_eq!(calls[0].1, calls[1].1);
+    assert_ne!(calls[0].1, thread::current().id());
+}
+
+#[test]
+fn cold_service_does_not_open_output_and_explicit_close_finishes_owner() {
+    let capture = Arc::new(Mutex::new(Capture::default()));
+    let (service, inbox) = AudioService::with_output(Provider {
+        capture: capture.clone(),
+        frames: 31,
+        rate: None,
+    })
+    .unwrap();
+    // No Plan, stream, device or PCM queue is admitted by service construction.
+    drop(inbox);
+    assert!(service.finish(Duration::from_secs(1)));
+    assert_eq!(capture.lock().unwrap().opens, 0);
+    assert_eq!(capture.lock().unwrap().drops, 0);
+}

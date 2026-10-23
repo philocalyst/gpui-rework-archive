@@ -594,19 +594,26 @@ impl<P: OutputProvider> Owner<P> {
             {
                 self.fail(error);
             }
-            if self.phase != Phase::Failed
-                && let Err(error) = self.cycle()
-            {
+            if self.phase == Phase::Failed {
+                // Retire a pending affine Close even after output has failed.
+                let _ = self.media.poll();
+            } else if let Err(error) = self.cycle() {
                 self.fail(error);
             }
             if !self.deliver() {
                 break;
             }
-            thread::park_timeout(if self.intent.playing || self.media.busy() {
-                Duration::from_millis(2)
+            if self.output.is_none() && !self.media.busy() && self.pending.is_empty() {
+                // Handle, media and explicit close already unpark this owner.
+                // Park permits cover publication racing this last check.
+                thread::park();
             } else {
-                Duration::from_millis(50)
-            });
+                thread::park_timeout(if self.intent.playing || self.media.busy() {
+                    Duration::from_millis(2)
+                } else {
+                    Duration::from_millis(50)
+                });
+            }
         }
         self.shared.gate.0.closed.store(true, Ordering::Release);
         // Output and decoder ownership are destroyed here, never by Window drop.

@@ -29,6 +29,12 @@ before polling replies. Stale decoder replies and stale UI events cannot change
 its current token. A cancelled OS/codec operation is not preempted: after 100 ms,
 one replacement decoder may be created while at most one retired worker remains.
 Closing the service never joins an unfinished codec call from a UI turn.
+Construction starts a control thread and one decoder thread even with no Plan;
+decoder-on-first-use is a separate follow-up. With no output, media work or
+pending delivery, the control owner parks without a periodic timer. Paused
+output faults and Full-Inbox delivery retain bounded polling. Remote has no
+receiver-close/credit wake; an otherwise idle service notices receiver closure
+on its next attempted delivery, while explicit service close always wakes it.
 The timing queue initially reserves eight merged spans and can grow on the
 control owner up to the checked input-chunk boundary bound. A fractional source
 start that rounds to zero output frames is carried to the next accepted frame.
@@ -56,6 +62,12 @@ selection/recovery, media keys, volume/replaygain, loops, crossfade, other codec
 multichannel mapping and idle stream suspension remain follow-ups. Pausing
 preserves application PCM; CPAL backend pause latency and existing hardware
 buffers are not sample-accurate seek/pause guarantees.
+Explicit seek/replace tears down and reopens the stream to flush its plain PCM
+ring. A ready feed may wait until the next control cycle to be submitted; active
+cycles can park for 2 ms. Stream-preserving generation descriptors and bounded
+progress loops require separate lifecycle/latency bills. Device configuration
+uses the default mono/stereo format, or the first admitted mono/stereo range at
+its maximum rate; source-aware selection needs backend/mixer policy work.
 
 Qualification uses actual decoding, pipeline, service, Inbox, Win and public
 controls. The test sink replaces only OutputProvider. Pinned upstream silent
@@ -66,6 +78,12 @@ pause/seek/stop, short and high-rate resampling. Callback allocation tests invok
 the exact production callback render method, with allocation-counter recording
 both allocations and frees. These tests establish no hardware playback or
 performance result. The local real CPAL probe reports an unavailable ALSA device.
+Before integration, run the complete existing default/no-audio/headless tests
+and ordinary native Registry/X11 immediate-click/inspector clients on this exact
+application source. Native auto-attachment adds asynchronous Opening/Failed
+updates that can reflow controls. Preserve the original `/music/*.flac` catalog
+fixtures and clients; their missing files and this host's absent ALSA device are
+failure-path controls, not successful playback or hardware evidence.
 
 UPSTREAM.json records the original algorithm/fixture hashes at the existing
 Hummingbird pin. `tools/audio-fixtures.py` generates the separate stereo corpus;
