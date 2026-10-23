@@ -1,0 +1,50 @@
+[
+  {
+    "original_path": "/tmp/gpui-reactive-grain-luna/borrowed-jobs-probe",
+    "bytes": 4453696,
+    "sha256": "b3c89244a3de154d2e32050d87a85c51f5fe251883456a7829bc4b66b40d3db4",
+    "external_elf": true
+  },
+  {
+    "original_path": "/tmp/gpui-reactive-grain-luna/borrowed-jobs-probe.rs",
+    "bytes": 2794,
+    "sha256": "759fab281f04c155bcb0920ee90bcf36dd1454d6de77485f8a9177bfd4cae147",
+    "archived_path": "gpui-reactive-grain-luna/borrowed-jobs-probe.rs"
+  },
+  {
+    "original_path": "/tmp/gpui-reactive-grain-luna/borrowed_jobs.rs",
+    "bytes": 930,
+    "sha256": "37dc26df5406c743de77a5f0548e0126a539597f4a6fc5a3cc5015d30a27e270",
+    "archived_path": "gpui-reactive-grain-luna/borrowed_jobs.rs"
+  },
+  {
+    "original_path": "/tmp/gpui-reactive-grain-luna/retained-grain-and-parallelism.md",
+    "bytes": 31716,
+    "sha256": "dcd084b232e642c476249ab4abdd04a96ca00631725c2df6b83be3371892bb1d",
+    "archived_path": "gpui-reactive-grain-luna/retained-grain-and-parallelism.md"
+  },
+  {
+    "original_path": "/tmp/gpui-reactive-grain-luna/second-pass-design-audit.md",
+    "bytes": 16549,
+    "sha256": "900392e2fd77f7f8a523fda0948ba88b199f4e4f67c533b832daad077e92d9e2",
+    "archived_path": "gpui-reactive-grain-luna/second-pass-design-audit.md"
+  },
+  {
+    "original_path": "/tmp/gpui-reactive-grain-luna/third-pass-borrowed-kernels.md",
+    "bytes": 21154,
+    "sha256": "67bc69721318964b29a84a3f18e7261b7aa414be0e05d36540f80090cccb3a12",
+    "archived_path": "gpui-reactive-grain-luna/third-pass-borrowed-kernels.md"
+  },
+  {
+    "original_path": "/tmp/gpui-coverage-algebra-luna/coverage-algebra.md",
+    "bytes": 17488,
+    "sha256": "616c4db3b96ce3a053c44b96517ad2824df79271f8f5cea20714aeae652cb31a",
+    "archived_path": "gpui-coverage-algebra-luna/coverage-algebra.md"
+  },
+  {
+    "original_path": "/tmp/gpui-coverage-algebra-luna/second-pass.md",
+    "bytes": 26033,
+    "sha256": "7d53985b75a82ff82cd275111a4b6d1f3228c8d530ccf8da30a88fd741b7527b",
+    "archived_path": "gpui-coverage-algebra-luna/second-pass.md"
+  }
+]

@@ -1,0 +1,1874 @@
+[
+  {
+    "pair": 6,
+    "max_frame_ratio": 2.333536304836134,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "9",
+        "sampled": "true",
+        "host_submit_ns": "73902",
+        "device_poll_ns": "377728",
+        "total_ns": "451700",
+        "stats": "Stats { submissions: 10, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4272, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "172453",
+        "device_poll_ns": "444340",
+        "total_ns": "617013",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4176, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "flat/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 5.6473609048674405,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "69972",
+        "device_poll_ns": "422209",
+        "total_ns": "492271",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4272, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "116062",
+        "device_poll_ns": "2663750",
+        "total_ns": "2780032",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4176, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "flat/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 2.1077497231753495,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "73151",
+        "device_poll_ns": "442570",
+        "total_ns": "515831",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4272, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "154184",
+        "device_poll_ns": "356788",
+        "total_ns": "511142",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4208, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "flat/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 10,
+    "max_frame_ratio": 1.1537118495767653,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-10-A/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "73472",
+        "device_poll_ns": "428059",
+        "total_ns": "501731",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4272, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-10-B/frames.csv",
+      "row": {
+        "case": "flat",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "141193",
+        "device_poll_ns": "437550",
+        "total_ns": "578853",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 1, binning_tile_visits: 1024, bind_group_creations: 1, draws: 1, tile_references: 0, original_tile_references: 512, skipped_tile_references: 512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4208, draw_record_bytes: 96, shared_groups: 0, compact_draws: 0, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 4308, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 6368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "flat/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 1,
+    "max_frame_ratio": 1.1343853864070557,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-01-A/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "152844",
+        "device_poll_ns": "14934852",
+        "total_ns": "15087786",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 19936, draw_record_bytes: 11904, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 22032, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-01-B/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "173384",
+        "device_poll_ns": "11981496",
+        "total_ns": "12154970",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 8032, draw_record_bytes: 11520, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 21648, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 0.9085750971087408,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "145684",
+        "device_poll_ns": "15601846",
+        "total_ns": "15747810",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 19936, draw_record_bytes: 11904, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 22032, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "100752",
+        "device_poll_ns": "14207196",
+        "total_ns": "14308068",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 8032, draw_record_bytes: 11520, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 21648, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 1,
+    "max_frame_ratio": 1.5822481690583978,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-01-A/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "114422",
+        "device_poll_ns": "14404301",
+        "total_ns": "14519093",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 312, binning_tile_visits: 1872, bind_group_creations: 1, draws: 312, tile_references: 936, original_tile_references: 936, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3833856, instance_upload_bytes: 19824, draw_record_bytes: 11904, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 22032, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-01-B/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "181044",
+        "device_poll_ns": "11215369",
+        "total_ns": "11396513",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 8800, draw_record_bytes: 11520, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 21648, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 0.8848313261881607,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "183124",
+        "device_poll_ns": "15356572",
+        "total_ns": "15539816",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 19936, draw_record_bytes: 11904, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 22032, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "128593",
+        "device_poll_ns": "13621423",
+        "total_ns": "13750116",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 312, binning_tile_visits: 1928, bind_group_creations: 1, draws: 312, tile_references: 964, original_tile_references: 964, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1511424, sample_draw_evaluations: 3948544, instance_upload_bytes: 8800, draw_record_bytes: 11520, shared_groups: 24, compact_draws: 312, inline_draws: 0, mask_upload_bytes: 0, gpu_buffer_bytes: 24656, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 21648, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 2,
+    "max_frame_ratio": 1.3852831529835228,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-A/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "132243",
+        "device_poll_ns": "19257949",
+        "total_ns": "19390282",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 313, binning_tile_visits: 2952, bind_group_creations: 1, draws: 313, tile_references: 1333, original_tile_references: 1476, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 5459968, instance_upload_bytes: 21508, draw_record_bytes: 12000, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23604, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-B/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "183194",
+        "device_poll_ns": "11617459",
+        "total_ns": "11800743",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 313, binning_tile_visits: 2952, bind_group_creations: 1, draws: 313, tile_references: 1333, original_tile_references: 1476, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 4043008, instance_upload_bytes: 9508, draw_record_bytes: 11616, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23220, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text-bg/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 0.6535871530001905,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "184164",
+        "device_poll_ns": "20334023",
+        "total_ns": "20518347",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 313, binning_tile_visits: 2952, bind_group_creations: 1, draws: 313, tile_references: 1333, original_tile_references: 1476, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 5459968, instance_upload_bytes: 21508, draw_record_bytes: 12000, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23604, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "154934",
+        "device_poll_ns": "13255394",
+        "total_ns": "13410528",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 313, binning_tile_visits: 2952, bind_group_creations: 1, draws: 313, tile_references: 1333, original_tile_references: 1476, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 4043008, instance_upload_bytes: 9508, draw_record_bytes: 11616, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23220, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text-bg/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 7,
+    "max_frame_ratio": 1.110345598093252,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-A/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "187964",
+        "device_poll_ns": "19118996",
+        "total_ns": "19307020",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 313, binning_tile_visits: 2896, bind_group_creations: 1, draws: 313, tile_references: 1305, original_tile_references: 1448, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 5345280, instance_upload_bytes: 21396, draw_record_bytes: 12000, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23604, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-B/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "208705",
+        "device_poll_ns": "11881964",
+        "total_ns": "12090749",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 313, binning_tile_visits: 2952, bind_group_creations: 1, draws: 313, tile_references: 1333, original_tile_references: 1476, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 4043008, instance_upload_bytes: 10308, draw_record_bytes: 11616, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23220, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text-bg/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 0.6644939519570189,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "9",
+        "sampled": "true",
+        "host_submit_ns": "122563",
+        "device_poll_ns": "20154878",
+        "total_ns": "20277551",
+        "stats": "Stats { submissions: 10, packet_reused: false, validated_draws: 313, binning_tile_visits: 2896, bind_group_creations: 1, draws: 313, tile_references: 1305, original_tile_references: 1448, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 5345280, instance_upload_bytes: 21396, draw_record_bytes: 12000, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23604, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "text-bg",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "125563",
+        "device_poll_ns": "13348667",
+        "total_ns": "13474310",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 313, binning_tile_visits: 2952, bind_group_creations: 1, draws: 313, tile_references: 1333, original_tile_references: 1476, skipped_tile_references: 143, uniform_tiles: 143, sample_evaluations: 1511424, sample_draw_evaluations: 4043008, instance_upload_bytes: 10308, draw_record_bytes: 11616, shared_groups: 24, compact_draws: 312, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 28752, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 23220, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "text-bg/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 2.4075740196429853,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "111592",
+        "device_poll_ns": "48756765",
+        "total_ns": "48868467",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "268666",
+        "device_poll_ns": "1260208",
+        "total_ns": "1528984",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20560, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 0.029195789313072266,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "77422",
+        "device_poll_ns": "53664323",
+        "total_ns": "53741825",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "199634",
+        "device_poll_ns": "1369301",
+        "total_ns": "1569035",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20560, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 4,
+    "max_frame_ratio": 2.088935974799191,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-04-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "124123",
+        "device_poll_ns": "51020465",
+        "total_ns": "51144668",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-04-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "259285",
+        "device_poll_ns": "1163946",
+        "total_ns": "1423291",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20816, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 0.04425121279873757,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "70851",
+        "device_poll_ns": "53524700",
+        "total_ns": "53595661",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "246116",
+        "device_poll_ns": "2125457",
+        "total_ns": "2371673",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20816, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 1,
+    "max_frame_ratio": 2.248112232731897,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-01-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "176134",
+        "device_poll_ns": "61683553",
+        "total_ns": "61859807",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20725760, instance_upload_bytes: 37088, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-01-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "395969",
+        "device_poll_ns": "45798189",
+        "total_ns": "46194338",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 24416, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 0.7034876250696501,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "154294",
+        "device_poll_ns": "66598751",
+        "total_ns": "66753305",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20725760, instance_upload_bytes: 37088, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "294746",
+        "device_poll_ns": "46665288",
+        "total_ns": "46960124",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 24416, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 2,
+    "max_frame_ratio": 2.2278429106633615,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "160953",
+        "device_poll_ns": "58327468",
+        "total_ns": "58488571",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 320, binning_tile_visits: 10064, bind_group_creations: 1, draws: 320, tile_references: 5032, original_tile_references: 5032, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20611072, instance_upload_bytes: 36976, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "358578",
+        "device_poll_ns": "42059846",
+        "total_ns": "42418514",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 320, binning_tile_visits: 10064, bind_group_creations: 1, draws: 320, tile_references: 5032, original_tile_references: 5032, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16218112, instance_upload_bytes: 25328, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 8,
+    "max_frame_ratio": 0.7506002699908861,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-08-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "217985",
+        "device_poll_ns": "64765590",
+        "total_ns": "64983675",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 320, binning_tile_visits: 10064, bind_group_creations: 1, draws: 320, tile_references: 5032, original_tile_references: 5032, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20611072, instance_upload_bytes: 36976, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-08-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "260126",
+        "device_poll_ns": "48516548",
+        "total_ns": "48776764",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 25440, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 1.5259779274578629,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "126492",
+        "device_poll_ns": "37416583",
+        "total_ns": "37543195",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 23440, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "193024",
+        "device_poll_ns": "32080884",
+        "total_ns": "32274208",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 10768, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 0.9852027306890954,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "141373",
+        "device_poll_ns": "34341894",
+        "total_ns": "34483457",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 23440, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "126363",
+        "device_poll_ns": "33846533",
+        "total_ns": "33973196",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 10768, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 1.6459292891809099,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "137433",
+        "device_poll_ns": "34740882",
+        "total_ns": "34878405",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 23440, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "226205",
+        "device_poll_ns": "31592782",
+        "total_ns": "31819077",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 11792, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 7,
+    "max_frame_ratio": 0.9483420578968262,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "142023",
+        "device_poll_ns": "34277173",
+        "total_ns": "34419296",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 320, binning_tile_visits: 3240, bind_group_creations: 1, draws: 320, tile_references: 1620, original_tile_references: 1620, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6635520, instance_upload_bytes: 23328, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "137753",
+        "device_poll_ns": "32503413",
+        "total_ns": "32641266",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 11792, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 2.12763694380429,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "62051",
+        "device_poll_ns": "10845291",
+        "total_ns": "10907452",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "132022",
+        "device_poll_ns": "9861610",
+        "total_ns": "9993742",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 6768, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 0,
+    "max_frame_ratio": 0.9658163887912334,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-00-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "73491",
+        "device_poll_ns": "13275476",
+        "total_ns": "13349087",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-00-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "77931",
+        "device_poll_ns": "12814746",
+        "total_ns": "12892767",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 6768, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 34.942575327658425,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "88812",
+        "device_poll_ns": "12629071",
+        "total_ns": "12717973",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "3103320",
+        "device_poll_ns": "11267550",
+        "total_ns": "14371010",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 7536, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 1.0965171736322405,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "68981",
+        "device_poll_ns": "13036980",
+        "total_ns": "13106051",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "3103320",
+        "device_poll_ns": "11267550",
+        "total_ns": "14371010",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 7536, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 2,
+    "max_frame_ratio": 1.5033055098620167,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-A/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "5008002",
+        "device_poll_ns": "460830",
+        "total_ns": "5468912",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 1108272, draw_record_bytes: 1104096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1110368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-B/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "7528557",
+        "device_poll_ns": "561883",
+        "total_ns": "8090610",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4176, draw_record_bytes: 1088096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1094368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "runs32k/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 2,
+    "max_frame_ratio": 1.4793820050496334,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-A/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "5008002",
+        "device_poll_ns": "460830",
+        "total_ns": "5468912",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 1108272, draw_record_bytes: 1104096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1110368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-02-B/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "7528557",
+        "device_poll_ns": "561883",
+        "total_ns": "8090610",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4176, draw_record_bytes: 1088096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1094368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "runs32k/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 1.119495466027368,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "5192356",
+        "device_poll_ns": "531911",
+        "total_ns": "5724337",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 1108272, draw_record_bytes: 1104096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1110368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "5812819",
+        "device_poll_ns": "445920",
+        "total_ns": "6258839",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 36208, draw_record_bytes: 1088096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1094368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "runs32k/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 7,
+    "max_frame_ratio": 1.095103101532347,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-A/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "5492852",
+        "device_poll_ns": "487141",
+        "total_ns": "5980173",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 1108272, draw_record_bytes: 1104096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1110368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-B/frames.csv",
+      "row": {
+        "case": "runs32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "9",
+        "sampled": "true",
+        "host_submit_ns": "6117216",
+        "device_poll_ns": "431570",
+        "total_ns": "6548906",
+        "stats": "Stats { submissions: 10, packet_reused: false, validated_draws: 32001, binning_tile_visits: 209636, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 104818, skipped_tile_references: 104818, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 36208, draw_record_bytes: 1088096, shared_groups: 1000, compact_draws: 32000, inline_draws: 1, mask_upload_bytes: 0, gpu_buffer_bytes: 2101332, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 1094368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "runs32k/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 1.2471403163874604,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "6105046",
+        "device_poll_ns": "670205",
+        "total_ns": "6775391",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 32001, binning_tile_visits: 165024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 82512, skipped_tile_references: 82512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 3076272, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "7613849",
+        "device_poll_ns": "408979",
+        "total_ns": "8022938",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 32001, binning_tile_visits: 165024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 82512, skipped_tile_references: 82512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4176, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "singletons32k/false/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 1.1841291521035464,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "6105046",
+        "device_poll_ns": "670205",
+        "total_ns": "6775391",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 32001, binning_tile_visits: 165024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 82512, skipped_tile_references: 82512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 3076272, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "false",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "7613849",
+        "device_poll_ns": "408979",
+        "total_ns": "8022938",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 32001, binning_tile_visits: 165024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 82512, skipped_tile_references: 82512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 4176, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "singletons32k/false/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 1.2751928241966457,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "6269960",
+        "device_poll_ns": "680695",
+        "total_ns": "6950755",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 32001, binning_tile_visits: 165024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 82512, skipped_tile_references: 82512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 3076272, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "7995408",
+        "device_poll_ns": "504582",
+        "total_ns": "8500090",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 32001, binning_tile_visits: 177024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 88512, skipped_tile_references: 88512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 1028208, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "singletons32k/false/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 1.222901684781006,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "6269960",
+        "device_poll_ns": "680695",
+        "total_ns": "6950755",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 32001, binning_tile_visits: 165024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 82512, skipped_tile_references: 82512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 3076272, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "singletons32k",
+        "hdr": "false",
+        "motion": "true",
+        "frame": "11",
+        "sampled": "true",
+        "host_submit_ns": "7995408",
+        "device_poll_ns": "504582",
+        "total_ns": "8500090",
+        "stats": "Stats { submissions: 12, packet_reused: false, validated_draws: 32001, binning_tile_visits: 177024, bind_group_creations: 1, draws: 32001, tile_references: 0, original_tile_references: 88512, skipped_tile_references: 88512, uniform_tiles: 512, sample_evaluations: 0, sample_draw_evaluations: 0, instance_upload_bytes: 1028208, draw_record_bytes: 3072096, shared_groups: 0, compact_draws: 0, inline_draws: 32001, mask_upload_bytes: 0, gpu_buffer_bytes: 4198484, atlas_bytes: 65536, atlas_keys: 1, atlas_key_capacity: 3, cpu_index_capacity_bytes: 3078368, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "singletons32k/false/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 2.753943995795931,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "93243",
+        "device_poll_ns": "50986603",
+        "total_ns": "51080026",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "9",
+        "sampled": "true",
+        "host_submit_ns": "256786",
+        "device_poll_ns": "1238687",
+        "total_ns": "1495553",
+        "stats": "Stats { submissions: 10, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20560, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/true/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 0.031154229702150208,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "81661",
+        "device_poll_ns": "48374687",
+        "total_ns": "48456438",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "219715",
+        "device_poll_ns": "1289848",
+        "total_ns": "1509623",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20560, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/true/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 2.7298375328339333,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "164464",
+        "device_poll_ns": "56926056",
+        "total_ns": "57090630",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "448960",
+        "device_poll_ns": "2400183",
+        "total_ns": "2849743",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20816, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/true/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 0.08415973871913483,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "143973",
+        "device_poll_ns": "57744294",
+        "total_ns": "57888357",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 16777216, instance_upload_bytes: 21328, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "layers8",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "426400",
+        "device_poll_ns": "4445228",
+        "total_ns": "4871869",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 8, binning_tile_visits: 8192, bind_group_creations: 1, draws: 8, tile_references: 4096, original_tile_references: 4096, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 131072, sample_draw_evaluations: 1048576, instance_upload_bytes: 20816, draw_record_bytes: 768, shared_groups: 0, compact_draws: 0, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 21584, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 23424, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8/true/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 8,
+    "max_frame_ratio": 2.175937547337214,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-08-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "8",
+        "sampled": "true",
+        "host_submit_ns": "184844",
+        "device_poll_ns": "65401685",
+        "total_ns": "65586639",
+        "stats": "Stats { submissions: 9, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20725760, instance_upload_bytes: 37088, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-08-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "402209",
+        "device_poll_ns": "43087978",
+        "total_ns": "43490297",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 24416, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/true/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 8,
+    "max_frame_ratio": 0.6972372270372776,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-08-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "124193",
+        "device_poll_ns": "66724844",
+        "total_ns": "66849467",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20725760, instance_upload_bytes: 37088, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-08-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "315027",
+        "device_poll_ns": "46294800",
+        "total_ns": "46609937",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 24416, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/true/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 10,
+    "max_frame_ratio": 2.4668561789329,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-10-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "5",
+        "sampled": "true",
+        "host_submit_ns": "224084",
+        "device_poll_ns": "59737049",
+        "total_ns": "59961233",
+        "stats": "Stats { submissions: 6, packet_reused: false, validated_draws: 320, binning_tile_visits: 10064, bind_group_creations: 1, draws: 320, tile_references: 5032, original_tile_references: 5032, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20611072, instance_upload_bytes: 36976, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-10-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "552783",
+        "device_poll_ns": "40734755",
+        "total_ns": "41287658",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 25440, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/true/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 3,
+    "max_frame_ratio": 0.732190147713749,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-03-A/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "163233",
+        "device_poll_ns": "62647784",
+        "total_ns": "62811147",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 20725760, instance_upload_bytes: 37088, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 39184, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-03-B/frames.csv",
+      "row": {
+        "case": "layers8-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "260835",
+        "device_poll_ns": "45728508",
+        "total_ns": "45989703",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 320, binning_tile_visits: 10120, bind_group_creations: 1, draws: 320, tile_references: 5060, original_tile_references: 5060, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 1548032, sample_draw_evaluations: 16332800, instance_upload_bytes: 25440, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 53328, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 38800, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "layers8-text/true/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 2.476616445325885,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "192614",
+        "device_poll_ns": "35546500",
+        "total_ns": "35739194",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 23440, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "9",
+        "sampled": "true",
+        "host_submit_ns": "477031",
+        "device_poll_ns": "37389841",
+        "total_ns": "37867262",
+        "stats": "Stats { submissions: 10, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 10768, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/true/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 0.9486673954589141,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "112722",
+        "device_poll_ns": "39803256",
+        "total_ns": "39916268",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 23440, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "9",
+        "sampled": "true",
+        "host_submit_ns": "477031",
+        "device_poll_ns": "37389841",
+        "total_ns": "37867262",
+        "stats": "Stats { submissions: 10, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 10768, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/true/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 4,
+    "max_frame_ratio": 1.4078412766298682,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-04-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "10",
+        "sampled": "true",
+        "host_submit_ns": "149644",
+        "device_poll_ns": "33985896",
+        "total_ns": "34135620",
+        "stats": "Stats { submissions: 11, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 23440, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-04-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "210675",
+        "device_poll_ns": "33110597",
+        "total_ns": "33321362",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 320, binning_tile_visits: 3240, bind_group_creations: 1, draws: 320, tile_references: 1620, original_tile_references: 1620, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6635520, instance_upload_bytes: 11680, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/true/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 6,
+    "max_frame_ratio": 0.990460689607822,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-A/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "114662",
+        "device_poll_ns": "35074030",
+        "total_ns": "35188812",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 320, binning_tile_visits: 3240, bind_group_creations: 1, draws: 320, tile_references: 1620, original_tile_references: 1620, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6635520, instance_upload_bytes: 23328, draw_record_bytes: 12672, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25536, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-06-B/frames.csv",
+      "row": {
+        "case": "image-text",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "137343",
+        "device_poll_ns": "34715672",
+        "total_ns": "34853135",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 320, binning_tile_visits: 3296, bind_group_creations: 1, draws: 320, tile_references: 1648, original_tile_references: 1648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2097152, sample_draw_evaluations: 6750208, instance_upload_bytes: 11792, draw_record_bytes: 12288, shared_groups: 24, compact_draws: 312, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 45136, atlas_bytes: 65536, atlas_keys: 9, atlas_key_capacity: 14, cpu_index_capacity_bytes: 25152, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "Some(ImageStats { resources: 1, packed_bytes: 16384, uploaded_bytes: 0, prefix_bytes: 16384, gpu_buffer_bytes: 32768, index_capacity: 3 })"
+      }
+    },
+    "cell": "image-text/true/true",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 7,
+    "max_frame_ratio": 2.048896701669982,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "64851",
+        "device_poll_ns": "11253030",
+        "total_ns": "11317961",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-07-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "3",
+        "sampled": "true",
+        "host_submit_ns": "132873",
+        "device_poll_ns": "11077356",
+        "total_ns": "11210309",
+        "stats": "Stats { submissions: 4, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 6768, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/true/false",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 9,
+    "max_frame_ratio": 1.0476612577769289,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "63542",
+        "device_poll_ns": "11528016",
+        "total_ns": "11591658",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-09-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "false",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "68362",
+        "device_poll_ns": "12075699",
+        "total_ns": "12144131",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 6768, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/true/false",
+    "metric": "total_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 2.437202145911059,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "4",
+        "sampled": "true",
+        "host_submit_ns": "73442",
+        "device_poll_ns": "12392045",
+        "total_ns": "12465577",
+        "stats": "Stats { submissions: 5, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "7",
+        "sampled": "true",
+        "host_submit_ns": "178993",
+        "device_poll_ns": "11824904",
+        "total_ns": "12004087",
+        "stats": "Stats { submissions: 8, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 7536, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/true/true",
+    "metric": "host_submit_ns"
+  },
+  {
+    "pair": 5,
+    "max_frame_ratio": 0.9234813623507625,
+    "shipping": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-A/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "61612",
+        "device_poll_ns": "13268805",
+        "total_ns": "13330517",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 9072, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "candidate": {
+      "path": "/tmp/gpui-gpu-frontier-evidence/measure/pair-05-B/frames.csv",
+      "row": {
+        "case": "rounded",
+        "hdr": "true",
+        "motion": "true",
+        "frame": "6",
+        "sampled": "true",
+        "host_submit_ns": "139013",
+        "device_poll_ns": "12171291",
+        "total_ns": "12310484",
+        "stats": "Stats { submissions: 7, packet_reused: false, validated_draws: 24, binning_tile_visits: 1296, bind_group_creations: 1, draws: 24, tile_references: 648, original_tile_references: 648, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 2031616, sample_draw_evaluations: 2654208, instance_upload_bytes: 7536, draw_record_bytes: 2304, shared_groups: 0, compact_draws: 0, inline_draws: 24, mask_upload_bytes: 0, gpu_buffer_bytes: 12368, atlas_bytes: 1, atlas_keys: 0, atlas_key_capacity: 0, cpu_index_capacity_bytes: 11168, correction_records: 1, correction_key_capacity: 0 }",
+        "image_stats": "None"
+      }
+    },
+    "cell": "rounded/true/true",
+    "metric": "total_ns"
+  }
+]

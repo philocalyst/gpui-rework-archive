@@ -97,7 +97,7 @@ and caller code are unchanged. Native clones retain one shared producer; a cold
 native endpoint pair costs eight more combined requested/header bytes, and the
 sealed optimized caller adds 99 code bytes. Default/native suites, six actual
 native controls including Registry repair, strict lint and Apple/MSVC source
-checks pass on the exact integrated sources. Current core is **30,805** nontest,
+checks pass on the exact integrated sources. Core at that checkpoint is **30,805** nontest,
 noncomment lines (+109). Hummingbird application integration remains separate;
 its discovered Stop race is pending correction. No latency or RSS win is claimed.
 
@@ -114,9 +114,18 @@ remain. The typed inbox successor is isolated and still under qualification.
 
 The [coverage frontier](evidence/uniform-packet/coverage-frontier/README.md)
 and [canonical text campaign](evidence/canonical-text-stream/README.md) remain
-unadopted. Graphics has exact readbacks and cross-platform compile checks but
-no qualified speed result. The text timing campaign stopped at a watchdog;
+unadopted. The [fixed GPU comparison](evidence/uniform-packet/failed-gpu-campaign/README.md)
+passes exact readbacks but fails its speed/regression gates: host submission
+ratio 1.2843916, total render/poll wall ratio 0.4873842, llvmpipe only. All
+22 legs and 6,864 warmup/measured frames remain archived; no retry or gate
+change followed measurement. Its coverage-setup successor is isolated. The text timing campaign stopped at a watchdog;
 diagnostic success does not complete or replace its missing benchmark cells.
+
+[Borrowed-kernel research](evidence/borrowed-kernel-research/README.md)
+now includes a compiled standalone Rust lifetime probe with three rejected
+sharing/aliasing controls. It establishes constructibility of borrowed selected
+Sync inputs and disjoint outputs while the root model stays non-Sync. It does
+not implement a worker pool, render dependency graph or parallel GPUI frame.
 
 The narrower [GPU scene bindings](evidence/buffer-prefix/README.md) follow source
 `a50b3b8512`: exact used prefixes avoid six Core capacity-tail clears/1,340 bytes
