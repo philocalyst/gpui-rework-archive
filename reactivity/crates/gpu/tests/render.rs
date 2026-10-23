@@ -150,7 +150,7 @@ fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() 
         )
         .unwrap();
         let viewport = Rect::new(0.0, 0.0, 128.0, 80.0);
-        let pages = [0.0, 0.25, 0.75, 1.0].map(|progress| {
+        let mut pages = [0.0, 0.25, 0.75, 1.0].map(|progress| {
             let mut canvas = Canvas::recording(128, 80, ColorConfig::default()).unwrap();
             canvas.clear(Color::WHITE);
             for page in 0..2 {
@@ -224,7 +224,7 @@ fn page_transitions_keep_mixed_materials_and_inspector_overlay_in_scene_order() 
             }
             // Queue every transition before reading: later resource/record
             // patches must not change an earlier submitted page or overlay.
-            for (frame, (canvas, output)) in pages.iter().zip(&outputs).enumerate() {
+            for (frame, (canvas, output)) in pages.iter_mut().zip(&outputs).enumerate() {
                 let actual = read_texture(&renderer, output);
                 for (byte, (&gpu, &cpu)) in actual.iter().zip(canvas.pixels()).enumerate() {
                     assert!(
