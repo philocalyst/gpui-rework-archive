@@ -15,6 +15,7 @@ use zbus::{Connection, OwnedObjectPath, Proxy, connection::Builder};
 use zruntime::{SharedRuntime, mpmc};
 
 mod checkbox;
+mod failure;
 mod lifecycle;
 
 const TITLE: &str = "GPUI native AT-SPI Todo proof";
