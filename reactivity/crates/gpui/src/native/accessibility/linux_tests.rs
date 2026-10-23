@@ -474,6 +474,8 @@ impl Script {
             let bridge = self.host.accessibility.as_mut().unwrap();
             assert_eq!(bridge.conversions, 0, "initial tree must remain lazy");
             assert!(bridge.published.is_none());
+            assert!(bridge.receiver.is_none());
+            assert!(bridge.ingress.0.sender.get().is_none());
             let inactive = allocation_counter::measure(|| {
                 for _ in 0..1000 {
                     bridge.sync(owner).unwrap();
@@ -509,6 +511,9 @@ impl Script {
                     );
                     assert_eq!(self.host.presented_frames, frames);
                     assert!(self.host.accessibility.as_ref().unwrap().conversions > 0);
+                    let bridge = self.host.accessibility.as_ref().unwrap();
+                    assert!(bridge.receiver.is_some());
+                    assert!(bridge.ingress.0.sender.get().is_some());
                     let heading = owner.role(Role::Text).text("Todos").one().unwrap();
                     owner
                         .set_semantic(
@@ -592,6 +597,9 @@ impl Script {
                     self.gate.try_send(()).unwrap();
                 }
                 Evidence::Reactivated => {
+                    let bridge = self.host.accessibility.as_ref().unwrap();
+                    assert!(bridge.receiver.is_some());
+                    assert!(bridge.ingress.0.sender.get().is_some());
                     assert_eq!(owner.accessibility_state().unwrap().epoch, 7);
                     assert_eq!(owner.counters().source_operations, 7);
                     assert_eq!(self.host.presented_frames, self.after_invoke_frames);
@@ -701,6 +709,9 @@ fn native_accessible_profile_without_session_bus_still_presents() {
                     let owner = self.host.owner.as_ref().unwrap();
                     assert!(owner.accessibility_state().unwrap().valid);
                     assert_eq!(self.host.accessibility.as_ref().unwrap().conversions, 0);
+                    let bridge = self.host.accessibility.as_ref().unwrap();
+                    assert!(bridge.receiver.is_none());
+                    assert!(bridge.ingress.0.sender.get().is_none());
                     assert!(self.host.instance.is_none());
                     assert!(owner.contains_text("Todos").unwrap());
                     self.complete = true;

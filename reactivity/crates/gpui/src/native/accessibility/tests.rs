@@ -286,6 +286,154 @@ fn projection_uses_old_p_during_pending_edit_and_failed_preparation() {
 }
 
 #[test]
+fn placeholder_actions_do_not_initialize_or_saturate_transport() {
+    let mut ingress = Ingress::new(None);
+    ingress.request_initial_tree();
+    let position = accesskit::TextPosition {
+        node: NodeId(1),
+        character_index: 0,
+    };
+    let measured = allocation_counter::measure(|| {
+        for _ in 0..CAPACITY * 2 {
+            ingress.do_action(request(accesskit::Action::Click, NodeId(8), None));
+            ingress.do_action(request(
+                accesskit::Action::SetTextSelection,
+                NodeId(1 << 63),
+                Some(ActionData::SetTextSelection(accesskit::TextSelection {
+                    anchor: position,
+                    focus: position,
+                })),
+            ));
+        }
+    });
+    assert_eq!(measured.count_total, 0);
+    // Even an oversized synthetic placeholder payload is discarded, rather
+    // than poisoning the later real provider's bounded action transport.
+    ingress.do_action(request(
+        accesskit::Action::SetValue,
+        NodeId(1 << 63),
+        Some(ActionData::Value("x".repeat(MAX_VALUE_BYTES + 1).into())),
+    ));
+    assert!(ingress.0.sender.get().is_none());
+    assert!(!ingress.0.overflow.load(Ordering::Acquire));
+    assert_eq!(ingress.0.publication.load(Ordering::Acquire), 0);
+}
+
+#[test]
+fn owner_publication_allocates_transport_once_and_retains_it_across_sessions() {
+    let mut ingress = None;
+    let cold = allocation_counter::measure(|| ingress = Some(Ingress::new(None)));
+    let mut ingress = ingress.unwrap();
+    assert_eq!(cold.count_total, 1, "only the shared ingress owner exists");
+    let mut receiver = None;
+    let first = allocation_counter::measure(|| {
+        ingress.prepare_publication(&mut receiver).unwrap();
+    });
+    assert_eq!(first.count_total, 2, "bounded channel control and slots");
+    ingress.request_initial_tree();
+    ingress.do_action(request(accesskit::Action::Click, NodeId(8), None));
+    let old_session = ingress.0.session.load(Ordering::Acquire);
+    let repeated = allocation_counter::measure(|| {
+        ingress.deactivate_accessibility();
+        ingress.request_initial_tree();
+        ingress.prepare_publication(&mut receiver).unwrap();
+    });
+    assert_eq!(repeated.count_total, 0);
+    assert_ne!(old_session, ingress.0.session.load(Ordering::Acquire));
+    assert_eq!(
+        receiver.as_ref().unwrap().try_recv().unwrap().session,
+        old_session
+    );
+    assert_eq!(ingress.0.publication.load(Ordering::Acquire), 2);
+    eprintln!(
+        "OWNER_QUEUE cold_count={} cold_bytes={} first_count={} first_bytes={} shared={} receiver={} optional_receiver={} bridge={}",
+        cold.count_total,
+        cold.bytes_current,
+        first.count_total,
+        first.bytes_current,
+        size_of::<Shared>(),
+        size_of::<Receiver<Queued>>(),
+        size_of::<Option<Receiver<Queued>>>(),
+        size_of::<Bridge>()
+    );
+}
+
+#[test]
+fn published_text_uses_new_generation_but_old_static_actions_remain_live() {
+    let mut win = Win::demo(Page::new());
+    let mut published = cohort(&win);
+    let input = id(&win, win.input());
+    assert!(input.0 >= 1 << 63);
+    let button = id(&win, win.button("Invoke"));
+    let mut ingress = Ingress::new(None);
+    ingress.request_initial_tree();
+    let mut receiver = None;
+    // Model the factory boundary: projection succeeds, then transport and
+    // generation are installed before the returned tree becomes observable.
+    let update = project(
+        &win.accessibility_sheet().unwrap(),
+        win.accessibility_state().unwrap(),
+        "Test document",
+        &published,
+    );
+    ingress.prepare_publication(&mut receiver).unwrap();
+    let tree = Tree::new(update, true);
+    assert!(
+        tree.state()
+            .node_by_tree_local_id(input, TreeId::ROOT)
+            .is_some()
+    );
+    let edit = || {
+        request(
+            accesskit::Action::SetValue,
+            input,
+            Some(ActionData::Value("fresh".into())),
+        )
+    };
+    ingress.do_action(edit());
+    let result = drain_actions(&ingress, receiver.as_ref().unwrap(), &published, &mut win).unwrap();
+    assert!(result[0].as_ref().unwrap().is_ok());
+    assert_eq!(&**win.root().unwrap().value, "fresh");
+
+    published.refresh(&win).unwrap();
+    let mut next_input = None;
+    win.visit(|part| {
+        if part.target() == win.input() {
+            next_input = Some(published.id(part));
+        }
+    })
+    .unwrap();
+    let next_input = next_input.unwrap();
+    assert_ne!(next_input, input, "changed source retires the old root ID");
+    ingress.do_action(request(
+        accesskit::Action::SetValue,
+        next_input,
+        Some(ActionData::Value("old generation".into())),
+    ));
+    ingress.do_action(request(accesskit::Action::Click, button, None));
+    ingress.prepare_publication(&mut receiver).unwrap();
+    let result = drain_actions(&ingress, receiver.as_ref().unwrap(), &published, &mut win).unwrap();
+    assert!(matches!(result[0], Some(Err(Error::StaleTarget))));
+    assert!(result[1].as_ref().unwrap().is_ok());
+    assert_eq!(&**win.root().unwrap().value, "fresh");
+    assert_eq!(win.root().unwrap().clicks, 1);
+}
+
+#[test]
+fn publication_exhaustion_revokes_callbacks_without_wrapping() {
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    ingress.0.publication.store(u64::MAX, Ordering::Release);
+    let mut receiver = Some(receiver);
+    assert!(ingress.prepare_publication(&mut receiver).is_err());
+    assert_eq!(ingress.0.publication.load(Ordering::Acquire), u64::MAX);
+    assert!(ingress.0.closed.load(Ordering::Acquire));
+    assert!(ingress.0.overflow.load(Ordering::Acquire));
+    ingress.do_action(request(accesskit::Action::Click, NodeId(8), None));
+    assert!(receiver.as_ref().unwrap().try_recv().is_err());
+}
+
+#[test]
 fn native_callbacks_are_inert_bounded_and_activation_bypasses_saturation() {
     let (mut ingress, receiver) = Ingress::channel(None);
     assert!(ingress.request_initial_tree().is_none());
