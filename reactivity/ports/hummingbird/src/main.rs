@@ -61,11 +61,14 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
         None => Database::fixture()?,
     };
     let (worker, inbox) = Worker::new(database)?;
-    let (model, questions) = connect(worker.handle())?;
+    let (mut model, questions) = connect(worker.handle())?;
+    let (audio, audio_inbox) = hummingbird_gpui_port::audio::AudioService::new()?;
+    model.queue.attach_audio(audio.handle())?;
     let result = gpui::Application::run_window(
         gpui::Window::document(model)
             .questions(questions)
             .with_inbox(inbox, Library::receive)
+            .with_inbox(audio_inbox, Library::receive_audio)
             .title("Hummingbird — Library port")
             .size(720, 900)
             .renderer(match renderer {
@@ -80,6 +83,7 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
                 )
             }),
     );
+    let _ = audio.finish(std::time::Duration::from_millis(100));
     worker.finish().map_err(|_| "library worker panicked")?;
     result?;
     Ok(())

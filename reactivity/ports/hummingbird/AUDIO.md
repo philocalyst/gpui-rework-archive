@@ -1,0 +1,65 @@
+# Real audio vertical slice
+
+`native` attaches the production audio service to Library's ordinary QueueScreen
+and typed Inbox. `audio` enables real WAV/PCM, FLAC and MP3 decoding with a
+replaceable output-device seam; `cpal-output` adds CPAL. The default headless
+transcript keeps its existing queue-only contract. Run the opt-in device probe:
+
+```sh
+cargo run --locked --features cpal-output --example audio_output -- /path/to/music.flac
+cargo test --locked --features cpal-output --lib --test audio
+```
+
+The decoder worker exclusively owns File, Symphonia format reader and codec.
+Three reusable 20 ms planar f64 blocks cross its bounded one-operation channel.
+The audio control owner holds FFT/remainder/tail staging, stream and the producer
+of a 100 ms f64 SPSC ring. CPAL's data callback consumes complete frames, converts
+sample type, applies the gain ramp and writes silence on underrun. It performs
+no allocation, reclamation, locks or I/O. CPAL's separate owned-error callback
+has a four-error retirement ring; overflow reclaims the exceptional owned error
+and sets a fault flag. It cannot promise universally allocation-free backend
+errors or teardown. Formatting ordinary retired errors happens on the control
+owner. No owned error is deliberately leaked.
+
+The UI publishes one complete latest intent. Plans lease immutable current and
+lookahead TrackRefs, with no second queue snapshot. Equal occurrence stamps
+refresh the plan. Seek changes a checked operation token within that occurrence;
+stop immediately revokes output permission. The control owner adopts intent
+before polling replies. Stale decoder replies and stale UI events cannot change
+its current token. A cancelled OS/codec operation is not preempted: after 100 ms,
+one replacement decoder may be created while at most one retired worker remains.
+Closing the service never joins an unfinished codec call from a UI turn.
+
+SourceEof follows all decoded source frames entering pipeline staging. It does
+not mean output drain. The UI authorizes the next plan from its latest queue;
+natural compatible transitions retain the prior PCM and FFT history, while
+explicit play/seek/stop replace the stream and flush the application queue.
+SourceEof → UI → next-plan delivery can stall, so this protocol cannot promise
+gapless playback under an arbitrary UI stall. Started and Position describe
+frames accepted into the application output queue. Drained additionally requires
+final resampler tail, staging and that queue to be empty; it excludes OS/device
+latency and audible completion. The final stream remains running silence to
+avoid truncating a hardware buffer based on an application-only drain signal.
+
+This first slice supports mono/stereo sources and output, with rates up to
+768 kHz, and rejects mid-stream format changes. It reopens the current path
+before an accurate seek, so seek can fail after a file is removed and performs
+extra I/O. Device absence/loss produces a typed failure; automatic device
+selection/recovery, media keys, volume/replaygain, loops, crossfade, other codecs,
+multichannel mapping and idle stream suspension remain follow-ups. Pausing
+preserves application PCM; CPAL backend pause latency and existing hardware
+buffers are not sample-accurate seek/pause guarantees.
+
+Qualification uses actual decoding, pipeline, service, Inbox, Win and public
+controls. The test sink replaces only OutputProvider. Pinned upstream silent
+WAV/FLAC/MP3 fixtures are explicit corner controls. A generated pinned nonzero
+stereo corpus checks every WAV/FLAC sample, MP3 error/channel identity and partial
+tail. Further controls cover latest equal-stamp lookahead, queued EOF, nonzero
+pause/seek/stop, short and high-rate resampling. Callback allocation tests invoke
+the exact production callback render method, with allocation-counter recording
+both allocations and frees. These tests establish no hardware playback or
+performance result. The local real CPAL probe reports an unavailable ALSA device.
+
+UPSTREAM.json records the original algorithm/fixture hashes at the existing
+Hummingbird pin. `tools/audio-fixtures.py` generates the separate stereo corpus;
+FFmpeg is a fixture-generation tool and is not an application dependency.

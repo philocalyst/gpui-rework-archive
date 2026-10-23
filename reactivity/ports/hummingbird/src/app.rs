@@ -18,6 +18,10 @@ pub struct Library {
     notice: String,
 }
 impl Library {
+    #[cfg(feature = "audio")]
+    pub fn receive_audio(&mut self, event: crate::audio::Event) {
+        self.queue.receive_audio(event);
+    }
     pub const QUEUE: Component<Self, QueueScreen> = Component::new(
         FieldId::new(5),
         "playback queue",

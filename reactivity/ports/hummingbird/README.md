@@ -3,8 +3,9 @@
 This application experiment ports a real Hummingbird data seam into the ordinary
 GPUI native/headless owner: SQLite query → Nucleo search → keyed virtual rows →
 SQLite-validated playback request → exclusively owned queue and playback plan.
-It is a foundation for growing the player port. Audio output, scanner/watcher,
-full navigation/table controls, artwork, settings and platform media integration
+Native now attaches [real decoding and CPAL output](AUDIO.md), including
+pause, seek, stop and queue-authorized source transitions. Scanner/watcher, full
+navigation/table controls, artwork, settings and platform media integration
 remain absent.
 
 Run from this standalone workspace:
@@ -37,7 +38,8 @@ explicit edge-case rows. `--database` opens an existing library **read-only**;
 it does not run migrations or seed it. Query compatibility is with the pin below,
 not a promise to migrate arbitrary future databases. Play resolves the actual
 track ID, album ID and stored path through `for_playback`; it displays a typed,
-sequenced request and does not start an audio device.
+sequenced request. Add it to the queue and use its Play control for native audio;
+the default headless transcript keeps its queue-only contract.
 
 ## Queue and decoder boundary
 
@@ -56,9 +58,10 @@ entry playing preserve its stamp, so an EOS already in transit still advances
 using the latest queue/policy/availability. Equal stamps do not mean equal plans:
 a decoder must reconcile lookahead on every delivery. The entry key remains in
 the plan and is not repeated in the 16-byte stamp. Track availability is a worker
-snapshot; a real decoder must recheck file-open errors. This UI prepares plans
-and does not attach audio,
-pause/seek, five-second previous behavior, consume or stop-after-current.
+snapshot; a real decoder must recheck file-open errors. The native attachment consumes these plans through the ordinary Inbox; see
+[AUDIO.md](AUDIO.md) for output timing and format limits. The default headless
+owner remains queue-only. Five-second previous behavior, consume and
+stop-after-current are not implemented.
 
 [Producer fixtures and costs](../../evidence/hummingbird-queue/README.md) retain
 the pinned original queue behavior and explicit desired differences. The
