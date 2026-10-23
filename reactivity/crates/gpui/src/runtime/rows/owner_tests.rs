@@ -1,11 +1,71 @@
 //! Whole-window ownership costs; ignored so the measured process runs one case.
 use super::*;
 use crate::prelude::*;
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Mode {
+    Sparse,
+    Dense,
+    Unchanged,
+    Keyed,
+    Truncate,
+}
 struct Page {
     count: usize,
     text: bool,
     general: bool,
+    mode: Mode,
     x: f32,
+}
+impl Page {
+    fn step(&self) -> usize {
+        (self.x * 8.) as usize
+    }
+    fn child(&self, index: usize) -> El<'_> {
+        let color = if self.mode == Mode::Unchanged {
+            Color::rgb((self.x * 800.) as u8, 0, 0)
+        } else {
+            Color::BLACK
+        };
+        let el = if self.text {
+            text("immutable text payload").w(240).h(20)
+        } else {
+            div().w(10).h(1).bg(color)
+        };
+        let map = Affine {
+            a: 1.,
+            b: if self.general { 0.1 } else { 0. },
+            c: if self.general { 0.2 } else { 0. },
+            d: 1.,
+            tx: if self.mode != Mode::Unchanged
+                && (self.mode == Mode::Dense || index == self.count / 2)
+            {
+                self.x
+            } else {
+                0.
+            },
+            ty: 0.,
+        };
+        if self.general {
+            el.rounded(4.).transform(map)
+        } else {
+            el.transform(map)
+        }
+    }
+}
+impl ItemSource for Page {
+    fn len(&self) -> usize {
+        self.count
+    }
+    fn key(&self, index: usize) -> ItemKey {
+        ItemKey::new(((index + self.step()) % self.count) as u64)
+    }
+    fn index_of(&self, key: ItemKey) -> Option<usize> {
+        let key = usize::try_from(key.get()).ok()?;
+        (key < self.count).then(|| (key + self.count - self.step() % self.count) % self.count)
+    }
+    fn row(&self, index: usize) -> El<'_> {
+        self.child(index)
+    }
 }
 impl View for Page {
     fn view(&self) -> El<'_> {
@@ -15,26 +75,18 @@ impl View for Page {
                 .bg(Color::BLACK)
                 .transform(Affine::translation(self.x, 0.));
         }
-        column((0..self.count).map(|index| {
-            let el = if self.text {
-                text("immutable text payload").w(240).h(20)
+        if self.mode == Mode::Keyed {
+            return uniform_list(ListId::new(81), self, 1)
+                .w(10)
+                .h(self.count as f32);
+        }
+        let count = self.count
+            - if self.mode == Mode::Truncate {
+                self.step()
             } else {
-                div().w(10).h(1).bg(Color::BLACK)
+                0
             };
-            let map = Affine {
-                a: 1.,
-                b: if self.general { 0.1 } else { 0. },
-                c: if self.general { 0.2 } else { 0. },
-                d: 1.,
-                tx: if index == self.count / 2 { self.x } else { 0. },
-                ty: 0.,
-            };
-            if self.general {
-                el.rounded(4.).transform(map)
-            } else {
-                el.transform(map)
-            }
-        }))
+        column((0..count).map(|index| self.child(index)))
     }
 }
 fn report(stage: &str, win: &Win<Page>, cost: allocation_counter::AllocationInfo) {
@@ -93,7 +145,8 @@ fn whole_window_candidate_owner_costs() {
         "workspace32" => (32, false),
         "sparse16k" => (16384, false),
         "text32k" => (32768, true),
-        "transformed32" | "inspector32" => (32, false),
+        "transformed32" | "inspector32" | "unchanged32" | "reorder32" | "truncate32" => (32, false),
+        "dense16k" => (16384, false),
         _ => panic!("unknown case"),
     };
     let mut win = None;
@@ -102,6 +155,13 @@ fn whole_window_candidate_owner_costs() {
             count,
             text,
             general: name == "transformed32" || name == "inspector32",
+            mode: match name.as_str() {
+                "dense16k" => Mode::Dense,
+                "unchanged32" => Mode::Unchanged,
+                "reorder32" => Mode::Keyed,
+                "truncate32" => Mode::Truncate,
+                _ => Mode::Sparse,
+            },
             x: 0.,
         };
         let options = WindowOptions {
@@ -133,7 +193,7 @@ fn whole_window_candidate_owner_costs() {
         win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
     });
     report("ACK", &win, ack);
-    if count > 1 {
+    if count > 1 && !["dense16k", "reorder32", "truncate32"].contains(&name.as_str()) {
         assert_eq!(p, win.runtime().unwrap().presented.as_ptr());
     }
     assert_eq!(
