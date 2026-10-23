@@ -55,6 +55,10 @@ impl QueueScreen {
         let result = self.playback.append(tracks, &available, &mut draw);
         self.changed(result.map(|_| ()));
     }
+    pub fn play_now(&mut self, track: TrackRef) {
+        let result = self.playback.play_now(track, &available, &mut draw);
+        self.changed(result);
+    }
     /// The application may bind this to its real decoder's typed Inbox. The
     /// queue UI itself never fabricates EOS or installs an audio side effect.
     pub fn receive_end_of_stream(&mut self, event: EndOfStream) {

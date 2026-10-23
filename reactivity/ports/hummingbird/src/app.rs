@@ -86,6 +86,16 @@ impl Library {
             self.notice = "This prepared recording belongs to the previous library source".into();
         }
     }
+    #[cfg(feature = "audio")]
+    fn play_prepared(&mut self, track: TrackRef, selection: Selection) {
+        if selection.generation != self.version.generation {
+            self.notice = "This prepared recording belongs to the previous library source".into();
+        } else if selection != *self.selected {
+            self.notice = "This prepared recording is no longer the current selection".into();
+        } else {
+            self.queue.play_now(track);
+        }
+    }
 }
 
 pub fn connect(
@@ -220,6 +230,23 @@ impl View for Library {
                     if let Some(track) = &request.track {
                         let leased = track.clone();
                         let generation = request.selection.generation;
+                        #[cfg(feature = "audio")]
+                        let play_now = if self.queue.audio_status().is_some() {
+                            let leased = track.clone();
+                            let selection = request.selection;
+                            let play = button("Play now").name(format!("Play {} now", track.title));
+                            if track.available_when_prepared {
+                                play.on_click(move |model: &mut Library| {
+                                    model.play_prepared(leased.clone(), selection)
+                                })
+                            } else {
+                                play.description("Path was unavailable when prepared")
+                            }
+                        } else {
+                            text("")
+                        };
+                        #[cfg(not(feature = "audio"))]
+                        let play_now = text("");
                         column((
                             text(format!(
                                 "Play request {}: recording {} — {}",
@@ -227,13 +254,19 @@ impl View for Library {
                                 track.track_id.unwrap(),
                                 track.path.display()
                             )),
-                            button(format!(
-                                "Add prepared recording {} to queue",
-                                track.track_id.unwrap()
+                            row((
+                                button(format!(
+                                    "Add prepared recording {} to queue",
+                                    track.track_id.unwrap()
+                                ))
+                                .on_click(
+                                    move |model: &mut Library| {
+                                        model.enqueue(leased.clone(), generation)
+                                    },
+                                ),
+                                play_now,
                             ))
-                            .on_click(move |model: &mut Library| {
-                                model.enqueue(leased.clone(), generation)
-                            }),
+                            .gap(8),
                         ))
                     } else {
                         text("No recording selected")

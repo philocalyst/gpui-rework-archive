@@ -38,7 +38,11 @@ explicit edge-case rows. `--database` opens an existing library **read-only**;
 it does not run migrations or seed it. Query compatibility is with the pin below,
 not a promise to migrate arbitrary future databases. Play resolves the actual
 track ID, album ID and stored path through `for_playback`; it displays a typed,
-sequenced request. Add it to the queue and use its Play control for native audio;
+sequenced request. With audio attached, its explicit **Play now** action appends
+and starts that recording while preserving the queue. Preparing or retrying a
+query never starts playback. This remains a two-step Library workflow, rather
+than upstream's single-click listing behavior. See [the integration report](LIBRARY-PLAY.md).
+Add also remains available for queueing;
 the default headless transcript keeps its queue-only contract.
 
 ## Queue and decoder boundary
