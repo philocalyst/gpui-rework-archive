@@ -1,5 +1,6 @@
 //! One explicit, bounded application service; no UI/runtime/entity executor.
 use crate::{
+    browser::{Input, Page, PlayRequest, PreparedListing},
     database::Database,
     query::tracks,
     queue::{Track, TrackRef},
@@ -28,6 +29,10 @@ pub struct Selection {
 }
 #[derive(Debug)]
 pub enum LibraryEvent {
+    ListingPrepared {
+        request: PlayRequest,
+        result: Result<PreparedListing, SourceError>,
+    },
     Prepared {
         selection: Selection,
         result: Result<TrackRef, SourceError>,
@@ -42,6 +47,8 @@ pub enum LibraryEvent {
 }
 enum Command {
     Search(SearchInput, Completion<SearchPage, SourceError>),
+    Browse(triomphe::Arc<Input>, Completion<Page, SourceError>),
+    PrepareListing(PlayRequest),
     Prepare(Selection),
     PrepareAndPlay(Selection),
     Prepend(mpsc::SyncSender<Result<Version, SourceError>>),
@@ -67,6 +74,16 @@ impl WorkerHandle {
         completion: Completion<SearchPage, SourceError>,
     ) -> Result<(), StartError> {
         self.enqueue(Command::Search(input, completion))
+    }
+    pub fn browse(
+        &self,
+        input: triomphe::Arc<Input>,
+        completion: Completion<Page, SourceError>,
+    ) -> Result<(), StartError> {
+        self.enqueue(Command::Browse(input, completion))
+    }
+    pub fn prepare_listing(&self, request: PlayRequest) -> Result<(), StartError> {
+        self.enqueue(Command::PrepareListing(request))
     }
     /// Prepare data only. Playback authority belongs to the receiving owner.
     pub fn prepare(&self, selection: Selection) -> Result<(), StartError> {
@@ -94,6 +111,32 @@ impl Worker {
                 let mut version = Version::default();
                 while let Ok(command) = commands.recv() {
                     match command {
+                        Command::Browse(input, completion) => {
+                            let _ = completion.run_cancellable(input, |input, cancellation| {
+                                if input.version != version {
+                                    return Some(Err(SourceError::OutdatedSource));
+                                }
+                                crate::collection_query::page(
+                                    &database,
+                                    &mut searcher,
+                                    input,
+                                    || cancellation.is_cancelled(),
+                                )
+                            });
+                        }
+                        Command::PrepareListing(request) => {
+                            let result = if request.input.version != version {
+                                Err(SourceError::OutdatedSource)
+                            } else {
+                                crate::collection_query::prepare(&database, &mut searcher, &request)
+                            };
+                            if updates
+                                .try_send(LibraryEvent::ListingPrepared { request, result })
+                                .is_err()
+                            {
+                                break;
+                            }
+                        }
                         Command::Search(input, completion) => {
                             let _ = completion.run_cancellable(input, |input, cancellation| {
                                 if cancellation.is_cancelled() {

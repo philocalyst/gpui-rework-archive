@@ -59,7 +59,12 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
         .unwrap();
     assert_eq!(committed.revision, 1);
     assert_eq!(owner.with_model(|model| model.version.revision).unwrap(), 0);
-    owner.set(Library::QUERY, "Arrival".into()).unwrap();
+    owner
+        .set(
+            Library::BROWSER.source(&hummingbird_gpui_port::browser::Browser::QUERY),
+            "Arrival".into(),
+        )
+        .unwrap();
     settle(&mut owner, &worker).unwrap();
     assert_eq!(
         owner.question_status(results).unwrap(),

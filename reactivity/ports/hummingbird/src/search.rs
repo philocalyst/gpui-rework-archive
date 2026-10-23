@@ -32,7 +32,7 @@ pub struct Version {
     pub revision: u64,
     pub generation: u64,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SearchInput {
     pub query: String,
     pub sort: Sort,
@@ -56,6 +56,7 @@ pub enum SourceError {
     Sqlite(rusqlite::Error),
     QueryTooLong,
     MissingTrack(i64),
+    MissingCollection,
     NoSelection,
     OutdatedSource,
     VersionExhausted,
@@ -68,6 +69,9 @@ impl fmt::Display for SourceError {
             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
             Self::NoSelection => f.write_str("No recording selected"),
             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
+            Self::MissingCollection => {
+                f.write_str("This collection or occurrence is no longer available")
+            }
             Self::OutdatedSource => f.write_str("The library source changed"),
             Self::VersionExhausted => f.write_str("Library revision space exhausted"),
             Self::NotificationsUnavailable => f.write_str("Library updates are unavailable"),
@@ -117,40 +121,56 @@ impl Searcher {
         &mut self,
         database: &Database,
         input: SearchInput,
-        mut cancelled: impl FnMut() -> bool,
+        cancelled: impl FnMut() -> bool,
     ) -> Option<Result<SearchPage, SourceError>> {
+        let query = match input.sort {
+            Sort::Title => tracks().sort_asc(TrackColumn::Title),
+            Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
+            Sort::Longest => tracks().sort_desc(TrackColumn::Length),
+        };
+        self.search_rows(database, &input, query, cancelled)
+            .map(|result| result.map(|rows| SearchPage { input, rows }))
+    }
+    pub(crate) fn search_rows(
+        &mut self,
+        database: &Database,
+        input: &SearchInput,
+        query: crate::query::TrackQuery,
+        mut cancelled: impl FnMut() -> bool,
+    ) -> Option<Result<Vec<TrackSearchRow>, SourceError>> {
         if cancelled() {
             return None;
         }
         if input.query.len() > MAX_QUERY_BYTES {
             return Some(Err(SourceError::QueryTooLong));
         }
-        let query = match input.sort {
-            Sort::Title => tracks().sort_asc(TrackColumn::Title),
-            Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
-            Sort::Longest => tracks().sort_desc(TrackColumn::Length),
-        };
         let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
         let rows = match query.for_search().fetch_matching(
             database.connection(),
             &mut cancelled,
-            |title, artists| {
-                self.corpus.clear();
-                self.corpus.push_str(title);
-                self.corpus.push(' ');
-                self.corpus.push_str(artists.unwrap_or_default());
-                pattern
-                    .score(
-                        Utf32Str::new(&self.corpus, &mut self.utf32),
-                        &mut self.matcher,
-                    )
-                    .is_some()
-            },
+            |title, artists| self.matches(&pattern, title, artists),
         ) {
             Ok(Some(rows)) => rows,
             Ok(None) => return None,
             Err(error) => return Some(Err(error.into())),
         };
-        Some(Ok(SearchPage { input, rows }))
+        Some(Ok(rows))
+    }
+    pub(crate) fn matches(
+        &mut self,
+        pattern: &Pattern,
+        title: &str,
+        artists: Option<&str>,
+    ) -> bool {
+        self.corpus.clear();
+        self.corpus.push_str(title);
+        self.corpus.push(' ');
+        self.corpus.push_str(artists.unwrap_or_default());
+        pattern
+            .score(
+                Utf32Str::new(&self.corpus, &mut self.utf32),
+                &mut self.matcher,
+            )
+            .is_some()
     }
 }

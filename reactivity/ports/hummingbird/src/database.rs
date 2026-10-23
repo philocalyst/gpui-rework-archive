@@ -17,6 +17,30 @@ impl Database {
         database.seed()?;
         Ok(database)
     }
+    /// Real relational browser fixture, separate from the original nine-track
+    /// transcript. Multiple credits, empty collections and tied playlist ranks
+    /// deliberately exercise collection identity rather than display indices.
+    pub fn collection_fixture() -> Result<Self> {
+        let database = Self::fixture()?;
+        database.connection.execute_batch("BEGIN IMMEDIATE;
+            INSERT INTO artist(id,name,name_sortable) VALUES(30,'Μαρία','Μαρία'),(31,'No recordings','No recordings'),(32,'Guest','Guest');
+            INSERT INTO album(id,title,title_sortable,artist_sort,artist_display_override) VALUES(40,'Album Z','Album Z','Guest','Guest');
+            INSERT INTO album_artist(album_id,artist_id) VALUES(30,30),(10,2);
+            INSERT INTO track_artist(track_id,artist_id) VALUES(44,1),(44,30),(44,32);
+            INSERT INTO playlist(id,name,type,position) VALUES(2,'Evening Καφέ',0,2),(3,'Empty playlist',0,3);
+            INSERT INTO playlist_item(id,playlist_id,track_id,position) VALUES(701,2,90,10),(702,2,44,0),(703,2,11,10);
+        ")?;
+        for (id, extension) in [(44, "wav"), (90, "flac"), (11, "mp3")] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(format!("assets/audio/stereo.{extension}"));
+            database.connection.execute(
+                "UPDATE track SET location=? WHERE id=?",
+                params![path.to_str().unwrap(), id],
+            )?;
+        }
+        database.connection.execute_batch("COMMIT")?;
+        Ok(database)
+    }
     /// Existing Hummingbird libraries are read without migrating or seeding them.
     pub fn open_read_only(path: &Path) -> Result<Self> {
         Ok(Self {

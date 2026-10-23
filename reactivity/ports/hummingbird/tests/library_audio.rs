@@ -2,7 +2,7 @@
 //! Complete Library/Sources -> SQLite worker -> queue -> real audio service.
 use gpui::{Error, LaneSet, Remote, Role, Target, Win, WindowOptions};
 use hummingbird_gpui_port::{
-    app::{Library, PreparationStatus, connect, recordings, track_key},
+    app::{Library, PreparationStatus, connect, track_key},
     audio::{
         AudioError, AudioService, Event, Format, Token,
         output::{OutputProvider, OutputStream, PlaybackGate},
@@ -128,7 +128,10 @@ type Owners<L> = (
     Win<Library, L>,
 );
 fn owner() -> Owners<impl LaneSet<Library>> {
-    let (worker, inbox) = Worker::new(database()).unwrap();
+    owner_with(database())
+}
+fn owner_with(database: Database) -> Owners<impl LaneSet<Library>> {
+    let (worker, inbox) = Worker::new(database).unwrap();
     let (mut model, questions) = connect(worker.handle()).unwrap();
     let capture = Arc::new(Mutex::new(Capture::default()));
     let (audio, audio_inbox) = AudioService::with_output(Provider(capture.clone())).unwrap();
@@ -163,7 +166,7 @@ fn owner() -> Owners<impl LaneSet<Library>> {
     (worker, audio, capture, inject, win)
 }
 fn row_prepare<L: LaneSet<Library>>(win: &mut Win<Library, L>, id: i64) -> Target {
-    let domain = win.with_model(|model| recordings(*model.version)).unwrap();
+    let domain = win.with_model(|model| model.recording_list()).unwrap();
     let list = win.list(domain).unwrap();
     win.scroll_to_key(list, track_key(id)).unwrap();
     let row = win.list_item(list, track_key(id)).unwrap();
@@ -1186,4 +1189,185 @@ fn public_prepare_and_play_command_cannot_turn_a_pure_owner_prepare_into_playbac
     );
     assert!(capture.lock().unwrap().streams.is_empty());
     close(win, audio, worker);
+}
+
+fn playlist<L: LaneSet<Library>>(
+    win: &mut Win<Library, L>,
+    worker: &Worker,
+) -> triomphe::Arc<hummingbird_gpui_port::browser::Input> {
+    win.update(|model| model.navigate(hummingbird_gpui_port::browser::Route::Playlist(2)))
+        .unwrap();
+    settle(win, worker).unwrap();
+    let reader = win.with_model(|model| model.results).unwrap();
+    win.with_ready(reader, |page| page.input.clone())
+        .unwrap()
+        .unwrap()
+}
+#[test]
+fn context_play_replaces_full_sql_order_at_selected_occurrence_once_and_obeys_output_credits() {
+    use hummingbird_gpui_port::browser::{PlayRequest, RowKey};
+    let (worker, audio, capture, _, mut win) = owner_with(Database::collection_fixture().unwrap());
+    let input = playlist(&mut win, &worker);
+    assert!(capture.lock().unwrap().opened.is_empty());
+    win.activate(
+        win.role(Role::Button)
+            .name("Prepare Καλημέρα")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert!(capture.lock().unwrap().opened.is_empty());
+    let key = RowKey::PlaylistItem {
+        item: 701,
+        track: 90,
+    };
+    win.activate(
+        win.role(Role::Button)
+            .name("Play from Untitled")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    let sequence = win.with_model(|model| model.selected.sequence).unwrap();
+    worker
+        .handle()
+        .prepare_listing(PlayRequest {
+            input: input.clone(),
+            start: Some(key),
+            sequence,
+        })
+        .unwrap();
+    settle(&mut win, &worker).unwrap();
+    until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
+    let plan = win
+        .with_model(|model| model.queue.playback().plan().unwrap().clone())
+        .unwrap();
+    assert_eq!(plan.current.track.track_id, Some(90));
+    assert_eq!(plan.lookahead.as_ref().unwrap().track.track_id, Some(11));
+    assert_eq!(
+        win.with_model(|model| (0..model.queue.playback().queue().len())
+            .map(|i| model
+                .queue
+                .playback()
+                .queue()
+                .at(i)
+                .unwrap()
+                .track
+                .track_id
+                .unwrap())
+            .collect::<Vec<_>>())
+            .unwrap(),
+        [44, 90, 11]
+    );
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
+            .unwrap(),
+        plan.stamp()
+    );
+    assert!(capture.lock().unwrap().queue.is_empty());
+    capture.lock().unwrap().capacity = 64;
+    until(&mut win, &capture, false, |_, sink| sink.queue.len() == 128);
+    assert_eq!(capture.lock().unwrap().queue.len(), 128);
+    win.activate(win.button("Stop")).unwrap();
+    until(&mut win, &capture, false, |_, sink| sink.drops == 1);
+    close(win, audio, worker);
+}
+#[test]
+fn context_results_reject_route_filter_selection_source_and_cloned_transport_changes_before_queue_mutation()
+ {
+    use hummingbird_gpui_port::browser::{Browser, Route};
+    for control in [
+        "route",
+        "filter",
+        "selection",
+        "source",
+        "stop",
+        "pause",
+        "seek",
+    ] {
+        let (worker, audio, capture, _, mut win) =
+            owner_with(Database::collection_fixture().unwrap());
+        playlist(&mut win, &worker);
+        win.activate(
+            win.role(Role::Button)
+                .name("Play all Evening Καφέ")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        settle(&mut win, &worker).unwrap();
+        until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
+        let stamp = win
+            .with_model(|model| model.queue.playback().plan().unwrap().stamp())
+            .unwrap();
+        win.activate(
+            win.role(Role::Button)
+                .name("Play from Untitled")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        match control {
+            "route" => {
+                win.update(|model| {
+                    model.navigate(Route::Tracks);
+                    model.navigate(Route::Playlist(2));
+                })
+                .unwrap();
+            }
+            "filter" => {
+                win.set(Library::BROWSER.source(&Browser::QUERY), "μαρ".into())
+                    .unwrap();
+                win.set(Library::BROWSER.source(&Browser::QUERY), String::new())
+                    .unwrap();
+            }
+            "selection" => {
+                let mut selected = *win.read(Library::SELECTED).unwrap();
+                selected.id = Some(11);
+                win.set(Library::SELECTED, selected).unwrap();
+            }
+            "source" => {
+                worker
+                    .replace_database(Database::collection_fixture().unwrap())
+                    .unwrap()
+                    .recv_timeout(Duration::from_secs(10))
+                    .unwrap()
+                    .unwrap();
+            }
+            "stop" => {
+                audio.handle().clone().stop().unwrap();
+            }
+            "pause" => {
+                audio.handle().clone().set_playing(false).unwrap();
+            }
+            "seek" => {
+                audio.handle().clone().seek(0).unwrap();
+            }
+            _ => unreachable!(),
+        }
+        settle(&mut win, &worker).unwrap();
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
+                .unwrap(),
+            stamp,
+            "{control} edited queue"
+        );
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().queue().len())
+                .unwrap(),
+            3
+        );
+        assert_ne!(
+            win.with_model(|model| model.preparation_status()).unwrap(),
+            PreparationStatus::Pending
+        );
+        assert_eq!(capture.lock().unwrap().opened.len(), 1);
+        close(win, audio, worker);
+    }
 }

@@ -1,6 +1,6 @@
 use gpui::{LaneSet, Role, StartError, Win, WindowOptions};
 use hummingbird_gpui_port::{
-    app::{Library, PreparationStatus, connect, recordings, track_key},
+    app::{Library, PreparationStatus, connect, track_key},
     database::Database,
     queue::TrackRef,
     transcript::settle,
@@ -26,9 +26,7 @@ fn open() -> (Worker, Win<Library, impl LaneSet<Library>>) {
     (worker, owner)
 }
 fn choose<L: LaneSet<Library>>(owner: &mut Win<Library, L>, id: i64) {
-    let domain = owner
-        .with_model(|model| recordings(*model.version))
-        .unwrap();
+    let domain = owner.with_model(|model| model.recording_list()).unwrap();
     let list = owner.list(domain).unwrap();
     owner.scroll_to_key(list, track_key(id)).unwrap();
     let item = owner.list_item(list, track_key(id)).unwrap();
