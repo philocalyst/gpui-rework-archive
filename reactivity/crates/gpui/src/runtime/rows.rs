@@ -66,26 +66,24 @@ impl CandidateRows {
 pub(super) trait RowAccess<'a>: Copy {
     fn at(self, index: usize) -> &'a Presented;
     fn len(self) -> usize;
-    fn contains_point(
+    fn foremost_hit(
         self,
         geometry: geometry::GeometryView<'_>,
         has_viewports: bool,
-        index: usize,
         point: Point,
-    ) -> bool;
+    ) -> Option<usize>;
     fn get(self, index: usize) -> Option<&'a Presented>;
     fn iter(self) -> impl DoubleEndedIterator<Item = &'a Presented> + ExactSizeIterator;
 }
 impl<'a> RowAccess<'a> for &'a [Presented] {
-    // Keep the point kernel in GPUI, beside its nongeneric geometry helpers.
-    fn contains_point(
+    // Compile each concrete reader beside the nongeneric geometry helpers.
+    fn foremost_hit(
         self,
         geometry: geometry::GeometryView<'_>,
         has_viewports: bool,
-        index: usize,
         point: Point,
-    ) -> bool {
-        query::contains_point_in_rows(self, geometry, has_viewports, index, point)
+    ) -> Option<usize> {
+        query::foremost_in_rows(self, geometry, has_viewports, point)
     }
     #[inline]
     fn at(self, index: usize) -> &'a Presented {
@@ -121,14 +119,13 @@ impl Index<usize> for Rows<'_> {
     }
 }
 impl<'a> RowAccess<'a> for Rows<'a> {
-    fn contains_point(
+    fn foremost_hit(
         self,
         geometry: geometry::GeometryView<'_>,
         has_viewports: bool,
-        index: usize,
         point: Point,
-    ) -> bool {
-        query::contains_point_in_rows(self, geometry, has_viewports, index, point)
+    ) -> Option<usize> {
+        query::foremost_in_rows(self, geometry, has_viewports, point)
     }
     fn at(self, index: usize) -> &'a Presented {
         self.get(index).unwrap()

@@ -646,39 +646,40 @@ impl<'a, R: RowAccess<'a>> HitSheet<'a, R> {
     }
     #[inline]
     pub fn hit(&self, point: crate::Point) -> Option<usize> {
-        let mut rows = self.nodes.iter().enumerate().rev();
-        while let Some((index, node)) = rows.next() {
-            if !node.hittable {
-                let skip = node.parent.skip();
-                // Discard the remaining nonhittable run in constant time.
-                if skip > 1 {
-                    rows.nth(skip - 2);
-                }
-                continue;
-            }
-            if contains_point(self.nodes, self.geometry, self.has_viewports, index, point) {
-                return Some(index);
-            }
-        }
-        None
+        self.nodes
+            .foremost_hit(self.geometry, self.has_viewports, point)
     }
+}
+
+// Instantiate this shared traversal only at the concrete library reader entry.
+#[inline(always)]
+pub(super) fn foremost_in_rows<'a>(
+    nodes: impl RowAccess<'a>,
+    geometry: super::geometry::GeometryView<'_>,
+    has_viewports: bool,
+    point: Point,
+) -> Option<usize> {
+    let mut rows = nodes.iter().enumerate().rev();
+    while let Some((index, node)) = rows.next() {
+        if !node.hittable {
+            let skip = node.parent.skip();
+            // Discard the remaining nonhittable run in constant time.
+            if skip > 1 {
+                rows.nth(skip - 2);
+            }
+            continue;
+        }
+        if contains_point(nodes, geometry, has_viewports, index, point) {
+            return Some(index);
+        }
+    }
+    None
 }
 
 // Shared by production pointer dispatch and borrowed public/native queries.
 // Every clip/shape belongs to the supplied sheet; L cannot skip its checks.
-// Static dispatch preserves the library compilation boundary for both readers.
 #[inline(always)]
 pub(super) fn contains_point<'a>(
-    nodes: impl RowAccess<'a>,
-    geometry: super::geometry::GeometryView<'_>,
-    has_viewports: bool,
-    index: usize,
-    point: crate::Point,
-) -> bool {
-    nodes.contains_point(geometry, has_viewports, index, point)
-}
-#[inline(always)]
-pub(super) fn contains_point_in_rows<'a>(
     nodes: impl RowAccess<'a>,
     geometry: super::geometry::GeometryView<'_>,
     has_viewports: bool,
