@@ -251,7 +251,7 @@ fn binding_fault_after_an_applied_prefix_commits_that_prefix_and_drops_only_reje
             Sources::new().direct(REGISTERED)
         }
         fn view(&self) -> El<'_> {
-            text(&self.left)
+            text_input(&self.left)
         }
     }
     let (remote, inbox) = Remote::bounded(2);
@@ -265,6 +265,11 @@ fn binding_fault_after_an_applied_prefix_commits_that_prefix_and_drops_only_reje
     .unwrap()
     .with_inbox(flips, |model, _: ()| model.flipped = true)
     .unwrap();
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, gpui::TextSelection::from_bytes(1, 3).unwrap())
+        .unwrap();
+    let before = win.snapshot().unwrap();
     flip.try_send(()).unwrap();
     remote.try_send("rejected".into()).unwrap();
     remote.try_send("accepted".into()).unwrap();
@@ -275,12 +280,17 @@ fn binding_fault_after_an_applied_prefix_commits_that_prefix_and_drops_only_reje
     ));
     let report = error.delivery.unwrap();
     assert_eq!((report.received, report.applied), (2, 1));
-    assert_eq!(report.commit.source_epoch, 1);
+    assert_eq!(report.commit.source_epoch, before.source_epoch + 1);
+    assert_eq!(report.commit.presentation_epoch, before.presentation_epoch);
+    assert_eq!(win.focused().unwrap(), None);
+    assert_eq!(win.selection(input), Err(Error::StaleTarget));
     assert!(win.root().unwrap().flipped);
     assert_eq!(&*win.root().unwrap().left, "seed");
     win.update(|model| model.flipped = false).unwrap();
     assert_eq!(win.deliver_ready(2).unwrap().applied, 1);
     assert_eq!(&*win.root().unwrap().left, "accepted");
+    assert_ne!(win.input(), input);
+    assert_eq!(win.selection(input), Err(Error::StaleTarget));
 }
 
 #[test]

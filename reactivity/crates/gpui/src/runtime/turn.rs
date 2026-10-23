@@ -34,8 +34,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.counters.source_operations += 1;
         }
         if let Err(error) = result {
-            self.runtime.logical_valid = false;
-            self.runtime.focused = None;
+            // A rejected projector may precede every callback. Preserve the
+            // coherent sheet and input in that case; an applied prefix instead
+            // commits source authority and revokes its old logical addresses.
+            if models != 0 {
+                self.runtime.clear_editing();
+                self.runtime.logical_valid = false;
+                self.runtime.focused = None;
+            }
             return Err(error);
         }
         let mut questions = 0;
