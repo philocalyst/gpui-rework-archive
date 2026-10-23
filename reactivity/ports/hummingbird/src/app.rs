@@ -175,9 +175,18 @@ impl Library {
                         self.preparation = Preparation::Canceled;
                         #[cfg(feature = "audio")]
                         if let Some(revision) = play_revision {
-                            match self.queue.play_now_if(&track, revision) {
-                                Ok(true) => {}
-                                Ok(false) => return,
+                            match self.worker.with_current_source(selection.generation, || {
+                                self.queue.play_now_if(&track, revision)
+                            }) {
+                                Ok(Some(Ok(true))) => {}
+                                Ok(Some(Ok(false))) | Ok(None) => return,
+                                Ok(Some(Err(error))) => {
+                                    self.preparation = Preparation::Failed {
+                                        selection,
+                                        error: error.to_string(),
+                                    };
+                                    return;
+                                }
                                 Err(error) => {
                                     self.preparation = Preparation::Failed {
                                         selection,
@@ -246,7 +255,14 @@ impl Library {
     }
     fn enqueue(&mut self, track: TrackRef, selection: Selection) {
         if self.current_selection(selection) {
-            self.queue.enqueue(track);
+            match self
+                .worker
+                .with_current_source(selection.generation, || self.queue.enqueue(track))
+            {
+                Ok(Some(())) => {}
+                Ok(None) => self.notice = "The library source changed".into(),
+                Err(error) => self.notice = error.to_string(),
+            }
         } else {
             self.notice = "This prepared recording is no longer the current selection".into();
         }

@@ -1258,3 +1258,56 @@ fn published_source_replace_rejects_visible_prepared_enqueue_before_owner_notifi
     assert!(capture.lock().unwrap().opened.is_empty());
     close(win, audio, worker);
 }
+
+#[test]
+fn source_import_keeps_buffered_existing_named_play_authorized_but_finish_retires_it() {
+    for finish in [false, true] {
+        let (worker, audio, capture, _, mut win) = owner();
+        row_prepare(&mut win, 44);
+        win.activate(
+            win.role(Role::Button)
+                .name("Play Καλημέρα now")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        if finish {
+            worker.finish().unwrap();
+            win.deliver_ready(32).unwrap();
+            assert!(
+                win.with_model(|model| model.queue.playback().queue().is_empty())
+                    .unwrap()
+            );
+            assert!(capture.lock().unwrap().opened.is_empty());
+            drop(win);
+            assert!(audio.finish(Duration::from_secs(2)));
+        } else {
+            worker
+                .prepend_fixture_track()
+                .unwrap()
+                .recv_timeout(Duration::from_secs(10))
+                .unwrap()
+                .unwrap();
+            settle(&mut win, &worker).unwrap();
+            until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
+            assert_eq!(
+                win.with_model(|model| model
+                    .queue
+                    .playback()
+                    .plan()
+                    .unwrap()
+                    .current
+                    .track
+                    .track_id)
+                    .unwrap(),
+                Some(44)
+            );
+            close(win, audio, worker);
+        }
+    }
+}
