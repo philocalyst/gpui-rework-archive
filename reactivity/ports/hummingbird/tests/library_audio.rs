@@ -2,7 +2,7 @@
 //! Complete Library/Sources -> SQLite worker -> queue -> real audio service.
 use gpui::{Error, LaneSet, Remote, Role, Target, Win, WindowOptions};
 use hummingbird_gpui_port::{
-    app::{Library, connect, recordings, track_key},
+    app::{Library, PreparationStatus, connect, recordings, track_key},
     audio::{
         AudioError, AudioService, Event, Format, Token,
         output::{OutputProvider, OutputStream, PlaybackGate},
@@ -144,7 +144,7 @@ fn owner() -> Owners<impl LaneSet<Library>> {
         },
     )
     .unwrap()
-    .with_inbox(inbox, Library::receive)
+    .with_inbox_status(inbox, Library::receive)
     .unwrap()
     .with_inbox(audio_inbox, move |model: &mut Library, event: Event| {
         if let Event::Opened { token, .. } = &event {
@@ -162,23 +162,24 @@ fn owner() -> Owners<impl LaneSet<Library>> {
     until(&mut win, &capture, false, |_, sink| sink.adopted > 0);
     (worker, audio, capture, inject, win)
 }
-fn row_play<L: LaneSet<Library>>(win: &mut Win<Library, L>, id: i64) -> Target {
+fn row_prepare<L: LaneSet<Library>>(win: &mut Win<Library, L>, id: i64) -> Target {
     let domain = win.with_model(|model| recordings(*model.version)).unwrap();
     let list = win.list(domain).unwrap();
     win.scroll_to_key(list, track_key(id)).unwrap();
     let row = win.list_item(list, track_key(id)).unwrap();
-    win.role(Role::Button).within(row).one().unwrap()
+    win.role(Role::Button)
+        .text("Prepare")
+        .within(row)
+        .one()
+        .unwrap()
 }
 fn prepare<L: LaneSet<Library>>(win: &mut Win<Library, L>, worker: &Worker, id: i64) {
-    let target = row_play(win, id);
+    let target = row_prepare(win, id);
     win.activate(target).unwrap();
     settle(win, worker).unwrap();
-    let reader = win.with_model(|model| model.playback).unwrap();
     assert_eq!(
-        win.with_ready(reader, |request| {
-            request.track.as_ref().unwrap().track_id.unwrap()
-        })
-        .unwrap(),
+        win.with_model(|model| model.prepared().map(|(_, track)| track.track_id.unwrap()))
+            .unwrap(),
         Some(id)
     );
 }
@@ -234,10 +235,10 @@ fn expected() -> Vec<f64> {
 }
 
 #[test]
-fn prepared_library_play_now_runs_real_pcm_pause_seek_and_latest_queued_successor() {
+fn library_row_play_now_runs_real_pcm_pause_seek_and_latest_queued_successor() {
     let (worker, audio, capture, inject, mut win) = owner();
     prepare(&mut win, &worker, 44);
-    let reader = win.with_model(|model| model.playback).unwrap();
+    let reader = win.with_model(|model| model.results).unwrap();
     win.retry(reader).unwrap();
     settle(&mut win, &worker).unwrap();
     assert!(
@@ -367,6 +368,7 @@ fn explicit_play_now_keeps_queue_and_rejects_retired_selection_occurrence_and_cl
     .unwrap();
     until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
     let old_token = capture.lock().unwrap().opened[0];
+    let old_selection = win.with_model(|model| *model.selected).unwrap();
     let old_plan = win
         .with_model(|model| model.queue.playback().plan().unwrap().clone())
         .unwrap();
@@ -419,30 +421,49 @@ fn explicit_play_now_keeps_queue_and_rejects_retired_selection_occurrence_and_cl
         AudioState::Opening
     );
 
-    let retained = win
-        .role(Role::Button)
-        .name("Play Untitled now")
-        .one()
-        .unwrap();
-    let select = row_play(&mut win, 44);
-    win.activate(select).unwrap();
-    worker
-        .checkpoint()
-        .unwrap()
-        .recv_timeout(Duration::from_secs(5))
-        .unwrap();
-    win.activate(retained).unwrap();
-    assert!(
-        win.contains_text("This prepared recording is no longer the current selection")
+    // Commands alone cannot mint an owner continuation. Duplicate current
+    // and late prior preparation replies must not append another occurrence.
+    let current_selection = win.with_model(|model| *model.selected).unwrap();
+    for selection in [old_selection, current_selection] {
+        worker.handle().prepare_and_play(selection).unwrap();
+        worker
+            .checkpoint()
             .unwrap()
-    );
+            .recv_timeout(Duration::from_secs(5))
+            .unwrap();
+        settle(&mut win, &worker).unwrap();
+    }
     assert_eq!(
         win.with_model(|model| model.queue.playback().queue().len())
             .unwrap(),
         2
     );
     assert_eq!(capture.lock().unwrap().streams.len(), 2);
+
+    // Finish the real Play-now query, leave its result buffered, and select a
+    // different pure preparation before the owner consumes that old reply.
+    row_prepare(&mut win, 44);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Καλημέρα now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap();
+    let prepare_other = row_prepare(&mut win, 90);
+    win.activate(prepare_other).unwrap();
     settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        2
+    );
+    assert_eq!(capture.lock().unwrap().streams.len(), 2);
     capture.lock().unwrap().capacity = 257;
     until(&mut win, &capture, false, |_, sink| sink.queue.len() == 514);
     win.activate(win.button("Stop")).unwrap();
@@ -463,8 +484,18 @@ fn explicit_play_now_keeps_queue_and_rejects_retired_selection_occurrence_and_cl
     )
     .unwrap();
     until(&mut win, &capture, false, |_, sink| sink.opened.len() == 3);
-    let reader = win.with_model(|model| model.playback).unwrap();
-    win.retry(reader).unwrap();
+    row_prepare(&mut win, 90);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Untitled now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        win.with_model(|model| model.preparation_status()).unwrap(),
+        PreparationStatus::Pending
+    );
     let handle = audio.handle();
     close(win, audio, worker);
     assert!(matches!(handle.set_playing(true), Err(AudioError::Closed)));
@@ -475,7 +506,7 @@ fn explicit_play_now_keeps_queue_and_rejects_retired_selection_occurrence_and_cl
 }
 
 #[test]
-fn source_replacement_rejects_prepared_play_and_old_row_then_plays_revalidated_path() {
+fn source_replacement_rejects_old_row_then_one_click_plays_revalidated_path() {
     let (worker, audio, capture, _, mut win) = owner();
     prepare(&mut win, &worker, 44);
     let old_play = win
@@ -483,7 +514,7 @@ fn source_replacement_rejects_prepared_play_and_old_row_then_plays_revalidated_p
         .name("Play Καλημέρα now")
         .one()
         .unwrap();
-    let old_row = row_play(&mut win, 44);
+    let old_row = row_prepare(&mut win, 44);
     let replacement = database();
     replacement
         .connection()
@@ -509,7 +540,7 @@ fn source_replacement_rejects_prepared_play_and_old_row_then_plays_revalidated_p
     assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 1);
     win.activate(old_play).unwrap();
     assert!(
-        win.contains_text("This prepared recording belongs to the previous library source")
+        win.contains_text("This recording belongs to the previous library source")
             .unwrap()
     );
     assert_eq!(
@@ -520,18 +551,7 @@ fn source_replacement_rejects_prepared_play_and_old_row_then_plays_revalidated_p
     assert!(capture.lock().unwrap().streams.is_empty());
     settle(&mut win, &worker).unwrap();
     assert_eq!(win.activate(old_row), Err(Error::StaleTarget));
-    prepare(&mut win, &worker, 44);
-    let reader = win.with_model(|model| model.playback).unwrap();
-    assert_eq!(
-        win.with_ready(reader, |request| request
-            .track
-            .as_ref()
-            .unwrap()
-            .path
-            .clone())
-            .unwrap(),
-        Some(fixture("flac"))
-    );
+    row_prepare(&mut win, 44);
     capture.lock().unwrap().capacity = 4096;
     win.activate(
         win.role(Role::Button)
@@ -543,6 +563,130 @@ fn source_replacement_rejects_prepared_play_and_old_row_then_plays_revalidated_p
     until(&mut win, &capture, true, |model, _| {
         model.queue.audio_status().unwrap().state == AudioState::Finished
     });
+    assert_eq!(
+        win.with_model(|model| model.prepared().unwrap().1.path.clone())
+            .unwrap(),
+        fixture("flac")
+    );
     assert_eq!(capture.lock().unwrap().streams[0], expected());
     close(win, audio, worker);
+}
+
+#[test]
+fn stop_on_empty_queue_and_active_pause_seek_revoke_play_before_result_consumption() {
+    for control in ["Stop", "Pause", "Back 10 seconds"] {
+        let (worker, audio, capture, _, mut win) = owner();
+        let active = control != "Stop";
+        let stamp = if active {
+            row_prepare(&mut win, 44);
+            win.activate(
+                win.role(Role::Button)
+                    .name("Play Καλημέρα now")
+                    .one()
+                    .unwrap(),
+            )
+            .unwrap();
+            until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
+            Some(
+                win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
+                    .unwrap(),
+            )
+        } else {
+            None
+        };
+        row_prepare(&mut win, 90);
+        win.activate(
+            win.role(Role::Button)
+                .name("Play Untitled now")
+                .one()
+                .unwrap(),
+        )
+        .unwrap();
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        assert_eq!(
+            win.with_model(|model| model.preparation_status()).unwrap(),
+            PreparationStatus::Pending
+        );
+        let revision = win
+            .with_model(|model| model.queue.audio_revision().unwrap())
+            .unwrap();
+        let adopted = capture.lock().unwrap().adopted;
+        win.activate(win.button(control)).unwrap();
+        assert!(
+            win.with_model(|model| model.queue.audio_revision().unwrap())
+                .unwrap()
+                > revision
+        );
+        assert_eq!(
+            win.with_model(|model| model.preparation_status()).unwrap(),
+            PreparationStatus::Canceled
+        );
+        settle(&mut win, &worker).unwrap();
+        until(&mut win, &capture, false, |_, sink| sink.adopted > adopted);
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().queue().len())
+                .unwrap(),
+            usize::from(active)
+        );
+        assert!(win.with_model(|model| model.prepared().is_none()).unwrap());
+        if let Some(stamp) = stamp {
+            assert!(
+                capture
+                    .lock()
+                    .unwrap()
+                    .opened
+                    .iter()
+                    .all(|token| token.stamp == stamp)
+            );
+        } else {
+            assert!(capture.lock().unwrap().opened.is_empty());
+        }
+        assert!(capture.lock().unwrap().streams.iter().all(Vec::is_empty));
+        close(win, audio, worker);
+    }
+}
+#[test]
+fn audio_feature_without_attached_output_rejects_play_now_and_still_allows_pure_prepare() {
+    let (worker, inbox) = Worker::new(database()).unwrap();
+    let (model, questions) = connect(worker.handle()).unwrap();
+    let mut win = Win::with_questions(
+        model,
+        questions,
+        WindowOptions {
+            size: [720, 1100],
+            ..Default::default()
+        },
+    )
+    .unwrap()
+    .with_inbox_status(inbox, Library::receive)
+    .unwrap();
+    settle(&mut win, &worker).unwrap();
+    row_prepare(&mut win, 44);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Καλημέρα now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    assert!(win.contains_text("Audio output is not attached").unwrap());
+    assert_eq!(
+        win.with_model(|model| model.preparation_status()).unwrap(),
+        PreparationStatus::Empty
+    );
+    assert!(
+        win.with_model(|model| model.queue.playback().queue().is_empty())
+            .unwrap()
+    );
+    prepare(&mut win, &worker, 44);
+    assert!(
+        win.with_model(|model| model.queue.playback().queue().is_empty())
+            .unwrap()
+    );
+    drop(win);
+    worker.finish().unwrap();
 }

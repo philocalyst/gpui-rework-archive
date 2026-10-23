@@ -44,6 +44,11 @@ impl QueueScreen {
         });
         Ok(())
     }
+    /// The existing service revision revokes an unconsumed Library intent when
+    /// any newer transport command, including Stop on an empty queue, wins.
+    pub fn audio_revision(&self) -> Option<u64> {
+        self.audio.as_ref().map(|audio| audio.receipt.revision)
+    }
     pub fn audio_status(&self) -> Option<Status> {
         self.audio.as_ref().map(|audio| audio.status)
     }

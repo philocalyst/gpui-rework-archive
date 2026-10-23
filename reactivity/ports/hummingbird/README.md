@@ -36,14 +36,17 @@ The default in-memory database applies all 39 real pinned migrations before
 inserting Hummingbird's original three-track/artist/album/liked fixture, plus six
 explicit edge-case rows. `--database` opens an existing library **read-only**;
 it does not run migrations or seed it. Query compatibility is with the pin below,
-not a promise to migrate arbitrary future databases. Play resolves the actual
-track ID, album ID and stored path through `for_playback`; it displays a typed,
-sequenced request. With audio attached, its explicit **Play now** action appends
-and starts that recording while preserving the queue. Preparing or retrying a
-query never starts playback. This remains a two-step Library workflow, rather
-than upstream's single-click listing behavior. See [the integration report](LIBRARY-PLAY.md).
-Add also remains available for queueing;
-the default headless transcript keeps its queue-only contract.
+not a promise to migrate arbitrary future databases. Each row offers explicit
+Prepare and, with the audio feature, Play now. Prepare resolves the actual
+track/album/title/path through the existing `for_queue` SQL projection and
+stores an inert lease. Play now prepares and starts that recording with one
+click, appending a fresh occurrence while preserving the queue. The owner
+consumes a checked pending request only if selection, source and audio Receipt
+still match. Search, retry and preparation completion carry no implicit play
+effect. An audio-feature headless owner without an attached output visibly
+rejects Play now. The default transcript remains preparation/queue-only.
+See [the current one-click integration report](LIBRARY-INTENT.md); the
+[prepared-only report](LIBRARY-PLAY.md) records the earlier two-step slice.
 
 ## Queue and decoder boundary
 
@@ -112,12 +115,13 @@ Two observed upstream quirks are explicit compatibility fixtures:
 
 ## Ownership and bounded delivery
 
-The model holds source inputs, a domain selection/revision and inert Readers.
+The model holds source inputs, one inert search Reader, and an owned preparation intent.
 One named app worker exclusively owns SQLite and Nucleo scratch. A four-command
-bounded channel carries typed search/play work and source operations; an
-eight-message GPUI Inbox carries committed import/replacement revisions.
-`Questions` freeze owned query/sort/version inputs and keep one physical
-completion per question. `Completion::run_cancellable` checks obsolete work;
+bounded channel carries typed search/preparation work and source operations;
+the existing eight-message GPUI Inbox also carries preparation results and
+committed import/replacement revisions. Its status-aware binding observes one
+terminal event after buffered data if the worker closes. The search Question
+freezes owned query/sort/version inputs and keeps one physical completion. `Completion::run_cancellable` checks obsolete work;
 search also checks before SQLite, between fetched rows, between matching
 candidates and before publishing. SQLite's internal sort/step is not preempted.
 The UI never waits for database/matcher work or joins the worker in a callback.
@@ -126,7 +130,7 @@ scratch; only accepted rows allocate owned title/artist strings. Every row still
 validates its projected types and UTF-8 before filtering. No borrowed SQLite
 value escapes a statement step, and SQL order remains the result order.
 
-Search, playback and database mutation commands share that one sequenced channel.
+Search, preparation and database mutation commands share that one sequenced channel.
 After an SQLite import commits, the worker advances its authoritative database
 revision before publishing the Inbox event. Every search compares its complete
 frozen revision/generation with that worker version **before** SQL execution;

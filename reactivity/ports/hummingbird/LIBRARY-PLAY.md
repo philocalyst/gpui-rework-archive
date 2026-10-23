@@ -1,5 +1,9 @@
 # Prepared Library playback integration
 
+Historical slice at e8ad0dab98. The successor removes the playback Question and
+adds the [current one-click owned-intent flow](LIBRARY-INTENT.md). The description
+and measurements below belong to the frozen prepared-only slice.
+
 The prepared-recording pane now has an explicit Play now action when audio is
 attached. It appends that immutable TrackRef and jumps to its fresh occurrence,
 preserving existing entries. One checked controller serial is reserved before

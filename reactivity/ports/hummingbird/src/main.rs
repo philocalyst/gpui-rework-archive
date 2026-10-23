@@ -67,7 +67,7 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
     let result = gpui::Application::run_window(
         gpui::Window::document(model)
             .questions(questions)
-            .with_inbox(inbox, Library::receive)
+            .with_inbox_status(inbox, Library::receive)?
             .with_inbox(audio_inbox, Library::receive_audio)
             .title("Hummingbird — Library port")
             .size(720, 900)

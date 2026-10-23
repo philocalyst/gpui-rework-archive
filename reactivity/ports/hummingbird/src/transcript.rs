@@ -1,6 +1,6 @@
 //! Executable app transcript using only the ordinary public window/service API.
 use crate::{
-    app::{Library, connect, recordings, track_key},
+    app::{Library, PreparationStatus, connect, recordings, track_key},
     database::Database,
     search::Sort,
     worker::Worker,
@@ -14,7 +14,7 @@ pub struct Transcript {
     pub initial_ids: Vec<i64>,
     pub sorted_ids: Vec<i64>,
     pub matched_ids: Vec<i64>,
-    pub played_id: i64,
+    pub prepared_id: i64,
     pub imported_id: i64,
     pub stale_completions: u64,
     pub realized_rows: usize,
@@ -28,13 +28,12 @@ pub fn settle<L: LaneSet<Library>>(
     for _ in 0..32 {
         worker.checkpoint()?.recv_timeout(Duration::from_secs(10))?;
         win.deliver_ready(32)?;
-        let (results, playback) = win.with_model(|model| (model.results, model.playback))?;
-        if [
+        let (results, preparation) =
+            win.with_model(|model| (model.results, model.preparation_status()))?;
+        if matches!(
             win.question_status(results)?,
-            win.question_status(playback)?,
-        ]
-        .into_iter()
-        .all(|status| matches!(status, QuestionStatus::Ready | QuestionStatus::Fault))
+            QuestionStatus::Ready | QuestionStatus::Fault
+        ) && preparation != PreparationStatus::Pending
         {
             return Ok(());
         }
@@ -52,7 +51,11 @@ fn play_target<L: LaneSet<Library>>(win: &Win<Library, L>, id: i64) -> Target {
     let row = win
         .list_item(win.list(list_id).unwrap(), track_key(id))
         .unwrap();
-    win.role(Role::Button).within(row).one().unwrap()
+    win.role(Role::Button)
+        .text("Prepare")
+        .within(row)
+        .one()
+        .unwrap()
 }
 
 pub fn run() -> Result<Transcript, Box<dyn StdError>> {
@@ -60,7 +63,6 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     let (worker, inbox) = Worker::new(Database::fixture()?)?;
     let (model, questions) = connect(worker.handle())?;
     let results = model.results;
-    let playback = model.playback;
     let mut win = Win::with_questions(
         model,
         questions,
@@ -69,7 +71,7 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
             ..WindowOptions::default()
         },
     )?
-    .with_inbox(inbox, Library::receive)?;
+    .with_inbox_status(inbox, Library::receive)?;
     settle(&mut win, &worker)?;
     let initial_ids = ids(&win);
     assert_eq!(initial_ids, [1, 13, 11, 21, 3, 2, 90, 44, 1001]);
@@ -81,13 +83,9 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     let original_play = play_target(&win, 44);
     win.click(original_play)?;
     settle(&mut win, &worker)?;
-    let played_id = win
-        .with_ready(playback, |request| {
-            request.track.as_ref().unwrap().track_id.unwrap()
-        })?
-        .unwrap();
-    assert_eq!(played_id, 44);
-    assert!(win.contains_text("Play request 1: recording 44 — /music/44.flac")?);
+    let prepared_id = win.with_model(|model| model.prepared().unwrap().1.track_id.unwrap())?;
+    assert_eq!(prepared_id, 44);
+    assert!(win.contains_text("Prepared request 1: recording 44 — /music/44.flac")?);
 
     win.click(win.role(Role::Button).text("Longest first").one()?)?;
     settle(&mut win, &worker)?;
@@ -102,12 +100,7 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     assert_eq!(ids(&win), [13, 11, 21, 5000, 90, 44, 1001, 1, 3, 2]);
     assert_eq!(play_target(&win, 44), original_play);
     assert_eq!(
-        win.with_ready(playback, |request| request
-            .track
-            .as_ref()
-            .unwrap()
-            .track_id
-            .unwrap())?,
+        win.with_model(|model| model.prepared().map(|(_, track)| track.track_id.unwrap()))?,
         Some(44)
     );
 
@@ -175,7 +168,7 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
         initial_ids,
         sorted_ids,
         matched_ids,
-        played_id,
+        prepared_id,
         imported_id: 5000,
         stale_completions,
         realized_rows,

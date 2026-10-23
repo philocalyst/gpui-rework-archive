@@ -3,9 +3,31 @@ use crate::{
     queue::TrackRef,
     queue_view::QueueScreen,
     search::{SearchInput, SearchPage, Sort, Version},
-    worker::{LibraryEvent, PlaybackRequest, Selection, WorkerHandle},
+    worker::{LibraryEvent, Selection, WorkerHandle},
 };
 use gpui::{LaneSet, QuestionFault, Questions, Reader, prelude::*};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PreparationStatus {
+    Empty,
+    Pending,
+    Ready,
+    Failed,
+    Canceled,
+}
+enum Preparation {
+    Empty,
+    Pending {
+        selection: Selection,
+        play_revision: Option<u64>,
+    },
+    Ready {
+        selection: Selection,
+        track: TrackRef,
+    },
+    Failed(String),
+    Canceled,
+}
 
 pub struct Library {
     pub query: Signal<String>,
@@ -13,7 +35,9 @@ pub struct Library {
     pub version: Signal<Version>,
     pub selected: Signal<Selection>,
     pub results: Reader<SearchPage>,
-    pub playback: Reader<PlaybackRequest>,
+    preparation: Preparation,
+    worker: WorkerHandle,
+    issued: u64,
     pub queue: QueueScreen,
     notice: String,
 }
@@ -44,7 +68,61 @@ impl Library {
         |m| &m.selected,
         |m| &mut m.selected,
     );
-    pub fn receive(&mut self, event: LibraryEvent) {
+    fn current_selection(&self, selection: Selection) -> bool {
+        selection == *self.selected && selection.generation == self.version.generation
+    }
+    fn audio_revision(&self) -> Option<u64> {
+        #[cfg(feature = "audio")]
+        {
+            self.queue.audio_revision()
+        }
+        #[cfg(not(feature = "audio"))]
+        {
+            None
+        }
+    }
+    /// Readiness is distinct from playback permission. A newer selection,
+    /// source or transport revision immediately makes pending Play canceled.
+    pub fn preparation_status(&self) -> PreparationStatus {
+        match &self.preparation {
+            Preparation::Empty => PreparationStatus::Empty,
+            Preparation::Pending {
+                selection,
+                play_revision,
+            } if self.current_selection(*selection)
+                && play_revision.is_none_or(|revision| self.audio_revision() == Some(revision)) =>
+            {
+                PreparationStatus::Pending
+            }
+            Preparation::Ready { selection, .. } if self.current_selection(*selection) => {
+                PreparationStatus::Ready
+            }
+            Preparation::Failed(_) => PreparationStatus::Failed,
+            _ => PreparationStatus::Canceled,
+        }
+    }
+    pub fn prepared(&self) -> Option<(Selection, &TrackRef)> {
+        match &self.preparation {
+            Preparation::Ready { selection, track } if self.current_selection(*selection) => {
+                Some((*selection, track))
+            }
+            _ => None,
+        }
+    }
+    /// The bounded worker lane reports final producer close after buffered
+    /// events, so a failed result delivery cannot leave a live owner Pending.
+    pub fn receive(&mut self, event: Option<LibraryEvent>) {
+        let Some(event) = event else {
+            if self.preparation_status() == PreparationStatus::Pending {
+                self.preparation = Preparation::Failed(
+                    "Library worker closed before preparation completed".into(),
+                );
+            } else if matches!(self.preparation, Preparation::Pending { .. }) {
+                self.preparation = Preparation::Canceled;
+            }
+            self.notice = "Library worker closed".into();
+            return;
+        };
         match event {
             LibraryEvent::Imported { id, version } => {
                 if version.revision > self.version.revision {
@@ -56,44 +134,126 @@ impl Library {
                 if version.revision > self.version.revision {
                     *self.version = version;
                     *self.selected = Selection {
+                        sequence: self.issued,
                         generation: version.generation,
                         ..Selection::default()
                     };
+                    self.preparation = Preparation::Empty;
                     self.notice = "Library source changed".into();
+                }
+            }
+            LibraryEvent::Prepared { request, result } => {
+                let (selection, play_revision) = match &self.preparation {
+                    Preparation::Pending {
+                        selection: pending,
+                        play_revision,
+                    } if pending.sequence == request => (*pending, *play_revision),
+                    _ => return,
+                };
+                if self.preparation_status() != PreparationStatus::Pending {
+                    self.preparation = Preparation::Canceled;
+                    return;
+                }
+                match result {
+                    Err(error) => self.preparation = Preparation::Failed(error.to_string()),
+                    Ok(track) => {
+                        // Retire authority before queue/service mutation. Duplicate and
+                        // late replies cannot consume this continuation a second time.
+                        self.preparation = Preparation::Ready {
+                            selection,
+                            track: track.clone(),
+                        };
+                        #[cfg(feature = "audio")]
+                        if play_revision.is_some() {
+                            self.queue.play_now(track);
+                        }
+                        #[cfg(not(feature = "audio"))]
+                        let _ = play_revision;
+                    }
                 }
             }
         }
     }
-    fn play(&mut self, id: i64, generation: u64) {
-        if generation == self.version.generation {
-            let Some(sequence) = self.selected.sequence.checked_add(1) else {
-                self.notice = "Play request space exhausted".into();
-                return;
-            };
-            *self.selected = Selection {
-                id: Some(id),
-                sequence,
-                generation,
-            };
-        } else {
-            self.notice = "This recording belongs to the previous library source".into();
-        }
-    }
-    fn enqueue(&mut self, track: TrackRef, generation: u64) {
-        if generation == self.version.generation {
-            self.queue.enqueue(track);
-        } else {
-            self.notice = "This prepared recording belongs to the previous library source".into();
-        }
+    /// Explicitly prepare one recording; this never grants playback permission.
+    pub fn prepare(&mut self, id: i64, generation: u64) {
+        self.begin_prepare(id, generation, None);
     }
     #[cfg(feature = "audio")]
-    fn play_prepared(&mut self, track: TrackRef, selection: Selection) {
-        if selection.generation != self.version.generation {
-            self.notice = "This prepared recording belongs to the previous library source".into();
-        } else if selection != *self.selected {
-            self.notice = "This prepared recording is no longer the current selection".into();
+    /// Prepare and play once if this owner still holds the same selection,
+    /// source and transport revision when the result enters its delivery turn.
+    pub fn play_now(&mut self, id: i64, generation: u64) {
+        let Some(revision) = self.queue.audio_revision() else {
+            self.notice = "Audio output is not attached".into();
+            return;
+        };
+        self.begin_prepare(id, generation, Some(revision));
+    }
+    fn begin_prepare(&mut self, id: i64, generation: u64, play_revision: Option<u64>) {
+        if generation != self.version.generation {
+            self.notice = "This recording belongs to the previous library source".into();
+            return;
+        }
+        let Some(sequence) = self.issued.checked_add(1) else {
+            self.preparation = Preparation::Failed("Preparation request space exhausted".into());
+            return;
+        };
+        self.issued = sequence;
+        let selection = Selection {
+            id: Some(id),
+            sequence,
+            generation,
+        };
+        *self.selected = selection;
+        self.preparation = Preparation::Pending {
+            selection,
+            play_revision,
+        };
+        let result = if play_revision.is_some() {
+            self.worker.prepare_and_play(selection)
         } else {
-            self.queue.play_now(track);
+            self.worker.prepare(selection)
+        };
+        if let Err(error) = result {
+            self.preparation = Preparation::Failed(crate::worker::QueueError(error).to_string());
+        }
+    }
+    fn enqueue(&mut self, track: TrackRef, selection: Selection) {
+        if self.current_selection(selection) {
+            self.queue.enqueue(track);
+        } else {
+            self.notice = "This prepared recording is no longer the current selection".into();
+        }
+    }
+    fn preparation_view(&self) -> El<'_> {
+        if self.preparation_status() == PreparationStatus::Canceled {
+            return text("Preparation canceled by newer controls");
+        }
+        match &self.preparation {
+            Preparation::Empty => text("No recording selected"),
+            Preparation::Pending { play_revision, .. } => text(if play_revision.is_some() {
+                "Preparing to play…"
+            } else {
+                "Preparing recording…"
+            }),
+            Preparation::Failed(error) => text(format!("Recording unavailable: {error}")),
+            Preparation::Canceled => text("Preparation canceled by newer controls"),
+            Preparation::Ready { selection, track } => {
+                let selection = *selection;
+                let leased = track.clone();
+                column((
+                    text(format!(
+                        "Prepared request {}: recording {} — {}",
+                        selection.sequence,
+                        track.track_id.unwrap(),
+                        track.path.display()
+                    )),
+                    button(format!(
+                        "Add prepared recording {} to queue",
+                        track.track_id.unwrap()
+                    ))
+                    .on_click(move |model: &mut Library| model.enqueue(leased.clone(), selection)),
+                ))
+            }
         }
     }
 }
@@ -115,11 +275,6 @@ pub fn connect(
             }
         },
     )?;
-    let (questions, playback) = questions.question(
-        Library::SELECTED,
-        |selection| *selection,
-        move |selection, completion| handle.play(selection, completion),
-    )?;
     Ok((
         Library {
             query: Signal::new(String::new()),
@@ -127,7 +282,9 @@ pub fn connect(
             version: Signal::new(Version::default()),
             selected: Signal::new(Selection::default()),
             results,
-            playback,
+            preparation: Preparation::Empty,
+            worker: handle,
+            issued: 0,
             // Search generations use generation+1; this one stable queue owns
             // the reserved zero domain and survives database replacement.
             queue: QueueScreen::new(ListId::new(0)).map_err(|_| QuestionFault::Exhausted)?,
@@ -158,13 +315,22 @@ impl ItemSource for SearchPage {
         let track = &self.rows[index];
         let id = track.id;
         let generation = self.input.version.generation;
+        #[cfg(feature = "audio")]
+        let play = button("Play now")
+            .name(format!("Play {} now", track.title))
+            .w(76)
+            .h(32)
+            .on_click(move |model: &mut Library| model.play_now(id, generation));
+        #[cfg(not(feature = "audio"))]
+        let play = text("");
         row((
-            button("Play")
-                .name(format!("Play {}", track.title))
+            button("Prepare")
+                .name(format!("Prepare {}", track.title))
                 .w(64)
                 .h(32)
-                .on_click(move |model: &mut Library| model.play(id, generation)),
-            text(track.title.as_str()).w(280).p(6),
+                .on_click(move |model: &mut Library| model.prepare(id, generation)),
+            play,
+            text(track.title.as_str()).w(240).p(6),
             text(track.artist_names.as_deref().unwrap_or("Unknown artist"))
                 .w(170)
                 .p(6),
@@ -225,59 +391,75 @@ impl View for Library {
                 })
                 .loading(|| text("Searching recordings…"))
                 .failed(|failure| text(format!("Library unavailable: {failure}"))),
-            self.playback
-                .project(|request| {
-                    if let Some(track) = &request.track {
-                        let leased = track.clone();
-                        let generation = request.selection.generation;
-                        #[cfg(feature = "audio")]
-                        let play_now = if self.queue.audio_status().is_some() {
-                            let leased = track.clone();
-                            let selection = request.selection;
-                            let play = button("Play now").name(format!("Play {} now", track.title));
-                            if track.available_when_prepared {
-                                play.on_click(move |model: &mut Library| {
-                                    model.play_prepared(leased.clone(), selection)
-                                })
-                            } else {
-                                play.description("Path was unavailable when prepared")
-                            }
-                        } else {
-                            text("")
-                        };
-                        #[cfg(not(feature = "audio"))]
-                        let play_now = text("");
-                        column((
-                            text(format!(
-                                "Play request {}: recording {} — {}",
-                                request.selection.sequence,
-                                track.track_id.unwrap(),
-                                track.path.display()
-                            )),
-                            row((
-                                button(format!(
-                                    "Add prepared recording {} to queue",
-                                    track.track_id.unwrap()
-                                ))
-                                .on_click(
-                                    move |model: &mut Library| {
-                                        model.enqueue(leased.clone(), generation)
-                                    },
-                                ),
-                                play_now,
-                            ))
-                            .gap(8),
-                        ))
-                    } else {
-                        text("No recording selected")
-                    }
-                })
-                .loading(|| text("Preparing playback request…"))
-                .failed(|failure| text(format!("Recording unavailable: {failure}"))),
+            self.preparation_view(),
             text(self.notice.as_str()),
             Self::QUEUE.view(self),
         ))
         .p(12)
         .gap(10)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{database::Database, worker::Worker};
+    use std::time::Duration;
+
+    #[test]
+    fn exhausted_issuance_revokes_prior_work_and_survives_source_and_public_selection_reset() {
+        let (worker, inbox) = Worker::new(Database::fixture().unwrap()).unwrap();
+        let (mut model, questions) = connect(worker.handle()).unwrap();
+        model.issued = u64::MAX - 1;
+        model.prepare(44, 0);
+        assert_eq!(model.selected.sequence, u64::MAX);
+        model.prepare(90, 0);
+        assert_eq!(model.preparation_status(), PreparationStatus::Failed);
+        let mut owner = gpui::Win::with_questions(model, questions, gpui::WindowOptions::default())
+            .unwrap()
+            .with_inbox_status(inbox, Library::receive)
+            .unwrap();
+        crate::transcript::settle(&mut owner, &worker).unwrap();
+        assert!(
+            owner
+                .with_model(|model| model.prepared().is_none())
+                .unwrap()
+        );
+        worker
+            .replace_database(Database::fixture().unwrap())
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap()
+            .unwrap();
+        crate::transcript::settle(&mut owner, &worker).unwrap();
+        owner
+            .set(
+                Library::SELECTED,
+                Selection {
+                    generation: 1,
+                    ..Selection::default()
+                },
+            )
+            .unwrap();
+        owner.update(|model| model.prepare(44, 1)).unwrap();
+        assert_eq!(owner.with_model(|model| model.issued).unwrap(), u64::MAX);
+        assert_eq!(
+            owner
+                .with_model(|model| model.preparation_status())
+                .unwrap(),
+            PreparationStatus::Failed
+        );
+        assert!(
+            owner
+                .contains_text("Preparation request space exhausted")
+                .unwrap()
+        );
+        assert!(
+            owner
+                .with_model(|model| model.prepared().is_none())
+                .unwrap()
+        );
+        drop(owner);
+        worker.finish().unwrap();
     }
 }
