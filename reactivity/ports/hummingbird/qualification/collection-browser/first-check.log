@@ -1,0 +1,113 @@
+    Checking parley_engine v0.12.0 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/parley_engine)
+    Checking cephal v0.1.1 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/cephal)
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/core)
+    Checking parley v0.12.0 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/parley)
+    Checking gpui_canvas v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/canvas)
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/state)
+    Checking gpui v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/gpui)
+    Checking hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird)
+warning: unused import: `RowKey`
+ --> src/collection_query.rs:5:87
+  |
+5 |         CollectionRow, Collections, Input, Page, PlayRequest, PreparedListing, Route, RowKey,
+  |                                                                                       ^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `params`
+  --> src/collection_query.rs:13:16
+   |
+13 | use rusqlite::{params, types::Value};
+   |                ^^^^^^
+
+error[E0277]: `?` couldn't convert the error to `SourceError`
+   --> src/collection_query.rs:140:54
+    |
+140 |                 let detail = row.get_ref(2)?.as_str()?;
+    |                                              --------^ the trait `From<FromSqlError>` is not implemented for `SourceError`
+    |                                              |
+    |                                              this can't be annotated with `?` because it has type `Result<_, FromSqlError>`
+    |
+note: `SourceError` needs to implement `From<FromSqlError>`
+   --> src/search.rs:55:1
+    |
+ 55 | pub enum SourceError {
+    | ^^^^^^^^^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: the trait `From<FromSqlError>` is not implemented for `SourceError`
+      but trait `From<rusqlite::Error>` is implemented for it
+   --> src/search.rs:82:1
+    |
+ 82 | impl From<rusqlite::Error> for SourceError {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for that trait implementation, expected `rusqlite::Error`, found `FromSqlError`
+
+error[E0277]: `?` couldn't convert the error to `SourceError`
+  --> src/collection_query.rs:87:57
+   |
+87 |                     let title = row.get_ref(1)?.as_str()?;
+   |                                                 --------^ the trait `From<FromSqlError>` is not implemented for `SourceError`
+   |                                                 |
+   |                                                 this can't be annotated with `?` because it has type `Result<_, FromSqlError>`
+   |
+note: `SourceError` needs to implement `From<FromSqlError>`
+  --> src/search.rs:55:1
+   |
+55 | pub enum SourceError {
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: the trait `From<FromSqlError>` is not implemented for `SourceError`
+      but trait `From<rusqlite::Error>` is implemented for it
+  --> src/search.rs:82:1
+   |
+82 | impl From<rusqlite::Error> for SourceError {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `rusqlite::Error`, found `FromSqlError`
+
+error[E0277]: `?` couldn't convert the error to `SourceError`
+  --> src/collection_query.rs:88:66
+   |
+88 |                     let artist = row.get_ref(2)?.as_str_or_null()?;
+   |                                                  ----------------^ the trait `From<FromSqlError>` is not implemented for `SourceError`
+   |                                                  |
+   |                                                  this can't be annotated with `?` because it has type `Result<_, FromSqlError>`
+   |
+note: `SourceError` needs to implement `From<FromSqlError>`
+  --> src/search.rs:55:1
+   |
+55 | pub enum SourceError {
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: the trait `From<FromSqlError>` is not implemented for `SourceError`
+      but trait `From<rusqlite::Error>` is implemented for it
+  --> src/search.rs:82:1
+   |
+82 | impl From<rusqlite::Error> for SourceError {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `rusqlite::Error`, found `FromSqlError`
+
+error[E0277]: `?` couldn't convert the error to `SourceError`
+   --> src/collection_query.rs:139:53
+    |
+139 |                 let title = row.get_ref(1)?.as_str()?;
+    |                                             --------^ the trait `From<FromSqlError>` is not implemented for `SourceError`
+    |                                             |
+    |                                             this can't be annotated with `?` because it has type `Result<_, FromSqlError>`
+    |
+note: `SourceError` needs to implement `From<FromSqlError>`
+   --> src/search.rs:55:1
+    |
+ 55 | pub enum SourceError {
+    | ^^^^^^^^^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: the trait `From<FromSqlError>` is not implemented for `SourceError`
+      but trait `From<rusqlite::Error>` is implemented for it
+   --> src/search.rs:82:1
+    |
+ 82 | impl From<rusqlite::Error> for SourceError {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for that trait implementation, expected `rusqlite::Error`, found `FromSqlError`
+
+For more information about this error, try `rustc --explain E0277`.
+warning: `hummingbird-gpui-port` (lib) generated 2 warnings
+error: could not compile `hummingbird-gpui-port` (lib) due to 4 previous errors; 2 warnings emitted

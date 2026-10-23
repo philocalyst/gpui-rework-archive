@@ -1,0 +1,10 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.17s
+     Running tests/browser.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/browser-1ed7202113eb2cf2)
+
+running 2 tests
+test navigation_history_is_bounded_and_new_branch_discards_forward_routes ... ok
+test real_collection_sql_and_public_nested_sources_browse_relations_and_history_without_play ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s
+

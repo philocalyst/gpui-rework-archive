@@ -1,0 +1,29 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird)
+error: mismatched closing delimiter: `}`
+   --> src/app.rs:508:15
+    |
+508 |         column((
+    |               ^ unclosed delimiter
+...
+536 |                 })
+    |                 ^ mismatched closing delimiter
+
+error: unexpected closing delimiter: `)`
+   --> src/app.rs:542:9
+    |
+499 | impl View for Library {
+    |                       - the nearest open delimiter
+...
+528 |                     let collections=if page.collections.rows.is_empty() {text("")} else {
+    |                                                                                         - the nearest open delimiter
+...
+534 |                     ))
+    |                     - missing open `(` for this delimiter
+535 |                     .gap(6)
+536 |                 })
+    |                  - missing open `(` for this delimiter
+...
+542 |         ))
+    |         ^ unexpected closing delimiter
+
+error: could not compile `hummingbird-gpui-port` (lib) due to 2 previous errors

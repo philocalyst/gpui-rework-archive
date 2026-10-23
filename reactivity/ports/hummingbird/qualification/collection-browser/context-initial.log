@@ -1,0 +1,31 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird)
+error[E0382]: borrow of partially moved value: `plan`
+    --> tests/library_audio.rs:1266:9
+     |
+1247 |     assert_eq!(plan.lookahead.unwrap().track.track_id, Some(11));
+     |                               -------- `plan.lookahead` partially moved due to this method call
+...
+1266 |         plan.stamp()
+     |         ^^^^ value borrowed here after partial move
+     |
+note: `Option::<T>::unwrap` takes ownership of the receiver `self`, which moves `plan.lookahead`
+    --> /nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/core/src/option.rs:1010:25
+     |
+1010 |     pub const fn unwrap(self) -> T {
+     |                         ^^^^
+     = note: partial move occurs because `plan.lookahead` has type `Option<hummingbird_gpui_port::queue::Entry>`, which does not implement the `Copy` trait
+help: consider calling `.as_ref()` to borrow the value's contents
+     |
+1247 |     assert_eq!(plan.lookahead.as_ref().unwrap().track.track_id, Some(11));
+     |                              +++++++++
+help: consider calling `.as_mut()` to mutably borrow the value's contents
+     |
+1247 |     assert_eq!(plan.lookahead.as_mut().unwrap().track.track_id, Some(11));
+     |                              +++++++++
+help: you can `clone` the value and consume it, but this might not be your desired behavior
+     |
+1247 |     assert_eq!(plan.lookahead.clone().unwrap().track.track_id, Some(11));
+     |                              ++++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `hummingbird-gpui-port` (test "library_audio") due to 1 previous error

@@ -1,0 +1,28 @@
+   Compiling parley_engine v0.12.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/crates/gpui)
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-negative-control-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 36.81s
+     Running tests/library_audio.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-3a665471da2124ef)
+
+running 1 test
+test context_results_reject_route_filter_selection_source_and_cloned_transport_changes_before_queue_mutation ... 
+thread 'context_results_reject_route_filter_selection_source_and_cloned_transport_changes_before_queue_mutation' (3971486) panicked at tests/library_audio.rs:1355:9:
+assertion `left == right` failed: source edited queue
+  left: PlanStamp { session: 4, serial: 2 }
+ right: PlanStamp { session: 4, serial: 1 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    context_results_reject_route_filter_selection_source_and_cloned_transport_changes_before_queue_mutation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 3.95s
+
+error: test failed, to rerun pass `--test library_audio`

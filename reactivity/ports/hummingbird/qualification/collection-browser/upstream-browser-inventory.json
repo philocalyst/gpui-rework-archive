@@ -1,0 +1,89 @@
+{
+  "upstream": "e15e8ba0ef6ff5445294030d373e3c8ccc7d780c",
+  "scope": "Reference inventory only; these files include substantial UI/query behavior absent from this slice. Totals are not feature-normalized and establish no code reduction or parity claim.",
+  "files": {
+    "src/ui/library.rs": {
+      "blob": "5c9f743445f67cc89d1b492a00edf422283ebce2",
+      "sha256": "5e5a9d044452977fb6e053f49eca8cdbac38f89d13124cf185c9d61f17aeeb8d",
+      "physical_lines": 927,
+      "code_lines_without_tests": 805
+    },
+    "src/ui/library/album_view.rs": {
+      "blob": "14ed1c720e7fe6fb5f3b4e3a918277bd5e46a36b",
+      "sha256": "ca7f0aa734ed366ffd398d1a6222386c19860e218563f4434a8878bf4c488c4b",
+      "physical_lines": 109,
+      "code_lines_without_tests": 95
+    },
+    "src/ui/library/artist_view.rs": {
+      "blob": "0524aa4db0da684cda169c920b33c67a091dd44e",
+      "sha256": "f1ca21ea85d14c22f31233fb7994ba7d9eee9b2876eeb4af1254b9ec300c94bc",
+      "physical_lines": 99,
+      "code_lines_without_tests": 85
+    },
+    "src/ui/library/artist_detail_view.rs": {
+      "blob": "af92822ecfc5c19c9cafc1b4440ee87d7cc9f823",
+      "sha256": "99880a688ced5b7e61c530e5f2695e1de8004872095cba57977cc8a5ad4a4694",
+      "physical_lines": 996,
+      "code_lines_without_tests": 937
+    },
+    "src/ui/library/playlist_view.rs": {
+      "blob": "2baabdc91e9a31e7b98122c79f7b5dfe92681105",
+      "sha256": "5335f3bc2f40efb15e5f8c5482bd67028e1fc148e934eda7b1df2be8462b558e",
+      "physical_lines": 1135,
+      "code_lines_without_tests": 1057
+    },
+    "src/ui/library/release_view.rs": {
+      "blob": "6286bf56017f8a48a25f160711e8b3126d2dc31f",
+      "sha256": "07ff3f3ae1cd1797206bb907f16d5ecd52e832a64a566788fe25cb7b8eb59c57",
+      "physical_lines": 770,
+      "code_lines_without_tests": 702
+    },
+    "src/ui/library/track_view.rs": {
+      "blob": "a79f0539a7ddbe2ef38802e043b9dd201b15f341",
+      "sha256": "af9dcd640a3ff56b5be05470a13a3f9516bc85575d2cc38ec7c40e27dbd4ecc2",
+      "physical_lines": 193,
+      "code_lines_without_tests": 175
+    },
+    "src/ui/library/library_view_header.rs": {
+      "blob": "576a5875ebe2d2dcdb9eecd0c5f3492d4a04ca08",
+      "sha256": "49594cf8840a9a23cdcece62207b34dce8d126bbf4451d67330d1e7776f4c0af",
+      "physical_lines": 185,
+      "code_lines_without_tests": 169
+    },
+    "src/ui/library/track_listing.rs": {
+      "blob": "5229bf4fd860d1a411e3a03ce66ecd5960a3078b",
+      "sha256": "f089b73a601b420897e4d526d858bbe5af2a6353fa1d49fce029fe38b964257c",
+      "physical_lines": 147,
+      "code_lines_without_tests": 88
+    },
+    "src/ui/library/nav_buttons.rs": {
+      "blob": "9b3df84bcaef03bca24eac1b9b9232a28f700a19",
+      "sha256": "371957f6c0864cdb242ac284fc7f7c761deeffaa5f7d3007c3238386931e22b9",
+      "physical_lines": 160,
+      "code_lines_without_tests": 148
+    },
+    "src/library/db/query/album.rs": {
+      "blob": "a49638f6073af4ea304ae6329e00b70b532a04d9",
+      "sha256": "dd6a9d57ef89c410dc9b6a29d48f992452803f4d439e0571bb765eddc165e450",
+      "physical_lines": 347,
+      "code_lines_without_tests": 309
+    },
+    "src/library/db/query/artist.rs": {
+      "blob": "00120dacd0332720dd4a5cf43953e6067ff4a40b",
+      "sha256": "53264fa7e63d709112c4c14bde5a9613a7de5fd488d73bc8048b148ff9893128",
+      "physical_lines": 350,
+      "code_lines_without_tests": 310
+    },
+    "src/library/db/query/playlist.rs": {
+      "blob": "de314de2f64ed56838b546776081ae8e15960706",
+      "sha256": "b59a61a4874beb588ddb10fc0a46a1721ddc8582f8c02afbf677425ea49719be",
+      "physical_lines": 320,
+      "code_lines_without_tests": 287
+    }
+  },
+  "total_selected_code_lines": 5167,
+  "current_port_shipping_code_lines": 6571,
+  "current_port_delta_from_9f": 938,
+  "actual_core_code_lines": 30987,
+  "license": "Existing complete LICENSE.upstream Apache-2.0; SQL projections and bounded history adapted, original mutable page/entity/cache glue replaced with single route/source component and Question."
+}

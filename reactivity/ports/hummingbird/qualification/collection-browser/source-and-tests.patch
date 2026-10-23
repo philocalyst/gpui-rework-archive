@@ -1,0 +1,2473 @@
+diff --git a/reactivity/ports/hummingbird/examples/native_service.rs b/reactivity/ports/hummingbird/examples/native_service.rs
+index d4e9edf197..35e931aabe 100644
+--- a/reactivity/ports/hummingbird/examples/native_service.rs
++++ b/reactivity/ports/hummingbird/examples/native_service.rs
+@@ -88,7 +88,11 @@ impl Drop for Sink {
+ }
+ 
+ fn main() -> Result<(), Box<dyn std::error::Error>> {
+-    let database = Database::fixture()?;
++    let database = if std::env::args().any(|arg| arg == "--collections") {
++        Database::collection_fixture()?
++    } else {
++        Database::fixture()?
++    };
+     for (id, extension) in [(44, "wav"), (90, "flac")] {
+         let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+             .join(format!("assets/audio/stereo.{extension}"));
+diff --git a/reactivity/ports/hummingbird/native-service.py b/reactivity/ports/hummingbird/native-service.py
+index d490e637de..aed102ebdf 100644
+--- a/reactivity/ports/hummingbird/native-service.py
++++ b/reactivity/ports/hummingbird/native-service.py
+@@ -51,6 +51,7 @@ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("binary", type=Path)
+     parser.add_argument("output", type=Path)
++    parser.add_argument("--collections", action="store_true")
+     args = parser.parse_args()
+     args.output.mkdir(exist_ok=False)
+     deadline = time.monotonic() + 150
+@@ -107,7 +108,7 @@ def main():
+ 
+             address = wait(discover, "private accessibility bus")
+             bus(session, "set-property", "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Status", "IsEnabled", "b", "true")
+-            app = subprocess.Popen([str(args.binary)], env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log)
++            app = subprocess.Popen([str(args.binary)] + (["--collections"] if args.collections else []), env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log)
+             children.append(app)
+             pending = b""
+ 
+@@ -166,32 +167,73 @@ def main():
+                 line = command("stats")[0].split(",")
+                 return [int(v) for v in line[1:5]] + [line[5] == "true"]
+ 
+-            find("9 recordings for ‘’ — Title")
+-            command("import")
+-            find("10 recordings for ‘’ — Title")
+-            find("Imported recording 5000")
+-            search("μαρ")
+-            find("1 recordings for ‘μαρ’ — Title")
+-            command("collision")
+-            invoke("Prepare Καλημέρα")
+-            fixture = Path(__file__).parent / "assets/audio/stereo.wav"
+-            find(f"Prepared request 1: recording 44 — {fixture}")
+-            assert stats() == [0, 0, 0, 0, False], "pure preparation or unmatched public request played"
+-            invoke("Play Καλημέρα now")
+-            find(f"Prepared request 2: recording 44 — {fixture}")
+-            wait(lambda: stats()[0] == 1, "real audio service open")
+-            assert stats()[1:3] == [0, 0], "zero-credit sink accepted PCM"
+-            command("credit")
+-            wait(lambda: stats()[1:3] == [64, 64], "bounded PCM production")
+-            find("Queue — 1 entries")
+-            invoke("Stop")
+-            find("No decoder plan")
+-            wait(lambda: not stats()[4], "Stop revokes output gate")
+-            command("disconnect")
+-            find("Library worker closed")
+-            invoke("Prepare Καλημέρα")
+-            find("Recording unavailable: Library worker is closed")
+-            assert stats()[0] == 1, "closed worker restarted playback"
++            if args.collections:
++                find("9 recordings for ‘’ — Title")
++                command("import")
++                find("10 recordings for ‘’ — Title")
++                invoke("Albums")
++                find("4 albums")
++                invoke("Open Album")
++                find("2 recordings for ‘’ — Track order")
++                invoke("Back")
++                find("4 albums")
++                invoke("Artists")
++                invoke("Open Alpha")
++                find("4 recordings for ‘’ — Title")
++                invoke("Playlists")
++                invoke("Open Evening Καφέ")
++                find("3 recordings for ‘’ — Playlist order")
++                search("μαρ")
++                find("1 recordings for ‘μαρ’ — Playlist order")
++                search("")
++                find("3 recordings for ‘’ — Playlist order")
++                command("collision")
++                invoke("Prepare Καλημέρα")
++                fixture = Path(__file__).parent / "assets/audio/stereo.wav"
++                find(f"Prepared request 1: recording 44 — {fixture}")
++                assert stats() == [0, 0, 0, 0, False], "navigation, queries, pure Prepare or wrong reply played"
++                invoke("Play from Untitled")
++                find("Collection playback started")
++                wait(lambda: stats()[0] == 1, "context playback real service open")
++                assert stats()[1:3] == [0, 0], "zero-credit sink accepted PCM"
++                command("credit")
++                wait(lambda: stats()[1:3] == [64, 64], "context bounded PCM production")
++                find("Queue — 3 entries")
++                invoke("Stop")
++                find("No decoder plan")
++                wait(lambda: not stats()[4], "Stop revokes context output gate")
++                command("disconnect")
++                find("Library worker closed")
++                invoke("Prepare Καλημέρα")
++                find("Recording unavailable: Library worker is closed")
++                assert stats()[0] == 1, "closed worker restarted context playback"
++            else:
++                find("9 recordings for ‘’ — Title")
++                command("import")
++                find("10 recordings for ‘’ — Title")
++                find("Imported recording 5000")
++                search("μαρ")
++                find("1 recordings for ‘μαρ’ — Title")
++                command("collision")
++                invoke("Prepare Καλημέρα")
++                fixture = Path(__file__).parent / "assets/audio/stereo.wav"
++                find(f"Prepared request 1: recording 44 — {fixture}")
++                assert stats() == [0, 0, 0, 0, False], "pure preparation or unmatched public request played"
++                invoke("Play Καλημέρα now")
++                find(f"Prepared request 2: recording 44 — {fixture}")
++                wait(lambda: stats()[0] == 1, "real audio service open")
++                assert stats()[1:3] == [0, 0], "zero-credit sink accepted PCM"
++                command("credit")
++                wait(lambda: stats()[1:3] == [64, 64], "bounded PCM production")
++                find("Queue — 1 entries")
++                invoke("Stop")
++                find("No decoder plan")
++                wait(lambda: not stats()[4], "Stop revokes output gate")
++                command("disconnect")
++                find("Library worker closed")
++                invoke("Prepare Καλημέρα")
++                find("Recording unavailable: Library worker is closed")
++                assert stats()[0] == 1, "closed worker restarted playback"
+             xdotool = "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool"
+             window = int(subprocess.check_output([xdotool, "search", "--onlyvisible", "--name", "Hummingbird"], env=env, text=True).splitlines()[0])
+             close_window(display, window)
+@@ -199,7 +241,7 @@ def main():
+             assert app.wait(timeout=10) == 0, "WM close did not retire application services"
+             log.flush()
+             assert "HUMMINGBIRD_NATIVE_CLOSED" in (args.output / "native.log").read_text()
+-            (args.output / "result.json").write_text(json.dumps({"passed": True, "events": events, "scope": "Actual Registry/public Window and original Library actions; real SQLite/audio owners; bounded counting output, no hardware or timing claim; prequeued unmatched full-Selection collision."}, indent=2) + "\n")
++            (args.output / "result.json").write_text(json.dumps({"passed": True, "events": events, "collections": args.collections, "scope": "Actual Registry/public Window and original Library actions; real SQLite/audio owners; bounded counting output, no hardware or timing claim; prequeued unmatched full-Selection collision."}, indent=2) + "\n")
+         finally:
+             for child in reversed(children):
+                 if child.poll() is None:
+diff --git a/reactivity/ports/hummingbird/src/app.rs b/reactivity/ports/hummingbird/src/app.rs
+index ee6549fe10..2479ed332f 100644
+--- a/reactivity/ports/hummingbird/src/app.rs
++++ b/reactivity/ports/hummingbird/src/app.rs
+@@ -1,8 +1,9 @@
+ //! One public GPUI View, shared by the ordinary native and headless owners.
+ use crate::{
++    browser::{Browser, Input, Page, PlayRequest, Route, RowKey},
+     queue::TrackRef,
+     queue_view::QueueScreen,
+-    search::{SearchInput, SearchPage, Sort, Version},
++    search::Version,
+     worker::{LibraryEvent, Selection, WorkerHandle},
+ };
+ use gpui::{LaneSet, QuestionFault, Questions, Reader, prelude::*};
+@@ -17,9 +18,25 @@ pub enum PreparationStatus {
+ }
+ enum Preparation {
+     Empty,
++    ListingPending {
++        request: PlayRequest,
++        edits: [u32; 3],
++        revision: u64,
++    },
++    #[cfg(feature = "audio")]
++    ListingPlayed {
++        request: PlayRequest,
++        edits: [u32; 3],
++    },
++    ListingFailed {
++        request: PlayRequest,
++        edits: [u32; 3],
++        error: String,
++    },
+     Pending {
+         selection: Selection,
+         play_revision: Option<u64>,
++        play_edits: Option<[u32; 3]>,
+     },
+     Ready {
+         selection: Selection,
+@@ -33,11 +50,10 @@ enum Preparation {
+ }
+ 
+ pub struct Library {
+-    pub query: Signal<String>,
+-    pub sort: Signal<Sort>,
++    browser: Browser,
+     pub version: Signal<Version>,
+     pub selected: Signal<Selection>,
+-    pub results: Reader<SearchPage>,
++    pub results: Reader<Page>,
+     preparation: Preparation,
+     worker: WorkerHandle,
+     issued: u64,
+@@ -55,10 +71,18 @@ impl Library {
+         |model| &model.queue,
+         |model| &mut model.queue,
+     );
+-    pub const QUERY: Source<Self, String> =
+-        Source::new(FieldId::new(1), "search", |m| &m.query, |m| &mut m.query);
+-    pub const SORT: Source<Self, Sort> =
+-        Source::new(FieldId::new(2), "sort", |m| &m.sort, |m| &mut m.sort);
++    pub const BROWSER: Component<Self, Browser> = Component::new(
++        FieldId::new(6),
++        "collection browser",
++        |m| &m.browser,
++        |m| &mut m.browser,
++    );
++    pub fn browser(&self) -> &Browser {
++        &self.browser
++    }
++    pub fn recording_list(&self) -> ListId {
++        self.browser.navigation().track_list()
++    }
+     pub const VERSION: Source<Self, Version> = Source::new(
+         FieldId::new(3),
+         "library revision",
+@@ -84,15 +108,98 @@ impl Library {
+             None
+         }
+     }
++    fn current_listing(&self, request: &PlayRequest, edits: [u32; 3]) -> bool {
++        let id = request.start.map(|key| match key {
++            RowKey::Track(id) | RowKey::PlaylistItem { track: id, .. } => id,
++        });
++        self.selected.sequence == request.sequence
++            && self.selected.id == id
++            && self.selected.generation == request.input.version.generation
++            && self.browser.revisions() == edits
++            && self.browser.matches(&request.input, *self.version)
++    }
++    pub fn navigate(&mut self, route: Route) {
++        self.browser.navigate(route);
++    }
++    pub fn open_collection(&mut self, input: &Input, route: Route) {
++        if self.browser.matches(input, *self.version) {
++            self.browser.navigate(route);
++        }
++    }
++    pub fn play_listing(&mut self, input: triomphe::Arc<Input>, start: Option<RowKey>) {
++        if !self.browser.matches(&input, *self.version) {
++            self.notice = "This listing is no longer current".into();
++            return;
++        }
++        let Some(revision) = self.audio_revision() else {
++            self.notice = "Audio output is not attached".into();
++            return;
++        };
++        let Some(sequence) = self.issued.checked_add(1) else {
++            self.preparation = Preparation::Failed {
++                selection: *self.selected,
++                error: "Preparation request space exhausted".into(),
++            };
++            return;
++        };
++        self.issued = sequence;
++        let request = PlayRequest {
++            input,
++            start,
++            sequence,
++        };
++        *self.selected = Selection {
++            id: start.map(|key| match key {
++                RowKey::Track(id) | RowKey::PlaylistItem { track: id, .. } => id,
++            }),
++            sequence,
++            generation: request.input.version.generation,
++        };
++        let edits = self.browser.revisions();
++        self.preparation = Preparation::ListingPending {
++            request: request.clone(),
++            edits,
++            revision,
++        };
++        if let Err(error) = self.worker.prepare_listing(request.clone()) {
++            self.preparation = Preparation::ListingFailed {
++                request,
++                edits,
++                error: crate::worker::QueueError(error).to_string(),
++            };
++        }
++    }
+     /// Readiness is distinct from playback permission. A newer selection,
+     /// source or transport revision immediately makes pending Play canceled.
+     pub fn preparation_status(&self) -> PreparationStatus {
+         match &self.preparation {
+             Preparation::Empty => PreparationStatus::Empty,
++            Preparation::ListingPending {
++                request,
++                edits,
++                revision,
++            } if self.current_listing(request, *edits)
++                && self.audio_revision() == Some(*revision) =>
++            {
++                PreparationStatus::Pending
++            }
++            #[cfg(feature = "audio")]
++            Preparation::ListingPlayed { request, edits }
++                if self.current_listing(request, *edits) =>
++            {
++                PreparationStatus::Ready
++            }
++            Preparation::ListingFailed { request, edits, .. }
++                if self.current_listing(request, *edits) =>
++            {
++                PreparationStatus::Failed
++            }
+             Preparation::Pending {
+                 selection,
+                 play_revision,
+-            } if self.current_selection(*selection)
++                play_edits,
++            } if play_edits.is_none_or(|edits| self.browser.revisions() == edits)
++                && self.current_selection(*selection)
+                 && play_revision.is_none_or(|revision| self.audio_revision() == Some(revision)) =>
+             {
+                 PreparationStatus::Pending
+@@ -119,10 +226,20 @@ impl Library {
+     pub fn receive(&mut self, event: Option<LibraryEvent>) {
+         let Some(event) = event else {
+             if self.preparation_status() == PreparationStatus::Pending {
+-                self.preparation = Preparation::Failed {
+-                    selection: *self.selected,
+-                    error: "Library worker closed before preparation completed".into(),
+-                };
++                self.preparation =
++                    match std::mem::replace(&mut self.preparation, Preparation::Canceled) {
++                        Preparation::ListingPending { request, edits, .. } => {
++                            Preparation::ListingFailed {
++                                request,
++                                edits,
++                                error: "Library worker closed before preparation completed".into(),
++                            }
++                        }
++                        _ => Preparation::Failed {
++                            selection: *self.selected,
++                            error: "Library worker closed before preparation completed".into(),
++                        },
++                    };
+             } else if matches!(self.preparation, Preparation::Pending { .. }) {
+                 self.preparation = Preparation::Canceled;
+             }
+@@ -130,6 +247,57 @@ impl Library {
+             return;
+         };
+         match event {
++            LibraryEvent::ListingPrepared { request, result } => {
++                let (edits, revision) = match &self.preparation {
++                    Preparation::ListingPending {
++                        request: pending,
++                        edits,
++                        revision,
++                    } if pending == &request => (*edits, *revision),
++                    _ => return,
++                };
++                if self.preparation_status() != PreparationStatus::Pending {
++                    self.preparation = Preparation::Canceled;
++                    return;
++                }
++                self.preparation = Preparation::Canceled;
++                match result {
++                    Err(error) => {
++                        self.preparation = Preparation::ListingFailed {
++                            request,
++                            edits,
++                            error: error.to_string(),
++                        }
++                    }
++                    Ok(listing) => {
++                        #[cfg(feature = "audio")]
++                        match self.worker.with_current_version(request.input.version, || {
++                            self.queue.play_listing_if(listing, revision)
++                        }) {
++                            Ok(Some(Ok(true))) => {
++                                self.preparation = Preparation::ListingPlayed { request, edits }
++                            }
++                            Ok(Some(Ok(false))) | Ok(None) => {}
++                            Ok(Some(Err(error))) => {
++                                self.preparation = Preparation::ListingFailed {
++                                    request,
++                                    edits,
++                                    error: error.to_string(),
++                                }
++                            }
++                            Err(error) => {
++                                self.preparation = Preparation::ListingFailed {
++                                    request,
++                                    edits,
++                                    error: error.to_string(),
++                                }
++                            }
++                        }
++                        #[cfg(not(feature = "audio"))]
++                        let _ = (listing, revision);
++                    }
++                }
++            }
+             LibraryEvent::Imported { id, version } => {
+                 if version.revision > self.version.revision {
+                     *self.version = version;
+@@ -145,6 +313,7 @@ impl Library {
+                         ..Selection::default()
+                     };
+                     self.preparation = Preparation::Empty;
++                    self.browser.source_changed();
+                     self.notice = "Library source changed".into();
+                 }
+             }
+@@ -155,6 +324,7 @@ impl Library {
+                     Preparation::Pending {
+                         selection: pending,
+                         play_revision,
++                        ..
+                     } if *pending == selection => (*pending, *play_revision),
+                     _ => return,
+                 };
+@@ -240,6 +410,7 @@ impl Library {
+         self.preparation = Preparation::Pending {
+             selection,
+             play_revision,
++            play_edits: play_revision.map(|_| self.browser.revisions()),
+         };
+         let result = if play_revision.is_some() {
+             self.worker.prepare_and_play(selection)
+@@ -273,6 +444,12 @@ impl Library {
+         }
+         match &self.preparation {
+             Preparation::Empty => text("No recording selected"),
++            Preparation::ListingPending { .. } => text("Preparing collection to play…"),
++            #[cfg(feature = "audio")]
++            Preparation::ListingPlayed { .. } => text("Collection playback started"),
++            Preparation::ListingFailed { error, .. } => {
++                text(format!("Collection unavailable: {error}"))
++            }
+             Preparation::Pending { play_revision, .. } => text(if play_revision.is_some() {
+                 "Preparing to play…"
+             } else {
+@@ -306,30 +483,33 @@ pub fn connect(
+ ) -> Result<(Library, Questions<Library, impl LaneSet<Library>>), QuestionFault> {
+     let search = handle.clone();
+     let (questions, results) = Questions::new().question(
+-        ((Library::QUERY, Library::SORT), Library::VERSION),
+-        |((query, sort), version)| SearchInput::freeze(query, *sort, *version),
+-        move |input, completion: gpui::Completion<SearchPage, crate::search::SourceError>| {
+-            match input {
+-                Ok(input) => search.search(input, completion),
+-                Err(error) => {
+-                    let _ = completion.complete(Err(error));
+-                    Ok(())
+-                }
++        (
++            (
++                Library::BROWSER.source(&Browser::QUERY),
++                Library::BROWSER.source(&Browser::SORT),
++            ),
++            (Library::BROWSER.source(&Browser::NAV), Library::VERSION),
++        ),
++        |((query, sort), (navigation, version))| Input::freeze(navigation, query, *sort, *version),
++        move |input, completion: gpui::Completion<Page, crate::search::SourceError>| match input {
++            Ok(input) => search.browse(input, completion),
++            Err(error) => {
++                let _ = completion.complete(Err(error));
++                Ok(())
+             }
+         },
+     )?;
+     Ok((
+         Library {
+-            query: Signal::new(String::new()),
+-            sort: Signal::new(Sort::Title),
++            browser: Browser::new(),
+             version: Signal::new(Version::default()),
+             selected: Signal::new(Selection::default()),
+             results,
+             preparation: Preparation::Empty,
+             worker: handle,
+             issued: 0,
+-            // Search generations use generation+1; this one stable queue owns
+-            // the reserved zero domain and survives database replacement.
++            // Navigation domains are nonzero; this stable queue owns zero
++            // and survives database replacement.
+             queue: QueueScreen::new(ListId::new(0)).map_err(|_| QuestionFault::Exhausted)?,
+             notice: String::new(),
+         },
+@@ -340,58 +520,11 @@ pub fn connect(
+ pub fn track_key(id: i64) -> ItemKey {
+     ItemKey::new(id as u64)
+ }
+-pub fn recordings(version: Version) -> ListId {
+-    ListId::new(version.generation + 1)
+-}
+-
+-impl ItemSource for SearchPage {
+-    fn len(&self) -> usize {
+-        self.rows.len()
+-    }
+-    fn key(&self, index: usize) -> ItemKey {
+-        track_key(self.rows[index].id)
+-    }
+-    fn index_of(&self, key: ItemKey) -> Option<usize> {
+-        self.rows.iter().position(|row| track_key(row.id) == key)
+-    }
+-    fn row(&self, index: usize) -> El<'_> {
+-        let track = &self.rows[index];
+-        let id = track.id;
+-        let generation = self.input.version.generation;
+-        #[cfg(feature = "audio")]
+-        let play = button("Play now")
+-            .name(format!("Play {} now", track.title))
+-            .w(76)
+-            .h(32)
+-            .on_click(move |model: &mut Library| model.play_now(id, generation));
+-        #[cfg(not(feature = "audio"))]
+-        let play = text("");
+-        row((
+-            button("Prepare")
+-                .name(format!("Prepare {}", track.title))
+-                .w(64)
+-                .h(32)
+-                .on_click(move |model: &mut Library| model.prepare(id, generation)),
+-            play,
+-            text(track.title.as_str()).w(240).p(6),
+-            text(track.artist_names.as_deref().unwrap_or("Unknown artist"))
+-                .w(170)
+-                .p(6),
+-        ))
+-        .h(32)
+-        .bg(if index.is_multiple_of(2) {
+-            rgb(0xf1f5f9)
+-        } else {
+-            Color::WHITE
+-        })
+-    }
+-}
+ 
+ impl View for Library {
+     fn sources() -> Sources<Self> {
+         Sources::new()
+-            .direct(Self::QUERY)
+-            .field(Self::SORT)
++            .direct_component(Self::BROWSER)
+             .field(Self::VERSION)
+             .field(Self::SELECTED)
+             .direct_component(Self::QUEUE)
+@@ -399,33 +532,55 @@ impl View for Library {
+     fn view(&self) -> El<'_> {
+         column((
+             text("Hummingbird — Library").font_size(24),
+-            text_input(&self.query)
+-                .name("Search recordings")
+-                .description("Search titles and artists")
+-                .w(650)
+-                .h(32),
+-            row((
+-                button("Title")
+-                    .p(8)
+-                    .on_click(Self::SORT.update(|sort| *sort = Sort::Title)),
+-                button("Artist")
+-                    .p(8)
+-                    .on_click(Self::SORT.update(|sort| *sort = Sort::Artist)),
+-                button("Longest first")
+-                    .p(8)
+-                    .on_click(Self::SORT.update(|sort| *sort = Sort::Longest)),
+-            ))
+-            .gap(8),
++            Self::BROWSER.view(self),
+             self.results
+                 .project(|page| {
+-                    column((
+-                        text(format!(
++                    #[cfg(feature = "audio")]
++                    let play_all = {
++                        if page.rows.is_empty() {
++                            text("")
++                        } else {
++                            let input = page.input().clone();
++                            button("Play all")
++                                .name(format!("Play all {}", page.title))
++                                .on_click(move |model: &mut Library| {
++                                    model.play_listing(input.clone(), None)
++                                })
++                        }
++                    };
++                    #[cfg(not(feature = "audio"))]
++                    let play_all = text("");
++                    let collections = if page.collections.rows.is_empty() {
++                        text("")
++                    } else {
++                        uniform_list(page.collection_list(), &page.collections, 32)
++                            .name("Collections")
++                            .w(650)
++                            .h(96)
++                    };
++                    let summary = if matches!(
++                        page.input().route,
++                        Route::Albums | Route::Artists | Route::Playlists
++                    ) {
++                        format!(
++                            "{} {}",
++                            page.collections.rows.len(),
++                            page.input().route.label().to_lowercase()
++                        )
++                    } else {
++                        format!(
+                             "{} recordings for ‘{}’ — {}",
+                             page.rows.len(),
+-                            page.input.query,
+-                            page.input.sort.label()
+-                        )),
+-                        uniform_list(recordings(page.input.version), page, 32)
++                            page.input().query,
++                            page.input().sort_label()
++                        )
++                    };
++                    column((
++                        text(format!("{} — {}", page.input().route.label(), page.title)),
++                        text(summary),
++                        play_all,
++                        collections,
++                        uniform_list(page.track_list(), &page.rows, 32)
+                             .name("Library recordings")
+                             .w(650)
+                             .h(160),
+diff --git a/reactivity/ports/hummingbird/src/browser.rs b/reactivity/ports/hummingbird/src/browser.rs
+new file mode 100644
+index 0000000000..4bbc1420b9
+--- /dev/null
++++ b/reactivity/ports/hummingbird/src/browser.rs
+@@ -0,0 +1,405 @@
++//! One collection browser state and one pure worker input; no page entities.
++use crate::{
++    app::Library,
++    search::{SearchInput, Sort, SourceError, Version},
++};
++use gpui::prelude::*;
++use triomphe::Arc;
++
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub enum Route {
++    #[default]
++    Tracks,
++    Albums,
++    Artists,
++    Playlists,
++    Album(i64),
++    Artist(i64),
++    Playlist(i64),
++}
++impl Route {
++    pub fn label(self) -> &'static str {
++        match self {
++            Self::Tracks => "Tracks",
++            Self::Albums => "Albums",
++            Self::Artists => "Artists",
++            Self::Playlists => "Playlists",
++            Self::Album(_) => "Album",
++            Self::Artist(_) => "Artist",
++            Self::Playlist(_) => "Playlist",
++        }
++    }
++}
++/// The private domain counter is never restored from navigation history.
++/// Both list domains are replaced before changing to unrelated items.
++#[derive(Debug)]
++pub struct Navigation {
++    history: Vec<Route>,
++    cursor: usize,
++    domain: u64,
++    exhausted: bool,
++}
++impl Navigation {
++    fn new() -> Self {
++        Self {
++            history: vec![Route::Tracks],
++            cursor: 0,
++            domain: 1,
++            exhausted: false,
++        }
++    }
++    pub fn current(&self) -> Route {
++        self.history[self.cursor]
++    }
++    pub fn len(&self) -> usize {
++        self.history.len()
++    }
++    pub fn is_empty(&self) -> bool {
++        self.history.is_empty()
++    }
++    pub fn can_back(&self) -> bool {
++        self.cursor != 0
++    }
++    pub fn can_forward(&self) -> bool {
++        self.cursor + 1 < self.history.len()
++    }
++    fn renew(&mut self) -> bool {
++        if let Some(next) = self.domain.checked_add(2).filter(|n| *n < u64::MAX) {
++            self.domain = next;
++            true
++        } else {
++            self.exhausted = true;
++            false
++        }
++    }
++    pub fn navigate(&mut self, route: Route) {
++        if !self.renew() {
++            return;
++        }
++        self.history.truncate(self.cursor + 1);
++        if self.history.len() == 100 {
++            self.history.remove(0);
++        }
++        self.history.push(route);
++        self.cursor = self.history.len() - 1;
++    }
++    pub fn back(&mut self) {
++        if self.can_back() && self.renew() {
++            self.cursor -= 1;
++        }
++    }
++    pub fn forward(&mut self) {
++        if self.can_forward() && self.renew() {
++            self.cursor += 1;
++        }
++    }
++    pub fn refresh(&mut self) {
++        self.renew();
++    }
++    pub fn track_list(&self) -> ListId {
++        ListId::new(self.domain)
++    }
++}
++#[derive(Debug)]
++pub struct Browser {
++    navigation: Signal<Navigation>,
++    query: Signal<String>,
++    sort: Signal<Sort>,
++}
++impl Browser {
++    pub const NAV: Source<Self, Navigation> = Source::new(
++        FieldId::new(1),
++        "navigation",
++        |m| &m.navigation,
++        |m| &mut m.navigation,
++    );
++    pub const QUERY: Source<Self, String> =
++        Source::new(FieldId::new(2), "search", |m| &m.query, |m| &mut m.query);
++    pub const SORT: Source<Self, Sort> =
++        Source::new(FieldId::new(3), "sort", |m| &m.sort, |m| &mut m.sort);
++    pub(crate) fn new() -> Self {
++        Self {
++            navigation: Signal::new(Navigation::new()),
++            query: Signal::new(String::new()),
++            sort: Signal::new(Sort::Title),
++        }
++    }
++    pub fn navigation(&self) -> &Navigation {
++        &self.navigation
++    }
++    pub fn revisions(&self) -> [u32; 3] {
++        [
++            self.navigation.revision().get(),
++            self.query.revision().get(),
++            self.sort.revision().get(),
++        ]
++    }
++    pub fn matches(&self, input: &Input, version: Version) -> bool {
++        self.navigation.current() == input.route
++            && self.navigation.domain == input.domain
++            && *self.query == input.search.query
++            && *self.sort == input.search.sort
++            && version == input.search.version
++    }
++    pub(crate) fn navigate(&mut self, route: Route) {
++        self.navigation.navigate(route);
++    }
++    pub(crate) fn source_changed(&mut self) {
++        self.navigation.refresh();
++    }
++}
++impl View for Browser {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .field(Self::NAV)
++            .direct(Self::QUERY)
++            .field(Self::SORT)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            row((
++                button("Tracks").on_click(Self::NAV.update(|nav| nav.navigate(Route::Tracks))),
++                button("Albums").on_click(Self::NAV.update(|nav| nav.navigate(Route::Albums))),
++                button("Artists").on_click(Self::NAV.update(|nav| nav.navigate(Route::Artists))),
++                button("Playlists")
++                    .on_click(Self::NAV.update(|nav| nav.navigate(Route::Playlists))),
++                button("Back").on_click(Self::NAV.update(Navigation::back)),
++                button("Forward").on_click(Self::NAV.update(Navigation::forward)),
++                button("Refresh").on_click(Self::NAV.update(Navigation::refresh)),
++            ))
++            .gap(8),
++            text_input(&self.query)
++                .name("Search recordings")
++                .description("Search this collection")
++                .w(650)
++                .h(32),
++            if matches!(
++                self.navigation.current(),
++                Route::Albums | Route::Artists | Route::Playlists
++            ) {
++                text(match self.navigation.current() {
++                    Route::Albums => "Album title order",
++                    Route::Artists => "Artist name order",
++                    _ => "Playlist order",
++                })
++            } else {
++                row((
++                    button(match self.navigation.current() {
++                        Route::Album(_) => "Track order",
++                        Route::Playlist(_) => "Playlist order",
++                        _ => "Title",
++                    })
++                    .on_click(Self::SORT.update(|sort| *sort = Sort::Title)),
++                    button("Artist").on_click(Self::SORT.update(|sort| *sort = Sort::Artist)),
++                    button("Longest first")
++                        .on_click(Self::SORT.update(|sort| *sort = Sort::Longest)),
++                ))
++                .gap(8)
++            },
++            text(if self.navigation.exhausted {
++                "Navigation identity space exhausted"
++            } else {
++                ""
++            }),
++        ))
++        .gap(8)
++    }
++}
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct Input {
++    pub route: Route,
++    pub(crate) domain: u64,
++    pub search: SearchInput,
++}
++impl Input {
++    pub fn sort_label(&self) -> &'static str {
++        match (self.route, self.sort) {
++            (Route::Album(_), Sort::Title) => "Track order",
++            (Route::Playlist(_), Sort::Title) => "Playlist order",
++            _ => self.sort.label(),
++        }
++    }
++    pub fn freeze(
++        navigation: &Navigation,
++        query: &str,
++        sort: Sort,
++        version: Version,
++    ) -> Result<Arc<Self>, SourceError> {
++        Ok(Arc::new(Self {
++            route: navigation.current(),
++            domain: navigation.domain,
++            search: SearchInput::freeze(query, sort, version)?,
++        }))
++    }
++}
++impl std::ops::Deref for Input {
++    type Target = SearchInput;
++    fn deref(&self) -> &SearchInput {
++        &self.search
++    }
++}
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum RowKey {
++    Track(i64),
++    PlaylistItem { item: i64, track: i64 },
++}
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct PlayRequest {
++    pub input: Arc<Input>,
++    pub start: Option<RowKey>,
++    pub sequence: u64,
++}
++#[derive(Debug)]
++pub struct PreparedListing {
++    pub tracks: Vec<crate::queue::TrackRef>,
++    pub start: usize,
++}
++#[derive(Debug)]
++pub struct CollectionRow {
++    pub route: Route,
++    pub id: i64,
++    pub title: String,
++    pub detail: String,
++}
++pub struct TrackRows {
++    pub input: Arc<Input>,
++    pub rows: Vec<crate::query::TrackSearchRow>,
++    /// Playlist item identity is separate from recording identity. Ordinary
++    /// track pages do not allocate this lane.
++    pub playlist_items: Vec<i64>,
++}
++impl TrackRows {
++    pub fn len(&self) -> usize {
++        self.rows.len()
++    }
++    pub fn is_empty(&self) -> bool {
++        self.rows.is_empty()
++    }
++    pub fn identity(&self, index: usize) -> RowKey {
++        let track = self.rows[index].id;
++        self.playlist_items
++            .get(index)
++            .map_or(RowKey::Track(track), |item| RowKey::PlaylistItem {
++                item: *item,
++                track,
++            })
++    }
++}
++pub struct Collections {
++    pub input: Arc<Input>,
++    pub rows: Vec<CollectionRow>,
++}
++pub struct Page {
++    pub title: String,
++    pub rows: TrackRows,
++    pub collections: Collections,
++}
++impl Page {
++    pub fn input(&self) -> &Arc<Input> {
++        &self.rows.input
++    }
++    pub fn ids(&self) -> impl Iterator<Item = i64> + '_ {
++        self.rows.rows.iter().map(|row| row.id)
++    }
++    pub fn track_list(&self) -> ListId {
++        ListId::new(self.input().domain)
++    }
++    pub fn collection_list(&self) -> ListId {
++        ListId::new(self.input().domain + 1)
++    }
++}
++impl ItemSource for TrackRows {
++    fn len(&self) -> usize {
++        self.len()
++    }
++    fn key(&self, index: usize) -> ItemKey {
++        ItemKey::new(match self.identity(index) {
++            RowKey::Track(id) => id,
++            RowKey::PlaylistItem { item, .. } => item,
++        } as u64)
++    }
++    fn index_of(&self, key: ItemKey) -> Option<usize> {
++        (0..self.len()).find(|i| self.key(*i) == key)
++    }
++    fn row(&self, index: usize) -> El<'_> {
++        let track = &self.rows[index];
++        let id = track.id;
++        let generation = self.input.version.generation;
++        #[cfg(feature = "audio")]
++        let context = self.input.clone();
++        #[cfg(feature = "audio")]
++        let key = self.identity(index);
++        #[cfg(feature = "audio")]
++        let play = button("Play now")
++            .name(format!("Play {} now", track.title))
++            .w(76)
++            .h(32)
++            .on_click(move |model: &mut Library| model.play_now(id, generation));
++        #[cfg(not(feature = "audio"))]
++        let play = text("");
++        #[cfg(feature = "audio")]
++        let from = button("Play from here")
++            .name(format!("Play from {}", track.title))
++            .on_click(move |model: &mut Library| model.play_listing(context.clone(), Some(key)));
++        #[cfg(not(feature = "audio"))]
++        let from = text("");
++        row((
++            button("Prepare")
++                .name(format!("Prepare {}", track.title))
++                .w(64)
++                .h(32)
++                .on_click(move |model: &mut Library| model.prepare(id, generation)),
++            play,
++            text(track.title.as_str()).w(180).p(6),
++            text(track.artist_names.as_deref().unwrap_or("Unknown artist"))
++                .w(120)
++                .p(6),
++            from,
++        ))
++        .h(32)
++        .bg(if index.is_multiple_of(2) {
++            rgb(0xf1f5f9)
++        } else {
++            Color::WHITE
++        })
++    }
++}
++impl ItemSource for Collections {
++    fn len(&self) -> usize {
++        self.rows.len()
++    }
++    fn key(&self, index: usize) -> ItemKey {
++        ItemKey::new(self.rows[index].id as u64)
++    }
++    fn index_of(&self, key: ItemKey) -> Option<usize> {
++        self.rows.iter().position(|row| row.id as u64 == key.get())
++    }
++    fn row(&self, index: usize) -> El<'_> {
++        let item = &self.rows[index];
++        let route = item.route;
++        let input = self.input.clone();
++        row((
++            button(format!("Open {}", item.title))
++                .w(260)
++                .on_click(move |model: &mut Library| model.open_collection(&input, route)),
++            text(item.detail.as_str()).w(330),
++        ))
++        .h(32)
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn navigation_domain_exhaustion_keeps_current_route_and_never_reuses_a_new_identity() {
++        let mut navigation = Navigation::new();
++        navigation.domain = u64::MAX - 2;
++        let old = navigation.track_list();
++        navigation.navigate(Route::Albums);
++        assert!(navigation.exhausted);
++        assert_eq!(navigation.current(), Route::Tracks);
++        assert_eq!(navigation.track_list(), old);
++        assert_eq!(navigation.len(), 1);
++    }
++}
+diff --git a/reactivity/ports/hummingbird/src/collection_query.rs b/reactivity/ports/hummingbird/src/collection_query.rs
+new file mode 100644
+index 0000000000..fda4e00d1c
+--- /dev/null
++++ b/reactivity/ports/hummingbird/src/collection_query.rs
+@@ -0,0 +1,272 @@
++//! Display projections adapted from upstream album/artist/playlist SQL. The
++//! existing TrackQuery supplies credited-artist UNION and release ordering.
++use crate::{
++    browser::{
++        CollectionRow, Collections, Input, Page, PlayRequest, PreparedListing, Route, TrackRows,
++    },
++    database::Database,
++    query::{TrackColumn, TrackQuery, TrackSearchRow, tracks},
++    search::{Searcher, Sort, SourceError},
++};
++use nucleo_matcher::pattern::{CaseMatching, Normalization, Pattern};
++use rusqlite::types::Value;
++use triomphe::Arc;
++
++pub(crate) fn page(
++    database: &Database,
++    searcher: &mut Searcher,
++    input: Arc<Input>,
++    cancelled: impl FnMut() -> bool,
++) -> Option<Result<Page, SourceError>> {
++    let _snapshot = match database.connection().unchecked_transaction() {
++        Ok(snapshot) => snapshot,
++        Err(error) => return Some(Err(error.into())),
++    };
++    read_page(database, searcher, input, cancelled)
++}
++fn read_page(
++    database: &Database,
++    searcher: &mut Searcher,
++    input: Arc<Input>,
++    mut cancelled: impl FnMut() -> bool,
++) -> Option<Result<Page, SourceError>> {
++    if input.query.len() > crate::search::MAX_QUERY_BYTES {
++        return Some(Err(SourceError::QueryTooLong));
++    }
++    if cancelled() {
++        return None;
++    }
++    let result = (|| {
++        let connection = database.connection();
++        let title = match input.route {
++            Route::Album(id) => connection
++                .query_row("SELECT title FROM album WHERE id=?", [id], |row| row.get(0))
++                .optional()?,
++            Route::Artist(id) => connection
++                .query_row("SELECT name FROM artist WHERE id=?", [id], |row| row.get(0))
++                .optional()?,
++            Route::Playlist(id) => connection
++                .query_row("SELECT name FROM playlist WHERE id=?", [id], |row| {
++                    row.get(0)
++                })
++                .optional()?,
++            route => Some(route.label().to_owned()),
++        }
++        .ok_or(SourceError::MissingCollection)?;
++        let Some(rows) = read_tracks(database, searcher, input.clone(), &mut cancelled) else {
++            return Ok(None);
++        };
++        let rows = rows?;
++        let mut collections = Collections {
++            input: input.clone(),
++            rows: Vec::new(),
++        };
++        let collection_query = match input.route {
++            Route::Albums | Route::Artist(_) => Some((
++                "SELECT album.id,album.title,COALESCE(NULLIF(album.artist_display_override,''),(SELECT GROUP_CONCAT(artist.name, ', ') FROM album_artist JOIN artist ON artist.id=album_artist.artist_id WHERE album_artist.album_id=album.id),'Unknown artist') FROM album",
++                "album.title_sortable COLLATE NOCASE ASC,album.id ASC",
++                0,
++            )),
++            Route::Artists => Some((
++                "SELECT artist.id,artist.name,CAST((SELECT COUNT(*) FROM album_artist WHERE album_artist.artist_id=artist.id) AS TEXT)||' albums' FROM artist WHERE EXISTS(SELECT 1 FROM album_artist WHERE album_artist.artist_id=artist.id) OR EXISTS(SELECT 1 FROM track_artist WHERE track_artist.artist_id=artist.id)",
++                "artist.name_sortable COLLATE NOCASE ASC,artist.id ASC",
++                1,
++            )),
++            Route::Playlists => Some((
++                "SELECT playlist.id,playlist.name,CAST(COUNT(playlist_item.id) AS TEXT)||' tracks' FROM playlist LEFT JOIN playlist_item ON playlist_item.playlist_id=playlist.id",
++                "playlist.position ASC,playlist.id ASC",
++                2,
++            )),
++            _ => None,
++        };
++        if let Some((sql, order, kind)) = collection_query {
++            let mut sql = sql.to_owned();
++            let mut values = Vec::<Value>::new();
++            if let Route::Artist(id) = input.route {
++                sql.push_str(" WHERE EXISTS(SELECT 1 FROM album_artist WHERE album_artist.album_id=album.id AND album_artist.artist_id=?)");
++                values.push(id.into());
++            }
++            if kind == 2 {
++                sql.push_str(" GROUP BY playlist.id");
++            }
++            sql.push_str(" ORDER BY ");
++            sql.push_str(order);
++            let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
++            let mut statement = connection.prepare(&sql)?;
++            let mut cursor = statement.query(rusqlite::params_from_iter(values))?;
++            while let Some(row) = cursor.next()? {
++                if cancelled() {
++                    return Ok(None);
++                }
++                let title = row.get_ref(1)?.as_str().map_err(text_error)?;
++                let detail = row.get_ref(2)?.as_str().map_err(text_error)?;
++                if searcher.matches(&pattern, title, Some(detail)) {
++                    let id = row.get(0)?;
++                    collections.rows.push(CollectionRow {
++                        route: match kind {
++                            0 => Route::Album(id),
++                            1 => Route::Artist(id),
++                            _ => Route::Playlist(id),
++                        },
++                        id,
++                        title: title.to_owned(),
++                        detail: detail.to_owned(),
++                    });
++                }
++            }
++        }
++        Ok(Some(Page {
++            title,
++            rows,
++            collections,
++        }))
++    })();
++    if cancelled() {
++        None
++    } else {
++        match result {
++            Ok(None) => None,
++            Ok(Some(page)) => Some(Ok(page)),
++            Err(error) => Some(Err(error)),
++        }
++    }
++}
++use rusqlite::OptionalExtension;
++fn read_tracks(
++    database: &Database,
++    searcher: &mut Searcher,
++    input: Arc<Input>,
++    mut cancelled: impl FnMut() -> bool,
++) -> Option<Result<TrackRows, SourceError>> {
++    if input.query.len() > crate::search::MAX_QUERY_BYTES {
++        return Some(Err(SourceError::QueryTooLong));
++    }
++    if cancelled() {
++        return None;
++    }
++    let result = (|| {
++        let connection = database.connection();
++        let mut rows = TrackRows {
++            input: input.clone(),
++            rows: Vec::new(),
++            playlist_items: Vec::new(),
++        };
++        match input.route {
++            Route::Tracks | Route::Album(_) | Route::Artist(_) => {
++                let base = match input.route {
++                    Route::Album(id) => tracks().from_album(id),
++                    Route::Artist(id) => tracks().from_artist(id),
++                    _ => tracks(),
++                };
++                let query = ordered(base, &input);
++                let Some(page) =
++                    searcher.search_rows(database, &input.search, query, &mut cancelled)
++                else {
++                    return Ok(None);
++                };
++                rows.rows = page?;
++            }
++            Route::Playlist(id) => {
++                let order = match input.sort {
++                    Sort::Title => "playlist_item.position ASC, playlist_item.id ASC",
++                    Sort::Artist => {
++                        "COALESCE(album.artist_sort, track.artist_sort, track.artist_names) COLLATE NOCASE ASC, track.title_sortable ASC, playlist_item.id ASC"
++                    }
++                    Sort::Longest => {
++                        "track.duration DESC, track.title_sortable COLLATE NOCASE ASC, playlist_item.id ASC"
++                    }
++                };
++                let sql = format!(
++                    "SELECT track.id,track.title,track.artist_names,track.album_id,playlist_item.id FROM playlist_item JOIN track ON track.id=playlist_item.track_id LEFT JOIN album ON album.id=track.album_id WHERE playlist_item.playlist_id=? ORDER BY {order}"
++                );
++                let pattern =
++                    Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
++                let mut statement = connection.prepare(&sql)?;
++                let mut cursor = statement.query([id])?;
++                while let Some(row) = cursor.next()? {
++                    if cancelled() {
++                        return Ok(None);
++                    }
++                    let title = row.get_ref(1)?.as_str().map_err(text_error)?;
++                    let artist = row.get_ref(2)?.as_str_or_null().map_err(text_error)?;
++                    if searcher.matches(&pattern, title, artist) {
++                        rows.rows.push(TrackSearchRow {
++                            id: row.get(0)?,
++                            title: title.to_owned(),
++                            artist_names: artist.map(str::to_owned),
++                            album_id: row.get(3)?,
++                        });
++                        rows.playlist_items.push(row.get(4)?);
++                    }
++                }
++            }
++            _ => {}
++        }
++        Ok(Some(rows))
++    })();
++    if cancelled() {
++        None
++    } else {
++        result.transpose()
++    }
++}
++fn ordered(query: TrackQuery, input: &Input) -> TrackQuery {
++    match input.sort {
++        Sort::Title if matches!(input.route, Route::Album(_)) => {
++            query.sort_asc(TrackColumn::TrackNumber)
++        }
++        Sort::Title => query.sort_asc(TrackColumn::Title),
++        Sort::Artist => query.sort_asc(TrackColumn::Artist),
++        Sort::Longest => query.sort_desc(TrackColumn::Length),
++    }
++}
++/// Materialize queue metadata only after an explicit action. The page query is
++/// shared with display, so filter/order and selected occurrence cannot drift.
++pub(crate) fn prepare(
++    database: &Database,
++    searcher: &mut Searcher,
++    request: &PlayRequest,
++) -> Result<PreparedListing, SourceError> {
++    let _snapshot = database.connection().unchecked_transaction()?;
++    let rows = read_tracks(database, searcher, request.input.clone(), || false)
++        .expect("uncancelled listing")?;
++    let start = match request.start {
++        Some(key) => (0..rows.len())
++            .find(|i| rows.identity(*i) == key)
++            .ok_or(SourceError::MissingCollection)?,
++        None => 0,
++    };
++    if rows.is_empty() {
++        return Err(SourceError::NoSelection);
++    }
++    let mut prepared = Vec::with_capacity(rows.len());
++    let mut statement = database
++        .connection()
++        .prepare("SELECT location FROM track WHERE id=?")?;
++    for row in rows.rows {
++        let path: String = statement
++            .query_row([row.id], |result| result.get(0))
++            .optional()?
++            .ok_or(SourceError::MissingTrack(row.id))?;
++        let path = std::path::PathBuf::from(path);
++        prepared.push(crate::queue::TrackRef::new(crate::queue::Track {
++            available_when_prepared: path.exists(),
++            path,
++            track_id: Some(row.id),
++            album_id: row.album_id,
++            title: row.title,
++        }));
++    }
++    if !prepared[start].available_when_prepared {
++        return Err(SourceError::MissingTrack(prepared[start].track_id.unwrap()));
++    }
++    Ok(PreparedListing {
++        tracks: prepared,
++        start,
++    })
++}
++
++fn text_error(error: rusqlite::types::FromSqlError) -> SourceError {
++    rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(error))
++        .into()
++}
+diff --git a/reactivity/ports/hummingbird/src/database.rs b/reactivity/ports/hummingbird/src/database.rs
+index 5180ffda44..5a3d92a2fb 100644
+--- a/reactivity/ports/hummingbird/src/database.rs
++++ b/reactivity/ports/hummingbird/src/database.rs
+@@ -17,6 +17,30 @@ impl Database {
+         database.seed()?;
+         Ok(database)
+     }
++    /// Real relational browser fixture, separate from the original nine-track
++    /// transcript. Multiple credits, empty collections and tied playlist ranks
++    /// deliberately exercise collection identity rather than display indices.
++    pub fn collection_fixture() -> Result<Self> {
++        let database = Self::fixture()?;
++        database.connection.execute_batch("BEGIN IMMEDIATE;
++            INSERT INTO artist(id,name,name_sortable) VALUES(30,'Μαρία','Μαρία'),(31,'No recordings','No recordings'),(32,'Guest','Guest');
++            INSERT INTO album(id,title,title_sortable,artist_sort,artist_display_override) VALUES(40,'Album Z','Album Z','Guest','Guest');
++            INSERT INTO album_artist(album_id,artist_id) VALUES(30,30),(10,2);
++            INSERT INTO track_artist(track_id,artist_id) VALUES(44,1),(44,30),(44,32);
++            INSERT INTO playlist(id,name,type,position) VALUES(2,'Evening Καφέ',0,2),(3,'Empty playlist',0,3);
++            INSERT INTO playlist_item(id,playlist_id,track_id,position) VALUES(701,2,90,10),(702,2,44,0),(703,2,11,10);
++        ")?;
++        for (id, extension) in [(44, "wav"), (90, "flac"), (11, "mp3")] {
++            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
++                .join(format!("assets/audio/stereo.{extension}"));
++            database.connection.execute(
++                "UPDATE track SET location=? WHERE id=?",
++                params![path.to_str().unwrap(), id],
++            )?;
++        }
++        database.connection.execute_batch("COMMIT")?;
++        Ok(database)
++    }
+     /// Existing Hummingbird libraries are read without migrating or seeding them.
+     pub fn open_read_only(path: &Path) -> Result<Self> {
+         Ok(Self {
+diff --git a/reactivity/ports/hummingbird/src/lib.rs b/reactivity/ports/hummingbird/src/lib.rs
+index 7426fd83d5..cb19333196 100644
+--- a/reactivity/ports/hummingbird/src/lib.rs
++++ b/reactivity/ports/hummingbird/src/lib.rs
+@@ -3,6 +3,8 @@ pub mod app;
+ pub mod application;
+ #[cfg(feature = "audio")]
+ pub mod audio;
++pub mod browser;
++mod collection_query;
+ pub mod database;
+ mod migrations;
+ pub mod query;
+diff --git a/reactivity/ports/hummingbird/src/queue.rs b/reactivity/ports/hummingbird/src/queue.rs
+index 877bc66dff..cb663bbbf2 100644
+--- a/reactivity/ports/hummingbird/src/queue.rs
++++ b/reactivity/ports/hummingbird/src/queue.rs
+@@ -303,6 +303,9 @@ impl Queue {
+         }
+         Ok(first)
+     }
++    pub(crate) fn input_key(&self, index: usize) -> Option<EntryKey> {
++        self.sheet.entries.get(index).map(|entry| entry.key)
++    }
+     pub fn replace(
+         &mut self,
+         tracks: Vec<TrackRef>,
+diff --git a/reactivity/ports/hummingbird/src/queue_audio.rs b/reactivity/ports/hummingbird/src/queue_audio.rs
+index 9f257e8abc..049263d163 100644
+--- a/reactivity/ports/hummingbird/src/queue_audio.rs
++++ b/reactivity/ports/hummingbird/src/queue_audio.rs
+@@ -82,6 +82,38 @@ impl QueueScreen {
+         self.notice.clear();
+         Ok(true)
+     }
++    pub(crate) fn play_listing_if(
++        &mut self,
++        listing: crate::browser::PreparedListing,
++        revision: u64,
++    ) -> Result<bool, AudioError> {
++        let Some(audio) = &mut self.audio else {
++            return Ok(false);
++        };
++        let receipt = audio.handle.replace_if(revision, || {
++            self.playback.replace_at(
++                listing.tracks,
++                listing.start,
++                &super::available,
++                &mut super::draw,
++            )?;
++            Ok(self.playback.plan().unwrap().clone())
++        })?;
++        let Some(receipt) = receipt else {
++            return Ok(false);
++        };
++        audio.receipt = receipt;
++        audio.playing = true;
++        audio.status = Status {
++            state: State::Opening,
++            position_ms: 0,
++            duration_ms: None,
++        };
++        self.selected.clear();
++        self.anchor = None;
++        self.notice.clear();
++        Ok(true)
++    }
+     pub fn audio_status(&self) -> Option<Status> {
+         self.audio.as_ref().map(|audio| audio.status)
+     }
+diff --git a/reactivity/ports/hummingbird/src/queue_playback.rs b/reactivity/ports/hummingbird/src/queue_playback.rs
+index 07687252d2..7c0be54c60 100644
+--- a/reactivity/ports/hummingbird/src/queue_playback.rs
++++ b/reactivity/ports/hummingbird/src/queue_playback.rs
+@@ -300,6 +300,32 @@ impl PlaybackQueue {
+         self.install(serial, available);
+         Ok(())
+     }
++    /// Replace the complete listing and start its selected occurrence. Every
++    /// returned error precedes replacement; jumping the fresh key is infallible.
++    pub fn replace_at(
++        &mut self,
++        tracks: Vec<TrackRef>,
++        start: usize,
++        available: &impl Fn(&Track) -> bool,
++        draw: &mut impl FnMut(usize) -> usize,
++    ) -> Result<(), QueueError> {
++        if !tracks.get(start).is_some_and(|track| available(track)) {
++            return Err(QueueError::Unavailable);
++        }
++        let serial = self.next_serial()?;
++        self.queue.replace(tracks, draw)?;
++        // Replacement allocates the new entries in input order even when its
++        // playback permutation is shuffled. Select that occurrence, not a rank.
++        let key = self
++            .queue
++            .input_key(start)
++            .expect("replacement index was checked");
++        self.queue
++            .jump(key, &|_| true)
++            .expect("fresh replacement key is retained");
++        self.install(serial, available);
++        Ok(())
++    }
+     pub fn clear(
+         &mut self,
+         keep_current: bool,
+@@ -380,6 +406,10 @@ mod tests {
+             player.remove(&[key], &|_| true),
+             Err(QueueError::PlanExhausted)
+         );
++        assert_eq!(
++            player.replace_at(vec![track.clone()], 0, &|_| true, &mut |_| 0),
++            Err(QueueError::PlanExhausted)
++        );
+         assert_eq!(
+             player.replace(vec![track], &|_| true, &mut |_| 0),
+             Err(QueueError::PlanExhausted)
+diff --git a/reactivity/ports/hummingbird/src/search.rs b/reactivity/ports/hummingbird/src/search.rs
+index ec1248d985..9e4a0e54d0 100644
+--- a/reactivity/ports/hummingbird/src/search.rs
++++ b/reactivity/ports/hummingbird/src/search.rs
+@@ -32,7 +32,7 @@ pub struct Version {
+     pub revision: u64,
+     pub generation: u64,
+ }
+-#[derive(Clone, Debug)]
++#[derive(Clone, Debug, PartialEq, Eq)]
+ pub struct SearchInput {
+     pub query: String,
+     pub sort: Sort,
+@@ -56,6 +56,7 @@ pub enum SourceError {
+     Sqlite(rusqlite::Error),
+     QueryTooLong,
+     MissingTrack(i64),
++    MissingCollection,
+     SourceAuthorityUnavailable,
+     SourceClosed,
+     SourceNotCommitted,
+@@ -71,6 +72,9 @@ impl fmt::Display for SourceError {
+             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
+             Self::NoSelection => f.write_str("No recording selected"),
+             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
++            Self::MissingCollection => {
++                f.write_str("This collection or occurrence is no longer available")
++            }
+             Self::SourceNotCommitted => {
+                 f.write_str("Commit the source database before attaching it")
+             }
+@@ -127,40 +131,56 @@ impl Searcher {
+         &mut self,
+         database: &Database,
+         input: SearchInput,
+-        mut cancelled: impl FnMut() -> bool,
++        cancelled: impl FnMut() -> bool,
+     ) -> Option<Result<SearchPage, SourceError>> {
++        let query = match input.sort {
++            Sort::Title => tracks().sort_asc(TrackColumn::Title),
++            Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
++            Sort::Longest => tracks().sort_desc(TrackColumn::Length),
++        };
++        self.search_rows(database, &input, query, cancelled)
++            .map(|result| result.map(|rows| SearchPage { input, rows }))
++    }
++    pub(crate) fn search_rows(
++        &mut self,
++        database: &Database,
++        input: &SearchInput,
++        query: crate::query::TrackQuery,
++        mut cancelled: impl FnMut() -> bool,
++    ) -> Option<Result<Vec<TrackSearchRow>, SourceError>> {
+         if cancelled() {
+             return None;
+         }
+         if input.query.len() > MAX_QUERY_BYTES {
+             return Some(Err(SourceError::QueryTooLong));
+         }
+-        let query = match input.sort {
+-            Sort::Title => tracks().sort_asc(TrackColumn::Title),
+-            Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
+-            Sort::Longest => tracks().sort_desc(TrackColumn::Length),
+-        };
+         let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
+         let rows = match query.for_search().fetch_matching(
+             database.connection(),
+             &mut cancelled,
+-            |title, artists| {
+-                self.corpus.clear();
+-                self.corpus.push_str(title);
+-                self.corpus.push(' ');
+-                self.corpus.push_str(artists.unwrap_or_default());
+-                pattern
+-                    .score(
+-                        Utf32Str::new(&self.corpus, &mut self.utf32),
+-                        &mut self.matcher,
+-                    )
+-                    .is_some()
+-            },
++            |title, artists| self.matches(&pattern, title, artists),
+         ) {
+             Ok(Some(rows)) => rows,
+             Ok(None) => return None,
+             Err(error) => return Some(Err(error.into())),
+         };
+-        Some(Ok(SearchPage { input, rows }))
++        Some(Ok(rows))
++    }
++    pub(crate) fn matches(
++        &mut self,
++        pattern: &Pattern,
++        title: &str,
++        artists: Option<&str>,
++    ) -> bool {
++        self.corpus.clear();
++        self.corpus.push_str(title);
++        self.corpus.push(' ');
++        self.corpus.push_str(artists.unwrap_or_default());
++        pattern
++            .score(
++                Utf32Str::new(&self.corpus, &mut self.utf32),
++                &mut self.matcher,
++            )
++            .is_some()
+     }
+ }
+diff --git a/reactivity/ports/hummingbird/src/transcript.rs b/reactivity/ports/hummingbird/src/transcript.rs
+index 7fa5d986d1..e7fcd4872f 100644
+--- a/reactivity/ports/hummingbird/src/transcript.rs
++++ b/reactivity/ports/hummingbird/src/transcript.rs
+@@ -1,6 +1,6 @@
+ //! Executable app transcript using only the ordinary public window/service API.
+ use crate::{
+-    app::{Library, PreparationStatus, connect, recordings, track_key},
++    app::{Library, PreparationStatus, connect, track_key},
+     database::Database,
+     search::Sort,
+     worker::Worker,
+@@ -47,7 +47,7 @@ fn ids<L: LaneSet<Library>>(win: &Win<Library, L>) -> Vec<i64> {
+         .expect("current query ready")
+ }
+ fn play_target<L: LaneSet<Library>>(win: &Win<Library, L>, id: i64) -> Target {
+-    let list_id = win.with_model(|model| recordings(*model.version)).unwrap();
++    let list_id = win.with_model(|model| model.recording_list()).unwrap();
+     let row = win
+         .list_item(win.list(list_id).unwrap(), track_key(id))
+         .unwrap();
+@@ -75,7 +75,7 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
+     settle(&mut win, &worker)?;
+     let initial_ids = ids(&win);
+     assert_eq!(initial_ids, [1, 13, 11, 21, 3, 2, 90, 44, 1001]);
+-    let list = win.list(recordings(Default::default()))?;
++    let list = win.list(win.with_model(Library::recording_list)?)?;
+     let realized_rows = win.list_state(list)?.realized_rows;
+     assert_eq!(realized_rows, 5);
+     assert!(win.inspect()?.nodes.len() < 100);
+@@ -108,7 +108,10 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
+     // through the ordinary public input before admitting that old completion.
+     win.type_text(win.input(), "Alpha")?;
+     worker.checkpoint()?.recv_timeout(Duration::from_secs(10))?;
+-    win.set(Library::QUERY, "cafe".into())?;
++    win.set(
++        Library::BROWSER.source(&crate::browser::Browser::QUERY),
++        "cafe".into(),
++    )?;
+     settle(&mut win, &worker)?;
+     let matched_ids = ids(&win);
+     assert_eq!(matched_ids, [13, 11, 21]);
+@@ -155,8 +158,14 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
+     worker
+         .replace_database(Database::fixture()?)?
+         .recv_timeout(Duration::from_secs(10))??;
+-    win.set(Library::QUERY, String::new())?;
+-    win.set(Library::SORT, Sort::Title)?;
++    win.set(
++        Library::BROWSER.source(&crate::browser::Browser::QUERY),
++        String::new(),
++    )?;
++    win.set(
++        Library::BROWSER.source(&crate::browser::Browser::SORT),
++        Sort::Title,
++    )?;
+     settle(&mut win, &worker)?;
+     assert_eq!(ids(&win), initial_ids);
+     assert_eq!(win.click(stale_source_row), Err(Error::StaleTarget));
+diff --git a/reactivity/ports/hummingbird/src/worker.rs b/reactivity/ports/hummingbird/src/worker.rs
+index 6e48bfc194..901e559ce7 100644
+--- a/reactivity/ports/hummingbird/src/worker.rs
++++ b/reactivity/ports/hummingbird/src/worker.rs
+@@ -1,9 +1,10 @@
+ //! One explicit, bounded application service; no UI/runtime/entity executor.
+ use crate::{
++    browser::{Input, Page, PlayRequest, PreparedListing},
+     database::Database,
+     query::tracks,
+     queue::{Track, TrackRef},
+-    search::{SearchInput, SearchPage, Searcher, SourceError, Version},
++    search::{Searcher, SourceError, Version},
+ };
+ use gpui::{Completion, Inbox, Remote, StartError};
+ use std::{
+@@ -31,6 +32,10 @@ pub struct Selection {
+ }
+ #[derive(Debug)]
+ pub enum LibraryEvent {
++    ListingPrepared {
++        request: PlayRequest,
++        result: Result<PreparedListing, SourceError>,
++    },
+     Prepared {
+         selection: Selection,
+         result: Result<TrackRef, SourceError>,
+@@ -44,7 +49,8 @@ pub enum LibraryEvent {
+     },
+ }
+ enum Command {
+-    Search(SearchInput, Completion<SearchPage, SourceError>),
++    Browse(triomphe::Arc<Input>, Completion<Page, SourceError>),
++    PrepareListing(PlayRequest),
+     Prepare(Selection),
+     PrepareAndPlay(Selection),
+     Prepend(mpsc::SyncSender<Result<Version, SourceError>>),
+@@ -125,12 +131,15 @@ impl WorkerHandle {
+         drop(version);
+         Ok(Some(result))
+     }
+-    pub fn search(
++    pub fn browse(
+         &self,
+-        input: SearchInput,
+-        completion: Completion<SearchPage, SourceError>,
++        input: triomphe::Arc<Input>,
++        completion: Completion<Page, SourceError>,
+     ) -> Result<(), StartError> {
+-        self.enqueue(Command::Search(input, completion))
++        self.enqueue(Command::Browse(input, completion))
++    }
++    pub fn prepare_listing(&self, request: PlayRequest) -> Result<(), StartError> {
++        self.enqueue(Command::PrepareListing(request))
+     }
+     /// Prepare data only. Playback authority belongs to the receiving owner.
+     pub fn prepare(&self, selection: Selection) -> Result<(), StartError> {
+@@ -181,17 +190,32 @@ impl Worker {
+                         Err(_) => break,
+                     };
+                     match command {
+-                        Command::Search(input, completion) => {
++                        Command::Browse(input, completion) => {
+                             let _ = completion.run_cancellable(input, |input, cancellation| {
+-                                if cancellation.is_cancelled() {
+-                                    return None;
+-                                }
+                                 if input.version != version {
+                                     return Some(Err(SourceError::OutdatedSource));
+                                 }
+-                                searcher.search(&database, input, || cancellation.is_cancelled())
++                                crate::collection_query::page(
++                                    &database,
++                                    &mut searcher,
++                                    input,
++                                    || cancellation.is_cancelled(),
++                                )
+                             });
+                         }
++                        Command::PrepareListing(request) => {
++                            let result = if request.input.version != version {
++                                Err(SourceError::OutdatedSource)
++                            } else {
++                                crate::collection_query::prepare(&database, &mut searcher, &request)
++                            };
++                            if updates
++                                .try_send(LibraryEvent::ListingPrepared { request, result })
++                                .is_err()
++                            {
++                                break;
++                            }
++                        }
+                         Command::Prepare(selection) | Command::PrepareAndPlay(selection) => {
+                             let result = prepare(&database, version, selection);
+                             if updates
+diff --git a/reactivity/ports/hummingbird/tests/browser.rs b/reactivity/ports/hummingbird/tests/browser.rs
+new file mode 100644
+index 0000000000..1695e3e27e
+--- /dev/null
++++ b/reactivity/ports/hummingbird/tests/browser.rs
+@@ -0,0 +1,166 @@
++use gpui::{LaneSet, Role, Win, WindowOptions};
++use hummingbird_gpui_port::{
++    app::{Library, connect},
++    browser::{Browser, Route},
++    database::Database,
++    transcript::settle,
++    worker::Worker,
++};
++
++fn open() -> (Worker, Win<Library, impl LaneSet<Library>>) {
++    let (worker, inbox) = Worker::new(Database::collection_fixture().unwrap()).unwrap();
++    let (model, questions) = connect(worker.handle()).unwrap();
++    let mut owner = Win::with_questions(
++        model,
++        questions,
++        WindowOptions {
++            size: [720, 1100],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++    .with_inbox_status(inbox, Library::receive)
++    .unwrap();
++    settle(&mut owner, &worker).unwrap();
++    (worker, owner)
++}
++fn route<L: LaneSet<Library>>(win: &mut Win<Library, L>, route: Route) {
++    win.update(|model| model.navigate(route)).unwrap();
++}
++fn ids<L: LaneSet<Library>>(win: &Win<Library, L>) -> Vec<i64> {
++    let result = win.with_model(|m| m.results).unwrap();
++    win.with_ready(result, |page| page.ids().collect())
++        .unwrap()
++        .unwrap()
++}
++#[test]
++fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_without_play() {
++    let (worker, mut win) = open();
++    win.activate(win.role(Role::Button).name("Albums").one().unwrap())
++        .unwrap();
++    settle(&mut win, &worker).unwrap();
++    let result = win.with_model(|m| m.results).unwrap();
++    assert_eq!(
++        win.with_ready(result, |page| page
++            .collections
++            .rows
++            .iter()
++            .map(|r| r.id)
++            .collect::<Vec<_>>())
++            .unwrap()
++            .unwrap(),
++        [10, 20, 40, 30]
++    );
++    assert_eq!(
++        win.with_ready(result, |page| page
++            .collections
++            .rows
++            .iter()
++            .find(|row| row.id == 40)
++            .unwrap()
++            .detail
++            .clone())
++            .unwrap()
++            .unwrap(),
++        "Guest"
++    );
++    win.activate(win.button("Open Album")).unwrap();
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(ids(&win), [1, 3]);
++    win.activate(win.button("Back")).unwrap();
++    settle(&mut win, &worker).unwrap();
++    win.activate(win.button("Forward")).unwrap();
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(ids(&win), [1, 3]);
++    route(&mut win, Route::Artist(1));
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(ids(&win), [1, 3, 2, 44]);
++    assert_eq!(
++        win.with_ready(result, |page| page
++            .collections
++            .rows
++            .iter()
++            .map(|r| r.id)
++            .collect::<Vec<_>>())
++            .unwrap()
++            .unwrap(),
++        [10]
++    );
++    route(&mut win, Route::Artists);
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(
++        win.with_ready(result, |page| page
++            .collections
++            .rows
++            .iter()
++            .map(|r| r.id)
++            .collect::<Vec<_>>())
++            .unwrap()
++            .unwrap(),
++        [1, 2, 32, 30]
++    );
++    route(&mut win, Route::Playlists);
++    settle(&mut win, &worker).unwrap();
++    assert!(win.contains_text("Open Evening Καφέ").unwrap());
++    win.activate(win.button("Open Evening Καφέ")).unwrap();
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(ids(&win), [44, 90, 11]);
++    assert_eq!(
++        win.with_ready(result, |page| page.rows.playlist_items.clone())
++            .unwrap()
++            .unwrap(),
++        [702, 701, 703]
++    );
++    win.set(Library::BROWSER.source(&Browser::QUERY), "μαρ".into())
++        .unwrap();
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(ids(&win), [44]);
++    win.set(Library::BROWSER.source(&Browser::QUERY), String::new())
++        .unwrap();
++    route(&mut win, Route::Album(40));
++    settle(&mut win, &worker).unwrap();
++    assert!(ids(&win).is_empty());
++    route(&mut win, Route::Playlist(3));
++    settle(&mut win, &worker).unwrap();
++    assert!(ids(&win).is_empty());
++    route(&mut win, Route::Album(999));
++    settle(&mut win, &worker).unwrap();
++    assert!(
++        win.contains_text("This collection or occurrence is no longer available")
++            .unwrap()
++    );
++    assert!(
++        win.with_model(|m| m.queue.playback().queue().is_empty())
++            .unwrap()
++    );
++    drop(win);
++    worker.finish().unwrap();
++}
++#[test]
++fn navigation_history_is_bounded_and_new_branch_discards_forward_routes() {
++    let (worker, mut win) = open();
++    for id in 0..105 {
++        route(&mut win, Route::Album(id));
++    }
++    assert_eq!(
++        win.with_model(|m| m.browser().navigation().len()).unwrap(),
++        100
++    );
++    win.activate(win.button("Back")).unwrap();
++    assert!(
++        win.with_model(|m| m.browser().navigation().can_forward())
++            .unwrap()
++    );
++    route(&mut win, Route::Tracks);
++    assert!(
++        !win.with_model(|m| m.browser().navigation().can_forward())
++            .unwrap()
++    );
++    assert_eq!(
++        win.with_model(|m| m.browser().navigation().current())
++            .unwrap(),
++        Route::Tracks
++    );
++    drop(win);
++    worker.finish().unwrap();
++}
+diff --git a/reactivity/ports/hummingbird/tests/library_audio.rs b/reactivity/ports/hummingbird/tests/library_audio.rs
+index 81e8b9c763..768dbf23ac 100644
+--- a/reactivity/ports/hummingbird/tests/library_audio.rs
++++ b/reactivity/ports/hummingbird/tests/library_audio.rs
+@@ -2,7 +2,7 @@
+ //! Complete Library/Sources -> SQLite worker -> queue -> real audio service.
+ use gpui::{Error, LaneSet, Remote, Role, Target, Win, WindowOptions};
+ use hummingbird_gpui_port::{
+-    app::{Library, PreparationStatus, connect, recordings, track_key},
++    app::{Library, PreparationStatus, connect, track_key},
+     audio::{
+         AudioError, AudioService, Event, Format, Token,
+         output::{OutputProvider, OutputStream, PlaybackGate},
+@@ -10,7 +10,7 @@ use hummingbird_gpui_port::{
+     database::Database,
+     queue_view::AudioState,
+     transcript::settle,
+-    worker::Worker,
++    worker::{Selection, Worker},
+ };
+ use std::{
+     collections::VecDeque,
+@@ -128,7 +128,10 @@ type Owners<L> = (
+     Win<Library, L>,
+ );
+ fn owner() -> Owners<impl LaneSet<Library>> {
+-    let (worker, inbox) = Worker::new(database()).unwrap();
++    owner_with(database())
++}
++fn owner_with(database: Database) -> Owners<impl LaneSet<Library>> {
++    let (worker, inbox) = Worker::new(database).unwrap();
+     let (mut model, questions) = connect(worker.handle()).unwrap();
+     let capture = Arc::new(Mutex::new(Capture::default()));
+     let (audio, audio_inbox) = AudioService::with_output(Provider(capture.clone())).unwrap();
+@@ -163,7 +166,7 @@ fn owner() -> Owners<impl LaneSet<Library>> {
+     (worker, audio, capture, inject, win)
+ }
+ fn row_prepare<L: LaneSet<Library>>(win: &mut Win<Library, L>, id: i64) -> Target {
+-    let domain = win.with_model(|model| recordings(*model.version)).unwrap();
++    let domain = win.with_model(|model| model.recording_list()).unwrap();
+     let list = win.list(domain).unwrap();
+     win.scroll_to_key(list, track_key(id)).unwrap();
+     let row = win.list_item(list, track_key(id)).unwrap();
+@@ -1188,6 +1191,220 @@ fn public_prepare_and_play_command_cannot_turn_a_pure_owner_prepare_into_playbac
+     close(win, audio, worker);
+ }
+ 
++fn playlist<L: LaneSet<Library>>(
++    win: &mut Win<Library, L>,
++    worker: &Worker,
++) -> triomphe::Arc<hummingbird_gpui_port::browser::Input> {
++    win.update(|model| model.navigate(hummingbird_gpui_port::browser::Route::Playlist(2)))
++        .unwrap();
++    settle(win, worker).unwrap();
++    let reader = win.with_model(|model| model.results).unwrap();
++    win.with_ready(reader, |page| page.input().clone())
++        .unwrap()
++        .unwrap()
++}
++#[test]
++fn context_play_replaces_full_sql_order_at_selected_occurrence_once_and_obeys_output_credits() {
++    use hummingbird_gpui_port::browser::{PlayRequest, RowKey};
++    let (worker, audio, capture, _, mut win) = owner_with(Database::collection_fixture().unwrap());
++    let input = playlist(&mut win, &worker);
++    assert!(capture.lock().unwrap().opened.is_empty());
++    win.activate(
++        win.role(Role::Button)
++            .name("Prepare Καλημέρα")
++            .one()
++            .unwrap(),
++    )
++    .unwrap();
++    settle(&mut win, &worker).unwrap();
++    assert!(capture.lock().unwrap().opened.is_empty());
++    let key = RowKey::PlaylistItem {
++        item: 701,
++        track: 90,
++    };
++    win.activate(
++        win.role(Role::Button)
++            .name("Play from Untitled")
++            .one()
++            .unwrap(),
++    )
++    .unwrap();
++    let sequence = win.with_model(|model| model.selected.sequence).unwrap();
++    worker
++        .handle()
++        .prepare_listing(PlayRequest {
++            input: input.clone(),
++            start: Some(key),
++            sequence,
++        })
++        .unwrap();
++    settle(&mut win, &worker).unwrap();
++    until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
++    let plan = win
++        .with_model(|model| model.queue.playback().plan().unwrap().clone())
++        .unwrap();
++    assert_eq!(plan.current.track.track_id, Some(90));
++    assert_eq!(plan.lookahead.as_ref().unwrap().track.track_id, Some(11));
++    assert_eq!(
++        win.with_model(|model| (0..model.queue.playback().queue().len())
++            .map(|i| model
++                .queue
++                .playback()
++                .queue()
++                .at(i)
++                .unwrap()
++                .track
++                .track_id
++                .unwrap())
++            .collect::<Vec<_>>())
++            .unwrap(),
++        [44, 90, 11]
++    );
++    assert_eq!(
++        win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
++            .unwrap(),
++        plan.stamp()
++    );
++    assert!(capture.lock().unwrap().queue.is_empty());
++    capture.lock().unwrap().capacity = 64;
++    until(&mut win, &capture, false, |_, sink| sink.queue.len() == 128);
++    assert_eq!(capture.lock().unwrap().queue.len(), 128);
++    win.activate(win.button("Stop")).unwrap();
++    until(&mut win, &capture, false, |_, sink| sink.drops == 1);
++    close(win, audio, worker);
++}
++#[test]
++fn context_results_reject_route_filter_selection_source_and_cloned_transport_changes_before_queue_mutation()
++ {
++    use hummingbird_gpui_port::browser::{Browser, Route};
++    for control in [
++        "route",
++        "filter",
++        "sort",
++        "refresh",
++        "selection",
++        "source",
++        "import",
++        "stop",
++        "pause",
++        "seek",
++    ] {
++        let (worker, audio, capture, _, mut win) =
++            owner_with(Database::collection_fixture().unwrap());
++        playlist(&mut win, &worker);
++        win.activate(
++            win.role(Role::Button)
++                .name("Play all Evening Καφέ")
++                .one()
++                .unwrap(),
++        )
++        .unwrap();
++        settle(&mut win, &worker).unwrap();
++        until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
++        let stamp = win
++            .with_model(|model| model.queue.playback().plan().unwrap().stamp())
++            .unwrap();
++        win.activate(
++            win.role(Role::Button)
++                .name("Play from Untitled")
++                .one()
++                .unwrap(),
++        )
++        .unwrap();
++        worker
++            .checkpoint()
++            .unwrap()
++            .recv_timeout(Duration::from_secs(10))
++            .unwrap();
++        match control {
++            "route" => {
++                win.update(|model| {
++                    model.navigate(Route::Tracks);
++                    model.navigate(Route::Playlist(2));
++                })
++                .unwrap();
++            }
++            "filter" => {
++                win.set(Library::BROWSER.source(&Browser::QUERY), "μαρ".into())
++                    .unwrap();
++                win.set(Library::BROWSER.source(&Browser::QUERY), String::new())
++                    .unwrap();
++            }
++            "sort" => {
++                win.set(
++                    Library::BROWSER.source(&Browser::SORT),
++                    hummingbird_gpui_port::search::Sort::Longest,
++                )
++                .unwrap();
++                win.set(
++                    Library::BROWSER.source(&Browser::SORT),
++                    hummingbird_gpui_port::search::Sort::Title,
++                )
++                .unwrap();
++            }
++            "refresh" => {
++                win.activate(win.button("Refresh")).unwrap();
++            }
++            "import" => {
++                worker
++                    .prepend_fixture_track()
++                    .unwrap()
++                    .recv_timeout(Duration::from_secs(10))
++                    .unwrap()
++                    .unwrap();
++            }
++            "selection" => {
++                let mut selected = *win.read(Library::SELECTED).unwrap();
++                selected.id = Some(11);
++                win.set(Library::SELECTED, selected).unwrap();
++            }
++            "source" => {
++                worker
++                    .replace_database(Database::collection_fixture().unwrap())
++                    .unwrap()
++                    .recv_timeout(Duration::from_secs(10))
++                    .unwrap()
++                    .unwrap();
++            }
++            "stop" => {
++                audio.handle().clone().stop().unwrap();
++            }
++            "pause" => {
++                audio.handle().clone().set_playing(false).unwrap();
++            }
++            "seek" => {
++                audio.handle().clone().seek(0).unwrap();
++            }
++            _ => unreachable!(),
++        }
++        settle(&mut win, &worker).unwrap();
++        assert_eq!(
++            win.with_model(|model| model.queue.playback().plan().unwrap().stamp())
++                .unwrap(),
++            stamp,
++            "{control} edited queue"
++        );
++        assert_eq!(
++            win.with_model(|model| model.queue.playback().queue().len())
++                .unwrap(),
++            3
++        );
++        assert_ne!(
++            win.with_model(|model| model.preparation_status()).unwrap(),
++            PreparationStatus::Pending
++        );
++        if control == "seek" {
++            until(&mut win, &capture, false, |_, sink| sink.opened.len() == 2);
++        }
++        assert_eq!(
++            capture.lock().unwrap().opened.len(),
++            if control == "seek" { 2 } else { 1 },
++            "{control} output opens"
++        );
++        close(win, audio, worker);
++    }
++}
++
+ #[test]
+ fn published_source_replace_rejects_buffered_named_play_before_owner_notification() {
+     let (worker, audio, capture, _, mut win) = owner();
+@@ -1311,3 +1528,164 @@ fn source_import_keeps_buffered_existing_named_play_authorized_but_finish_retire
+         }
+     }
+ }
++
++#[test]
++fn context_play_rejects_prequeued_public_wrong_occurrence_input_sequence_and_pure_prepare_replies()
++{
++    use hummingbird_gpui_port::browser::{PlayRequest, RowKey};
++    for collision in ["occurrence", "input", "sequence", "pure"] {
++        let (worker, audio, capture, _, mut win) =
++            owner_with(Database::collection_fixture().unwrap());
++        let input = playlist(&mut win, &worker);
++        if collision == "pure" {
++            worker
++                .handle()
++                .prepare(Selection {
++                    id: Some(90),
++                    generation: 0,
++                    sequence: 1,
++                })
++                .unwrap();
++        } else {
++            let mut wrong = PlayRequest {
++                input,
++                start: Some(RowKey::PlaylistItem {
++                    item: 701,
++                    track: 90,
++                }),
++                sequence: 1,
++            };
++            match collision {
++                "occurrence" => {
++                    wrong.start = Some(RowKey::PlaylistItem {
++                        item: 703,
++                        track: 11,
++                    })
++                }
++                "input" => {
++                    let mut input = (*wrong.input).clone();
++                    input.search.sort = hummingbird_gpui_port::search::Sort::Longest;
++                    wrong.input = triomphe::Arc::new(input);
++                }
++                "sequence" => wrong.sequence = 2,
++                _ => unreachable!(),
++            }
++            worker.handle().prepare_listing(wrong).unwrap();
++        }
++        worker
++            .checkpoint()
++            .unwrap()
++            .recv_timeout(Duration::from_secs(10))
++            .unwrap();
++        win.activate(
++            win.role(Role::Button)
++                .name("Play from Untitled")
++                .one()
++                .unwrap(),
++        )
++        .unwrap();
++        worker
++            .checkpoint()
++            .unwrap()
++            .recv_timeout(Duration::from_secs(10))
++            .unwrap();
++        win.deliver_ready(1).unwrap();
++        assert!(
++            win.with_model(|model| model.queue.playback().queue().is_empty())
++                .unwrap(),
++            "{collision} consumed the intent"
++        );
++        assert_eq!(
++            win.with_model(Library::preparation_status).unwrap(),
++            PreparationStatus::Pending
++        );
++        settle(&mut win, &worker).unwrap();
++        until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
++        assert_eq!(
++            win.with_model(|model| model
++                .queue
++                .playback()
++                .plan()
++                .unwrap()
++                .current
++                .track
++                .track_id)
++                .unwrap(),
++            Some(90)
++        );
++        assert_eq!(
++            win.with_model(|model| model.queue.playback().queue().len())
++                .unwrap(),
++            3
++        );
++        close(win, audio, worker);
++    }
++}
++
++#[test]
++fn worker_finish_retires_buffered_context_intent_before_terminal_notification() {
++    let (worker, audio, capture, _, mut win) = owner_with(Database::collection_fixture().unwrap());
++    playlist(&mut win, &worker);
++    win.activate(
++        win.role(Role::Button)
++            .name("Play all Evening Καφέ")
++            .one()
++            .unwrap(),
++    )
++    .unwrap();
++    worker
++        .checkpoint()
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap();
++    worker.finish().unwrap();
++    win.deliver_ready(32).unwrap();
++    assert!(
++        win.with_model(|model| model.queue.playback().queue().is_empty())
++            .unwrap()
++    );
++    assert!(capture.lock().unwrap().opened.is_empty());
++    assert_eq!(
++        win.with_model(Library::preparation_status).unwrap(),
++        PreparationStatus::Failed
++    );
++    assert!(win.contains_text("Library worker closed").unwrap());
++    drop(win);
++    assert!(audio.finish(Duration::from_secs(2)));
++}
++
++#[test]
++fn context_prepare_missing_selected_path_does_not_replace_queue_or_open_output() {
++    let database = Database::collection_fixture().unwrap();
++    database
++        .connection()
++        .execute(
++            "UPDATE track SET location='/missing/context-selected.wav' WHERE id=90",
++            [],
++        )
++        .unwrap();
++    let (worker, audio, capture, _, mut win) = owner_with(database);
++    playlist(&mut win, &worker);
++    win.activate(
++        win.role(Role::Button)
++            .name("Play from Untitled")
++            .one()
++            .unwrap(),
++    )
++    .unwrap();
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(
++        win.with_model(Library::preparation_status).unwrap(),
++        PreparationStatus::Failed
++    );
++    assert!(
++        win.with_model(|model| model.queue.playback().queue().is_empty())
++            .unwrap()
++    );
++    assert!(capture.lock().unwrap().opened.is_empty());
++    assert!(
++        win.contains_text("Recording 90 is no longer available")
++            .unwrap()
++    );
++    close(win, audio, worker);
++}
+diff --git a/reactivity/ports/hummingbird/tests/preparation.rs b/reactivity/ports/hummingbird/tests/preparation.rs
+index cdf72f4041..07b8c15b08 100644
+--- a/reactivity/ports/hummingbird/tests/preparation.rs
++++ b/reactivity/ports/hummingbird/tests/preparation.rs
+@@ -1,6 +1,6 @@
+ use gpui::{LaneSet, Role, StartError, Win, WindowOptions};
+ use hummingbird_gpui_port::{
+-    app::{Library, PreparationStatus, connect, recordings, track_key},
++    app::{Library, PreparationStatus, connect, track_key},
+     database::Database,
+     queue::TrackRef,
+     transcript::settle,
+@@ -26,9 +26,7 @@ fn open() -> (Worker, Win<Library, impl LaneSet<Library>>) {
+     (worker, owner)
+ }
+ fn choose<L: LaneSet<Library>>(owner: &mut Win<Library, L>, id: i64) {
+-    let domain = owner
+-        .with_model(|model| recordings(*model.version))
+-        .unwrap();
++    let domain = owner.with_model(|model| model.recording_list()).unwrap();
+     let list = owner.list(domain).unwrap();
+     owner.scroll_to_key(list, track_key(id)).unwrap();
+     let item = owner.list_item(list, track_key(id)).unwrap();
+diff --git a/reactivity/ports/hummingbird/tests/queue_consumer.rs b/reactivity/ports/hummingbird/tests/queue_consumer.rs
+index 569d51f262..f94f44bbe2 100644
+--- a/reactivity/ports/hummingbird/tests/queue_consumer.rs
++++ b/reactivity/ports/hummingbird/tests/queue_consumer.rs
+@@ -18,7 +18,7 @@ fn queue_control<L: gpui::LaneSet<Library>>(
+     }
+ }
+ use hummingbird_gpui_port::{
+-    app::{Library, connect, recordings, track_key},
++    app::{Library, connect, track_key},
+     database::Database,
+     transcript::settle,
+     worker::Worker,
+@@ -113,7 +113,9 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
+     .with_inbox_status(inbox, Library::receive)
+     .unwrap();
+     settle(&mut owner, &worker).unwrap();
+-    let list = owner.list(recordings(Default::default())).unwrap();
++    let list = owner
++        .list(owner.with_model(Library::recording_list).unwrap())
++        .unwrap();
+     owner.scroll_to_key(list, track_key(44)).unwrap();
+     let item = owner.list_item(list, track_key(44)).unwrap();
+     owner
+diff --git a/reactivity/ports/hummingbird/tests/queue_playback.rs b/reactivity/ports/hummingbird/tests/queue_playback.rs
+index 238fb8eb6d..596150edd2 100644
+--- a/reactivity/ports/hummingbird/tests/queue_playback.rs
++++ b/reactivity/ports/hummingbird/tests/queue_playback.rs
+@@ -260,3 +260,50 @@ fn queue_and_plan_carriers_are_measured_without_claiming_a_stack_peak() {
+         assert_eq!(size_of::<Option<Plan>>(), 48);
+     }
+ }
++
++#[test]
++fn replacing_a_listing_selects_input_occurrence_under_shuffle_and_rejects_errors_before_mutation() {
++    let mut player = playback();
++    let old = player.plan().unwrap().end_of_stream();
++    let old_len = player.queue().len();
++    let before = player.plan().unwrap().stamp();
++    assert!(
++        player
++            .replace_at(vec![track(4)], 1, &available, &mut draw)
++            .is_err()
++    );
++    assert!(
++        player
++            .replace_at(vec![track(4)], 0, &|_| false, &mut draw)
++            .is_err()
++    );
++    assert_eq!(player.queue().len(), old_len);
++    assert_eq!(player.plan().unwrap().stamp(), before);
++    player.toggle_shuffle(&available, &mut draw).unwrap();
++    player
++        .replace_at(vec![track(4), track(5), track(4)], 2, &available, &mut draw)
++        .unwrap();
++    let selected = player.plan().unwrap().current.key;
++    assert_eq!(player.plan().unwrap().current.track.track_id, Some(4));
++    assert_eq!(
++        selected,
++        (0..3)
++            .map(|i| player.queue().at(i).unwrap().key)
++            .max()
++            .unwrap()
++    );
++    assert!(!player.end_of_stream(old, &available, &mut draw).unwrap());
++    // Both identical track values survive as distinct queue occurrences.
++    assert_eq!(
++        (0..3)
++            .filter(|i| player.queue().at(*i).unwrap().track.track_id == Some(4))
++            .count(),
++        2
++    );
++    assert_eq!(
++        (0..3)
++            .filter(|i| player.queue().at(*i).unwrap().key == selected)
++            .count(),
++        1
++    );
++}
+diff --git a/reactivity/ports/hummingbird/tests/transcript.rs b/reactivity/ports/hummingbird/tests/transcript.rs
+index dcf5fe225b..8516e5c4e8 100644
+--- a/reactivity/ports/hummingbird/tests/transcript.rs
++++ b/reactivity/ports/hummingbird/tests/transcript.rs
+@@ -59,7 +59,12 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
+         .unwrap();
+     assert_eq!(committed.revision, 1);
+     assert_eq!(owner.with_model(|model| model.version.revision).unwrap(), 0);
+-    owner.set(Library::QUERY, "Arrival".into()).unwrap();
++    owner
++        .set(
++            Library::BROWSER.source(&hummingbird_gpui_port::browser::Browser::QUERY),
++            "Arrival".into(),
++        )
++        .unwrap();
+     settle(&mut owner, &worker).unwrap();
+     assert_eq!(
+         owner.question_status(results).unwrap(),
+@@ -67,7 +72,7 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
+     );
+     assert_eq!(
+         owner
+-            .with_ready(results, |page| page.input.version.revision)
++            .with_ready(results, |page| page.input().version.revision)
+             .unwrap(),
+         None
+     );
+@@ -81,7 +86,7 @@ fn committed_database_revision_cannot_be_mislabelled_before_its_inbox_notificati
+     assert_eq!(
+         owner
+             .with_ready(results, |page| (
+-                page.input.version.revision,
++                page.input().version.revision,
+                 page.ids().collect::<Vec<_>>()
+             ))
+             .unwrap(),

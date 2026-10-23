@@ -1,0 +1,249 @@
+diff --git a/reactivity/ports/hummingbird/src/app.rs b/reactivity/ports/hummingbird/src/app.rs
+index 1c16fcda7d..17e55c1722 100644
+--- a/reactivity/ports/hummingbird/src/app.rs
++++ b/reactivity/ports/hummingbird/src/app.rs
+@@ -37,6 +37,7 @@ enum Preparation {
+         selection: Selection,
+         play_revision: Option<u64>,
+         play_edits: Option<[u32; 3]>,
++        version: Version,
+     },
+     Ready {
+         selection: Selection,
+@@ -198,6 +199,7 @@ impl Library {
+                 selection,
+                 play_revision,
+                 play_edits,
++                ..
+             } if play_edits.is_none_or(|edits| self.browser.revisions() == edits)
+                 && self.current_selection(*selection)
+                 && play_revision.is_none_or(|revision| self.audio_revision() == Some(revision)) =>
+@@ -271,7 +273,8 @@ impl Library {
+                     }
+                     Ok(listing) => {
+                         #[cfg(feature = "audio")]
+-                        match self.queue.play_listing_if(listing, revision) {
++                        match self.worker.with_current_version(request.input.version,||self.queue.play_listing_if(listing,revision)) {
++                            Ok(Some(result))=>match result {
+                             Ok(true) => {
+                                 self.preparation = Preparation::ListingPlayed { request, edits }
+                             }
+@@ -283,6 +286,10 @@ impl Library {
+                                     error: error.to_string(),
+                                 }
+                             }
++                        }
++                            },
++                            Ok(None)=>{},
++                            Err(error)=>self.preparation=Preparation::ListingFailed {request,edits,error:error.to_string()},
+                         }
+                         #[cfg(not(feature = "audio"))]
+                         let _ = (listing, revision);
+@@ -311,12 +318,13 @@ impl Library {
+             LibraryEvent::Prepared { selection, result } => {
+                 // Public worker callers choose their own request numbers.
+                 // Match the full recording/source identity issued by this owner.
+-                let (selection, play_revision) = match &self.preparation {
++                let (selection, play_revision,version) = match &self.preparation {
+                     Preparation::Pending {
+                         selection: pending,
+                         play_revision,
++                        version,
+                         ..
+-                    } if *pending == selection => (*pending, *play_revision),
++                    } if *pending == selection => (*pending, *play_revision,*version),
+                     _ => return,
+                 };
+                 if self.preparation_status() != PreparationStatus::Pending {
+@@ -336,7 +344,8 @@ impl Library {
+                         self.preparation = Preparation::Canceled;
+                         #[cfg(feature = "audio")]
+                         if let Some(revision) = play_revision {
+-                            match self.queue.play_now_if(&track, revision) {
++                            match self.worker.with_current_version(version,||self.queue.play_now_if(&track,revision)) {
++                                Ok(Some(result))=>match result {
+                                 Ok(true) => {}
+                                 Ok(false) => return,
+                                 Err(error) => {
+@@ -346,10 +355,15 @@ impl Library {
+                                     };
+                                     return;
+                                 }
++                                },
++                                Ok(None)=>return,
++                                Err(error)=>{
++                                    self.preparation=Preparation::Failed {selection,error:error.to_string()};return;
++                                }
+                             }
+                         }
+                         #[cfg(not(feature = "audio"))]
+-                        let _ = play_revision;
++                        let _ = (play_revision,version);
+                         self.preparation = Preparation::Ready { selection, track };
+                     }
+                 }
+@@ -393,6 +407,7 @@ impl Library {
+             selection,
+             play_revision,
+             play_edits: play_revision.map(|_| self.browser.revisions()),
++            version:*self.version,
+         };
+         let result = if play_revision.is_some() {
+             self.worker.prepare_and_play(selection)
+diff --git a/reactivity/ports/hummingbird/src/database.rs b/reactivity/ports/hummingbird/src/database.rs
+index ee91bd3f0b..93f2c37a8f 100644
+--- a/reactivity/ports/hummingbird/src/database.rs
++++ b/reactivity/ports/hummingbird/src/database.rs
+@@ -162,11 +162,10 @@ impl Database {
+         Ok(())
+     }
+     pub(crate) fn prepend_fixture_track(&mut self) -> Result<TrackSearchRow> {
++        let transaction=self.connection.unchecked_transaction()?;
+         self.insert_track(5000, "A New Arrival", None, Some("New Artist"), 220, None)?;
+-        Ok(crate::query::tracks()
+-            .by_id(5000)
+-            .for_search()
+-            .fetch_rows(&self.connection)?
+-            .remove(0))
++        let row=crate::query::tracks().by_id(5000).for_search().fetch_rows(&self.connection)?.remove(0);
++        transaction.commit()?;
++        Ok(row)
+     }
+ }
+diff --git a/reactivity/ports/hummingbird/src/search.rs b/reactivity/ports/hummingbird/src/search.rs
+index 9e5d2bfe08..ecf6c9d49e 100644
+--- a/reactivity/ports/hummingbird/src/search.rs
++++ b/reactivity/ports/hummingbird/src/search.rs
+@@ -57,6 +57,7 @@ pub enum SourceError {
+     QueryTooLong,
+     MissingTrack(i64),
+     MissingCollection,
++    SourceAuthorityUnavailable,
+     NoSelection,
+     OutdatedSource,
+     VersionExhausted,
+@@ -69,6 +70,7 @@ impl fmt::Display for SourceError {
+             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
+             Self::NoSelection => f.write_str("No recording selected"),
+             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
++            Self::SourceAuthorityUnavailable => f.write_str("Library source authority is unavailable"),
+             Self::MissingCollection => {
+                 f.write_str("This collection or occurrence is no longer available")
+             }
+diff --git a/reactivity/ports/hummingbird/src/worker.rs b/reactivity/ports/hummingbird/src/worker.rs
+index b72c295b7a..da90b08a59 100644
+--- a/reactivity/ports/hummingbird/src/worker.rs
++++ b/reactivity/ports/hummingbird/src/worker.rs
+@@ -7,7 +7,7 @@ use crate::{
+     search::{SearchInput, SearchPage, Searcher, SourceError, Version},
+ };
+ use gpui::{Completion, Inbox, Remote, StartError};
+-use std::{sync::mpsc, thread};
++use std::{sync::{mpsc,Arc,Mutex}, thread};
+ 
+ #[derive(Debug)]
+ pub struct QueueError(pub StartError);
+@@ -58,16 +58,29 @@ enum Command {
+ }
+ 
+ #[derive(Clone)]
+-pub struct WorkerHandle {
++pub struct WorkerHandle { shared: Arc<Producer> }
++struct Producer {
+     sender: mpsc::SyncSender<Command>,
++    version: Mutex<Version>,
+ }
+ impl WorkerHandle {
+     fn enqueue(&self, command: Command) -> Result<(), StartError> {
+-        self.sender.try_send(command).map_err(|error| match error {
++        self.shared.sender.try_send(command).map_err(|error| match error {
+             mpsc::TrySendError::Full(_) => StartError::Busy,
+             mpsc::TrySendError::Disconnected(_) => StartError::Closed,
+         })
+     }
++    /// Atomically validate the published library version around an application
++    /// edit. A snapshot read grants no authority. Do not re-enter this handle
++    /// from commit. Queue edits may scan/allocate; this is not a latency bound.
++    /// The application takes this lock before the audio desired-state lock.
++    pub fn with_current_version<R>(&self, expected:Version, commit:impl FnOnce()->R)->Result<Option<R>,SourceError> {
++        let version=self.shared.version.lock().map_err(|_|SourceError::SourceAuthorityUnavailable)?;
++        if *version!=expected {return Ok(None)}
++        let result=commit();
++        drop(version);
++        Ok(Some(result))
++    }
+     pub fn search(
+         &self,
+         input: SearchInput,
+@@ -104,12 +117,17 @@ impl Worker {
+     pub fn new(mut database: Database) -> std::io::Result<(Self, Inbox<LibraryEvent>)> {
+         let (sender, commands) = mpsc::sync_channel(4);
+         let (updates, inbox) = Remote::bounded(8);
++        let shared=Arc::new(Producer {sender,version:Mutex::new(Version::default())});
++        let producer=Arc::downgrade(&shared);
+         let thread = thread::Builder::new()
+             .name("hummingbird-library".into())
+             .spawn(move || {
+                 let mut searcher = Searcher::default();
+-                let mut version = Version::default();
+                 while let Ok(command) = commands.recv() {
++                    // Upgrade only inside this turn. Its strong sender must drop
++                    // before the next blocking recv so last-handle drop closes it.
++                    let Some(shared)=producer.upgrade() else {break};
++                    let version=match shared.version.lock() {Ok(version)=>*version,Err(_)=>break};
+                     match command {
+                         Command::Browse(input, completion) => {
+                             let _ = completion.run_cancellable(input, |input, cancellation| {
+@@ -162,14 +180,15 @@ impl Worker {
+                         Command::Prepend(reply) => {
+                             let result = next_revision(version).and_then(|next| {
+                                 let row = database.prepend_fixture_track()?;
+-                                version = next;
++                                // The single worker committed SQL before publication.
++                                *shared.version.lock().map_err(|_|SourceError::SourceAuthorityUnavailable)?=next;
+                                 updates
+                                     .try_send(LibraryEvent::Imported {
+                                         id: row.id,
+-                                        version,
++                                        version:next,
+                                     })
+                                     .map_err(|_| SourceError::NotificationsUnavailable)?;
+-                                Ok(version)
++                                Ok(next)
+                             });
+                             let failed_delivery =
+                                 matches!(result, Err(SourceError::NotificationsUnavailable));
+@@ -186,11 +205,12 @@ impl Worker {
+                                     .filter(|&generation| generation < u64::MAX)
+                                     .ok_or(SourceError::VersionExhausted)?;
+                                 database = replacement;
+-                                version = next;
++                                // The single worker committed SQL before publication.
++                                *shared.version.lock().map_err(|_|SourceError::SourceAuthorityUnavailable)?=next;
+                                 updates
+-                                    .try_send(LibraryEvent::Replaced { version })
++                                    .try_send(LibraryEvent::Replaced { version:next })
+                                     .map_err(|_| SourceError::NotificationsUnavailable)?;
+-                                Ok(version)
++                                Ok(next)
+                             });
+                             let failed_delivery =
+                                 matches!(result, Err(SourceError::NotificationsUnavailable));
+@@ -208,7 +228,7 @@ impl Worker {
+             })?;
+         Ok((
+             Self {
+-                handle: WorkerHandle { sender },
++                handle: WorkerHandle { shared },
+                 thread,
+             },
+             inbox,
+@@ -253,7 +273,7 @@ impl Worker {
+     /// revokes cloned service handles; their next enqueue returns Closed.
+     /// Ordinary Drop detaches the join handle instead of blocking a UI callback.
+     pub fn finish(self) -> thread::Result<()> {
+-        let _ = self.handle.sender.send(Command::Stop);
++        let _ = self.handle.shared.sender.send(Command::Stop);
+         drop(self.handle);
+         self.thread.join()
+     }

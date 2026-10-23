@@ -1,0 +1,57 @@
+   Compiling parley_engine v0.12.0 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/gpui)
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird)
+warning: variants `ListingPending` and `ListingPlayed` are never constructed
+  --> src/app.rs:21:5
+   |
+19 | enum Preparation {
+   |      ----------- variants in this enum
+20 |     Empty,
+21 |     ListingPending {
+   |     ^^^^^^^^^^^^^^
+...
+26 |     ListingPlayed {
+   |     ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `hummingbird-gpui-port` (lib) generated 1 warning
+warning: `hummingbird-gpui-port` (lib test) generated 1 warning (1 duplicate)
+warning: unused import: `recordings`
+ --> tests/preparation.rs:3:48
+  |
+3 |     app::{Library, PreparationStatus, connect, recordings, track_key},
+  |                                                ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `hummingbird-gpui-port` (test "preparation") generated 1 warning (run `cargo fix --test "preparation" -p hummingbird-gpui-port` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 39.58s
+     Running unittests src/lib.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-8ae8f14e77d6e045)
+
+running 4 tests
+test queue_playback::tests::exhausted_plan_sequence_rejects_mutation_but_stop_still_revokes_eos ... ok
+test queue::tests::contiguous_inserted_range_includes_maximum_key_and_never_recycles ... ok
+test queue::tests::inverse_key_merge_restores_every_small_removal_subset_without_reordering ... ok
+test app::tests::exhausted_issuance_revokes_prior_work_and_survives_source_and_public_selection_reset ... FAILED
+
+failures:
+
+---- app::tests::exhausted_issuance_revokes_prior_work_and_survives_source_and_public_selection_reset stdout ----
+
+thread 'app::tests::exhausted_issuance_revokes_prior_work_and_survives_source_and_public_selection_reset' (3638683) panicked at src/app.rs:580:56:
+called `Result::unwrap()` on an `Err` value: DeliveryError { error: List(InvalidMetrics), delivery: Some(Delivery { received: 1, applied: 1, commit: Commit { source_epoch: 2, presentation_epoch: 1, presentation_valid: true, prepared_epoch: None, changed_nodes: 0 }, more: false }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    app::tests::exhausted_issuance_revokes_prior_work_and_survives_source_and_public_selection_reset
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+error: test failed, to rerun pass `--lib`

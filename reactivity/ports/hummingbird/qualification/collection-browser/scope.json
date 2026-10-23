@@ -1,0 +1,33 @@
+{
+  "production": "ae18a3740471a0c7b1f8261713c7bcd8d94d6019",
+  "review_with_corrected_client": "00ac22ef331fbae52a3526f968ad5fe6b008fd55",
+  "baseline": "9f83f23288bbb364142ff2a82d059b6d99670a7e",
+  "shipping_app_lines": 6571,
+  "shipping_app_line_delta": 938,
+  "shipping_core_lines": 30987,
+  "core_vendor_changed_paths": [],
+  "dependency_or_lock_changes": [],
+  "startup_constructor_resources": "REGRESSION with changed UI; +20605B cold/+20925B warm retained; +530/+531 requested allocations",
+  "timing": "unmeasured; no hardware or global resource ceiling claim",
+  "functional": {
+    "default-qualified": {
+      "passed": 54,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses_including_doc": 16
+    },
+    "cpal-qualified": {
+      "passed": 125,
+      "failed": 0,
+      "ignored": 1,
+      "harnesses_including_doc": 16
+    },
+    "native-qualified": {
+      "passed": 125,
+      "failed": 0,
+      "ignored": 1,
+      "harnesses_including_doc": 16
+    }
+  },
+  "native_registry": "PASS corrected fixture label, original150s client timeout retained separately"
+}

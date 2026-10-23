@@ -1,0 +1,71 @@
+[
+  {
+    "visible": "9 recordings for \u2018\u2019 \u2014 Title",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "command": "import",
+    "reply": [
+      "ACK,import"
+    ]
+  },
+  {
+    "visible": "10 recordings for \u2018\u2019 \u2014 Title",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Albums",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/221360928884514619392"
+    ]
+  },
+  {
+    "visible": "4 albums",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Open Album",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/3578668350299653013504"
+    ]
+  },
+  {
+    "visible": "2 recordings for \u2018\u2019 \u2014 Track order",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Back",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/332041393326771929088"
+    ]
+  },
+  {
+    "visible": "4 albums",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/1807780919223536058368"
+    ]
+  },
+  {
+    "visible": "Artists",
+    "provider": [
+      ":1.107",
+      "/org/a11y/atspi/accessible/0/258254417031933722624"
+    ]
+  }
+]

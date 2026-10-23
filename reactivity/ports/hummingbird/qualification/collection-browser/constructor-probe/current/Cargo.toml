@@ -1,0 +1,27 @@
+[package]
+name = "authority-constructor-bill"
+version = "0.0.0"
+edition = "2024"
+[workspace]
+[dependencies]
+gpui = { path = "/root/gpui-hummingbird-browser-sol/reactivity/crates/gpui" }
+hummingbird-gpui-port = { path = "/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird", features = ["cpal-output"] }
+allocation-counter = "=0.8.1"
+[patch.crates-io]
+parley = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/parley" }
+parley_engine = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/parley_engine" }
+winit = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/winit" }
+wgpu = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/wgpu" }
+wgpu-hal = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/wgpu-hal" }
+wgpu-core = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/wgpu-core" }
+softbuffer = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/softbuffer" }
+accesskit_unix = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/accesskit_unix" }
+accesskit_atspi_common = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/accesskit_atspi_common" }
+accesskit = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/accesskit" }
+accesskit_consumer = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/accesskit_consumer" }
+accesskit_macos = { path = "/root/gpui-hummingbird-browser-sol/reactivity/vendor/accesskit_macos" }
+
+[dependencies.triomphe]
+version = "=0.1.17"
+default-features = false
+features = ["std"]

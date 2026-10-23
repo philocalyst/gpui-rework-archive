@@ -1,0 +1,6 @@
+    Checking cephal v0.1.1 (/root/gpui-hummingbird-browser-sol/reactivity/vendor/cephal)
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/core)
+    Checking gpui_canvas v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/canvas)
+    Checking gpui v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/crates/gpui)
+    Checking hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-browser-sol/reactivity/ports/hummingbird)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 30s
