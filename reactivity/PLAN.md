@@ -68,11 +68,27 @@ imported-buffer ownership and unwind cleanup have explicit controls. Producer
 Apple/MSVC/WebGL compilation is separate from actual Vulkan runtime proof;
 neither startup nor process-memory improvements follow from these counts.
 The [zero-source audit](docs/gpu-zero-floor-luna.md) identifies eager Core/HAL
-owners and their command-order obligations. Its first isolated implementation
-targets the unused default external-texture parameters buffer/upload. Larger
+owners and their command-order obligations. Its
+[integrated feature cut](evidence/external-params/README.md) removes the unused
+default external-texture parameters buffer/upload without a lazy state machine.
+Enabled/imported/derived-layout admission, failure injection and portable library
+compilation have separate producer controls. Correct the inherited constructor
+and staging-buffer failure cleanup defects before calling that boundary complete.
+Larger
 zero-source deferral must prove fallible admission before init-tracker mutation,
 queue ordering, outer-lock callback safety and portable cleanup; descriptor bytes
 are not process-memory measurements.
+
+The [combined inspector/capability qualification](evidence/inspector-params-main/README.md)
+now covers the actual merged source and ordinary Hummingbird/inspector clients.
+The matched caret transaction is [rejected](evidence/caret-transaction/matched-rejected/README.md)
+despite reduced transient requests; preserve the original gate and indexed path.
+For the next memory reduction, eliminate duplicated candidate ownership before
+packing more fields: prove unchanged text maps/origins during the existing row
+walk and reuse P through the current optional column, without new epoch headers
+or map retains. Price full fallback, topology contraction, failed C2 and successful
+C2 replacement. Sparse candidate rows must also preserve ordinary P code/frames
+and dense-update costs; retained-byte savings alone do not admit that experiment.
 The [combined main source](evidence/structural-main/README.md) passes 656
 GPUI/GPU cases/docs, strict all-target checks and formatting with all 2,033
 shipping/configuration/port guards intact. It does not rerun the separate native

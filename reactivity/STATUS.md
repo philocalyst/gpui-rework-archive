@@ -68,7 +68,20 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Core shipping source `8c17a763ee` integrates the rapid-focus pointer correction
+Core shipping source `a50b3b8512` combines inspector P/C picking, the playback
+occurrence correction and the vendor external-parameters capability cut with
+the qualified sibling index and rapid-pointer proof. The
+[combined main campaign](evidence/inspector-params-main/README.md) passes 673
+GPUI/GPU cases/docs (30 ignored), 35 default and 35 native Hummingbird cases,
+strict checks and formatting. All 2,113 input guards hold. Five real external
+client executions pass: both Hummingbird clients under CPU and forced Vulkan,
+then the public inspector fixture under CPU. Exact source reconstruction proves
+the inspector runtime patch retains main's prior CSR changes. These software
+driver checks establish behavior, with no timing, RSS, hardware/HDR or foreign
+runtime claim. The six libraries measure 30,681 code lines including 18 build
+lines; apps, vendors, tests, comments, blanks and evidence stay outside that bill.
+
+Earlier core shipping source `8c17a763ee` integrates the rapid-focus pointer correction
 and Hummingbird queue/controller, including the smaller playback occurrence
 stamp. The [combined main qualification](evidence/pointer-queue-main/README.md)
 passes 667 GPUI/GPU cases and docs (30 ignored), 33 default and 33 native
@@ -84,8 +97,8 @@ The later [Hummingbird occurrence correction](evidence/hummingbird-occurrence/RE
 preserves an in-flight EOS across lookahead edits without a restart flag or new
 owner field. Two old-source controls fail actual EOS acceptance; the corrected
 application passes 35 default and 35 native-feature cases, strict checks and its
-headless executable. Core source remains identical to `8c17a763ee`; this does not
-rerun or broaden the separate native-window campaign.
+headless executable. That application-only campaign kept core at `8c17a763ee`;
+the newer combined campaign above qualifies the integrated native source.
 
 Its predecessor `89aeabd539` integrates the
 [flat sibling index](evidence/sibling-reconciliation/README.md) and
@@ -139,7 +152,7 @@ from 3,816 to 3,416 bytes, with 96 additional linked text bytes and an opt-in ca
 allocation rows are unchanged. Canonical
 value and exact stored contribution can differ on the inspector shell, so a
 compact representation cannot silently conflate them. Current core source is
-[30,599 non-test code lines](evidence/core-lines/README.md), including build scripts;
+[30,681 non-test code lines](evidence/core-lines/README.md), including build scripts;
 this does not establish full feature parity or forecast final size.
 
 The unmerged [monotonic caret control](evidence/monotonic-caret-stream/control16/README.md)
@@ -149,10 +162,12 @@ retention, but loses 10–29% on warm long-text timing medians. Main keeps its
 cached index. The later [borrowed stream](evidence/monotonic-caret-stream/final-borrowed/README.md)
 also remains unadopted: its exact public transcript passes and transient owner
 requests fall, but RTL cold/warm medians regress 4.10%/3.06% in the one capture.
-The [transaction frontier](docs/text-transaction-frontier-luna.md) selects a
+The [transaction frontier](docs/text-transaction-frontier-luna.md) led to a
 separate partial visitor inside unpublished Canvas planning, keeping the public
-atomic visitor contract. Its source, admission and error-precedence proof still
-require complete owner/codegen/performance qualification.
+atomic visitor contract. Its [matched 196-observation control](evidence/caret-transaction/matched-rejected/README.md)
+is now rejected: RTL cold/warm regress 3.43%/3.17%, and the bulk geometric ratio
+regresses 0.87% despite lower transient requests. The original gate stays false;
+no resampling or API adoption follows from its correctness results.
 The [route census](docs/route-density-census-luna.md) and
 [thin-handle feasibility experiment](evidence/thin-route-feasibility/README.md)
 likewise remain evidence, not adopted unsafe storage. The
@@ -167,17 +182,24 @@ pairs and several activation cohorts. None is merged; all captures and complete
 owner costs are retained.
 The [Hummingbird producer](evidence/hummingbird-queue/README.md) retains its
 original queue/navigation and native bug evidence. The integrated correction
-keeps Session and optional Session at 32 bytes. Its separate inspector successor
-requires matching hits on P and its own pending C; it remains unadopted pending
-codegen and broader qualification. Audio output/full player and foreign-app
-compilation remain outstanding.
+keeps Session and optional Session at 32 bytes. The integrated inspector successor
+requires matching hits on P and its own pending C. Its
+[producer archive](evidence/inspector-pointer/qualified-d0/README.md) retains
+normal-P code/frame controls and independent native/foreign compilation; the
+combined campaign above qualifies main's retained CSR implementation. Audio
+output/full player and foreign-app compilation remain outstanding.
 
 The [portable GPU zero-source audit](docs/gpu-zero-floor-luna.md) identifies
 Core's eager 512 KiB zero source and separate 256 KiB DX12/GLES sources. These are
 descriptor sizes, with no new RSS or timing result. A reviewed primary-source
-record corrects an inaccessible Dawn citation. The next isolated Core spike
-defers the unused default external-texture parameters buffer/upload; zero-source
-ordering and initialization-tracker recovery remain separate proof obligations.
+record corrects an inaccessible Dawn citation. The
+[integrated capability cut](evidence/external-params/README.md) removes the unused
+default external-texture parameters buffer/upload when the feature is absent.
+Matched Vulkan constructor controls observe 43→33 Rust allocation calls and
+5,691→4,384 newly retained requested bytes; these are not RSS measurements.
+Enabled-feature behavior and foreign library compilation retain their producer
+proof. Existing constructor/staging error cleanup defects still need correction.
+Larger zero-source deferral must separately prove ordering and tracker recovery.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),
