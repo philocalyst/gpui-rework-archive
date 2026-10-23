@@ -1,6 +1,6 @@
 //! Borrowed semantic queries over the acknowledged sheet, shared by tools and
 //! application users. Queries never construct a diagnostic snapshot or mirror.
-use super::{Actions, Error, Presented, Runtime, Target, View, Win};
+use super::{Actions, Error, Presented, Runtime, Target, View, Win, rows::RowAccess};
 use crate::identity::Sites;
 use crate::{Rect, Role, remote::LaneSet};
 
@@ -633,13 +633,13 @@ mod tests {
 }
 
 // One sheet-qualified borrow for hit traversal, never retained in a row/owner.
-pub(super) struct HitSheet<'a> {
-    pub nodes: &'a [Presented],
+pub(super) struct HitSheet<'a, R = &'a [Presented]> {
+    pub nodes: R,
     pub geometry: super::geometry::GeometryView<'a>,
     pub size: [u32; 2],
     pub has_viewports: bool,
 }
-impl HitSheet<'_> {
+impl<'a, R: RowAccess<'a>> HitSheet<'a, R> {
     #[inline(always)]
     pub fn contains_window(&self, point: crate::Point) -> bool {
         Rect::new(0., 0., self.size[0] as f32, self.size[1] as f32).contains(point)
@@ -666,15 +666,15 @@ impl HitSheet<'_> {
 
 // Shared by production pointer dispatch and borrowed public/native queries.
 // Every clip/shape belongs to the supplied sheet; L cannot skip its checks.
-pub(super) fn contains_point(
-    nodes: &[Presented],
+pub(super) fn contains_point<'a>(
+    nodes: impl RowAccess<'a>,
     geometry: super::geometry::GeometryView<'_>,
     has_viewports: bool,
     index: usize,
     point: crate::Point,
 ) -> bool {
     use gpui_reactivity_core::CoordinateSpace;
-    let node = &nodes[index];
+    let node = nodes.at(index);
     if !node.bounds.contains(point)
         || !node.transform(geometry.bases()).is_some_and(|map| {
             let radius = geometry.radius(node.identity);
@@ -694,7 +694,7 @@ pub(super) fn contains_point(
     }
     let mut parent = node.parent.index();
     while let Some(index) = parent {
-        let node = &nodes[index];
+        let node = nodes.at(index);
         if matches!(
             node.kind,
             super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll

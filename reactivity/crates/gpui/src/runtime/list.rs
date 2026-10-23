@@ -364,7 +364,7 @@ impl<M: View + 'static> Runtime<M> {
         geometry: geometry::GeometryView<'_>,
     ) -> bool {
         super::query::contains_point(
-            &self.presented,
+            self.presented.as_slice(),
             geometry,
             self.metadata
                 .as_ref()

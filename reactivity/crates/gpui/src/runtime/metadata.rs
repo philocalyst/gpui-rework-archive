@@ -290,7 +290,7 @@ impl<M: View + 'static> Runtime<M> {
             }
         })
     }
-    pub(super) fn freeze_metadata(&self, nodes: &[Presented]) -> Option<Sheet> {
+    pub(super) fn freeze_metadata(&self, nodes: rows::Rows<'_>) -> Option<Sheet> {
         let mut sheet = self.metadata_sheet()?;
         let metadata = self.metadata.as_ref()?;
         sheet.viewports = metadata
@@ -299,7 +299,7 @@ impl<M: View + 'static> Runtime<M> {
             .unwrap_or(&metadata.presented)
             .viewports
             .clone();
-        for node in nodes {
+        for node in nodes.iter() {
             sheet.capture(metadata, node.identity, self.list_rows.get(&node.identity));
         }
         sheet.sort();
@@ -315,10 +315,10 @@ impl<M: View + 'static> Runtime<M> {
         let candidate = self.prepared.is_some() || !self.presentation_valid;
         let frozen = matches!(publish, Publish::All)
             .then(|| {
-                let nodes = self
-                    .prepared
-                    .as_ref()
-                    .map_or(self.presented.as_slice(), |p| p.rows(&self.presented));
+                let nodes = self.prepared.as_ref().map_or_else(
+                    || rows::Rows::from(self.presented.as_slice()),
+                    |p| p.rows(&self.presented),
+                );
                 self.freeze_metadata(nodes)
             })
             .flatten();
@@ -399,10 +399,10 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         {
-            let nodes = self
-                .prepared
-                .as_ref()
-                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented));
+            let nodes = self.prepared.as_ref().map_or_else(
+                || rows::Rows::from(self.presented.as_slice()),
+                |p| p.rows(&self.presented),
+            );
             if matches!(publish, Publish::All) {
                 if let Some(sheet) = frozen
                     && let Some(metadata) = &mut self.metadata

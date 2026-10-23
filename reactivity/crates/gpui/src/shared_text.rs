@@ -33,6 +33,9 @@ impl From<String> for SharedText {
 }
 #[cfg(test)]
 impl SharedText {
+    pub(crate) fn lease_count(&self) -> Option<usize> {
+        arcstr::ArcStr::strong_count(&self.0)
+    }
     pub fn as_ptr(&self) -> *const str {
         self.0.as_str() as *const str
     }

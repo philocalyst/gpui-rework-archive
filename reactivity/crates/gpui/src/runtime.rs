@@ -55,6 +55,8 @@ mod metadata;
 pub(crate) mod paint;
 use paint::PatchOutcome;
 mod query;
+mod rows;
+use rows::RowAccess;
 mod semantics;
 mod styles;
 pub use input::{Key, PointerEvent, PointerSession};
@@ -748,18 +750,19 @@ impl PresentedLink {
     }
 }
 const _: () = assert!(MAX_NODES < (1 << PresentedLink::PARENT_BITS));
-struct Presented {
+#[derive(Clone)]
+struct Presented<T = SharedText> {
     identity: u64,
     parent: PresentedLink,
     kind: NodeKind,
-    text: Option<SharedText>,
+    text: Option<T>,
     placement: geometry::Placement,
     basis: geometry::MapBasis,
     bounds: Rect,
     hittable: bool,
     actions: Actions,
 }
-impl Presented {
+impl<T> Presented<T> {
     fn local_rect(&self) -> Rect {
         self.placement.local_rect()
     }
@@ -780,7 +783,7 @@ impl<M> Runtime<M> {
         }
     }
     // This proof requires a full C and its own frozen columns, never KEEP/P.
-    fn candidate_hit_sheet(&self) -> Option<query::HitSheet<'_>> {
+    fn candidate_hit_sheet(&self) -> Option<query::HitSheet<'_, rows::Rows<'_>>> {
         let prepared = self.prepared.as_ref().filter(|c| !c.keeps_rows())?;
         let metadata = self.metadata.as_ref()?;
         let sheet = metadata.candidate.as_ref()?;
@@ -789,7 +792,7 @@ impl<M> Runtime<M> {
             None => geometry::GeometryView::empty(),
         };
         Some(query::HitSheet {
-            nodes: &prepared.nodes,
+            nodes: prepared.rows(&self.presented),
             geometry,
             size: prepared.dimensions(),
             has_viewports: !sheet.viewports.is_empty(),
@@ -808,7 +811,7 @@ struct Prepared {
     // extents leaves room for damage without growing this 64-bit header.
     size: [u16; 2],
     scale_factor: f32,
-    nodes: Vec<Presented>,
+    nodes: rows::CandidateRows,
     damage: DamageRegion,
 }
 
@@ -1637,7 +1640,10 @@ impl<M: View + 'static> Runtime<M> {
             && !self
                 .prepared
                 .as_ref()
-                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
+                .map_or_else(
+                    || rows::Rows::from(self.presented.as_slice()),
+                    |p| p.rows(&self.presented),
+                )
                 .iter()
                 .any(|node| node.identity == identity)
         {
@@ -2493,7 +2499,7 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(prepared) = prepared {
             self.presentation_size = prepared.dimensions();
             if !prepared.keeps_rows() {
-                self.presented = prepared.nodes;
+                prepared.nodes.acknowledge(&mut self.presented);
                 if let Some(text) = &mut self.text {
                     text.acknowledge();
                 }
@@ -2717,7 +2723,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         self.refresh_inspector(true)?;
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
-        let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
+        let mut presented = rows::Build::new(&self.presented, self.nodes.len());
         let mut geometry_records = Vec::new();
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
         let list_mode = !self.viewports.is_empty();
@@ -2762,7 +2768,7 @@ impl<M: View + 'static> Runtime<M> {
         for index in 0..self.nodes.len() {
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
-                    &presented,
+                    presented.view(),
                     geometry::Bases::new(&geometry_records),
                     &mut self.texts,
                     &mut self.layout,
@@ -3033,7 +3039,7 @@ impl<M: View + 'static> Runtime<M> {
             let link = PresentedLink::new(
                 published_parent,
                 !hittable,
-                presented.last().map(|node: &Presented| node.parent),
+                presented.last().map(|node| node.parent),
             );
             if let Some((origin, map)) = geometry {
                 text_geometry.push(text_geometry::Entry {
@@ -3044,17 +3050,16 @@ impl<M: View + 'static> Runtime<M> {
             }
             let basis = geometry::MapBasis::record(
                 transform,
-                published_parent.index().map(|index| presented[index].basis),
+                published_parent
+                    .index()
+                    .map(|index| presented.get(index).unwrap().basis),
                 &mut geometry_records,
             );
             presented.push(Presented {
                 identity: node.identity(),
                 parent: link,
                 kind: node.kind(),
-                text: node
-                    .text_slot()
-                    .get(&self.texts)
-                    .map(|text| text.value.clone()),
+                text: node.text_slot().get(&self.texts).map(|text| &text.value),
                 placement: geometry::Placement::new([rect.width, rect.height], transform),
                 basis,
                 bounds,
@@ -3076,7 +3081,7 @@ impl<M: View + 'static> Runtime<M> {
                             bases: previous_geometry.bases(),
                         }),
                         next: accessibility::RowView {
-                            row: &presented[index],
+                            row: presented.get(index).unwrap(),
                             bases: geometry::Bases::new(&geometry_records),
                         },
                     },
@@ -3104,6 +3109,9 @@ impl<M: View + 'static> Runtime<M> {
                 );
             }
         }
+        // Finish topology admission before committing any candidate column.
+        let presented = presented.finish();
+        let candidate_rows = presented.view(&self.presented);
         // Everything fallible has finished. This transfers commands; native
         // recording retains no CPU image, while same-size headless updates reuse
         // the selected output allocation. No model borrow is published.
@@ -3119,7 +3127,7 @@ impl<M: View + 'static> Runtime<M> {
                     size,
                 },
                 self.presented.len(),
-                presented.len(),
+                candidate_rows.len(),
             );
         }
         let logical_indices = &self.by_identity;
@@ -3134,7 +3142,7 @@ impl<M: View + 'static> Runtime<M> {
                             .get(identity)
                             .and_then(|index| published.get(index))
                             .and_then(|entry| entry.index())
-                            .and_then(|index| presented.get(index))
+                            .and_then(|index| candidate_rows.get(index))
                             .is_some_and(|node| node.identity == identity)
                 })
             })
@@ -3174,7 +3182,7 @@ impl<M: View + 'static> Runtime<M> {
                 let index = self.by_identity.required(identity);
                 published[index]
                     .index()
-                    .filter(|&index| presented[index].identity == identity)
+                    .filter(|&index| candidate_rows[index].identity == identity)
             });
             metadata.candidate = Some(sheet);
         }
@@ -3227,13 +3235,17 @@ impl<M: View + 'static> Runtime<M> {
         self.hit_in_sheet(self.presented_hit_sheet(), point)
     }
     #[inline(always)]
-    fn hit_in_sheet(&self, sheet: query::HitSheet<'_>, point: Point) -> Option<u64> {
+    fn hit_in_sheet<'a>(
+        &self,
+        sheet: query::HitSheet<'a, impl RowAccess<'a>>,
+        point: Point,
+    ) -> Option<u64> {
         if !sheet.contains_window(point) {
             return None;
         }
         let mut cursor = Some(sheet.hit(point)?);
         while let Some(index) = cursor {
-            let node = &sheet.nodes[index];
+            let node = sheet.nodes.at(index);
             if let Some(logical) = self.by_identity.get(node.identity)
                 && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
             {

@@ -336,14 +336,14 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn inspector_pick(&self, point: Point) -> Option<Target> {
         self.inspector_pick_in_sheet(self.presented_hit_sheet(), point)
     }
-    pub(super) fn inspector_pick_in_sheet(
+    pub(super) fn inspector_pick_in_sheet<'a>(
         &self,
-        sheet: query::HitSheet<'_>,
+        sheet: query::HitSheet<'a, impl RowAccess<'a>>,
         point: Point,
     ) -> Option<Target> {
         self.inspector_panel()?;
         // Picking selects the foremost actual shape, even without a handler.
-        let node = &sheet.nodes[sheet.hit(point)?];
+        let node = sheet.nodes.at(sheet.hit(point)?);
         let target = self.sites.target(node.identity);
         self.inspector_app_index(target).ok().map(|_| target)
     }
@@ -518,9 +518,9 @@ pub(super) struct DisplayCaptions {
     slots: [TextSlot; 2],
 }
 impl DisplayCaptions {
-    pub fn refresh(
+    pub fn refresh<'a>(
         &self,
-        candidate: &[Presented],
+        candidate: impl RowAccess<'a>,
         bases: geometry::Bases<'_>,
         texts: &mut [Option<TextSite>],
         layout: &mut LayoutTree,
@@ -750,9 +750,9 @@ pub(super) fn description<'a, M: View>(
 mod tests {
     use super::*;
     // Frozen old direct-loop oracle: no window-extent gate or compressed skip.
-    fn legacy_pick<M: View + 'static>(
+    fn legacy_pick<'a, M: View + 'static>(
         runtime: &Runtime<M>,
-        sheet: &query::HitSheet<'_>,
+        sheet: &query::HitSheet<'a, impl RowAccess<'a>>,
         point: Point,
     ) -> Option<Target> {
         runtime.inspector_panel()?;
@@ -902,7 +902,15 @@ mod tests {
             }
             {
                 let runtime = win.runtime().unwrap();
-                assert!(runtime.prepared.as_ref().unwrap().nodes.len() < runtime.nodes.len());
+                assert!(
+                    runtime
+                        .prepared
+                        .as_ref()
+                        .unwrap()
+                        .rows(&runtime.presented)
+                        .len()
+                        < runtime.nodes.len()
+                );
                 for y in (-1..130).step_by(4) {
                     for x in [-1., 0., 0.5, 31., 63.9, 64., 719.9, 720., 721.] {
                         let point = Point { x, y: y as f32 };

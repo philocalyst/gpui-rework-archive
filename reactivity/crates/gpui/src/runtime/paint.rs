@@ -106,7 +106,7 @@ impl<M: View + 'static> Runtime<M> {
                     self.presentation_size[1] as u16,
                 ],
                 scale_factor: self.presentation_scale_factor,
-                nodes: Vec::new(),
+                nodes: rows::CandidateRows::empty(),
                 damage,
             });
         }
@@ -147,11 +147,11 @@ impl Prepared {
             u32::from(self.size[1]),
         ]
     }
-    pub(super) fn rows<'a>(&'a self, acknowledged: &'a [Presented]) -> &'a [Presented] {
+    pub(super) fn rows<'a>(&'a self, acknowledged: &'a [Presented]) -> rows::Rows<'a> {
         if self.keeps_rows() {
-            acknowledged
+            rows::Rows::from(acknowledged)
         } else {
-            &self.nodes
+            self.nodes.view(acknowledged)
         }
     }
 }

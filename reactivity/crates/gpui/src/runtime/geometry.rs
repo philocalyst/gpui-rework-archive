@@ -95,7 +95,7 @@ impl Record {
 /// Exact diagonal coefficients fit inline when both off-diagonal words are +0.
 /// Finite admitted a cannot equal either reserved NaN tag. General bases use a
 /// direct index in their own sheet's stream; no sibling interning is performed.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) struct MapBasis([u32; 2]);
 const _: () = assert!(MAX_NODES < u32::MAX as usize);
 impl MapBasis {
@@ -188,6 +188,12 @@ pub(super) struct Geometry {
     candidate: Option<Vec<Record>>,
 }
 impl Geometry {
+    #[cfg(test)]
+    pub(super) fn candidate_storage(&self) -> Option<(usize, usize)> {
+        self.candidate
+            .as_ref()
+            .map(|records| (records.len(), records.capacity()))
+    }
     #[cfg(test)]
     pub(super) fn record_storage(&self) -> (usize, usize) {
         (self.presented.len(), self.presented.capacity())

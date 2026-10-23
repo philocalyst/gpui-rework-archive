@@ -451,6 +451,7 @@ impl<M: View + 'static> Runtime<M> {
 
 #[cfg(test)]
 mod focus_release_tests {
+    use super::super::{Presented, rows::RowAccess};
     use super::*;
     use crate::{WindowOptions, prelude::*};
 
@@ -578,6 +579,18 @@ mod focus_release_tests {
         (win, pointer, target)
     }
 
+    fn candidate_rows(runtime: &mut Runtime<Page>) -> &mut Vec<Presented> {
+        let Runtime {
+            presented,
+            prepared,
+            ..
+        } = runtime;
+        prepared
+            .as_mut()
+            .unwrap()
+            .nodes
+            .full(presented, presented.len())
+    }
     #[test]
     fn inspector_proof_uses_candidate_shapes_clips_sizes_and_required_columns() {
         for change in 0..12 {
@@ -603,7 +616,7 @@ mod focus_release_tests {
                     .prepared
                     .as_ref()
                     .unwrap()
-                    .nodes
+                    .rows(&runtime.presented)
                     .iter()
                     .position(|row| row.identity == identity)
                     .unwrap();
@@ -612,13 +625,10 @@ mod focus_release_tests {
                         runtime.prepared.as_mut().unwrap().size = [4, 4];
                     }
                     1 => {
-                        runtime.prepared.as_mut().unwrap().nodes[index]
-                            .placement
-                            .translation
-                            .x += 1000.;
+                        candidate_rows(&mut runtime)[index].placement.translation.x += 1000.;
                     }
                     2 => {
-                        runtime.prepared.as_mut().unwrap().nodes[index].bounds =
+                        candidate_rows(&mut runtime)[index].bounds =
                             Rect::new(1000., 1000., 20., 20.);
                     }
                     3 => {
@@ -630,7 +640,7 @@ mod focus_release_tests {
                         let mut records = Vec::new();
                         let basis =
                             super::super::geometry::MapBasis::record(Some(map), None, &mut records);
-                        runtime.prepared.as_mut().unwrap().nodes[index].basis = basis;
+                        candidate_rows(&mut runtime)[index].basis = basis;
                         let geometry = runtime
                             .metadata
                             .as_mut()
@@ -656,7 +666,7 @@ mod focus_release_tests {
                             .unwrap();
                         let basis =
                             super::super::geometry::MapBasis::record(Some(map), None, &mut records);
-                        runtime.prepared.as_mut().unwrap().nodes[index].basis = basis;
+                        candidate_rows(&mut runtime)[index].basis = basis;
                         let geometry = runtime
                             .metadata
                             .as_mut()
@@ -668,10 +678,10 @@ mod focus_release_tests {
                         geometry.prepare(records);
                     }
                     5 => {
-                        let prepared = runtime.prepared.as_mut().unwrap();
-                        let parent = prepared.nodes[index].parent.index().unwrap();
-                        assert_eq!(prepared.nodes[parent].kind, NodeKind::Scroll);
-                        prepared.nodes[parent].placement.size = [4., 4.];
+                        let nodes = candidate_rows(&mut runtime);
+                        let parent = nodes[index].parent.index().unwrap();
+                        assert_eq!(nodes[parent].kind, NodeKind::Scroll);
+                        nodes[parent].placement.size = [4., 4.];
                     }
                     6 => {
                         runtime.metadata.as_mut().unwrap().candidate = None;
@@ -690,14 +700,13 @@ mod focus_release_tests {
                         runtime.prepared.as_mut().unwrap().size[0] |= 1 << 15;
                     }
                     9 => {
-                        runtime.prepared.as_mut().unwrap().nodes.truncate(index);
+                        candidate_rows(&mut runtime).truncate(index);
                     }
                     10 => {
-                        let prepared = runtime.prepared.as_mut().unwrap();
-                        let placement = prepared.nodes[index].placement;
-                        let bounds = prepared.nodes[index].bounds;
-                        let overlay = prepared
-                            .nodes
+                        let nodes = candidate_rows(&mut runtime);
+                        let placement = nodes[index].placement;
+                        let bounds = nodes[index].bounds;
+                        let overlay = nodes
                             .iter_mut()
                             .rev()
                             .find(|row| row.kind == NodeKind::Text)
@@ -713,9 +722,7 @@ mod focus_release_tests {
                         overlay.hittable = true;
                     }
                     11 => {
-                        let prepared = runtime.prepared.as_mut().unwrap();
-                        let panel = prepared
-                            .nodes
+                        let panel = candidate_rows(&mut runtime)
                             .iter_mut()
                             .rev()
                             .find(|node| node.kind == NodeKind::Scroll)
