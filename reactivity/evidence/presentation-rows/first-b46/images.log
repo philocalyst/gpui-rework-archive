@@ -1,0 +1,8 @@
+
+running 2 tests
+test runtime::image::tests::exact_image_cohort_leases_survive_failed_newer_candidate_loss_and_removal ... ok
+test runtime::image::tests::image_only_owner_does_not_initialize_text_services ... Image=8 ImageState=80 Runtime=1848 Node=40 Presented=64 El=176 Draft=152 Style=88 Canvas=488
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 159 filtered out; finished in 0.00s
+

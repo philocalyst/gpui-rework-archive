@@ -1,0 +1,12 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.26s
+     Running tests/presentation_rows.rs (/tmp/gpui-presented-basis-target/debug/deps/presentation_rows-89ffe575edbecdd2)
+
+running 4 tests
+test keyed_reorder_and_compacted_virtual_rows_use_full_topology_recovery ... ok
+test coalesced_candidates_keep_p_immutable_and_ack_latest_changes_in_place ... ok
+test failed_later_preparation_preserves_the_old_exact_candidate_then_repairs ... ok
+test independent_geometry_pools_and_viewport_changes_resolve_their_own_rows ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

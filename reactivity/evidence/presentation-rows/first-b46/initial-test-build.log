@@ -1,0 +1,122 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling zerofrom v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling yoke v0.8.3
+   Compiling zerovec-derive v0.11.6
+   Compiling zerovec v0.11.8
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+   Compiling bytemuck v1.25.2
+   Compiling font-types v0.12.7
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling icu_provider v2.3.1
+   Compiling icu_collections v2.3.0
+   Compiling read-fonts v0.41.0
+   Compiling serde_derive v1.0.229
+   Compiling serde v1.0.229
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling fontique v0.12.0
+   Compiling skrifa v0.49.0
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling parley_engine v0.12.0 (/tmp/gpui-presented-changes-sol/reactivity/vendor/parley_engine)
+   Compiling zbus_utils v6.0.0
+   Compiling skrifa v0.44.0
+   Compiling cephal v0.1.1 (/tmp/gpui-presented-changes-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/core)
+   Compiling swash v0.2.10
+   Compiling zbus_macros v6.0.0
+   Compiling parley v0.12.0 (/tmp/gpui-presented-changes-sol/reactivity/vendor/parley)
+   Compiling accesskit v0.25.1 (/tmp/gpui-presented-changes-sol/reactivity/vendor/accesskit)
+   Compiling zcheapstr v1.1.0
+   Compiling serde_repr v0.1.21
+   Compiling async-trait v0.1.92
+   Compiling fearless_simd_macros v0.1.0
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/canvas)
+   Compiling zbus v6.0.0
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-presented-changes-sol/reactivity/vendor/accesskit_consumer)
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/gpui)
+error[E0425]: cannot find type `Presented` in this scope
+   --> crates/gpui/src/runtime/input.rs:581:64
+    |
+ 40 | struct Pressed {
+    | -------------- similarly named struct `Pressed` defined here
+...
+581 |     fn candidate_rows(runtime: &mut Runtime<Page>) -> &mut Vec<Presented> {
+    |                                                                ^^^^^^^^^
+    |
+help: a struct with a similar name exists
+    |
+581 -     fn candidate_rows(runtime: &mut Runtime<Page>) -> &mut Vec<Presented> {
+581 +     fn candidate_rows(runtime: &mut Runtime<Page>) -> &mut Vec<Pressed> {
+    |
+help: consider importing this struct
+    |
+454 +     use crate::runtime::Presented;
+    |
+
+error[E0599]: no method named `iter` found for struct `runtime::rows::Rows<'a>` in the current scope
+   --> crates/gpui/src/runtime/input.rs:619:22
+    |
+614 |                    let index = runtime
+    |   _____________________________-
+    |  |_____________________________|
+615 | ||                     .prepared
+    | ||_____________________________- method `iter` is available on `&std::option::Option<runtime::Prepared>`
+616 | |                      .as_ref()
+    | |                       -------- method `iter` is available on `std::option::Option<&runtime::Prepared>`
+617 | |                      .unwrap()
+618 | |                      .rows(&runtime.presented)
+619 | |                      .iter()
+    | |                      -^^^^ method not found in `runtime::rows::Rows<'_>`
+    | |______________________|
+    |
+    |
+   ::: crates/gpui/src/runtime/rows.rs:70:8
+    |
+ 70 |        fn iter(self) -> impl DoubleEndedIterator<Item = &'a Presented> + ExactSizeIterator;
+    |           ---- the method is available for `runtime::rows::Rows<'_>` here
+...
+ 87 |    pub(super) struct Rows<'a> {
+    |    -------------------------- method `iter` not found for this struct
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `RowAccess` which provides `iter` is implemented but not in scope; perhaps you want to import it
+    |
+454 +     use crate::runtime::rows::RowAccess;
+    |
+
+error[E0599]: no method named `len` found for enum `CandidateRows` in the current scope
+   --> crates/gpui/src/runtime/inspector.rs:905:66
+    |
+905 |                 assert!(runtime.prepared.as_ref().unwrap().nodes.len() < runtime.nodes.len());
+    |                                                                  ^^^ method not found in `CandidateRows`
+    |
+   ::: crates/gpui/src/runtime/rows.rs:10:1
+    |
+ 10 | pub(super) enum CandidateRows {
+    | ----------------------------- method `len` not found for this enum
+    |
+    = help: items from traits can only be used if the trait is implemented and in scope
+    = note: the following traits define an item `len`, perhaps you need to implement one of them:
+            candidate #1: `list::ItemSource`
+            candidate #2: `runtime::rows::RowAccess`
+            candidate #3: `source::ComponentSchema`
+            candidate #4: `ExactSizeIterator`
+            candidate #5: `winnow::stream::AsChar`
+
+Some errors have detailed explanations: E0425, E0599.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `gpui` (lib test) due to 3 previous errors

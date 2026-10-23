@@ -1,0 +1,9 @@
+
+running 3 tests
+test runtime::input::focus_release_tests::failed_focus_preparation_and_epoch_exhaustion_leave_no_pressed_authority ... ok
+test runtime::input::focus_release_tests::inspector_proof_uses_candidate_shapes_clips_sizes_and_required_columns ... ok
+test runtime::input::focus_release_tests::private_press_proof_uses_the_existing_session_header ... POINTER_LAYOUT point=8 option_point=12 target=16 pressed=24 option_pressed=24 position=8 optional_position=8 session=32 optional_session=32 session_align=8 hit_sheet=56 optional_hit_sheet=56 hit_reply=56 old_hit_reply=56 runtime=1872 win=8
+ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 158 filtered out; finished in 0.25s
+

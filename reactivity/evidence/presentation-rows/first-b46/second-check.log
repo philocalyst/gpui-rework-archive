@@ -1,0 +1,9 @@
+    Checking gpui v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/gpui)
+error[E0608]: cannot index into a value of type `impl RowAccess<'a>`
+   --> crates/gpui/src/runtime/inspector.rs:346:32
+    |
+346 |         let node = &sheet.nodes[sheet.hit(point)?];
+    |                                ^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0608`.
+error: could not compile `gpui` (lib) due to 1 previous error

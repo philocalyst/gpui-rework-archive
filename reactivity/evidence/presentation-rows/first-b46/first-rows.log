@@ -1,0 +1,12 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 29.50s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-1369131ef757ea8e)
+
+running 3 tests
+ROW_HEADERS owned=64 borrowed=64 change=72 candidate=32 option_candidate=32 prepared=48 option_prepared=48 rows=32 p_hit=56 c_hit=72 runtime=1832
+test runtime::rows::tests::exact_sparse_rows_keep_unmodified_leases_and_apply_in_place ... ok
+test runtime::rows::tests::overlay_iteration_and_topology_fallbacks_use_the_same_candidate_rows ... ok
+test runtime::rows::tests::dense_and_tiny_changes_fall_back_without_sparse_minimum_capacity_tax ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 157 filtered out; finished in 0.02s
+

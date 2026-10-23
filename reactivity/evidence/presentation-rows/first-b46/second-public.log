@@ -1,0 +1,37 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-presented-changes-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.94s
+     Running tests/presentation_rows.rs (/tmp/gpui-presented-basis-target/debug/deps/presentation_rows-89ffe575edbecdd2)
+
+running 4 tests
+test keyed_reorder_and_compacted_virtual_rows_use_full_topology_recovery ... FAILED
+test coalesced_candidates_keep_p_immutable_and_ack_latest_changes_in_place ... FAILED
+test failed_later_preparation_preserves_the_old_exact_candidate_then_repairs ... FAILED
+test independent_geometry_pools_and_viewport_changes_resolve_their_own_rows ... ok
+
+failures:
+
+---- keyed_reorder_and_compacted_virtual_rows_use_full_topology_recovery stdout ----
+
+thread 'keyed_reorder_and_compacted_virtual_rows_use_full_topology_recovery' (2294892) panicked at crates/gpui/tests/presentation_rows.rs:171:48:
+called `Result::unwrap()` on an `Err` value: PresentationStale
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- coalesced_candidates_keep_p_immutable_and_ack_latest_changes_in_place stdout ----
+
+thread 'coalesced_candidates_keep_p_immutable_and_ack_latest_changes_in_place' (2294889) panicked at crates/gpui/tests/presentation_rows.rs:56:67:
+called `Result::unwrap()` on an `Err` value: PresentationStale
+
+---- failed_later_preparation_preserves_the_old_exact_candidate_then_repairs stdout ----
+
+thread 'failed_later_preparation_preserves_the_old_exact_candidate_then_repairs' (2294890) panicked at crates/gpui/tests/presentation_rows.rs:91:5:
+assertion failed: win.update(|m| { m.checked[9] = true; m.broken = true }).is_err()
+
+
+failures:
+    coalesced_candidates_keep_p_immutable_and_ack_latest_changes_in_place
+    failed_later_preparation_preserves_the_old_exact_candidate_then_repairs
+    keyed_reorder_and_compacted_virtual_rows_use_full_topology_recovery
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `-p gpui --test presentation_rows`

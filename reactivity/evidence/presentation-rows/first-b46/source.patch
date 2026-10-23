@@ -1,0 +1,1449 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 09e9ed0289..f03ded3cc4 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -55,6 +55,8 @@ mod metadata;
+ pub(crate) mod paint;
+ use paint::PatchOutcome;
+ mod query;
++mod rows;
++use rows::RowAccess;
+ mod semantics;
+ mod styles;
+ pub use input::{Key, PointerEvent, PointerSession};
+@@ -748,18 +750,19 @@ impl PresentedLink {
+     }
+ }
+ const _: () = assert!(MAX_NODES < (1 << PresentedLink::PARENT_BITS));
+-struct Presented {
++#[derive(Clone)]
++struct Presented<T = SharedText> {
+     identity: u64,
+     parent: PresentedLink,
+     kind: NodeKind,
+-    text: Option<SharedText>,
++    text: Option<T>,
+     placement: geometry::Placement,
+     basis: geometry::MapBasis,
+     bounds: Rect,
+     hittable: bool,
+     actions: Actions,
+ }
+-impl Presented {
++impl<T> Presented<T> {
+     fn local_rect(&self) -> Rect {
+         self.placement.local_rect()
+     }
+@@ -780,7 +783,7 @@ impl<M> Runtime<M> {
+         }
+     }
+     // This proof requires a full C and its own frozen columns, never KEEP/P.
+-    fn candidate_hit_sheet(&self) -> Option<query::HitSheet<'_>> {
++    fn candidate_hit_sheet(&self) -> Option<query::HitSheet<'_, rows::Rows<'_>>> {
+         let prepared = self.prepared.as_ref().filter(|c| !c.keeps_rows())?;
+         let metadata = self.metadata.as_ref()?;
+         let sheet = metadata.candidate.as_ref()?;
+@@ -789,7 +792,7 @@ impl<M> Runtime<M> {
+             None => geometry::GeometryView::empty(),
+         };
+         Some(query::HitSheet {
+-            nodes: &prepared.nodes,
++            nodes: prepared.rows(&self.presented),
+             geometry,
+             size: prepared.dimensions(),
+             has_viewports: !sheet.viewports.is_empty(),
+@@ -808,7 +811,7 @@ struct Prepared {
+     // extents leaves room for damage without growing this 64-bit header.
+     size: [u16; 2],
+     scale_factor: f32,
+-    nodes: Vec<Presented>,
++    nodes: rows::CandidateRows,
+     damage: DamageRegion,
+ }
+ 
+@@ -1637,7 +1640,10 @@ impl<M: View + 'static> Runtime<M> {
+             && !self
+                 .prepared
+                 .as_ref()
+-                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented))
++                .map_or_else(
++                    || rows::Rows::from(self.presented.as_slice()),
++                    |p| p.rows(&self.presented),
++                )
+                 .iter()
+                 .any(|node| node.identity == identity)
+         {
+@@ -2493,7 +2499,7 @@ impl<M: View + 'static> Runtime<M> {
+         if let Some(prepared) = prepared {
+             self.presentation_size = prepared.dimensions();
+             if !prepared.keeps_rows() {
+-                self.presented = prepared.nodes;
++                prepared.nodes.acknowledge(&mut self.presented);
+                 if let Some(text) = &mut self.text {
+                     text.acknowledge();
+                 }
+@@ -2717,7 +2723,7 @@ impl<M: View + 'static> Runtime<M> {
+         }
+         self.refresh_inspector(true)?;
+         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
+-        let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
++        let mut presented = rows::Build::new(&self.presented, self.nodes.len());
+         let mut geometry_records = Vec::new();
+         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
+         let list_mode = !self.viewports.is_empty();
+@@ -2762,7 +2768,7 @@ impl<M: View + 'static> Runtime<M> {
+         for index in 0..self.nodes.len() {
+             if index == inspector_boundary {
+                 inspector_display.as_ref().unwrap().refresh(
+-                    &presented,
++                    presented.view(),
+                     geometry::Bases::new(&geometry_records),
+                     &mut self.texts,
+                     &mut self.layout,
+@@ -3033,7 +3039,7 @@ impl<M: View + 'static> Runtime<M> {
+             let link = PresentedLink::new(
+                 published_parent,
+                 !hittable,
+-                presented.last().map(|node: &Presented| node.parent),
++                presented.last().map(|node| node.parent),
+             );
+             if let Some((origin, map)) = geometry {
+                 text_geometry.push(text_geometry::Entry {
+@@ -3044,17 +3050,16 @@ impl<M: View + 'static> Runtime<M> {
+             }
+             let basis = geometry::MapBasis::record(
+                 transform,
+-                published_parent.index().map(|index| presented[index].basis),
++                published_parent
++                    .index()
++                    .map(|index| presented.get(index).unwrap().basis),
+                 &mut geometry_records,
+             );
+             presented.push(Presented {
+                 identity: node.identity(),
+                 parent: link,
+                 kind: node.kind(),
+-                text: node
+-                    .text_slot()
+-                    .get(&self.texts)
+-                    .map(|text| text.value.clone()),
++                text: node.text_slot().get(&self.texts).map(|text| &text.value),
+                 placement: geometry::Placement::new([rect.width, rect.height], transform),
+                 basis,
+                 bounds,
+@@ -3076,7 +3081,7 @@ impl<M: View + 'static> Runtime<M> {
+                             bases: previous_geometry.bases(),
+                         }),
+                         next: accessibility::RowView {
+-                            row: &presented[index],
++                            row: presented.get(index).unwrap(),
+                             bases: geometry::Bases::new(&geometry_records),
+                         },
+                     },
+@@ -3104,6 +3109,9 @@ impl<M: View + 'static> Runtime<M> {
+                 );
+             }
+         }
++        // Finish topology admission before committing any candidate column.
++        let presented = presented.finish();
++        let candidate_rows = presented.view(&self.presented);
+         // Everything fallible has finished. This transfers commands; native
+         // recording retains no CPU image, while same-size headless updates reuse
+         // the selected output allocation. No model borrow is published.
+@@ -3119,7 +3127,7 @@ impl<M: View + 'static> Runtime<M> {
+                     size,
+                 },
+                 self.presented.len(),
+-                presented.len(),
++                candidate_rows.len(),
+             );
+         }
+         let logical_indices = &self.by_identity;
+@@ -3134,7 +3142,7 @@ impl<M: View + 'static> Runtime<M> {
+                             .get(identity)
+                             .and_then(|index| published.get(index))
+                             .and_then(|entry| entry.index())
+-                            .and_then(|index| presented.get(index))
++                            .and_then(|index| candidate_rows.get(index))
+                             .is_some_and(|node| node.identity == identity)
+                 })
+             })
+@@ -3174,7 +3182,7 @@ impl<M: View + 'static> Runtime<M> {
+                 let index = self.by_identity.required(identity);
+                 published[index]
+                     .index()
+-                    .filter(|&index| presented[index].identity == identity)
++                    .filter(|&index| candidate_rows[index].identity == identity)
+             });
+             metadata.candidate = Some(sheet);
+         }
+@@ -3227,13 +3235,17 @@ impl<M: View + 'static> Runtime<M> {
+         self.hit_in_sheet(self.presented_hit_sheet(), point)
+     }
+     #[inline(always)]
+-    fn hit_in_sheet(&self, sheet: query::HitSheet<'_>, point: Point) -> Option<u64> {
++    fn hit_in_sheet<'a>(
++        &self,
++        sheet: query::HitSheet<'a, impl RowAccess<'a>>,
++        point: Point,
++    ) -> Option<u64> {
+         if !sheet.contains_window(point) {
+             return None;
+         }
+         let mut cursor = Some(sheet.hit(point)?);
+         while let Some(index) = cursor {
+-            let node = &sheet.nodes[index];
++            let node = sheet.nodes.at(index);
+             if let Some(logical) = self.by_identity.get(node.identity)
+                 && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
+             {
+diff --git a/reactivity/crates/gpui/src/runtime/geometry.rs b/reactivity/crates/gpui/src/runtime/geometry.rs
+index 6894257a8d..4682c58875 100644
+--- a/reactivity/crates/gpui/src/runtime/geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/geometry.rs
+@@ -95,7 +95,7 @@ impl Record {
+ /// Exact diagonal coefficients fit inline when both off-diagonal words are +0.
+ /// Finite admitted a cannot equal either reserved NaN tag. General bases use a
+ /// direct index in their own sheet's stream; no sibling interning is performed.
+-#[derive(Clone, Copy)]
++#[derive(Clone, Copy, PartialEq, Eq)]
+ pub(super) struct MapBasis([u32; 2]);
+ const _: () = assert!(MAX_NODES < u32::MAX as usize);
+ impl MapBasis {
+@@ -188,6 +188,12 @@ pub(super) struct Geometry {
+     candidate: Option<Vec<Record>>,
+ }
+ impl Geometry {
++    #[cfg(test)]
++    pub(super) fn candidate_storage(&self) -> Option<(usize, usize)> {
++        self.candidate
++            .as_ref()
++            .map(|records| (records.len(), records.capacity()))
++    }
+     #[cfg(test)]
+     pub(super) fn record_storage(&self) -> (usize, usize) {
+         (self.presented.len(), self.presented.capacity())
+diff --git a/reactivity/crates/gpui/src/runtime/input.rs b/reactivity/crates/gpui/src/runtime/input.rs
+index db4a75bd3a..e4a4e46b28 100644
+--- a/reactivity/crates/gpui/src/runtime/input.rs
++++ b/reactivity/crates/gpui/src/runtime/input.rs
+@@ -451,6 +451,7 @@ impl<M: View + 'static> Runtime<M> {
+ 
+ #[cfg(test)]
+ mod focus_release_tests {
++    use super::super::{Presented, rows::RowAccess};
+     use super::*;
+     use crate::{WindowOptions, prelude::*};
+ 
+@@ -578,6 +579,18 @@ mod focus_release_tests {
+         (win, pointer, target)
+     }
+ 
++    fn candidate_rows(runtime: &mut Runtime<Page>) -> &mut Vec<Presented> {
++        let Runtime {
++            presented,
++            prepared,
++            ..
++        } = runtime;
++        prepared
++            .as_mut()
++            .unwrap()
++            .nodes
++            .full(presented, presented.len())
++    }
+     #[test]
+     fn inspector_proof_uses_candidate_shapes_clips_sizes_and_required_columns() {
+         for change in 0..12 {
+@@ -603,7 +616,7 @@ mod focus_release_tests {
+                     .prepared
+                     .as_ref()
+                     .unwrap()
+-                    .nodes
++                    .rows(&runtime.presented)
+                     .iter()
+                     .position(|row| row.identity == identity)
+                     .unwrap();
+@@ -612,13 +625,10 @@ mod focus_release_tests {
+                         runtime.prepared.as_mut().unwrap().size = [4, 4];
+                     }
+                     1 => {
+-                        runtime.prepared.as_mut().unwrap().nodes[index]
+-                            .placement
+-                            .translation
+-                            .x += 1000.;
++                        candidate_rows(&mut runtime)[index].placement.translation.x += 1000.;
+                     }
+                     2 => {
+-                        runtime.prepared.as_mut().unwrap().nodes[index].bounds =
++                        candidate_rows(&mut runtime)[index].bounds =
+                             Rect::new(1000., 1000., 20., 20.);
+                     }
+                     3 => {
+@@ -630,7 +640,7 @@ mod focus_release_tests {
+                         let mut records = Vec::new();
+                         let basis =
+                             super::super::geometry::MapBasis::record(Some(map), None, &mut records);
+-                        runtime.prepared.as_mut().unwrap().nodes[index].basis = basis;
++                        candidate_rows(&mut runtime)[index].basis = basis;
+                         let geometry = runtime
+                             .metadata
+                             .as_mut()
+@@ -656,7 +666,7 @@ mod focus_release_tests {
+                             .unwrap();
+                         let basis =
+                             super::super::geometry::MapBasis::record(Some(map), None, &mut records);
+-                        runtime.prepared.as_mut().unwrap().nodes[index].basis = basis;
++                        candidate_rows(&mut runtime)[index].basis = basis;
+                         let geometry = runtime
+                             .metadata
+                             .as_mut()
+@@ -668,10 +678,10 @@ mod focus_release_tests {
+                         geometry.prepare(records);
+                     }
+                     5 => {
+-                        let prepared = runtime.prepared.as_mut().unwrap();
+-                        let parent = prepared.nodes[index].parent.index().unwrap();
+-                        assert_eq!(prepared.nodes[parent].kind, NodeKind::Scroll);
+-                        prepared.nodes[parent].placement.size = [4., 4.];
++                        let nodes = candidate_rows(&mut runtime);
++                        let parent = nodes[index].parent.index().unwrap();
++                        assert_eq!(nodes[parent].kind, NodeKind::Scroll);
++                        nodes[parent].placement.size = [4., 4.];
+                     }
+                     6 => {
+                         runtime.metadata.as_mut().unwrap().candidate = None;
+@@ -690,14 +700,13 @@ mod focus_release_tests {
+                         runtime.prepared.as_mut().unwrap().size[0] |= 1 << 15;
+                     }
+                     9 => {
+-                        runtime.prepared.as_mut().unwrap().nodes.truncate(index);
++                        candidate_rows(&mut runtime).truncate(index);
+                     }
+                     10 => {
+-                        let prepared = runtime.prepared.as_mut().unwrap();
+-                        let placement = prepared.nodes[index].placement;
+-                        let bounds = prepared.nodes[index].bounds;
+-                        let overlay = prepared
+-                            .nodes
++                        let nodes = candidate_rows(&mut runtime);
++                        let placement = nodes[index].placement;
++                        let bounds = nodes[index].bounds;
++                        let overlay = nodes
+                             .iter_mut()
+                             .rev()
+                             .find(|row| row.kind == NodeKind::Text)
+@@ -713,9 +722,7 @@ mod focus_release_tests {
+                         overlay.hittable = true;
+                     }
+                     11 => {
+-                        let prepared = runtime.prepared.as_mut().unwrap();
+-                        let panel = prepared
+-                            .nodes
++                        let panel = candidate_rows(&mut runtime)
+                             .iter_mut()
+                             .rev()
+                             .find(|node| node.kind == NodeKind::Scroll)
+diff --git a/reactivity/crates/gpui/src/runtime/inspector.rs b/reactivity/crates/gpui/src/runtime/inspector.rs
+index 8f1e0ba375..ce02cdfe53 100644
+--- a/reactivity/crates/gpui/src/runtime/inspector.rs
++++ b/reactivity/crates/gpui/src/runtime/inspector.rs
+@@ -336,14 +336,14 @@ impl<M: View + 'static> Runtime<M> {
+     pub(super) fn inspector_pick(&self, point: Point) -> Option<Target> {
+         self.inspector_pick_in_sheet(self.presented_hit_sheet(), point)
+     }
+-    pub(super) fn inspector_pick_in_sheet(
++    pub(super) fn inspector_pick_in_sheet<'a>(
+         &self,
+-        sheet: query::HitSheet<'_>,
++        sheet: query::HitSheet<'a, impl RowAccess<'a>>,
+         point: Point,
+     ) -> Option<Target> {
+         self.inspector_panel()?;
+         // Picking selects the foremost actual shape, even without a handler.
+-        let node = &sheet.nodes[sheet.hit(point)?];
++        let node = sheet.nodes.at(sheet.hit(point)?);
+         let target = self.sites.target(node.identity);
+         self.inspector_app_index(target).ok().map(|_| target)
+     }
+@@ -518,9 +518,9 @@ pub(super) struct DisplayCaptions {
+     slots: [TextSlot; 2],
+ }
+ impl DisplayCaptions {
+-    pub fn refresh(
++    pub fn refresh<'a>(
+         &self,
+-        candidate: &[Presented],
++        candidate: impl RowAccess<'a>,
+         bases: geometry::Bases<'_>,
+         texts: &mut [Option<TextSite>],
+         layout: &mut LayoutTree,
+@@ -750,9 +750,9 @@ pub(super) fn description<'a, M: View>(
+ mod tests {
+     use super::*;
+     // Frozen old direct-loop oracle: no window-extent gate or compressed skip.
+-    fn legacy_pick<M: View + 'static>(
++    fn legacy_pick<'a, M: View + 'static>(
+         runtime: &Runtime<M>,
+-        sheet: &query::HitSheet<'_>,
++        sheet: &query::HitSheet<'a, impl RowAccess<'a>>,
+         point: Point,
+     ) -> Option<Target> {
+         runtime.inspector_panel()?;
+@@ -902,7 +902,15 @@ mod tests {
+             }
+             {
+                 let runtime = win.runtime().unwrap();
+-                assert!(runtime.prepared.as_ref().unwrap().nodes.len() < runtime.nodes.len());
++                assert!(
++                    runtime
++                        .prepared
++                        .as_ref()
++                        .unwrap()
++                        .rows(&runtime.presented)
++                        .len()
++                        < runtime.nodes.len()
++                );
+                 for y in (-1..130).step_by(4) {
+                     for x in [-1., 0., 0.5, 31., 63.9, 64., 719.9, 720., 721.] {
+                         let point = Point { x, y: y as f32 };
+diff --git a/reactivity/crates/gpui/src/runtime/list.rs b/reactivity/crates/gpui/src/runtime/list.rs
+index d8a996e97f..1e54590954 100644
+--- a/reactivity/crates/gpui/src/runtime/list.rs
++++ b/reactivity/crates/gpui/src/runtime/list.rs
+@@ -364,7 +364,7 @@ impl<M: View + 'static> Runtime<M> {
+         geometry: geometry::GeometryView<'_>,
+     ) -> bool {
+         super::query::contains_point(
+-            &self.presented,
++            self.presented.as_slice(),
+             geometry,
+             self.metadata
+                 .as_ref()
+diff --git a/reactivity/crates/gpui/src/runtime/metadata.rs b/reactivity/crates/gpui/src/runtime/metadata.rs
+index a0969dc8f8..05b4de4185 100644
+--- a/reactivity/crates/gpui/src/runtime/metadata.rs
++++ b/reactivity/crates/gpui/src/runtime/metadata.rs
+@@ -290,7 +290,7 @@ impl<M: View + 'static> Runtime<M> {
+             }
+         })
+     }
+-    pub(super) fn freeze_metadata(&self, nodes: &[Presented]) -> Option<Sheet> {
++    pub(super) fn freeze_metadata(&self, nodes: rows::Rows<'_>) -> Option<Sheet> {
+         let mut sheet = self.metadata_sheet()?;
+         let metadata = self.metadata.as_ref()?;
+         sheet.viewports = metadata
+@@ -299,7 +299,7 @@ impl<M: View + 'static> Runtime<M> {
+             .unwrap_or(&metadata.presented)
+             .viewports
+             .clone();
+-        for node in nodes {
++        for node in nodes.iter() {
+             sheet.capture(metadata, node.identity, self.list_rows.get(&node.identity));
+         }
+         sheet.sort();
+@@ -315,10 +315,10 @@ impl<M: View + 'static> Runtime<M> {
+         let candidate = self.prepared.is_some() || !self.presentation_valid;
+         let frozen = matches!(publish, Publish::All)
+             .then(|| {
+-                let nodes = self
+-                    .prepared
+-                    .as_ref()
+-                    .map_or(self.presented.as_slice(), |p| p.rows(&self.presented));
++                let nodes = self.prepared.as_ref().map_or_else(
++                    || rows::Rows::from(self.presented.as_slice()),
++                    |p| p.rows(&self.presented),
++                );
+                 self.freeze_metadata(nodes)
+             })
+             .flatten();
+@@ -399,10 +399,10 @@ impl<M: View + 'static> Runtime<M> {
+             }
+         }
+         {
+-            let nodes = self
+-                .prepared
+-                .as_ref()
+-                .map_or(self.presented.as_slice(), |p| p.rows(&self.presented));
++            let nodes = self.prepared.as_ref().map_or_else(
++                || rows::Rows::from(self.presented.as_slice()),
++                |p| p.rows(&self.presented),
++            );
+             if matches!(publish, Publish::All) {
+                 if let Some(sheet) = frozen
+                     && let Some(metadata) = &mut self.metadata
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 09b8dd8c14..784c93b90c 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -106,7 +106,7 @@ impl<M: View + 'static> Runtime<M> {
+                     self.presentation_size[1] as u16,
+                 ],
+                 scale_factor: self.presentation_scale_factor,
+-                nodes: Vec::new(),
++                nodes: rows::CandidateRows::empty(),
+                 damage,
+             });
+         }
+@@ -147,11 +147,11 @@ impl Prepared {
+             u32::from(self.size[1]),
+         ]
+     }
+-    pub(super) fn rows<'a>(&'a self, acknowledged: &'a [Presented]) -> &'a [Presented] {
++    pub(super) fn rows<'a>(&'a self, acknowledged: &'a [Presented]) -> rows::Rows<'a> {
+         if self.keeps_rows() {
+-            acknowledged
++            rows::Rows::from(acknowledged)
+         } else {
+-            &self.nodes
++            self.nodes.view(acknowledged)
+         }
+     }
+ }
+diff --git a/reactivity/crates/gpui/src/runtime/query.rs b/reactivity/crates/gpui/src/runtime/query.rs
+index 9cf7db3011..00d876f5e3 100644
+--- a/reactivity/crates/gpui/src/runtime/query.rs
++++ b/reactivity/crates/gpui/src/runtime/query.rs
+@@ -1,6 +1,6 @@
+ //! Borrowed semantic queries over the acknowledged sheet, shared by tools and
+ //! application users. Queries never construct a diagnostic snapshot or mirror.
+-use super::{Actions, Error, Presented, Runtime, Target, View, Win};
++use super::{Actions, Error, Presented, Runtime, Target, View, Win, rows::RowAccess};
+ use crate::identity::Sites;
+ use crate::{Rect, Role, remote::LaneSet};
+ 
+@@ -633,13 +633,13 @@ mod tests {
+ }
+ 
+ // One sheet-qualified borrow for hit traversal, never retained in a row/owner.
+-pub(super) struct HitSheet<'a> {
+-    pub nodes: &'a [Presented],
++pub(super) struct HitSheet<'a, R = &'a [Presented]> {
++    pub nodes: R,
+     pub geometry: super::geometry::GeometryView<'a>,
+     pub size: [u32; 2],
+     pub has_viewports: bool,
+ }
+-impl HitSheet<'_> {
++impl<'a, R: RowAccess<'a>> HitSheet<'a, R> {
+     #[inline(always)]
+     pub fn contains_window(&self, point: crate::Point) -> bool {
+         Rect::new(0., 0., self.size[0] as f32, self.size[1] as f32).contains(point)
+@@ -666,15 +666,15 @@ impl HitSheet<'_> {
+ 
+ // Shared by production pointer dispatch and borrowed public/native queries.
+ // Every clip/shape belongs to the supplied sheet; L cannot skip its checks.
+-pub(super) fn contains_point(
+-    nodes: &[Presented],
++pub(super) fn contains_point<'a>(
++    nodes: impl RowAccess<'a>,
+     geometry: super::geometry::GeometryView<'_>,
+     has_viewports: bool,
+     index: usize,
+     point: crate::Point,
+ ) -> bool {
+     use gpui_reactivity_core::CoordinateSpace;
+-    let node = &nodes[index];
++    let node = nodes.at(index);
+     if !node.bounds.contains(point)
+         || !node.transform(geometry.bases()).is_some_and(|map| {
+             let radius = geometry.radius(node.identity);
+@@ -694,7 +694,7 @@ pub(super) fn contains_point(
+     }
+     let mut parent = node.parent.index();
+     while let Some(index) = parent {
+-        let node = &nodes[index];
++        let node = nodes.at(index);
+         if matches!(
+             node.kind,
+             super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
+diff --git a/reactivity/crates/gpui/src/runtime/rows.rs b/reactivity/crates/gpui/src/runtime/rows.rs
+new file mode 100644
+index 0000000000..155b9fb2e1
+--- /dev/null
++++ b/reactivity/crates/gpui/src/runtime/rows.rs
+@@ -0,0 +1,519 @@
++//! A candidate owns only changed rows while its published topology matches P.
++//! All deltas borrow the same P epoch; candidates never borrow each other.
++use super::*;
++use std::ops::Index;
++
++pub(super) struct Change {
++    index: u32,
++    row: Presented,
++}
++pub(super) enum CandidateRows {
++    Full(Vec<Presented>),
++    Changes(Vec<Change>),
++}
++impl CandidateRows {
++    pub fn empty() -> Self {
++        Self::Changes(Vec::new())
++    }
++    pub fn view<'a>(&'a self, base: &'a [Presented]) -> Rows<'a> {
++        match self {
++            Self::Full(rows) => Rows {
++                base: rows,
++                changes: &[],
++            },
++            Self::Changes(changes) => Rows { base, changes },
++        }
++    }
++    pub(super) fn full(&mut self, base: &[Presented], capacity: usize) -> &mut Vec<Presented> {
++        if matches!(self, Self::Changes(_)) {
++            let Self::Changes(changes) = std::mem::replace(self, Self::empty()) else {
++                unreachable!()
++            };
++            let mut changes = changes.into_iter().peekable();
++            let mut rows = Vec::with_capacity(capacity);
++            for (index, old) in base.iter().enumerate() {
++                rows.push(
++                    if changes
++                        .peek()
++                        .is_some_and(|change| change.index as usize == index)
++                    {
++                        changes.next().unwrap().row
++                    } else {
++                        old.clone()
++                    },
++                );
++            }
++            *self = Self::Full(rows);
++        }
++        match self {
++            Self::Full(rows) => rows,
++            Self::Changes(_) => unreachable!(),
++        }
++    }
++    pub fn acknowledge(self, base: &mut Vec<Presented>) {
++        match self {
++            Self::Full(rows) => *base = rows,
++            Self::Changes(changes) => {
++                for change in changes {
++                    base[change.index as usize] = change.row;
++                }
++            }
++        }
++    }
++}
++
++/// Only C needs overlay lookup. P uses its original slice implementation.
++pub(super) trait RowAccess<'a>: Copy {
++    fn at(self, index: usize) -> &'a Presented;
++    fn len(self) -> usize;
++    fn get(self, index: usize) -> Option<&'a Presented>;
++    fn iter(self) -> impl DoubleEndedIterator<Item = &'a Presented> + ExactSizeIterator;
++}
++impl<'a> RowAccess<'a> for &'a [Presented] {
++    fn at(self, index: usize) -> &'a Presented {
++        &self[index]
++    }
++    fn len(self) -> usize {
++        <[Presented]>::len(self)
++    }
++    fn get(self, index: usize) -> Option<&'a Presented> {
++        <[Presented]>::get(self, index)
++    }
++    fn iter(self) -> impl DoubleEndedIterator<Item = &'a Presented> + ExactSizeIterator {
++        <[Presented]>::iter(self)
++    }
++}
++#[derive(Clone, Copy)]
++pub(super) struct Rows<'a> {
++    base: &'a [Presented],
++    changes: &'a [Change],
++}
++impl<'a> From<&'a [Presented]> for Rows<'a> {
++    fn from(base: &'a [Presented]) -> Self {
++        Self { base, changes: &[] }
++    }
++}
++impl Index<usize> for Rows<'_> {
++    type Output = Presented;
++    fn index(&self, index: usize) -> &Presented {
++        self.get(index).unwrap()
++    }
++}
++impl<'a> RowAccess<'a> for Rows<'a> {
++    fn at(self, index: usize) -> &'a Presented {
++        self.get(index).unwrap()
++    }
++    fn len(self) -> usize {
++        self.base.len()
++    }
++    fn get(self, index: usize) -> Option<&'a Presented> {
++        self.changes
++            .binary_search_by_key(&index, |change| change.index as usize)
++            .map(|at| &self.changes[at].row)
++            .ok()
++            .or_else(|| self.base.get(index))
++    }
++    fn iter(self) -> impl DoubleEndedIterator<Item = &'a Presented> + ExactSizeIterator {
++        Iter {
++            rows: self,
++            front: 0,
++            back: self.len(),
++        }
++    }
++}
++struct Iter<'a> {
++    rows: Rows<'a>,
++    front: usize,
++    back: usize,
++}
++impl<'a> Iterator for Iter<'a> {
++    type Item = &'a Presented;
++    fn next(&mut self) -> Option<Self::Item> {
++        if self.front == self.back {
++            return None;
++        }
++        let index = self.front;
++        self.front += 1;
++        if let Some(change) = self.rows.changes.first()
++            && change.index as usize == index
++        {
++            self.rows.changes = &self.rows.changes[1..];
++            Some(&change.row)
++        } else {
++            Some(&self.rows.base[index])
++        }
++    }
++    fn size_hint(&self) -> (usize, Option<usize>) {
++        let len = self.back - self.front;
++        (len, Some(len))
++    }
++    fn nth(&mut self, n: usize) -> Option<Self::Item> {
++        self.front += n.min(self.back - self.front);
++        let at = self
++            .rows
++            .changes
++            .partition_point(|change| (change.index as usize) < self.front);
++        self.rows.changes = &self.rows.changes[at..];
++        self.next()
++    }
++}
++impl DoubleEndedIterator for Iter<'_> {
++    fn next_back(&mut self) -> Option<Self::Item> {
++        if self.front == self.back {
++            return None;
++        }
++        self.back -= 1;
++        if let Some(change) = self.rows.changes.last()
++            && change.index as usize == self.back
++        {
++            self.rows.changes = &self.rows.changes[..self.rows.changes.len() - 1];
++            Some(&change.row)
++        } else {
++            Some(&self.rows.base[self.back])
++        }
++    }
++    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
++        self.back -= n.min(self.back - self.front);
++        let at = self
++            .rows
++            .changes
++            .partition_point(|change| (change.index as usize) < self.back);
++        self.rows.changes = &self.rows.changes[..at];
++        self.next_back()
++    }
++}
++impl ExactSizeIterator for Iter<'_> {}
++
++pub(super) struct Build<'a> {
++    base: &'a [Presented],
++    rows: CandidateRows,
++    len: usize,
++    capacity: usize,
++}
++impl<'a> Build<'a> {
++    pub fn new(base: &'a [Presented], capacity: usize) -> Self {
++        Self {
++            base,
++            rows: if base.is_empty() {
++                CandidateRows::Full(Vec::with_capacity(capacity))
++            } else {
++                CandidateRows::empty()
++            },
++            len: 0,
++            capacity,
++        }
++    }
++    pub fn len(&self) -> usize {
++        self.len
++    }
++    pub fn view(&self) -> Rows<'_> {
++        self.rows.view(&self.base[..self.len.min(self.base.len())])
++    }
++    pub fn get(&self, index: usize) -> Option<&Presented> {
++        self.view().get(index)
++    }
++    pub fn last(&self) -> Option<&Presented> {
++        self.len.checked_sub(1).and_then(|index| self.get(index))
++    }
++    pub fn push(&mut self, row: Presented<&SharedText>) {
++        if let CandidateRows::Changes(changes) = &mut self.rows {
++            let old = self.base.get(self.len).filter(|old| {
++                old.identity == row.identity && old.parent.index() == row.parent.index()
++            });
++            if old.is_some_and(|old| old.same(&row)) {
++                self.len += 1;
++                return;
++            }
++            let grow = if changes.len() == changes.capacity() {
++                (changes.len() + 1).next_power_of_two()
++            } else {
++                changes.capacity()
++            };
++            if old.is_none()
++                || grow * size_of::<Change>() >= self.base.len() * size_of::<Presented>()
++            {
++                self.rows.full(&self.base[..self.len], self.capacity);
++            } else if changes.capacity() < grow {
++                // Avoid Vec's minimum four rows for the first sparse change.
++                changes.reserve_exact(grow - changes.len());
++            }
++        }
++        let row = row.into_owned();
++        match &mut self.rows {
++            CandidateRows::Full(rows) => rows.push(row),
++            CandidateRows::Changes(changes) => changes.push(Change {
++                index: self.len as u32,
++                row,
++            }),
++        }
++        self.len += 1;
++    }
++    pub fn finish(mut self) -> CandidateRows {
++        if self.len != self.base.len() {
++            self.rows
++                .full(&self.base[..self.len.min(self.base.len())], self.capacity);
++        }
++        self.rows
++    }
++}
++
++impl Presented {
++    fn same(&self, next: &Presented<&SharedText>) -> bool {
++        let text = match (&self.text, next.text) {
++            (Some(old), Some(next)) => std::ptr::eq::<str>(old.as_ref(), next.as_ref()),
++            (None, None) => true,
++            _ => false,
++        };
++        // Different immutable leases conservatively own a changed row even if
++        // bytes are equal. The common identical pointer never scans long text.
++        text && self.identity == next.identity
++            && self.parent.0 == next.parent.0
++            && self.kind == next.kind
++            && self.basis == next.basis
++            && [
++                self.placement.translation.x,
++                self.placement.translation.y,
++                self.placement.size[0],
++                self.placement.size[1],
++                self.bounds.x,
++                self.bounds.y,
++                self.bounds.width,
++                self.bounds.height,
++            ]
++            .map(f32::to_bits)
++                == [
++                    next.placement.translation.x,
++                    next.placement.translation.y,
++                    next.placement.size[0],
++                    next.placement.size[1],
++                    next.bounds.x,
++                    next.bounds.y,
++                    next.bounds.width,
++                    next.bounds.height,
++                ]
++                .map(f32::to_bits)
++            && self.hittable == next.hittable
++            && self.actions == next.actions
++    }
++}
++impl Presented<&SharedText> {
++    fn into_owned(self) -> Presented {
++        Presented {
++            identity: self.identity,
++            parent: self.parent,
++            kind: self.kind,
++            text: self.text.cloned(),
++            placement: self.placement,
++            basis: self.basis,
++            bounds: self.bounds,
++            hittable: self.hittable,
++            actions: self.actions,
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    fn owned(index: usize, text: &SharedText) -> Presented {
++        Presented {
++            identity: index as u64 + 1,
++            parent: PresentedLink::new(
++                if index == 0 {
++                    Parent::NONE
++                } else {
++                    Parent::new(Some(0))
++                },
++                false,
++                None,
++            ),
++            kind: NodeKind::Text,
++            text: Some(text.clone()),
++            placement: geometry::Placement::new([10., 10.], Some(Affine::IDENTITY)),
++            basis: geometry::MapBasis::record(Some(Affine::IDENTITY), None, &mut Vec::new()),
++            bounds: Rect::new(0., index as f32 * 10., 10., 10.),
++            hittable: true,
++            actions: Actions::for_node(NodeKind::Text, false),
++        }
++    }
++    fn borrowed(row: &Presented) -> Presented<&SharedText> {
++        Presented {
++            identity: row.identity,
++            parent: row.parent,
++            kind: row.kind,
++            text: row.text.as_ref(),
++            placement: row.placement,
++            basis: row.basis,
++            bounds: row.bounds,
++            hittable: row.hittable,
++            actions: row.actions,
++        }
++    }
++    #[test]
++    fn exact_sparse_rows_keep_unmodified_leases_and_apply_in_place() {
++        let text = SharedText::from("not a static literal: ".repeat(100));
++        let mut base: Vec<_> = (0..32).map(|index| owned(index, &text)).collect();
++        let base_pointer = base.as_ptr();
++        let capacity = base.capacity();
++        let leases = text.lease_count().unwrap();
++        let mut unchanged = None;
++        let cost = allocation_counter::measure(|| {
++            let mut build = Build::new(&base, base.len());
++            for row in &base {
++                build.push(borrowed(row));
++            }
++            unchanged = Some(build.finish());
++        });
++        assert_eq!(cost.count_total, 0);
++        assert_eq!(text.lease_count(), Some(leases));
++        assert!(matches!(unchanged.unwrap(), CandidateRows::Changes(rows) if rows.is_empty()));
++        let mut build = Build::new(&base, base.len());
++        for (index, old) in base.iter().enumerate() {
++            let mut row = borrowed(old);
++            if index == 17 {
++                row.bounds.x = -0.;
++            }
++            build.push(row);
++        }
++        let candidate = build.finish();
++        assert!(
++            matches!(&candidate, CandidateRows::Changes(rows) if rows.len()==1 && rows.capacity()==1)
++        );
++        assert_eq!(text.lease_count(), Some(leases + 1));
++        assert_eq!(
++            candidate.view(&base)[17].bounds.x.to_bits(),
++            (-0f32).to_bits()
++        );
++        assert_eq!(base[17].bounds.x.to_bits(), 0f32.to_bits());
++        candidate.acknowledge(&mut base);
++        assert_eq!(base.as_ptr(), base_pointer);
++        assert_eq!(base.capacity(), capacity);
++        assert_eq!(text.lease_count(), Some(leases));
++        assert_eq!(base[17].bounds.x.to_bits(), (-0f32).to_bits());
++        println!(
++            "ROW_HEADERS owned={} borrowed={} change={} candidate={} option_candidate={} prepared={} option_prepared={} rows={} p_hit={} c_hit={} runtime={}",
++            size_of::<Presented>(),
++            size_of::<Presented<&SharedText>>(),
++            size_of::<Change>(),
++            size_of::<CandidateRows>(),
++            size_of::<Option<CandidateRows>>(),
++            size_of::<Prepared>(),
++            size_of::<Option<Prepared>>(),
++            size_of::<Rows<'_>>(),
++            size_of::<query::HitSheet<'_>>(),
++            size_of::<query::HitSheet<'_, Rows<'_>>>(),
++            size_of::<Runtime<()>>()
++        );
++    }
++    #[test]
++    fn overlay_iteration_and_topology_fallbacks_use_the_same_candidate_rows() {
++        let text = SharedText::from(String::from("immutable row"));
++        let base: Vec<_> = (0..32).map(|index| owned(index, &text)).collect();
++        let mut build = Build::new(&base, base.len());
++        for (index, old) in base.iter().enumerate() {
++            let mut row = borrowed(old);
++            if [1, 7, 19].contains(&index) {
++                row.bounds.x = f32::from_bits(1);
++            }
++            build.push(row);
++        }
++        let candidate = build.finish();
++        let view = candidate.view(&base);
++        let expected: Vec<_> = (0..base.len())
++            .map(|index| view[index].bounds.x.to_bits())
++            .collect();
++        assert_eq!(
++            view.iter()
++                .map(|row| row.bounds.x.to_bits())
++                .collect::<Vec<_>>(),
++            expected
++        );
++        assert_eq!(
++            view.iter()
++                .rev()
++                .map(|row| row.bounds.x.to_bits())
++                .collect::<Vec<_>>(),
++            expected.iter().rev().copied().collect::<Vec<_>>()
++        );
++        for front in 0..33 {
++            for back in 0..33 - front {
++                let mut rows = view.iter();
++                assert_eq!(
++                    rows.nth(front).map(|row| row.bounds.x.to_bits()),
++                    expected.get(front).copied()
++                );
++                let remaining = 32usize.saturating_sub(front + 1);
++                assert_eq!(
++                    rows.nth_back(back).map(|row| row.bounds.x.to_bits()),
++                    remaining
++                        .checked_sub(back + 1)
++                        .map(|at| expected[front + 1 + at])
++                );
++            }
++        }
++        for topology in 0..4 {
++            let mut build = Build::new(&base, 33);
++            let mut order: Vec<_> = (0..32).collect();
++            match topology {
++                0 => order.swap(4, 5),
++                1 => {
++                    order.pop();
++                }
++                2 => order.push(31),
++                _ => {}
++            }
++            for (index, &at) in order.iter().enumerate() {
++                let mut row = borrowed(&base[at]);
++                if topology == 3 && index == 12 {
++                    row.parent = PresentedLink::new(Parent::NONE, false, None);
++                }
++                build.push(row);
++            }
++            let candidate = build.finish();
++            assert!(matches!(candidate, CandidateRows::Full(_)));
++            assert_eq!(
++                candidate
++                    .view(&base)
++                    .iter()
++                    .map(|row| row.identity)
++                    .collect::<Vec<_>>(),
++                order
++                    .iter()
++                    .map(|&at| base[at].identity)
++                    .collect::<Vec<_>>()
++            );
++        }
++    }
++    #[test]
++    fn dense_and_tiny_changes_fall_back_without_sparse_minimum_capacity_tax() {
++        let text = SharedText::from(String::from("payload"));
++        for count in [1, 32, 16384] {
++            let mut base: Vec<_> = (0..count).map(|index| owned(index, &text)).collect();
++            let mut build = Build::new(&base, count);
++            for old in &base {
++                let mut row = borrowed(old);
++                row.hittable = false;
++                build.push(row);
++            }
++            let candidate = build.finish();
++            assert!(matches!(candidate, CandidateRows::Full(_)));
++            candidate.acknowledge(&mut base);
++            assert!(base.iter().all(|row| !row.hittable));
++        }
++        let base: Vec<_> = (0..32).map(|index| owned(index, &text)).collect();
++        let equal = SharedText::from(String::from("payload"));
++        assert_eq!(&*text, &*equal);
++        let mut build = Build::new(&base, 32);
++        for (index, old) in base.iter().enumerate() {
++            let mut row = borrowed(old);
++            if index == 2 {
++                row.text = Some(&equal);
++            }
++            build.push(row);
++        }
++        assert!(matches!(build.finish(),CandidateRows::Changes(rows) if rows.len()==1));
++    }
++}
++
++#[cfg(test)]
++mod owner_tests;
+diff --git a/reactivity/crates/gpui/src/runtime/rows/owner_tests.rs b/reactivity/crates/gpui/src/runtime/rows/owner_tests.rs
+new file mode 100644
+index 0000000000..ba8953b1ca
+--- /dev/null
++++ b/reactivity/crates/gpui/src/runtime/rows/owner_tests.rs
+@@ -0,0 +1,143 @@
++//! Whole-window ownership costs; ignored so the measured process runs one case.
++use super::*;
++use crate::prelude::*;
++struct Page {
++    count: usize,
++    text: bool,
++    general: bool,
++    x: f32,
++}
++impl View for Page {
++    fn view(&self) -> El<'_> {
++        if self.count == 1 {
++            return div()
++                .size(10)
++                .bg(Color::BLACK)
++                .transform(Affine::translation(self.x, 0.));
++        }
++        column((0..self.count).map(|index| {
++            let el = if self.text {
++                text("immutable text payload").w(240).h(20)
++            } else {
++                div().w(10).h(1).bg(Color::BLACK)
++            };
++            let map = Affine {
++                a: 1.,
++                b: if self.general { 0.1 } else { 0. },
++                c: if self.general { 0.2 } else { 0. },
++                d: 1.,
++                tx: if index == self.count / 2 { self.x } else { 0. },
++                ty: 0.,
++            };
++            if self.general {
++                el.rounded(4.).transform(map)
++            } else {
++                el.transform(map)
++            }
++        }))
++    }
++}
++fn report(stage: &str, win: &Win<Page>, cost: allocation_counter::AllocationInfo) {
++    let r = win.runtime().unwrap();
++    let (mode, count, capacity) = match r.prepared.as_ref().map(|p| &p.nodes) {
++        None => ("none", 0, 0),
++        Some(CandidateRows::Full(rows)) => {
++            ("full", rows.len(), rows.capacity() * size_of::<Presented>())
++        }
++        Some(CandidateRows::Changes(rows)) => {
++            ("changes", rows.len(), rows.capacity() * size_of::<Change>())
++        }
++    };
++    let text = r.text.as_ref();
++    let geometry = r.metadata.as_ref().and_then(|m| m.geometry.as_ref());
++    let pgeo = geometry.map_or((0, 0), |g| g.record_storage());
++    let cgeo = geometry
++        .and_then(|g| g.candidate_storage())
++        .unwrap_or_default();
++    let leases: usize = r
++        .presented
++        .iter()
++        .filter_map(|row| row.text.as_ref())
++        .filter_map(SharedText::lease_count)
++        .sum();
++    println!(
++        "ROW_OWNER stage={stage} logical={} l_node_bytes={} p_rows={} p_bytes={} c_mode={mode} c_owned_rows={count} c_bytes={capacity} shared_text_p_lease_sum={leases} l_text_slots_bytes={} p_text_entries={} p_text_bytes={} c_text_entries={} c_text_bytes={} p_geometry_records={} p_geometry_bytes={} c_geometry_records={} c_geometry_bytes={} images={} allocations={} requested={} retained_delta={} peak_extra={}",
++        r.nodes.len(),
++        r.nodes.capacity() * size_of::<Node>(),
++        r.presented.len(),
++        r.presented.capacity() * size_of::<Presented>(),
++        r.texts.capacity() * size_of::<Option<TextSite>>(),
++        text.map_or(0, |t| t.presented.len()),
++        text.map_or(0, |t| t.presented.capacity()
++            * size_of::<text_geometry::Entry>()),
++        text.and_then(|t| t.candidate.as_ref()).map_or(0, Vec::len),
++        text.and_then(|t| t.candidate.as_ref())
++            .map_or(0, |c| c.capacity() * size_of::<text_geometry::Entry>()),
++        pgeo.0,
++        pgeo.1 * size_of::<geometry::Record>(),
++        cgeo.0,
++        cgeo.1 * size_of::<geometry::Record>(),
++        usize::from(r.images.is_some()),
++        cost.count_total,
++        cost.bytes_total,
++        cost.bytes_current,
++        cost.bytes_max
++    );
++}
++#[test]
++#[ignore = "owner allocation control: one explicitly selected fresh-process case"]
++fn whole_window_candidate_owner_costs() {
++    let name = std::env::var("GPUI_ROW_OWNER_CASE").unwrap_or_else(|_| "workspace32".into());
++    let (count, text) = match name.as_str() {
++        "tiny1" => (1, false),
++        "workspace32" => (32, false),
++        "sparse16k" => (16384, false),
++        "text32k" => (32768, true),
++        "transformed32" | "inspector32" => (32, false),
++        _ => panic!("unknown case"),
++    };
++    let mut win = None;
++    let mount = allocation_counter::measure(|| {
++        let page = Page {
++            count,
++            text,
++            general: name == "transformed32" || name == "inspector32",
++            x: 0.,
++        };
++        let options = WindowOptions {
++            size: [400, 400],
++            ..Default::default()
++        };
++        win = Some(
++            if name == "inspector32" {
++                Win::recording_with_inspector(page, options)
++            } else {
++                Win::recording(page, options)
++            }
++            .unwrap(),
++        );
++    });
++    let mut win = win.unwrap();
++    report("mount-C0", &win, mount);
++    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++    let p = win.runtime().unwrap().presented.as_ptr();
++    let first = allocation_counter::measure(|| {
++        win.update(|m| m.x = 0.125).unwrap();
++    });
++    report("C1", &win, first);
++    let second = allocation_counter::measure(|| {
++        win.update(|m| m.x = 0.25).unwrap();
++    });
++    report("C2", &win, second);
++    let ack = allocation_counter::measure(|| {
++        win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++    });
++    report("ACK", &win, ack);
++    if count > 1 {
++        assert_eq!(p, win.runtime().unwrap().presented.as_ptr());
++    }
++    assert_eq!(
++        win.snapshot().unwrap().source_epoch,
++        win.snapshot().unwrap().presentation_epoch
++    );
++}
+diff --git a/reactivity/crates/gpui/src/shared_text.rs b/reactivity/crates/gpui/src/shared_text.rs
+index 0a6964a240..26d1fc5051 100644
+--- a/reactivity/crates/gpui/src/shared_text.rs
++++ b/reactivity/crates/gpui/src/shared_text.rs
+@@ -33,6 +33,9 @@ impl From<String> for SharedText {
+ }
+ #[cfg(test)]
+ impl SharedText {
++    pub(crate) fn lease_count(&self) -> Option<usize> {
++        arcstr::ArcStr::strong_count(&self.0)
++    }
+     pub fn as_ptr(&self) -> *const str {
+         self.0.as_str() as *const str
+     }
+diff --git a/reactivity/crates/gpui/tests/presentation_rows.rs b/reactivity/crates/gpui/tests/presentation_rows.rs
+new file mode 100644
+index 0000000000..94e39eeb35
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/presentation_rows.rs
+@@ -0,0 +1,197 @@
++//! Candidate row ownership is exercised through ordinary public window APIs.
++use gpui::{Error, Role, WindowOptions, prelude::*};
++
++struct Page {
++    checked: [bool; 32],
++    broken: bool,
++    shear: f32,
++}
++impl Default for Page {
++    fn default() -> Self {
++        Self {
++            checked: [false; 32],
++            broken: false,
++            shear: 0.1,
++        }
++    }
++}
++impl View for Page {
++    fn view(&self) -> El<'_> {
++        column((0..32).map(|index| {
++            checkbox(format!("item {index}"), self.checked[index])
++                .w(180)
++                .h(24)
++                .rounded(4.)
++                .transform(Affine {
++                    a: if self.broken && index == 31 { 0. } else { 1. },
++                    b: if self.broken && index == 31 {
++                        0.
++                    } else {
++                        self.shear
++                    },
++                    c: 0.2,
++                    d: 1.,
++                    tx: 0.,
++                    ty: 0.,
++                })
++                .on_click(move |m: &mut Self| m.checked[index] = !m.checked[index])
++        }))
++    }
++}
++fn token<M: View + 'static>(win: &Win<M>) -> gpui::PresentationToken {
++    win.with_scene(|_, token| token).unwrap()
++}
++fn ack<M: View + 'static>(win: &mut Win<M>) {
++    win.presented(token(win)).unwrap();
++}
++fn page() -> Win<Page> {
++    let mut win = Win::recording(
++        Page::default(),
++        WindowOptions {
++            size: [400, 900],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    ack(&mut win);
++    win
++}
++fn displayed<M: View + 'static>(win: &Win<M>, name: &str) -> Option<Target> {
++    let mut target = None;
++    win.visit(|part| {
++        if part.name() == Some(name) {
++            target = Some(part.target())
++        }
++    })
++    .unwrap();
++    target
++}
++fn checked(win: &Win<Page>, index: usize) -> bool {
++    let name = format!("item {index}");
++    let mut result = None;
++    win.visit(|part| {
++        if part.name() == Some(name.as_str()) {
++            result = part.checked()
++        }
++    })
++    .unwrap();
++    result.unwrap()
++}
++#[test]
++fn coalesced_candidates_keep_p_immutable_and_ack_latest_changes_in_place() {
++    let mut win = page();
++    let target = win.query().name("item 7").one().unwrap();
++    let bounds = win.bounds(target).unwrap();
++    win.activate(target).unwrap();
++    let first = token(&win);
++    assert!(!checked(&win, 7));
++    win.update(|m| m.checked[11] = true).unwrap();
++    let second = token(&win);
++    assert_ne!(first, second);
++    assert_eq!(win.presented(first), Err(Error::StalePresentation));
++    assert!(!checked(&win, 7));
++    assert!(!checked(&win, 11));
++    win.presented(second).unwrap();
++    assert!(checked(&win, 7));
++    assert!(checked(&win, 11));
++    assert_eq!(win.query().name("item 7").one().unwrap(), target);
++    assert_eq!(win.bounds(target).unwrap(), bounds);
++}
++#[test]
++fn failed_later_preparation_preserves_the_old_exact_candidate_then_repairs() {
++    let mut win = page();
++    win.update(|m| m.checked[7] = true).unwrap();
++    let coherent = token(&win);
++    assert!(
++        win.update(|m| {
++            m.checked[9] = true;
++            m.broken = true
++        })
++        .is_err()
++    );
++    assert_eq!(token(&win), coherent);
++    assert!(!checked(&win, 7));
++    assert!(!checked(&win, 9));
++    let commit = win.presented(coherent).unwrap();
++    assert!(commit.source_epoch > commit.presentation_epoch);
++    assert!(checked(&win, 7));
++    assert!(!checked(&win, 9));
++    win.update(|m| m.broken = false).unwrap();
++    ack(&mut win);
++    assert!(checked(&win, 7));
++    assert!(checked(&win, 9));
++}
++#[test]
++fn independent_geometry_pools_and_viewport_changes_resolve_their_own_rows() {
++    let mut win = page();
++    let target = win.query().name("item 7").one().unwrap();
++    let old = win.bounds(target).unwrap();
++    win.update(|m| m.shear = 0.3).unwrap();
++    let changed = token(&win);
++    assert_eq!(win.bounds(target).unwrap(), old);
++    win.presented(changed).unwrap();
++    assert_ne!(win.bounds(target).unwrap(), old);
++    let unit = win.bounds(target).unwrap();
++    win.resize_scaled([800, 1800], 2.).unwrap();
++    assert_eq!(win.bounds(target).unwrap(), unit);
++    ack(&mut win);
++    let scaled = win.bounds(target).unwrap();
++    assert_eq!(scaled.x, unit.x * 2.);
++    assert_eq!(scaled.y, unit.y * 2.);
++    assert_eq!(win.query().name("item 7").one().unwrap(), target);
++}
++
++struct List {
++    reverse: bool,
++}
++const LIST: ListId = ListId::new(57);
++impl ItemSource for List {
++    fn len(&self) -> usize {
++        100
++    }
++    fn key(&self, index: usize) -> ItemKey {
++        ItemKey::new(if self.reverse { 99 - index } else { index } as u64)
++    }
++    fn index_of(&self, key: ItemKey) -> Option<usize> {
++        let index = usize::try_from(key.get()).ok()?;
++        (index < 100).then(|| if self.reverse { 99 - index } else { index })
++    }
++    fn row(&self, index: usize) -> El<'_> {
++        button(format!("row {}", self.key(index).get()))
++            .w(160)
++            .h(24)
++            .on_click(|_: &mut Self| {})
++    }
++}
++impl View for List {
++    fn view(&self) -> El<'_> {
++        uniform_list(LIST, self, 24).w(160).h(72)
++    }
++}
++#[test]
++fn keyed_reorder_and_compacted_virtual_rows_use_full_topology_recovery() {
++    let mut win = Win::recording(
++        List { reverse: false },
++        WindowOptions {
++            size: [200, 100],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    ack(&mut win);
++    let list = win.list(LIST).unwrap();
++    let old = win.query().name("row 0").one().unwrap();
++    win.scroll_to_index(list, 1).unwrap();
++    assert_eq!(displayed(&win, "row 0"), Some(old));
++    ack(&mut win);
++    assert_eq!(win.query().name("row 0").count().unwrap(), 0);
++    assert_eq!(win.activate(old), Err(Error::StaleTarget));
++    let surviving = win.query().name("row 2").one().unwrap();
++    win.update(|m| m.reverse = true).unwrap();
++    assert_eq!(displayed(&win, "row 2"), Some(surviving));
++    ack(&mut win);
++    assert_eq!(win.role(Role::Button).count().unwrap(), 3);
++    assert_eq!(win.list_state(list).unwrap().visible_range, 97..100);
++    assert_eq!(win.query().name("row 2").one().unwrap(), surviving);
++    assert_eq!(win.activate(old), Err(Error::StaleTarget));
++}

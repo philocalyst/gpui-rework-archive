@@ -1,0 +1,10 @@
+
+running 1 test
+test runtime::rows::owner_tests::whole_window_candidate_owner_costs ... ROW_OWNER stage=mount-C0 logical=33 l_node_bytes=1320 p_rows=0 p_bytes=0 c_mode=full c_owned_rows=33 c_bytes=2112 shared_text_p_lease_sum=0 l_text_slots_bytes=0 p_text_entries=0 p_text_bytes=0 c_text_entries=0 c_text_bytes=0 p_geometry_records=0 p_geometry_bytes=0 c_geometry_records=0 c_geometry_bytes=0 images=0 allocations=94 requested=81177 retained_delta=26637 peak_extra=30101
+ROW_OWNER stage=C1 logical=33 l_node_bytes=1320 p_rows=33 p_bytes=2112 c_mode=changes c_owned_rows=1 c_bytes=72 shared_text_p_lease_sum=0 l_text_slots_bytes=0 p_text_entries=0 p_text_bytes=0 c_text_entries=0 c_text_bytes=0 p_geometry_records=0 p_geometry_bytes=0 c_geometry_records=0 c_geometry_bytes=0 images=0 allocations=38 requested=50669 retained_delta=160 peak_extra=21760
+ROW_OWNER stage=C2 logical=33 l_node_bytes=1320 p_rows=33 p_bytes=2112 c_mode=changes c_owned_rows=1 c_bytes=72 shared_text_p_lease_sum=0 l_text_slots_bytes=0 p_text_entries=0 p_text_bytes=0 c_text_entries=0 c_text_bytes=0 p_geometry_records=0 p_geometry_bytes=0 c_geometry_records=0 c_geometry_bytes=0 images=0 allocations=38 requested=50669 retained_delta=0 peak_extra=21760
+ROW_OWNER stage=ACK logical=33 l_node_bytes=1320 p_rows=33 p_bytes=2112 c_mode=none c_owned_rows=0 c_bytes=0 shared_text_p_lease_sum=0 l_text_slots_bytes=0 p_text_entries=0 p_text_bytes=0 c_text_entries=0 c_text_bytes=0 p_geometry_records=0 p_geometry_bytes=0 c_geometry_records=0 c_geometry_bytes=0 images=0 allocations=0 requested=0 retained_delta=-72 peak_extra=0
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 160 filtered out; finished in 0.00s
+
