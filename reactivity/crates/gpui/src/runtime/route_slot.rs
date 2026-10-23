@@ -230,4 +230,62 @@ mod tests {
             runtime.handlers[slot] = Some(handler);
         }
     }
+
+    #[test]
+    #[ignore = "structural spike: exercise every route address in a max-admission owner"]
+    fn max_admitted_owner_dispatches_routes_across_both_high_bits() {
+        use crate::{WindowOptions, prelude::*};
+        struct Page {
+            seen: Signal<usize>,
+        }
+        impl Page {
+            const SEEN: Source<Self, usize> =
+                Source::new(FieldId::new(1), "seen", |m| &m.seen, |m| &mut m.seen);
+            fn site<'a>(index: usize, site: El<'a>) -> El<'a> {
+                site.on_click(Self::SEEN.update(move |seen| *seen = index))
+            }
+        }
+        impl View for Page {
+            fn sources() -> Sources<Self> {
+                Sources::new().direct(Self::SEEN)
+            }
+            fn view(&self) -> El<'_> {
+                Self::site(
+                    0,
+                    column((1..MAX_NODES).map(|index| Self::site(index, div().w(8).h(1)))),
+                )
+            }
+        }
+        let mut win = Win::recording(
+            Page {
+                seen: Signal::new(usize::MAX),
+            },
+            WindowOptions {
+                size: [32, 32],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let snapshot = win.snapshot().unwrap();
+        assert_eq!(snapshot.nodes.len(), MAX_NODES);
+        let targets = snapshot
+            .nodes
+            .iter()
+            .map(|node| node.target.unwrap())
+            .collect::<Vec<_>>();
+        drop(snapshot);
+        let before = win.counters();
+        for index in [0, 32767, 32768, 65535, 65536, 98303, 98304, MAX_NODES - 1] {
+            win.activate(targets[index]).unwrap();
+            assert_eq!(*win.root().unwrap().seen, index);
+        }
+        assert_eq!(win.counters().owner_reruns, before.owner_reruns);
+        assert_eq!(win.counters().exact_updates - before.exact_updates, 8);
+        let runtime = win.runtime_mut().unwrap();
+        assert_eq!(runtime.handlers.len(), MAX_NODES);
+        for (index, node) in runtime.nodes.iter().enumerate() {
+            assert_eq!(node.route(), Some(index));
+            assert!(runtime.handlers[index].is_some());
+        }
+    }
 }
