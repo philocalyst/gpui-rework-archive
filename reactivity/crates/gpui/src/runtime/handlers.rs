@@ -134,6 +134,56 @@ mod tests {
         assert_eq!(allocation.count_total, 0);
     }
     #[test]
+    fn old_indexing_touches_only_sparse_routes_and_takes_dense_by_row() {
+        use super::super::{Content, NodeKind, Parent, TextSlot};
+        use std::num::NonZeroU64;
+        for pattern in 0..4 {
+            let routed = |node| match pattern {
+                0 => false,
+                1 => true,
+                2 => [1, 5, 11].contains(&node),
+                _ => node != 6,
+            };
+            let mut builder = Builder::new(12, (0..12).filter(|&node| routed(node)).count());
+            let mut nodes = (0..12)
+                .map(|index| {
+                    builder.push(index, routed(index).then(route));
+                    Node {
+                        identity: NonZeroU64::new(index as u64 + 1).unwrap(),
+                        parent: Parent::new(index.checked_sub(1)),
+                        ordinal: 0,
+                        content: Content::new(NodeKind::Div, TextSlot::NONE)
+                            .with_route(routed(index)),
+                        component_scope: 0,
+                    }
+                })
+                .collect::<Vec<_>>();
+            let mut sites = builder.finish();
+            sites.index_old(&mut nodes);
+            let mut sparse_slot = 0;
+            for (index, node) in nodes.iter().enumerate() {
+                let expected = if routed(index) && !sites.sites.is_empty() {
+                    let slot = sparse_slot;
+                    sparse_slot += 1;
+                    slot
+                } else {
+                    0
+                };
+                assert_eq!(node.ordinal, expected);
+            }
+            for index in (0..12).rev() {
+                assert_eq!(
+                    sites.take_old(index, &nodes[index]).is_some(),
+                    routed(index)
+                );
+                // Temporary ownership never changes logical eligibility.
+                assert_eq!(nodes[index].content.has_route(), routed(index));
+                assert!(sites.take_old(index, &nodes[index]).is_none());
+            }
+        }
+    }
+
+    #[test]
     fn route_presence_masks_every_bounded_content_payload() {
         use super::super::{Content, MAX_NODES, NodeKind, TextSlot, image::ImageUse};
         for index in [0, 1, MAX_NODES as u32 - 1] {
