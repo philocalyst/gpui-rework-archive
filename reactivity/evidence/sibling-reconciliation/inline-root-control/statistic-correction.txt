@@ -1,0 +1,1 @@
+Before commit, review caught that the initial README called the ratio of cohort medians the median paired change. The corrected README and JSON distinguish both; all raw samples and original capture are preserved. This correction does not change the decision to keep the control unadopted.

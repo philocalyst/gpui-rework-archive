@@ -1,10 +1,11 @@
-# Hummingbird data and Library port
+# Hummingbird Library and queue port
 
 This application experiment ports a real Hummingbird data seam into the ordinary
 GPUI native/headless owner: SQLite query → Nucleo search → keyed virtual rows →
-SQLite-validated playback request. It is a foundation for growing the player
-port, not a full player. Audio output, scanner/watcher, full navigation/table
-controls, queue, artwork, settings and platform media integration remain absent.
+SQLite-validated playback request → exclusively owned queue and playback plan.
+It is a foundation for growing the player port. Audio output, scanner/watcher,
+full navigation/table controls, artwork, settings and platform media integration
+remain absent.
 
 Run from this standalone workspace:
 
@@ -37,6 +38,30 @@ it does not run migrations or seed it. Query compatibility is with the pin below
 not a promise to migrate arbitrary future databases. Play resolves the actual
 track ID, album ID and stored path through `for_playback`; it displays a typed,
 sequenced request and does not start an audio device.
+
+## Queue and decoder boundary
+
+After preparing a recording, use its Add control to append the actual queried
+title/path to the queue. The contained `QueueScreen: View` uses the same public
+component, keyed-list, checkbox, action and semantic APIs as Library. Duplicate
+recordings have distinct occurrence keys while sharing immutable `TrackRef`
+payloads. Explicit Only/Range controls expose selection; modifier/drag behavior
+is not supplied by this slice. Remove, reorder, clear, undo, shuffle, repeat and
+previous/next operate on the exclusive controller.
+
+Plans lease only current/lookahead metadata. A unique checked session/serial
+stamp rejects duplicate, retired and foreign end-of-stream messages, including
+same-entry replay. The entry key remains in the plan and is not repeated in the
+16-byte stamp. Track availability is a worker snapshot; a real decoder must
+recheck file-open errors. This UI prepares plans and does not attach audio,
+pause/seek, five-second previous behavior, consume or stop-after-current.
+
+[Producer fixtures and costs](../../evidence/hummingbird-queue/README.md) retain
+the pinned original queue behavior and explicit desired differences. The
+[integrated checks](../../evidence/pointer-queue-main/README.md) pass all 33 cases
+under default/native features, strict checks, and actual Registry/X11 immediate
+press/release clients on CPU/GPU. The core focus-paint correction is exercised
+through these ordinary app controls; no private event dispatcher is substituted.
 
 ## Source, SQL and matching
 
@@ -166,6 +191,9 @@ Nucleo's Unicode features remain enabled. Its registry matcher is MPL-2.0 and
 Rusqlite is MIT; neither dependency is vendored or modified. SQLx/Tokio and the
 full upstream i18n/media/entity dependency graph are not imported. The path
 patches preserve GPUI's existing local text/window/platform repairs.
+The queue adds Triomphe0.1.17 for immutable track leases and Fastrand2.5.0 for
+shuffle; allocation-counter0.8.1 is test-only. These app dependencies add no
+dependencies to the shipping UI libraries.
 
 The uncompiled upstream query reference and migration bytes are provenance
 inputs, distinct from compiled port code and from the shipping UI core.

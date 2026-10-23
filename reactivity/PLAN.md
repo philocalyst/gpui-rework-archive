@@ -71,6 +71,11 @@ The [combined main source](evidence/structural-main/README.md) passes 656
 GPUI/GPU cases/docs, strict all-target checks and formatting with all 2,033
 shipping/configuration/port guards intact. It does not rerun the separate native
 Window or foreign-OS producer campaigns.
+The later [rapid-pointer/queue integration](evidence/pointer-queue-main/README.md)
+passes 667 core/GPU cases/docs, both 33-case Hummingbird feature sets and six
+actual Registry/input executions, including explicitly forced Vulkan. Preserve
+the failed pre-app Python launch and the separately scoped native-only resume.
+These behavioral gates do not establish startup, RSS or hardware performance.
 
 The [flat sibling index](evidence/sibling-reconciliation/README.md) is also
 integrated. One temporary prefix/child buffer replaces ordered reconciliation
@@ -135,6 +140,12 @@ identifies those copies; it does not establish a later win. Preserve the empty-e
 fixture coverage limits and exact RTL f32
 recurrence; do not reverse-subtract advances or assume wrapped u32 source
 offsets remain monotonic above 4 GiB. Canvas already admits at most 32 KiB.
+The [final borrowed capture](evidence/monotonic-caret-stream/final-borrowed/README.md)
+still loses RTL/mixed timing and stays unadopted. Continue through the
+[transaction boundary](docs/text-transaction-frontier-luna.md): admit while
+writing only unpublished local carets, roll back to the old index on ambiguity,
+and preserve structural error precedence. Price RTL reservation/slack and the
+old atomic path's codegen rather than assuming fewer passes are sufficient.
 Parallel planners duplicate font and paragraph scratch; scheduling
 and variable-output merge storage require separate measured justification.
 
@@ -161,17 +172,23 @@ modeled route payload grows 40 bytes. The [standalone feasibility controls](evid
 preserve an initial unsound lifetime-erasure candidate and its corrected version.
 They are neither a shipping implementation nor a soundness proof; allocator-class,
 dispatch and full lifecycle costs remain before adoption.
-The [route storage frontier](docs/route-storage-frontier-luna.md) instead selects
-a safe hot/cold retained-node experiment: keep route presence in the packed kind
-word and move callback owners into density-selected columns. Qualify actual
-owner headers, old/new overlap, dispatch and destructor order before accepting
-the proposed 40→24-byte node. A separate tail-header thin owner reduces padding
+The [route storage frontier](docs/route-storage-frontier-luna.md) motivates
+safe hot/cold retained nodes. Actual [density-column controls](crates/gpui/evidence/route-columns/rejected-controls.md)
+lose the speed gate; the [packed direct-slot successor](crates/gpui/evidence/route-columns/packed-rejected-controls.md)
+recovers activation but consistently loses resize and no-route description.
+Preserve every losing capture. The next isolated formulation keeps the hot
+parent representation intact and uses spare ordinal/content bits for direct
+route addressing. Qualify actual owner headers, old/new overlap, full-width
+identity/scope, dispatch and destructor order before accepting a smaller node.
+A separate tail-header thin owner reduces padding
 but still requires an unsafe policy decision and full soundness qualification.
-The isolated [Hummingbird queue](evidence/hummingbird-queue/README.md) now supplies
+The integrated [Hummingbird queue](evidence/hummingbird-queue/README.md) now supplies
 real queue/controller and public UI contracts, including distinct duplicate
-identity and stale EOS rejection. Integration is waiting on a core rapid-click
-correction exposed by the native consumer. Audio transport and the rest of the
-full player remain required work; held-button success is not rapid-click proof.
+identity and stale EOS rejection. Its native consumer exposed and now verifies
+the core rapid-click correction, including immediate press/release. The checked
+session/serial pair removes a redundant entry key from playback stamps. Audio
+transport and the rest of the full player remain required work; held-button
+success alone is not rapid-click proof.
 Designer color still needs shared
 batch/palette operations,
 explicit mix contracts and accessibility contrast, beyond the integrated gamut

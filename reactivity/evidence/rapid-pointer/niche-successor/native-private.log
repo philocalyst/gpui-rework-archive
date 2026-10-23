@@ -1,0 +1,107 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling thiserror v2.0.21
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling serde_derive v1.0.229
+   Compiling bytemuck_derive v1.12.1
+   Compiling bytemuck v1.25.2
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling serde v1.0.229
+   Compiling yoke-derive v0.8.4
+   Compiling zerofrom v0.1.8
+   Compiling zvariant_utils v4.2.0
+   Compiling yoke v0.8.3
+   Compiling zcheapstr v1.1.0
+   Compiling enumflags2_derive v0.7.12
+   Compiling zvariant_derive v5.15.1
+   Compiling enumflags2 v0.7.12
+   Compiling thiserror-impl v2.0.21
+   Compiling zerovec-derive v0.11.6
+   Compiling zerovec v0.11.8
+   Compiling zerocopy-derive v0.8.63
+   Compiling displaydoc v0.2.7
+   Compiling zerocopy v0.8.63
+   Compiling zvariant v5.15.1
+   Compiling half v2.7.1
+   Compiling tracing-attributes v0.1.31
+   Compiling zbus_names v4.3.5
+   Compiling tinystr v0.8.4
+   Compiling tracing v0.1.44
+   Compiling font-types v0.12.7
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling naga-types v30.0.1
+   Compiling icu_provider v2.3.1
+   Compiling icu_collections v2.3.0
+   Compiling read-fonts v0.41.0
+   Compiling zbus_xml v5.2.1
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling snafu-derive v0.8.9
+   Compiling naga v30.0.1
+   Compiling zbus-lockstep v0.5.2
+   Compiling zbus_macros v5.19.0
+   Compiling async-recursion v1.2.0
+   Compiling zbus v5.19.0
+   Compiling zbus-lockstep-macros v0.5.2
+   Compiling snafu v0.8.9
+   Compiling wgpu-types v30.0.1
+   Compiling gpu-allocator v0.28.0
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+   Compiling thiserror v1.0.69
+   Compiling atspi-common v0.13.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling thiserror-impl v1.0.69
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu-hal)
+   Compiling skrifa v0.49.0
+   Compiling fontique v0.12.0
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling phf_macros v0.14.0
+   Compiling harfrust v0.12.0
+   Compiling phf v0.14.0
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling parley_engine v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley_engine)
+   Compiling calloop v0.13.0
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling atspi-proxies v0.13.0
+   Compiling skrifa v0.44.0
+   Compiling futures-macro v0.3.34
+   Compiling futures-util v0.3.34
+   Compiling swash v0.2.10
+   Compiling winit v0.30.13 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/winit)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpu)
+   Compiling atspi v0.29.0
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu-core)
+   Compiling parley v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley)
+   Compiling accesskit_atspi_common v0.21.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_atspi_common)
+   Compiling zbus_utils v6.0.0
+   Compiling fearless_simd_macros v0.1.0
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/canvas)
+   Compiling tiny-xlib v0.2.5
+   Compiling zbus_macros v6.0.0
+   Compiling wgpu v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu)
+   Compiling accesskit_unix v0.24.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_unix)
+   Compiling zbus v6.0.0
+   Compiling accesskit_winit v0.34.1
+   Compiling softbuffer v0.4.8 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/host)
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 49s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-e5c9359d761e98c0)
+
+running 2 tests
+POINTER_LAYOUT point=8 option_point=12 target=16 pressed=24 option_pressed=24 position=8 optional_position=8 session=32 optional_session=32 session_align=8 runtime=1880 win=8
+test runtime::input::focus_release_tests::private_press_proof_uses_the_existing_session_header ... ok
+test runtime::input::focus_release_tests::failed_focus_preparation_and_epoch_exhaustion_leave_no_pressed_authority ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 228 filtered out; finished in 0.01s
+

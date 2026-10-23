@@ -19,7 +19,7 @@ describe the intended complete system; this page records what is connected now.
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
 | Native | Vendor-owned backend hints and target proof; Winit software-first windows, no Auto GPU initialization for certified fills, background GPU preparation for general scenes, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
-| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library port with shared native/headless View, typed workers and database-backed playback requests | Hummingbird audio/scanner/navigation/queue/artwork/media services and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
+| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library and queue port with shared native/headless View, typed workers, duplicate occurrence identity and revocable playback plans | Hummingbird audio/scanner/full navigation/artwork/media services and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
@@ -68,7 +68,19 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
-Current shipping source `89aeabd539` integrates the
+Current shipping source `8c17a763ee` integrates the rapid-focus pointer correction
+and Hummingbird queue/controller, including the smaller playback occurrence
+stamp. The [combined main qualification](evidence/pointer-queue-main/README.md)
+passes 667 GPUI/GPU cases and docs (30 ignored), 33 default and 33 native
+Hummingbird cases, strict all-target checks and scoped formatting. All 2,104
+tracked input guards match. Both unchanged external Registry/input clients pass
+on the frozen ordinary app under CPU and GPU policies; two additional captures
+force Vulkan, for six native executions in total. Owned displays stop. These are
+behavioral checks on a software-driver host, not timing, RSS, native HDR or
+foreign-OS runtime results. Producer foreign library checks remain separately
+pinned; SQLite SDK failures are not foreign-app success.
+
+Its predecessor `89aeabd539` integrates the
 [flat sibling index](evidence/sibling-reconciliation/README.md) and
 [lazy Core indirect validation](evidence/lazy-indirect/README.md). Their exact
 producer archives retain allocation, code and lifecycle controls. The
@@ -80,7 +92,8 @@ remain pinned to their separate producer campaigns. The earlier `06b15c1835` add
 [outlined property activation](evidence/property-successor/ADOPTION.md). Its
 32 public merged-source cases, strict all-target checks and formatting pass;
 exact producer `49707a4a4a` retains its native and Apple/MSVC qualification.
-The broader actual native Window/Hummingbird campaign remains at `c717df64a9`, which combines cached-edge caret lowering,
+The broader set of native Window/lifecycle/inspector scenarios remains frozen at
+`c717df64a9`, which combines cached-edge caret lowering,
 compact presentation rows, contained property actions, their exact count fix and
 [public selection/state replies](docs/property-state-routes.md). The
 [four-way text controls](benchmarks/caret-pair-controls/cached-edge/README.md)
@@ -119,24 +132,36 @@ from 3,816 to 3,416 bytes, with 96 additional linked text bytes and an opt-in ca
 allocation rows are unchanged. Canonical
 value and exact stored contribution can differ on the inspector shell, so a
 compact representation cannot silently conflate them. Current core source is
-[30,513 non-test code lines](evidence/core-lines/README.md), including build scripts;
+[30,599 non-test code lines](evidence/core-lines/README.md), including build scripts;
 this does not establish full feature parity or forecast final size.
 
 The unmerged [monotonic caret control](evidence/monotonic-caret-stream/control16/README.md)
 passes bitwise geometry, admission and unchanged public-transcript gates. It
 saves 655,296 transient requested bytes on the 32 KiB owner, with unchanged
 retention, but loses 10–29% on warm long-text timing medians. Main keeps its
-cached index while separate slot, boundary-cache and iterator controls develop.
+cached index. The later [borrowed stream](evidence/monotonic-caret-stream/final-borrowed/README.md)
+also remains unadopted: its exact public transcript passes and transient owner
+requests fall, but RTL cold/warm medians regress 4.10%/3.06% in the one capture.
+The [transaction frontier](docs/text-transaction-frontier-luna.md) selects a
+separate partial visitor inside unpublished Canvas planning, keeping the public
+atomic visitor contract. Its source, admission and error-precedence proof still
+require complete owner/codegen/performance qualification.
 The [route census](docs/route-density-census-luna.md) and
 [thin-handle feasibility experiment](evidence/thin-route-feasibility/README.md)
 likewise remain evidence, not adopted unsafe storage. The
-[safe route-column proposal](docs/route-storage-frontier-luna.md) is now an
-isolated implementation experiment, including dense-route and blank-owner costs.
-The [Hummingbird queue/controller](evidence/hummingbird-queue/README.md) is also
-isolated: its public native consumer exposed a core focus-paint rapid-click bug.
-The correction passes the unchanged original native client; broader gates and
-a public optional-session layout correction remain before adoption. No full
-player or foreign-app compilation success is claimed.
+[safe route-column proposal](docs/route-storage-frontier-luna.md) has measured
+[rejected AoS/SoA controls](crates/gpui/evidence/route-columns/rejected-controls.md).
+The later [packed topology control](crates/gpui/evidence/route-columns/packed-rejected-controls.md)
+restores direct activation but still loses no-route description and resize in
+all nine pairs. None is merged. The next isolated representation keeps the raw
+parent word and distributes bounded route bits across unused ordinal/content
+space; this is a hypothesis, not a speed or memory result.
+The [Hummingbird producer](evidence/hummingbird-queue/README.md) retains its
+original queue/navigation and native bug evidence. The integrated correction
+keeps Session and optional Session at 32 bytes. Its separate inspector successor
+requires matching hits on P and its own pending C; it remains unadopted pending
+codegen and broader qualification. Audio output/full player and foreign-app
+compilation remain outstanding.
 
 The [combined compact-text/static-shader campaign](evidence/compact-static-main/README.md)
 pins source `ebfdb2ad45`: 782 GPUI/Canvas/GPU cases and doctests (31 ignored),

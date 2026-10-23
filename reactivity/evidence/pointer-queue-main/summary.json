@@ -1,0 +1,68 @@
+{
+  "source": "8c17a763ee7a5f1d2d932d375d2c839759d8a28b",
+  "guarded_files": 2104,
+  "source_unchanged": true,
+  "totals": {
+    "gpui-gpu-full": {
+      "groups": 62,
+      "passed": 667,
+      "failed": 0,
+      "ignored": 30
+    },
+    "hummingbird-default": {
+      "groups": 9,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    "hummingbird-native": {
+      "groups": 9,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "core_non_test_code_lines": 30599,
+  "native_binary_sha256": "99e98f16a4c8dafebbdb7a285825ffd001e573803c51e112e40e38b7b83d2525",
+  "native_results": [
+    {
+      "case": "original-cpu",
+      "exit": 0,
+      "client_sha256": "3c28a92a7aa3842cb5ff8bc2d065a9f4c6ed7e5114684e3c87d4ae952b31b4dd"
+    },
+    {
+      "case": "rapid-loop-cpu",
+      "exit": 0,
+      "client_sha256": "b3d4a66ad73eaa74c8846f90b48b3140f5cb25cb23c2e4c999ad29ec3f34d2b6"
+    },
+    {
+      "case": "original-gpu",
+      "exit": 0,
+      "client_sha256": "3c28a92a7aa3842cb5ff8bc2d065a9f4c6ed7e5114684e3c87d4ae952b31b4dd"
+    },
+    {
+      "case": "rapid-loop-gpu",
+      "exit": 0,
+      "client_sha256": "b3d4a66ad73eaa74c8846f90b48b3140f5cb25cb23c2e4c999ad29ec3f34d2b6"
+    }
+  ],
+  "preserved_runner_failure": "Initial native launch used python3 absent from PATH and exited before the app; the native-only runner resumes verified completed prefix with the absolute interpreter.",
+  "limits": "No new timing, RSS, hardware performance, native HDR, full audio player, Zed port or merged-source foreign-OS runtime claim.",
+  "forced_vulkan_results": [
+    {
+      "case": "original-gpu",
+      "exit": 0,
+      "client_sha256": "3c28a92a7aa3842cb5ff8bc2d065a9f4c6ed7e5114684e3c87d4ae952b31b4dd"
+    },
+    {
+      "case": "rapid-loop-gpu",
+      "exit": 0,
+      "client_sha256": "b3d4a66ad73eaa74c8846f90b48b3140f5cb25cb23c2e4c999ad29ec3f34d2b6"
+    }
+  ],
+  "forced_vulkan_environment": {
+    "WGPU_BACKEND": "vulkan",
+    "VK_DRIVER_FILES": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/share/vulkan/icd.d/lvp_icd.x86_64.json"
+  },
+  "owned_displays_stopped": true
+}
