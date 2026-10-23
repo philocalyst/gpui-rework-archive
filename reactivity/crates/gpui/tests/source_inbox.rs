@@ -336,6 +336,12 @@ fn mutable_projector_disagreement_rejects_before_editing_or_advancing_source() {
     let mut win = Win::demo(Panel::new())
         .with_inbox_for(inbox, bad, |_, _: ()| panic!("wrong write projector"))
         .unwrap();
+    let input = win.input();
+    let selection = gpui::TextSelection::from_bytes(1, 3).unwrap();
+    win.focus(input).unwrap();
+    win.select(input, selection).unwrap();
+    let before = win.snapshot().unwrap();
+    win.reset_counters().unwrap();
     remote.try_send(()).unwrap();
     let error = win.deliver_ready(1).unwrap_err();
     assert!(matches!(
@@ -344,9 +350,17 @@ fn mutable_projector_disagreement_rejects_before_editing_or_advancing_source() {
     ));
     let report = error.delivery.unwrap();
     assert_eq!(report.applied, 0);
-    assert_eq!(report.commit.source_epoch, 0);
+    assert_eq!(report.commit.source_epoch, before.source_epoch);
     assert_eq!(&*win.root().unwrap().left, "seed");
     assert_eq!(&*win.root().unwrap().right, "peer");
+    assert_eq!(win.focused().unwrap(), Some(input));
+    assert_eq!(win.selection(input).unwrap(), selection);
+    assert_eq!(win.snapshot().unwrap(), before);
+    assert_eq!(win.counters(), gpui::Counters::default());
+    // The rejected message cannot revoke a coherent input target. Editing
+    // through that same target must still reach its original logical range.
+    win.type_text(input, "x").unwrap();
+    assert_eq!(&**win.read(Panel::LEFT).unwrap(), "sxd");
 }
 
 #[test]
