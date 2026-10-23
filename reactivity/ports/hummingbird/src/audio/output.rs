@@ -31,11 +31,12 @@ pub trait OutputStream {
     }
 }
 pub trait OutputProvider: Send + 'static {
+    type Stream: OutputStream;
     /// Called on the control owner. Returned stream need not be Send.
     fn open(
         &mut self,
         source: Format,
         gate: PlaybackGate,
         epoch: u64,
-    ) -> Result<Box<dyn OutputStream>, AudioError>;
+    ) -> Result<Self::Stream, AudioError>;
 }

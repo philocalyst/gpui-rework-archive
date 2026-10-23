@@ -16,12 +16,13 @@ fn error(error: cpal::Error) -> AudioError {
     AudioError::Output(error.to_string())
 }
 impl OutputProvider for CpalProvider {
+    type Stream = CpalStream;
     fn open(
         &mut self,
         _source: Format,
         gate: PlaybackGate,
         epoch: u64,
-    ) -> Result<Box<dyn OutputStream>, AudioError> {
+    ) -> Result<CpalStream, AudioError> {
         let device = cpal::default_host()
             .default_output_device()
             .ok_or(AudioError::DeviceUnavailable)?;
@@ -157,7 +158,7 @@ impl Callback {
         }
     }
 }
-struct CpalStream {
+pub(super) struct CpalStream {
     // Stream closes before producer/status owners are released. Backend teardown
     // thread/latency behavior is a CPAL contract, not a data-callback guarantee.
     stream: Option<cpal::Stream>,
@@ -188,7 +189,7 @@ fn build<T: OutputSample>(
     format: Format,
     gate: PlaybackGate,
     epoch: u64,
-) -> Result<Box<dyn OutputStream>, AudioError> {
+) -> Result<CpalStream, AudioError> {
     let capacity = (format.rate as usize).div_ceil(10) * format.channels as usize;
     let (producer, consumer) = RingBuffer::new(capacity);
     let fault = Arc::new(AtomicU32::new(0));
@@ -212,7 +213,7 @@ fn build<T: OutputSample>(
             None,
         )
         .map_err(error)?;
-    Ok(Box::new(CpalStream {
+    Ok(CpalStream {
         stream: Some(stream),
         samples: producer,
         format,
@@ -220,7 +221,7 @@ fn build<T: OutputSample>(
         errors: retired,
         fault,
         _underruns: underruns,
-    }))
+    })
 }
 impl OutputStream for CpalStream {
     fn format(&self) -> Format {

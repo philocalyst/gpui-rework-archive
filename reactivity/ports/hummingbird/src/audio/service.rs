@@ -202,7 +202,7 @@ impl AudioService {
                     thread::park();
                 };
                 match Media::new() {
-                    Ok(media) => Owner::new(shared, Box::new(provider), media, events).run(),
+                    Ok(media) => Owner::new(shared, provider, media, events).run(),
                     Err(error) => {
                         shared.gate.0.closed.store(true, Ordering::Release);
                         if let Some(token) = shared.desired.lock().unwrap().token {
@@ -274,14 +274,14 @@ enum Phase {
     FailedDraining,
     Failed,
 }
-struct Owner {
+struct Owner<P: OutputProvider> {
     shared: Arc<Shared>,
-    provider: Box<dyn OutputProvider>,
+    provider: P,
     media: Media,
     events: Remote<Event>,
     intent: Intent,
     phase: Phase,
-    output: Option<Box<dyn OutputStream>>,
+    output: Option<P::Stream>,
     pipeline: Option<Pipeline>,
     info: Option<MediaInfo>,
     pending_info: Option<MediaInfo>,
@@ -291,13 +291,8 @@ struct Owner {
     pending: VecDeque<Event>,
     position_at: Instant,
 }
-impl Owner {
-    fn new(
-        shared: Arc<Shared>,
-        provider: Box<dyn OutputProvider>,
-        media: Media,
-        events: Remote<Event>,
-    ) -> Self {
+impl<P: OutputProvider> Owner<P> {
+    fn new(shared: Arc<Shared>, provider: P, media: Media, events: Remote<Event>) -> Self {
         // Start before the initial state so an already published Play is adopted.
         let intent = Intent {
             revision: 0,

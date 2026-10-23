@@ -37,18 +37,14 @@ struct Sink {
     epoch: u64,
 }
 impl OutputProvider for Provider {
-    fn open(
-        &mut self,
-        source: Format,
-        gate: PlaybackGate,
-        epoch: u64,
-    ) -> Result<Box<dyn OutputStream>, AudioError> {
+    type Stream = Sink;
+    fn open(&mut self, source: Format, gate: PlaybackGate, epoch: u64) -> Result<Sink, AudioError> {
         let mut capture = self.capture.lock().unwrap();
         capture.opens += 1;
         capture.queue.clear();
         capture.samples.clear();
         drop(capture);
-        Ok(Box::new(Sink {
+        Ok(Sink {
             capture: self.capture.clone(),
             frames: self.frames,
             format: Format {
@@ -57,7 +53,7 @@ impl OutputProvider for Provider {
             },
             gate,
             epoch,
-        }))
+        })
     }
 }
 impl OutputStream for Sink {
