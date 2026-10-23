@@ -61,7 +61,9 @@ fn validate_format(format: wgpu::TextureFormat) -> Result<(), Error> {
 struct Globals {
     viewport: [u32; 4],
     clear: [f32; 4],
-    mapping: [f32; 4],
+    exposure: f32,
+    material_offset: u32,
+    padding: [u32; 2],
 }
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
@@ -95,7 +97,10 @@ pub struct Stats {
     pub instance_upload_bytes: usize,
     pub draw_record_bytes: usize,
     pub shared_groups: usize,
+    /// Placements sharing common state with another placement.
     pub compact_draws: usize,
+    /// Placements owning unshared common state; the legacy diagnostic name
+    /// remains, but every placement now uses the same two-word schema.
     pub inline_draws: usize,
     pub mask_upload_bytes: usize,
     pub gpu_buffer_bytes: u64,
@@ -108,8 +113,9 @@ pub struct Stats {
     pub correction_key_capacity: usize,
 }
 
-// Every placement is two words pointing into a four-word common-state prefix.
-// Singleton packets still cost six words; sharing saves four words per repeat.
+// Every placement points at two affine words and two material words. Separate
+// planes make a multi-group transform one contiguous upload. Singleton packets
+// still cost six words; sharing saves four words per repeated placement.
 // The common address's high bit selects a paint-bank color, never another schema.
 const _: () = assert!(MAX_DRAWS * 6 < SLOT_COLOR as usize);
 const CORRECTION_BITS: u32 = 17;
@@ -118,6 +124,37 @@ const RESOURCE_BITS: u32 = 32 - CORRECTION_BITS;
 const _: () = assert!(MAX_DRAWS <= CORRECTION_MASK as usize);
 const _: () = assert!(MAX_ATLAS_SIDE < 1 << RESOURCE_BITS);
 type Word = [u32; 4];
+
+// Two stack-owned envelopes follow the physical packet bands. No shadow
+// records, per-draw dirty tags, dirty collection or retained generation exists.
+struct Changes(std::ops::Range<usize>);
+impl Changes {
+    fn new() -> Self {
+        Self(usize::MAX..0)
+    }
+    fn replace<const N: usize>(&mut self, records: &mut [Word], start: usize, next: [Word; N]) {
+        for (offset, next) in next.into_iter().enumerate() {
+            let index = start + offset;
+            if records[index] != next {
+                self.0.start = self.0.start.min(index);
+                self.0.end = self.0.end.max(index + 1);
+                records[index] = next;
+            }
+        }
+    }
+    fn upload(&self, records: &[Word], buffer: &Buffer, queue: &wgpu::Queue) -> usize {
+        if self.0.is_empty() {
+            return 0;
+        }
+        let words = &records[self.0.clone()];
+        queue.write_buffer(
+            &buffer.handle,
+            (self.0.start * 16) as u64,
+            bytemuck::cast_slice(words),
+        );
+        words.len() * 16
+    }
+}
 fn float_word(value: [f32; 4]) -> Word {
     value.map(f32::to_bits)
 }
@@ -211,15 +248,20 @@ impl Buffer {
             size,
         }
     }
-    fn write(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, bytes: &[u8]) {
-        if bytes.len() as u64 > self.size {
+    fn reserve(&mut self, device: &wgpu::Device, bytes: usize) -> bool {
+        if bytes as u64 > self.size {
             *self = Self::new(
                 device,
                 "scene data",
-                (bytes.len() as u64).next_power_of_two(),
+                (bytes as u64).next_power_of_two(),
                 false,
             );
+            return true;
         }
+        false
+    }
+    fn write(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, bytes: &[u8]) {
+        self.reserve(device, bytes.len());
         if !bytes.is_empty() {
             queue.write_buffer(&self.handle, 0, bytes);
         }
@@ -617,13 +659,16 @@ impl RendererState {
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.render_observed(context, scene, target, |_, _, _, _| {})
+        self.check_context(context)?;
+        let resident = self.packet.take().is_some();
+        self.render_observed(context, scene, target, resident, |_, _, _, _| {})
     }
     fn render_observed(
         &mut self,
         context: &GpuContext,
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
+        resident: bool,
         mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
     ) -> Result<wgpu::SubmissionIndex, Error> {
         self.check_context(context)?;
@@ -670,7 +715,7 @@ impl RendererState {
         );
         self.ranges.clear();
         self.ranges.resize(columns * rows, [0, 0]);
-        self.records.clear();
+        let old_words = self.records.len();
         let bank_count = scene.paint_bank().len();
         if bank_count > MAX_DRAWS * 2 {
             return Err(Error::ResourceLimit);
@@ -688,13 +733,21 @@ impl RendererState {
                 }
             })
             .sum();
-        let placement_start = bank_words + common_count * 4;
+        let material_offset = common_count * 2;
+        let placement_start = bank_words + material_offset * 2;
         let word_count = placement_start + scene.draws().len() * 2;
         self.records
-            .try_reserve_exact(word_count)
+            .try_reserve_exact(word_count.saturating_sub(old_words))
             .map_err(|_| Error::ResourceLimit)?;
-        slots::write_prefix(&mut self.records, scene, bank_count);
-        self.records.resize(placement_start, [0; 4]);
+        self.records.resize(word_count, [0; 4]);
+        let mut common_changes = Changes::new();
+        let mut placement_changes = Changes::new();
+        slots::write_prefix(
+            &mut self.records[..bank_words],
+            scene,
+            bank_count,
+            &mut common_changes,
+        );
         self.cursors.clear();
         self.cursors.resize(columns * rows, 0);
         self.residuals.clear();
@@ -706,9 +759,10 @@ impl RendererState {
         let mut shared_groups = 0;
         let mut compact_draws = 0;
         let mut common_word = bank_words;
+        let mut placement_word = placement_start;
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
-            group_ready(ordinal, group, common_word, compact);
+            group_ready(ordinal, group, common_word + material_offset + 1, compact);
             let mut shared_error = [0.0_f32; 2];
             if compact {
                 for (offset, p) in group.placements().enumerate() {
@@ -738,22 +792,34 @@ impl RendererState {
                     if let Some(slot) = group.paint_slot() {
                         words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
                     }
-                    self.records[common_word..common_word + 4].copy_from_slice(&words);
-                    common_word += 4;
+                    common_changes.replace(&mut self.records, common_word, [words[0], words[1]]);
+                    common_changes.replace(
+                        &mut self.records,
+                        common_word + material_offset,
+                        [words[2], words[3]],
+                    );
+                    common_word += 2;
                 }
                 has_masks |= draw.source.mask().is_some();
                 let r = draw.local_rect;
-                let address = self.records.len() as u32;
+                let address = placement_word as u32;
                 let common = common as u32
                     | if group.paint_slot().is_some() {
                         SLOT_COLOR
                     } else {
                         0
                     };
-                self.records.extend_from_slice(&[
-                    float_word([r.x, r.y, r.width, r.height]),
-                    [0, 0, 0, common],
-                ]);
+                placement_changes.replace(
+                    &mut self.records,
+                    placement_word,
+                    [float_word([r.x, r.y, r.width, r.height])],
+                );
+                // Resource xyz remain untouched until final admission. Merge
+                // only the common address now; no temporary correction encoding.
+                let mut metadata = self.records[placement_word + 1];
+                metadata[3] = common;
+                placement_changes.replace(&mut self.records, placement_word + 1, [metadata]);
+                placement_word += 2;
                 original_references = self.bin_draw(
                     draw,
                     error,
@@ -767,8 +833,11 @@ impl RendererState {
                 ordinal += 1;
             }
         }
-        debug_assert_eq!(common_word, placement_start);
-        images::prepare(
+        debug_assert_eq!(
+            (common_word, placement_word),
+            (bank_words + material_offset, word_count)
+        );
+        let relocated = images::prepare(
             &context.device,
             &context.queue,
             &mut self.draws,
@@ -792,7 +861,7 @@ impl RendererState {
         self.references.resize(references, 0);
         // Uniform placement strides need no per-draw address lane. Correction
         // handles are assigned here, so no temporary metadata crosses admission.
-        let mut word = self.records.len();
+        let mut word = word_count;
         let mut reverse_ordinal = ordinal;
         for group in scene.groups().rev() {
             let correction = self.correction(group.inverse, group.clip);
@@ -822,7 +891,11 @@ impl RendererState {
                     })
                 };
                 let metadata = self.records[word + 1];
-                self.records[word + 1] = resource_words(atlas, metadata[3], correction);
+                placement_changes.replace(
+                    &mut self.records,
+                    word + 1,
+                    [resource_words(atlas, metadata[3], correction)],
+                );
                 let address = word as u32;
                 visit(prepared(group, p), columns, |tile| {
                     let range = &mut self.ranges[tile];
@@ -864,16 +937,31 @@ impl RendererState {
         let globals = Globals {
             viewport: [scene.width, scene.height, columns as u32, mode],
             clear: scene.clear,
-            mapping: [exposure, 0.0, 0.0, 0.0],
+            exposure,
+            material_offset: material_offset as u32,
+            padding: [0; 2],
         };
         context
             .queue
             .write_buffer(&self.globals.handle, 0, bytemuck::bytes_of(&globals));
-        self.draws.write(
-            &context.device,
-            &context.queue,
-            bytemuck::cast_slice(&self.records),
-        );
+        let grew = self.draws.reserve(&context.device, word_count * 16);
+        let draw_upload_bytes = if !resident || old_words != word_count || relocated || grew {
+            self.draws.write(
+                &context.device,
+                &context.queue,
+                bytemuck::cast_slice(&self.records),
+            );
+            word_count * 16
+        } else {
+            // Merge only touching envelopes. Disjoint changes cost at most two
+            // queue writes, independent of the number of changed placements.
+            if common_changes.0.end == placement_changes.0.start {
+                common_changes.0.end = placement_changes.0.end;
+                placement_changes = Changes::new();
+            }
+            common_changes.upload(&self.records, &self.draws, &context.queue)
+                + placement_changes.upload(&self.records, &self.draws, &context.queue)
+        };
         self.tiles.write(
             &context.device,
             &context.queue,
@@ -951,7 +1039,7 @@ impl RendererState {
             uniform_tiles,
             sample_evaluations,
             sample_draw_evaluations,
-            instance_upload_bytes: self.records.len() * 16
+            instance_upload_bytes: draw_upload_bytes
                 + self.ranges.len() * 8
                 + references * 4
                 + self.residuals.len() * 32
@@ -1359,6 +1447,8 @@ mod tests {
         assert_eq!(std::mem::size_of::<Correction>(), 32);
         assert_eq!(std::mem::offset_of!(Correction, y), 16);
         assert_eq!(std::mem::size_of::<Globals>(), 48);
+        assert_eq!(std::mem::offset_of!(Globals, exposure), 32);
+        assert_eq!(std::mem::offset_of!(Globals, material_offset), 36);
         assert_eq!(
             SHADER_SOURCE,
             crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap()
@@ -1390,7 +1480,7 @@ mod tests {
         layout.update(module.to_ctx()).unwrap();
         for (name, size, offsets) in [
             ("Draw", 96, &[0, 16, 32, 48, 64, 80][..]),
-            ("Globals", 48, &[0, 16, 32][..]),
+            ("Globals", 48, &[0, 16, 32, 36][..]),
             ("Correction", 32, &[0, 16][..]),
         ] {
             let (handle, ty) = module
@@ -1444,6 +1534,38 @@ mod tests {
                 group.clip.height
             ])
         );
+    }
+
+    #[test]
+    fn change_envelopes_cover_exactly_the_first_through_last_changed_word() {
+        for mask in 0u32..4096 {
+            let mut records = [[0; 4]; 12];
+            let expected: [Word; 12] = std::array::from_fn(|index| {
+                if mask & (1 << index) == 0 {
+                    [0; 4]
+                } else {
+                    [u32::MAX; 4]
+                }
+            });
+            let mut changes = Changes::new();
+            for index in (0..12).step_by(2) {
+                changes.replace(&mut records, index, [expected[index], expected[index + 1]]);
+            }
+            assert_eq!(records, expected);
+            if mask == 0 {
+                assert!(changes.0.is_empty());
+            } else {
+                assert_eq!(
+                    changes.0,
+                    mask.trailing_zeros() as usize..(32 - mask.leading_zeros()) as usize
+                );
+            }
+            let before = changes.0.clone();
+            for index in 0..12 {
+                changes.replace(&mut records, index, [expected[index]]);
+            }
+            assert_eq!(changes.0, before);
+        }
     }
 
     #[test]

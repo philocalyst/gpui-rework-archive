@@ -65,10 +65,11 @@ pub(super) fn prepare(
     current: &mut Option<Box<Images>>,
     draw_words: usize,
     scene: PreparedScene<'_>,
-) -> Result<(), Error> {
+) -> Result<bool, Error> {
     let count = scene.images().count();
     if count == 0 {
-        if current.take().is_some() {
+        let relocated = current.take().is_some();
+        if relocated {
             // Submitted bind groups retain their own old buffer leases.
             *buffer = Buffer::new(
                 device,
@@ -77,7 +78,7 @@ pub(super) fn prepare(
                 false,
             );
         }
-        return Ok(());
+        return Ok(relocated);
     }
     if let Some(current) = current.as_mut()
         && draw_words <= current.prefix_words
@@ -88,7 +89,7 @@ pub(super) fn prepare(
             .eq(scene.images().map(|image| image.key()))
     {
         current.stats.uploaded_bytes = 0;
-        return Ok(());
+        return Ok(false);
     }
     let prefix_words = draw_words
         .max(1)
@@ -153,7 +154,8 @@ pub(super) fn prepare(
     {
         return Err(Error::ResourceLimit);
     }
-    if buffer.size < required || buffer.size > required.saturating_mul(4) {
+    let relocated = buffer.size < required || buffer.size > required.saturating_mul(4);
+    if relocated {
         *buffer = Buffer::new(device, "scene words and packed images", required, false);
     }
     for image in scene.images() {
@@ -180,5 +182,5 @@ pub(super) fn prepare(
     next.stats.gpu_buffer_bytes = buffer.size;
     next.stats.index_capacity = next.entries.capacity();
     *current = Some(Box::new(next));
-    Ok(())
+    Ok(relocated)
 }

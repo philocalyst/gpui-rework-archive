@@ -3349,3 +3349,157 @@ fn viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges() {
         }
     });
 }
+
+fn record_upload_bytes(stats: Stats, width: u32, height: u32) -> usize {
+    stats.instance_upload_bytes
+        - (width.div_ceil(16) * height.div_ceil(16)) as usize * 8
+        - stats.tile_references * 4
+        - stats.correction_records * 32
+        - 48
+}
+
+#[test]
+fn resident_words_match_forced_uploads_across_transforms_growth_and_failed_prepare() {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut reused = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut reference = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut fonts = TextSystem::bundled().unwrap();
+        let run = fonts.shape("office café", 16.0, None).unwrap();
+        let image = Image::rgba8(
+            1,
+            1,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![13, 61, 209, 255].into_boxed_slice(),
+        )
+        .unwrap();
+        let viewport = Rect::new(0., 0., 160., 64.);
+        for (step, (translation, extras, has_image)) in [
+            (0., 0, true),
+            (0., 0, true),
+            (0.25, 0, true),
+            (1.5, 0, true),
+            (1.5, 41, true),
+            (1.5, 0, true),
+            (-0.25, 0, false),
+            (-0.25, 0, false),
+            (0., 0, true),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let mut canvas = Canvas::recording(160, 64, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            canvas
+                .draw_text(
+                    &mut fonts,
+                    &run,
+                    Point { x: 8., y: 4. },
+                    Affine::translation(translation, 0.),
+                    viewport,
+                    Color::BLACK,
+                )
+                .unwrap();
+            if has_image {
+                canvas
+                    .draw_image(
+                        &image,
+                        Rect::new(2., 40., 16., 16.),
+                        Affine::translation(translation, 0.),
+                        viewport,
+                        ImageSampling::Nearest,
+                    )
+                    .unwrap();
+            }
+            for index in 0..extras {
+                canvas
+                    .fill_rect(
+                        Rect::new(index as f32, 31., 0.5, 2.),
+                        Affine::IDENTITY,
+                        viewport,
+                        Color::rgba(31, 61, 103, 80),
+                    )
+                    .unwrap();
+            }
+            reference.set_tile_proofs(false);
+            reference.set_tile_proofs(true);
+            let expected = readback(&mut reference, &canvas);
+            let actual = readback(&mut reused, &canvas);
+            assert_eq!(actual, expected, "step{step}");
+            let stats = reused.stats();
+            let bytes = record_upload_bytes(stats, 160, 64);
+            if step == 1 || step == 7 {
+                assert_eq!(bytes, 0, "equal final words require no record upload");
+            }
+            if step == 2 || step == 3 {
+                // Both groups share the affine plane. Their local placements,
+                // materials, glyph masks and image pixels remain resident.
+                assert!(bytes <= 4 * 16, "step{step}: {bytes} bytes");
+                assert!(bytes < stats.draw_record_bytes);
+                assert_eq!(stats.mask_upload_bytes, 0);
+                assert_eq!(reused.image_stats().unwrap().uploaded_bytes, 0);
+            }
+            if step == 3 {
+                let mut scene_for = |reject| {
+                    let mut scene = Canvas::recording(160, 64, ColorConfig::default()).unwrap();
+                    scene.clear(Color::WHITE);
+                    scene
+                        .draw_text(
+                            &mut fonts,
+                            &run,
+                            Point { x: 8., y: 4. },
+                            Affine::translation(-0.75, 0.),
+                            viewport,
+                            Color::BLACK,
+                        )
+                        .unwrap();
+                    if reject {
+                        // CPU geometry admits this radius; GPU precision admission
+                        // rejects it after earlier common words have been replaced.
+                        scene
+                            .fill_rounded_rect(
+                                Rect::new(2., 40., 16., 16.),
+                                1e-40,
+                                Affine::IDENTITY,
+                                viewport,
+                                Color::BLACK,
+                            )
+                            .unwrap();
+                    } else {
+                        scene
+                            .draw_image(
+                                &image,
+                                Rect::new(2., 40., 16., 16.),
+                                Affine::IDENTITY,
+                                viewport,
+                                ImageSampling::Nearest,
+                            )
+                            .unwrap();
+                    }
+                    scene
+                };
+                let bad = scene_for(true);
+                let repaired = scene_for(false);
+                let texture = output_texture(&reused, &bad);
+                let target = texture.create_view(&Default::default());
+                assert!(matches!(
+                    reused.render(bad.prepared_scene(), &target),
+                    Err(gpui_gpu::Error::Precision { .. })
+                ));
+                assert!(reused.redraw(&target).unwrap().is_none());
+                // Exact old dimensions, record count and image prefix prevent
+                // growth/relocation from concealing a stale residency certificate.
+                reference.set_tile_proofs(false);
+                reference.set_tile_proofs(true);
+                let expected = readback(&mut reference, &repaired);
+                assert_eq!(readback(&mut reused, &repaired), expected);
+                let recovered = reused.stats();
+                assert_eq!(
+                    record_upload_bytes(recovered, 160, 64),
+                    recovered.draw_record_bytes
+                );
+            }
+        }
+    });
+}

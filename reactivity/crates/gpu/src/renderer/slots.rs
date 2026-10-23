@@ -18,18 +18,37 @@ pub(super) fn color_word(rows: usize, slot: PaintSlot) -> u32 {
     assert!(index < rows);
     (1 + rows.div_ceil(64) + index) as u32
 }
-pub(super) fn write_prefix(records: &mut Vec<Word>, scene: PreparedScene<'_>, rows: usize) {
+pub(super) fn write_prefix(
+    records: &mut [Word],
+    scene: PreparedScene<'_>,
+    rows: usize,
+    changes: &mut Changes,
+) {
     if rows == 0 {
         return;
     }
     let flags = rows.div_ceil(64);
-    records.resize(1 + flags, [0; 4]);
-    records[0] = [rows as u32, flags as u32, (1 + flags) as u32, 0];
+    changes.replace(
+        records,
+        0,
+        [[rows as u32, flags as u32, (1 + flags) as u32, 0]],
+    );
+    let mut paints = scene.paint_bank();
+    for flag in 0..flags {
+        let mut word = [0; 4];
+        for (index, paint) in paints.by_ref().take(64).enumerate() {
+            let bits =
+                (u32::from(paint.shared()) * SHARED) | (u32::from(paint.rectangle()) * RECTANGLE);
+            word[index / 16] |= bits << (index % 16 * 2);
+        }
+        changes.replace(records, 1 + flag, [word]);
+    }
     for (index, paint) in scene.paint_bank().enumerate() {
-        let bits =
-            (u32::from(paint.shared()) * SHARED) | (u32::from(paint.rectangle()) * RECTANGLE);
-        records[1 + index / 64][index / 16 % 4] |= bits << (index % 16 * 2);
-        records.push(float_word(paint.value().working()));
+        changes.replace(
+            records,
+            1 + flags + index,
+            [float_word(paint.value().working())],
+        );
     }
 }
 fn row(records: &[Word], slot: PaintSlot) -> Option<(usize, u32)> {

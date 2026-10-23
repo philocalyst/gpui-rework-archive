@@ -17,7 +17,8 @@ pub mod ui {
     pub struct Globals {
         pub viewport: Vec4u,
         pub clear: Vec4f,
-        pub mapping: Vec4f,
+        pub exposure: f32,
+        pub material_offset: u32,
     }
     #[derive(Clone, Copy, Wgsl)]
     pub struct Correction {
@@ -31,7 +32,7 @@ pub mod ui {
     texture!(group(0), binding(4), MASKS: Texture2D<f32>);
     storage!(group(0), binding(5), CORRECTIONS: RuntimeArray<Correction>);
 
-    // One packet schema: a two-word placement points at four common words.
+    // One placement schema points at two affine words and two material words.
     // The resource's closed variants supply seventeen otherwise unused bits;
     // decoding restores all original float, coordinate and flag bits exactly.
     pub fn load_color(word: Vec4u, state_base: u32) -> Vec4f {
@@ -50,12 +51,13 @@ pub mod ui {
         let base = address as usize;
         let atlas = get!(WORDS)[base + 1];
         let state_base = (atlas.w & 0x7fffffff) as usize;
+        let material_base = state_base + get!(GLOBALS).material_offset as usize;
         Draw {
             local: bitcast_vec4f(get!(WORDS)[base]),
             inverse_x: bitcast_vec4f(get!(WORDS)[state_base]),
             inverse_y: bitcast_vec4f(get!(WORDS)[state_base + 1]),
-            clip: bitcast_vec4f(get!(WORDS)[state_base + 2]),
-            color: load_color(get!(WORDS)[state_base + 3], atlas.w),
+            clip: bitcast_vec4f(get!(WORDS)[material_base]),
+            color: load_color(get!(WORDS)[material_base + 1], atlas.w),
             atlas: decode_resource(atlas),
         }
     }
@@ -397,7 +399,7 @@ pub mod ui {
         }
         rgb /= alpha;
         if (mode & 2) != 0 {
-            rgb = reinhard(rgb, globals.mapping.x);
+            rgb = reinhard(rgb, globals.exposure);
         } else {
             rgb = clamp(rgb, vec3f(0.0, 0.0, 0.0), vec3f(1.0, 1.0, 1.0));
         }

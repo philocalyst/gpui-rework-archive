@@ -105,7 +105,7 @@ impl PaintRenderer {
         target: &wgpu::TextureView,
         requested: impl IntoIterator<Item = PaintIndex>,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.inner.state.packet = None;
+        let resident = self.inner.state.packet.take().is_some();
         self.sites.clear();
         let requested = requested.into_iter();
         let demand = requested.size_hint().0;
@@ -130,13 +130,14 @@ impl PaintRenderer {
         } else if self.sites.capacity() > self.sites.len().saturating_mul(4) {
             self.sites.shrink_to_fit();
         }
-        self.render_mapped(scene, target)
+        self.render_mapped(scene, target, resident)
     }
 
     fn render_mapped(
         &mut self,
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
+        resident: bool,
     ) -> Result<wgpu::SubmissionIndex, Error> {
         self.sites.sort_unstable_by_key(|site| site.index);
         let mut previous = None;
@@ -155,13 +156,14 @@ impl PaintRenderer {
             &self.inner.context,
             scene,
             target,
-            |ordinal, group, word, compact| {
+            resident,
+            |ordinal, group, color_word, compact| {
                 if let Some(site) = sites.get_mut(next)
                     && site.index.order() as usize == ordinal
                 {
                     site.word = (group.paint_slot().is_none()
                         && (compact || group.placements().len() == 1))
-                        .then(|| NonZeroU32::new((word + 3) as u32))
+                        .then(|| NonZeroU32::new(color_word as u32))
                         .flatten();
                     site.rectangle = group
                         .placements()
