@@ -493,6 +493,9 @@ fn visit_source_pairs<const ADMIT: bool, B: Brush, E>(
             let mut prefix = slot.origin;
             rtl.clear();
             if run.is_rtl() {
+                if ADMIT {
+                    rtl.reserve(run.len());
+                }
                 let _ = run.try_for_each_cluster(true, |run, atom, grapheme| {
                     rtl.push(prefix);
                     prefix += run
