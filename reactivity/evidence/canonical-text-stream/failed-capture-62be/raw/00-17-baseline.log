@@ -1,0 +1,1 @@
+{"case":"label","checksum":9468235000087347201,"count":8192,"counters":{"coarse_updates":0,"descriptions":0,"destination_compares":8192,"exact_updates":8192,"layout_runs":0,"measure_calls":0,"owner_reruns":0,"paint_passes":8192,"presentations":8192,"source_operations":8192,"source_reads":8192,"text_bytes_copied":0,"text_promotions":0},"elapsed_ns":33615727,"operation":"prepare"}

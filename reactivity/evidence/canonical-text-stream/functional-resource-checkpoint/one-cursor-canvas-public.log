@@ -1,0 +1,39 @@
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.87s
+     Running tests/selection.rs (/tmp/gpui-canonical-text-target/debug/deps/selection-05c66d5e58a81f62)
+
+running 11 tests
+test derived_selection_intervals_match_parley_real_bidi_ligature_and_wrap_geometry ... ok
+test directional_run_boxes_do_not_span_disconnected_isolate_fragments ... ok
+test discarding_interaction_keeps_glyph_storage_source_runs_and_lines ... ok
+test distant_hits_and_line_transitions_choose_physical_extrema ... ok
+test hit_selection_and_motion_share_exact_grapheme_crlf_and_bidi_positions ... ok
+test independent_visible_order_hits_half_intervals_with_source_affinity ... ok
+test interaction_authority_is_the_completed_canonical_stop_stream ... ok
+test ordinary_interaction_queries_allocate_nothing_and_preserve_layout_size ... ok
+test physical_arrows_walk_independent_known_visual_edges ... ok
+test selected_crlf_is_atomic_and_its_marker_extends_past_the_source_trailing_edge ... ok
+test source_affinity_at_bidi_wrap_owns_the_correct_adjacent_line ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/unicode.rs (/tmp/gpui-canonical-text-target/debug/deps/unicode-d319bc19e2122db1)
+
+running 14 tests
+test bidi_visual_positions_match_explicit_mixed_direction_examples ... ok
+test every_bidi_grapheme_boundary_has_both_requested_destinations ... ok
+test explicit_variable_face_uses_its_default_instance_for_shape_and_raster ... ok
+test fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_bytes ... ok
+test fallback_layout_leases_survive_later_sets_and_cache_eviction ... ok
+test grapheme_interiors_are_not_legal_byte_positions ... ok
+test line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it ... ok
+test long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail ... ok
+test missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback ... ok
+test mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range ... ok
+test mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage ... ok
+test original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact ... ok
+test single_script_glyphs_match_independent_harfbuzz_implementation ... ok
+test wrapped_ligatures_never_cross_font_or_bidi_run_boundaries ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+

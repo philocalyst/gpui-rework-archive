@@ -1,0 +1,4 @@
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/canvas)
+    Checking gpui_gpu v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/gpu)
+    Checking gpui v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.67s

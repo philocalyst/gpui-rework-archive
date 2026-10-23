@@ -1,0 +1,82 @@
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.36s
+     Running unittests src/lib.rs (/tmp/gpui-canonical-text-target/debug/deps/gpui_canvas-632cbd6014900903)
+
+running 17 tests
+test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... 
+thread '<unnamed>' (2562083) panicked at crates/canvas/src/text.rs:671:17:
+simulated unpublished-font initialization panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+font_face_bytes=8,text_system_bytes=72,font_data_header_bytes=48,registry_static_bytes=16,scaler_header_bytes=360
+ok
+test text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding ... CARET_GROUPS case=empty width=None bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(1.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(55.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(400.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=None bytes=32768 stops=32769 common=32769 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(1.0) bytes=32768 stops=65536 common=2 split=32767 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(55.0) bytes=32768 stops=38230 common=27308 split=5461 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(400.0) bytes=32768 stops=33513 common=32025 split=744 exclusive=0
+CARET_GROUPS case=ligatures width=None bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=ligatures width=Some(1.0) bytes=17 stops=24 common=8 split=8 exclusive=0
+CARET_GROUPS case=ligatures width=Some(55.0) bytes=17 stops=18 common=14 split=2 exclusive=0
+CARET_GROUPS case=ligatures width=Some(400.0) bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=None bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(1.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(55.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(400.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=bidi width=None bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=bidi width=Some(1.0) bytes=33 stops=44 common=4 split=20 exclusive=0
+CARET_GROUPS case=bidi width=Some(55.0) bytes=33 stops=30 common=18 split=6 exclusive=0
+CARET_GROUPS case=bidi width=Some(400.0) bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=isolates width=None bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(1.0) bytes=29 stops=31 common=7 split=12 exclusive=0
+CARET_GROUPS case=isolates width=Some(55.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(400.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=zwj width=None bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=zwj width=Some(1.0) bytes=24 stops=22 common=4 split=9 exclusive=0
+CARET_GROUPS case=zwj width=Some(55.0) bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=zwj width=Some(400.0) bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=emoji width=None rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(1.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(55.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(400.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=one_long_grapheme width=None bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(1.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(55.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(400.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+ok
+test text::geometry_ledger::retained_geometry_drops_paint_leases_and_detaches_explicit_mutation ... ok
+test text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger ... GEOMETRY_HEADERS layout=56 details=80 stop=12 run=24 line=24 system=72
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=false glyphs=0 glyph_capacity_bytes=0 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=206 requested=110272 peak_live=47412 retained=40 retained_allocations=1
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=true glyphs=0 glyph_capacity_bytes=0 runs=0 lines=1 stops=1 geometry_capacity_bytes=108 allocations=210 requested=110524 peak_live=47608 retained=244 retained_allocations=4
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=false glyphs=13 glyph_capacity_bytes=208 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=208 requested=111394 peak_live=48494 retained=248 retained_allocations=2
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=true glyphs=13 glyph_capacity_bytes=208 runs=1 lines=1 stops=14 geometry_capacity_bytes=360 allocations=217 requested=112446 peak_live=49234 retained=704 retained_allocations=6
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=false glyphs=624 glyph_capacity_bytes=9984 runs=150 lines=30 stops=0 geometry_capacity_bytes=6912 allocations=440 requested=444560 peak_live=237740 retained=17032 retained_allocations=5
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=true glyphs=624 glyph_capacity_bytes=9984 runs=150 lines=30 stops=786 geometry_capacity_bytes=16344 allocations=452 requested=493016 peak_live=267596 retained=26464 retained_allocations=6
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=false glyphs=32768 glyph_capacity_bytes=524288 runs=745 lines=745 stops=0 geometry_capacity_bytes=49152 allocations=242 requested=4253720 peak_live=3999044 retained=573576 retained_allocations=5
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=true glyphs=32768 glyph_capacity_bytes=524288 runs=745 lines=745 stops=33513 geometry_capacity_bytes=451308 allocations=260 requested=6884052 peak_live=5821764 retained=975732 retained_allocations=6
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=false glyphs=1024 glyph_capacity_bytes=16384 runs=1 lines=1 stops=0 geometry_capacity_bytes=48 allocations=219 requested=357866 peak_live=278646 retained=16568 retained_allocations=5
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=true glyphs=1024 glyph_capacity_bytes=16384 runs=1 lines=1 stops=2 geometry_capacity_bytes=216 allocations=221 requested=358082 peak_live=278814 retained=16736 retained_allocations=6
+ok
+test text::layout::interaction::canonical_stream_tests::canonical_walk_matches_frozen_grouped_walk_and_source_boundaries ... ok
+test text::layout::interaction::tests::byte_cuts_keep_boundary_ownership_and_only_visit_the_requested_source ... ok
+test text::paragraph::tests::original_utf8_ranges_empty_and_crlf_are_exact ... ok
+test text::planner::cursor_pair_tests::indexed_affinity_pairs_preserve_every_direct_geometry_bit ... cursor_pairs,accepted=94176,snapped=41760,distinct=11096
+ok
+test text::planner::line_break_tests::batch_incremental_revert_and_mixed_breaking_preserve_actual_layout_bits ... ok
+test text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract ... 
+thread 'text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract' (2562108) panicked at vendor/parley/src/layout/line_break.rs:1040:9:
+assertion failed: self.state.layout_max_advance == f32::INFINITY ||
+    self.state.line_max_advance - self.state.layout_max_advance < 1.0
+ok
+test text::planner::line_ownership_tests::mandatory_break_lines_exclude_separators_but_runs_cover_document ... ok
+test text::planner::line_ownership_tests::source_line_geometry_reconstruction_preserves_producer_arithmetic_bits ... ok
+test text::planner::line_ownership_tests::visual_line_transitions_do_not_rehit_collapsed_line_tops ... ok
+test text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership ... ok
+test text::planner::tests::cached_cmaps_match_face_for_every_scalar_and_absent_or_custom_tables ... ok
+test text::planner::tests::indexed_cursor_geometry_matches_original_at_every_byte_and_affinity ... ok
+test text::planner::tests::rejected_expanding_output_does_not_contaminate_the_next_paragraph ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 51 filtered out; finished in 41.50s
+

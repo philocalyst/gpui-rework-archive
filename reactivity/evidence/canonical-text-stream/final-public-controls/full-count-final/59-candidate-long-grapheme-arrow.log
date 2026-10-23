@@ -1,0 +1,1 @@
+{"case":"long-grapheme","checksum":918068437586083841,"count":4096,"counters":{"coarse_updates":0,"descriptions":0,"destination_compares":0,"exact_updates":0,"layout_runs":0,"measure_calls":0,"owner_reruns":0,"paint_passes":4096,"presentations":4096,"source_operations":4096,"source_reads":0,"text_bytes_copied":0,"text_promotions":0},"elapsed_ns":0,"operation":"arrow"}

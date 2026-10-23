@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index 24e28b57e2..501f3dea57 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -550,7 +550,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
+         {
+             self.accessibility = None;
+         }
+-        if let Some(owner) = &mut self.owner {
++        if let Some(mut owner) = self.owner.take() {
+             owner.close();
+         }
+         self.graphics = None;

@@ -1,0 +1,41 @@
+{
+  "status": "final frozen verification-capable inputs; controls pending; NO timing",
+  "fixture_path": "/tmp/gpui-canonical-text-public-control",
+  "fixture_sha256": {
+    "Cargo.lock": "cd7520fe6a1f7c4929dffc71c226a9b7a53605d32137658c62b37a4f6f7c1841",
+    "Cargo.toml": "d32c34111ebe76cef0ec5136c83b2d36d3486c37beca2e400357b6e1fc10ee4c",
+    "src/main.rs": "68880408e693d60761faa05c14743308008c83e6f42f2a18e5e84cf2955fe0b4",
+    "src/native.rs": "c7bdfa5ffa51d387482c89d370f930990dae44586610111cb4eaab67df30358e",
+    "src/bin/x11_close_probe.rs": "47c4c007b53d7160aede4bccb65643111ac4c45404af11cd3dd0550a05b6fa3b"
+  },
+  "source_pins": {
+    "baseline": "9874a6e15bf4f69e63ae493924c093583375e12b",
+    "candidate": "501368955ee9021c56933614522dfb087620dc81",
+    "common_fix": "cc74e92d7fb2ffd9eedb9b66813a79c2fcfc41b5",
+    "baseline_shipping": "51f38a3a9b7f62e6f45fbfcd9c95292eb98cb0df",
+    "candidate_shipping": "9f934e85b5b6211a3985b830ce4dcc672a1ffe16"
+  },
+  "rootflags": [
+    "-C",
+    "symbol-mangling-version=v0",
+    "--cfg",
+    "tokio_unstable"
+  ],
+  "features": [
+    "native",
+    "simd"
+  ],
+  "default_features": false,
+  "profile": "release opt3/noLTO/CGU1/debug0/stripnone",
+  "ordinary_public_cells": 60,
+  "ordinary_cycles_per_cell": 4,
+  "native_cohorts": 10,
+  "native_cycles_per_cohort": 4,
+  "observer_active_through_close": true,
+  "actual_native_failed_prepare_old_P_and_repair": true,
+  "counting_allocator": false,
+  "quiet_hold": true,
+  "terminal_query_input_correction": "Include terminal boundary and upstream terminal affinity; empty byte zero remains downstream; tiny selection now nonempty.",
+  "native_additions": "Real minimal two-unit changing selections and >u8-length combining-grapheme transport, each idle/busy.",
+  "verification_mode": "verify CASE OP COUNT executes identical public work with timed=false; elapsed_ns must0. Native oracle already accepts full count."
+}

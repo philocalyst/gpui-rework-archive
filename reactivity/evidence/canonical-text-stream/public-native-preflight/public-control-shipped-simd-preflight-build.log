@@ -1,0 +1,5 @@
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/gpu)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/gpui)
+   Compiling canonical-text-public-control v0.0.0 (/tmp/gpui-canonical-text-public-control)
+    Finished `release` profile [optimized] target(s) in 1m 07s

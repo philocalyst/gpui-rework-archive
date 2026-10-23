@@ -1,0 +1,157 @@
+warning: patch `accesskit v0.25.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit)` was not used in the crate graph
+warning: patch `accesskit_atspi_common v0.21.0 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_atspi_common)` was not used in the crate graph
+warning: patch `accesskit_consumer v0.39.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_consumer)` was not used in the crate graph
+warning: patch `accesskit_macos v0.27.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_macos)` was not used in the crate graph
+warning: patch `accesskit_unix v0.24.0 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_unix)` was not used in the crate graph
+warning: patch `softbuffer v0.4.8 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/softbuffer)` was not used in the crate graph
+warning: patch `wgpu v30.0.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/wgpu)` was not used in the crate graph
+warning: patch `wgpu-core v30.0.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/wgpu-core)` was not used in the crate graph
+warning: patch `wgpu-hal v30.0.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/wgpu-hal)` was not used in the crate graph
+warning: patch `winit v0.30.13 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/winit)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+     Locking 72 packages to latest Rust 1.97.1 compatible versions
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling syn v3.0.9
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+    Checking zerofrom v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking stable_deref_trait v1.2.1
+    Checking yoke v0.8.4
+   Compiling zerovec-derive v0.11.7
+    Checking zerovec v0.11.9
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+    Checking writeable v0.6.4
+    Checking bytemuck v1.25.2
+    Checking font-types v0.12.7
+    Checking tinystr v0.8.5
+    Checking litemap v0.8.3
+    Checking once_cell v1.21.4
+    Checking icu_locale_core v2.4.0
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+    Checking smallvec v1.16.3
+    Checking icu_provider v2.4.0
+    Checking utf8_iter v1.0.4
+    Checking icu_collections v2.3.0
+    Checking read-fonts v0.41.0
+   Compiling libc v0.2.191
+   Compiling icu_locale_fallback_data v2.3.0
+    Checking foldhash v0.2.0
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling icu_segmenter_data v2.3.0
+   Compiling serde_core v1.0.229
+    Checking icu_properties v2.3.0
+    Checking icu_locale_fallback v2.3.0
+    Checking memmap2 v0.9.12
+    Checking hashbrown v0.17.1
+    Checking read-fonts v0.46.0
+    Checking bitflags v2.13.2
+    Checking parlance v0.1.1
+    Checking linebender_resource_handle v0.1.1
+    Checking fontique v0.12.0
+    Checking harfrust v0.12.0
+    Checking skrifa v0.49.0
+    Checking icu_segmenter v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking parley_data v0.12.0
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+    Checking parley_emoji v0.12.0
+    Checking parley_engine v0.12.0 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/parley_engine)
+    Checking skrifa v0.44.0
+   Compiling serde_derive v1.0.229
+    Checking zeno v0.3.3
+   Compiling serde_json v1.0.154
+    Checking yazi v0.2.1
+    Checking cephal v0.1.1 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/cephal)
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/core)
+    Checking swash v0.2.10
+    Checking parley v0.12.0 (/tmp/gpui-canonical-text-control-sol/reactivity/vendor/parley)
+   Compiling fearless_simd_macros v0.1.0
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking ttf-parser v0.25.1
+    Checking fearless_simd v1.1.0
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/canvas)
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/state)
+    Checking pin-project-lite v0.2.17
+    Checking arcstr v1.2.0
+    Checking gpui v0.1.0 (/tmp/gpui-canonical-text-control-sol/reactivity/crates/gpui)
+    Checking canonical-text-public-control v0.0.0 (/tmp/gpui-canonical-text-public-control)
+error[E0425]: cannot find type `TextSelection` in this scope
+  --> src/main.rs:71:42
+   |
+71 | fn query_selection(map: &Map, selection: TextSelection) -> u64 {
+   |                                          ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `TextSelection` in this scope
+   --> src/main.rs:200:66
+    |
+200 | ...   "selection" => black_box(query_selection as fn(&Map, TextSelection) -> u64)(black_box(map), black_box(TextSelection { anchor:...
+    |                                                            ^^^^^^^^^^^^^ not found in this scope
+
+error[E0422]: cannot find struct, variant or union type `TextSelection` in this scope
+   --> src/main.rs:200:115
+    |
+200 | ...Selection) -> u64)(black_box(map), black_box(TextSelection { anchor: caret(i), focus: caret(i + offsets.len() / 2) })),
+    |                                                 ^^^^^^^^^^^^^ not found in this scope
+
+error[E0433]: cannot find type `Role` in this scope
+  --> src/main.rs:82:27
+   |
+82 |         if part.role() == Role::TextInput {
+   |                           ^^^^ use of undeclared type `Role`
+
+error[E0433]: cannot find type `Role` in this scope
+   --> src/main.rs:114:27
+    |
+114 |         if part.role() == Role::TextInput {
+    |                           ^^^^ use of undeclared type `Role`
+
+error[E0433]: cannot find type `Role` in this scope
+   --> src/main.rs:141:35
+    |
+141 |                 if part.role() == Role::TextInput {
+    |                                   ^^^^ use of undeclared type `Role`
+
+error[E0433]: cannot find type `TextSelection` in this scope
+   --> src/main.rs:148:27
+    |
+148 |         win.select(input, TextSelection::from_bytes(0, value.len()).unwrap()).unwrap();
+    |                           ^^^^^^^^^^^^^ use of undeclared type `TextSelection`
+
+error[E0433]: cannot find type `TextSelection` in this scope
+   --> src/main.rs:155:32
+    |
+155 |         assert_eq!(selected.1, TextSelection::from_bytes(0, value.len()).unwrap());
+    |                                ^^^^^^^^^^^^^ use of undeclared type `TextSelection`
+
+error[E0433]: cannot find type `TextOffset` in this scope
+   --> src/main.rs:172:108
+    |
+172 | ...offsets.len().max(1)).copied().unwrap_or(TextOffset::new(0).unwrap()), affinity: gpui::CaretAffinity::Downstream };
+    |                                             ^^^^^^^^^^ use of undeclared type `TextOffset`
+
+error[E0433]: cannot find type `TextOffset` in this scope
+   --> src/main.rs:177:42
+    |
+177 |     let initial = TextPosition { offset: TextOffset::new(0).unwrap(), affinity: gpui::CaretAffinity::Downstream };
+    |                                          ^^^^^^^^^^ use of undeclared type `TextOffset`
+
+error[E0433]: cannot find type `TextSelection` in this scope
+   --> src/main.rs:181:27
+    |
+181 |         win.select(input, TextSelection::caret(0).unwrap()).unwrap();
+    |                           ^^^^^^^^^^^^^ use of undeclared type `TextSelection`
+
+Some errors have detailed explanations: E0422, E0425, E0433.
+For more information about an error, try `rustc --explain E0422`.
+error: could not compile `canonical-text-public-control` (bin "canonical-text-public-control") due to 11 previous errors

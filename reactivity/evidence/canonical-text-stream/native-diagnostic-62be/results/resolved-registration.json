@@ -1,0 +1,87 @@
+{
+  "purpose": "Root-authorized once-per-frozen-binary functional protocol diagnostic, no timing arrays or performance claims",
+  "campaign_registration_path": "/tmp/gpui-text-selection-foundation-evidence/timing-final-registration.json",
+  "campaign_registration_sha256": "62beffd6c594f53c0bd4e10f34679072cc1790a9b02ca9827988f071d699601f",
+  "display": ":116",
+  "cpu": 0,
+  "order": [
+    "baseline",
+    "candidate"
+  ],
+  "count": 128,
+  "mode": "oracle",
+  "binaries": {
+    "baseline": {
+      "path": "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/baseline-normal-canonical-text-native-control",
+      "sha256": "63a9303499b271ae2e8be7612b2ddceff5bcbb5815d9792cef2bda262eecbd95",
+      "bytes": 30292528
+    },
+    "candidate": {
+      "path": "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/candidate-normal-canonical-text-native-control",
+      "sha256": "c1adbfd46649b84b9e563f5e3daf13eb30c8686677ad9466943589763a14f9fe",
+      "bytes": 30286952
+    }
+  },
+  "xvfb_command": [
+    "/nix/store/dsmjn4c7f9grzihzwf605yhmp8gsbjdz-xvfb-21.1.23/bin/Xvfb",
+    ":116",
+    "-screen",
+    "0",
+    "800x600x24",
+    "-nolisten",
+    "tcp"
+  ],
+  "monitor_command": [
+    "/nix/store/8snmq54bp5d5vp5dihgn7xr53hayx629-dbus-1.16.2/bin/dbus-monitor",
+    "--session",
+    "--monitor"
+  ],
+  "strace": "/run/current-system/sw/bin/strace",
+  "strace_syscalls": "trace=futex,epoll_wait,epoll_pwait,poll,ppoll,recvmsg,sendmsg,connect,shutdown,read,write",
+  "watchdogs": "fixture fixed60s; external80s then normalWM_DELETE_WINDOW/XSync+10s wait; forced cleanup only if neither exits; root explicitly authorized cleanup",
+  "strace_available_for_both": true,
+  "native_commands": {
+    "baseline": [
+      "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/baseline-normal-canonical-text-native-control",
+      "oracle",
+      "tiny",
+      "busy",
+      "128"
+    ],
+    "candidate": [
+      "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/candidate-normal-canonical-text-native-control",
+      "oracle",
+      "tiny",
+      "busy",
+      "128"
+    ]
+  },
+  "outer_commands": {
+    "baseline": [
+      "/run/current-system/sw/bin/taskset",
+      "-c",
+      "0",
+      "/nix/store/8snmq54bp5d5vp5dihgn7xr53hayx629-dbus-1.16.2/bin/dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/tmp/gpui-text-selection-foundation-evidence/native-diagnostic-frozen/worker.py",
+      "baseline"
+    ],
+    "candidate": [
+      "/run/current-system/sw/bin/taskset",
+      "-c",
+      "0",
+      "/nix/store/8snmq54bp5d5vp5dihgn7xr53hayx629-dbus-1.16.2/bin/dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/tmp/gpui-text-selection-foundation-evidence/native-diagnostic-frozen/worker.py",
+      "candidate"
+    ]
+  },
+  "diagnostic_sources_sha256": {
+    "worker.py": "af06c5ef290ccc19d9f4a458552558fb911dba6f11481b17617f0153c540e9f3",
+    "normal_close.py": "67beb7d5c0546f28606a39ae1b3c845543ea03e21c54e8967b7ecfc7539b7a70",
+    "run.py": "67ac102217bef2a01cbdfa12e9b7979abf758c40cd2bb143a28ffbaaf0818e21"
+  },
+  "tool_probe_exit": 0
+}
