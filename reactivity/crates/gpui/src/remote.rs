@@ -331,6 +331,8 @@ impl<T, F, L: ReaderValues> ReaderValues for Lane<T, F, L> {
 #[doc(hidden)]
 pub struct InboxStatus<F>(pub(crate) F);
 #[doc(hidden)]
+pub type StatusLane<T, F, L> = Lane<T, InboxStatus<F>, L>;
+#[doc(hidden)]
 pub trait InboxHandler<M, T> {
     const OBSERVE_CLOSE: bool;
     fn receive(&mut self, model: &mut M, value: T);
