@@ -1,0 +1,1730 @@
+{
+  "upstream_commit": "e15e8ba0ef6ff5445294030d373e3c8ccc7d780c",
+  "scope": "Entire pinned upstream src manifest plus grouped application API areas; Git blob identity, not port parity. Groups intentionally overlap.",
+  "areas": {
+    "navigation_library_ui": [
+      {
+        "path": "src/ui/app.rs",
+        "git_blob": "54c1d3822ddd1585be1227409aee76b2f56803ce"
+      },
+      {
+        "path": "src/ui/header.rs",
+        "git_blob": "b61c449afc2831fa3a33215318376043e5f25d76"
+      },
+      {
+        "path": "src/ui/library.rs",
+        "git_blob": "5c9f743445f67cc89d1b492a00edf422283ebce2"
+      },
+      {
+        "path": "src/ui/library/add_to_playlist.rs",
+        "git_blob": "c57cc243b12e66b117f819a4552362d7580fbdb7"
+      },
+      {
+        "path": "src/ui/library/album_view.rs",
+        "git_blob": "14ed1c720e7fe6fb5f3b4e3a918277bd5e46a36b"
+      },
+      {
+        "path": "src/ui/library/artist_detail_view.rs",
+        "git_blob": "af92822ecfc5c19c9cafc1b4440ee87d7cc9f823"
+      },
+      {
+        "path": "src/ui/library/artist_view.rs",
+        "git_blob": "0524aa4db0da684cda169c920b33c67a091dd44e"
+      },
+      {
+        "path": "src/ui/library/collection_summary.rs",
+        "git_blob": "3a4be3fd0ada3ed05a2cdd544d196f1b81ce39ea"
+      },
+      {
+        "path": "src/ui/library/context_menus.rs",
+        "git_blob": "696795ff0d68c0c6d4d173fde3af68fec5b5f16f"
+      },
+      {
+        "path": "src/ui/library/context_menus/album.rs",
+        "git_blob": "191361006a4db0549158d0764cb3bf2bb382f1a7"
+      },
+      {
+        "path": "src/ui/library/context_menus/info_section.rs",
+        "git_blob": "0e71cb6afe7430e9887c70b30a02f68df0e4c0d7"
+      },
+      {
+        "path": "src/ui/library/context_menus/track.rs",
+        "git_blob": "3e1eddafed6089212eed7af2bfd5286114c0a301"
+      },
+      {
+        "path": "src/ui/library/files_view.rs",
+        "git_blob": "898ddd8f57b28254024314eca487e8f563faad76"
+      },
+      {
+        "path": "src/ui/library/files_view/cache.rs",
+        "git_blob": "d4a79ab3260f1318e1cd97081bef1fadfa76cb06"
+      },
+      {
+        "path": "src/ui/library/files_view/file_context_menu.rs",
+        "git_blob": "60d176c199b23efe0f1f8ed87cafc976bdaf483e"
+      },
+      {
+        "path": "src/ui/library/files_view/file_row.rs",
+        "git_blob": "482f93070b4eaf18a6eaa2487ae25b6903ca47ac"
+      },
+      {
+        "path": "src/ui/library/files_view/loader.rs",
+        "git_blob": "43fa644e69707c9fc137fdaa63962fd621bfc593"
+      },
+      {
+        "path": "src/ui/library/files_view/model.rs",
+        "git_blob": "fe4ff811b9142edd8a399b47f21a6b7c075d06f2"
+      },
+      {
+        "path": "src/ui/library/files_view/tree.rs",
+        "git_blob": "243e4f364ccb57c6f63e54167778283f01e814b0"
+      },
+      {
+        "path": "src/ui/library/library_view_header.rs",
+        "git_blob": "576a5875ebe2d2dcdb9eecd0c5f3492d4a04ca08"
+      },
+      {
+        "path": "src/ui/library/missing_folder_dialog.rs",
+        "git_blob": "6cd9982430e83017bb6b66613ce09e37b7e8c788"
+      },
+      {
+        "path": "src/ui/library/nav_buttons.rs",
+        "git_blob": "9b3df84bcaef03bca24eac1b9b9232a28f700a19"
+      },
+      {
+        "path": "src/ui/library/playlist_view.rs",
+        "git_blob": "2baabdc91e9a31e7b98122c79f7b5dfe92681105"
+      },
+      {
+        "path": "src/ui/library/release_view.rs",
+        "git_blob": "6286bf56017f8a48a25f160711e8b3126d2dc31f"
+      },
+      {
+        "path": "src/ui/library/sidebar.rs",
+        "git_blob": "121ac80bf5409dff875a31c4c50812ff1c04e991"
+      },
+      {
+        "path": "src/ui/library/sidebar/playlists.rs",
+        "git_blob": "096813dcbc0f72b2d8bc6d36de217cc57452e671"
+      },
+      {
+        "path": "src/ui/library/table_view_header.rs",
+        "git_blob": "51380c914285e08ae4db2168186e54f1d5488d96"
+      },
+      {
+        "path": "src/ui/library/track_listing.rs",
+        "git_blob": "5229bf4fd860d1a411e3a03ce66ecd5960a3078b"
+      },
+      {
+        "path": "src/ui/library/track_listing/track_item.rs",
+        "git_blob": "68b6d2bcd8becb5668e855ba38f0b48a6bcdb68c"
+      },
+      {
+        "path": "src/ui/library/track_view.rs",
+        "git_blob": "a79f0539a7ddbe2ef38802e043b9dd201b15f341"
+      },
+      {
+        "path": "src/ui/library/update_playlist.rs",
+        "git_blob": "c3c2b99bc3b67fbd295d74601f1f7f427dbcc30b"
+      },
+      {
+        "path": "src/ui/lyrics.rs",
+        "git_blob": "7580a2a1859601cd0135cb8760443f5281ecd1cf"
+      },
+      {
+        "path": "src/ui/models.rs",
+        "git_blob": "d50c21331c2fe2c2136eda848a2c53e085a320ad"
+      },
+      {
+        "path": "src/ui/queue.rs",
+        "git_blob": "2cd9d76df5d42243622511f6a2a1034047cc8429"
+      },
+      {
+        "path": "src/ui/right_sidebar.rs",
+        "git_blob": "949dd21f4af652c6006cc6423ab63014bebe176e"
+      },
+      {
+        "path": "src/ui/search.rs",
+        "git_blob": "1302bea3f5626040adb0a92f0c1ddea3a07b87b9"
+      },
+      {
+        "path": "src/ui/search/model.rs",
+        "git_blob": "23d660c321570d481850fe92c311be003fd6a3f9"
+      },
+      {
+        "path": "src/ui/search/search_item.rs",
+        "git_blob": "c9e3ce4a8fd6e2ef1aa9f32dbd55f95a03bbd1ec"
+      }
+    ],
+    "scanner_import_availability": [
+      {
+        "path": "src/library/availability.rs",
+        "git_blob": "95022dc87a0972889e97690d35195c09ef8cbd04"
+      },
+      {
+        "path": "src/library/availability/linux.rs",
+        "git_blob": "f0eb0ab568f0d39f2566de0c79605bc4b56fdaa3"
+      },
+      {
+        "path": "src/library/availability/macos.rs",
+        "git_blob": "f667223a0a49bb18b5a6a2174f8140ff3a5593b6"
+      },
+      {
+        "path": "src/library/availability/unsupported.rs",
+        "git_blob": "ffcf6d250132d91008e4d3f72a9c76f3c2c8d84a"
+      },
+      {
+        "path": "src/library/availability/windows.rs",
+        "git_blob": "526338206071807644c3d05460822a6f338ccdda"
+      },
+      {
+        "path": "src/library/playlist.rs",
+        "git_blob": "e2c1f315bd287068321498a063b637e4a310b069"
+      },
+      {
+        "path": "src/library/scan.rs",
+        "git_blob": "2ed3b4e5e3579ca088981e4472c61480a0ff989a"
+      },
+      {
+        "path": "src/library/scan/active_scan.rs",
+        "git_blob": "72c0918bbd88a2706f3d29d01448611f8014fb34"
+      },
+      {
+        "path": "src/library/scan/artist_match.rs",
+        "git_blob": "a34c259b7bbc768403d61157aa377dc62faf3349"
+      },
+      {
+        "path": "src/library/scan/artwork.rs",
+        "git_blob": "beae4bd0b65fd44ed3415f45d577a7635f16d699"
+      },
+      {
+        "path": "src/library/scan/artwork/finalize.rs",
+        "git_blob": "f4b89b5bbfc8606214f5b5aa2176ea60a41d0e0e"
+      },
+      {
+        "path": "src/library/scan/artwork/processing.rs",
+        "git_blob": "ae6d6d9f4d8f00a63e9c5f0e76b3f38dd1d1735b"
+      },
+      {
+        "path": "src/library/scan/artwork/repository.rs",
+        "git_blob": "b628f7feac85e9bf16b2b06273094d8daef2f3c6"
+      },
+      {
+        "path": "src/library/scan/artwork/tests.rs",
+        "git_blob": "7032202e0dc8d1670d54234227e7b45ee35e134c"
+      },
+      {
+        "path": "src/library/scan/control.rs",
+        "git_blob": "1c9e65b4c58be4c47f5a13693e8251bf42d5726e"
+      },
+      {
+        "path": "src/library/scan/database.rs",
+        "git_blob": "fc9ba274ee5566faaaa12718341a914804f72d90"
+      },
+      {
+        "path": "src/library/scan/database/albums.rs",
+        "git_blob": "6f522804f27ee4ededf90b49fd9854d90c31eb47"
+      },
+      {
+        "path": "src/library/scan/database/artist_links.rs",
+        "git_blob": "9545585884d40a5fc11a2e8b8b810154c46e9ca9"
+      },
+      {
+        "path": "src/library/scan/database/artists.rs",
+        "git_blob": "12aac9bf9ece368415cd795e91caf2850671ddaa"
+      },
+      {
+        "path": "src/library/scan/database/genre_links.rs",
+        "git_blob": "03b9014f50503893e965c2d15546a9d09a2d2241"
+      },
+      {
+        "path": "src/library/scan/database/relocate.rs",
+        "git_blob": "8f441d6a6ebd1e24197e72283b68f58d9b266d8d"
+      },
+      {
+        "path": "src/library/scan/database/tests.rs",
+        "git_blob": "e2371cdbbcab9de29b76b61039ab7cb924fe8296"
+      },
+      {
+        "path": "src/library/scan/database/tracks.rs",
+        "git_blob": "a64ce4e3dca08e5606a97b5e1579a1305ff1f43d"
+      },
+      {
+        "path": "src/library/scan/decode.rs",
+        "git_blob": "cdc490c49fb41821df88d8ccec84290bac086287"
+      },
+      {
+        "path": "src/library/scan/decode/tests.rs",
+        "git_blob": "99d69efe588534338881b817b6653c843495d910"
+      },
+      {
+        "path": "src/library/scan/discover.rs",
+        "git_blob": "540288db0d092dc20c86c46f12b17fd9a78215d4"
+      },
+      {
+        "path": "src/library/scan/discover/cleanup.rs",
+        "git_blob": "009f89a3aef92b0994664beff020808b777e195b"
+      },
+      {
+        "path": "src/library/scan/discover/directory.rs",
+        "git_blob": "e8573cf01a86d9992cd533a068578169d1e2a81d"
+      },
+      {
+        "path": "src/library/scan/discover/full.rs",
+        "git_blob": "d03aa44b969573a9bb037678454df56c287cfb92"
+      },
+      {
+        "path": "src/library/scan/discover/targeted.rs",
+        "git_blob": "95f2538308ba454a10c6043c559b2d782ad97487"
+      },
+      {
+        "path": "src/library/scan/discover/test_support.rs",
+        "git_blob": "2578562dc2368c68cf24754fad0160a26adcf80c"
+      },
+      {
+        "path": "src/library/scan/discover/tests.rs",
+        "git_blob": "937655b0296a443d3b1df42fd8526a18e0b326f1"
+      },
+      {
+        "path": "src/library/scan/disk.rs",
+        "git_blob": "c3e4e63341c0cfb3a5e7d062c00ad0bba9a04b9f"
+      },
+      {
+        "path": "src/library/scan/execution.rs",
+        "git_blob": "44cf6d06fc78e1ac5bc335a6ad9bc7af1d848799"
+      },
+      {
+        "path": "src/library/scan/fs_case.rs",
+        "git_blob": "e56a5f2438cf5fd2515bddb277a664ae39bdc643"
+      },
+      {
+        "path": "src/library/scan/pipeline.rs",
+        "git_blob": "988543299944a7cc272efb0b26fce009619b4643"
+      },
+      {
+        "path": "src/library/scan/record.rs",
+        "git_blob": "478c93f8f67730dd36119d4740bc5e824d2ee35d"
+      },
+      {
+        "path": "src/library/scan/scanner.rs",
+        "git_blob": "7d21c8221dc70a508b9fc60033296f0dd58fc23e"
+      },
+      {
+        "path": "src/library/scan/session.rs",
+        "git_blob": "302fc20533bdcb2503a2d3a709ca8d47e43567e7"
+      },
+      {
+        "path": "src/library/scan/tests.rs",
+        "git_blob": "056b93631cf53af0385907db55e778ef685ae161"
+      },
+      {
+        "path": "src/library/scan/watch.rs",
+        "git_blob": "1e269fda9ac73338c2fa115d95f5c4550d896ddf"
+      },
+      {
+        "path": "src/library/scan/watch_state.rs",
+        "git_blob": "3d00051f9ea2a655863b0afc5587082d6651660a"
+      },
+      {
+        "path": "src/library/scan/writer.rs",
+        "git_blob": "647ac652b0bb836fe49833387769ffbfd9252645"
+      },
+      {
+        "path": "src/ui/settings/library.rs",
+        "git_blob": "503ecadd55520cb321938deefd3544c6cd7d63cd"
+      }
+    ],
+    "artwork": [
+      {
+        "path": "src/library/scan/artwork.rs",
+        "git_blob": "beae4bd0b65fd44ed3415f45d577a7635f16d699"
+      },
+      {
+        "path": "src/library/scan/artwork/finalize.rs",
+        "git_blob": "f4b89b5bbfc8606214f5b5aa2176ea60a41d0e0e"
+      },
+      {
+        "path": "src/library/scan/artwork/processing.rs",
+        "git_blob": "ae6d6d9f4d8f00a63e9c5f0e76b3f38dd1d1735b"
+      },
+      {
+        "path": "src/library/scan/artwork/repository.rs",
+        "git_blob": "b628f7feac85e9bf16b2b06273094d8daef2f3c6"
+      },
+      {
+        "path": "src/library/scan/artwork/tests.rs",
+        "git_blob": "7032202e0dc8d1670d54234227e7b45ee35e134c"
+      },
+      {
+        "path": "src/ui/components/managed_image.rs",
+        "git_blob": "3cd9359cb1852b2a359afec3f2c62125e27f0c52"
+      },
+      {
+        "path": "src/ui/models.rs",
+        "git_blob": "d50c21331c2fe2c2136eda848a2c53e085a320ad"
+      }
+    ],
+    "settings": [
+      {
+        "path": "src/settings.rs",
+        "git_blob": "0fc6ec6cb42d85568f1b716cb359b6b117f0d4b5"
+      },
+      {
+        "path": "src/settings/equalizer.rs",
+        "git_blob": "096b7939e68e671cff97cc7ac07f3a44077afcfe"
+      },
+      {
+        "path": "src/settings/interface.rs",
+        "git_blob": "8aecbfbd9ef8a0df68c221c53b6e328f51d36dba"
+      },
+      {
+        "path": "src/settings/playback.rs",
+        "git_blob": "d690c981ac69131fe4e73d861c5c3b69a5c931fc"
+      },
+      {
+        "path": "src/settings/replaygain.rs",
+        "git_blob": "21552d883ad0a6027fb4584bbd5c4324a0266736"
+      },
+      {
+        "path": "src/settings/scan.rs",
+        "git_blob": "b27c1997e0e0895b038eea4aa4eabbef4d814327"
+      },
+      {
+        "path": "src/settings/services.rs",
+        "git_blob": "9d39bb386695657942a74f35c05120814d5dc70b"
+      },
+      {
+        "path": "src/settings/storage.rs",
+        "git_blob": "16d8cdeee4ab0414bd9ce9c419ade1bd963cbcb5"
+      },
+      {
+        "path": "src/settings/update.rs",
+        "git_blob": "aa35b4edccb8207b9faa6fbaf771d3fc58ffcb15"
+      },
+      {
+        "path": "src/ui/equalizer.rs",
+        "git_blob": "d4602919fd27cab2ef028eb02b76295886b08010"
+      },
+      {
+        "path": "src/ui/equalizer/band_editor.rs",
+        "git_blob": "afd45358f97b6cef1bb244bfeb6652d703734c2c"
+      },
+      {
+        "path": "src/ui/equalizer/graph.rs",
+        "git_blob": "0eb5b361bffb3cc0dd7ed9d725901dfd079ef931"
+      },
+      {
+        "path": "src/ui/equalizer/mapping.rs",
+        "git_blob": "8d4e355d490a5409c9db25fdd8f722b34699b11c"
+      },
+      {
+        "path": "src/ui/equalizer/spectrum.rs",
+        "git_blob": "6aff5ac1e6803cfde5093c270fe05a8359535dfb"
+      },
+      {
+        "path": "src/ui/equalizer/view.rs",
+        "git_blob": "44f8b63b523cacef7a1f10f4ddeffafa57e7d889"
+      },
+      {
+        "path": "src/ui/settings.rs",
+        "git_blob": "36ffff1107ad44896ff993b84fffe1c417eab98a"
+      },
+      {
+        "path": "src/ui/settings/corrupt_settings_dialog.rs",
+        "git_blob": "f5e81e76394e1adb4a365061ef7a75e95cc5e651"
+      },
+      {
+        "path": "src/ui/settings/equalizer.rs",
+        "git_blob": "efc16f11b82b87a8d12cc4c82abf038ef620d89a"
+      },
+      {
+        "path": "src/ui/settings/interface.rs",
+        "git_blob": "07f2213c30a038d8a82a62df690279b9887dc5f4"
+      },
+      {
+        "path": "src/ui/settings/lastfm.rs",
+        "git_blob": "7cd8753b734a1ca2f544a36abbbaee0ab65c37fd"
+      },
+      {
+        "path": "src/ui/settings/library.rs",
+        "git_blob": "503ecadd55520cb321938deefd3544c6cd7d63cd"
+      },
+      {
+        "path": "src/ui/settings/listenbrainz.rs",
+        "git_blob": "30b92f5fd08cd1f44fa0f6a2a5071aea94bdbf66"
+      },
+      {
+        "path": "src/ui/settings/playback.rs",
+        "git_blob": "c0fb049bf3d0f0a3ffd653373ca57a1706a782c6"
+      },
+      {
+        "path": "src/ui/settings/services.rs",
+        "git_blob": "867d695fcfef17e528cb9b40f1f33e9060bfa68a"
+      },
+      {
+        "path": "src/ui/settings/update.rs",
+        "git_blob": "bfb1a951a0434d574b112513e6cad54e34d79067"
+      }
+    ],
+    "platform_media_and_services": [
+      {
+        "path": "src/services.rs",
+        "git_blob": "1051e888c4a97f3b094cc4e9ed1ab175a1e64964"
+      },
+      {
+        "path": "src/services/controllers.rs",
+        "git_blob": "adb5982db0bb69155450d46ceb66bda3462c6322"
+      },
+      {
+        "path": "src/services/controllers/macos.rs",
+        "git_blob": "dbd1c5261ff9bdd1872acac6e4c29cdb910f6a5d"
+      },
+      {
+        "path": "src/services/controllers/mpris.rs",
+        "git_blob": "cb7c68d767b9479c9a43fc789f24b60083862ba1"
+      },
+      {
+        "path": "src/services/controllers/windows.rs",
+        "git_blob": "d05d5db5f242644212dd1fa3aff89394f9f5a37c"
+      },
+      {
+        "path": "src/services/mmb.rs",
+        "git_blob": "4b0444ee966b143dbeda1cedff8889e1f1ea118b"
+      },
+      {
+        "path": "src/services/mmb/discord.rs",
+        "git_blob": "75f26fcdf1192a583751c6b4ca1ac9a5577146f1"
+      },
+      {
+        "path": "src/services/mmb/lastfm.rs",
+        "git_blob": "4c815816923f8a5f9a72cbcfbf4ecf2e2e2e4f4a"
+      },
+      {
+        "path": "src/services/mmb/lastfm/client.rs",
+        "git_blob": "951c06ff8c884df27e423ed73a403563ee29432f"
+      },
+      {
+        "path": "src/services/mmb/lastfm/types.rs",
+        "git_blob": "bbdadc51f2ed42e131d15127b02ad1ca5c762f8a"
+      },
+      {
+        "path": "src/services/mmb/listenbrainz.rs",
+        "git_blob": "654ac9005b31082bb27d0d76937adce7fd11d74e"
+      },
+      {
+        "path": "src/services/mmb/listenbrainz/client.rs",
+        "git_blob": "397cf1243e6c44af48951af97b27bc01cabb859e"
+      },
+      {
+        "path": "src/services/mmb/listenbrainz/types.rs",
+        "git_blob": "b343c253133ba3d54ae4bf6ab5e2e56775d0309d"
+      }
+    ],
+    "library_queries_models": [
+      {
+        "path": "src/library/db.rs",
+        "git_blob": "cf93cca6990efbda7a394acb5f9ea95245fe8179"
+      },
+      {
+        "path": "src/library/db/direction.rs",
+        "git_blob": "2f29c94f46ca1e1c2f8fc30c439b01e9e31bf4af"
+      },
+      {
+        "path": "src/library/db/pool.rs",
+        "git_blob": "a4ede11e41d705cf9f29a78d4b20f164bb489a04"
+      },
+      {
+        "path": "src/library/db/query/album.rs",
+        "git_blob": "a49638f6073af4ea304ae6329e00b70b532a04d9"
+      },
+      {
+        "path": "src/library/db/query/artist.rs",
+        "git_blob": "00120dacd0332720dd4a5cf43953e6067ff4a40b"
+      },
+      {
+        "path": "src/library/db/query/mod.rs",
+        "git_blob": "ef1ef2f1e0e187f67c6b37ff50d8cd72eb4e0367"
+      },
+      {
+        "path": "src/library/db/query/playlist.rs",
+        "git_blob": "de314de2f64ed56838b546776081ae8e15960706"
+      },
+      {
+        "path": "src/library/db/query/track.rs",
+        "git_blob": "a7891dd93175f818c1f66ba0f0ffb23c91fcc9da"
+      },
+      {
+        "path": "src/library/db/tests.rs",
+        "git_blob": "da1884c496e3f7249f3cf37fb7b9462f9d761aa5"
+      },
+      {
+        "path": "src/library/model.rs",
+        "git_blob": "6864de129d4b7fac77f3626921d096f9a304e22d"
+      },
+      {
+        "path": "src/library/model/album.rs",
+        "git_blob": "0b4e0fc9aa63ad080c096fd47504287ff43b3f9e"
+      },
+      {
+        "path": "src/library/model/artist.rs",
+        "git_blob": "35f392ef9902ac2a1ae8b2452a4d262e005d9f29"
+      },
+      {
+        "path": "src/library/model/genre.rs",
+        "git_blob": "9e8b64cb281da486a7aaaeb2a43cbc34b65ac826"
+      },
+      {
+        "path": "src/library/model/playlist.rs",
+        "git_blob": "1ec14bb201a837cd989d63f50af8af7b2214051c"
+      },
+      {
+        "path": "src/library/model/stats.rs",
+        "git_blob": "51fb56251bb8793ab179d755ac1d30508b5a8b1b"
+      },
+      {
+        "path": "src/library/model/track.rs",
+        "git_blob": "32eb5516da9c2753dcb084ce5b415e71eb108273"
+      }
+    ],
+    "media_metadata_and_providers": [
+      {
+        "path": "src/media.rs",
+        "git_blob": "001daa1303ff36efc3f9736248a08f9dbec1d7dd"
+      },
+      {
+        "path": "src/media/builtin.rs",
+        "git_blob": "b48c8a9b9ab807d80b12dafcd3b11860f29acdea"
+      },
+      {
+        "path": "src/media/builtin/lofty.rs",
+        "git_blob": "334786b9216105652dfbf45c594c65def3dbb434"
+      },
+      {
+        "path": "src/media/builtin/symphonia.rs",
+        "git_blob": "87401cdbd16f5db5f78fc960741b3bd37e194253"
+      },
+      {
+        "path": "src/media/errors.rs",
+        "git_blob": "32ece968e9c5f6c07407cd9031e894ded36f7dec"
+      },
+      {
+        "path": "src/media/lookup_table.rs",
+        "git_blob": "948c52191efee801afd213bdccac6cb6a78b213e"
+      },
+      {
+        "path": "src/media/metadata.rs",
+        "git_blob": "488db773663172d4c33548ab5fcb45889c7119a5"
+      },
+      {
+        "path": "src/media/numbering.rs",
+        "git_blob": "2d13287a9d126a5b9f001edb44bab1cf2f00f4da"
+      },
+      {
+        "path": "src/media/pipeline.rs",
+        "git_blob": "de88bf18c11d3e99c8222a54e52c2539621df224"
+      },
+      {
+        "path": "src/media/playback.rs",
+        "git_blob": "232266dcbee8bd451bf842b3ffd2db84837868fa"
+      },
+      {
+        "path": "src/media/traits.rs",
+        "git_blob": "9868e775f32625650dd782b5f33f6497633bfaff"
+      }
+    ]
+  },
+  "all_source_files": [
+    {
+      "path": "src/devices.rs",
+      "git_blob": "abae7e9196c5da10c84cc7eb04a3d2755e56a28a"
+    },
+    {
+      "path": "src/devices/builtin.rs",
+      "git_blob": "9305387f654213a8018d61b01bfba6629329ccfe"
+    },
+    {
+      "path": "src/devices/builtin/cpal.rs",
+      "git_blob": "7ff1449043450889ee92b10f8d6126575764ad58"
+    },
+    {
+      "path": "src/devices/builtin/dummy.rs",
+      "git_blob": "b77cf5d3bcdbf04ded1694f21c4aa1ae2e66b1e0"
+    },
+    {
+      "path": "src/devices/channels.rs",
+      "git_blob": "3c7d85c8360c6648ee18219b568c9c930700b712"
+    },
+    {
+      "path": "src/devices/errors.rs",
+      "git_blob": "1ea35c849503548ffebd0274ce8d781376de6e69"
+    },
+    {
+      "path": "src/devices/format.rs",
+      "git_blob": "120c973fc613bc10da8bacd92c315f23654307d5"
+    },
+    {
+      "path": "src/devices/mix.rs",
+      "git_blob": "8ed0f9190f8bb6a572440323b60f9a7bf93349ff"
+    },
+    {
+      "path": "src/devices/resample.rs",
+      "git_blob": "65d31f6e2a7e7fdc6e1593f5dbfb1cf9e8821936"
+    },
+    {
+      "path": "src/devices/traits.rs",
+      "git_blob": "2278d1ac8ae01681efe43ce247ad528acca5eb3c"
+    },
+    {
+      "path": "src/devices/util.rs",
+      "git_blob": "ae83c89a05d8fceada3ad833e4372d7d9a006425"
+    },
+    {
+      "path": "src/errors.rs",
+      "git_blob": "93bd5130c58ec3e7122845700474142127b7a827"
+    },
+    {
+      "path": "src/library.rs",
+      "git_blob": "ef19af76af323e5092a3f3d7e4a9f24adb36a37d"
+    },
+    {
+      "path": "src/library/availability.rs",
+      "git_blob": "95022dc87a0972889e97690d35195c09ef8cbd04"
+    },
+    {
+      "path": "src/library/availability/linux.rs",
+      "git_blob": "f0eb0ab568f0d39f2566de0c79605bc4b56fdaa3"
+    },
+    {
+      "path": "src/library/availability/macos.rs",
+      "git_blob": "f667223a0a49bb18b5a6a2174f8140ff3a5593b6"
+    },
+    {
+      "path": "src/library/availability/unsupported.rs",
+      "git_blob": "ffcf6d250132d91008e4d3f72a9c76f3c2c8d84a"
+    },
+    {
+      "path": "src/library/availability/windows.rs",
+      "git_blob": "526338206071807644c3d05460822a6f338ccdda"
+    },
+    {
+      "path": "src/library/db.rs",
+      "git_blob": "cf93cca6990efbda7a394acb5f9ea95245fe8179"
+    },
+    {
+      "path": "src/library/db/direction.rs",
+      "git_blob": "2f29c94f46ca1e1c2f8fc30c439b01e9e31bf4af"
+    },
+    {
+      "path": "src/library/db/pool.rs",
+      "git_blob": "a4ede11e41d705cf9f29a78d4b20f164bb489a04"
+    },
+    {
+      "path": "src/library/db/query/album.rs",
+      "git_blob": "a49638f6073af4ea304ae6329e00b70b532a04d9"
+    },
+    {
+      "path": "src/library/db/query/artist.rs",
+      "git_blob": "00120dacd0332720dd4a5cf43953e6067ff4a40b"
+    },
+    {
+      "path": "src/library/db/query/mod.rs",
+      "git_blob": "ef1ef2f1e0e187f67c6b37ff50d8cd72eb4e0367"
+    },
+    {
+      "path": "src/library/db/query/playlist.rs",
+      "git_blob": "de314de2f64ed56838b546776081ae8e15960706"
+    },
+    {
+      "path": "src/library/db/query/track.rs",
+      "git_blob": "a7891dd93175f818c1f66ba0f0ffb23c91fcc9da"
+    },
+    {
+      "path": "src/library/db/tests.rs",
+      "git_blob": "da1884c496e3f7249f3cf37fb7b9462f9d761aa5"
+    },
+    {
+      "path": "src/library/model.rs",
+      "git_blob": "6864de129d4b7fac77f3626921d096f9a304e22d"
+    },
+    {
+      "path": "src/library/model/album.rs",
+      "git_blob": "0b4e0fc9aa63ad080c096fd47504287ff43b3f9e"
+    },
+    {
+      "path": "src/library/model/artist.rs",
+      "git_blob": "35f392ef9902ac2a1ae8b2452a4d262e005d9f29"
+    },
+    {
+      "path": "src/library/model/genre.rs",
+      "git_blob": "9e8b64cb281da486a7aaaeb2a43cbc34b65ac826"
+    },
+    {
+      "path": "src/library/model/playlist.rs",
+      "git_blob": "1ec14bb201a837cd989d63f50af8af7b2214051c"
+    },
+    {
+      "path": "src/library/model/stats.rs",
+      "git_blob": "51fb56251bb8793ab179d755ac1d30508b5a8b1b"
+    },
+    {
+      "path": "src/library/model/track.rs",
+      "git_blob": "32eb5516da9c2753dcb084ce5b415e71eb108273"
+    },
+    {
+      "path": "src/library/playlist.rs",
+      "git_blob": "e2c1f315bd287068321498a063b637e4a310b069"
+    },
+    {
+      "path": "src/library/scan.rs",
+      "git_blob": "2ed3b4e5e3579ca088981e4472c61480a0ff989a"
+    },
+    {
+      "path": "src/library/scan/active_scan.rs",
+      "git_blob": "72c0918bbd88a2706f3d29d01448611f8014fb34"
+    },
+    {
+      "path": "src/library/scan/artist_match.rs",
+      "git_blob": "a34c259b7bbc768403d61157aa377dc62faf3349"
+    },
+    {
+      "path": "src/library/scan/artwork.rs",
+      "git_blob": "beae4bd0b65fd44ed3415f45d577a7635f16d699"
+    },
+    {
+      "path": "src/library/scan/artwork/finalize.rs",
+      "git_blob": "f4b89b5bbfc8606214f5b5aa2176ea60a41d0e0e"
+    },
+    {
+      "path": "src/library/scan/artwork/processing.rs",
+      "git_blob": "ae6d6d9f4d8f00a63e9c5f0e76b3f38dd1d1735b"
+    },
+    {
+      "path": "src/library/scan/artwork/repository.rs",
+      "git_blob": "b628f7feac85e9bf16b2b06273094d8daef2f3c6"
+    },
+    {
+      "path": "src/library/scan/artwork/tests.rs",
+      "git_blob": "7032202e0dc8d1670d54234227e7b45ee35e134c"
+    },
+    {
+      "path": "src/library/scan/control.rs",
+      "git_blob": "1c9e65b4c58be4c47f5a13693e8251bf42d5726e"
+    },
+    {
+      "path": "src/library/scan/database.rs",
+      "git_blob": "fc9ba274ee5566faaaa12718341a914804f72d90"
+    },
+    {
+      "path": "src/library/scan/database/albums.rs",
+      "git_blob": "6f522804f27ee4ededf90b49fd9854d90c31eb47"
+    },
+    {
+      "path": "src/library/scan/database/artist_links.rs",
+      "git_blob": "9545585884d40a5fc11a2e8b8b810154c46e9ca9"
+    },
+    {
+      "path": "src/library/scan/database/artists.rs",
+      "git_blob": "12aac9bf9ece368415cd795e91caf2850671ddaa"
+    },
+    {
+      "path": "src/library/scan/database/genre_links.rs",
+      "git_blob": "03b9014f50503893e965c2d15546a9d09a2d2241"
+    },
+    {
+      "path": "src/library/scan/database/relocate.rs",
+      "git_blob": "8f441d6a6ebd1e24197e72283b68f58d9b266d8d"
+    },
+    {
+      "path": "src/library/scan/database/tests.rs",
+      "git_blob": "e2371cdbbcab9de29b76b61039ab7cb924fe8296"
+    },
+    {
+      "path": "src/library/scan/database/tracks.rs",
+      "git_blob": "a64ce4e3dca08e5606a97b5e1579a1305ff1f43d"
+    },
+    {
+      "path": "src/library/scan/decode.rs",
+      "git_blob": "cdc490c49fb41821df88d8ccec84290bac086287"
+    },
+    {
+      "path": "src/library/scan/decode/tests.rs",
+      "git_blob": "99d69efe588534338881b817b6653c843495d910"
+    },
+    {
+      "path": "src/library/scan/discover.rs",
+      "git_blob": "540288db0d092dc20c86c46f12b17fd9a78215d4"
+    },
+    {
+      "path": "src/library/scan/discover/cleanup.rs",
+      "git_blob": "009f89a3aef92b0994664beff020808b777e195b"
+    },
+    {
+      "path": "src/library/scan/discover/directory.rs",
+      "git_blob": "e8573cf01a86d9992cd533a068578169d1e2a81d"
+    },
+    {
+      "path": "src/library/scan/discover/full.rs",
+      "git_blob": "d03aa44b969573a9bb037678454df56c287cfb92"
+    },
+    {
+      "path": "src/library/scan/discover/targeted.rs",
+      "git_blob": "95f2538308ba454a10c6043c559b2d782ad97487"
+    },
+    {
+      "path": "src/library/scan/discover/test_support.rs",
+      "git_blob": "2578562dc2368c68cf24754fad0160a26adcf80c"
+    },
+    {
+      "path": "src/library/scan/discover/tests.rs",
+      "git_blob": "937655b0296a443d3b1df42fd8526a18e0b326f1"
+    },
+    {
+      "path": "src/library/scan/disk.rs",
+      "git_blob": "c3e4e63341c0cfb3a5e7d062c00ad0bba9a04b9f"
+    },
+    {
+      "path": "src/library/scan/execution.rs",
+      "git_blob": "44cf6d06fc78e1ac5bc335a6ad9bc7af1d848799"
+    },
+    {
+      "path": "src/library/scan/fs_case.rs",
+      "git_blob": "e56a5f2438cf5fd2515bddb277a664ae39bdc643"
+    },
+    {
+      "path": "src/library/scan/pipeline.rs",
+      "git_blob": "988543299944a7cc272efb0b26fce009619b4643"
+    },
+    {
+      "path": "src/library/scan/record.rs",
+      "git_blob": "478c93f8f67730dd36119d4740bc5e824d2ee35d"
+    },
+    {
+      "path": "src/library/scan/scanner.rs",
+      "git_blob": "7d21c8221dc70a508b9fc60033296f0dd58fc23e"
+    },
+    {
+      "path": "src/library/scan/session.rs",
+      "git_blob": "302fc20533bdcb2503a2d3a709ca8d47e43567e7"
+    },
+    {
+      "path": "src/library/scan/tests.rs",
+      "git_blob": "056b93631cf53af0385907db55e778ef685ae161"
+    },
+    {
+      "path": "src/library/scan/watch.rs",
+      "git_blob": "1e269fda9ac73338c2fa115d95f5c4550d896ddf"
+    },
+    {
+      "path": "src/library/scan/watch_state.rs",
+      "git_blob": "3d00051f9ea2a655863b0afc5587082d6651660a"
+    },
+    {
+      "path": "src/library/scan/writer.rs",
+      "git_blob": "647ac652b0bb836fe49833387769ffbfd9252645"
+    },
+    {
+      "path": "src/library/types.rs",
+      "git_blob": "f9c429315f4acd63448f9b9319f03336cda25c58"
+    },
+    {
+      "path": "src/library/types/table.rs",
+      "git_blob": "16cf4863dcf4cc0697715a0ac1d13c3c5f380df7"
+    },
+    {
+      "path": "src/logging.rs",
+      "git_blob": "e967264c3c691519e1685519f05134bba037856a"
+    },
+    {
+      "path": "src/main.rs",
+      "git_blob": "36f38c4e1b5aee8f0b768bf571eaf91d5ea65565"
+    },
+    {
+      "path": "src/media.rs",
+      "git_blob": "001daa1303ff36efc3f9736248a08f9dbec1d7dd"
+    },
+    {
+      "path": "src/media/builtin.rs",
+      "git_blob": "b48c8a9b9ab807d80b12dafcd3b11860f29acdea"
+    },
+    {
+      "path": "src/media/builtin/lofty.rs",
+      "git_blob": "334786b9216105652dfbf45c594c65def3dbb434"
+    },
+    {
+      "path": "src/media/builtin/symphonia.rs",
+      "git_blob": "87401cdbd16f5db5f78fc960741b3bd37e194253"
+    },
+    {
+      "path": "src/media/errors.rs",
+      "git_blob": "32ece968e9c5f6c07407cd9031e894ded36f7dec"
+    },
+    {
+      "path": "src/media/lookup_table.rs",
+      "git_blob": "948c52191efee801afd213bdccac6cb6a78b213e"
+    },
+    {
+      "path": "src/media/metadata.rs",
+      "git_blob": "488db773663172d4c33548ab5fcb45889c7119a5"
+    },
+    {
+      "path": "src/media/numbering.rs",
+      "git_blob": "2d13287a9d126a5b9f001edb44bab1cf2f00f4da"
+    },
+    {
+      "path": "src/media/pipeline.rs",
+      "git_blob": "de88bf18c11d3e99c8222a54e52c2539621df224"
+    },
+    {
+      "path": "src/media/playback.rs",
+      "git_blob": "232266dcbee8bd451bf842b3ffd2db84837868fa"
+    },
+    {
+      "path": "src/media/traits.rs",
+      "git_blob": "9868e775f32625650dd782b5f33f6497633bfaff"
+    },
+    {
+      "path": "src/paths.rs",
+      "git_blob": "f80220a27ac716311f238bd3b34e2b4681020c66"
+    },
+    {
+      "path": "src/playback.rs",
+      "git_blob": "147b1568afbc76907eeb5fe8ff6362fd2e1cda65"
+    },
+    {
+      "path": "src/playback/commands.rs",
+      "git_blob": "5f09afcbbcb7f1a0b8e0b136a83b0969bf430ebc"
+    },
+    {
+      "path": "src/playback/dsp.rs",
+      "git_blob": "4547dfa0485db7640fb876a03f99f8b3e6f2f2bc"
+    },
+    {
+      "path": "src/playback/dsp/equalizer.rs",
+      "git_blob": "09a02c307196aa9337b80aab6b36927e581e9be5"
+    },
+    {
+      "path": "src/playback/dsp/spectrum.rs",
+      "git_blob": "ca2ad6b96adac48f6e4d49324b65b9688f69e322"
+    },
+    {
+      "path": "src/playback/events.rs",
+      "git_blob": "e4267b3a0b076b93c2c99a8cc129c96c890e35b1"
+    },
+    {
+      "path": "src/playback/interface.rs",
+      "git_blob": "ad9acc309832f73dd2a13a32c5b693934d5cdbe9"
+    },
+    {
+      "path": "src/playback/queue.rs",
+      "git_blob": "17790361192e79f87e8a4805ad66b9860d26a14a"
+    },
+    {
+      "path": "src/playback/session_storage.rs",
+      "git_blob": "1526b9b652775ebea8847caa52047644a9715de5"
+    },
+    {
+      "path": "src/playback/tests.rs",
+      "git_blob": "7abb8a204dd9866d58f4ed1ed3b8527d23863f69"
+    },
+    {
+      "path": "src/playback/tests/alloc_guard.rs",
+      "git_blob": "42f822d19d1aa979be8713dd9dc5bb5f6415ca16"
+    },
+    {
+      "path": "src/playback/tests/bit_transparency.rs",
+      "git_blob": "864dd1e592cf839fdcc51005b09a8967ce7f30d4"
+    },
+    {
+      "path": "src/playback/tests/eof_drain.rs",
+      "git_blob": "cf2bca067e827124599138b64651b938b82c8bf7"
+    },
+    {
+      "path": "src/playback/tests/error_handling.rs",
+      "git_blob": "107211e90036f70225e439bd4ed90a5561c4c16f"
+    },
+    {
+      "path": "src/playback/tests/harness.rs",
+      "git_blob": "2a786e80dd65fe9788ad8d26515d68d7c6722a9b"
+    },
+    {
+      "path": "src/playback/tests/round_trip.rs",
+      "git_blob": "3e846a0e2dc6f101eee822eb17853229d5320ac9"
+    },
+    {
+      "path": "src/playback/thread.rs",
+      "git_blob": "cedb99c959d08f73723a3ff70db3eb4f1809ccaa"
+    },
+    {
+      "path": "src/playback/thread/audio_engine.rs",
+      "git_blob": "4d3248ce91c790874a448395cca552ba79227c37"
+    },
+    {
+      "path": "src/playback/thread/decoder.rs",
+      "git_blob": "269ba4a76c0cc80687e33cee038d56e2bdbfdc74"
+    },
+    {
+      "path": "src/playback/thread/device_controller.rs",
+      "git_blob": "38a60870cc9c4a2231148d97c48dc5272bb0691d"
+    },
+    {
+      "path": "src/playback/thread/media_controller.rs",
+      "git_blob": "41a2a8e1807eec0b388fe88beaac4665aa93c9f9"
+    },
+    {
+      "path": "src/playback/thread/queue_manager.rs",
+      "git_blob": "8452eab5785c9918fecf38473f1a5be7b94e529d"
+    },
+    {
+      "path": "src/playback/thread/submission_timing.rs",
+      "git_blob": "25e1540cf33d5d1e0a86cb9e769f46e3b541c81d"
+    },
+    {
+      "path": "src/playback/thread/worker_tests.rs",
+      "git_blob": "7b47635294851820e2b4931521bcb40cf386f648"
+    },
+    {
+      "path": "src/power.rs",
+      "git_blob": "4c1d3e6129c0b15276b57a7fccb0e5799c0a838a"
+    },
+    {
+      "path": "src/power/linux.rs",
+      "git_blob": "0ab7e1954d55737f5f737e4ba50e3a765498cc27"
+    },
+    {
+      "path": "src/power/macos.rs",
+      "git_blob": "3f192a4d2ae9ebb2539b2d40babfec3aeb501a33"
+    },
+    {
+      "path": "src/power/windows.rs",
+      "git_blob": "08fd3e8de0eb228385f2e319bcc804e086a3c754"
+    },
+    {
+      "path": "src/services.rs",
+      "git_blob": "1051e888c4a97f3b094cc4e9ed1ab175a1e64964"
+    },
+    {
+      "path": "src/services/controllers.rs",
+      "git_blob": "adb5982db0bb69155450d46ceb66bda3462c6322"
+    },
+    {
+      "path": "src/services/controllers/macos.rs",
+      "git_blob": "dbd1c5261ff9bdd1872acac6e4c29cdb910f6a5d"
+    },
+    {
+      "path": "src/services/controllers/mpris.rs",
+      "git_blob": "cb7c68d767b9479c9a43fc789f24b60083862ba1"
+    },
+    {
+      "path": "src/services/controllers/windows.rs",
+      "git_blob": "d05d5db5f242644212dd1fa3aff89394f9f5a37c"
+    },
+    {
+      "path": "src/services/mmb.rs",
+      "git_blob": "4b0444ee966b143dbeda1cedff8889e1f1ea118b"
+    },
+    {
+      "path": "src/services/mmb/discord.rs",
+      "git_blob": "75f26fcdf1192a583751c6b4ca1ac9a5577146f1"
+    },
+    {
+      "path": "src/services/mmb/lastfm.rs",
+      "git_blob": "4c815816923f8a5f9a72cbcfbf4ecf2e2e2e4f4a"
+    },
+    {
+      "path": "src/services/mmb/lastfm/client.rs",
+      "git_blob": "951c06ff8c884df27e423ed73a403563ee29432f"
+    },
+    {
+      "path": "src/services/mmb/lastfm/types.rs",
+      "git_blob": "bbdadc51f2ed42e131d15127b02ad1ca5c762f8a"
+    },
+    {
+      "path": "src/services/mmb/listenbrainz.rs",
+      "git_blob": "654ac9005b31082bb27d0d76937adce7fd11d74e"
+    },
+    {
+      "path": "src/services/mmb/listenbrainz/client.rs",
+      "git_blob": "397cf1243e6c44af48951af97b27bc01cabb859e"
+    },
+    {
+      "path": "src/services/mmb/listenbrainz/types.rs",
+      "git_blob": "b343c253133ba3d54ae4bf6ab5e2e56775d0309d"
+    },
+    {
+      "path": "src/settings.rs",
+      "git_blob": "0fc6ec6cb42d85568f1b716cb359b6b117f0d4b5"
+    },
+    {
+      "path": "src/settings/equalizer.rs",
+      "git_blob": "096b7939e68e671cff97cc7ac07f3a44077afcfe"
+    },
+    {
+      "path": "src/settings/interface.rs",
+      "git_blob": "8aecbfbd9ef8a0df68c221c53b6e328f51d36dba"
+    },
+    {
+      "path": "src/settings/playback.rs",
+      "git_blob": "d690c981ac69131fe4e73d861c5c3b69a5c931fc"
+    },
+    {
+      "path": "src/settings/replaygain.rs",
+      "git_blob": "21552d883ad0a6027fb4584bbd5c4324a0266736"
+    },
+    {
+      "path": "src/settings/scan.rs",
+      "git_blob": "b27c1997e0e0895b038eea4aa4eabbef4d814327"
+    },
+    {
+      "path": "src/settings/services.rs",
+      "git_blob": "9d39bb386695657942a74f35c05120814d5dc70b"
+    },
+    {
+      "path": "src/settings/storage.rs",
+      "git_blob": "16d8cdeee4ab0414bd9ce9c419ade1bd963cbcb5"
+    },
+    {
+      "path": "src/settings/update.rs",
+      "git_blob": "aa35b4edccb8207b9faa6fbaf771d3fc58ffcb15"
+    },
+    {
+      "path": "src/test_support.rs",
+      "git_blob": "1fc26e5e197b0cbb20773bb89c3eea39c92f0ef4"
+    },
+    {
+      "path": "src/toasts.rs",
+      "git_blob": "c020ad6936ce7f60e1066d612171a156005e8955"
+    },
+    {
+      "path": "src/ui.rs",
+      "git_blob": "ea56b3a79d22f6752d2425f98f831ef4781eaf48"
+    },
+    {
+      "path": "src/ui/about.rs",
+      "git_blob": "7c5f49530e23ce90c8a8bb56a94888e8f55c32dc"
+    },
+    {
+      "path": "src/ui/app.rs",
+      "git_blob": "54c1d3822ddd1585be1227409aee76b2f56803ce"
+    },
+    {
+      "path": "src/ui/arguments.rs",
+      "git_blob": "272363cd83a5539178b01f3e7d0ca8e079e027f5"
+    },
+    {
+      "path": "src/ui/artist_picker.rs",
+      "git_blob": "743a25798e704a9a86a8e168c8e452b7789e46a0"
+    },
+    {
+      "path": "src/ui/assets.rs",
+      "git_blob": "41aa742f27c0aa7218e51a58ca12e85bdb6d7bec"
+    },
+    {
+      "path": "src/ui/assets/bundled.rs",
+      "git_blob": "9480c0f9f13cc0c0ea2bceb0cdfc581ba9c274d7"
+    },
+    {
+      "path": "src/ui/availability.rs",
+      "git_blob": "788b60bc2251882f06676f53debaf229d306d116"
+    },
+    {
+      "path": "src/ui/command_palette.rs",
+      "git_blob": "4e2ccbc9982610e8dfc6dfcccf13324697956e1a"
+    },
+    {
+      "path": "src/ui/components.rs",
+      "git_blob": "c13ed52674c7a74ad78aa5ee1be1da5f2cb05e4b"
+    },
+    {
+      "path": "src/ui/components/action_dialog.rs",
+      "git_blob": "f9f2e3c728a8feba07de47249f5aba8dcad94cbe"
+    },
+    {
+      "path": "src/ui/components/async_resource.rs",
+      "git_blob": "9be156a22489aedcfef901437c499d34a3eded29"
+    },
+    {
+      "path": "src/ui/components/button.rs",
+      "git_blob": "d7cc3a1dc7e396a6186c2553d054d6261e3b7b6a"
+    },
+    {
+      "path": "src/ui/components/callout.rs",
+      "git_blob": "017cc86d5548608c19e99e59d0f51e5c2d695386"
+    },
+    {
+      "path": "src/ui/components/checkbox.rs",
+      "git_blob": "bf4ddb5af469e6dd681bb306fb6ce58da0bdd59c"
+    },
+    {
+      "path": "src/ui/components/context.rs",
+      "git_blob": "2c31a4c76f72a6e223660c0e6456f0a3e5cbce65"
+    },
+    {
+      "path": "src/ui/components/drag_drop.rs",
+      "git_blob": "0d4b89bb1b9f68b84d5837ff7dbb70af7c76ef29"
+    },
+    {
+      "path": "src/ui/components/dropdown.rs",
+      "git_blob": "da8ed9ba6c84da81b06d23a0f3197a67183b70bd"
+    },
+    {
+      "path": "src/ui/components/icons.rs",
+      "git_blob": "499b5dd2bc5f5df2e60dac314711e4cd38a99137"
+    },
+    {
+      "path": "src/ui/components/icons/icon.rs",
+      "git_blob": "f7d98b692b84906e4ab1cbe80cec86282b5bb180"
+    },
+    {
+      "path": "src/ui/components/icons/icons.rs",
+      "git_blob": "0420c4505906a1730a217db08d4bd40379e3023e"
+    },
+    {
+      "path": "src/ui/components/input.rs",
+      "git_blob": "9d1b7ae608b1d245bdd184983bd2286246b19ec6"
+    },
+    {
+      "path": "src/ui/components/knob.rs",
+      "git_blob": "8a6744c330300d5f3f2b133d8fc855976104f27c"
+    },
+    {
+      "path": "src/ui/components/label.rs",
+      "git_blob": "7bf0cf55efaf3e7dbfcabbeb2ccc776cb107703b"
+    },
+    {
+      "path": "src/ui/components/labeled_slider.rs",
+      "git_blob": "6b5f74aa86471d49946045fd6ed20139173c45b5"
+    },
+    {
+      "path": "src/ui/components/managed_image.rs",
+      "git_blob": "3cd9359cb1852b2a359afec3f2c62125e27f0c52"
+    },
+    {
+      "path": "src/ui/components/menu.rs",
+      "git_blob": "2b78b9e92473864e088c6f1affbd4f4cd47d4397"
+    },
+    {
+      "path": "src/ui/components/menu_bar.rs",
+      "git_blob": "b370abac7d043aa5e86a2167bda97b96be0e5dc9"
+    },
+    {
+      "path": "src/ui/components/menus_builder.rs",
+      "git_blob": "18233896700c3227b84fb4e15f4aa0dbcd0a9517"
+    },
+    {
+      "path": "src/ui/components/modal.rs",
+      "git_blob": "d77110f7d3dd0ed13c58fbf603c03a7efa40c660"
+    },
+    {
+      "path": "src/ui/components/nav_button.rs",
+      "git_blob": "b0372aa627cf34b28efea3124b428c7575e3fe89"
+    },
+    {
+      "path": "src/ui/components/palette.rs",
+      "git_blob": "80e5b34e162e82193a8a1281c16511736019cbad"
+    },
+    {
+      "path": "src/ui/components/palette/finder.rs",
+      "git_blob": "86e524e5a46be592b227d42ac8900dd7dfc19aea"
+    },
+    {
+      "path": "src/ui/components/playback_controls.rs",
+      "git_blob": "60df1a46591510d2a390f2da841a356fe103dfee"
+    },
+    {
+      "path": "src/ui/components/popover.rs",
+      "git_blob": "f157ac01127e07207bebad7ae97645e28071bb06"
+    },
+    {
+      "path": "src/ui/components/resizable.rs",
+      "git_blob": "4fe7f69958df31f8bee64405697dd6583345b8fe"
+    },
+    {
+      "path": "src/ui/components/scrollbar.rs",
+      "git_blob": "21aa2b2eed4306302034012fd39c95d38e4b058b"
+    },
+    {
+      "path": "src/ui/components/section_header.rs",
+      "git_blob": "c84483675d5c9207a74c6bfd71a22d7244b7faa6"
+    },
+    {
+      "path": "src/ui/components/segmented_control.rs",
+      "git_blob": "19b674544d1df4f9077a0e992fddebe34c2ab053"
+    },
+    {
+      "path": "src/ui/components/sidebar.rs",
+      "git_blob": "33062ae813e4454d4e9c42e6149f533c4ab0716f"
+    },
+    {
+      "path": "src/ui/components/slider.rs",
+      "git_blob": "57c12ce89e4cce01f467577d17eab05438e55622"
+    },
+    {
+      "path": "src/ui/components/styling.rs",
+      "git_blob": "2e66007ad652ba240f5c576515f48932add03cba"
+    },
+    {
+      "path": "src/ui/components/table.rs",
+      "git_blob": "f822bf7238010948737d4b05b96bcbde3622694d"
+    },
+    {
+      "path": "src/ui/components/table/cell_strip.rs",
+      "git_blob": "a0f65040bdc2cf6d1bb02d0850b74ebfc8d2cdbe"
+    },
+    {
+      "path": "src/ui/components/table/column_resize_handle.rs",
+      "git_blob": "3b0cb752e940bc40df98ae6dcf4077b2d2dadf2c"
+    },
+    {
+      "path": "src/ui/components/table/grid_item.rs",
+      "git_blob": "1c092ea0870844747684a634a744f3794fda13d5"
+    },
+    {
+      "path": "src/ui/components/table/table_body.rs",
+      "git_blob": "e53964a2d7e6e8e68e8dfc1db7699fb5e9a5e7da"
+    },
+    {
+      "path": "src/ui/components/table/table_column_header.rs",
+      "git_blob": "7458abb1c0f7119a5600ed8b865bcd07b722a454"
+    },
+    {
+      "path": "src/ui/components/table/table_data.rs",
+      "git_blob": "ab493c830b7cbf965c6398e24d4c7a72637f6b22"
+    },
+    {
+      "path": "src/ui/components/table/table_item.rs",
+      "git_blob": "f10d3e7620b23ebab1cf3ac73c5f31ea11e08506"
+    },
+    {
+      "path": "src/ui/components/textbox.rs",
+      "git_blob": "4021f5de81a12f0bbdde36f783413c5a4ebf9c0c"
+    },
+    {
+      "path": "src/ui/components/tooltip.rs",
+      "git_blob": "90c0fbad52944332770aacc774e0bd3340c078c9"
+    },
+    {
+      "path": "src/ui/components/uniform_grid.rs",
+      "git_blob": "93360e58f9106e691e9637f5c6e34725f85b60c2"
+    },
+    {
+      "path": "src/ui/components/volume_tooltip.rs",
+      "git_blob": "cc526c0fdd36b988f70f5ef04ffcd47b23cbc6c2"
+    },
+    {
+      "path": "src/ui/components/window_chrome.rs",
+      "git_blob": "600ecb2e4c67c3e16fb0354599cb7a4b0a78cff2"
+    },
+    {
+      "path": "src/ui/components/window_header.rs",
+      "git_blob": "a6d77c627cec7817fb1a89f8dee92838a3d1653e"
+    },
+    {
+      "path": "src/ui/constants.rs",
+      "git_blob": "df1bf76d477ecd336cd88ce430a75a5cbfe3650c"
+    },
+    {
+      "path": "src/ui/controls.rs",
+      "git_blob": "d621716019ad16c53755c84241a0b8b376ad4168"
+    },
+    {
+      "path": "src/ui/controls/replaygain.rs",
+      "git_blob": "5d2858df13dc9eabd2ed011a5c31ec6cbf7f816b"
+    },
+    {
+      "path": "src/ui/data.rs",
+      "git_blob": "1820f38dc56cf65ce0b8fcaa1f5638bf983112a0"
+    },
+    {
+      "path": "src/ui/equalizer.rs",
+      "git_blob": "d4602919fd27cab2ef028eb02b76295886b08010"
+    },
+    {
+      "path": "src/ui/equalizer/band_editor.rs",
+      "git_blob": "afd45358f97b6cef1bb244bfeb6652d703734c2c"
+    },
+    {
+      "path": "src/ui/equalizer/graph.rs",
+      "git_blob": "0eb5b361bffb3cc0dd7ed9d725901dfd079ef931"
+    },
+    {
+      "path": "src/ui/equalizer/mapping.rs",
+      "git_blob": "8d4e355d490a5409c9db25fdd8f722b34699b11c"
+    },
+    {
+      "path": "src/ui/equalizer/spectrum.rs",
+      "git_blob": "6aff5ac1e6803cfde5093c270fe05a8359535dfb"
+    },
+    {
+      "path": "src/ui/equalizer/view.rs",
+      "git_blob": "44f8b63b523cacef7a1f10f4ddeffafa57e7d889"
+    },
+    {
+      "path": "src/ui/global_actions.rs",
+      "git_blob": "412015b60fe4a910bdc42b8b7ae0136b9ac8764d"
+    },
+    {
+      "path": "src/ui/header.rs",
+      "git_blob": "b61c449afc2831fa3a33215318376043e5f25d76"
+    },
+    {
+      "path": "src/ui/header/services.rs",
+      "git_blob": "d91a33ab9270c4ac2cbd8f7c1e86fc87b70828ee"
+    },
+    {
+      "path": "src/ui/header/update.rs",
+      "git_blob": "3d6b98181e7f032564af442033ef31cb4fd345ba"
+    },
+    {
+      "path": "src/ui/keymap.rs",
+      "git_blob": "ce80fd9fff3664a708d60defbf1e4647d227b986"
+    },
+    {
+      "path": "src/ui/library.rs",
+      "git_blob": "5c9f743445f67cc89d1b492a00edf422283ebce2"
+    },
+    {
+      "path": "src/ui/library/add_to_playlist.rs",
+      "git_blob": "c57cc243b12e66b117f819a4552362d7580fbdb7"
+    },
+    {
+      "path": "src/ui/library/album_view.rs",
+      "git_blob": "14ed1c720e7fe6fb5f3b4e3a918277bd5e46a36b"
+    },
+    {
+      "path": "src/ui/library/artist_detail_view.rs",
+      "git_blob": "af92822ecfc5c19c9cafc1b4440ee87d7cc9f823"
+    },
+    {
+      "path": "src/ui/library/artist_view.rs",
+      "git_blob": "0524aa4db0da684cda169c920b33c67a091dd44e"
+    },
+    {
+      "path": "src/ui/library/collection_summary.rs",
+      "git_blob": "3a4be3fd0ada3ed05a2cdd544d196f1b81ce39ea"
+    },
+    {
+      "path": "src/ui/library/context_menus.rs",
+      "git_blob": "696795ff0d68c0c6d4d173fde3af68fec5b5f16f"
+    },
+    {
+      "path": "src/ui/library/context_menus/album.rs",
+      "git_blob": "191361006a4db0549158d0764cb3bf2bb382f1a7"
+    },
+    {
+      "path": "src/ui/library/context_menus/info_section.rs",
+      "git_blob": "0e71cb6afe7430e9887c70b30a02f68df0e4c0d7"
+    },
+    {
+      "path": "src/ui/library/context_menus/track.rs",
+      "git_blob": "3e1eddafed6089212eed7af2bfd5286114c0a301"
+    },
+    {
+      "path": "src/ui/library/files_view.rs",
+      "git_blob": "898ddd8f57b28254024314eca487e8f563faad76"
+    },
+    {
+      "path": "src/ui/library/files_view/cache.rs",
+      "git_blob": "d4a79ab3260f1318e1cd97081bef1fadfa76cb06"
+    },
+    {
+      "path": "src/ui/library/files_view/file_context_menu.rs",
+      "git_blob": "60d176c199b23efe0f1f8ed87cafc976bdaf483e"
+    },
+    {
+      "path": "src/ui/library/files_view/file_row.rs",
+      "git_blob": "482f93070b4eaf18a6eaa2487ae25b6903ca47ac"
+    },
+    {
+      "path": "src/ui/library/files_view/loader.rs",
+      "git_blob": "43fa644e69707c9fc137fdaa63962fd621bfc593"
+    },
+    {
+      "path": "src/ui/library/files_view/model.rs",
+      "git_blob": "fe4ff811b9142edd8a399b47f21a6b7c075d06f2"
+    },
+    {
+      "path": "src/ui/library/files_view/tree.rs",
+      "git_blob": "243e4f364ccb57c6f63e54167778283f01e814b0"
+    },
+    {
+      "path": "src/ui/library/library_view_header.rs",
+      "git_blob": "576a5875ebe2d2dcdb9eecd0c5f3492d4a04ca08"
+    },
+    {
+      "path": "src/ui/library/missing_folder_dialog.rs",
+      "git_blob": "6cd9982430e83017bb6b66613ce09e37b7e8c788"
+    },
+    {
+      "path": "src/ui/library/nav_buttons.rs",
+      "git_blob": "9b3df84bcaef03bca24eac1b9b9232a28f700a19"
+    },
+    {
+      "path": "src/ui/library/playlist_view.rs",
+      "git_blob": "2baabdc91e9a31e7b98122c79f7b5dfe92681105"
+    },
+    {
+      "path": "src/ui/library/release_view.rs",
+      "git_blob": "6286bf56017f8a48a25f160711e8b3126d2dc31f"
+    },
+    {
+      "path": "src/ui/library/sidebar.rs",
+      "git_blob": "121ac80bf5409dff875a31c4c50812ff1c04e991"
+    },
+    {
+      "path": "src/ui/library/sidebar/playlists.rs",
+      "git_blob": "096813dcbc0f72b2d8bc6d36de217cc57452e671"
+    },
+    {
+      "path": "src/ui/library/table_view_header.rs",
+      "git_blob": "51380c914285e08ae4db2168186e54f1d5488d96"
+    },
+    {
+      "path": "src/ui/library/track_listing.rs",
+      "git_blob": "5229bf4fd860d1a411e3a03ce66ecd5960a3078b"
+    },
+    {
+      "path": "src/ui/library/track_listing/track_item.rs",
+      "git_blob": "68b6d2bcd8becb5668e855ba38f0b48a6bcdb68c"
+    },
+    {
+      "path": "src/ui/library/track_view.rs",
+      "git_blob": "a79f0539a7ddbe2ef38802e043b9dd201b15f341"
+    },
+    {
+      "path": "src/ui/library/update_playlist.rs",
+      "git_blob": "c3c2b99bc3b67fbd295d74601f1f7f427dbcc30b"
+    },
+    {
+      "path": "src/ui/lyrics.rs",
+      "git_blob": "7580a2a1859601cd0135cb8760443f5281ecd1cf"
+    },
+    {
+      "path": "src/ui/lyrics/lrc.rs",
+      "git_blob": "6d0336e628646b75e5c518a25188f08532bd389d"
+    },
+    {
+      "path": "src/ui/models.rs",
+      "git_blob": "d50c21331c2fe2c2136eda848a2c53e085a320ad"
+    },
+    {
+      "path": "src/ui/queue.rs",
+      "git_blob": "2cd9d76df5d42243622511f6a2a1034047cc8429"
+    },
+    {
+      "path": "src/ui/right_sidebar.rs",
+      "git_blob": "949dd21f4af652c6006cc6423ab63014bebe176e"
+    },
+    {
+      "path": "src/ui/scroll_follow.rs",
+      "git_blob": "530a8169777fae47abb0fa023a538cf3d77baedf"
+    },
+    {
+      "path": "src/ui/search.rs",
+      "git_blob": "1302bea3f5626040adb0a92f0c1ddea3a07b87b9"
+    },
+    {
+      "path": "src/ui/search/model.rs",
+      "git_blob": "23d660c321570d481850fe92c311be003fd6a3f9"
+    },
+    {
+      "path": "src/ui/search/search_item.rs",
+      "git_blob": "c9e3ce4a8fd6e2ef1aa9f32dbd55f95a03bbd1ec"
+    },
+    {
+      "path": "src/ui/settings.rs",
+      "git_blob": "36ffff1107ad44896ff993b84fffe1c417eab98a"
+    },
+    {
+      "path": "src/ui/settings/corrupt_settings_dialog.rs",
+      "git_blob": "f5e81e76394e1adb4a365061ef7a75e95cc5e651"
+    },
+    {
+      "path": "src/ui/settings/equalizer.rs",
+      "git_blob": "efc16f11b82b87a8d12cc4c82abf038ef620d89a"
+    },
+    {
+      "path": "src/ui/settings/interface.rs",
+      "git_blob": "07f2213c30a038d8a82a62df690279b9887dc5f4"
+    },
+    {
+      "path": "src/ui/settings/lastfm.rs",
+      "git_blob": "7cd8753b734a1ca2f544a36abbbaee0ab65c37fd"
+    },
+    {
+      "path": "src/ui/settings/library.rs",
+      "git_blob": "503ecadd55520cb321938deefd3544c6cd7d63cd"
+    },
+    {
+      "path": "src/ui/settings/listenbrainz.rs",
+      "git_blob": "30b92f5fd08cd1f44fa0f6a2a5071aea94bdbf66"
+    },
+    {
+      "path": "src/ui/settings/playback.rs",
+      "git_blob": "c0fb049bf3d0f0a3ffd653373ca57a1706a782c6"
+    },
+    {
+      "path": "src/ui/settings/services.rs",
+      "git_blob": "867d695fcfef17e528cb9b40f1f33e9060bfa68a"
+    },
+    {
+      "path": "src/ui/settings/update.rs",
+      "git_blob": "bfb1a951a0434d574b112513e6cad54e34d79067"
+    },
+    {
+      "path": "src/ui/theme.rs",
+      "git_blob": "fbea92cd90e0dea802504b1562ca938ae141fac6"
+    },
+    {
+      "path": "src/ui/toasts.rs",
+      "git_blob": "674a13eea649b975a0e6aff4f8cfb2aa9c8a4522"
+    },
+    {
+      "path": "src/ui/troubleshooting.rs",
+      "git_blob": "5af59e0b3b68adf343cb69660c5e388aba51ce37"
+    },
+    {
+      "path": "src/ui/util.rs",
+      "git_blob": "4ea1ef90adcb04fcc4c700a01e3744d3ff9d28dc"
+    },
+    {
+      "path": "src/update.rs",
+      "git_blob": "9eb0a15e041dbebc10d7e74562569b6c42e6b24a"
+    },
+    {
+      "path": "src/update/check.rs",
+      "git_blob": "3e483a42d64d945fa0d6e0678fa29acb96ee549f"
+    },
+    {
+      "path": "src/update/download.rs",
+      "git_blob": "f154a8bbc3e703e0f2905c196669f2f5b1fdada0"
+    },
+    {
+      "path": "src/update/linux.rs",
+      "git_blob": "a41dea0da038b83919a30f8d07bee5f4148d228c"
+    },
+    {
+      "path": "src/update/macos.rs",
+      "git_blob": "a44ca21048766a00c2577b4c8ba751a1a7cbe8b0"
+    },
+    {
+      "path": "src/update/macos/restart.sh",
+      "git_blob": "ee98f0c3a4b6168ca751be367a3879c8c92db597"
+    },
+    {
+      "path": "src/update/windows.rs",
+      "git_blob": "860b26e5e85496147d8893f2e37e833c8b82f1e1"
+    },
+    {
+      "path": "src/update/windows/restart.ps1",
+      "git_blob": "042a72f4a61971a9825e883af34bbd70150e32a2"
+    },
+    {
+      "path": "src/util.rs",
+      "git_blob": "3f8112c4912b2b0ad4413dc64667bcd8a064f81b"
+    },
+    {
+      "path": "src/windows.rs",
+      "git_blob": "fdb90eb3d92f82035e659512dd82606084260c47"
+    }
+  ]
+}
