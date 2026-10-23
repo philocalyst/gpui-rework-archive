@@ -3224,7 +3224,7 @@ impl<M: View + 'static> Runtime<M> {
     fn hit(&self, point: Point) -> Option<u64> {
         self.hit_in_sheet(self.presented_hit_sheet(), point)
     }
-    #[inline]
+    #[inline(always)]
     fn hit_in_sheet(&self, sheet: query::HitSheet<'_>, point: Point) -> Option<u64> {
         if !sheet.contains_window(point) {
             return None;

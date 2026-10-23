@@ -173,7 +173,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime.pointer_release_hit(pressed, session.position())?
         } else {
             runtime.current_presentation()?;
-            runtime.pointer_hit(runtime.presented_hit_sheet(), session.position())
+            runtime.pointer_hit(session.position())
         };
         let picking = runtime.inspector_picking();
         if matches!(event, PointerEvent::Press) {
@@ -312,18 +312,45 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 }
 
 impl<M: View + 'static> Runtime<M> {
-    fn pointer_hit(
-        &self,
-        sheet: super::query::HitSheet<'_>,
-        point: Option<Point>,
-    ) -> Option<Target> {
+    fn pointer_hit(&self, point: Option<Point>) -> Option<Target> {
         let point = point?;
         if self.inspector_picking() {
+            self.inspector_pick(point)
+        } else {
+            self.hit(point).map(|id| self.sites.target(id))
+        }
+    }
+    // Keep the new opt-in C view out of ordinary pointer caller frames.
+    #[inline(never)]
+    fn inspector_focus_hit(&self, target: Target, point: Option<Point>) -> bool {
+        let Some(point) = point else {
+            return false;
+        };
+        // Strict picking historically relies on outward frozen bounds. Only
+        // this pending-C proof additionally requires both window extents.
+        if !crate::Rect::new(
+            0.,
+            0.,
+            self.presentation_size[0] as f32,
+            self.presentation_size[1] as f32,
+        )
+        .contains(point)
+        {
+            return false;
+        }
+        let Some(sheet) = self.candidate_hit_sheet() else {
+            return false;
+        };
+        if !sheet.contains_window(point) {
+            return false;
+        }
+        let hit = if self.inspector_picking() {
             self.inspector_pick_in_sheet(sheet, point)
         } else {
             self.hit_in_sheet(sheet, point)
                 .map(|id| self.sites.target(id))
-        }
+        };
+        hit == Some(target)
     }
     fn pointer_release_hit(
         &self,
@@ -331,7 +358,7 @@ impl<M: View + 'static> Runtime<M> {
         point: Option<Point>,
     ) -> Result<Option<Target>, Error> {
         let error = match self.current_presentation() {
-            Ok(()) => return Ok(self.pointer_hit(self.presented_hit_sheet(), point)),
+            Ok(()) => return Ok(self.pointer_hit(point)),
             Err(error) => error,
         };
         // Epoch rejects even no-op source edits; token rejects viewport ABA and
@@ -350,19 +377,9 @@ impl<M: View + 'static> Runtime<M> {
         {
             return Err(error);
         }
-        let sheet = self.presented_hit_sheet();
-        // Strict picking historically relies on outward frozen bounds. Only
-        // this new pending-C proof additionally requires both window extents.
-        let inspector = self.inspector_enabled();
-        let inside = !inspector || point.is_some_and(|p| sheet.contains_window(p));
-        let hit = self.pointer_hit(sheet, point);
-        if inspector
-            && (!inside
-                || hit != Some(pressed.target)
-                || self.candidate_hit_sheet().is_none_or(|sheet| {
-                    !point.is_some_and(|p| sheet.contains_window(p))
-                        || self.pointer_hit(sheet, point) != Some(pressed.target)
-                }))
+        let hit = self.pointer_hit(point);
+        if self.inspector_enabled()
+            && (hit != Some(pressed.target) || !self.inspector_focus_hit(pressed.target, point))
         {
             return Err(error);
         }
@@ -574,12 +591,11 @@ mod focus_release_tests {
                 .unwrap();
             {
                 let mut runtime = win.runtime_mut().unwrap();
+                assert_eq!(runtime.pointer_hit(Some(point)), Some(target));
                 assert_eq!(
-                    runtime.pointer_hit(runtime.presented_hit_sheet(), Some(point)),
-                    Some(target)
-                );
-                assert_eq!(
-                    runtime.pointer_hit(runtime.candidate_hit_sheet().unwrap(), Some(point)),
+                    runtime
+                        .hit_in_sheet(runtime.candidate_hit_sheet().unwrap(), point)
+                        .map(|id| runtime.sites.target(id)),
                     Some(target)
                 );
                 let identity = runtime.sites.resolve(target).unwrap();
@@ -710,10 +726,7 @@ mod focus_release_tests {
                     _ => unreachable!(),
                 }
                 // Inject only C-side outcomes; P's exact shape must remain eligible.
-                assert_eq!(
-                    runtime.pointer_hit(runtime.presented_hit_sheet(), Some(point)),
-                    Some(target)
-                );
+                assert_eq!(runtime.pointer_hit(Some(point)), Some(target));
             }
             let result = win.pointer_event(&mut pointer, PointerEvent::Release);
             if change == 10 {
