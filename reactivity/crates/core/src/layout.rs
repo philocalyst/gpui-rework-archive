@@ -45,6 +45,14 @@ const _: () = assert!(HIDDEN_SUBTREE & cephal::schedule::META_MASK == HIDDEN_SUB
 /// Hooks must give consistent answers for a fixed question during one compute.
 pub type MeasureFn = fn(MeasureInput) -> MeasureOutput;
 
+/// A measurement whose wrapping depends only on available width. Known
+/// dimensions still constrain either axis; available height is not observable.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WidthMeasureInput {
+    pub known_dimensions: Size<Option<f32>>,
+    pub available_width: AvailableSpace,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LayoutError {
     Tree(TreeError),
@@ -408,7 +416,7 @@ impl LayoutTree {
         root: NodeId,
         viewport: Size<AvailableSpace>,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner(root, viewport, None)
+        self.compute_inner::<false>(root, viewport, None)
     }
     /// Borrow a content service for this computation instead of storing it in
     /// every measured node. Only nodes installed with `set_measure` invoke it.
@@ -422,9 +430,33 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: &mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner(root, viewport, Some(measure))
+        self.compute_inner::<false>(root, viewport, Some(measure))
     }
-    fn compute_inner(
+    /// Like `compute_with`, with no available height in the callback's input.
+    /// The existing leaf cache can therefore share answers across available
+    /// heights. Known heights remain part of the question. As with any content
+    /// service change, mark affected nodes dirty before replacing its answers.
+    pub fn compute_with_width_measure(
+        &mut self,
+        root: NodeId,
+        viewport: Size<AvailableSpace>,
+        measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
+    ) -> Result<bool, LayoutError> {
+        self.compute_inner::<true>(
+            root,
+            viewport,
+            Some(&mut |node, input| {
+                measure(
+                    node,
+                    WidthMeasureInput {
+                        known_dimensions: input.known_dimensions,
+                        available_width: input.available_space.width,
+                    },
+                )
+            }),
+        )
+    }
+    fn compute_inner<const WIDTH_ONLY: bool>(
         &mut self,
         root: NodeId,
         viewport: Size<AvailableSpace>,
@@ -472,7 +504,7 @@ impl LayoutTree {
             self.pending.remove(node);
         }
         {
-            let mut engine = Engine {
+            let mut engine = Engine::<WIDTH_ONLY> {
                 owner: self,
                 measure,
                 observed: 0,
@@ -614,12 +646,12 @@ impl LayoutTree {
 // Private view: Cephal's engine-local u64 ids cannot be used as public GPUI
 // capabilities. The codec includes generation; arena validation occurs at the
 // public boundary, and every engine id is minted from this adapter's topology.
-struct Engine<'a, 'service> {
+struct Engine<'a, 'service, const WIDTH_ONLY: bool> {
     observed: u8,
     owner: &'a mut LayoutTree,
     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
 }
-impl Engine<'_, '_> {
+impl<const WIDTH_ONLY: bool> Engine<'_, '_, WIDTH_ONLY> {
     fn node(&self, node: EngineId) -> NodeId {
         self.owner.tree.node_for_layout_key(node.raw())
     }
@@ -639,7 +671,7 @@ impl Iterator for Children<'_> {
             .map(|id| EngineId::new(self.tree.layout_key(id)))
     }
 }
-impl EngineTree for Engine<'_, '_> {
+impl<const WIDTH_ONLY: bool> EngineTree for Engine<'_, '_, WIDTH_ONLY> {
     type ChildIter<'a>
         = Children<'a>
     where
@@ -693,10 +725,12 @@ impl EngineTree for Engine<'_, '_> {
             hidden: self.owner.styles.get(style).generates_no_box(),
             cheap_leaf: leaf && !self.is_measured_leaf(node),
             dependency: self.owner.styles.parent_size_dependency(style),
-            // This adapter uses Cephal's default leaf algorithm. Measurements
-            // may inspect either available axis, so height remains observed.
             kind: if leaf {
-                cephal::tree::NodeKind::Leaf
+                if WIDTH_ONLY {
+                    cephal::tree::NodeKind::LeafIgnoringHeight
+                } else {
+                    cephal::tree::NodeKind::Leaf
+                }
             } else {
                 self.owner.styles.kind(style)
             },
@@ -719,6 +753,9 @@ impl EngineTree for Engine<'_, '_> {
         } else {
             MeasureOutput::from_size(input.known_dimensions.unwrap_or(Size::ZERO))
         }
+    }
+    fn measure_ignores_available_height(&self) -> bool {
+        WIDTH_ONLY
     }
     fn set_unrounded_layout(&mut self, node: EngineId, layout: &Layout) {
         if self.owner.speculation != 0 {
@@ -784,7 +821,7 @@ impl EngineTree for Engine<'_, '_> {
         }
     }
 }
-impl CacheAccess for Engine<'_, '_> {
+impl<const WIDTH_ONLY: bool> CacheAccess for Engine<'_, '_, WIDTH_ONLY> {
     fn cache(&self, node: EngineId) -> &NodeCache {
         &self.owner.caches[self.slot(node)]
     }
@@ -812,7 +849,7 @@ impl CacheAccess for Engine<'_, '_> {
         self.owner.speculation = depth;
     }
 }
-impl Incremental for Engine<'_, '_> {
+impl<const WIDTH_ONLY: bool> Incremental for Engine<'_, '_, WIDTH_ONLY> {
     fn parent(&self, node: EngineId) -> Option<EngineId> {
         self.owner
             .tree
@@ -861,7 +898,7 @@ mod tests {
         assert_eq!(tree.storage().cache_heap_bytes, 0);
         let key = EngineId::new(tree.tree.layout_key(hidden));
         {
-            let mut engine = Engine {
+            let mut engine = Engine::<false> {
                 owner: &mut tree,
                 measure: None,
                 observed: 0,
@@ -1031,7 +1068,7 @@ mod tests {
             .insert(None, NodeKind::Element, Style::DEFAULT)
             .unwrap();
         let key = EngineId::new(owner.tree.layout_key(node));
-        let mut engine = Engine {
+        let mut engine = Engine::<false> {
             owner: &mut owner,
             observed: 0,
             measure: None,

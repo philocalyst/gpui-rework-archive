@@ -15,7 +15,10 @@ use gpui_canvas::{
 };
 use gpui_reactivity_core::{
     Affine, CoordinateSpace, NodeId, Point, Rect,
-    layout::{AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size},
+    layout::{
+        AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size,
+        WidthMeasureInput,
+    },
 };
 use serde::Serialize;
 
@@ -2678,11 +2681,11 @@ impl<M: View + 'static> Runtime<M> {
         let texts = &mut self.texts;
         let images = &self.images;
         let service = &mut shaper;
-        let mut measure = |id: NodeId, input: MeasureInput| {
+        let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let width = input
                 .known_dimensions
                 .width
-                .or(match input.available_space.width {
+                .or(match input.available_width {
                     AvailableSpace::Definite(width) => Some(width),
                     AvailableSpace::MinContent => Some(f32::MIN_POSITIVE),
                     AvailableSpace::MaxContent => None,
@@ -2704,7 +2707,7 @@ impl<M: View + 'static> Runtime<M> {
                 // Intrinsic probes cannot publish geometry. Final finite
                 // placement upgrades the cache before retaining C/P maps.
                 input.known_dimensions.width.is_some()
-                    || matches!(input.available_space.width, AvailableSpace::Definite(_)),
+                    || matches!(input.available_width, AvailableSpace::Definite(_)),
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
@@ -2722,7 +2725,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
         };
-        self.layout.compute_with(
+        self.layout.compute_with_width_measure(
             self.layout_nodes[0],
             Size {
                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
