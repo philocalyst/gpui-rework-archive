@@ -26,7 +26,7 @@ pub(super) struct Decoder {
     packet_offset: usize,
     packet_position: f64,
     position: f64,
-    seek_to: Option<f64>,
+    seek_to: Option<u64>,
     eof: bool,
 }
 fn failure(error: Error) -> AudioError {
@@ -104,13 +104,12 @@ impl Decoder {
         })
     }
     pub fn seek(&mut self, milliseconds: u64) -> Result<(), AudioError> {
-        let seconds = milliseconds as f64 / 1000.;
+        let time = Time::from_millis_u64(milliseconds);
         self.format
             .seek(
                 SeekMode::Accurate,
                 SeekTo::Time {
-                    time: Time::try_from_secs_f64(seconds)
-                        .ok_or(AudioError::Unsupported("seek time"))?,
+                    time,
                     track_id: Some(self.track),
                 },
             )
@@ -120,8 +119,8 @@ impl Decoder {
             plane.clear();
         }
         self.packet_offset = 0;
-        self.seek_to = Some(seconds);
-        self.position = seconds;
+        self.seek_to = Some(milliseconds);
+        self.position = time.as_secs_f64();
         self.eof = false;
         Ok(())
     }
@@ -196,14 +195,24 @@ impl Decoder {
                 .map_or(self.position, |time| time.as_secs_f64());
             let skip = self
                 .seek_to
-                .map_or(0, |target| {
-                    ((target - self.packet_position).max(0.) * f64::from(actual.rate)).ceil()
-                        as usize
+                .map_or(0, |milliseconds| {
+                    if let Some(base) = self.time_base {
+                        // Keep timestamp arithmetic rational until the final
+                        // ceiling. Nanosecond/f64 conversion can move an exact
+                        // sample boundary just past its integer and trim twice.
+                        let ticks = i128::from(milliseconds) * i128::from(base.denom.get())
+                            - i128::from(presentation.get()) * i128::from(base.numer.get()) * 1000;
+                        let samples = ticks.max(0) as u128 * u128::from(actual.rate);
+                        let denominator = 1000 * u128::from(base.denom.get());
+                        samples.div_ceil(denominator).min(decoded.frames() as u128) as usize
+                    } else {
+                        ((milliseconds as f64 / 1000. - self.packet_position).max(0.)
+                            * f64::from(actual.rate))
+                        .ceil() as usize
+                    }
                 })
                 .min(decoded.frames());
-            if self.packet_position + decoded.frames() as f64 / f64::from(actual.rate)
-                >= self.seek_to.unwrap_or(0.)
-            {
+            if skip < decoded.frames() {
                 self.seek_to = None;
             }
             for plane in &mut self.packet {
@@ -284,7 +293,7 @@ mod tests {
                 .join(format!("assets/audio/stereo.{extension}"));
             let mut decoder = Decoder::open(&path).unwrap();
             let full = remaining(&mut decoder);
-            for milliseconds in [37, 241, 0] {
+            for milliseconds in [1, 10, 100, 120, 128, 200, 201, 241, 37, 0] {
                 decoder.seek(milliseconds).unwrap();
                 let seeked = remaining(&mut decoder);
                 let first = (milliseconds * 44100).div_ceil(1000) as usize * 2;

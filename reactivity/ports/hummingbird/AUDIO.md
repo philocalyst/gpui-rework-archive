@@ -55,7 +55,9 @@ latency and audible completion. The final stream remains running silence to
 avoid truncating a hardware buffer based on an application-only drain signal.
 
 This first slice supports mono/stereo sources and output, with rates up to
-768 kHz, and rejects mid-stream format changes. It reopens the current path
+768 kHz within the bounded FFT plan described in AUDIO-BUDGET.md; some valid
+rational rate pairs remain unsupported. It rejects mid-stream format changes.
+It reopens the current path
 before an accurate seek, so seek can fail after a file is removed and performs
 extra I/O. Device absence/loss produces a typed failure; automatic device
 selection/recovery, media keys, volume/replaygain, loops, crossfade, other codecs,
@@ -64,8 +66,10 @@ preserves application PCM; CPAL backend pause latency and existing hardware
 buffers are not sample-accurate seek/pause guarantees.
 Explicit seek/replace tears down and reopens the stream to flush its plain PCM
 ring. A ready feed may wait until the next control cycle to be submitted; active
-cycles can park for 2 ms. Stream-preserving generation descriptors and bounded
-progress loops require separate lifecycle/latency bills. Device configuration
+cycles continue while replies, preparation, PCM acceptance, input or tails make
+real progress, checking latest intent and close between bounded units. Blocked
+output/media retain timed parking. Stream-preserving generation descriptors
+remain a follow-up. Device configuration
 uses the default mono/stereo format, or the first admitted mono/stereo range at
 its maximum rate; source-aware selection needs backend/mixer policy work.
 
@@ -77,7 +81,12 @@ tail. Further controls cover latest equal-stamp lookahead, queued EOF, nonzero
 pause/seek/stop, short and high-rate resampling. Callback allocation tests invoke
 the exact production callback render method, with allocation-counter recording
 both allocations and frees. These tests establish no hardware playback or
-performance result. The local real CPAL probe reports an unavailable ALSA device.
+hardware performance result. A separate frozen public-service clock gate passes
+13 repetitions of six rate pairs at fixed 10 ms consumption deadlines after
+100 ms prebuffering, with zero missing frames. Its control's unconditional
+2 ms park misses 5328 frames at 768000 -> 48000. See
+`qualification/audio-progress-clock` for scope, exact hashes and every capture.
+The local real CPAL probe reports an unavailable ALSA device.
 Before integration, run the complete existing default/no-audio/headless tests
 and ordinary native Registry/X11 immediate-click/inspector clients on this exact
 application source. Native auto-attachment adds asynchronous Opening/Failed

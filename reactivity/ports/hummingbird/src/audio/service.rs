@@ -452,10 +452,11 @@ impl<P: OutputProvider> Owner<P> {
         }
         Ok(())
     }
-    fn prepare(&mut self) -> Result<(), AudioError> {
+    fn prepare(&mut self) -> Result<bool, AudioError> {
         let Some(info) = self.pending_info else {
-            return Ok(());
+            return Ok(false);
         };
+        let mut progress = false;
         let token = self.intent.token.unwrap();
         if self.output.is_none() {
             let mut output = self.provider.open(
@@ -466,15 +467,18 @@ impl<P: OutputProvider> Owner<P> {
             output.format().checked()?;
             output.set_playing(self.intent.playing)?;
             self.output = Some(output);
+            progress = true;
         }
         if self.natural
             && let Some(pipeline) = &mut self.pipeline
         {
             if pipeline.compatible(info.format) {
                 pipeline.next_source(token);
-            } else if !pipeline.finish()? {
-                return Ok(());
             } else {
+                let was_empty = pipeline.empty();
+                if !pipeline.finish()? {
+                    return Ok(progress || (was_empty && !pipeline.empty()));
+                }
                 self.pipeline = None;
             }
         }
@@ -499,24 +503,28 @@ impl<P: OutputProvider> Owner<P> {
         self.pending_info = None;
         self.natural = false;
         self.phase = Phase::Reading;
-        Ok(())
+        Ok(true)
     }
-    fn cycle(&mut self) -> Result<(), AudioError> {
+    /// One bounded input/FFT/submission step. Only one-way work earns another
+    /// immediate turn; blocked credit or media never spins the owner.
+    fn cycle(&mut self) -> Result<bool, AudioError> {
+        let mut progress = false;
         if self.phase != Phase::FailedDraining {
             if let Some(reply) = self.media.poll()? {
                 self.reply(reply)?;
+                progress = true;
             }
-            self.prepare()?;
+            progress |= self.prepare()?;
         }
         let Some(output) = &mut self.output else {
-            return Ok(());
+            return Ok(progress);
         };
         output.poll()?;
         if !self.intent.playing {
-            return Ok(());
+            return Ok(progress);
         }
         let Some(pipeline) = &mut self.pipeline else {
-            return Ok(());
+            return Ok(progress);
         };
         let mut started = None;
         let mut position = None;
@@ -529,21 +537,26 @@ impl<P: OutputProvider> Owner<P> {
                     "sink accepted more frames than offered".into(),
                 ));
             }
-            pipeline.accepted(accepted);
-            started = pipeline.take_started();
-            if self.position_at.elapsed() >= Duration::from_millis(50) {
-                position = self.intent.token.and_then(|token| {
-                    pipeline
-                        .position_for(token)
-                        .map(|milliseconds| (token, milliseconds))
-                });
-                self.position_at = Instant::now();
+            if accepted > 0 {
+                pipeline.accepted(accepted);
+                progress = true;
+                started = pipeline.take_started();
+                if self.position_at.elapsed() >= Duration::from_millis(50) {
+                    position = self.intent.token.and_then(|token| {
+                        pipeline
+                            .position_for(token)
+                            .map(|milliseconds| (token, milliseconds))
+                    });
+                    self.position_at = Instant::now();
+                }
             }
         }
         if pipeline.empty() {
             if self.phase == Phase::Reading {
                 if let Some((block, offset)) = &mut self.ready {
+                    let before = *offset;
                     pipeline.feed(block, offset)?;
+                    progress |= *offset != before;
                     if *offset == block.frames {
                         self.free.push(self.ready.take().unwrap().0);
                     }
@@ -551,18 +564,22 @@ impl<P: OutputProvider> Owner<P> {
                     && let Some(block) = self.free.pop()
                 {
                     self.media.decode(block)?;
+                    progress = true;
                 }
-            } else if matches!(self.phase, Phase::Finishing | Phase::FailedDraining)
-                && pipeline.finish()?
-                && output.queued_frames() == 0
-            {
-                self.phase = if self.phase == Phase::FailedDraining {
-                    Phase::Failed
-                } else {
-                    Phase::Finished
-                };
-                // Leave the stream emitting silence: application queue-empty is
-                // not proof the backend/hardware has played its final buffer.
+            } else if matches!(self.phase, Phase::Finishing | Phase::FailedDraining) {
+                let finished = pipeline.finish()?;
+                // The entry condition was empty, so this is newly produced PCM.
+                progress |= !pipeline.empty();
+                if finished && output.queued_frames() == 0 {
+                    self.phase = if self.phase == Phase::FailedDraining {
+                        Phase::Failed
+                    } else {
+                        Phase::Finished
+                    };
+                    progress = true;
+                    // Application queue-empty does not prove backend playback;
+                    // leave the stream emitting silence through its final buffer.
+                }
             }
         }
         if let Some(token) = started {
@@ -580,7 +597,7 @@ impl<P: OutputProvider> Owner<P> {
             });
             self.phase = Phase::Idle;
         }
-        Ok(())
+        Ok(progress)
     }
     fn run(mut self) {
         while !self.shared.gate.0.closed.load(Ordering::Acquire) {
@@ -594,14 +611,25 @@ impl<P: OutputProvider> Owner<P> {
             {
                 self.fail(error);
             }
-            if self.phase == Phase::Failed {
+            let progress = if self.phase == Phase::Failed {
                 // Retire a pending affine Close even after output has failed.
                 let _ = self.media.poll();
-            } else if let Err(error) = self.cycle() {
-                self.fail(error);
-            }
+                false
+            } else {
+                match self.cycle() {
+                    Ok(progress) => progress,
+                    Err(error) => {
+                        self.fail(error);
+                        true
+                    }
+                }
+            };
             if !self.deliver() {
                 break;
+            }
+            if progress {
+                // Recheck close/latest intent and deliver events between units.
+                continue;
             }
             if self.output.is_none() && !self.media.busy() && self.pending.is_empty() {
                 // Handle, media and explicit close already unpark this owner.
@@ -624,6 +652,203 @@ impl<P: OutputProvider> Owner<P> {
 mod tests {
     use super::*;
     use std::mem::size_of;
+
+    struct CreditSink {
+        format: super::super::Format,
+        capacity: usize,
+        queued: usize,
+        accepted: usize,
+    }
+    struct CreditProvider;
+    impl OutputProvider for CreditProvider {
+        type Stream = CreditSink;
+        fn open(
+            &mut self,
+            _: super::super::Format,
+            _: PlaybackGate,
+            _: u64,
+        ) -> Result<CreditSink, AudioError> {
+            Err(AudioError::Unsupported(
+                "cycle control installs its prepared sink",
+            ))
+        }
+    }
+    impl OutputStream for CreditSink {
+        fn format(&self) -> super::super::Format {
+            self.format
+        }
+        fn submit(&mut self, samples: &[f64]) -> Result<usize, AudioError> {
+            let frames =
+                (samples.len() / self.format.channels as usize).min(self.capacity - self.queued);
+            self.queued += frames;
+            self.accepted += frames;
+            Ok(frames)
+        }
+        fn queued_frames(&self) -> usize {
+            self.queued
+        }
+        fn set_playing(&mut self, _: bool) -> Result<(), AudioError> {
+            Ok(())
+        }
+    }
+    fn work_state(
+        owner: &Owner<CreditProvider>,
+    ) -> (usize, usize, Option<usize>, usize, usize, u8) {
+        let output = owner.output.as_ref().unwrap();
+        let pipeline = owner.pipeline.as_ref().unwrap();
+        (
+            output.queued,
+            output.accepted,
+            owner.ready.as_ref().map(|(_, offset)| *offset),
+            pipeline.offset,
+            pipeline.pending.len(),
+            owner.phase as u8,
+        )
+    }
+    #[test]
+    fn actual_cycle_progress_and_credit_exhaustion_follow_a_virtual_consumption_schedule() {
+        use super::super::Format;
+        use crate::{
+            queue::{Track, TrackRef},
+            queue_playback::PlaybackQueue,
+        };
+        use rubato::Resampler;
+        for (source_rate, target_rate) in [
+            (768000, 48000),
+            (768000, 96000),
+            (384000, 48000),
+            (44100, 48000),
+        ] {
+            let source = Format {
+                rate: source_rate,
+                channels: 2,
+            };
+            let device = Format {
+                rate: target_rate,
+                channels: 2,
+            };
+            let mut queue = PlaybackQueue::new().unwrap();
+            queue
+                .append(
+                    vec![TrackRef::new(Track {
+                        path: "unused".into(),
+                        title: "virtual credits".into(),
+                        track_id: None,
+                        album_id: None,
+                        available_when_prepared: true,
+                    })],
+                    &|_| true,
+                    &mut |_| 0,
+                )
+                .unwrap();
+            let plan = queue.plan().unwrap();
+            let token = Token {
+                stamp: plan.stamp(),
+                revision: 1,
+            };
+            let intent = Intent {
+                revision: 1,
+                plan: Some(plan.clone()),
+                token: Some(token),
+                playing: true,
+                seek: None,
+                transition: Transition::Replace,
+                output_epoch: 0,
+            };
+            let shared = Arc::new(Shared {
+                desired: Mutex::new(intent.clone()),
+                gate: PlaybackGate(Arc::new(Gate {
+                    epoch: AtomicU64::new(0),
+                    playing: AtomicBool::new(true),
+                    closed: AtomicBool::new(false),
+                })),
+                owner: thread::current(),
+            });
+            let (events, _inbox) = Remote::bounded(32);
+            let mut owner = Owner::new(shared, CreditProvider, Media::new().unwrap(), events);
+            owner.intent = intent;
+            owner.phase = Phase::Reading;
+            owner.info = Some(MediaInfo {
+                format: source,
+                duration_ms: Some(20),
+            });
+            owner.output = Some(CreditSink {
+                format: device,
+                capacity: target_rate as usize / 500,
+                queued: 0,
+                accepted: 0,
+            });
+            owner.pipeline = Some(Pipeline::new(source, device, token, 0).unwrap());
+            let mut block = AudioBlock::new(source).unwrap();
+            block.frames = block.capacity();
+            for (channel, plane) in block.planes.iter_mut().enumerate() {
+                plane.resize(block.frames, (channel + 1) as f64 * 0.125);
+            }
+            let source_frames = block.frames;
+            owner.ready = Some((block, 0));
+            let reference = rubato::Fft::<f64>::new(
+                source_rate as usize,
+                target_rate as usize,
+                source_frames,
+                2,
+                rubato::FixedSync::Input,
+            )
+            .unwrap();
+            let expected = (source_frames as u64 * u64::from(target_rate))
+                .div_ceil(u64::from(source_rate)) as usize
+                + reference.output_delay();
+            drop(reference);
+            let mut work_turns = 0;
+            let mut blocked_turns = 0;
+            for _ in 0..=expected {
+                loop {
+                    let before = work_state(&owner);
+                    let progress = owner.cycle().unwrap();
+                    let after = work_state(&owner);
+                    if progress {
+                        assert_ne!(after, before, "progress must advance work");
+                    }
+                    assert!(owner.deliver());
+                    if owner.ready.is_none() && owner.phase == Phase::Reading {
+                        // Source EOF is already established for this prepared
+                        // final block; no synthetic decoder work is requested.
+                        owner.phase = Phase::Finishing;
+                    }
+                    assert!(owner.output.as_ref().unwrap().accepted <= expected);
+                    if owner.phase == Phase::Idle {
+                        break;
+                    }
+                    if !progress {
+                        let blocked = work_state(&owner);
+                        for _ in 0..3 {
+                            assert!(
+                                !owner.cycle().unwrap(),
+                                "zero credit/exhausted work cannot spin"
+                            );
+                            assert_eq!(work_state(&owner), blocked);
+                        }
+                        blocked_turns += 1;
+                        break;
+                    }
+                    work_turns += 1;
+                    assert!(work_turns <= source_frames + expected + 4);
+                }
+                if owner.phase == Phase::Idle {
+                    break;
+                }
+                let output = owner.output.as_mut().unwrap();
+                assert!(
+                    output.queued > 0,
+                    "blocked owner has no consumption to await"
+                );
+                output.queued = output.queued.saturating_sub(target_rate as usize / 1000);
+            }
+            assert!(owner.phase == Phase::Idle);
+            assert_eq!(owner.output.as_ref().unwrap().accepted, expected);
+            assert_eq!(owner.output.as_ref().unwrap().queued, 0);
+            assert!(work_turns > 0 && blocked_turns > 0);
+        }
+    }
     #[test]
     fn actual_audio_owner_header_bill() {
         println!(

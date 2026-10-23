@@ -1,4 +1,6 @@
 #![cfg(feature = "audio")]
+#[path = "support/audio_clock.rs"]
+mod clocked;
 use gpui::{ListId, Role, Win};
 use hummingbird_gpui_port::{
     audio::{
