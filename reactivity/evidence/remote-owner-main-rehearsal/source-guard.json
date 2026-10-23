@@ -1,0 +1,32 @@
+{
+  "base": "f102ef111c7214c7ace900f76a74c9d3e7ca14e2",
+  "source_commit": "d198075bbc604a06ac75c1f84261f9601687c90b",
+  "exact_transport_source": "e62a4ae5ae..2aec8e8f5b",
+  "changed_files": [
+    "reactivity/crates/gpui/src/lib.rs",
+    "reactivity/crates/gpui/src/native.rs",
+    "reactivity/crates/gpui/src/native/remote_tests.rs",
+    "reactivity/crates/gpui/src/reader/question.rs",
+    "reactivity/crates/gpui/src/remote.rs",
+    "reactivity/crates/gpui/src/runtime.rs",
+    "reactivity/crates/gpui/src/runtime/delivery.rs",
+    "reactivity/crates/gpui/tests/questions.rs",
+    "reactivity/crates/gpui/tests/remote.rs"
+  ],
+  "unchanged_root_accessibility": {
+    "reactivity/crates/gpui/src/native/accessibility.rs": "2238cb7533d179cb9002321b2ae98349e6224c160b97c51bd802d2c853ccfdec",
+    "reactivity/crates/gpui/src/native/accessibility/geometry_tests.rs": "8567f3f34ac58757376587ce51d31f2a7486595f7a441ea103b4df8dd84ef202",
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests.rs": "a0187475bbf904f4c2ad5d00099310022042aabbc006d1beff3c5ea921267095",
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests/checkbox.rs": "e3c83ee4b900c1b9bf86631d411d23929096dda1309c6b7938ac2b22f55b276b",
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests/failure.rs": "bee64a76e6b0a4b4a17615f48c8859dfbf874b5ed71f16819de37929a1c7a9fc",
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests/lifecycle.rs": "80eec81cc0b8986a221fc1c58549446ccbe867438f851eadd7fb7988044847a7",
+    "reactivity/crates/gpui/src/native/accessibility/poll_tests.rs": "3a7d86bb95a1814ce9363a617a3292f8315bb17cb3eb62c2f12d8dec785e42e5",
+    "reactivity/crates/gpui/src/native/accessibility/selection_tests.rs": "6e645b1e1c6e438796f0f1915dc8b3425bf3129edf3b669b287b2bf04f4f214d",
+    "reactivity/crates/gpui/src/native/accessibility/tests.rs": "f582e57d211a1c63639c12d300d935d72ad8b38f3b88da2698be4cc609e52294",
+    "reactivity/crates/gpui/src/native/accessibility/text.rs": "9220cc6abcf34860e51e12be3ae4b687c290c7d07d2aac8dc4692f2f008fef7b",
+    "reactivity/crates/gpui/src/native/accessibility/transitions.rs": "9eda889b8bc858170acbf1d9e2df7b3d867c9bc9e41ae8ac72b1d6b79b227a28",
+    "fn retire_window(": "30a3b5a08a92d459c31f9527f8c49bfa53219edee5df155e3b445207a1903abf",
+    "fn accessibility_work(": "075eb8291147c9310d2460ea66e5b1686fd01bea5afecba2217f170f0313f5de"
+  },
+  "shipping_patch_sha256": "feb98e177d8374bec6da9992272b0cc29095ac94c140fc8dd1673c3ac38d8898"
+}

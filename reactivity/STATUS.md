@@ -85,9 +85,21 @@ next command; stale sessions retain the bounded turn/rearm contract. The
 ordinary linked consumer loses 3,696 code bytes, its callback static frame
 falls 3,000→2,120 bytes, and bridge drain/poll falls 1,432→296 bytes. Actual
 native fault injection/restoration, Registry failed-L/old-P/repair, strict and
-Apple/MSVC compile gates pass. Core is now **30,696** nontest, noncomment
+Apple/MSVC compile gates pass. Core at that checkpoint is **30,696** nontest, noncomment
 lines (+10 for this follow-on, +4 before both accessibility changes). No timing,
 dynamic stack-peak or RSS win is inferred from static frames.
+
+The integrated [remote transport](evidence/remote-owner-main-rehearsal/README.md)
+adds optional producer-disconnection delivery after buffered messages, with one
+owner wake after a bounded turn. Dropping the final producer disconnects before
+waking; close revokes data and terminal delivery. The ordinary headless endpoint
+and caller code are unchanged. Native clones retain one shared producer; a cold
+native endpoint pair costs eight more combined requested/header bytes, and the
+sealed optimized caller adds 99 code bytes. Default/native suites, six actual
+native controls including Registry repair, strict lint and Apple/MSVC source
+checks pass on the exact integrated sources. Current core is **30,805** nontest,
+noncomment lines (+109). Hummingbird application integration remains separate;
+its discovered Stop race is pending correction. No latency or RSS win is claimed.
 
 The [coverage frontier](evidence/uniform-packet/coverage-frontier/README.md)
 and [canonical text campaign](evidence/canonical-text-stream/README.md) remain
