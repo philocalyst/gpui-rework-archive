@@ -33,4 +33,7 @@ A fresh matched 26-cell timing campaign is separately preregistered. Memory/code
 adoption requires the entire historical per-cell regression gate to pass, plus
 the correctness and storage proof. The historical speed gate will also be
 reported, independently of memory-slice acceptance. There is no timing result,
-speed claim, RSS claim or universal performance claim in this archive.
+speed claim, RSS claim or universal performance claim in this archive. That
+[subsequently completed campaign](../descending-timing/ROOT-REVIEW.md) fails the
+entire per-cell regression gate, so memory-slice adoption fails. Its complete
+failure is retained separately; this earlier correctness/static archive is unchanged.

@@ -191,7 +191,9 @@ also preserves shipping GPU bytes while deleting CPU cursor storage. Its
 complete packets, fault controls and static costs are independently verified;
 a stronger [descending-cursor successor](evidence/uniform-packet/descending-csr/ROOT-REVIEW.md)
 passes correctness, fault, foreign-compile and static-cost qualification. Its
-matched timing regression campaign remains separate and Main is unchanged. The
+[complete matched timing campaign](evidence/uniform-packet/descending-timing/ROOT-REVIEW.md)
+fails 93 per-cell regression rules across 22 processes and 6,864 frames despite
+exact pixels/work and slightly lower aggregate time. It is not adopted. The
 [one-word short-text experiment](evidence/word-text/ROOT-REVIEW.md) passes six
 strict-provenance Miri target/model gates and two deliberate broken controls,
 but remains unadopted because target-byte portability, equality and actual

@@ -1,0 +1,23 @@
+{
+  "source": "1c97566cf0a7140d4f258deab136342a609d5755",
+  "baseline": "7a5e1619a27010ec63f6c27506a6d1fcd113f67c",
+  "archive_sha256": "3007f00e361e0e0162561b4ff3f36c2328b81ea5a64430dcd0a9834a34775d1c",
+  "manifest_sha256": "88c9cad55264587c79faf00523864891a5dc2fc57b2b63c15d01b756493a1c75",
+  "payloads_reopened": 11442,
+  "payload_bytes": 1827212495,
+  "external_files_reopened": 19,
+  "production_adopted": false,
+  "timing_capture_complete": true,
+  "acceptance": {
+    "candidate": "1c97566cf0a7140d4f258deab136342a609d5755",
+    "sealed_capacity_object_code_ledger": true,
+    "matched_frame_work_counter_pairs": 3432,
+    "work_counter_failures": [],
+    "correctness_gate": true,
+    "entire_historical_v3_regression_gate": false,
+    "historical_v3_speed_gate": false,
+    "historical_v3_combined_qualified": false,
+    "memory_slice_acceptance": false,
+    "scope": "Fixed premeasurement Root-approved memory/code acceptance. Historical speed reported independently, never inferred from deletion or aggregate offsets. No universal speed/RSS claim."
+  }
+}
