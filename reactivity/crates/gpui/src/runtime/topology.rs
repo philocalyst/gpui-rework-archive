@@ -122,7 +122,7 @@ mod tests {
             }
         }
         let mut win = Win::demo(Page);
-        let runtime = win.runtime_mut().unwrap();
+        let mut runtime = win.runtime_mut().unwrap();
         assert_eq!(runtime.handlers.len(), 3);
         let rows = runtime
             .nodes
