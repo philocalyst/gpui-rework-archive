@@ -266,6 +266,8 @@ mod tests {
             },
         )
         .unwrap();
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
         let snapshot = win.snapshot().unwrap();
         assert_eq!(snapshot.nodes.len(), MAX_NODES);
         let targets = snapshot
