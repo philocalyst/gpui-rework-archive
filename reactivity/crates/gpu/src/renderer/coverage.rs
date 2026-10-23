@@ -88,7 +88,7 @@ fn axis(
 }
 
 fn certificate(
-    draw: PreparedDraw<'_>,
+    draw: &PreparedDraw<'_>,
     error: [f32; 2],
     columns: usize,
     width: u32,
@@ -148,7 +148,7 @@ fn certificate(
 }
 
 pub(super) fn whole(
-    draw: PreparedDraw<'_>,
+    draw: &PreparedDraw<'_>,
     error: [f32; 2],
     columns: usize,
     width: u32,
@@ -179,7 +179,7 @@ mod tests {
             return false;
         };
         let columns = width.div_ceil(16) as usize;
-        if !whole(draw, error, columns, width, height) {
+        if !whole(&draw, error, columns, width, height) {
             return false;
         }
         visit(draw, columns, |tile| {
@@ -209,7 +209,7 @@ mod tests {
         // Bounds select complete tiles. A geometry matching only the bounds
         // must not certify the extra sample points in those visited tiles.
         shifted.local_rect = shifted.bounds;
-        assert!(!whole(shifted, [0.0; 2], 6, 81, 49));
+        assert!(!whole(&shifted, [0.0; 2], 6, 81, 49));
     }
 
     #[test]

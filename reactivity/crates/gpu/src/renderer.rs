@@ -1185,8 +1185,9 @@ impl RendererState {
         visit(draw, columns, |tile| {
             let covered = solid && (opaque || self.ranges[tile][1] & CONSTANT_TILE != 0) && {
                 let certified = if count > 1 && proof_seen {
-                    *whole
-                        .get_or_insert_with(|| coverage::whole(draw, error, columns, width, height))
+                    *whole.get_or_insert_with(|| {
+                        coverage::whole(&draw, error, columns, width, height)
+                    })
                 } else {
                     proof_seen = true;
                     false
