@@ -39,13 +39,17 @@ pub(super) fn fft_geometry(source: u32, target: u32) -> Result<(usize, usize), A
     if last == 0 {
         return Err(limit());
     }
-    // Keep already-admitted filter units unchanged. Packet-rounding primes
-    // need only a binary multiplier; no planner search or extra FFT stage.
-    let units = if first <= last && smooth_fft_unit(first) {
-        first
-    } else {
-        first.next_power_of_two().min(1 << last.ilog2())
-    };
+    // Keep already-admitted units. For packet-rounding primes, use the least
+    // smooth multiplier at or above the target, or the largest legal one if
+    // the target cannot fit. This searches small integers, never FFT plans.
+    let units = (first..=last)
+        .find(|&units| smooth_fft_unit(units))
+        .unwrap_or_else(|| {
+            (1..=last)
+                .rev()
+                .find(|&units| smooth_fft_unit(units))
+                .expect("a nonzero bound admits one exact FFT unit")
+        });
     Ok((units * minimum_input, units * minimum_output))
 }
 
@@ -487,9 +491,10 @@ mod resource_tests {
     #[test]
     fn large_legacy_fft_unit_finishes_the_tail_beyond_a_decoder_packet() {
         // The untouched FixedInput baseline fails at this exact source length:
-        // its first zero-padded 1639-frame packet emits no 8192-frame FFT unit.
+        // after its partial source packet, a zero-only 1639-frame packet emits
+        // no 8192-frame FFT unit although 3951 output frames are still due.
         // Exact-unit processing must retain the filter history and flush all
-        // 3937 delayed frames, not treat that empty packet as a final tail.
+        // delayed frames, not treat that empty packet as a final tail.
         assert_eq!(fft_geometry(81920, 78750).unwrap(), (8192, 7875));
         let packet = 81920usize.div_ceil(50);
         assert!(8192 > 2 * packet);
@@ -690,7 +695,38 @@ mod resource_tests {
             }
         });
         assert_eq!(allocations.count_total, 0);
-        assert_eq!(fft_geometry(11025, 44100).unwrap(), (256, 1024));
+        assert_eq!(fft_geometry(11025, 44100).unwrap(), (224, 896));
+        assert_eq!(fft_geometry(44100, 11025).unwrap(), (300, 75));
+    }
+
+    #[test]
+    fn every_bounded_smooth_ratio_family_has_exact_allocation_free_admission() {
+        // Rates ten times these lengths admit the complete bounded family at
+        // at most 100 ms. This exercises all pairs, not only marginal lengths;
+        // actual FFT ownership remains a separate constructor campaign.
+        let units: Vec<_> = (1..=MAX_FFT_UNIT)
+            .filter(|&unit| smooth_fft_unit(unit))
+            .collect();
+        assert_eq!(units.len(), 400);
+        let allocation = allocation_counter::measure(|| {
+            for &source in &units {
+                for &target in &units {
+                    let source = source as u32 * 10;
+                    let target = target as u32 * 10;
+                    let (input, output) = fft_geometry(source, target).unwrap();
+                    assert_eq!(
+                        input as u64 * u64::from(target),
+                        output as u64 * u64::from(source)
+                    );
+                    assert!(input <= MAX_FFT_UNIT && output <= MAX_FFT_UNIT);
+                    assert!(input * 10 <= source as usize && output * 10 <= target as usize);
+                    assert!(smooth_fft_unit(input) && smooth_fft_unit(output));
+                }
+            }
+        });
+        assert_eq!(allocation.count_total, 0);
+        assert_eq!(allocation.count_current, 0);
+        assert_eq!(fft_geometry(11025, 768000).unwrap(), (147, 10240));
     }
 }
 
