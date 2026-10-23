@@ -12,5 +12,19 @@
     "document": "ready-publication-mpsc-luna.md",
     "document_sha256": "b20b3b0dac75e00f344bb05f1fbd47794d830662f8e504c30426175386e0ea19",
     "changes": "status preamble and local Markdown URL normalization"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/scene-prep-elimination.md",
+    "original_sha256": "856a846923588b2b0bdeea8d22642769fbf244d1c4a7c1275328b766b9fad8d5",
+    "document": "scene-preparation-luna.md",
+    "document_sha256": "fd71c74f1e9b714059f352ab0a56de3ff745ed78f5068c40d8cb3a6a95f3f844",
+    "changes": "status/review preamble only"
+  },
+  {
+    "original": "/tmp/gpui-work-elimination-luna/deep-tile-prep-research.md",
+    "original_sha256": "e1cc63aa113bdac1ab07e5a9b25f23ac88346f94f6f6c814b17ba20f0b54fe7d",
+    "document": "shared-tile-prefix-luna.md",
+    "document_sha256": "da8f4695c3941d4540f9d8c10f8a8acb32dbcbd10c3f9a96fc88dd0bb0dfee36",
+    "changes": "status/review preamble only"
   }
 ]
