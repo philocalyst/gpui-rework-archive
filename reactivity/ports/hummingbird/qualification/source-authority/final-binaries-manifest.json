@@ -1,0 +1,170 @@
+{
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-fafaf4e14fac74da": {
+    "sha256": "ce98b4388fedd44acad325b5949a869d5aa1d63a1b671c5e40ea5a32eea6c751",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-37798f22d70c6972": {
+    "sha256": "902af51a1c734e6bb529ef119113b60573eb4711ffda11fa93b69cbb603103b2",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/audio-7412eafa4f9dcb94": {
+    "sha256": "0382677f80319e031762990e44fbc60caf3cdd4425bdfea605859e7bc183e61d",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-6f9b10daf5b629e4": {
+    "sha256": "c08e22f36aaf3e2c04ef7aa24822b8972636623cf3350599f1ed49d6620581a7",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation-050af771e23d35d8": {
+    "sha256": "e9174a1a057f8709a13ea78212822a19a99a06128fe959094236b4c7dc7e4ed7",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation_authority-42721cc2ef6d57e4": {
+    "sha256": "b58542490a53a81e73980530c801407942225d0f6eded2bfa62eda8831251bfe",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/query-07f811fe5172801a": {
+    "sha256": "9345b200a2a81563fc4729b4a59e88b0b0b793a27318e22b4c39d5546988076b",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue-0f28d3049ca3dde0": {
+    "sha256": "685cd0fe2a3e04a813592091c4ec2e93bf281d2d9de806d2ccb64651693a2ba0",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_consumer-2ba6ed55462632de": {
+    "sha256": "eccb82a9f9856078428105364fb3b9ca349c9c295863d0394a778322d0942468",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_costs-b0dae2cb2115ad38": {
+    "sha256": "078f9c573ae05d07a4dd379a9cb33f0386e68207b8016f283dac34f6c4e5c4b7",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_playback-d4ed849a9fb4e102": {
+    "sha256": "dd70def1fb3292b07d3e9f4643cebb3f2e2588a5d73b7f8eff3591421953c7fe",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/search-c608f1e430bdfc64": {
+    "sha256": "b48846886141c68144af66ba96b2b4b1c209f05c618eb7d4aa6aab20efdfe752",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/source_authority-6559322e57dbb038": {
+    "sha256": "4361648ba4089144637a2064b8a9b5b5e61c4cc872d25c40d76580087cbe9b2d",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/transcript-8ad372f38a0871b9": {
+    "sha256": "88d4c61c7bd47b9af62f919b5e3e05ac6869cab0cc36052921829bda1528c872",
+    "log": "default-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-de1ff1a37921e19b": {
+    "sha256": "d0be63fb2baa5809414c5f669f857c6e432969402d3468026042a753b392af62",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-648f15fa69f61372": {
+    "sha256": "f8ecbe132e81e5916c8fc50bbc6df4392be77a9d09a033cc02ee0f960de9aca9",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/audio-31370cc4338b0fa1": {
+    "sha256": "78d1fd7f4ef44e84c5b271332f87b32deb7a1fc7bfe7102d1acf41299b7cbc9b",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-bf3fe0e19751049e": {
+    "sha256": "84e0453454ab6d5d19c4a76929e89311190c6beee5309a0801d5e3f0a14d4087",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation-270cda04b7d7be51": {
+    "sha256": "80e930e6a1f6e0b7dcddf5c7fbaf22eb66af8afec337390a9d7630593f6e8111",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation_authority-51533b5ad075040b": {
+    "sha256": "476d4f2c3d52587d36ff2e071d0f45de8f1992b5ed3053f2c49981ad7bb64b4a",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/query-9bd165bcca3b0898": {
+    "sha256": "2c3bf411084eb0ee17ebf1b5bd891b9a130aebfcebd765ec5121840a777c8162",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue-05d097b65e93aa62": {
+    "sha256": "925f21405ecf7765f43591fab31e0331adfbb783c107192b4570d11646177aba",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_consumer-816407fb807a1997": {
+    "sha256": "e8e184ff489aa18a080fb9d71e05fd4907aab8aaf7e8648d63d124a19c991ca2",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_costs-39ea4ee081cb755f": {
+    "sha256": "dd97eb50451afd36537ae6699d0231df227adb96d6901f3173a191f781af4a6c",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_playback-9da77ddde6a64796": {
+    "sha256": "108725364ee2ddcb7f7a63c979c6cbedfd2cf6282dd27cd8a248bd312723ba5d",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/search-389d6d89eb305441": {
+    "sha256": "a38e0e0457fa0ebb89da12277bc287101d978eeabf7d9701fa42a9151a1603f2",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/source_authority-3d992171c346fe71": {
+    "sha256": "9f9ad4d1da479258f02c63abbe9993e50bfe2c8aa399686c679404a391161bd8",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/transcript-23b4776528dd496d": {
+    "sha256": "12d7a4170be576c1734ae45b82df3b9a1e228cfbeec60b722066ca3d105e8302",
+    "log": "cpal-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-089d1965e8461f7e": {
+    "sha256": "29d59d3db21a1855114274b5f318efc194fdb4112bdeef4159e46deb434bad75",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-c7651d9247e4fccd": {
+    "sha256": "cf62422a3d6962dc76f4e2cfb6dfb5b9589f471804dfc84603c6b72f37c18c94",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/audio-cce46fe9d3f1db1d": {
+    "sha256": "85d26b91e1a906297462e71735ead78ae026350628fd1b0503008b6effa88f9d",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-2c9b30e3e5056b38": {
+    "sha256": "9fb9d26218f15309215ec953ef3a47c17a052b87f37981c971edd2a72acd6d37",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation-bac30e4bca2a96b9": {
+    "sha256": "cde175d66c69daeb7afe2a106edc9b74c13422a6751c3afa48d27eb2554c8559",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/preparation_authority-8f1fbbc706cb230f": {
+    "sha256": "33e7e84d22e79d719187f587c5a19fe86d5bf4e63be1fe008533ee94789b14d8",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/query-e4af3951a0a06d88": {
+    "sha256": "356b71284544af0f97b45b58f32c1f0f0f050d9521c287f5e853386f6c13a53e",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue-6902f2f7192f2cf7": {
+    "sha256": "eb7774897cd4c814703de14eea372b1a495dc7689505995e2fe9311b9aca0927",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_consumer-e507dcdfa96fa54e": {
+    "sha256": "aa99bab091835cd6fb478449273311f0bd00ab22c276170f4c96a27b73d3d44b",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_costs-55a62b6e3b611553": {
+    "sha256": "36fb130c94f39afcd198b9f0baed8fa9dd0507b547a2e31139d27ebd8d51bd29",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/queue_playback-7bedd96a83dc4ee7": {
+    "sha256": "9266cb1c158f3204d812bb30bf6cfb6d78eee87a72c609b00c42543a8820b089",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/search-c959194404bc52c0": {
+    "sha256": "6504d744848e8363359d3139ebd3d0487a8380fe19f46d74bc5f5b6bd3510dfc",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/source_authority-ceb43576ca9c6909": {
+    "sha256": "727746dc0edd835d6fce96eb91146f820cad9fd644bbc617de6aefca77822a4f",
+    "log": "native-qualified"
+  },
+  "/tmp/gpui-hummingbird-audio-target/debug/deps/transcript-371d6259ca982c80": {
+    "sha256": "ebad024de16163b130584d93db77700b8cb5313d68a801c47ebcda82b77cacfb",
+    "log": "native-qualified"
+  }
+}

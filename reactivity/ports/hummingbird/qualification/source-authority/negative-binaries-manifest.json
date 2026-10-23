@@ -1,0 +1,14 @@
+{
+  "named": {
+    "path": "/tmp/gpui-hummingbird-source-authority-evidence/baseline-binaries/library-audio",
+    "sha256": "a7c259de35a7c97f3bd07e8935c362636310a76eb13f3426c79aa6f3f030e19e"
+  },
+  "named-and-add": {
+    "path": "/tmp/gpui-hummingbird-source-authority-evidence/baseline-binaries/library-audio-both",
+    "sha256": "adfa1a85118dd5bde402fad4cd2d73dfe74cdd3e748121586000a6ae9329998d"
+  },
+  "uncommitted": {
+    "path": "/tmp/gpui-hummingbird-source-authority-evidence/baseline-binaries/uncommitted-source",
+    "sha256": "82d545af605528c4aa4e446e5d18db4a1ad6b6db8aa29520373e33be8269b722"
+  }
+}

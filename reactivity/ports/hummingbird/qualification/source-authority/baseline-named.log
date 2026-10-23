@@ -1,0 +1,28 @@
+   Compiling parley_engine v0.12.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/root/gpui-hummingbird-source-authority-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/crates/canvas)
+   Compiling gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/crates/gpui)
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 40.80s
+     Running tests/library_audio.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-bf3fe0e19751049e)
+
+running 1 test
+
+thread 'published_source_replace_rejects_buffered_named_play_before_owner_notification' (3692884) panicked at tests/library_audio.rs:1221:5:
+assertion `left == right` failed: buffered old-source preparation edited queue after replacement acknowledgement
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test published_source_replace_rejects_buffered_named_play_before_owner_notification ... FAILED
+
+failures:
+
+failures:
+    published_source_replace_rejects_buffered_named_play_before_owner_notification
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.55s
+
+error: test failed, to rerun pass `--test library_audio`

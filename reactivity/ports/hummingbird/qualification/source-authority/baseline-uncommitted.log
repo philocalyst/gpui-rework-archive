@@ -1,0 +1,24 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 15s
+     Running tests/source_authority.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/source_authority-6559322e57dbb038)
+
+running 2 tests
+
+thread 'initial_uncommitted_database_is_rejected_before_starting_a_worker' (3758887) panicked at tests/source_authority.rs:14:5:
+assertion failed: Worker::new(uncommitted()).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test initial_uncommitted_database_is_rejected_before_starting_a_worker ... FAILED
+
+thread 'replacement_with_uncommitted_sql_never_publishes_or_consumes_a_version' (3758888) panicked at tests/source_authority.rs:24:5:
+replacement acknowledged an active SQL transaction
+test replacement_with_uncommitted_sql_never_publishes_or_consumes_a_version ... FAILED
+
+failures:
+
+failures:
+    initial_uncommitted_database_is_rejected_before_starting_a_worker
+    replacement_with_uncommitted_sql_never_publishes_or_consumes_a_version
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+error: test failed, to rerun pass `--test source_authority`
