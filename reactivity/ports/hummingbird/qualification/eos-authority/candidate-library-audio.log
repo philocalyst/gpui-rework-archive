@@ -1,0 +1,22 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.14s
+     Running tests/library_audio.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-0fc84c1a60b46f5a)
+
+running 14 tests
+test audio_feature_without_attached_output_rejects_play_now_and_still_allows_pure_prepare ... ok
+test cloned_handle_stop_revokes_buffered_play_without_editing_the_owner_queue ... ok
+test cloned_pause_seek_and_stop_revoke_pending_replacement_and_later_explicit_play_can_win ... ok
+test cloned_seek_after_adopted_rejects_retired_eof_without_queue_edit ... ok
+test cloned_seek_before_adopted_rejects_retired_eof_without_queue_edit ... ok
+test cloned_stop_after_adopted_rejects_retired_eof_without_queue_edit ... ok
+test cloned_stop_before_adopted_rejects_retired_eof_without_queue_edit ... ok
+test explicit_play_now_keeps_queue_and_rejects_retired_selection_occurrence_and_close_work ... ok
+test library_row_play_now_runs_real_pcm_pause_seek_and_latest_queued_successor ... ok
+test paused_same_token_eof_advances_once_without_resuming_output ... ok
+test public_prepare_and_play_command_cannot_turn_a_pure_owner_prepare_into_playback ... ok
+test source_replacement_rejects_old_row_then_one_click_plays_revalidated_path ... ok
+test stop_on_empty_queue_and_active_pause_seek_revoke_play_before_result_consumption ... ok
+test unavailable_play_error_leaves_current_queue_plan_and_audio_authority_unchanged ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.71s
+
