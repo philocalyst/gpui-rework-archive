@@ -1015,3 +1015,60 @@ fn unusual_coprime_rates_fail_resource_admission_before_pcm_output() {
         finish(service, win);
     }
 }
+
+#[test]
+fn public_stop_and_close_revoke_a_real_open_stream_for_every_handle_clone() {
+    use hummingbird_gpui_port::{audio::Transition, queue_playback::PlaybackQueue};
+    use std::sync::mpsc;
+    struct ObservedProvider {
+        provider: Provider,
+        gate: mpsc::SyncSender<(PlaybackGate, u64)>,
+    }
+    impl OutputProvider for ObservedProvider {
+        type Stream = Sink;
+        fn open(
+            &mut self,
+            format: Format,
+            gate: PlaybackGate,
+            epoch: u64,
+        ) -> Result<Sink, AudioError> {
+            self.gate.try_send((gate.clone(), epoch)).unwrap();
+            self.provider.open(format, gate, epoch)
+        }
+    }
+    let capture = Arc::new(Mutex::new(Capture::default()));
+    let (sender, opened) = mpsc::sync_channel(1);
+    let (service, inbox) = AudioService::with_output(ObservedProvider {
+        provider: Provider {
+            capture: capture.clone(),
+            frames: 31,
+            rate: None,
+            channels: None,
+        },
+        gate: sender,
+    })
+    .unwrap();
+    let mut queue = PlaybackQueue::new().unwrap();
+    queue
+        .play_now(track(&fixture("wav"), "public gate"), &|_| true, &mut |_| 0)
+        .unwrap();
+    let handle = service.handle();
+    let clone = handle.clone();
+    handle.apply(queue.plan(), Transition::Replace).unwrap();
+    let (gate, epoch) = opened.recv_timeout(Duration::from_secs(5)).unwrap();
+    assert!(gate.allows(epoch));
+    assert!(clone.stop().unwrap().token.is_none());
+    assert!(!gate.allows(epoch));
+    handle.set_playing(true).unwrap();
+    assert!(
+        !gate.allows(epoch),
+        "Resume without a source cannot restore old PCM"
+    );
+    assert!(service.finish(Duration::from_secs(5)));
+    assert_eq!(clone.set_playing(true).unwrap_err(), AudioError::Closed);
+    assert_eq!(handle.seek(0).unwrap_err(), AudioError::Closed);
+    assert!(clone.stop().unwrap().token.is_none());
+    assert!(!gate.allows(epoch));
+    assert_eq!(capture.lock().unwrap().drops, 1);
+    drop(inbox);
+}
