@@ -343,7 +343,8 @@ mod parent_tests {
         let nodes = (1..=64)
             .map(|identity| Node {
                 identity: NonZeroU64::new(identity).unwrap(),
-                topology: Topology::new(None, 0, None),
+                parent: Parent::NONE,
+                ordinal_route: 0,
                 content: Content::new(NodeKind::Div, TextSlot::NONE),
                 component_scope: 0,
             })
@@ -543,11 +544,12 @@ impl TextSlot {
     }
 }
 /// A closed kind and an optional admitted text-lane index fit in one word.
-/// Zero in the upper bits means no text; the lower four bits encode the kind
-/// including the checkbox state. No Rust enum representation is reinterpreted.
+/// Zero in the payload means no text; the lower four bits encode the kind
+/// including the checkbox state. High route bits are masked by payload decoders.
+/// No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES * 2 <= (u32::MAX >> 4) as usize);
+const _: () = assert!(MAX_NODES * 2 <= (route_slot::CONTENT_VALUE_MASK >> 4) as usize);
 impl Content {
     #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
@@ -594,7 +596,7 @@ impl Content {
         if self.kind() == NodeKind::Image {
             return TextSlot::NONE;
         }
-        let text = self.0 >> 4;
+        let text = (self.0 & route_slot::CONTENT_VALUE_MASK) >> 4;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
     fn image(image: image::ImageUse) -> Self {
@@ -603,7 +605,7 @@ impl Content {
         Self(((value + 1) << 4) | 6)
     }
     fn image_use(self) -> Option<image::ImageUse> {
-        let value = self.0 >> 4;
+        let value = (self.0 & route_slot::CONTENT_VALUE_MASK) >> 4;
         if self.kind() != NodeKind::Image || value == 0 {
             return None;
         }
@@ -618,12 +620,12 @@ impl Content {
         })
     }
 }
-mod topology;
-use topology::Topology;
+mod route_slot;
 
 struct Node {
     identity: NonZeroU64,
-    topology: Topology,
+    parent: Parent,
+    ordinal_route: u32,
     content: Content,
     component_scope: u32,
 }
@@ -633,16 +635,7 @@ mod hit_tests;
 mod style_ledger;
 impl Node {
     fn parent(&self) -> Parent {
-        self.topology.parent()
-    }
-    fn ordinal(&self) -> u32 {
-        self.topology.ordinal()
-    }
-    fn route(&self) -> Option<usize> {
-        self.topology.route()
-    }
-    fn has_route(&self) -> bool {
-        self.topology.has_route()
+        self.parent
     }
     fn focusable(&self) -> bool {
         matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_route()
@@ -1983,7 +1976,8 @@ impl<M: View + 'static> Runtime<M> {
                     // IDs start at one, never roll back, and admission above
                     // reserves the entire checked nonzero interval.
                     identity: NonZeroU64::new(identity).expect("admitted node identity"),
-                    topology: Topology::new(None, 0, None),
+                    parent: Parent::NONE,
+                    ordinal_route: 0,
                     content: Content::new(draft.kind, TextSlot::NONE),
                     component_scope: component_scopes[index],
                 }
@@ -2088,7 +2082,8 @@ impl<M: View + 'static> Runtime<M> {
                 handlers.push(Some(handler));
                 slot
             });
-            node.topology = Topology::new(parent, ordinal, route);
+            node.parent = Parent::new(parent);
+            node.set_route(ordinal, route);
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
@@ -2097,11 +2092,11 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 TextSlot::NONE
             };
-            node.content = if let Some(image) = next_image {
+            node.replace_content(if let Some(image) = next_image {
                 Content::image(image)
             } else {
                 Content::new(draft.kind, text_slot)
-            };
+            });
             if property_changed == Some(node.identity) {
                 node_changed = true;
                 property_changed = None;

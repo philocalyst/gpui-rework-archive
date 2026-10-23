@@ -64,7 +64,8 @@ mod tests {
                 let node = Node {
                     // Reverse full-width identities force the non-affine lookup.
                     identity: NonZeroU64::new(u64::MAX - index as u64 * 2).unwrap(),
-                    topology: super::super::Topology::new(parent, *ordinal, None),
+                    parent: Parent::new(parent),
+                    ordinal_route: *ordinal,
                     content: Content::new(
                         match index % 4 {
                             0 => NodeKind::Div,
