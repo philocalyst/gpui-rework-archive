@@ -261,3 +261,55 @@ fn public_selection_change_revokes_buffered_preparation_and_closed_commands_fail
     assert!(owner.contains_text("Library worker is closed").unwrap());
     drop(owner);
 }
+
+#[test]
+fn failed_preparation_is_retired_by_full_public_selection_and_source_identity() {
+    let (worker, mut owner) = open();
+    worker.finish().unwrap();
+    owner.update(|model| model.prepare(44, 0)).unwrap();
+    assert_eq!(
+        owner.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Failed
+    );
+    assert!(owner.contains_text("Library worker is closed").unwrap());
+    let failed = owner.with_model(|model| *model.selected).unwrap();
+    for selected in [
+        Selection {
+            id: Some(90),
+            ..failed
+        },
+        Selection {
+            sequence: failed.sequence + 1,
+            ..failed
+        },
+        Selection {
+            generation: failed.generation + 1,
+            ..failed
+        },
+    ] {
+        owner.set(Library::SELECTED, selected).unwrap();
+        assert_eq!(
+            owner.with_model(Library::preparation_status).unwrap(),
+            PreparationStatus::Canceled
+        );
+        assert!(
+            !owner
+                .contains_text("Recording unavailable: Library worker is closed")
+                .unwrap()
+        );
+        owner.set(Library::SELECTED, failed).unwrap();
+    }
+    owner
+        .set(
+            Library::VERSION,
+            hummingbird_gpui_port::search::Version {
+                generation: 1,
+                revision: 1,
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        owner.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Canceled
+    );
+}

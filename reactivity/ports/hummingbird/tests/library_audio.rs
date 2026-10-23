@@ -573,6 +573,45 @@ fn source_replacement_rejects_old_row_then_one_click_plays_revalidated_path() {
 }
 
 #[test]
+fn cloned_handle_stop_revokes_buffered_play_without_editing_the_owner_queue() {
+    let (worker, audio, capture, _, mut win) = owner();
+    row_prepare(&mut win, 44);
+    win.activate(
+        win.role(Role::Button)
+            .name("Play Καλημέρα now")
+            .one()
+            .unwrap(),
+    )
+    .unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap();
+    assert_eq!(
+        win.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Pending
+    );
+    // The real worker result is buffered. No Adopted event has updated the UI
+    // receipt when the separately owned public clone wins authoritative Stop.
+    let stopped = audio.handle().clone().stop().unwrap();
+    assert!(stopped.token.is_none());
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        0,
+        "retired preparation mutated the queue after cloned Stop"
+    );
+    assert_eq!(
+        win.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Canceled
+    );
+    assert!(capture.lock().unwrap().streams.is_empty());
+    close(win, audio, worker);
+}
+
+#[test]
 fn stop_on_empty_queue_and_active_pause_seek_revoke_play_before_result_consumption() {
     for control in ["Stop", "Pause", "Back 10 seconds"] {
         let (worker, audio, capture, _, mut win) = owner();

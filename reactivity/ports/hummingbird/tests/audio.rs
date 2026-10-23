@@ -517,6 +517,67 @@ fn bad_next_source_keeps_preceding_resampled_tail_and_reports_failure() {
 }
 
 #[test]
+fn incompatible_successor_admission_keeps_every_accepted_predecessor_tail_sample() {
+    use audioadapter_buffers::direct::SequentialSliceOfVecs;
+    use rubato::{Fft, FixedSync, Resampler};
+    let samples: Vec<i16> = (0..169).map(|i| (i * 53 - 10000) as i16).collect();
+    let first = Wave::new(8000, samples.iter().copied());
+    let successor = Wave::new(44101, std::iter::repeat_n(6000, 17));
+    // Independent pinned Rubato, explicit unchanged 160/960 geometry, integer
+    // final-frame bound. No AudioService result is its own sample oracle.
+    let mut oracle = Fft::<f64>::new(8000, 48000, 160, 1, FixedSync::Both).unwrap();
+    let frames = samples.len() * 6 + oracle.output_delay();
+    let mut expected = Vec::new();
+    for cursor in [0, 160] {
+        let length = (samples.len() - cursor).min(160);
+        let input = vec![
+            samples[cursor..cursor + length]
+                .iter()
+                .map(|sample| f64::from(*sample) / 32768.)
+                .collect(),
+        ];
+        let input = SequentialSliceOfVecs::new(&input, 1, length).unwrap();
+        let mut output = vec![vec![0.; 960]];
+        let mut adapter = SequentialSliceOfVecs::new_mut(&mut output, 1, 960).unwrap();
+        oracle
+            .process_into_buffer(
+                &input,
+                &mut adapter,
+                Some(&rubato::Indexing {
+                    input_offset: 0,
+                    output_offset: 0,
+                    active_channels_mask: None,
+                    partial_len: Some(length),
+                }),
+            )
+            .unwrap();
+        expected.extend_from_slice(&output[0]);
+    }
+    expected.truncate(frames);
+    let (service, capture, mut win) = owner(
+        vec![
+            track(&first.0, "valid predecessor"),
+            track(&successor.0, "unadmitted successor"),
+        ],
+        2048,
+        Some(48000),
+    );
+    // Hold all accepted output rather than conflating acceptance with playback.
+    until(&mut win, &capture, false, |model| {
+        model.audio_status().unwrap().state == AudioState::Failed
+    });
+    {
+        let observed = capture.lock().unwrap();
+        assert_eq!(observed.drops, 0, "failure retired queued predecessor PCM");
+        assert_eq!(observed.queue.iter().copied().collect::<Vec<_>>(), expected);
+        assert!(observed.samples.is_empty());
+    }
+    drain(&capture);
+    assert_eq!(capture.lock().unwrap().samples, expected);
+    finish(service, win);
+}
+
+#[test]
 fn paused_device_failure_closes_output_and_explicit_replay_can_reopen() {
     let source = Wave::new(8000, (0..100_000).map(|i| (i / 100) as i16));
     let (service, capture, mut win) = owner(vec![track(&source.0, "device")], 31, None);
