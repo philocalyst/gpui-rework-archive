@@ -231,4 +231,9 @@ fn queue_and_plan_carriers_are_measured_without_claiming_a_stack_peak() {
     assert_eq!(size_of::<EntryKey>(), 8);
     assert_eq!(size_of::<Option<EntryKey>>(), 8);
     assert_eq!(size_of::<Entry>(), 16);
+    if cfg!(target_pointer_width = "64") {
+        assert_eq!(size_of::<PlanStamp>(), 16);
+        assert_eq!(size_of::<Plan>(), 48);
+        assert_eq!(size_of::<Option<Plan>>(), 48);
+    }
 }

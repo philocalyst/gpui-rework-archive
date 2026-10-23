@@ -11,9 +11,10 @@ static NEXT_SESSION: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PlanStamp {
+    // Neither counter wraps or reuses an accepted occurrence. The entry key
+    // already lives in Plan and is unnecessary for EOS authority.
     session: NonZeroU64,
     serial: NonZeroU64,
-    entry: EntryKey,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct EndOfStream(PlanStamp);
@@ -89,7 +90,6 @@ impl PlaybackQueue {
                 stamp: PlanStamp {
                     session: self.session,
                     serial,
-                    entry: key,
                 },
                 current,
                 lookahead,
