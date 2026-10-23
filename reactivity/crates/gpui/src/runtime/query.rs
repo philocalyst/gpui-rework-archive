@@ -657,7 +657,7 @@ pub(super) fn foremost_in_rows<'a>(
     nodes: impl RowAccess<'a>,
     geometry: super::geometry::GeometryView<'_>,
     has_viewports: bool,
-    point: Point,
+    point: crate::Point,
 ) -> Option<usize> {
     let mut rows = nodes.iter().enumerate().rev();
     while let Some((index, node)) = rows.next() {
