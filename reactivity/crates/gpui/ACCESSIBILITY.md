@@ -147,17 +147,22 @@ borrow Win, a Part, the model, or a UI closure. A 64-command FIFO accepts Click,
 Focus, Blur, whole-value SetValue, SetTextSelection and range replacement.
 Replacement values are limited to 65,536 UTF-8 bytes;
 boxed payloads can retain at most 4 MiB across a saturated queue, plus its fixed
-record/channel storage. The Linux x86-64 ledger measures three allocations and
-4,312 requested retained bytes for the ingress/channel before payloads; queued
-records are 48 bytes. This excludes the preexisting native wake and platform
-adapter. AccessKit has already allocated the incoming value before
+record/channel storage. The owner creates that queue only when an active
+adapter factory publishes its first real tree; callbacks discard prepublication
+requests before decoding payloads. The Linux x86-64 ledger measures one ingress
+allocation of 88 bytes before publication, then 3,800 retained bytes across
+three allocations after installing the queue; queued records are 40 bytes.
+This excludes the preexisting native wake and platform adapter.
+AccessKit has already allocated the incoming value before
 this boundary; this quota cannot prevent that upstream allocation.
 
 The owner applies at most 16 commands per wake and rearms when the budget is
 exhausted. It reconstructs the window-qualified Target and calls `Win::perform`:
 P-advertised support and current logical membership are checked again. Stable
 position-free static targets remain usable across later P updates. Input actions
-also validate the provider publication, window, field and exact source lease.
+also validate current presentation, window, registered field and exact immutable
+source lease. Position-bearing actions decode only current, never-recycled run
+IDs. A global publication counter is unnecessary for these authority checks.
 AT-SPI InsertText/DeleteText carry one atomic range-and-value action; they never
 queue selection and replacement separately. Explicit edits reject interior
 graphemes rather than silently flooring scalar/UTF-16 offsets. Root/TextRun IDs,
@@ -165,6 +170,11 @@ foreign subtree IDs and retired sites cannot acquire a route. No action drains
 before the provider's first publication. Deactivation,
 close, owner failure and adapter teardown may cancel queued work; an activation
 session stamp prevents canceled commands from running after reactivation.
+
+The [owner-lazy transport evidence](../../evidence/owner-lazy-a11y/README.md)
+records the matched whole-window allocation controls, unchanged peak and owner
+layouts, actual Registry failure/old-P/repair workflow, and the unfavorable
+ordinary drain stack cost. These allocator results are not RSS measurements.
 
 Activation is independent of the FIFO and is idempotent. Repeated activation
 requests cannot be blocked by a full action queue. Overflow or an oversized

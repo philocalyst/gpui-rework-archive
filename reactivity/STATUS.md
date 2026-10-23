@@ -68,6 +68,23 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The integrated [owner-lazy accessibility transport](evidence/owner-lazy-a11y/README.md)
+uses exact source `157b995e7e` and final tests `112c27e728`. It creates no action
+queue before the first actual provider tree and removes the redundant global
+publication stamp, retaining window, field, text-lease and run-ID authority.
+The matched cold owner removes two allocations and 4,224 retained requested
+bytes; peak remains 90,734 bytes. Production owner layouts are unchanged.
+Actual Linux Registry failure/old-P/original-button repair and the recorded
+default/native/strict/Apple/MSVC gates pass. Core code is 30,686 noncomment,
+nontest lines, six fewer than the prior 30,692. The +16-byte ordinary drain
+frame is charged; a separate action-poll successor remains unadopted.
+
+The [coverage frontier](evidence/uniform-packet/coverage-frontier/README.md)
+and [canonical text campaign](evidence/canonical-text-stream/README.md) remain
+unadopted. Graphics has exact readbacks and cross-platform compile checks but
+no qualified speed result. The text timing campaign stopped at a watchdog;
+diagnostic success does not complete or replace its missing benchmark cells.
+
 The narrower [GPU scene bindings](evidence/buffer-prefix/README.md) follow source
 `a50b3b8512`: exact used prefixes avoid six Core capacity-tail clears/1,340 bytes
 in the matched growth/shrink control, while empty-array/readback initialization

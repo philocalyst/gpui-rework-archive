@@ -12,7 +12,7 @@ const LIST: ListId = ListId::new(1);
 #[test]
 fn native_text_transport_memory_budget() {
     assert_eq!(size_of::<Command>(), 32);
-    assert_eq!(size_of::<Queued>(), 48);
+    assert_eq!(size_of::<Queued>(), 40);
     assert_eq!(size_of::<Ingress>(), 8);
     assert_eq!(size_of::<accesskit::ActionData>(), 40);
     assert_eq!(size_of::<accesskit::TextReplacement>(), 48);
@@ -121,6 +121,146 @@ fn selection(
             character_index: focus,
         },
     }
+}
+
+#[test]
+fn source_aba_and_shared_empty_allocation_cannot_revive_retired_provider_ids() {
+    let mut win = Win::demo(Inputs::new(""));
+    win.set(Inputs::B, String::new()).unwrap();
+    let target = target(&win, 1);
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let old = native_id(&win, &cohort, target);
+    let empty = win.accessibility_input(target).unwrap().1.as_ptr();
+    win.set(Inputs::A, "different source".into()).unwrap();
+    cohort.refresh(&win).unwrap();
+    win.set(Inputs::A, String::new()).unwrap();
+    cohort.refresh(&win).unwrap();
+    assert!(std::ptr::eq(
+        empty,
+        win.accessibility_input(target).unwrap().1.as_ptr()
+    ));
+    let restored = native_id(&win, &cohort, target);
+    assert_ne!(
+        old, restored,
+        "retired IDs never recycle even for the same empty allocation"
+    );
+    assert!(cohort.target(&win, old).is_err());
+    assert_eq!(cohort.target(&win, restored).unwrap(), target);
+
+    win.update(|m| m.rebind = true).unwrap();
+    cohort.refresh(&win).unwrap();
+    assert!(std::ptr::eq(
+        empty,
+        win.accessibility_input(target).unwrap().1.as_ptr()
+    ));
+    assert_ne!(restored, native_id(&win, &cohort, target));
+    assert!(
+        cohort.target(&win, restored).is_err(),
+        "field rebinding revokes the same allocation"
+    );
+}
+
+#[test]
+fn unpublished_source_aba_keeps_only_identical_acknowledged_root_authority() {
+    let mut win = Win::recording(Inputs::new(""), WindowOptions::default()).unwrap();
+    ack(&mut win);
+    let target = target(&win, 1);
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let root = native_id(&win, &cohort, target);
+    let empty = win.accessibility_input(target).unwrap().1.as_ptr();
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    ingress.do_action(request(
+        accesskit::Action::SetValue,
+        root,
+        ActionData::Value("after identical empty source".into()),
+    ));
+    win.set(Inputs::A, "unpublished intermediate".into())
+        .unwrap();
+    win.set(Inputs::A, String::new()).unwrap();
+    ack(&mut win);
+    cohort.refresh(&win).unwrap();
+    assert!(std::ptr::eq(
+        empty,
+        win.accessibility_input(target).unwrap().1.as_ptr()
+    ));
+    assert_eq!(native_id(&win, &cohort, target), root);
+    // No different source was ever published under this ID. A position-free
+    // intent still addresses the same field and exact acknowledged empty lease.
+    assert!(
+        drain_actions(&ingress, &receiver, &cohort, &mut win).unwrap()[0]
+            .as_ref()
+            .unwrap()
+            .is_ok()
+    );
+    assert_eq!(
+        win.root().unwrap().a.as_str(),
+        "after identical empty source"
+    );
+}
+
+#[test]
+fn old_provider_run_endpoints_fail_on_both_sides_of_geometry_publication() {
+    let mut win = Win::demo(Inputs::new("e\u{301} אבג"));
+    let target = target(&win, 1);
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let root = native_id(&win, &cohort, target);
+    let previous = selection(root, 0, 0, 0, 1);
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    // A request queued before publication and an old provider invoked after it
+    // carry the same retired run IDs, independently of a global tree counter.
+    ingress.do_action(request(
+        accesskit::Action::SetTextSelection,
+        root,
+        ActionData::SetTextSelection(previous),
+    ));
+    win.set_property(
+        target,
+        crate::property::FONT_SIZE,
+        crate::property::Contribution::Set(24.),
+    )
+    .unwrap();
+    cohort.refresh(&win).unwrap();
+    assert_eq!(
+        native_id(&win, &cohort, target),
+        root,
+        "position-free root authority survives"
+    );
+    ingress.do_action(request(
+        accesskit::Action::SetTextSelection,
+        root,
+        ActionData::SetTextSelection(previous),
+    ));
+    let update = project(
+        &win.accessibility_sheet().unwrap(),
+        win.accessibility_state().unwrap(),
+        "Inputs",
+        &cohort,
+    );
+    let tree = Tree::new(update, true);
+    let current = tree
+        .state()
+        .node_by_tree_local_id(root, TreeId::ROOT)
+        .unwrap()
+        .document_range()
+        .to_text_selection();
+    ingress.do_action(request(
+        accesskit::Action::SetTextSelection,
+        root,
+        ActionData::SetTextSelection(current),
+    ));
+    let result = drain_actions(&ingress, &receiver, &cohort, &mut win).unwrap();
+    assert!(matches!(result[0], Some(Err(Error::InvalidSelection))));
+    assert!(matches!(result[1], Some(Err(Error::InvalidSelection))));
+    assert!(result[2].as_ref().unwrap().is_ok());
+    assert_eq!(
+        win.selection(target).unwrap().focus.offset.byte(),
+        win.root().unwrap().a.len()
+    );
 }
 
 #[test]
@@ -372,7 +512,7 @@ fn long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip() {
         assert_eq!(win.root().unwrap().a.as_str(), value);
     }
     if cfg!(target_pointer_width = "64") {
-        assert_eq!(size_of::<Queued>(), 48);
+        assert_eq!(size_of::<Queued>(), 40);
         assert_eq!(size_of::<accesskit::ActionData>(), 40);
     }
 }

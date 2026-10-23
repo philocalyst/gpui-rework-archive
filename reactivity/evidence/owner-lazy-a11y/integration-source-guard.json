@@ -1,0 +1,4398 @@
+{
+  "qualified_source": "199ab4a06c012ae18d707cbb8b406bbea1eaeb39",
+  "scope": "all tracked Rust, WGSL, manifests and lock/config under first-party crates and vendors; exact bytes, no rerun claim",
+  "files": [
+    {
+      "path": ".cargo/ci-config.toml",
+      "sha256": "843ee417eebae174c09365ec637478fd41eb407698e9cc265b3c16ed1969c361"
+    },
+    {
+      "path": ".cargo/config.toml",
+      "sha256": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295"
+    },
+    {
+      "path": "reactivity/Cargo.lock",
+      "sha256": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22"
+    },
+    {
+      "path": "reactivity/Cargo.toml",
+      "sha256": "d03d32db802e06ee9d17bd33f59733be7d74109e7bf918635e3e9b00cdc330f4"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/Cargo.toml",
+      "sha256": "985122a8d50020f67d2dce0f792d1cf27d8bf954384aeded3bac83513075fafe"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/examples/exact_frontier.rs",
+      "sha256": "05cef92be2a1487c9001f87a6a2f49eff79432e6f9a28c57e88c1d5930b042b6"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/examples/frontier.rs",
+      "sha256": "6aedf38cd5fcd118072f9eb612f4f3656c36d407b07639e34b1037fd80fef345"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/src/lib.rs",
+      "sha256": "7966bde82dc8413e585d29449b1990729d3b3c6bf46ed96fcfd87b6977b8c738"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/src/translation.rs",
+      "sha256": "5bbdebb749060d0bdeaf6640ea410a977aaab379f64fdf151c4f7986a4f86dc2"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/tests/exact_translation.rs",
+      "sha256": "092b411dd9c573e8b5b121b4a5c317bee1a472f9cc46af0172693e7c47272c6f"
+    },
+    {
+      "path": "reactivity/crates/algebra-lab/tests/oracle.rs",
+      "sha256": "76cf8a436dff5ca8a87c5924a7b4370b271ea195514abd297121f744e344f29e"
+    },
+    {
+      "path": "reactivity/crates/api-lab/Cargo.toml",
+      "sha256": "cb41f4266e51ced386e28440024cc725f2263663f76108b4296f2a4b2b9884d8"
+    },
+    {
+      "path": "reactivity/crates/api-lab/src/lib.rs",
+      "sha256": "7a14539dec1bad8032a79cc920b62abd4a0e5fe61f3db35fab40b3f83ff72e41"
+    },
+    {
+      "path": "reactivity/crates/api-lab/src/scope.rs",
+      "sha256": "ff1d28ec291af31327bd12e0e6bc963db7a7c3f3c73c0f0ac8d1f1ff0e9102aa"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/api.rs",
+      "sha256": "2ba325bb21244e694de56499d1f2132d8d17bd40d9228b61d73aec88bc67ffa3"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/compile_fail.rs",
+      "sha256": "44332cdd675e798436992790adbc8e848b926648d90af6fd6b5f15d3023e28ab"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/ui/borrowed_text_escape.rs",
+      "sha256": "867d9f16a1e811f0f0e4453e80499359983a3c268cd53e13f66a6bbdfd6f39fd"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/ui/cursor_cross_scope.rs",
+      "sha256": "87ba0b4cef188d3e7a8aedf9db0df578e6d2c6294f3df7c26f0e1c2ac629ee38"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/ui/cursor_escape.rs",
+      "sha256": "dddab2067d8b79c6d85f1a78923817851f02c079ceb5e9a94ec5739b82b4f808"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/ui/cursor_inner_to_outer.rs",
+      "sha256": "38e708328ffd9609a1649496d2db12f05732f9724b69153db4700fefb2e702b5"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/ui/forge_child_sequence.rs",
+      "sha256": "6d52b4e6e4bb1e7a292f78627111406bc044829232ffa8d454d14e08833662bb"
+    },
+    {
+      "path": "reactivity/crates/api-lab/tests/ui/mutate_borrowed_owner.rs",
+      "sha256": "5c02ad34cbb046e1c7d7c9b95184db574ddbed55301e1851279c6d7c7ecfbdea"
+    },
+    {
+      "path": "reactivity/crates/canvas/Cargo.toml",
+      "sha256": "eb41eb188e3e047c7393bf109c5b9675985582fa08b44332670a80db59310ebd"
+    },
+    {
+      "path": "reactivity/crates/canvas/evidence/image-transfer.rs",
+      "sha256": "853a5bc7e58b5dbe5895b264e7decf7ad41e19b3df32538ecab2fbe15fa556aa"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/caret_pair_measure.rs",
+      "sha256": "01524ab238c5a0ef28357369a29e6efd42c4b9ec91aa6f44cf552450f31176cf"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/cpu.rs",
+      "sha256": "2c6116a1c30d3cb704adbcd5903c170e5bcebe4d3fa708418263ec6a0a5fc233"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/damage_cost.rs",
+      "sha256": "3c43364c27ee332f497e237f88c72f6bbc31d5b6a7432f7c671614c949b3d315"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/font_memory.rs",
+      "sha256": "1f012a44c70864c702f3dbc9c845371258a1f9fc9b436e889266f34a409f1f9b"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/group_views.rs",
+      "sha256": "ca651149742f263781ab2cda4a1a3dbcdcdda3fd7d4dd5027bb9199db7535def"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/image_axis.rs",
+      "sha256": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/images.rs",
+      "sha256": "c573a6fa5b50bfc1a8970849fbb44c82cba12d2caa6efb481683ec6829499671"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/parallel.rs",
+      "sha256": "0a234b396afc9942764153da50caf583889a8eb2315268315c2d787beb0c93e1"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/retained_runs.rs",
+      "sha256": "4a70a6aaffa3f527891fc377c0cf30ce3dd7f2af6d64e72196e6c94cdc49ce6f"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/selection_queries.rs",
+      "sha256": "4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/support/images.rs",
+      "sha256": "53861e7c3fb00ceb137ce280bbeff798bdc1acd140a23f9a28e03784b6351fe2"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/text_interaction.rs",
+      "sha256": "f72db44ddf909e31eb2b4ba193cf1a629d755ca5827c00706f37ef8210919d43"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/text_oracle.rs",
+      "sha256": "18ed4dc2c57a6364c41da0ccb0a235827326cc05f9b2ed8b90c5a4d27ec3a27e"
+    },
+    {
+      "path": "reactivity/crates/canvas/examples/text_shaping.rs",
+      "sha256": "cb793b22fe8b563de7d75d534a869e7e73a8b9619b4018d54f4f29836f0c2adf"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas.rs",
+      "sha256": "0391372788fa1b77edf041142d366283146301f50441b02770ac5a004f48db64"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/bins.rs",
+      "sha256": "2e03d85da420c94ba02aa2ead9b671db7d7b9064778dcbf8bb02a58544f588d9"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/columns.rs",
+      "sha256": "a54e0cbbb1c67d2d23e6d53f535a0a51aa7992da6a94e855896b5c206381360d"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/glyph_axis.rs",
+      "sha256": "f060c15e923bd027c2b5ed55bce66c18243aaf482e3d21298f8b92dfc2d4ea94"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/image_axis.rs",
+      "sha256": "58a628d2d45334cc61cef73631e93f3dfa46884160bb0a3150f8c3a486f1d838"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/mask_kernel.rs",
+      "sha256": "d705803687c49f9656aec56aa07701546ddb269043c3577f7420757b214d11b8"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/paint.rs",
+      "sha256": "39bc755b9aa00c5072505c83655a2390507685aeeef93ce35d358c5a789a15a6"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/rounded.rs",
+      "sha256": "3d575ea1f650493d4e9beeb282a3dfe410af67ac651a7431800b213b65bcf924"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/samples.rs",
+      "sha256": "cd0ec5ffe15678fc9569189b77e8284baa0ff40a2ce9f2481a4ef58dc578355f"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/canvas/simd_tests.rs",
+      "sha256": "33365012911b25f56cb5e5bd18893a4b4de12dce488c2ed9b0e0dedf21e9051e"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/color.rs",
+      "sha256": "35848adc117fe5215bc80e921912c665c5b485c45538fee4777018e49df08cfb"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/color/gamut.rs",
+      "sha256": "75054e29399be75a01aacaf3e87bb91b71afa374bf8095e3a377d798dd551751"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/color/gamut/tests.rs",
+      "sha256": "e1cebf516da535790679fa63f3d302361b2938f4b37b9aed9a79da853c4507f8"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/damage.rs",
+      "sha256": "25f5fe53314d02d0180a3334cc22549711cb7dd21d2e8ed72e27520975529941"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/image.rs",
+      "sha256": "39af731a2a7e054fa86c11289699a811e4bf68cd25094af898bbd73f31e3b464"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/image/transfer.rs",
+      "sha256": "b25553a496729d4ca1e2372d46941393dccda6da55ff454138d73751f7188d30"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/lib.rs",
+      "sha256": "8aadd5144b3bc0a22ff1f60384f30ffa01ba5d94234deb98a3ede119bd8126bb"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text.rs",
+      "sha256": "161f5a0e7185cbce705ee5d58cd0f1e6209c5c385ffc4e150871afecf1ac2890"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/cursor_pair_tests.rs",
+      "sha256": "2c5e6f7703a51b3bbec74ba47e7481be00662760bef75dd37a93ffea6d706c98"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/geometry_ledger.rs",
+      "sha256": "c9b80cbb2ab5286549254c58ff2bcb11e8a4e9da4bd10588423249863b51c956"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/layout.rs",
+      "sha256": "b10aafdd08199c4e763c6ce0165a0bba9b8014ec5f4c26d07a04717dd77820e6"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/layout/interaction.rs",
+      "sha256": "cb7fedc8a64bc38d4e4a49d6a7bd1151fd6908a4dc75d45e3b83fb714a637638"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/line_break_tests.rs",
+      "sha256": "916edd405b738d250e58bef2daba55316d4026f4d405a364895fb6757ca3d02e"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/line_ownership_tests.rs",
+      "sha256": "0b6bfc056755010bd7acfd643fb2570ebf6f24dc541815d07a8372a1a4c09c52"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/paragraph.rs",
+      "sha256": "1f01a61295eacabf52b50e6a0a44da42ce333773fae7c1a9ce7e1c868c1d3780"
+    },
+    {
+      "path": "reactivity/crates/canvas/src/text/planner.rs",
+      "sha256": "afc3384ea7d3850f491d2f2234ddc90fd9c770f2f339f1ddb999bd4abee86579"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/bins.rs",
+      "sha256": "4d493cf9a57eac71b6fb7f98a95dd7c229aed0decb6a08a8bd6111afe4cd5ad9"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/color.rs",
+      "sha256": "45929e2577b85edd865ea22a07ab0060b13b503b7f421b3999741a3471d1ef39"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/color_authoring.rs",
+      "sha256": "39282e23df8c3ee069b9a430ef060a81c7b083796f7dd98092a1efc22a37e95d"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/color_packing.rs",
+      "sha256": "aec8b7ab2b169286b46957a3edc9f3806721325b9889af40d556e23ed01044ca"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/damage.rs",
+      "sha256": "a3e2d0b2c18a95a2726a87c4f403cb9382faaeb3446c5ce2608370ca1155359c"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/dpi.rs",
+      "sha256": "fb168524d67d50fc1be9dd2e803bd92404b5c90c2503183c6ed38192729174f6"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/external.rs",
+      "sha256": "f2ac734df80b30c4bdadea413444c3cec35a5952b0c07d432e0874958ae4ec1d"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/font_quality.rs",
+      "sha256": "142f94db08bf126b35c41ffb8c45d2ff311c0934c8c1b9e4b3d9d1e60fa6aa12"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/font_sharing.rs",
+      "sha256": "512b13f0565ecb6ac31f8d210a0aac948650c68a8e0170af7481b74ae33a15f6"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/grouped.rs",
+      "sha256": "d7e1c64d8a4ecc8d921e28675b255095090630e17ed948472c3c25d600194551"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/hdr.rs",
+      "sha256": "ad4e700ff180f440aab31939100ffa22b92370ddac38e52f901b329cdbd2db17"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/images.rs",
+      "sha256": "03200f6687c165547e0dfd179bbd8e911a324b860cd926d614773a58814b4fec"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/literal_cow.rs",
+      "sha256": "1393f5a7c80b336df93bf9f47959c35828c2a7fa04612e1a817192c6ceb52799"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/oklch.rs",
+      "sha256": "278daffc64ac87106d8cb746bf061a771f70df72df3d1be24a7b3c4f0eac141e"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/paint.rs",
+      "sha256": "001492221ff10707a836dfe4ae90dbffb30b748ad2bc659af23273231ef63985"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/parallel.rs",
+      "sha256": "dce56439dc2a37a20a97b92f089be22ca8f0a724807e9e0069963a5ffd69414c"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/prepared_scene.rs",
+      "sha256": "9aa85a326772a9326f4759633536b6e3468a66ab52f618660107190ff1710543"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/render.rs",
+      "sha256": "a16a97352c43237a1524192602b43261ed19bca726570ef0758a7ef36e515929"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/rounded.rs",
+      "sha256": "200c62e197b881c680b7edaa917d5cc11397d69b9f5d0f9e0a47651a825762e3"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/sample_clip.rs",
+      "sha256": "cfb5939e8a43ca906b46e84b42a200b9077a9375b9888645c31eb51c28bb1a7a"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/sample_storage.rs",
+      "sha256": "ba1d957976d20828d7918804e2dd1f5fb94516c4660a573c65f6c652481798d9"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/selection.rs",
+      "sha256": "25489828d8a97a6c61cd76c6b52495048c15df60bf4a3a277b44bd12ded952a9"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/shaping.rs",
+      "sha256": "aac25806135123035957b76f78d57052a546f553640c5641808d1d1f829d5033"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/slots.rs",
+      "sha256": "fcf59e176bc4236f0e5f3797af8327793d5512d0051b23e065587bd0939511cc"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/solid.rs",
+      "sha256": "c4cb17754deafefb9e88837afd77539770c185102d93485bfdd0a14299a3e8d2"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/support/legacy_color.rs",
+      "sha256": "1f78b3b3c9e69857bee7a72b10bd38e239a7cb3b44818a19202b65140837a9b8"
+    },
+    {
+      "path": "reactivity/crates/canvas/tests/unicode.rs",
+      "sha256": "6f6f38a6a412a510623b503ba91e06603bf920901a54b1854f308cd5d39c98f5"
+    },
+    {
+      "path": "reactivity/crates/core/Cargo.toml",
+      "sha256": "c55a76531f66bd21203dae6e6732fcd285714a58f056d9f8c006322dca19771f"
+    },
+    {
+      "path": "reactivity/crates/core/examples/retained_layout.rs",
+      "sha256": "a2cdf1fe60888eb0c99bff81da702c1d43dfc13f39b9411d6db593e4f8e46e83"
+    },
+    {
+      "path": "reactivity/crates/core/examples/retained_tree.rs",
+      "sha256": "c74c2c7a9b2a08f035410a58e2747f813c311d8000a6185e665b392492561788"
+    },
+    {
+      "path": "reactivity/crates/core/src/damage.rs",
+      "sha256": "389a3f5fcabcd14ab25624c47f8dbdb27efbaddb5c9456709c7ba6547f10f0c3"
+    },
+    {
+      "path": "reactivity/crates/core/src/geometry.rs",
+      "sha256": "1ef7c0cb4e1ab0cb70cbffcceaef85b94b318749795da89a1f9552a610ae63d4"
+    },
+    {
+      "path": "reactivity/crates/core/src/inspect.rs",
+      "sha256": "c3be727cf2e2bd33246bb41ad91cfb811c33e35a39bad031f6d07363d7adeb38"
+    },
+    {
+      "path": "reactivity/crates/core/src/layout.rs",
+      "sha256": "19e012b77be0881c0bba4c5fc075c1c893834492a511610aee17d8ca184fc29b"
+    },
+    {
+      "path": "reactivity/crates/core/src/lib.rs",
+      "sha256": "0bdc1a07cdcb7b81f5264d012592a18620c4c8ae3b78013f89d0cb004f7b02df"
+    },
+    {
+      "path": "reactivity/crates/core/src/spatial.rs",
+      "sha256": "b497392441478e55770ef33cc86b9ea211135e3e0a933779fed495a8a7f95060"
+    },
+    {
+      "path": "reactivity/crates/core/src/tree.rs",
+      "sha256": "86688fad538bdfcb939441cb20868dced764d8293a30595e1cb3a37fa1d0a238"
+    },
+    {
+      "path": "reactivity/crates/core/tests/layout.rs",
+      "sha256": "c7ce201f9ed4f62e363f20ccd95f16caacc0d5436146caa7e596a0a65d5c6631"
+    },
+    {
+      "path": "reactivity/crates/core/tests/layout/hidden.rs",
+      "sha256": "f308a9c2c5e5164dc714ed14e45b3d5091016a81646b460d3366bac962be857b"
+    },
+    {
+      "path": "reactivity/crates/core/tests/layout/oof.rs",
+      "sha256": "c4df5b1172046bd1b6aeae2e7d97cdbab2d802a2eacf77445c0535d518cace31"
+    },
+    {
+      "path": "reactivity/crates/core/tests/spatial.rs",
+      "sha256": "34a791f934bc4fd807ae7b4f7bba560f6bcdb1dbcf1a932cccad2c038e23f4cd"
+    },
+    {
+      "path": "reactivity/crates/core/tests/tree_oracle.rs",
+      "sha256": "e8a1936ab35218523c32d5048b49de6e628e5f5f0eeb4a577ebcf87fa14e21b3"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/Cargo.toml",
+      "sha256": "20fe027fccedee8299bd15b24c6100134417b7f890b455aab638e60e79db2321"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/examples/workloads.rs",
+      "sha256": "263cbc7d05ecbfaf4c9c53e61dbe1759f8819f4c65c96653b59e7f3a32699ada"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/src/geometry.rs",
+      "sha256": "8e10e3265755548feaf31ca96a249448b9068b747e5d0c4b94d0b7ec53afe9eb"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/src/lib.rs",
+      "sha256": "28817f047ff93c7d1074ecc285bac53204548d8928506532743b9e1b02c7c6de"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/src/math.rs",
+      "sha256": "77641ab31604fb5a2d11aba243a27c506a6807da7c66d572033cca9b280fc541"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/src/planner.rs",
+      "sha256": "b7c5e67eb1f017ea222acc5f4c87141f9f814d34ccec6e3daeeb12177900545f"
+    },
+    {
+      "path": "reactivity/crates/coverage-lab/tests/proofs.rs",
+      "sha256": "21adbb2c795e4ad7ccb685ed2786ab48006941e835c9902696cf0173d031523d"
+    },
+    {
+      "path": "reactivity/crates/gpu/Cargo.toml",
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "path": "reactivity/crates/gpu/build.rs",
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "path": "reactivity/crates/gpu/examples/groups.rs",
+      "sha256": "42469b9361c93b7a72bc6ac6e930f9888daad5a3f3c5c3f907afdae6f2f6e3e8"
+    },
+    {
+      "path": "reactivity/crates/gpu/examples/images.rs",
+      "sha256": "9eea2bff3d57051e0b14ccb656bb1bf943ba3769d98abce09a0b7deac4a9f666"
+    },
+    {
+      "path": "reactivity/crates/gpu/examples/tiles.rs",
+      "sha256": "277fe77477dcbda0a39ae261eadb623399aa1e2d88277caf7ad0e617a09bfff7"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/lib.rs",
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer.rs",
+      "sha256": "558c4ceec7c4b01c48218d0d0c268a61ea003ef4601fedb1d798a88900a56f16"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer/artifact.rs",
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer/images.rs",
+      "sha256": "368e1bf78865e679c422dc0c6aeb8ba1b9038c02672fc0356864609b9d1cb932"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer/owned.rs",
+      "sha256": "fbaa391262814d80cf6dd39045521e66a71cdc6decc6d63165bfcee67229140e"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer/paint.rs",
+      "sha256": "47bfb85fddfe86d39092fdfa08fb48827b3c39a033367983a337ae6e2c73b604"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer/slots.rs",
+      "sha256": "06d1cbd9dc55f5d0c9a9d1715b57103f9b4b61cc1e4a08418466e66b1a300bed"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/shader.rs",
+      "sha256": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/shader_build.rs",
+      "sha256": "3fbbcd5627a1f2f8415fecaf153814a70c83dbfd1ed6e10fb3f39bee2cca3d1d"
+    },
+    {
+      "path": "reactivity/crates/gpu/tests/presentation.rs",
+      "sha256": "9c1dcd118f0c05f92206e4e4ac33b9aae574498fde8860e3efeac9afda82b0c7"
+    },
+    {
+      "path": "reactivity/crates/gpu/tests/render.rs",
+      "sha256": "4d4bad6ec9ce5763d456b49c345cd83cef3ccbd2631a5c21d7ef4665dd18fbc4"
+    },
+    {
+      "path": "reactivity/crates/gpui/Cargo.toml",
+      "sha256": "9d4768b579f5f3fe9805cb28f3ece50bd23ad3f0fb1b1777bc81458a8332fe66"
+    },
+    {
+      "path": "reactivity/crates/gpui/evidence/images-control.rs",
+      "sha256": "cef722e574a9e59e083cccec5d8bfee320b0b5a19a5f7318c571329ab80ebf2c"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/color_cost.rs",
+      "sha256": "90b5402bc45af1a561b708809b6310ea49fc6d6474084c36719494d67d56a586"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/contained_owner_spike.rs",
+      "sha256": "32831088ab522b1b38469bafb3e6e849ce294a1c558d9c6e75997e0d4409840f"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/counter.rs",
+      "sha256": "b57dacecc86b5e0bfa0a0db471ff85b8f45f261832a6cba3c4eaac38b65b9318"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/covers.rs",
+      "sha256": "4f182cede4b201c5d057c610b6e979e9e9207875aa942f840e61abe0eb7ee87d"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/empty.rs",
+      "sha256": "419d6b422a034f213419cda3f09f794b5ac0d76320cdaa42d5e1f26b42044da8"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/first_frame.rs",
+      "sha256": "54394a8b49a265dbfe8ec9226611c1ed6f916b9d8444adfaf3e37a14cfc1a2ef"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/graphics.rs",
+      "sha256": "3514a3cac19f953df9477922eade08c44700877b389bb26a22191254dc997beb"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/immutable_text_measure.rs",
+      "sha256": "f522acaacd741cd0f997b6af27dd0d68ff98ffd4938a1d404c6ed27f02c32133"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/inspector.rs",
+      "sha256": "ddae1319ee4160920258dd6aff11948feb63ab2b70a9729c68478f479fed959b"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/library.rs",
+      "sha256": "359cb357322cf9ae01e1f38dd6ed3e73be8d1d9a8669c107783689128dfe2755"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/luna_bench.rs",
+      "sha256": "a2c7b0a4992efa06719127cba59978aff62536d8d61994ca8c4c7dceb4f67c29"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/paint_slot_storage.rs",
+      "sha256": "ab1af17d3e9e6716e00baef1a7ca813d59f9b96b0e1a27018e7732acf1df85eb"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/panes.rs",
+      "sha256": "209afd7b6215b5094c7bd7dadabaf0b65b7500e1730daae991ae9e7cc30e74bf"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/property_editor.rs",
+      "sha256": "5cb29449b06c00b0d1aba1c88c87b7a0866f11a68a93fe3fc5f0d45727449856"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/reactive_styles.rs",
+      "sha256": "41e5bf080bda66b0e3ff68a3efc0f3a7d82cabf0f3e7dc0075e0086e33863c05"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/remote_delivery_measure.rs",
+      "sha256": "a68d7a86a9ae9f1d6cdc3fc4df34a2dbf5039cba378c0e6934d17125237689e4"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/retained_list.rs",
+      "sha256": "758923a4536033ea2333465580b02feeeda173b6ce8151feaf125622eba8b4e5"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/sheet_access_measure.rs",
+      "sha256": "8538bb4301e15ff85b924de2bf01a947f7e95f406f374f55f7b687a0fa1a7b45"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/catalogue.rs",
+      "sha256": "4d0a8b2ae6a6638c16d1d59c448985f4ddfab5b7aa3ea948d1fcf32c3ec7d005"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/graphics.rs",
+      "sha256": "4d3074c1441829757d6c247fb49ab5ad57dd873a19beb87184dca10a40533d91"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/library.rs",
+      "sha256": "a0d0fa986d2a02892d2daa8c3470a7a5fa7f66824d6ddc4589477ec15c2fe887"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/panes.rs",
+      "sha256": "a4ba37e8d77d24534e4584f2dbf2dc250e8559ea01cb9702743c510caed7a96b"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/property_workbench.rs",
+      "sha256": "86f3f49a764281b0b149db1ea10b358c691951c3979e6d545ec516a7a7a7fd65"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/renderer.rs",
+      "sha256": "38eac98311473da85d2abefa16e0af384c358a8d5fed2aa60dfc77aeef4298f2"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/search_library.rs",
+      "sha256": "d5ff6c11b751afe08f23ae6ffe5975bc2ccf41a2ee400b0c24eb0c78d5006d08"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/todo_comparison.rs",
+      "sha256": "e9ed011fbe92f3d69db61c4364d43a47f6f68729d0aac3f37a936fa40ac43daf"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/todos.rs",
+      "sha256": "dea4ab34caa6069226333a9d13f38dec0a48549397cd9f3bd8fa831b61e03eae"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/value_entry.rs",
+      "sha256": "0b241c871bb588c26fa790a2d232812ab657ee83e7146bde18af6ecf0984cad8"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/support/workspace.rs",
+      "sha256": "a9d0f7d4d0ee1c59bc5c63cc55ff8db3603f46ab3c743e17434a29c994534920"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/text_lane_measure.rs",
+      "sha256": "4d2078701d980a4e425b844366ce494cdeada11fa8770f568688643c71a3351f"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/text_lease_measure.rs",
+      "sha256": "cc08b355c51515f523aa84b25b46b75bffef6e498786661040b15e13a5400e53"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/todo_comparison.rs",
+      "sha256": "6d7a9f46cf67b4615eee59274659bc467405160801c3008098c69d29179f98b5"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/unicode.rs",
+      "sha256": "8af3e587d833fbec49310da89106635ec3fb1006583434e33358f30206080050"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/unicode_text_measure.rs",
+      "sha256": "d3d53f6d3f0ddc6048a34f9d05e0a0d4478c994d5af8246c739cb87b6299e602"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/workbench.rs",
+      "sha256": "d1da1f9d975ea0be2ab2da774996fe5728b7c1a45542b569d26b6970ae225446"
+    },
+    {
+      "path": "reactivity/crates/gpui/examples/workspace.rs",
+      "sha256": "808618c92659fc7ac47dca2793e7cfa397baa3b9e259d6103dfc85c9c15f0f27"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/application.rs",
+      "sha256": "b0a9dde34248bbfcc88112b141927ac75ad0a3908bd8b236cc4780562fc83873"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/component.rs",
+      "sha256": "e2239f3fb99289449daf6f3c93a7371a32ec6936b5046466faa6bb2c115c8d5c"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/element.rs",
+      "sha256": "10e0d394ed41d8fc2d68915d536c47eb11867014b62c5c12e9db369f5ee282a7"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/identity.rs",
+      "sha256": "8348756f0524ba3bb91094c2c24c1d12d557f4dfc72387aee507ab0d4bcc2b5b"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/image.rs",
+      "sha256": "1c7f8cd7509d963622339942d70dab50e6f38c9f9800c24e92196f8d8aafcff7"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/lib.rs",
+      "sha256": "53ef070ce5d875d9049a45aad58d7363d1db3e2e61fa57f26338c0bc920199b4"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/list.rs",
+      "sha256": "1c459748c7edebe54f99ace83cd67529ee31987cc410582058180a0cebbc6611"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native.rs",
+      "sha256": "ea62370947bcbbe459de5fa82961410d5e10141a302eb44bac15aeb80b672147"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility.rs",
+      "sha256": "0c1c25d9ef1bb8a0958c276919e6a5e9d0aa6c863e379117e4b15e75650ba7d6"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/geometry_tests.rs",
+      "sha256": "8567f3f34ac58757376587ce51d31f2a7486595f7a441ea103b4df8dd84ef202"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/linux_tests.rs",
+      "sha256": "a0187475bbf904f4c2ad5d00099310022042aabbc006d1beff3c5ea921267095"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/linux_tests/checkbox.rs",
+      "sha256": "e3c83ee4b900c1b9bf86631d411d23929096dda1309c6b7938ac2b22f55b276b"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/linux_tests/failure.rs",
+      "sha256": "bee64a76e6b0a4b4a17615f48c8859dfbf874b5ed71f16819de37929a1c7a9fc"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/linux_tests/lifecycle.rs",
+      "sha256": "80eec81cc0b8986a221fc1c58549446ccbe867438f851eadd7fb7988044847a7"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/selection_tests.rs",
+      "sha256": "6e645b1e1c6e438796f0f1915dc8b3425bf3129edf3b669b287b2bf04f4f214d"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/tests.rs",
+      "sha256": "f582e57d211a1c63639c12d300d935d72ad8b38f3b88da2698be4cc609e52294"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/text.rs",
+      "sha256": "9220cc6abcf34860e51e12be3ae4b687c290c7d07d2aac8dc4692f2f008fef7b"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/accessibility/transitions.rs",
+      "sha256": "9eda889b8bc858170acbf1d9e2df7b3d867c9bc9e41ae8ac72b1d6b79b227a28"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/destination.rs",
+      "sha256": "1100a860096a42c820dc7b48e4a67509cf76987927ee2e14d8734de77a42251a"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/destination_tests.rs",
+      "sha256": "80e9a9e5ecacb66ae676e754a2bfee2cc20ae37eefd930cdaacb9e6210d6c582"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/destination_tests/record.rs",
+      "sha256": "a52aa33ba44c25a604adff875a7d0ebc32a41d49e95545c738ed515966b354af"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/image_tests.rs",
+      "sha256": "6b0c4e3e8d3c4afd42e54baa00497f232f31638223cf8d1acc5302c48d108ddf"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/inspector_tests.rs",
+      "sha256": "2a56c610e4ae23da12f50f42d30308734ad592d58f7d8186ea2e347249f5ba41"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/list_tests.rs",
+      "sha256": "3c6af2fa8c01f575a5b9c8e5b33fa55e5c2b6665bee5c8136fa384f1215fc997"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/paint_tests.rs",
+      "sha256": "185ff8b175cf17e45737eeaad1379d29b939622ab38384b52243bdcbfaeb6cc4"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/property_action_tests.rs",
+      "sha256": "02d87692b4a40983e99d5843047ac94123599a495b6b609673b99aa6986723ea"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/question_tests.rs",
+      "sha256": "f2248ea291dc00495bc12df542c69c9ae826de3672de3804f08b9c1027739b1f"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/remote_tests.rs",
+      "sha256": "b1258594d961bbba4e89cb816e1c6c00a623b2f969b684673489580f2eb1f45e"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/scroll_tests.rs",
+      "sha256": "9414206d1e2e0aafb86644f1aeaacc3eb89e27cbfcd24df9d26be83828e5c908"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/solid_tests.rs",
+      "sha256": "d260130ceed4e53aba85eb22e6fc14ea363aa2b87e6f45b6f5bbd4cd56641389"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/style_tests.rs",
+      "sha256": "f960650978e8c3e210c4b57a049b1165f5bf0841be586bfb25175ee1f5eaa61b"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/unicode_tests.rs",
+      "sha256": "e5126ce8e2845a9ac001c3ffbb8bb07244c7b6ff3830e4e459062328a3b33a3c"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/upgrade.rs",
+      "sha256": "03cfabb1c49266c473c6d3d153d76e0007bd5bbaa8428474a4f09040916cae5e"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/native/upgrade_tests.rs",
+      "sha256": "27b89ea4c07b1e316e086ea72fd76b3eccd55bb258f1a1c0f64e2ea9800ed0e9"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/property.rs",
+      "sha256": "55374c57e51926337e2cc1b0ae6ba007f1d7a75e591c369d42f4d849ab85a898"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/reader.rs",
+      "sha256": "7defb74f2e3ef00b94d2ae2d91919a948283f6024cc95a5c266b872541dc4640"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/reader/future.rs",
+      "sha256": "d2025b1474c1cac3b083577234d01ac0f42cc3a66dfdb33e26d577fad0ad56ff"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/reader/inputs.rs",
+      "sha256": "d0f213f657693b7d3b87c1dd899e9504dbf240a70d2d17a0fb70dcddbd258ba0"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/reader/linear_mailbox.rs",
+      "sha256": "eb837024c17a33cb8e2552685d4a6caddb4ebb062d426910f4c90f177ae441e0"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/reader/question.rs",
+      "sha256": "6e011c85363d4153b4b276ea56080766ecc73552329a74b076c8c016e7985473"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/remote.rs",
+      "sha256": "32f46c9e9f362765bbd3aa6bbaea6ed1234419ec959456db8260c93d724cfc97"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime.rs",
+      "sha256": "1007dfaca69bb06e7c00c708359461c436e4530ec66ceef7c9764b1c72fa0258"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/accessibility.rs",
+      "sha256": "b972afc5267beb8048dc0f5898fdf8223307947aa2ede1a81e9646afebcda662"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/basis_layout_probe.rs",
+      "sha256": "f83f18726a3c9c0f5b51fa78b88dfee9bb7e504d32daf8caca322ccb99c5efea"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/basis_lifecycle_tests.rs",
+      "sha256": "18cf23aed016ef65bb9c50d89de7b49d94d695eff79031fdbff5026eae4970e5"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/delivery.rs",
+      "sha256": "b4b2c4eae6f2111cfc5e214a5c6146d65d85ca681d869138564a9e343a369584"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/editing.rs",
+      "sha256": "37b610c0556ec38fb61e1417ee4694c527fdb9a3c8247d34ec84c34c1bafb120"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/geometry.rs",
+      "sha256": "e807e38bb113a879f28b85f9e7ab2b5bf62e6229559ef4fea29ddb9b99f59ec6"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/hit_tests.rs",
+      "sha256": "b18c874ca29d6fe4519ff9e7c7708c97a968b6b2c2130f5b95d2c5b1c31e2738"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/identity_index.rs",
+      "sha256": "60982f39d3b0db098f2b9211b56fe4ff96ac5aa960e10e31aad12b3e88e34419"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/image.rs",
+      "sha256": "e2ff2da37ec6d2b2861cdcf640d341416ec91fe86a121fcee494ee47ad7a84f2"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/input.rs",
+      "sha256": "8fe2ac03fd4c48302f829bd3dd5e24b928970e832d2d6f457acfe0bc176a390d"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/inspector.rs",
+      "sha256": "b7a81122fb107995a3362c26764a21b71c8da5e13e22389bb88cdcc50ea50986"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/list.rs",
+      "sha256": "bba192ee17998dfbdc7d5aafde9624eea2260309f1547457e064ff847439eb3e"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/metadata.rs",
+      "sha256": "fac20fb7e96ac6026bdf302a73acfa15aa79e0e12fe58e386e64a43431848b1f"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/paint.rs",
+      "sha256": "c62ea4461cf3e172e21cf18b57d341ad5788be12898178c971a430d26db8f6dc"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/query.rs",
+      "sha256": "43c3dbb3305029ba34b6e4f25ae3d790817ff932768ede3eb38432fa4e82e02e"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/query/serialize.rs",
+      "sha256": "6ea4642ad59b5c04bb0f5544b0fa63e56f752e88d9f1431753d7b5f6c815cd23"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/scroll.rs",
+      "sha256": "1c8ad47e197bf9fc58534141630f28ab00c6b2e2862a388f7811a8659dca271a"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/semantics.rs",
+      "sha256": "b93a1c687c7795c6275fd915cf4a6f6b59a9a1ff3487c723dfdc6e752016cd0e"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/siblings.rs",
+      "sha256": "d304c024869fa5df4de837ccd27c9b5aa39d2de0c56c1b7ddea40af6ac9f861f"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/style_ledger.rs",
+      "sha256": "d8ce15b2afcff5618ea113ad12c3f4c862d3cd0d3698f026e4d1ecd0d67fd2b9"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/styles.rs",
+      "sha256": "df50dd0c8f75a7594b9b1340403583e83b8a71b111236dc59a7d80a95a2449a9"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/styles/colours.rs",
+      "sha256": "a52ffa7b3a1adddf943a36220f1a8e6f29d68e2183e5aafa05ed176a00618ad2"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/text_geometry.rs",
+      "sha256": "d1879b33fb500976b591de68da1b30a86e53717c0d1207e9a7aa15862c038c17"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/runtime/turn.rs",
+      "sha256": "4f0c1f5de59cf143d0b2c24c20d250808f897d5ce3c3c5706e9182bcd754f6cb"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/scroll.rs",
+      "sha256": "86bd2b22785955abfe7359b067df34258c669431ab6073cf2184c593cf456bd8"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/semantic.rs",
+      "sha256": "70cb64214d34b3f2f03dd3eaa3c951acfc96615139ddfd11dc462433d6c1a3d3"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/shared_text.rs",
+      "sha256": "e4e173c56b7a596137488d1f8000f68cae14ca9cf86f604e9797048ec23714a2"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/source.rs",
+      "sha256": "451c3b090d8a870e7f5d105b16aaa5a67513b9dea057ca74476e53f605586d69"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/style.rs",
+      "sha256": "96d911bd372565a53c3debbc44075f358bc3089d407e2d3fa7cb9ef3f1b13110"
+    },
+    {
+      "path": "reactivity/crates/gpui/src/style_port.rs",
+      "sha256": "6fb56cdc98ca9aaf0f39c2cd527ccc851cae6ba875f34ac805b519fdfc211db9"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/acceptance.rs",
+      "sha256": "2b3cf68aced82b26c3675ed8141ec95f6807155045da1a724252162e06fc7145"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/application.rs",
+      "sha256": "855621aac85065ace41d89bfe2426db6f31ae9f5c8e4f05f9cc2b45ad5d2dfb2"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/checkbox.rs",
+      "sha256": "020ca139142437746d8a591a65f5b16cc118c6e8fb8b5d87a17ee7046372653f"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/color_packing.rs",
+      "sha256": "e23cbd78b8d432ba87ad8a7675b7ad765c77f4df625f6c0841f2a30d8ed5300a"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/components.rs",
+      "sha256": "d4198163b56f81b6410e10416a0d6aea6a22ae7d272358de56bcd744c1463aba"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/dpi.rs",
+      "sha256": "ad69d7f75018fec4e0ef9bc2d08e470d0d70e4a869ecc352c784a7b6e1e42f8c"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/field_identity.rs",
+      "sha256": "cdd95da56c84685e2cad51b46a7b632c79d0c484249977748b23b53ea2aed22c"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/flex.rs",
+      "sha256": "2f7dc51e4d1e35925b07c88df4d91fb7fe1d8b08de502c327c3d9325e9b27feb"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/focus.rs",
+      "sha256": "370aea7c89d7ba60f11a4bd861fb457096479b25795ff9a59dc3a249440309dc"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/identity_recovery.rs",
+      "sha256": "167b1dea9fb4cfcd4bd433ce6a1677309a8b0e5cd6c40955ca02daa395062b01"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/images.rs",
+      "sha256": "2ae6c09103ed32b23acab224c969713e9df2da50f908c065ad03a1dfc00c9711"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/immutable_text.rs",
+      "sha256": "21f552a31fffa8e10cc0850da1894073423bffe910c3bdac119af63e0f8517ab"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/inspector.rs",
+      "sha256": "381ed09ae04d07839741474db5205f5de0b69c464256f48582f908f0916501bd"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/intrinsic_text.rs",
+      "sha256": "8f0060dad4a89044b0e4dbf228f23ff0aa179f3dede1d49e718498cdf914e267"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/library.rs",
+      "sha256": "f5b36d0900cd143d4c073b6b4003185c400f55887bfd5367160fb457fb419c35"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/lists.rs",
+      "sha256": "6f4a18e91fbaef2fdbf25f89345d5ba813e2d2019f5cb4d1422f7621091bf152"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/literal_dispatch.rs",
+      "sha256": "4d0849cec386a07b9b6722e86e4ec73748ccaf92d52162e370bd8171d8d2ac01"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/paint_patch.rs",
+      "sha256": "306c57c67246c3e7d73fb9e624852c69e005db26c2c66b811d08438bc9a1cf65"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/paint_slot_rebind.rs",
+      "sha256": "112a19d44d85ef9d568c85c83c7f01f00e338e4ae9505307a5f666ba4c22dd12"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/paint_slots.rs",
+      "sha256": "a015bdb80473691b9efb0685ef0911d22265440d6d4cac89cefd49e80dc79580"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/pointer.rs",
+      "sha256": "19774ce3fc4eea7e5e54284466a8626ac15858bb0cb56c7d9bbb532434b8fb42"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/pointer_focus.rs",
+      "sha256": "a6a64532d50876244be88eac7a543831dcc464361a0dfaae7933c0705a79edd2"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/ports.rs",
+      "sha256": "a0870932da46858b991d01f6892a13516d3bfd19efacdcd26989e131156faa02"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/presentation.rs",
+      "sha256": "10d7c2a4ce30964f594c51613c0db57641163887d9ab5d2258da0dd51fbc1c89"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/property_actions.rs",
+      "sha256": "f612fdba79d3af6485b925463383a21d82ef9c6b606c0898b681c84689c3364f"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/property_change_union.rs",
+      "sha256": "3a4f22acc6f5a1856a126af812c4936727b4ce65eb5165f10cf9a8254f2265eb"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/property_outline_allocations.rs",
+      "sha256": "d84a3163da118358ee4f1d513a81e8b4cc5b7d2a43388d02183b07bb89d2da76"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/property_selection.rs",
+      "sha256": "2b45f16b0d730bcbdca059ceb5fb76b5ba64a65f64e9528cb9f518352193cdb6"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/property_state_shell.rs",
+      "sha256": "b84633a426a85d4311b0ed1cd7ff8d4ba805f69f43a68e19a5d9b977af37f1f6"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/queries.rs",
+      "sha256": "7aac020f79a725c1bf04497e32d88a45a40f9f2492c8e0e90dbe6cd34c18c739"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/question_cost.rs",
+      "sha256": "39aa3f736c401bcda4e4d7d1e742347e6d02761cc41b0f14fe9e2bc44085ad0b"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/question_futures.rs",
+      "sha256": "9dd844b0a20ef331855ea04986b64d691969ce4f7eaeb6f17dd12a1f25cd7a34"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/question_input_cost.rs",
+      "sha256": "4a2a2f18a2dc3cc2caf4c708d2cb4b70855f8a2504af7ffb4636dd75e82f2194"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/question_inputs.rs",
+      "sha256": "8cf51fb30cdb49e9e30a62b102c9a038a60c12d3bd4c3b37d22f8f8474edc745"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/question_mailbox.rs",
+      "sha256": "63b7d91b9117d92293abf441939642e725f2234c8e8fb288faedb83abe8e5326"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/question_storage.rs",
+      "sha256": "5a7ff9325af11bad1564acad0a5975f67cca8154e039c092ca9bcd8c0dea6945"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/questions.rs",
+      "sha256": "4a29d0b9096c72b8ce4c94d097a1f1542017825199440898249715876ae68575"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/remote.rs",
+      "sha256": "4a15e5c105e1b83e2aea712c0f9158e846fffb007caa03163a1ae54c3a44b3ed"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/retained_styles.rs",
+      "sha256": "12c487421a8909495b20128ec8c93dc703df8d49e5195cf3d6c8273d96ee3894"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/rounded.rs",
+      "sha256": "650ab68a21eb1528bf7b78f5f8d5a5adc5abef152aae7f0ee2a7228167cc0250"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/routes.rs",
+      "sha256": "a41e978d136791f1ba3caf2bc88d5fb265a37c29d63fae13cdd12da31b4d1ab5"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/runtime.rs",
+      "sha256": "604954fe77ec29367659aeae2aab6543e02b57540330e575430ea20062e765b9"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/scroll.rs",
+      "sha256": "5f3fa56f71807b5566dd814b3f349dd0aa142bb9ba317f7f6d819d72e2e944c7"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/search_library.rs",
+      "sha256": "829e3886e79e9cd6367d8b6c031b5510a674ff13fe4f6759d95574fc1c5cbd58"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/semantic_metadata.rs",
+      "sha256": "8499add60d2bed4c03a2914cb20e7a130dbed1cb4243ca6df0ab28e196b4c4ff"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/semantic_serialization.rs",
+      "sha256": "4f55e13007b77a230e160fbb284032e161dcbbb3e011cb80688f478300dcb0bc"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/semantics.rs",
+      "sha256": "b8d2be76e172ed8313a07a0710039fb38dde609939776b9f2688b47d6c8bafe6"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/sibling_reconciliation_cost.rs",
+      "sha256": "8ac3ff609e6e7af336f2676cda8de0a6ce7c3dd26427baaf509c88a8ae60dfa1"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/style_ports.rs",
+      "sha256": "9e3a45302142b7ddb757ab57ab412f7b23f2ad0da733797522db7bce7977e166"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/text_cache.rs",
+      "sha256": "e9e87a03ba7a14c375611aa4b8f24ceed3551f0204d638b766228d233eafe199"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/text_geometry.rs",
+      "sha256": "74e3ebbf30ce9dc47a9d5ade52ac49cd0990d07587ec7c6d183caac19a081568"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/text_selection.rs",
+      "sha256": "0bcf93786ab68a9338c38984060b9a90192b6b3f88ab9d60b2160a99d79ad29c"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/text_selection_compound.rs",
+      "sha256": "1f7fcdb135e109e77c4969deba1a100281940f30605be33a3732fcc5950b5c8a"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/todo_comparison.rs",
+      "sha256": "9dd12332b8575e8e1bbb53af0910063dbb0c754d7d9a4d563d8e1d6e4373cf66"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/unicode_text.rs",
+      "sha256": "0541b4383890b3eff702ca09a4ed313f9c38530c28db4a7a0a942c208208f165"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/unit_action_cost.rs",
+      "sha256": "6ca3a0b26e5db4c8af8f6e27a0eda78ab4a5ec24702cb1e3fb0869a31f920062"
+    },
+    {
+      "path": "reactivity/crates/gpui/tests/unit_action_cost_two.rs",
+      "sha256": "af63399d490204e079811758815027fd298def126c7bf4888daaf22f0b5d0fab"
+    },
+    {
+      "path": "reactivity/crates/host/Cargo.toml",
+      "sha256": "c02f5f0790b534c063a1e2adf204f1645a1b9ce1bb201f393c9acbfb9d98528e"
+    },
+    {
+      "path": "reactivity/crates/host/src/lib.rs",
+      "sha256": "b83d02834f8b2e7f6cd6cb4b11f77c1deb5cfd00217fd523530d17482ded38b3"
+    },
+    {
+      "path": "reactivity/crates/host/src/native.rs",
+      "sha256": "95078f73d63e9aa311944d64cf37a306d00013185feae719279573eb220f8077"
+    },
+    {
+      "path": "reactivity/crates/host/tests/dispatch.rs",
+      "sha256": "4f20bf52781e4590b1cb0eafa1180563dbb0da49731e9979db83224db0f8ef15"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/Cargo.toml",
+      "sha256": "e56378f1c4c7bde47e64d7634862cb02a323b47e838baf5c810863cc6af5342d"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/examples/measure.rs",
+      "sha256": "496e5b6fa8a0b522261bbe0c49ffcce3b1f88c20c66e8cad0d261f186124c2b3"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/src/lib.rs",
+      "sha256": "7f0b74e04a3de017293e69978135b0e500b7489c893e34648707c6b2d8f4f173"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/src/pages.rs",
+      "sha256": "642d376f9475f3f84360b0e08233c875609f3e5593786366d52f1218c0620a6b"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/src/phase.rs",
+      "sha256": "0ba738c317c68daf225203bde7ce5d4a10efd001504b163a2f9cf1515073bb4f"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/src/ready.rs",
+      "sha256": "7d94549be94dae554675477d9e5257d0420870680f61227ac32611c96197088d"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/tests/loom_protocol.rs",
+      "sha256": "fed87779bfe596d0e46c8f344a227ee1fe70da329cffe1c89622dd76b954ed0f"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/tests/public.rs",
+      "sha256": "0a4e37f17d7dad75de8b8ba28263b50b7836cbc62b989924c41ca66deff0112e"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/tests/question_credit.rs",
+      "sha256": "51e6f05ddc06164f6466fa0b9017372d1ff4f9ffc8cf7564b83debdfcc6b90a3"
+    },
+    {
+      "path": "reactivity/crates/ownership-lab/tests/question_mailbox.rs",
+      "sha256": "801e141cee28a3ee651a8ee9672d7ba28b69f0e8b0053d44ef14ce38906a1f44"
+    },
+    {
+      "path": "reactivity/crates/presenter-tests/Cargo.toml",
+      "sha256": "ed2b2e5719563abef985fd565ea7680a1c70fd58ada28abc833aa36ba6a72753"
+    },
+    {
+      "path": "reactivity/crates/retained/Cargo.toml",
+      "sha256": "c8f5a0f2ac5bc6ea2b4a29c8aeda5fa21b669940c7e5d7b366f29e66078aaa3f"
+    },
+    {
+      "path": "reactivity/crates/retained/examples/checkpoint_bench.rs",
+      "sha256": "3736414ffd3917f646533388dd7415f30f034ce62bc16d08a3473fe4ab9cba18"
+    },
+    {
+      "path": "reactivity/crates/retained/src/lib.rs",
+      "sha256": "dbe3ea9797670c00304f8442209a51af649281f403d190a22461dce9352b52d2"
+    },
+    {
+      "path": "reactivity/crates/retained/tests/checkpoint.rs",
+      "sha256": "88053a1501a34764bd34125e2e04e8e41c93a3e59b64c2839c23caed7f6707a4"
+    },
+    {
+      "path": "reactivity/crates/state/Cargo.toml",
+      "sha256": "2d57c69725f2fd00bfed4b1d256db0a86c44d2bc792dddff2dd60b88f06b18bc"
+    },
+    {
+      "path": "reactivity/crates/state/src/field.rs",
+      "sha256": "90dfe1e8354fdd9cb38f15f2089fc997da7d84343598755af7397b7860440b56"
+    },
+    {
+      "path": "reactivity/crates/state/src/handoff.rs",
+      "sha256": "3f70a2000b41c3af26e9f92a714da3d9ee21976addea2e0cfff96166850f5302"
+    },
+    {
+      "path": "reactivity/crates/state/src/lib.rs",
+      "sha256": "8d460d5915f14824b6b840116a08a10973f6fd2cea1a55fc3578aee41c3eb0b1"
+    },
+    {
+      "path": "reactivity/crates/state/src/publication.rs",
+      "sha256": "a456c9f7e283683ab4cfcd71c55c98167620d136265f8f0375599f1766d1047d"
+    },
+    {
+      "path": "reactivity/crates/state/src/request.rs",
+      "sha256": "08e1978efe93ce7974cfabecd67112e312701b3414aa480f9c01a402e9568ca7"
+    },
+    {
+      "path": "reactivity/crates/state/src/signal.rs",
+      "sha256": "05d2670eef676e4931a02a48c5557d252dc599851448bdab7a7d4fdf16360dad"
+    },
+    {
+      "path": "reactivity/crates/state/tests/protocol.rs",
+      "sha256": "6507dad1cc96a1a6d0d375c6081e0ce5e9fa71c60d313f2ef62f395d91993049"
+    },
+    {
+      "path": "reactivity/crates/state/tests/serde.rs",
+      "sha256": "34c20e202309f7ccd03b4c3fdd8082a7250603953f361f625814be7b4725cfd5"
+    },
+    {
+      "path": "reactivity/crates/template-lab/Cargo.toml",
+      "sha256": "a06d0f84831b9e29744df98deeae23d01e4939a27efa0cb020d6914488d8a92b"
+    },
+    {
+      "path": "reactivity/crates/template-lab/examples/sweep.rs",
+      "sha256": "08cb7822adcec40fca83cd94295e8a6c8e7c6a2b62d66971ed662d60154d42c5"
+    },
+    {
+      "path": "reactivity/crates/template-lab/src/lib.rs",
+      "sha256": "97b776d9467f7747bf9a378ac95603dc759d83aacb61679ee2606ee84c6af630"
+    },
+    {
+      "path": "reactivity/crates/template-lab/src/property.rs",
+      "sha256": "1d43a3e8d2cbda9f54371b205dfdd7e4abfb1c98fab4d80b4e342cc064d80d85"
+    },
+    {
+      "path": "reactivity/crates/template-lab/src/topology.rs",
+      "sha256": "980a7913c7a47cd3661f36809a86293a345b7616431e4fff85b5fcea89efe248"
+    },
+    {
+      "path": "reactivity/crates/template-lab/tests/model.rs",
+      "sha256": "89709c1183c012e1cf19ce9c8c9c01bcc8eb4cb9047e18a26a51c01e855fc6ee"
+    },
+    {
+      "path": "reactivity/vendor/accesskit/Cargo.lock",
+      "sha256": "a55c0bf4857eab8a2f547268e6aa4b93cb25242173cd2b559934e2e1de538363"
+    },
+    {
+      "path": "reactivity/vendor/accesskit/Cargo.toml",
+      "sha256": "4622b7e8e02906e376ac9f4eb5d954237d35477ed760476cc0f97188a56da1a5"
+    },
+    {
+      "path": "reactivity/vendor/accesskit/src/geometry.rs",
+      "sha256": "2f2c37da6a856f1463c593bd2c01d07f237951556c3f72594cb05a2561afa7ed"
+    },
+    {
+      "path": "reactivity/vendor/accesskit/src/lib.rs",
+      "sha256": "12c41a220bf4d903d98476aa3295134b7da6cd43111ecdedc9cb1fd6c29a7ca7"
+    },
+    {
+      "path": "reactivity/vendor/accesskit/src/text_lengths.rs",
+      "sha256": "edbd70172a5af866fa4d0ee70fbe9e28d6e4a5928a613aa8a5759e89c4fb27dd"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/Cargo.lock",
+      "sha256": "43375a4d1fc749a271a5701832a6404c911a7709a7e42115a5b581f034a3432a"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/Cargo.toml",
+      "sha256": "58502ae92b23c889a2b5b60e643c9e6f7f67fff4ab3d628bff132ea9b6bb3e7c"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/action.rs",
+      "sha256": "36d0787759c74a16a0718a81bd9b10d73d03c1114610c7c7d529ef8f2bd8efb5"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/adapter.rs",
+      "sha256": "2f1a7498903790b4a00934a322d1a363389acb7c6664ecf6ba58e5de08ef3a20"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/callback.rs",
+      "sha256": "17c178506a151d0341f4f7eb0824daf57cfd6190170a6af2627701237a805d12"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/context.rs",
+      "sha256": "83feb006a50a9015079d80ece57885717bca6f1731bd90d1d332bea4e87e6940"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/error.rs",
+      "sha256": "9905c653b2b86274331ba783f6ed3f37acf9bd3f450e59811bdc6b7522c51ff7"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/events.rs",
+      "sha256": "151b7ac8a6ccd2b4ab7ad81dc4c8618f4270182d6def747ce31b1bd30d039ee0"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/filters.rs",
+      "sha256": "cfe74d16da43ccfda209f11107faf78442c6830fa126cf2d48ffdcdf14c65288"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/lib.rs",
+      "sha256": "2cdd44a13d5403fb8327f6b0fdb6761066c910d603de5c441bb15c17830b070e"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/node.rs",
+      "sha256": "3e8169ff47a14a46241e8a808e42c9f0d3d19fd334b37fdcd270497fe2a8fac4"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/rect.rs",
+      "sha256": "b24337632621ee6bfa6397525bbd864b08b94e23c9201ebefd0fd73d1aa112e2"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/simplified.rs",
+      "sha256": "f5da65c5f7f92e54747ad0f957522fc2bf7f6e215a1b1582b0ea1526f9404bb5"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/text_attributes.rs",
+      "sha256": "eeeb55273de1e21aca136a2f082cd2a91354f5166c15fa7fa5924aff60577f04"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/src/util.rs",
+      "sha256": "8b3c60980dd6448cdfacc6e45c8fd3886c41456ca9ba86d0904601143d673566"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_atspi_common/tests/adapter_order.rs",
+      "sha256": "5dcea9220095a03e462245860c8e8ed4ed14130b61125fb33ba63c1ebccddf01"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/Cargo.lock",
+      "sha256": "2f68b3c95d3e1a974c9fbf2980b95eb56710f380d328da52bea9543bcd3fe50a"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/Cargo.toml",
+      "sha256": "9e32ab843ddc713da76250587ad624cd772b2fe1ef676a83bbcce29d87c5beb9"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/filters.rs",
+      "sha256": "0511ef395f702095a0add38d3659492bf646dfd120eaa75232275bcfadb963b3"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/iterators.rs",
+      "sha256": "454de6ccb571e7bd831c721b8ba4eb76dbefbe97043abfc727b917c2bcc28a1a"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/lib.rs",
+      "sha256": "c05cb365dd464b05b18f6ac97ff98c22e507f37c22918cb19c47b80dd9e85227"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/node.rs",
+      "sha256": "79686e8c6867cff462dd7920bba8774dc01163829f1cfb75d46af07cbf2ec6a2"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/text.rs",
+      "sha256": "c370be52b723075ebb27cf93dbaa8913faabbae5951aaa4cf645899aed02ed42"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/text_codec_tests.rs",
+      "sha256": "d76a73c2bf036194316b26b2cdbf9f3363b0a7c095f9046ae33b5e5fc480fe1d"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_consumer/src/tree.rs",
+      "sha256": "8b600cfb981db3c41d88619db30a93293d8fa8fca6dd37853b4b3e746129f0c5"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/Cargo.lock",
+      "sha256": "4d61ce71db0f7a83aacd41db4a90e84539dd8059ba7ad7cb79e420d7922e4147"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/Cargo.toml",
+      "sha256": "6b7055b3a6c35490c7684bc7b1269bd12e776c44be73d1ee4a8f984509838c07"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/adapter.rs",
+      "sha256": "622334ba9d79d695bd320a6da0be4d6b4476f3031dcd8b2f0e0f358bcbc9b122"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/context.rs",
+      "sha256": "044150b753eeed39855a9bf5893c7eb20f06183068a697bca529407e2b989261"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/event.rs",
+      "sha256": "e3cc2226539c79b4153fbbdf17963db91699fe1f0a9827326f2f919578d75335"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/filters.rs",
+      "sha256": "cfe74d16da43ccfda209f11107faf78442c6830fa126cf2d48ffdcdf14c65288"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/lib.rs",
+      "sha256": "b1df68dc7181efe2f833df5367493a3d2cc06dc2993202f612c4bf18285f7972"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/node.rs",
+      "sha256": "8d2ef59cc7bce6684b3d322f1e0870a493ee7abbf50b43ec65c43b4b7fc6b5eb"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/patch.rs",
+      "sha256": "66cd13504699cb38789cdb07f7cb2c7878c0ef0f867a4f6040b3d014ef63d7d6"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/subclass.rs",
+      "sha256": "54bfb61ddd2f8f10d5b2d632849c20a2f6b0d6716cae5091ae4122d8afbb42b9"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_macos/src/util.rs",
+      "sha256": "a2c014d62ebdc4e4ef3677b00b3635d68017658f7823b6bb0324ebd8fca0e424"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/Cargo.lock",
+      "sha256": "d6c5c4aa19b5363517e69066c8495a72b8079499c9ef57a87e41fff5c1c7d7e2"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/Cargo.toml",
+      "sha256": "e046eb9e0b1d8fa61838f3e6005523ccf7681d349af2dee9e2fd64c67489b242"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/adapter.rs",
+      "sha256": "0d09b3944a98998c7e7138e1077fbcd4e0ff19d1d2e09e665d14daa9273640e3"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/bus.rs",
+      "sha256": "f5d23f8250988c4d4b4cc966c444a6c9596a9f3aa4aa11f68525eaa7c684dae8"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/accessible.rs",
+      "sha256": "b60a1c989be3edf03e9661df8663cdd1b3930ac40db40058cafabb322ce38626"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/action.rs",
+      "sha256": "7ffa334b1cace21aa567a074d0c1ba59dd2229449af02ffc329bfd4671940903"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/application.rs",
+      "sha256": "530316441ee42b415605f6f50526ac776d8ab038aff24dfa02d4352dedcf2db0"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/cache.rs",
+      "sha256": "abf640927b5dc79cae1ff19a1562721ffc833ffe3a4bede0e07f66d54e8314e2"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/component.rs",
+      "sha256": "bb95115fe289aa2b92b6fce76a7a60df9a93a06a32281192aa4fdd6e75373fc3"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/document.rs",
+      "sha256": "61cde20381ea0966adb5ed67ad262a7d8231c10c44cbeecda639316154618f1a"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/editable_text.rs",
+      "sha256": "93144da3a4c7a96f5979a228ec27096dda9bbe075c1e4827523d910dbbd88369"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/hyperlink.rs",
+      "sha256": "9a53b1d164208963ed047326f12ab380700807a3338b8c76f4edd8a492cd35d8"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/image.rs",
+      "sha256": "29cbbe368afbbbb8bfe9a8ede4dc4a2154c329e136e6aa5f115a37aa5b403b0e"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/mod.rs",
+      "sha256": "a3f7875a51c3f69de9a6cbbf03044fa588270d6095c00446525308d84a5172fb"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/selection.rs",
+      "sha256": "980d556b2620de481146580744d80f3bde0631b148d1330aed268a0a5a6b7905"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/text.rs",
+      "sha256": "3e36eb6bdd8dcdb7d9831474aec4d0cc86ba281d65addbbb52e72aa165b64ed9"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/interfaces/value.rs",
+      "sha256": "829dfa73ab581da1be9210c1a6a0361bbb8563fb8d49c7057557cc1ddefafbab"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/mod.rs",
+      "sha256": "2ea8e56ae5d3fde6a380582890597d49a0390a86dfddcb275df5281ad46cd90e"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/object_address.rs",
+      "sha256": "71f293f5de1c46e5e2a2503053baa3c1fe7c62c13cc7c957dbf2843dfa531e79"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/atspi/object_id.rs",
+      "sha256": "d0046b00da17de03c1aecbe6b50b1eb6cad5d7c3f28235f7abe263cc4d483d3f"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/context.rs",
+      "sha256": "6dca0ead057f6c50dd5c7f878d0c33a3a4e44309d63f3671122f8891dd571b46"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/context_tests.rs",
+      "sha256": "7b5a4d8ed9e1ac9a05c8bfd33525313cedae978f16b32b59cbeadc72708c3e95"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/executor.rs",
+      "sha256": "38e4a47fc2afd555d91d8e74156165d7da632c381e488a1c7693ed140ff278fa"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/lib.rs",
+      "sha256": "4416ce59366d321c3dbd29a1054c3ad6c426168c97f7b237ff3e818de6c3168c"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/src/util.rs",
+      "sha256": "2a043a60ea1d76c5603d65d5a9844586f00d1d310902032214a10c70b80750c5"
+    },
+    {
+      "path": "reactivity/vendor/accesskit_unix/tests/service_lifecycle.rs",
+      "sha256": "299e144d21250c815cb401a49b2652e657be2c086ccb716546d7ecb64c0e9e0f"
+    },
+    {
+      "path": "reactivity/vendor/cephal/Cargo.lock",
+      "sha256": "8045b4558cb17106be231102704a7be690dc3752892f336d5f92ccf08754270d"
+    },
+    {
+      "path": "reactivity/vendor/cephal/Cargo.toml",
+      "sha256": "fed063e737f0fefb416e581588fab5d101e8938cebb420d832e51f9172b9a1ee"
+    },
+    {
+      "path": "reactivity/vendor/cephal/benches/layout.rs",
+      "sha256": "b03bd2fc5fccfd7f44b648d9e07f058b46603203f0498a933e3c8e8db5e19f24"
+    },
+    {
+      "path": "reactivity/vendor/cephal/benches/suite.rs",
+      "sha256": "d635d3852fecf5556f1db10c04eadab62bbce86410b08d0c092c1d0eb9f1aaf3"
+    },
+    {
+      "path": "reactivity/vendor/cephal/benches/workloads/mod.rs",
+      "sha256": "0bb3aea171f9dd128619e23e3d177f194f48043b0faf3a7d61936065adbe7c78"
+    },
+    {
+      "path": "reactivity/vendor/cephal/examples/memory.rs",
+      "sha256": "254860051ee043ef5a0df23bc0c3eb8c432b19210f246a407f98c4a1f50fc998"
+    },
+    {
+      "path": "reactivity/vendor/cephal/examples/profile.rs",
+      "sha256": "3c09d08013a7193f8db35f53e3b55f54c9619f493d45063237313ef0e14cb84d"
+    },
+    {
+      "path": "reactivity/vendor/cephal/examples/scaling.rs",
+      "sha256": "b203559a37652bbd6af49a366c564bb6b7b45f3448557f41f5862a9b598d2054"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compat/mod.rs",
+      "sha256": "49ff5f31799ad8a983435e43c4adad57d6aeb3a9c4da9eaccdc6f7d98ff7f90a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compat/taffy.rs",
+      "sha256": "15ed5ee4bf5cd0752470af1274edc370ec4a31a6cb14bb4aacc33f0c6348711c"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/block/context.rs",
+      "sha256": "0bcf903147c391a9941b7ef9ba2854a2c583599889a762d99d2448d40add01f6"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/block/floats/mod.rs",
+      "sha256": "a44d0c0d8eb31f9ad3a14a0aad82c12f82f86641085a5c5111bf92e53b190d42"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/block/flow.rs",
+      "sha256": "3e86ff87bc7321b4770000328e188ab898532058ec75ecf642a5cbb5dd1451ed"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/block/items.rs",
+      "sha256": "03769c4f77b937b178f2b61f85357a97d4588d6582a2ba856a9cc266ae2c2dda"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/block/mod.rs",
+      "sha256": "edf6af9153b039e6244bbde4d452d8bcf7623b101e9d0352a5c88ffe5852429c"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/block/width.rs",
+      "sha256": "539cf2b81fe73467b2c826e967889fa336d3863fd759db2bc4118f5120b613c9"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/common/alignment.rs",
+      "sha256": "970e48305378795a8b0bdef766d3ebe11c95360a0f63976d2f217b972974c396"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/common/mod.rs",
+      "sha256": "025945627ed3022644c9957e23eda6ce7396f8ebb08fb2b179e50d9626556ee8"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/common/overflow.rs",
+      "sha256": "ee52b2ccd42915d148afcb954d0716e76440ab1b62d92941bad49f88cf08f06a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/common/sizing_keyword.rs",
+      "sha256": "7362c596235623111793debb0ef439939ce31bb386b166a9c661a04d65872494"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/align.rs",
+      "sha256": "a5589396726c0076c491ad6f7e5a228562e5adb948573926cf661b87c329a5d7"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/axis.rs",
+      "sha256": "69933a5980eec43fd722f3f3badd39c450ec5516658473bd67e2d57e9ed6b0b4"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/balance.rs",
+      "sha256": "d7211e5caf47b88c9c3e16e27f503e5e05bbe27d9898ecba13af6482d9a3418f"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/base_size.rs",
+      "sha256": "a04f98f4464943eddf7975ad957813d3b8bf6f504a0ee0a7b721695c1053b3f4"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/cross.rs",
+      "sha256": "e82530d7f980c78b4e2b91ffda024462ddf048c0b9961a0823327ed81de8779a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/final_pass.rs",
+      "sha256": "b3590296e399dd6700e0bcc25a488723cf814b3ec11d6972f8e54ac1c9aab2ab"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/flexible.rs",
+      "sha256": "f2e35c73b0173e9e27f5707f1217d60d5cfb6722d42f1dc97ae27432dc45399a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/fused.rs",
+      "sha256": "121ed751d579c0a13e5cf95a2df60d172fedde20c3a54ab76a15592c6f4cf970"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/lines.rs",
+      "sha256": "7ad05f360738b81aa7124e1835f5748fa63f43cf8c9535b37ab29ac56eb446fb"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/main_size.rs",
+      "sha256": "b71b6f30f6e3a3b86d96c7aac76500bbe26adf907f71f0e6126257ee35053749"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/flex/mod.rs",
+      "sha256": "662c8cf21c5c4e251986cbad362f6488bf8159df9e0722a069700140d441d405"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/alignment.rs",
+      "sha256": "cf4b0aea8d9771e452c29dff63ce32ec719845e800f6466e786debb0d4a317b5"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/coordinates.rs",
+      "sha256": "7888862122e16527d38db9118a13d6e2057a7339139565d32071de0969999e22"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/explicit.rs",
+      "sha256": "70d52e5fdc8d43398611d02915dd767215c197d0480e15e59fb77f770c47c24d"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/implicit.rs",
+      "sha256": "d01e211f3bcf5b7649c8a913fe2c76ff382f7dc54bfd827926071b12ef79e3a3"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/item.rs",
+      "sha256": "a1eceb99ca92393d6a921766bb7020c51fb274d5b3bd29a13dc71c7979278305"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/mod.rs",
+      "sha256": "0b4e5632ee7b8f0bf40fd480ae9b6b733c9cae5d6bf758e70420e384948619a5"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/named.rs",
+      "sha256": "cc0876b8afcb1f3b7c6bca0198c82f10fbde33fce7f9517d1c4e48e46d2cdb60"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/occupancy.rs",
+      "sha256": "7b3b7edb298470d25eb0e1b033798d6301d09f79b4399409ffba6a786b9a2f0a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/placement.rs",
+      "sha256": "79651f8b1f6b6bbc7cce684fdbde0080465764434dabf777fca6939d89c9e9ad"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/track.rs",
+      "sha256": "22214acc62c8f12659841215299543f7bf39accbe63edbf06203b683bed3cc30"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/track_sizing/distribute.rs",
+      "sha256": "f0c13ef9129c9b06c97eac32b5452c3db5e67b21e1eebd035c7d029f32d3559e"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/track_sizing/intrinsic.rs",
+      "sha256": "95aacc442da45fab394cd3e218b537e557cb444b995677f20bcb81358981fdbd"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/grid/track_sizing/mod.rs",
+      "sha256": "2d755b89b63bf706d3cc8dbbc8c634fcc9b7520e57610122bc7994313a3b1eb8"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/leaf.rs",
+      "sha256": "6a1198e8d436b762b67131d118e3bfeed67b810089afba23cda0edb8c107e772"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/mod.rs",
+      "sha256": "30d8471366f1c4f9806be8e68d5d43d2d4ba9b4320c7c7be8a9d7135ccd17abb"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/oof.rs",
+      "sha256": "488013040b2783ddef1ad6105eaddc72867a8dfebccecee055a236c2390bcc93"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/plan.rs",
+      "sha256": "b1b68dc393373c54c25d7513169c2cf8f54bafa52622dc04ef1dcbb7d6f38445"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/compute/scratch.rs",
+      "sha256": "1058c3b8250f34367c8ffa10c44d50f4e9d0925e9158a73aaf5dbce9bf2a8e44"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/geometry/abstract_axis.rs",
+      "sha256": "aa47edccf1fe3a8be516f0e43ab3b02090e78d03796dfc98f6620c9a0fb31d43"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/geometry/maybe.rs",
+      "sha256": "b6eb706547175d00eaa978149928a87f00445e7994cb573fd41fcb0f3f1817dc"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/geometry/mod.rs",
+      "sha256": "3d58a890f5420a19060e8e748a7baab5c23e0a29c4b86f7eef314e4208431d1e"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/hash.rs",
+      "sha256": "9166fc1164e4a3a91da0505a7312ffb3e274ce5d03330a2020a7641736b0dccf"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/lib.rs",
+      "sha256": "d03dad35cc4a92cef9234d1be58bb6640b346420a07b153a884c4bb87130d9ff"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/column.rs",
+      "sha256": "ee0e5d3221a3df4f5ecc5649e563ec72dcad09d1ea75676341016c236b49e166"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/id.rs",
+      "sha256": "f659995a956e17beaefecb1efca40850778e56544c1163e0bf83b47615d7b0ee"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/mod.rs",
+      "sha256": "c20fa7caff16a0fbe4d1afe834f5f82696e8500d6ad9015d24e714128a0ad047"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/node.rs",
+      "sha256": "48a755a65d27e594633f2202c5416f09a82b3ecdf48de1f7c4cfe6b376486ccf"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/parallel/mod.rs",
+      "sha256": "13e4843d84612a735ddc8b9aba48cab51cd543e520690587f37bae7022411607"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/parallel/pool.rs",
+      "sha256": "39a2854b7d24269069ee1671412fbf8ab0fa4bcc0a6b6be48176a3ea5ca0f736"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/parallel/worker.rs",
+      "sha256": "705b37b386a1e0c4ef0cb2512c0dd2cfdb7456c6594ed8be8db38ad4a281c56e"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/styles.rs",
+      "sha256": "5d6220e7e562160fa3a1b5e6e85647661ed5d38e58c9a2a836383739f0e13a8c"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/owned/view.rs",
+      "sha256": "9f40cee56554038dad81522c1a06d8317c0baddcaafee0293b45987c50ed5656"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/round/mod.rs",
+      "sha256": "f45a00991413108c60943043909f6bffe97973b56406f8652fb70d0c22736540"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/schedule/mod.rs",
+      "sha256": "5c25257f097c11d734545c153f0ea87b37ae9f7ab9b38eb0b4632f6d65c334d3"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/schedule/queue.rs",
+      "sha256": "435ebfbd3751db81bf456b12a0ee0edf514e83c05b74ba8c36cad0ddac4886fe"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/alignment.rs",
+      "sha256": "d0bd62270a0febef88ce481aa9e3b590e0af762fae9e92048e2c22b296093873"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/calc/mod.rs",
+      "sha256": "70f35229a8b65e5b3a0a054694e04428a62dd52edb916182a4ef43fa3ca40be9"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/dimension.rs",
+      "sha256": "7e8c5dff31e7ca0d6451828d2e7e81747fc932eb61cb2320587b97413e07f3ff"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/display.rs",
+      "sha256": "5cda6bb19860aaf1aaac85d3c593ea00d4127c4ae17a4b905f98e75c7697b671"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/flex.rs",
+      "sha256": "fec6704774ae94ab67bae1ed200c815e661ecbc227ec2df481a6a0c00b1c5934"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/grid/mod.rs",
+      "sha256": "eb1a372e5ece4af08df583b0b5f1837594c7be2e555a06b18dac9031c4f467bb"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/grid/placement.rs",
+      "sha256": "e741f71e78dcc4186828cf8231ea81b604727714ca9a0596af6bbc170845de05"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/grid/track.rs",
+      "sha256": "40834105e126988bb1068dd4df655ab6b8107e68d5ec675fe9424df88abb7f62"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/length.rs",
+      "sha256": "e6807d784587dd6949495ec2886ba12e2084abcf1ae977190f7afae9512b1e5d"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/mod.rs",
+      "sha256": "811a4f34dd9b100ec3b84094768fc0761467ad83e2d914b3099506a8496d1852"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/style/parse.rs",
+      "sha256": "620142a3803b17597a73211bfccabb95f9edd3c1a8e90dd19e920b2c317b9713"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/cache/entry.rs",
+      "sha256": "d499422c4d82f81d3f695cf713d5cc2a6d15d54013cd04e7e6ee20cd082b3b4e"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/cache/key.rs",
+      "sha256": "2994f63f962dfdc8f2fb2b17fed11c62938c32f634ee75cf18484de6e0f46481"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/cache/mod.rs",
+      "sha256": "3b1034d5a7e42cebfcbb9b5a82a43f52b4fe0fe421a9de732df423f67b7396f8"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/input.rs",
+      "sha256": "f904064d65318852a045cbbe97c07e39fe66555b2a3a670f789e063ac336dbc7"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/layout.rs",
+      "sha256": "bf9e06771440007bad0a5839cbe9d46e67fb763e03558f13cad0fba45292182c"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/mod.rs",
+      "sha256": "1739b3ca54d067ee33df467f4837f72130dc856f811bb0cf9e36f7bdfef49093"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/node.rs",
+      "sha256": "e7d00727b59d5906b2eb9ea9054c769beebd86f96abfb1b1d637427a0012b5d8"
+    },
+    {
+      "path": "reactivity/vendor/cephal/src/tree/traits.rs",
+      "sha256": "62f94e8b4c7eb562d6cd34f0d63ece66918c1894e2e109c397480bbabd21baf6"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/aspect_ratio.rs",
+      "sha256": "781c48e50354ec6513ffbdc89bb595a849070d4d09c1221ca5f1c9ac8e6b70d9"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/baselines.rs",
+      "sha256": "f15f9da25202b4477af9f2d4de6ff9ae38429e0f47f6c4a692072b1b93c1c684"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/block_flow.rs",
+      "sha256": "1fade760168db241cbcd4364c2157729465fe08d02268e57f0b0ea1ea825fe59"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/common/chrome.rs",
+      "sha256": "44f2ecf71898a67238b3b45e80ebdbd61ad9e8a9ddac8bbd0420a48c6c1b4265"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/common/mod.rs",
+      "sha256": "bc173ba6c703f2a587d6a412c5e776856c8357187f7e8a6bb2118fda23dc2b1f"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/differential.rs",
+      "sha256": "c0826bbbce1966e3e73c069078610b9bd3ee33b33596cffc17e8155a1af9082b"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/fast_paths.rs",
+      "sha256": "f4e6b0b9341aa25af6f612f2bedb96905e2ec7520b483b1b65203a6a6f1752be"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/fixed.rs",
+      "sha256": "43a47682ee40f7f826be80a7a5fb3908983c4670c880acb096462e0c9975fb8c"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/fixtures.rs",
+      "sha256": "7d93c7aaff04b9a59e0ef11fb083ab72239f068d3d111669d092e7e3273cda9e"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/flex_stretch_measure.rs",
+      "sha256": "d732e977ff706a22587d9c539021843ffdf813ac5201aeeed7339a240f61d76a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/grid_min_content.rs",
+      "sha256": "d4c08adeb76bee1f366539fa9e4f3a12e0c17352750342961c380e9f5becb359"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/grid_replaced.rs",
+      "sha256": "f15a3d519b118f6c938eb8f4dcb80b45c533ccb58a8b40dca52fe2fa9e8ca47a"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/incremental.rs",
+      "sha256": "aec4c353ea3e6caf923f7396dd3c6cef6544a4a06d605897f4f9a0f4a4eedd92"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/measure_count.rs",
+      "sha256": "29b86b6210fe53912add8840bfcd081b83e8f0045bf8c1e91a009597080f40fb"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/observe.rs",
+      "sha256": "6fcc995c4096004ed295f359c0b963f42db67b968e29d0d44c48450fcd198def"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/rounding.rs",
+      "sha256": "73f552ce9c9750aa20c827683d1f95118e9ede00fbf2cc51265d6df2ae086b2e"
+    },
+    {
+      "path": "reactivity/vendor/cephal/tests/serde.rs",
+      "sha256": "ca9934311992ab5cd597ea562824233948cc53dd687e2fe99186decab41141ed"
+    },
+    {
+      "path": "reactivity/vendor/parley/Cargo.toml",
+      "sha256": "2c56dc23a167e24c92ed4c29ce905a31ecb847ec59ebe7d8e7707087fec5a09a"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/analysis.rs",
+      "sha256": "2ba2b899fa4740d27f00cc6234dcf13d67241ff76fa0cd1403298a05e025b021"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/builder.rs",
+      "sha256": "0ddfb7b33a1867cba02629c1a88c5df3d842f03dd3b10511ff9c5c254f315e21"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/context.rs",
+      "sha256": "29db1d3f419c9222dc49f697f63c2f4e28864dd55d801f126190084cfef12ad4"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/cursor.rs",
+      "sha256": "3f811aa5ad86d888f1718e4e54a37ae7916d9fd4ff003d014d065e48f3ae0d3d"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/editor.rs",
+      "sha256": "f4174feb25131c2e273ed9f75d44ef5e29c77f985e4bd5836564f1d966408093"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/geometry.rs",
+      "sha256": "21983679ebfeeb48d67f06a58ca7873fcfe5d437032de0f54903819e49af12cc"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/mod.rs",
+      "sha256": "43b9f0a8a6eb4bae19f15669502754531ebb7e947a8257cb493683edcb09a456"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/editing/selection.rs",
+      "sha256": "b48f4651bd4058f15a807e6bf6ceabb5565ad98eeaf92b841d5f5c91d1e0288f"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/font.rs",
+      "sha256": "62f6d126c6169e0cd163c2676de60c7e168df9e990a80303fcead812becc4a32"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/inline_box.rs",
+      "sha256": "ff07f03db8033fe4a456cf6e6bb8adb93773186e2630270e8e4df0ed8c59672d"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/alignment.rs",
+      "sha256": "cf4a4c622a0d484d4d90eaac1e229cf598370c5ae15e9872459fe1dd2b815853"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/cluster.rs",
+      "sha256": "01823dc2a169eb3e765c70780b940be64319f309ea6f0f9c7d4e2a2c355009af"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/data.rs",
+      "sha256": "7759354a87ee00cd57571aaedbf2d6dd636e9713480ca8563aea2bf92a2323d1"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/layout.rs",
+      "sha256": "71031835064b10c4e5b8fa0fa26421a5e55a1a1fb4a08e03cb15ba140e04d461"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/line.rs",
+      "sha256": "479bbe37cf666f52210ed38dd4429575c6fc914cfc18cdb7bfb8a5c7ba10b310"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/line_break.rs",
+      "sha256": "2545bced43ff30bae565e9650c663cd73d4e8004a9cadbfda0604e3424f5c6f5"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/mod.rs",
+      "sha256": "5758a595904341c2a80ef151e2b57e0093cdd478ccc8642ee22f31a48df8ccc9"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/run.rs",
+      "sha256": "5d9fff5492c2adab4a4263ce47fcbff7820b156deb5c2246b15ddc7c5944b45f"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/spacing.rs",
+      "sha256": "0521e13ace4873b2c742a32be05128b1ae67c8f5e691405caaf516b6a3f682ce"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/style_metrics.rs",
+      "sha256": "f8052144dbab767c056359419a06cfe14c64497e54ccc7ceb84df17ad2d5bc1a"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/layout/whitespace.rs",
+      "sha256": "1b743c60d5356fcd9e0dbb8b162c6e834cf342f4dda19205116bd250097d9821"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/lib.rs",
+      "sha256": "ecd7ec5136d49d3c40ee070be10d1342598248861c95b0078800f3cba3d308a5"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/resolve/mod.rs",
+      "sha256": "8e02f2a4b0700a52a4b66c4990fdf8bafce55e01a34bfdedbfd39bda7da7571d"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/resolve/range.rs",
+      "sha256": "d5bb5cee256ffadf8cd544b3f25388da041299cd9b90dd44b5ab85b945aee446"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/resolve/tree.rs",
+      "sha256": "b03514c231f8f6ffc0ce0f3bc886f233f98f86da7c6f31d5351521ec83c85183"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/setting.rs",
+      "sha256": "9bd642f3b83da67667b513907e17974bc759fd8c7ce4460ec1923a9c86971057"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/shape/mod.rs",
+      "sha256": "c2d1be0d718f63ad5fb96495b98b4f10999bae2b5561ff0d5be109cc8103dec8"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/style/brush.rs",
+      "sha256": "d09dfa6e3283c03550186bced5f9f32ce39c4f5798b2979b02f945dc2c55b8e6"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/style/font.rs",
+      "sha256": "f65a9b1106b618c5301964453f943c59a866a73a5516393400dfbedef23e3d21"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/style/mod.rs",
+      "sha256": "37d271bec95111b98fa6c83008c11c70c3d6c488903ecc7ce67738031f889009"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/style/styleset.rs",
+      "sha256": "cd7851de616865786eea7d72d114abd8ad60b9aa49372cd23c7ab1fe70d88e65"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/mod.rs",
+      "sha256": "5228e89a84b2b6e9bbbf351e548160a7d57e20e439ac8d675adf6465051b268c"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/test_analysis.rs",
+      "sha256": "1f5078cf3311411c2452bb12540997661a9f2e85b14c020adeaa739bab653c23"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/test_builders.rs",
+      "sha256": "646d02888b8c1850affcd8809145fe3fd4608f546e7122cb17e4270de6305144"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/test_layout.rs",
+      "sha256": "0f6e0592ea35bd89d695644341342655c2af56ee54b7ef24d22703ee79bb13c7"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/test_style_metrics.rs",
+      "sha256": "9876acbcb825227b005b041bf2e5a270b6840673abcf2e4ef9fd5692bfc55616"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/utils/asserts.rs",
+      "sha256": "b7860f09d593a529c19d82e2524480c95f56cb749069ddf091dad69a769f2673"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/utils/fonts.rs",
+      "sha256": "d01f85603963e37ecc4b87a5d9be1357e42a1ef288fe7873f55ccf48a78b47e6"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/tests/utils/mod.rs",
+      "sha256": "6aa325fbbc1c5213a05bd57c64df247a936a5a1c1e2c5c609b58d395246f5f62"
+    },
+    {
+      "path": "reactivity/vendor/parley/src/util.rs",
+      "sha256": "fa541354618ebcc115494d969983d316726d6bd37faa32439e47a011bd32d39b"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/Cargo.toml",
+      "sha256": "115f26056ee14ccf6272d4f1f3373d356dbc21b14c9429890da01485cb0ca927"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/analysis.rs",
+      "sha256": "eb8d4cd7c80fafb42baad9e9647e4a31a2ef7318e7d1d098c101c8fe7519d80d"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/analyzer.rs",
+      "sha256": "d1b9f210b05cc5f6289b1f89191bbca95c93ccd55dc865100f911efd1f5a783f"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/bidi.rs",
+      "sha256": "c00a69eaf50c80fdfb0cfb4fc03ffd7fbf65b5406799db391268aa430827e070"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/break_overrides.rs",
+      "sha256": "cb89c649c87a1cc461f5acf1b37caf900114453edd06430cfb9304f43b29bc7b"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/glyph.rs",
+      "sha256": "28a20763e8b658fb73be9055f902439c6ee4dc80a58c3ee547995b34d01368d1"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/itemize.rs",
+      "sha256": "779d73c188613693d8b5fda94ccc6096146dead9947abba7e6bbf4c762d0ad62"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/lib.rs",
+      "sha256": "12a8d3e3333b6b96090b6520a164604504f4d4755af93e655a8a2a918046c80d"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/lru_cache.rs",
+      "sha256": "fc5cf96f67e269afa5243c59bddb16f2c39c7bf8ccf60977086a37d0db253ab4"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/atom.rs",
+      "sha256": "eab412ddfcc3bbc9e3a82592281fb641a6d28811ffc0f1a73eaa8b741170b0ed"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/cache.rs",
+      "sha256": "7180647a7c6777cb73a4df5f05d853f714453a16ce98d824edad8e4009ee5a37"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/cluster.rs",
+      "sha256": "e7ebb2a89fdc6baa36b761a87f116ee5d4d41688f2a880d40d87ba5727e7fc9a"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/data.rs",
+      "sha256": "502bf573cc61481517bfcddc4b8de90bd087a76c378367c71867a0a3ca5a73e6"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/mod.rs",
+      "sha256": "14b9df86097af1beca5c332aa92421db6ee5790fc6ff73114b388247411fd845"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/shaped_text.rs",
+      "sha256": "98c121bb42a3e482922092fde5e89c04b489a10018337669e95ab055e591fd9b"
+    },
+    {
+      "path": "reactivity/vendor/parley_engine/src/shape/shaper.rs",
+      "sha256": "9352ffae3c9c50e324c97aa3f7ece523425106229d489c2c1834e86ca238fe90"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/.cargo/config.toml",
+      "sha256": "62a9c68460154961be2950a2d75d448d8e7eccd404bc019da36987130020c388"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/Cargo.lock",
+      "sha256": "6488dd9d4dbda3973e8e80b661677cfc68ef1f38deec8097e8f00bc3053d10de"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/Cargo.toml",
+      "sha256": "e521b1d6b4f09dcf8a90c57d4c99bc3a4e4d0529dda625ed8bf5dd9577257422"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/benches/buffer_mut.rs",
+      "sha256": "e300424129855073c9b610e691945b720de89976d42d1e603a2c052d09cc8f39"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backend_dispatch.rs",
+      "sha256": "3ee7dfdf817aa0067e0a9398a3ac290b3a9b64f3e4f20c01d900a894b580722f"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backend_interface.rs",
+      "sha256": "824ddf038bae84ccbdc42884d8ebc1995b4a24ec6d14abe9cbedb287c55b9239"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/android.rs",
+      "sha256": "0ab5fa681b8e8219fd3e65f712a3165cc42257a9f18e31026a104d9b3a698a27"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/cg.rs",
+      "sha256": "8dd529b4e145b137657a81966103af01177007e8af25f85e46a2b3d43d91a71c"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/kms.rs",
+      "sha256": "e9eeb8b177b6b9aa715ec1ac9b5032bcee2cbfba964a6e65f1b4eded52d24a83"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/mod.rs",
+      "sha256": "c9d348a887c004fdcb76b8366063262d7f8e0c25a26aab514e8daa4a137729f0"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/orbital.rs",
+      "sha256": "9e4496eefeba51e8c8be2900ed6cd8a8532173828fceb73f2948e688493ef607"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/wayland/buffer.rs",
+      "sha256": "4941b7c45bdc8e11dfd029b0c0931bd3c6caae4fef041b1f059d9d5c34623bdb"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/wayland/mod.rs",
+      "sha256": "b6206e083c6248a9ea434f6654b1854271aa4bcb654acd6ffa2e01cd0a7ce38c"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/web.rs",
+      "sha256": "1b33b34985fee9a5277a7f69f414c1f7d615b7f8db06e546c4d0229e34d846f1"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/win32.rs",
+      "sha256": "856f1a7a6cfaed98154cfd9d33cb4e458885c4a508ce0d29e4102f1ca62fba9e"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/backends/x11.rs",
+      "sha256": "7ba994461d10d8ddf964326a603520656e524536faa62c7410434dc1766e0cbe"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/error.rs",
+      "sha256": "40e53f0721d0a241da10d52b7ed58a6f81ae545236bd45ee636b968efa2480cf"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/lib.rs",
+      "sha256": "f3f0fe76cf418fd037479f738958642db98f3d55f00d0ec38177714e1857f9af"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/src/util.rs",
+      "sha256": "22e801a7966d270b9e040c0d71a4780d80e0510041183b9a9582d985f90dc883"
+    },
+    {
+      "path": "reactivity/vendor/softbuffer/tests/apple_layers.rs",
+      "sha256": "d1ae60096d6d3aa953e481a46bf4d7e63bedfc5b6b77507ee8df3bb22c9cc6a4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/Cargo.lock",
+      "sha256": "3183bf42771f1178a255d27b3b34f99b382e3ae38fde43ef1cedb035c6a9431f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/Cargo.toml",
+      "sha256": "c218342b95ef3b727a0e32a74597e0e19275c8d64d214b210fdb171caf4b15bd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/build.rs",
+      "sha256": "f3d39c06752630257f6bf5efe76a61e54b32b354704f7c16c76c8e2128fa6b34"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/as_hal.rs",
+      "sha256": "e5823b9c0fac61359d56a2b19af9d9c807a6c89aa73d07022be5a1166e43e2f2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/binding_model.rs",
+      "sha256": "07e72628b4aa645ce7e7c35c9e427760d1862916a8fc5ecdb4dfe40d4ab7c93f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/allocator.rs",
+      "sha256": "386cb6e60bd332a881dbbe57ff66a0fa83f35e3ee924559f1689418ac6c7273a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/bind.rs",
+      "sha256": "188d8507f2399db23c5614151a0c3489fd9edd73ca94d4a539a4fd36d823e832"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/bundle.rs",
+      "sha256": "acab3fd887277316f974fe60469268a639b0e8b098d863ef4372c62731b94153"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/clear.rs",
+      "sha256": "a2391466574538b1a0c41564ad75e55baee3816a280cdf46a67dea2c248e1489"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/compute.rs",
+      "sha256": "3cc256a13c7b1a6980bd82d3b7bb544fb44249e0a11da51c51f8fc5a1d808fe2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/compute_command.rs",
+      "sha256": "7cb0b83584f40606966d272d22981a94a5ede5ca50778a25dd6481ee3ef39978"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/draw.rs",
+      "sha256": "2ad390cbc668bb38a653ad156c3fc81e34115f6fc240b2a4b8fb3ad6ba260abc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/encoder.rs",
+      "sha256": "b13ca12960f39925f0f36500b8107fb6c5a21da05a433ac8e8a5d6d9b3200691"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/encoder_command.rs",
+      "sha256": "2f9417c9c6c0cb52db561ed7d8a777fc29b59ade95a98ffaf91e4bb84f3b8cda"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/ffi.rs",
+      "sha256": "4924adbb42a670b5e9827c0f2175939981e8fc78a36b2fe370426e8c550a4ce7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/memory_init.rs",
+      "sha256": "ec50657786a476a6be717cef872b644b841dbbe2ba4cf67a0e46839377122135"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/mod.rs",
+      "sha256": "63cac4e60b20f672ff9ce8460c9d745156793239baa03561b6a8e523d7a793db"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/pass.rs",
+      "sha256": "17ab893b63b99f1a99a79690ebd15bfaa6c99f4a7702ae2c7d139669b2745dbb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/query.rs",
+      "sha256": "e2392dfc4285b4d2d5c8eee398124440d81ae7f452d812cb14b3b7912d652a16"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/ray_tracing.rs",
+      "sha256": "7a5c080cd4f8a899058c21924089297318678535aa2139193541a468771e7fdb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/render.rs",
+      "sha256": "6d8b06ad2e06f11a3f00d544ade56f6050a03b7ec1819db5949f2f0c1333a8fc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/render_command.rs",
+      "sha256": "99c1e1b143a015e55bdb2076e35c1be8db58df79ed2b80c05fd070d1a830bb6b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/timestamp_writes.rs",
+      "sha256": "da06fb07b8d0917be3e7fb9212d0ffc6b16526e1c1df617213ef354c3e1fb446"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/transfer.rs",
+      "sha256": "3ad39433f5b4704d3465a6bf76984ff04a554926dd2a463cc5b36daaf44c43f6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/transition_resources.rs",
+      "sha256": "f3574fc30d5bf0b3913424e0d2527029ec205a9522df2dc1699222ea803c52c4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/conv.rs",
+      "sha256": "c71246db2914a48a6b651d38c25b348095cbb7bd6a3f7c3706ec9bda095fbeba"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/bgl.rs",
+      "sha256": "b081fe1393f1dd917151efc3a10ee0269fecd3920eac3b45411c1197a98c5a06"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/global.rs",
+      "sha256": "bdb01659c1ee814ba9671795c8e0a030181c905682b81f3414937887e16ad296"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/life.rs",
+      "sha256": "1c11985bb4a11fd0513a926cd28774fd96c075eea48bf45c89a392974d313157"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/mod.rs",
+      "sha256": "0fa10a8106a4f3cdd11e9f09a5b4141faa0945e2cd0f6325193c6df87a47b499"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/queue.rs",
+      "sha256": "ec1e845d9f4ec1a149e31bc28697caf41543c89b0e35116427602ff86395b125"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/ray_tracing.rs",
+      "sha256": "99313b88c4c6ea0d2e5765a8d19ed15c0bd60a6bead479e8ea585b4f2020c78e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/resource.rs",
+      "sha256": "6ed1d6796534f9fc11609847925685785b7e14f8ada2813fd4299558a6c8777d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/surface_config.rs",
+      "sha256": "d44273674bc13e410a18a5bd3a260be6388d287a995a25d883edb9452d7de48e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/trace.rs",
+      "sha256": "8d9f2a948a84ad9cb04655eabe1fd857cc42f6d1f94da83a4cacc57a00c76da3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/trace/record.rs",
+      "sha256": "c0149f524bf3513c618d9b679dabaf85ba0a593b650f1efea7eff27d16894894"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/trace/replay.rs",
+      "sha256": "24cd8e175810071114855793a1219de0ed01c33daa7d1329195a64df5f11c626"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/error.rs",
+      "sha256": "4f07a0b09b30b2d6cbc855d0091d724000f492018af3b41e80befbeccf2a6f4e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/global.rs",
+      "sha256": "b29b96777103398ed337ceae8d866c4606c5cdc5ace2db6555bacf66766306af"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/hub.rs",
+      "sha256": "a6c654e019926fa9881a5cbb395c1477a9efcf40c2431e0846d14871e7f3c5e0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/id.rs",
+      "sha256": "529303b55ca4f159ee224540c798ebc4421e93256d49ef16a4ad775624c427e6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/identity.rs",
+      "sha256": "712ccda267eb602655c53672a94346aa4c9f88c0044ae6edcd658a814c9a50cf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/dispatch.rs",
+      "sha256": "3cf27b797adbe402d52411c9a2922a11cf77cee28d984f79c5cb2aaef47d3c5b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/draw.rs",
+      "sha256": "e697b50666918a0aad5ea1407f7e1c328ee41cdde2ef2cf398e986056130140d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/mod.rs",
+      "sha256": "8b36086671b6af25e6fe710e9f9c3ab935feb31c5779b0b1d1562b515e03b0ab"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/utils.rs",
+      "sha256": "a7fc3c2d81b6f4ce3facbc9b007012c5bd8d5e89d78b41bb8ba154e08cb94cb8"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/validate_draw.wgsl",
+      "sha256": "75ed361eb7f3ca4d0c7841f1077ed2e1c5f97e0150734a2d1535874e55465a86"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/init_tracker/buffer.rs",
+      "sha256": "6167a400ab271ba857f1c507e60a46fbd318c185aff87eecf7eb05f7f09b6963"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/init_tracker/mod.rs",
+      "sha256": "38773a6e51c165d8e54f1ab56f2a0c20c3a126ac3cb19733ea8b423fc305e214"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/init_tracker/texture.rs",
+      "sha256": "384c224ce90df97062d4828107c17500434488c9b7dd6ea83649f9e710995324"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/instance.rs",
+      "sha256": "3605199dc2f4e4344ae908b496b316f871e66d7174ca1f2b91357411843b70bb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lib.rs",
+      "sha256": "bbcce7beb46b9f4f1a6a3fd09f99b7a8072e3e3d789aa65e6df362d9ca7ccdaf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/limits.rs",
+      "sha256": "edce18a96fbc13e4c992c5fe95972f8895218fd881a54d10bd808e9229395990"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/mod.rs",
+      "sha256": "8d3ae3f8d004d7f7d8a3aefe9f30b35669cb8e2409f5fba27b1fcb116b2429c4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/observing.rs",
+      "sha256": "d848f19cfc7ce092a964b68ab02a399a13f29af9cb686d4dfc2a2b59bbdaff81"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/rank.rs",
+      "sha256": "3a240acfc0ff78b7a41a29244ff5ee38263426a12b45668b9bb0faf1888b7663"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/ranked.rs",
+      "sha256": "b47b8f7275d6eb8088fc41bc476bf1af37fc01491be52adf7148f7d96055b879"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/vanilla.rs",
+      "sha256": "0ab88039841ac0e4983364fe1692a6f0a838d6162687f50e8d24f4a95eb00136"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/pipeline.rs",
+      "sha256": "e35c6269edb20f5f89f8cd2862712e0fe7bab711d56ebc8c85b029094e69001c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/pipeline_cache.rs",
+      "sha256": "2e15a195b1e7a25fa2d21aa922acf07cf78c1fe09002db67915e0a6ac2e76c23"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/pool.rs",
+      "sha256": "e11bfdc73a66321d26715465fa74657dcd26a9b856b80b8369b4aac2132a4295"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/present.rs",
+      "sha256": "cb53160d93ee210025cf4a483ce700b713d56c16daba87cad6b9934cc803f47b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/ray_tracing.rs",
+      "sha256": "da0f5c4bfdf1718c26c51014c8ad6be86678bc8ad4b86fbd62243ed26596f6f7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/registry.rs",
+      "sha256": "02980feeb366f26e627ec8a04aaea49363fd10dea18a74b18a7952b548a98a1f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/resource.rs",
+      "sha256": "72d8815e912b102a4308f4c71f5b1c14758812a7d66f97837f441a1822f9e641"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/scratch.rs",
+      "sha256": "ea5c40e4d18a12f09cc1038f2dcdddb69b13e99275ac987d826658229a39b326"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/snatch.rs",
+      "sha256": "c2dad4e5086ddd021bad68479686f2e61f9889a9e00381a55f1222aa0f4c22a3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/storage.rs",
+      "sha256": "a778ea826ffef4c9c345b499d4ca5f7a7f32a447de7e572b806900cb661bc2a5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/timestamp_normalization/common.wgsl",
+      "sha256": "9f65aef0526ff9dde945fae70cef064ad961b0aee4291759ae82974cd2ead0a7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/timestamp_normalization/mod.rs",
+      "sha256": "64f00f6aedd84ed53d45fe895d0f498d8df28df904cb2430ab118329c0535c5b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/timestamp_normalization/timestamp_normalization.wgsl",
+      "sha256": "c0225bf02fdd741542bd20664a6d9195b91936e6f7758c9c4c0ac05b08122e79"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/blas.rs",
+      "sha256": "18c7b5b89a60ab49bbc0f4f8b85a24502c1d968714ef4c586095e119848d902a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/buffer.rs",
+      "sha256": "b5c1ba69545186d1771ce7062d6c2f097f6a66dcec0453df4ccf7e1098a17d12"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/metadata.rs",
+      "sha256": "b3140163ef3ac1682ed11183d16a19562f11ffe081d9aa7b128bff1ec4db2fdb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/mod.rs",
+      "sha256": "cce8080f69372c915f11568a0e9ef289de1498a4ee161cb56ea3a380c9e717c1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/query_set.rs",
+      "sha256": "52f73250082af6a9e8d6e574e2c370f1da4d47d8a1d22bd3c60df60b4358c4a5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/range.rs",
+      "sha256": "de885c3a7f4cb1c2bf86e2203831bc1905348b8312bc4bd016f7da3f233b774e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/stateless.rs",
+      "sha256": "3db699f5f48a319fa07fb16cdf51e1623d6ecac7a476467ee366e014ea665b89"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/texture.rs",
+      "sha256": "f7fd7dfb776d8f524c5f5c53c6ce09bc4de254f9e1a277f9f1c66fd6b3ffb6fa"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/validation.rs",
+      "sha256": "4437697bcabf198358e7198c2d9c4f738000f3afe0ed670cf2ab1b26261e58c9"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/validation/shader_io_deductions.rs",
+      "sha256": "b690145ca7286a7f356b9df68ce49421a30bdc242e38e1c07a6568d23587410d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/weak_vec.rs",
+      "sha256": "a4193add5912b91226a3155cc613365b7fafdf2e7929d21d68bc19d149696e85"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/Cargo.lock",
+      "sha256": "c4da0b85155fcc10a596cfc7deb55a7e5c6ae2c8cbbdb80a7e7bf083f9e7b74c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/Cargo.toml",
+      "sha256": "120c5e78708fe77156a23e9d7b1ddb1f5cb14040fca6f7de358849a50de03b3e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/build.rs",
+      "sha256": "001414f5b7dcdbebb18939ef47ab03a36aaf98d92deb4b40af61ab8c9e440bf6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/examples/halmark/main.rs",
+      "sha256": "1ebefa4c0c93891e73a7de19680671cfd8cc7a30f8d2b2f4240818b4f209aac0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/examples/halmark/shader.wgsl",
+      "sha256": "26c256ec36d6f0e9a1647431ca772766bee4382d64eaa718ba7b488dcfb6bcca"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/examples/raw-gles.rs",
+      "sha256": "84f6a40d746fb1ce4ca10748c901352e918db5ffb246d7f98c07be32738c67f0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/examples/ray-traced-triangle/main.rs",
+      "sha256": "ff7e2d54be361867bb55127209cfe0ec76e4c6e48e6c7466a3db0312dff77b7f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/examples/ray-traced-triangle/shader.wgsl",
+      "sha256": "90a66ffa57a642fd806a5b3c96347448158cd562d8951b5afd067bfd0b3d1e98"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/conv.rs",
+      "sha256": "c2cdc3d1a6ae34f88432e36227558a3f54fcec39fea1ceb4862b74d4d94405f4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/exception.rs",
+      "sha256": "0eafc977390cf76b6ab92697a60de05b8fd61fbad5f3d3ea0649d6e93777e1bc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/factory.rs",
+      "sha256": "81e479e550a09127384d8080e43d5f5bae8e8dda6082fe41a87bea8f872eb0f1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/hdr.rs",
+      "sha256": "329660d1c36edfffc98c06800e3dedacd1d69da19548ddfa5044f296c87f8a4e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/mod.rs",
+      "sha256": "34bebcabd5e740fc5afdec52cff845c41953b283da84e6a6c2d15f88efd17b51"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/name.rs",
+      "sha256": "ff942da0da1a497ee4d2be21604f7ba9fae963588105b3d1f63aae1a0c536e82"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/result.rs",
+      "sha256": "ae8317767376c2d011d7562b37a99e14d72f2c8e37b107cd5e15e601c9abba8a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/dxgi/time.rs",
+      "sha256": "d4cb85205f93a1c00f4ad7d6f7bec2bd18746b5724adcb4cf62c7d392680cca2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/mod.rs",
+      "sha256": "8fcac93db5e23a097da636b64619991c151f282d3747c4dd13dddb37b54648dd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/auxil/renderdoc.rs",
+      "sha256": "94898f747476e269b2910d42e769f2bbb6be0cb466ad92f9d381f55799d2756e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/adapter.rs",
+      "sha256": "3a49d6fa30f43916752916003ffd4de9379d6e2ec91d6a9b3ca156922a994894"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/command.rs",
+      "sha256": "e63ba5aeb666d783e430b907f6563d09cfb97780d540d0f21957dd41f3490735"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/conv.rs",
+      "sha256": "2676420e6e1d2aa6386b923c8224aa63a199210c19dd611ee8059de41df0e6de"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/dcomp.rs",
+      "sha256": "053068fbd393a4b8610c7070a72e5887f0fe09b61d35d2be806083d800b48b08"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/descriptor.rs",
+      "sha256": "ccd4feb6bd3e0a0ffc26142f8a81fca26180d0f50146b6eb2f670cbc89ea7064"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/device.rs",
+      "sha256": "b428f4d101a257c99a340355746ab5a185596cecd178de063a11dbc3ba5d8afb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/device_creation.rs",
+      "sha256": "fbaf9487c63f936e3556ea6376d9b41b072c700aa69303f67ea20012ad61a54a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/instance.rs",
+      "sha256": "88da287d2ff2bfa4098d54c03193a711b584bcdccee2713a93fdac015ceae7f4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/mod.rs",
+      "sha256": "aea978a714e2427df87458bcb36d66f9195cff6ad521c5bab2ca2806a56d94dc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/pipeline_desc.rs",
+      "sha256": "631c72108f6735debe9f7059e22574ad50b11aca4dc0ca804e6d89b1373d19ff"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/sampler.rs",
+      "sha256": "d18d243efe4fa667dbab5b75b5b91d47de94d441976d9f44a46a2b49ba38473d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/shader_compilation.rs",
+      "sha256": "e5f91338615badb72398a3853675865f1cf74ecd91948efcdd6aa44d5785e378"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/suballocation.rs",
+      "sha256": "3abbde338015079fe366c5b76bd155b2c41b31ea5b44b7a67ad42f2c43545239"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/types.rs",
+      "sha256": "3fc7619fc09303eb3c936d4ded6889f94ce9e8b9aa62742ce900baa1b1e1cca7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/view.rs",
+      "sha256": "2ba4e4889de11c7f0b1ffbd0301462b424f055f959d84e92ca9f9402754fbd83"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/adapter.rs",
+      "sha256": "df93d7856ec0c7c42ff6eb65435a16cc918c5d3b4f718ebcd6c695423ab9ca41"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/command.rs",
+      "sha256": "ee53aa6abd98a6bd82ccb9613d1ac779067cd1e87f2ceb3eb0f1f59fa2abd569"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/device.rs",
+      "sha256": "4ae7d802fc593d1c3f0fbf4b1caf5649a3970f9ef03819be7a5cbb504dbac719"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/instance.rs",
+      "sha256": "c5c9f1d3089c0b508c3619aceecaf99234e77af833cf124de792ca3ea8a56f70"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/mod.rs",
+      "sha256": "8a447369289290fed459e7fb333e51f8ba22adacfea45362b07d4f193d1dd94f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/queue.rs",
+      "sha256": "c993c79029b182d21b48006e37715c1083817258764356c9b131b0637e7e8c86"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dynamic/surface.rs",
+      "sha256": "a7b67292ead4c2f3978b4ba17e6a83d94fd80db81b2afbf1aa18da9d392b54b2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/adapter.rs",
+      "sha256": "469fb40d3b8f791957767bd0884f69a511d021886116b14c7e8a4c200f052fd0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/command.rs",
+      "sha256": "9b53ea51473766e11c78d5fab081695b5a443e067127ccf31e6d7c5a37cc309a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/conv.rs",
+      "sha256": "1013e1e48bc6b5b0df60a026251b97653528b112600eb3f8d4e905dbf791d897"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/device.rs",
+      "sha256": "4da3fb4ee9145870270f52bbac95f42789f73bfaf0011c46e21883a3d28696e9"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/egl.rs",
+      "sha256": "25ef4629921f6b87daa559f62f3a6132f766451e4e3674cdec62e9d8ecac2627"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/emscripten.rs",
+      "sha256": "316d2bb6f2a4bb126dbe68a223f7393399080d116b61c39504454acdf4f9cfaf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/fence.rs",
+      "sha256": "f63e9c7cc71a1b65d66e6b8e6153c0d855e6b166ca2d521cdd9c4bfc9d67313c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/mod.rs",
+      "sha256": "505b231099410c5acd2dc8f940792006dbe4dc14df7cf4b8e527244ce2ff5210"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/queue.rs",
+      "sha256": "1186a5d89160db28d827f3f8c46ec6a12cf9e0e829514bced433fbf4b84340fe"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/web.rs",
+      "sha256": "90f15af538aa2d67e6a3518d39b5e6f763efba8b39e43c3c8106603d1a1b0d48"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/wgl.rs",
+      "sha256": "2a02d9370c69a121cfbc91a24d902c0ad2af2cc464c0b64c181ee9b55b4b1041"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/lib.rs",
+      "sha256": "8790870ab477ce10a05f75e670dd5f1d3d1db25adc8c8beae886f50acd12901e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/adapter.rs",
+      "sha256": "50ae470024e8d0aa4f031f4d503aa73bfa8ecac69c4496f1080a07fdfc8a10c3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/command.rs",
+      "sha256": "291547df7aad7e691f459ec5a8b91fc7126c7723a2c0604a5ad0f2f95b38ea94"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/conv.rs",
+      "sha256": "fb7e365642e50c23432eab53e8355356ae2037162e4093b779207818dd2ec67d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/device.rs",
+      "sha256": "1803b3ba5a88e4891c1d9c1632884f7ececadb14c7f7b630d7d55802879eb0ac"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/library_from_metallib.rs",
+      "sha256": "4484f4d622c39fac5038cd0bb9ea76eccaf12619b31ec231e2f34415bb72c386"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/mod.rs",
+      "sha256": "5419bc8b78ca3ce5989280421dbbfc6f6582460c039fb8baec1358247e1f23bf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/surface.rs",
+      "sha256": "8a632382bc67c01a41a9baa18a16ec6a637345557f7a8f422219066a3baa68cd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/time.rs",
+      "sha256": "c32d69f30e846dfcc0e39e01097fb80df63b2bebb6586143bb62494999850246"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/noop/buffer.rs",
+      "sha256": "b5edc5e2c52287dfbd4f619e36097ac233041eb9ab287b889b6ee477d740fa09"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/noop/command.rs",
+      "sha256": "858948feef6b328e2333aedc051dfb4bba4d25e6c7b47ac481d4161a3410b473"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/noop/mod.rs",
+      "sha256": "8c3ad9284398dd6aaa7da0b82bc3943dcf251073b935e5e138f7356f3f572b48"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/presentation.rs",
+      "sha256": "3bf2e76a1d0508d5e60af2b8ae4c15130c28344d672d5a66fd380ca450b95b12"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/validation_canary.rs",
+      "sha256": "d96300c6005a02e0c5d411cf065837e50c0c37957cb88de89fafec43032fa08a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/adapter.rs",
+      "sha256": "1f897cd265879ec3e68efcf09fac52d8f32068184781eab9cf48acaf74820485"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/command.rs",
+      "sha256": "562877b666133bf5de6961569a4aca34cb5e9f2224b2efe6cefec20dc99e6c93"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/conv.rs",
+      "sha256": "6930e077c055c6766c5ccb311abf4afa557afcd0d157466131ae62534ccdb30a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/descriptor.rs",
+      "sha256": "43a94ad2e10fa563984426f0628755ebadd2522fbcd806b73d6f4fedc05ac0ac"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/device.rs",
+      "sha256": "accf1be799da8f1b4282d2893377113f00169e966dda7f179f6b5e9f1223017b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/drm.rs",
+      "sha256": "b071e1092164bf7c9952f33aff26ad8d74789f233516ac986ac63b2e6a0a0210"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/instance.rs",
+      "sha256": "e10b91b2c0bff2293cbcf0e99e7b30da95f8dc0deb9ac51af16261cbe7a54537"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/mod.rs",
+      "sha256": "73cdd286fe1bdcca51aad33f521999f469eb1a8acbe6f28c230685144e0b0d04"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/sampler.rs",
+      "sha256": "f65729d6df5cce681b7756b3e48074017f0c7f42da69ca55e26cc723cd14ad59"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/semaphore_list.rs",
+      "sha256": "919c7dfd5864fa2f2ebb478268aa8bfe8a540ca759efb777066fa1f7216a6f9e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/swapchain/mod.rs",
+      "sha256": "68dc4eb82e3d9aa9d0a0343c430777f9c0a2870314da8806b96ca8a8cd8df0c6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/swapchain/native.rs",
+      "sha256": "9a0be6f9bda9e160d9fea944d661467bb5017018b7a0612d20d47fd3eb2f26f9"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/tests/apple_layers.rs",
+      "sha256": "9dbe60f6373a5600c19425da1e3f9fac54bc8188100ac75c860ccd45d2dcc297"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/Cargo.lock",
+      "sha256": "33300e7f2c87119592ad2bbe3200637d0256f8eb366a339032d80640bf41c3eb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/Cargo.toml",
+      "sha256": "f630292115a79f237447bdf561eccb93eca1b4f7c4b1446868af7faaa7ddae09"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/build.rs",
+      "sha256": "18681e37762d3a8e36e04df1b6228a16e93f8b5946f1e1886839c5cab1b034f0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/adapter.rs",
+      "sha256": "fc21ce5d1aebc1f21512d23e7ecceb2905c951c036782652f3198754d7fbf090"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/bind_group.rs",
+      "sha256": "9ede7539a72cd4e09e8eb75534c565bbc5d761ba9c00564907372f30e9ed7c21"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/bind_group_layout.rs",
+      "sha256": "70e2a2a2dc14e876ce99e5f5f8372468acd537eab22bfb9b5b4adc874c02d632"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/blas.rs",
+      "sha256": "794e0b70fe968efae0fda94949defc234a111b88b17b6fa5fcdcd80b99d5045c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/buffer.rs",
+      "sha256": "a304040166251cb1f1e60d6e1407b2e951dc3836144b40b95852749005095042"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/command_buffer.rs",
+      "sha256": "a3880607d748cf7376bf0ca41a0a82de9a90634fa253feba4a403a23b146d88d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/command_buffer_actions.rs",
+      "sha256": "d6e16877f95906d0ae3aa5c7d82d5c50e596bb817ed9440020f48eb6fea288a3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/command_encoder.rs",
+      "sha256": "b5a770f88388e3b1368e4c8adeb65886958353fb6130ac392b1f43e7f7a8bbe7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/common_pipeline.rs",
+      "sha256": "b06931663df3d9c11db6884f9b8c77ae57b72327fd7d6676382d6da81b71c37d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/compute_pass.rs",
+      "sha256": "5292a526931c588454dcbc5c4fb0f1a70a1657f9b9a6da8fe9ff8ce97bbe6f38"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/compute_pipeline.rs",
+      "sha256": "8edbc8d749519041c184af70450a89d4ca284fba230a2276218c23af38cd3348"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/device.rs",
+      "sha256": "6adbd3b5bb966fb20601cd55f0cf1b0cffd48fc615c72029dfe3c116b9c88e8f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/external_texture.rs",
+      "sha256": "b63f65c84d93fca12cd245a8c03fd85ce0363a8b56d239467f32f250c4af997a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/instance.rs",
+      "sha256": "f23ad742449df3658744cf909249cac12e6d8c7d435348a1c1f04a46d2976f58"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/mod.rs",
+      "sha256": "0d04f8674bfc390e2ec4338d297eb8107117e278fd2e3c12f0151bab778dbdeb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/pipeline_cache.rs",
+      "sha256": "50a0e02486fdbb8b86cfecad91d2df4cb0f212c7a98ee4b7d7b73d2e019ef2cc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/pipeline_layout.rs",
+      "sha256": "d23904fbd62e81c737a3a6b8fe6c9d00447c55ebe7fe31979c19f948559d827d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/query_set.rs",
+      "sha256": "e61268c9b883aa599e3cc817f505ac49d5c1932de81a6e9f1b3b9f791f6412c3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/queue.rs",
+      "sha256": "14dae3b36f75911a5ac4ed556d48875930e097990649110f9a5e53deada8d846"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/render_bundle.rs",
+      "sha256": "75c6ae0696a80e56a32742cc8a86cf16ea795662efffa2c9e343b8d7bfd958cf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/render_bundle_encoder.rs",
+      "sha256": "3aca76e0878a8fb1b83911ecf4f5a45f4b385049e54bdc06eed7745128cc7ff0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/render_pass.rs",
+      "sha256": "95a595c1092ce49d2924cdfaaa417c98a0b8349914a3a2cd66f89a0e84c8d958"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/render_pipeline.rs",
+      "sha256": "be283878d265f3c5c4f4ad1f5a66ce8b1fdf53ffabc4763b1185fd8912dfab92"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/sampler.rs",
+      "sha256": "13c8befefa962196be8698357841196f021f1fe4e1027996ca9057d8e2f0c33a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/shader_module.rs",
+      "sha256": "2c644b81f8ef154bd29c10c580e43581d7b64299c5a359d546bfa34eca3128a4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/surface.rs",
+      "sha256": "13df4577966d4bcc10aba4b8950023ec17a7cd3933019df1cf1f7f139e92b9a3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/surface_texture.rs",
+      "sha256": "8805708256f94c13fa09ffe50e6db93f237117e77a67fb114a964040bac155d4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/texture.rs",
+      "sha256": "d278b7badb427b5f77aa9363763f1d0dbed1575bf1a5af684be9d2c50c4031cd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/texture_view.rs",
+      "sha256": "73a77adca9a03d90db5bb6548e80a078b09819b6d3e8d84997bcf5e3fc1446a1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/api/tlas.rs",
+      "sha256": "bf0868ac2ee0f6f9deff63275773b1f1d1f6e67a6ced6a54603ca5cdb00fc1ee"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/custom.rs",
+      "sha256": "79a092c6c0ac9f6b6a0d0128f4420de614df09257da04e0f4bac7fce01c2908e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/mod.rs",
+      "sha256": "18cc81f2f18c1f701f3060bda8d537dc3594064ff534bf33c35676f01d4af89a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu.rs",
+      "sha256": "38ac841e850c31b1902f4247b6e43c18d702dcf732655703ebcecc55f8015068"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/defined_non_null_js_value.rs",
+      "sha256": "9aa15e9a9d37cc1daed858bbc12ded80d3636f1ab61c2d8554251721af53951d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/ext_bindings.rs",
+      "sha256": "6dab532255f8bff63a37ad6d3b868dde7afe8a6cae351c5e54011071ac4e2aea"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_Gpu.rs",
+      "sha256": "5fc930b97a5e729c0ca47aee6011d595fed1d3dcd890156da1ec9f3ee6805aae"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuAdapter.rs",
+      "sha256": "bb375d9dc5302f6c8aadfc722bee8c2de892da69e16227388ffae8acf6862d42"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuAdapterInfo.rs",
+      "sha256": "ce815684871f7ec6a97b11ad7f3e6047efcaf2b051f1664d899311e9a267a774"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuAddressMode.rs",
+      "sha256": "4f6e4856f3c8f32e143f0801db681ed27c3ba9fc858ee6fb24045a2da91a4d1b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuAutoLayoutMode.rs",
+      "sha256": "94d5f45385907b006100d387174bbf61e603269283419244666ac6f54d64f565"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBindGroup.rs",
+      "sha256": "67b2663eea7a991bb89f13bce0ea87f32b4b58ac4b2152332f205200b73d8a69"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBindGroupDescriptor.rs",
+      "sha256": "a7f64e7eeb5d41aa3995ee0a5e917d50efc47ff4bca5706d664e22548c41fae5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBindGroupEntry.rs",
+      "sha256": "f51dc571199339ee13876b2c67f96d2cd6c6203ccd2e6b557aca9f0501b19ba3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBindGroupLayout.rs",
+      "sha256": "3e9f450b6ad4744da40cbbc157ec482952bfa6eab1d093f3bcb44464c1fc7661"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBindGroupLayoutDescriptor.rs",
+      "sha256": "7f88ec9f6552262cb6e1b0429d6a59f776630a58aadcb87f2fdc582a179e3d77"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBindGroupLayoutEntry.rs",
+      "sha256": "fb3249c5654ee3fc2178d2bdbc8fec0f92812d0ce62929e854321f2dfdaa8206"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBlendComponent.rs",
+      "sha256": "fbdbf7942542420519d28353ef3f55755bf3fb66116b87cd436e048142b31416"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBlendFactor.rs",
+      "sha256": "0a0e911b94b6014c17d12e08f54081d8ce37ae16668dc69933789d9e9507779f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBlendOperation.rs",
+      "sha256": "d496fc0ce7d46eb7e7fde0c7ccf37a27b3e0f1ea49719b63440d4a672fb03fde"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBlendState.rs",
+      "sha256": "5f0300e2e63cbaf5910ffd88f8ad8b8307f2bf56d6679003bf72df3d0e221598"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBuffer.rs",
+      "sha256": "0fb72837caa543232f90ac4bf57057c239d10af9e51689f96e40f9cefe3d67ce"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBufferBinding.rs",
+      "sha256": "63b1d3586510e3597cd636cb67fbc5dd83d12df7496d5229a6c23ca0696a9d61"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBufferBindingLayout.rs",
+      "sha256": "fe03bf3cfab7f611da762b53de66d0e522c6969e1890b29f95e815c3ec5dcdc4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBufferBindingType.rs",
+      "sha256": "3c1fcd776823dae5f5ceec9dd3f84214682920f3fe2f7d325463c2acf7c2746d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBufferDescriptor.rs",
+      "sha256": "672c585b8a883ee428c25a120662cf78197d0b1545191578f59d103e878807e1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuBufferMapState.rs",
+      "sha256": "ffec8c253aa3cd097b0a356bf7b59d1c7aacd37b865e5275a259851fd6ecf46c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCanvasAlphaMode.rs",
+      "sha256": "0944c5baa25001620847bc7def8a335e442006afc587f4348ffbf3376186f986"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCanvasConfiguration.rs",
+      "sha256": "eba781f5ad2a3a253fad77377581ca6ba9041ef4adaa27a7a4d116dd59cd5d55"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCanvasContext.rs",
+      "sha256": "97044f0d59847ce8a9a65f7a0404b2ded345c6483f3a05f0ae2fde9989a1a8ca"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCanvasToneMapping.rs",
+      "sha256": "a228219d51a62af6a63cc670bba9a29d913c2b3dbd51c1cc321199f0c3bd3d0d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCanvasToneMappingMode.rs",
+      "sha256": "3e93b9aca7d8ff057a9ba2f520ac5edda141e203f912d0290288adc2a904d54c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuColorDict.rs",
+      "sha256": "283a5b52b9626e028a19b1743b9e62aaeea0429846fd30396f721a75cd8482a7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuColorTargetState.rs",
+      "sha256": "d5b7db04a1d1ab4061693829bbc915f72e095f097d7fab6c99d0da84d9ae4bc6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCommandBuffer.rs",
+      "sha256": "3c26f824158dddf5859997f653f993c15e685ac103f518948b363af83186f850"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCommandBufferDescriptor.rs",
+      "sha256": "fabb37e01b9d026a00a3d68a4a89ff5b6508270a40b4cc0a196f4087ab11aa3c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCommandEncoder.rs",
+      "sha256": "80935d0568331ecc0a34f68d72520fc2453157cebb7e48a58e906683d7168be4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCommandEncoderDescriptor.rs",
+      "sha256": "a514c4c3375a7c6fb9808c342788e44c1af4b1292187b09011894ddaefdaf469"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCompareFunction.rs",
+      "sha256": "c4ab4bbd739e6ab9217a6c06fc738fd7608fab129679bc84ecd50afee89c293f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCompilationInfo.rs",
+      "sha256": "5008682a607dee445c444784aae9fdf67d8e8c7054d3c595f77c840455f9ee44"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCompilationMessage.rs",
+      "sha256": "5610d8e9a118cd10b689a945077ab9d2e0a7db218e076eac3ce95f787c51e55a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCompilationMessageType.rs",
+      "sha256": "40f8344fe2a7a5ca56ddb0eabce094b02871f42a093e8923d0b8cdd7a1ee0acd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuComputePassDescriptor.rs",
+      "sha256": "d43ba9714bb0d92f70f0c745b11dcbd80c0e003291a118555b344c3c403ec800"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuComputePassEncoder.rs",
+      "sha256": "deb0c1f318b9d6a645517fda0f6f0d608098c0b4cf3664ad06214cf7a912d69b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuComputePassTimestampWrites.rs",
+      "sha256": "12e98d931214f8417e1f36252c3dede788d5fbbcc0b123b714c07c08e00e86ac"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuComputePipeline.rs",
+      "sha256": "b5060f69ed292dc9609cefdb3aa2f059f5ffbefad750f494caeac8d18a502c94"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuComputePipelineDescriptor.rs",
+      "sha256": "c5e5919a58dd4ee092b3f7b04a885ea1d2b9a7a988248d4f42646c03fc55145b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCopyExternalImageDestInfo.rs",
+      "sha256": "b633673111115752b77bc82e40a180f17a8fa2757e5dd772551958f41846f633"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCopyExternalImageSourceInfo.rs",
+      "sha256": "3f1ac317796a23c63baab922a8c40956d60839e506881947a68b244319a359d8"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuCullMode.rs",
+      "sha256": "a8fac0f1dad9baac534a226d2a0f9d72dcd2b7532e0361281da2b268f1e01216"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuDepthStencilState.rs",
+      "sha256": "636aeace716c9a7125b6a0e725e34e06a290938ccc89ddc7730bb03c5a4f1812"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuDevice.rs",
+      "sha256": "a8a7720a5f7fecf9efc962d291e42f3ea53f2d9349a70d01af26526e68e6043f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuDeviceDescriptor.rs",
+      "sha256": "75af01d5c6c95808d3c4fffd9c50a8ef6d6fbb10de06342512bb21cca83f17fe"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuDeviceLostInfo.rs",
+      "sha256": "14ba57a9dbaa532ea92f8048b8cfa4cf64e7c44115aa80e3caad514c057a5b9e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuDeviceLostReason.rs",
+      "sha256": "b6669aba14ec38abe96c92130084275629208b389b2fec51c9fb995c810e7d3c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuError.rs",
+      "sha256": "5221df22053f82b64ed68b7de0f57ea531e4937e4c6bcdc43303d4b34a8541c7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuErrorFilter.rs",
+      "sha256": "077d0e450efc0e7eef4bdb153d4703a35b3571bf7c759f4f4f233c4834ba9869"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuExtent3dDict.rs",
+      "sha256": "89c32f838ccaeb1ccbd732162521e80c98c681e0bc330b8662623c4d2431b76c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuExternalTexture.rs",
+      "sha256": "544a51d277749c30dc513d8780c7c1c5c672437d3b0b7c709db0718d5381c655"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuExternalTextureBindingLayout.rs",
+      "sha256": "24a876d4315bed5353c67ecb45d47a437c99bb6760449bd36d1092451e67d89d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuExternalTextureDescriptor.rs",
+      "sha256": "1c8c6c2836d4a8ab82808598d8b4e7931fabf3782aa0a4c29d4406099467658f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuFeatureName.rs",
+      "sha256": "d84a9c3856d1143e9ec254f58cae7bf32e6411c2ff31b1f6e27ae65e98ac61fd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuFilterMode.rs",
+      "sha256": "715b6d3a57ecf198065a2f61695979f3de8ec774e709cc8cabaec9cf051e16e5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuFragmentState.rs",
+      "sha256": "152f3581a675f91087c37d8fc7050d93f57c4bcb5a69e4f19ad8f0880d475be6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuFrontFace.rs",
+      "sha256": "218b44c693908622f9feee6e11bfdbe065f0a0799b33cb0adde8749144e90aec"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuIndexFormat.rs",
+      "sha256": "752975f76f52f76dc178697a44580c77bde778e225326a68070a597509c76795"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuInternalError.rs",
+      "sha256": "3706e02da462043260f3aada1da32cabc8cd6aaa805e0b2638eb86a94d6ae66c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuLoadOp.rs",
+      "sha256": "3643adf6235537d0b3f0392203a15fcdc09b9dfce9c7df0c929e8f219565725a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuMipmapFilterMode.rs",
+      "sha256": "922e5f7314ddf4661652a7bc2275822b2acc7fa24cc4580b9c25282375915dc7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuMultisampleState.rs",
+      "sha256": "35ece62b5b84bc5aab7518ef52474f4277db67305a930cbb97d94d205e487637"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuObjectDescriptorBase.rs",
+      "sha256": "64d371107ebfcd3857c0bf050e41a3b9b6fc97b6d908fce63e200ee1f706fb9b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuOrigin2dDict.rs",
+      "sha256": "de9b3320306c5419c35398f8def2873a9d1506eaefe4bc817c9b4fa8a61fb136"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuOrigin3dDict.rs",
+      "sha256": "8c209523264e11051e8702613600baa9ecfb53788d0acc7f190eec7847f78977"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuOutOfMemoryError.rs",
+      "sha256": "09f495d12dd2451d1d17f5bf416693115cd5b83392db7c5e21706eb8a5d6ba3b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuPipelineDescriptorBase.rs",
+      "sha256": "be4591fc7a131571cd93ede341d63386d93df581ac0614371c3003b976262197"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuPipelineLayout.rs",
+      "sha256": "4eba9fe83b22f0a20322e63ffe21fc510152ad4beb9c59bff3a583e1df64b21b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuPipelineLayoutDescriptor.rs",
+      "sha256": "b025bc2620aa132da45eb0281eb7d8dab5f683d9bd202ee05a136fd2ee677f09"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuPowerPreference.rs",
+      "sha256": "3c1244800a3251de6c9a7fd01950ea47523173934dc074925773796ba9cc8ade"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuPrimitiveState.rs",
+      "sha256": "f90687bf855d8197425b1bbfad104e0855bfd9190c41fe255009c513356ddbe4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuPrimitiveTopology.rs",
+      "sha256": "73ed5e3d173bb8bc3c9cf9b35ebf79e2800a861ed84d5fe6abdcb5cbb4763b20"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuProgrammableStage.rs",
+      "sha256": "a40bfbceef6a3590286e23b3b6cc0a3a3fff1ae4b84ff9a54a591507104359bc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuQuerySet.rs",
+      "sha256": "e4c331a42445b24edede7abcc6055d9ef6fafee7b8a30213ab2ddbc7faaab4e8"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuQuerySetDescriptor.rs",
+      "sha256": "1ffb278a3ef0eb98f3ba043d6bcced39479df95167f9b95c5bba10bf1500e6f6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuQueryType.rs",
+      "sha256": "810ba4546d1672b77ff0a1c1f2ce83af2b9820c9053b02b16ba7792f185d2a2f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuQueue.rs",
+      "sha256": "698364aa7b7cb1cb919453ca69c7dc327eb8a28ecb07ac3682617c97a903965e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuQueueDescriptor.rs",
+      "sha256": "05e7724bb3422a6d6a2e2a0d717f70a90012e0263d9d947a1f3ad35fe51ded49"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderBundle.rs",
+      "sha256": "7d73052252e59d5a72d2cbe04de6c57f6dfd69300106a47972e89b4cb1b26ef5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderBundleDescriptor.rs",
+      "sha256": "0192a6600e238a677e6ed95f1d2c16437d6b3399307ce853e971cd8b5dc4e571"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderBundleEncoder.rs",
+      "sha256": "44e1a79ddad2fb44f38bdc26cbab2813485dba19f0998027cbc7b7d51b7b2c69"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderBundleEncoderDescriptor.rs",
+      "sha256": "238a72bd63955fea98a1d080ddbf80aa85f879bbee95815a0dbf16e4ca2e64eb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPassColorAttachment.rs",
+      "sha256": "860a9790f80137e0325707de8589bca1d3ad4fb67a86ee942238ecc57dae1f98"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPassDepthStencilAttachment.rs",
+      "sha256": "82c4a101e4e36346bf8b6f9978dd8f51c88243d48b055608f7f54c40b1d656c5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPassDescriptor.rs",
+      "sha256": "bec3a896acbc248a6846f8c635d56449f854dce4321533e3aa51b8fc8550b3a2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPassEncoder.rs",
+      "sha256": "deb60f056c5203a062a560158050674caacfab4180d5c7f8488550e69d3333c3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPassTimestampWrites.rs",
+      "sha256": "7f70c3fe1e064a8d8385c15ebe416178b501987e486ccca960737e6c99df3a83"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPipeline.rs",
+      "sha256": "db7f92df43112dfc5e5659027db52250cce6e42633e3e2a52aa8867b985c98f5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRenderPipelineDescriptor.rs",
+      "sha256": "6252a64c2f732f09a22e4cee0e7f1b9ca1549ac9a2db67170cb91636aed55bf2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuRequestAdapterOptions.rs",
+      "sha256": "fa90961d30b82edbdf1bb611bde1a31808494adce8802407f835a9b99ec5fba4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuSampler.rs",
+      "sha256": "ccb20c0aa8c1a6b974710978292cfd3e38966952c051bbb6c6a6838347f801f8"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuSamplerBindingLayout.rs",
+      "sha256": "957216e5862f051b21f32d2107d54f59606152c313065784dc429e82e0e61096"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuSamplerBindingType.rs",
+      "sha256": "88b624a9b2baaccf64f93f63ecb6ec557b290a1187ba89ff2c2b0d6d34f11798"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuSamplerDescriptor.rs",
+      "sha256": "18d85e7b730bb042f872596c841ffdaeb73470c5b81946f78c416982f1f7b031"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuShaderModule.rs",
+      "sha256": "aa0d53a1def316c12205ef08f0138a61bea35306caa20237217119203197c3e6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuShaderModuleCompilationHint.rs",
+      "sha256": "3a46b7b2eeeb918e6000a5d0b97e414a31ccc166a660553932bb5feb0a7fb06f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuShaderModuleDescriptor.rs",
+      "sha256": "8a23968215317b5730f590f53393a2a608d0a11b7b961875aba07d41d6355444"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuStencilFaceState.rs",
+      "sha256": "e09cc5e8d2283c0bbc8cd12d9dac7fbf9836acad9199b001c731572d4a984e6a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuStencilOperation.rs",
+      "sha256": "e40e063166d8d38aafed3901f5268f54193c6a5373e7bc827b7bcddaa34ce912"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuStorageTextureAccess.rs",
+      "sha256": "951ff479702c7d1946b82c610cbeeb1d1f20d9f90d1994f3c258dc62644cd315"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuStorageTextureBindingLayout.rs",
+      "sha256": "d8407275e205f7635d4510ad7fd60dd0a3afdba84358cb7188656c070d76c797"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuStoreOp.rs",
+      "sha256": "5eb0917c076876ffbba9b9bdfec40a4328f7e791189a29ef85569a57963b8da5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuSupportedFeatures.rs",
+      "sha256": "a90195fa3108bb290fcd715aa851687926628e40d5e8298e430fc7cc26d89477"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuSupportedLimits.rs",
+      "sha256": "1977b2fcba9eaefa0601452fe1c46cd4b9c309cc246dbb2e77de608ce62690f2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTexelCopyBufferInfo.rs",
+      "sha256": "e2e591f352b49f8896b1e85d2e8097683d23a282be0cabe5a6a4bb25f9eb7eb9"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTexelCopyBufferLayout.rs",
+      "sha256": "b9d38a7bdbfa7c79fb620d6a104b75f454811285418cf93a64d6ee0cc82aa03d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTexelCopyTextureInfo.rs",
+      "sha256": "d6b66fff2a635093fd1679418c6d79266a6fbacc6d5f4c7852b90dc0d2a4f4e8"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTexture.rs",
+      "sha256": "01b90d25279fdac1ee707678066777900cb66a82de0562c5ff40f866a5dac056"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureAspect.rs",
+      "sha256": "e9028922ce08e2505a86fbcd6544f1aa6f23fafa800c3b23a17b8a8243d6b965"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureBindingLayout.rs",
+      "sha256": "0badaf20e8f3ee1931c23186a9b55b62832f355d8f658b09f4bdcafcf877d555"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureDescriptor.rs",
+      "sha256": "9dd267d10704ba0ffbabec3458b8b9d6ddf300248f77aea9831ea2abbc07edc2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureDimension.rs",
+      "sha256": "d165b620c33c94cc78b66a3500297a9e64da6986d68508230626b3e4d114658a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureFormat.rs",
+      "sha256": "9f78d5ab3d90d8fe85c655233e344e987fecad971e40c7e8ce21fab31f92f08e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureSampleType.rs",
+      "sha256": "1f4a2ce533ca841ecdedc33a84bc9d1bb7ecf92993f065b7bacc97cf3154693f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureView.rs",
+      "sha256": "01f733225bcbabf38cf0130eaf35066493b9ca48c5463d8cf66c772b90f4354a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureViewDescriptor.rs",
+      "sha256": "832a17477af4f6ebe66d8866f2b217f18ff7c84ca4b0ac7771a0289ef9fa1ca1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuTextureViewDimension.rs",
+      "sha256": "2894c44e36f0dafb91ca238f7f386de296821257163bafbb4da0db860503d5c2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuUncapturedErrorEvent.rs",
+      "sha256": "e0ff1bfab4a1a766ff4b745bba26dcf3e82495358739663b162920c831f79349"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuUncapturedErrorEventInit.rs",
+      "sha256": "559cc50f019ed70cac3101f83bf5e65f4b95fa98e4ed0fa90e3d6c9ca72fd99b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuValidationError.rs",
+      "sha256": "59bce7fbceaad238f88ffa30752b041109dd66269afdd2683ad0d5c27bbfd694"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuVertexAttribute.rs",
+      "sha256": "9f5688c013d6629615c2653d4d8244328e54af26bb0f18ba9ceb68354f134797"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuVertexBufferLayout.rs",
+      "sha256": "445eb9e4e76f8525c5eb47b518d369c3241839d2c6dd55213154676646316286"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuVertexFormat.rs",
+      "sha256": "c7cbd6ec336fe57d2e1dcc4fe990f628863fac2e62c480be312b43a418866976"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuVertexState.rs",
+      "sha256": "1ab4c83bb4b5e90d9b996ae836bd53a941fe5e406ac6e5c3d78d35b8f5492e96"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_GpuVertexStepMode.rs",
+      "sha256": "62e5e053ebae81eaae433ff8c5c703415cfb98d0d2d49d695919f18096f8a745"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_WgslLanguageFeatures.rs",
+      "sha256": "a18c0bda2cf749604b442eaa0dac035cef85c1d1a6c4080f019dacfb578fcc99"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/gen_gpu_map_mode.rs",
+      "sha256": "5692413926be8e404f14f59788a044348ef83295d69f875dfe44047ce54e61ae"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/webgpu/webgpu_sys/mod.rs",
+      "sha256": "6d5ac394dfcf0077d68d0b3ff818a87663e44e626e5feedfb349d2480e366bd4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/wgpu_core.rs",
+      "sha256": "6f1a9288924385fa383f70ea5e48226b48869f07186c9c79d62470ed9e1fc68b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/wgpu_core/thread_id.rs",
+      "sha256": "20d1aa5017ab143cf5439f84e8db8a7e0eea576a107b1c8ef4b46e02fd7ec79a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/cmp.rs",
+      "sha256": "4c07201a23386c3acc787e3974416f0c5fcd8d35c8163d038485f8da9dcff177"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/dispatch.rs",
+      "sha256": "86d9f89d32841f16fb3ef35b49125ad87470f2d4fb17f67e30ddae102cd72bf1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/lib.rs",
+      "sha256": "9da12f5d242324bf24109438e76904da830d8008f78a3f12210bdd6160ccd3c4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/macros/mod.rs",
+      "sha256": "d5b9c469c67c2976a1c92e9d160888744c41880d6b28262dabc507cd337d53c5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/presentation.rs",
+      "sha256": "4796d21483bfe68f8ff9f2f52a562ef121f49c30f9da4e0d3e0094216bdf6167"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/shader_artifact.rs",
+      "sha256": "906852414b0a597f6b3aa2c40d05cad382ba40dd7b62043efea7edbd1761ef9f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/belt.rs",
+      "sha256": "6b5869754341042480cf43e65d83e3006d3b9a506165bd5f2394c8c26d3f0be0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/blit.wgsl",
+      "sha256": "8c91d8168c8f72ea4ad7e7facc21072d014a82b3d84de9b0504d0a0fcb3a146b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/device.rs",
+      "sha256": "5165417ab59e057b22aa16dd0a9728134c026dfda3c03beac7db6ccdb31b40c2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/encoder.rs",
+      "sha256": "67192104cc0729891ff6f2282cd22e1375e3ff123ec85ff644e21cf7353fbca7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/init.rs",
+      "sha256": "9b7c66f7ea60894e1f01a567f4fcd31d072945e92a1ed944e67839a4b96d2f5e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/mod.rs",
+      "sha256": "6fe4a1d2cc7d0abd2e789e0944bdb852cfb64e66763cc948adb2b224b8acf1a6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/mutex.rs",
+      "sha256": "ce1f147f8bf22460cb78cec0477670a149015f55b7f25800fb8a461db60ae501"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/panicking.rs",
+      "sha256": "56893f6aa859fa9f648ecdf13f5c610dbb7b14d7bbc84304f10b964030baa80a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/spirv.rs",
+      "sha256": "ec85d59da63e4d86b19eff9058af3d46de7f8305e1e1517ec49e6503be4389e2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/util/texture_blitter.rs",
+      "sha256": "19f6f81ff2cf6bb639fe429ffd6ccae1839d178b76666d8911c1aa166e5051a4"
+    },
+    {
+      "path": "reactivity/vendor/winit/Cargo.lock",
+      "sha256": "b6183ac90e9aabac21f3fd993380cd8d8f7a28c7b7b67f8ae5549e95bedc205f"
+    },
+    {
+      "path": "reactivity/vendor/winit/Cargo.toml",
+      "sha256": "2aeb741d47b763ee198ca915c330a6bf0b1fc094dd69357e80278b7852289c61"
+    },
+    {
+      "path": "reactivity/vendor/winit/build.rs",
+      "sha256": "eda62c3ebf765708bf1608b51ccf77501b4aa0253214c419f813c6d08d640b1a"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/child_window.rs",
+      "sha256": "a605c0d8d2b7e9bbc585a109f82fe0f032dda2ea80e4efb07c396d34576bc10c"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/control_flow.rs",
+      "sha256": "3c3ab1670113f7ef4b826f91a1daf6b8419171cac3e6042cc3d871c31fcb858d"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/pump_events.rs",
+      "sha256": "9d2b52aee808ba58c4e987eda0562493c15da298de67bba210a5727ceb910c9c"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/run_on_demand.rs",
+      "sha256": "b12ac771a8e4fd8945170f5dead56905ca6146e98c6203f2e197e50a364d0406"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/util/fill.rs",
+      "sha256": "9fb51f71015d6a0bac1ab796c1b4806970f4cda6003d996ce2a5fce97c4f5260"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/util/tracing.rs",
+      "sha256": "4df742b6fa78a20e1d1971c789042a154c3cfa83eaea7b670ff56ab6e04f5a86"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/window.rs",
+      "sha256": "f7cd8787211bb307736dd385766dd22e93a74fecae5f4f45928152a0265537e7"
+    },
+    {
+      "path": "reactivity/vendor/winit/examples/x11_embed.rs",
+      "sha256": "571f44156b395c4b2466f2bedae81c818817a6b87f1d1958e9b52c117df3f5ad"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/application.rs",
+      "sha256": "993ddc2bbffca969224b2045dfd6cefd6cadd923df83f8ba24da8da8e5ab3fb4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/changelog/mod.rs",
+      "sha256": "55a97a82a15c4006dca76e46bbd7ade72e103f54bbcc111bc55341207dff5140"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/cursor.rs",
+      "sha256": "479eb73a7a23a58b718ce7255345f3f65ed2cf46d2e4e7d1716deb469dd9099b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/error.rs",
+      "sha256": "549f95a2afff4435eed400c580b7d512229c7958df19258c0ce2ac30474f121d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/event.rs",
+      "sha256": "ff5c577343a725173a539c797e243fa8f6150c02181d904bddb9d82581a7a61e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/event_loop.rs",
+      "sha256": "f84209476849188122139926697f1fe97e17409a41ef0e8dfadf9bd4718108c7"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/icon.rs",
+      "sha256": "42780fcdb3dfe001fa24c51e21d326df2961e4232e0b09b0e8d9c3518161e73b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/keyboard.rs",
+      "sha256": "fb1400750fb0c6d376415e642c837e0e8ded95f55ba03a8889d336d180620394"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/lib.rs",
+      "sha256": "924aead3c0bd3e446e8ee51193c636916f8b0b9d2cbb964e81e160db0f07a2ec"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/monitor.rs",
+      "sha256": "60d8887910f1d3836544f12d000146d95790f8af54476d7288f73f822377083b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/android.rs",
+      "sha256": "7a576387937d93c03654067a7197ec65da6c9f3e39b145a32182fe43f93609bc"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/ios.rs",
+      "sha256": "bfb43e3067cd74067ce6019048141f86c1524b5a7859756f7b938310e9d9984b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/macos.rs",
+      "sha256": "c6685a9e320715b00124d66eb5e9be088cf1f165678e832a86459f0026d215e9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/mod.rs",
+      "sha256": "371ae3adce64ba6353c03cc5f7251325b50f0516bed4eca50496f1e42b5f6dfc"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/modifier_supplement.rs",
+      "sha256": "e23c4a667aec84232ce072b7066a2aa2c912a1a7d5c0b7d9b5b648f877fb642d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/orbital.rs",
+      "sha256": "e511445fa2d06fc7210a88abbc760395710c60a4c0376d1a4a0ee29e522bf2ac"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/pump_events.rs",
+      "sha256": "bbdc0f490758f91609f1b46998976e071775bf9f17a7c4a3a12bd6781b0c6b3c"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/run_on_demand.rs",
+      "sha256": "007047afc1e916f1bc01c5ee1bc959dd865049f17be97dc517abb7bacda66262"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/scancode.rs",
+      "sha256": "2ce520012ee3ab6b5884d2f74e84380811b6e50c7139eee176fb233d75b25df2"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/startup_notify.rs",
+      "sha256": "c2b3ba714649268109ab48ef5cc7dddd7dab0198518987f8735c174fe6b2c5b8"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/wayland.rs",
+      "sha256": "4fd4601c7733275031f14c40d33caca8e493197c40bc721fdd055297f9690d00"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/web.rs",
+      "sha256": "4dac8e96213a4ca4ec586946f18d16dfbad3666ce1e60b34c4e28eac6e213c5e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/windows.rs",
+      "sha256": "1a480966b317ac2f3117b26d379954b2d9af1740472a9ae07e055598862a24eb"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform/x11.rs",
+      "sha256": "a64f13d1e3e77c4cb3b21faafe87d74e8063bd901e5cb38af98738dbdd0fa911"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/android/keycodes.rs",
+      "sha256": "ee8674acc597a71665bedd05e7ac79b8efb76570fcefe616e5eeb81474822475"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/android/mod.rs",
+      "sha256": "17e982ffa857b36166b38a89c99bd4c19e199d847dfb3d43f289ca8d4e3bd066"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/app_state.rs",
+      "sha256": "f2ff4a1093ccd4d52f3db86458ea8fbd18805876082c3a4ccc127e8d8e614a6a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/event_loop.rs",
+      "sha256": "df8f0d5e25b799b63edba57168ccfd736283c10149d596aab146019fc770a5aa"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/mod.rs",
+      "sha256": "0707a46215de8a0c7692ae04ade45de27de19988fd3cb54fd4c5553e7c3aea7c"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/monitor.rs",
+      "sha256": "76abeeafdab29e5dd46426a3f0eb173931b392dcff356bdc1c218e00adefec37"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/notification_center.rs",
+      "sha256": "cdcee390403dc4518402248022ad7d7fcd61ac42a041633f3de684d6533bddd3"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/view.rs",
+      "sha256": "95f8cb9caf86ef10174c687eb017d110567d8ad3adba89c25c37f41fb6359cc6"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/view_controller.rs",
+      "sha256": "fe4d8403c4e8f8bba6cb5f45191532649c6e28886536173dc3f546a3c9c9ff69"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/ios/window.rs",
+      "sha256": "731b07469178cf763d44f43e6dc31a2b1dce89788ac4b5a9e8adf641237ea7f4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/common/mod.rs",
+      "sha256": "697b29a56eeebe70eed5e9549b53d15c474d8c7f54a7476f992646f8603aeb25"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/common/xkb/compose.rs",
+      "sha256": "d4f11c74f1e1ffd93ecc75d7fa2afdba25212925f0589d7a9c26b9784a43e344"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/common/xkb/keymap.rs",
+      "sha256": "e08d41edd547e57df87b6c8da271f7c956a0d4dcead1cf2b17ab2c67652e0c82"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/common/xkb/mod.rs",
+      "sha256": "4ae8efa819657fa6cd8c38543f8638d7c7c67af18ff3a8b871919252d87c2400"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/common/xkb/state.rs",
+      "sha256": "c7a940941b2d1c679a2da163b244d6ec131c2d5d24f75e5265921cdb938c3cb5"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/mod.rs",
+      "sha256": "9c4b64e947af8bfb5f9ddb68d36f5536638ad9b9eaa18b6bf239a4c1af46164b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/event_loop/mod.rs",
+      "sha256": "dd1ceefa859550fb109460ff9b536307dfa457069899244da0220c0a81267edb"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/event_loop/proxy.rs",
+      "sha256": "090756d810c1cdf56832c8b283044f93965f0149db601f40625bb977a05468de"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/event_loop/sink.rs",
+      "sha256": "3f92a12b7d786f12edfe69925c2ba17194974c427614d4c449335aa843f9d2c2"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/mod.rs",
+      "sha256": "473911ef643fb20ca22dcc9a7eb9c87344b0914b470b019384d7ba1be1e92111"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/output.rs",
+      "sha256": "14982bc1e6ba130eb2c3d0da790905d28075cd1cec215b6f74e560fa449f5421"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/seat/keyboard/mod.rs",
+      "sha256": "dd20e74809b3a7987864bc5cabdbeaf62a8474400ddbc4fc86188ed7a84dea62"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/seat/mod.rs",
+      "sha256": "70bbd2a8c43a898f4cb2580d38c4f14e478e7331ab65d2e115feb0377fe2fc44"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/seat/pointer/mod.rs",
+      "sha256": "842ea0e853a3fef090ddf2ff6bc68f00c008f38db3b222468f8332451aa569b8"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/seat/pointer/relative_pointer.rs",
+      "sha256": "c1e9a253d23827036950ec58fb78f4d3b326b2f57cdff7381f0c0cef8015bea9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/seat/text_input/mod.rs",
+      "sha256": "197f1b241915f4d579649e187b653efb7f1bfac9405821f2a2e0eef88e5375c2"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/seat/touch/mod.rs",
+      "sha256": "dd16a75607cab3ba5723ad6b7a2ad6dd09fa2a63fffa57622367f137ea5d3987"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/state.rs",
+      "sha256": "18beef206a1d0a1cf72ac65b1cefb4984bc204ca0638ecbbe2cb2c8d316422c9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/types/cursor.rs",
+      "sha256": "b513bb85d34e3df1d5bc765e2f88a468e80f43d50464336d5dbaf54332fdf8e7"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/types/kwin_blur.rs",
+      "sha256": "6cbb4ce3e2484a01bacfa24a55ea3c1659503b18fc48e8f41f341d437f291ea4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/types/mod.rs",
+      "sha256": "84e32b36a90e15747ce5beae9318f1475d15925a45248147a5b7e9920e74f4c8"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/types/wp_fractional_scaling.rs",
+      "sha256": "c0897ffeee6f631aac024e9a737b90c18b807a775cf898e64b45fcca84ca97c7"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/types/wp_viewporter.rs",
+      "sha256": "77b67951f7bdd959555e8b39a8830d4547b28f73a921a4f347a647a9758d156a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/types/xdg_activation.rs",
+      "sha256": "8d0fd39c97c6eb19b8231df20624777feca1aa45bb38692ab498e37e42aa5bab"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/window/mod.rs",
+      "sha256": "30b6c00aa143046e4b1d7277e5fd08ae7ef7f7f084b0c0e62c89e0dda8a5c6c2"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/wayland/window/state.rs",
+      "sha256": "d09f9c19235a36d0a0068eb82428a27e3a4f318f31925368e573310ae791030a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/activation.rs",
+      "sha256": "e30310151a7277aa8467adb0890b16482913efa6aea1e518a0b1d5ac83e3ec95"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/atoms.rs",
+      "sha256": "409f77f94faa03e9ae3ab09d62a01e044aaeb5bbde9c9ee5e55ad6994374138b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/dnd.rs",
+      "sha256": "89b186416d72fb36ecfaa350cae884949b1445d7a7b99a926eadba861d550243"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/event_processor.rs",
+      "sha256": "a95ab90423fbe1bae5b987dbd75e601b3b7204747c6d05199ec71545f9f611d7"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/ffi.rs",
+      "sha256": "a311e1e922ce9dab1d1761854bcff0b64ff50d7c34848a869ef70820cbcbdd79"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/ime/callbacks.rs",
+      "sha256": "82fe96afa6d46514b54d3c1a35bc9ea8ef44e91750976c17aada99f521f33325"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/ime/context.rs",
+      "sha256": "c4cbbdd20f6eb46e26521c1e877456363a2752e962ea4c4d27ee0f8e98e545f9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/ime/inner.rs",
+      "sha256": "0f8e8070b1590cff566db06d8fd4e849ebfd4066817f60a455cb020dff81ba2d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/ime/input_method.rs",
+      "sha256": "b301d72119cd3c87109540a760a7c0cac5cec58ced425a4bf2a91ff1c7dfb700"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/ime/mod.rs",
+      "sha256": "efa84f5da26bdb10bbed3c0c5089e4aa719985b96fa18215db9c71bf3dcd5f10"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/mod.rs",
+      "sha256": "811861508c9e34923fc77ff9aa610b1b977b641fd72a919e634ce0d38f788d45"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/monitor.rs",
+      "sha256": "5c49263f0ae5355cf56f379544f28301ebe63f4130e3b5744bfb5e1ae5d16fa0"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/client_msg.rs",
+      "sha256": "76c0c08831829fc010be1150e8f9aa9cc366b25dd344dba381ce7f7d3d3373af"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/cookie.rs",
+      "sha256": "d53987a8d3bb8e0b4462ed3bf670ff35f1f9c8315f622ad199990cd7629adaef"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/cursor.rs",
+      "sha256": "e3d229d3f27ed087c8916ba9b7e9ec6f08af11a5064e659f45aeb364ca703d22"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/geometry.rs",
+      "sha256": "fd2054b2e1c086011cb639830038737654fb9ecbd7fd090f5bcc0cc1567a1803"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/hint.rs",
+      "sha256": "f5f4744d090bbe6280e09ce2d6ea2da76d0d899d87762059a99d1174b39e47f8"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/icon.rs",
+      "sha256": "598a457838fff1e3eccc4274a13bdd140419ce303684347604712b127d57c6d6"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/input.rs",
+      "sha256": "a1db43e9940a20581cc4308f9be5b749d9912208c5bfd5fa6ce7d2aac71daaef"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/keys.rs",
+      "sha256": "5d6af7d9c91107ad5d9d8451bc3f85922bc5dcb87deb9e215956d03d2a69acba"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/memory.rs",
+      "sha256": "b88e9bb56f20582c85bf07d176011dce4c6357c1de877c6241f2496ad4d27c42"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/mod.rs",
+      "sha256": "180f12c887da4c10904de7cf2934543784c917338b49d182aba7d098b183a899"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/modifiers.rs",
+      "sha256": "1f99aa3c76936f76eccc1eab18d39aa38916b97c4429e40818279650a09df78b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/mouse.rs",
+      "sha256": "5eb02a1b1206dc05d056da762c210e4828158758d10f547277e7e08d8cead38b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/randr.rs",
+      "sha256": "220d9343b2b3987c77fd346154fdfd9a23b004c077e1f57c3649c458a935b502"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/window_property.rs",
+      "sha256": "a079a7c6a7ed75e39b35cc76e4f55aff54b1cb6887711d1323fd60bc36ab4e4a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/wm.rs",
+      "sha256": "09ec80c212ce2110022c8d2d81731e1f7c90438722cff8fae8dbbcc5e92ae220"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/util/xmodmap.rs",
+      "sha256": "1bd99ff1891b79ff59f38773a1ab5ad3fb9a60fc55643a3787dd3c02b6afb48d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/window.rs",
+      "sha256": "13dfb6eeee1ce7938e2758760621c07eeec820f1b27c3b5b7a55f77e75deac69"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/xdisplay.rs",
+      "sha256": "ddfa5f2140c8cded23e14247011a5fdcc6c2a83d2523584f50d2da49b8a094d6"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/linux/x11/xsettings.rs",
+      "sha256": "3429aea240688c0faaab7f9725b586b6cd2f3332d6f9b19ac8da7689605713b0"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/app.rs",
+      "sha256": "14ba9f49d955a906a115c34fd12fdbbda13ac9b75740606e9fe0daeffa903c5b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/app_state.rs",
+      "sha256": "cb346eda09cfb7ddb4941fead441e3242eec0c64639a621e7f3116702531b7a4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/cursor.rs",
+      "sha256": "537ee43a90cba74cc73801a45b67ef2356d99c7af12489865d0ff78273c6a9c9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/event.rs",
+      "sha256": "dd073f82f85c5950eebb45256521da675e216ec56eaacadb7b413b96f1e894d4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/event_handler.rs",
+      "sha256": "05b01ef0413ef0eb1004decf7def1131aa0ac6ce445bbcc03606c9c8b3a862c5"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/event_loop.rs",
+      "sha256": "c538c57419a311e335842f18e55d3e1ba4d493fa88c111d3e956ef81458f0c89"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/ffi.rs",
+      "sha256": "ae4aed628db11c332c8de422bb181bec15b22e44712b50d0a8eabb98d25f417d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/menu.rs",
+      "sha256": "b0bcc89693df6c2f5ff5cbfadaad83cff7fd5815483e2aaeea07b55e61a32ceb"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/mod.rs",
+      "sha256": "584af72536847910a3e461fb40b9a0f9a375da3200f7ecf38f5d989b3c143d9d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/monitor.rs",
+      "sha256": "456ae20157b0c40f98cf2d7b6850fc07aacb510f5cfda27891c0ffcc2ee47e68"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/observer.rs",
+      "sha256": "c4b1a7e129237924d6f2f20eed2e66d1d9c111b267d2bf1556bec85accc509b4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/util.rs",
+      "sha256": "9c938d322c89cee11fb041ebd43ef77355fb1a38fc77151ce730133929e32955"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/view.rs",
+      "sha256": "de63351d7a757d58883600c3f1702fc369cb77b2ae323a4efca7cb520e9da90e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/window.rs",
+      "sha256": "981b8acb0e46f9b153c143b939c8e39a63b994b5d3f8f0c0f24c56b2993bd1f8"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/macos/window_delegate.rs",
+      "sha256": "791c8112b5eb95d4c5bf7efff3f458432cdfd77598053c3d756ae610323f36ae"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/mod.rs",
+      "sha256": "32e11e828a4cee9ad1dcb649beab6b6842f9b5bff4c1e070c67e78c7c1e3d6c6"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/orbital/event_loop.rs",
+      "sha256": "20865c2ee7405e5dec577bc5aa6c62ca043ae4c3ff0cbd17f6d029ee27b1726d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/orbital/mod.rs",
+      "sha256": "6b078d029061621f88dca6b1b88eba78671304779352281a9ee8d84e6c5829ca"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/orbital/window.rs",
+      "sha256": "a804344a32c90e8ff43a2640f99a63f3a3894a52137dd07a4503a435e7552279"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/abortable.rs",
+      "sha256": "9a6e1ca49d3cc19cd808dc5d0a94a1da16f7049021449aed05073703f1410f1e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/atomic_waker.rs",
+      "sha256": "d06e582da4c06722419566040cf2b9b131139072825d3c6da94183fa42d760ba"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/channel.rs",
+      "sha256": "32c90e56e0c975168e6f1cb05dbec119112f5c34925ebdae02ac3ff933ee66ad"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/concurrent_queue.rs",
+      "sha256": "b2db7edc5ae541bab5157cc057a5c5594aa4083acd6c564f615387799520c1b4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/dispatcher.rs",
+      "sha256": "8e9f12f85ff04ef43af769eb968208076c47bd8135e31af78e65defe972e58e1"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/mod.rs",
+      "sha256": "3d67f5c7205a9c506bf0273d97b786901225c015058eca4408f9aa09de4b5fa4"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/notifier.rs",
+      "sha256": "a13b0d9e0517da28716b86c5155fcce06294e3386f4267a20eac043e97b7fa90"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/waker.rs",
+      "sha256": "c6cde0c84e315972bc1735762961e29ff5cfdb4990a16c6e4196705a32305852"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/async/wrapper.rs",
+      "sha256": "03aa2bcbf2a4af964f023d34d89344268ecd6851ee14ed62ec80735f7633894e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/cursor.rs",
+      "sha256": "4c44bb489893ffa0ce6f72e3949d4f6ec208ef0848ab76e2f2491d49227dd63b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/device.rs",
+      "sha256": "b01dba26e4eaaa488e25637428d766d64e0ba3985645f9dd4f7a6c999d77243a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/error.rs",
+      "sha256": "aa81b02160abb8707f5420d373ce9fd664f3255fedb49982f8539caf3a5e6083"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/event_loop/mod.rs",
+      "sha256": "6352287ae6a0afb3ebcf3919d12c2dfb3821901f790dd31cdd4bf4a3846069a0"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/event_loop/proxy.rs",
+      "sha256": "03062c47460e5c53007bbccb233484435e081c515d7b59edd66bf808b40b3d62"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/event_loop/runner.rs",
+      "sha256": "e8ecd77ef8c4550ded308827e3975fdc54065ab58413a80b48e2f2bd1325bc8a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/event_loop/state.rs",
+      "sha256": "989601ab5a56c7eb6ba495d027f6093a64a8fb32facd31ad9e2f0da24697c98a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/event_loop/window_target.rs",
+      "sha256": "8c47586f4fba7a77d8ce339289893040287b6c78e6d98dc7f12522522ace337e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/keyboard.rs",
+      "sha256": "b15c5d89b2989b516ad87dbdc97b0b41aea6d09f929404894a0a907e4c4a2f6d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/main_thread.rs",
+      "sha256": "9658c9a69410784162c983144a5c37638eef4cd6967d24eaedd25f01567ab00c"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/mod.rs",
+      "sha256": "2208e8c703370f19caa7c545badae78fce6f4bd5c569399dfa5497399212c98e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/monitor.rs",
+      "sha256": "a746440b15fd8affbef1cc7bec63bbb40e548494a01b67bfc061fb0e4da77d38"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/animation_frame.rs",
+      "sha256": "6aee3f5a4ed6c2d6b8d5f570da552a618773e4e513c76746efcdd8c316f94043"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/canvas.rs",
+      "sha256": "f2272f16a45b2245bd2e7dfc9458899d1fd248a9615ab49d5976bd1584d9af56"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/event.rs",
+      "sha256": "f73d5c0509b1e4a430ac238712e5963d21d378e0701e9c2b67cf839d890e3fb1"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/event_handle.rs",
+      "sha256": "3e81317e037627fa4874d28ff6d43dff4cc3f2970f33496ed345910f33eed108"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/fullscreen.rs",
+      "sha256": "6cf26354391839b55f8d9f1426f842349bb159384a79598a47628da64ae5dc1d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/intersection_handle.rs",
+      "sha256": "af2024c3fea10a70fa9fdbb6cca474730fecc9ccdcf1d3bb7cec6305fdb7346b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/media_query_handle.rs",
+      "sha256": "0c6dde21f28ee2f47db2cf10f859e158e156549dd1c10141be02d9496ea720ab"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/mod.rs",
+      "sha256": "60c26a5a11e998a7ebaa0432fdc11aa1458a9b6676ca6c398487f7d9dbbdffc9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/pointer.rs",
+      "sha256": "e6277ddcc06acf6d3e09ba95ea54e618c3d355a82f92fa8ee56463bd30c6f643"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/resize_scaling.rs",
+      "sha256": "fe98de29d14f60d10447ddd87ffec46bd24bfdf90095b608143f8d253627e06e"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/web_sys/schedule.rs",
+      "sha256": "351aa8dc3019b4efd8af1457129faafc35ea8ce0581b39b9ac95d141753f2c09"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/web/window.rs",
+      "sha256": "fc6a7844845ec3b9d84188b59c9ef4bc8f5357a922f34bcb62d7a1dd3ec29424"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/dark_mode.rs",
+      "sha256": "9fa225a2462e0a0467b7608fc126515f5138d7762f0f86688b17ef9d627f0fe1"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/definitions.rs",
+      "sha256": "d3eb11a33c6daf98682796f7c019238fdc8bd2d389119699a20c1ed7d9dbddaf"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/dpi.rs",
+      "sha256": "de57490ede1509fadd0b92404450bb1044aa42fb59a14619e32497618e1dac46"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/drop_handler.rs",
+      "sha256": "47abcad8770ba1d5ec8c877c8e725aa330c472ef07ec4ffcb60c1e7ae33c41c8"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/event_loop.rs",
+      "sha256": "f99c748e189ea8ce4bde08ec186ee27306756ce93d5235371e198c07e582c52d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/event_loop/runner.rs",
+      "sha256": "dfa68a445d4218098e39c731d27abfb172d55a2580c8e5bd16e209409f315f5b"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/icon.rs",
+      "sha256": "89dd2f1e567852327cdc20adfb78ce12404f9ecc6786178d4caffe425a8d96c5"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/ime.rs",
+      "sha256": "fb98b36a12d98bacf7fa88e8444f5d85713d51110e9ada028ce5ca12677a7feb"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/keyboard.rs",
+      "sha256": "93188bdea60bce1014d624f289d25063b59a14985a318ca736bf62d8ba3e5d16"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/keyboard_layout.rs",
+      "sha256": "d324796eaf474c35905f1b539cafaedaa3ee639e8ad7ad9ec559aeb2c56cf722"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/minimal_ime.rs",
+      "sha256": "f400011bf7f57b50dd6f47066b6b1f354339217887938c26cbd22a062594805c"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/mod.rs",
+      "sha256": "c739237f4903d6be9aaa3e913e50ae01575a689a4678486a3b82e214adf7020d"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/monitor.rs",
+      "sha256": "fb177904e37746a41ff7607b60863282c505a885180dc9e069904f379b66f206"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/raw_input.rs",
+      "sha256": "d36ff2c05cecc97b8b4e293a0a7dff4046a033b128101b07cc04812cbcc24b7a"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/util.rs",
+      "sha256": "beed128bdedfb31daaa28da786bc6bdae037cbb41e5bf4db4d10678a44c72a68"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/window.rs",
+      "sha256": "337a9fe3162e6ec2c4075b0a483fcdb9f424d57ac4c758bffc17adf712845bd7"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/platform_impl/windows/window_state.rs",
+      "sha256": "505e7ea90e1fa75500cb296cf6ec4cf3f04407c44731ffc9ae1f48e78d8d0f34"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/utils.rs",
+      "sha256": "a6b2a21ab09102d288d9c9bfdd4c9173ae24cd50b18f3b11c6d9842c69ea3fc9"
+    },
+    {
+      "path": "reactivity/vendor/winit/src/window.rs",
+      "sha256": "78710820b0a19b4133f9c08758ef67be964d4d1c112b97aca684fde4f76f2847"
+    },
+    {
+      "path": "reactivity/vendor/winit/tests/send_objects.rs",
+      "sha256": "dd13b75fa0584cb03f928de109afd08859cffe9fd7828529ea3f4f1041b5085d"
+    },
+    {
+      "path": "reactivity/vendor/winit/tests/serde_objects.rs",
+      "sha256": "25ba1c2321a77a5b67196dd694eea65f7101f59c78d0a64f511ea02457937396"
+    },
+    {
+      "path": "reactivity/vendor/winit/tests/sync_object.rs",
+      "sha256": "be6f81b8e53b705b6733135d7f3bb3a33294c3c3e28078ffbf3b448d19a98235"
+    }
+  ]
+}

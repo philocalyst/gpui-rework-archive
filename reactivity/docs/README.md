@@ -16,6 +16,10 @@ that have since been corrected. [Current dispositions](../REVIEW.md) and
 | [Portable presenter boundary](portable-presenter-luna.md) | Vendor-owned hints/target proof/leases, source-review corrections and cross-platform fallback limits |
 | [Remaining portable graphics owner](portable-graphics-boundary-next-luna.md) | Current vendor boundary, redundant configuration removal, backend leases and explicit legacy gaps |
 | [Graphics work elimination](graphics-work-elimination-luna.md) | Device-owned resources, shader artifact safety, backend preservation contracts and separately gated first-window experiments |
+| [Exact constant coverage](constant-coverage-luna.md) | Ordered HDR sample reduction, WGSL signed-zero limits and separately qualified unadopted prototype |
+| [Scene preparation review](scene-preparation-luna.md) | Plane locality tradeoffs and diagnostic-pass fusion proposals |
+| [Shared tile prefixes](shared-tile-prefix-luna.md) | Ordered full-bounds address sharing, affine certificates and rejected additive count shortcuts; research only |
+| [Ready-publication transport](ready-publication-mpsc-luna.md) | Pinned standard-channel reserved-head stall and a custom-queue proposal with explicit progress/unsafe obligations; unimplemented |
 | [Offline shader proof](offline-shader-proof-luna.md) | Exact six-binding ABI, Vulkan artifact generation, enabled robustness policies, host bounds and unsafe admission gates; proposed, not implemented |
 | [Typed reflection and composition](typed-reflection-composition-luna.md) | Closed property traversal, shared validators, component-library controls and inspector ownership budgets |
 | [Production API gaps](production-gaps-luna.md) | Concrete accessible editor actions, typed reflection/inspector and designer color operations |

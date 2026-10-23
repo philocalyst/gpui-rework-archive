@@ -6,7 +6,7 @@ use crate::{Action, ActionKind, Error, Part, Role, Target, View, Win};
 use accesskit::{ActionData, ActionRequest, Node, NodeId, TreeId, TreeInfo, TreeUpdate};
 use accesskit_winit::Adapter;
 use std::sync::{
-    Arc,
+    Arc, OnceLock,
     atomic::{AtomicBool, AtomicU64, Ordering},
     mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError},
 };
@@ -34,7 +34,6 @@ enum Command {
 }
 struct Queued {
     session: u64,
-    publication: u64,
     command: Command,
 }
 impl Command {
@@ -76,7 +75,7 @@ impl Command {
 }
 
 struct Shared {
-    sender: SyncSender<Queued>,
+    sender: OnceLock<SyncSender<Queued>>,
     wake: Option<Wake>,
     closed: AtomicBool,
     overflow: AtomicBool,
@@ -84,7 +83,6 @@ struct Shared {
     // never on a new presentation; old live position-free targets remain valid.
     session: AtomicU64,
     initial: AtomicBool,
-    publication: AtomicU64,
 }
 impl Shared {
     fn set_active(&self, active: bool) {
@@ -115,20 +113,32 @@ impl Shared {
 #[derive(Clone)]
 struct Ingress(Arc<Shared>);
 impl Ingress {
+    fn new(wake: Option<Wake>) -> Self {
+        Self(Arc::new(Shared {
+            sender: OnceLock::new(),
+            wake,
+            closed: AtomicBool::new(false),
+            overflow: AtomicBool::new(false),
+            session: AtomicU64::new(0),
+            initial: AtomicBool::new(false),
+        }))
+    }
+    // Only the owner's actual publication factory initializes this cell.
+    // Callbacks use get(), so they neither initialize nor wait for the queue.
+    fn prepare_publication(&self, receiver: &mut Option<Receiver<Queued>>) {
+        self.0.sender.get_or_init(|| {
+            let (sender, channel) = mpsc::sync_channel(CAPACITY);
+            *receiver = Some(channel);
+            sender
+        });
+    }
+    #[cfg(test)]
     fn channel(wake: Option<Wake>) -> (Self, Receiver<Queued>) {
-        let (sender, receiver) = mpsc::sync_channel(CAPACITY);
-        (
-            Self(Arc::new(Shared {
-                sender,
-                wake,
-                closed: AtomicBool::new(false),
-                overflow: AtomicBool::new(false),
-                session: AtomicU64::new(0),
-                initial: AtomicBool::new(false),
-                publication: AtomicU64::new(0),
-            })),
-            receiver,
-        )
+        // Lower-layer transport fixtures represent an installed publication.
+        let ingress = Self::new(wake);
+        let mut receiver = None;
+        ingress.prepare_publication(&mut receiver);
+        (ingress, receiver.unwrap())
     }
 }
 impl accesskit::ActivationHandler for Ingress {
@@ -158,6 +168,11 @@ impl accesskit::ActionHandler for Ingress {
         {
             return;
         }
+        // Placeholder providers advertise no applicable GPUI action. Discard
+        // pre-publication requests before decoding or allocating their payload.
+        let Some(sender) = self.0.sender.get() else {
+            return;
+        };
         let id = request.target_node;
         let command = match (request.action, request.data) {
             (accesskit::Action::Click, None) => Command::Activate(id),
@@ -235,11 +250,7 @@ impl accesskit::ActionHandler for Ingress {
             // item realization need additional runtime authority.
             _ => return,
         };
-        match self.0.sender.try_send(Queued {
-            session,
-            publication: self.0.publication.load(Ordering::Acquire),
-            command,
-        }) {
+        match sender.try_send(Queued { session, command }) {
             Ok(()) => self.0.signal(),
             Err(TrySendError::Full(_)) => self.0.overload(),
             Err(TrySendError::Disconnected(_)) => {}
@@ -267,7 +278,7 @@ impl Refresh {
 }
 pub(super) struct Bridge {
     adapter: Adapter,
-    receiver: Receiver<Queued>,
+    receiver: Option<Receiver<Queued>>,
     ingress: Ingress,
     published: Option<State>,
     refresh: Refresh,
@@ -289,7 +300,7 @@ impl Bridge {
         wake: Wake,
         title: String,
     ) -> Self {
-        let (ingress, receiver) = Ingress::channel(Some(wake));
+        let ingress = Ingress::new(Some(wake));
         let adapter = Adapter::with_direct_handlers(
             event_loop,
             window,
@@ -299,7 +310,7 @@ impl Bridge {
         );
         Self {
             adapter,
-            receiver,
+            receiver: None,
             ingress,
             published: None,
             refresh: Refresh::Immediate,
@@ -318,13 +329,19 @@ impl Bridge {
         &mut self,
         owner: &mut Win<M, L>,
     ) -> Result<Applied, NativeError> {
-        // No request may act before this provider has published a cohort. Any
-        // queued pre-publication request is rejected by its older publication
-        // revision after sync; the namespace binding survives provider restarts.
+        // No request may act before this provider has published a cohort.
+        // Queue and namespace binding survive provider restarts.
         if self.published.is_none() {
             return Ok(std::array::from_fn(|_| None));
         }
-        drain_actions(&self.ingress, &self.receiver, &self.cohort, owner)
+        drain_actions(
+            &self.ingress,
+            self.receiver
+                .as_ref()
+                .expect("published provider owns its queue"),
+            &self.cohort,
+            owner,
+        )
     }
     pub(super) fn sync<M: View + 'static, L: crate::remote::LaneSet<M>>(
         &mut self,
@@ -374,6 +391,8 @@ impl Bridge {
             self.refresh == Refresh::Sparse
         };
         let sheet = owner.accessibility_sheet()?;
+        let ingress = &self.ingress;
+        let receiver = &mut self.receiver;
         let mut updated = false;
         self.adapter.update_if_active(|| {
             let update = if let Some(indices) = delta.filter(|_| !relink.root) {
@@ -393,20 +412,13 @@ impl Bridge {
             {
                 self.conversions += update.nodes.len();
             }
+            // A skipped factory creates no queue. Install transport before the
+            // returned tree can serve actions; cohort IDs qualify text leases.
+            ingress.prepare_publication(receiver);
             updated = true;
             update
         });
         if updated {
-            if self
-                .ingress
-                .0
-                .publication
-                .fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_add(1))
-                .is_err()
-            {
-                self.ingress.0.overload();
-                return Err(NativeError::AccessibilityOverloaded);
-            }
             self.published = Some(state);
             self.refresh = Refresh::published(qualified);
         }
@@ -435,11 +447,6 @@ fn drain_actions<M: View + 'static, L: crate::remote::LaneSet<M>>(
         }
         *result = Some((|| {
             let (id, action) = queued.command.operation(cohort)?;
-            if id.0 >= (1 << 63)
-                && queued.publication != ingress.0.publication.load(Ordering::Acquire)
-            {
-                return Err(Error::StaleTarget);
-            }
             let target = cohort.target(owner, id)?;
             let action = local_scroll_action(owner, target, action)?;
             owner.perform(target, action)
