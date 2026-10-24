@@ -47,11 +47,10 @@ impl Script {
     }
     fn value(&self, name: &str) -> String {
         let owner = self.host.owner.as_ref().unwrap();
-        let target = owner.query().name(name).one().unwrap();
         let mut value = None;
         owner
             .visit(|part| {
-                if part.target() == target {
+                if part.name() == Some(name) {
                     value = part.value().map(str::to_owned);
                 }
             })
@@ -92,6 +91,11 @@ impl Script {
         self.oracle();
         match self.stage {
             0 => {
+                // Xvfb has no window manager; explicitly deliver the normalized
+                // native focus callback through the same production handler.
+                self.host
+                    .window_event(event_loop, &WindowEvent::Focused(true))
+                    .unwrap();
                 assert_eq!(self.value("first"), "日本");
                 let owner = self.host.owner.as_mut().unwrap();
                 let target = owner.query().name("first").one().unwrap();

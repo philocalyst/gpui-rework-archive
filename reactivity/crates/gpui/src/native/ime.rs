@@ -28,8 +28,8 @@ impl Bridge {
         &mut self,
         owner: &mut Win<V, L>,
         window: &NativeWindow,
+        desired: Option<ImeTarget>,
     ) -> Result<Option<Commit>, Error> {
-        let desired = owner.ime_target();
         if self.phase == Phase::Disabling {
             // Keep only the next requested binding. No old event can enable it.
             self.binding = desired;

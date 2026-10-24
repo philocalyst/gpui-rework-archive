@@ -414,6 +414,7 @@ struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
     graphics: Option<Graphics>,
     pointer: PointerSession,
     ime: Option<Box<ime::Bridge>>,
+    native_focused: bool,
     occluded: bool,
     destination: destination::Destination,
     error: Option<NativeError>,
@@ -455,6 +456,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             graphics: None,
             pointer: PointerSession::default(),
             ime: None,
+            native_focused: false,
             occluded: false,
             destination: destination::Destination::default(),
             error: None,
@@ -527,9 +529,10 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         }
         if let Some(window) = &self.window {
             window.set_visible(true);
+            self.native_focused = window.has_focus();
             window.request_redraw();
         }
-        Ok(())
+        self.sync_ime()
     }
     fn create_surface(&mut self) -> Result<(), NativeError> {
         let Some(window) = &self.window else {
@@ -982,11 +985,12 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         let (Some(owner), Some(window)) = (&mut self.owner, &self.window) else {
             return Ok(());
         };
-        if self.ime.is_none() && owner.ime_target().is_some() {
+        let desired = self.native_focused.then(|| owner.ime_target()).flatten();
+        if self.ime.is_none() && desired.is_some() {
             self.ime = Some(Box::default());
         }
         if let Some(bridge) = &mut self.ime {
-            if let Some(commit) = bridge.sync(owner, window)?
+            if let Some(commit) = bridge.sync(owner, window, desired)?
                 && commit.prepared_epoch.is_some()
             {
                 window.request_redraw();
@@ -1000,6 +1004,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
     }
     fn ime_input(&mut self, event: &winit::event::Ime) -> Result<(), NativeError> {
         self.sync_ime()?;
+        if !self.native_focused && !matches!(event, winit::event::Ime::Disabled) {
+            return Ok(());
+        }
         let result = match (&mut self.ime, &mut self.owner) {
             (Some(bridge), Some(owner)) => bridge.event(owner, event),
             _ => None,
@@ -1151,7 +1158,12 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             WindowEvent::CursorLeft { .. } => {
                 self.pointer_input(PointerEvent::Leave)?;
             }
+            WindowEvent::Focused(true) => {
+                self.native_focused = true;
+                self.sync_ime()?;
+            }
             WindowEvent::Focused(false) => {
+                self.native_focused = false;
                 self.pointer = PointerSession::default();
                 if let Some(owner) = &mut self.owner {
                     let result = owner.clear_focus();
@@ -1313,6 +1325,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             }
             Callback::Resumed => self.resumed(event_loop),
             Callback::Suspended => {
+                self.native_focused = false;
                 self.destination.invalidate();
                 self.pointer = PointerSession::default();
                 // Dropping both bounded channel endpoints cancels this admission
@@ -1321,12 +1334,14 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                 self.upgrade_attempted = false;
                 self.instance = None;
                 self.graphics = None;
-                self.owner
-                    .as_mut()
-                    .map(Win::presentation_lost)
-                    .transpose()
-                    .map(|_| ())
-                    .map_err(NativeError::from)
+                self.sync_ime().and_then(|()| {
+                    self.owner
+                        .as_mut()
+                        .map(Win::presentation_lost)
+                        .transpose()
+                        .map(|_| ())
+                        .map_err(NativeError::from)
+                })
             }
             Callback::Exiting => {
                 self.retire_window();
