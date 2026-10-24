@@ -259,10 +259,7 @@ fn explicit_checkbox_parts_keep_one_semantic_root_and_activation_route() {
     }
     let mut win = Win::demo(Parts(0));
     let root = win.role(Role::CheckBox).name("Choice").one().unwrap();
-    assert_eq!(
-        win.role(Role::Text).text("Visible label").one().is_ok(),
-        true
-    );
+    assert!(win.role(Role::Text).text("Visible label").one().is_ok());
     win.click(root).unwrap();
     assert_eq!(win.root().unwrap().0, 1);
     win.visit(|part| {

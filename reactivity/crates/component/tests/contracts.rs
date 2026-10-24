@@ -91,6 +91,7 @@ fn controlled_requests_do_not_silently_change_owner_and_keyboard_matches_pointer
         window.activate(target),
         Err(Error::NotInteractive)
     ));
+    assert_eq!(window.update(|_| {}).unwrap().changed_nodes, 0);
     window
         .visit(|part| {
             if part.target() == target {

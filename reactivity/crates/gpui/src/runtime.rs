@@ -2495,7 +2495,7 @@ impl<M: View + 'static> Runtime<M> {
             {
                 site.shaped = None;
             }
-            if node.has_handler() != draft.on_click.is_some() {
+            if node.has_handler() != (!disabled && draft.on_click.is_some()) {
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
