@@ -1,0 +1,2356 @@
+{
+  "cpu-diagnostic-v1": {
+    "instrumented_diagnostic_only": true,
+    "source_and_binary_unchanged": true,
+    "sample_method": "owned per-thread perf_event_open PERF_TYPE_SOFTWARE CPU_CLOCK,10msperiod, userspace IP+callchains; CLOCK_MONOTONIC; kernel/hypervisor excluded",
+    "kernel_settings_changed": false,
+    "lost_samples": 0,
+    "errors": [],
+    "measurement_window_samples": 2200,
+    "module_leaf_samples": {
+      "[anonymous]": 2155,
+      "/home/miles/gpui-ce3-compute-20261024/targets/mapped-todo/release/examples/todo_comparison_mapped": 33,
+      "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so": 10,
+      "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6": 2
+    },
+    "threads": [
+      {
+        "tid": 3172117,
+        "name": "llvmpipe-2",
+        "cpu_ticks_delta": 532,
+        "cpu_seconds": 5.32,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 540
+      },
+      {
+        "tid": 3172115,
+        "name": "llvmpipe-0",
+        "cpu_ticks_delta": 531,
+        "cpu_seconds": 5.31,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 541
+      },
+      {
+        "tid": 3172116,
+        "name": "llvmpipe-1",
+        "cpu_ticks_delta": 531,
+        "cpu_seconds": 5.31,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 541
+      },
+      {
+        "tid": 3172118,
+        "name": "llvmpipe-3",
+        "cpu_ticks_delta": 531,
+        "cpu_seconds": 5.31,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 541
+      },
+      {
+        "tid": 3172099,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 35,
+        "cpu_seconds": 0.35,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 35
+      },
+      {
+        "tid": 3172124,
+        "name": "WSI swapchain q",
+        "cpu_ticks_delta": 4,
+        "cpu_seconds": 0.04,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172114,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 3,
+        "cpu_seconds": 0.03,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 2
+      },
+      {
+        "tid": 3172101,
+        "name": "todo-animation",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172102,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172103,
+        "name": "blocking-1",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172104,
+        "name": "async-io",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172105,
+        "name": "llvmpipe-0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172106,
+        "name": "llvmpipe-1",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172107,
+        "name": "llvmpipe-2",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172108,
+        "name": "llvmpipe-3",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172109,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172110,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172111,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172112,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172113,
+        "name": "todo_co:disk$0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172119,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172120,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172121,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172122,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172123,
+        "name": "todo_co:disk$0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3172125,
+        "name": "WSI swapchain e",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900088528,
+        "user_cpu_clock_samples": 0
+      }
+    ],
+    "top_instruction_addresses": [
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136493,
+        "samples": 111
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107332,
+        "samples": 109
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136526,
+        "samples": 100
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136426,
+        "samples": 97
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136460,
+        "samples": 90
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106902,
+        "samples": 27
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 108013,
+        "samples": 20
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107123,
+        "samples": 20
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106937,
+        "samples": 20
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106883,
+        "samples": 20
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106989,
+        "samples": 20
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106963,
+        "samples": 19
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106958,
+        "samples": 17
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107099,
+        "samples": 16
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106834,
+        "samples": 15
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111189,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107007,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111593,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 114282,
+        "samples": 13
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107109,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111232,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107002,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106976,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107594,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107584,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111174,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107113,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136487,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107497,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107456,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 101452,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111208,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107488,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136535,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106769,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136436,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137542,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 16897,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137638,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111575,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107085,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137965,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137168,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137990,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 46137,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137436,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107605,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136992,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136589,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 114017,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 102447,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107118,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 114141,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106813,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111588,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137270,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136824,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107529,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106693,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136571,
+        "samples": 6
+      }
+    ],
+    "host_receipts": 179,
+    "model_ticks": 222,
+    "model_skipped": 200,
+    "limits": [
+      "Software CPU-clock IP sample counts are statistical, not cycle-exact.",
+      "Short-lived threads may be missed before100msdiscovery.",
+      "Callchains may truncate without frame pointers; raw IPs/maps retained.",
+      "Visible marker samples record presented revisions, not every internal model event.",
+      "These instrumented observations are excluded from performance medians."
+    ]
+  },
+  "cpu-diagnostic-jit-v2": {
+    "instrumented_diagnostic_only": true,
+    "source_and_binary_unchanged": true,
+    "sample_method": "owned per-thread perf_event_open PERF_TYPE_SOFTWARE CPU_CLOCK,10msperiod, userspace IP+callchains; CLOCK_MONOTONIC; kernel/hypervisor excluded",
+    "kernel_settings_changed": false,
+    "lost_samples": 0,
+    "errors": [],
+    "measurement_window_samples": 2200,
+    "module_leaf_samples": {
+      "/home/miles/gpui-ce3-compute-20261024/targets/mapped-todo/release/examples/todo_comparison_mapped": 26,
+      "[anonymous]": 2160,
+      "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so": 12,
+      "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6": 2
+    },
+    "threads": [
+      {
+        "tid": 3175083,
+        "name": "llvmpipe-0",
+        "cpu_ticks_delta": 534,
+        "cpu_seconds": 5.34,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 543
+      },
+      {
+        "tid": 3175084,
+        "name": "llvmpipe-1",
+        "cpu_ticks_delta": 534,
+        "cpu_seconds": 5.34,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 543
+      },
+      {
+        "tid": 3175085,
+        "name": "llvmpipe-2",
+        "cpu_ticks_delta": 534,
+        "cpu_seconds": 5.34,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 542
+      },
+      {
+        "tid": 3175086,
+        "name": "llvmpipe-3",
+        "cpu_ticks_delta": 533,
+        "cpu_seconds": 5.33,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 543
+      },
+      {
+        "tid": 3175067,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 29,
+        "cpu_seconds": 0.29,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 27
+      },
+      {
+        "tid": 3175093,
+        "name": "WSI swapchain q",
+        "cpu_ticks_delta": 4,
+        "cpu_seconds": 0.04,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175082,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 2,
+        "cpu_seconds": 0.02,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 2
+      },
+      {
+        "tid": 3175069,
+        "name": "todo-animation",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175070,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175071,
+        "name": "blocking-1",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175072,
+        "name": "async-io",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175073,
+        "name": "llvmpipe-0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175074,
+        "name": "llvmpipe-1",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175075,
+        "name": "llvmpipe-2",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175076,
+        "name": "llvmpipe-3",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175077,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175078,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175079,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175080,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175081,
+        "name": "todo_co:disk$0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175087,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175088,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175089,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175090,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175091,
+        "name": "todo_co:disk$0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3175094,
+        "name": "WSI swapchain e",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900058458,
+        "user_cpu_clock_samples": 0
+      }
+    ],
+    "top_instruction_addresses": [
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136526,
+        "samples": 117
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136460,
+        "samples": 116
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107332,
+        "samples": 110
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136493,
+        "samples": 95
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136426,
+        "samples": 93
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106976,
+        "samples": 30
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106958,
+        "samples": 21
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106963,
+        "samples": 21
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106902,
+        "samples": 20
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106834,
+        "samples": 18
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107123,
+        "samples": 18
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106989,
+        "samples": 17
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107594,
+        "samples": 16
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 101452,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111174,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106883,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107113,
+        "samples": 13
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106937,
+        "samples": 13
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111189,
+        "samples": 13
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111593,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 108013,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107002,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111092,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 92550,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107497,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106892,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107456,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107584,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106928,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107044,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 114282,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107488,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 16897,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107105,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107007,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111158,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137795,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107464,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111588,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111232,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106941,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107109,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136963,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 101599,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137461,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111575,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136535,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136861,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137097,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 105074,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107062,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137126,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137734,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107567,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107605,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137270,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106684,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106662,
+        "samples": 6
+      },
+      {
+        "module": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+        "relative_ip": 2419484,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136470,
+        "samples": 6
+      }
+    ],
+    "host_receipts": 179,
+    "model_ticks": 256,
+    "model_skipped": 168,
+    "limits": [
+      "Software CPU-clock IP sample counts are statistical, not cycle-exact.",
+      "Short-lived threads may be missed before100msdiscovery.",
+      "Callchains may truncate without frame pointers; raw IPs/maps retained.",
+      "Visible marker samples record presented revisions, not every internal model event.",
+      "These instrumented observations are excluded from performance medians."
+    ]
+  },
+  "cpu-diagnostic-code-v3": {
+    "instrumented_diagnostic_only": true,
+    "source_and_binary_unchanged": true,
+    "sample_method": "owned per-thread perf_event_open PERF_TYPE_SOFTWARE CPU_CLOCK,10msperiod, userspace IP+callchains; CLOCK_MONOTONIC; kernel/hypervisor excluded",
+    "kernel_settings_changed": false,
+    "lost_samples": 0,
+    "errors": [],
+    "measurement_window_samples": 2210,
+    "module_leaf_samples": {
+      "[anonymous]": 2164,
+      "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so": 15,
+      "/home/miles/gpui-ce3-compute-20261024/targets/mapped-todo/release/examples/todo_comparison_mapped": 27,
+      "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6": 4
+    },
+    "threads": [
+      {
+        "tid": 3182997,
+        "name": "llvmpipe-2",
+        "cpu_ticks_delta": 537,
+        "cpu_seconds": 5.37,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 546
+      },
+      {
+        "tid": 3182998,
+        "name": "llvmpipe-3",
+        "cpu_ticks_delta": 536,
+        "cpu_seconds": 5.36,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 546
+      },
+      {
+        "tid": 3182996,
+        "name": "llvmpipe-1",
+        "cpu_ticks_delta": 535,
+        "cpu_seconds": 5.35,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 544
+      },
+      {
+        "tid": 3182995,
+        "name": "llvmpipe-0",
+        "cpu_ticks_delta": 534,
+        "cpu_seconds": 5.34,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 544
+      },
+      {
+        "tid": 3182979,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 29,
+        "cpu_seconds": 0.29,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 28
+      },
+      {
+        "tid": 3183004,
+        "name": "WSI swapchain q",
+        "cpu_ticks_delta": 4,
+        "cpu_seconds": 0.04,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182994,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 2,
+        "cpu_seconds": 0.02,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 2
+      },
+      {
+        "tid": 3182981,
+        "name": "todo-animation",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182982,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182983,
+        "name": "blocking-1",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182984,
+        "name": "async-io",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182985,
+        "name": "llvmpipe-0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182986,
+        "name": "llvmpipe-1",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182987,
+        "name": "llvmpipe-2",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182988,
+        "name": "llvmpipe-3",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182989,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182990,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182991,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182992,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182993,
+        "name": "todo_co:disk$0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3182999,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3183000,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3183001,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3183002,
+        "name": "todo_comparison",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3183003,
+        "name": "todo_co:disk$0",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      },
+      {
+        "tid": 3183005,
+        "name": "WSI swapchain e",
+        "cpu_ticks_delta": 0,
+        "cpu_seconds": 0.0,
+        "elapsed_sampled_s": 5.900056613,
+        "user_cpu_clock_samples": 0
+      }
+    ],
+    "top_instruction_addresses": [
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136460,
+        "samples": 130
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136426,
+        "samples": 123
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136493,
+        "samples": 119
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107332,
+        "samples": 104
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136526,
+        "samples": 97
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106963,
+        "samples": 22
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106958,
+        "samples": 17
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111189,
+        "samples": 16
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107002,
+        "samples": 16
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107085,
+        "samples": 15
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106937,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106902,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111593,
+        "samples": 14
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106769,
+        "samples": 12
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107109,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111174,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111092,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 92550,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107584,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107007,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106883,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 108013,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107113,
+        "samples": 11
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111232,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106989,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106928,
+        "samples": 10
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107594,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107488,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 101452,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137097,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107123,
+        "samples": 9
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107497,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107176,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136535,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106834,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106892,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106976,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111152,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107464,
+        "samples": 8
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 114282,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136520,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106718,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 138045,
+        "samples": 7
+      },
+      {
+        "module": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+        "relative_ip": 2419484,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 106941,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111158,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136739,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 46203,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111575,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 108158,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107456,
+        "samples": 7
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111164,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 114141,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 111338,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 107044,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 136470,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137379,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 137734,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 104690,
+        "samples": 6
+      },
+      {
+        "module": "[anonymous]",
+        "relative_ip": 16897,
+        "samples": 6
+      }
+    ],
+    "host_receipts": 180,
+    "model_ticks": 243,
+    "model_skipped": 180,
+    "limits": [
+      "Software CPU-clock IP sample counts are statistical, not cycle-exact.",
+      "Short-lived threads may be missed before100msdiscovery.",
+      "Callchains may truncate without frame pointers; raw IPs/maps retained.",
+      "Visible marker samples record presented revisions, not every internal model event.",
+      "These instrumented observations are excluded from performance medians."
+    ]
+  },
+  "latest_preceding_maps_resolution_v1": {
+    "version": 2,
+    "resolution": "latest preceding /proc maps snapshot, executable mappings only",
+    "module_counts": {
+      "[anonymous]": 2155,
+      "/home/miles/gpui-ce3-compute-20261024/targets/mapped-todo/release/examples/todo_comparison_mapped": 33,
+      "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so": 10,
+      "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6": 2
+    },
+    "tid_module_counts": [
+      {
+        "tid": 3172118,
+        "module": "[anonymous]",
+        "samples": 541
+      },
+      {
+        "tid": 3172116,
+        "module": "[anonymous]",
+        "samples": 539
+      },
+      {
+        "tid": 3172117,
+        "module": "[anonymous]",
+        "samples": 538
+      },
+      {
+        "tid": 3172115,
+        "module": "[anonymous]",
+        "samples": 537
+      },
+      {
+        "tid": 3172099,
+        "module": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-todo/release/examples/todo_comparison_mapped",
+        "samples": 33
+      },
+      {
+        "tid": 3172115,
+        "module": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+        "samples": 4
+      },
+      {
+        "tid": 3172117,
+        "module": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+        "samples": 2
+      },
+      {
+        "tid": 3172099,
+        "module": "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+        "samples": 2
+      },
+      {
+        "tid": 3172114,
+        "module": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+        "samples": 2
+      },
+      {
+        "tid": 3172116,
+        "module": "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+        "samples": 2
+      }
+    ],
+    "example_raw_callchains": [
+      {
+        "tid": 3172115,
+        "leaf_map": [
+          132865149214720,
+          132865149394944,
+          0,
+          "[anonymous]",
+          "r-xp"
+        ],
+        "chain": [
+          {
+            "ip": "0xfffffffffffffe00",
+            "mapping": null
+          },
+          {
+            "ip": "0x78d71407b4ea",
+            "mapping": [
+              132865149214720,
+              132865149394944,
+              0,
+              "[anonymous]",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715288411",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715288eef",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71528612c",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715286393",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71500c3f8",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71689f751",
+            "mapping": [
+              132865190952960,
+              132865192566784,
+              163840,
+              "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71692ba4c",
+            "mapping": [
+              132865190952960,
+              132865192566784,
+              163840,
+              "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+              "r-xp"
+            ]
+          }
+        ]
+      },
+      {
+        "tid": 3172115,
+        "leaf_map": [
+          132865149190144,
+          132865149194240,
+          0,
+          "[anonymous]",
+          "r-xp"
+        ],
+        "chain": [
+          {
+            "ip": "0xfffffffffffffe00",
+            "mapping": null
+          },
+          {
+            "ip": "0x78d714054302",
+            "mapping": [
+              132865149190144,
+              132865149194240,
+              0,
+              "[anonymous]",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715285b03",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71528612c",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715286393",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71500c3f8",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71689f751",
+            "mapping": [
+              132865190952960,
+              132865192566784,
+              163840,
+              "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71692ba4c",
+            "mapping": [
+              132865190952960,
+              132865192566784,
+              163840,
+              "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+              "r-xp"
+            ]
+          }
+        ]
+      },
+      {
+        "tid": 3172115,
+        "leaf_map": [
+          132865149214720,
+          132865149394944,
+          0,
+          "[anonymous]",
+          "r-xp"
+        ],
+        "chain": [
+          {
+            "ip": "0xfffffffffffffe00",
+            "mapping": null
+          },
+          {
+            "ip": "0x78d71405dfa1",
+            "mapping": [
+              132865149214720,
+              132865149394944,
+              0,
+              "[anonymous]",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d7152866ed",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715288e73",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71528612c",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d715286393",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71500c3f8",
+            "mapping": [
+              132865163841536,
+              132865169313792,
+              315392,
+              "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71689f751",
+            "mapping": [
+              132865190952960,
+              132865192566784,
+              163840,
+              "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+              "r-xp"
+            ]
+          },
+          {
+            "ip": "0x78d71692ba4c",
+            "mapping": [
+              132865190952960,
+              132865192566784,
+              163840,
+              "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6",
+              "r-xp"
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_unchanged": true
+  },
+  "owned_code_analysis_v3": {
+    "resolution": "latest preceding /proc maps snapshot; executable mappings only",
+    "samples": 2210,
+    "module_leaf_samples": {
+      "[anonymous]": 2164,
+      "/nix/store/dv3gad7cjnnnzbfsv7jslvj9fmn5420j-mesa-26.1.4/lib/libvulkan_lvp.so": 15,
+      "/home/miles/gpui-ce3-compute-20261024/targets/mapped-todo/release/examples/todo_comparison_mapped": 27,
+      "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/libc.so.6": 4
+    },
+    "inventory_bytes": 184320,
+    "inventory_errors": [],
+    "assembly_windows": [
+      {
+        "ip": 138831670699276,
+        "samples": 130,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a650c.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670699276",
+          "--stop-address=138831670699468",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670699242,
+        "samples": 123,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a64ea.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670699242",
+          "--stop-address=138831670699434",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670699309,
+        "samples": 119,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a652d.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670699309",
+          "--stop-address=138831670699501",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670670148,
+        "samples": 104,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f344.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670670148",
+          "--stop-address=138831670670340",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670699342,
+        "samples": 97,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a654e.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670699342",
+          "--stop-address=138831670699534",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669779,
+        "samples": 22,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f1d3.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669779",
+          "--stop-address=138831670669971",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669774,
+        "samples": 17,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f1ce.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669774",
+          "--stop-address=138831670669966",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670674005,
+        "samples": 16,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a0255.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670674005",
+          "--stop-address=138831670674197",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669818,
+        "samples": 16,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f1fa.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669818",
+          "--stop-address=138831670670010",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669901,
+        "samples": 15,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f24d.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669901",
+          "--stop-address=138831670670093",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669753,
+        "samples": 14,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f1b9.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669753",
+          "--stop-address=138831670669945",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669718,
+        "samples": 14,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f196.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669718",
+          "--stop-address=138831670669910",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670674409,
+        "samples": 14,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a03e9.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670674409",
+          "--stop-address=138831670674601",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669585,
+        "samples": 12,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f111.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669585",
+          "--stop-address=138831670669777",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669925,
+        "samples": 11,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f265.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669925",
+          "--stop-address=138831670670117",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670673990,
+        "samples": 11,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a0246.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670673990",
+          "--stop-address=138831670674182",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670673908,
+        "samples": 11,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e44446a01f4.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670673908",
+          "--stop-address=138831670674100",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670655366,
+        "samples": 11,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469b986.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670655366",
+          "--stop-address=138831670655558",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670670400,
+        "samples": 11,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f440.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670670400",
+          "--stop-address=138831670670592",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      },
+      {
+        "ip": 138831670669823,
+        "samples": 11,
+        "snapshot_sha256": "8f8d19b4100b12d9466383aab04e0fd711dc6a13fe549d3aaf39e8ecc223c2a5",
+        "snapshot_monotonic_ns": 630856740095737,
+        "output": "code-analysis/7e444469f1ff.asm",
+        "command": [
+          "/nix/store/ddk8rvjihg4vhh1k6x9rc65y1zb1kx34-binutils-2.46/bin/objdump",
+          "-D",
+          "-b",
+          "binary",
+          "-m",
+          "i386:x86-64",
+          "--adjust-vma=138831670562816",
+          "--start-address=138831670669823",
+          "--stop-address=138831670670015",
+          "jit-code/7e4444685000-7e44446b1000.bin"
+        ]
+      }
+    ],
+    "scope": "only owned-child anonymous RX bytes; each window begins at a sampled instruction IP",
+    "limits": [
+      "Byte snapshots represent their recorded capture times, not proof that every sample saw identical code.",
+      "Raw machine instructions have no established function or shader-stage names.",
+      "Samples are software CPU-clock statistical observations and may skid, not cycle-exact instruction cost or whole-program attribution."
+    ]
+  }
+}
