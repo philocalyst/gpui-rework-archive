@@ -1,0 +1,2 @@
+{"job_absent": true, "no_owned_compilers": true, "exclusive_lock": true, "source_hashes_match": true, "partial_executables": 62, "partial_bytes": 1956909024, "free_bytes": 21371928576, "target_sizes_kib": "669296\t/Users/mileswirht/gpui-reactivity-20261024-root/target\n1443960\t/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly\n"}
+

@@ -1,0 +1,330 @@
+{
+  "gpui-component-ime-after-1.json": {
+    "bytes": 281503,
+    "sha256": "481d5e87270b1508e61886c401e44bee7b5aa95ebd4acacde4e41a01b56c352d"
+  },
+  "gpui-component-ime-after-2.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-after-runtime.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-atspi-launch.py": {
+    "bytes": 1405,
+    "sha256": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf"
+  },
+  "gpui-component-ime-before-1.json": {
+    "bytes": 281503,
+    "sha256": "481d5e87270b1508e61886c401e44bee7b5aa95ebd4acacde4e41a01b56c352d"
+  },
+  "gpui-component-ime-before-2.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-binding_costs.log": {
+    "bytes": 776,
+    "sha256": "85ff254bd85a565ba26fecd9197446fbfece6b5744c3d5857d6475555ce2dfca"
+  },
+  "gpui-component-ime-capsules.py": {
+    "bytes": 3341,
+    "sha256": "00cf04b5b312c3a403367982bc4b430b2ab14a41ec233a6be632b6ff2f862edf"
+  },
+  "gpui-component-ime-clean-default.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-clean-default.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-clean-default.command.json": {
+    "bytes": 560,
+    "sha256": "44056efb153e1fd668541ba4a14e4a6f7700fbfaa76873eeff41ca640f3c946e"
+  },
+  "gpui-component-ime-clean-default.jsonl": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-ime-clean-default.log": {
+    "bytes": 141,
+    "sha256": "88219c0e28d0732ae4ca3a1ea25e7ba250c486415cf074417fcdda430a9965b4"
+  },
+  "gpui-component-ime-clean-native-2.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-clean-native-2.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-clean-native-2.command.json": {
+    "bytes": 567,
+    "sha256": "17592040d17319a60eb999435a72796dd9168bab70247daf32e87eb8d19c489d"
+  },
+  "gpui-component-ime-clean-native-2.jsonl": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-ime-clean-native-2.log": {
+    "bytes": 29,
+    "sha256": "0142284f51a4e324beefb9a36e77fe85f54813642f6bae7a34fd0c8814a16bef"
+  },
+  "gpui-component-ime-costs.log": {
+    "bytes": 719,
+    "sha256": "b63f1582628f6e0990a83eb7c0067291c162780d860709234550a311cf69dcaa"
+  },
+  "gpui-component-ime-default-gates.json": {
+    "bytes": 260,
+    "sha256": "9528b781252c53cc3f9df41de4c325fea4ae6f05d601ec247f9717f8a2590179"
+  },
+  "gpui-component-ime-default-orchestrator.log": {
+    "bytes": 866,
+    "sha256": "d54eda410e5cc3c6b4b1de6ea354ae6cd21e1bd5033f78264b84a76346f60608"
+  },
+  "gpui-component-ime-freeze.py": {
+    "bytes": 924,
+    "sha256": "a75d82ebae37c562fd9784ce3205569cff7d76076da0aab1f3f39c9b9d5d2f79"
+  },
+  "gpui-component-ime-full-default.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-full-default.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-full-default.command.json": {
+    "bytes": 489,
+    "sha256": "f6e787707466047574955f0946717671517b323f623e5288ea60d3676814aedf"
+  },
+  "gpui-component-ime-full-default.jsonl": {
+    "bytes": 261861,
+    "sha256": "7dd14a337af0fd6e50dc35bda0d91fdf1d281d3d203b6a54921707023e097bd1"
+  },
+  "gpui-component-ime-full-default.log": {
+    "bytes": 14774,
+    "sha256": "24682453d1814c0884ac0723f5b5d6f51d5561104e7261e37b50544a3bf1927b"
+  },
+  "gpui-component-ime-gates-native2.py": {
+    "bytes": 3308,
+    "sha256": "020c784aa807667c48b7f826cffdcc3d5f624c15c79745c0808bb5f54fee4629"
+  },
+  "gpui-component-ime-gates.py": {
+    "bytes": 2928,
+    "sha256": "0392210340a40287f0cc5866248207d883ee68f2660fd1e32852e1e26e2722ca"
+  },
+  "gpui-component-ime-hummingbird-gates.json": {
+    "bytes": 88,
+    "sha256": "8414122f2be03fe17af9073cf38170938593021646de832478f0491abab373e8"
+  },
+  "gpui-component-ime-hummingbird-orchestrator.log": {
+    "bytes": 288,
+    "sha256": "68f3ac2c55ee5813980148db88678328c041b3be4a838f4076ee997a15b0d2e3"
+  },
+  "gpui-component-ime-hummingbird.after.json": {
+    "bytes": 288012,
+    "sha256": "4858e68a22fe437d25fb237960ba67f33350ba7b5338c9495b5a73e035869e70"
+  },
+  "gpui-component-ime-hummingbird.before.json": {
+    "bytes": 288012,
+    "sha256": "4858e68a22fe437d25fb237960ba67f33350ba7b5338c9495b5a73e035869e70"
+  },
+  "gpui-component-ime-hummingbird.command.json": {
+    "bytes": 487,
+    "sha256": "375164bac93b87ad8279cc712d9c913fb552086d1d7a26d35adab02d8ec172d8"
+  },
+  "gpui-component-ime-hummingbird.jsonl": {
+    "bytes": 131215,
+    "sha256": "257ed5d0de822a24722635eaf23b9fc66e0f50abc99a59fc362981a598cba8ce"
+  },
+  "gpui-component-ime-hummingbird.log": {
+    "bytes": 4877,
+    "sha256": "8075894b7d3e04060754e0708276a9856ec065e870ee22ee03cc642cd7a3be4f"
+  },
+  "gpui-component-ime-inputs.py": {
+    "bytes": 900,
+    "sha256": "d7b6f590bb21d71122fb64c506152aae8ee4e7cd581be56efcf5c60460de2a24"
+  },
+  "gpui-component-ime-inventory.json": {
+    "bytes": 77822,
+    "sha256": "dd9d4ecbdaa86e76445f05706ea077fa6fb539cc22ed6025f8418fd036992a9d"
+  },
+  "gpui-component-ime-inventory.py": {
+    "bytes": 624,
+    "sha256": "fe7c9d9a0d582a501a7fc4d3e46d852851b7fd64ea7211a53696f3f9ff22e627"
+  },
+  "gpui-component-ime-native-atspi-ime.log": {
+    "bytes": 770,
+    "sha256": "69579647ce971236548e439194f637a9047a55ec8993114b3dda3189764257a3"
+  },
+  "gpui-component-ime-native-atspi-invalid.log": {
+    "bytes": 464,
+    "sha256": "3a22e4ddd5292b5d4437fe71a59a4f6f4d44f4e985f46e2b888963e3578f071f"
+  },
+  "gpui-component-ime-native-gates.json": {
+    "bytes": 177,
+    "sha256": "6a1677953a1ce5d4c347de83d458d2428059d4358cbc083f7421314e430f3ffb"
+  },
+  "gpui-component-ime-native-inspector.log": {
+    "bytes": 393,
+    "sha256": "3512363a41a152280080c07062c813ece4ae931e3df42d55b8cb8a296f123e69"
+  },
+  "gpui-component-ime-native-orchestrator.log": {
+    "bytes": 580,
+    "sha256": "0162580a13dc8d4d2298d7c4890cb372c1f4ef0567988cf2151d349b84fcd61a"
+  },
+  "gpui-component-ime-native-property-xvfb.log": {
+    "bytes": 817,
+    "sha256": "12dcabf0449b9ff85d589b86d110c814777977daca56e7ba8ec300c5334fe397"
+  },
+  "gpui-component-ime-native-run.py": {
+    "bytes": 1521,
+    "sha256": "438afc47486670e6ca8a0513a873bc11ed4dc036d2568667b8955e659c5094b7"
+  },
+  "gpui-component-ime-native-unit-2.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-native-unit-2.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-native-unit-2.command.json": {
+    "bytes": 513,
+    "sha256": "21a1cfecafd5a0f10f7c65a5c047f399743a6df47a2e88b821400153c6f7c116"
+  },
+  "gpui-component-ime-native-unit-2.jsonl": {
+    "bytes": 296105,
+    "sha256": "4cf66dbdec81071f490bc0ea7950971173dee5b6b687d7e331a5e9e63c8c41e2"
+  },
+  "gpui-component-ime-native-unit-2.log": {
+    "bytes": 2984,
+    "sha256": "dd885b5e1cc1b089d85f8249be84d151d1de9629171f8bb6efd5a795ce64bd2d"
+  },
+  "gpui-component-ime-native-unit.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-native-unit.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-native-unit.command.json": {
+    "bytes": 509,
+    "sha256": "010b44d4673aad9f6f98007014a9b2e414d0a8db21b9353aab60b79b9fec6516"
+  },
+  "gpui-component-ime-native-unit.jsonl": {
+    "bytes": 218816,
+    "sha256": "170f9a5c6a8e4c4fa432dc8e2b8b3adf29e3a08689ca078c51ed535ae5a458e4"
+  },
+  "gpui-component-ime-native-unit.log": {
+    "bytes": 7162,
+    "sha256": "2e03a4e252a3dac503e2bcd50ff3c560bbc935f5f67a3a0dc91a6f585dbe9f59"
+  },
+  "gpui-component-ime-native2-gates.json": {
+    "bytes": 266,
+    "sha256": "af5927b3f097c6f0ccecc9697e097a730d5803a9455ff055aae8bdec18b17985"
+  },
+  "gpui-component-ime-native2-orchestrator.log": {
+    "bytes": 872,
+    "sha256": "63fcf507e350a4028250ded3876f43581ac1ec71964a40995092228cc5a30cf9"
+  },
+  "gpui-component-ime-parent-inventory.json": {
+    "bytes": 54106,
+    "sha256": "c36190021e9d535059db9bb6dd217e2ae89c961df23656555ffebf6190a99367"
+  },
+  "gpui-component-ime-port-inputs.py": {
+    "bytes": 1136,
+    "sha256": "efeb36d080dd37be66ded811c958f0c4802b9c050ccf7dfbdbdce57297bbd4bf"
+  },
+  "gpui-component-ime-protected.json": {
+    "bytes": 391198,
+    "sha256": "302f5d6796c806d45301de9271194e67a126f281594c707c2d4f75805160fd05"
+  },
+  "gpui-component-ime-protected.py": {
+    "bytes": 1575,
+    "sha256": "c2bb6f4f021379f76d25d9378e9e2874f3b432db2b988787b0b0b8fa0f32f972"
+  },
+  "gpui-component-ime-strict-default.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-strict-default.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-strict-default.command.json": {
+    "bytes": 548,
+    "sha256": "b236d60eef81e267fe6ce9ac4799925d5b536bb63145e9df2541124f78b41827"
+  },
+  "gpui-component-ime-strict-default.jsonl": {
+    "bytes": 171296,
+    "sha256": "66777eb04a251e3fa6179e2f1e87a85656839bd77d5f51c06c47e35a7bfc1983"
+  },
+  "gpui-component-ime-strict-default.log": {
+    "bytes": 3734,
+    "sha256": "2ff4564c93316c257919835c96fa0b44cf2411cc08133b762e0e162d22d9a0fe"
+  },
+  "gpui-component-ime-strict-native-2.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-strict-native-2.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-strict-native-2.command.json": {
+    "bytes": 591,
+    "sha256": "7cfd5ce168df7a7d66a77c773197fa1918b8da46770cf91579e95be393a75ac9"
+  },
+  "gpui-component-ime-strict-native-2.jsonl": {
+    "bytes": 353488,
+    "sha256": "929d1eb1171dc83613ccdba184eb4efdd3699ffa54bd30a3a01ddc7b059e83d2"
+  },
+  "gpui-component-ime-strict-native-2.log": {
+    "bytes": 3136,
+    "sha256": "c91c2e029b3805b2f24e9dc0115c4e7e5308c2dfc5246b987fe634032ba304aa"
+  },
+  "gpui-component-ime-strict-native.after.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-strict-native.before.json": {
+    "bytes": 281503,
+    "sha256": "6ccb1d26bd806ca3d6235fc9f1016dc86169352350b30eb591dfd1ba4f4b1dde"
+  },
+  "gpui-component-ime-strict-native.command.json": {
+    "bytes": 587,
+    "sha256": "1e2c93ab4018b4d40e523af5478fc3f5795ec9dabb07edb5d9dc08b615da68a3"
+  },
+  "gpui-component-ime-strict-native.jsonl": {
+    "bytes": 215622,
+    "sha256": "c682f2be99766ebd5cbea0f26d2d0f85fef636289cfd125cff2319fcbffb9119"
+  },
+  "gpui-component-ime-strict-native.log": {
+    "bytes": 5195,
+    "sha256": "830f8d33d4f1594a600bffa791a939dd555b7c091d5a0440fca11b09fa33be8d"
+  },
+  "gpui-component-ime-targeted-1.jsonl": {
+    "bytes": 84395,
+    "sha256": "44c28a92369af5a9f26b7db7579d9e840383bdedebc57ebb5a68c8547af2d9bd"
+  },
+  "gpui-component-ime-targeted-1.log": {
+    "bytes": 3524,
+    "sha256": "5f2ebd17dc914ef1adf1eda7441c6c451b5a2b9ab748bc5340874dae30e3d579"
+  },
+  "gpui-component-ime-targeted-2.jsonl": {
+    "bytes": 83565,
+    "sha256": "19ce85f8cb66c45b3887e7bc923e6ed2293dc49a75d275046b617d56a42ea4f8"
+  },
+  "gpui-component-ime-targeted-2.log": {
+    "bytes": 336,
+    "sha256": "8c3cb5f137db12005a680119948c3b69231cad17de3eab6776b06daf258fdb95"
+  },
+  "gpui-component-ime-wire.py": {
+    "bytes": 3126,
+    "sha256": "96ae45d49abd702a15f2fac6920b13fde78ca9cfb951014ef53fee1f4b9f9208"
+  }
+}

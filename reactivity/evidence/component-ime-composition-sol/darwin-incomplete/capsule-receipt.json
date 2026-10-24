@@ -1,0 +1,12 @@
+{
+  "pin": "3ab1d964981f44d503f1df9b4947c929c6742160",
+  "parent": "0e97be59c5a033f7ca146a45ab739477261ad900",
+  "base": "5aff5a1b30cd2518ecd69852fa586fbdeafcdbff",
+  "added": 41,
+  "changed": 65,
+  "deleted": [],
+  "before_files": 2061,
+  "after_files": 2102,
+  "bytes": 724961,
+  "sha256": "8fca0d5505b8e27adbb5ba8191a3d4ca6cab3bc43bcc9216345109cdaecaecf4"
+}

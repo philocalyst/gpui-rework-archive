@@ -1,0 +1,978 @@
+{
+  "/root/gpui-component-ime-sol-artifacts-20261024/targeted-1-a4ef1021dd": [
+    {
+      "name": "ime_contracts",
+      "source": "a4ef1021dd8c1283da852e91cef40c162249c556",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui-component/2491af97e728ec50/out/ime_contracts-2491af97e728ec50",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/targeted-1-a4ef1021dd/ime_contracts-ime_contracts-2491af97e728ec50",
+      "bytes": 27344496,
+      "sha256": "f1b3d8f6e28678b03acc2bbea6706601c7ea46713f7e2026d9b51571be48a3ba",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ],
+  "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498": [
+    {
+      "name": "source_inbox_reader_gate",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/b27134642b576578/out/source_inbox_reader_gate-b27134642b576578",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/source_inbox_reader_gate-source_inbox_reader_gate-b27134642b576578",
+      "bytes": 27253280,
+      "sha256": "6e6dbed114ce9fd977363946322f416a894c0706aeac973b24afdd7e3150a4fb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "literal_dispatch",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/09b39d708ae28dc5/out/literal_dispatch-09b39d708ae28dc5",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/literal_dispatch-literal_dispatch-09b39d708ae28dc5",
+      "bytes": 28612872,
+      "sha256": "4040362b49c574a58416f8be0cfcd323676233f715d8769951e9d492bd873de4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slots",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/8abb498a8fcca78b/out/paint_slots-8abb498a8fcca78b",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/paint_slots-paint_slots-8abb498a8fcca78b",
+      "bytes": 30012144,
+      "sha256": "49148a8e1db593f5459302f57277a16ab5c0f8af598031f29c2c0d19f6d00205",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_geometry",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/b8c57e995fb38d0f/out/text_geometry-b8c57e995fb38d0f",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/text_geometry-text_geometry-b8c57e995fb38d0f",
+      "bytes": 27914536,
+      "sha256": "c6df6deb6b2ac37f70788245c07f3ab0148bffded3764e05069e846ef0bf2841",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "checkbox",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/e73f55b17eabca96/out/checkbox-e73f55b17eabca96",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/checkbox-checkbox-e73f55b17eabca96",
+      "bytes": 31265200,
+      "sha256": "469557222083872b0a01e59d716aa6ee3a4d6183925372105af0a1deb86d1050",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/188ea42047087a27/out/unit_action_cost-188ea42047087a27",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/unit_action_cost-unit_action_cost-188ea42047087a27",
+      "bytes": 27126616,
+      "sha256": "1e3298744d267074b9488f79d030eab4f61de51fb240f59c5d579aecca758ea5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "projected_sources",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/9cea5ddfd60a0024/out/projected_sources-9cea5ddfd60a0024",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/projected_sources-projected_sources-9cea5ddfd60a0024",
+      "bytes": 30210384,
+      "sha256": "309dc05783c8e738b30aa9c24b668e19d759f7af5b18415793935e4e551c9e3d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_state_shell",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/fbf9d8354ca921f4/out/property_state_shell-fbf9d8354ca921f4",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/property_state_shell-property_state_shell-fbf9d8354ca921f4",
+      "bytes": 27076160,
+      "sha256": "9a93c05c12abedde42ca3489a614ff1e78ece60778660bb6b9baabb3705bd783",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dimensions",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/1f0f817ca8138a47/out/dimensions-1f0f817ca8138a47",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/dimensions-dimensions-1f0f817ca8138a47",
+      "bytes": 29616536,
+      "sha256": "d499c5d3e1c345322b0751fce582cd0441645ec7a9f5eb594a4648196ae389c3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "first_frame",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/first_frame",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/first_frame-first_frame",
+      "bytes": 28343288,
+      "sha256": "6de3cfbc785fe8d0562241e0a378411a63b315cbf45d1a8fbda8d8775192c6a0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote_delivery_measure",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/remote_delivery_measure",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/remote_delivery_measure-remote_delivery_measure",
+      "bytes": 27833608,
+      "sha256": "2b1c2858cf056d10c95f60d8813f80101fdea45dd75dbb0ab072f540aa807e92",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "frontier",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/ce3c4d5d42eb1667/out/frontier-ce3c4d5d42eb1667",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/frontier-frontier-ce3c4d5d42eb1667",
+      "bytes": 30340760,
+      "sha256": "40e4b1be9ffed9e7779f21d4264d93a8c6c76bb64e460afe764e5970c39341a7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_inputs",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/ac7a59a8698519bd/out/question_inputs-ac7a59a8698519bd",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/question_inputs-question_inputs-ac7a59a8698519bd",
+      "bytes": 28368232,
+      "sha256": "46eb1792ecbd4d6610d6e8a06e58dc21fcf55b9dfade26bd0adb08104ab3943f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gpui_component",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui-component/cf94ae0675d4c945/out/gpui_component-cf94ae0675d4c945",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/gpui_component-gpui_component-cf94ae0675d4c945",
+      "bytes": 1076224,
+      "sha256": "7c4b4781d6b501339a03fb4de1b111f84982c9c92fca2647eee633144f6334bc",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "immutable_text",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/a3554f425c0c5b6d/out/immutable_text-a3554f425c0c5b6d",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/immutable_text-immutable_text-a3554f425c0c5b6d",
+      "bytes": 26838208,
+      "sha256": "ae8c5c9625df097e9c302feb7e405add92279df9247a9f4f6047314c85168820",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "todo_recording_cost",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/todo_recording_cost",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/todo_recording_cost-todo_recording_cost",
+      "bytes": 28823448,
+      "sha256": "26e9942c1e6a1263db3a51f1fbec823b43307f8c5c6b500b9a4a3ad0346ec232",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "search_library",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/5a831c232a336991/out/search_library-5a831c232a336991",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/search_library-search_library-5a831c232a336991",
+      "bytes": 29077792,
+      "sha256": "91be47ed4e15800d51b8677db8a034392ff21962fcc72dd645197f37a37023f8",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_rebind",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/06e452352320cad9/out/paint_slot_rebind-06e452352320cad9",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/paint_slot_rebind-paint_slot_rebind-06e452352320cad9",
+      "bytes": 28386504,
+      "sha256": "4f3b1c921a9ba5195c25288df1d47414b97af2af8bc6550b03397a8a9323000f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_cache",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/3035aad925017448/out/text_cache-3035aad925017448",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/text_cache-text_cache-3035aad925017448",
+      "bytes": 29258992,
+      "sha256": "9c6ba78f3a2d6e7d7dc7c40ef3c237dad088f1e8b46f1f9ac33da9477470bb11",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/729a7f5457eb70e1/out/source_inbox-729a7f5457eb70e1",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/source_inbox-source_inbox-729a7f5457eb70e1",
+      "bytes": 31635824,
+      "sha256": "1d7a3b346da45901533ed560c2d317afb5de51d3dcf037c00fb6ffd0d973f8c0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "lists",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/453cce4cc0c32507/out/lists-453cce4cc0c32507",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/lists-lists-453cce4cc0c32507",
+      "bytes": 38662912,
+      "sha256": "052ddf3fa010219593e722dc6d6d4cc31655c10f6be70506eecba13f5a13d809",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "costs",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/costs",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/costs-costs",
+      "bytes": 26410496,
+      "sha256": "577ce741092197c0a851aa0a90f014a4453c61497820e2bd5d24c8ac2b7df484",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "application",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/d6fd2ec5f7d2e6fe/out/application-d6fd2ec5f7d2e6fe",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/application-application-d6fd2ec5f7d2e6fe",
+      "bytes": 30157832,
+      "sha256": "b0df74ec9c9f4a8439755870903e4832e82cb03a16d509163ada15cd92728d73",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "presentation",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/6f24bb4ba4426896/out/presentation-6f24bb4ba4426896",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/presentation-presentation-6f24bb4ba4426896",
+      "bytes": 28710376,
+      "sha256": "b78a5805f531261b08b5873209a0a44e341a5a2f4e3b197cb5e6bd26d02a7219",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/acdb0b923113fcf3/out/unicode_text-acdb0b923113fcf3",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/unicode_text-unicode_text-acdb0b923113fcf3",
+      "bytes": 28365936,
+      "sha256": "8f18cd34bfc309d840d769c3ea16e2e10b6d45a5042259648b2c69852b937926",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "counter",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/counter",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/counter-counter",
+      "bytes": 28105168,
+      "sha256": "b87ee4475fa8bdc70f40606fd3e4fbd6cc12b20bd3dd50eb09aecd0af6947569",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "components",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/ac6cd2619e36a6da/out/components-ac6cd2619e36a6da",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/components-components-ac6cd2619e36a6da",
+      "bytes": 32338664,
+      "sha256": "7bd438e03755a9af452ec8b740b94ea182005ec04761a89931e697b7335197bf",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_selection",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/2a65d48bd5c62b07/out/property_selection-2a65d48bd5c62b07",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/property_selection-property_selection-2a65d48bd5c62b07",
+      "bytes": 30917520,
+      "sha256": "eb4e28d6a1cf120dfe32512f587e94215db73c255fa0da0b8e81ac0a57944f28",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_input_cost",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/170cb5caff453e03/out/question_input_cost-170cb5caff453e03",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/question_input_cost-question_input_cost-170cb5caff453e03",
+      "bytes": 27015736,
+      "sha256": "5b7e8c36f845a6447af17a9180795cadef1ea48df75c6f7af7b464915d9d66f9",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "reactive_styles",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/reactive_styles",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/reactive_styles-reactive_styles",
+      "bytes": 28384152,
+      "sha256": "f287b00453fa2ef7aeaac6d49093d37406d230924810575e56c0dab469e34f9d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "focus",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/0791cff5af63143a/out/focus-0791cff5af63143a",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/focus-focus-0791cff5af63143a",
+      "bytes": 30743304,
+      "sha256": "9b78b7c0c423944c4186bdc9a02352ab42b566b9aed560a9787de080b1e4daa1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lease_measure",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/text_lease_measure",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/text_lease_measure-text_lease_measure",
+      "bytes": 636664,
+      "sha256": "84e5318735cb58c16a5aa56465de1a0375f9dc3527a87da685b1101045eaeec4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "library",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/68b3e0c8c1684451/out/library-68b3e0c8c1684451",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/library-library-68b3e0c8c1684451",
+      "bytes": 28167504,
+      "sha256": "ca7e72bb13ed80ba467b3bff8dabd710c140f2700574bcf2becbab35494dd1bf",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "ime",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/77c66174853d2311/out/ime-77c66174853d2311",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/ime-ime-77c66174853d2311",
+      "bytes": 29616896,
+      "sha256": "3b2c1c260d2531a7fb4688e5f9e4802d4a3dd50c67cb28222eaa3871310e4686",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sibling_reconciliation_cost",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/1efbae4959e739d5/out/sibling_reconciliation_cost-1efbae4959e739d5",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/sibling_reconciliation_cost-sibling_reconciliation_cost-1efbae4959e739d5",
+      "bytes": 26873544,
+      "sha256": "a388a972f08001fd63c46b95497c2934b1721dbd9efad54c2ec969c784a3ce35",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "binding_costs",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/binding_costs",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/binding_costs-binding_costs",
+      "bytes": 28642048,
+      "sha256": "c0e687e00773de1a6951744da46afea757cc82dafb84ce95e18c66bbebe1e447",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "gpui",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/af179fd8723c989f/out/gpui-af179fd8723c989f",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/gpui-gpui-af179fd8723c989f",
+      "bytes": 72659904,
+      "sha256": "2ddbfb55fc9fc357719cf97c61257ce1a13b207f6b8444076f26f659ccc7d3f4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "scroll",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/58d6625e9ba684de/out/scroll-58d6625e9ba684de",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/scroll-scroll-58d6625e9ba684de",
+      "bytes": 38469288,
+      "sha256": "f3700634daa4024727cfd3e24a7f38b3e2e5230f713d61935059b35a0c22a5c6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_patch",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/e18681c48b1e8561/out/paint_patch-e18681c48b1e8561",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/paint_patch-paint_patch-e18681c48b1e8561",
+      "bytes": 29391680,
+      "sha256": "63ae226ab824f68ae87169bf31c078c0a84ada41183c2d8c792444b442ce6bcc",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/1eabd29ae951b78c/out/remote-1eabd29ae951b78c",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/remote-remote-1eabd29ae951b78c",
+      "bytes": 30306144,
+      "sha256": "ea39ac63bff9b2c139af88af78e37ece3ae93c258fa3c6d45a33fb05f46e218d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "todo_comparison",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/0e8b0473a620860c/out/todo_comparison-0e8b0473a620860c",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/todo_comparison-todo_comparison-0e8b0473a620860c",
+      "bytes": 29650160,
+      "sha256": "7b39ff07c0b3c9d9b3ee411f4be7a257b59f0ff16e6a2e39a4dde3e72d0116a3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "ports",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/de01650fb7b68588/out/ports-de01650fb7b68588",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/ports-ports-de01650fb7b68588",
+      "bytes": 30803240,
+      "sha256": "ddfc428f17e3ce93933578a5c0c498e1def8a8193073f61fb635bce99bbe1f38",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "acceptance",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/831671b36506f83f/out/acceptance-831671b36506f83f",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/acceptance-acceptance-831671b36506f83f",
+      "bytes": 31870504,
+      "sha256": "637dec70891fd23c86c624fd95cfafaa08efe57e2f3ea65791da9bcf1793310f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "style_ports",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/192b910939765f75/out/style_ports-192b910939765f75",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/style_ports-style_ports-192b910939765f75",
+      "bytes": 38280688,
+      "sha256": "fa85392ca54b34e223e9957963d62e72fe01b86a80c0bc42045e4ed9b86832ce",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_packing",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/102ddc81b5dfed44/out/color_packing-102ddc81b5dfed44",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/color_packing-color_packing-102ddc81b5dfed44",
+      "bytes": 28442992,
+      "sha256": "ad94c85346b2b3b0a600b76b3c4b02c53871018438d13b3742a36373a7ba5b7f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_outline_allocations",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/00e4d0a412b7f030/out/property_outline_allocations-00e4d0a412b7f030",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/property_outline_allocations-property_outline_allocations-00e4d0a412b7f030",
+      "bytes": 27103520,
+      "sha256": "2a7551a81d9b5c45f52e40a35a1936dfccac5d6aba0441542d11ac860e490e50",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_styles",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/f5a005eac7775f8a/out/retained_styles-f5a005eac7775f8a",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/retained_styles-retained_styles-f5a005eac7775f8a",
+      "bytes": 29207696,
+      "sha256": "2f81c7279ace74267446b05de9f39e957aadeb9b9ad5f9a9fc2d5b192dd1badd",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contained_owner_spike",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/contained_owner_spike",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/contained_owner_spike-contained_owner_spike",
+      "bytes": 26949224,
+      "sha256": "f744e55a27ee26abe07a62e32bc34e6cd3bfb9b05b01313c64777683a5a2fb12",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "ime_contracts",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui-component/9bc86caf1cf6f57a/out/ime_contracts-9bc86caf1cf6f57a",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/ime_contracts-ime_contracts-9bc86caf1cf6f57a",
+      "bytes": 27403536,
+      "sha256": "221a50337e5d8282476e57b0d168d58965f3584cffe549ec387795c3d3b27134",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "paint_slot_storage",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/paint_slot_storage",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/paint_slot_storage-paint_slot_storage",
+      "bytes": 26339616,
+      "sha256": "8d37595faa465cdd5d5e19deefd4398a04731a9270e9d2bb5bf3b32a8b58c81b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_futures",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/ca2ea51ec5b71555/out/question_futures-ca2ea51ec5b71555",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/question_futures-question_futures-ca2ea51ec5b71555",
+      "bytes": 30754888,
+      "sha256": "dcd22e508dfebee819abda1f855363afed32a82a237f4971f63922ab1fda8cb0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "flex",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/f2d6012dc5951377/out/flex-f2d6012dc5951377",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/flex-flex-f2d6012dc5951377",
+      "bytes": 33025424,
+      "sha256": "402b73c6a98c1e283a8f93b1f224ea2c461c1d03d2de5ed4674ac4f0a407f14b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "images",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/f9ae40fd17757ec1/out/images-f9ae40fd17757ec1",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/images-images-f9ae40fd17757ec1",
+      "bytes": 29981968,
+      "sha256": "b3c3b57de3f3bae3e09edbb1679113b83c5eefb24862559e5ac26dd6f35c9f0b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lane_measure",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/text_lane_measure",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/text_lane_measure-text_lane_measure",
+      "bytes": 27907344,
+      "sha256": "38cb2eac741c7377fe2f2e48c57485d7a07bb61317fdcaea1275fbf49d79c720",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "intrinsic_text",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/d0adec3259e7f742/out/intrinsic_text-d0adec3259e7f742",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/intrinsic_text-intrinsic_text-d0adec3259e7f742",
+      "bytes": 27424752,
+      "sha256": "950dbe02adbcd4df58da0aa615716fac5f3f8d8d4a0aab868c4388bc7b4238f9",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "questions",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/cebd45f1235223ac/out/questions-cebd45f1235223ac",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/questions-questions-cebd45f1235223ac",
+      "bytes": 29284184,
+      "sha256": "d25e46efab4d55d4e21b803d1cab40abc24cbc964c6129e54ce2c50e924f6f02",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantics",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/fcfd95ac4717cdb8/out/semantics-fcfd95ac4717cdb8",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/semantics-semantics-fcfd95ac4717cdb8",
+      "bytes": 29687208,
+      "sha256": "3f42f241387214e18ec46a40702a5f976029f1ba528858f6a4f746968f593112",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_values",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/830b1abfd3f13941/out/source_values-830b1abfd3f13941",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/source_values-source_values-830b1abfd3f13941",
+      "bytes": 28046296,
+      "sha256": "b8a55dce5ee6eea6aad0e6a5ba0c1d8badc322d532781707b82e61575b31d524",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "runtime",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/9ea64b9ba1261e64/out/runtime-9ea64b9ba1261e64",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/runtime-runtime-9ea64b9ba1261e64",
+      "bytes": 37049608,
+      "sha256": "7bdbdb050be052b4b9d2d9243ab8cf79ab6ac37e3db0995a1818649a6e041869",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "pointer_focus",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/70db759396f671f3/out/pointer_focus-70db759396f671f3",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/pointer_focus-pointer_focus-70db759396f671f3",
+      "bytes": 27473672,
+      "sha256": "af9700f799b8d2129c8f258c411435ecfe581162efdf962857dd90383729f6e6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_properties",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/9534a3c0ad25ab93/out/mapped_properties-9534a3c0ad25ab93",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/mapped_properties-mapped_properties-9534a3c0ad25ab93",
+      "bytes": 32586280,
+      "sha256": "5004c6bfce80946e41ee74ca094e257d4a424f8f289ad736fc065c5a58c66a07",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection_compound",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/613e4eee01c2b2c7/out/text_selection_compound-613e4eee01c2b2c7",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/text_selection_compound-text_selection_compound-613e4eee01c2b2c7",
+      "bytes": 27556112,
+      "sha256": "ae5f23f99f6b20103a57b566a94dea4e883e9c2918fa5147bb6a68c035f90a9f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "field_identity",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/fe2e97a1b27db335/out/field_identity-fe2e97a1b27db335",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/field_identity-field_identity-fe2e97a1b27db335",
+      "bytes": 26892576,
+      "sha256": "ac3f3617f96e6c4f392870f50904f6b9d2c773f5f5a6a6cd903ce838fef42a7c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_change_union",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/4b2d89a398abc8f2/out/property_change_union-4b2d89a398abc8f2",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/property_change_union-property_change_union-4b2d89a398abc8f2",
+      "bytes": 28844848,
+      "sha256": "8c3c6b4c5a1c6217ecfc1900a2b7c99907a55676c9242cbb395b2335cd5a537d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "clipping",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/7998e0234bf42ff1/out/clipping-7998e0234bf42ff1",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/clipping-clipping-7998e0234bf42ff1",
+      "bytes": 31959440,
+      "sha256": "6c0aa55776a8729a4c46bc7fd5babedb83c38c622af36a3d49bb46c02f3c366a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_cost",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/color_cost",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/color_cost-color_cost",
+      "bytes": 26102832,
+      "sha256": "e18bcc015e6c658d8d93aef11d70fb757558f0dcafa005e2d575c58ed36e109f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text_measure",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/immutable_text_measure",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/immutable_text_measure-immutable_text_measure",
+      "bytes": 27890912,
+      "sha256": "30ffad18b1ad629f9fa88dea65c89b0b5cd11b7e2d42798a7d89c52b0192db3e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_cost",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/a9dde526211fbfee/out/question_cost-a9dde526211fbfee",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/question_cost-question_cost-a9dde526211fbfee",
+      "bytes": 27846608,
+      "sha256": "c798f31c60823e7c694e9427641c2926da9594e4cf5014afc4b3afb249d62db0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contracts",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui-component/b80f6d4fc66afab6/out/contracts-b80f6d4fc66afab6",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/contracts-contracts-b80f6d4fc66afab6",
+      "bytes": 34781984,
+      "sha256": "00423a4b08c3f7c8409d500e3e6573e884c97d48a86ad10fd465fa941a0e1458",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "identity_recovery",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/60ef604fa26b6c1b/out/identity_recovery-60ef604fa26b6c1b",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/identity_recovery-identity_recovery-60ef604fa26b6c1b",
+      "bytes": 27124776,
+      "sha256": "81a84bc733837d63e57babe7f5c3c679d9417c7d3495a0bb1629a43118e3a6b0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "halloween",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/halloween-halloween",
+      "bytes": 28095368,
+      "sha256": "7eda8a360b67da0d4ecef2129137ae4f84edb1b3755e7b580673b288774c8f11",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "routes",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/f4af92f84e583e4f/out/routes-f4af92f84e583e4f",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/routes-routes-f4af92f84e583e4f",
+      "bytes": 28631104,
+      "sha256": "0854c5ab36c4e28aaaf979b1920ba44f38e0e7f0186e4e3de8b385610ca3a348",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sheet_access_measure",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/sheet_access_measure",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/sheet_access_measure-sheet_access_measure",
+      "bytes": 26192896,
+      "sha256": "1223fe1267c17c62035dab0be03c29e6e7ac6c800fac9ef939309cf6c93a1064",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_storage",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/494a8db55f5c5040/out/question_storage-494a8db55f5c5040",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/question_storage-question_storage-494a8db55f5c5040",
+      "bytes": 29666096,
+      "sha256": "c322e93f1ed2727d39138546c5973281ee05444862205bf87ff13c232c7068c2",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_paint",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/0f2a5c96853da426/out/mapped_paint-0f2a5c96853da426",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/mapped_paint-mapped_paint-0f2a5c96853da426",
+      "bytes": 28450528,
+      "sha256": "e793300fb2ef1d91cbd48ed4cb2e19a3d55407dda240d54a738409739511fbd0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantic_serialization",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/671d0604ffcfe965/out/semantic_serialization-671d0604ffcfe965",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/semantic_serialization-semantic_serialization-671d0604ffcfe965",
+      "bytes": 29608344,
+      "sha256": "d6df6c2941b905502761e6493f746bfc40bbc29b90bea0d1ccbd6fe6ece9cb9a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_value_isolation",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/aa147e891e07e6ae/out/source_value_isolation-aa147e891e07e6ae",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/source_value_isolation-source_value_isolation-aa147e891e07e6ae",
+      "bytes": 28959864,
+      "sha256": "5b2fb13eff718a38778e70462d110c10e4d64d64ea16bbf92a9f7fd87e6638b4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inspector",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/22e68a1d51d84800/out/inspector-22e68a1d51d84800",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/inspector-inspector-22e68a1d51d84800",
+      "bytes": 33857520,
+      "sha256": "540002a88466ea4801f97f45112bf24d5bdd777bfb3ebfa4c254747b14893c94",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "boolean_cohorts",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui-component/8bd9b9b5263b422e/out/boolean_cohorts-8bd9b9b5263b422e",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/boolean_cohorts-boolean_cohorts-8bd9b9b5263b422e",
+      "bytes": 30609216,
+      "sha256": "dc3ae35dda61a94bf7efcd7bae3c148dc8801cb53d3b841a3e3548460b2117f3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "pointer",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/694c82e5c2129f56/out/pointer-694c82e5c2129f56",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/pointer-pointer-694c82e5c2129f56",
+      "bytes": 29042560,
+      "sha256": "f7beb2283d6216625f57e8e822b233f808901c83ecac56bcbccbd1f6b726db6d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "child_capacity",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/e6a6a63353deed83/out/child_capacity-e6a6a63353deed83",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/child_capacity-child_capacity-e6a6a63353deed83",
+      "bytes": 26881536,
+      "sha256": "4db578be08ccf11d1e563632d0572b4f3f4f9034d19330f57f500aa3f1d05b51",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/ed1b02cf84b42565/out/text_selection-ed1b02cf84b42565",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/text_selection-text_selection-ed1b02cf84b42565",
+      "bytes": 30960016,
+      "sha256": "fee7732f88d961185ddeae69673ece0bd616649a262572f724b8c890dbe4a3e0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text_measure",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/unicode_text_measure",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/unicode_text_measure-unicode_text_measure",
+      "bytes": 27798120,
+      "sha256": "3a154e1b9d2a60f78c13588793c3b9b8e93e0501628bacf61c67e47fb87c5109",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost_two",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/94c42e3bb03face7/out/unit_action_cost_two-94c42e3bb03face7",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/unit_action_cost_two-unit_action_cost_two-94c42e3bb03face7",
+      "bytes": 27923584,
+      "sha256": "7cedbd35b9d261460b0e97016acf81116130229551907b34b828508b6a3fc547",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_actions",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/52edcb343ac577d2/out/property_actions-52edcb343ac577d2",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/property_actions-property_actions-52edcb343ac577d2",
+      "bytes": 29505320,
+      "sha256": "86ded8486cb49959f3b6faa7b42a589daf32a541161f1e98682b1f3c990ebc24",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "queries",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/1564c8afd80b95b8/out/queries-1564c8afd80b95b8",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/queries-queries-1564c8afd80b95b8",
+      "bytes": 27698280,
+      "sha256": "a4cb307c2b3eade93bdc23abff625f09302f6c6fa018f55f58f5a005a7bde10f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dpi",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/c53f163a537174de/out/dpi-c53f163a537174de",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/dpi-dpi-c53f163a537174de",
+      "bytes": 29525448,
+      "sha256": "58d689807da7534d37b7554fe0677bef343eab4613444d9b4e12d69a0d4a05b4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gradient_backgrounds",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/gradient_backgrounds",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/gradient_backgrounds-gradient_backgrounds",
+      "bytes": 27775784,
+      "sha256": "313f4cfaa43da3d9a7e87c5c335d7f2c24628814fe1a869a88a1852283d00134",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_mailbox",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/a94ca03c074e02a1/out/question_mailbox-a94ca03c074e02a1",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/question_mailbox-question_mailbox-a94ca03c074e02a1",
+      "bytes": 27299400,
+      "sha256": "51836e0208f35810b230215e6a030bf97e4e3e56757a1fa0ee494719e06d0f2e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "rounded",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/04e8b6f5c5517797/out/rounded-04e8b6f5c5517797",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/rounded-rounded-04e8b6f5c5517797",
+      "bytes": 31626600,
+      "sha256": "cb58bc4743be66ef7118bbc59361b92be292756e695cae0934f78d85aed4373f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "bindings",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui-component/cc29c985f7ce692e/out/bindings-cc29c985f7ce692e",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/bindings-bindings-cc29c985f7ce692e",
+      "bytes": 30812448,
+      "sha256": "fb80fb7161ecf1042a75abc5426bbbf2b34a67ab47c785460a55bcdd6385ac74",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "handler_storage",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/26370e7ca9495b46/out/handler_storage-26370e7ca9495b46",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/handler_storage-handler_storage-26370e7ca9495b46",
+      "bytes": 33076208,
+      "sha256": "27d8ec7a5f719bcf776dbd7906005c6af3dea34107074bcaa91fbee87b57149c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_list",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/examples/retained_list",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/retained_list-retained_list",
+      "bytes": 27690808,
+      "sha256": "67a513bcba99dca0188cd3b1b71c2e163758f5cfb4c3b3d984687b08bc6b5d68",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inbox_storage",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/480dcd62ab590121/out/inbox_storage-480dcd62ab590121",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/inbox_storage-inbox_storage-480dcd62ab590121",
+      "bytes": 28312408,
+      "sha256": "eb7b79dc7bc6ac9a866e893f00c8dd0f972d4e08014d05571e013fa10a95ec45",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantic_metadata",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-20261024/debug/build/gpui/0d1689717e60644b/out/semantic_metadata-0d1689717e60644b",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/full-default-3ab1d96498/semantic_metadata-semantic_metadata-0d1689717e60644b",
+      "bytes": 34540408,
+      "sha256": "a19f53870ec358590ff693007d9dacc0d954a652876f367301cf3f715a6565ea",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    }
+  ],
+  "/root/gpui-component-ime-sol-artifacts-20261024/native-unit-2-3ab1d96498": [
+    {
+      "name": "gpui",
+      "source": "3ab1d964981f44d503f1df9b4947c929c6742160",
+      "original": "/root/targets/component-ime-review-sol-native-20261024/debug/build/gpui/52fe618ddfae8b3f/out/gpui-52fe618ddfae8b3f",
+      "frozen": "/root/gpui-component-ime-sol-artifacts-20261024/native-unit-2-3ab1d96498/gpui-gpui-52fe618ddfae8b3f",
+      "bytes": 182687664,
+      "sha256": "68c844a52afccdad1603079bf83deb7624188d7100f918616dd7f75d9fede268",
+      "fresh": false,
+      "package": "path+file:///root/gpui-component-ime-review-sol-20261024/reactivity/crates/gpui#0.1.0"
+    }
+  ]
+}

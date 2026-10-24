@@ -1,0 +1,560 @@
+[
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-0-presentation",
+    "archive_member": "partial-3ab1/floor-partial-0-presentation",
+    "sha256": "c281e3fc0972b4b12bd7290026a8ff4bc90f681527bd23f35ed5b192c9db227e",
+    "bytes": 28787824,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-1-ports",
+    "archive_member": "partial-3ab1/floor-partial-1-ports",
+    "sha256": "f39889dca8165fb53b7015b56bfb1907f01b7d3dd5c138198c15c7822e60423a",
+    "bytes": 30812528,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-2-projected_sources",
+    "archive_member": "partial-3ab1/floor-partial-2-projected_sources",
+    "sha256": "7859881a631087e2c024600afa8fd7b8716a02e1c7fc713e0f6463c6dca0f0d4",
+    "bytes": 31280224,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-3-property_actions",
+    "archive_member": "partial-3ab1/floor-partial-3-property_actions",
+    "sha256": "9edf35ea605f39bdeb0ce45d6c520dbad563e6bd1d580856b03be2db4d20157c",
+    "bytes": 30430864,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-4-property_outline_allocations",
+    "archive_member": "partial-3ab1/floor-partial-4-property_outline_allocations",
+    "sha256": "c73d8a06b44b9860176165aadd56e8286b612ca4c99f61f6e7a01da19f100cf8",
+    "bytes": 28089696,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-5-property_change_union",
+    "archive_member": "partial-3ab1/floor-partial-5-property_change_union",
+    "sha256": "ba9e0ad67da761dcb0f2b7978d34aa7976af6a34a630244f99eb5e9b423fe49e",
+    "bytes": 29785200,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-6-property_state_shell",
+    "archive_member": "partial-3ab1/floor-partial-6-property_state_shell",
+    "sha256": "ff83616b41e08e09edff1a0b86b9c9a75233a4820ce5ddb88ddda7733e6ed5bc",
+    "bytes": 28069248,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-7-queries",
+    "archive_member": "partial-3ab1/floor-partial-7-queries",
+    "sha256": "9e1fb534b8b01535aac9df1668a89a16075fcbfe92ad0c85bd1ea0cae90ca165",
+    "bytes": 28683840,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-8-property_selection",
+    "archive_member": "partial-3ab1/floor-partial-8-property_selection",
+    "sha256": "3de44a4e3b2c76c2e0f73f54834f4b88cff2789a04cdd6046c1bc3a941cb2762",
+    "bytes": 31787632,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-9-question_cost",
+    "archive_member": "partial-3ab1/floor-partial-9-question_cost",
+    "sha256": "77024f0dd4c58bb48f08e39c42cda12ae8281bcb90b14767cd116133687f8ddb",
+    "bytes": 29041248,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-10-question_input_cost",
+    "archive_member": "partial-3ab1/floor-partial-10-question_input_cost",
+    "sha256": "66009265c70b050e091ba89fd2a183e7894db96d8a07d7611138645c41b7e49e",
+    "bytes": 28232960,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-11-question_futures",
+    "archive_member": "partial-3ab1/floor-partial-11-question_futures",
+    "sha256": "676837721af21480f420c17af2aad04df1eb2957fef54279d5f7cf5dfcc9f260",
+    "bytes": 31823568,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-12-question_inputs",
+    "archive_member": "partial-3ab1/floor-partial-12-question_inputs",
+    "sha256": "290e7ce95f2f1705c86acffbe10e8f8547723c537f2e341640d7f352699b0af3",
+    "bytes": 29521392,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-13-question_mailbox",
+    "archive_member": "partial-3ab1/floor-partial-13-question_mailbox",
+    "sha256": "0ec4c981f54f5d105ecd1ac491505c5cbe0db859b7ae85576a13f25a68b4643e",
+    "bytes": 28519184,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-14-question_storage",
+    "archive_member": "partial-3ab1/floor-partial-14-question_storage",
+    "sha256": "4f7f1142dc776bd62c091598586d748dbfae4eed2a89936faa02534ea3faed43",
+    "bytes": 30792880,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-15-questions",
+    "archive_member": "partial-3ab1/floor-partial-15-questions",
+    "sha256": "a4f41f0bcb6bc47378322a8d9bb2b6ff400911961c358748c04ed2d65725c860",
+    "bytes": 30405760,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-16-remote",
+    "archive_member": "partial-3ab1/floor-partial-16-remote",
+    "sha256": "d9fc95c79aa73485b5af472f0bc2b052eafe3ecd4aa2081bbc48479631133f52",
+    "bytes": 31429552,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-17-retained_styles",
+    "archive_member": "partial-3ab1/floor-partial-17-retained_styles",
+    "sha256": "9e0afedb0d1122d8481c3e763e78c2b397fd3af15369ee06d280037d5f2802b2",
+    "bytes": 29283232,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-18-rounded",
+    "archive_member": "partial-3ab1/floor-partial-18-rounded",
+    "sha256": "fdffaa2231b5067f14c7c79030e056aa46a0294f00b553f521f4960b2ff29cb4",
+    "bytes": 31650624,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-19-routes",
+    "archive_member": "partial-3ab1/floor-partial-19-routes",
+    "sha256": "7ada001806266de89d6cf1d017e7cbbbb88949ac47f9fed459b1c80f90414037",
+    "bytes": 29590240,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-20-search_library",
+    "archive_member": "partial-3ab1/floor-partial-20-search_library",
+    "sha256": "c30f41632c41cfe4f2c40f3a8abad6f874ea2479cf9471b48355fe0f2e8dd975",
+    "bytes": 30247104,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-21-runtime",
+    "archive_member": "partial-3ab1/floor-partial-21-runtime",
+    "sha256": "75cede111c710cb79bef5002ba4f27c1fd9f752d1baea7deecfb2fbb39185f09",
+    "bytes": 36822832,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-22-scroll",
+    "archive_member": "partial-3ab1/floor-partial-22-scroll",
+    "sha256": "8ea098a5285d0f7a28b376c61d8354c2373b815856d2002ac3b3e5c0c01ae88b",
+    "bytes": 38217568,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-23-semantic_serialization",
+    "archive_member": "partial-3ab1/floor-partial-23-semantic_serialization",
+    "sha256": "6c29254abae9a23f96186a84bd1e1d027c843874815cd002115783e5abb6e124",
+    "bytes": 30562224,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-24-semantic_metadata",
+    "archive_member": "partial-3ab1/floor-partial-24-semantic_metadata",
+    "sha256": "b3f420ae5b1358f97ef67177b804d8caa342c1b59fa0e6044e5205f866c35474",
+    "bytes": 34673728,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-25-sibling_reconciliation_cost",
+    "archive_member": "partial-3ab1/floor-partial-25-sibling_reconciliation_cost",
+    "sha256": "6a1ecb08142da622a31284c0d43e81c51b2224e3c46ef8813a2a907d4ea097fc",
+    "bytes": 27883920,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-26-semantics",
+    "archive_member": "partial-3ab1/floor-partial-26-semantics",
+    "sha256": "78b7b2c7e5ac8450c0bc06a0e74981a7bfec7f1efd7d0e1c4f2fdbf2ddf9c447",
+    "bytes": 29755296,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-27-source_inbox_reader_gate",
+    "archive_member": "partial-3ab1/floor-partial-27-source_inbox_reader_gate",
+    "sha256": "66523d4ac64ebbd4e0929d5e75a41165b21cb13c2d3e5aec3bddd848ef7c899b",
+    "bytes": 28480944,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-28-source_value_isolation",
+    "archive_member": "partial-3ab1/floor-partial-28-source_value_isolation",
+    "sha256": "b38302d42b4750379c6f9035e4fef3a231f9bfc550f500847c29c8c616350c88",
+    "bytes": 30129808,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-29-source_inbox",
+    "archive_member": "partial-3ab1/floor-partial-29-source_inbox",
+    "sha256": "314b93f6b28b9fa24443b4c82547f830bb585dfcc6e1f6346416fca712d3e114",
+    "bytes": 32723472,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-30-source_values",
+    "archive_member": "partial-3ab1/floor-partial-30-source_values",
+    "sha256": "0615e2fc184127e275ce3f607d656afeafef8e390b73f6c123c4fa9532757f0b",
+    "bytes": 29202576,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-31-text_cache",
+    "archive_member": "partial-3ab1/floor-partial-31-text_cache",
+    "sha256": "6e8b723c3684a563dffc73479f4e580fb5c83d118c2809603b59e948e642fdf4",
+    "bytes": 29333664,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-32-text_geometry",
+    "archive_member": "partial-3ab1/floor-partial-32-text_geometry",
+    "sha256": "cdc1dac900eb64dd2096cbf6db3383bd3db89312140f5a8deb4a6ba97c949665",
+    "bytes": 28886064,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-33-acceptance",
+    "archive_member": "partial-3ab1/floor-partial-33-acceptance",
+    "sha256": "7452cc40c8b611c1c9433b487169f07563948d618d541427141ff7b514a59702",
+    "bytes": 31858704,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-34-style_ports",
+    "archive_member": "partial-3ab1/floor-partial-34-style_ports",
+    "sha256": "bb435d80c3b4b0b20f9bcd9155eb695491e95884fc263b449dca6f0bc9498889",
+    "bytes": 38103088,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-35-application",
+    "archive_member": "partial-3ab1/floor-partial-35-application",
+    "sha256": "3b257a741b40ec8ab3e1bcec84539c7a58503ac5e8aa1e573bb4801fa38dfbba",
+    "bytes": 30212352,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-36-gpui",
+    "archive_member": "partial-3ab1/floor-partial-36-gpui",
+    "sha256": "289ae61772dc37bbc1961836223b0309d8ad59cb604b06b24a974664335a0d03",
+    "bytes": 97688384,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-37-text_selection",
+    "archive_member": "partial-3ab1/floor-partial-37-text_selection",
+    "sha256": "d85d8a1df6af3bb67ea69514de499e80090b4ed8a58f255820dd6e64ac0713f7",
+    "bytes": 30955648,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-38-text_selection_compound",
+    "archive_member": "partial-3ab1/floor-partial-38-text_selection_compound",
+    "sha256": "a99502cac1306bc7f5e40551a1c56b1bf956c328f0a9523bf1f73f1f545fcb90",
+    "bytes": 28528176,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-39-checkbox",
+    "archive_member": "partial-3ab1/floor-partial-39-checkbox",
+    "sha256": "6b30c1242ebf44eef5eb51d098d6619b0f9fb20f1096429b16f503e07d41492b",
+    "bytes": 32157232,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-40-child_capacity",
+    "archive_member": "partial-3ab1/floor-partial-40-child_capacity",
+    "sha256": "873b067a2d8e2a124718cb8f20f89c4fd56a7119e092bbdd83b9186e275fc33e",
+    "bytes": 27900208,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-41-todo_comparison",
+    "archive_member": "partial-3ab1/floor-partial-41-todo_comparison",
+    "sha256": "f2cc8a9dab33018f5f2f28dcd9ca5f7ce1613698689f2b370115ae87014dcbf6",
+    "bytes": 29981552,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-42-unicode_text",
+    "archive_member": "partial-3ab1/floor-partial-42-unicode_text",
+    "sha256": "da1c05e9973d50308ecf46a7652f83c6d58fa6a48466688f6e950695b3585216",
+    "bytes": 28490512,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-43-color_packing",
+    "archive_member": "partial-3ab1/floor-partial-43-color_packing",
+    "sha256": "790ee0478a27aa567c7cbdc54e1fe0b2264af1fa13a94578867752766d65f217",
+    "bytes": 28540800,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-44-unit_action_cost",
+    "archive_member": "partial-3ab1/floor-partial-44-unit_action_cost",
+    "sha256": "06d3161129a9deac378a9199307822517ea93e25e24db7a8531c279b721af4a8",
+    "bytes": 28117232,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-45-clipping",
+    "archive_member": "partial-3ab1/floor-partial-45-clipping",
+    "sha256": "e5a373c92c1aa4538ed3ce53eccd73e7ffe30b9358e74cbadba2f7dc0d29e4a8",
+    "bytes": 32208480,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-46-unit_action_cost_two",
+    "archive_member": "partial-3ab1/floor-partial-46-unit_action_cost_two",
+    "sha256": "87bf08ed4babe0980d0c6dbae27527e83d3455be81110b3c2eb4ef9b3b21060f",
+    "bytes": 28876288,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-47-dimensions",
+    "archive_member": "partial-3ab1/floor-partial-47-dimensions",
+    "sha256": "d5c4c9c36db0c01c8b3f95216bed1eca8958484d83ee328182db595fdffea5c5",
+    "bytes": 29698864,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-48-dpi",
+    "archive_member": "partial-3ab1/floor-partial-48-dpi",
+    "sha256": "5daa1134d700f1da54865ee26f9e4256faf7b3f95549c489f65d18c070779766",
+    "bytes": 29584752,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-49-components",
+    "archive_member": "partial-3ab1/floor-partial-49-components",
+    "sha256": "a9426af06e41d5937abc24495b4754d7f9b159557f018ee653a162c911747d5e",
+    "bytes": 33150784,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-50-field_identity",
+    "archive_member": "partial-3ab1/floor-partial-50-field_identity",
+    "sha256": "0f4137c0d88b7098e0f100ca47692649a06f8ad0d77e4996000d51b2181173ba",
+    "bytes": 27899264,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-51-ime_contracts",
+    "archive_member": "partial-3ab1/floor-partial-51-ime_contracts",
+    "sha256": "80304845ee52f1e54f6f78947309233b1e0abe5f6d3e46f5ce671f670b392010",
+    "bytes": 28430800,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-52-frontier",
+    "archive_member": "partial-3ab1/floor-partial-52-frontier",
+    "sha256": "2ff99d6fcb39a6b280dab30d0bc070fb48db2a6a3dcce2935389b449385768c4",
+    "bytes": 30403168,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-53-flex",
+    "archive_member": "partial-3ab1/floor-partial-53-flex",
+    "sha256": "8fcc0e6841e8f3a3cbe9024c2f9b28ad66c7e14cf648a4a047ff8e2b528cdc46",
+    "bytes": 33006000,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-54-focus",
+    "archive_member": "partial-3ab1/floor-partial-54-focus",
+    "sha256": "52f6ee8d9bedb67998af3fd23883fa336b5ad64ca7f1b23a0d8ab445f52cba48",
+    "bytes": 31578848,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-55-identity_recovery",
+    "archive_member": "partial-3ab1/floor-partial-55-identity_recovery",
+    "sha256": "b56eb14035a7ad61a4aeec0fe5336952f96be9d79cbb9157c4259086507db9a6",
+    "bytes": 28118272,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-56-images",
+    "archive_member": "partial-3ab1/floor-partial-56-images",
+    "sha256": "bc73bd64d441b9a9e701802f49afcdfb51f88111c40554c07375d59b9e4b57c5",
+    "bytes": 30039520,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-57-ime",
+    "archive_member": "partial-3ab1/floor-partial-57-ime",
+    "sha256": "dde7314c0c3ba89b1c0e31c15838bf97730d4fc7665f33c409f854fc33945980",
+    "bytes": 30574032,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-58-handler_storage",
+    "archive_member": "partial-3ab1/floor-partial-58-handler_storage",
+    "sha256": "7b98dec1cee386630b599702d902f5d7310241ce1a4c27857e20d71257139995",
+    "bytes": 33867632,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-59-immutable_text",
+    "archive_member": "partial-3ab1/floor-partial-59-immutable_text",
+    "sha256": "f995718d1985d61dd73d1961636347c014fa8c76e1527a26470b53940007acd9",
+    "bytes": 27840816,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-60-inbox_storage",
+    "archive_member": "partial-3ab1/floor-partial-60-inbox_storage",
+    "sha256": "85e5581f5ac8cb19b0ce9d805224e8c840fcbcab2a17c694631fb7e639d9e4c2",
+    "bytes": 29510608,
+    "was_executed": false
+  },
+  {
+    "cohort": "partial-3ab1",
+    "source_commit": "3ab1d964981f44d503f1df9b4947c929c6742160",
+    "original_remote_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-ime-3ab1d964-sol/qualification/floor-partial-61-contracts",
+    "archive_member": "partial-3ab1/floor-partial-61-contracts",
+    "sha256": "85582d962783d3bf647be3185eb4f5a93f52fb7be26eae8530286bb83dcab3c5",
+    "bytes": 34650112,
+    "was_executed": false
+  }
+]

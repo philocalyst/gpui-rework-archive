@@ -1,0 +1,3 @@
+dbus-daemon[3345647]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=3345650 comm="/root/gpui-component-ime-sol-artifacts-20261024/na")
+dbus-daemon[3345647]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry

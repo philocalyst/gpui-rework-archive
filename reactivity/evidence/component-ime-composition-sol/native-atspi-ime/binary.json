@@ -1,0 +1,17 @@
+{
+  "path": "/root/gpui-component-ime-sol-artifacts-20261024/native-unit-2-3ab1d96498/gpui-gpui-52fe618ddfae8b3f",
+  "sha256": "68c844a52afccdad1603079bf83deb7624188d7100f918616dd7f75d9fede268",
+  "bytes": 182687664,
+  "inode": 17835481,
+  "mtime_ns": 1792882797030586726,
+  "features": [
+    "accessibility",
+    "default",
+    "native",
+    "native-core",
+    "simd",
+    "x11",
+    "x11-minimal"
+  ],
+  "fresh": false
+}
