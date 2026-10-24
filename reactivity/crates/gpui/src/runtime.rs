@@ -2853,7 +2853,7 @@ impl<M: View + 'static> Runtime<M> {
                 };
                 let before = node.content;
                 let after = if control == crate::style_port::Sink::CHECKED {
-                    before.with_checked(value)
+                    before
                 } else {
                     before.with_own_disabled(value)
                 };
