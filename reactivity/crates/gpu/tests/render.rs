@@ -3614,59 +3614,81 @@ fn analytic_gradients_geometry_spreads_hard_edges_hdr_and_cache_match_cpu() {
             Stop::new(0.4, Color::linear_srgb(0.2, 2., -0.1, 0.5).unwrap()),
             Stop::new(1.2, Color::linear_display_p3(0.1, 0.3, 3., 0.75).unwrap()),
         ];
-        for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
-            for geometry in geometries {
-                for extend in [Extend::Pad, Extend::Repeat, Extend::Reflect] {
-                    let gradient =
-                        Gradient::new(geometry, &stops, extend, Interpolation::LinearSrgb).unwrap();
-                    for map in maps {
-                        for radius in [0., 5.] {
-                            let mut canvas = Canvas::recording(
-                                32,
-                                24,
-                                ColorConfig::linear_hdr(profile, 203.).unwrap(),
-                            )
-                            .unwrap();
-                            canvas.clear(Color::linear_srgb(0.2, 0.3, 0.5, 0.7).unwrap());
-                            canvas
-                                .fill_gradient(
-                                    &gradient,
-                                    Rect::new(0.125, 0.375, 25.5, 19.25),
-                                    radius,
-                                    map,
-                                    Rect::new(1.125, 0.375, 29.5, 22.25),
+        for interpolation in [
+            Interpolation::LinearSrgb,
+            Interpolation::Oklab,
+            Interpolation::Oklch {
+                hue: gpui_canvas::HueInterpolation::Shorter,
+            },
+            Interpolation::Oklch {
+                hue: gpui_canvas::HueInterpolation::Longer,
+            },
+            Interpolation::Oklch {
+                hue: gpui_canvas::HueInterpolation::Increasing,
+            },
+            Interpolation::Oklch {
+                hue: gpui_canvas::HueInterpolation::Decreasing,
+            },
+        ] {
+            for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
+                for geometry in geometries {
+                    for extend in [Extend::Pad, Extend::Repeat, Extend::Reflect] {
+                        let gradient =
+                            Gradient::new(geometry, &stops, extend, interpolation).unwrap();
+                        for map in maps {
+                            for radius in [0., 5.] {
+                                let mut canvas = Canvas::recording(
+                                    32,
+                                    24,
+                                    ColorConfig::linear_hdr(profile, 203.).unwrap(),
                                 )
                                 .unwrap();
-                            let first = readback(&mut renderer, &canvas);
-                            let stats = renderer.image_stats().unwrap();
-                            assert_eq!(stats.resources, 1);
-                            assert_eq!(stats.packed_bytes, gradient.view().byte_len());
-                            let second = readback(&mut renderer, &canvas);
-                            assert_eq!(first, second);
-                            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
-                            let cpu = canvas.pixels();
-                            for (i, (a, b)) in first
-                                .as_chunks::<2>()
-                                .0
-                                .iter()
-                                .zip(cpu.as_chunks::<2>().0)
-                                .enumerate()
-                            {
-                                let (a, b) = (half(a), half(b));
+                                canvas.clear(Color::linear_srgb(0.2, 0.3, 0.5, 0.7).unwrap());
+                                canvas
+                                    .fill_gradient(
+                                        &gradient,
+                                        Rect::new(0.125, 0.375, 25.5, 19.25),
+                                        radius,
+                                        map,
+                                        Rect::new(1.125, 0.375, 29.5, 22.25),
+                                    )
+                                    .unwrap();
+                                let first = readback(&mut renderer, &canvas);
+                                let stats = renderer.image_stats().unwrap();
+                                assert_eq!(stats.resources, 1);
+                                assert_eq!(stats.packed_bytes, gradient.view().byte_len());
+                                let second = readback(&mut renderer, &canvas);
+                                assert_eq!(first, second);
+                                assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+                                let cpu = canvas.pixels();
+                                for (i, (a, b)) in first
+                                    .as_chunks::<2>()
+                                    .0
+                                    .iter()
+                                    .zip(cpu.as_chunks::<2>().0)
+                                    .enumerate()
+                                {
+                                    let (a, b) = (half(a), half(b));
+                                    assert!(
+                                        (a - b).abs()
+                                            <= if interpolation == Interpolation::LinearSrgb {
+                                                0.000004f32.max(b.abs() * 0.002)
+                                            } else {
+                                                0.0003f32.max(b.abs() * 0.004)
+                                            },
+                                        "{profile:?} {geometry:?} {extend:?} {map:?} radius{radius} value{i} GPU{a} CPU{b}"
+                                    );
+                                }
                                 assert!(
-                                    (a - b).abs() <= 0.000004f32.max(b.abs() * 0.002),
-                                    "{profile:?} {geometry:?} {extend:?} {map:?} radius{radius} value{i} GPU{a} CPU{b}"
+                                    !canvas
+                                        .prepared_scene()
+                                        .draws()
+                                        .next()
+                                        .unwrap()
+                                        .source
+                                        .is_solid()
                                 );
                             }
-                            assert!(
-                                !canvas
-                                    .prepared_scene()
-                                    .draws()
-                                    .next()
-                                    .unwrap()
-                                    .source
-                                    .is_solid()
-                            );
                         }
                     }
                 }
@@ -4130,6 +4152,121 @@ fn all_solid_packet_declines_rectangular_certification_for_a_rounded_clip() {
                         assert!(gpu.abs_diff(cpu) <= 1);
                     }
                     assert_eq!(gpu.stats().uniform_tiles, 0);
+                }
+            }
+        }
+    });
+}
+
+#[path = "../../canvas/tests/support/perceptual_oracle.rs"]
+mod perceptual_oracle;
+
+#[test]
+fn perceptual_gradients_match_independent_authored_f64_oracle() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, HueInterpolation as Hue,
+        Interpolation as Mode, OutputProfile,
+    };
+    fn half(bytes: &[u8]) -> f64 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let e = ((bits >> 10) & 31) as i32;
+        let m = f64::from(bits & 1023);
+        sign * if e == 0 {
+            m * 2f64.powi(-24)
+        } else {
+            (1. + m / 1024.) * 2f64.powi(e - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let modes = [
+            Mode::Oklab,
+            Mode::Oklch { hue: Hue::Shorter },
+            Mode::Oklch { hue: Hue::Longer },
+            Mode::Oklch {
+                hue: Hue::Increasing,
+            },
+            Mode::Oklch {
+                hue: Hue::Decreasing,
+            },
+        ];
+        let pairs = [
+            (
+                Color::oklch(0.7, 0.2, 350., 0.1).unwrap(),
+                Color::oklch(0.5, 0.15, 10., 0.9).unwrap(),
+            ),
+            (
+                Color::oklch(0.7, 0.2, 10., 0.25).unwrap(),
+                Color::oklch(0.3, 0.1, 190., 0.75).unwrap(),
+            ),
+            (
+                Color::linear_srgb(9., -1., 3., 0.).unwrap(),
+                Color::linear_display_p3(0.1, 4., -0.2, 1.).unwrap(),
+            ),
+            (
+                Color::linear_srgb(0.2, 0.2, 0.2, 1.).unwrap(),
+                Color::linear_display_p3(4., -0.1, 0.3, 0.).unwrap(),
+            ),
+            (
+                Color::linear_srgb(-2., 8., -1., 0.0001).unwrap(),
+                Color::linear_srgb(4., 0., 0., 0.7).unwrap(),
+            ),
+            (
+                Color::linear_srgb(-2., -2., -2., f32::MIN_POSITIVE).unwrap(),
+                Color::linear_srgb(4., 0., 0., f32::MIN_POSITIVE).unwrap(),
+            ),
+        ];
+        for mode in modes {
+            for (left, right) in pairs {
+                let gradient = Gradient::new(
+                    GradientGeometry::Linear {
+                        start: Point { x: 0., y: 0. },
+                        end: Point { x: 1., y: 0. },
+                    },
+                    &[Stop::new(0., left), Stop::new(1., right)],
+                    Extend::Pad,
+                    mode,
+                )
+                .unwrap();
+                let mut canvas = Canvas::recording(
+                    8,
+                    1,
+                    ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+                )
+                .unwrap();
+                canvas.clear(Color::TRANSPARENT);
+                let rect = Rect::new(0., 0., 8., 1.);
+                canvas
+                    .fill_gradient(&gradient, rect, 0., Affine::IDENTITY, rect)
+                    .unwrap();
+                let gpu = readback(&mut renderer, &canvas);
+                let cpu = canvas.pixels();
+                for x in 0..8 {
+                    let mut expected = [0.; 4];
+                    for dx in [0.125, 0.375, 0.625, 0.875] {
+                        let oracle =
+                            perceptual_oracle::interpolate(left, right, (x as f64 + dx) / 8., mode);
+                        for c in 0..4 {
+                            expected[c] += oracle[c] * 0.25;
+                        }
+                    }
+                    let scale = expected[..3]
+                        .iter()
+                        .map(|v| v.abs())
+                        .fold(1.0_f64, f64::max);
+                    for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", cpu)] {
+                        for c in 0..4 {
+                            let index = (x * 4 + c) * 2;
+                            let actual = half(&bytes[index..index + 2]);
+                            let tolerance = if c == 3 { 0.001 } else { 0.003 * scale };
+                            assert!(
+                                (actual - expected[c]).abs() <= tolerance,
+                                "{name} {mode:?} {left:?} {right:?} x={x} c={c}: {actual} oracle={} tolerance={tolerance}",
+                                expected[c]
+                            );
+                        }
+                    }
                 }
             }
         }
