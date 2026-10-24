@@ -70,7 +70,7 @@ pub(super) fn bernstein(
         // conversion assumption remains the same as the direct-LMS profile.
         error += 128.0 * f64::EPSILON * (1.0 + preparation_norm);
         // <256 scalar arithmetic input/output sites, each with sensitivity
-        // <32*max(1, norm+anchor_error), plus weighted ratio loss <512*T*norm.
+        // <32*max(1, norm+anchor_error), plus weighted ratio loss <2304*T*norm.
         // Ordinary subnormal rounding and FTZ double this <2^15 allowance;
         // 2^20 reserves the remaining DAG fanout. See the experiment ledger.
         error += 1048576.0 * TINY * (1.0 + norm + anchor_error);
