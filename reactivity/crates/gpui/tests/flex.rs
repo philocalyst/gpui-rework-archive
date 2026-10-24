@@ -104,8 +104,12 @@ fn wrapping_overrides_and_unset_reveal_changed_declarations() {
     let root = container(&mut win);
     win.set_property(root, WRAP, Contribution::Set(true))
         .unwrap();
-    win.set_property(root, gpui::property::WIDTH, Contribution::Set(Some(30.0)))
-        .unwrap();
+    win.set_property(
+        root,
+        gpui::property::WIDTH,
+        Contribution::Set(gpui::Length::Points(30.0)),
+    )
+    .unwrap();
     let a = win.role(Role::Button).text("a").one().unwrap();
     let b = win.role(Role::Button).text("b").one().unwrap();
     near(bounds(&win, "b"), [0.0, 25.0, 20.0, 20.0]);

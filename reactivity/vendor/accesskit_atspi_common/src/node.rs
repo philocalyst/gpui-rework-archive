@@ -320,6 +320,9 @@ impl NodeWrapper<'_> {
         if filter_result == FilterResult::Include {
             atspi_state.insert(State::Visible | State::Showing);
         }
+        if state.data().invalid().is_some() {
+            atspi_state.insert(State::InvalidEntry);
+        }
         if state.is_required() {
             atspi_state.insert(State::Required);
         }

@@ -17,6 +17,7 @@ use zruntime::{SharedRuntime, mpmc};
 mod checkbox;
 mod clipping;
 mod failure;
+mod invalid;
 mod lifecycle;
 
 const TITLE: &str = "GPUI native AT-SPI Todo proof";

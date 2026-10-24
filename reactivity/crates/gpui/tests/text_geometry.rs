@@ -73,7 +73,7 @@ fn old_p_and_eligible_c_keep_exact_geometry_after_new_l_reshapes_then_fails() {
         .unwrap();
     let p0 = capture(&win);
     let target = win.query().name("paragraph").one().unwrap();
-    win.set_property(target, WIDTH, Contribution::Set(Some(55.)))
+    win.set_property(target, WIDTH, Contribution::Set(gpui::Length::Points(55.)))
         .unwrap();
     let c1 = win.with_scene(|_, token| token).unwrap();
     assert_eq!(capture(&win), p0);
