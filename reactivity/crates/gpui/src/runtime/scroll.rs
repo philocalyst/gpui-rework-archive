@@ -277,8 +277,8 @@ impl ViewportBuild {
 
 const MAX_RANGE: f64 = (1_u64 << 40) as f64;
 
-/// Transform overflow is an active-viewport calculation. Existing paint scratch
-/// serves as relative mappings and nearest-viewport indexes, then is cleared.
+/// Transform overflow inherits relative mappings and nearest viewport indexes
+/// through the active ancestor frontier.
 /// A nested viewport contributes its aperture, never its hidden content.
 fn bounds64(space: CoordinateSpace, rect: Rect) -> Result<[f64; 4], Error> {
     let [a, b, c, d, x, y] = space.coefficients();
@@ -305,11 +305,7 @@ fn bounds64(space: CoordinateSpace, rect: Rect) -> Result<[f64; 4], Error> {
     }
     Ok(edges)
 }
-pub(super) fn geometry<M: View + 'static>(
-    runtime: &Runtime<M>,
-    spaces: &mut Vec<CoordinateSpace>,
-    nearest: &mut Vec<Parent>,
-) -> Result<ViewportBuild, Error> {
+pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<ViewportBuild, Error> {
     let lists = runtime
         .viewports
         .keys()
@@ -364,10 +360,20 @@ pub(super) fn geometry<M: View + 'static>(
     if !has_scroll {
         return Ok(infos);
     }
+    let mut frontier = super::frontier::Frontier::new(
+        (CoordinateSpace::new(Affine::IDENTITY), Parent::NONE),
+        usize::from(runtime.layout_depth),
+    );
+    let mut ancestor = Parent::NONE;
     for (index, node) in runtime.nodes.iter().enumerate() {
         let layout = runtime.layout.layout(runtime.layout_nodes[index])?;
+        while ancestor.index() != node.parent.index() {
+            frontier.pop();
+            ancestor = runtime.nodes[ancestor.index().unwrap()].parent;
+        }
+        let (parent_space, nearest) = frontier.top();
         let parent = node.parent.index();
-        let inherited = parent.and_then(|parent| nearest[parent].index());
+        let inherited = nearest.index();
         let base = parent
             .filter(|&parent| {
                 !matches!(
@@ -375,13 +381,10 @@ pub(super) fn geometry<M: View + 'static>(
                     NodeKind::List | NodeKind::Scroll
                 )
             })
-            .map_or(CoordinateSpace::new(Affine::IDENTITY), |parent| {
-                spaces[parent]
-            });
+            .map_or(CoordinateSpace::new(Affine::IDENTITY), |_| parent_space);
         let space = base
             .compose(Affine::translation(layout.location.x, layout.location.y))
             .compose(runtime.styles.get(index).transform);
-        spaces.push(space);
         let rect = Rect::new(0.0, 0.0, layout.size.width, layout.size.height);
         if !rect.is_empty()
             && let Some(parent) = inherited
@@ -397,11 +400,21 @@ pub(super) fn geometry<M: View + 'static>(
             .scrolls
             .binary_search_by_key(&node.identity(), |row| row.identity)
             .ok();
-        nearest.push(Parent::new(if node.kind() == NodeKind::List {
-            None
-        } else {
-            own.or(inherited)
-        }));
+        if runtime
+            .nodes
+            .get(index + 1)
+            .is_some_and(|next| next.parent.index() == Some(index))
+        {
+            frontier.push((
+                space,
+                Parent::new(if node.kind() == NodeKind::List {
+                    None
+                } else {
+                    own.or(inherited)
+                }),
+            ));
+            ancestor = Parent::new(Some(index));
+        }
     }
     for viewport in &mut infos.scrolls {
         let layout = runtime
@@ -434,8 +447,6 @@ pub(super) fn geometry<M: View + 'static>(
         viewport.offset.x = viewport.offset.x.clamp(viewport.min.x, viewport.max.x);
         viewport.offset.y = viewport.offset.y.clamp(viewport.min.y, viewport.max.y);
     }
-    spaces.clear();
-    nearest.clear();
     Ok(infos)
 }
 

@@ -38,11 +38,13 @@ const MAX_NODES: usize = 100_000;
 const _: () = assert!(MAX_NODES <= u32::MAX as usize);
 // Cephal's algorithms recurse even though public description disposal does not.
 const MAX_LAYOUT_DEPTH: usize = 128;
+const _: () = assert!(MAX_LAYOUT_DEPTH <= u8::MAX as usize);
 
 #[cfg(feature = "accessibility")]
 mod accessibility;
 mod delivery;
 mod editing;
+mod frontier;
 mod text_geometry;
 use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
@@ -72,6 +74,16 @@ pub use query::{Part, Query, SemanticSnapshot};
 #[cfg(feature = "accessibility")]
 pub(crate) use query::{SemanticSheet, SemanticState};
 pub use semantics::{Action, ActionKind, Actions};
+
+// Plain preparation carries only coordinate spaces. This second frontier is
+// present only when a viewport or logical clip needs inherited clipping state.
+#[derive(Clone, Copy)]
+struct ClipFrame {
+    clip: Rect,
+    hit_clip: Rect,
+    chain: Option<gpui_canvas::ClipId>,
+    membership: u8,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WindowOptions {
@@ -1132,6 +1144,7 @@ struct Runtime<M> {
     layout_nodes: Vec<NodeId>,
     layout_dirty: BTreeSet<u64>,
     rebuild_layout: bool,
+    layout_depth: u8,
     topology_changed: bool,
     logical_valid: bool,
     dirty: bool,
@@ -1344,6 +1357,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             layout_nodes: Vec::new(),
             layout_dirty: BTreeSet::new(),
             rebuild_layout: true,
+            layout_depth: 0,
             topology_changed: true,
             logical_valid: false,
             dirty: true,
@@ -2034,6 +2048,7 @@ impl<M: View + 'static> Runtime<M> {
             .ok_or(Error::EpochExhausted)?;
         let (image_resources, image_nodes) = image::describe(image_drafts)?;
         let mut depths = Vec::with_capacity(drafts.len());
+        let mut layout_depth = 0u8;
         let mut fields = Vec::with_capacity(drafts.len());
         let mut component_scopes = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0usize; drafts.len() + 1];
@@ -2044,6 +2059,7 @@ impl<M: View + 'static> Runtime<M> {
             if depth > MAX_LAYOUT_DEPTH {
                 return Err(Error::DepthLimit { node: index });
             }
+            layout_depth = layout_depth.max(depth as u8);
             depths.push(depth);
             let mut component_scope = node
                 .parent
@@ -2586,6 +2602,7 @@ impl<M: View + 'static> Runtime<M> {
         self.viewports = viewports;
         self.list_rows = list_rows;
         self.nodes = nodes;
+        self.layout_depth = layout_depth;
         self.styles = styles.finish();
         // A replacement source bank has no authority over the preceding
         // Canvas slots, even if every effective value and binding is equal.
@@ -3049,7 +3066,6 @@ impl<M: View + 'static> Runtime<M> {
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut geometry_records = Vec::new();
-        let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
         let list_mode = !self.viewports.is_empty();
         let clip_mode = self
             .metadata
@@ -3057,21 +3073,24 @@ impl<M: View + 'static> Runtime<M> {
             .and_then(|m| m.geometry.as_ref())
             .is_some_and(|geometry| geometry.has_logical_clips());
         let list_capacity = if list_mode { self.nodes.len() } else { 0 };
-        let clip_capacity = if clip_mode {
-            self.nodes.len()
-        } else {
-            list_capacity
+        let mut spaces = frontier::Frontier::new(
+            CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
+            usize::from(self.layout_depth),
+        );
+        let root_clip = ClipFrame {
+            clip: viewport,
+            hit_clip: viewport,
+            chain: None,
+            membership: 0,
         };
-        let mut clip_chains: Vec<Option<gpui_canvas::ClipId>> =
-            Vec::with_capacity(if clip_mode { self.nodes.len() } else { 0 });
-        let mut clips: Vec<Rect> = Vec::with_capacity(clip_capacity);
-        let mut hit_clips: Vec<Rect> = Vec::with_capacity(clip_capacity);
-        let mut clip_membership: Vec<u8> = Vec::with_capacity(list_capacity);
+        let mut clips = (list_mode || clip_mode)
+            .then(|| frontier::Frontier::new(root_clip, usize::from(self.layout_depth)));
+        let mut ancestor = Parent::NONE;
         let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
         let mut metadata_sheet = self.metadata_sheet();
         let viewport_geometry = if list_mode {
-            scroll::geometry(self, &mut spaces, &mut published)?
+            scroll::geometry(self)?
         } else {
             scroll::ViewportBuild::default()
         };
@@ -3107,6 +3126,14 @@ impl<M: View + 'static> Runtime<M> {
                 )?;
             }
             let layout = self.layout.layout(self.layout_nodes[index])?;
+            while ancestor.index() != self.nodes[index].parent.index() {
+                spaces.pop();
+                if let Some(clips) = &mut clips {
+                    clips.pop();
+                }
+                ancestor = self.nodes[ancestor.index().unwrap()].parent;
+            }
+            let inherited = clips.as_ref().map_or(root_clip, frontier::Frontier::top);
             let has_children = self
                 .nodes
                 .get(index + 1)
@@ -3128,8 +3155,8 @@ impl<M: View + 'static> Runtime<M> {
             let node = &mut self.nodes[index];
             let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
-                |parent| {
-                    let base = spaces[parent];
+                |_| {
+                    let base = spaces.top();
                     if let Some(offset) = viewport_geometry.offset(parent_identity.unwrap()) {
                         base.translated(-offset.x, -offset.y)
                     } else {
@@ -3140,7 +3167,6 @@ impl<M: View + 'static> Runtime<M> {
             let space = parent
                 .compose(Affine::translation(layout.location.x, layout.location.y))
                 .compose(style.transform);
-            spaces.push(space);
             let [a, b, c, d, tx, ty] = space.coefficients().map(|value| value as f32);
             let candidate = Affine { a, b, c, d, tx, ty };
             let transform =
@@ -3149,29 +3175,14 @@ impl<M: View + 'static> Runtime<M> {
             let rect = Rect::new(0.0, 0.0, layout.size.width, layout.size.height);
             let (mut clip, mut hit_clip, in_list) = if list_mode || clip_mode {
                 (
-                    node.parent.index().map_or(viewport, |parent| clips[parent]),
-                    node.parent
-                        .index()
-                        .map_or(viewport, |parent| hit_clips[parent]),
-                    node.kind() == NodeKind::ListItem
-                        || node.parent.index().is_some_and(|parent| {
-                            clip_membership
-                                .get(parent)
-                                .is_some_and(|flags| flags & 1 != 0)
-                        }),
+                    inherited.clip,
+                    inherited.hit_clip,
+                    node.kind() == NodeKind::ListItem || inherited.membership & 1 != 0,
                 )
             } else {
                 (viewport, viewport, false)
             };
-            let in_scroll = node.kind() == NodeKind::Scroll
-                || node.parent.index().is_some_and(|parent| {
-                    clip_membership
-                        .get(parent)
-                        .is_some_and(|flags| flags & 2 != 0)
-                });
-            if list_mode {
-                clip_membership.push(u8::from(in_list) | (u8::from(in_scroll) << 1));
-            }
+            let in_scroll = node.kind() == NodeKind::Scroll || inherited.membership & 2 != 0;
             if matches!(
                 node.kind(),
                 NodeKind::List | NodeKind::ListItem | NodeKind::Scroll
@@ -3190,11 +3201,7 @@ impl<M: View + 'static> Runtime<M> {
             let raw_bounds = transform
                 .and_then(|map| CoordinateSpace::new(map).bounds(rect))
                 .unwrap_or_default();
-            let mut chain = if clip_mode {
-                node.parent.index().and_then(|parent| clip_chains[parent])
-            } else {
-                None
-            };
+            let mut chain = if clip_mode { inherited.chain } else { None };
             let viewport_node = matches!(
                 node.kind(),
                 NodeKind::List | NodeKind::ListItem | NodeKind::Scroll
@@ -3219,12 +3226,21 @@ impl<M: View + 'static> Runtime<M> {
             if geometry_style.clip_children {
                 hit_clip = hit_clip.intersection(raw_bounds);
             }
-            if clip_mode {
-                clip_chains.push(chain);
-            }
-            if list_mode || clip_mode {
-                clips.push(clip);
-                hit_clips.push(hit_clip);
+            if has_children {
+                spaces.push(space);
+                if let Some(clips) = &mut clips {
+                    clips.push(ClipFrame {
+                        clip,
+                        hit_clip,
+                        chain,
+                        membership: if list_mode {
+                            u8::from(in_list) | (u8::from(in_scroll) << 1)
+                        } else {
+                            0
+                        },
+                    });
+                }
+                ancestor = Parent::new(Some(index));
             }
             let bounds = if in_list || in_scroll || node.kind() == NodeKind::List || chain.is_some()
             {
@@ -3456,11 +3472,8 @@ impl<M: View + 'static> Runtime<M> {
                 basis,
                 bounds,
                 hittable,
-                actions: Actions::for_node(node.kind(), node.handler.is_some()).scroll_into_view(
-                    node.parent.index().is_some_and(|parent| {
-                        clip_membership.get(parent).is_some_and(|flags| *flags != 0)
-                    }) || parent_is_viewport,
-                ),
+                actions: Actions::for_node(node.kind(), node.handler.is_some())
+                    .scroll_into_view(inherited.membership != 0 || parent_is_viewport),
             });
             #[cfg(feature = "accessibility")]
             if let Some(observation) = &mut observation {
