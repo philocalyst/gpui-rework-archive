@@ -102,6 +102,25 @@ fn inverse(lab: [f64; 3]) -> [f64; 3] {
         xyz,
     )
 }
+fn author_rgb(color: Color) -> [f64; 3] {
+    if color.space() == ColorSpace::Oklch {
+        inverse(lab(color))
+    } else {
+        linear(color)
+    }
+}
+fn identity_or_fade(left: Color, right: Color, t: f64, alpha: f64) -> [f64; 4] {
+    let a = author_rgb(left);
+    let b = author_rgb(right);
+    let weight_a = (1.0 - t) * f64::from(left.alpha());
+    let weight_b = t * f64::from(right.alpha());
+    [
+        a[0] * weight_a + b[0] * weight_b,
+        a[1] * weight_a + b[1] * weight_b,
+        a[2] * weight_a + b[2] * weight_b,
+        alpha,
+    ]
+}
 pub fn interpolate(left: Color, right: Color, t: f64, mode: Mode) -> [f64; 4] {
     let alpha0 = f64::from(left.alpha());
     let alpha1 = f64::from(right.alpha());
@@ -177,11 +196,17 @@ pub fn interpolate(left: Color, right: Color, t: f64, mode: Mode) -> [f64; 4] {
                 }
             }
         };
+        if d == 0.0 && (alpha0 == 0.0 || alpha1 == 0.0 || (a[0] == b[0] && a[1] == b[1])) {
+            return identity_or_fade(left, right, t, alpha);
+        }
         let l = ((1.0 - t) * alpha0 * a[0] + t * alpha1 * b[0]) / alpha;
         let c = ((1.0 - t) * alpha0 * a[1] + t * alpha1 * b[1]) / alpha;
         let angle = (a[2] + t * d).to_radians();
         a = [l, c * angle.cos(), c * angle.sin()];
     } else {
+        if a == b || alpha0 == 0.0 || alpha1 == 0.0 {
+            return identity_or_fade(left, right, t, alpha);
+        }
         a = std::array::from_fn(|i| ((1.0 - t) * alpha0 * a[i] + t * alpha1 * b[i]) / alpha);
     }
     let rgb = inverse(a);
