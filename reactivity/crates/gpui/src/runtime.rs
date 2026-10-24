@@ -1059,6 +1059,7 @@ impl Fanout {
             // Freeze each declared computation once, before any destination is
             // compared or changed. Palette endpoints were admitted at mount.
             for group in &mut fanout.groups {
+                let _ = group.recipe.call(source);
                 let Some(crate::style_port::Scalar::Value(crate::property::PropertyValue::Flag(
                     value,
                 ))) = group.recipe.call(source)
