@@ -29,6 +29,7 @@ pub(super) struct Editing {
     logical: Option<LogicalSelection>,
     pub presented: Option<SelectionSnapshot>,
     pub candidate: Option<SelectionSnapshot>,
+    pub ime: Option<Box<super::ime::Ime>>,
 }
 impl SelectionSnapshot {
     pub fn selection(self, identity: u64) -> Option<TextSelection> {
@@ -37,7 +38,10 @@ impl SelectionSnapshot {
 }
 impl Editing {
     pub fn unused(&self) -> bool {
-        self.logical.is_none() && self.presented.is_none() && self.candidate.is_none()
+        self.logical.is_none()
+            && self.presented.is_none()
+            && self.candidate.is_none()
+            && self.ime.as_ref().is_none_or(|ime| ime.unused())
     }
 }
 
@@ -54,14 +58,14 @@ pub(super) enum EditingIntent {
     Focus,
 }
 
-fn position(byte: usize) -> Result<TextPosition, Error> {
+pub(super) fn position(byte: usize) -> Result<TextPosition, Error> {
     Ok(TextPosition {
         offset: TextOffset::new(byte).ok_or(Error::ResourceLimit)?,
         affinity: CaretAffinity::Downstream,
     })
 }
 
-fn validates(value: &str, selection: TextSelection) -> bool {
+pub(super) fn validates(value: &str, selection: TextSelection) -> bool {
     let a = selection.anchor.offset.byte();
     let b = selection.focus.offset.byte();
     let mut anchor = false;
@@ -78,6 +82,9 @@ fn validates(value: &str, selection: TextSelection) -> bool {
 
 impl<M: View + 'static> Runtime<M> {
     pub(super) fn active_selection(&self) -> Option<(u64, TextSelection)> {
+        if let Some((identity, preview)) = self.composition_preview() {
+            return Some((identity, preview.selection));
+        }
         let state = self.metadata.as_ref()?.editing.as_ref()?.logical.as_ref()?;
         let index = self.by_identity.get(state.identity)?;
         self.editing_at(index)
@@ -125,7 +132,7 @@ impl<M: View + 'static> Runtime<M> {
             .layout)
     }
 
-    fn input_index(&self, target: Target) -> Result<usize, Error> {
+    pub(super) fn input_index(&self, target: Target) -> Result<usize, Error> {
         let index = self.resolve_index(target)?;
         if self.nodes[index].kind() != NodeKind::Input {
             return Err(Error::NotInput);
@@ -152,7 +159,7 @@ impl<M: View + 'static> Runtime<M> {
         .then_some(state)
     }
 
-    fn selection_at(&self, index: usize) -> Result<TextSelection, Error> {
+    pub(super) fn selection_at(&self, index: usize) -> Result<TextSelection, Error> {
         if let Some(state) = self.editing_at(index) {
             return Ok(state.selection);
         }
@@ -170,7 +177,7 @@ impl<M: View + 'static> Runtime<M> {
         })
     }
 
-    fn set_selection(
+    pub(super) fn set_selection(
         &mut self,
         index: usize,
         selection: TextSelection,
@@ -206,19 +213,21 @@ impl<M: View + 'static> Runtime<M> {
     }
 
     pub(super) fn clear_editing(&mut self) -> bool {
+        let composition = self.cancel_ime();
         let Some(_) = self
             .metadata
             .as_mut()
             .and_then(|metadata| metadata.editing.as_mut())
             .and_then(|editing| editing.logical.take())
         else {
-            return false;
+            return composition;
         };
         self.dirty = true;
         true
     }
 
     pub(super) fn reconcile_editing(&mut self, intent: EditingIntent) -> Result<bool, Error> {
+        let composition = self.reconcile_ime();
         if let EditingIntent::Replace {
             identity,
             field,
@@ -258,7 +267,7 @@ impl<M: View + 'static> Runtime<M> {
                         .get(state.identity)
                         .is_none_or(|index| self.editing_at(index).is_none())
             });
-        let changed = stale && self.clear_editing();
+        let changed = (stale && self.clear_editing()) || composition;
         if matches!(intent, EditingIntent::Focus) {
             self.dirty = true;
             return Ok(true);
@@ -330,6 +339,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         &mut self,
         previous: Option<Target>,
     ) -> Result<Commit, Error> {
+        if self.runtime.reconcile_ime() {
+            return self.present();
+        }
         if !self.focus_needs_paint(previous) {
             return Ok(self.commit());
         }
@@ -382,6 +394,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .interaction_layout(index)?
             .position_at(point)
             .ok_or(Error::NotHittable)?;
+        let focus = self.runtime.source_position(target, focus)?;
         self.source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
@@ -518,8 +531,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         self.changed_nodes = 0;
+        let cancelled = self.runtime.cancel_ime();
         if !self.set_selection(index, selection, preferred_x) {
-            return Ok(self.commit());
+            return if cancelled {
+                self.present()
+            } else {
+                Ok(self.commit())
+            };
         }
         self.runtime.source_epoch = epoch;
         self.runtime.counters.source_operations += 1;
@@ -814,7 +832,7 @@ mod tests {
         if cfg!(target_pointer_width = "64") {
             assert_eq!(std::mem::size_of::<LogicalSelection>(), 48);
             assert_eq!(std::mem::size_of::<Option<LogicalSelection>>(), 48);
-            assert_eq!(std::mem::size_of::<Editing>(), 96);
+            assert_eq!(std::mem::size_of::<Editing>(), 104);
             assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
             assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);

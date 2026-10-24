@@ -443,8 +443,9 @@ fn public_consumer_headers_remain_explicit() {
     );
     assert_eq!(size_of::<Win<Companion>>(), 8);
     assert_eq!(size_of::<Option<Win<Companion>>>(), 16);
-    assert_eq!(size_of::<gpui::Window<Companion>>(), 208);
-    assert_eq!(size_of::<Option<gpui::Window<Companion>>>(), 208);
+    // The optional initial font resource adds one cold builder word.
+    assert_eq!(size_of::<gpui::Window<Companion>>(), 216);
+    assert_eq!(size_of::<Option<gpui::Window<Companion>>>(), 216);
     assert_eq!(size_of::<Companion>(), 136);
     assert_eq!(size_of::<workbench::value_entry::ValueEntry>(), 104);
 }
