@@ -153,13 +153,20 @@ impl<'font> Planner<'font> {
         interactive: bool,
     ) -> Result<TextLayout<G>, Error> {
         let planned = self.plan::<true>(text, size, max_width, interactive)?;
+        self.materialize(planned, text.len(), size)
+    }
+    fn materialize<G: From<Details>>(
+        &mut self,
+        planned: Planned,
+        text_len: usize,
+        size: f32,
+    ) -> Result<TextLayout<G>, Error> {
         Ok(TextLayout {
             width: planned.metrics.width,
             height: planned.metrics.height,
             baseline: planned.metrics.baseline,
             font_size: size,
-            glyphs: GlyphBuffer::new(planned.glyphs, text.len())
-                .map_err(|_| Error::ResourceLimit)?,
+            glyphs: GlyphBuffer::new(planned.glyphs, text_len).map_err(|_| Error::ResourceLimit)?,
             fonts: self.font_set(planned.mask),
             mapping: planned.details.map(G::from),
         })
@@ -543,6 +550,38 @@ fn register_font(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn direct_materialization_allocates_no_geometry_owner() {
+        let _registry = super::super::BUNDLED_TEST_LOCK.lock().unwrap();
+        let font = FontFace::bundled().unwrap();
+        let mut planner = Planner::new(&font).unwrap();
+        let source = "office אבג\r\nnext";
+        let shared_plan = planner.plan::<true>(source, 16., Some(80.), true).unwrap();
+        let owned_plan = planner.plan::<true>(source, 16., Some(80.), true).unwrap();
+        let mut shared = None;
+        let shared_cost = allocation_counter::measure(|| {
+            shared = Some(
+                planner
+                    .materialize::<Arc<Details>>(shared_plan, source.len(), 16.)
+                    .unwrap(),
+            );
+        });
+        let mut owned = None;
+        let owned_cost = allocation_counter::measure(|| {
+            owned = Some(
+                planner
+                    .materialize::<Details>(owned_plan, source.len(), 16.)
+                    .unwrap(),
+            );
+        });
+        assert_eq!(shared_cost.count_total, 1);
+        assert_eq!(owned_cost.count_total, 0);
+        assert_eq!(
+            shared.unwrap().glyphs().collect::<Vec<_>>(),
+            owned.unwrap().glyphs().collect::<Vec<_>>()
+        );
+    }
 
     #[test]
     fn raw_run_counts_match_positioned_output_across_wraps_and_scripts() {
