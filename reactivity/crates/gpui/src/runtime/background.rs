@@ -738,9 +738,9 @@ mod tests {
         let mut runtime = win.runtime_mut().unwrap();
         let Runtime { images, nodes, .. } = &mut *runtime;
         let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
-        let drafts = vec![(0, &resource)];
+        let mut drafts = Some(vec![(0, &resource)]);
         let cost = measured(&mut || {
-            assert!(!reconcile(images, nodes, &live, drafts).unwrap());
+            assert!(!reconcile(images, nodes, &live, drafts.take().unwrap()).unwrap());
         });
         eprintln!(
             "gradient_work_audit,path=unchanged-reconcile-excluding-input-vec,iterations=1,allocs={},requested={},retained_delta={},peak_delta={}",
@@ -752,9 +752,9 @@ mod tests {
         let mut runtime = win.runtime_mut().unwrap();
         let Runtime { images, nodes, .. } = &mut *runtime;
         let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
-        let drafts = vec![(0, &resource)];
+        let mut drafts = Some(vec![(0, &resource)]);
         let cost = measured(&mut || {
-            assert!(!reconcile(images, nodes, &live, drafts).unwrap());
+            assert!(!reconcile(images, nodes, &live, drafts.take().unwrap()).unwrap());
         });
         eprintln!(
             "gradient_work_audit,path=unchanged-reconcile-no-overrides-excluding-input-vec,iterations=1,allocs={},requested={},retained_delta={},peak_delta={}",
