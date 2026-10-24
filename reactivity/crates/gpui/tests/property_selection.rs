@@ -45,13 +45,13 @@ fn inherit_and_refresh_read_canonical_state_after_a_masked_source_change() {
     win.update(|model| *model.application.width = 170.).unwrap();
     assert_eq!(
         win.property(target, gpui::property::WIDTH).unwrap(),
-        Some(193.25)
+        gpui::Length::Points(193.25)
     );
     assert_eq!(&**win.root().unwrap().editor.draft, "193.25");
     win.activate(win.button("Inherit")).unwrap();
     assert_eq!(
         win.property(target, gpui::property::WIDTH).unwrap(),
-        Some(170.)
+        gpui::Length::Points(170.)
     );
     assert_eq!(&**win.root().unwrap().editor.draft, "170");
     assert_eq!(
@@ -165,7 +165,7 @@ fn owned_result_precedes_mutable_reply_source_edits() {
     assert_eq!(win.root().unwrap().last.unwrap(), initial);
     assert_eq!(
         win.property(target, gpui::property::WIDTH).unwrap(),
-        Some(170.)
+        gpui::Length::Points(170.)
     );
 }
 #[test]

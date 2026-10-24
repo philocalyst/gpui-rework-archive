@@ -651,13 +651,16 @@ fn large_integer_lengths_preserve_the_inherited_f019_narrowing_oracle() {
             for (literal, actual) in [
                 (true, {
                     let target = literal.inspect().unwrap().nodes[0].target.unwrap();
-                    literal.property(target, WIDTH).unwrap().unwrap()
+                    literal.property(target, WIDTH).unwrap()
                 }),
                 (false, {
                     let target = bound.inspect().unwrap().nodes[0].target.unwrap();
-                    bound.property(target, WIDTH).unwrap().unwrap()
+                    bound.property(target, WIDTH).unwrap()
                 }),
             ] {
+                let Length::Points(actual) = actual else {
+                    panic!("point dimension")
+                };
                 assert_eq!(actual.to_bits(), expected.to_bits(), "literal={literal}");
             }
         }};
