@@ -12,7 +12,7 @@ use gpui_canvas::{
 };
 use std::{cmp::Ordering, hint::black_box, mem::size_of, sync::Arc, time::Instant};
 
-// A physical-page-sized payload budget and an independent packed-index bound.
+// A 4KiB payload budget and an independent packed-index bound.
 // Large resources get singleton chunks and never pin smaller neighbors.
 const CHUNK_BYTES: usize = 4096;
 const SLOT_BITS: u32 = 8;
@@ -299,7 +299,7 @@ fn corpus(mode: &str, count: usize) -> Vec<Spec> {
             }
         })
         .unwrap();
-        win.close().unwrap();
+        win.close();
         values
     } else {
         (0..count)
@@ -321,20 +321,22 @@ fn corpus(mode: &str, count: usize) -> Vec<Spec> {
         })
         .collect()
 }
-fn lifecycle(specs: &mut [Spec], font: &FontFace, p: Snapshot) {
+fn lifecycle(mut specs: Vec<Spec>, font: FontFace, p: Snapshot) {
     if specs.is_empty() {
         return;
     }
     let old_value = specs[0].value.clone();
     specs[0].value = "a replacement office אבג".into();
-    let c1 = measured("old_p_new_c", || build(specs, font, Some(&p.page)).unwrap());
+    let c1 = measured("old_p_new_c", || {
+        build(&specs, &font, Some(&p.page)).unwrap()
+    });
     assert_eq!(p.row(0).value(), old_value);
     assert_eq!(c1.row(0).value(), specs[0].value);
     let stable = measured("unchanged_page_root", || c1.page.clone());
     assert!(Arc::ptr_eq(&stable, &c1.page));
     drop(stable);
     specs[0].value = "\u{1}".into();
-    assert!(measured("failed_newer", || build(specs, font, Some(&c1.page))).is_err());
+    assert!(measured("failed_newer", || build(&specs, &font, Some(&c1.page))).is_err());
     assert_eq!(p.row(0).value(), old_value);
     assert_eq!(c1.row(0).value(), "a replacement office אבג");
     println!(
@@ -344,7 +346,9 @@ fn lifecycle(specs: &mut [Spec], font: &FontFace, p: Snapshot) {
     let job_page = c1.page.clone();
     let job_key = c1.rows[0];
     let weak = Arc::downgrade(&job_page);
+    let (release, ready) = std::sync::mpsc::sync_channel(0);
     let worker = std::thread::spawn(move || {
+        ready.recv().unwrap();
         let resource = job_page.get(job_key);
         assert_eq!(resource.value.as_ref(), "a replacement office אבג");
         assert!(resource.shape.runs().count() > 0);
@@ -364,6 +368,7 @@ fn lifecycle(specs: &mut [Spec], font: &FontFace, p: Snapshot) {
                 Color::BLACK,
             )
             .unwrap();
+        drop(service);
         drop(job_page);
         // The current implementation still leases packed glyphs per scene run;
         // this control charges that retained owner rather than claiming deletion.
@@ -371,6 +376,9 @@ fn lifecycle(specs: &mut [Spec], font: &FontFace, p: Snapshot) {
     });
     drop(c1);
     drop(p);
+    drop(specs);
+    drop(font);
+    release.send(()).unwrap();
     worker.join().unwrap();
     assert!(weak.upgrade().is_none());
 }
@@ -378,7 +386,7 @@ fn main() {
     let args: Vec<_> = std::env::args().collect();
     let mode = args.get(1).map_or("unique", String::as_str);
     let count = args.get(2).map_or(10000, |n| n.parse().unwrap());
-    let mut specs = corpus(mode, count);
+    let specs = corpus(mode, count);
     let font = FontFace::bundled().unwrap();
     println!(
         "PAGE_SCOPE,{}",
@@ -411,5 +419,5 @@ fn main() {
         serde_json::json!({"mounted":snapshot.retained()})
     );
     measured("shared_columns_drop", || drop(baseline));
-    lifecycle(&mut specs, &font, snapshot);
+    lifecycle(specs, font, snapshot);
 }
