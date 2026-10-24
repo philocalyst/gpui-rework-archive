@@ -29,6 +29,7 @@ use zeno as path_backend;
 mod layout;
 mod paragraph;
 mod planner;
+#[cfg(test)]
 use layout::Details;
 pub use layout::{
     CaretAffinity, GlyphRun, TextDirection, TextGeometry, TextGrapheme, TextLine, TextOffset,

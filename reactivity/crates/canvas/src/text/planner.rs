@@ -559,7 +559,9 @@ mod tests {
             &stacked,
         ] {
             for width in [None, Some(0.), Some(17.), Some(80.)] {
-                planner.shape(source, 18., width, true).unwrap();
+                planner
+                    .shape::<Arc<Details>>(source, 18., width, true)
+                    .unwrap();
                 for line in planner.layout.lines() {
                     let raw = line.runs().map(|run| run.glyph_count()).sum::<usize>();
                     let positioned = line
@@ -580,12 +582,12 @@ mod tests {
         let face = FontFace::new(&PRIMARY_BYTES[..]).unwrap();
         let mut planner = Planner::new(&face).unwrap();
         planner
-            .shape("first paragraph", 18., Some(40.), true)
+            .shape::<Arc<Details>>("first paragraph", 18., Some(40.), true)
             .unwrap();
         // Exercise the output guard directly: public TextShaper also limits
         // source bytes, whereas a font may expand short admitted source.
         assert!(matches!(
-            planner.shape(&"W".repeat(MAX_GLYPHS + 1), 18., None, false),
+            planner.shape::<Arc<Details>>(&"W".repeat(MAX_GLYPHS + 1), 18., None, false),
             Err(Error::ResourceLimit)
         ));
         assert!(matches!(
@@ -593,7 +595,9 @@ mod tests {
             Err(Error::ResourceLimit)
         ));
         let source = "office\n\nnext";
-        let actual = planner.shape(source, 18., Some(60.), true).unwrap();
+        let actual = planner
+            .shape::<Arc<Details>>(source, 18., Some(60.), true)
+            .unwrap();
         let expected = face
             .shaper()
             .shape_interactive(source, 18., Some(60.))
@@ -637,7 +641,9 @@ mod tests {
         ] {
             for width in [None, Some(f32::MIN_POSITIVE), Some(30.), Some(180.)] {
                 let measured = planner.measure(source, 16., width).unwrap();
-                let shape = planner.shape(source, 16., width, true).unwrap();
+                let shape = planner
+                    .shape::<Arc<Details>>(source, 16., width, true)
+                    .unwrap();
                 assert_eq!(
                     [measured.width, measured.height, measured.baseline].map(f32::to_bits),
                     [shape.width, shape.height, shape.baseline].map(f32::to_bits),
