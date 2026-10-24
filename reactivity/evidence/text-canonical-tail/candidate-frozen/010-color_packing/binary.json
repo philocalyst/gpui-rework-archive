@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/19ed6aa1fe947f2f/out/color_packing-19ed6aa1fe947f2f",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/010-color_packing/test",
+  "sha256": "8e4967a39ee8faf1e832b9deabf3a5223fbed19b1f2104e139e5c008cb055d25",
+  "bytes": 83342720,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "color_packing",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/color_packing.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

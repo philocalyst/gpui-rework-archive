@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/a33eb1aca1ea617d/out/default_font-a33eb1aca1ea617d",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/003-default_font/test",
+  "sha256": "5eaed66229e12404d3f874b1d6678f7c19d8d4e345ca467c3821b54da146661d",
+  "bytes": 123614272,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "default_font",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/default_font.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

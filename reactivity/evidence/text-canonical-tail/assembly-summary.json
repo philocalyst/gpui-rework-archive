@@ -1,0 +1,19 @@
+[
+  {
+    "name": "control",
+    "symbols": [
+      "0000000000786fc0 0000000000000e56 t <gpui_canvas::canvas::Canvas>::draw_text_working"
+    ],
+    "total_symbol_bytes": 3670,
+    "excerpt_sha256": "f0ba2141637a7148b45e116db093b3652c4991959c4b8d916b842a4de8bb0635"
+  },
+  {
+    "name": "candidate",
+    "symbols": [
+      "0000000000784640 0000000000000e54 t <gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}",
+      "00000000007871e0 000000000000066a t <gpui_canvas::canvas::Canvas>::draw_text_working"
+    ],
+    "total_symbol_bytes": 5310,
+    "excerpt_sha256": "588f483e4025077715dca7d716870a45635f3c30e08c9d17f7fd91a23ea1a469"
+  }
+]

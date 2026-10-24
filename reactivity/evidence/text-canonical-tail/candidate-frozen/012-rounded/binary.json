@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/8ae4d02c83089caf/out/rounded-8ae4d02c83089caf",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/012-rounded/test",
+  "sha256": "7071df4a3527023761d76718bc8e635483b4617f16163ec6341be873f376a3c0",
+  "bytes": 83344504,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "rounded",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/rounded.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

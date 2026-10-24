@@ -1,0 +1,10 @@
+
+running 5 tests
+test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
+test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
+test invalid_ranges_and_out_of_working_range_are_rejected ... ok
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
+test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

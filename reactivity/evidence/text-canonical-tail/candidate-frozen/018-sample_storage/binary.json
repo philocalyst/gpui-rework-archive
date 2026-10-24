@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/67dbab3e1373ed4f/out/sample_storage-67dbab3e1373ed4f",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/018-sample_storage/test",
+  "sha256": "94a0f46159d0acf0d9aad954b786ef242b914d09555537013ad46e166296ae81",
+  "bytes": 100367208,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "sample_storage",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/sample_storage.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

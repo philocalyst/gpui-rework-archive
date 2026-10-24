@@ -1,0 +1,11 @@
+
+running 6 tests
+test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
+test final_mapping_occurs_after_extended_linear_composition ... ok
+test invalid_color_values_and_configuration_are_rejected ... ok
+test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
+test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
+test tone_mapping_is_selected_not_implicit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
