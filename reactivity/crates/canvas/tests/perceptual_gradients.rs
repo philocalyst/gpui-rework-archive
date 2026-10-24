@@ -71,7 +71,11 @@ fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
                             actual[c].is_finite(),
                             "{mode:?} {left:?} {right:?} t={t} {actual:?}"
                         );
-                        let tolerance = if c == 3 { 2e-7 } else { 0.00002 * scale };
+                        let tolerance = if c == 3 {
+                            2e-7
+                        } else {
+                            0.00002 + 0.00002 * expected[c].abs()
+                        };
                         let error = (f64::from(actual[c]) - expected[c]).abs();
                         max_scaled_error =
                             max_scaled_error.max(if c == 3 { error } else { error / scale });
