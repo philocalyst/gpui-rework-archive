@@ -329,6 +329,58 @@ mod tests {
         }
     }
     #[test]
+    fn public_backgrounds_retain_perceptual_modes_and_authored_stops() {
+        for interpolation in [
+            Interpolation::Oklab,
+            Interpolation::default(),
+            Interpolation::Oklch {
+                hue: crate::HueInterpolation::Longer,
+            },
+            Interpolation::Oklch {
+                hue: crate::HueInterpolation::Increasing,
+            },
+            Interpolation::Oklch {
+                hue: crate::HueInterpolation::Decreasing,
+            },
+        ] {
+            let color = Color::linear_display_p3(2., -0.25, 0.5, 0.75).unwrap();
+            let paint = Gradient::new(
+                GradientGeometry::Linear {
+                    start: Point::default(),
+                    end: Point { x: 1., y: 0. },
+                },
+                &[
+                    GradientStop::new(0., color),
+                    GradientStop::new(1., Color::WHITE),
+                ],
+                Extend::Pad,
+                interpolation,
+            )
+            .unwrap();
+            let key = paint.key();
+            let mut win = Win::with_size(
+                Page {
+                    paint: Some(paint),
+                    bad: false,
+                },
+                16,
+                16,
+            )
+            .unwrap();
+            win.with_scene(|scene, _| {
+                let view = scene.gradients().next().unwrap();
+                assert_eq!(view.key(), key);
+                assert_eq!(view.interpolation(), interpolation);
+                assert!(view.stop(0).unwrap().color.same_authoring(color));
+                assert!(scene.draws().all(|draw| !draw.source.is_solid()));
+            })
+            .unwrap();
+            let before = win.with_scene(|_, token| token).unwrap();
+            assert!(win.update(|page| page.bad = true).is_err());
+            assert_eq!(win.with_scene(|_, token| token).unwrap(), before);
+        }
+    }
+    #[test]
     fn shared_resource_overrides_follow_surviving_owners_with_one_resource() {
         let paint = gradient(Color::WHITE);
         let key = paint.key();

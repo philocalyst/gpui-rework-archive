@@ -4272,3 +4272,80 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
         }
     });
 }
+
+#[test]
+fn perceptual_pad_and_coincident_edges_use_exact_prepared_endpoint_pixels() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, HueInterpolation as Hue,
+        Interpolation as Mode, OutputProfile,
+    };
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let red = Color::linear_srgb(8., 0., 0., 0.5).unwrap();
+        let blue = Color::linear_srgb(0., 0., 2., 0.75).unwrap();
+        for mode in [
+            Mode::Oklab,
+            Mode::default(),
+            Mode::Oklch { hue: Hue::Longer },
+            Mode::Oklch {
+                hue: Hue::Increasing,
+            },
+            Mode::Oklch {
+                hue: Hue::Decreasing,
+            },
+        ] {
+            for (start, end, stops, expected) in [
+                (
+                    2.,
+                    3.,
+                    [Stop::new(0., red), Stop::new(1., blue)],
+                    [0x4400_u16, 0, 0, 0x3800],
+                ),
+                (
+                    -3.,
+                    -2.,
+                    [Stop::new(0., red), Stop::new(1., blue)],
+                    [0, 0, 0x3e00, 0x3a00],
+                ),
+                (
+                    0.,
+                    1.,
+                    [Stop::new(0.375, red), Stop::new(0.375, blue)],
+                    [0x3c00, 0, 0x3c80, 0x3980],
+                ),
+            ] {
+                let gradient = Gradient::new(
+                    GradientGeometry::Linear {
+                        start: Point { x: start, y: 0. },
+                        end: Point { x: end, y: 0. },
+                    },
+                    &stops,
+                    Extend::Pad,
+                    mode,
+                )
+                .unwrap();
+                let mut canvas = Canvas::recording(
+                    1,
+                    1,
+                    ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+                )
+                .unwrap();
+                canvas.clear(Color::TRANSPARENT);
+                let rect = Rect::new(0., 0., 1., 1.);
+                canvas
+                    .fill_gradient(&gradient, rect, 0., Affine::IDENTITY, rect)
+                    .unwrap();
+                let gpu = readback(&mut renderer, &canvas);
+                for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", canvas.pixels())] {
+                    let actual: Vec<_> = bytes
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .map(|b| u16::from_le_bytes(*b))
+                        .collect();
+                    assert_eq!(actual, expected, "{name} {mode:?} start={start}");
+                }
+            }
+        }
+    });
+}
