@@ -370,6 +370,103 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+    fn update_preedit(
+        &mut self,
+        active: &mut Active,
+        text: &str,
+        cursor: Option<(usize, usize)>,
+    ) -> Result<(), Error> {
+        if cursor.is_some_and(|(a, b)| !text.is_char_boundary(a) || !text.is_char_boundary(b)) {
+            self.runtime.invalidate_display(active.target);
+            return Err(Error::InvalidSelection);
+        }
+        let index = self.input_index(active.target)?;
+        let replacement = active
+            .preview
+            .as_ref()
+            .map_or_else(|| self.selection_at(index), |p| Ok(p.replacement))?;
+        if !validates(&active.source, replacement) {
+            return Err(Error::InvalidSelection);
+        }
+        let start = replacement
+            .anchor
+            .offset
+            .byte()
+            .min(replacement.focus.offset.byte());
+        let end = replacement
+            .anchor
+            .offset
+            .byte()
+            .max(replacement.focus.offset.byte());
+        let joined_len = active
+            .source
+            .len()
+            .checked_sub(end - start)
+            .and_then(|n| n.checked_add(text.len()))
+            .ok_or(Error::ResourceLimit)?;
+        if joined_len > 32 * 1024 {
+            self.runtime.invalidate_display(active.target);
+            return Err(Error::ResourceLimit);
+        }
+        let identity = NonZeroU64::new(self.nodes[index].identity()).unwrap();
+        let preview = active.preview.get_or_insert_with(|| {
+            Box::new(Preview {
+                replacement,
+                buffer: String::new(),
+                display: active.source.clone(),
+                selection: replacement,
+                decoration: replacement,
+                mark: MarkSnapshot {
+                    identity,
+                    stamp: active.stamp,
+                    range: [start as u32; 2],
+                    cursor: None,
+                },
+            })
+        });
+        let before = preview.display.clone();
+        if text.is_empty() {
+            preview.display = active.source.clone();
+        } else {
+            preview.buffer.clear();
+            preview
+                .buffer
+                .try_reserve(joined_len)
+                .map_err(|_| Error::ResourceLimit)?;
+            preview.buffer.push_str(&active.source[..start]);
+            preview.buffer.push_str(text);
+            preview.buffer.push_str(&active.source[end..]);
+            if preview.display.as_ref() != preview.buffer {
+                preview.display = SharedText::from(preview.buffer.as_str());
+            }
+        }
+        let finish = start + text.len();
+        let exact = cursor.map(|(a, b)| [(start + a) as u32, (start + b) as u32]);
+        let focus = nearest(&preview.display, exact.map_or(start, |c| c[1] as usize))?;
+        let anchor = nearest(&preview.display, exact.map_or(start, |c| c[0] as usize))?;
+        preview.selection = gpui_canvas::TextSelection { anchor, focus };
+        preview.decoration = decoration(&preview.display, start, finish)?;
+        preview.mark = MarkSnapshot {
+            identity,
+            stamp: active.stamp,
+            range: [start as u32, finish as u32],
+            cursor: exact,
+        };
+        let source_caret = position(start)?;
+        self.runtime.set_selection(
+            index,
+            gpui_canvas::TextSelection {
+                anchor: source_caret,
+                focus: source_caret,
+            },
+            None,
+        );
+        if !std::ptr::eq::<str>(before.as_ref(), preview.display.as_ref()) {
+            self.runtime.invalidate_display(active.target);
+        }
+        self.runtime.dirty = true;
+        Ok(())
+    }
     fn ime_event(
         &mut self,
         stamp: Option<NonZeroU64>,
@@ -433,99 +530,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 Ok((commit, stamp))
             }
             ImeEvent::Preedit { text, cursor } => {
-                if cursor
-                    .is_some_and(|(a, b)| !text.is_char_boundary(a) || !text.is_char_boundary(b))
-                {
-                    self.runtime.invalidate_display(active.target);
-                    return Err(Error::InvalidSelection);
-                }
-                let index = self.input_index(active.target)?;
-                let replacement = active
-                    .preview
-                    .as_ref()
-                    .map_or_else(|| self.selection_at(index), |p| Ok(p.replacement))?;
-                if !validates(&active.source, replacement) {
-                    return Err(Error::InvalidSelection);
-                }
-                let start = replacement
-                    .anchor
-                    .offset
-                    .byte()
-                    .min(replacement.focus.offset.byte());
-                let end = replacement
-                    .anchor
-                    .offset
-                    .byte()
-                    .max(replacement.focus.offset.byte());
-                let joined_len = active
-                    .source
-                    .len()
-                    .checked_sub(end - start)
-                    .and_then(|n| n.checked_add(text.len()))
-                    .ok_or(Error::ResourceLimit)?;
-                if joined_len > 32 * 1024 {
-                    self.runtime.invalidate_display(active.target);
-                    return Err(Error::ResourceLimit);
-                }
-                let identity = NonZeroU64::new(self.nodes[index].identity()).unwrap();
-                let mut preview = active.preview.take().unwrap_or_else(|| {
-                    Box::new(Preview {
-                        replacement,
-                        buffer: String::new(),
-                        display: active.source.clone(),
-                        selection: replacement,
-                        decoration: replacement,
-                        mark: MarkSnapshot {
-                            identity,
-                            stamp: active.stamp,
-                            range: [start as u32; 2],
-                            cursor: None,
-                        },
-                    })
-                });
-                let before = preview.display.clone();
-                if text.is_empty() {
-                    preview.display = active.source.clone();
-                } else {
-                    preview.buffer.clear();
-                    preview
-                        .buffer
-                        .try_reserve(joined_len)
-                        .map_err(|_| Error::ResourceLimit)?;
-                    preview.buffer.push_str(&active.source[..start]);
-                    preview.buffer.push_str(text);
-                    preview.buffer.push_str(&active.source[end..]);
-                    if preview.display.as_ref() != preview.buffer {
-                        preview.display = SharedText::from(preview.buffer.as_str());
-                    }
-                }
-                let finish = start + text.len();
-                let exact = cursor.map(|(a, b)| [(start + a) as u32, (start + b) as u32]);
-                let focus = nearest(&preview.display, exact.map_or(start, |c| c[1] as usize))?;
-                let anchor = nearest(&preview.display, exact.map_or(start, |c| c[0] as usize))?;
-                preview.selection = gpui_canvas::TextSelection { anchor, focus };
-                preview.decoration = decoration(&preview.display, start, finish)?;
-                preview.mark = MarkSnapshot {
-                    identity,
-                    stamp: active.stamp,
-                    range: [start as u32, finish as u32],
-                    cursor: exact,
-                };
-                let source_caret = position(start)?;
-                self.runtime.set_selection(
-                    index,
-                    gpui_canvas::TextSelection {
-                        anchor: source_caret,
-                        focus: source_caret,
-                    },
-                    None,
-                );
-                if !std::ptr::eq::<str>(before.as_ref(), preview.display.as_ref()) {
-                    self.runtime.invalidate_display(active.target);
-                }
-                self.runtime.dirty = true;
-                active.preview = Some(preview);
+                // Keep the exclusive owner installed even when validation or
+                // preparation fails, so the common cancellation path restores
+                // the original source selection and releases active capacity.
+                let result = self.update_preedit(&mut active, text, cursor);
                 self.runtime.install_ime(active);
+                result?;
                 Ok((self.present()?, stamp))
             }
             _ => unreachable!(),

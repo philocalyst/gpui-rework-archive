@@ -393,3 +393,144 @@ fn pointer_preview_suffix_resolves_back_to_source_before_cancel() {
         .unwrap();
     assert_eq!(win.read(&Form::A).unwrap(), "abc XYZ tail");
 }
+
+#[test]
+fn failed_preedit_restores_original_source_selection_and_releases_stream() {
+    for failure in ["é", "日"] {
+        let (mut win, target, mut session) = window("left RIGHT tail");
+        let original = selection(5, 10);
+        win.select(target, original).unwrap();
+        ack(&mut win);
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        let epoch = win.snapshot().unwrap().source_epoch;
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "x",
+                cursor: Some((1, 1)),
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        let old = displayed(&win, target);
+        let cursor = if failure == "é" { 1 } else { 3 };
+        assert!(
+            win.ime_event(
+                &mut session,
+                ImeEvent::Preedit {
+                    text: failure,
+                    cursor: Some((cursor, cursor))
+                }
+            )
+            .is_err()
+        );
+        assert!(!session.is_enabled());
+        assert_eq!(win.selection(target).unwrap(), original);
+        assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
+        assert_eq!(
+            displayed(&win, target),
+            old,
+            "failed preview preserves acknowledged P"
+        );
+        assert!(win.ime_cursor_area(&session).unwrap().is_none());
+        win.ime_event(&mut session, ImeEvent::Commit("late"))
+            .unwrap();
+        assert_eq!(win.read(&Form::A).unwrap(), "left RIGHT tail");
+    }
+}
+
+#[test]
+fn ime_cursor_area_tracks_acknowledged_physical_transform_clip_and_dpi() {
+    struct Geometry(Signal<String>);
+    impl Geometry {
+        const VALUE: Source<Self, String> =
+            Source::new(FieldId::new(1), "value", |m| &m.0, |m| &mut m.0);
+    }
+    impl View for Geometry {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::VALUE)
+        }
+        fn view(&self) -> El<'_> {
+            div()
+                .w(90)
+                .h(50)
+                .clip()
+                .transform(Affine {
+                    a: 1.2,
+                    d: 1.1,
+                    tx: 10.,
+                    ty: 5.,
+                    ..Affine::IDENTITY
+                })
+                .child(text_input(&self.0).w(150).p(4))
+        }
+    }
+    let mut win = Win::recording_scaled(
+        Geometry(Signal::new("abc".into())),
+        WindowOptions {
+            size: [320, 200],
+            ..Default::default()
+        },
+        2.,
+    )
+    .unwrap();
+    let ack = |win: &mut Win<Geometry>| {
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+    };
+    ack(&mut win);
+    let target = win.input();
+    win.focus(target).unwrap();
+    ack(&mut win);
+    let mut session = ImeSession::default();
+    win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+    let old = win.ime_cursor_area(&session).unwrap();
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "ef",
+            cursor: Some((2, 2)),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        win.ime_cursor_area(&session).unwrap(),
+        old,
+        "C cannot move the native P caret"
+    );
+    ack(&mut win);
+    let mut expected = None;
+    win.visit(|part| {
+        if part.target() == target {
+            let geometry = part.text_geometry().unwrap();
+            let map = geometry.transform().unwrap().coefficients();
+            assert_eq!(map[0], 2.4);
+            assert_eq!(map[3], 2.2);
+            let caret = geometry
+                .layout()
+                .caret_bounds(part.selection().unwrap().focus)
+                .unwrap();
+            expected = geometry.visible_bounds(caret);
+        }
+    })
+    .unwrap();
+    assert!(expected.is_some());
+    assert_ne!(expected, old);
+    assert_eq!(win.ime_cursor_area(&session).unwrap(), expected);
+    let long = "x".repeat(200);
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: &long,
+            cursor: Some((200, 200)),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    assert!(
+        win.ime_cursor_area(&session).unwrap().is_none(),
+        "caret beyond acknowledged ancestor clip has no native area"
+    );
+    win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
+    assert!(win.ime_cursor_area(&session).unwrap().is_none());
+}
