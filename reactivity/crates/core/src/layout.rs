@@ -45,6 +45,14 @@ const _: () = assert!(HIDDEN_SUBTREE & cephal::schedule::META_MASK == HIDDEN_SUB
 /// Hooks must give consistent answers for a fixed question during one compute.
 pub type MeasureFn = fn(MeasureInput) -> MeasureOutput;
 
+/// A measurement whose wrapping depends only on available width. Known
+/// dimensions still constrain either axis; available height is not observable.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WidthMeasureInput {
+    pub known_dimensions: Size<Option<f32>>,
+    pub available_width: AvailableSpace,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LayoutError {
     Tree(TreeError),
@@ -408,7 +416,7 @@ impl LayoutTree {
         root: NodeId,
         viewport: Size<AvailableSpace>,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner(root, viewport, None)
+        self.compute_inner(root, viewport, None, false)
     }
     /// Borrow a content service for this computation instead of storing it in
     /// every measured node. Only nodes installed with `set_measure` invoke it.
@@ -422,13 +430,39 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: &mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner(root, viewport, Some(measure))
+        self.compute_inner(root, viewport, Some(measure), false)
+    }
+    /// Like `compute_with`, with no available height in the callback's input.
+    /// The existing leaf cache can therefore share answers across available
+    /// heights. Known heights remain part of the question. As with any content
+    /// service change, mark affected nodes dirty before replacing its answers.
+    pub fn compute_with_width_measure(
+        &mut self,
+        root: NodeId,
+        viewport: Size<AvailableSpace>,
+        measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
+    ) -> Result<bool, LayoutError> {
+        self.compute_inner(
+            root,
+            viewport,
+            Some(&mut |node, input| {
+                measure(
+                    node,
+                    WidthMeasureInput {
+                        known_dimensions: input.known_dimensions,
+                        available_width: input.available_space.width,
+                    },
+                )
+            }),
+            true,
+        )
     }
     fn compute_inner(
         &mut self,
         root: NodeId,
         viewport: Size<AvailableSpace>,
         measure: Option<&mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
+        width_only: bool,
     ) -> Result<bool, LayoutError> {
         self.tree.index(root)?;
         if self.poisoned {
@@ -476,6 +510,7 @@ impl LayoutTree {
                 owner: self,
                 measure,
                 observed: 0,
+                width_only,
             };
             for node in selected {
                 let key = EngineId::new(engine.owner.tree.layout_key(node));
@@ -616,6 +651,7 @@ impl LayoutTree {
 // public boundary, and every engine id is minted from this adapter's topology.
 struct Engine<'a, 'service> {
     observed: u8,
+    width_only: bool,
     owner: &'a mut LayoutTree,
     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
 }
@@ -693,10 +729,12 @@ impl EngineTree for Engine<'_, '_> {
             hidden: self.owner.styles.get(style).generates_no_box(),
             cheap_leaf: leaf && !self.is_measured_leaf(node),
             dependency: self.owner.styles.parent_size_dependency(style),
-            // This adapter uses Cephal's default leaf algorithm. Measurements
-            // may inspect either available axis, so height remains observed.
             kind: if leaf {
-                cephal::tree::NodeKind::Leaf
+                if self.width_only {
+                    cephal::tree::NodeKind::LeafIgnoringHeight
+                } else {
+                    cephal::tree::NodeKind::Leaf
+                }
             } else {
                 self.owner.styles.kind(style)
             },
@@ -719,6 +757,9 @@ impl EngineTree for Engine<'_, '_> {
         } else {
             MeasureOutput::from_size(input.known_dimensions.unwrap_or(Size::ZERO))
         }
+    }
+    fn measure_ignores_available_height(&self) -> bool {
+        self.width_only
     }
     fn set_unrounded_layout(&mut self, node: EngineId, layout: &Layout) {
         if self.owner.speculation != 0 {
@@ -865,6 +906,7 @@ mod tests {
                 owner: &mut tree,
                 measure: None,
                 observed: 0,
+                width_only: false,
             };
             engine.set_speculation(1);
             cephal::compute::compute_hidden_layout(&mut engine, key);
@@ -1035,6 +1077,7 @@ mod tests {
             owner: &mut owner,
             observed: 0,
             measure: None,
+            width_only: false,
         };
         engine.set_speculation(1);
         engine.set_absolute_context(key, AbsoluteContext::default());

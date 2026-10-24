@@ -55,7 +55,7 @@ fn main() {
                     layout.baseline.to_bits()
                 ]
             );
-            println!("{:?}", layout.glyphs());
+            println!("{:?}", layout.glyphs().collect::<Vec<_>>());
             for run in layout.runs() {
                 println!(
                     "run {:?} {:?} {} {}",

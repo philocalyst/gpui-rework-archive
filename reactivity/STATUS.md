@@ -43,11 +43,11 @@ AccessKit tree mirror or historical ID map; the native adapter retains its own
 required tree. Stock Linux adapter construction starts background work even
 before activation, so lazy conversion is not a zero-cost native AT claim.
 
-On the current 64-bit build, Node is 40 B, an actual text-site entry is 80 B,
+On the current 64-bit build, Node is 40 B, an actual text-site entry is 72 B,
 Presented is 64 B and a frozen list-viewport entry is 40 B. Author Color is 16 B and
 Style is 88 B. Resolved styles use an owner-owned default/dense/shared lane with
 bounded exact discovery and an unrestricted dense fallback; its header adds 40 B
-per owner. Unicode TextLayout is 56 B, eight bytes larger than its predecessor.
+per owner. Unicode TextLayout is 48 B; its 16-byte glyph owner retains packed 12-byte records.
 These are exact retained layouts, not whole-window memory figures; layout/font/scene
 storage and native services remain separately owned.
 The [presentation-basis producer](evidence/presented-basis/final/README.md)
@@ -67,6 +67,18 @@ and [lattice/adaptive controls](evidence/gamut-search-controls/README.md) retain
 precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
+
+The [composed text stack](evidence/text-stack/README.md) removes output storage
+from intrinsic measurement, retains 12-byte canonical glyphs behind a 16-byte
+unique owner, and sends one validated Skrifa outline directly to Zeno. All 132
+library source files match Root's qualified `826ecb675f`; its default/fallback/
+native suites pass 838/211/648 cases and strict checks pass. Core is **31,616**
+non-test, non-comment lines, **+298** from 5381. The public glyph API is a
+borrowed value iterator. Its removed private Debug field caused an original
+oracle failure; the separate exact semantic comparison and all costs are kept.
+Hummingbird Files, common-eight compression, vertical navigation and the new
+axis-boundary GPU correction remain separate candidates. No whole-campaign,
+application-parity, speed or RSS claim follows from this text integration.
 
 The bundled primary now embeds a reproducible [full static default instance](crates/canvas/evidence/default-font/README.md).
 All 4,515 glyphs, IDs and shaping features remain; the original variable font

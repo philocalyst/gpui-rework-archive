@@ -158,10 +158,10 @@ mod tests {
         let runtime = win.runtime().unwrap();
         let owner = runtime.text.as_ref().unwrap();
         let mut maps = Vec::new();
-        let mut glyph_capacity = 0;
+        let mut glyph_count = 0;
         for site in runtime.texts.iter().flatten() {
             if let Some(shape) = &site.shaped {
-                glyph_capacity += std::mem::size_of_val(shape.layout.glyphs());
+                glyph_count += shape.layout.glyphs().len();
                 maps.push(shape.layout.geometry().unwrap() as *const _);
             }
         }
@@ -176,7 +176,7 @@ mod tests {
         maps.sort_unstable();
         maps.dedup();
         println!(
-            "TEXT_OWNER case={name} unique_maps={} l_glyph_len_bytes={glyph_capacity} p_entries={} p_capacity_bytes={} c_entries={} c_capacity_bytes={} allocations={} requested={} peak_extra={} retained_delta={}",
+            "TEXT_OWNER case={name} unique_maps={} l_glyphs={glyph_count} p_entries={} p_capacity_bytes={} c_entries={} c_capacity_bytes={} allocations={} requested={} peak_extra={} retained_delta={}",
             maps.len(),
             owner.presented.len(),
             owner.presented.capacity() * size_of::<Entry>(),

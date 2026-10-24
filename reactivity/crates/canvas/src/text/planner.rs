@@ -51,6 +51,12 @@ pub(super) struct Planner<'font> {
     sets: [Option<Arc<FontSet>>; 4],
     primary_cmap: Cmap<'font>,
 }
+struct Planned {
+    metrics: TextMetrics,
+    glyphs: Vec<PackedGlyph>,
+    details: Option<Details>,
+    mask: usize,
+}
 impl<'font> Planner<'font> {
     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
         let faces = FontSet {
@@ -146,7 +152,34 @@ impl<'font> Planner<'font> {
         max_width: Option<f32>,
         interactive: bool,
     ) -> Result<TextLayout, Error> {
-        let result = self.shape_inner(text, size, max_width, interactive);
+        let planned = self.plan::<true>(text, size, max_width, interactive)?;
+        Ok(TextLayout {
+            width: planned.metrics.width,
+            height: planned.metrics.height,
+            baseline: planned.metrics.baseline,
+            font_size: size,
+            glyphs: GlyphBuffer::new(planned.glyphs, text.len())
+                .map_err(|_| Error::ResourceLimit)?,
+            fonts: self.font_set(planned.mask),
+            mapping: planned.details.map(Arc::new),
+        })
+    }
+    pub fn measure(
+        &mut self,
+        text: &str,
+        size: f32,
+        max_width: Option<f32>,
+    ) -> Result<TextMetrics, Error> {
+        Ok(self.plan::<false>(text, size, max_width, false)?.metrics)
+    }
+    fn plan<const MATERIALIZE: bool>(
+        &mut self,
+        text: &str,
+        size: f32,
+        max_width: Option<f32>,
+        interactive: bool,
+    ) -> Result<Planned, Error> {
+        let result = self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive);
         if result.is_err() {
             // An invalid or expanding font can create a rejected large layout.
             // Do not keep its buffers for later calls in this planning pass.
@@ -154,13 +187,13 @@ impl<'font> Planner<'font> {
         }
         result
     }
-    fn shape_inner(
+    fn plan_inner<const MATERIALIZE: bool>(
         &mut self,
         text: &str,
         size: f32,
         max_width: Option<f32>,
         interactive: bool,
-    ) -> Result<TextLayout, Error> {
+    ) -> Result<Planned, Error> {
         let needed = self.coverage(text)?;
         let mut names = FAMILIES.map(|name| FontFamilyName::Named(name.into()));
         let mut family_count = 1;
@@ -172,6 +205,8 @@ impl<'font> Planner<'font> {
         }
         let mut glyphs = Vec::new();
         let mut details: Option<Details> = None;
+        let mut detailed = false;
+        let mut glyph_count = 0usize;
         let mut width = 0.0f32;
         let mut height = 0.0f32;
         let mut baseline = 0.0f32;
@@ -196,28 +231,30 @@ impl<'font> Planner<'font> {
                     .flat_map(|line| line.runs())
                     .all(|run| !run.is_rtl() && Some(run.font().data.id()) == self.blob_ids[0])
                 && planned.lines().flat_map(|line| line.runs()).count() <= 1;
-            if !simple && details.is_none() {
-                details = Some(Details {
-                    len: text.len() as u32,
-                    font_size: size,
-                    runs: Vec::new(),
-                    lines: Vec::new(),
-                    carets: interactive.then(Vec::new),
-                });
+            if !simple && !detailed {
+                detailed = true;
+                if MATERIALIZE {
+                    details = Some(Details {
+                        len: text.len() as u32,
+                        font_size: size,
+                        runs: Vec::new(),
+                        lines: Vec::new(),
+                        carets: interactive.then(Vec::new),
+                    });
+                }
             }
             let count = planned
                 .lines()
                 .flat_map(|line| line.runs())
                 .map(|run| run.glyph_count())
                 .sum::<usize>();
-            if glyphs
-                .len()
+            if glyph_count
                 .checked_add(count)
                 .is_none_or(|n| n > MAX_GLYPHS)
             {
                 return Err(Error::ResourceLimit);
             }
-            if !content.is_empty() {
+            if MATERIALIZE && !content.is_empty() {
                 glyphs.reserve(count);
             }
             if paragraph.content.start == 0 {
@@ -235,9 +272,11 @@ impl<'font> Planner<'font> {
             });
             for (line_index, line) in planned.lines().enumerate() {
                 let global_line = details.as_ref().map_or(line_index, |d| d.lines.len());
-                if let Some(d) = &mut details {
-                    d.lines
-                        .push(freeze_line(line, content, paragraph.content.start, height)?);
+                if detailed {
+                    let frozen = freeze_line(line, content, paragraph.content.start, height)?;
+                    if let Some(d) = &mut details {
+                        d.lines.push(frozen);
+                    }
                 }
                 for item in line.items() {
                     let PositionedLayoutItem::GlyphRun(run) = item else {
@@ -259,7 +298,7 @@ impl<'font> Planner<'font> {
                     if slot != 0 {
                         mask |= 1 << (slot - 1);
                     }
-                    let first = glyphs.len();
+                    let first = glyph_count;
                     // This API shapes one style over each paragraph, so every
                     // positioned item covers its run's full visual glyph range.
                     let mut clusters = run.run().glyph_source_ranges();
@@ -288,19 +327,22 @@ impl<'font> Planner<'font> {
                         if !g.x.is_finite() || !g.y.is_finite() {
                             return Err(Error::InvalidGeometry);
                         }
-                        glyphs.push(Glyph {
+                        let glyph = PackedGlyph::new(Glyph {
                             id: u16::try_from(g.id).map_err(|_| Error::InvalidFont)?,
                             font: FontSlot(slot as u8),
-                            simple_tail_bytes: 0,
                             cluster: (paragraph.content.start + source.start) as u32,
                             x: g.x,
                             baseline: height + g.y,
-                        });
+                        })?;
+                        glyph_count += 1;
+                        if MATERIALIZE {
+                            glyphs.push(glyph);
+                        }
                     }
                     if clusters.next().is_some() {
                         return Err(Error::InvalidFont);
                     }
-                    if let Some(d) = &mut details {
+                    if detailed {
                         let source = if content.is_empty() {
                             0..0
                         } else {
@@ -309,19 +351,21 @@ impl<'font> Planner<'font> {
                         if content.get(source.clone()).is_none() {
                             return Err(Error::InvalidFont);
                         }
-                        d.runs.push(Run {
-                            start: (paragraph.content.start + source.start) as u32,
-                            end: (paragraph.content.start + source.end) as u32,
-                            glyph_start: first as u32,
-                            glyph_end: glyphs.len() as u32,
-                            line: global_line as u32,
-                            font: FontSlot(slot as u8),
-                            direction: if run.run().is_rtl() {
-                                TextDirection::RightToLeft
-                            } else {
-                                TextDirection::LeftToRight
-                            },
-                        });
+                        if let Some(d) = &mut details {
+                            d.runs.push(Run {
+                                start: (paragraph.content.start + source.start) as u32,
+                                end: (paragraph.content.start + source.end) as u32,
+                                glyph_start: first as u32,
+                                glyph_end: glyph_count as u32,
+                                line: global_line as u32,
+                                font: FontSlot(slot as u8),
+                                direction: if run.run().is_rtl() {
+                                    TextDirection::RightToLeft
+                                } else {
+                                    TextDirection::LeftToRight
+                                },
+                            });
+                        }
                     }
                 }
             }
@@ -330,59 +374,20 @@ impl<'font> Planner<'font> {
             }
             height += planned.height();
         }
-        if details.is_none() {
-            let encoded = match glyphs.last_mut() {
-                Some(last) => {
-                    let tail = (text.len() as u32)
-                        .checked_sub(last.cluster)
-                        .ok_or(Error::InvalidFont)?;
-                    if let Ok(tail) = u8::try_from(tail) {
-                        last.simple_tail_bytes = tail;
-                        true
-                    } else {
-                        false
-                    }
-                }
-                None => text.is_empty(),
-            };
-            if !encoded {
-                details = Some(Details {
-                    len: text.len() as u32,
-                    font_size: size,
-                    runs: vec![Run {
-                        start: 0,
-                        end: text.len() as u32,
-                        glyph_start: 0,
-                        glyph_end: glyphs.len() as u32,
-                        line: 0,
-                        font: FontSlot(0),
-                        direction: TextDirection::LeftToRight,
-                    }],
-                    lines: vec![Line {
-                        start: 0,
-                        end: text.len() as u32,
-                        top: 0.,
-                        height,
-                        baseline,
-                        width,
-                    }],
-                    carets: None,
-                });
-            }
-        }
         // The immutable map cannot append stops after publication. Charge the
         // trim separately from stop-field compression and query changes.
         if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
             stops.shrink_to_fit();
         }
-        Ok(TextLayout {
-            width,
-            height,
-            baseline,
-            font_size: size,
+        Ok(Planned {
+            metrics: TextMetrics {
+                width,
+                height,
+                baseline,
+            },
             glyphs,
-            fonts: self.font_set(mask),
-            mapping: details.map(Arc::new),
+            mask,
+            details,
         })
     }
 }
@@ -583,13 +588,20 @@ mod tests {
             planner.shape(&"W".repeat(MAX_GLYPHS + 1), 18., None, false),
             Err(Error::ResourceLimit)
         ));
+        assert!(matches!(
+            planner.measure(&"W".repeat(MAX_GLYPHS + 1), 18., None),
+            Err(Error::ResourceLimit)
+        ));
         let source = "office\n\nnext";
         let actual = planner.shape(source, 18., Some(60.), true).unwrap();
         let expected = face
             .shaper()
             .shape_interactive(source, 18., Some(60.))
             .unwrap();
-        assert_eq!(actual.glyphs(), expected.glyphs());
+        assert_eq!(
+            actual.glyphs().collect::<Vec<_>>(),
+            expected.glyphs().collect::<Vec<_>>()
+        );
         assert_eq!(
             [actual.width, actual.height, actual.baseline],
             [expected.width, expected.height, expected.baseline]
@@ -610,6 +622,41 @@ mod tests {
                 );
             }
         }
+    }
+    #[test]
+    fn measurement_keeps_exact_metrics_and_no_owned_geometry() {
+        let _registry = super::super::BUNDLED_TEST_LOCK.lock().unwrap();
+        let face = FontFace::bundled().unwrap();
+        let mut planner = Planner::new(&face).unwrap();
+        for source in [
+            "",
+            "office ffi fi  spaces   tail ",
+            "a\u{301}b\u{200d}c",
+            "abc אבג 123 xyz العربية نهاية",
+            "\r\n\u{2028}\u{2028}end\n",
+        ] {
+            for width in [None, Some(f32::MIN_POSITIVE), Some(30.), Some(180.)] {
+                let measured = planner.measure(source, 16., width).unwrap();
+                let shape = planner.shape(source, 16., width, true).unwrap();
+                assert_eq!(
+                    [measured.width, measured.height, measured.baseline].map(f32::to_bits),
+                    [shape.width, shape.height, shape.baseline].map(f32::to_bits),
+                    "source={source:?} width={width:?}",
+                );
+                // Inspect the same specialization used by the public measure
+                // entry point, including scripts that need detailed layouts.
+                let planned = planner.plan::<false>(source, 16., width, false).unwrap();
+                assert_eq!(planned.glyphs.capacity(), 0);
+                assert!(planned.details.is_none());
+            }
+        }
+        println!(
+            "TEXT_HEADERS metrics={} planned={} layout={} planner={}",
+            size_of::<TextMetrics>(),
+            size_of::<Planned>(),
+            size_of::<TextLayout>(),
+            size_of::<Planner<'_>>()
+        );
     }
     use parley::Cursor;
 

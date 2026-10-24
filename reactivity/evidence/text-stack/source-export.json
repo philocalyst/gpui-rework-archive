@@ -1,0 +1,39 @@
+{
+  "base": "5381eb93e62e97573bbbb3577e8bd0512d4f0dde",
+  "qualified_library_pin": "826ecb675f8b5beb61261d54e0a6945f1328051f",
+  "app_composition_pin": "64162234a00b1a0ecb32535e020566f1b59568e8",
+  "patch_sha256": "d27c8973e3676200ae9689a85b7659ecb38b05ddaf703be93b9ab21a6b6aeaaa",
+  "paths": {
+    "reactivity/Cargo.lock": "eefeccf4e553245f191fa863b0c81b98b1b4ffeb24bcd84b61424f2ee0a3f089",
+    "reactivity/crates/canvas/Cargo.toml": "0b6664c108bd7fa6a5f9bf99f73f0a396a68c4f54cb75357686a4d5a970a91a5",
+    "reactivity/crates/canvas/examples/text_oracle.rs": "a8f89f863ec36a475dca13c1d0c430dd1132b998bd7d115dc3db351166c0ddbf",
+    "reactivity/crates/canvas/src/canvas.rs": "2a9d71aa3759ae6e35b3cc4ef8d3b174d46788363a5ca810843d772d04c26a89",
+    "reactivity/crates/canvas/src/lib.rs": "7705fbc75ae7d272dbe672952846e591ea9f7f8d002ee43dce902d0c469c2ede",
+    "reactivity/crates/canvas/src/text.rs": "f7a872a4abbd62d3a7eef8e7c77083b5d56c7c03637554c6a13430c409ba38ed",
+    "reactivity/crates/canvas/src/text/geometry_ledger.rs": "0a98e7b9652ffbc18c1896bcf35bd2c75b53c04925f2185fee4283ae44669b93",
+    "reactivity/crates/canvas/src/text/glyph_buffer.rs": "79e17860e45836bf611b65c6fc6a564a37b7eccb15009e02f08e36e8bd26e113",
+    "reactivity/crates/canvas/src/text/glyph_codec_tests.rs": "2d55d7475b1eb78e2a93f7d2b93583106d222f60666e55753d130e6576242169",
+    "reactivity/crates/canvas/src/text/layout.rs": "7e84432f5dfd98b26824b4b2fb17c96a407c484e72d95df83b02674a24adc556",
+    "reactivity/crates/canvas/src/text/outline_once_gate.rs": "6fd18555a186adad1e5c0f1aa6096b29c91b80a778e5862416f4fc88c3fad125",
+    "reactivity/crates/canvas/src/text/outline_record_tests.rs": "1a5a69f817b22bf45047675f60d6fe20e842ab089b2539e4cac0039cdc0190b0",
+    "reactivity/crates/canvas/src/text/planner.rs": "031e42a4efe2b8ac3f8ca79d1afa97d5bc591a5f30820afd7cf7918874369e87",
+    "reactivity/crates/canvas/tests/font_quality.rs": "70b8f21b324550f57c35cfbcfff036b512e04c01032d52ca328fa127fdae3da5",
+    "reactivity/crates/canvas/tests/render.rs": "96185faad7bc3839bd9fce9d55582389eaf491b2cdbb79cc819516ceb79026f9",
+    "reactivity/crates/canvas/tests/selection.rs": "138b462883fb430c1abfecc2ec9893385d9e1a208fb95cbbd8bb3fa38b85a0f8",
+    "reactivity/crates/canvas/tests/shaping.rs": "7ee75ac6b786657e9ee46264a225a87336bd0b9ca97784c4f993d27c4cf7755e",
+    "reactivity/crates/canvas/tests/unicode.rs": "0f4b054cc882a7323036aff4d43cf0cb95864cbb1358537f1c65ceddcf8c8dbd",
+    "reactivity/crates/core/src/layout.rs": "e2221ae739884c2e71bc7dfa436f0d6c6122d453a4452a7bef7025a733aab019",
+    "reactivity/crates/core/tests/layout.rs": "2d03bb2a10ddbbb1905e663d29c995ce150bdfef7d23b5b894440fc909ddb114",
+    "reactivity/crates/gpui/src/runtime.rs": "041766afe15ad5e0a5a9deab12d576be6bb5e62535467b6f6a9b85958a88890f",
+    "reactivity/crates/gpui/src/runtime/editing.rs": "9356a6792b692fc99325d7f5f529f4dd30ead301625aeb2835dcc519fa78f09c",
+    "reactivity/crates/gpui/src/runtime/image.rs": "03cd3029790bf71dd88597f4f9a0470c0fbd937f6e7f3cb54d51acd11791a743",
+    "reactivity/crates/gpui/src/runtime/text_geometry.rs": "ee3b551b4a2936a62ed53a0ca09bc0032507444654c0b2df61305ec81426b38e"
+  },
+  "scope": "Selected library/manifests/examples/tests only. Main default-font reproduction and documentation are deliberately preserved. Hummingbird and new RIFF remain separate unadopted composition.",
+  "dependent_lock_refresh": {
+    "source": "1a652e7924332331ed57a7f92a1ecffef68d5597",
+    "path": "reactivity/ports/hummingbird/Cargo.lock",
+    "sha256": "7a1a7311245d02bb8aea490eb3e1050eb95fbc72670d071db474a09ea795a654",
+    "change": "Remove only unused production Swash, Skrifa0.44 and Yazi; add direct Zeno edge; no dependency version upgrades."
+  }
+}

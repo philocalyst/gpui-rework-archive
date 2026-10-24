@@ -1,5 +1,5 @@
 //! CPU canvas with extended-linear source-over and profiled premultiplied output.
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 mod canvas;
 mod color;
@@ -23,7 +23,8 @@ pub use image::{
 };
 pub use text::{
     CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextDirection, TextGeometry, TextGrapheme,
-    TextLayout, TextLine, TextOffset, TextPosition, TextRun, TextSelection, TextShaper, TextSystem,
+    TextLayout, TextLine, TextMetrics, TextOffset, TextPosition, TextRun, TextSelection,
+    TextShaper, TextSystem,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]

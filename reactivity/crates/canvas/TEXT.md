@@ -18,13 +18,22 @@ The original source is neither rewritten nor retained in a second document.
 
 The transient Parley layout is lowered immediately into the existing canonical
 glyph positions. No Parley layout or second glyph/run authority survives.
-`Glyph` remains 16 bytes: a private typed one-byte font slot and one-byte simple
-tail length use its former padding. `TextLayout` grows from 48 to 56 bytes on
-x86_64: an immutable font-set lease replaces the old numeric font identity, and
-one optional boxed-details pointer is added. Simple primary-font, single-line
-LTR labels need no details allocation. Reordering, multiple lines/runs, a long
-tail or nonempty zero-glyph source takes the cold details path. Long graphemes
-are not rejected to fit the byte-sized fast representation.
+The canonical record is 12 bytes: checked glyph/font and source-cluster bits
+share one word while x and the frozen baseline keep their original f32 bits.
+The public decoded `Glyph` remains 16 bytes; `glyphs()` returns a borrowed value
+iterator without retaining an expanded array. Its 16-byte unique allocation
+owner also carries the bounded document length, so long trailing graphemes need
+no tail-length escape allocation. `TextLayout` is 48 bytes on x86_64, including
+its immutable font-set lease and optional details pointer. Simple primary-font,
+single-line LTR labels need no details allocation; reordering, multiple
+lines/runs or nonempty zero-glyph source take the cold details path.
+
+`TextShaper::measure` validates through the same planner without retaining an
+output glyph buffer or interaction geometry. Runtime intrinsic probes use that
+path; final placement owns an interactive layout at the exact width and font
+size. [The combined text ledger](../../evidence/text-stack/README.md) records
+source equivalence, functional gates, API migration, exact layout costs and the
+original Debug-schema comparison failure.
 
 The immutable font set contains one primary and at most two bundled fallback
 leases. Subsets are shared within the pass; old layouts retain their exact
@@ -74,11 +83,14 @@ no caret map. A byte inside UTF-8, a combining grapheme or CRLF has no legal
 destination; the API returns `None` rather than snapping it. `TextSelection`
 validates endpoints in that layout only; it is not a document revision token.
 
-This does not implement native range selection, selection painting, IME/preedit,
-language/variation authoring, discretionary-hyphen insertion, vertical writing,
-color glyphs or OS font discovery. Native `Key::Text` still excludes controls;
-CRLF can enter through the existing typed source/SetValue path. Native scalar
-backspace remains the existing behavior, not a new grapheme-aware editor.
+GPUI owns one source-qualified logical selection, paints acknowledged caret and
+selection geometry, and shares legal range edits with native accessibility.
+Horizontal visual navigation and deletion use grapheme boundaries. Canvas
+geometry alone grants no authority to edit a later source revision. IME/preedit,
+clipboard, vertical navigation, language/variation authoring, discretionary
+hyphens, vertical writing, color glyphs and OS font discovery remain outside
+this integrated slice. Native `Key::Text` excludes controls; CRLF can enter
+through the typed source/SetValue path.
 Tabs and unsupported C0 controls remain explicit errors. Missing CJK/emoji
 coverage is a font-policy error, not an artificial script rejection.
 
@@ -117,7 +129,7 @@ paragraph, mark, ZWJ and isolate combinations validate source ranges, glyph
 coverage and both byte affinities. The fixture-specific glyph conservation
 oracle is not a universal contract that all fonts/line shapers preserve glyph
 IDs after wrapping. Scoped CPU pools of 1/2/4 workers produce exact pixels.
-All 20 actual Vulkan tests pass, including mixed Unicode fallback at fractional
+At the original Unicode checkpoint, all 20 actual Vulkan tests passed, including mixed Unicode fallback at fractional
 raster density and reflected transforms, exact optimized/reference GPU pixels
 and the existing bounded CPU/GPU rounding oracle.
 

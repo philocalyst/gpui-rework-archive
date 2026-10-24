@@ -1490,7 +1490,7 @@ impl Canvas {
         let mut pending_bytes = 0;
         let base = self.commands.masks.len();
         for glyph in layout.glyphs() {
-            let key = text.layout_key(layout, *glyph, physical_font_size)?;
+            let key = text.layout_key(layout, glyph, physical_font_size)?;
             let existing = self
                 .commands
                 .mask_index
@@ -1500,7 +1500,7 @@ impl Canvas {
             // Lookup precedes the font-cache lease. Repeated glyph placements
             // perform no Arc increment/decrement; only unique scene masks lease.
             let new = if existing.is_none() {
-                Some(text.layout_raster(layout, *glyph, physical_font_size)?)
+                Some(text.layout_raster(layout, glyph, physical_font_size)?)
             } else {
                 None
             };

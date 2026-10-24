@@ -1,0 +1,58 @@
+[
+  {
+    "gate": "default-tests-826",
+    "exit": 0
+  },
+  {
+    "gate": "fallback-build",
+    "exit": 0
+  },
+  {
+    "gate": "fallback-tests",
+    "exit": 0
+  },
+  {
+    "gate": "strict-default",
+    "exit": 0
+  },
+  {
+    "gate": "strict-fallback",
+    "exit": 0
+  },
+  {
+    "gate": "oracle-build",
+    "exit": 0
+  },
+  {
+    "gate": "oracle-run",
+    "exit": 0
+  },
+  {
+    "gate": "oracle-comparison",
+    "exit": 1
+  },
+  {
+    "gate": "native-build",
+    "exit": 0
+  },
+  {
+    "gate": "native-tests",
+    "exit": 0
+  },
+  {
+    "gate": "strict-native",
+    "exit": 0
+  },
+  {
+    "gate": "hummingbird-build",
+    "exit": 101
+  },
+  {
+    "gate": "hummingbird-native-build",
+    "exit": 101
+  },
+  {
+    "gate": "strict-hummingbird-native",
+    "exit": 101
+  }
+]
