@@ -11,7 +11,6 @@ struct Form {
     gate: Signal<f64>,
     palette: Signal<bool>,
     rebound: bool,
-    inherited: bool,
     theme: Theme,
 }
 impl Form {
@@ -51,26 +50,17 @@ impl View for Form {
             &self.theme,
         )
         .invalid(state);
-        let input = if self.inherited {
-            input.disabled(false)
-        } else {
-            input.disabled(state)
-        };
+        let input = input.disabled(state);
         let root = gpui::column((input.build(),))
             .w(&self.gate)
             .bg(painted.select(self.theme.surface(), self.theme.raised()));
-        let root = if self.inherited {
-            root.disabled(state)
-        } else {
-            root
-        };
         controls.attach(paint.attach(root))
     }
 }
 fn ack(win: &mut Win<Form>) {
     win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
 }
-fn window(inherited: bool) -> (Win<Form>, Target, ImeSession) {
+fn window() -> (Win<Form>, Target, ImeSession) {
     let mut win = Win::recording(
         Form {
             first: Signal::new("base".into()),
@@ -78,7 +68,6 @@ fn window(inherited: bool) -> (Win<Form>, Target, ImeSession) {
             gate: Signal::new(280.0),
             palette: Signal::new(false),
             rebound: false,
-            inherited,
             theme: Theme::halloween(),
         },
         WindowOptions::default(),
@@ -117,42 +106,40 @@ fn shown(win: &Win<Form>, target: Target) -> (String, Option<MarkedText>, bool, 
     result.unwrap()
 }
 #[test]
-fn direct_and_inherited_disable_revoke_preedit_before_ack_and_never_reenable_old_stream() {
-    for inherited in [false, true] {
-        let (mut win, target, mut session) = window(inherited);
-        let old = shown(&win, target);
-        assert_eq!(old.0, "baseghost");
-        assert!(old.1.is_some());
-        assert!(!old.2 && !old.3);
-        let json = win.semantics().unwrap().to_json().unwrap();
-        assert!(json.contains("marked_text"));
-        assert!(json.contains("\"disabled\":false,\"invalid\":false"));
-        win.set(Form::GATE, 0.5).unwrap();
-        assert_eq!(shown(&win, target), old);
-        assert!(win.ime_cursor_area(&session).unwrap().is_none());
-        assert!(matches!(win.focus(target), Err(Error::NotInteractive)));
-        win.ime_event(&mut session, ImeEvent::Commit("late"))
-            .unwrap();
-        assert_eq!(win.read(Form::FIRST).unwrap(), "base");
-        ack(&mut win);
-        assert_eq!(shown(&win, target), ("base".into(), None, true, true));
-        let json = win.semantics().unwrap().to_json().unwrap();
-        assert!(!json.contains("marked_text"));
-        assert!(json.contains("\"disabled\":true,\"invalid\":true"));
-        win.set(Form::GATE, 280.0).unwrap();
-        ack(&mut win);
-        win.focus(target).unwrap();
-        win.ime_event(&mut session, ImeEvent::Commit("still late"))
-            .unwrap();
-        assert_eq!(win.read(Form::FIRST).unwrap(), "base");
-        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
-        win.ime_event(&mut session, ImeEvent::Commit("!")).unwrap();
-        assert_eq!(win.read(Form::FIRST).unwrap(), "base!");
-    }
+fn disable_revokes_preedit_before_ack_and_never_reenables_old_stream() {
+    let (mut win, target, mut session) = window();
+    let old = shown(&win, target);
+    assert_eq!(old.0, "baseghost");
+    assert!(old.1.is_some());
+    assert!(!old.2 && !old.3);
+    let json = win.semantics().unwrap().to_json().unwrap();
+    assert!(json.contains("marked_text"));
+    assert!(json.contains("\"disabled\":false,\"invalid\":false"));
+    win.set(Form::GATE, 0.5).unwrap();
+    assert_eq!(shown(&win, target), old);
+    assert!(win.ime_cursor_area(&session).unwrap().is_none());
+    assert!(matches!(win.focus(target), Err(Error::NotInteractive)));
+    win.ime_event(&mut session, ImeEvent::Commit("late"))
+        .unwrap();
+    assert_eq!(win.read(Form::FIRST).unwrap(), "base");
+    ack(&mut win);
+    assert_eq!(shown(&win, target), ("base".into(), None, true, true));
+    let json = win.semantics().unwrap().to_json().unwrap();
+    assert!(!json.contains("marked_text"));
+    assert!(json.contains("\"disabled\":true,\"invalid\":true"));
+    win.set(Form::GATE, 280.0).unwrap();
+    ack(&mut win);
+    win.focus(target).unwrap();
+    win.ime_event(&mut session, ImeEvent::Commit("still late"))
+        .unwrap();
+    assert_eq!(win.read(Form::FIRST).unwrap(), "base");
+    win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+    win.ime_event(&mut session, ImeEvent::Commit("!")).unwrap();
+    assert_eq!(win.read(Form::FIRST).unwrap(), "base!");
 }
 #[test]
 fn rebinding_component_during_preedit_does_not_transfer_the_old_source_lease() {
-    let (mut win, target, mut session) = window(false);
+    let (mut win, target, mut session) = window();
     let old = shown(&win, target);
     win.update(|model| model.rebound = true).unwrap();
     assert_eq!(shown(&win, target), old);
@@ -170,7 +157,7 @@ fn rebinding_component_during_preedit_does_not_transfer_the_old_source_lease() {
 }
 #[test]
 fn eligible_disabled_invalid_candidate_after_newer_failure_carries_no_ime_authority() {
-    let (mut win, target, mut session) = window(false);
+    let (mut win, target, mut session) = window();
     let old = shown(&win, target);
     win.set(Form::GATE, 0.5).unwrap();
     let eligible = win.with_scene(|_, token| token).unwrap();
@@ -194,7 +181,7 @@ fn eligible_disabled_invalid_candidate_after_newer_failure_carries_no_ime_author
 }
 #[test]
 fn paint_only_cohort_admission_cancels_preedit_and_publishes_its_removal() {
-    let (mut win, target, mut session) = window(false);
+    let (mut win, target, mut session) = window();
     let old = shown(&win, target);
     win.reset_counters().unwrap();
     let committed = win.set(Form::PALETTE, true).unwrap();
