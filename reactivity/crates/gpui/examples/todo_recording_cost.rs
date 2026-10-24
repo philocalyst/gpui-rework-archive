@@ -158,7 +158,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nth(1)
         .map_or(Ok(10_000), |value| value.parse::<usize>())?;
     let model = measure("seed", || Ok(todos::Todos::seeded(rows, false)))?;
-    let mut expected = Expected::seeded(rows);
     let mut win = measure("mount", || {
         Win::recording(
             model,
@@ -169,6 +168,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     })?;
     measure("initial_ack", || acknowledge(&mut win))?;
+    let mut expected = Expected::seeded(rows);
     checkpoint(&mut win, "mounted", &expected)?;
     let input = win.input();
     win.reset_counters()?;
