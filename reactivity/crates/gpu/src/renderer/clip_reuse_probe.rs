@@ -1090,6 +1090,61 @@ fn optional_pipeline_identity_fallback_and_packet_selection() {
             expected,
             "actual selector mutant must change pixels"
         );
+        // Actual post-binning negative fixtures, each retaining logical clip
+        // nodes while offering no reusable sampled chain.
+        for kind in 0..4 {
+            let mut scene = Canvas::recording(32, 24, cfg).unwrap();
+            let mut retained_chain = None;
+            for n in 0..4 {
+                let clip = if kind == 0 || retained_chain.is_none() {
+                    let chain = scene
+                        .create_clip(
+                            None,
+                            ClipShape::RoundedRect {
+                                rect: Rect::new(0.125 + n as f32 * 0.125, 0.375, 30., 22.),
+                                radius: 2.,
+                            },
+                            Affine::IDENTITY,
+                        )
+                        .unwrap();
+                    retained_chain = Some(chain);
+                    chain
+                } else {
+                    retained_chain.unwrap()
+                };
+                let rect = if kind == 1 {
+                    Rect::new(100., 100., 8., 8.)
+                } else {
+                    Rect::new(1., 1., 28., 20.)
+                };
+                scene
+                    .fill_rect(rect, Affine::IDENTITY, clip, Color::rgba(20, 40, 80, 127))
+                    .unwrap();
+            }
+            if kind >= 2 {
+                // One later opaque draw removes clipped references via cuts;
+                // kind3 also allows the certified uniform tile path.
+                scene
+                    .fill_rect(
+                        Rect::new(0., 0., 32., 24.),
+                        Affine::IDENTITY,
+                        Rect::new(0., 0., 32., 24.),
+                        Color::BLACK,
+                    )
+                    .unwrap();
+                gpu.set_tile_proofs(kind == 3);
+            }
+            gpu.render(
+                scene.prepared_scene(),
+                &small.create_view(&Default::default()),
+            )
+            .unwrap();
+            assert!(
+                !gpu.state.benefits_from_clip_acceleration(),
+                "negative eligibility fixture {kind}"
+            );
+        }
+        gpu.set_tile_proofs(true);
         // These exact CSR addresses include a flat draw between repeated keys.
         let mut words = vec![[0; 4]; 24];
         words[3] = [0x7fc0_0003, 100, 0, 0];
