@@ -23,7 +23,7 @@ fn affine(left: f64, right: f64, weight_error: f64) -> (f64, f64) {
 // values use the independently bounded polynomial with a 2e-6 outward pad;
 // every interior extremum is included explicitly, without atan2 or sampling.
 fn hue_ranges(left: f64, right: f64) -> [[f64; 2]; 2] {
-    use fearless_simd::{Fallback, f32x4};
+    use fearless_simd::{Fallback, f32x4, prelude::*};
     let endpoint = |hue: f64| {
         let tau = std::f64::consts::TAU;
         let angle = hue - ((hue + std::f64::consts::PI) / tau).floor() * tau;
