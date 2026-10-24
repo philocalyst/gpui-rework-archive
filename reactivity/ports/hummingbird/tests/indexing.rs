@@ -377,3 +377,73 @@ fn symlinks_are_not_traversed_and_missing_roots_preserve_committed_recordings() 
     drop(win);
     worker.finish().unwrap();
 }
+
+#[cfg(unix)]
+#[test]
+fn files_keep_distinct_non_utf8_names_and_actions_without_lossy_identity() {
+    use gpui::ItemKey;
+    use std::{ffi::OsString, os::unix::ffi::OsStringExt};
+    let folder = Folder::new();
+    let root = folder.0.join("music");
+    fs::create_dir(&root).unwrap();
+    let first = root.join(OsString::from_vec(b"disc-\x80".to_vec()));
+    let second = root.join(OsString::from_vec(b"disc-\x81".to_vec()));
+    assert_ne!(first, second);
+    assert_eq!(first.to_string_lossy(), second.to_string_lossy());
+    fs::create_dir(&first).unwrap();
+    fs::create_dir(&second).unwrap();
+    wave(&first.join("first.wav"), "First", "Artist", "Album");
+    wave(&second.join("second.wav"), "Second", "Artist", "Album");
+    let db = folder.0.join("library.sqlite");
+    let (worker, mut win) = open(&db);
+    add(&mut win, &worker, &root);
+    scan(&mut win, &worker);
+    assert!(win.contains_text("failed 2").unwrap());
+    let read = Database::open_read_only(&db).unwrap();
+    assert_eq!(
+        read.connection()
+            .query_row("SELECT COUNT(*) FROM track", [], |row| row.get::<_, i64>(0))
+            .unwrap(),
+        0,
+        "non-UTF8 paths cannot be silently admitted to TEXT locations"
+    );
+    win.activate(win.button(&format!("Open {}", root.display())))
+        .unwrap();
+    settle(&mut win, &worker).unwrap();
+    let result = win.with_model(|model| model.results).unwrap();
+    let (list, paths) = win
+        .with_ready(result, |page| match page {
+            Page::Files(files) => (
+                files.list(),
+                (0..files.entries.len())
+                    .map(|index| files.path(index).unwrap())
+                    .collect::<Vec<_>>(),
+            ),
+            _ => panic!("Files page"),
+        })
+        .unwrap()
+        .unwrap();
+    assert_eq!(paths, [first, second.clone()]);
+    let item = win
+        .list_item(win.list(list).unwrap(), ItemKey::new(1))
+        .unwrap();
+    let action = win
+        .role(Role::Button)
+        .name("Open disc-�")
+        .within(item)
+        .one()
+        .unwrap();
+    win.activate(action).unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_ready(result, |page| match page {
+            Page::Files(files) => files.path(0).unwrap(),
+            _ => panic!("Files page"),
+        })
+        .unwrap(),
+        Some(second.join("second.wav"))
+    );
+    drop(read);
+    drop(win);
+    worker.finish().unwrap();
+}
