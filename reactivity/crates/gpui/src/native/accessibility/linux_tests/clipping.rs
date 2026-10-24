@@ -139,6 +139,7 @@ struct Script {
     client: Option<thread::JoinHandle<()>>,
     complete: bool,
     pointer_checked: bool,
+    finishing: bool,
     acknowledge: Option<mpmc::Sender<()>>,
     acknowledged: Option<mpmc::Receiver<()>>,
 }
@@ -248,6 +249,27 @@ impl Host for Script {
         }
         if let Ok(result) = self.receiver.try_recv() {
             result.expect("actual rounded-clip AT-SPI client failed");
+            self.finishing = true;
+            self.host
+                .window
+                .as_ref()
+                .unwrap()
+                .set_outer_position(Position::Physical(PhysicalPosition::new(40, 30)));
+            self.host.window.as_ref().unwrap().request_redraw();
+        }
+        if self.finishing
+            && ready
+            && self
+                .host
+                .window
+                .as_ref()
+                .unwrap()
+                .outer_position()
+                .is_ok_and(|position| position.x >= 0 && position.y >= 0)
+        {
+            // X11 GetImage requires the fetched window region to be onscreen.
+            // The negative-origin point queries completed before this move.
+            self.host.redraw().unwrap();
             let owner = self.host.owner.as_mut().unwrap();
             assert_eq!(owner.root().unwrap().calls, 2);
             assert!(owner.snapshot().unwrap().presentation_valid);
@@ -295,6 +317,7 @@ fn native_atspi_rounded_clip_point_queries_pointer_and_ack() {
         client: None,
         complete: false,
         pointer_checked: false,
+        finishing: false,
         acknowledge: Some(acknowledge),
         acknowledged: Some(acknowledged),
     };

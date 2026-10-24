@@ -3614,3 +3614,67 @@ fn clip_word_prefixes_survive_banked_patches_image_permutations_and_growth() {
         }
     });
 }
+
+#[test]
+fn all_solid_packet_declines_rectangular_certification_for_a_rounded_clip() {
+    use gpui_canvas::ClipShape;
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        for map in [
+            Affine::IDENTITY,
+            Affine {
+                a: -1.,
+                tx: 32.,
+                ..Affine::IDENTITY
+            },
+            Affine {
+                c: 0.25,
+                tx: -3.,
+                ..Affine::IDENTITY
+            },
+        ] {
+            let mut canvas = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
+            canvas.clear(Color::BLACK);
+            let rect = Rect::new(0., 0., 32., 32.);
+            let clip = canvas
+                .create_clip(
+                    None,
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(0.125, 0.375, 30.5, 29.5),
+                        radius: 8.,
+                    },
+                    map,
+                )
+                .unwrap();
+            canvas
+                .fill_rect(rect, Affine::IDENTITY, clip, Color::WHITE)
+                .unwrap();
+            assert!(
+                canvas
+                    .prepared_scene()
+                    .draws()
+                    .all(|draw| draw.source.is_solid())
+            );
+            let expected = canvas.pixels().to_vec();
+            assert_eq!(&expected[..4], &[0, 0, 0, 255]);
+            assert!(
+                expected
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .any(|pixel| pixel[0] > 0 && pixel[0] < 255)
+            );
+            for grouped in [false, true] {
+                gpu.set_grouped_records(grouped);
+                for proofs in [false, true] {
+                    gpu.set_tile_proofs(proofs);
+                    let actual = readback(&mut gpu, &canvas);
+                    for (&gpu, &cpu) in actual.iter().zip(&expected) {
+                        assert!(gpu.abs_diff(cpu) <= 1);
+                    }
+                    assert_eq!(gpu.stats().uniform_tiles, 0);
+                }
+            }
+        }
+    });
+}

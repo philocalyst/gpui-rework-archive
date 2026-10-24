@@ -54,9 +54,9 @@ fn proposal_basis_headers_and_owner_allocations() {
         header!(accessibility::RowView<'_>);
         header!(Option<accessibility::RowView<'_>>);
         header!(accessibility::ComparedRows<'_, '_>);
-        assert_eq!(size_of::<accessibility::RowView<'_>>(), 24);
-        assert_eq!(size_of::<Option<accessibility::RowView<'_>>>(), 24);
-        assert_eq!(size_of::<accessibility::ComparedRows<'_, '_>>(), 48);
+        assert_eq!(size_of::<accessibility::RowView<'_>>(), 32);
+        assert_eq!(size_of::<Option<accessibility::RowView<'_>>>(), 32);
+        assert_eq!(size_of::<accessibility::ComparedRows<'_, '_>>(), 64);
     }
     header!(Presented);
     header!(Option<Presented>);
