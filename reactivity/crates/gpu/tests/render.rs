@@ -3362,3 +3362,105 @@ fn axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties() 
         }
     });
 }
+
+#[test]
+fn lowered_solids_keep_clipped_sample_ties_and_exceptional_paints() {
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut renderer = renderer(format).await;
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for banked in [false, true] {
+                for edge in [8.125_f32.next_down(), 8.125, 8.125_f32.next_up()] {
+                    let mut canvas = Canvas::recording(19, 17, config).unwrap();
+                    canvas.clear(Color::linear_srgb(0.125, 0.25, 0.5, 1.0).unwrap());
+                    let paint = Color::linear_srgb(-0.0, -1e-40, 2.0, 0.75).unwrap();
+                    let slot = banked.then(|| {
+                        canvas
+                            .paint_slot(gpui_canvas::PaintColor::new(paint))
+                            .unwrap()
+                    });
+                    for (rect, transform, clip) in [
+                        (
+                            Rect::new(-1.0, -1.0, 22.0, 20.0),
+                            Affine {
+                                b: -0.0,
+                                c: -0.0,
+                                ..Affine::IDENTITY
+                            },
+                            // Endpoint rounding has a nonzero f64 residual.
+                            Rect::new(0.125, 0.375, edge, 15.75),
+                        ),
+                        (
+                            Rect::new(0.125, 0.375, edge, 12.25),
+                            Affine {
+                                a: -1.25,
+                                d: -0.75,
+                                tx: 18.125,
+                                ty: 16.375,
+                                b: -0.0,
+                                c: 0.0,
+                            },
+                            Rect::new(2.125, edge, 14.75, 8.5),
+                        ),
+                        (
+                            // Continuous nonempty geometry selects no samples.
+                            Rect::new(0.126, 0.126, 0.001, 0.001),
+                            Affine::IDENTITY,
+                            Rect::new(0.0, 0.0, 19.0, 17.0),
+                        ),
+                        (
+                            Rect::new(0.0, 0.0, edge, 14.0),
+                            Affine {
+                                c: 0.125,
+                                ..Affine::IDENTITY
+                            },
+                            Rect::new(0.375, 0.125, 17.5, 16.75),
+                        ),
+                    ] {
+                        if let Some(slot) = slot {
+                            canvas.fill_rect_slot(rect, transform, clip, slot).unwrap();
+                        } else {
+                            canvas.fill_rect(rect, transform, clip, paint).unwrap();
+                        }
+                    }
+                    canvas.set_tile_proofs(false);
+                    renderer.set_tile_proofs(false);
+                    let sampled = readback(&mut renderer, &canvas);
+                    assert!(renderer.stats().sample_draw_evaluations > 0);
+                    renderer.set_tile_proofs(true);
+                    assert_eq!(readback(&mut renderer, &canvas), sampled);
+                    let cpu = canvas.pixels();
+                    if hdr {
+                        for (a, b) in sampled
+                            .as_chunks::<2>()
+                            .0
+                            .iter()
+                            .zip(cpu.as_chunks::<2>().0)
+                        {
+                            let a = u16::from_le_bytes(*a);
+                            let b = u16::from_le_bytes(*b);
+                            assert!(
+                                a.abs_diff(b) <= 1 || (a & 0x7fff == 0 && b & 0x7fff == 0),
+                                "HDR banked{banked} edge{edge}: {a:04x} {b:04x}"
+                            );
+                        }
+                    } else {
+                        assert!(
+                            sampled.iter().zip(cpu).all(|(&a, &b)| a.abs_diff(b) <= 1),
+                            "SDR banked{banked} edge{edge}"
+                        );
+                    }
+                }
+            }
+        }
+    });
+}

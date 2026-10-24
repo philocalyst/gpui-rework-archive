@@ -293,6 +293,19 @@ pub mod ui {
     }
 
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
+        // Host-only certificate: this solid's quarter-grid bounds already
+        // include canonical inverse coverage, clip and viewport membership.
+        // Eighth-grid samples and both endpoint sums are exact in f32.
+        if (draw.atlas.w & 0x40000000) != 0 {
+            if point.x < draw.local.x
+                || point.y < draw.local.y
+                || point.x >= draw.local.x + draw.local.z
+                || point.y >= draw.local.y + draw.local.w
+            {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
+            return draw.color;
+        }
         if point.x < draw.clip.x
             || point.y < draw.clip.y
             || outside_clip_max(point.x, draw.clip.x, draw.clip.z, draw.atlas.w, false)
