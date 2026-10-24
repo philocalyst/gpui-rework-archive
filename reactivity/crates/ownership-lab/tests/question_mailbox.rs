@@ -1,8 +1,7 @@
 #![cfg(feature = "loom")]
-//! The exact GPUI safe mailbox implementation, with Loom synchronization.
+//! The exact GPUI mailbox, with tracked cells and Loom atomics.
 mod sync {
-    pub use loom::sync::{Mutex, atomic};
-    pub use std::sync::TryLockError;
+    pub use loom::{cell::UnsafeCell as Cell, sync::atomic};
 }
 #[path = "../../gpui/src/reader/linear_mailbox.rs"]
 mod mailbox;

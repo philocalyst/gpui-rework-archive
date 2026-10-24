@@ -16,12 +16,28 @@ use std::{
 
 mod future;
 mod inputs;
+// The private response handoff is checked independently with Loom and Miri.
+#[allow(unsafe_code)]
 mod linear_mailbox;
 pub use future::{QuestionExecutor, QuestionTask};
 pub use inputs::QuestionInputs;
 pub(crate) mod question;
 mod sync {
-    pub(super) use std::sync::{Mutex, TryLockError, atomic};
+    pub(super) use std::sync::atomic;
+
+    // Loom supplies this same interface with tracked cell-borrow lifetimes.
+    pub(super) struct Cell<T>(std::cell::UnsafeCell<T>);
+    impl<T> Cell<T> {
+        pub(super) fn new(value: T) -> Self {
+            Self(std::cell::UnsafeCell::new(value))
+        }
+        pub(super) fn with_mut<R>(&self, visit: impl FnOnce(*mut T) -> R) -> R {
+            visit(self.0.get())
+        }
+        pub(super) fn into_inner(self) -> T {
+            self.0.into_inner()
+        }
+    }
 }
 use linear_mailbox::Mailbox;
 pub use question::{QuestionSet, Questions};
