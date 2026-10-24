@@ -167,6 +167,9 @@ impl<'font> Planner<'font> {
             blob_ids: self.blob_ids,
             glyphs: 0,
         };
+        // Ordinary scratch may have grown for a fallback input. It must not
+        // enter the handoff pool and evade the caller's small-input budget.
+        self.layout = self.spare.pop().unwrap_or_default();
         // Capture only after each paragraph passes the same glyph/geometry
         // admission as ordinary measurement. Failure releases prior paragraphs.
         match self.plan_inner::<false>(text, size, max_width, false, Some(&mut paragraphs), true) {
@@ -183,8 +186,6 @@ impl<'font> Planner<'font> {
         let Paragraphs {
             mut first, rest, ..
         } = paragraphs;
-        first.clear();
-        std::mem::swap(&mut self.layout, &mut first);
         first.clear();
         self.spare.push(first);
         for mut layout in rest {
@@ -312,6 +313,11 @@ impl<'font> Planner<'font> {
         let mut height = 0.0f32;
         let mut baseline = 0.0f32;
         let mut mask = 0;
+        let capture_count = if capture {
+            paragraph::ranges(text).count()
+        } else {
+            0
+        };
         for (index, paragraph) in paragraph::ranges(text).enumerate() {
             let content = &text[paragraph.content.clone()];
             let planned = if !capture && let Some(paragraphs) = &mut paragraphs {
@@ -477,8 +483,10 @@ impl<'font> Planner<'font> {
             }
             height += planned.height();
             if capture && let Some(paragraphs) = &mut paragraphs {
-                let layout =
-                    std::mem::replace(&mut self.layout, self.spare.pop().unwrap_or_default());
+                let layout = std::mem::take(&mut self.layout);
+                if index + 1 < capture_count {
+                    self.layout = self.spare.pop().unwrap_or_default();
+                }
                 paragraphs.glyphs += count;
                 if index == 0 {
                     paragraphs.first = layout;
