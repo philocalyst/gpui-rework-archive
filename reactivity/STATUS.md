@@ -68,6 +68,15 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [close-time accessibility cleanup](evidence/accesskit-close/README.md)
+retires stale AT-SPI interfaces and client-cache entries when one window closes
+while another survives. Its original public Adapter control fails; both valid
+Unix runtime candidates pass. Root passes 55 accessibility tests, two explicitly
+executed X11 lifecycle/checkbox cases, and strict native all-target checks.
+The fix adds ten non-test/non-comment vendor lines and no retained fields; core
+stays **31,813**. Close costs three terminal messages per exposed node. These are
+functional results, with no startup, RSS or latency claim.
+
 The [axis-solid coverage correction](evidence/axis-solid-coverage/README.md)
 uses the canonical CPU inverse predicate to select exact GPU sample intervals
 for plain axis-aligned solids. Root passes 47 ordinary GPU and 273 scalar

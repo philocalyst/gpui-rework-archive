@@ -1,0 +1,72 @@
+{
+  "root_source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+  "native_build": {
+    "source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+    "exit": 0,
+    "guards": 12000,
+    "guards_match": true,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "native_execution": {
+    "source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+    "binary_sha256": "030ded948093a75159e19af1bba84a303705d1741cc7693460d653ddd1963678",
+    "all_exit_zero": true,
+    "passed": 57,
+    "failed": 0,
+    "ignored": 8,
+    "results": [
+      {
+        "name": "ordinary-accessibility",
+        "exit": 0,
+        "passed": 55,
+        "failed": 0,
+        "ignored": 8,
+        "binary_sha256_matches": true
+      },
+      {
+        "name": "native-lifecycle",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256_matches": true
+      },
+      {
+        "name": "native-checkbox",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256_matches": true
+      }
+    ],
+    "scope": "Real GPUI native library accessibility composition, private X11 and session buses; no hardware/latency/RSS claim."
+  },
+  "native_execution_guard": {
+    "source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+    "exit": 0,
+    "guards": 12000,
+    "guards_match": true,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "strict_native": {
+    "source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+    "exit": 0,
+    "guards": 12000,
+    "guards_match": true,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "producer_scope": "Independent public Adapter/private D-Bus proof, default and Tokio; see raw logs. No GPUI runtime equivalence inferred from standalone tests."
+}

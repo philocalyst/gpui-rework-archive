@@ -122,3 +122,18 @@ default cached peer/cache-task disappearance does not terminate PropertyStream.
 The real uncached-proxy helper/no-spin/late-owner regression is deliberately
 separate from the actual Adapter protocol and earlier NativeAdapter proof.
 See `stream-parking-*` evidence; d5fc source pins and gates remain preserved.
+
+The [close-time follow-up](../../evidence/accesskit-close/README.md) extends the
+public two-window protocol to distinguish Cache.GetItems (which was already
+correct) from stale object-server interfaces and missing client-cache removal.
+Common Adapter Drop now unregisters the current filtered tree in postorder.
+Both default and Tokio protocol executions remove the closed window/button
+interfaces, observe two actual RemoveAccessible signals and successfully invoke
+the surviving button. The extended protocol now performs eight actions; earlier
+seven-action evidence remains attached to its original source. The original
+executed interface failure and valid-runtime strict results are retained.
+The test-only with_state_for_test helper uses the same non-Tokio cfg as its two
+callers; production transport, state layout and fencing are unchanged. Close
+adds 3N terminal messages, including during old-generation retirement. Root's
+real NativeHost lifecycle/checkbox composition and exact vendor/core source
+costs are recorded separately in that dossier.

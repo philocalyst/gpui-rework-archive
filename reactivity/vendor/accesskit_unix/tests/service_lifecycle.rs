@@ -26,6 +26,7 @@ use zbus::{
 };
 
 type Address = (String, OwnedObjectPath);
+const CACHE: &str = "/org/a11y/atspi/cache";
 const ROOT: &str = "/org/a11y/atspi/accessible/root";
 const STATUS_PATH: &str = "/org/a11y/bus";
 
@@ -289,6 +290,95 @@ fn invoke(client: &Connection, button: &Address, counts: &Counts, expected: usiz
     });
 }
 
+// GetItems walks AppContext; introspection independently observes the object
+// server. Keep the shared Bus alive through a surviving public Adapter.
+fn close_one_window(client: &Connection, root: &Address, survivor: &Address, counts: &Counts) {
+    let closed_counts = Arc::new(Counts::default());
+    let handlers = Handlers(closed_counts.clone());
+    let closed = Adapter::new(
+        TaggedActivation {
+            tag: 90,
+            counts: closed_counts.clone(),
+        },
+        handlers.clone(),
+        handlers,
+    );
+    let window = wait_for("second window registration", || {
+        window_names(client, root)?
+            .into_iter()
+            .find_map(|(node, name)| (name == "generation 90").then_some(node))
+    });
+    let button = wait_for("second window button registration", || {
+        let button = children(client, &window).ok()?.into_iter().next()?;
+        let count = proxy(client, &button, "org.a11y.atspi.Action")
+            .get_property::<i32>("NActions")
+            .ok()?;
+        (count == 1).then_some(button)
+    });
+    invoke(client, &button, &closed_counts, 1);
+    let cache = Proxy::new(client, root.0.as_str(), CACHE, "org.a11y.atspi.Cache").unwrap();
+    let snapshot = || {
+        cache
+            .call::<_, _, Vec<atspi::CacheItem>>("GetItems", &())
+            .unwrap()
+    };
+    let paths = |items: Vec<atspi::CacheItem>| {
+        items
+            .into_iter()
+            .map(|item| item.object.path_as_str().to_owned())
+            .collect::<Vec<_>>()
+    };
+    let before = paths(snapshot());
+    assert!(before.contains(&window.1.to_string()));
+    assert!(before.contains(&button.1.to_string()));
+    assert!(before.contains(&survivor.1.to_string()));
+    let removals = cache.receive_signal("RemoveAccessible").unwrap();
+    let (removed_tx, removed_rx) = mpsc::channel();
+    let listener = thread::spawn(move || {
+        for message in removals.take(2) {
+            let reference: atspi::ObjectRefOwned = message.body().deserialize().unwrap();
+            removed_tx.send(reference.path_as_str().to_owned()).unwrap();
+        }
+    });
+    drop(closed);
+    wait_for("closed window leaves desktop", || {
+        (children(client, root).ok()?.len() == 1).then_some(())
+    });
+    let after = paths(snapshot());
+    assert!(!after.contains(&window.1.to_string()));
+    assert!(!after.contains(&button.1.to_string()));
+    assert!(after.contains(&survivor.1.to_string()));
+    println!(
+        "CLOSE_PROTOCOL cache_before={} cache_after={} survivor_cached=true",
+        before.len(),
+        after.len()
+    );
+    for node in [&button, &window] {
+        let xml = proxy(client, node, "org.freedesktop.DBus.Introspectable")
+            .call::<_, _, String>("Introspect", &());
+        println!(
+            "CLOSE_PROTOCOL closed_path={} retained_atspi_interfaces={}",
+            node.1,
+            xml.is_ok_and(|xml| xml.contains("org.a11y.atspi."))
+        );
+    }
+    for node in [&button, &window] {
+        wait_for("closed window object interfaces removed", || {
+            let xml = proxy(client, node, "org.freedesktop.DBus.Introspectable")
+                .call::<_, _, String>("Introspect", &());
+            (!xml.is_ok_and(|xml| xml.contains("org.a11y.atspi."))).then_some(())
+        });
+    }
+    let removed = (0..2)
+        .map(|_| removed_rx.recv_timeout(Duration::from_secs(8)).unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(removed, [button.1.to_string(), window.1.to_string()]);
+    listener.join().unwrap();
+    assert_eq!(closed_counts.deactivated.load(Ordering::SeqCst), 0);
+    invoke(client, survivor, counts, 2);
+    println!("CLOSE_PROTOCOL closed_paths=2 cache_remove=2 survivor_action=ok");
+}
+
 #[test]
 fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     // This test binary has one test. Set the process address before starting any
@@ -322,6 +412,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     let old_service = service(&address, true, false);
     let (old_root, old_button) = published(&client, &embeds, 1);
     invoke(&client, &old_button, &counts, 1);
+    close_one_window(&client, &old_root, &old_button, &counts);
 
     // Consumer checks the exact initial update used by the native protocol proof.
     let consumer = accesskit_consumer::Tree::new(tree(1, "press"), false);
@@ -341,7 +432,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     });
     set_enabled(&client, "org.a11y.Bus", true);
     let (_second_root, second_button) = published(&client, &embeds, 2);
-    invoke(&client, &second_button, &counts, 2);
+    invoke(&client, &second_button, &counts, 3);
 
     let (entered_tx, entered_rx) = mpsc::channel();
     let (release_tx, release_rx) = mpsc::channel();
@@ -409,7 +500,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
         "replacement must own a fresh AT-SPI connection"
     );
     assert_eq!(counts.deactivated.load(Ordering::SeqCst), 2);
-    invoke(&client, &new_button, &counts, 3);
+    invoke(&client, &new_button, &counts, 4);
     let old_owner = old_service.unique_name().unwrap().to_string();
     set_enabled(&client, &old_owner, false);
     set_enabled(&client, &old_owner, true);
@@ -477,7 +568,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
         cycle_root.0, new_root.0,
         "snapshot-equal owner cycle must reconstruct Bus"
     );
-    invoke(&client, &cycle_button, &counts, 4);
+    invoke(&client, &cycle_button, &counts, 5);
     assert_eq!(counts.deactivated.load(Ordering::SeqCst), 3);
     drop(gate_adapter);
     let new_root = cycle_root;
@@ -501,7 +592,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     let _restored = service(&address, true, true);
     let (restored_root, restored_button) = published(&client, &embeds, 5);
     assert_ne!(restored_root.0, new_root.0);
-    invoke(&client, &restored_button, &counts, 5);
+    invoke(&client, &restored_button, &counts, 6);
 
     // Initial tree completion order can differ from creation/Add order even
     // without concurrent construction. Keep actual append/desktop ordinals.
@@ -557,7 +648,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     drop(low);
     assert_windows(&client, &reactivated_root, &["generation 6".into()]);
 
-    invoke(&client, &reactivated_button, &counts, 6);
+    invoke(&client, &reactivated_button, &counts, 7);
 
     // Race actual public Adapter creation on four callers, then remove a
     // particular tagged adapter and preserve the remaining desktop-child order.
@@ -638,7 +729,7 @@ fn late_service_initial_true_disable_reenable_and_live_owner_replacement() {
     assert_windows(&client, &reactivated_root, &remaining);
     drop(concurrent);
     assert_windows(&client, &reactivated_root, &["generation 7".into()]);
-    invoke(&client, &reactivated_button, &counts, 7);
+    invoke(&client, &reactivated_button, &counts, 8);
     assert_eq!(counts.activated.load(Ordering::SeqCst), 7);
     assert_eq!(counts.deactivated.load(Ordering::SeqCst), 6);
     drop(adapter);

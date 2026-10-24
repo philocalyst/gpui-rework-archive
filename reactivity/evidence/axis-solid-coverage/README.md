@@ -22,6 +22,9 @@ WGSL, packet ABI, GPU resources and color operations are unchanged.
 PreparedDraw and Mapping cross the lowering boundaries by borrow. No new
 retained fields, allocations or caches are added. The correctness fix adds 68
 non-test, non-comment core lines, making the composed core 31,813.
+[The independent Main inventory](main-core-lines.json), measured at `63e0a521f4`,
+counts 31,795 library source lines and 18 build-script lines. Vendored code,
+comments, tests, examples and application ports are excluded.
 
 Root passes the unchanged ordinary GPU suite (47), scalar Canvas/GPU suite
 (273 passed, 3 ignored, 31 harnesses) and default/scalar strict checks. All 2,787

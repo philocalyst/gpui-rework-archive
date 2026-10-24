@@ -97,15 +97,10 @@ impl<'a> AdapterChangeHandler<'a> {
 
         let role = node.role();
         let is_root = node.is_root();
-        let wrapper = NodeWrapper(node);
         if is_root && role == Role::Window {
             self.adapter.window_destroyed(node.id());
         }
-        self.adapter
-            .emit_object_event(node.id(), ObjectEvent::StateChanged(State::Defunct, true));
-        self.adapter.emit_cache_removed(node.id());
-        self.adapter
-            .unregister_interfaces(node.id(), wrapper.interfaces());
+        self.adapter.unregister_node(node);
         if let Some(true) = node.is_selected() {
             self.enqueue_selection_changed_if_needed(node);
         }
@@ -498,6 +493,19 @@ impl Adapter {
             .unregister_interfaces(self, id, old_interfaces);
     }
 
+    fn unregister_node(&self, node: &NodeRef) {
+        self.emit_object_event(node.id(), ObjectEvent::StateChanged(State::Defunct, true));
+        self.emit_cache_removed(node.id());
+        self.unregister_interfaces(node.id(), NodeWrapper(node).interfaces());
+    }
+
+    fn unregister_subtree(&self, node: &NodeRef) {
+        for child in node.filtered_children(&filter) {
+            self.unregister_subtree(&child);
+        }
+        self.unregister_node(node);
+    }
+
     pub(crate) fn emit_object_event(&self, target: FullNodeId, event: ObjectEvent) {
         let target = NodeIdOrRoot::Node(target);
         self.callback
@@ -609,7 +617,12 @@ fn root_window(current_state: &TreeState) -> Option<NodeRef<'_>> {
 impl Drop for Adapter {
     fn drop(&mut self) {
         let root_id = self.context.read_tree().state().root_id();
+        // register_tree includes the root independently of its role.
         self.window_destroyed(root_id);
+        {
+            let tree = self.context.read_tree();
+            self.unregister_subtree(&tree.state().root());
+        }
         // Note: We deliberately do the following here, not in a Drop
         // implementation on context, because AppContext owns a second
         // strong reference to Context, and we need that to be released.
@@ -694,6 +707,155 @@ mod tests {
             tree_id: TreeId::ROOT,
             focus: NodeId(0),
         }
+    }
+
+    #[derive(Debug, PartialEq)]
+    enum DropOp {
+        Register(FullNodeId, InterfaceSet),
+        ChildRemoved(FullNodeId),
+        Defunct(FullNodeId),
+        CacheRemoved(FullNodeId),
+        Unregister(FullNodeId, InterfaceSet),
+        Other,
+    }
+
+    struct DropCallback(Arc<Mutex<Vec<DropOp>>>);
+
+    impl AdapterCallback for DropCallback {
+        fn register_interfaces(&self, _: &Adapter, id: FullNodeId, interfaces: InterfaceSet) {
+            self.0
+                .lock()
+                .unwrap()
+                .push(DropOp::Register(id, interfaces));
+        }
+        fn unregister_interfaces(&self, _: &Adapter, id: FullNodeId, interfaces: InterfaceSet) {
+            self.0
+                .lock()
+                .unwrap()
+                .push(DropOp::Unregister(id, interfaces));
+        }
+        fn emit_event(&self, _: &Adapter, event: Event) {
+            use crate::{NodeIdOrRoot, ObjectEvent};
+            use atspi_common::State;
+            let op = match event {
+                Event::Object {
+                    target: NodeIdOrRoot::Root,
+                    event: ObjectEvent::ChildRemoved(id),
+                } => DropOp::ChildRemoved(id),
+                Event::Object {
+                    target: NodeIdOrRoot::Node(id),
+                    event: ObjectEvent::StateChanged(State::Defunct, true),
+                } => DropOp::Defunct(id),
+                Event::Cache(CacheEvent::Removed(id)) => DropOp::CacheRemoved(id),
+                _ => DropOp::Other,
+            };
+            self.0.lock().unwrap().push(op);
+        }
+    }
+
+    fn capture_drop(initial: TreeUpdate) -> (Adapter, Arc<Mutex<Vec<DropOp>>>) {
+        let ops = Arc::new(Mutex::new(Vec::new()));
+        let adapter = Adapter::new(
+            &AppContext::new(None),
+            DropCallback(ops.clone()),
+            initial,
+            false,
+            WindowBounds::default(),
+            NoOpActionHandler,
+        );
+        (adapter, ops)
+    }
+
+    fn assert_drop_ops(ops: &[DropOp], root: FullNodeId, nodes: &[(FullNodeId, InterfaceSet)]) {
+        let mut expected = vec![DropOp::ChildRemoved(root)];
+        for &(id, interfaces) in nodes {
+            expected.extend([
+                DropOp::Defunct(id),
+                DropOp::CacheRemoved(id),
+                DropOp::Unregister(id, interfaces),
+            ]);
+        }
+        assert_eq!(ops, expected);
+    }
+
+    #[test]
+    fn drop_unregisters_filtered_tree_once_for_every_root_role() {
+        for role in [
+            Role::Window,
+            Role::Dialog,
+            Role::AlertDialog,
+            Role::GenericContainer,
+        ] {
+            let mut initial = initial_tree();
+            initial.nodes[0].1 = with_children(role, &[NodeId(1), NodeId(2), NodeId(4)]);
+            let mut hidden = with_children(Role::Group, &[NodeId(3)]);
+            hidden.set_hidden();
+            let mut selected = Node::new(Role::ListBoxOption);
+            selected.set_selected(true);
+            initial.nodes.extend([
+                (NodeId(2), hidden),
+                (NodeId(3), Node::new(Role::Button)),
+                (
+                    NodeId(4),
+                    with_children(Role::GenericContainer, &[NodeId(5)]),
+                ),
+                (NodeId(5), selected),
+            ]);
+            let (adapter, ops) = capture_drop(initial);
+            let registered = ops
+                .lock()
+                .unwrap()
+                .iter()
+                .filter_map(|op| {
+                    if let DropOp::Register(id, interfaces) = op {
+                        Some((*id, *interfaces))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(
+                registered
+                    .iter()
+                    .map(|(id, _)| u128::from(*id) >> 64)
+                    .collect::<Vec<_>>(),
+                [0, 1, 5]
+            );
+            let root = adapter.root_id();
+            let app_context = Arc::clone(&adapter.context.app_context);
+            let platform_root = adapter.platform_root();
+            ops.lock().unwrap().clear();
+            drop(adapter);
+            assert_drop_ops(
+                &ops.lock().unwrap(),
+                root,
+                &[registered[1], registered[2], registered[0]],
+            );
+            assert_eq!(platform_root.child_count().unwrap(), 0);
+            assert!(app_context.read().unwrap().adapters.is_empty());
+        }
+    }
+
+    #[test]
+    fn drop_uses_current_tree_after_update() {
+        let (mut adapter, ops) = capture_drop(initial_tree());
+        adapter.update(update(vec![
+            (NodeId(0), with_children(Role::Window, &[NodeId(2)])),
+            (NodeId(2), Node::new(Role::Slider)),
+        ]));
+        let root = adapter.root_id();
+        let nodes = {
+            let tree = adapter.context.read_tree();
+            let root = tree.state().root();
+            let child = root.children().next().unwrap();
+            [
+                (child.id(), super::NodeWrapper(&child).interfaces()),
+                (root.id(), super::NodeWrapper(&root).interfaces()),
+            ]
+        };
+        ops.lock().unwrap().clear();
+        drop(adapter);
+        assert_drop_ops(&ops.lock().unwrap(), root, &nodes);
     }
 
     #[test]

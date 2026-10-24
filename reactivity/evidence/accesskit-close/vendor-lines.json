@@ -1,0 +1,50 @@
+{
+  "scope": "Changed vendor files only; Syn strips test syntax and Tokei excludes comments/blanks. Test target service_lifecycle is entirely excluded. Not added to the six-library core count.",
+  "helper_sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea",
+  "tokei_sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712",
+  "versions": {
+    "baseline": {
+      "source": "7617e15a2241cd735a98d98a69c3ed8f5f5ed681",
+      "total": 782,
+      "files": {
+        "reactivity/vendor/accesskit_atspi_common/src/adapter.rs": {
+          "source_sha256": "2f1a7498903790b4a00934a322d1a363389acb7c6664ecf6ba58e5de08ef3a20",
+          "test_target": false,
+          "code_lines": 540
+        },
+        "reactivity/vendor/accesskit_unix/src/adapter.rs": {
+          "source_sha256": "0d09b3944a98998c7e7138e1077fbcd4e0ff19d1d2e09e665d14daa9273640e3",
+          "test_target": false,
+          "code_lines": 242
+        },
+        "reactivity/vendor/accesskit_unix/tests/service_lifecycle.rs": {
+          "source_sha256": "299e144d21250c815cb401a49b2652e657be2c086ccb716546d7ecb64c0e9e0f",
+          "test_target": true,
+          "code_lines": 0
+        }
+      }
+    },
+    "candidate": {
+      "source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+      "total": 792,
+      "files": {
+        "reactivity/vendor/accesskit_atspi_common/src/adapter.rs": {
+          "source_sha256": "9e8038c40b2425f78ca81ea495e4cb61b2887f98d371de8d2d7955345a43fc21",
+          "test_target": false,
+          "code_lines": 550
+        },
+        "reactivity/vendor/accesskit_unix/src/adapter.rs": {
+          "source_sha256": "3853a9fa3c81672c8e9e18f019e7ea722035de2b69ca4d61cf6efdfb6ebc7662",
+          "test_target": false,
+          "code_lines": 242
+        },
+        "reactivity/vendor/accesskit_unix/tests/service_lifecycle.rs": {
+          "source_sha256": "260ad81fb8ef2c70f3a0ee2ebd2d207e676176b5d238884a3b779d9d2fd231e2",
+          "test_target": true,
+          "code_lines": 0
+        }
+      }
+    }
+  },
+  "delta_non_test_code_lines": 10
+}

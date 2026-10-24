@@ -1,0 +1,13 @@
+{
+  "root_source": "34e9290b7ecaf882b069a048bae4a7160c66d489",
+  "main_base": "7617e15a2241cd735a98d98a69c3ed8f5f5ed681",
+  "root_guard_files_compared": 12000,
+  "all_code_manifests_locks_configs_and_assets_match": true,
+  "documentation_only_differences": [
+    "reactivity/STATUS.md",
+    "reactivity/evidence/axis-solid-coverage/README.md",
+    "reactivity/vendor/accesskit_atspi_common/GPUI-PATCHES.txt",
+    "reactivity/vendor/accesskit_unix/GPUI-PATCHES.md"
+  ],
+  "scope": "Materialized Main versus actual Root build source before adoption. Newly added evidence is not a compiler input."
+}
