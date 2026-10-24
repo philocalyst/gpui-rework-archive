@@ -229,7 +229,7 @@ pub(crate) fn prepare(
     request: &PlayRequest,
 ) -> Result<PreparedListing, SourceError> {
     if let crate::browser::Listing::Files(files) = &request.listing {
-        return files.prepare(request.start);
+        return files.prepare(database, request.start);
     }
     let _snapshot = database.connection().unchecked_transaction()?;
     let rows = read_tracks(database, searcher, request.input().clone(), || false)

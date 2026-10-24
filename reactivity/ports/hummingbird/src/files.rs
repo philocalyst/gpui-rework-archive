@@ -10,6 +10,7 @@ use crate::{
 };
 use gpui::prelude::*;
 use nucleo_matcher::pattern::{CaseMatching, Normalization, Pattern};
+use rusqlite::OptionalExtension;
 use std::{fs, path::PathBuf};
 use triomphe::Arc;
 
@@ -53,7 +54,11 @@ impl FileListing {
             .filter(|entry| matches!(entry.kind, Kind::Recording))
             .count()
     }
-    pub(crate) fn prepare(&self, start: Option<RowKey>) -> Result<PreparedListing, SourceError> {
+    pub(crate) fn prepare(
+        &self,
+        database: &Database,
+        start: Option<RowKey>,
+    ) -> Result<PreparedListing, SourceError> {
         let selected = match start {
             None => None,
             Some(RowKey::File(index))
@@ -66,6 +71,10 @@ impl FileListing {
             }
             _ => return Err(SourceError::NoSelection),
         };
+        let _snapshot = database.connection().unchecked_transaction()?;
+        let mut metadata = database
+            .connection()
+            .prepare("SELECT id,album_id,title FROM track WHERE location=?")?;
         let mut tracks = Vec::with_capacity(self.recording_count());
         let mut beginning = 0;
         for (index, entry) in self.entries.iter().enumerate() {
@@ -75,11 +84,31 @@ impl FileListing {
             if selected == Some(index) {
                 beginning = tracks.len();
             }
+            let indexed = entry
+                .path
+                .to_str()
+                .map(|location| {
+                    metadata
+                        .query_row([location], |row| {
+                            Ok((
+                                row.get::<_, i64>(0)?,
+                                row.get::<_, Option<i64>>(1)?,
+                                row.get::<_, String>(2)?,
+                            ))
+                        })
+                        .optional()
+                })
+                .transpose()?
+                .flatten();
+            let (track_id, album_id, title) = indexed.map_or_else(
+                || (None, None, entry.label().into_owned()),
+                |(id, album, title)| (Some(id), album, title),
+            );
             tracks.push(TrackRef::new(Track {
                 path: entry.path.clone(),
-                title: entry.label().into_owned(),
-                track_id: None,
-                album_id: None,
+                title,
+                track_id,
+                album_id,
                 available_when_prepared: entry.path.is_file(),
             }));
         }

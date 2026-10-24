@@ -33,6 +33,7 @@ rubato = "=5.0.1"
 audioadapter-buffers = "=5.2.0"
 
 [patch.crates-io]
+symphonia-format-riff = { path = "../../vendor/symphonia-format-riff" }
 parley = { path = "../../vendor/parley" }
 parley_engine = { path = "../../vendor/parley_engine" }
 winit = { path = "../../vendor/winit" }

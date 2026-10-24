@@ -703,7 +703,7 @@ impl View for Library {
                             play,
                             uniform_list(files.list(), files, 32)
                                 .name("Library files")
-                                .w(900)
+                                .w(650)
                                 .h(160),
                         ))
                         .gap(6)

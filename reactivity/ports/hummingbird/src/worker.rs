@@ -221,8 +221,193 @@ impl Worker {
                         Ok(version) => *version,
                         Err(_) => break,
                     };
-                    let Some(command) = command else {
-                        let active = scan.as_mut().expect("scan progress turn");
+                    if let Some(command) = command {
+                        match command {
+                            Command::Index(request, command) => {
+                                let result = if request.version != version {
+                                    Err(SourceError::OutdatedSource)
+                                } else {
+                                    if cancel_scan(&mut scan, &database, &updates, version).is_err()
+                                    {
+                                        break;
+                                    }
+                                    match command {
+                                        indexing::Command::Scan => {
+                                            match indexing::Scan::new(&database, request) {
+                                                Ok(active) => {
+                                                    scan = Some(active);
+                                                    continue;
+                                                }
+                                                Err(error) => {
+                                                    if indexing::clear(&database).is_err() {
+                                                        break;
+                                                    }
+                                                    Err(error)
+                                                }
+                                            }
+                                        }
+                                        indexing::Command::Cancel => {
+                                            Ok((version, indexing::Outcome::Canceled))
+                                        }
+                                        indexing::Command::AddRoot(path) => {
+                                            indexing::add_root(&database, &path, version)
+                                                .map(|next| (next, indexing::Outcome::RootsChanged))
+                                        }
+                                        indexing::Command::RemoveRoot {
+                                            id,
+                                            delete_recordings,
+                                        } => indexing::remove_root(
+                                            &database,
+                                            id,
+                                            delete_recordings,
+                                            version,
+                                        )
+                                        .map(|next| (next, indexing::Outcome::RootsChanged)),
+                                    }
+                                };
+                                let (published, result) = match result {
+                                    Ok((next, outcome)) => {
+                                        let Ok(mut authority) = shared.version.lock() else {
+                                            break;
+                                        };
+                                        *authority = next;
+                                        (next, Ok(outcome))
+                                    }
+                                    Err(error) => (version, Err(error)),
+                                };
+                                if updates
+                                    .try_send(LibraryEvent::Indexed {
+                                        request,
+                                        version: published,
+                                        result,
+                                    })
+                                    .is_err()
+                                {
+                                    break;
+                                }
+                            }
+                            Command::Browse(input, completion) => {
+                                let _ = completion.run_cancellable(input, |input, cancellation| {
+                                    if input.version != version {
+                                        return Some(Err(SourceError::OutdatedSource));
+                                    }
+                                    if matches!(
+                                        input.route,
+                                        crate::browser::Route::Files
+                                            | crate::browser::Route::Directory(_)
+                                    ) {
+                                        let Some(next) =
+                                            file_domain.checked_add(4).filter(|n| *n < u64::MAX)
+                                        else {
+                                            return Some(Err(SourceError::IndexExhausted));
+                                        };
+                                        file_domain = next;
+                                        return crate::files::page(
+                                            &database,
+                                            &mut searcher,
+                                            input,
+                                            file_domain,
+                                            || cancellation.is_cancelled(),
+                                        );
+                                    }
+                                    crate::collection_query::page(
+                                        &database,
+                                        &mut searcher,
+                                        input,
+                                        || cancellation.is_cancelled(),
+                                    )
+                                });
+                            }
+                            Command::PrepareListing(request) => {
+                                let result = if request.input().version != version {
+                                    Err(SourceError::OutdatedSource)
+                                } else {
+                                    crate::collection_query::prepare(
+                                        &database,
+                                        &mut searcher,
+                                        &request,
+                                    )
+                                };
+                                if updates
+                                    .try_send(LibraryEvent::ListingPrepared { request, result })
+                                    .is_err()
+                                {
+                                    break;
+                                }
+                            }
+                            Command::Prepare(selection) | Command::PrepareAndPlay(selection) => {
+                                let result = prepare(&database, version, selection);
+                                if updates
+                                    .try_send(LibraryEvent::Prepared { selection, result })
+                                    .is_err()
+                                {
+                                    // The status-aware lane reports final producer close after
+                                    // its buffered events. No accepted owner intent stays Pending.
+                                    break;
+                                }
+                            }
+                            Command::Prepend(reply) => {
+                                if cancel_scan(&mut scan, &database, &updates, version).is_err() {
+                                    break;
+                                }
+                                let result =
+                                    next_revision(version).and_then(|next| {
+                                        let row = database.prepend_fixture_track()?;
+                                        // SQL is committed before Version publication. The
+                                        // single worker cannot start a new read before it.
+                                        *shared.version.lock().map_err(|_| {
+                                            SourceError::SourceAuthorityUnavailable
+                                        })? = next;
+                                        updates
+                                            .try_send(LibraryEvent::Imported {
+                                                id: row.id,
+                                                version: next,
+                                            })
+                                            .map_err(|_| SourceError::NotificationsUnavailable)?;
+                                        Ok(next)
+                                    });
+                                let failed_delivery =
+                                    matches!(result, Err(SourceError::NotificationsUnavailable));
+                                let _ = reply.try_send(result);
+                                if failed_delivery {
+                                    break;
+                                }
+                            }
+                            Command::Replace(replacement, reply) => {
+                                if cancel_scan(&mut scan, &database, &updates, version).is_err() {
+                                    break;
+                                }
+                                let result =
+                                    version.advance(true).and_then(|next| {
+                                        if !replacement.connection().is_autocommit() {
+                                            return Err(SourceError::SourceNotCommitted);
+                                        }
+                                        replacement.initialize_index()?;
+                                        database = replacement;
+                                        // SQL is committed before Version publication. The
+                                        // single worker cannot start a new read before it.
+                                        *shared.version.lock().map_err(|_| {
+                                            SourceError::SourceAuthorityUnavailable
+                                        })? = next;
+                                        updates
+                                            .try_send(LibraryEvent::Replaced { version: next })
+                                            .map_err(|_| SourceError::NotificationsUnavailable)?;
+                                        Ok(next)
+                                    });
+                                let failed_delivery =
+                                    matches!(result, Err(SourceError::NotificationsUnavailable));
+                                let _ = reply.try_send(result);
+                                if failed_delivery {
+                                    break;
+                                }
+                            }
+                            Command::Checkpoint(reply) => {
+                                let _ = reply.try_send(());
+                            }
+                            Command::Stop => break,
+                        }
+                    }
+                    if let Some(active) = scan.as_mut() {
                         let result = active.step(&database);
                         if matches!(result, Ok(false)) {
                             continue;
@@ -238,7 +423,12 @@ impl Worker {
                                 *authority = next;
                                 (next, Ok(indexing::Outcome::Indexed(report)))
                             }
-                            Err(error) => (version, Err(error)),
+                            Err(error) => {
+                                if indexing::clear(&database).is_err() {
+                                    break;
+                                }
+                                (version, Err(error))
+                            }
                         };
                         if updates
                             .try_send(LibraryEvent::Indexed {
@@ -251,192 +441,6 @@ impl Worker {
                             break;
                         }
                         continue;
-                    };
-                    match command {
-                        Command::Index(request, command) => {
-                            let result = if request.version != version {
-                                Err(SourceError::OutdatedSource)
-                            } else {
-                                if scan.take().is_some() {
-                                    if let Err(error) = indexing::clear(&database) {
-                                        if updates
-                                            .try_send(LibraryEvent::Indexed {
-                                                request,
-                                                version,
-                                                result: Err(error),
-                                            })
-                                            .is_err()
-                                        {
-                                            break;
-                                        }
-                                        continue;
-                                    }
-                                }
-                                match command {
-                                    indexing::Command::Scan => {
-                                        match indexing::Scan::new(&database, request) {
-                                            Ok(active) => {
-                                                scan = Some(active);
-                                                continue;
-                                            }
-                                            Err(error) => Err(error),
-                                        }
-                                    }
-                                    indexing::Command::Cancel => {
-                                        Ok((version, indexing::Outcome::Canceled))
-                                    }
-                                    indexing::Command::AddRoot(path) => {
-                                        indexing::add_root(&database, &path, version)
-                                            .map(|next| (next, indexing::Outcome::RootsChanged))
-                                    }
-                                    indexing::Command::RemoveRoot {
-                                        id,
-                                        delete_recordings,
-                                    } => indexing::remove_root(
-                                        &database,
-                                        id,
-                                        delete_recordings,
-                                        version,
-                                    )
-                                    .map(|next| (next, indexing::Outcome::RootsChanged)),
-                                }
-                            };
-                            let (published, result) = match result {
-                                Ok((next, outcome)) => {
-                                    let Ok(mut authority) = shared.version.lock() else {
-                                        break;
-                                    };
-                                    *authority = next;
-                                    (next, Ok(outcome))
-                                }
-                                Err(error) => (version, Err(error)),
-                            };
-                            if updates
-                                .try_send(LibraryEvent::Indexed {
-                                    request,
-                                    version: published,
-                                    result,
-                                })
-                                .is_err()
-                            {
-                                break;
-                            }
-                        }
-                        Command::Browse(input, completion) => {
-                            let _ = completion.run_cancellable(input, |input, cancellation| {
-                                if input.version != version {
-                                    return Some(Err(SourceError::OutdatedSource));
-                                }
-                                if matches!(
-                                    input.route,
-                                    crate::browser::Route::Files
-                                        | crate::browser::Route::Directory(_)
-                                ) {
-                                    let Some(next) =
-                                        file_domain.checked_add(4).filter(|n| *n < u64::MAX)
-                                    else {
-                                        return Some(Err(SourceError::IndexExhausted));
-                                    };
-                                    file_domain = next;
-                                    return crate::files::page(
-                                        &database,
-                                        &mut searcher,
-                                        input,
-                                        file_domain,
-                                        || cancellation.is_cancelled(),
-                                    );
-                                }
-                                crate::collection_query::page(
-                                    &database,
-                                    &mut searcher,
-                                    input,
-                                    || cancellation.is_cancelled(),
-                                )
-                            });
-                        }
-                        Command::PrepareListing(request) => {
-                            let result = if request.input().version != version {
-                                Err(SourceError::OutdatedSource)
-                            } else {
-                                crate::collection_query::prepare(&database, &mut searcher, &request)
-                            };
-                            if updates
-                                .try_send(LibraryEvent::ListingPrepared { request, result })
-                                .is_err()
-                            {
-                                break;
-                            }
-                        }
-                        Command::Prepare(selection) | Command::PrepareAndPlay(selection) => {
-                            let result = prepare(&database, version, selection);
-                            if updates
-                                .try_send(LibraryEvent::Prepared { selection, result })
-                                .is_err()
-                            {
-                                // The status-aware lane reports final producer close after
-                                // its buffered events. No accepted owner intent stays Pending.
-                                break;
-                            }
-                        }
-                        Command::Prepend(reply) => {
-                            if scan.take().is_some() && indexing::clear(&database).is_err() {
-                                break;
-                            }
-                            let result = next_revision(version).and_then(|next| {
-                                let row = database.prepend_fixture_track()?;
-                                // SQL is committed before Version publication. The
-                                // single worker cannot start a new read before it.
-                                *shared
-                                    .version
-                                    .lock()
-                                    .map_err(|_| SourceError::SourceAuthorityUnavailable)? = next;
-                                updates
-                                    .try_send(LibraryEvent::Imported {
-                                        id: row.id,
-                                        version: next,
-                                    })
-                                    .map_err(|_| SourceError::NotificationsUnavailable)?;
-                                Ok(next)
-                            });
-                            let failed_delivery =
-                                matches!(result, Err(SourceError::NotificationsUnavailable));
-                            let _ = reply.try_send(result);
-                            if failed_delivery {
-                                break;
-                            }
-                        }
-                        Command::Replace(replacement, reply) => {
-                            if scan.take().is_some() && indexing::clear(&database).is_err() {
-                                break;
-                            }
-                            let result = version.advance(true).and_then(|next| {
-                                if !replacement.connection().is_autocommit() {
-                                    return Err(SourceError::SourceNotCommitted);
-                                }
-                                replacement.initialize_index()?;
-                                database = replacement;
-                                // SQL is committed before Version publication. The
-                                // single worker cannot start a new read before it.
-                                *shared
-                                    .version
-                                    .lock()
-                                    .map_err(|_| SourceError::SourceAuthorityUnavailable)? = next;
-                                updates
-                                    .try_send(LibraryEvent::Replaced { version: next })
-                                    .map_err(|_| SourceError::NotificationsUnavailable)?;
-                                Ok(next)
-                            });
-                            let failed_delivery =
-                                matches!(result, Err(SourceError::NotificationsUnavailable));
-                            let _ = reply.try_send(result);
-                            if failed_delivery {
-                                break;
-                            }
-                        }
-                        Command::Checkpoint(reply) => {
-                            let _ = reply.try_send(());
-                        }
-                        Command::Stop => break,
                     }
                 }
             })?;
@@ -491,6 +495,27 @@ impl Worker {
         drop(self.handle);
         self.thread.join()
     }
+}
+/// Interruption resolves the accepted task on the existing bounded lane. If
+/// terminal delivery fails, the caller closes the producer and native owners
+/// observe that close instead of retaining an impossible Pending task.
+fn cancel_scan(
+    scan: &mut Option<indexing::Scan>,
+    database: &Database,
+    updates: &Remote<LibraryEvent>,
+    version: Version,
+) -> Result<(), SourceError> {
+    if let Some(active) = scan.take() {
+        indexing::clear(database)?;
+        updates
+            .try_send(LibraryEvent::Indexed {
+                request: active.request,
+                version,
+                result: Ok(indexing::Outcome::Canceled),
+            })
+            .map_err(|_| SourceError::NotificationsUnavailable)?;
+    }
+    Ok(())
 }
 fn next_revision(version: Version) -> Result<Version, SourceError> {
     version.advance(false)
