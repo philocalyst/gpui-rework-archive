@@ -723,6 +723,10 @@ struct MappedFanout {
     values: Vec<crate::property::PropertyValue>,
     direct_color: u32,
 }
+enum ColorPatch {
+    Full,
+    Candidate(Option<styles::ColorChange>),
+}
 impl MappedFanout {
     // Every comparison and inspector base must see the OLD bank. Publish only
     // after all sinks compare, including masked peers sharing the direct slot.
@@ -731,13 +735,46 @@ impl MappedFanout {
         &self,
         styles: &mut styles::Styles,
         direct: Option<crate::style_port::Scalar>,
-    ) {
+        eligible: bool,
+    ) -> ColorPatch {
+        let mut patch = if eligible
+            && self.records.iter().all(|record| record.color != 0)
+            && self.destinations.iter().all(|destination| {
+                matches!(
+                    destination.property(),
+                    Some(
+                        crate::property::PropertyId::Foreground
+                            | crate::property::PropertyId::Background
+                    )
+                )
+            }) {
+            ColorPatch::Candidate(None)
+        } else {
+            ColorPatch::Full
+        };
+        let mut publish = |slot, color| {
+            if let Some(change) = styles.update_color(slot, color)
+                && let ColorPatch::Candidate(candidate) = &mut patch
+                && change.users != 0
+                && change.previous.working().map(f32::to_bits)
+                    != change.value.working().map(f32::to_bits)
+                && (change.canvas.is_some()
+                    || change.previous.working()[3].to_bits()
+                        != change.value.working()[3].to_bits())
+            {
+                if candidate.is_some() {
+                    patch = ColorPatch::Full;
+                } else {
+                    *candidate = Some(change);
+                }
+            }
+        };
         for (record, value) in self.records.iter().zip(&self.values) {
             if let Some(slot) = styles::ColorSlot::from_source_code(record.color) {
                 let crate::property::PropertyValue::Color(color) = *value else {
                     unreachable!("color slot has color property")
                 };
-                styles.update_color(slot, color);
+                publish(slot, color);
             }
         }
         if let Some(slot) = styles::ColorSlot::from_source_code(self.direct_color) {
@@ -747,8 +784,9 @@ impl MappedFanout {
             else {
                 unreachable!("direct color frozen and admitted")
             };
-            styles.update_color(slot, color);
+            publish(slot, color);
         }
+        patch
     }
 }
 enum Fanout {
@@ -2563,6 +2601,7 @@ impl<M: View + 'static> Runtime<M> {
             self.dirty |= self.changed_nodes != 0;
             return Ok(PatchOutcome::Visual);
         }
+        let eligible = !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
         let Some(fanout) = self.fanout.get_mut(&field) else {
             return Ok(PatchOutcome::Visual);
         };
@@ -2675,7 +2714,17 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         if let Fanout::Mapped(mapped) = fanout {
-            mapped.publish_colors(&mut self.styles, frozen.style);
+            if let ColorPatch::Candidate(change) =
+                mapped.publish_colors(&mut self.styles, frozen.style, eligible)
+            {
+                // Only color relationships changed; preserve complete geometry
+                // through the existing alpha-checked transaction and ACK path.
+                self.dirty = false;
+                if self.finish_color_slot(change.as_ref())? {
+                    return Ok(PatchOutcome::Complete);
+                }
+                self.dirty = visual_changed;
+            }
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata

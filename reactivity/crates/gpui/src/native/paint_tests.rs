@@ -1,17 +1,25 @@
 //! The actual private native packet bridge, with offscreen readback oracles.
 use super::*;
-use crate::{Color, El, FieldId, Signal, Source, Sources, div, rgb};
-struct Paint(Signal<Color>);
+use crate::{Color, El, FieldId, Signal, SignalMap, Source, Sources, div, rgb};
+struct Paint {
+    color: Signal<Color>,
+    mapped: bool,
+}
 impl Paint {
     const COLOR: Source<Self, Color> =
-        Source::new(FieldId::new(1), "color", |m| &m.0, |m| &mut m.0);
+        Source::new(FieldId::new(1), "color", |m| &m.color, |m| &mut m.color);
 }
 impl View for Paint {
     fn sources() -> Sources<Self> {
         Sources::new().direct(Self::COLOR)
     }
     fn view(&self) -> El<'_> {
-        div().size(24).rounded(5.0).bg(&self.0)
+        let node = div().size(24).rounded(5.0);
+        if self.mapped {
+            node.bg(self.color.map(|color| *color))
+        } else {
+            node.bg(&self.color)
+        }
     }
 }
 fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
@@ -123,7 +131,7 @@ fn render(
     owner.presented(token).unwrap();
 }
 pub(super) fn run(gpu: &mut GpuSurface) {
-    for hdr in [false, true] {
+    for (hdr, mapped) in [(false, false), (true, false), (false, true), (true, true)] {
         let old = if hdr {
             let renderer = pollster::block_on(Renderer::new(
                 gpu.renderer.device().clone(),
@@ -143,7 +151,10 @@ pub(super) fn run(gpu: &mut GpuSurface) {
         ))
         .unwrap();
         let mut owner = Win::recording(
-            Paint(Signal::new(Color::BLACK)),
+            Paint {
+                color: Signal::new(Color::BLACK),
+                mapped,
+            },
             WindowOptions {
                 size: [32, 24],
                 colors: if hdr {
