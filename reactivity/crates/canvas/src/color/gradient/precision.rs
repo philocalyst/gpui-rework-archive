@@ -41,14 +41,15 @@ pub(super) fn bernstein(
         let cast_error = (f64::from(stored[0][c]) - alpha * controls[1][c])
             .abs()
             .max((f64::from(stored[1][c]) - alpha * controls[2][c]).abs());
-        let anchor_error = endpoint_error + 0.75 * cast_error;
+        let denominator_error = if a0 == a1 { 0.0 } else { gamma(4.0) };
+        // Rounded D may exceed one; retain its explicit control-cast coupling.
+        let anchor_error = endpoint_error + 0.75 * (1.0 + denominator_error) * cast_error;
         let mut parameter_error = 0.0;
         if a0 != a1 && a0 > 0.0 && a1 > 0.0 {
             // Absolute derivative in v of the alpha-conditioned endpoint form.
             let k1 = f64::from(stored[0][c]);
             let k2 = f64::from(stored[1][c]);
             let k = k1.abs().max(k2.abs());
-            let denominator_error = gamma(4.0);
             let derivative = 2.0 * f64::from(p0[c]).abs().max(f64::from(p1[c]).abs())
                 + (1.0 + denominator_error) * (3.0 * k + 0.75 * (k2 - k1).abs());
             parameter_error = 12.0 * EPS * derivative + denominator_error * 0.75 * k;

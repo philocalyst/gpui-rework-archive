@@ -347,7 +347,15 @@ fn prepare_interval(
     let exact_fixed = !polar && left == right && exact_rgb;
     // Rectangular Lab is a cubic in normalized-alpha progress. Its two
     // interior RGB controls replace LMS base/delta without another packet word.
-    let cubic = if mode == Interpolation::Oklab {
+    let within_budget = |errors: &[f64; 3]| {
+        errors
+            .iter()
+            .all(|error| error.is_finite() && *error <= Interpolation::MAX_CONVERSION_ERROR)
+    };
+    let direct_admitted = span <= 0.0
+        || exact_fixed
+        || within_budget(&precision::conversion_bound(left, right, a0, a1, polar));
+    let cubic = if mode == Interpolation::Oklab && !direct_admitted {
         Some(precision::bernstein(
             left,
             right,
@@ -359,24 +367,17 @@ fn prepare_interval(
     } else {
         None
     };
-    let errors = cubic.as_ref().map_or_else(
-        || precision::conversion_bound(left, right, a0, a1, polar),
-        |(_, errors)| *errors,
-    );
-    let admitted = span <= 0.0
-        || exact_fixed
-        || errors
-            .iter()
-            .all(|error| error.is_finite() && *error <= Interpolation::MAX_CONVERSION_ERROR);
-    let controls = cubic.map_or_else(
-        || {
-            [
-                left.map(|v| v as f32),
-                std::array::from_fn(|i| (right[i] - left[i]) as f32),
-            ]
-        },
-        |(controls, _)| controls,
-    );
+    let use_cubic = cubic
+        .as_ref()
+        .is_some_and(|(_, errors)| within_budget(errors));
+    let admitted = direct_admitted || use_cubic;
+    let controls = match cubic {
+        Some((controls, _)) if use_cubic => controls,
+        _ => [
+            left.map(|v| v as f32),
+            std::array::from_fn(|i| (right[i] - left[i]) as f32),
+        ],
+    };
     let scale = f64::from(a0.max(a1));
     let normalized = if scale == 0.0 {
         [0.0; 2]
@@ -387,7 +388,12 @@ fn prepare_interval(
         [
             [
                 stop.offset.to_bits(),
-                (if polar { reciprocal } else { -reciprocal }).to_bits(),
+                (if polar || use_cubic {
+                    reciprocal
+                } else {
+                    -reciprocal
+                })
+                .to_bits(),
                 (normalized[0] as f32).to_bits() | if exact_fixed { 1 << 31 } else { 0 },
                 (normalized[1] as f32).to_bits(),
             ],
@@ -735,7 +741,17 @@ impl<'a> GradientView<'a> {
             alpha = left_alpha
                 .simd_eq(right_alpha)
                 .select(left_alpha, (1.0 - t) * left_alpha + t * right_alpha);
-            if self.interpolation() == Interpolation::Oklab {
+            // In Oklab only, a positive reciprocal marks Bernstein controls;
+            // a negative reciprocal retains the frozen direct-LMS packet.
+            let cubic = std::array::from_fn::<_, 4, _>(|i| {
+                self.interpolation() == Interpolation::Oklab
+                    && self.words[intervals[i].0][1] >> 31 == 0
+            });
+            let zero = f32x4::splat(simd, 0.0);
+            let cubic_mask =
+                f32x4::from_fn(simd, |i| if cubic[i] { 1.0 } else { 0.0 }).simd_ne(0.0);
+            let mut cubic_color = [zero; 3];
+            if (0..4).any(|i| mask & (1 << i) != 0 && cubic[i]) {
                 let u = 1.0 - v;
                 let w0 = (1.0 - t) * u * u;
                 let w3 = t * v * v;
@@ -747,16 +763,21 @@ impl<'a> GradientView<'a> {
                         let next = (base + self.stride()).min(self.words.len() - self.stride());
                         f32::from_bits(self.words[next + 4][j])
                     });
-                    c[j] = w0 * left + w3 * right + cross * (u * c[j] + v * d[j]);
+                    cubic_color[j] = w0 * left + w3 * right + cross * (u * c[j] + v * d[j]);
                 }
-            } else {
+            }
+            if (0..4).any(|i| mask & (1 << i) != 0 && !cubic[i]) {
                 // Hue is never premultiplied: it advances with t, L and C with v.
                 let h = c[2] + t * d[2];
                 for j in 0..3 {
-                    c[j] += v * d[j];
+                    // A mixed batch must not cube a Bernstein RGB control as
+                    // LMS: its inactive direct-path value could overflow.
+                    c[j] = cubic_mask.select(zero, c[j]) + v * cubic_mask.select(zero, d[j]);
                 }
                 let polar = std::array::from_fn::<_, 4, _>(|i| {
-                    mask & (1 << i) != 0 && self.words[intervals[i].0][1] >> 31 == 0
+                    mask & (1 << i) != 0
+                        && self.interpolation() != Interpolation::Oklab
+                        && self.words[intervals[i].0][1] >> 31 == 0
                 });
                 if polar.iter().any(|p| *p) {
                     let tau = std::f32::consts::TAU;
@@ -786,6 +807,9 @@ impl<'a> GradientView<'a> {
                 for value in &mut c {
                     *value *= alpha;
                 }
+            }
+            for j in 0..3 {
+                c[j] = cubic_mask.select(cubic_color[j], c[j]);
             }
         }
         let channels: [[f32; 4]; 4] = [c[0].into(), c[1].into(), c[2].into(), alpha.into()];
@@ -823,6 +847,72 @@ mod tests {
     }
     fn gradient(stops: &[GradientStop], extend: Extend) -> Gradient {
         Gradient::new(line(), stops, extend, Interpolation::LinearSrgb).unwrap()
+    }
+    #[test]
+    fn direct_and_cubic_intervals_share_all_masks_and_simd_backends() {
+        let colors = [
+            Color::linear_srgb(10., 0., 0., 0.25).unwrap(),
+            Color::linear_srgb(10., 0., 10., 0.75).unwrap(),
+            Color::linear_srgb(10., 10., 10., 0.75).unwrap(),
+        ];
+        for colors in [colors, [colors[2], colors[1], colors[0]]] {
+            let stops = [
+                GradientStop::new(0., colors[0]),
+                GradientStop::new(0.5, colors[1]),
+                GradientStop::new(1., colors[2]),
+            ];
+            let gradient =
+                Gradient::new(line(), &stops, Extend::Pad, Interpolation::Oklab).unwrap();
+            let g = gradient.view();
+            assert_ne!(
+                g.words[HEADER_WORDS][1] >> 31,
+                g.words[HEADER_WORDS + 5][1] >> 31
+            );
+            fn check<S: Simd>(simd: S, g: GradientView<'_>) {
+                for mask in 0..16 {
+                    for points in [
+                        [[0.125, 0.], [0.625, 0.], [0.375, 0.], [0.875, 0.]],
+                        [[0., 0.], [0.5, 0.], [1., 0.], [0.75, 0.]],
+                    ] {
+                        let actual = g.sample_four(simd, points, mask);
+                        for i in 0..4 {
+                            let expected = if mask & (1 << i) == 0 {
+                                [0.; 4]
+                            } else {
+                                g.sample(points[i]).unwrap()
+                            };
+                            assert_eq!(
+                                actual[i].map(f32::to_bits),
+                                expected.map(f32::to_bits),
+                                "{:?} {mask} {i}",
+                                simd.level()
+                            );
+                        }
+                    }
+                }
+            }
+            check(fearless_simd::Fallback::new(), g);
+            let level = fearless_simd::Level::new();
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            {
+                if let Some(s) = level.as_sse2() {
+                    check(s, g);
+                }
+                if let Some(s) = level.as_sse4_2() {
+                    check(s, g);
+                }
+                if let Some(s) = level.as_avx2() {
+                    check(s, g);
+                }
+                if let Some(s) = level.as_avx512() {
+                    check(s, g);
+                }
+            }
+            #[cfg(target_arch = "aarch64")]
+            if let Some(s) = level.as_neon() {
+                check(s, g);
+            }
+        }
     }
     #[test]
     fn perceptual_allocation_and_all_available_simd_backends_share_the_kernel() {

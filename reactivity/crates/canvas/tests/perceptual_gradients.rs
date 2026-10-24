@@ -1,3 +1,7 @@
+#[path = "support/legacy_admission_masks.rs"]
+mod legacy_admission;
+#[path = "support/legacy_direct_packets.rs"]
+mod legacy_packets;
 #[path = "support/perceptual_oracle.rs"]
 mod oracle;
 const HDR: f32 = f32::from_bits(1e20_f32.to_bits() - 1);
@@ -258,6 +262,7 @@ fn display_referred_hdr_and_p3_admission_cohorts() {
         [1., 0., 1.],
         [1., 1., 1.],
     ];
+    let mut row = 0;
     for reference in [80., 100., 203.] {
         for peak in [reference, 1000., 4000., 10000.] {
             let scale = peak / reference;
@@ -316,6 +321,13 @@ fn display_referred_hdr_and_p3_admission_cohorts() {
                             accepted.count_ones(),
                             49 - accepted.count_ones()
                         );
+                        let legacy = legacy_admission::LEGACY_MASKS[row];
+                        assert_eq!(
+                            accepted & legacy,
+                            legacy,
+                            "legacy admission lost at row {row}: reference={reference} peak={peak} p3={p3} alpha={a0}/{a1} {mode:?}"
+                        );
+                        row += 1;
                         // Lab's authored identities remain exact at every peak.
                         // LCH can replace a tiny nonzero powerless hue, while
                         // Longer can intentionally rotate identical colors.
@@ -329,6 +341,30 @@ fn display_referred_hdr_and_p3_admission_cohorts() {
             }
         }
     }
+    assert_eq!(row, legacy_admission::LEGACY_MASKS.len());
+}
+
+#[test]
+fn direct_fallback_packets_match_frozen_profile_bit_for_bit() {
+    for (reverse, packet) in legacy_packets::DIRECT_PACKETS.iter().enumerate() {
+        let red = Color::linear_srgb(10., 0., 0., if reverse == 0 { 0.25 } else { 0.75 }).unwrap();
+        let magenta =
+            Color::linear_srgb(10., 0., 10., if reverse == 0 { 0.75 } else { 0.25 }).unwrap();
+        let colors = if reverse == 0 {
+            [red, magenta]
+        } else {
+            [magenta, red]
+        };
+        let gradient = make(colors[0], colors[1], Mode::Oklab);
+        assert_eq!(gradient.view().words(), packet);
+        assert_ne!(gradient.view().words()[3][1] >> 31, 0);
+    }
+    let cubic = make(
+        Color::linear_srgb(10., 0., 0., 1.).unwrap(),
+        Color::linear_srgb(0., 10., 0., 1.).unwrap(),
+        Mode::Oklab,
+    );
+    assert_eq!(cubic.view().words()[3][1] >> 31, 0);
 }
 
 #[test]

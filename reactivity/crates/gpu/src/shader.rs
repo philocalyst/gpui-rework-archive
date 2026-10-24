@@ -439,7 +439,7 @@ pub mod ui {
             }
         }
         v = clamp(v, 0.0, 1.0);
-        if (header.w >> 1) == 1 {
+        if (header.w >> 1) == 1 && (packed_interval.y & 0x80000000) == 0 {
             let mut denominator = 1.0;
             if alpha0 != interval.w {
                 denominator = (1.0 - u) * alpha0 + u * interval.w;
