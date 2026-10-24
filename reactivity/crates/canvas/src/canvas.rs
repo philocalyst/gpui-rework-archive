@@ -535,9 +535,10 @@ impl DisplayList {
     }
     fn reserve_placements(&mut self, additional: usize) -> Result<(), Error> {
         let required = self.placements.len() + additional;
-        if required > self.placements.capacity()
-            && let Some(previous) = self.commons.last()
-        {
+        if required <= self.placements.capacity() {
+            return Ok(());
+        }
+        if let Some(previous) = self.commons.last() {
             // Reuse an admitted group's actual cardinality for bulk growth.
             // No invisible glyphs or previous-frame prediction reserve storage.
             let quantum = (previous.range[1] - previous.range[0]) as usize;
