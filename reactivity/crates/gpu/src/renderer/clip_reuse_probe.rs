@@ -1199,6 +1199,7 @@ fn optional_cold_compile_overlap() {
         let view = target.create_view(&Default::default());
         gpu.render(canvas.prepared_scene(), &view).unwrap();
         let baseline = &gpu.context.pipeline;
+        let mut ready = None;
         for _ in 0..6 {
             completed_frame(&gpu, baseline, &view);
         }
@@ -1211,6 +1212,15 @@ fn optional_cold_compile_overlap() {
                     );
                 }
             } else {
+                eprintln!(
+                    "optional_cold_rss_before,{}",
+                    std::fs::read_to_string("/proc/self/status")
+                        .unwrap()
+                        .lines()
+                        .filter(|l| l.starts_with("VmRSS:") || l.starts_with("VmHWM:"))
+                        .collect::<Vec<_>>()
+                        .join(";")
+                );
                 let job = gpu.clip_acceleration_job().unwrap();
                 let (send, receive) = std::sync::mpsc::sync_channel(1);
                 let started = std::time::Instant::now();
@@ -1233,7 +1243,7 @@ fn optional_cold_compile_overlap() {
                 };
                 worker.join().unwrap();
                 // Keep the baseline selected for the after/control phase.
-                drop(prepared);
+                ready = Some(prepared);
                 eprintln!("optional_cold_compile_ns,{}", cold.as_nanos());
                 eprintln!(
                     "optional_cold_rss,{}",
@@ -1246,5 +1256,192 @@ fn optional_cold_compile_overlap() {
                 );
             }
         }
+        gpu.install_clip_acceleration(ready.unwrap()).unwrap();
+        for round in 0..8 {
+            eprintln!(
+                "optional_first_use,{round},{}",
+                completed_frame(&gpu, gpu.context.clip_pipeline.as_ref().unwrap(), &view)
+                    .as_nanos()
+            );
+        }
+    });
+}
+
+// Original f287 constructor; only the new empty owner field is initialized.
+async fn legacy_context(
+    device: wgpu::Device,
+    queue: wgpu::Queue,
+    format: wgpu::TextureFormat,
+) -> Result<GpuContext, Error> {
+    validate_format(format)?;
+    #[cfg(feature = "offline-shader")]
+    let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
+    #[cfg(feature = "offline-shader")]
+    let memory = device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
+    let errors = device.push_error_scope(wgpu::ErrorFilter::Validation);
+    #[cfg(feature = "offline-shader")]
+    let artifact = legacy_artifact::create(&device);
+    #[cfg(not(feature = "offline-shader"))]
+    let artifact = None::<(
+        wgpu::ShaderModule,
+        wgpu::ShaderModule,
+        wgpu::BindGroupLayout,
+        wgpu::PipelineLayout,
+    )>;
+    let (module, explicit) = match artifact {
+        Some((module, fragment, layout, pipeline_layout)) => {
+            (module, Some((fragment, layout, pipeline_layout)))
+        }
+        None => (
+            device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("GPUI tile compositor"),
+                source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
+            }),
+            None,
+        ),
+    };
+    let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("GPUI tile compositor"),
+        layout: explicit
+            .as_ref()
+            .map(|(_, _, pipeline_layout)| pipeline_layout),
+        vertex: wgpu::VertexState {
+            module: &module,
+            entry_point: Some("vertex"),
+            compilation_options: Default::default(),
+            buffers: &[],
+        },
+        primitive: Default::default(),
+        depth_stencil: None,
+        multisample: Default::default(),
+        fragment: Some(wgpu::FragmentState {
+            module: explicit
+                .as_ref()
+                .map(|(fragment, _, _)| fragment)
+                .unwrap_or(&module),
+            entry_point: Some("fragment"),
+            compilation_options: Default::default(),
+            targets: &[Some(wgpu::ColorTargetState {
+                format,
+                blend: None,
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+        }),
+        multiview_mask: None,
+        cache: None,
+    });
+    // A destroyed device can yield an invalid pipeline. Keep inferred
+    // layout validation in the same scope instead of panicking afterward.
+    // Each context must mint a fresh layout handle, including if this ever
+    // uses explicit layouts. Sharing a BGL across contexts/formats would
+    // invalidate the state/context identity certificate.
+    // Keep this checked pipeline lookup on the explicit route too: after
+    // device loss creation errors can be ignored by WGPU's scopes, while
+    // this rejects the invalid pipeline instead of returning a dead owner.
+    drop(explicit);
+    let layout = pipeline.get_bind_group_layout(0);
+    let error = errors.pop().await;
+    #[cfg(feature = "offline-shader")]
+    let error = {
+        let memory = memory.pop().await;
+        let internal = internal.pop().await;
+        error.or(memory).or(internal)
+    };
+    if let Some(error) = error {
+        return Err(Error::Shader(error.to_string()));
+    }
+    Ok(GpuContext {
+        device,
+        queue,
+        format,
+        pipeline,
+        clip_pipeline: None,
+        layout,
+    })
+}
+
+#[cfg(feature = "offline-shader")]
+#[allow(unsafe_code)]
+#[path = "clip_legacy_artifact.rs"]
+mod legacy_artifact;
+
+#[test]
+fn optional_context_startup_cost() {
+    if std::env::var("GPUI_OPTIONAL_CLIP_STARTUP").as_deref() != Ok("1") {
+        return;
+    }
+    pollster::block_on(async {
+        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+        desc.backends = wgpu::Backends::VULKAN;
+        let instance = wgpu::Instance::new(desc);
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                force_fallback_adapter: true,
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+        let (device, queue) = adapter
+            .request_device(&wgpu::DeviceDescriptor {
+                #[cfg(feature = "offline-shader")]
+                required_features: adapter.shader_artifact_features(),
+                ..Default::default()
+            })
+            .await
+            .unwrap();
+        for round in 0..8 {
+            for (position, which) in [round % 2, 1 - round % 2].into_iter().enumerate() {
+                let start = std::time::Instant::now();
+                let context = if which == 0 {
+                    legacy_context(
+                        device.clone(),
+                        queue.clone(),
+                        wgpu::TextureFormat::Rgba16Float,
+                    )
+                    .await
+                    .unwrap()
+                } else {
+                    GpuContext::new(
+                        device.clone(),
+                        queue.clone(),
+                        wgpu::TextureFormat::Rgba16Float,
+                    )
+                    .await
+                    .unwrap()
+                };
+                eprintln!(
+                    "optional_context_startup,{round},{position},{which},{}",
+                    start.elapsed().as_nanos()
+                );
+                drop(context);
+                device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
+            }
+        }
+    });
+}
+
+#[test]
+fn optional_late_preparation_cannot_enter_replacement_context() {
+    pollster::block_on(async {
+        let gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let job = gpu.context.clip_acceleration_job().unwrap();
+        let device = gpu.device().clone();
+        let queue = gpu.queue().clone();
+        let (start, wait) = std::sync::mpsc::sync_channel(0);
+        let worker = std::thread::spawn(move || {
+            wait.recv().unwrap();
+            pollster::block_on(job.prepare()).unwrap()
+        });
+        drop(gpu);
+        let mut replacement = GpuContext::new(device, queue, wgpu::TextureFormat::Rgba16Float)
+            .await
+            .unwrap();
+        start.send(()).unwrap();
+        let prepared = worker.join().unwrap();
+        assert!(matches!(
+            replacement.install_clip_acceleration(prepared),
+            Err(Error::IncompatibleContext)
+        ));
+        assert!(replacement.clip_pipeline.is_none());
     });
 }

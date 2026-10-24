@@ -489,6 +489,27 @@ fn deliver(send: &SyncSender<Message>, message: Message, wake: &Option<Wake>) ->
 mod tests {
     use super::*;
     #[test]
+    fn closing_optional_owner_revokes_delivery_without_waiting_for_driver() {
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let (send, messages) = mpsc::sync_channel(1);
+        let preparation = ClipPreparation {
+            messages,
+            cancelled: Arc::clone(&cancelled),
+        };
+        drop(preparation);
+        assert!(cancelled.load(Ordering::Acquire));
+        assert!(
+            send.send(Err(gpui_gpu::Error::Shader("late result".into())))
+                .is_err()
+        );
+        eprintln!(
+            "optional_native_header surface={} controller={} pending={}",
+            size_of::<GpuSurface>(),
+            size_of::<ClipUpgrade>(),
+            size_of::<ClipPreparation>()
+        );
+    }
+    #[test]
     fn initialization_cohort_ledger() {
         // A layout comparison with the prior actual message payload; this does
         // not estimate process/driver memory from Rust headers.
