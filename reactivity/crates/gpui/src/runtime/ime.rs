@@ -16,6 +16,9 @@ pub struct ImeSession {
     stamp: Option<NonZeroU64>,
 }
 impl ImeSession {
+    /// Whether this transport has received Enabled without a terminal event.
+    /// Source/focus changes can revoke runtime authority before the next event;
+    /// this flag is not permission to edit or a current-presentation proof.
     pub fn is_enabled(&self) -> bool {
         self.stamp.is_some()
     }
@@ -148,6 +151,42 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn composition_snapshot(&self) -> Option<MarkSnapshot> {
         Some(self.composition_preview()?.1.mark)
     }
+    pub(super) fn source_position(
+        &self,
+        target: Target,
+        point: gpui_canvas::TextPosition,
+    ) -> Result<gpui_canvas::TextPosition, Error> {
+        let Some(active) = self
+            .ime_active()
+            .filter(|a| a.target == target && self.ime_valid(a))
+        else {
+            return Ok(point);
+        };
+        let Some(preview) = &active.preview else {
+            return Ok(point);
+        };
+        let [start, end] = preview.mark.range.map(|n| n as usize);
+        if start == end {
+            return Ok(point);
+        }
+        let source_end = preview
+            .replacement
+            .anchor
+            .offset
+            .byte()
+            .max(preview.replacement.focus.offset.byte());
+        let byte = point.offset.byte();
+        let mapped = if byte <= start {
+            byte
+        } else if byte >= end {
+            byte - (end - start) + (source_end - start)
+        } else if byte - start < end - byte {
+            start
+        } else {
+            source_end
+        };
+        nearest(&active.source, mapped)
+    }
     pub(super) fn ime_composing(&self) -> bool {
         self.composition_preview().is_some()
     }
@@ -194,7 +233,7 @@ impl<M: View + 'static> Runtime<M> {
             false
         }
     }
-    fn reclaim_ime(&mut self) {
+    pub(super) fn reclaim_ime(&mut self) {
         if let Some(editing) = self.metadata.as_mut().and_then(|m| m.editing.as_mut())
             && editing.ime.as_ref().is_some_and(|ime| ime.unused())
         {

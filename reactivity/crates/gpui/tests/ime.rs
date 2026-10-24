@@ -34,15 +34,29 @@ fn ack(win: &mut Win<Form>) {
     win.presented(token).unwrap();
 }
 fn window(value: &str) -> (Win<Form>, Target, ImeSession) {
-    let mut win = Win::recording(
-        Form {
-            a: Signal::new(value.into()),
-            b: Signal::new("other".into()),
-            rebound: false,
-            broken: false,
-        },
-        WindowOptions::default(),
+    window_font(value, None)
+}
+fn cjk_window(value: &str) -> (Win<Form>, Target, ImeSession) {
+    window_font(
+        value,
+        Some(FontFace::new(include_bytes!("fonts/ime/cjk.otf")).unwrap()),
     )
+}
+fn window_font(value: &str, font: Option<FontFace>) -> (Win<Form>, Target, ImeSession) {
+    let model = Form {
+        a: Signal::new(value.into()),
+        b: Signal::new(if font.is_some() {
+            String::new()
+        } else {
+            "other".into()
+        }),
+        rebound: false,
+        broken: false,
+    };
+    let mut win = match font {
+        Some(font) => Win::recording_with_font(model, WindowOptions::default(), font),
+        None => Win::recording(model, WindowOptions::default()),
+    }
     .unwrap();
     ack(&mut win);
     let target = win.query().name("first").one().unwrap();
@@ -85,7 +99,7 @@ fn displayed(win: &Win<Form>, target: Target) -> (String, Option<MarkedText>, Te
 }
 #[test]
 fn cjk_preedit_replaces_original_selection_then_commits_different_text_once() {
-    let (mut win, target, mut session) = window("left RIGHT tail");
+    let (mut win, target, mut session) = cjk_window("left RIGHT tail");
     win.select(target, selection(5, 10)).unwrap();
     ack(&mut win);
     // Selection is a source-domain operation, so explicitly start a fresh stream.
@@ -135,8 +149,12 @@ fn cjk_preedit_replaces_original_selection_then_commits_different_text_once() {
 }
 #[test]
 fn interior_combining_and_zwj_byte_intent_uses_legal_geometry_and_invalid_utf8_revokes() {
-    for (text, byte) in [("e\u{301}", 1), ("👩\u{200d}💻", 4), ("אבג", 2)] {
-        let (mut win, target, mut session) = window("");
+    for (text, byte, canonical) in [("e\u{301}", 1, 0), ("👩\u{200d}💻", 4, 0), ("אבג", 2, 2)]
+    {
+        let font = text
+            .contains('👩')
+            .then(|| FontFace::new(include_bytes!("fonts/ime/emoji.ttf")).unwrap());
+        let (mut win, target, mut session) = window_font("", font);
         win.ime_event(
             &mut session,
             ImeEvent::Preedit {
@@ -149,7 +167,7 @@ fn interior_combining_and_zwj_byte_intent_uses_legal_geometry_and_invalid_utf8_r
         let (_, mark, selected, _) = displayed(&win, target);
         assert_eq!(mark.unwrap().cursor, Some(byte..byte));
         assert!(win.ime_cursor_area(&session).unwrap().is_some());
-        assert!(selected.focus.offset.byte() <= text.len());
+        assert_eq!(selected.focus.offset.byte(), canonical);
         win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
         ack(&mut win);
         assert_eq!(displayed(&win, target).0, "");
@@ -212,7 +230,7 @@ fn external_equal_edit_rebind_and_focus_turnover_revoke_old_stream() {
 }
 #[test]
 fn old_candidate_ack_after_failed_new_source_retains_preview_bytes_mark_and_geometry() {
-    let (mut win, target, mut session) = window("base");
+    let (mut win, target, mut session) = cjk_window("base");
     win.ime_event(
         &mut session,
         ImeEvent::Preedit {

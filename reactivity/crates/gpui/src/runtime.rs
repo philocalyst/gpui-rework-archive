@@ -2985,6 +2985,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.presentation_scale_factor = prepared.scale_factor;
         }
+        self.reclaim_ime();
         if let Some(metadata) = &mut self.metadata
             && let Some(sheet) = metadata.candidate.take()
         {
