@@ -72,6 +72,7 @@ fn exact_embedded_fallback_fonts_fit_the_code_namespaces() {
 
 #[test]
 fn borrowed_iteration_never_materializes_an_expanded_buffer() {
+    let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let face = FontFace::bundled().unwrap();
     let shape = face
         .shaper()
@@ -99,6 +100,7 @@ fn borrowed_iteration_never_materializes_an_expanded_buffer() {
 
 #[test]
 fn document_length_does_not_require_a_long_tail_geometry_owner() {
+    let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let face = FontFace::bundled().unwrap();
     let source = format!("a{}", "\u{301}".repeat(1024));
     let mut shaper = face.shaper();
