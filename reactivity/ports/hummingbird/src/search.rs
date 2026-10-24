@@ -32,7 +32,27 @@ pub struct Version {
     pub revision: u64,
     pub generation: u64,
 }
-#[derive(Clone, Debug)]
+impl Version {
+    pub(crate) fn advance(self, replace: bool) -> Result<Self, SourceError> {
+        let revision = self
+            .revision
+            .checked_add(1)
+            .ok_or(SourceError::VersionExhausted)?;
+        let generation = if replace {
+            self.generation
+                .checked_add(1)
+                .filter(|generation| *generation < u64::MAX)
+                .ok_or(SourceError::VersionExhausted)?
+        } else {
+            self.generation
+        };
+        Ok(Self {
+            revision,
+            generation,
+        })
+    }
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SearchInput {
     pub query: String,
     pub sort: Sort,
@@ -54,8 +74,25 @@ impl SearchInput {
 #[derive(Debug)]
 pub enum SourceError {
     Sqlite(rusqlite::Error),
+    Io {
+        path: std::path::PathBuf,
+        error: std::io::Error,
+    },
+    Metadata {
+        path: std::path::PathBuf,
+        error: symphonia::core::errors::Error,
+    },
+    UnsupportedPath(std::path::PathBuf),
+    NoAudioTrack(std::path::PathBuf),
+    InvalidMetadataNumber(std::path::PathBuf),
+    ReadOnlyLibrary,
+    UnknownLibrarySchema,
+    OutsideLibraryRoots(std::path::PathBuf),
+    NotDirectory(std::path::PathBuf),
+    IndexExhausted,
     QueryTooLong,
     MissingTrack(i64),
+    MissingCollection,
     SourceAuthorityUnavailable,
     SourceClosed,
     SourceNotCommitted,
@@ -68,9 +105,38 @@ impl fmt::Display for SourceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Sqlite(error) => write!(f, "Library source: {error}"),
+            Self::Io { path, error } => write!(f, "{}: {error}", path.display()),
+            Self::Metadata { path, error } => write!(f, "Metadata in {}: {error}", path.display()),
+            Self::UnsupportedPath(path) => write!(
+                f,
+                "The library index requires a UTF-8 path: {}",
+                path.display()
+            ),
+            Self::NoAudioTrack(path) => write!(f, "No supported audio track in {}", path.display()),
+            Self::InvalidMetadataNumber(path) => write!(
+                f,
+                "Metadata number is outside the library integer range: {}",
+                path.display()
+            ),
+            Self::ReadOnlyLibrary => f.write_str(
+                "This library is read-only; open a writable port library to manage folders",
+            ),
+            Self::UnknownLibrarySchema => f.write_str(
+                "This is an existing library; use read-only --database or create a new --library",
+            ),
+            Self::OutsideLibraryRoots(path) => write!(
+                f,
+                "Folder is outside the registered library roots: {}",
+                path.display()
+            ),
+            Self::NotDirectory(path) => write!(f, "Not a library folder: {}", path.display()),
+            Self::IndexExhausted => f.write_str("Library index counter space exhausted"),
             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
             Self::NoSelection => f.write_str("No recording selected"),
             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
+            Self::MissingCollection => {
+                f.write_str("This collection or occurrence is no longer available")
+            }
             Self::SourceNotCommitted => {
                 f.write_str("Commit the source database before attaching it")
             }
@@ -127,40 +193,56 @@ impl Searcher {
         &mut self,
         database: &Database,
         input: SearchInput,
-        mut cancelled: impl FnMut() -> bool,
+        cancelled: impl FnMut() -> bool,
     ) -> Option<Result<SearchPage, SourceError>> {
+        let query = match input.sort {
+            Sort::Title => tracks().sort_asc(TrackColumn::Title),
+            Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
+            Sort::Longest => tracks().sort_desc(TrackColumn::Length),
+        };
+        self.search_rows(database, &input, query, cancelled)
+            .map(|result| result.map(|rows| SearchPage { input, rows }))
+    }
+    pub(crate) fn search_rows(
+        &mut self,
+        database: &Database,
+        input: &SearchInput,
+        query: crate::query::TrackQuery,
+        mut cancelled: impl FnMut() -> bool,
+    ) -> Option<Result<Vec<TrackSearchRow>, SourceError>> {
         if cancelled() {
             return None;
         }
         if input.query.len() > MAX_QUERY_BYTES {
             return Some(Err(SourceError::QueryTooLong));
         }
-        let query = match input.sort {
-            Sort::Title => tracks().sort_asc(TrackColumn::Title),
-            Sort::Artist => tracks().sort_asc(TrackColumn::Artist),
-            Sort::Longest => tracks().sort_desc(TrackColumn::Length),
-        };
         let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
         let rows = match query.for_search().fetch_matching(
             database.connection(),
             &mut cancelled,
-            |title, artists| {
-                self.corpus.clear();
-                self.corpus.push_str(title);
-                self.corpus.push(' ');
-                self.corpus.push_str(artists.unwrap_or_default());
-                pattern
-                    .score(
-                        Utf32Str::new(&self.corpus, &mut self.utf32),
-                        &mut self.matcher,
-                    )
-                    .is_some()
-            },
+            |title, artists| self.matches(&pattern, title, artists),
         ) {
             Ok(Some(rows)) => rows,
             Ok(None) => return None,
             Err(error) => return Some(Err(error.into())),
         };
-        Some(Ok(SearchPage { input, rows }))
+        Some(Ok(rows))
+    }
+    pub(crate) fn matches(
+        &mut self,
+        pattern: &Pattern,
+        title: &str,
+        artists: Option<&str>,
+    ) -> bool {
+        self.corpus.clear();
+        self.corpus.push_str(title);
+        self.corpus.push(' ');
+        self.corpus.push_str(artists.unwrap_or_default());
+        pattern
+            .score(
+                Utf32Str::new(&self.corpus, &mut self.utf32),
+                &mut self.matcher,
+            )
+            .is_some()
     }
 }

@@ -19,7 +19,7 @@ describe the intended complete system; this page records what is connected now.
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
 | Native | Vendor-owned backend hints and target proof; Winit software-first windows, no Auto GPU initialization for certified fills, background GPU preparation for general scenes, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
-| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library, queue, decoding and lazy CPAL output with shared native/headless View, typed workers, duplicate occurrence identity and checked source/audio authority | Full Hummingbird navigation, scanner, artwork, settings and media services, broader audio formats/output policy and the complete Zed port remain; synthetic scaling is separate from real domain evidence |
+| Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library, album/artist/playlist and Files navigation, persistent roots, cancellable metadata indexing, queue, decoding and lazy CPAL output through the shared native/headless View | Hummingbird artwork, settings/media services, watchers, rename matching, playlist editing and full codec/output policy plus the complete Zed port remain; synthetic scaling is separate from real domain evidence |
 
 Mutable model/window state uses ordinary exclusive Rust borrows. The production
 window engine contains no Rc, RefCell or Cell. Native observation callbacks use
@@ -68,6 +68,16 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [Hummingbird composition](evidence/hummingbird-composition/README.md) integrates
+the Browser and Files routes with one existing worker and checked playback
+authority. Fresh libraries execute a generated final schema in one transaction
+instead of replaying historical migrations; original migrations remain the test
+oracle. Root passes 70 default and 143 native-feature tests, strict checks and
+three actual Registry clients. Original indexing timeouts and successor fixture
+lint failures remain recorded. Core stays **31,616** non-test, non-comment lines;
+production app Rust is **7,936**, with SQL/vendor/tool code charged separately.
+No performance or whole-player parity claim follows from these functional gates.
+
 The [composed text stack](evidence/text-stack/README.md) removes output storage
 from intrinsic measurement, retains 12-byte canonical glyphs behind a 16-byte
 unique owner, and sends one validated Skrifa outline directly to Zeno. All 132
@@ -76,8 +86,8 @@ native suites pass 838/211/648 cases and strict checks pass. Core is **31,616**
 non-test, non-comment lines, **+298** from 5381. The public glyph API is a
 borrowed value iterator. Its removed private Debug field caused an original
 oracle failure; the separate exact semantic comparison and all costs are kept.
-Hummingbird Files, common-eight compression, vertical navigation and the new
-axis-boundary GPU correction remain separate candidates. No whole-campaign,
+Common-eight compression, vertical navigation and the new axis-boundary GPU
+correction remain separate candidates. No whole-campaign,
 application-parity, speed or RSS claim follows from this text integration.
 
 The bundled primary now embeds a reproducible [full static default instance](crates/canvas/evidence/default-font/README.md).

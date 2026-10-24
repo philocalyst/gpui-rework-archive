@@ -260,3 +260,50 @@ fn queue_and_plan_carriers_are_measured_without_claiming_a_stack_peak() {
         assert_eq!(size_of::<Option<Plan>>(), 48);
     }
 }
+
+#[test]
+fn replacing_a_listing_selects_input_occurrence_under_shuffle_and_rejects_errors_before_mutation() {
+    let mut player = playback();
+    let old = player.plan().unwrap().end_of_stream();
+    let old_len = player.queue().len();
+    let before = player.plan().unwrap().stamp();
+    assert!(
+        player
+            .replace_at(vec![track(4)], 1, &available, &mut draw)
+            .is_err()
+    );
+    assert!(
+        player
+            .replace_at(vec![track(4)], 0, &|_| false, &mut draw)
+            .is_err()
+    );
+    assert_eq!(player.queue().len(), old_len);
+    assert_eq!(player.plan().unwrap().stamp(), before);
+    player.toggle_shuffle(&available, &mut draw).unwrap();
+    player
+        .replace_at(vec![track(4), track(5), track(4)], 2, &available, &mut draw)
+        .unwrap();
+    let selected = player.plan().unwrap().current.key;
+    assert_eq!(player.plan().unwrap().current.track.track_id, Some(4));
+    assert_eq!(
+        selected,
+        (0..3)
+            .map(|i| player.queue().at(i).unwrap().key)
+            .max()
+            .unwrap()
+    );
+    assert!(!player.end_of_stream(old, &available, &mut draw).unwrap());
+    // Both identical track values survive as distinct queue occurrences.
+    assert_eq!(
+        (0..3)
+            .filter(|i| player.queue().at(*i).unwrap().track.track_id == Some(4))
+            .count(),
+        2
+    );
+    assert_eq!(
+        (0..3)
+            .filter(|i| player.queue().at(*i).unwrap().key == selected)
+            .count(),
+        1
+    );
+}

@@ -376,7 +376,7 @@ fn nonzero_stereo_wav_flac_and_mp3_preserve_samples_channels_and_partial_tail() 
         .as_chunks::<2>()
         .0
         .iter()
-        .map(|bytes| i16::from_le_bytes(*bytes) as f64 / 32768.)
+        .map(|&bytes| i16::from_le_bytes(bytes) as f64 / 32768.)
         .collect();
     assert_eq!(expected.len(), 17239 * 2);
     for extension in ["wav", "flac", "mp3"] {

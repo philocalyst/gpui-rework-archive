@@ -18,7 +18,7 @@ fn queue_control<L: gpui::LaneSet<Library>>(
     }
 }
 use hummingbird_gpui_port::{
-    app::{Library, connect, recordings, track_key},
+    app::{Library, connect, track_key},
     database::Database,
     transcript::settle,
     worker::Worker,
@@ -113,7 +113,9 @@ fn real_library_preparation_and_public_queue_input_preserve_keys_selection_and_s
     .with_inbox_status(inbox, Library::receive)
     .unwrap();
     settle(&mut owner, &worker).unwrap();
-    let list = owner.list(recordings(Default::default())).unwrap();
+    let list = owner
+        .list(owner.with_model(Library::recording_list).unwrap())
+        .unwrap();
     owner.scroll_to_key(list, track_key(44)).unwrap();
     let item = owner.list_item(list, track_key(44)).unwrap();
     owner

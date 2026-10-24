@@ -1,6 +1,6 @@
 //! Executable app transcript using only the ordinary public window/service API.
 use crate::{
-    app::{Library, PreparationStatus, connect, recordings, track_key},
+    app::{Library, PreparationStatus, connect, track_key},
     database::Database,
     search::Sort,
     worker::Worker,
@@ -47,7 +47,7 @@ fn ids<L: LaneSet<Library>>(win: &Win<Library, L>) -> Vec<i64> {
         .expect("current query ready")
 }
 fn play_target<L: LaneSet<Library>>(win: &Win<Library, L>, id: i64) -> Target {
-    let list_id = win.with_model(|model| recordings(*model.version)).unwrap();
+    let list_id = win.with_model(|model| model.recording_list()).unwrap();
     let row = win
         .list_item(win.list(list_id).unwrap(), track_key(id))
         .unwrap();
@@ -75,7 +75,7 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     settle(&mut win, &worker)?;
     let initial_ids = ids(&win);
     assert_eq!(initial_ids, [1, 13, 11, 21, 3, 2, 90, 44, 1001]);
-    let list = win.list(recordings(Default::default()))?;
+    let list = win.list(win.with_model(Library::recording_list)?)?;
     let realized_rows = win.list_state(list)?.realized_rows;
     assert_eq!(realized_rows, 5);
     assert!(win.inspect()?.nodes.len() < 100);
@@ -108,7 +108,10 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     // through the ordinary public input before admitting that old completion.
     win.type_text(win.input(), "Alpha")?;
     worker.checkpoint()?.recv_timeout(Duration::from_secs(10))?;
-    win.set(Library::QUERY, "cafe".into())?;
+    win.set(
+        Library::BROWSER.source(&crate::browser::Browser::QUERY),
+        "cafe".into(),
+    )?;
     settle(&mut win, &worker)?;
     let matched_ids = ids(&win);
     assert_eq!(matched_ids, [13, 11, 21]);
@@ -137,7 +140,10 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
         .recv_timeout(Duration::from_secs(10))??;
     settle(&mut win, &worker)?;
     assert_eq!(win.question_status(results)?, QuestionStatus::Fault);
-    assert_eq!(win.with_ready(results, |page| page.rows.len())?, None);
+    assert_eq!(
+        win.with_ready(results, |page| page.library().unwrap().rows.len())?,
+        None
+    );
     let source_failure_visible =
         win.contains_text("Library unavailable: Library source: no such table: track")?;
     assert!(source_failure_visible);
@@ -155,8 +161,14 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
     worker
         .replace_database(Database::fixture()?)?
         .recv_timeout(Duration::from_secs(10))??;
-    win.set(Library::QUERY, String::new())?;
-    win.set(Library::SORT, Sort::Title)?;
+    win.set(
+        Library::BROWSER.source(&crate::browser::Browser::QUERY),
+        String::new(),
+    )?;
+    win.set(
+        Library::BROWSER.source(&crate::browser::Browser::SORT),
+        Sort::Title,
+    )?;
     settle(&mut win, &worker)?;
     assert_eq!(ids(&win), initial_ids);
     assert_eq!(win.click(stale_source_row), Err(Error::StaleTarget));

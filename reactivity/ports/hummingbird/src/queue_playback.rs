@@ -300,6 +300,32 @@ impl PlaybackQueue {
         self.install(serial, available);
         Ok(())
     }
+    /// Replace the complete listing and start its selected occurrence. Every
+    /// returned error precedes replacement; jumping the fresh key is infallible.
+    pub fn replace_at(
+        &mut self,
+        tracks: Vec<TrackRef>,
+        start: usize,
+        available: &impl Fn(&Track) -> bool,
+        draw: &mut impl FnMut(usize) -> usize,
+    ) -> Result<(), QueueError> {
+        if !tracks.get(start).is_some_and(|track| available(track)) {
+            return Err(QueueError::Unavailable);
+        }
+        let serial = self.next_serial()?;
+        self.queue.replace(tracks, draw)?;
+        // Replacement allocates the new entries in input order even when its
+        // playback permutation is shuffled. Select that occurrence, not a rank.
+        let key = self
+            .queue
+            .input_key(start)
+            .expect("replacement index was checked");
+        self.queue
+            .jump(key, &|_| true)
+            .expect("fresh replacement key is retained");
+        self.install(serial, available);
+        Ok(())
+    }
     pub fn clear(
         &mut self,
         keep_current: bool,
@@ -378,6 +404,10 @@ mod tests {
         );
         assert_eq!(
             player.remove(&[key], &|_| true),
+            Err(QueueError::PlanExhausted)
+        );
+        assert_eq!(
+            player.replace_at(vec![track.clone()], 0, &|_| true, &mut |_| 0),
             Err(QueueError::PlanExhausted)
         );
         assert_eq!(

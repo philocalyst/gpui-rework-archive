@@ -1,21 +1,111 @@
 //! Application-owned SQLite source. The UI never borrows this connection.
-use crate::{migrations::MIGRATIONS, query::TrackSearchRow};
-use rusqlite::{Connection, OpenFlags, Result, params};
+use crate::query::TrackSearchRow;
+use rusqlite::{Connection, OpenFlags, Result, TransactionBehavior, params};
 use std::path::Path;
+
+const FRESH_SCHEMA: &str = include_str!("../schema/fresh.sql");
 
 pub struct Database {
     pub(crate) connection: Connection,
 }
 impl Database {
     pub fn fixture() -> Result<Self> {
-        let connection = Connection::open_in_memory()?;
+        let mut connection = Connection::open_in_memory()?;
         connection.pragma_update(None, "foreign_keys", true)?;
-        for (_, sql) in MIGRATIONS {
-            connection.execute_batch(sql)?;
-        }
+        let transaction = connection.transaction()?;
+        transaction.execute_batch(FRESH_SCHEMA)?;
+        transaction.commit()?;
         let mut database = Self { connection };
         database.seed()?;
         Ok(database)
+    }
+    /// Real relational browser fixture, separate from the original nine-track
+    /// transcript. Multiple credits, empty collections and tied playlist ranks
+    /// deliberately exercise collection identity rather than display indices.
+    pub fn collection_fixture() -> Result<Self> {
+        let database = Self::fixture()?;
+        database.connection.execute_batch("BEGIN IMMEDIATE;
+            INSERT INTO artist(id,name,name_sortable) VALUES(30,'Μαρία','Μαρία'),(31,'No recordings','No recordings'),(32,'Guest','Guest');
+            INSERT INTO album(id,title,title_sortable,artist_sort,artist_display_override) VALUES(40,'Album Z','Album Z','Guest','Guest');
+            INSERT INTO album_artist(album_id,artist_id) VALUES(30,30),(10,2);
+            INSERT INTO track_artist(track_id,artist_id) VALUES(44,1),(44,30),(44,32);
+            INSERT INTO playlist(id,name,type,position) VALUES(2,'Evening Καφέ',0,2),(3,'Empty playlist',0,3);
+            INSERT INTO playlist_item(id,playlist_id,track_id,position) VALUES(701,2,90,10),(702,2,44,0),(703,2,11,10);
+        ")?;
+        for (id, extension) in [(44, "wav"), (90, "flac"), (11, "mp3")] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(format!("assets/audio/stereo.{extension}"));
+            database.connection.execute(
+                "UPDATE track SET location=? WHERE id=?",
+                params![path.to_str().unwrap(), id],
+            )?;
+        }
+        database.connection.execute_batch("COMMIT")?;
+        Ok(database)
+    }
+    /// Create or reopen this port's persistent writable library. An unrelated
+    /// existing Hummingbird database keeps the separate read-only API; its
+    /// schema is never guessed, rewritten or reseeded by this constructor.
+    pub fn open_library(path: &Path) -> Result<Self, crate::search::SourceError> {
+        let mut connection = Connection::open(path)?;
+        connection.pragma_update(None, "foreign_keys", true)?;
+        Self::initialize_library(&mut connection)?;
+        Ok(Self { connection })
+    }
+    fn initialize_library(connection: &mut Connection) -> Result<(), crate::search::SourceError> {
+        // Serialize creators before checking admission. Schema, seed and marker
+        // publish together; a failed creation rolls back to an empty database.
+        let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let marked: bool = transaction.query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name='_gpui_library')",
+            [],
+            |row| row.get(0),
+        )?;
+        if !marked {
+            let occupied: bool = transaction.query_row(
+                "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE name NOT GLOB 'sqlite_*')",
+                [],
+                |row| row.get(0),
+            )?;
+            if occupied {
+                return Err(crate::search::SourceError::UnknownLibrarySchema);
+            }
+            transaction.execute_batch(FRESH_SCHEMA)?;
+            transaction.execute_batch("CREATE TABLE _gpui_library(version INTEGER NOT NULL); INSERT INTO _gpui_library VALUES(1)")?;
+        }
+        let (markers, version): (i64, Option<i64>) = transaction.query_row(
+            "SELECT COUNT(*),MIN(version) FROM _gpui_library",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )?;
+        if markers != 1 || version != Some(1) {
+            return Err(crate::search::SourceError::UnknownLibrarySchema);
+        }
+        transaction.commit()?;
+        // Acquisition tables remain at the worker's source-admission boundary.
+        Ok(())
+    }
+    pub(crate) fn initialize_index(&self) -> Result<()> {
+        if self.connection.is_readonly("main")? {
+            return Ok(());
+        }
+        let transaction = self.connection.unchecked_transaction()?;
+        transaction.execute_batch(
+            "CREATE TABLE IF NOT EXISTS _gpui_root(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                path TEXT NOT NULL UNIQUE
+            );
+            CREATE TABLE IF NOT EXISTS _gpui_index_file(
+                location TEXT PRIMARY KEY,
+                track_id INTEGER NOT NULL UNIQUE REFERENCES track(id) ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS _gpui_index_member(
+                root_id INTEGER NOT NULL REFERENCES _gpui_root(id) ON DELETE CASCADE,
+                location TEXT NOT NULL REFERENCES _gpui_index_file(location) ON DELETE CASCADE,
+                PRIMARY KEY(root_id,location)
+            );",
+        )?;
+        transaction.commit()
     }
     /// Existing Hummingbird libraries are read without migrating or seeding them.
     pub fn open_read_only(path: &Path) -> Result<Self> {
@@ -149,3 +239,6 @@ impl Database {
         Ok(row)
     }
 }
+
+#[cfg(test)]
+mod tests;
