@@ -210,7 +210,7 @@ impl PackedGlyph {
             )
         };
         Glyph {
-            id,
+            id: id ^ 1,
             font,
             cluster: self.meta >> GLYPH_CODE_BITS,
             x: self.x,
