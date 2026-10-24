@@ -790,7 +790,7 @@ mod tests {
                 }
             }
         }
-        assert_eq!(cases, 37_632);
+        assert_eq!(cases, 43_008);
     }
     #[test]
     fn initial_equal_preedit_and_clear_reuse_the_exact_source_lease() {
