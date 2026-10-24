@@ -38,6 +38,15 @@ impl<B: Brush> Clone for Run<'_, B> {
 }
 
 impl<'a, B: Brush> Run<'a, B> {
+    /// Number of raw shaped glyphs in this run, restricted to its line if any.
+    pub fn glyph_count(&self) -> usize {
+        self.line_slice()
+            .shaped_clusters()
+            .iter()
+            .map(|cluster| cluster.glyph_len() as usize)
+            .sum()
+    }
+
     #[expect(clippy::cast_possible_truncation, reason = "deferred")]
     pub(crate) fn new(
         layout: &'a Layout<B>,

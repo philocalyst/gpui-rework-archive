@@ -1,5 +1,13 @@
 # Parley 0.12.0 local repairs
 
+`Run::glyph_count` sums the existing line-scoped raw shaped-cluster lengths,
+without grouping positioned runs, placing glyphs or retaining a count field. The
+engine already stores one for inline glyphs at its sole cluster constructor;
+its count accessor now returns that field directly, including the inline case.
+This preserves the release elimination of GlyphRunIter's debug-only count sum.
+Placement, raw glyph iteration, reserve policy and whole-paragraph output-limit
+error order remain unchanged. No run, paragraph or retained layout grows.
+
 Published crate: `https://static.crates.io/crates/parley/parley-0.12.0.crate`.
 Archive SHA-256: `61bd0c0c1737f0b3d3726dc06b225083af213b61913e4fbae1670613a106c6ce`.
 Upstream commit: `6e1143dda817360dd3a2a64f9133c6e5dfabd881`, directory `parley`.

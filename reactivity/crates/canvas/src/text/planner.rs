@@ -207,11 +207,8 @@ impl<'font> Planner<'font> {
             }
             let count = planned
                 .lines()
-                .flat_map(|line| line.items())
-                .map(|item| match item {
-                    PositionedLayoutItem::GlyphRun(run) => run.positioned_glyphs().count(),
-                    _ => 0,
-                })
+                .flat_map(|line| line.runs())
+                .map(|run| run.glyph_count())
                 .sum::<usize>();
             if glyphs
                 .len()
@@ -541,6 +538,37 @@ fn register_font(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn raw_run_counts_match_positioned_output_across_wraps_and_scripts() {
+        let face = FontFace::bundled().unwrap();
+        let mut planner = Planner::new(&face).unwrap();
+        let stacked = format!("a{}", "\u{301}".repeat(512));
+        for source in [
+            "",
+            "office ffi",
+            "a אבג 123 العربية नमस्ते",
+            "\u{200d}\u{2067}\u{2069}",
+            "a\u{202e}BC\u{202c}D",
+            "  spaces  ",
+            &stacked,
+        ] {
+            for width in [None, Some(0.), Some(17.), Some(80.)] {
+                planner.shape(source, 18., width, true).unwrap();
+                for line in planner.layout.lines() {
+                    let raw = line.runs().map(|run| run.glyph_count()).sum::<usize>();
+                    let positioned = line
+                        .items()
+                        .map(|item| match item {
+                            PositionedLayoutItem::GlyphRun(run) => run.positioned_glyphs().count(),
+                            _ => 0,
+                        })
+                        .sum::<usize>();
+                    assert_eq!(raw, positioned, "{source:?}, {width:?}");
+                }
+            }
+        }
+    }
 
     #[test]
     fn rejected_expanding_output_does_not_contaminate_the_next_paragraph() {

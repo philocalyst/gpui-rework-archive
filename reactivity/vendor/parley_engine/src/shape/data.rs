@@ -177,12 +177,8 @@ impl ShapedCluster {
 
     /// The number of glyphs of this cluster.
     #[inline(always)]
-    pub fn glyph_len(self) -> u32 {
-        if self.has_inline_glyph() {
-            1
-        } else {
-            self.glyph_len
-        }
+    pub const fn glyph_len(self) -> u32 {
+        self.glyph_len
     }
 
     /// Whether this cluster's glyph is stored inline in [`Self::glyph_offset`].
