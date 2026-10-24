@@ -324,8 +324,8 @@ impl Builder {
 #[inline]
 pub(super) fn exact_eq(a: &Style, b: &Style) -> bool {
     use crate::property::ExactValue;
-    Option::<f32>::same(&a.width, &b.width)
-        && Option::<f32>::same(&a.height, &b.height)
+    crate::Length::same(&a.width, &b.width)
+        && crate::Length::same(&a.height, &b.height)
         && f32::same(&a.gap, &b.gap)
         && f32::same(&a.padding, &b.padding)
         && f32::same(&a.font_size, &b.font_size)
@@ -407,7 +407,7 @@ mod tests {
     fn shared_values_preserve_author_channels_profiles_and_signed_zero() {
         let mut values = vec![Style::default(); 8];
         values[1].gap = -0.0;
-        values[2].width = Some(0.0);
+        values[2].width = crate::Length::Points(0.0);
         values[3].transform.b = -0.0;
         values[4].fg = Color::linear_srgb(-0.0, 0.0, 0.0, 1.0).unwrap();
         values[5].fg = Color::linear_srgb(0.0, 0.0, 0.0, 1.0).unwrap();
@@ -488,8 +488,8 @@ mod tests {
     fn exact_comparison_covers_every_style_field() {
         let base = Style::default();
         let mut changes = [base; 18];
-        changes[0].width = Some(0.0);
-        changes[1].height = Some(0.0);
+        changes[0].width = crate::Length::Points(0.0);
+        changes[1].height = crate::Length::Points(0.0);
         changes[2].gap = -0.0;
         changes[3].padding = -0.0;
         changes[4].font_size = 17.0;
