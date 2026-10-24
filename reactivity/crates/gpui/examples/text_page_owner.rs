@@ -62,14 +62,17 @@ impl Resource {
         size_of::<Self>() + self.value.len() + self.shape.buffer_capacity_bytes()
     }
 }
+struct Chunk {
+    values: Vec<Resource>,
+}
 struct Page {
-    chunks: Box<[Arc<[Resource]>]>,
+    chunks: Box<[Arc<Chunk>]>,
     index: Box<[Key]>,
     font: FontFace,
 }
 impl Page {
     fn get(&self, key: Key) -> &Resource {
-        &self.chunks[key.chunk()][key.slot()]
+        &self.chunks[key.chunk()].values[key.slot()]
     }
     fn find(&self, spec: &Spec) -> Option<Key> {
         self.index
@@ -79,7 +82,7 @@ impl Page {
     }
 }
 struct Snapshot {
-    page: Arc<Page>,
+    page: Option<Arc<Page>>,
     rows: Box<[Key]>,
 }
 struct Row<'a> {
@@ -97,16 +100,18 @@ impl Row<'_> {
 impl Snapshot {
     fn row(&self, index: usize) -> Row<'_> {
         Row {
-            page: &self.page,
+            page: self.page.as_deref().unwrap(),
             key: self.rows[index],
         }
     }
-    fn retained(&self) -> (usize, usize, usize, usize) {
-        let mut used: Vec<_> = self
-            .page
+    fn retained(&self) -> (usize, usize, usize, usize, usize) {
+        let Some(page) = &self.page else {
+            return (0, 0, 0, 0, 0);
+        };
+        let mut used: Vec<_> = page
             .chunks
             .iter()
-            .map(|chunk| vec![false; chunk.len()])
+            .map(|chunk| vec![false; chunk.values.len()])
             .collect();
         for &key in &self.rows {
             used[key.chunk()][key.slot()] = true;
@@ -114,25 +119,29 @@ impl Snapshot {
         let mut bytes = 0;
         let mut stale = 0;
         let mut resources = 0;
-        for (chunk, live) in self.page.chunks.iter().zip(used) {
-            let total: usize = chunk.iter().map(Resource::bytes).sum();
-            assert!(total <= CHUNK_BYTES || chunk.len() == 1);
-            for (resource, used) in chunk.iter().zip(live) {
-                bytes += resource.bytes();
+        let mut spare = 0;
+        for (chunk, live) in page.chunks.iter().zip(used) {
+            let slack = (chunk.values.capacity() - chunk.values.len()) * size_of::<Resource>();
+            let total: usize = chunk.values.iter().map(Resource::bytes).sum::<usize>() + slack;
+            assert!(total <= CHUNK_BYTES || chunk.values.len() == 1);
+            bytes += total;
+            spare += slack;
+            for (resource, used) in chunk.values.iter().zip(live) {
                 resources += 1;
                 if !used {
                     stale += resource.bytes();
                 }
             }
         }
-        (self.page.chunks.len(), resources, bytes, stale)
+        (page.chunks.len(), resources, bytes, stale, spare)
     }
 }
 struct Builder<'a> {
     old: Option<&'a Page>,
-    chunks: Vec<Arc<[Resource]>>,
+    chunks: Vec<Arc<Chunk>>,
     open: Vec<Resource>,
     bytes: usize,
+    hint: usize,
 }
 impl Builder<'_> {
     fn old_count(&self) -> usize {
@@ -140,14 +149,25 @@ impl Builder<'_> {
     }
     fn seal(&mut self) {
         if !self.open.is_empty() {
-            self.chunks.push(Arc::from(std::mem::take(&mut self.open)));
+            self.hint = self.open.len();
+            self.chunks.push(Arc::new(Chunk {
+                values: std::mem::take(&mut self.open),
+            }));
             self.bytes = 0;
         }
     }
     fn push(&mut self, resource: Resource) -> Key {
         let bytes = resource.bytes();
-        if self.bytes + bytes > CHUNK_BYTES || self.open.len() == (1 << SLOT_BITS) {
+        let header = size_of::<Resource>();
+        let spare = self.open.capacity().saturating_sub(self.open.len() + 1) * header;
+        if self.bytes + bytes + spare > CHUNK_BYTES || self.open.len() == (1 << SLOT_BITS) {
             self.seal();
+        }
+        if self.open.capacity() == 0 {
+            let limit = (CHUNK_BYTES.saturating_sub(bytes - header) / header).max(1);
+            self.open.reserve_exact(self.hint.max(1).min(limit));
+        } else if self.open.len() == self.open.capacity() {
+            self.open.reserve_exact(1);
         }
         let key = Key::new(self.old_count() + self.chunks.len(), self.open.len());
         self.open.push(resource);
@@ -159,6 +179,12 @@ impl Builder<'_> {
     }
     fn finish(mut self, mut rows: Vec<Key>, mut index: Vec<Key>, font: FontFace) -> Snapshot {
         self.seal();
+        if rows.is_empty() {
+            return Snapshot {
+                page: None,
+                rows: rows.into_boxed_slice(),
+            };
+        }
         let old_count = self.old_count();
         let mut remap = vec![usize::MAX; old_count + self.chunks.len()];
         for key in &rows {
@@ -180,11 +206,11 @@ impl Builder<'_> {
             *key = Key::new(remap[key.chunk()], key.slot());
         }
         Snapshot {
-            page: Arc::new(Page {
+            page: Some(Arc::new(Page {
                 chunks: chunks.into_boxed_slice(),
                 index: index.into_boxed_slice(),
                 font,
-            }),
+            })),
             rows: rows.into_boxed_slice(),
         }
     }
@@ -202,6 +228,7 @@ fn build(
         chunks: Vec::new(),
         open: Vec::new(),
         bytes: 0,
+        hint: 0,
     };
     let mut rows = vec![Key(0); specs.len()];
     let mut index = Vec::new();
@@ -328,22 +355,25 @@ fn lifecycle(mut specs: Vec<Spec>, font: FontFace, p: Snapshot) {
     let old_value = specs[0].value.clone();
     specs[0].value = "a replacement office אבג".into();
     let c1 = measured("old_p_new_c", || {
-        build(&specs, &font, Some(&p.page)).unwrap()
+        build(&specs, &font, p.page.as_deref()).unwrap()
     });
     assert_eq!(p.row(0).value(), old_value);
     assert_eq!(c1.row(0).value(), specs[0].value);
     let stable = measured("unchanged_page_root", || c1.page.clone());
-    assert!(Arc::ptr_eq(&stable, &c1.page));
+    assert!(Arc::ptr_eq(
+        stable.as_ref().unwrap(),
+        c1.page.as_ref().unwrap()
+    ));
     drop(stable);
     specs[0].value = "\u{1}".into();
-    assert!(measured("failed_newer", || build(&specs, &font, Some(&c1.page))).is_err());
+    assert!(measured("failed_newer", || build(&specs, &font, c1.page.as_deref())).is_err());
     assert_eq!(p.row(0).value(), old_value);
     assert_eq!(c1.row(0).value(), "a replacement office אבג");
     println!(
         "PAGE_LIVE,{}",
         serde_json::json!({"p":p.retained(),"c":c1.retained()})
     );
-    let job_page = c1.page.clone();
+    let job_page = c1.page.clone().unwrap();
     let job_key = c1.rows[0];
     let weak = Arc::downgrade(&job_page);
     let (release, ready) = std::sync::mpsc::sync_channel(0);
