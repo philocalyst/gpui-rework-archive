@@ -3056,15 +3056,16 @@ impl<M: View + 'static> Runtime<M> {
             .as_ref()
             .and_then(|m| m.geometry.as_ref())
             .is_some_and(|geometry| geometry.has_logical_clips());
-        let list_capacity = if list_mode || clip_mode {
+        let list_capacity = if list_mode { self.nodes.len() } else { 0 };
+        let clip_capacity = if clip_mode {
             self.nodes.len()
         } else {
-            0
+            list_capacity
         };
         let mut clip_chains: Vec<Option<gpui_canvas::ClipId>> =
             Vec::with_capacity(if clip_mode { self.nodes.len() } else { 0 });
-        let mut clips: Vec<Rect> = Vec::with_capacity(list_capacity);
-        let mut hit_clips: Vec<Rect> = Vec::with_capacity(list_capacity);
+        let mut clips: Vec<Rect> = Vec::with_capacity(clip_capacity);
+        let mut hit_clips: Vec<Rect> = Vec::with_capacity(clip_capacity);
         let mut clip_membership: Vec<u8> = Vec::with_capacity(list_capacity);
         let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
