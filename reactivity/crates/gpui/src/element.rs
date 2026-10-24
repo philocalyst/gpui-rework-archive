@@ -601,18 +601,39 @@ impl<'a> El<'a> {
     /// Opt into a visible focus marker inside the control frame. The caller
     /// chooses its color; the runtime owns focus and clipped affine painting.
     pub fn focus_indicator(mut self, color: Color) -> Self {
-        self.annotations_mut().focus_indicator = Some(color);
+        assert!(
+            matches!(
+                self.kind,
+                NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+            ),
+            "focus appearance belongs to a semantic control"
+        );
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+            })
+            .focus_indicator(color);
         self
     }
 
+    /// Disable a semantic control and its named-part descendants. Physical
+    /// routes remain installed for normal replacement/drop, but cannot act.
     pub fn disabled(mut self, disabled: bool) -> Self {
+        if disabled {
+            assert!(
+                matches!(
+                    self.kind,
+                    NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+                ),
+                "disabled state belongs to a semantic control"
+            );
+        }
         if disabled || self.extra.is_some() {
             self.extra
                 .get_or_insert_with(|| {
                     Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
                 })
-                .annotations_mut()
-                .disabled = disabled;
+                .set_disabled(disabled);
         }
         self
     }
@@ -903,6 +924,7 @@ impl<'a> El<'a> {
         let mut output = Vec::new();
         let mut viewports: Vec<crate::list::ViewportDraft> = Vec::new();
         let mut annotations = Vec::new();
+        let mut focus_indicators = Vec::new();
         let mut images = Vec::new();
         let mut geometry = Vec::new();
         let mut backgrounds = Vec::new();
@@ -928,7 +950,8 @@ impl<'a> El<'a> {
             }
             let crate::semantic::ExtraParts {
                 list: spec,
-                annotations: mut annotation,
+                annotations: annotation,
+                control,
                 projection: projector,
                 image,
                 axes,
@@ -1001,8 +1024,10 @@ impl<'a> El<'a> {
                 }
                 element.append_children(child);
             }
-            let disabled = annotation.disabled;
-            annotation.disabled = false;
+            let disabled = control.disabled;
+            if let Some(color) = control.focus_indicator {
+                focus_indicators.push((index as usize, color));
+            }
             if !annotation.is_empty() {
                 annotations.push(crate::semantic::AnnotationDraft {
                     node: index,
@@ -1074,6 +1099,7 @@ impl<'a> El<'a> {
             nodes: output,
             viewports,
             annotations,
+            focus_indicators,
             images,
             geometry,
             backgrounds,
@@ -1140,6 +1166,7 @@ pub(crate) struct Description<'a> {
     pub nodes: Vec<DraftNode<'a>>,
     pub viewports: Vec<crate::list::ViewportDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,
+    pub focus_indicators: Vec<(usize, Color)>,
     pub images: Vec<crate::image::ImageDraft<'a>>,
 }
 pub(crate) struct DraftNode<'a> {

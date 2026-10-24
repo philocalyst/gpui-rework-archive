@@ -606,7 +606,7 @@ impl TextSlot {
 /// including the checkbox state. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES * 2 <= (u32::MAX >> 4) as usize);
+const _: () = assert!(MAX_NODES * 2 <= (1 << (Content::BITS - 1 - 4)));
 impl Content {
     const BITS: u32 = 23;
     const DISABLED: u32 = 1 << (Self::BITS - 1);
@@ -2041,6 +2041,7 @@ impl<M: View + 'static> Runtime<M> {
             nodes: mut drafts,
             viewports: viewport_drafts,
             annotations: annotation_drafts,
+            focus_indicators: focus_drafts,
             images: image_drafts,
             geometry: geometry_drafts,
             backgrounds: background_drafts,
@@ -2303,6 +2304,8 @@ impl<M: View + 'static> Runtime<M> {
         let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
             let parent = draft.parent.map(|parent| parent as usize);
+            let disabled =
+                draft.disabled || parent.is_some_and(|parent| nodes[parent].content.disabled());
             // Only a boundary can change ownership. Reminting that root also
             // prevents descendant reuse: every match includes parent identity.
             let component_scope = draft.components.scope().unwrap_or(0);
@@ -2433,7 +2436,7 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
                 node_changed = true;
             }
-            if node.kind() != draft.kind || node.content.disabled() != draft.disabled {
+            if node.kind() != draft.kind || node.content.disabled() != disabled {
                 // State belongs to the next presentation, not the mount identity.
                 self.dirty = true;
                 node_changed = true;
@@ -2530,7 +2533,7 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 Content::new(draft.kind, text_slot)
             }
-            .with_disabled(draft.disabled);
+            .with_disabled(disabled);
             if property_changed == Some(node.identity) {
                 node_changed = true;
                 property_changed = None;
@@ -2617,7 +2620,11 @@ impl<M: View + 'static> Runtime<M> {
                 }),
             );
         }
-        if !annotation_drafts.is_empty() || !viewports.is_empty() || self.metadata.is_some() {
+        if !annotation_drafts.is_empty()
+            || !focus_drafts.is_empty()
+            || !viewports.is_empty()
+            || self.metadata.is_some()
+        {
             let metadata = self
                 .metadata
                 .get_or_insert_with(|| Box::new(Metadata::default()));
@@ -2627,23 +2634,19 @@ impl<M: View + 'static> Runtime<M> {
                     .filter(|a| a.text.name.is_some() || a.text.description.is_some())
                     .count(),
             );
-            let focus_changed = metadata.focus_indicators.len()
-                != annotation_drafts
-                    .iter()
-                    .filter(|a| a.text.focus_indicator.is_some())
-                    .count()
-                || annotation_drafts.iter().any(|a| {
-                    a.text.focus_indicator.is_some_and(|color| {
-                        metadata.focus_indicator(nodes[a.node as usize].identity()) != Some(color)
-                    })
+            let focus_changed = metadata.focus_indicators.len() != focus_drafts.len()
+                || focus_drafts.iter().any(|&(node, color)| {
+                    metadata.focus_indicator(nodes[node].identity()) != Some(color)
                 });
             self.dirty |= focus_changed;
             metadata.focus_indicators.clear();
+            metadata.focus_indicators.extend(
+                focus_drafts
+                    .into_iter()
+                    .map(|(node, color)| (nodes[node].identity(), color)),
+            );
             for (annotation, fields) in annotation_drafts.into_iter().zip(annotation_fields) {
                 let identity = nodes[annotation.node as usize].identity();
-                if let Some(color) = annotation.text.focus_indicator {
-                    metadata.focus_indicators.push((identity, color));
-                }
                 let previous = metadata.base(identity);
                 let mut values = [None, None];
                 for (slot, text) in [annotation.text.name, annotation.text.description]

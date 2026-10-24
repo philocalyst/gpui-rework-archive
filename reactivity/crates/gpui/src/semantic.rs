@@ -22,15 +22,10 @@ pub const DESCRIPTION: SemanticText = SemanticText::Description;
 pub(crate) struct Annotations<'a> {
     pub name: Option<Text<'a>>,
     pub description: Option<Text<'a>>,
-    pub disabled: bool,
-    pub focus_indicator: Option<crate::Color>,
 }
 impl Annotations<'_> {
     pub(crate) fn is_empty(&self) -> bool {
-        self.name.is_none()
-            && self.description.is_none()
-            && !self.disabled
-            && self.focus_indicator.is_none()
+        self.name.is_none() && self.description.is_none()
     }
 }
 pub(crate) struct AnnotationDraft<'a> {
@@ -46,7 +41,13 @@ type Projected<'a> = (
     Option<crate::list::RowMap>,
 );
 #[derive(Default)]
+pub(crate) struct ControlAppearance {
+    pub disabled: bool,
+    pub focus_indicator: Option<crate::Color>,
+}
+#[derive(Default)]
 pub(crate) struct ExtraParts<'a> {
+    pub control: ControlAppearance,
     pub list: Option<crate::list::ListSpec<'a>>,
     pub annotations: Annotations<'a>,
     pub projection: Option<Projected<'a>>,
@@ -72,6 +73,14 @@ enum LeafExtra<'a> {
     List(crate::list::ListSpec<'a>),
 }
 pub(crate) enum ElementExtra<'a> {
+    // A semantic control reuses the existing extra's 56-byte envelope. Literal
+    // geometry and focus have no additional box; optional bindings remain cold.
+    Control {
+        appearance: ControlAppearance,
+        semantic: Option<Box<Annotations<'a>>>,
+        geometry: crate::property::GeometryStyle,
+        base: Option<Box<ElementExtra<'a>>>,
+    },
     // Only mapped nodes pay for this payload; one normalized optional base.
     Mapped {
         bindings: Vec<crate::style_port::MapBinding<'a>>,
@@ -96,7 +105,63 @@ pub(crate) enum ElementExtra<'a> {
     },
 }
 impl<'a> ElementExtra<'a> {
+    pub fn focus_indicator(&mut self, color: crate::Color) {
+        self.control_mut().focus_indicator = Some(color);
+    }
+    pub fn set_disabled(&mut self, disabled: bool) {
+        if disabled {
+            self.control_mut().disabled = true;
+        } else if let Self::Control { appearance, .. } = self {
+            appearance.disabled = false;
+        }
+    }
+    fn control_mut(&mut self) -> &mut ControlAppearance {
+        if !matches!(self, Self::Control { .. }) {
+            let previous = std::mem::replace(self, Self::Semantic(Default::default()));
+            let parts = previous.into_parts();
+            assert!(
+                parts.image.is_none()
+                    && parts.projection.is_none()
+                    && parts.list.is_none()
+                    && parts.axes.is_none(),
+                "semantic control appearance cannot contain a deep system"
+            );
+            let mut base = (!parts.bindings.is_empty()).then(|| {
+                Box::new(Self::Decorations(Decorations {
+                    bindings: parts.bindings,
+                    ..Default::default()
+                }))
+            });
+            if !parts.mapped.is_empty() || parts.background.is_some() {
+                base = Some(Box::new(Self::Mapped {
+                    bindings: parts.mapped,
+                    background: parts.background,
+                    base,
+                }));
+            }
+            *self = Self::Control {
+                appearance: parts.control,
+                geometry: parts.geometry.unwrap_or_default(),
+                semantic: (!parts.annotations.is_empty()).then(|| Box::new(parts.annotations)),
+                base,
+            };
+        }
+        let Self::Control { appearance, .. } = self else {
+            unreachable!()
+        };
+        appearance
+    }
+    fn control_base(&mut self) -> &mut Self {
+        let Self::Control { base, .. } = self else {
+            unreachable!()
+        };
+        base.get_or_insert_with(|| Box::new(Self::Decorations(Default::default())))
+    }
+
     fn decorations(&mut self) -> &mut Decorations<'a> {
+        if matches!(self, Self::Control { .. }) {
+            return self.control_base().decorations();
+        }
         if let Self::Mapped { base, .. } = self {
             return base
                 .get_or_insert_with(|| Box::new(Self::Decorations(Default::default())))
@@ -123,7 +188,7 @@ impl<'a> ElementExtra<'a> {
                 Self::Semantic(semantic) => {
                     (None, (!semantic.is_empty()).then(|| Box::new(semantic)))
                 }
-                Self::Decorations(_) | Self::Mapped { .. } => unreachable!(),
+                Self::Decorations(_) | Self::Mapped { .. } | Self::Control { .. } => unreachable!(),
             };
             decorations.base = base.map(Box::new);
             decorations.semantic = semantic;
@@ -135,6 +200,20 @@ impl<'a> ElementExtra<'a> {
         decorations
     }
     pub fn empty(&self) -> bool {
+        if let Self::Control {
+            appearance,
+            semantic,
+            geometry,
+            base,
+        } = self
+        {
+            return !appearance.disabled
+                && appearance.focus_indicator.is_none()
+                && semantic.is_none()
+                && geometry.corner_radius.to_bits() == 0
+                && !geometry.clip_children
+                && base.as_deref().is_none_or(Self::empty);
+        }
         if let Self::Mapped {
             bindings,
             base,
@@ -153,6 +232,10 @@ impl<'a> ElementExtra<'a> {
         property: crate::property::PropertyId,
         signal: &'a dyn crate::style_port::StyleSignal,
     ) {
+        if matches!(self, Self::Control { .. }) {
+            self.control_base().bind(property, signal);
+            return;
+        }
         if let Self::Mapped {
             bindings,
             base: Some(base),
@@ -204,6 +287,10 @@ impl<'a> ElementExtra<'a> {
         property: crate::property::PropertyId,
         operand: crate::style_port::MapOperand<'a>,
     ) {
+        if matches!(self, Self::Control { .. }) {
+            self.control_base().bind_map(property, operand);
+            return;
+        }
         if let Self::Mapped { bindings, .. } = self
             && let Some(binding) = bindings
                 .iter_mut()
@@ -237,6 +324,12 @@ impl<'a> ElementExtra<'a> {
         bindings.push(crate::style_port::MapBinding { property, operand });
     }
     pub fn unbind(&mut self, property: crate::property::PropertyId) {
+        if let Self::Control { base, .. } = self {
+            if let Some(base) = base {
+                base.unbind(property);
+            }
+            return;
+        }
         if let Self::Mapped {
             bindings,
             base,
@@ -263,11 +356,21 @@ impl<'a> ElementExtra<'a> {
         }
     }
     pub fn clear_background(&mut self) {
+        if let Self::Control { base, .. } = self {
+            if let Some(base) = base {
+                base.clear_background();
+            }
+            return;
+        }
         if let Self::Mapped { background, .. } = self {
             *background = None;
         }
     }
     pub fn set_background(&mut self, gradient: &'a gpui_canvas::Gradient) {
+        if matches!(self, Self::Control { .. }) {
+            self.control_base().set_background(gradient);
+            return;
+        }
         self.unbind(crate::property::PropertyId::Background);
         if !matches!(self, Self::Mapped { .. }) {
             let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
@@ -287,12 +390,14 @@ impl<'a> ElementExtra<'a> {
     }
     pub fn set_radius(&mut self, value: f32) {
         match self {
+            Self::Control { geometry, .. } => geometry.corner_radius = value,
             Self::Image { spec, .. } => spec.corner_radius = value,
             _ => self.decorations().corner_radius = value,
         }
     }
     pub fn clip_children(&mut self, value: bool) {
         match self {
+            Self::Control { geometry, .. } => geometry.clip_children = value,
             Self::Image { spec, .. } => spec.clip_children = value,
             _ => self.decorations().clip_children = value,
         }
@@ -352,6 +457,9 @@ impl<'a> ElementExtra<'a> {
         }
     }
     pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
+        if let Self::Control { semantic, .. } = self {
+            return semantic.get_or_insert_with(Default::default);
+        }
         if let Self::Mapped { base, .. } = self {
             return base
                 .get_or_insert_with(|| Box::new(Self::Semantic(Annotations::default())))
@@ -372,13 +480,27 @@ impl<'a> ElementExtra<'a> {
                 semantic.get_or_insert_with(Default::default)
             }
             Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
-            Self::List(_) | Self::Mapped { .. } => unreachable!(),
+            Self::List(_) | Self::Mapped { .. } | Self::Control { .. } => unreachable!(),
         }
     }
     pub fn into_parts(mut self) -> ExtraParts<'a> {
         let mut parts = ExtraParts::default();
         loop {
             match self {
+                Self::Control {
+                    appearance,
+                    semantic,
+                    geometry,
+                    base,
+                } => {
+                    parts.control = appearance;
+                    parts.geometry = Some(geometry);
+                    parts.annotations = semantic.map(|s| *s).unwrap_or_default();
+                    if let Some(base) = base {
+                        self = *base;
+                        continue;
+                    }
+                }
                 Self::Mapped {
                     bindings,
                     base,
@@ -396,9 +518,11 @@ impl<'a> ElementExtra<'a> {
                         corner_radius: d.corner_radius,
                         clip_children: d.clip_children,
                     };
-                    parts.annotations = d.semantic.map(|s| *s).unwrap_or_default();
+                    if let Some(semantic) = d.semantic {
+                        parts.annotations = *semantic;
+                    }
                     parts.axes = d.axes;
-                    parts.geometry = Some(geometry);
+                    parts.geometry.get_or_insert(geometry);
                     parts.bindings = d.bindings;
                     match d.base.map(|base| *base) {
                         Some(LeafExtra::List(list)) => parts.list = Some(list),

@@ -378,3 +378,49 @@ fn failed_newer_candidate_cannot_restore_disabled_interaction_through_older_ack(
         "eligible older candidate"
     );
 }
+
+#[test]
+fn disabled_compound_parts_cannot_install_an_independent_action() {
+    struct Page {
+        disabled: bool,
+        calls: usize,
+        theme: Theme,
+    }
+    impl View for Page {
+        fn view(&self) -> El<'_> {
+            Checkbox::new("Part action", false, &self.theme)
+                .disabled(self.disabled)
+                .parts(|parts| parts.label(|e| e.on_click(|m: &mut Self| m.calls += 1)))
+                .build()
+        }
+    }
+    let mut window = Win::demo(Page {
+        disabled: true,
+        calls: 0,
+        theme: Theme::default(),
+    });
+    let part = window.role(Role::Text).text("Part action").one().unwrap();
+    assert!(matches!(window.activate(part), Err(Error::NotInteractive)));
+    assert!(matches!(window.focus(part), Err(Error::NotInteractive)));
+    window
+        .visit(|p| {
+            if p.target() == part {
+                assert!(p.disabled());
+                assert_eq!(p.actions().iter().count(), 0);
+            }
+        })
+        .unwrap();
+    window.update(|m| m.disabled = false).unwrap();
+    window.activate(part).unwrap();
+    assert_eq!(window.root().unwrap().calls, 1);
+}
+
+#[test]
+fn focus_and_geometry_share_the_existing_control_extra_allocation() {
+    let theme = Theme::default();
+    let cost = allocation_counter::measure(|| {
+        drop(Button::new("Stock", &theme).build());
+    });
+    assert_eq!(cost.count_total, 1);
+    assert_eq!(cost.bytes_total, 56);
+}
