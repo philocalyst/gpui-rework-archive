@@ -244,3 +244,79 @@ fn ill_conditioned_opaque_hdr_is_rejected_and_tiny_normal_alpha_hdr_is_admitted(
         assert_eq!(g.view().sample_parameter(0.5).unwrap()[0], HDR * 0.5);
     }
 }
+
+#[test]
+fn display_referred_hdr_and_p3_admission_cohorts() {
+    // Pair bit 7*left+right uses this order: R,G,B,Y,C,M,neutral. The
+    // hexadecimal mask records every accepted/rejected pair, not just a count.
+    let palette = [
+        [1., 0., 0.],
+        [0., 1., 0.],
+        [0., 0., 1.],
+        [1., 1., 0.],
+        [0., 1., 1.],
+        [1., 0., 1.],
+        [1., 1., 1.],
+    ];
+    for reference in [80., 100., 203.] {
+        for peak in [reference, 1000., 4000., 10000.] {
+            let scale = peak / reference;
+            for p3 in [false, true] {
+                for (a0, a1) in [(1., 1.), (0.25, 0.75)] {
+                    for mode in modes() {
+                        let mut accepted = 0_u64;
+                        for (i, rgb0) in palette.iter().enumerate() {
+                            for (j, rgb1) in palette.iter().enumerate() {
+                                let color = |rgb: [f32; 3], alpha| {
+                                    let [r, g, b] = rgb.map(|v| v * scale);
+                                    if p3 {
+                                        Color::linear_display_p3(r, g, b, alpha).unwrap()
+                                    } else {
+                                        Color::linear_srgb(r, g, b, alpha).unwrap()
+                                    }
+                                };
+                                let (left, right) = (color(*rgb0, a0), color(*rgb1, a1));
+                                match try_make(left, right, mode) {
+                                    Ok(gradient) => {
+                                        accepted |= 1 << (7 * i + j);
+                                        for t in [0.125, 0.5, 0.875] {
+                                            let actual =
+                                                gradient.view().sample_parameter(t).unwrap();
+                                            let expected = oracle::interpolate(
+                                                left,
+                                                right,
+                                                f64::from(t),
+                                                mode,
+                                            );
+                                            for c in 0..3 {
+                                                assert!(
+                                                    (f64::from(actual[c]) - expected[c]).abs()
+                                                        <= Mode::MAX_CONVERSION_ERROR
+                                                            + 2e-7 * expected[c].abs(),
+                                                    "reference={reference} peak={peak} p3={p3} alpha={a0}/{a1} {mode:?} pair={i}/{j} t={t} c={c} actual={actual:?} expected={expected:?}"
+                                                );
+                                            }
+                                        }
+                                    }
+                                    Err(gpui_canvas::Error::GradientPrecision) => {}
+                                    Err(error) => panic!("unexpected admission error {error:?}"),
+                                }
+                            }
+                        }
+                        eprintln!(
+                            "display_hdr_profile,reference_nits={reference},peak_nits={peak},p3={p3},alpha={a0}/{a1},mode={mode:?},admitted={},rejected={},accepted_pair_mask={accepted:013x}",
+                            accepted.count_ones(),
+                            49 - accepted.count_ones()
+                        );
+                        // Exact fixed intervals remain available at every peak.
+                        for i in 0..7 {
+                            if mode != (Mode::Oklch { hue: Hue::Longer }) {
+                                assert_ne!(accepted & (1 << (8 * i)), 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

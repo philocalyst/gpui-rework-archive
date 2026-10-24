@@ -4233,8 +4233,9 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
             ),
         ];
         for mode in modes {
+            let (mut admitted, mut rejected) = (0, 0);
             for (left, right) in pairs {
-                let gradient = Gradient::new(
+                let gradient = match Gradient::new(
                     GradientGeometry::Linear {
                         start: Point { x: 0., y: 0. },
                         end: Point { x: 1., y: 0. },
@@ -4242,8 +4243,18 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                     &[Stop::new(0., left), Stop::new(1., right)],
                     Extend::Pad,
                     mode,
-                )
-                .unwrap();
+                ) {
+                    Ok(gradient) => {
+                        admitted += 1;
+                        gradient
+                    }
+                    Err(gpui_canvas::Error::GradientPrecision) => {
+                        rejected += 1;
+                        eprintln!("gpu_profile_rejected,{mode:?},{left:?},{right:?}");
+                        continue;
+                    }
+                    Err(error) => panic!("unexpected admission error {error:?}"),
+                };
                 let mut canvas = Canvas::recording(
                     8,
                     1,
@@ -4284,6 +4295,11 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                     }
                 }
             }
+            eprintln!("gpu_profile,{mode:?},admitted={admitted},rejected={rejected}");
+            assert!(
+                admitted >= 5,
+                "GPU corpus must retain meaningful positive cases"
+            );
         }
     });
 }
@@ -4313,13 +4329,13 @@ fn perceptual_pad_and_coincident_edges_use_exact_prepared_endpoint_pixels() {
                 (
                     2.,
                     3.,
-                    [Stop::new(0., red), Stop::new(1., blue)],
+                    [Stop::new(0., red), Stop::new(0., blue)],
                     [0x4400_u16, 0, 0, 0x3800],
                 ),
                 (
                     -3.,
                     -2.,
-                    [Stop::new(0., red), Stop::new(1., blue)],
+                    [Stop::new(1., red), Stop::new(1., blue)],
                     [0, 0, 0x3e00, 0x3a00],
                 ),
                 (
@@ -4439,6 +4455,55 @@ fn transformed_gradient_edges_use_corrected_material_coordinates() {
                     );
                 }
             }
+        }
+    });
+}
+
+#[test]
+fn transparent_left_fixed_fade_preserves_exact_axis_channels() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, Interpolation, OutputProfile,
+    };
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        // The fixed-coordinate tag occupies the sign bit of normalized alpha0:
+        // this fixture encodes negative zero. WGSL floating arithmetic may lose
+        // its sign; the shader must inspect the original unsigned packet word.
+        let gradient = Gradient::new(
+            GradientGeometry::Linear {
+                start: Point { x: 0., y: 0. },
+                end: Point { x: 1., y: 0. },
+            },
+            &[
+                Stop::new(0., Color::linear_srgb(9., -1., 3., 0.).unwrap()),
+                Stop::new(1., Color::linear_srgb(0., 0., 8., 0.75).unwrap()),
+            ],
+            Extend::Pad,
+            Interpolation::Oklab,
+        )
+        .unwrap();
+        let mut canvas = Canvas::recording(
+            8,
+            1,
+            ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+        )
+        .unwrap();
+        canvas.clear(Color::TRANSPARENT);
+        let rect = Rect::new(0., 0., 8., 1.);
+        canvas
+            .fill_gradient(&gradient, rect, 0., Affine::IDENTITY, rect)
+            .unwrap();
+        let expected = canvas.pixels().to_vec();
+        for pixel in expected.as_chunks::<8>().0 {
+            assert_eq!(&pixel[..4], &[0; 4]);
+        }
+        for grouped in [false, true] {
+            renderer.set_grouped_records(grouped);
+            assert_eq!(
+                readback(&mut renderer, &canvas),
+                expected,
+                "grouped={grouped}"
+            );
         }
     });
 }

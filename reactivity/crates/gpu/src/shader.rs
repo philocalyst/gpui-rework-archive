@@ -403,7 +403,8 @@ pub mod ui {
             index = low - 1;
         }
         let word = base + 3 + index * stride;
-        let interval = bitcast_vec4f(get!(WORDS)[word as usize]);
+        let packed_interval = get!(WORDS)[word as usize];
+        let interval = bitcast_vec4f(packed_interval);
         let color = bitcast_vec4f(get!(WORDS)[(word + 1) as usize]);
         let mut u = 0.0;
         if low != 0 && index + 1 != count {
@@ -422,7 +423,7 @@ pub mod ui {
             return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]);
         }
         let delta = bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
-        if (bitcast_u32(interval.z) & 0x80000000) != 0 {
+        if (packed_interval.z & 0x80000000) != 0 {
             return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]) * (1.0 - u)
                 + bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]) * u;
         }
@@ -439,7 +440,7 @@ pub mod ui {
         }
         v = clamp(v, 0.0, 1.0);
         let mut q = color.xyz() + v * delta.xyz();
-        if (bitcast_u32(interval.y) & 0x80000000) == 0 {
+        if (packed_interval.y & 0x80000000) == 0 {
             // Only L and C are premultiplied; hue advances with u, not v.
             let hue = color.z + u * delta.z;
             let tau = bitcast_f32(0x40c90fdb);
