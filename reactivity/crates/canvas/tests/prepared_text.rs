@@ -39,6 +39,8 @@ fn prepared_rebreak_matches_independent_builder_metrics_and_complete_geometry() 
         "a\r\nb\rc\nd\u{85}e\u{2029}f\u{2028}g",
         "\r\n",
         "x\n\n",
+        "\n\r\nאבג\n\nالعربية\r\n\nabc\n\n",
+        "\u{85}\u{2029}\r\n\n",
     ] {
         for size in [1., 12., 16., 31.25, 512.] {
             let (mut prepared, initial) = reused
@@ -136,5 +138,36 @@ fn rejected_first_paragraph_never_reserves_remaining_layout_headers() {
             "reject before allocating paragraph headers: {length}"
         );
         assert_eq!(cost.bytes_total, 0);
+    }
+}
+
+#[test]
+fn empty_paragraph_capture_retention_is_independent_of_separator_count() {
+    let face = FontFace::bundled().unwrap();
+    let mut retained = None;
+    for length in [1, 1024, 32 * 1024] {
+        let source = "\n".repeat(length);
+        let mut shaper = face.shaper();
+        drop(shaper.shape("warm", 12., None).unwrap());
+        let mut prepared = None;
+        let cost = allocation_counter::measure(|| {
+            prepared = Some(shaper.prepare(&source, 12., None).unwrap());
+        });
+        assert_eq!(
+            *retained.get_or_insert(cost.bytes_current),
+            cost.bytes_current
+        );
+        let (mut prepared, measured) = prepared.unwrap();
+        let mut oracle = face.shaper();
+        assert_eq!(
+            bits(measured),
+            bits(oracle.measure(&source, 12., None).unwrap())
+        );
+        for width in [Some(f32::MIN_POSITIVE), Some(40.), None] {
+            assert_eq!(
+                layout_bits(&shaper.shape_prepared(&mut prepared, width).unwrap()),
+                layout_bits(&oracle.shape_interactive(&source, 12., width).unwrap())
+            );
+        }
     }
 }
