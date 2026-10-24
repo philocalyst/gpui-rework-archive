@@ -133,3 +133,32 @@ fn alpha_changes_and_two_changed_slots_preserve_complete_pixels() {
         }
     }
 }
+
+#[test]
+fn mounted_inspector_refreshes_the_mapped_color_after_a_complete_paint_turn() {
+    let mut win = Win::with_inspector(
+        Panel {
+            value: Signal::new(0),
+            alpha: false,
+            two: false,
+        },
+        WindowOptions {
+            size: [640, 240],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let target = win.query().name("paint").one().unwrap();
+    win.inspector_select(target).unwrap();
+    let caption = |color| {
+        format!(
+            "background: {:?}\nInherit",
+            gpui::property::PropertyValue::Color(color)
+        )
+    };
+    assert!(win.contains_text(&caption(Color::BLACK)).unwrap());
+    win.set(Panel::VALUE, 1).unwrap();
+    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert!(win.contains_text(&caption(Color::WHITE)).unwrap());
+    assert!(!win.contains_text(&caption(Color::BLACK)).unwrap());
+}

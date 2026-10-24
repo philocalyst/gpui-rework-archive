@@ -2713,18 +2713,17 @@ impl<M: View + 'static> Runtime<M> {
                 last_changed = Some(index);
             }
         }
-        if let Fanout::Mapped(mapped) = fanout {
-            if let ColorPatch::Candidate(change) =
+        if let Fanout::Mapped(mapped) = fanout
+            && let ColorPatch::Candidate(change) =
                 mapped.publish_colors(&mut self.styles, frozen.style, eligible)
-            {
-                // Only color relationships changed; preserve complete geometry
-                // through the existing alpha-checked transaction and ACK path.
-                self.dirty = false;
-                if self.finish_color_slot(change.as_ref())? {
-                    return Ok(PatchOutcome::Complete);
-                }
-                self.dirty = visual_changed;
+        {
+            // Only color relationships changed; preserve complete geometry
+            // through the existing alpha-checked transaction and ACK path.
+            self.dirty = false;
+            if self.finish_color_slot(change.as_ref())? {
+                return Ok(PatchOutcome::Complete);
             }
+            self.dirty = visual_changed;
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata

@@ -114,10 +114,21 @@ fn render(
             .iter()
             .zip(expected.as_chunks::<2>().0.iter())
         {
-            // This fixture uses nonnegative SDR-range author colors in HDR.
             let a = u16::from_le_bytes(*gpu);
             let b = u16::from_le_bytes(*cpu);
-            assert!(a.abs_diff(b) <= 1, "CPU/HDR conversion: {a:04x} vs {b:04x}");
+            // Rank finite signed halves monotonically, identifying both zeros.
+            let ordered = |bits: u16| {
+                let magnitude = bits & 0x7fff;
+                if bits & 0x8000 == 0 {
+                    0x8000 + magnitude
+                } else {
+                    0x8000 - magnitude
+                }
+            };
+            assert!(
+                ordered(a).abs_diff(ordered(b)) <= 1,
+                "CPU/HDR conversion: {a:04x} vs {b:04x}"
+            );
         }
     } else {
         assert!(
@@ -200,6 +211,16 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             gpu.renderer.stats().validated_draws > 0,
             "coalesced token gap rebuilds latest C"
         );
+        for color in [
+            Color::linear_srgb(3.0, -0.5, 0.25, 1.0).unwrap(),
+            Color::linear_srgb(-f32::from_bits(1), 0.5, 2.0, 1.0).unwrap(),
+            Color::TRANSPARENT,
+            Color::linear_srgb(2.0, 0.5, 0.0, 0.0).unwrap(),
+            Color::BLACK,
+        ] {
+            owner.set(Paint::COLOR, color).unwrap();
+            render(gpu, &mut oracle, &mut owner, &texture);
+        }
         owner
             .set(Paint::COLOR, Color::rgba(40, 60, 80, 100))
             .unwrap();
