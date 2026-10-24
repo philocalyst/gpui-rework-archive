@@ -42,7 +42,11 @@ fn compare(a: (&str, u32, Option<u32>), b: (&str, u32, Option<u32>)) -> Ordering
 }
 impl Spec {
     fn key(&self) -> (&str, u32, Option<u32>) {
-        (&self.value, self.size.to_bits(), None)
+        (
+            &self.value,
+            self.size.to_bits(),
+            self.width.map(f32::to_bits),
+        )
     }
 }
 struct Resource {
@@ -52,7 +56,7 @@ struct Resource {
 }
 impl Resource {
     fn key(&self) -> (&str, u32, Option<u32>) {
-        (&self.value, self.shape.font_size().to_bits(), None)
+        (&self.value, self.shape.font_size().to_bits(), self.width)
     }
     fn bytes(&self) -> usize {
         size_of::<Self>() + self.value.len() + self.shape.buffer_capacity_bytes()
