@@ -1,3 +1,5 @@
+#[path = "src/clip_specialization.rs"]
+mod clip_specialization;
 #[allow(dead_code)]
 #[path = "src/shader.rs"]
 mod shader;
@@ -18,4 +20,11 @@ fn main() {
     std::fs::write(&output, &source).expect("write the typed UI shader");
     #[cfg(feature = "offline-shader")]
     shader_build::generate(&source, output.parent().unwrap());
+    let source = clip_specialization::specialize(&source);
+    wgsl_rs::validate_wgsl_source(&source).expect("validate the cold clip specialization");
+    let cold = output.parent().unwrap().join("clip");
+    std::fs::create_dir_all(&cold).expect("cold artifact directory");
+    std::fs::write(cold.join("ui.wgsl"), &source).expect("write cold specialization");
+    #[cfg(feature = "offline-shader")]
+    shader_build::generate(&source, &cold);
 }

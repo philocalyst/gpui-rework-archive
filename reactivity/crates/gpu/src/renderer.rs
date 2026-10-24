@@ -1775,3 +1775,6 @@ mod tests {
         });
     }
 }
+
+#[cfg(test)]
+mod clip_reuse_probe;
