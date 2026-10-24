@@ -2240,10 +2240,9 @@ impl<M: View + 'static> Runtime<M> {
         let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
             let parent = draft.parent.map(|parent| parent as usize);
-            let component_scope = draft
-                .components
-                .scope()
-                .unwrap_or_else(|| parent.map_or(0, |parent| nodes[parent].component_scope));
+            // Only a boundary can change ownership. Reminting that root also
+            // prevents descendant reuse: every match includes parent identity.
+            let component_scope = draft.components.scope().unwrap_or(0);
             let ordinal_slot = parent.map_or(0, |parent| parent + 1);
             let ordinal = if index == 0 || parent == Some(index - 1) {
                 0

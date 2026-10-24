@@ -299,6 +299,110 @@ fn changing_the_inner_owner_of_a_shared_visual_root_revokes_both_subtrees() {
     assert_eq!(win.with_model(|m| m.pair.left.plain).unwrap(), 1);
 }
 
+#[derive(Default)]
+struct OwnerContent {
+    clicks: usize,
+    invalid: bool,
+    unregistered: Signal<String>,
+}
+impl OwnerContent {
+    fn bump(&mut self) {
+        self.clicks += 1;
+    }
+}
+impl ItemSource for OwnerContent {
+    fn len(&self) -> usize {
+        3
+    }
+    fn key(&self, index: usize) -> ItemKey {
+        ItemKey::new(index as u64 + 1)
+    }
+    fn index_of(&self, key: ItemKey) -> Option<usize> {
+        let index = key.get().checked_sub(1)? as usize;
+        (index < self.len()).then_some(index)
+    }
+    fn row(&self, index: usize) -> El<'_> {
+        button(format!("keyed{index}")).on_click(Self::bump)
+    }
+}
+impl View for OwnerContent {
+    fn view(&self) -> El<'_> {
+        column((
+            button("plain").on_click(Self::bump),
+            uniform_list(ListId::new(71), self, 24).w(180).h(72),
+            self.invalid.then(|| text_input(&self.unregistered)),
+        ))
+    }
+}
+#[derive(Default)]
+struct OwnerSwitch {
+    left: OwnerContent,
+    right: OwnerContent,
+    swap: bool,
+}
+impl OwnerSwitch {
+    const LEFT: Component<Self, OwnerContent> =
+        Component::new(FieldId::new(1), "left", |m| &m.left, |m| &mut m.left);
+    const RIGHT: Component<Self, OwnerContent> =
+        Component::new(FieldId::new(2), "right", |m| &m.right, |m| &mut m.right);
+}
+impl View for OwnerSwitch {
+    fn sources() -> Sources<Self> {
+        Sources::new().component(Self::LEFT).component(Self::RIGHT)
+    }
+    fn view(&self) -> El<'_> {
+        if self.swap {
+            Self::RIGHT.view(self)
+        } else {
+            Self::LEFT.view(self)
+        }
+    }
+}
+
+#[test]
+fn owner_changes_remint_unkeyed_and_keyed_descendants_and_recover_after_rejection() {
+    let mut win = Win::with_size(OwnerSwitch::default(), 200, 160).unwrap();
+    let identities = |win: &Win<OwnerSwitch>| {
+        win.snapshot()
+            .unwrap()
+            .nodes
+            .into_iter()
+            .map(|node| node.identity)
+            .collect::<Vec<_>>()
+    };
+    let before = identities(&win);
+    win.update(|_| {}).unwrap();
+    assert_eq!(identities(&win), before);
+    let plain = win.button("plain");
+    let keyed = win.button("keyed0");
+    win.update(|m| m.swap = true).unwrap();
+    assert!(identities(&win).iter().all(|id| !before.contains(id)));
+    assert_eq!(win.activate(plain), Err(Error::StaleTarget));
+    assert_eq!(win.activate(keyed), Err(Error::StaleTarget));
+    win.activate(win.button("keyed0")).unwrap();
+    assert_eq!(
+        win.with_model(|m| (m.left.clicks, m.right.clicks)).unwrap(),
+        (0, 1)
+    );
+
+    let held = win.button("keyed0");
+    assert!(matches!(
+        win.update(|m| m.right.invalid = true),
+        Err(Error::UnregisteredInput { .. })
+    ));
+    win.update(|m| {
+        m.right.invalid = false;
+        m.swap = false;
+    })
+    .unwrap();
+    assert_eq!(win.activate(held), Err(Error::StaleTarget));
+    win.activate(win.button("plain")).unwrap();
+    assert_eq!(
+        win.with_model(|m| (m.left.clicks, m.right.clicks)).unwrap(),
+        (1, 1)
+    );
+}
+
 struct ReadOnly {
     value: String,
 }
