@@ -3920,10 +3920,10 @@ fn nested_transformed_clip_prefixes_match_cpu_across_materials_and_group_layouts
                         &mut fonts,
                         &layout,
                         Point { x: 0.5, y: 1.5 },
-                        dpr,
                         Affine::IDENTITY,
                         child,
                         Color::WHITE,
+                        dpr,
                     )
                     .unwrap();
                 canvas

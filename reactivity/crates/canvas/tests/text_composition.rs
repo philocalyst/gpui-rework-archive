@@ -66,10 +66,10 @@ fn retained_text_metadata_preserves_complex_clip_gradient_order_and_lifetime() {
                         x: 2.5,
                         y: row as f32 * 10.0,
                     },
-                    dpr,
                     Affine::IDENTITY,
                     child,
                     Color::WHITE,
+                    dpr,
                 )
                 .unwrap();
         }
