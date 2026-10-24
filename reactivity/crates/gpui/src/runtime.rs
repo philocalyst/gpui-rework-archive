@@ -689,6 +689,7 @@ impl Node {
     }
 }
 impl TextSite {
+    #[cfg(test)]
     fn measure_for(
         &mut self,
         service: &mut TextShaper<'_>,
