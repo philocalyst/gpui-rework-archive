@@ -57,12 +57,15 @@ impl<'font, 'text> TextPass<'font, 'text> {
         if bytes > self.capacity_peak {
             self.capacity_peak = bytes;
             eprintln!(
-                "HANDOFF_CAPACITY bytes={bytes} pending={} peak={} pool_len={pool_len} pool_headers={pool_headers} pending_rows={pending:?} pool_rows={pool:?} ordinary_rows={ordinary:?} input_headers={} fact_headers={} prepared_header={}",
+                "HANDOFF_CAPACITY bytes={bytes} pending={} peak={} pool_len={pool_len} pool_headers={pool_headers} pending_rows={pending:?} pool_rows={pool:?} ordinary_rows={ordinary:?} input_headers={} fact_headers={} prepared_header={} map_capacity={} pass_header={} input_present={}",
                 self.prepared.len(),
                 self.peak,
                 self.inputs.len() * core::mem::size_of::<Option<SharedText>>(),
                 self.minimums.capacity() * core::mem::size_of::<Option<Minimum>>(),
-                core::mem::size_of::<PreparedText<'_>>()
+                core::mem::size_of::<PreparedText<'_>>(),
+                self.prepared.capacity(),
+                core::mem::size_of::<Self>(),
+                self.inputs.iter().filter(|input| input.is_some()).count()
             );
         }
     }
