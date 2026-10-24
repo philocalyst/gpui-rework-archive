@@ -4,21 +4,27 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
-The latest [text and preorder preparation composition](evidence/frontier-text-integration/README.md)
-qualifies library source `22dae0afcc65071909ddbfcce0d2d8bc00dcbfa1` and the
-standalone Hummingbird lock at `c6bef498a41a96ab23938f9025aa0ef0a63431b5`.
+The latest [component boundary composition](evidence/component-boundaries/README.md)
+qualifies library source `88e68054ba637e1a840d1311b56bfa53fa74544f` over the
+[text and preorder preparation composition](evidence/frontier-text-integration/README.md).
+Checked component boundaries reuse their route storage for identity scope,
+removing a third dense description buffer. Scope is stored only at boundaries;
+parent-qualified matching prevents descendant reuse across changed owners.
+Hummingbird's standalone lock remains `c6bef498a41a96ab23938f9025aa0ef0a63431b5`.
 Inherited preparation state follows the active branch; exact bitmap/rank replaces
 the dense publication map. Description recovers depth and sibling ordinals from
 existing parent links, removing two scratch allocations. Packed text leases and
 raster witnesses remove expanded retained placements, while metadata scans avoid
 unneeded geometry reconstruction. These compose with the existing
 [gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
-The composed ancestor passes 1,026 tests across 106 frozen executables; final
-GPUI passes 698 tests, strict all-target native/GPU Clippy, 33 doctests and 184
-scalar tests. Actual native paint/inspector and AT-SPI fixtures pass; Hummingbird
-passes 70 default-feature tests. Counts overlap and each pin remains explicit.
+The text/Canvas/GPU ancestor passes 1,026 tests across 106 frozen executables;
+final GPUI passes 700 tests, strict all-target native/GPU Clippy, 28 GPUI doctests
+and 190 scalar tests. Actual native paint/inspector and AT-SPI fixtures pass;
+Hummingbird passes 70 default-feature tests in 18 frozen executables. Counts
+overlap and each pin remains explicit. Two comment corrections preserve every
+production token from the qualified source.
 Generated WGSL and all eight SPIR-V recipes are verified in the executed binaries.
-The seven-library inventory is **34,680 non-test, non-comment shipping lines**,
+The seven-library inventory is **34,697 non-test, non-comment shipping lines**,
 including build scripts. EcoVec adds 2,315 separately charged dependency lines;
 tiny-layout costs and changed AccessKit vendor code remain explicit.
 The [mapped Todo](comparisons/mapped-todo/README.md) and

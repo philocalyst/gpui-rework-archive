@@ -1,0 +1,7 @@
+{
+  "sha256": "1eea535d2e01b477f4fbf78904b1644d549c37bb84596091c758a2fafbe4bdf5",
+  "bytes": 9284464,
+  "members": 1304,
+  "all_payload_hashes_reverified": true,
+  "scope": "Commands, guards, logs, executable identities, shaders and public outputs; no executable payloads. Frozen ELFs remain at recorded external paths."
+}

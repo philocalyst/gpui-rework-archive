@@ -1066,8 +1066,8 @@ impl ComponentBoundaries {
                 unreachable!("a component boundary is admitted once")
             };
             check.validate(receiver, sources)?;
-            // Model ancestry is independent of visual parentage. The final,
-            // innermost boundary supplies the scope inherited by visual children.
+            // Model ancestry is independent of visual parentage. Identity reuse
+            // checks this root against its innermost component boundary.
             scope = check.owner_scope(receiver, sources)?;
         }
         if let Some(boundary) = self.0.as_deref_mut() {

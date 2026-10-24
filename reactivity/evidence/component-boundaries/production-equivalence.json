@@ -1,0 +1,14 @@
+{
+  "qualified_source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+  "guarded_build_and_port_files": 2777,
+  "byte_exact_files": 2776,
+  "comment_only_file": "reactivity/crates/gpui/src/element.rs",
+  "qualified_sha256": "9bd5e39e869a74c239fab80515ac894ca5f2b1a29d2b2c530a7ad00ac30d97ca",
+  "current_sha256": "17b6c7207bd6f797158c287751f35266e02459b78fe712f07fa571df105b8310",
+  "old_comment": "            // Model ancestry is independent of visual parentage. The final,\n            // innermost boundary supplies the scope inherited by visual children.\n",
+  "new_comment": "            // Model ancestry is independent of visual parentage. Identity reuse\n            // checks this root against its innermost component boundary.\n",
+  "same_line_count": true,
+  "all_bytes_match_after_reversing_exact_full_line_comment_replacement": true,
+  "production_tokens_unchanged": true,
+  "scope": "Only two existing full-line comments differ; every other guarded byte is identical to executed qualification. No test rerun is required for these comment words."
+}
