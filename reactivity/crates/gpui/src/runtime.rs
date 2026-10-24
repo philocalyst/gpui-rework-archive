@@ -5021,7 +5021,7 @@ mod style_port_tests {
                     Contribution::Inherit,
                 )
                 .unwrap();
-            assert_eq!(lower.width, Some(24.0));
+            assert_eq!(lower.width, Length::Points(24.0));
         }
     }
     #[test]

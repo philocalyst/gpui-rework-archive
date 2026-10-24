@@ -1794,22 +1794,34 @@ mod tests {
         }
         macro_rules! numbers {
             ($($ty:ty),+) => {$(
-                check!(w, f64, WIDTH, 3 as $ty, Some(3.0));
-                check!(h, f64, HEIGHT, 3 as $ty, Some(3.0));
+                check!(w, f64, WIDTH, 3 as $ty, crate::Length::Points(3.0));
+                check!(h, f64, HEIGHT, 3 as $ty, crate::Length::Points(3.0));
                 check!(gap, f64, GAP, 3 as $ty, 3.0);
                 check!(p, f64, PADDING, 3 as $ty, 3.0);
                 check!(font_size, f64, FONT_SIZE, 3 as $ty, 3.0);
             )+};
         }
         numbers!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
-        check!(w, f64, WIDTH, -0.0_f64, Some(-0.0));
+        check!(w, f64, WIDTH, -0.0_f64, crate::Length::Points(-0.0));
         check!(p, f64, PADDING, -0.0_f32, -0.0);
         // Preserve the inherited IntoLength→f64→f32 conversion, including its
         // double-rounding boundaries, rather than silently switching casts.
         let midpoint = (1_u64 << 63) + (1_u64 << 39) + 1;
-        check!(w, f64, WIDTH, midpoint, Some((midpoint as f64) as f32));
+        check!(
+            w,
+            f64,
+            WIDTH,
+            midpoint,
+            crate::Length::Points((midpoint as f64) as f32)
+        );
         let midpoint = (1_i64 << 62) + (1_i64 << 38) + 1;
-        check!(h, f64, HEIGHT, midpoint, Some((midpoint as f64) as f32));
+        check!(
+            h,
+            f64,
+            HEIGHT,
+            midpoint,
+            crate::Length::Points((midpoint as f64) as f32)
+        );
         for color in [
             Color::rgb(1, 2, 3),
             Color::display_p3(-0.0, 0.5, 1.0, 0.5).unwrap(),
