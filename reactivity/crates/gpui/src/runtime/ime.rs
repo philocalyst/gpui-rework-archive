@@ -134,9 +134,7 @@ fn preview_selections(
     // Admission places both raw cursor endpoints inside the marked range. Each
     // nearest endpoint needs only its adjacent boundaries; ties go downstream.
     // The first boundary at/after marked.end also completes its decoration.
-    for boundary in icu_segmenter::GraphemeClusterSegmenter::new()
-        .segment_str(&value[base..base + marked.end])
-    {
+    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(&value[base..]) {
         let nearest = |byte: usize| {
             if byte.abs_diff(previous) < byte.abs_diff(boundary) {
                 previous
