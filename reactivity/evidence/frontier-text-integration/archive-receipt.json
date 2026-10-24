@@ -1,0 +1,7 @@
+{
+  "sha256": "b5ccdcdaf7172a9f635dc88b16285e248698c6a6bc00d354f272fe0b9d06027c",
+  "bytes": 7586255,
+  "members": 1006,
+  "every_payload_hash_reverified": true,
+  "scope": "Logs, guards, commands, executable identities and generated shaders only. Frozen executable payloads remain at recorded external paths; no executable is copied into this archive."
+}

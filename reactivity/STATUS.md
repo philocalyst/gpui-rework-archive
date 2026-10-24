@@ -4,21 +4,28 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
-The latest composed source `948eff489aaa1f5d36a2514dc247884755b8e5c7` adds
-[gradient materials and nested transformed clipping](evidence/clipping-gradients-integration/README.md)
-to mapped properties, canonical text submission and certified-solid GPU packets.
-The composed ancestor passes 997 tests across 102 frozen executables, 32 doctests,
-16 scalar evaluator/coverage checks and strict native/GPU all-target Clippy;
-actual native paint/inspector and AT-SPI wire fixtures pass. The final exact
-clip-damage delta passes 14 focused tests in both SIMD/default and scalar builds,
-and strict native/GPU Clippy. Counts overlap and each source pin remains explicit.
-Generated WGSL and all SPIR-V recipes are verified in the executed binaries.
-The seven-library inventory is **34,466 non-test, non-comment shipping lines**,
-including build scripts; changed AccessKit vendor code is charged separately.
+The latest [text and preorder preparation composition](evidence/frontier-text-integration/README.md)
+qualifies library source `22dae0afcc65071909ddbfcce0d2d8bc00dcbfa1` and the
+standalone Hummingbird lock at `c6bef498a41a96ab23938f9025aa0ef0a63431b5`.
+Inherited preparation state follows the active branch; exact bitmap/rank replaces
+the dense publication map. Description recovers depth and sibling ordinals from
+existing parent links, removing two scratch allocations. Packed text leases and
+raster witnesses remove expanded retained placements, while metadata scans avoid
+unneeded geometry reconstruction. These compose with the existing
+[gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
+The composed ancestor passes 1,026 tests across 106 frozen executables; final
+GPUI passes 698 tests, strict all-target native/GPU Clippy, 33 doctests and 184
+scalar tests. Actual native paint/inspector and AT-SPI fixtures pass; Hummingbird
+passes 70 default-feature tests. Counts overlap and each pin remains explicit.
+Generated WGSL and all eight SPIR-V recipes are verified in the executed binaries.
+The seven-library inventory is **34,680 non-test, non-comment shipping lines**,
+including build scripts. EcoVec adds 2,315 separately charged dependency lines;
+tiny-layout costs and changed AccessKit vendor code remain explicit.
 The [mapped Todo](comparisons/mapped-todo/README.md) and
 [matched shader](comparisons/todo-shader-profiles/README.md) experiments retain
-their historical source identities and failed work gates. Perceptual gradients,
-compact shared text and the O(depth) preparation frontier remain separate spikes.
+their historical source identities and failed work gates. Perceptual-gradient
+precision tiers, thinner glyph ownership and GPU clip-membership reuse remain
+separate spikes; their costs and unsupported domains are not shipping claims.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
@@ -29,7 +36,7 @@ compact shared text and the O(depth) preparation frontier remain separate spikes
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 14 properties and nine value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse, shared packed glyphs and direct raster witnesses; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | Rich styled spans/color fonts, general Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, analytic linear/radial/conic gradient materials, nested transformed rectangle/rounded clip chains, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |

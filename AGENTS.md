@@ -20,11 +20,16 @@ the actual clean-room composition before adoption. Designs live in
 - Format only intended files with `rustfmt --edition 2024 --config skip_children=true`.
   `cargo fmt --all` traverses path dependencies and has modified vendored source
   accidentally; do not use it for this workspace.
-- Give each concurrent lane its own target. A reused GPU target can retain stale
-  build-script output after source overlays. Clean the GPU package or use a fresh
-  target, compare generated WGSL against the typed shader, and verify the actual
-  generated WGSL/SPIR-V bytes inside the executable that ran. A source file alone
-  is not executable identity.
+- Give each concurrent lane its own target. Cross-worktree target reuse has
+  returned an identical stale Rust executable for changed source whose mtime
+  preceded the baseline build. Clean changed first-party packages before such
+  reuse, or use a fresh target. Pinned Cargo's `-Z checksum-freshness --config
+  'build.fingerprint="content"'` passed an actual old-mtime 17→19→17 control.
+  [Cargo documents](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#checksum-freshness)
+  that build-script `rerun-if-changed` still uses mtimes. Clean the GPU package
+  after overlays, compare generated WGSL against the typed shader, and verify
+  generated WGSL/SPIR-V bytes inside the executable that ran. Inspect Cargo JSON
+  freshness and actual executable identities; source guards alone are insufficient.
 - Treat execution and measurement separately. Preserve full source/toolchain,
   features, input guards, executable hashes and exact workload gates. Report
   failed gates and fallbacks. Software Vulkan and private X11 establish neither
@@ -45,3 +50,6 @@ the actual clean-room composition before adoption. Designs live in
   numerical boundaries and actual native accessibility. A bounded mutant should
   falsify any new optimization certificate. Never substitute tolerance or reduced
   work for an established exact/workload gate.
+- Standalone application ports have independent lockfiles. Resolve necessary
+  dependency edges without unrelated upgrades, then run their locked offline
+  checks against the composed core before claiming those ports still build.
