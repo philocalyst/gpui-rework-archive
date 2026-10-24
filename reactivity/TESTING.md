@@ -89,6 +89,14 @@ or paint work. Virtual time, completion control and replay remain implementation
 gates through production facilities. There are no dummy test-only timers or a
 second event loop.
 
+The ordinary [IME cursor cost example](crates/gpui/examples/ime_cursor_cost.rs)
+times complete recording calls, then checks unchanged canonical source/epoch
+and exact acknowledged display, mark and selection focus. The
+[grapheme restart dossier](evidence/ime-ascii-restart/README.md) keeps its matched
+raw samples separate from native rendering and latency gates. Full-string ICU
+oracles independently check both Unicode seams; bounded mutants must fail a
+semantic assertion rather than merely panic on an unrelated bound.
+
 The [contained property editor](docs/property-state-routes.md) exercises this same
 surface through public mounted selection, canonical state replies, editable
 drafts, Apply, Inherit and Refresh. Its headless cases use ordinary `Win` actions;

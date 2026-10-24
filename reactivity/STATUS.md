@@ -4,6 +4,15 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
+The [IME grapheme restart](evidence/ime-ascii-restart/README.md) removes repeated
+grapheme work over certified ASCII prefixes while preserving complete Unicode
+seam context. Main passes 209 affected cases and strict checks; both missing-context
+mutants fail semantic oracles. Six matched recording processes measure 10.1%
+less time at 4 KiB and 12.4% at 32 KiB, with a separately preserved earlier
+Unicode slowdown. This is CPU recording evidence, not native display latency.
+Current seven-library source `ce75a3511b` contains **35,863** non-test code lines,
+including 18 build-script lines: +12, no retained state or dependency added.
+
 The [scoped IME composition](evidence/ime-integration/README.md) connects
 ordinary composition events to source-qualified editing, immutable display text,
 acknowledged geometry and native accessibility. Root's exact composed review
@@ -11,7 +20,7 @@ passes 673 Linux cases and 744 native Mac cases, 28 docs on each, strict checks
 and Hummingbird's locked default-target check. Native cancellation without a
 Disabled acknowledgement can still quarantine composition until window close;
 physical candidate engines, VoiceOver and Windows runtime remain unqualified.
-Current seven-library source `373c9c6ba2` contains **35,851** non-test code lines,
+That seven-library source `373c9c6ba2` contains **35,851** non-test code lines,
 including 18 library build-script lines, up 952 from its predecessor.
 
 The ordinary [Todo recording fixture](crates/gpui/examples/todo_recording_cost.rs)
@@ -63,7 +72,7 @@ Hummingbird's standalone lock remains `c6bef498a41a96ab23938f9025aa0ef0a63431b5`
 Generated WGSL and all eight SPIR-V recipes are verified in the executed native
 binary. These compose with the [text and preorder preparation](evidence/frontier-text-integration/README.md)
 and [gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
-The current seven-library inventory is **34,899 non-test, non-comment shipping lines**,
+That predecessor's seven-library inventory is **34,899 non-test, non-comment shipping lines**,
 including 18 build-script lines, 47 above the packed-tree source. EcoVec adds
 2,315 separately charged dependency lines;
 tiny-layout costs and changed AccessKit vendor code remain explicit.

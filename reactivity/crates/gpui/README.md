@@ -216,7 +216,7 @@ input-version and cohort graph remains outstanding.
 Current boundaries are explicit: one root owner; full scene preparation on a
 visual/hit change; layout topology rebuilds after structural changes; Cephal
 depth bounded to 128; viewport clipping; the canvas's documented text/script
-limits; IME, clipboard and autoscroll remain; no
+limits; native IME turnover, clipboard and autoscroll remain; no
 complete async graph, embedded native/web content,
 or compatibility facade yet. GPU completion is distinct from presentation
 acknowledgement; Wgpu retains submitted resource leases. Multiwindow device
