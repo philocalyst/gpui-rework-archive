@@ -2510,6 +2510,7 @@ impl<M: View + 'static> Runtime<M> {
             self.dirty |= self.changed_nodes != 0;
             return Ok(PatchOutcome::Visual);
         }
+        let eligible = !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
         let Some(fanout) = self.fanout.get_mut(&field) else {
             return Ok(PatchOutcome::Visual);
         };
@@ -2550,6 +2551,16 @@ impl<M: View + 'static> Runtime<M> {
                 frozen.style.expect("style codec requested").admit(id)?;
             }
         }
+        let mut paintable = eligible
+            && fanout.all_destinations().all(|(destination, _, _)| {
+                matches!(
+                    destination.property(),
+                    Some(
+                        crate::property::PropertyId::Foreground
+                            | crate::property::PropertyId::Background
+                    )
+                )
+            });
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
@@ -2659,6 +2670,7 @@ impl<M: View + 'static> Runtime<M> {
         // Every comparison and inspector base above sees the OLD bank. A
         // shared identity slot can have an overridden first sink and unmasked
         // later sinks. Mutating it earlier would hide those later changes.
+        let mut paint_change = None;
         for (_, mapped_value, color) in fanout.all_destinations() {
             if let Some(slot) = styles::ColorSlot::from_source_code(color) {
                 let value = match mapped_value {
@@ -2671,8 +2683,30 @@ impl<M: View + 'static> Runtime<M> {
                 let crate::property::PropertyValue::Color(value) = value else {
                     unreachable!("color slot has color property")
                 };
-                self.styles.update_color(slot, value);
+                if let Some(change) = self.styles.update_color(slot, value)
+                    && change.users != 0
+                    && change.previous.working().map(f32::to_bits)
+                        != change.value.working().map(f32::to_bits)
+                    && (change.canvas.is_some()
+                        || change.previous.working()[3].to_bits()
+                            != change.value.working()[3].to_bits())
+                {
+                    if paint_change.is_some() {
+                        paintable = false;
+                    } else {
+                        paint_change = Some(change);
+                    }
+                }
             }
+        }
+        if paintable {
+            // Only color relationships changed. The existing transactional path
+            // checks alpha and complete-C authority before preserving geometry.
+            self.dirty = false;
+            if self.finish_color_slot(paint_change.as_ref())? {
+                return Ok(PatchOutcome::Complete);
+            }
+            self.dirty = visual_changed;
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
