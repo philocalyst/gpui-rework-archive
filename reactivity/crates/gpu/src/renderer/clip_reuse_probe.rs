@@ -90,7 +90,7 @@ fn custom(
         .device
         .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[&c.layout],
+            bind_group_layouts: &[Some(&c.layout)],
             immediate_size: 0,
         });
     let pipeline = c
@@ -269,13 +269,13 @@ fn diagnostic(source: &str) -> String {
     let cost = chain
         .replace("clip_chain_contains(", "clip_chain_cost(")
         .replace("-> bool", "-> vec2u")
-        .replace("return false;", "return vec2u(0u, _depth + 1u);")
-        .replace("return true;", "return vec2u(1u, _depth + 1u);");
+        .replace("return false;", "return vec2u(0u, u32(_depth) + 1u);")
+        .replace("return true;", "return vec2u(1u, u32(_depth) + 1u);");
     // Final bounded-depth fallthrough has no in-scope loop counter.
-    let at = cost.rfind("return vec2u(0u, _depth + 1u);").unwrap();
+    let at = cost.rfind("return vec2u(0u, u32(_depth) + 1u);").unwrap();
     let mut cost = cost;
     cost.replace_range(
-        at..at + "return vec2u(0u, _depth + 1u);".len(),
+        at..at + "return vec2u(0u, u32(_depth) + 1u);".len(),
         "return vec2u(0u, 64u);",
     );
     let fragment = source.find("@fragment").unwrap();
