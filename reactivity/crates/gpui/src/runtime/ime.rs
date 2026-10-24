@@ -114,7 +114,7 @@ fn preview_selections(
     // ASCII bytes also certify the restart offset is a UTF-8 boundary.
     let bytes = value.as_bytes();
     let mut base = if bytes.get(..marked.start).is_some_and(<[u8]>::is_ascii) {
-        marked.start.saturating_sub(1)
+        marked.start.saturating_sub(0)
     } else {
         0
     };
