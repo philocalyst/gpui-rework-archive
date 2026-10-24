@@ -1096,6 +1096,7 @@ impl<'a> El<'a> {
                 mapped_ports.push(crate::style_port::MapDraft {
                     node: index,
                     sink: binding.sink,
+                    value,
                     operand: binding.operand,
                 });
             }

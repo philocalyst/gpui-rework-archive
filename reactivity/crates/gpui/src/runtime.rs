@@ -911,7 +911,7 @@ impl Fanout {
         draft: crate::style_port::MapDraft<'_>,
         colors: &mut styles::ColorDiscovery,
     ) -> Result<(), Error> {
-        let value = draft.sink.admit(draft.operand.scalar()?)?;
+        let value = draft.value;
         let recipe = draft
             .operand
             .recipe

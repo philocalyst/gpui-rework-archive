@@ -462,16 +462,14 @@ fn invalid_shared_style_output_rejects_boolean_publication_before_any_sink_write
         })
     ));
     win.presented(older).unwrap();
-    assert_eq!(
-        win.snapshot()
-            .unwrap()
-            .nodes
-            .iter()
-            .find(|n| n.role == Role::CheckBox)
-            .unwrap()
-            .checked,
-        Some(true)
-    );
+    let mut checked = None;
+    win.visit(|part| {
+        if part.role() == Role::CheckBox {
+            checked = part.checked();
+        }
+    })
+    .unwrap();
+    assert_eq!(checked, Some(true));
     assert!(matches!(win.activate(target), Err(Error::StaleTarget)));
     win.set(VALUE, 1.0).unwrap();
     ack(&mut win);

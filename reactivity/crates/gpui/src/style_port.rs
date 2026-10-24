@@ -312,6 +312,7 @@ pub(crate) struct MapBinding<'a> {
 pub(crate) struct MapDraft<'a> {
     pub node: u32,
     pub sink: Sink,
+    pub value: PropertyValue,
     pub operand: MapOperand<'a>,
 }
 
