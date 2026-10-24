@@ -23,7 +23,11 @@ the actual clean-room composition before adoption. Designs live in
 - Give each concurrent lane its own target. Cross-worktree target reuse has
   returned an identical stale Rust executable for changed source whose mtime
   preceded the baseline build. Clean changed first-party packages before such
-  reuse, or use a fresh target. Pinned Cargo's `-Z checksum-freshness --config
+  reuse, or use a fresh target. Profile selection matters: `cargo clean -p gpui`
+  does not clean release artifacts; use `cargo clean --release -p gpui` for a
+  release comparison. Verify the changed library was rebuilt, not merely the
+  final executable. Preserve rejected stale captures. Pinned Cargo's
+  `-Z checksum-freshness --config
   'build.fingerprint="content"'` passed an actual old-mtime 17→19→17 control.
   [Cargo documents](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#checksum-freshness)
   that build-script `rerun-if-changed` still uses mtimes. Clean the GPU package

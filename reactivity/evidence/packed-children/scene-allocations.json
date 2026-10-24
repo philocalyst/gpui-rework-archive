@@ -1,0 +1,1064 @@
+{
+  "baseline": {
+    "label": "baseline",
+    "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+    "binary": "/tmp/gpui-component-boundary-root-artifacts/046-frontier/test",
+    "elf_sha256": "1e1167595e4f1f5262d9fcd623d3221447c216e1834bbd0add6d7c77dbe02481",
+    "rows": {
+      "Plain-1": {
+        "logical": 1,
+        "cold": [
+          37,
+          7419,
+          5979,
+          6131
+        ],
+        "warm": [
+          12,
+          752,
+          -16508,
+          296
+        ]
+      },
+      "Plain-32": {
+        "logical": 32,
+        "cold": [
+          184,
+          66611,
+          23773,
+          25157
+        ],
+        "warm": [
+          30,
+          13344,
+          -16904,
+          5512
+        ]
+      },
+      "Plain-10000": {
+        "logical": 10000,
+        "cold": [
+          40850,
+          24632591,
+          6019297,
+          7109850
+        ],
+        "warm": [
+          38,
+          1632032,
+          -17360,
+          811208
+        ]
+      },
+      "Clip-1": {
+        "logical": 1,
+        "cold": [
+          45,
+          8203,
+          6651,
+          6755
+        ],
+        "warm": [
+          20,
+          1872,
+          -16508,
+          744
+        ]
+      },
+      "Clip-32": {
+        "logical": 32,
+        "cold": [
+          189,
+          61939,
+          18989,
+          20357
+        ],
+        "warm": [
+          40,
+          14848,
+          -16904,
+          6248
+        ]
+      },
+      "Clip-10000": {
+        "logical": 10000,
+        "cold": [
+          40855,
+          22865807,
+          4261825,
+          7109914
+        ],
+        "warm": [
+          44,
+          1617664,
+          -16952,
+          806440
+        ]
+      },
+      "Wide-1": {
+        "logical": 1,
+        "cold": [
+          37,
+          7419,
+          5979,
+          6131
+        ],
+        "warm": [
+          12,
+          752,
+          -16508,
+          296
+        ]
+      },
+      "Wide-32": {
+        "logical": 32,
+        "cold": [
+          180,
+          61315,
+          18477,
+          19861
+        ],
+        "warm": [
+          30,
+          13344,
+          -16904,
+          5512
+        ]
+      },
+      "Wide-10000": {
+        "logical": 10000,
+        "cold": [
+          40848,
+          22873119,
+          4265281,
+          7109850
+        ],
+        "warm": [
+          38,
+          1632032,
+          -17360,
+          811208
+        ]
+      },
+      "List-1": {
+        "logical": 3,
+        "cold": [
+          72,
+          15448,
+          11272,
+          11496
+        ],
+        "warm": [
+          92,
+          17136,
+          -16524,
+          5088
+        ]
+      },
+      "List-32": {
+        "logical": 65,
+        "cold": [
+          355,
+          260738,
+          99686,
+          102030
+        ],
+        "warm": [
+          366,
+          241522,
+          -16892,
+          42352
+        ]
+      },
+      "List-10000": {
+        "logical": 196,
+        "cold": [
+          37850,
+          29931194,
+          10371048,
+          10571928
+        ],
+        "warm": [
+          75356,
+          56866191,
+          -17228,
+          6753986
+        ]
+      },
+      "Scroll-1": {
+        "logical": 1,
+        "cold": [
+          43,
+          9707,
+          7467,
+          7587
+        ],
+        "warm": [
+          16,
+          912,
+          -16508,
+          296
+        ]
+      },
+      "Scroll-32": {
+        "logical": 32,
+        "cold": [
+          187,
+          63443,
+          19805,
+          21205
+        ],
+        "warm": [
+          36,
+          13888,
+          -16904,
+          5784
+        ]
+      },
+      "Scroll-10000": {
+        "logical": 10000,
+        "cold": [
+          40853,
+          22869807,
+          4262641,
+          7110522
+        ],
+        "warm": [
+          40,
+          1621696,
+          -16928,
+          808472
+        ]
+      },
+      "Deep-1": {
+        "logical": 1,
+        "cold": [
+          39,
+          7664,
+          6224,
+          6328
+        ],
+        "warm": [
+          16,
+          1248,
+          -16524,
+          432
+        ]
+      },
+      "Deep-32": {
+        "logical": 32,
+        "cold": [
+          334,
+          100914,
+          48448,
+          50576
+        ],
+        "warm": [
+          18,
+          9232,
+          -16524,
+          4424
+        ]
+      },
+      "Deep-129": {
+        "logical": 129,
+        "cold": [
+          1207,
+          522357,
+          -1644883,
+          144445
+        ],
+        "warm": [
+          18,
+          35616,
+          -16524,
+          17616
+        ]
+      }
+    },
+    "artifacts": {
+      "Wide-1-warm.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Wide-1-warm.json": "28b06ff1da2da4d56c3963990ad2445527bd06216b37b5ef6fbec6bbcbfbd698",
+      "mixed-repaired.json": "803b2c730fde3ca51baed31d526ac58b22aafda02daaf62da54c1bf97ac4a260",
+      "Deep-32-cold.rgba": "ecf8d97f5a249934c23c0761a7c4176dc7e7a868f023fcefa6db990d9f01f0dd",
+      "mixed-repaired.rgba": "149a26ed5d20d6da9254f84e7cbfa5cfccba7285ff74cd2a5bfd2b67d76c7870",
+      "Deep-32-cold.json": "95f83a935a2e09624f5651037b8085f0dc0211b7aa272acd6a3a3dbfbc2c758e",
+      "Plain-10000-warm.rgba": "233a7069e06a542f36eed061fd692f3d16ada98472d4375ad0c55e738f6f8673",
+      "Scroll-10000-cold.hits": "e357fcf77f4f0143006fa278462b0772cd9e426e57e9bc532a8537ce37bfa174",
+      "Wide-10000-warm.hits": "69c4e43feb11aa1b300460ae4cf0465faacca0d97be4afad8fffb2f0c790f7ce",
+      "Deep-129-cold.json": "f557b14cf5c593784cbf7bd361d4eb12315b22f1e10dacc356477426ee988ee4",
+      "Scroll-10000-warm.hits": "e357fcf77f4f0143006fa278462b0772cd9e426e57e9bc532a8537ce37bfa174",
+      "Scroll-1-warm.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Wide-32-warm.hits": "37843ae4f18711f87be3305308b4b2fca10792b85eed23d112ec3895d95a73f7",
+      "Deep-129-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Wide-32-warm.json": "05968905a3b13123b941858cf5d5b6a85b8c059e9408fc3afc7fd733efb0d4fa",
+      "Wide-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Wide-10000-warm.json": "9e8b0029872d7c471ef3e76291cbd6c6366b49391b7c5e4b5ff7f7c24ac0bfaf",
+      "List-32-warm.json": "96015a3bae1abec9cfd520dd758c3a1d1e6be6a2e621789f093ebac461b3c67f",
+      "List-10000-cold.json": "6e7562b21feccbec8093b47a7b26f53f8772a53d3d5eae3c99fdec0c0f43943b",
+      "Plain-32-cold.json": "3162a1d35f336853ea75011382074e0db58abc76f16134a44670cce8a7bdfb67",
+      "Clip-32-cold.hits": "d5dcf2a3a69c714bea67977bda80a53f52cf9b1340b6da1b7b1e080a0b9e6515",
+      "List-10000-warm.json": "6e7562b21feccbec8093b47a7b26f53f8772a53d3d5eae3c99fdec0c0f43943b",
+      "Scroll-1-warm.json": "4717bb1e0f658a9988e629b3346096f3548379231d25d96419630b08ea341bd3",
+      "Deep-129-warm.json": "f557b14cf5c593784cbf7bd361d4eb12315b22f1e10dacc356477426ee988ee4",
+      "Wide-10000-cold.json": "9e8b0029872d7c471ef3e76291cbd6c6366b49391b7c5e4b5ff7f7c24ac0bfaf",
+      "Plain-10000-warm.json": "e81f3741c3769fa5a2021cd0bd69e81caa67a95e23b19eee7c82950fa96d95c9",
+      "Clip-1-warm.json": "a60913ab89007cc5a2d7d8d767d6840e0e55cd22e384575a52fb3cf666d4a3a6",
+      "Scroll-10000-warm.json": "a37859fc5fc3b9afb554d21c51e53536e241be10c969f272e832cb23a9897c07",
+      "Scroll-32-cold.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Clip-10000-cold.rgba": "be66f2af98840d4a66826be024831cb07e64c40300971431d09acee2b341e154",
+      "Wide-32-cold.rgba": "eab24216503b71af78e8e85b45e0efc7bdf75217132a9cd0b84a3674ba6cc06e",
+      "Deep-129-warm.hits": "7817ba81e227f5b1d6120c1e7d3f01cdd1f648dca9ca04ca8e3c2c0939c6e99d",
+      "Scroll-32-cold.json": "7c2ea9706bda5a635c35951aa70dffd3bd7fb71531c11c2bc9b90b4bc06c43a6",
+      "Deep-32-warm.json": "95f83a935a2e09624f5651037b8085f0dc0211b7aa272acd6a3a3dbfbc2c758e",
+      "Scroll-32-warm.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "mixed-p.rgba": "c51c9f74cd482d4b4226c303a90f6e190786f75b7e6be055b2b19a28a76bf4fa",
+      "Clip-32-cold.rgba": "1aa86d32fbd52e3f9e5a6eef70530fb1cdbd81e0f490657a514bfbc656a219aa",
+      "Clip-1-cold.json": "a60913ab89007cc5a2d7d8d767d6840e0e55cd22e384575a52fb3cf666d4a3a6",
+      "Plain-32-warm.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Wide-10000-cold.hits": "69c4e43feb11aa1b300460ae4cf0465faacca0d97be4afad8fffb2f0c790f7ce",
+      "Wide-32-cold.json": "05968905a3b13123b941858cf5d5b6a85b8c059e9408fc3afc7fd733efb0d4fa",
+      "Scroll-10000-warm.rgba": "8981508d3f234726fe66576f8603f7b242089a51142e6453db2baa0e4d580aff",
+      "List-1-cold.json": "0b250d799e2a2e9e4abcc67e775297419fb4261434249af9dc941dc5f999be55",
+      "mixed-p.hits": "41ab1bb743d6d8b0765a52a90f36781df76947860b6c60410a8c7d704f2b427b",
+      "List-1-warm.rgba": "a159d87420162303ff8d515e5b0c40c20e91e0add816f57878b6e03cf3346a9a",
+      "mixed-eligible-after-failure.rgba": "149a26ed5d20d6da9254f84e7cbfa5cfccba7285ff74cd2a5bfd2b67d76c7870",
+      "Clip-10000-cold.json": "1117a105ca81aefa1a98c582079fed5f821eea90a0c7d3c3cf5a2a2c6b4e06a3",
+      "Plain-10000-cold.hits": "76bd97f9fa11283f11ebf4134dd8a2dbfb7bb3fbd13008ebcd103809cb4ac1f9",
+      "Deep-1-cold.hits": "fc4bf709681358f568388e88874c1f5e1f1884f1ca12bb7645299af3ea3e5475",
+      "mixed-eligible-after-failure.hits": "a198a390ef367740a69f17996c444e32be34cb8b986e441643cdf4b432f53956",
+      "Scroll-32-warm.json": "7c2ea9706bda5a635c35951aa70dffd3bd7fb71531c11c2bc9b90b4bc06c43a6",
+      "mixed-p.json": "a4718dceef0fcce5dae62a55580aca4ed2260479f4c757170f4e09e2f8b09fee",
+      "mixed-eligible-after-failure.json": "c219af1a2a2e3ef1d32cb8acf00f52d79ef05745b3076530b769f4a0f1d278fa",
+      "List-10000-cold.hits": "0e78bdc18611d121006cc26973e191ac9d1ee46b95523f0adc023a2ea6aa26ef",
+      "mixed-scrolled.json": "c8389f86b9bf296e914a8ac4e65974da28526c7edf914d35297641bcd6a333ba",
+      "Wide-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "List-32-cold.hits": "ef76a99aac251a1d0559031f6f5ff810aafeec3e00009500f217a0d86f1ccb6c",
+      "Deep-1-warm.json": "9bad077980aca0af80ad1843b4d377d34ab398fd39e5fed00ef5a737a599ded7",
+      "Clip-10000-warm.rgba": "be66f2af98840d4a66826be024831cb07e64c40300971431d09acee2b341e154",
+      "Wide-1-cold.json": "28b06ff1da2da4d56c3963990ad2445527bd06216b37b5ef6fbec6bbcbfbd698",
+      "Plain-32-cold.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Deep-1-cold.rgba": "4409d3a1742d97d983bc9b26f8542bcfbaf3610c4135e69c64314c00b14ba2f3",
+      "List-32-warm.hits": "ef76a99aac251a1d0559031f6f5ff810aafeec3e00009500f217a0d86f1ccb6c",
+      "Plain-32-warm.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "Clip-32-warm.rgba": "1aa86d32fbd52e3f9e5a6eef70530fb1cdbd81e0f490657a514bfbc656a219aa",
+      "Clip-10000-warm.json": "1117a105ca81aefa1a98c582079fed5f821eea90a0c7d3c3cf5a2a2c6b4e06a3",
+      "Plain-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Scroll-1-cold.json": "4717bb1e0f658a9988e629b3346096f3548379231d25d96419630b08ea341bd3",
+      "Clip-10000-warm.hits": "9bed43f2e1e33032200be6881f38d89c3ecdc430a630b119ec8ebf00299df44c",
+      "Scroll-32-warm.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Plain-1-warm.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Plain-32-warm.json": "3162a1d35f336853ea75011382074e0db58abc76f16134a44670cce8a7bdfb67",
+      "Scroll-10000-cold.rgba": "8981508d3f234726fe66576f8603f7b242089a51142e6453db2baa0e4d580aff",
+      "Deep-32-warm.rgba": "ecf8d97f5a249934c23c0761a7c4176dc7e7a868f023fcefa6db990d9f01f0dd",
+      "Scroll-10000-cold.json": "a37859fc5fc3b9afb554d21c51e53536e241be10c969f272e832cb23a9897c07",
+      "mixed-repaired.hits": "a198a390ef367740a69f17996c444e32be34cb8b986e441643cdf4b432f53956",
+      "Clip-1-cold.hits": "45a32ebfba95d07946646c1b86b3cdab93878084d951a68d1caaf4af697e461d",
+      "Plain-10000-cold.rgba": "233a7069e06a542f36eed061fd692f3d16ada98472d4375ad0c55e738f6f8673",
+      "List-10000-warm.rgba": "75ea48cc96fd7de628c2cdaef00ba890709f07127b16f30261b0d6a18152c655",
+      "List-10000-cold.rgba": "75ea48cc96fd7de628c2cdaef00ba890709f07127b16f30261b0d6a18152c655",
+      "Scroll-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-10000-cold.json": "e81f3741c3769fa5a2021cd0bd69e81caa67a95e23b19eee7c82950fa96d95c9",
+      "Clip-32-warm.json": "1b4670e303d0d711d2e96e76572fbfe64639c416fa59606dcd07e2d675ac8511",
+      "List-10000-warm.hits": "0e78bdc18611d121006cc26973e191ac9d1ee46b95523f0adc023a2ea6aa26ef",
+      "Wide-10000-warm.rgba": "b8a312930fb6c11a7168b89a991058e736c0c62c43e0d6f554c09942561677b0",
+      "List-32-warm.rgba": "946fad5b539f4d6ba453756a23604ce7f9e6452b168182a0b7cf56e82f71047a",
+      "Wide-32-warm.rgba": "eab24216503b71af78e8e85b45e0efc7bdf75217132a9cd0b84a3674ba6cc06e",
+      "Clip-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "List-1-cold.rgba": "a159d87420162303ff8d515e5b0c40c20e91e0add816f57878b6e03cf3346a9a",
+      "Deep-1-cold.json": "9bad077980aca0af80ad1843b4d377d34ab398fd39e5fed00ef5a737a599ded7",
+      "Deep-1-warm.hits": "fc4bf709681358f568388e88874c1f5e1f1884f1ca12bb7645299af3ea3e5475",
+      "Clip-32-cold.json": "1b4670e303d0d711d2e96e76572fbfe64639c416fa59606dcd07e2d675ac8511",
+      "Plain-1-cold.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "mixed-scrolled.hits": "a198a390ef367740a69f17996c444e32be34cb8b986e441643cdf4b432f53956",
+      "Plain-32-cold.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "Scroll-1-cold.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Deep-129-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Clip-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-10000-warm.hits": "76bd97f9fa11283f11ebf4134dd8a2dbfb7bb3fbd13008ebcd103809cb4ac1f9",
+      "Clip-32-warm.hits": "d5dcf2a3a69c714bea67977bda80a53f52cf9b1340b6da1b7b1e080a0b9e6515",
+      "Scroll-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-1-cold.json": "3ce1bfb94cfe7cdf47d409d5f0206c9df5a623adf33b62024fd62f5126b1913e",
+      "Deep-1-warm.rgba": "4409d3a1742d97d983bc9b26f8542bcfbaf3610c4135e69c64314c00b14ba2f3",
+      "Deep-32-warm.hits": "64beda53a4321f707736a3ce9f89f2b5944b6a42daf53ba9d2f72e3675f4ab6f",
+      "Scroll-32-cold.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "Wide-10000-cold.rgba": "b8a312930fb6c11a7168b89a991058e736c0c62c43e0d6f554c09942561677b0",
+      "List-32-cold.rgba": "946fad5b539f4d6ba453756a23604ce7f9e6452b168182a0b7cf56e82f71047a",
+      "List-1-warm.hits": "05b0f72706965363201b90059351d5c7c52e216e73b167363c124d99b9c80da9",
+      "Clip-1-warm.hits": "45a32ebfba95d07946646c1b86b3cdab93878084d951a68d1caaf4af697e461d",
+      "Wide-32-cold.hits": "37843ae4f18711f87be3305308b4b2fca10792b85eed23d112ec3895d95a73f7",
+      "Clip-10000-cold.hits": "9bed43f2e1e33032200be6881f38d89c3ecdc430a630b119ec8ebf00299df44c",
+      "List-32-cold.json": "96015a3bae1abec9cfd520dd758c3a1d1e6be6a2e621789f093ebac461b3c67f",
+      "List-1-cold.hits": "05b0f72706965363201b90059351d5c7c52e216e73b167363c124d99b9c80da9",
+      "mixed-scrolled.rgba": "d01bae53fb07eed11f0706a5ec72a3328aed3467dc2047cb147cc16dfb6f5ab5",
+      "Plain-1-warm.json": "3ce1bfb94cfe7cdf47d409d5f0206c9df5a623adf33b62024fd62f5126b1913e",
+      "Deep-32-cold.hits": "64beda53a4321f707736a3ce9f89f2b5944b6a42daf53ba9d2f72e3675f4ab6f",
+      "Wide-1-cold.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Deep-129-cold.hits": "7817ba81e227f5b1d6120c1e7d3f01cdd1f648dca9ca04ca8e3c2c0939c6e99d",
+      "List-1-warm.json": "0b250d799e2a2e9e4abcc67e775297419fb4261434249af9dc941dc5f999be55"
+    }
+  },
+  "candidate": {
+    "label": "candidate",
+    "source": "ce79d00fb004859994c8574254bbd091e964a2d4",
+    "binary": "/tmp/gpui-packed-children-root-artifacts/047-frontier/test",
+    "elf_sha256": "bc9c46a174930a7827f92bb8a2e8d86cc70436eb785e60124e9fb3bc7582bf9e",
+    "rows": {
+      "Plain-1": {
+        "logical": 1,
+        "cold": [
+          37,
+          7411,
+          5971,
+          6123
+        ],
+        "warm": [
+          12,
+          752,
+          -16508,
+          296
+        ]
+      },
+      "Plain-32": {
+        "logical": 32,
+        "cold": [
+          181,
+          61003,
+          23269,
+          24653
+        ],
+        "warm": [
+          30,
+          13344,
+          -16904,
+          5512
+        ]
+      },
+      "Plain-10000": {
+        "logical": 10000,
+        "cold": [
+          40838,
+          20465959,
+          5859305,
+          7109858
+        ],
+        "warm": [
+          38,
+          1632032,
+          -17360,
+          811208
+        ]
+      },
+      "Clip-1": {
+        "logical": 1,
+        "cold": [
+          45,
+          8195,
+          6643,
+          6747
+        ],
+        "warm": [
+          20,
+          1872,
+          -16508,
+          744
+        ]
+      },
+      "Clip-32": {
+        "logical": 32,
+        "cold": [
+          186,
+          56331,
+          18485,
+          19853
+        ],
+        "warm": [
+          40,
+          14848,
+          -16904,
+          6248
+        ]
+      },
+      "Clip-10000": {
+        "logical": 10000,
+        "cold": [
+          40843,
+          18699175,
+          4101833,
+          7109922
+        ],
+        "warm": [
+          44,
+          1617664,
+          -16952,
+          806440
+        ]
+      },
+      "Wide-1": {
+        "logical": 1,
+        "cold": [
+          37,
+          7411,
+          5971,
+          6123
+        ],
+        "warm": [
+          12,
+          752,
+          -16508,
+          296
+        ]
+      },
+      "Wide-32": {
+        "logical": 32,
+        "cold": [
+          177,
+          55707,
+          17973,
+          19357
+        ],
+        "warm": [
+          30,
+          13344,
+          -16904,
+          5512
+        ]
+      },
+      "Wide-10000": {
+        "logical": 10000,
+        "cold": [
+          40836,
+          18706487,
+          4105289,
+          7109858
+        ],
+        "warm": [
+          38,
+          1632032,
+          -17360,
+          811208
+        ]
+      },
+      "List-1": {
+        "logical": 3,
+        "cold": [
+          72,
+          14880,
+          11232,
+          11456
+        ],
+        "warm": [
+          92,
+          15984,
+          -16524,
+          5040
+        ]
+      },
+      "List-32": {
+        "logical": 65,
+        "cold": [
+          355,
+          242810,
+          98654,
+          100998
+        ],
+        "warm": [
+          366,
+          205650,
+          -16892,
+          42352
+        ]
+      },
+      "List-10000": {
+        "logical": 196,
+        "cold": [
+          37850,
+          26251554,
+          10211056,
+          10411936
+        ],
+        "warm": [
+          75356,
+          49506895,
+          -17228,
+          5414474
+        ]
+      },
+      "Scroll-1": {
+        "logical": 1,
+        "cold": [
+          43,
+          9699,
+          7459,
+          7579
+        ],
+        "warm": [
+          16,
+          912,
+          -16508,
+          296
+        ]
+      },
+      "Scroll-32": {
+        "logical": 32,
+        "cold": [
+          184,
+          57835,
+          19301,
+          20701
+        ],
+        "warm": [
+          36,
+          13888,
+          -16904,
+          5784
+        ]
+      },
+      "Scroll-10000": {
+        "logical": 10000,
+        "cold": [
+          40841,
+          18703175,
+          4102649,
+          7110530
+        ],
+        "warm": [
+          40,
+          1621696,
+          -16928,
+          808472
+        ]
+      },
+      "Deep-1": {
+        "logical": 1,
+        "cold": [
+          39,
+          7656,
+          6216,
+          6320
+        ],
+        "warm": [
+          16,
+          1248,
+          -16524,
+          432
+        ]
+      },
+      "Deep-32": {
+        "logical": 32,
+        "cold": [
+          334,
+          84042,
+          47944,
+          50072
+        ],
+        "warm": [
+          18,
+          9232,
+          -16524,
+          4424
+        ]
+      },
+      "Deep-129": {
+        "logical": 129,
+        "cold": [
+          1207,
+          452717,
+          -1646939,
+          142389
+        ],
+        "warm": [
+          18,
+          35616,
+          -16524,
+          17616
+        ]
+      }
+    },
+    "artifacts": {
+      "Wide-1-warm.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Wide-1-warm.json": "28b06ff1da2da4d56c3963990ad2445527bd06216b37b5ef6fbec6bbcbfbd698",
+      "mixed-repaired.json": "803b2c730fde3ca51baed31d526ac58b22aafda02daaf62da54c1bf97ac4a260",
+      "Deep-32-cold.rgba": "ecf8d97f5a249934c23c0761a7c4176dc7e7a868f023fcefa6db990d9f01f0dd",
+      "mixed-repaired.rgba": "149a26ed5d20d6da9254f84e7cbfa5cfccba7285ff74cd2a5bfd2b67d76c7870",
+      "Deep-32-cold.json": "95f83a935a2e09624f5651037b8085f0dc0211b7aa272acd6a3a3dbfbc2c758e",
+      "Plain-10000-warm.rgba": "233a7069e06a542f36eed061fd692f3d16ada98472d4375ad0c55e738f6f8673",
+      "Scroll-10000-cold.hits": "e357fcf77f4f0143006fa278462b0772cd9e426e57e9bc532a8537ce37bfa174",
+      "Wide-10000-warm.hits": "69c4e43feb11aa1b300460ae4cf0465faacca0d97be4afad8fffb2f0c790f7ce",
+      "Deep-129-cold.json": "f557b14cf5c593784cbf7bd361d4eb12315b22f1e10dacc356477426ee988ee4",
+      "Scroll-10000-warm.hits": "e357fcf77f4f0143006fa278462b0772cd9e426e57e9bc532a8537ce37bfa174",
+      "Scroll-1-warm.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Wide-32-warm.hits": "37843ae4f18711f87be3305308b4b2fca10792b85eed23d112ec3895d95a73f7",
+      "Deep-129-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Wide-32-warm.json": "05968905a3b13123b941858cf5d5b6a85b8c059e9408fc3afc7fd733efb0d4fa",
+      "Wide-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Wide-10000-warm.json": "9e8b0029872d7c471ef3e76291cbd6c6366b49391b7c5e4b5ff7f7c24ac0bfaf",
+      "List-32-warm.json": "96015a3bae1abec9cfd520dd758c3a1d1e6be6a2e621789f093ebac461b3c67f",
+      "List-10000-cold.json": "6e7562b21feccbec8093b47a7b26f53f8772a53d3d5eae3c99fdec0c0f43943b",
+      "Plain-32-cold.json": "3162a1d35f336853ea75011382074e0db58abc76f16134a44670cce8a7bdfb67",
+      "Clip-32-cold.hits": "d5dcf2a3a69c714bea67977bda80a53f52cf9b1340b6da1b7b1e080a0b9e6515",
+      "List-10000-warm.json": "6e7562b21feccbec8093b47a7b26f53f8772a53d3d5eae3c99fdec0c0f43943b",
+      "Scroll-1-warm.json": "4717bb1e0f658a9988e629b3346096f3548379231d25d96419630b08ea341bd3",
+      "Deep-129-warm.json": "f557b14cf5c593784cbf7bd361d4eb12315b22f1e10dacc356477426ee988ee4",
+      "Wide-10000-cold.json": "9e8b0029872d7c471ef3e76291cbd6c6366b49391b7c5e4b5ff7f7c24ac0bfaf",
+      "Plain-10000-warm.json": "e81f3741c3769fa5a2021cd0bd69e81caa67a95e23b19eee7c82950fa96d95c9",
+      "Clip-1-warm.json": "a60913ab89007cc5a2d7d8d767d6840e0e55cd22e384575a52fb3cf666d4a3a6",
+      "Scroll-10000-warm.json": "a37859fc5fc3b9afb554d21c51e53536e241be10c969f272e832cb23a9897c07",
+      "Scroll-32-cold.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Clip-10000-cold.rgba": "be66f2af98840d4a66826be024831cb07e64c40300971431d09acee2b341e154",
+      "Wide-32-cold.rgba": "eab24216503b71af78e8e85b45e0efc7bdf75217132a9cd0b84a3674ba6cc06e",
+      "Deep-129-warm.hits": "7817ba81e227f5b1d6120c1e7d3f01cdd1f648dca9ca04ca8e3c2c0939c6e99d",
+      "Scroll-32-cold.json": "7c2ea9706bda5a635c35951aa70dffd3bd7fb71531c11c2bc9b90b4bc06c43a6",
+      "Deep-32-warm.json": "95f83a935a2e09624f5651037b8085f0dc0211b7aa272acd6a3a3dbfbc2c758e",
+      "Scroll-32-warm.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "mixed-p.rgba": "c51c9f74cd482d4b4226c303a90f6e190786f75b7e6be055b2b19a28a76bf4fa",
+      "Clip-32-cold.rgba": "1aa86d32fbd52e3f9e5a6eef70530fb1cdbd81e0f490657a514bfbc656a219aa",
+      "Clip-1-cold.json": "a60913ab89007cc5a2d7d8d767d6840e0e55cd22e384575a52fb3cf666d4a3a6",
+      "Plain-32-warm.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Wide-10000-cold.hits": "69c4e43feb11aa1b300460ae4cf0465faacca0d97be4afad8fffb2f0c790f7ce",
+      "Wide-32-cold.json": "05968905a3b13123b941858cf5d5b6a85b8c059e9408fc3afc7fd733efb0d4fa",
+      "Scroll-10000-warm.rgba": "8981508d3f234726fe66576f8603f7b242089a51142e6453db2baa0e4d580aff",
+      "List-1-cold.json": "0b250d799e2a2e9e4abcc67e775297419fb4261434249af9dc941dc5f999be55",
+      "mixed-p.hits": "41ab1bb743d6d8b0765a52a90f36781df76947860b6c60410a8c7d704f2b427b",
+      "List-1-warm.rgba": "a159d87420162303ff8d515e5b0c40c20e91e0add816f57878b6e03cf3346a9a",
+      "mixed-eligible-after-failure.rgba": "149a26ed5d20d6da9254f84e7cbfa5cfccba7285ff74cd2a5bfd2b67d76c7870",
+      "Clip-10000-cold.json": "1117a105ca81aefa1a98c582079fed5f821eea90a0c7d3c3cf5a2a2c6b4e06a3",
+      "Plain-10000-cold.hits": "76bd97f9fa11283f11ebf4134dd8a2dbfb7bb3fbd13008ebcd103809cb4ac1f9",
+      "Deep-1-cold.hits": "fc4bf709681358f568388e88874c1f5e1f1884f1ca12bb7645299af3ea3e5475",
+      "mixed-eligible-after-failure.hits": "a198a390ef367740a69f17996c444e32be34cb8b986e441643cdf4b432f53956",
+      "Scroll-32-warm.json": "7c2ea9706bda5a635c35951aa70dffd3bd7fb71531c11c2bc9b90b4bc06c43a6",
+      "mixed-p.json": "a4718dceef0fcce5dae62a55580aca4ed2260479f4c757170f4e09e2f8b09fee",
+      "mixed-eligible-after-failure.json": "c219af1a2a2e3ef1d32cb8acf00f52d79ef05745b3076530b769f4a0f1d278fa",
+      "List-10000-cold.hits": "0e78bdc18611d121006cc26973e191ac9d1ee46b95523f0adc023a2ea6aa26ef",
+      "mixed-scrolled.json": "c8389f86b9bf296e914a8ac4e65974da28526c7edf914d35297641bcd6a333ba",
+      "Wide-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "List-32-cold.hits": "ef76a99aac251a1d0559031f6f5ff810aafeec3e00009500f217a0d86f1ccb6c",
+      "Deep-1-warm.json": "9bad077980aca0af80ad1843b4d377d34ab398fd39e5fed00ef5a737a599ded7",
+      "Clip-10000-warm.rgba": "be66f2af98840d4a66826be024831cb07e64c40300971431d09acee2b341e154",
+      "Wide-1-cold.json": "28b06ff1da2da4d56c3963990ad2445527bd06216b37b5ef6fbec6bbcbfbd698",
+      "Plain-32-cold.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Deep-1-cold.rgba": "4409d3a1742d97d983bc9b26f8542bcfbaf3610c4135e69c64314c00b14ba2f3",
+      "List-32-warm.hits": "ef76a99aac251a1d0559031f6f5ff810aafeec3e00009500f217a0d86f1ccb6c",
+      "Plain-32-warm.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "Clip-32-warm.rgba": "1aa86d32fbd52e3f9e5a6eef70530fb1cdbd81e0f490657a514bfbc656a219aa",
+      "Clip-10000-warm.json": "1117a105ca81aefa1a98c582079fed5f821eea90a0c7d3c3cf5a2a2c6b4e06a3",
+      "Plain-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Scroll-1-cold.json": "4717bb1e0f658a9988e629b3346096f3548379231d25d96419630b08ea341bd3",
+      "Clip-10000-warm.hits": "9bed43f2e1e33032200be6881f38d89c3ecdc430a630b119ec8ebf00299df44c",
+      "Scroll-32-warm.hits": "5e122cc0ef0cc68a69869f5049ffd2f226334086148c5919f6a5bdca94597fcc",
+      "Plain-1-warm.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Plain-32-warm.json": "3162a1d35f336853ea75011382074e0db58abc76f16134a44670cce8a7bdfb67",
+      "Scroll-10000-cold.rgba": "8981508d3f234726fe66576f8603f7b242089a51142e6453db2baa0e4d580aff",
+      "Deep-32-warm.rgba": "ecf8d97f5a249934c23c0761a7c4176dc7e7a868f023fcefa6db990d9f01f0dd",
+      "Scroll-10000-cold.json": "a37859fc5fc3b9afb554d21c51e53536e241be10c969f272e832cb23a9897c07",
+      "mixed-repaired.hits": "a198a390ef367740a69f17996c444e32be34cb8b986e441643cdf4b432f53956",
+      "Clip-1-cold.hits": "45a32ebfba95d07946646c1b86b3cdab93878084d951a68d1caaf4af697e461d",
+      "Plain-10000-cold.rgba": "233a7069e06a542f36eed061fd692f3d16ada98472d4375ad0c55e738f6f8673",
+      "List-10000-warm.rgba": "75ea48cc96fd7de628c2cdaef00ba890709f07127b16f30261b0d6a18152c655",
+      "List-10000-cold.rgba": "75ea48cc96fd7de628c2cdaef00ba890709f07127b16f30261b0d6a18152c655",
+      "Scroll-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-10000-cold.json": "e81f3741c3769fa5a2021cd0bd69e81caa67a95e23b19eee7c82950fa96d95c9",
+      "Clip-32-warm.json": "1b4670e303d0d711d2e96e76572fbfe64639c416fa59606dcd07e2d675ac8511",
+      "List-10000-warm.hits": "0e78bdc18611d121006cc26973e191ac9d1ee46b95523f0adc023a2ea6aa26ef",
+      "Wide-10000-warm.rgba": "b8a312930fb6c11a7168b89a991058e736c0c62c43e0d6f554c09942561677b0",
+      "List-32-warm.rgba": "946fad5b539f4d6ba453756a23604ce7f9e6452b168182a0b7cf56e82f71047a",
+      "Wide-32-warm.rgba": "eab24216503b71af78e8e85b45e0efc7bdf75217132a9cd0b84a3674ba6cc06e",
+      "Clip-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-1-warm.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "List-1-cold.rgba": "a159d87420162303ff8d515e5b0c40c20e91e0add816f57878b6e03cf3346a9a",
+      "Deep-1-cold.json": "9bad077980aca0af80ad1843b4d377d34ab398fd39e5fed00ef5a737a599ded7",
+      "Deep-1-warm.hits": "fc4bf709681358f568388e88874c1f5e1f1884f1ca12bb7645299af3ea3e5475",
+      "Clip-32-cold.json": "1b4670e303d0d711d2e96e76572fbfe64639c416fa59606dcd07e2d675ac8511",
+      "Plain-1-cold.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "mixed-scrolled.hits": "a198a390ef367740a69f17996c444e32be34cb8b986e441643cdf4b432f53956",
+      "Plain-32-cold.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "Scroll-1-cold.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Deep-129-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Clip-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-10000-warm.hits": "76bd97f9fa11283f11ebf4134dd8a2dbfb7bb3fbd13008ebcd103809cb4ac1f9",
+      "Clip-32-warm.hits": "d5dcf2a3a69c714bea67977bda80a53f52cf9b1340b6da1b7b1e080a0b9e6515",
+      "Scroll-1-cold.rgba": "0fbba07a833d4dcfc7024eaf313661a0ba8f80a05c6d29b8801c612e10e60dee",
+      "Plain-1-cold.json": "3ce1bfb94cfe7cdf47d409d5f0206c9df5a623adf33b62024fd62f5126b1913e",
+      "Deep-1-warm.rgba": "4409d3a1742d97d983bc9b26f8542bcfbaf3610c4135e69c64314c00b14ba2f3",
+      "Deep-32-warm.hits": "64beda53a4321f707736a3ce9f89f2b5944b6a42daf53ba9d2f72e3675f4ab6f",
+      "Scroll-32-cold.rgba": "3151a4ea71957cb55d0de8b8086911340c68f095438676d35c28505f49bf3736",
+      "Wide-10000-cold.rgba": "b8a312930fb6c11a7168b89a991058e736c0c62c43e0d6f554c09942561677b0",
+      "List-32-cold.rgba": "946fad5b539f4d6ba453756a23604ce7f9e6452b168182a0b7cf56e82f71047a",
+      "List-1-warm.hits": "05b0f72706965363201b90059351d5c7c52e216e73b167363c124d99b9c80da9",
+      "Clip-1-warm.hits": "45a32ebfba95d07946646c1b86b3cdab93878084d951a68d1caaf4af697e461d",
+      "Wide-32-cold.hits": "37843ae4f18711f87be3305308b4b2fca10792b85eed23d112ec3895d95a73f7",
+      "Clip-10000-cold.hits": "9bed43f2e1e33032200be6881f38d89c3ecdc430a630b119ec8ebf00299df44c",
+      "List-32-cold.json": "96015a3bae1abec9cfd520dd758c3a1d1e6be6a2e621789f093ebac461b3c67f",
+      "List-1-cold.hits": "05b0f72706965363201b90059351d5c7c52e216e73b167363c124d99b9c80da9",
+      "mixed-scrolled.rgba": "d01bae53fb07eed11f0706a5ec72a3328aed3467dc2047cb147cc16dfb6f5ab5",
+      "Plain-1-warm.json": "3ce1bfb94cfe7cdf47d409d5f0206c9df5a623adf33b62024fd62f5126b1913e",
+      "Deep-32-cold.hits": "64beda53a4321f707736a3ce9f89f2b5944b6a42daf53ba9d2f72e3675f4ab6f",
+      "Wide-1-cold.hits": "48f6cdf8f0669748bcc3f8c53e22476ef940c2ebb9580e2ee9497b69455f90f2",
+      "Deep-129-cold.hits": "7817ba81e227f5b1d6120c1e7d3f01cdd1f648dca9ca04ca8e3c2c0939c6e99d",
+      "List-1-warm.json": "0b250d799e2a2e9e4abcc67e775297419fb4261434249af9dc941dc5f999be55"
+    }
+  },
+  "exact_public_artifacts": 120,
+  "baseline_minus_candidate_deltas": {
+    "Plain-1": {
+      "cold": [
+        0,
+        8,
+        8,
+        8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Plain-32": {
+      "cold": [
+        3,
+        5608,
+        504,
+        504
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Plain-10000": {
+      "cold": [
+        12,
+        4166632,
+        159992,
+        -8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Clip-1": {
+      "cold": [
+        0,
+        8,
+        8,
+        8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Clip-32": {
+      "cold": [
+        3,
+        5608,
+        504,
+        504
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Clip-10000": {
+      "cold": [
+        12,
+        4166632,
+        159992,
+        -8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Wide-1": {
+      "cold": [
+        0,
+        8,
+        8,
+        8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Wide-32": {
+      "cold": [
+        3,
+        5608,
+        504,
+        504
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Wide-10000": {
+      "cold": [
+        12,
+        4166632,
+        159992,
+        -8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "List-1": {
+      "cold": [
+        0,
+        568,
+        40,
+        40
+      ],
+      "warm": [
+        0,
+        1152,
+        0,
+        48
+      ]
+    },
+    "List-32": {
+      "cold": [
+        0,
+        17928,
+        1032,
+        1032
+      ],
+      "warm": [
+        0,
+        35872,
+        0,
+        0
+      ]
+    },
+    "List-10000": {
+      "cold": [
+        0,
+        3679640,
+        159992,
+        159992
+      ],
+      "warm": [
+        0,
+        7359296,
+        0,
+        1339512
+      ]
+    },
+    "Scroll-1": {
+      "cold": [
+        0,
+        8,
+        8,
+        8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Scroll-32": {
+      "cold": [
+        3,
+        5608,
+        504,
+        504
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Scroll-10000": {
+      "cold": [
+        12,
+        4166632,
+        159992,
+        -8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Deep-1": {
+      "cold": [
+        0,
+        8,
+        8,
+        8
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Deep-32": {
+      "cold": [
+        0,
+        16872,
+        504,
+        504
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "Deep-129": {
+      "cold": [
+        0,
+        69640,
+        2056,
+        2056
+      ],
+      "warm": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "counter_order": [
+    "requested_allocations",
+    "requested_bytes",
+    "current_bytes",
+    "peak_bytes"
+  ],
+  "scope": "Actual allocation requests and exact public semantic/hit/RGBA artifacts. No timing or RSS inference."
+}

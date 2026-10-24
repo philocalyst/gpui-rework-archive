@@ -4,34 +4,37 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
-The latest [component boundary composition](evidence/component-boundaries/README.md)
-qualifies library source `88e68054ba637e1a840d1311b56bfa53fa74544f` over the
-[text and preorder preparation composition](evidence/frontier-text-integration/README.md).
-Checked component boundaries reuse their route storage for identity scope,
-removing a third dense description buffer. Scope is stored only at boundaries;
-parent-qualified matching prevents descendant reuse across changed owners.
+The latest [packed tree and typed child composition](evidence/packed-children/README.md)
+qualifies library source `ce79d00fb004859994c8574254bbd091e964a2d4` over the
+[component boundary composition](evidence/component-boundaries/README.md).
+Safe packed logical links shrink ordinary retained nodes from 40 to 24 bytes;
+only interactive nodes retain sparse routes. Typed child cardinality removes
+geometric vector growth without another child traversal. The 10,000-child
+public declaration falls from 13 allocations and 5,766,464 requested bytes to
+one allocation and 1,760,000 bytes. The full cold 10,000-node scene removes
+4,166,632 requested bytes; all 120 semantic, hit and pixel artifacts match.
+Tiny/all-handler owners and machine-code growth remain charged in the dossier.
+Component scope remains boundary-only, with parent-qualified identity matching;
+lexical component route wrappers remain an unresolved allocation cost.
+
+Final GPUI passes 712 tests across 70 frozen executables, strict all-target
+native/GPU Clippy, 28 GPUI doctests and 194 scalar tests. Actual native
+paint/inspector and AT-SPI fixtures pass; Hummingbird passes 70 default-feature
+tests in 18 frozen executables. Counts overlap and source pins remain explicit.
+All 2,781 build/port inputs match the qualified source byte-for-byte.
 Hummingbird's standalone lock remains `c6bef498a41a96ab23938f9025aa0ef0a63431b5`.
-Inherited preparation state follows the active branch; exact bitmap/rank replaces
-the dense publication map. Description recovers depth and sibling ordinals from
-existing parent links, removing two scratch allocations. Packed text leases and
-raster witnesses remove expanded retained placements, while metadata scans avoid
-unneeded geometry reconstruction. These compose with the existing
-[gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
-The text/Canvas/GPU ancestor passes 1,026 tests across 106 frozen executables;
-final GPUI passes 700 tests, strict all-target native/GPU Clippy, 28 GPUI doctests
-and 190 scalar tests. Actual native paint/inspector and AT-SPI fixtures pass;
-Hummingbird passes 70 default-feature tests in 18 frozen executables. Counts
-overlap and each pin remains explicit. Two comment corrections preserve every
-production token from the qualified source.
-Generated WGSL and all eight SPIR-V recipes are verified in the executed binaries.
-The seven-library inventory is **34,697 non-test, non-comment shipping lines**,
+Generated WGSL and all eight SPIR-V recipes are verified in the executed native
+binary. These compose with the [text and preorder preparation](evidence/frontier-text-integration/README.md)
+and [gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
+The seven-library inventory is **34,852 non-test, non-comment shipping lines**,
 including build scripts. EcoVec adds 2,315 separately charged dependency lines;
 tiny-layout costs and changed AccessKit vendor code remain explicit.
 The [mapped Todo](comparisons/mapped-todo/README.md) and
 [matched shader](comparisons/todo-shader-profiles/README.md) experiments retain
 their historical source identities and failed work gates. Perceptual-gradient
-precision tiers, thinner glyph ownership and GPU clip-membership reuse remain
-separate spikes; their costs and unsupported domains are not shipping claims.
+precision tiers, thinner glyph ownership, 16-byte node storage, real IME and
+optional GPU clip acceleration remain separate spikes. Their costs and
+unsupported domains are not shipping claims.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
@@ -72,11 +75,12 @@ AccessKit tree mirror or historical ID map; the native adapter retains its own
 required tree. Stock Linux adapter construction starts background work even
 before activation, so lazy conversion is not a zero-cost native AT claim.
 
-On the current 64-bit build, Node is 40 B, an actual text-site entry is 72 B,
+On the current 64-bit build, Node is 24 B, an actual text-site entry is 80 B,
 Presented is 64 B and a frozen list-viewport entry is 40 B. Author Color is 16 B and
 Style is 88 B. Resolved styles use an owner-owned default/dense/shared lane with
 bounded exact discovery and an unrestricted dense fallback; its header adds 40 B
-per owner. Unicode TextLayout is 48 B; its 16-byte glyph owner retains packed 12-byte records.
+per owner. Unicode TextLayout is 56 B; its 24-byte glyph buffer retains packed 12-byte records.
+Frozen glyph leases remain 16 bytes; thinner ownership is an unadopted spike.
 These are exact retained layouts, not whole-window memory figures; layout/font/scene
 storage and native services remain separately owned.
 The [presentation-basis producer](evidence/presented-basis/final/README.md)

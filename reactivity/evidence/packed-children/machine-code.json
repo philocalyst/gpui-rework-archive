@@ -1,0 +1,98 @@
+{
+  "baseline_source": "8f0b9725ddf7ab71edc0f390f0ce57f527cd0638",
+  "candidate_source": "ce79d00fb004859994c8574254bbd091e964a2d4",
+  "baseline_elf_sha256": "fc4f0e4739aa32efa9934444c49da54995d91e0985381e4a4df700a4c51247ed",
+  "candidate_elf_sha256": "3816d1048e50743e076aaac5a0862c0096409a02d760c38aff256798d426e3f7",
+  "candidate_gpui_rebuilt": true,
+  "headless_counter_stdout_exact": true,
+  "whole_elf_bytes": {
+    "baseline": 9970056,
+    "candidate": 9970984,
+    "delta": 928
+  },
+  "section_deltas": {
+    ".interp": 0,
+    ".note.ABI-tag": 0,
+    ".dynsym": 0,
+    ".gnu.version": 0,
+    ".gnu.version_r": 0,
+    ".gnu.hash": 0,
+    ".dynstr": 0,
+    ".rela.dyn": 552,
+    ".rela.plt": 0,
+    ".gcc_except_table": 16,
+    ".rodata": 128,
+    ".eh_frame_hdr": -16,
+    ".eh_frame": -308,
+    ".text": 1440,
+    ".init": 0,
+    ".fini": 0,
+    ".plt": 0,
+    ".tdata": 0,
+    ".tbss": 0,
+    ".fini_array": 0,
+    ".init_array": 0,
+    ".data.rel.ro": 384,
+    ".dynamic": 0,
+    ".got": 56,
+    ".got.plt": 0,
+    ".relro_padding": 1832,
+    ".tm_clone_table": 0,
+    ".data": 0,
+    ".bss": 0,
+    ".comment": 0
+  },
+  "selected_symbols": [
+    {
+      "label": "baseline",
+      "symbols": [
+        {
+          "name": "<counter::Counter as gpui::View>::view",
+          "address": "00000000005a1680",
+          "bytes": 1049
+        },
+        {
+          "name": "<gpui::runtime::Win<counter::Counter>>::mount_lanes",
+          "address": "00000000005801d0",
+          "bytes": 2481
+        },
+        {
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::present_walk",
+          "address": "0000000000581f50",
+          "bytes": 23172
+        },
+        {
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+          "address": "00000000005879e0",
+          "bytes": 33920
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "symbols": [
+        {
+          "name": "<counter::Counter as gpui::View>::view",
+          "address": "00000000005a0270",
+          "bytes": 1049
+        },
+        {
+          "name": "<gpui::runtime::Win<counter::Counter>>::mount_lanes",
+          "address": "0000000000580320",
+          "bytes": 2462
+        },
+        {
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::present_walk",
+          "address": "0000000000582080",
+          "bytes": 23204
+        },
+        {
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+          "address": "0000000000587b30",
+          "bytes": 34507
+        }
+      ]
+    }
+  ],
+  "scope": "Actual optimized headless SIMD Counter, no timing/RSS/native claim. Full disassembly and executable identities retained. Unqualified stale-cache captures rejected before execution and preserved separately."
+}

@@ -1,0 +1,1341 @@
+diff --git a/reactivity/crates/gpui/src/element.rs b/reactivity/crates/gpui/src/element.rs
+index f3f560264e..40d816dd39 100644
+--- a/reactivity/crates/gpui/src/element.rs
++++ b/reactivity/crates/gpui/src/element.rs
+@@ -606,10 +606,23 @@ impl<'a> El<'a> {
+             ),
+             "this element does not accept children"
+         );
+-        children.append(&mut self.children);
++        self.append_children(children);
+         self
+     }
+ 
++    fn append_children<C, S>(&mut self, children: C)
++    where
++        C: ChildSeq<'a, S>,
++    {
++        let additional = children.lower_bound();
++        if self.children.capacity() == 0 {
++            self.children.reserve_exact(additional);
++        } else {
++            self.children.reserve(additional);
++        }
++        children.append(&mut self.children);
++    }
++
+     pub(crate) fn on_window(mut self, action: crate::runtime::inspector::WindowAction) -> Self {
+         self.on_click = Some(Handler::window(action));
+         self
+@@ -964,7 +977,7 @@ impl<'a> El<'a> {
+                 if let Some(map) = map {
+                     map(&mut child);
+                 }
+-                element.children.push(child);
++                element.append_children(child);
+             }
+             if !annotation.is_empty() {
+                 annotations.push(crate::semantic::AnnotationDraft {
+@@ -987,7 +1000,7 @@ impl<'a> El<'a> {
+                         map(&mut row);
+                     }
+                     let mut wrapper = Self::new(NodeKind::ListItem, None);
+-                    wrapper.children.push(row);
++                    wrapper.append_children(row);
+                     wrapper.style.height = Some(row_height as f32);
+                     rows.push((
+                         Some(index),
+@@ -1281,11 +1294,18 @@ pub mod shape {
+ /// Closed constructor-child family. The inferred shape parameter separates
+ /// blanket iterator implementations from tuples without an application adapter.
+ pub trait ChildSeq<'a, S>: sealed::Children<S> {
++    #[doc(hidden)]
++    const MIN_ELEMENTS: usize = 0;
++    #[doc(hidden)]
++    fn lower_bound(&self) -> usize {
++        Self::MIN_ELEMENTS
++    }
+     #[doc(hidden)]
+     fn append(self, out: &mut Vec<El<'a>>);
+ }
+ impl<E: Element> sealed::Children<shape::One> for E {}
+ impl<'a, E: Element + 'a> ChildSeq<'a, shape::One> for E {
++    const MIN_ELEMENTS: usize = 1;
+     fn append(self, out: &mut Vec<El<'a>>) {
+         out.push(self.into_el());
+     }
+@@ -1295,6 +1315,9 @@ impl<'a, C, S> ChildSeq<'a, shape::Optional<S>> for Option<C>
+ where
+     C: ChildSeq<'a, S>,
+ {
++    fn lower_bound(&self) -> usize {
++        self.as_ref().map_or(0, C::lower_bound)
++    }
+     fn append(self, out: &mut Vec<El<'a>>) {
+         if let Some(children) = self {
+             children.append(out);
+@@ -1312,6 +1335,13 @@ where
+     I: Iterator,
+     I::Item: ChildSeq<'a, S>,
+ {
++    fn lower_bound(&self) -> usize {
++        if I::Item::MIN_ELEMENTS == 0 {
++            0
++        } else {
++            self.size_hint().0.saturating_mul(I::Item::MIN_ELEMENTS)
++        }
++    }
+     fn append(self, out: &mut Vec<El<'a>>) {
+         for children in self {
+             children.append(out);
+@@ -1320,12 +1350,16 @@ where
+ }
+ impl<T: View> sealed::Children<shape::Views> for &Vec<T> {}
+ impl<'a, T: View + 'a> ChildSeq<'a, shape::Views> for &'a Vec<T> {
++    fn lower_bound(&self) -> usize {
++        self.len()
++    }
+     fn append(self, out: &mut Vec<El<'a>>) {
+         out.extend(self.iter().map(View::view));
+     }
+ }
+ impl<T: View> sealed::Children<shape::View> for &T {}
+ impl<'a, T: View + 'a> ChildSeq<'a, shape::View> for &'a T {
++    const MIN_ELEMENTS: usize = 1;
+     fn append(self, out: &mut Vec<El<'a>>) {
+         out.push(self.view());
+     }
+@@ -1340,6 +1374,11 @@ macro_rules! tuples {
+         where $($ty: sealed::Children<$shape>),+ {}
+         impl<'a,$($ty,$shape),+> ChildSeq<'a,shape::Tuple<($($shape,)+)>> for ($($ty,)+)
+         where $($ty: ChildSeq<'a,$shape>),+ {
++            const MIN_ELEMENTS: usize = 0_usize$(.saturating_add($ty::MIN_ELEMENTS))+;
++            fn lower_bound(&self) -> usize {
++                let ($($name,)+) = self;
++                0_usize$(.saturating_add($name.lower_bound()))+
++            }
+             fn append(self,out: &mut Vec<El<'a>>) {
+                 let ($($name,)+) = self;
+                 $($name.append(out);)+
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 92e5dac5fe..ddd09edc35 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -365,16 +365,14 @@ mod parent_tests {
+ 
+     #[test]
+     fn nonzero_identity_keeps_old_node_migration_in_place() {
+-        assert_eq!(size_of::<Node>(), 40);
++        assert_eq!(size_of::<Node>(), 24);
+         assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
+         let nodes = (1..=64)
+             .map(|identity| Node {
+                 identity: NonZeroU64::new(identity).unwrap(),
+-                parent: Parent::NONE,
+-                ordinal: 0,
++                links: links::NodeLinks::new(None, 0, None),
+                 content: Content::new(NodeKind::Div, TextSlot::NONE),
+                 component_scope: 0,
+-                handler: None,
+             })
+             .collect::<Vec<_>>();
+         let pointer = nodes.as_ptr().cast::<u8>();
+@@ -502,8 +500,8 @@ mod parent_tests {
+         assert_eq!(size_of::<NodeKind>(), 1);
+         assert_eq!(size_of::<Option<NodeKind>>(), 1);
+         assert_eq!(size_of::<Content>(), 4);
+-        assert_eq!(size_of::<Node>(), 40);
+-        assert_eq!(size_of::<Option<Node>>(), 40);
++        assert_eq!(size_of::<Node>(), 24);
++        assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
+         assert_eq!(size_of::<Presented>(), 64);
+         assert_eq!(size_of::<Prepared>(), 40);
+         assert_eq!(size_of::<crate::El<'_>>(), 176);
+@@ -647,21 +645,33 @@ impl Content {
+         })
+     }
+ }
++mod handlers;
++mod links;
+ struct Node {
+     identity: NonZeroU64,
+-    parent: Parent,
+-    ordinal: u32,
++    links: links::NodeLinks,
+     content: Content,
+     component_scope: u32,
+-    handler: Option<Handler>,
+ }
+ #[cfg(test)]
+ mod hit_tests;
+ #[cfg(test)]
+ mod style_ledger;
+ impl Node {
++    fn parent(&self) -> Parent {
++        self.links.parent()
++    }
++    fn ordinal(&self) -> u32 {
++        self.links.ordinal()
++    }
++    fn handler_slot(&self) -> Option<usize> {
++        self.links.handler()
++    }
++    fn has_handler(&self) -> bool {
++        self.handler_slot().is_some()
++    }
+     fn focusable(&self) -> bool {
+-        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.handler.is_some()
++        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_handler()
+     }
+     #[inline]
+     fn identity(&self) -> u64 {
+@@ -1131,6 +1141,7 @@ struct Runtime<M> {
+     model: M,
+     sources: Sources<M>,
+     nodes: Vec<Node>,
++    handlers: Option<Box<handlers::Handlers>>,
+     styles: styles::Styles,
+     texts: Vec<Option<TextSite>>,
+     images: Option<Box<image::SceneResources>>,
+@@ -1339,6 +1350,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             model: pending.model,
+             sources,
+             nodes: Vec::new(),
++            handlers: None,
+             styles: styles::Styles::default(),
+             texts: Vec::new(),
+             images: None,
+@@ -1679,7 +1691,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+                 && !runtime.poisoned
+                 && let Some(index) = runtime.by_identity.get(identity)
+                 && (all_targets
+-                    || runtime.nodes[index].handler.is_some()
++                    || runtime.nodes[index].has_handler()
+                     || runtime.nodes[index].kind() == NodeKind::Input)
+             {
+                 Some(runtime.sites.target(identity))
+@@ -2052,6 +2064,7 @@ impl<M: View + 'static> Runtime<M> {
+         let (image_resources, image_nodes) = image::describe(image_drafts)?;
+         let mut depth = 0usize;
+         let mut layout_depth = 0u8;
++        let mut handler_count = 0;
+         let mut fields = Vec::with_capacity(drafts.len());
+         let mut new_counts = vec![0u32; drafts.len() + 1];
+         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
+@@ -2079,6 +2092,7 @@ impl<M: View + 'static> Runtime<M> {
+             drafts[index].components.admit(&self.model, &self.sources)?;
+             let node = &drafts[index];
+             if let Some(handler) = &node.on_click {
++                handler_count += 1;
+                 handler.admit(&self.model, &self.sources)?;
+             }
+             let field = match node.text.as_ref().and_then(|text| text.signal()) {
+@@ -2193,12 +2207,16 @@ impl<M: View + 'static> Runtime<M> {
+             )));
+             *entry = Fanout::Color(slot);
+         }
++        let (handlers, old_handlers) =
++            handlers::Handlers::replace(self.handlers.take(), handler_count);
+         let old_styles = std::mem::take(&mut self.styles);
+         let siblings = siblings::Siblings::new(&self.nodes);
+         let mut old = std::mem::take(&mut self.nodes)
+             .into_iter()
+             .map(Some)
+             .collect::<Vec<_>>();
++        // Match the old Node vector's callback-drop position during unwind.
++        let mut old_handlers = old_handlers;
+         let mut keyed_rows = BTreeMap::new();
+         let mut keyed_lists = BTreeMap::new();
+         let old_list_ids: BTreeMap<_, _> = self
+@@ -2212,7 +2230,7 @@ impl<M: View + 'static> Runtime<M> {
+         for (index, node) in old.iter().enumerate() {
+             let node = node.as_ref().unwrap();
+             let parent = node
+-                .parent
++                .parent()
+                 .index()
+                 .map(|parent| old[parent].as_ref().unwrap().identity());
+             if let Some(row) = self
+@@ -2231,6 +2249,9 @@ impl<M: View + 'static> Runtime<M> {
+             .map(|node| node.as_ref().unwrap().identity())
+             .collect::<Vec<_>>();
+         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
++        // New captures must drop before remaining old captures on unwind,
++        // just as they did when these Node vectors owned routes directly.
++        let mut handlers = handlers;
+         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
+         // Retain no holes or visited-site history. Moving TextSite transfers
+         // its text lease and glyph Vec header without cloning either.
+@@ -2250,10 +2271,10 @@ impl<M: View + 'static> Runtime<M> {
+                 // The preceding subtree ends at the previous sibling. Its
+                 // retained ordinal gives this sibling's ordinal directly.
+                 let mut sibling = index - 1;
+-                while nodes[sibling].parent.index() != parent {
+-                    sibling = nodes[sibling].parent.index().unwrap();
++                while nodes[sibling].parent().index() != parent {
++                    sibling = nodes[sibling].parent().index().unwrap();
+                 }
+-                nodes[sibling].ordinal + 1
++                nodes[sibling].ordinal() + 1
+             };
+             let parent_identity = parent.map(|parent| nodes[parent].identity());
+             let old_siblings = match parent_identity {
+@@ -2289,7 +2310,16 @@ impl<M: View + 'static> Runtime<M> {
+             };
+             let previous = previous_index
+                 .and_then(|old_index| old[old_index].take())
+-                .filter(|node| node.component_scope == component_scope);
++                .filter(|node| {
++                    let retained = node.component_scope == component_scope;
++                    if !retained && let Some(slot) = node.handler_slot() {
++                        // The former inline route dropped with the rejected
++                        // Node here, before any replacement-site processing.
++                        drop(old_handlers[slot].take().expect("installed route"));
++                    }
++                    retained
++                });
++            let previous_handler = previous.as_ref().and_then(Node::handler_slot);
+             let previous_style = if previous.is_some() {
+                 old_styles.get(previous_index.unwrap())
+             } else {
+@@ -2337,11 +2367,9 @@ impl<M: View + 'static> Runtime<M> {
+                     // IDs start at one, never roll back, and admission above
+                     // reserves the entire checked nonzero interval.
+                     identity: NonZeroU64::new(identity).expect("admitted node identity"),
+-                    parent: Parent::new(parent),
+-                    ordinal,
++                    links: links::NodeLinks::new(parent, ordinal, None),
+                     content: Content::new(draft.kind, TextSlot::NONE),
+                     component_scope,
+-                    handler: None,
+                 }
+             };
+             let mut site = node.text_slot().take(&mut self.texts);
+@@ -2422,14 +2450,12 @@ impl<M: View + 'static> Runtime<M> {
+             {
+                 site.shaped = None;
+             }
+-            if node.handler.is_some() != draft.on_click.is_some() {
++            if node.has_handler() != draft.on_click.is_some() {
+                 // Eligibility is part of the published hit sheet even when
+                 // this transparent site's pixels and layout remain equal.
+                 self.dirty = true;
+                 node_changed = true;
+             }
+-            node.parent = Parent::new(parent);
+-            node.ordinal = ordinal;
+             let mask = u8::from(matches!(
+                 self.overrides
+                     .get(node.identity(), crate::property::FOREGROUND),
+@@ -2440,7 +2466,15 @@ impl<M: View + 'static> Runtime<M> {
+                 Contribution::Set(_)
+             )) << 1);
+             styles.declaration(index, draft.style, style, mask);
+-            node.handler = draft.on_click;
++            // Drop the consumed old route at the same replacement barrier as
++            // the former inline field. Removed sites drop with old_handlers.
++            if let Some(slot) = previous_handler {
++                old_handlers[slot].take().expect("installed route");
++            }
++            let handler = draft
++                .on_click
++                .map(|handler| handlers.as_deref_mut().unwrap().push(handler));
++            node.links = links::NodeLinks::new(parent, ordinal, handler);
+             let text_slot = if let Some(mut site) = site {
+                 site.field = fields[index];
+                 let slot = TextSlot(texts.len() as u32);
+@@ -2618,6 +2652,7 @@ impl<M: View + 'static> Runtime<M> {
+         self.viewports = viewports;
+         self.list_rows = list_rows;
+         self.nodes = nodes;
++        self.handlers = handlers;
+         self.layout_depth = layout_depth;
+         self.styles = styles.finish();
+         // A replacement source bank has no authority over the preceding
+@@ -3005,14 +3040,19 @@ impl<M: View + 'static> Runtime<M> {
+             self.layout = LayoutTree::new();
+             self.layout_nodes.clear();
+             for (index, node) in self.nodes.iter().enumerate() {
+-                let parent = node.parent.index().map(|parent| self.layout_nodes[parent]);
++                let parent = node
++                    .parent()
++                    .index()
++                    .map(|parent| self.layout_nodes[parent]);
+                 let id = self.layout.insert(
+                     parent,
+                     gpui_reactivity_core::NodeKind::Element,
+                     list::row_style(
+                         node.kind(),
+                         &self.styles.get(index),
+-                        node.parent.index().map(|index| self.styles.get(index).flow),
++                        node.parent()
++                            .index()
++                            .map(|index| self.styles.get(index).flow),
+                         self.list_rows.get(&node.identity()),
+                     ),
+                 )?;
+@@ -3032,7 +3072,7 @@ impl<M: View + 'static> Runtime<M> {
+             for (&key, state) in &self.viewports {
+                 let identity = state.identity(key);
+                 let index = self.by_identity.required(identity);
+-                if self.nodes[index].parent.index().is_some_and(|parent| {
++                if self.nodes[index].parent().index().is_some_and(|parent| {
+                     self.layout_dirty.contains(&self.nodes[parent].identity())
+                 }) {
+                     self.layout_dirty.insert(identity);
+@@ -3047,7 +3087,7 @@ impl<M: View + 'static> Runtime<M> {
+                         self.nodes[index].kind(),
+                         &self.styles.get(index),
+                         self.nodes[index]
+-                            .parent
++                            .parent()
+                             .index()
+                             .map(|parent| self.styles.get(parent).flow),
+                         self.list_rows.get(identity),
+@@ -3169,24 +3209,24 @@ impl<M: View + 'static> Runtime<M> {
+                 )?;
+             }
+             let layout = self.layout.layout(self.layout_nodes[index])?;
+-            while ancestor.index() != self.nodes[index].parent.index() {
++            while ancestor.index() != self.nodes[index].parent().index() {
+                 spaces.pop();
+                 if let Some(clips) = &mut clips {
+                     clips.pop();
+                 }
+-                ancestor = self.nodes[ancestor.index().unwrap()].parent;
++                ancestor = self.nodes[ancestor.index().unwrap()].parent();
+             }
+             let inherited = clips.as_deref().map_or(root_clip, frontier::Frontier::top);
+             let has_children = self
+                 .nodes
+                 .get(index + 1)
+-                .is_some_and(|child| child.parent.index() == Some(index));
++                .is_some_and(|child| child.parent().index() == Some(index));
+             let style = self.styles.get(index);
+-            let parent_is_viewport = self.nodes[index].parent.index().is_some_and(|parent| {
++            let parent_is_viewport = self.nodes[index].parent().index().is_some_and(|parent| {
+                 matches!(self.nodes[parent].kind(), NodeKind::List | NodeKind::Scroll)
+             });
+             let parent_identity = self.nodes[index]
+-                .parent
++                .parent()
+                 .index()
+                 .map(|parent| self.nodes[parent].identity());
+             let geometry_style = self
+@@ -3196,7 +3236,7 @@ impl<M: View + 'static> Runtime<M> {
+                 .map_or_else(Default::default, |g| g.get(self.nodes[index].identity()));
+             let radius = geometry_style.corner_radius;
+             let node = &mut self.nodes[index];
+-            let parent = node.parent.index().map_or(
++            let parent = node.parent().index().map_or(
+                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
+                 |_| {
+                     let base = spaces.top();
+@@ -3278,7 +3318,7 @@ impl<M: View + 'static> Runtime<M> {
+             let published_parent = if list_mode {
+                 inherited.published
+             } else {
+-                node.parent
++                node.parent()
+             };
+             let omitted = in_list
+                 && bounds.is_empty()
+@@ -3339,7 +3379,7 @@ impl<M: View + 'static> Runtime<M> {
+                 } else {
+                     scene.fill_rounded_rect(rect, radius, transform, clip, style.bg)?;
+                 }
+-            } else if paint && (node.handler.is_some() || node.kind() == NodeKind::Input) {
++            } else if paint && (node.has_handler() || node.kind() == NodeKind::Input) {
+                 // An invisible input region still obeys the renderer's exact
+                 // numerical admission domain before becoming a hit target.
+                 scene.fill_rounded_rect(
+@@ -3487,7 +3527,7 @@ impl<M: View + 'static> Runtime<M> {
+                 && (node.text_slot().0 != u32::MAX
+                     || style.bg.alpha() > 0.0
+                     || gradient.is_some_and(|g| g.view().has_visible_stop())
+-                    || node.handler.is_some()
++                    || node.has_handler()
+                     || matches!(node.kind(), NodeKind::Input | NodeKind::Image));
+             let link = PresentedLink::new(
+                 published_parent,
+@@ -3518,7 +3558,7 @@ impl<M: View + 'static> Runtime<M> {
+                 basis,
+                 bounds,
+                 hittable,
+-                actions: Actions::for_node(node.kind(), node.handler.is_some())
++                actions: Actions::for_node(node.kind(), node.has_handler())
+                     .scroll_into_view(inherited.membership != 0 || parent_is_viewport),
+             });
+             #[cfg(feature = "accessibility")]
+@@ -3689,7 +3729,7 @@ impl<M: View + 'static> Runtime<M> {
+         while let Some(index) = cursor {
+             let node = &sheet.nodes[index];
+             if let Some(logical) = self.by_identity.get(node.identity)
+-                && (self.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
++                && (self.nodes[logical].has_handler() || node.kind == NodeKind::Input)
+             {
+                 return Some(node.identity);
+             }
+@@ -4632,7 +4672,7 @@ mod semantic_storage_ledger {
+         );
+         // Parent/transform packing and the source namespace niche are shared
+         // baseline improvements; semantic columns add no hot-node fields.
+-        assert_eq!(size_of::<Node>(), 40);
++        assert_eq!(size_of::<Node>(), 24);
+         assert_eq!(size_of::<Prepared>(), 40);
+         assert_eq!(size_of::<Presented>(), 64);
+         assert_eq!(size_of::<crate::El<'_>>(), 176);
+@@ -5027,7 +5067,7 @@ mod style_port_tests {
+             size_of::<Destination>(),
+             size_of::<crate::Flex>()
+         );
+-        assert_eq!(size_of::<Node>(), 40);
++        assert_eq!(size_of::<Node>(), 24);
+         assert_eq!(size_of::<Presented>(), 64);
+         assert_eq!(size_of::<crate::El<'_>>(), 176);
+         assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
+diff --git a/reactivity/crates/gpui/src/runtime/background.rs b/reactivity/crates/gpui/src/runtime/background.rs
+index 6d422722ae..844ff13aab 100644
+--- a/reactivity/crates/gpui/src/runtime/background.rs
++++ b/reactivity/crates/gpui/src/runtime/background.rs
+@@ -746,7 +746,7 @@ mod tests {
+     fn gradient_background_typed_reflection_owner_validation_and_replacement_are_coherent() {
+         assert_eq!(size_of::<Color>(), 16);
+         assert_eq!(size_of::<Style>(), 88);
+-        assert_eq!(size_of::<Node>(), 40);
++        assert_eq!(size_of::<Node>(), 24);
+         assert_eq!(size_of::<crate::property::PropertyValue>(), 28);
+         assert_eq!(size_of::<crate::style_port::PropInput<'_, Color>>(), 48);
+         assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
+diff --git a/reactivity/crates/gpui/src/runtime/editing.rs b/reactivity/crates/gpui/src/runtime/editing.rs
+index b5b64b3e8f..7d77445faa 100644
+--- a/reactivity/crates/gpui/src/runtime/editing.rs
++++ b/reactivity/crates/gpui/src/runtime/editing.rs
+@@ -818,7 +818,7 @@ mod tests {
+             assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
+             assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
+             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);
+-            assert_eq!(std::mem::size_of::<Node>(), 40);
++            assert_eq!(std::mem::size_of::<Node>(), 24);
+             // The safe packed owner makes embedded TextLayout 56B and this site 80B.
+             assert_eq!(std::mem::size_of::<TextSite>(), 80);
+         }
+diff --git a/reactivity/crates/gpui/src/runtime/geometry.rs b/reactivity/crates/gpui/src/runtime/geometry.rs
+index fc2efdc606..996a0d40c2 100644
+--- a/reactivity/crates/gpui/src/runtime/geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/geometry.rs
+@@ -909,7 +909,7 @@ mod clip_layout_tests {
+             );
+             drop(held);
+         }
+-        assert_eq!(size_of::<Node>(), 40);
++        assert_eq!(size_of::<Node>(), 24);
+         assert_eq!(size_of::<Presented>(), 64);
+         assert_eq!(size_of::<crate::Style>(), 88);
+         assert_eq!(size_of::<Record>(), 16);
+diff --git a/reactivity/crates/gpui/src/runtime/handlers.rs b/reactivity/crates/gpui/src/runtime/handlers.rs
+new file mode 100644
+index 0000000000..77cf7d443e
+--- /dev/null
++++ b/reactivity/crates/gpui/src/runtime/handlers.rs
+@@ -0,0 +1,112 @@
++//! One retained slot per installed route, indexed directly by NodeLinks. The
++//! optional owner keeps the vector header out of handler-free runtimes.
++use super::Handler;
++
++pub(super) struct Handlers {
++    values: Vec<Option<Handler>>,
++}
++impl Handlers {
++    pub(super) fn new(count: usize) -> Option<Box<Self>> {
++        (count != 0).then(|| {
++            Box::new(Self {
++                values: Vec::with_capacity(count),
++            })
++        })
++    }
++    // Reuse the cold owner, but exchange its vector in full: old site indices
++    // address only the returned retired routes until their normal drop barrier.
++    pub(super) fn replace(
++        previous: Option<Box<Self>>,
++        count: usize,
++    ) -> (Option<Box<Self>>, Vec<Option<Handler>>) {
++        match previous {
++            Some(mut owner) => {
++                let retired = std::mem::replace(&mut owner.values, Vec::with_capacity(count));
++                ((count != 0).then_some(owner), retired)
++            }
++            None => (Self::new(count), Vec::new()),
++        }
++    }
++    pub(super) fn push(&mut self, handler: Handler) -> usize {
++        let slot = self.values.len();
++        self.values.push(Some(handler));
++        slot
++    }
++    pub(super) fn get(&self, slot: usize) -> &Handler {
++        self.values[slot].as_ref().expect("installed route")
++    }
++    pub(super) fn take(&mut self, slot: usize) -> Handler {
++        self.values[slot].take().expect("installed route")
++    }
++    pub(super) fn restore(&mut self, slot: usize, handler: Handler) {
++        self.values[slot] = Some(handler);
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::super::*;
++    use super::Handlers;
++    use crate::prelude::*;
++    struct Blank;
++    impl View for Blank {
++        fn view(&self) -> El<'_> {
++            div()
++        }
++    }
++    #[test]
++    fn retained_header_and_capacity_ledger() {
++        println!(
++            "HANDLER_LAYOUT node={} optional_node={} runtime={} owner_slot={} table={} handler={} parent={} links={}",
++            size_of::<Node>(),
++            size_of::<Option<Node>>(),
++            size_of::<Runtime<Blank>>(),
++            size_of::<Option<Box<Handlers>>>(),
++            size_of::<Handlers>(),
++            size_of::<Option<Handler>>(),
++            size_of::<Parent>(),
++            size_of::<links::NodeLinks>()
++        );
++        for count in [0, 1, 2, 63, 64, 65, 100_000] {
++            let table = Handlers::new(count);
++            assert_eq!(table.is_some(), count != 0);
++            if let Some(table) = table {
++                assert_eq!(table.values.capacity(), count);
++                println!(
++                    "HANDLER_CAPACITY count={count} capacity={} bytes={}",
++                    table.values.capacity(),
++                    size_of::<Handlers>() + table.values.capacity() * size_of::<Option<Handler>>()
++                );
++            }
++        }
++    }
++    #[test]
++    fn replacement_reuses_only_the_cold_owner_and_releases_empty_capacity() {
++        for (before, after) in [(0, 0), (0, 1), (1, 1), (100_000, 1), (1, 0)] {
++            let previous = Handlers::new(before);
++            let mut replaced = None;
++            let allocation = allocation_counter::measure(|| {
++                replaced = Some(Handlers::replace(previous, after));
++            });
++            let (owner, retired) = replaced.unwrap();
++            let allocations = if after == 0 {
++                0
++            } else if before == 0 {
++                2
++            } else {
++                1
++            };
++            assert_eq!(allocation.count_total, allocations);
++            assert_eq!(owner.is_some(), after != 0);
++            assert_eq!(
++                owner.as_deref().map_or(0, |owner| owner.values.capacity()),
++                after
++            );
++            assert_eq!(retired.capacity(), before);
++            println!(
++                "HANDLER_REPLACE before={before} after={after} allocations={} requested={}",
++                allocation.count_total, allocation.bytes_total
++            );
++        }
++    }
++}
+diff --git a/reactivity/crates/gpui/src/runtime/hit_tests.rs b/reactivity/crates/gpui/src/runtime/hit_tests.rs
+index f896411f5c..7449960dd6 100644
+--- a/reactivity/crates/gpui/src/runtime/hit_tests.rs
++++ b/reactivity/crates/gpui/src/runtime/hit_tests.rs
+@@ -69,7 +69,7 @@ fn exhaustive<M: View + 'static>(runtime: &Runtime<M>, point: Point) -> Option<u
+             while let Some(index) = cursor {
+                 let node = &runtime.presented[index];
+                 if let Some(logical) = runtime.by_identity.get(node.identity)
+-                    && (runtime.nodes[logical].handler.is_some() || node.kind == NodeKind::Input)
++                    && (runtime.nodes[logical].has_handler() || node.kind == NodeKind::Input)
+                 {
+                     return Some(node.identity);
+                 }
+diff --git a/reactivity/crates/gpui/src/runtime/inspector.rs b/reactivity/crates/gpui/src/runtime/inspector.rs
+index 9565dbeada..a97e7b28ed 100644
+--- a/reactivity/crates/gpui/src/runtime/inspector.rs
++++ b/reactivity/crates/gpui/src/runtime/inspector.rs
+@@ -353,7 +353,7 @@ impl<M: View + 'static> Runtime<M> {
+         // The fixed panel is the final sibling in every description. Derive
+         // its root from that contract without walking the application's tree.
+         let panel = self.nodes.len().checked_sub(PANEL_NODES)?;
+-        debug_assert_eq!(self.nodes[panel].parent.index(), Some(0));
++        debug_assert_eq!(self.nodes[panel].parent().index(), Some(0));
+         Some(panel)
+     }
+     fn inspector_app_index(&self, target: Target) -> Result<usize, Error> {
+@@ -673,7 +673,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+                     (5, EditorOp::Auto),
+                     (6, EditorOp::Inherit),
+                 ] {
+-                    self.nodes[panel + EDITOR + offset].handler = Some(
++                    let slot = self.nodes[panel + EDITOR + offset]
++                        .handler_slot()
++                        .expect("editor route");
++                    self.runtime.handlers.as_deref_mut().unwrap().restore(
++                        slot,
+                         crate::element::Handler::window(WindowAction::Inspector(Edit(next.0, op))),
+                     );
+                 }
+@@ -695,7 +699,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+         match action {
+             Pick | Choose(_) => unreachable!(),
+             Parent => {
+-                let parent = self.nodes[index].parent.index().ok_or(Error::StaleTarget)?;
++                let parent = self.nodes[index]
++                    .parent()
++                    .index()
++                    .ok_or(Error::StaleTarget)?;
+                 let target = self.sites.target(self.nodes[parent].identity());
+                 if self.inspector_app_index(target).is_err() {
+                     return Ok(self.commit());
+diff --git a/reactivity/crates/gpui/src/runtime/links.rs b/reactivity/crates/gpui/src/runtime/links.rs
+new file mode 100644
+index 0000000000..d3baf96115
+--- /dev/null
++++ b/reactivity/crates/gpui/src/runtime/links.rs
+@@ -0,0 +1,77 @@
++//! Three independently bounded logical indices share one word. No pointers or
++//! externally actionable identities are compressed here.
++use super::{MAX_NODES, Parent};
++
++const BITS: u32 = usize::BITS - MAX_NODES.leading_zeros();
++const MASK: u64 = (1 << BITS) - 1;
++const _: () = assert!(BITS * 3 <= u64::BITS && MAX_NODES as u64 <= MASK);
++
++pub(super) struct NodeLinks(u64);
++impl NodeLinks {
++    pub(super) fn new(parent: Option<usize>, ordinal: u32, handler: Option<usize>) -> Self {
++        assert!((ordinal as usize) < MAX_NODES, "admitted sibling ordinal");
++        Self(
++            Self::optional(parent)
++                | ((ordinal as u64) << BITS)
++                | (Self::optional(handler) << (BITS * 2)),
++        )
++    }
++    fn optional(index: Option<usize>) -> u64 {
++        index.map_or(0, |index| {
++            assert!(index < MAX_NODES, "admitted logical index");
++            index as u64 + 1
++        })
++    }
++    pub(super) fn parent(&self) -> Parent {
++        // Only new constructs this word, and it admits every stored index.
++        // Zero maps to Parent::NONE; an encoded index + 1 maps to that index.
++        Parent(((self.0 & MASK) as u32).wrapping_sub(1))
++    }
++    pub(super) fn ordinal(&self) -> u32 {
++        ((self.0 >> BITS) & MASK) as u32
++    }
++    pub(super) fn handler(&self) -> Option<usize> {
++        ((self.0 >> (BITS * 2)) & MASK)
++            .checked_sub(1)
++            .map(|index| index as usize)
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[inline(never)]
++    fn emitted_parent_probe(links: &NodeLinks) -> Parent {
++        links.parent()
++    }
++    #[test]
++    fn independent_indices_cover_every_admitted_value_and_do_not_alias() {
++        assert_eq!(size_of::<NodeLinks>(), 8);
++        for index in 0..MAX_NODES {
++            for (parent, handler) in [
++                (None, None),
++                (Some(index), None),
++                (None, Some(index)),
++                (Some(index), Some(MAX_NODES - 1 - index)),
++            ] {
++                let links = NodeLinks::new(parent, index as u32, handler);
++                assert_eq!(
++                    emitted_parent_probe(std::hint::black_box(&links)).index(),
++                    parent
++                );
++                assert_eq!(links.ordinal(), index as u32);
++                assert_eq!(links.handler(), handler);
++            }
++        }
++    }
++    #[test]
++    fn out_of_domain_indices_are_rejected_before_encoding() {
++        for make in [
++            || NodeLinks::new(Some(MAX_NODES), 0, None),
++            || NodeLinks::new(None, MAX_NODES as u32, None),
++            || NodeLinks::new(None, 0, Some(MAX_NODES)),
++        ] {
++            assert!(std::panic::catch_unwind(make).is_err());
++        }
++    }
++}
+diff --git a/reactivity/crates/gpui/src/runtime/list.rs b/reactivity/crates/gpui/src/runtime/list.rs
+index d8a996e97f..d1f22408c3 100644
+--- a/reactivity/crates/gpui/src/runtime/list.rs
++++ b/reactivity/crates/gpui/src/runtime/list.rs
+@@ -378,7 +378,7 @@ impl<M: View + 'static> Runtime<M> {
+             if self.nodes[index].kind() == NodeKind::ListItem {
+                 return true;
+             }
+-            match self.nodes[index].parent.index() {
++            match self.nodes[index].parent().index() {
+                 Some(parent) => index = parent,
+                 None => return false,
+             }
+diff --git a/reactivity/crates/gpui/src/runtime/scroll.rs b/reactivity/crates/gpui/src/runtime/scroll.rs
+index 4ee3cf7555..3fd4de5767 100644
+--- a/reactivity/crates/gpui/src/runtime/scroll.rs
++++ b/reactivity/crates/gpui/src/runtime/scroll.rs
+@@ -367,12 +367,12 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
+     let mut ancestor = Parent::NONE;
+     for (index, node) in runtime.nodes.iter().enumerate() {
+         let layout = runtime.layout.layout(runtime.layout_nodes[index])?;
+-        while ancestor.index() != node.parent.index() {
++        while ancestor.index() != node.parent().index() {
+             frontier.pop();
+-            ancestor = runtime.nodes[ancestor.index().unwrap()].parent;
++            ancestor = runtime.nodes[ancestor.index().unwrap()].parent();
+         }
+         let (parent_space, nearest) = frontier.top();
+-        let parent = node.parent.index();
++        let parent = node.parent().index();
+         let inherited = nearest.index();
+         let base = parent
+             .filter(|&parent| {
+@@ -403,7 +403,7 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
+         if runtime
+             .nodes
+             .get(index + 1)
+-            .is_some_and(|next| next.parent.index() == Some(index))
++            .is_some_and(|next| next.parent().index() == Some(index))
+         {
+             frontier.push((
+                 space,
+diff --git a/reactivity/crates/gpui/src/runtime/siblings.rs b/reactivity/crates/gpui/src/runtime/siblings.rs
+index bf8b98bce6..0f2e208646 100644
+--- a/reactivity/crates/gpui/src/runtime/siblings.rs
++++ b/reactivity/crates/gpui/src/runtime/siblings.rs
+@@ -13,14 +13,14 @@ impl Siblings {
+         let mut words = vec![0u32; nodes.len() * 2 + 2];
+         let (offsets, children) = words.split_at_mut(nodes.len() + 2);
+         for node in nodes {
+-            offsets[slot(node.parent) + 1] += 1;
++            offsets[slot(node.parent()) + 1] += 1;
+         }
+         for index in 1..offsets.len() {
+             offsets[index] += offsets[index - 1];
+         }
+         for (index, node) in nodes.iter().enumerate() {
+             // Ordinals already enumerate each parent's admitted child run.
+-            children[(offsets[slot(node.parent)] + node.ordinal) as usize] = index as u32;
++            children[(offsets[slot(node.parent())] + node.ordinal()) as usize] = index as u32;
+         }
+         Self(words)
+     }
+@@ -64,8 +64,7 @@ mod tests {
+                 let node = Node {
+                     // Reverse full-width identities force the non-affine lookup.
+                     identity: NonZeroU64::new(u64::MAX - index as u64 * 2).unwrap(),
+-                    parent: Parent::new(parent),
+-                    ordinal: *ordinal,
++                    links: super::super::links::NodeLinks::new(parent, *ordinal, None),
+                     content: Content::new(
+                         match index % 4 {
+                             0 => NodeKind::Div,
+@@ -76,7 +75,6 @@ mod tests {
+                         TextSlot::NONE,
+                     ),
+                     component_scope: 0,
+-                    handler: None,
+                 };
+                 *ordinal += 1;
+                 node
+@@ -89,13 +87,13 @@ mod tests {
+         for count in [0, 1, 2, 32, 1024, MAX_NODES] {
+             for shape in 0..3 {
+                 let nodes = tree(count, shape);
+-                let parent_id = |node: &Node| node.parent.index().map(|i| nodes[i].identity());
++                let parent_id = |node: &Node| node.parent().index().map(|i| nodes[i].identity());
+                 let mut counts = BTreeMap::new();
+                 let mut sites = BTreeMap::new();
+                 for (index, node) in nodes.iter().enumerate() {
+                     *counts.entry(parent_id(node)).or_insert(0) += 1;
+                     sites.insert(
+-                        (parent_id(node), node.ordinal, node.kind().site_kind()),
++                        (parent_id(node), node.ordinal(), node.kind().site_kind()),
+                         index,
+                     );
+                 }
+@@ -135,7 +133,7 @@ mod tests {
+                 siblings.children(Parent::NONE).len(),
+                 nodes
+                     .iter()
+-                    .filter(|node| node.parent.index().is_none())
++                    .filter(|node| node.parent().index().is_none())
+                     .count()
+             );
+         }
+diff --git a/reactivity/crates/gpui/src/runtime/turn.rs b/reactivity/crates/gpui/src/runtime/turn.rs
+index 19cedf784d..79b510597b 100644
+--- a/reactivity/crates/gpui/src/runtime/turn.rs
++++ b/reactivity/crates/gpui/src/runtime/turn.rs
+@@ -341,10 +341,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+             self.runtime.changed_nodes = 0;
+             return Ok(self.commit());
+         }
+-        let handler = self.runtime.nodes[index]
+-            .handler
+-            .as_ref()
++        let slot = self.runtime.nodes[index]
++            .handler_slot()
+             .ok_or(Error::NotInteractive)?;
++        let handler = self.runtime.handlers.as_deref().unwrap().get(slot);
+         let admission = match catch_unwind(AssertUnwindSafe(|| {
+             handler.admit(&self.runtime.model, &self.runtime.sources)
+         })) {
+@@ -382,10 +382,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+         // M, and the shared property mutation touches only style/geometry.
+         // Own this existing route on the stack so no handler/node borrow spans
+         // logical mutation. Restore it before the sole reconciliation barrier.
+-        let handler = self.runtime.nodes[index]
+-            .handler
+-            .take()
++        let slot = self.runtime.nodes[index]
++            .handler_slot()
+             .expect("admitted route");
++        let handler = self.runtime.handlers.as_deref_mut().unwrap().take(slot);
+         let before = self.source_epoch;
+         let mut property_changed = None;
+         let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
+@@ -431,7 +431,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+             handler.applied_logically(&mut self.runtime.model, result.as_ref())?;
+             Ok(true)
+         }));
+-        self.runtime.nodes[index].handler = Some(handler);
++        self.runtime
++            .handlers
++            .as_deref_mut()
++            .unwrap()
++            .restore(slot, handler);
+         match result {
+             Ok(Ok(false)) => Ok(self.commit()),
+             Ok(Ok(true)) => self.after_source_changed(None, editing, property_changed),
+diff --git a/reactivity/crates/gpui/tests/child_capacity.rs b/reactivity/crates/gpui/tests/child_capacity.rs
+new file mode 100644
+index 0000000000..5626fd3060
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/child_capacity.rs
+@@ -0,0 +1,97 @@
++//! Declaration costs through the same child API used by application views.
++use gpui::{El, View, prelude::*};
++
++fn census<'a>(label: &str, build: impl FnOnce() -> El<'a>) {
++    let mut declaration = None;
++    let cost = allocation_counter::measure(|| declaration = Some(build()));
++    println!(
++        "CHILDREN {label} allocations={} requested={} retained={} peak={}",
++        cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
++    );
++    drop(declaration);
++}
++
++fn chain(depth: usize) -> El<'static> {
++    (0..depth).fold(div(), |child, _| div().child(child))
++}
++
++#[test]
++fn declaration_allocation_census() {
++    census("leaf", div);
++    census("single", || div().child(div()));
++    census("optional-none", || div().child(None::<El<'_>>));
++    census("optional-some", || div().child(Some(div())));
++    census("tuple-six", || {
++        row((div(), div(), div(), div(), div(), div()))
++    });
++    census("tuple-nested", || {
++        row(((div(), div()), Some((div(), div())), None::<El<'_>>))
++    });
++    census("iterator-empty", || column(std::iter::empty::<El<'_>>()));
++    census("iterator-wide", || column((0..10_000).map(|_| div())));
++    census("iterator-pairs", || {
++        column((0..5_000).map(|_| (div(), div())))
++    });
++    census("iterator-filtered", || {
++        column((0..10_000).filter(|i| i % 2 == 0).map(|_| div()))
++    });
++    census("appended-groups", || {
++        div().child(div()).child((0..10).map(|_| div()))
++    });
++    census("chain-129", || chain(129));
++    census("chain-4096", || chain(4096));
++    struct Leaf;
++    impl View for Leaf {
++        fn view(&self) -> El<'_> {
++            div()
++        }
++    }
++    let views = (0..10_000).map(|_| Leaf).collect::<Vec<_>>();
++    census("borrowed-views", || column(&views));
++}
++
++#[test]
++fn nested_child_families_keep_their_public_preorder() {
++    struct Page;
++    impl View for Page {
++        fn view(&self) -> El<'_> {
++            column((
++                text("first"),
++                Some((text("second"), text("third"))),
++                None::<El<'_>>,
++                (0..3).map(|_| (text("fourth"), text("fifth"))),
++            ))
++        }
++    }
++    let win = gpui::Win::demo(Page);
++    let texts = win
++        .snapshot()
++        .unwrap()
++        .nodes
++        .into_iter()
++        .filter_map(|node| node.text)
++        .collect::<Vec<_>>();
++    assert_eq!(
++        texts,
++        [
++            "first", "second", "third", "fourth", "fifth", "fourth", "fifth", "fourth", "fifth"
++        ]
++    );
++}
++
++#[test]
++fn known_child_counts_need_one_exact_declaration_allocation() {
++    for count in [1, 2, 6, 129, 10_000] {
++        let mut declaration = None;
++        let cost = allocation_counter::measure(|| {
++            declaration = Some(column((0..count).map(|_| div())));
++        });
++        assert_eq!(cost.count_total, 1, "child count {count}");
++        assert_eq!(
++            cost.bytes_total as usize,
++            count * size_of::<El<'_>>(),
++            "child count {count}"
++        );
++        drop(declaration);
++    }
++}
+diff --git a/reactivity/crates/gpui/tests/handler_storage.rs b/reactivity/crates/gpui/tests/handler_storage.rs
+new file mode 100644
+index 0000000000..eec50c760c
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/handler_storage.rs
+@@ -0,0 +1,294 @@
++//! Public-interface allocation census and routing after sparse slots move.
++use gpui::{Win, WindowOptions, prelude::*};
++
++struct Buttons {
++    count: usize,
++    stride: usize,
++    clicks: usize,
++}
++impl Buttons {
++    fn click(&mut self) {
++        self.clicks += 1;
++    }
++}
++impl View for Buttons {
++    fn view(&self) -> El<'_> {
++        column((0..self.count).map(|index| {
++            let el = div().size(1);
++            if self.stride != 0 && index % self.stride == 0 {
++                el.on_click(Self::click)
++            } else {
++                el
++            }
++        }))
++    }
++}
++macro_rules! layer {
++    ($name:ident, $child:ty) => {
++        struct $name {
++            child: $child,
++        }
++        impl $name {
++            const CHILD: Component<Self, $child> =
++                Component::new(FieldId::new(1), "child", |m| &m.child, |m| &mut m.child);
++        }
++        impl View for $name {
++            fn sources() -> Sources<Self> {
++                Sources::new().direct_component(Self::CHILD)
++            }
++            fn view(&self) -> El<'_> {
++                Self::CHILD.view(self)
++            }
++        }
++    };
++}
++layer!(One, Buttons);
++layer!(Two, One);
++layer!(Three, Two);
++layer!(Four, Three);
++fn model(count: usize, stride: usize) -> Buttons {
++    Buttons {
++        count,
++        stride,
++        clicks: 0,
++    }
++}
++
++fn census<M: View + 'static>(name: &str, model: M) {
++    let mut description = None;
++    let view = allocation_counter::measure(|| {
++        description = Some(model.view());
++    });
++    println!(
++        "VIEW {name} allocations={} requested={} retained={} peak={}",
++        view.count_total, view.bytes_total, view.bytes_current, view.bytes_max
++    );
++    drop(description);
++    let mut owner = None;
++    let open = allocation_counter::measure(|| {
++        let mut win = Win::recording(
++            model,
++            WindowOptions {
++                size: [32, 32],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        let token = win.with_scene(|_, token| token).unwrap();
++        win.presented(token).unwrap();
++        owner = Some(win);
++    });
++    let mut win = owner.unwrap();
++    let targets = win
++        .snapshot()
++        .unwrap()
++        .nodes
++        .into_iter()
++        .filter_map(|node| node.target)
++        .collect::<Vec<_>>();
++    println!(
++        "OPEN {name} targets={} allocations={} requested={} retained={} peak={}",
++        targets.len(),
++        open.count_total,
++        open.bytes_total,
++        open.bytes_current,
++        open.bytes_max
++    );
++    if let Some(target) = targets.last() {
++        win.activate(*target).unwrap();
++    }
++    std::hint::black_box(win);
++}
++
++#[test]
++fn public_allocation_census() {
++    for count in [0, 1, 63, 64, 65, 4096] {
++        for stride in [0, 64, 1] {
++            census(&format!("root-{count}-{stride}"), model(count, stride));
++        }
++    }
++    for count in [1, 100, 10000] {
++        census(
++            &format!("depth1-{count}"),
++            One {
++                child: model(count, 1),
++            },
++        );
++        census(
++            &format!("depth4-{count}"),
++            Four {
++                child: Three {
++                    child: Two {
++                        child: One {
++                            child: model(count, 1),
++                        },
++                    },
++                },
++            },
++        );
++    }
++}
++
++#[test]
++fn sparse_routes_survive_description_growth_removal_and_replacement() {
++    let mut win = Win::demo(model(130, 64));
++    for expected in 1..=3 {
++        let target = win
++            .snapshot()
++            .unwrap()
++            .nodes
++            .into_iter()
++            .filter_map(|node| node.target)
++            .nth(expected - 1)
++            .unwrap();
++        win.activate(target).unwrap();
++        assert_eq!(win.root().unwrap().clicks, expected);
++    }
++    let stale = win
++        .snapshot()
++        .unwrap()
++        .nodes
++        .into_iter()
++        .filter_map(|node| node.target)
++        .next_back()
++        .unwrap();
++    win.update(|m| {
++        m.count = 65;
++        m.stride = 0;
++    })
++    .unwrap();
++    assert!(win.activate(stale).is_err());
++    assert!(
++        win.snapshot()
++            .unwrap()
++            .nodes
++            .iter()
++            .all(|node| node.target.is_none())
++    );
++    win.update(|m| {
++        m.count = 129;
++        m.stride = 1;
++    })
++    .unwrap();
++    let targets = win
++        .snapshot()
++        .unwrap()
++        .nodes
++        .into_iter()
++        .filter_map(|node| node.target)
++        .collect::<Vec<_>>();
++    assert_eq!(targets.len(), 129);
++    for index in [0, 62, 63, 64, 127, 128] {
++        win.activate(targets[index]).unwrap();
++    }
++    assert_eq!(win.root().unwrap().clicks, 9);
++}
++
++#[test]
++fn each_target_calls_its_own_capture_after_sparse_slots_move() {
++    struct Routes {
++        last: Option<usize>,
++        sparse: bool,
++    }
++    impl View for Routes {
++        fn view(&self) -> El<'_> {
++            column((0..130).map(|index| {
++                let el = div().size(1).name(index.to_string());
++                if !self.sparse || [0, 63, 64, 65, 128, 129].contains(&index) {
++                    el.on_click(move |m: &mut Routes| m.last = Some(index))
++                } else {
++                    el
++                }
++            }))
++        }
++    }
++    let mut win = Win::demo(Routes {
++        last: None,
++        sparse: false,
++    });
++    for sparse in [false, true, false] {
++        win.update(|m| m.sparse = sparse).unwrap();
++        let nodes = win.snapshot().unwrap().nodes;
++        for (index, node) in nodes.iter().skip(1).enumerate() {
++            if let Some(target) = node.target {
++                win.activate(target).unwrap();
++                assert_eq!(win.root().unwrap().last, Some(index));
++            }
++        }
++    }
++}
++
++#[path = "../examples/support/graphics.rs"]
++mod graphics;
++#[path = "../examples/support/library.rs"]
++mod library;
++#[path = "../examples/support/todos.rs"]
++mod todos;
++#[path = "../examples/support/workspace.rs"]
++mod workspace;
++
++#[test]
++fn ordinary_application_allocation_census() {
++    census("todos-default", todos::Todos::default());
++    census("workspace-default", workspace::Workspace::default());
++    census("library-250000", library::Library::new(250_000));
++}
++
++#[test]
++fn a_reconciliation_panic_drops_new_captures_before_remaining_old_captures() {
++    use std::sync::{Arc, Mutex};
++    struct Probe {
++        generation: u8,
++        index: usize,
++        log: Arc<Mutex<Vec<(u8, usize)>>>,
++    }
++    impl Drop for Probe {
++        fn drop(&mut self) {
++            self.log.lock().unwrap().push((self.generation, self.index));
++            assert!(
++                !(self.generation == 0 && self.index == 1),
++                "route destructor"
++            );
++        }
++    }
++    struct Owner {
++        generation: u8,
++        log: Arc<Mutex<Vec<(u8, usize)>>>,
++    }
++    impl View for Owner {
++        fn view(&self) -> El<'_> {
++            column((0..4).map(|index| {
++                let probe = Probe {
++                    generation: self.generation,
++                    index,
++                    log: self.log.clone(),
++                };
++                div().size(1).on_click(move |_: &mut Self| {
++                    std::hint::black_box(&probe);
++                })
++            }))
++        }
++    }
++    let log = Arc::new(Mutex::new(Vec::new()));
++    let mut win = Win::demo(Owner {
++        generation: 0,
++        log: log.clone(),
++    });
++    assert_eq!(
++        win.update(|m| m.generation = 1),
++        Err(gpui::Error::OwnerPanicked)
++    );
++    let expected = vec![
++        (0, 0),
++        (0, 1),
++        (1, 1),
++        (1, 2),
++        (1, 3),
++        (1, 0),
++        (0, 2),
++        (0, 3),
++    ];
++    assert_eq!(*log.lock().unwrap(), expected);
++    win.close();
++    assert_eq!(*log.lock().unwrap(), expected);
++}

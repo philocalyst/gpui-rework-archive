@@ -1,0 +1,216 @@
+{
+  "source": "ce79d00fb004859994c8574254bbd091e964a2d4",
+  "baseline_source": "0ba8a7b5f8d54256550d7e4993430497b4b4ef77",
+  "binary": "/tmp/gpui-child-capacity-root-artifacts/000-child_capacity/test",
+  "identity": {
+    "original": "/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui/d5c2449183bc5a84/out/child_capacity-d5c2449183bc5a84",
+    "frozen": "/tmp/gpui-child-capacity-root-artifacts/000-child_capacity/test",
+    "sha256": "b765aeb8db0115251ffa140565e83a77255fd40b865a1527cf791fc8cf425366",
+    "bytes": 144124744,
+    "fresh": false,
+    "package_id": "path+file:///tmp/gpui-packed-nodes-compose-root/reactivity/crates/gpui#0.1.0",
+    "target": {
+      "kind": [
+        "test"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "child_capacity",
+      "src_path": "/tmp/gpui-packed-nodes-compose-root/reactivity/crates/gpui/tests/child_capacity.rs",
+      "edition": "2024",
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "freeze_method": "atomic rename of uniquely linked ELF"
+  },
+  "command": [
+    "/tmp/gpui-child-capacity-root-artifacts/000-child_capacity/test",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "sha256_matches_after": true,
+  "rows": {
+    "leaf": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "single": {
+      "allocations": 1,
+      "requested": 176,
+      "retained": 176,
+      "peak": 176
+    },
+    "optional-none": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "optional-some": {
+      "allocations": 1,
+      "requested": 176,
+      "retained": 176,
+      "peak": 176
+    },
+    "tuple-six": {
+      "allocations": 1,
+      "requested": 1056,
+      "retained": 1056,
+      "peak": 1056
+    },
+    "tuple-nested": {
+      "allocations": 1,
+      "requested": 704,
+      "retained": 704,
+      "peak": 704
+    },
+    "iterator-empty": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "iterator-wide": {
+      "allocations": 1,
+      "requested": 1760000,
+      "retained": 1760000,
+      "peak": 1760000
+    },
+    "iterator-pairs": {
+      "allocations": 1,
+      "requested": 1760000,
+      "retained": 1760000,
+      "peak": 1760000
+    },
+    "iterator-filtered": {
+      "allocations": 12,
+      "requested": 2882880,
+      "retained": 1441792,
+      "peak": 2162688
+    },
+    "appended-groups": {
+      "allocations": 2,
+      "requested": 2112,
+      "retained": 1936,
+      "peak": 2112
+    },
+    "chain-129": {
+      "allocations": 129,
+      "requested": 22704,
+      "retained": 22704,
+      "peak": 22704
+    },
+    "chain-4096": {
+      "allocations": 4096,
+      "requested": 720896,
+      "retained": 720896,
+      "peak": 720896
+    },
+    "borrowed-views": {
+      "allocations": 1,
+      "requested": 1760000,
+      "retained": 1760000,
+      "peak": 1760000
+    }
+  },
+  "baseline_minus_candidate": {
+    "leaf": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "single": {
+      "allocations": 0,
+      "requested": 528,
+      "retained": 528,
+      "peak": 528
+    },
+    "optional-none": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "optional-some": {
+      "allocations": 0,
+      "requested": 528,
+      "retained": 528,
+      "peak": 528
+    },
+    "tuple-six": {
+      "allocations": 1,
+      "requested": 1056,
+      "retained": 352,
+      "peak": 1056
+    },
+    "tuple-nested": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "iterator-empty": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "iterator-wide": {
+      "allocations": 12,
+      "requested": 4006464,
+      "retained": 1123584,
+      "peak": 2565376
+    },
+    "iterator-pairs": {
+      "allocations": 12,
+      "requested": 4006464,
+      "retained": 1123584,
+      "peak": 2565376
+    },
+    "iterator-filtered": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    },
+    "appended-groups": {
+      "allocations": 1,
+      "requested": 2816,
+      "retained": 880,
+      "peak": 2112
+    },
+    "chain-129": {
+      "allocations": 0,
+      "requested": 68112,
+      "retained": 68112,
+      "peak": 68112
+    },
+    "chain-4096": {
+      "allocations": 0,
+      "requested": 2162688,
+      "retained": 2162688,
+      "peak": 2162688
+    },
+    "borrowed-views": {
+      "allocations": 0,
+      "requested": 0,
+      "retained": 0,
+      "peak": 0
+    }
+  },
+  "scope": "Actual public declaration requested allocations; no speed/RSS/native claim."
+}
