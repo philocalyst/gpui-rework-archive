@@ -367,12 +367,12 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
     let mut ancestor = Parent::NONE;
     for (index, node) in runtime.nodes.iter().enumerate() {
         let layout = runtime.layout.layout(runtime.layout_nodes[index])?;
-        while ancestor.index() != node.parent.index() {
+        while ancestor.index() != node.parent().index() {
             frontier.pop();
-            ancestor = runtime.nodes[ancestor.index().unwrap()].parent;
+            ancestor = runtime.nodes[ancestor.index().unwrap()].parent();
         }
         let (parent_space, nearest) = frontier.top();
-        let parent = node.parent.index();
+        let parent = node.parent().index();
         let inherited = nearest.index();
         let base = parent
             .filter(|&parent| {
@@ -403,7 +403,7 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
         if runtime
             .nodes
             .get(index + 1)
-            .is_some_and(|next| next.parent.index() == Some(index))
+            .is_some_and(|next| next.parent().index() == Some(index))
         {
             frontier.push((
                 space,

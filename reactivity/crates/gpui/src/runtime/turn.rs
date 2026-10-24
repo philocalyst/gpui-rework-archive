@@ -341,10 +341,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.changed_nodes = 0;
             return Ok(self.commit());
         }
-        let handler = self.runtime.nodes[index]
-            .handler
-            .as_ref()
+        let slot = self.runtime.nodes[index]
+            .handler_slot()
             .ok_or(Error::NotInteractive)?;
+        let handler = self.runtime.handlers.as_deref().unwrap().get(slot);
         let admission = match catch_unwind(AssertUnwindSafe(|| {
             handler.admit(&self.runtime.model, &self.runtime.sources)
         })) {
@@ -382,10 +382,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         // M, and the shared property mutation touches only style/geometry.
         // Own this existing route on the stack so no handler/node borrow spans
         // logical mutation. Restore it before the sole reconciliation barrier.
-        let handler = self.runtime.nodes[index]
-            .handler
-            .take()
+        let slot = self.runtime.nodes[index]
+            .handler_slot()
             .expect("admitted route");
+        let handler = self.runtime.handlers.as_deref_mut().unwrap().take(slot);
         let before = self.source_epoch;
         let mut property_changed = None;
         let result = catch_unwind(AssertUnwindSafe(|| -> Result<bool, Error> {
@@ -431,7 +431,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             handler.applied_logically(&mut self.runtime.model, result.as_ref())?;
             Ok(true)
         }));
-        self.runtime.nodes[index].handler = Some(handler);
+        self.runtime
+            .handlers
+            .as_deref_mut()
+            .unwrap()
+            .restore(slot, handler);
         match result {
             Ok(Ok(false)) => Ok(self.commit()),
             Ok(Ok(true)) => self.after_source_changed(None, editing, property_changed),

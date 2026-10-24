@@ -378,7 +378,7 @@ impl<M: View + 'static> Runtime<M> {
             if self.nodes[index].kind() == NodeKind::ListItem {
                 return true;
             }
-            match self.nodes[index].parent.index() {
+            match self.nodes[index].parent().index() {
                 Some(parent) => index = parent,
                 None => return false,
             }

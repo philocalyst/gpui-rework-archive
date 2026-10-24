@@ -13,14 +13,14 @@ impl Siblings {
         let mut words = vec![0u32; nodes.len() * 2 + 2];
         let (offsets, children) = words.split_at_mut(nodes.len() + 2);
         for node in nodes {
-            offsets[slot(node.parent) + 1] += 1;
+            offsets[slot(node.parent()) + 1] += 1;
         }
         for index in 1..offsets.len() {
             offsets[index] += offsets[index - 1];
         }
         for (index, node) in nodes.iter().enumerate() {
             // Ordinals already enumerate each parent's admitted child run.
-            children[(offsets[slot(node.parent)] + node.ordinal) as usize] = index as u32;
+            children[(offsets[slot(node.parent())] + node.ordinal()) as usize] = index as u32;
         }
         Self(words)
     }
@@ -64,8 +64,7 @@ mod tests {
                 let node = Node {
                     // Reverse full-width identities force the non-affine lookup.
                     identity: NonZeroU64::new(u64::MAX - index as u64 * 2).unwrap(),
-                    parent: Parent::new(parent),
-                    ordinal: *ordinal,
+                    links: super::super::links::NodeLinks::new(parent, *ordinal, None),
                     content: Content::new(
                         match index % 4 {
                             0 => NodeKind::Div,
@@ -76,7 +75,6 @@ mod tests {
                         TextSlot::NONE,
                     ),
                     component_scope: 0,
-                    handler: None,
                 };
                 *ordinal += 1;
                 node
@@ -89,13 +87,13 @@ mod tests {
         for count in [0, 1, 2, 32, 1024, MAX_NODES] {
             for shape in 0..3 {
                 let nodes = tree(count, shape);
-                let parent_id = |node: &Node| node.parent.index().map(|i| nodes[i].identity());
+                let parent_id = |node: &Node| node.parent().index().map(|i| nodes[i].identity());
                 let mut counts = BTreeMap::new();
                 let mut sites = BTreeMap::new();
                 for (index, node) in nodes.iter().enumerate() {
                     *counts.entry(parent_id(node)).or_insert(0) += 1;
                     sites.insert(
-                        (parent_id(node), node.ordinal, node.kind().site_kind()),
+                        (parent_id(node), node.ordinal(), node.kind().site_kind()),
                         index,
                     );
                 }
@@ -135,7 +133,7 @@ mod tests {
                 siblings.children(Parent::NONE).len(),
                 nodes
                     .iter()
-                    .filter(|node| node.parent.index().is_none())
+                    .filter(|node| node.parent().index().is_none())
                     .count()
             );
         }
