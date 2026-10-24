@@ -233,3 +233,62 @@ fn ordinary_application_allocation_census() {
     census("workspace-default", workspace::Workspace::default());
     census("library-250000", library::Library::new(250_000));
 }
+
+#[test]
+fn a_reconciliation_panic_drops_new_captures_before_remaining_old_captures() {
+    use std::sync::{Arc, Mutex};
+    struct Probe {
+        generation: u8,
+        index: usize,
+        log: Arc<Mutex<Vec<(u8, usize)>>>,
+    }
+    impl Drop for Probe {
+        fn drop(&mut self) {
+            self.log.lock().unwrap().push((self.generation, self.index));
+            assert!(
+                !(self.generation == 0 && self.index == 1),
+                "route destructor"
+            );
+        }
+    }
+    struct Owner {
+        generation: u8,
+        log: Arc<Mutex<Vec<(u8, usize)>>>,
+    }
+    impl View for Owner {
+        fn view(&self) -> El<'_> {
+            column((0..4).map(|index| {
+                let probe = Probe {
+                    generation: self.generation,
+                    index,
+                    log: self.log.clone(),
+                };
+                div().size(1).on_click(move |_: &mut Self| {
+                    std::hint::black_box(&probe);
+                })
+            }))
+        }
+    }
+    let log = Arc::new(Mutex::new(Vec::new()));
+    let mut win = Win::demo(Owner {
+        generation: 0,
+        log: log.clone(),
+    });
+    assert_eq!(
+        win.update(|m| m.generation = 1),
+        Err(gpui::Error::OwnerPanicked)
+    );
+    let expected = vec![
+        (0, 0),
+        (0, 1),
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (1, 0),
+        (0, 2),
+        (0, 3),
+    ];
+    assert_eq!(*log.lock().unwrap(), expected);
+    win.close();
+    assert_eq!(*log.lock().unwrap(), expected);
+}

@@ -2207,7 +2207,7 @@ impl<M: View + 'static> Runtime<M> {
             )));
             *entry = Fanout::Color(slot);
         }
-        let (mut handlers, mut old_handlers) =
+        let (handlers, old_handlers) =
             handlers::Handlers::replace(self.handlers.take(), handler_count);
         let old_styles = std::mem::take(&mut self.styles);
         let siblings = siblings::Siblings::new(&self.nodes);
@@ -2215,6 +2215,8 @@ impl<M: View + 'static> Runtime<M> {
             .into_iter()
             .map(Some)
             .collect::<Vec<_>>();
+        // Match the old Node vector's callback-drop position during unwind.
+        let mut old_handlers = old_handlers;
         let mut keyed_rows = BTreeMap::new();
         let mut keyed_lists = BTreeMap::new();
         let old_list_ids: BTreeMap<_, _> = self
@@ -2247,6 +2249,9 @@ impl<M: View + 'static> Runtime<M> {
             .map(|node| node.as_ref().unwrap().identity())
             .collect::<Vec<_>>();
         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
+        // New captures must drop before remaining old captures on unwind,
+        // just as they did when these Node vectors owned routes directly.
+        let mut handlers = handlers;
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
