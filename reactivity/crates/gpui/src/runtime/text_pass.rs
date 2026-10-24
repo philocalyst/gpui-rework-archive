@@ -14,6 +14,8 @@ pub(super) struct TextPass<'font, 'text> {
     inputs: &'text [Option<SharedText>],
     prepared: HashMap<usize, PreparedText<'text>>,
     selected: TextSlot,
+    pub peak: usize,
+    capacity_peak: usize,
     minimums: Vec<Option<Minimum>>,
 }
 // Frozen input leases and the fixed pass font qualify these numerical facts.
@@ -32,7 +34,36 @@ impl<'font, 'text> TextPass<'font, 'text> {
             inputs,
             prepared: HashMap::new(),
             selected: TextSlot(u32::MAX),
+            peak: 0,
+            capacity_peak: 0,
             minimums: Vec::new(),
+        }
+    }
+    pub fn paragraph_shapes(&self) -> u64 {
+        self.shaper.paragraph_shapes()
+    }
+    fn observe(&mut self) {
+        self.peak = self.peak.max(self.prepared.len());
+        let mut pending = [[0; 3]; 14];
+        for p in self.prepared.values() {
+            for (out, row) in pending.iter_mut().zip(p.diagnostic_storage()) {
+                for i in 0..3 {
+                    out[i] += row[i];
+                }
+            }
+        }
+        let (pool, ordinary, pool_len, pool_headers) = self.shaper.diagnostic_storage();
+        let bytes = pending.iter().chain(&pool).map(|r| r[2]).sum::<usize>();
+        if bytes > self.capacity_peak {
+            self.capacity_peak = bytes;
+            eprintln!(
+                "HANDOFF_CAPACITY bytes={bytes} pending={} peak={} pool_len={pool_len} pool_headers={pool_headers} pending_rows={pending:?} pool_rows={pool:?} ordinary_rows={ordinary:?} input_headers={} fact_headers={} prepared_header={}",
+                self.prepared.len(),
+                self.peak,
+                self.inputs.len() * core::mem::size_of::<Option<SharedText>>(),
+                self.minimums.capacity() * core::mem::size_of::<Option<Minimum>>(),
+                core::mem::size_of::<PreparedText<'_>>()
+            );
         }
     }
     pub fn select(&mut self, slot: TextSlot) {
@@ -42,6 +73,7 @@ impl<'font, 'text> TextPass<'font, 'text> {
         if let Some(prepared) = self.prepared.remove(&(slot.0 as usize)) {
             self.shaper.recycle_prepared(prepared);
         }
+        self.observe();
     }
     fn input(&self, text: &str) -> Option<&'text str> {
         let input = self.inputs.get(self.selected.0 as usize)?.as_ref()?;
@@ -89,6 +121,13 @@ impl<'font, 'text> TextPass<'font, 'text> {
         {
             return Ok(fact.metrics);
         }
+        if capture && !self.can_capture(input) {
+            eprintln!(
+                "HANDOFF_FALLBACK pending={} source_bytes={}",
+                self.prepared.len(),
+                input.len()
+            );
+        }
         let metrics = if let Some(prepared) = self.prepared.get_mut(&index)
             && prepared.font_size().to_bits() == size.to_bits()
         {
@@ -116,6 +155,7 @@ impl<'font, 'text> TextPass<'font, 'text> {
                 metrics,
             });
         }
+        self.observe();
         Ok(metrics)
     }
     pub fn shape_interactive(
@@ -134,6 +174,7 @@ impl<'font, 'text> TextPass<'font, 'text> {
                 self.shaper.shape_interactive(text, size, width)
             };
             self.shaper.recycle_prepared(prepared);
+            self.observe();
             result
         } else {
             self.shaper.shape_interactive(text, size, width)

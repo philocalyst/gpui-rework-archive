@@ -352,6 +352,12 @@ pub struct PreparedText<'text> {
     paragraphs: Option<planner::Paragraphs>,
 }
 impl PreparedText<'_> {
+    pub fn diagnostic_storage(&self) -> [[usize; 3]; 14] {
+        self.paragraphs
+            .as_ref()
+            .map_or([[0; 3]; 14], |p| p.diagnostic_storage())
+    }
+
     pub fn text(&self) -> &str {
         self.text
     }
@@ -379,6 +385,17 @@ pub struct TextShaper<'font> {
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
+    pub fn paragraph_shapes(&self) -> u64 {
+        self.planner.as_ref().map_or(0, |p| p.paragraph_shapes)
+    }
+    pub fn diagnostic_storage(&self) -> ([[usize; 3]; 14], [[usize; 3]; 14], usize, usize) {
+        self.planner
+            .as_ref()
+            .map_or(([[0; 3]; 14], [[0; 3]; 14], 0, 0), |p| {
+                p.diagnostic_storage()
+            })
+    }
+
     /// Measure and shape each paragraph once, preserving its source borrow.
     ///
     /// ```compile_fail

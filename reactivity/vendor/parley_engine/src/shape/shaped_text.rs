@@ -155,6 +155,25 @@ pub struct ShapedText {
 }
 
 impl ShapedText {
+    /// Diagnostic-only allocation-capacity view; not part of the candidate.
+    pub fn diagnostic_storage(&self) -> [[usize; 3]; 6] {
+        fn row<T>(v: &Vec<T>) -> [usize; 3] {
+            [
+                v.len(),
+                v.capacity(),
+                v.capacity() * core::mem::size_of::<T>(),
+            ]
+        }
+        [
+            row(&self.runs),
+            row(&self.characters),
+            row(&self.shaped_clusters),
+            row(&self.glyphs),
+            row(&self.fonts),
+            row(&self.normalized_coords),
+        ]
+    }
+
     /// Create a reusable [`ShapedText`].
     pub fn new() -> Self {
         Self::default()

@@ -43,6 +43,35 @@ impl<B: Brush> fmt::Debug for Layout<B> {
 }
 
 impl<B: Brush> Layout<B> {
+    /// Diagnostic-only Vec length/capacity/payload bytes; shared font bytes excluded.
+    pub fn diagnostic_storage(&self) -> [[usize; 3]; 14] {
+        fn row<T>(v: &Vec<T>) -> [usize; 3] {
+            [
+                v.len(),
+                v.capacity(),
+                v.capacity() * core::mem::size_of::<T>(),
+            ]
+        }
+        let d = &self.data;
+        let s = d.shaped_text.diagnostic_storage();
+        [
+            s[0],
+            s[1],
+            s[2],
+            s[3],
+            s[4],
+            s[5],
+            row(&d.styles),
+            row(&d.style_metrics),
+            row(&d.inline_boxes),
+            row(&d.runs),
+            row(&d.items),
+            row(&d.lines),
+            row(&d.line_items),
+            row(&d.aligned_subtree_offsets),
+        ]
+    }
+
     /// Creates an empty layout.
     pub fn new() -> Self {
         Self::default()

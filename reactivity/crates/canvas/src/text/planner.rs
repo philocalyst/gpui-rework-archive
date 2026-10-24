@@ -50,6 +50,7 @@ pub(super) struct Planner<'font> {
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
     primary_cmap: Cmap<'font>,
+    pub(super) paragraph_shapes: u64,
     spare: Vec<parley::Layout<()>>,
 }
 pub(super) struct Paragraphs {
@@ -59,6 +60,19 @@ pub(super) struct Paragraphs {
     blob_ids: [Option<u64>; 3],
     pub(super) glyphs: usize,
 }
+impl Paragraphs {
+    pub(super) fn diagnostic_storage(&self) -> [[usize; 3]; 14] {
+        let mut result = self.first.diagnostic_storage();
+        for layout in &self.rest {
+            for (out, row) in result.iter_mut().zip(layout.diagnostic_storage()) {
+                for i in 0..3 {
+                    out[i] += row[i];
+                }
+            }
+        }
+        result
+    }
+}
 struct Planned {
     metrics: TextMetrics,
     glyphs: EcoVec<PackedGlyph>,
@@ -66,6 +80,23 @@ struct Planned {
     mask: usize,
 }
 impl<'font> Planner<'font> {
+    pub(super) fn diagnostic_storage(&self) -> ([[usize; 3]; 14], [[usize; 3]; 14], usize, usize) {
+        let mut pool = [[0; 3]; 14];
+        for layout in &self.spare {
+            for (out, row) in pool.iter_mut().zip(layout.diagnostic_storage()) {
+                for i in 0..3 {
+                    out[i] += row[i];
+                }
+            }
+        }
+        (
+            pool,
+            self.layout.diagnostic_storage(),
+            self.spare.len(),
+            self.spare.capacity() * core::mem::size_of::<parley::Layout<()>>(),
+        )
+    }
+
     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
         let faces = FontSet {
             primary: primary.clone(),
@@ -86,6 +117,7 @@ impl<'font> Planner<'font> {
             blob_ids: [None; 3],
             sets: [Some(base), None, None, None],
             spare: Vec::new(),
+            paragraph_shapes: 0,
             primary_cmap: if primary.0.bundled {
                 Cmap(None)
             } else {
@@ -209,6 +241,7 @@ impl<'font> Planner<'font> {
         builder.push_default(StyleProperty::FontSize(size));
         builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
         builder.build_into(&mut self.layout, content);
+        self.paragraph_shapes += 1;
     }
     pub fn shape_prepared(
         &mut self,
