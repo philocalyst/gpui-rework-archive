@@ -74,9 +74,10 @@ impl Database {
         if version != 1 || markers != 1 {
             return Err(crate::search::SourceError::UnknownLibrarySchema);
         }
-        let database = Self { connection };
-        database.initialize_index()?;
-        Ok(database)
+        // Acquisition tables belong to the worker's source-admission boundary.
+        // It initializes fixtures and persistent sources once before accepting
+        // commands; source replacement uses the same boundary.
+        Ok(Self { connection })
     }
     pub(crate) fn initialize_index(&self) -> Result<()> {
         if self.connection.is_readonly("main")? {

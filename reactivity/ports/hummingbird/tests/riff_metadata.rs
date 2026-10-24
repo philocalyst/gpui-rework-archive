@@ -71,10 +71,7 @@ fn external_then_multiple_info_revisions_survive_unknown_chunks_with_exact_pcm_p
     let mut tagged = reader(wave(&chunks), options).unwrap();
     let mut revisions = Vec::new();
     let mut metadata = tagged.metadata();
-    loop {
-        let Some(revision) = metadata.current() else {
-            break;
-        };
+    while let Some(revision) = metadata.current() {
         revisions.push(
             revision
                 .media

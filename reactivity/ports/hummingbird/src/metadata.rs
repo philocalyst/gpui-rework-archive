@@ -87,10 +87,7 @@ pub(crate) fn read(probe: &Probe, path: &Path) -> Result<Metadata, SourceError> 
         ..Metadata::default()
     };
     let mut metadata = format.metadata();
-    loop {
-        let Some(revision) = metadata.current() else {
-            break;
-        };
+    while let Some(revision) = metadata.current() {
         for tag in revision.media.tags.iter().chain(
             revision
                 .per_track
