@@ -522,7 +522,7 @@ impl TextGeometry {
     }
 }
 
-impl TextLayout {
+impl<G: AsRef<TextGeometry>> TextLayout<G> {
     /// Nearest grapheme caret; see [`TextGeometry::position_at`].
     pub fn position_at(&self, point: Point) -> Option<TextPosition> {
         self.geometry()?.position_at(point)

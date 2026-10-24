@@ -1,4 +1,4 @@
-use crate::text::{Raster, SharedGlyphs};
+use crate::text::{LayoutView, Raster, SharedGlyphs};
 use crate::{
     Affine, Color, ColorConfig, DamageRegion, Error, Image, ImageKey, ImageSampling, ImageView,
     Point, Rect, TextLayout, TextSystem,
@@ -1455,10 +1455,10 @@ impl Canvas {
         )
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_text_scaled_shared(
+    pub fn draw_text_scaled_shared<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -1473,7 +1473,7 @@ impl Canvas {
         };
         self.draw_text_working(
             text,
-            layout,
+            layout.view(),
             origin,
             transform,
             clip.into(),
@@ -1715,10 +1715,10 @@ impl Canvas {
     }
     /// Origin and layout positions are local to transform. Layout and glyph masks
     /// belong to the same immutable FontFace. No text is reshaped during painting.
-    pub fn draw_text(
+    pub fn draw_text<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -1732,10 +1732,10 @@ impl Canvas {
     /// low-resolution bitmap. Physical font sizes are bounded to 4096px, and
     /// each bitmap remains subject to the existing 1MiB raster resource limit.
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_text_scaled(
+    pub fn draw_text_scaled<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -1744,7 +1744,7 @@ impl Canvas {
     ) -> Result<(), Error> {
         self.draw_text_working(
             text,
-            layout,
+            layout.view(),
             origin,
             transform,
             clip.into(),
@@ -1754,10 +1754,10 @@ impl Canvas {
         )
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_text_scaled_slot(
+    pub fn draw_text_scaled_slot<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -1766,7 +1766,7 @@ impl Canvas {
     ) -> Result<(), Error> {
         self.draw_text_working(
             text,
-            layout,
+            layout.view(),
             origin,
             transform,
             clip.into(),
@@ -1779,7 +1779,7 @@ impl Canvas {
     fn draw_text_working(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: LayoutView<'_>,
         origin: Point,
         transform: Affine,
         clip: Clip,
@@ -2961,10 +2961,10 @@ impl CanvasScene<'_> {
             .fill_rounded_rect_slot(rect, radius, transform, clip, slot)
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_text_scaled_slot(
+    pub fn draw_text_scaled_slot<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -2995,10 +2995,10 @@ impl CanvasScene<'_> {
             .fill_rounded_rect_shared(rect, radius, transform, clip, initial, cache)
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_text_scaled_shared(
+    pub fn draw_text_scaled_shared<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -3039,10 +3039,10 @@ impl CanvasScene<'_> {
         self.pending
             .draw_image_with(image, rect, transform, clip, options)
     }
-    pub fn draw_text(
+    pub fn draw_text<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,
@@ -3052,10 +3052,10 @@ impl CanvasScene<'_> {
             .draw_text(text, layout, origin, transform, clip, color)
     }
     #[allow(clippy::too_many_arguments)]
-    pub fn draw_text_scaled(
+    pub fn draw_text_scaled<G: AsRef<crate::TextGeometry>>(
         &mut self,
         text: &mut TextSystem,
-        layout: &TextLayout,
+        layout: &TextLayout<G>,
         origin: Point,
         transform: Affine,
         clip: impl Into<Clip>,

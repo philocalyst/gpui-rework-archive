@@ -145,13 +145,13 @@ impl<'font> Planner<'font> {
             })
         }))
     }
-    pub fn shape(
+    pub fn shape<G: From<Details>>(
         &mut self,
         text: &str,
         size: f32,
         max_width: Option<f32>,
         interactive: bool,
-    ) -> Result<TextLayout, Error> {
+    ) -> Result<TextLayout<G>, Error> {
         let planned = self.plan::<true>(text, size, max_width, interactive)?;
         Ok(TextLayout {
             width: planned.metrics.width,
@@ -161,7 +161,7 @@ impl<'font> Planner<'font> {
             glyphs: GlyphBuffer::new(planned.glyphs, text.len())
                 .map_err(|_| Error::ResourceLimit)?,
             fonts: self.font_set(planned.mask),
-            mapping: planned.details.map(Arc::new),
+            mapping: planned.details.map(G::from),
         })
     }
     pub fn measure(

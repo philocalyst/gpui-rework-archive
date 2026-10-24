@@ -2,6 +2,47 @@
 use super::*;
 
 #[test]
+fn direct_geometry_materialization_omits_the_shared_allocation() {
+    let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
+    let font = FontFace::bundled().unwrap();
+    let mut shaper = font.shaper();
+    drop(
+        shaper
+            .shape_interactive("office אבג\r\nnext", 16., Some(80.))
+            .unwrap(),
+    );
+    for _ in 0..4 {
+        let mut shared = None;
+        let shared_cost = allocation_counter::measure(|| {
+            shared = Some(
+                shaper
+                    .shape_interactive("office אבג\r\nnext", 16., Some(80.))
+                    .unwrap(),
+            );
+        });
+        let mut owned = None;
+        let owned_cost = allocation_counter::measure(|| {
+            owned = Some(
+                shaper
+                    .shape_owned_interactive("office אבג\r\nnext", 16., Some(80.))
+                    .unwrap(),
+            );
+        });
+        assert_eq!(shared_cost.count_total, owned_cost.count_total + 1);
+        assert_eq!(shared_cost.count_current, owned_cost.count_current + 1);
+        assert_eq!(
+            shared.as_ref().unwrap().glyphs().len(),
+            owned.as_ref().unwrap().glyphs().len()
+        );
+        println!(
+            "DIRECT_GEOMETRY shared_header={} owned_header={} shared={shared_cost:?} owned={owned_cost:?}",
+            size_of::<TextLayout>(),
+            size_of::<OwnedTextLayout>()
+        );
+    }
+}
+
+#[test]
 fn scoped_geometry_allocation_and_payload_ledger() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let font = FontFace::bundled().unwrap();
