@@ -421,6 +421,55 @@ mod tests {
     use std::sync::atomic::AtomicUsize;
 
     #[test]
+    fn closing_admission_precedes_a_panicking_context_cleanup() {
+        struct PanicClose;
+        impl linear_mailbox::Context for PanicClose {
+            fn notify(&self) {}
+            fn close(&self) {
+                panic!("context cleanup");
+            }
+        }
+        let mut owner = Owner::new(PanicClose);
+        let producer = owner.begin();
+        assert!(catch_unwind(AssertUnwindSafe(|| owner.close())).is_err());
+        let value = String::from("the exact rejected allocation");
+        let pointer = value.as_ptr();
+        let returned = producer.complete(value).unwrap_err();
+        assert_eq!(returned.as_ptr(), pointer);
+        assert!(owner.close().is_none());
+    }
+
+    #[test]
+    fn notification_panic_keeps_the_published_response_and_linear_terminal() {
+        struct PanicNotify;
+        impl linear_mailbox::Context for PanicNotify {
+            fn notify(&self) {
+                panic!("notification");
+            }
+            fn close(&self) {}
+        }
+        let mut owner = Owner::new(PanicNotify);
+        let producer = owner.begin();
+        assert!(catch_unwind(AssertUnwindSafe(|| producer.complete(7))).is_err());
+        assert_eq!(owner.freeze(), Some(2));
+        assert_eq!(owner.take(), Some(7));
+        assert!(owner.take().is_none());
+        owner.retire();
+        assert!(owner.idle());
+    }
+
+    #[test]
+    fn response_roles_preserve_pointer_niches_without_an_active_flag() {
+        assert_eq!(size_of::<Owner<u64, QuestionContext>>(), size_of::<usize>());
+        assert_eq!(
+            size_of::<Producer<u64, QuestionContext>>(),
+            size_of::<usize>()
+        );
+        assert_eq!(size_of::<Completion<u64, Infallible>>(), 40);
+        assert_eq!(size_of::<Option<Completion<u64, Infallible>>>(), 40);
+    }
+
+    #[test]
     fn cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it() {
         let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
         let stamp = scope.producer(1).unwrap().begin().unwrap();

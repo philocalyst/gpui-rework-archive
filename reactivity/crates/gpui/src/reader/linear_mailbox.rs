@@ -101,8 +101,8 @@ impl<P, C: Context> Owner<P, C> {
     }
     pub(super) fn close(&mut self) -> Option<P> {
         let shared = self.shared.take()?;
-        shared.context.close();
         shared.closed.store(true, Ordering::Release);
+        shared.context.close();
         // Atomically release this lease or reclaim the allocation uniquely.
         // A producer can never race a unique slot extraction.
         Arc::into_inner(shared).and_then(|shared| shared.slot.into_inner())
