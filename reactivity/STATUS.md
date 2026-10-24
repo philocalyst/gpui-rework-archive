@@ -68,6 +68,20 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [five-native Todo capture](comparisons/five-app-todo/capture-2026-10-24/report.md)
+records all 75 primary cells and all fifteen requested metric categories. All
+Busy trials passed; no Heavy resource trial passed, including corrected Zeron
+input coordinates. Only Zeron passed the animation delivery and independent
+host-receipt gates. Failed samples remain diagnostics. Physical GPU utilization
+and display smoothness are unsupported on this software-driver host.
+GPUI's separately measured ordinary Auto policy selected ReferenceCpu: three
+idle trials had median peak PSS 15.06 MiB, and three warm startup trials had
+median spawn-to-host receipt 16.08 ms. These are separate from the primary
+forced-GPU profile and do not measure first visible pixels or cold startup.
+The coordinator independently reproduced all four report outputs from the raw
+archive, verified 987 member hashes and six frozen executables, and passed all
+20 offline tests with the historical six failures required to remain failures.
+
 The [exact-inbox Reader refresh fix](evidence/inbox-reader-refresh/README.md)
 publishes Pending/Updating chrome when a source edit invalidates a question
 without consuming a completion. The original public regression fails; Root

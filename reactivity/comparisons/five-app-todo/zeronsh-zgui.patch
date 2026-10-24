@@ -1,0 +1,433 @@
+diff --git a/crates/zgui-desktop/examples/benchmark_todo.rs b/crates/zgui-desktop/examples/benchmark_todo.rs
+new file mode 100644
+index 0000000..2ffc842
+--- /dev/null
++++ b/crates/zgui-desktop/examples/benchmark_todo.rs
+@@ -0,0 +1,314 @@
++//! Matched ordinary Todo workload for the five-app comparison.
++use std::{
++    cell::RefCell,
++    rc::Rc,
++    time::{Duration, Instant},
++};
++use zgui::{compose::prelude::*, reactive::Signal, scene::Color};
++use zgui_desktop::{Application, WindowOptions};
++
++#[derive(Clone)]
++struct Task {
++    id: u64,
++    title: String,
++    done: bool,
++}
++struct Deleted {
++    index: usize,
++    task: Task,
++}
++#[derive(Default)]
++struct Model {
++    rows: Vec<Task>,
++    filter: String,
++    next_id: u64,
++    deleted: Option<Deleted>,
++    callbacks: u64,
++    actions: Vec<String>,
++    ticks: u64,
++    skipped: u64,
++}
++fn action(model: &mut Model, name: &str) {
++    model.callbacks += 1;
++    model.actions.push(name.to_owned());
++    eprintln!(
++        "TODO_ACTION,{}",
++        serde_json::json!({"action":name,"callbacks":model.callbacks,"rows":model.rows.len(),"filter":model.filter})
++    );
++}
++const WIDTH: f64 = 540.0;
++const HEIGHT: f64 = 620.0;
++const BG: Color = Color(248, 250, 252, 255);
++fn button(label: &'static str, action: impl Fn() + 'static) -> View {
++    zgui::compose::button()
++        .h(38.0)
++        .p(8.0)
++        .bg(Color(226, 232, 240, 255))
++        .child(text(label))
++        .on_click(action)
++}
++fn app(
++    model: Rc<RefCell<Model>>,
++    draft: Signal<String>,
++    revision: Signal<u64>,
++    offset: Signal<f32>,
++) -> View {
++    let selection_revision = revision.clone();
++    let selection_model = model.clone();
++    switch(move || { selection_revision.get(); selection_model.borrow().callbacks }, move |_, _cx| {
++        let model = model.clone(); let draft = draft.clone(); let revision = revision.clone(); let offset = offset.clone();
++        // Callback changes rebuild the eager Todo view; animation translates retained rows.
++        let stamp = revision.get();
++        let _ = stamp;
++        let m = model.borrow();
++        let mut rows = Vec::new();
++        for (index, task) in m.rows.iter().enumerate() {
++            if m.filter == "active" && task.done || m.filter == "done" && !task.done {
++                continue;
++            }
++            let id = task.id;
++            let name = task.title.clone();
++            let done = task.done;
++            let model_toggle = model.clone();
++            let revision_toggle = revision.clone();
++            let toggle = button(if done { "Reopen" } else { "Complete" }, move || {
++                let mut m = model_toggle.borrow_mut();
++                if let Some(row) = m.rows.iter_mut().find(|row| row.id == id) {
++                    row.done = !row.done;
++                }
++                action(&mut m, "complete");
++                drop(m);
++                revision_toggle.set(revision_toggle.get() + 1);
++            })
++            .id(format!("toggle-{id}"));
++            let model_delete = model.clone();
++            let revision_delete = revision.clone();
++            let delete = button("Delete", move || {
++                let mut m = model_delete.borrow_mut();
++                if let Some(at) = m.rows.iter().position(|row| row.id == id) {
++                    let task = m.rows.remove(at);
++                    m.deleted = Some(Deleted { index: at, task });
++                    action(&mut m, "delete");
++                }
++                drop(m);
++                revision_delete.set(revision_delete.get() + 1);
++            })
++            .id(format!("delete-{id}"));
++            rows.push(
++                row()
++                    .id(format!("task-{id}-{index}"))
++                    .h(38.0)
++                    .gap(8.0)
++                    .child(toggle.w(100.0))
++                    .child(text(name).w(220.0).h(38.0).p(8.0))
++                    .child(delete),
++            );
++        }
++        let translate_y = offset.clone();
++        let visible = column().w(492.0).gap(6.0).children(rows).reactive_style(move || Styles::new().translate(0.0, translate_y.get()));
++        let scroll_y = _cx.state(0_f32);
++        let mut left = 0usize;
++        for task in &m.rows {
++            if !task.done {
++                left += 1;
++            }
++        }
++        let count = format!("{left} left");
++        let draft_add = draft.clone();
++        let model_add = model.clone();
++        let revision_add = revision.clone();
++        let add = button("Add", move || {
++            let value = draft_add.get().trim().to_owned();
++            if !value.is_empty() {
++                let mut m = model_add.borrow_mut();
++                let id = m.next_id;
++                m.next_id += 1;
++                m.rows.push(Task {
++                    id,
++                    title: value,
++                    done: false,
++                });
++                action(&mut m, "add");
++                drop(m);
++                draft_add.set(String::new());
++                revision_add.set(revision_add.get() + 1);
++            }
++        })
++        .id("add")
++        .w(56.0);
++        let mut filters = Vec::new();
++        for (label, value) in [("All", "all"), ("Active", "active"), ("Done", "done")] {
++            let model_filter = model.clone();
++            let revision_filter = revision.clone();
++            let active = m.filter == value;
++            filters.push(
++                button(label, move || {
++                    let mut m = model_filter.borrow_mut();
++                    m.filter = value.into();
++                    action(&mut m, value);
++                    drop(m);
++                    revision_filter.set(revision_filter.get() + 1);
++                })
++                .id(value)
++                .bg(if active {
++                    Color(199, 210, 254, 255)
++                } else {
++                    Color(226, 232, 240, 255)
++                }),
++            );
++        }
++        let mut restore = None;
++        if m.deleted.is_some() {
++            let model_undo = model.clone();
++            let revision_undo = revision.clone();
++            restore = Some(
++                row()
++                    .h(38.0)
++                    .gap(8.0)
++                    .child(text("Deleted task").w(330.0))
++                    .child(
++                        button("Undo", move || {
++                            let mut m = model_undo.borrow_mut();
++                            if let Some(deleted) = m.deleted.take() {
++                                let at = deleted.index.min(m.rows.len());
++                                m.rows.insert(at, deleted.task);
++                                action(&mut m, "undo");
++                            }
++                            drop(m);
++                            revision_undo.set(revision_undo.get() + 1);
++                        })
++                        .id("undo"),
++                    ),
++            );
++        }
++        let _ = stamp;
++        let marker = overlay()
++            .w(56.0)
++            .h(28.0)
++            .translate(476.0, 18.0)
++            .children((0..32).map(|bit| {
++                let marker_revision = revision.clone();
++                overlay()
++                    .w(5.0)
++                    .h(5.0)
++                    .translate((bit % 8) as f32 * 7.0, (bit / 8) as f32 * 7.0)
++                    .reactive_style(move || {
++                        let payload = marker_revision.get() as u32 & 0x7fff_ffff;
++                        let on = if bit==31 { payload.count_ones()%2==1 } else { ((payload>>bit)&1)!=0 };
++                        Styles::new().bg(if on { Color(255,255,255,255) } else { Color(0,0,0,255) })
++                    })
++            }));
++        let mut root = column()
++            .w(WIDTH as f32)
++            .h(HEIGHT as f32)
++            .p(24.0)
++            .gap(12.0)
++            .bg(BG)
++            .text_color(Color(15, 23, 42, 255))
++            .text_size(16.0)
++            .font_family("Noto Sans")
++            .child(text("Todos").h(38.0).text_size(28.0))
++            .child(
++                row()
++                    .h(42.0)
++                    .gap(8.0)
++                    .child(
++                        text_input("New task", draft.clone())
++                            .id("input")
++                            .w(280.0)
++                            .h(42.0)
++                            .p(10.0).bg(Color(241,245,249,255)).text_color(Color(15,23,42,255)),
++                    )
++                    .child(add),
++            )
++            .child(scroll(scroll_y).w(492.0).h(360.0).child(visible))
++            .child(
++                row()
++                    .h(38.0)
++                    .gap(12.0)
++                    .child(text(count).h(38.0))
++                    .children(filters),
++            );
++        if let Some(restore) = restore {
++            root = root.child(restore);
++        }
++        overlay()
++            .w(WIDTH as f32)
++            .h(HEIGHT as f32)
++            .child(root)
++            .child(marker)
++    })
++}
++fn main() -> Result<(), Box<dyn std::error::Error>> {
++    let rows: usize = std::env::var("TODO_BENCH_ROWS")
++        .ok()
++        .and_then(|s| s.parse().ok())
++        .unwrap_or(0);
++    assert!(rows <= 10_000, "TODO_BENCH_ROWS must be <= 10000");
++    let animate = matches!(std::env::var("TODO_BENCH_ANIMATE").as_deref(), Ok("1"));
++    zgui_desktop::todo_bench::begin();
++    let model = Rc::new(RefCell::new(Model {
++        filter: "all".into(),
++        next_id: rows as u64,
++        ..Default::default()
++    }));
++    for i in 0..rows {
++        model.borrow_mut().rows.push(Task {
++            id: i as u64,
++            title: format!("Task {:04}", i + 1),
++            done: i % 3 == 1,
++        });
++    }
++    Application::new().window(WindowOptions { title: "zgui Todo comparison".into(), width: WIDTH, height: HEIGHT,
++        resizable: false, ..Default::default() }).run(move |cx| {
++        let draft = cx.ui.signal(String::new()); let revision = cx.ui.signal(0_u64);
++        let offset = cx.ui.signal(0_f32);
++        cx.render(app(model.clone(), draft.clone(), revision.clone(), offset.clone()));
++        if animate {
++            let tasks = cx.tasks.clone();
++            let animated_model = model.clone();
++            let animated_revision = revision.clone();
++            let animated_offset = offset.clone();
++            tasks.spawn(async move {
++                let start = loop {
++                    if let Some(epoch) = zgui_desktop::todo_bench::first_present_time() { break epoch; }
++                    zgui::timer::sleep_until(Instant::now() + Duration::from_millis(1)).await;
++                };
++                let mut next = start + Duration::from_nanos(16_666_667);
++                let mut delivered = 0_u64;
++                loop {
++                    zgui::timer::sleep_until(next).await;
++                    let now = Instant::now();
++                    let scheduled = (now.duration_since(start).as_nanos() * 60 / 1_000_000_000) as u64;
++                    if scheduled > delivered {
++                        let mut m = animated_model.borrow_mut();
++                        m.skipped += scheduled.saturating_sub(delivered + 1);
++                        m.ticks += 1;
++                        delivered = scheduled;
++                        drop(m);
++                        let phase = (scheduled as f64 / 60.0 * std::f64::consts::TAU).sin() as f32 * 12.0;
++                        animated_offset.set(phase);
++                        animated_revision.set(animated_revision.get() + 1);
++                    }
++                    next = start + Duration::from_nanos((delivered + 1) * 16_666_667);
++                }
++            });
++        }
++        cx.on_closed(move || {
++            let m = model.borrow(); let done = m.rows.iter().filter(|t| t.done).count();
++            let first = m.rows.first().map(|t| serde_json::json!({"id":t.id,"title":t.title,"done":t.done}));
++            let last = m.rows.last().map(|t| serde_json::json!({"id":t.id,"title":t.title,"done":t.done}));
++            let state = serde_json::json!({"rows":m.rows.iter().map(|t| serde_json::json!({"id":t.id,"title":t.title,"done":t.done})).collect::<Vec<_>>(),
++                "filter":m.filter,"next_id":m.next_id,"draft":draft.get(),"deleted":m.deleted.as_ref().map(|d| d.task.id)});
++            let mut hash = 0xcbf29ce484222325_u64;
++            for byte in state.to_string().bytes() { hash ^= byte as u64; hash = hash.wrapping_mul(0x100000001b3); }
++            eprintln!("TODO_STATE,{}", state);
++            let summary = serde_json::json!({"framework":"zeron-zgui","rows":m.rows.len(),"done":done,
++                "callbacks":m.callbacks,"actions":&m.actions,"animation_ticks":m.ticks,"animation_skipped":m.skipped,
++                "draft":draft.get(),"deleted":m.deleted.as_ref().map(|d| d.task.id),"filter":m.filter,
++                "next_id":m.next_id,"first_task":first,"last_task":last,"model_hash":format!("{hash:016x}")});
++            eprintln!("TODO_MODEL,{}", summary);
++            drop(m); zgui_desktop::todo_bench::finish();
++        });
++    })
++}
+diff --git a/crates/zgui-desktop/src/application.rs b/crates/zgui-desktop/src/application.rs
+index d925f9e..e0718c9 100644
+--- a/crates/zgui-desktop/src/application.rs
++++ b/crates/zgui-desktop/src/application.rs
+@@ -1758,6 +1758,16 @@ impl Host {
+                         self.startup_trim = StartupTrim::At(now + STARTUP_TRIM_DELAY);
+                     }
+                 }
++                if status == zgui_gpu::PresentationStatus::Presented {
++                    let info = renderer.adapter_info();
++                    crate::todo_bench::record_present(
++                        &info.name,
++                        &format!("{:?}", info.backend),
++                        &format!("{:?}", info.device_type),
++                        info.vendor,
++                        info.device,
++                    );
++                }
+                 self.presentation
+                     .completed(status, std::time::Instant::now());
+             }
+diff --git a/crates/zgui-desktop/src/lib.rs b/crates/zgui-desktop/src/lib.rs
+index a9a4413..aa3d29c 100644
+--- a/crates/zgui-desktop/src/lib.rs
++++ b/crates/zgui-desktop/src/lib.rs
+@@ -75,6 +75,8 @@ mod focus_memory;
+ mod frame_source;
+ mod native_ime;
+ pub mod presentation;
++#[doc(hidden)]
++pub mod todo_bench;
+ pub mod raster;
+ pub mod terminal_process;
+ pub use terminal_process::{
+diff --git a/crates/zgui-desktop/src/todo_bench.rs b/crates/zgui-desktop/src/todo_bench.rs
+new file mode 100644
+index 0000000..3b067ad
+--- /dev/null
++++ b/crates/zgui-desktop/src/todo_bench.rs
+@@ -0,0 +1,73 @@
++//! Hidden host-presentation receipts for the cross-framework Todo benchmark.
++//! Enabled only by the adapter calling `begin`; timestamps are collected after
++//! `PresentationStatus::Presented` and emitted once after the window closes.
++use std::sync::{Mutex, OnceLock};
++use std::time::{Duration, Instant};
++
++#[derive(Default)]
++struct Receipts {
++    started: Option<Instant>,
++    elapsed_ns: Vec<u64>,
++    renderer: Option<String>,
++    overflow: u64,
++}
++static RECEIPTS: OnceLock<Mutex<Receipts>> = OnceLock::new();
++fn receipts() -> &'static Mutex<Receipts> {
++    RECEIPTS.get_or_init(|| Mutex::new(Receipts::default()))
++}
++
++/// Start timing before application startup. No-op unless `TODO_BENCH_PRESENT_MARKER=1`.
++pub fn begin() {
++    if std::env::var_os("TODO_BENCH_PRESENT_MARKER").is_some() {
++        let mut r = receipts().lock().unwrap();
++        r.started = Some(Instant::now());
++        r.elapsed_ns.clear();
++        r.overflow = 0;
++    }
++}
++
++/// Record a successfully returned native host presentation.
++pub(crate) fn record_present(
++    name: &str,
++    backend: &str,
++    device_type: &str,
++    vendor: u32,
++    device: u32,
++) {
++    let Ok(mut r) = receipts().lock() else { return };
++    let Some(start) = r.started else { return };
++    let elapsed = start.elapsed().as_nanos().min(u64::MAX as u128) as u64;
++    if r.elapsed_ns.is_empty() {
++        r.renderer = Some(format!(
++            "wgpu:{backend}:{device_type}:{vendor:04x}:{device:04x}:{name}"
++        ));
++        eprintln!(
++            "TODO_RENDERER,{}",
++            r.renderer.as_deref().unwrap_or("unknown")
++        );
++        eprintln!("TODO_FIRST_PRESENT,{elapsed}");
++    }
++    if r.elapsed_ns.len() < 200_000 {
++        r.elapsed_ns.push(elapsed);
++    } else {
++        r.overflow += 1;
++    }
++}
++
++/// Emit buffered host receipts once, when the benchmark window closes.
++pub fn finish() {
++    let Ok(r) = receipts().lock() else { return };
++    if r.started.is_none() {
++        return;
++    }
++    eprintln!(
++        "TODO_FRAMES,{{\"framework\":\"zgui\",\"boundary\":\"wgpu_surface_present_return\",\"elapsed_ns\":{:?},\"observer_overflow\":{}}}",
++        r.elapsed_ns, r.overflow
++    );
++}
++
++/// Successful first-presentation epoch used by the benchmark animation scheduler.
++pub fn first_present_time() -> Option<Instant> {
++    let r = receipts().lock().ok()?;
++    Some(r.started? + Duration::from_nanos(*r.elapsed_ns.first()?))
++}

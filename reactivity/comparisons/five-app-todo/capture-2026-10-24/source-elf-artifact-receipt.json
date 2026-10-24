@@ -1,0 +1,154 @@
+{
+  "artifact_path": "/tmp/gpui-four-framework-benchmark-sol-build/five-app-frozen-sources-and-elfs-20261024.tar.gz",
+  "bytes": 196674756,
+  "sha256": "21eae983b9b154d10f6db0f9cb3aac128db03757bf6e45342139fb770c3ac56d",
+  "every_outer_member_sha256_verified": true,
+  "six_elfs_match_frozen_build_receipts": true,
+  "four_peer_source_archives_complete_set_and_every_byte_hash_verified": true,
+  "inventory": {
+    "sources": {
+      "mygo": {
+        "archive_sha256": "923a8893627cd6a25202cbe4eab02a081ac1bce9e18755033f4434aa7c1652b4",
+        "members_verified": 1813,
+        "set_equality": true
+      },
+      "nanoui": {
+        "archive_sha256": "0a61bec07255b63afe72cac59b743136d5ba89d70ae0a0f65eb7c220d4e6e7b6",
+        "members_verified": 252,
+        "set_equality": true
+      },
+      "zeronsh-zgui": {
+        "archive_sha256": "0127947ce8c139dc452a6536bf2d103e1e198bdb98beccc50d5c4031460a9561",
+        "members_verified": 9208,
+        "set_equality": true
+      },
+      "zortax-zgui": {
+        "archive_sha256": "d90b3d56fa7d01b47657ecf7e64ed107aa2f2f6d301bed3e328d1d9ae4c009d6",
+        "members_verified": 3475,
+        "set_equality": true
+      }
+    },
+    "gpui_scope": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "gpui_full_repository_claim": false,
+    "gpui_upstream_archive_sha256": "6e7a6b69bc358916801960e3b9013559d964c041bf3eabb3d30cbb40cf183d73",
+    "gpui_overlay_sha256": "13024a098d7a49b708dc37a5e07729975571bf178dbcf42577f1d613c128d967",
+    "elfs": {
+      "gpui/release/examples/todo_comparison_five": {
+        "sha256": "7dbfdc6ee6a1c7fb6b5af86d66da304011fcb079654abddf2768f8a2d17d6b56",
+        "bytes": 24158584,
+        "matching_build_receipt": "gpui-receipt.json"
+      },
+      "rust-peers/dist/examples/benchmark_todo": {
+        "sha256": "efaa58c319605399d88bbbda65fefbd18627a62ec5e055e0b42e8053dc2fa198",
+        "bytes": 21227360,
+        "matching_build_receipt": "zeronsh-zgui-retry4-receipt.json"
+      },
+      "rust-peers/release/examples/benchmark_todo": {
+        "sha256": "22e178997cd0061f5768a7539e9adac7e22cd59e3e218eee826136cc23cbd5c5",
+        "bytes": 46114272,
+        "matching_build_receipt": "zortax-zgui-qualified2-receipt.json"
+      },
+      "nanoui/bin/benchmark-todo": {
+        "sha256": "2436c12b44fc595dbedd7bf58290a76c368b056fe7b14bf0d8b00e4c57ba302b",
+        "bytes": 7176720,
+        "matching_build_receipt": "nanoui-receipt.json"
+      },
+      "bin/mygo": {
+        "sha256": "1565d26b68a8ea3573ea64cfbe6cd6e3d3a4ce325c4ec5e200a7c947b850e192",
+        "bytes": 13817880,
+        "matching_build_receipt": "mygo-final-receipt.json"
+      },
+      "native-present-control/dist/examples/benchmark_todo": {
+        "sha256": "87467612f550d6f57e82f145db3a674efb1c090934b439302ead20d55154ecd7",
+        "bytes": 21231456,
+        "matching_build_receipt": "native-present-control-v1-receipt.json"
+      }
+    },
+    "runtime": "ELFs require the pinned coherent Linux loader and dependency paths recorded in raw evidence; this is an artifact seal, not a portable app package",
+    "files": [
+      {
+        "path": "sources/mygo/mygo-full-source-manifest.json",
+        "sha256": "e0186236d97f19e92c1fa1e44a71a9f8181bad216cb43a05306c3922adab1f88",
+        "bytes": 609749
+      },
+      {
+        "path": "sources/mygo/mygo-full-build-source.tar.gz",
+        "sha256": "923a8893627cd6a25202cbe4eab02a081ac1bce9e18755033f4434aa7c1652b4",
+        "bytes": 5381538
+      },
+      {
+        "path": "sources/nanoui/nanoui-full-source-manifest.json",
+        "sha256": "279c81eaa4d8ba6395a7d96bea0023b5da1909f8a4dd168083244decd60573e7",
+        "bytes": 85170
+      },
+      {
+        "path": "sources/nanoui/nanoui-full-build-source.tar.gz",
+        "sha256": "0a61bec07255b63afe72cac59b743136d5ba89d70ae0a0f65eb7c220d4e6e7b6",
+        "bytes": 9995941
+      },
+      {
+        "path": "sources/zeronsh-zgui/zeronsh-zgui-full-source-manifest.json",
+        "sha256": "6ac70597335b006b5483dfa97f57165a2707d8ccc285cc86deaeee29496754d9",
+        "bytes": 3428093
+      },
+      {
+        "path": "sources/zeronsh-zgui/zeronsh-zgui-full-build-source.tar.gz",
+        "sha256": "0127947ce8c139dc452a6536bf2d103e1e198bdb98beccc50d5c4031460a9561",
+        "bytes": 111723097
+      },
+      {
+        "path": "sources/zortax-zgui/zortax-zgui-full-source-manifest.json",
+        "sha256": "a4b774bff0c21492621e7bd1d224c6d681f866ce7f8c3259ce020f86248d1866",
+        "bytes": 1214898
+      },
+      {
+        "path": "sources/zortax-zgui/zortax-zgui-full-build-source.tar.gz",
+        "sha256": "d90b3d56fa7d01b47657ecf7e64ed107aa2f2f6d301bed3e328d1d9ae4c009d6",
+        "bytes": 7884204
+      },
+      {
+        "path": "sources/gpui/gpui-63e0a-build-source.tar",
+        "sha256": "6e7a6b69bc358916801960e3b9013559d964c041bf3eabb3d30cbb40cf183d73",
+        "bytes": 36126720
+      },
+      {
+        "path": "sources/gpui/gpui-build-source-manifest.json",
+        "sha256": "b307e6a221159a235d768b221a2219d8ca3e1eb7d30d831c63064385074c3dd2",
+        "bytes": 540020
+      },
+      {
+        "path": "sources/gpui/gpui-runtime-adapter.patch",
+        "sha256": "13024a098d7a49b708dc37a5e07729975571bf178dbcf42577f1d613c128d967",
+        "bytes": 15972
+      },
+      {
+        "path": "sources/gpui/gpui-benchmark-overlay.patch",
+        "sha256": "62fed784665f960bb0b2a17d7f2034497ade42accf94b46376c6fc714078dd68",
+        "bytes": 179810
+      },
+      {
+        "path": "elfs/frozen-native-elfs.tar.gz",
+        "sha256": "a0fdd2d58a93fc647306458b909df2004c99c41dfafce17a03ebef871f1e5e72",
+        "bytes": 52043423
+      },
+      {
+        "path": "controls/native-present-control-v1.patch",
+        "sha256": "2b4e52c3676a7a3b643082813db5eed57dfc952ac7c01881f190a61a662ede60",
+        "bytes": 2546
+      },
+      {
+        "path": "controls/stage-native-coalescing.py",
+        "sha256": "09b333ff3777413d6569665971dc4a721aa8867baafaf6baaca67bc2dd70ffd3",
+        "bytes": 2146
+      }
+    ]
+  }
+}
