@@ -3032,3 +3032,15 @@ mod scaled_mask_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod clip_header_control {
+    use super::*;
+    #[test]
+    fn clip_baseline_headers() {
+        println!("CLIP_CONTROL canvas={} candidate={} display_list={} resource_box={} common={} scope={} draw_view={} group_view={} cpu_command={}",
+            size_of::<Canvas>(), size_of::<CanvasScene<'_>>(), size_of::<DisplayList>(),
+            size_of::<ImageResources>(), size_of::<StoredCommon>(), size_of::<columns::Scope>(),
+            size_of::<PreparedDraw<'_>>(), size_of::<PreparedGroup<'_>>(), size_of::<BorrowedCommand<'_>>());
+    }
+}

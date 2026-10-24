@@ -845,3 +845,17 @@ mod virtual_basis_tests {
         assert_eq!(geometry.view().radius_start, after.len());
     }
 }
+
+#[cfg(test)]
+mod clip_header_control {
+    use super::*;
+    #[test]
+    fn clip_baseline_headers() {
+        println!("CLIP_CONTROL geometry_style={} decorations={} extra={} parts={} image_spec={} image_draft={} el={} node={} presented={} style={} record={}",
+            size_of::<GeometryStyle>(), size_of::<crate::semantic::Decorations<'_>>(),
+            size_of::<crate::semantic::ElementExtra<'_>>(), size_of::<crate::semantic::ExtraParts<'_>>(),
+            size_of::<crate::image::ImageSpec<'_>>(), size_of::<crate::image::ImageDraft<'_>>(),
+            size_of::<crate::El<'_>>(), size_of::<Node>(), size_of::<Presented>(),
+            size_of::<Style>(), size_of::<Record>());
+    }
+}

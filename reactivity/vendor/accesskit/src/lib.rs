@@ -3735,3 +3735,14 @@ mod tests {
         assert_eq!(tree.toolkit_version, None);
     }
 }
+
+#[cfg(test)]
+mod clip_header_control {
+    extern crate std;
+    use super::*;
+    #[test]
+    fn clip_baseline_headers() {
+        std::println!("CLIP_CONTROL accesskit_node={} properties={} indices={} property_value={}",
+            size_of::<Node>(), size_of::<Properties>(), size_of::<PropertyIndices>(), size_of::<PropertyValue>());
+    }
+}
