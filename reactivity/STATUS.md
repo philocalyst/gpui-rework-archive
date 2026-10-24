@@ -68,6 +68,20 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The integrated [source-delivery admission](evidence/delivery-isolation/README.md)
+uses `2b52030aed` over `37d0321fe2`. Registered worker replies share ordinary
+source invalidation; one bounded buffer owns both queued and frozen messages.
+Canonical shared mutable aliases are rejected at `Source::new`, closing the
+demonstrated stale sibling-Question failure. The kernel requires the pinned
+genuine nightly and does not use bootstrap. Root's composed-source gates pass
+580 default tests, 707 X11/GPU tests, 28 docs and strict default/native-GPU lint
+under repository policy. Separate producer evidence includes native Registry
+clients and Apple/MSVC cross-compilation. Core is now **31,232** non-test,
+non-comment source lines, **+245** from the preceding Main; Hummingbird remains
+5,633. Matched transport and exact-edit allocation savings, ordinary-frame
+growth and typed-delivery code/frame growth are all charged in that dossier.
+The transport remains mutex-based; no latency, RSS or lock-free claim is made.
+
 The integrated [Hummingbird audio and source-authority slice](ports/hummingbird/qualification/main-source-authority-integration/README.md)
 uses runtime `9f83f23288` over the independently replayed `9145411365` package.
 Default tests pass 50 cases across 14 harnesses; native-feature tests pass 116

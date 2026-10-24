@@ -19,6 +19,10 @@ cargo run -p gpui --features x11 --example workbench -- --cpu
 cargo run -p gpui --features x11 --example workbench -- --gpu
 ```
 
+The workspace pins `nightly-2026-10-23`. GPUI's structural source admission uses
+nightly traits; ordinary builds do not use `RUSTC_BOOTSTRAP`. The independently
+usable lower-level crates retain their narrower compiler requirements.
+
 This remains an implementation in progress. [STATUS.md](STATUS.md) distinguishes
 integrated application behavior, measured experiments and outstanding gates.
 

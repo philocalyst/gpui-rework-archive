@@ -1,0 +1,11 @@
+{
+  "root_parser": "/tmp/gpui-isolation-contracts-root.py",
+  "root_sha256": "a9ef47f8ef0e9a71432bbf4ddfb5c0bbce2df5d5f51d99cda11398142ba84e10",
+  "changes": [
+    "four immutable lease positives and corresponding extern metadata",
+    "two original mutable drop-observer representation negatives",
+    "exact test-only qualification pin3ae5 with productiondf57",
+    "sealed immutable helper and failing-source paths"
+  ],
+  "algorithm": "Root artifact discovery, all-artifact before/after SHA guards and exact public-bound diagnostics unchanged"
+}

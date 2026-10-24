@@ -1,0 +1,12 @@
+{
+  "purpose": "New samepath costs and separately preserved same5s native replay; no shipping source changes",
+  "copied_cost_helpers": {
+    "cost_gate.py": "16ff11b964050b6ab1c07b316a32806d27fc71bdecdc4b733f967b229dc052ab",
+    "capture_cost.py": "593507c3467dc3c7e8fb0cdea1515e43711b8463eac151bd7e7fae271648a172",
+    "analyze_cost.py": "9b255f5cde5e541d525170430ff246c5ce473f8e403d8dea9ab8e2754468854c",
+    "frames.py": "9ad1fa70dd94b3afbe3f95bb11027034843395beae4b2384cfdac262d9b08046"
+  },
+  "native_replay": "Only output directory/input split changed; original readiness and application watchdogs unchanged",
+  "registry_replay": "Only native executable discovery result path changed",
+  "cost_checkout_setup": "Initial full worktree checkout was terminated before any control build; Git cleaned its partial tree. Recreated with --no-checkout, cone .cargo/reactivity crates/vendor/HB, then reset only new isolated tree to HEAD. No producer or main source mutation."
+}

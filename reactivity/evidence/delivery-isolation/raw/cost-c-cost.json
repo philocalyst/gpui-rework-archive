@@ -1,0 +1,84 @@
+{
+  "artifacts": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-delivery-isolation-target/release/build/gpui/8df9e68978239fa3/out/libgpui-8df9e68978239fa3.rlib",
+        "/tmp/gpui-delivery-isolation-target/release/build/gpui/8df9e68978239fa3/out/libgpui-8df9e68978239fa3.rmeta"
+      ],
+      "executable": null,
+      "fresh": true
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "field_control",
+        "src_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/examples/field_control.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-delivery-isolation-target/release/examples/field_control"
+      ],
+      "executable": "/tmp/gpui-delivery-isolation-target/release/examples/field_control",
+      "fresh": false
+    }
+  ],
+  "binaries": [
+    {
+      "name": "field_control",
+      "source": "/tmp/gpui-delivery-isolation-target/release/examples/field_control",
+      "frozen": "/tmp/gpui-delivery-isolation-captures/cost-c-field_control.elf",
+      "sha256": "61ef7720b87ef900d004f6cd61e9ac024e0470168aca202f726a9ffca852e132",
+      "size": 12220144
+    }
+  ]
+}
