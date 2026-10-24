@@ -114,6 +114,19 @@ impl Bridge {
             _ => None,
         }
     }
+    #[cfg(all(
+        test,
+        target_os = "linux",
+        any(feature = "x11", feature = "x11-minimal")
+    ))]
+    pub(super) fn has_acknowledged_cursor<V: View + 'static, L: LaneSet<V>>(
+        &self,
+        owner: &Win<V, L>,
+    ) -> bool {
+        owner
+            .ime_cursor_area(&self.session)
+            .is_ok_and(|area| area.is_some())
+    }
     pub fn update_cursor<V: View + 'static, L: LaneSet<V>>(
         &self,
         owner: &Win<V, L>,

@@ -1218,3 +1218,124 @@ fn checkbox_native_carrier_sizes() {
         size_of::<text::Relink>()
     );
 }
+
+#[test]
+fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_authority() {
+    struct Input {
+        value: Signal<String>,
+        broken: bool,
+    }
+    impl Input {
+        const VALUE: Source<Self, String> =
+            Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    }
+    impl View for Input {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::VALUE)
+        }
+        fn view(&self) -> El<'_> {
+            column((
+                text_input(&self.value).w(180),
+                div().size(2).transform(if self.broken {
+                    Affine::scale(0., 1.)
+                } else {
+                    Affine::IDENTITY
+                }),
+            ))
+        }
+    }
+    let mut win = Win::recording(
+        Input {
+            value: Signal::new("base".into()),
+            broken: false,
+        },
+        WindowOptions::default(),
+    )
+    .unwrap();
+    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+    let mut session = crate::ImeSession::default();
+    win.ime_event(&mut session, crate::ImeEvent::Enabled)
+        .unwrap();
+    let initial = projection(&win);
+    win.ime_event(
+        &mut session,
+        crate::ImeEvent::Preedit {
+            text: "e\u{301}",
+            cursor: Some((1, 1)),
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        projection(&win),
+        initial,
+        "candidate must not leak into AccessKit P"
+    );
+    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+    let current = projection(&win);
+    let native = id(&win, input);
+    let node = &current
+        .nodes
+        .iter()
+        .find(|(id, _)| *id == native)
+        .unwrap()
+        .1;
+    assert_eq!(node.value(), Some("basee\u{301}"));
+    assert!(node.text_selection().is_some());
+    assert!(!node.supports_action(accesskit::Action::ReplaceSelectedText));
+    assert!(!node.supports_action(accesskit::Action::SetTextSelection));
+    assert!(!node.supports_action(accesskit::Action::SetValue));
+    let tree = Tree::new(current.clone(), true);
+    assert_eq!(
+        tree.state()
+            .node_by_tree_local_id(native, TreeId::ROOT)
+            .unwrap()
+            .raw_text_selection()
+            .unwrap()
+            .focus
+            .character_index,
+        4
+    );
+    win.ime_event(
+        &mut session,
+        crate::ImeEvent::Preedit {
+            text: "אבג",
+            cursor: Some((2, 2)),
+        },
+    )
+    .unwrap();
+    let old_candidate = win.with_scene(|_, t| t).unwrap();
+    assert_eq!(projection(&win), current);
+    assert!(win.update(|m| m.broken = true).is_err());
+    assert_eq!(projection(&win), current);
+    win.presented(old_candidate).unwrap();
+    let acknowledged = projection(&win);
+    assert_eq!(
+        acknowledged
+            .nodes
+            .iter()
+            .find(|(node, _)| *node == id(&win, input))
+            .unwrap()
+            .1
+            .value(),
+        Some("baseאבג")
+    );
+    assert_eq!(win.read(&Input::VALUE).unwrap(), "base");
+    assert!(
+        win.ime_cursor_area(&session).unwrap().is_none(),
+        "revoked L cannot expose native caret from old C"
+    );
+    win.update(|m| m.broken = false).unwrap();
+    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+    let restored = projection(&win);
+    let node = &restored
+        .nodes
+        .iter()
+        .find(|(node, _)| *node == id(&win, input))
+        .unwrap()
+        .1;
+    assert_eq!(node.value(), Some("base"));
+    assert!(node.supports_action(accesskit::Action::ReplaceSelectedText));
+}

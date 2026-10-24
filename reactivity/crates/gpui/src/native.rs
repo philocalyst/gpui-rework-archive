@@ -58,6 +58,12 @@ pub(crate) mod test_library;
 mod destination_tests;
 #[cfg(all(
     test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod ime_tests;
+#[cfg(all(
+    test,
     any(feature = "x11", feature = "x11-minimal"),
     target_os = "linux"
 ))]
