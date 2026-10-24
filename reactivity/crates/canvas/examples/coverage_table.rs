@@ -5,7 +5,7 @@ use ttf_parser::Face;
 
 fn main() {
     let bytes = [
-        include_bytes!("../assets/NotoSans.ttf").as_slice(),
+        include_bytes!("../assets/NotoSans-default.ttf").as_slice(),
         include_bytes!("../assets/arabic/NotoSansArabic-Regular.ttf").as_slice(),
         include_bytes!("../assets/hebrew/NotoSansHebrew-Regular.ttf").as_slice(),
     ];

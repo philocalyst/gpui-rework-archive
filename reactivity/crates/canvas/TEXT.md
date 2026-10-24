@@ -37,6 +37,13 @@ this is not a claim of coverage for every Unicode scalar. Fonts and OFL
 provenance are in [assets](assets/README.md), [Arabic](assets/arabic/README.md)
 and [Hebrew](assets/hebrew/README.md).
 
+The bundled primary embeds the full static default instance, preserving all
+4,515 glyph IDs and features. The original variable asset remains available for
+reproduction and caller-font tests. [Independent parity and payload evidence](evidence/default-font/README.md)
+records exact outlines/metrics/masks, public geometry and SDR/HDR pixels; the
+ordinary release font payload shrinks by 1,402,936 bytes without changing code
+size. This does not add variation-axis authoring.
+
 Bundled coverage now uses a checked-in 585-byte certificate: 195 maximal
 intervals encode the exact three font-presence bits. An exhaustive Unicode test
 compares it with the production parser against the immutable assets. Printable

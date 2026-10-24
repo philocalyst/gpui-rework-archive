@@ -35,7 +35,7 @@ const MAX_GLYPHS: usize = 32 * 1024;
 const CACHE_BYTES: usize = 8 * 1024 * 1024;
 // Named immutable arrays guarantee one linked payload per bundled face even
 // when coverage probing and lazy registration land in different codegen units.
-static PRIMARY_BYTES: [u8; 2_049_096] = *include_bytes!("../assets/NotoSans.ttf");
+static PRIMARY_BYTES: [u8; 646_160] = *include_bytes!("../assets/NotoSans-default.ttf");
 static ARABIC_BYTES: [u8; 240_456] = *include_bytes!("../assets/arabic/NotoSansArabic-Regular.ttf");
 static HEBREW_BYTES: [u8; 26_900] = *include_bytes!("../assets/hebrew/NotoSansHebrew-Regular.ttf");
 static NEXT_FONT: AtomicU64 = AtomicU64::new(1);

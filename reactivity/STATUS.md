@@ -68,6 +68,16 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The bundled primary now embeds a reproducible [full static default instance](crates/canvas/evidence/default-font/README.md).
+All 4,515 glyphs, IDs and shaping features remain; the original variable font
+and caller-font tests remain in the source. Independent regeneration matches
+exactly. All-glyph outlines, metrics and masks, the 1,120-case public text oracle,
+and 432 SDR/HDR scenes match the original. Canvas passes 203 tests and two
+doctests, strict all-feature lint and formatting. Ordinary release `.rodata`
+falls **1,402,936 bytes**, with identical code size; cold shaping requests three
+fewer allocations per service. Retained layout bytes, headers and core line
+count remain unchanged. This is no startup, RSS or latency measurement.
+
 The integrated [raw glyph count](evidence/raw-glyph-count/README.md) uses exact
 source `ff8fa35f19`, adopted as `2fefe2d266`. Preflight sums existing raw
 line-scoped cluster counts without constructing positioned runs or adding a
