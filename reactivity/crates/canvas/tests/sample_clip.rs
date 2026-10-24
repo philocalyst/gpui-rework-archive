@@ -125,3 +125,99 @@ fn prepared_inverse_lowering_preserves_canonical_ties_without_forward_roundtrip(
         assert!(draw.sampled_rect_clip([33, 17]).is_err());
     }
 }
+
+#[test]
+fn prepared_cuts_match_frozen_prechange_binary_search() {
+    use gpui_canvas::{PreparedDraw, PreparedSource};
+    fn rect(fields: &[&str]) -> Rect {
+        let [x, y, width, height] =
+            std::array::from_fn(|i| f32::from_bits(u32::from_str_radix(fields[i], 16).unwrap()));
+        Rect::new(x, y, width, height)
+    }
+    let mut count = 0;
+    for (index, line) in include_str!("fixtures/sample-clip-cuts.csv")
+        .lines()
+        .enumerate()
+    {
+        let fields: Vec<_> = line.split(',').collect();
+        assert_eq!(fields.len(), 21);
+        let viewport = [fields[1].parse().unwrap(), fields[2].parse().unwrap()];
+        let inverse = std::array::from_fn(|i| {
+            f64::from_bits(u64::from_str_radix(fields[3 + i], 16).unwrap())
+        });
+        let draw = PreparedDraw {
+            local_rect: rect(&fields[9..13]),
+            inverse,
+            clip: rect(&fields[13..17]),
+            bounds: Rect::default(),
+            color: [0.0; 4],
+            source: PreparedSource::Solid,
+        };
+        let actual = draw.sampled_rect_clip(viewport).unwrap();
+        let expected = rect(&fields[17..21]);
+        assert_eq!(
+            [actual.x, actual.y, actual.width, actual.height].map(f32::to_bits),
+            [expected.x, expected.y, expected.width, expected.height].map(f32::to_bits),
+            "frozen case {index}: {}",
+            fields[0]
+        );
+        count += 1;
+    }
+    assert_eq!(count, 22_296);
+}
+
+#[test]
+fn handcrafted_prepared_inverse_cuts_match_scalar_membership() {
+    use gpui_canvas::{PreparedDraw, PreparedSource};
+    let [width, height] = [9, 5];
+    let sides = [width, height];
+    for scale in [
+        f64::from_bits(1),
+        f64::MIN_POSITIVE,
+        0.8_f64.next_down(),
+        0.8,
+        1e12,
+    ] {
+        for sign in [-1.0, 1.0] {
+            for zero in [-0.0, 0.0] {
+                for translation in [-0.0, 0.0, -1e-308, 8.5] {
+                    let draw = PreparedDraw {
+                        local_rect: Rect::new(-0.0, 0.0, 8.5, 3.0),
+                        inverse: [
+                            scale * sign,
+                            zero,
+                            -zero,
+                            scale * sign,
+                            translation,
+                            -translation,
+                        ],
+                        clip: Rect::new(-0.0, 0.0, width as f32, height as f32),
+                        bounds: Rect::default(),
+                        color: [0.0; 4],
+                        source: PreparedSource::Solid,
+                    };
+                    let lowered = draw.sampled_rect_clip(sides).unwrap();
+                    for y in 0..height * 4 {
+                        for x in 0..width * 4 {
+                            let wx = x as f64 * 0.25 + 0.125;
+                            let wy = y as f64 * 0.25 + 0.125;
+                            let [a, b, c, d, tx, ty] = draw.inverse;
+                            let lx = a * wx + c * wy + tx;
+                            let ly = b * wx + d * wy + ty;
+                            let canonical = lx >= 0.0 && lx < 8.5 && ly >= 0.0 && ly < 3.0;
+                            let lowered = wx >= lowered.x as f64
+                                && wx < lowered.x as f64 + lowered.width as f64
+                                && wy >= lowered.y as f64
+                                && wy < lowered.y as f64 + lowered.height as f64;
+                            assert_eq!(
+                                canonical, lowered,
+                                "inverse={:?}, sample=({x},{y})",
+                                draw.inverse
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
