@@ -212,7 +212,7 @@ impl PackedGlyph {
         Glyph {
             id,
             font,
-            cluster: self.meta >> GLYPH_CODE_BITS,
+            cluster: (self.meta >> GLYPH_CODE_BITS) ^ 1,
             x: self.x,
             baseline: self.baseline,
         }
