@@ -45,7 +45,7 @@ impl<'a> Context<'a> {
                 .as_ref()
                 .and_then(|m| m.editing.as_ref())
                 .and_then(|e| e.ime.as_ref())
-                .and_then(|ime| ime.presented.as_ref()),
+                .and_then(|ime| ime.candidate.as_ref()),
             geometry: runtime.presented_geometry(),
             metadata: runtime
                 .metadata
