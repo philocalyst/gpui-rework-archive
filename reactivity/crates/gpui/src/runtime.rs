@@ -5274,3 +5274,36 @@ mod mapped_qualification {
         assert_eq!(cost.count_total, 0);
     }
 }
+#[cfg(test)]
+mod ordinary_background_allocation_audit {
+    use super::*;
+    #[test]
+    fn ordinary_background_allocation_first_warm_equal_clear() {
+        use crate::property::{PropertyId, PropertyValue};
+        struct Plain;
+        impl View for Plain {
+            fn view(&self) -> crate::El<'_> {
+                crate::div().size(16).bg(Color::BLACK).name("plain")
+            }
+        }
+        let mut win = Win::with_size(Plain, 16, 16).unwrap();
+        let target = win.query().name("plain").one().unwrap();
+        assert!(win.runtime().unwrap().images.is_none());
+        for (phase, contribution) in [
+            ("first", Contribution::Set(PropertyValue::Color(Color::WHITE))),
+            ("warm", Contribution::Set(PropertyValue::Color(Color::BLACK))),
+            ("equal", Contribution::Set(PropertyValue::Color(Color::BLACK))),
+            ("inherit", Contribution::Inherit),
+        ] {
+            let cost = allocation_counter::measure(|| {
+                win.set_property_value(target, PropertyId::Background, contribution).unwrap();
+            });
+            let runtime = win.runtime().unwrap();
+            let style_capacity = match &runtime.styles {
+                styles::Styles::Dense(values) => values.capacity() * size_of::<Style>(),
+                _ => 0,
+            };
+            eprintln!("ordinary_background_audit,phase={phase},allocs={},requested={},retained_delta={},peak_delta={},images_present={},style_dense_bytes={style_capacity},contribution={:?}", cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max, runtime.images.is_some(), runtime.property_contribution_at(runtime.resolve(target).unwrap(), PropertyId::Background));
+        }
+    }
+}
